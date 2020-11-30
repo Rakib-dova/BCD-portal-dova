@@ -11,6 +11,9 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 
 var appInsights = require('applicationinsights');
+//セキュリティ
+var helmet = require('helmet');
+
 if(process.env.NODE_ENV == "production"){
     appInsights.setup();
     appInsights.start();
@@ -18,6 +21,19 @@ if(process.env.NODE_ENV == "production"){
 
 var server; 
 var app = express();
+app.use(helmet());
+//セキュリティ helmet.jsの仕様を確認のこと
+//https://github.com/helmetjs/helmet
+app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "img-src":["'self' https https://picsum.photos https://i.picsum.photos/"],
+        "form-action": ["'self'"], //form-actionは自己ドメインに制限
+        "style-src": ["'self' https:"] //style-srcは自己ドメインに制限
+      },
+    })
+  );
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

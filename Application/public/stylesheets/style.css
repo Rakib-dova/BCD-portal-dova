@@ -1,3 +1,13 @@
+
+@font-face {
+    font-family: "NotoSansCJKjp-Bold";
+    src: url('../fonts/NotoSansCJKjp-Bold.otf') format('opentype');
+}
+@font-face {
+    font-family: "NotoSansCJKjp-Reqular";
+    src: url('../fonts/NotoSansCJKjp-Regular.otf') format('opentype');
+}
+
 html,
 body {
     height: 100%;
@@ -5,29 +15,27 @@ body {
     padding: 0;
     margin: 0;
 }
-
-@font-face {
-    font-family: "Segoe UI";
-    src: url('../fonts/segoeuil.ttf') format('truetype');
+.navbar {
+    font-family: "NotoSansCJKjp-Bold";
 }
 
 .main-container {
-    height: 400px;
+    background-image: url('../images/bannerTop.png');
+    background-repeat: no-repeat;
+    height: 380px;
     width: 100%;
-    background-color: #1d539d;
+    background-color: white;
     color: white;
     padding-top: 30px;
     box-sizing: border-box;
     overflow-y: hidden;
     overflow-x: hidden;
-    font-family: "Segoe UI";
+    font-family: "NotoSansCJKjp-Reqular";
     padding: 80px;
     margin-bottom: 30px;
 }
 
 .cloud-image {
-    width: 350px;
-    height: 150px;
     padding-bottom: 20px;
     margin: auto;
 }
