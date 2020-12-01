@@ -29,7 +29,7 @@
             "type": "String"
         },
         "startupCommand": {
-            "defaultValue": "null",
+            "defaultValue": "",
             "type": "String"
         }
     },
