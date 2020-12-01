@@ -28,7 +28,7 @@ app.use(
     helmet.contentSecurityPolicy({
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        "img-src":["'self' https https://picsum.photos https://i.picsum.photos/"],
+        "img-src":["'self' https:"],
         "form-action": ["'self'"], //form-actionは自己ドメインに制限
         "style-src": ["'self' https:"] //style-srcは自己ドメインに制限
       },

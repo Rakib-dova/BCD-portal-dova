@@ -1,34 +1,121 @@
 ﻿extends layout
 
+block hero
+  .hero.is-large
+    .hero-body
+      .container
+  
 block content
-  .main-container
-    //.cloud-image
-    //    img(src='https://picsum.photos/id/237/200/300')
-    .content
-        .tweet-container
-             a(href='http://twitter.com/intent/tweet/?text=I%20just%20created%20a%20new%20Node.js%20Express%20website%20on%20Azure%20using%20Azure%20DevOps%20Project&hashtags=AzureDevOpsProject%2CVSTS%20%40Azure%20%40VSTS')
-                img(src='/images/tweetThis.svg')    
-        .content-body
-            .success-text
-                p Success!
-            .description 
-                p Azure DevOps Project has been successfully setup
-            .description
-                p Your Node.js Express app is up and running on Azure
-    
-  .row
-    .col-md-4
-      h2 Get started right away
-      p Clone your code repository and start developing your application on IDE of your choice
-      p
-        a.btn.btn-default(href='https://go.microsoft.com/fwlink/?linkid=862409') Learn more &raquo;
-    .col-md-4
-      h2 Continuous Delivery
-      p View your CI/CD pipeline on Azure Devops and customize it as per your needs
-      p
-        a.btn.btn-default(href='https://go.microsoft.com/fwlink/?linkid=862410') Learn more &raquo;
-    .col-md-4
-      h2 Azure DevOps Project
-      p Learn more about all you can do with Azure DevOps project by visiting the documentation
-      p
-        a.btn.btn-default(href='https://go.microsoft.com/fwlink/?linkid=862126') Learn more &raquo;
+
+  .level-left.is-family-sans-serif
+    .level-item
+      div
+        p.title.is-spaced Apps
+
+  .columns.is-family-noto-sans
+    .column
+      .card
+        .card-content
+          a.show-modal(data-target='support-modal')
+            .media
+              .media-left
+                img.app-icon(src='../images/support.svg')
+              .media-content
+                p.title.is-5 サポート
+                p 設定方法、利用方法に関するお問い合わせやFAQが無償で利用できます。
+                br
+                p 
+                p
+                p.tag.is-link.is-normal 有効化されています
+    .column
+    .column
+    .column
+
+  .level-left.is-family-sans-serif
+    .level-item
+      div
+        p.title.is-spaced Tools
+
+  .columns.is-family-noto-sans
+    .column
+      .card
+        .card-content
+          a.show-modal(data-target='createdocument-modal')
+            .media.show-modal
+              .media-left
+                img.app-icon(src='../images/ts-app-createdocument.svg')
+              .media-content
+                p.title.is-5 文書の新規作成
+                p Tradeshiftの画面で文書を作成します。
+                br
+                p 
+                p.tag.is-link.is-normal Powered by Tradeshift
+    .column
+      .card
+        .card-content
+          a.show-modal(data-target='documentmanager-modal')
+            .media.show-modal
+              .media-left
+                img.app-icon(src='../images/ts-app-documentmanager.svg')
+              .media-content
+                p.title.is-5 文書管理
+                p Tradeshiftの画面で文書を管理します。
+                br
+                p 
+                p.tag.is-link.is-normal Powered by Tradeshift
+    .column
+    .column
+  
+  .modal#support-modal
+    .modal-background.cancel-button(data-target='support-modal')
+    .modal-card
+      header.modal-card-head
+        p.modal-card-title サポート
+        button.delete(data-target="support-modal")
+      section.modal-card-body
+        nav.panel
+          a.panel-block(href='https://support.ntt.com/bconnection/faq/search' target='_blank') 
+            span.panel-icon
+              i.fas.fa-file
+            p よくある質問（日本語）を参照する
+          a.panel-block(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank')
+            span.panel-icon
+              i.fas.fa-file
+            p 設定方法、ご利用方法のお問い合わせ
+      footer.modal-card-foot
+        p.is-size-7 アイテムをクリックすると別ウィンドウで表示します。
+
+  .modal#createdocument-modal
+    .modal-background.cancel-button(data-target='createdocument-modal')
+    .modal-card
+      header.modal-card-head
+        p.modal-card-title 文書の新規作成
+        button.delete(data-target="createdocument-modal")
+      section.modal-card-body
+        nav.panel
+          a.panel-block(href='https://go.tradeshift.com/#/Tradeshift.InvoiceLG/create' target='_blank') 
+            span.panel-icon
+              i.fas.fa-file
+            p 請求書を作成する
+          a.panel-block(href='https://go.tradeshift.com/#/Tradeshift.OrderLG' target='_blank')
+            span.panel-icon
+              i.fas.fa-file
+            p 注文書を作成する
+          a.panel-block(href='https://go.tradeshift.com/#/Tradeshift.QuoteLG/create' target='_blank')
+            span.panel-icon
+              i.fas.fa-file
+            p 見積書を作成する
+      footer.modal-card-foot
+        p.is-size-7 アイテムをクリックすると別ウィンドウで表示します。
+
+  .modal#documentmanager-modal
+    .modal-background.cancel-button(data-target='documentmanager-modal')
+    .modal-card
+      header.modal-card-head
+        p.modal-card-title 文書管理
+        button.delete(data-target='documentmanager-modal')
+      section.modal-card-body
+        p 「開く」をクリックすると別ウィンドウで表示します。
+      footer.modal-card-foot
+        a.button.is-success(href='https://go.tradeshift.com/#/Tradeshift.DocumentManager' target='_blank') 開く
+        a.button.cancel-button(data-target='documentmanager-modal') キャンセル

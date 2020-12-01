@@ -4,27 +4,26 @@ html
     meta(charset='utf-8')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
     title #{title} - BConnectionデジタルトレード
-    link(rel='stylesheet', type='text/css', href='/stylesheets/bootstrap.min.css')
+    link(rel='stylesheet', type='text/css', href='https://use.fontawesome.com/releases/v5.6.1/css/all.css')
+    link(rel='stylesheet', type='text/css', href='/stylesheets/bulma.css')
     link(rel='stylesheet', type='text/css', href='/stylesheets/style.css')
+
+  body.has-navbar-fixed-top
+    .navbar.is-dark.is-family-noto-sans-bold.is-fixed-top
+        .navbar-brand
+          a.navbar-item(href='/') BConnectionデジタルトレード
+          //a.navbar-brand(href='/') BConnectionデジタルトレード
+          a.fas.fa-home.navbar-item(href='/') Home
     
-  body
-    .navbar.navbar-inverse.navbar-fixed-top
-      .container
-        .navbar-header
-          button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
-          a.navbar-brand(href='/') BConnectionデジタルトレード
-        .navbar-collapse.collapse
-          ul.nav.navbar-nav
-            li
-              a(href='/') Home
-            
-    .container.body-content
+    block hero
+
+    .container
       block content
-      hr
-      footer
-        p &copy; NTT Communications Corporation All Rights Reserved.
+      footer.footer
+        .content.has-text-centered
+          p &copy; NTT Communications Corporation All Rights Reserved.
    
     block scripts
+
+  script(src="/js/common.js")
+    

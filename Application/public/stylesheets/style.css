@@ -4,7 +4,7 @@
     src: url('../fonts/NotoSansCJKjp-Bold.otf') format('opentype');
 }
 @font-face {
-    font-family: "NotoSansCJKjp-Reqular";
+    font-family: "NotoSansCJKjp-Regular";
     src: url('../fonts/NotoSansCJKjp-Regular.otf') format('opentype');
 }
 
@@ -15,12 +15,30 @@ body {
     padding: 0;
     margin: 0;
 }
-.navbar {
+
+.is-family-noto-sans {
+    font-family: "NotoSansCJKjp-Regular";
+}
+.is-family-noto-sans-bold {
     font-family: "NotoSansCJKjp-Bold";
 }
 
-.main-container {
+.app-icon {
+    height: 5rem;
+    width: 5rem;
+}
+.panel {
+    background-color: white;
+}
+
+.hero-body {
     background-image: url('../images/bannerTop.png');
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: contain;
+}
+.main-container {
     background-repeat: no-repeat;
     height: 380px;
     width: 100%;
