@@ -8,22 +8,13 @@
   },
   "description": "nodejs-webapp-express",
   "author": {
-    "name": "alagrawa"
+    "name": "Hiroki Watanabe"
   },
   "dependencies": {
-    "applicationinsights": "^1.0.0",
-    "body-parser": "^1.15.0",
-    "cookie-parser": "^1.4.0",
-    "debug": "^2.2.0",
-    "express": "^4.14.0",
+    "applicationinsights": "^1.8.8",
+    "express": "^4.17.1",
     "helmet": "^4.2.0",
-    "morgan": "^1.7.0",
-    "natives": "^1.1.6",
-    "pug": "^2.0.0-beta6",
-    "serve-favicon": "^2.3.0"
-  },
-  "engines": {
-    "node": "~6.10.x"
+    "pug": "^3.0.0"
   },
   "devDependencies": {
     "bulma": "^0.9.1",

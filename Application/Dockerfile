@@ -1,5 +1,5 @@
-FROM node:8
-LABEL maintainer="Azure App Services Container Images <appsvc-images@microsoft.com>"
+FROM node:14
+LABEL maintainer="NTT Communications Corporation"
 
 # Create app directory
 WORKDIR /app
