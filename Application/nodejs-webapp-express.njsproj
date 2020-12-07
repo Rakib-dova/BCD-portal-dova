@@ -33,12 +33,12 @@
     <Compile Include="routes\index.js" />
     <Compile Include="routes\users.js" />
     <Content Include="package.json" />
-    <Content Include="public\fonts\segoeuil.ttf" />
-    <Content Include="public\images\successCloudNew.svg" />
-    <Content Include="public\images\tweetThis.svg" />
-    <Content Include="public\stylesheets\bootstrap.css" />
-    <Content Include="public\stylesheets\bootstrap.min.css" />
-    <Content Include="public\stylesheets\style.css" />
+    <Content Include="public\font\segoeuil.ttf" />
+    <Content Include="public\image\successCloudNew.svg" />
+    <Content Include="public\image\tweetThis.svg" />
+    <Content Include="public\css\bootstrap.css" />
+    <Content Include="public\css\bootstrap.min.css" />
+    <Content Include="public\css\style.css" />
     <Content Include="README.md" />
     <Content Include="views\index.pug" />
     <Content Include="views\layout.pug" />
@@ -46,9 +46,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\" />
-    <Folder Include="public\fonts\" />
-    <Folder Include="public\images\" />
-    <Folder Include="public\stylesheets\" />
+    <Folder Include="public\font\" />
+    <Folder Include="public\image\" />
+    <Folder Include="public\css\" />
     <Folder Include="routes\" />
     <Folder Include="views\" />
   </ItemGroup>

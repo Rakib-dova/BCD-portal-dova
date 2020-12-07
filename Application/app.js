@@ -8,7 +8,7 @@ var path = require('path');
 //var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
-var users = require('./routes/users');
+var register = require('./routes/register');
 
 var appInsights = require('applicationinsights');
 //セキュリティ
@@ -30,7 +30,8 @@ app.use(
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         "img-src":["'self' https:"],
         "form-action": ["'self'"], //form-actionは自己ドメインに制限
-        "style-src": ["'self' https:"] //style-srcは自己ドメインに制限
+        "style-src": ["'self' https:"], //style-srcは自己ドメインに制限
+        "object-src": ["'self'"]
       },
     })
   );
@@ -48,7 +49,7 @@ app.set('view engine', 'pug');
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-app.use('/users', users);
+app.use('/register', register);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

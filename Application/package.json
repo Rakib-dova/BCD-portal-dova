@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node app",
-    "css-build": "node-sass scss/style.scss public/stylesheets/bulma.css"
+    "css-build": "node-sass scss/style.scss public/css/bulma.css"
   },
   "description": "nodejs-webapp-express",
   "author": {
