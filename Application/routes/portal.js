@@ -2,10 +2,9 @@
 const express = require('express');
 const router = express.Router();
 
-/* GET home page. */
+/* GET users listing. */
 router.get('/', function (req, res) {
-    console.log(req.user.userId)
-    res.render('index', { title: 'ポータル' , state: req.query.state, customerId: req.user.userId });
+    res.render('portal', { title: 'ポータル' , state: req.query.state, customerId: 'xxxxxxxx' });
 });
 
 module.exports = router;

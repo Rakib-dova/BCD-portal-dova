@@ -1,19 +1,16 @@
 ﻿'use strict';
-var debug = require('debug');
-var express = require('express');
-var path = require('path');
+require('dotenv').config({ path: './config/.env' })
+
+const debug = require('debug')('app4');
+const express = require('express');
+const path = require('path');
+
 //var favicon = require('serve-favicon');
 //var logger = require('morgan');
 //var cookieParser = require('cookie-parser');
 //var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-var register = require('./routes/register');
-
-var appInsights = require('applicationinsights');
-//セキュリティ
-var helmet = require('helmet');
-
+const appInsights = require('applicationinsights');
 if(process.env.NODE_ENV == "production"){
     appInsights.setup();
     appInsights.start();
@@ -21,6 +18,9 @@ if(process.env.NODE_ENV == "production"){
 
 var server; 
 var app = express();
+
+//セキュリティ
+const helmet = require('helmet');
 app.use(helmet());
 //セキュリティ helmet.jsの仕様を確認のこと
 //https://github.com/helmetjs/helmet
@@ -36,6 +36,26 @@ app.use(
     })
   );
 
+//session
+const session = require("express-session");
+app.use(session({
+    secret: 'bcd pentas',
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    name:"bcd.sid",
+    cookie:{
+        httpOnly: true,
+        secure: false, //リバースプロキシやローバラから使えなくなるためfalseとしておく
+        maxAge: 1000 * 60 * 30
+    }
+}));
+
+//oauth2認証
+const auth = require('./lib/auth')
+app.use(auth.initialize());
+app.use(auth.session());
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -48,8 +68,10 @@ app.set('view engine', 'pug');
 //app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/register', register);
+app.use('/', require('./routes/index'));
+app.use('/portal', require('./routes/portal'));
+app.use('/register', require('./routes/register'));
+app.use('/auth', require('./routes/auth'));
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -84,16 +106,38 @@ app.use(function (err, req, res, next) {
 
 app.set('port', process.env.PORT || 3000);
 
-exports.listen = function () {
-    server = app.listen(app.get('port'), function () {
-        debug('Express server listening on port ' + server.address().port);
-    });
-}
+if(process.env.LOCALHOST_WITH_HTTPS == "true") {
+    // https サーバ
+    debug('Running localhost with HTTPS...');
+    const fs = require('fs');
+    var https = require('https');
+    https.globalAgent.options.rejectUnauthorized = false;
+    const options = {
+        key: fs.readFileSync('./certs/server.key'),
+        cert: fs.readFileSync('./certs/server.crt')
+    };
+    exports.listen = () => {
+        server = https.createServer(options, app).listen(app.get('port'), () => {
+            debug('Express server listening on port ' + server.address().port);
+      });
+    }
+    exports.close = () => {
+        server.close(() => {
+            debug('Server stopped.');
+        });
+    }
+} else {
+    exports.listen = () => {
+        server = app.listen(app.get('port'), () => {
+            debug('Express server listening on port ' + server.address().port);
+        });
+    }
+    exports.close = () => {
+        server.close(() => {
+            debug('Server stopped.');
+        });
+    }
 
-exports.close = function () {
-    server.close(() => {
-        debug('Server stopped.');
-    });
 }
 
 this.listen();

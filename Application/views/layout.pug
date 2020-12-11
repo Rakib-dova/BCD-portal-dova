@@ -33,11 +33,11 @@ html
           p.modal-card-title アカウント情報
           button.delete(data-target="accountinfo-modal")
         section.modal-card-body
-          p サポートアプリより問い合わせの際は、以下のお客様番号をご利用ください。
+          //p サポートアプリより問い合わせの際は、以下のお客様番号をご利用ください。
           table.table
             tbody
             -var aryLabel = ["お客様番号"]
-            -var aryDataTarget = ["xxxxxxxxxxx"]
+            -var aryDataTarget = [customerId]
               each val, index in aryLabel
                 tr
                   th #{val}
