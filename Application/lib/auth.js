@@ -1,6 +1,6 @@
 const passport = require('passport');
 const OAuth2Strategy = require('passport-oauth2');
-const authToken = Buffer.from('BCDdev.PortalAppL' + ':' + '40ff49b9-ce2a-4db6-ae73-e118d4a96833').toString('base64');
+const authToken = Buffer.from(process.env.TS_CLIENT_ID + ':' + process.env.TS_CLIENT_SECRET).toString('base64');
 const jwt = require('jwt-simple');
 
 const parseIdToken = (token) => {
