@@ -1,0 +1,35 @@
+﻿extends layout
+
+block content
+  .hero.is-large
+    .hero-body
+      .container
+
+  .section.is-overlay.mt-6
+    .container.is-max-widescreen.is-family-noto-sans
+      form#form(method="post")
+        article.panel.is-info
+          h2.panel-heading デジタルトレードアプリご利用にあたって
+          .panel-block
+            .container
+
+              .columns.is-centered: .column.is-four-fifths
+                .field.is-grouped.is-grouped-left
+                  label.label 免責事項
+                iframe(src="../html/terms-of-service20201203.html" width="100%" height="600px")
+                //iframe(src="" width="100%" height="200px")
+
+              .columns.is-centered: .column.is-four-fifths
+                .field.is-horizontal.is-grouped.is-grouped-centered
+                  .control: label.checkbox
+                    input.is-normal#check(name="termsCheck" type="checkbox" required="required")
+                    span.checkboxtext 免責事項を承諾しました
+              .columns.is-centered: .column.is-four-fifths
+                .field.is-grouped.is-grouped-centered
+                  .control
+                    button.button.is-link#next-btn(type="submit" disabled="disabled") 利用を開始する
+
+      include footer
+
+block append scripts
+  script(src="/js/register-page.js")

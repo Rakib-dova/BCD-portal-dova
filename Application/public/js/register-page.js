@@ -13,13 +13,13 @@ document.getElementById('next-btn').onclick = function() {
   const elements = document.querySelectorAll('input[type="text"]');
   const elementsArr = Array.prototype.slice.call(elements);
   elementsArr.forEach(function(element) {
-    const target = element.dataset.target;
+    const target = element.name;
     const td = document.getElementById(target);
     td.innerHTML = element.value;
   })
 
   const element_checkbox = document.querySelector('input[type="checkbox"]');
-  const target_checkbox = element_checkbox.dataset.target;
+  const target_checkbox = element_checkbox.name;
 
   if(document.getElementById('form').checkValidity()) {
 

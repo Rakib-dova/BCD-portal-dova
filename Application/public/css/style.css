@@ -48,6 +48,14 @@ input:invalid:focus {
     box-shadow: 0 0 4px 0 #f00;
 }
 
+input[readonly]{
+    background-color:whitesmoke;
+    border-color:whitesmoke;
+    box-shadow: none;
+    color:#7a7a7a;
+    cursor: not-allowed;
+}
+
 .appdesc {
   color: hsl(0, 0%, 21%);
 }

@@ -3,9 +3,11 @@ const express = require('express');
 const router = express.Router();
 
 /* GET home page. */
-router.get('/', function (req, res) {
-    console.log(req.user.userId)
-    res.render('index', { title: 'ポータル' , state: req.query.state, customerId: req.user.userId });
+router.get('/', async (req, res) => {
+    //将来的にポータルがトレードシフトから切り離される場合に備えて、indexを確保
+    //現在はポータルへのリダイレクトのみとする
+
+    res.redirect('/portal');
 });
 
 module.exports = router;

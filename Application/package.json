@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node app",
-    "css-build": "node-sass scss/style.scss public/css/bulma.css"
+    "css-build": "node-sass scss/style.scss public/css/bulma.css",
+    "start:local": "cross-env LOCALLY_HOSTED=true nodemon app"
   },
   "description": "nodejs-webapp-express",
   "author": {
@@ -12,20 +13,25 @@
   },
   "dependencies": {
     "applicationinsights": "^1.8.8",
+    "axios": "^0.21.0",
+    "body-parser": "^1.19.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-flash": "0.0.2",
     "express-session": "^1.17.1",
     "helmet": "^4.2.0",
     "jwt-simple": "^0.5.6",
     "passport": "^0.4.1",
     "passport-oauth2": "^1.5.0",
     "pug": "^3.0.0",
+    "qs": "^6.9.4",
     "sequelize": "^6.3.5",
     "tedious": "^9.2.1"
   },
   "devDependencies": {
     "bulma": "^0.9.1",
     "node-sass": "^5.0.0",
+    "nodemon": "^2.0.6",
     "sequelize-cli": "^6.2.0"
   }
 }

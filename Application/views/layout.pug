@@ -10,6 +10,7 @@ html
       link(rel='stylesheet', type='text/css', href='/css/modal-fx.css')
       link(rel='stylesheet', type='text/css', href='/css/hover.css')
       link(rel='stylesheet', type='text/css', href='/css/style.css')
+      link(rel='stylesheet', type='text/css', href='https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css')
 
   body.has-navbar-fixed-top
     .navbar.is-dark.is-fixed-top
@@ -24,7 +25,7 @@ html
         if customerId != 'none'
           .navbar-end
             .navbar-item
-              a.button.is-info.show-modal(data-target='accountinfo-modal') アカウント情報
+              //a.button.is-info.show-modal(data-target='accountinfo-modal') アカウント情報
     
     .modal.modal-fx-fadeInScale#accountinfo-modal
       .modal-background.cancel-button(data-target='accountinfo-modal')
@@ -46,7 +47,10 @@ html
     
     block content
 
-
-    block scripts
-      script(src="/js/common-page.js")
+    if messages.info
+      #message-info(title= messages.info[0])
     
+    block scripts
+      script(src="/js/bulma-toast.min.js")
+      script(src="/js/common-page.js")
+      

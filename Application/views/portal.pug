@@ -4,15 +4,11 @@ block content
   .hero.is-large
     .hero-body
       .container
-  .container
-    if state=="registrationCompleted"
-      article.message.is-info
-        .message-header INFO
-        .message-body 登録を受け付けました。「お客様番号」を記載したメールを受領後に、登録完了となります。
+
+  .container.is-max-widescreen
     .level-left.is-family-sans-serif
       .level-item
         p.title.mb-4 Apps
-
     .columns.is-desktop.is-family-noto-sans
       .column.hvr-float
         .box
@@ -25,7 +21,6 @@ block content
                 p 設定方法、利用方法に関するお問い合わせやFAQが無償で利用できます。
                 br
                 p.tag.is-link.is-normal 有効化されています
-      .column
       .column
       .column
 
@@ -49,7 +44,7 @@ block content
     
       .column.hvr-float
         .box
-          a(href='https://go.tradeshift.com/#/Tradeshift.DocumentManager' target='_blank')
+          a(href='https://'+TS_HOST+'/#/Tradeshift.DocumentManager' target='_blank')
             .media.appdesc
               .media-left
                 img.app-icon(src='../image/ts-app-documentmanager.svg')
@@ -59,7 +54,6 @@ block content
                 br
                 p 
                 p.tag.is-link.is-normal Powered by Tradeshift
-      .column
       .column
     
     .modal#support-modal
@@ -88,15 +82,15 @@ block content
           button.delete(data-target="createdocument-modal")
         section.modal-card-body
           nav.panel
-            a.panel-block(href='https://go.tradeshift.com/#/Tradeshift.InvoiceLG/create' target='_blank') 
+            a.panel-block(href='https://'+TS_HOST+'/#/Tradeshift.InvoiceLG/create' target='_blank') 
               span.panel-icon
                 i.fas.fa-file
               p 請求書を作成する
-            a.panel-block(href='https://go.tradeshift.com/#/Tradeshift.OrderLG' target='_blank')
+            a.panel-block(href='https://'+TS_HOST+'/#/Tradeshift.OrderLG' target='_blank')
               span.panel-icon
                 i.fas.fa-file
               p 注文書を作成する
-            a.panel-block(href='https://go.tradeshift.com/#/Tradeshift.QuoteLG/create' target='_blank')
+            a.panel-block(href='https://'+TS_HOST+'/#/Tradeshift.QuoteLG/create' target='_blank')
               span.panel-icon
                 i.fas.fa-file
               p 見積書を作成する

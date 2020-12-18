@@ -10,11 +10,11 @@ const parseIdToken = (token) => {
 };
 
 const oauthStrategy = new OAuth2Strategy({
-    authorizationURL: 'https://api-sandbox.tradeshift.com/tradeshift/auth/login',
-    tokenURL: 'https://api-sandbox.tradeshift.com/tradeshift/auth/token',
-    clientID: 'BCDdev.PortalAppL',
-    clientSecret: '40ff49b9-ce2a-4db6-ae73-e118d4a96833',
-    callbackURL: "https://localhost:3000/auth/callback/"
+    authorizationURL: `https://${process.env.TS_API_HOST}/tradeshift/auth/login`,
+    tokenURL: `https://${process.env.TS_API_HOST}/tradeshift/auth/token`,
+    clientID: process.env.TS_CLIENT_ID,
+    clientSecret: process.env.TS_CLIENT_SECRET,
+    callbackURL: `https://${process.env.HOST}/auth/callback/`
     }, (accessToken, refreshToken, params, profile, done) => {
 
         const { companyId, email, userId } = parseIdToken(params.id_token);
@@ -34,13 +34,11 @@ const oauthStrategy = new OAuth2Strategy({
 );
 
 passport.serializeUser(function(user, done){
-    console.log("serialize")
-    done(null, jwt.encode(user, '40ff49b9-ce2a-4db6-ae73-e118d4a96833'));
+    done(null, jwt.encode(user, process.env.TS_CLIENT_SECRET));
 });
   
 passport.deserializeUser(function(user, done){
-    console.log("deserialize")
-    done(null, jwt.decode(user, '40ff49b9-ce2a-4db6-ae73-e118d4a96833'));
+    done(null, jwt.decode(user, process.env.TS_CLIENT_SECRET));
 });
 
 /* Setting custom Authorization header */
