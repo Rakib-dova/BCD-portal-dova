@@ -15,17 +15,8 @@ const logger = require('./lib/logger')
 
 const appInsights = require('applicationinsights');
 if(process.env.LOCALLY_HOSTED != "true"){
-    appInsights.setup();
-    appInsights.setAutoDependencyCorrelation(true)
-    .setAutoCollectRequests(true)
-    .setAutoCollectPerformance(true, true)
-    .setAutoCollectExceptions(true)
-    .setAutoCollectDependencies(true)
-    .setAutoCollectConsole(true)
-    .setUseDiskRetryCaching(true)
-    .setSendLiveMetrics(false)
-    .setDistributedTracingMode(appInsights.DistributedTracingModes.AI)
-    .start();
+    appInsights.setup().setAutoCollectConsole(true);
+    appInsights.start();
 }
 
 var server; 
