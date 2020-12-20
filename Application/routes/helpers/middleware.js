@@ -3,7 +3,8 @@ const e = require('express');
 const express = require('express');
 const router = express.Router();
 // Require our controllers.
-const userController = require('../../controllers/userController'); 
+const userController = require('../../controllers/userController');
+const tenantController = require('../../controllers/tenantController'); 
 
 exports.isAuthenticated = async (req, res, next) => {
 
@@ -29,15 +30,15 @@ exports.isTenantRegistered = async (req, res, next) => {
     if(!req.user || !req.user.userId) return res.redirect(303, '/auth')
 
     //isRegistered? テナントがアカウント管理者によって登録されているか
-    const user = await userController.findByTenantId(req.user.companyId)
+    const tenant = await tenantController.findOne(req.user.companyId)
 
-    if(user === null) { //ユーザが見つからない場合null値になる
+    if(tenant === null) { //ユーザが見つからない場合null値になる
         //ユーザがDBに登録されていない
         req.session.userContext="NotTenantRegistered"
 
         res.redirect(303, '/register/tenant'); //registerへリダイレクトさせる
 
-    } else if (user.dataValues && user.dataValues.userId) { //TODO: userIdがUUIDかどうか
+    } else if (tenant.dataValues && tenant.dataValues.tenantId) { //TODO: userIdがUUIDかどうか
         //ユーザがDBに登録されている
 
         //TODO: ユーザの名前、メールアドレスがセッション内の情報と一致するか

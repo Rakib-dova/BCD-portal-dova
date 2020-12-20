@@ -1,7 +1,7 @@
 ﻿'use strict';
 const express = require('express');
 const router = express.Router();
-
+const logger = require('../lib/logger')
 const helper = require('./helpers/middleware')
 // Require our controllers.
 var userController = require('../controllers/userController.js'); 
@@ -13,9 +13,11 @@ router.get('/delete', helper.isAuthenticated, helper.isTenantRegistered, helper.
     //console.log(deleted)
 
     if(deleted == 1) {
-        res.send('User delete success');
+        logger.info({tenant: req.user.companyId, user: req.user.userId}, 'User deleted successfully')
+        res.send('User deleted successfully');
     } else {
-        res.send('User delete failure');        
+        logger.warn({tenant: req.user.companyId, user: req.user.userId}, 'User deleted successfully')
+        res.send('Failed to delete user');        
     }
 });
 

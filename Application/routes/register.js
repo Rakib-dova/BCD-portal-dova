@@ -7,6 +7,7 @@ const helper = require('./helpers/middleware')
 var userController = require('../controllers/userController.js'); 
 
 const apihelper = require('../lib/apihelper');
+const logger = require('../lib/logger')
 
 router.get('/tenant', helper.isAuthenticated, async (req, res) => {
 
@@ -73,16 +74,19 @@ router.post('/tenant', helper.isAuthenticated, async (req,res) => {
     }
 
     //TODO: formのバリデーションチェック
-    console.log(req.body);
+    //console.log(req.body);
     
     //TODO: Subspere経由でSO系にformの内容を送信
 
     //TODO: DBにセッション内のuser情報を登録
     
+    //ユーザ登録と同時にテナント登録も行われる
     const user = await userController.create(req.user.accessToken, req.user.refreshToken)
 
     if(user !== null) {
-    //ユーザ登録成功したら
+        //テナント＆ユーザ登録成功したら
+        logger.info({tenant: req.user.companyId, user: req.user.userId}, 'Tenant Registration Succeeded')
+
         req.flash('info', '登録を受け付けました。「お客様番号」を記載したメールを受領後に、登録完了となります。');
         res.redirect('/portal');
     } else {
@@ -107,11 +111,19 @@ router.post('/user', helper.isAuthenticated, async (req,res) => {
     //TODO: Subspere経由でSO系にformの内容を送信
 
     //TODO: DBにセッション内のuser情報を登録
-    
-    const user = await userController.create(req.user.accessToken, req.user.refreshToken)
-
+    let user;
+    try {
+    user = await userController.create(req.user.accessToken, req.user.refreshToken)
+    } catch(error){
+        res.render('error', { //TODO: エラーハンドリングをしっかりかく
+            message: "エラー:TODO エラーメッセージ",
+            error: "エラー"
+        });
+    }
     if(user !== null) {
-    //ユーザ登録成功したら
+        //ユーザ登録成功したら
+        logger.info({tenant: req.user.companyId, user: req.user.userId}, 'User Registration Succeeded')
+
         res.redirect('/portal');
     } else {
     //失敗したら

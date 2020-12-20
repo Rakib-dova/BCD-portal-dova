@@ -2,7 +2,9 @@
 const express = require('express');
 const Views = '../views/'
 const User = require('../models').User;
+const Tenant = require('../models').Tenant;
 
+const db = require('../models');
 const apihelper = require('../lib/apihelper')
 
 //リフレッシュトークン暗号化メソッド
@@ -77,18 +79,41 @@ module.exports = {
         const iv = Buffer.from(user_id.replace(/-/g, ''), 'hex') //user_idはUUIDで16byteなのでこれを初期ベクトルとする
         //リフレッシュトークンは暗号化してDB保管
         const encrypted_refresh_token = encrypt('aes-256-cbc', password, salt, iv, refreshToken)
+        let created;
+        //TODO:データベース接続回りはtry-catchしておく
+        try{
+          created = await db.sequelize.transaction(async (t) => {
+            
+            await Tenant.findOrCreate({
+              where: { tenantId: tenant_id },
+              defaults: {
+                tenantId: tenant_id,
+                registeredBy: user_id
+              },
+              transaction: t 
+            })
+            
+            const user = await User.create({
+              userId: user_id,
+              tenantId: tenant_id,
+              userRole: role,
+              appVersion: process.env.TS_APP_VERSION,
+              refreshToken: encrypted_refresh_token,
+              userStatus: 0,
+            }, { transaction: t })
 
-        const created = await User.create({
-          userId: user_id,
-          tenantId: tenant_id,
-          userRole: role,
-          appVersion: process.env.TS_APP_VERSION,
-          refreshToken: encrypted_refresh_token,
-          userStatus: 0,
-        })
+            return user
+          });
+        } catch(error) {
+        //TODO:エラー内容はログに吐く
+          console.log(error)
+          created = null
+        }
+
         if(created == null) {
           //TODO: ユーザ作成が失敗したときのエラーハンドリング
         }
+
         return created
 
     } else {
@@ -98,10 +123,35 @@ module.exports = {
     return null
   },
   delete: async (userId) => {
-    const deleted = await User.destroy({
-      where: { userId: userId }
-    })
-    
+
+    let deleted;
+    //TODO:データベース接続回りはtry-catchしておく
+    try{
+      deleted = await db.sequelize.transaction(async (t) => {
+        const user = await User.findOne({
+          where: { userId: userId }
+        })
+
+        const deleted = await User.destroy({
+          where: { userId: userId }
+        })
+
+        const count = await User.count({
+          where: { tenantId: user.tenantId }
+        })
+
+        if(count==0){
+          await Tenant.destroy({
+            where: { tenantId: user.tenantId }
+          })
+        }
+      return deleted
+      });
+    } catch(error) {
+      //TODO:ログにエラー吐く
+      console.log(error)
+      deleted = null;
+    }
     return deleted
   }
 }

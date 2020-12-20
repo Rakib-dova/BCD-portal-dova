@@ -9,11 +9,12 @@ const path = require('path');
 const bodyParser = require('body-parser');
 
 //var favicon = require('serve-favicon');
-//var logger = require('morgan');
+const morgan = require('morgan');
+const logger = require('./lib/logger')
 //var cookieParser = require('cookie-parser');
 
 const appInsights = require('applicationinsights');
-if(process.env.NODE_ENV == "production"){
+if(process.env.LOCALLY_HOSTED != "true"){
     appInsights.setup();
     appInsights.start();
 }
@@ -79,7 +80,14 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
-//app.use(logger('dev'));
+if(process.env.LOCALLY_HOSTED != "true") {
+    morgan.token('id', function getId(req){
+        if(req.user && req.user.userId) return req.user.userId
+    });
+    app.use(morgan(':id [:date[web]] :remote-addr - ":method :url HTTP/:http-version" \
+    :status :res[content-length] :response-time ms - :res[content-length] ":referrer" ":user-agent"'));
+}
+
 //app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: false }));
 //app.use(cookieParser());
@@ -138,23 +146,23 @@ if(process.env.LOCALLY_HOSTED == "true") {
     };
     exports.listen = () => {
         server = https.createServer(options, app).listen(app.get('port'), () => {
-            debug('Express server listening on port ' + server.address().port);
+            logger.info('Express server listening on port ' + server.address().port);
       });
     }
     exports.close = () => {
         server.close(() => {
-            debug('Server stopped.');
+            logger.info('Server stopped.');
         });
     }
 } else {
     exports.listen = () => {
         server = app.listen(app.get('port'), () => {
-            debug('Express server listening on port ' + server.address().port);
+            logger.info('Express server listening on port ' + server.address().port);
         });
     }
     exports.close = () => {
         server.close(() => {
-            debug('Server stopped.');
+            logger.info('Server stopped.');
         });
     }
 

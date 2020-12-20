@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
+const logger = require('../lib/logger')
 
 // Require our controllers.
 var userController = require('../controllers/userController.js'); 
@@ -11,6 +12,8 @@ router.get('/', passport.authenticate('tradeshift', { scope: 'openid offline' })
 
 // /auth/callbackにアクセスした時
 router.get('/callback', passport.authenticate('tradeshift', { failureRedirect: '/auth/failuer' }), async (req, res) => {
+
+    logger.info({tenant: req.user.companyId, user: req.user.userId}, 'Tradeshift Authentication Succeeded')
 
     //ユーザの登録が見つかったら更新
     await userController.findAndUpdate(req.user.userId, req.user.accessToken, req.user.refreshToken)
