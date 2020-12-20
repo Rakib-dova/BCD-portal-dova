@@ -15,7 +15,7 @@ const logger = require('./lib/logger')
 
 const appInsights = require('applicationinsights');
 if(process.env.LOCALLY_HOSTED != "true"){
-    appInsights.setup().setAutoCollectConsole(true);
+    appInsights.setup().setAutoCollectConsole(true,true);
     appInsights.start();
 }
 
