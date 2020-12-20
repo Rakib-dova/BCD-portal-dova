@@ -8,12 +8,12 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 
+const appInsights = require('applicationinsights');
 //var favicon = require('serve-favicon');
 const morgan = require('morgan');
 const logger = require('./lib/logger')
 //var cookieParser = require('cookie-parser');
 
-const appInsights = require('applicationinsights');
 if(process.env.LOCALLY_HOSTED != "true"){
     appInsights.setup().setAutoCollectConsole(true,true);
     appInsights.start();
