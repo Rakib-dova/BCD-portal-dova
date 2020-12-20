@@ -9,7 +9,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const appInsights = require('./lib/appinsights');
 //var favicon = require('serve-favicon');
-const morgan = require('morgan');
+//const morgan = require('morgan');
 const logger = require('./lib/logger')
 //var cookieParser = require('cookie-parser');
 
@@ -74,13 +74,14 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
+/*
 if(process.env.LOCALLY_HOSTED != "true") {
     morgan.token('id', function getId(req){
         if(req.user && req.user.userId) return req.user.userId
     });
     app.use(morgan(':id [:date[web]] :remote-addr - ":method :url HTTP/:http-version" \
     :status :res[content-length] :response-time ms - :res[content-length] ":referrer" ":user-agent"'));
-}
+}*/
 
 //app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: false }));

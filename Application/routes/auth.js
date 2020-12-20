@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const logger = require('../lib/logger')
-const appInsights = require('../lib/appinsights')
+
 // Require our controllers.
 var userController = require('../controllers/userController.js'); 
 
@@ -13,7 +13,6 @@ router.get('/', passport.authenticate('tradeshift', { scope: 'openid offline' })
 // /auth/callbackにアクセスした時
 router.get('/callback', passport.authenticate('tradeshift', { failureRedirect: '/auth/failuer' }), async (req, res) => {
 
-    appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.userAuthUserId]=req.user.userId
     logger.info({tenant: req.user.companyId, user: req.user.userId}, 'Tradeshift Authentication Succeeded')
 
     //ユーザの登録が見つかったら更新

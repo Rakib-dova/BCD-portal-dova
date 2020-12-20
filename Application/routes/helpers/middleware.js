@@ -6,10 +6,15 @@ const router = express.Router();
 const userController = require('../../controllers/userController');
 const tenantController = require('../../controllers/tenantController'); 
 
+const appInsights = require('../lib/appinsights')
+
 exports.isAuthenticated = async (req, res, next) => {
 
     //if(req.isAuthenticated()) {
     if(req.user && req.user.userId) {
+
+        //Auth Idでアクセスログを追跡する
+        appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.userAuthUserId]=req.user.userId
         //セッションにユーザ情報が格納されている
 
         //セッション情報に前のアカウント情報が残っているが、新しいアカウントでTradeshiftにログインした場合を判定する
