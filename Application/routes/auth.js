@@ -13,7 +13,7 @@ router.get('/', passport.authenticate('tradeshift', { scope: 'openid offline' })
 // /auth/callbackにアクセスした時
 router.get('/callback', passport.authenticate('tradeshift', { failureRedirect: '/auth/failuer' }), async (req, res) => {
 
-    appInsights.setAuthenticatedUserContext(req.user.userId);
+    appInsights.defaultClient.context.tags[appInsights.defaultClient.context.keys.userAuthUserId]=req.user.userId
     logger.info({tenant: req.user.companyId, user: req.user.userId}, 'Tradeshift Authentication Succeeded')
 
     //ユーザの登録が見つかったら更新
