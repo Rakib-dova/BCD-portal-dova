@@ -6,7 +6,7 @@ const router = express.Router();
 const userController = require('../../controllers/userController');
 const tenantController = require('../../controllers/tenantController'); 
 
-const appInsights = require('../lib/appinsights')
+const appInsights = require('../../lib/appinsights')
 
 exports.isAuthenticated = async (req, res, next) => {
 
