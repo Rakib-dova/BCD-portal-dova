@@ -7,7 +7,7 @@ block content
 
   .section.is-overlay.mt-6
     .container.is-max-widescreen.is-family-noto-sans
-      form#form(method="post")
+      form#form(action="#")
         article.panel.is-info
           h2.panel-heading デジタルトレードアプリご利用にあたって
           .panel-block
@@ -43,7 +43,7 @@ block content
               .columns.is-centered: .column.is-four-fifths
                 .field.is-grouped.is-grouped-left
                   label.label 利用規約
-                iframe(src="../html/terms-of-service20201203.html" width="100%" height="200px")
+                iframe(src="" width="100%" height="200px")
                 //iframe(src="" width="100%" height="200px")
 
               .columns.is-centered: .column.is-four-fifths
@@ -54,14 +54,14 @@ block content
               .columns.is-centered: .column.is-four-fifths
                 .field.is-grouped.is-grouped-centered
                   .control
-                    button.button.is-link#next-btn(type="button" disabled="disabled") 次へ
+                    button.button.is-link#next-btn(type="submit" disabled="disabled") 次へ
 
         .modal.modal-fx-fadeInScale#confirmregister-modal
           .modal-background.cancel-button(data-target='confirmregister-modal')
           .modal-card
             header.modal-card-head
               p.modal-card-title 以下の内容で利用登録します。
-              button.delete(data-target="confirmregister-modal")
+              button.delete(type="button" data-target="confirmregister-modal")
             section.modal-card-body
               table.table
                 tbody
@@ -74,7 +74,7 @@ block content
               p ※登録したメールアドレスに「お客様番号」を記載した登録完了メールを送付いたします。配信ドメイン「〇〇」を受信できるよう設定してください。
 
             footer.modal-card-foot
-              button.button.is-success(type="submit") 登録
+              button.button.is-success(type="submit" formaction="/register/tenant" formmethod="POST") 登録
               a.button.cancel-button(data-target='confirmregister-modal') キャンセル
 
       include footer

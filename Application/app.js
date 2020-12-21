@@ -7,7 +7,9 @@ const debug = require('debug')('app4');
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-const appInsights = require('./lib/appinsights');
+
+const appInsights = process.env.LOCALLY_HOSTED != "true" ? require('./lib/appinsights') : {};
+
 //var favicon = require('serve-favicon');
 //const morgan = require('morgan');
 const logger = require('./lib/logger')
@@ -29,12 +31,15 @@ app.use(
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         "img-src":["'self'"],
         "form-action": ["'self'"], //form-actionは自己ドメインに制限
+        //bulma-toast、fontawasom、googlefontsを使うためstyle-srcを一部許可
+        //sha256はbulma-toastがinline styeを使用するためハッシュを指定(See common-page.js)
         "style-src": ["'self' 'unsafe-hashes' \
             'sha256-UFSdfDBHU2GqtdoDHN2BFW+gCZ9hKcFKzgGr97RwY5o=' \
             'sha256-E/nvqET/9zpctDshjbx7JreRM/gAx3JcoKF+f+rglGY=' \
+            'sha256-oZlOzimqeBC3337zzQaIzbHhSc7p/5AqrpTayBe83Hg=' \
             https://cdnjs.cloudflare.com \
             https://use.fontawesome.com \
-            https://fonts.googleapis.com"], //bulma-toast、fontawasom、googlefontsを使うためstyle-srcを一部許可
+            https://fonts.googleapis.com"],
         "object-src": ["'self'"],
         "frame-ancestors": [`'self' https://${process.env.TS_HOST}`]
       },

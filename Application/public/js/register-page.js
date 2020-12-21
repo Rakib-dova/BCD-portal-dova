@@ -28,13 +28,18 @@ document.getElementById('next-btn').onclick = function() {
       td_ckeckbox.innerHTML = "同意する"
       var modal = document.getElementById("confirmregister-modal");
       if(modal) modal.classList.toggle('is-active');
+
       return false;
     } else {
       //checkValidity()でバリデーションのため正常系では下記アラートは表示されない
       alert("利用規約への同意が必要です。")
+
       return false;
     }
   }
+
+  //return falseで返すとバリデーションの結果が画面表示されないためコメントアウト
+  //return false;
 }
 
 
