@@ -1,6 +1,11 @@
 ﻿extends layout
 
 block content
-  h1= message
-  h2= error.status
-  pre #{error.stack}
+  section.section.is-medium
+    .container
+      .colums.is-vcentered
+        .colum.has-text-centered
+          h1.title= status+" "+title
+          p.subtitle= message
+      - if (error.stack) 
+        pre #{error.stack}

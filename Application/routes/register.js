@@ -9,18 +9,29 @@ var userController = require('../controllers/userController.js');
 const apihelper = require('../lib/apihelper');
 const logger = require('../lib/logger')
 
-router.get('/tenant', helper.isAuthenticated, async (req, res) => {
+const errorHelper = require('./helpers/error');
 
-    if(req.session.userContext != "NotTenantRegistered") {
-        return  res.render('error', { //TODO: エラーハンドリングをしっかりかく
-            message: "エラー不正な操作が行われました（TODO:エラーメッセージ）",
-            error: "エラー"
-        });
+const checkUserContext = (userContext, requiredContext, next) => {
+    if(userContext != requiredContext) {
+        return next(errorHelper.create(400))
     }
+}
+const checkUserTokens = (accessToken, refreshToken, next) => {
+    //TODO: uuidのバリデーションチェック
+    if(!accessToken || !refreshToken) {
+        return next(errorHelper.create(500))
+    }
+}
+
+router.get('/tenant', helper.isAuthenticated, async (req, res, next) => {
+
+    checkUserContext(req.session?.userContext, "NotTenantRegistered", next)
+
+    checkUserTokens(req.user?.accessToken, req.user?.refreshToken, next)
 
     const userdata = await apihelper.accessTradeshift(req.user.accessToken, req.user.refreshToken, "get", "/account/info/user")
 
-    if(userdata.Memberships[0].Role.toLowerCase() != "a6a3edcd-00d9-427c-bf03-4ef0112ba16d") {
+    if(userdata.Memberships?.[0].Role?.toLowerCase() != "a6a3edcd-00d9-427c-bf03-4ef0112ba16d") {
         return res.render('error', { //TODO: エラーハンドリングをしっかりかく
             message: "デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。（TODO:画面デザイン）",
             error: "エラー"
@@ -40,97 +51,76 @@ router.get('/tenant', helper.isAuthenticated, async (req, res) => {
         street = companydata.AddressLines.filter(item => (item.scheme == "street"))[0].value
         zip = companydata.AddressLines.filter(item => (item.scheme == "zip"))[0].value.replace(/-/g,"")//郵便番号はハイフンなし
     } catch {
-        city = ""
-        street = ""
-        zip = ""
+
+        city = street = zip = ""
     }
-    const address = city + " " + street
+    const address = city+" "+street
 
     res.render('registerTenant', { title: '利用登録', companyName: companyName, userName: userName, email: email, zip: zip, address: address, customerId: 'none' });
 
 });
 
-router.get('/user', helper.isAuthenticated, async (req, res) => {
+router.get('/user', helper.isAuthenticated, async (req, res, next) => {
 
-    if(req.session.userContext != "NotUserRegistered") {
-        return  res.render('error', { //TODO: エラーハンドリングをしっかりかく
-            message: "エラー不正な操作が行われました（TODO:エラーメッセージ）",
-            error: "エラー"
-        });
-    }
+    checkUserContext(req.session?.userContext, "NotUserRegistered", next)
 
     res.render('registerUser', { title: '利用登録' });
 
-
 });
 
-router.post('/tenant', helper.isAuthenticated, async (req,res) => {
+router.post('/tenant', helper.isAuthenticated, async (req, res, next) => {
 
-    if(req.session.userContext != "NotTenantRegistered") {
-        return  res.render('error', { //TODO: エラーハンドリングをしっかりかく
-            message: "エラー不正な操作が行われました（TODO:エラーメッセージ）",
-            error: "エラー"
-        });
-    }
+    checkUserContext(req.session?.userContext, "NotTenantRegistered", next)
+
+    checkUserTokens(req.user?.accessToken, req.user?.refreshToken, next)
 
     //TODO: formのバリデーションチェック
-    //console.log(req.body);
-    
-    //TODO: Subspere経由でSO系にformの内容を送信
 
-    //TODO: DBにセッション内のuser情報を登録
+    //TODO: SO系にformの内容を送信
     
     //ユーザ登録と同時にテナント登録も行われる
     const user = await userController.create(req.user.accessToken, req.user.refreshToken)
 
     if(user !== null) {
         //テナント＆ユーザ登録成功したら
-        logger.info({tenant: req.user.companyId, user: req.user.userId}, 'Tenant Registration Succeeded')
+        logger.info({tenant: req.user?.companyId, user: req.user?.userId}, 'Tenant Registration Succeeded')
 
         req.flash('info', '登録を受け付けました。「お客様番号」を記載したメールを受領後に、登録完了となります。');
-        res.redirect('/portal');
+        return res.redirect('/portal');
     } else {
+        //TODO:20201225
     //失敗したら
-        res.render('error', { //TODO: エラーハンドリングをしっかりかく
-            message: "エラー:TODO エラーメッセージ",
-            error: "エラー"
-        });
+        return next(errorHelper.create(500))
     }
 });
 
 
-router.post('/user', helper.isAuthenticated, async (req,res) => {
+router.post('/user', helper.isAuthenticated, async (req, res, next) => {
 
-    if(req.session.userContext != "NotUserRegistered") {
-        return  res.render('error', { //TODO: エラーハンドリングをしっかりかく
-            message: "エラー不正な操作が行われました（TODO:エラーメッセージ）",
-            error: "エラー"
-        });
-    }
-    
+    checkUserContext(req.session?.userContext, "NotUserRegistered", next)
+
+    checkUserTokens(req.user?.accessToken, req.user?.refreshToken, next)
+
     //TODO: Subspere経由でSO系にformの内容を送信
 
     //TODO: DBにセッション内のuser情報を登録
     let user;
     try {
-    user = await userController.create(req.user.accessToken, req.user.refreshToken)
+        user = await userController.create(req.user.accessToken, req.user.refreshToken)
     } catch(error){
-        res.render('error', { //TODO: エラーハンドリングをしっかりかく
-            message: "エラー:TODO エラーメッセージ",
-            error: "エラー"
-        });
+
+        return next(errorHelper.create(500))
     }
+
     if(user !== null) {
         //ユーザ登録成功したら
         logger.info({tenant: req.user.companyId, user: req.user.userId}, 'User Registration Succeeded')
 
-        res.redirect('/portal');
+        return res.redirect('/portal');
     } else {
     //失敗したら
-        res.render('error', { //TODO: エラーハンドリングをしっかりかく
-            message: "エラー:TODO エラーメッセージ",
-            error: "エラー"
-        });
+
+        return next(errorHelper.create(500))
     }
 });
 

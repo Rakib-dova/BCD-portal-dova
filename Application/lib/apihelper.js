@@ -39,7 +39,7 @@ exports.accessTradeshift = async (access_token, refresh_token, method, query, bo
         } catch(error) {
             
             retry_count++;
-            if(error.response.status == "401" && retry_count == 1 ) {
+            if(error.response?.status == "401" && retry_count == 1 ) {
                 //リフレッシュを試行するフロー
                 const app_token = Buffer.from(`${process.env.TS_CLIENT_ID}:${process.env.TS_CLIENT_SECRET}`).toString('base64')
     

@@ -7,7 +7,7 @@ const helper = require('./helpers/middleware')
 var userController = require('../controllers/userController.js'); 
 
 /* GET users listing. */
-router.get('/delete', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, async (req, res) => {
+router.get('/delete', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, async (req, res, next) => {
     
     const deleted = await userController.delete(req.user.userId)
     //console.log(deleted)
@@ -16,7 +16,7 @@ router.get('/delete', helper.isAuthenticated, helper.isTenantRegistered, helper.
         logger.info({tenant: req.user.companyId, user: req.user.userId}, 'User deleted successfully')
         res.send('User deleted successfully');
     } else {
-        logger.warn({tenant: req.user.companyId, user: req.user.userId}, 'User deleted successfully')
+        logger.warn({tenant: req.user.companyId, user: req.user.userId}, 'Failed to delete user')
         res.send('Failed to delete user');        
     }
 });
