@@ -1,16 +1,13 @@
 {
-  "name": "nodejs-webapp-express",
+  "name": "bcd-portal",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node app",
+    "start": "node server",
     "css-build": "node-sass scss/style.scss public/css/bulma.css",
-    "start:local": "cross-env LOCALLY_HOSTED=true nodemon app"
+    "start:local": "cross-env LOCALLY_HOSTED=true nodemon server"
   },
-  "description": "nodejs-webapp-express",
-  "author": {
-    "name": "Hiroki Watanabe"
-  },
+  "description": "bcd-portal",
   "dependencies": {
     "applicationinsights": "^1.8.8",
     "axios": "^0.21.0",

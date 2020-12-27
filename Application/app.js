@@ -3,7 +3,6 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.env' })
 }
 
-const debug = require('debug')('app4')
 const express = require('express')
 const path = require('path')
 const bodyParser = require('body-parser')
@@ -53,11 +52,7 @@ if (process.env.LOCALLY_HOSTED !== 'true') {
 }
 
 // var favicon = require('serve-favicon');
-// const morgan = require('morgan');
-const logger = require('./lib/logger')
-// var cookieParser = require('cookie-parser');
 
-let server
 const app = express()
 
 // セキュリティ
@@ -170,38 +165,4 @@ app.use(errorHelper.render)
 
 app.set('port', process.env.PORT || 3000)
 
-if (process.env.LOCALLY_HOSTED === 'true') {
-  // https サーバ
-  debug('Running localhost with HTTPS...')
-  const fs = require('fs')
-  const https = require('https')
-  https.globalAgent.options.rejectUnauthorized = false
-  const options = {
-    key: fs.readFileSync('./certs/server.key'),
-    cert: fs.readFileSync('./certs/server.crt')
-  }
-  exports.listen = () => {
-    server = https.createServer(options, app).listen(app.get('port'), () => {
-      logger.info('Express server listening on port ' + server.address().port)
-    })
-  }
-
-  exports.close = () => {
-    server.close(() => {
-      logger.info('Server stopped.')
-    })
-  }
-} else {
-  exports.listen = () => {
-    server = app.listen(app.get('port'), () => {
-      logger.info('Express server listening on port ' + server.address().port)
-    })
-  }
-  exports.close = () => {
-    server.close(() => {
-      logger.info('Server stopped.')
-    })
-  }
-}
-
-this.listen()
+module.exports = app
