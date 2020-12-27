@@ -18,6 +18,9 @@ if (process.env.LOCALLY_HOSTED !== 'true') {
 
   // テレメンタリに送る前の前処理を追加
   appInsights.defaultClient.addTelemetryProcessor((envelope, context) => {
+    const requestContext = context.correlationContext?.requestContext
+    if (!requestContext) return true
+
     const getContextKey = (key) => {
       return appInsights.defaultClient.context.keys[key]
     }
@@ -26,7 +29,6 @@ if (process.env.LOCALLY_HOSTED !== 'true') {
     }
 
     // custom context that I set on per-request basis
-    const requestContext = appInsights.getCorrelationContext().requestContext
     const data = envelope.data.baseData
 
     // userIdをセット
@@ -133,18 +135,17 @@ app.use(express.static(path.join(__dirname, 'public')))
 // セッションにuserIdがあればappInsightに送信
 if (process.env.LOCALLY_HOSTED !== 'true') {
   app.use((req, res, next) => {
-    if (req.user?.userId) {
-      const userId = req.user.userId
+    const userId = req.user?.userId || null
 
-      const currentRequestContext = appInsights.getCorrelationContext().requestContext || {}
+    const currentRequestContext = appInsights.getCorrelationContext().requestContext || {}
 
-      const nextRequestContext = {
-        ...currentRequestContext,
-        userId
-      }
-
-      appInsights.getCorrelationContext().requestContext = nextRequestContext
+    const nextRequestContext = {
+      ...currentRequestContext,
+      userId
     }
+
+    appInsights.getCorrelationContext().requestContext = nextRequestContext
+
     next()
   })
 }
