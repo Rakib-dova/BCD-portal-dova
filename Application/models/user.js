@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+'use strict'
+const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -11,29 +9,32 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      //https://qiita.com/NewGyu/items/83390aa17dce1ffb4cd3
-      //TODO:試す
-      User.belongsTo(models.Tenant,{
-        foreignKey: "tenantId",  //k1を指定
-        targetKey: "tenantId"    //k2を指定
-      });
+      // https://qiita.com/NewGyu/items/83390aa17dce1ffb4cd3
+      // TODO:試す
+      User.belongsTo(models.Tenant, {
+        foreignKey: 'tenantId', // k1を指定
+        targetKey: 'tenantId' // k2を指定
+      })
     }
-  };
-  User.init({
-    userId: {
-      type: DataTypes.UUID,
-      primaryKey: true
+  }
+  User.init(
+    {
+      userId: {
+        type: DataTypes.UUID,
+        primaryKey: true
+      },
+      tenantId: DataTypes.UUID,
+      userRole: DataTypes.UUID,
+      appVersion: DataTypes.STRING,
+      refreshToken: DataTypes.STRING(840),
+      subRefreshToken: DataTypes.STRING(840),
+      userStatus: DataTypes.INTEGER,
+      lastRefreshedAt: DataTypes.DATE
     },
-    tenantId: DataTypes.UUID,
-    userRole: DataTypes.UUID,
-    appVersion: DataTypes.STRING,
-    refreshToken: DataTypes.STRING(840),
-    subRefreshToken: DataTypes.STRING(840),
-    userStatus: DataTypes.INTEGER,
-    lastRefreshedAt: DataTypes.DATE
-  }, {
-    sequelize,
-    modelName: 'User',
-  });
-  return User;
-};
+    {
+      sequelize,
+      modelName: 'User'
+    }
+  )
+  return User
+}

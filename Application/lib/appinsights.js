@@ -1,8 +1,8 @@
-const appInsights = require('applicationinsights');
+const appInsights = require('applicationinsights')
 
-if(process.env.LOCALLY_HOSTED != "true"){
-    appInsights.setup().setAutoCollectConsole(true,true);
-    appInsights.start();
+if (process.env.LOCALLY_HOSTED !== 'true') {
+  appInsights.setup().setAutoCollectConsole(true, true)
+  appInsights.start()
 }
 
-module.exports = appInsights;
+module.exports = appInsights

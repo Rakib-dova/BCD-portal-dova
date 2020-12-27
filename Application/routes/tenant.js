@@ -11,7 +11,7 @@ const logger = require('../lib/logger')
 
 const errorHelper = require('./helpers/error')
 
-router.get('/tenant', helper.isAuthenticated, async (req, res, next) => {
+router.get('/register', helper.isAuthenticated, async (req, res, next) => {
   errorHelper.checkUserContext(req.session?.userContext, 'NotTenantRegistered', next)
 
   errorHelper.checkUserTokens(req.user?.accessToken, req.user?.refreshToken, next)
@@ -54,13 +54,7 @@ router.get('/tenant', helper.isAuthenticated, async (req, res, next) => {
   })
 })
 
-router.get('/user', helper.isAuthenticated, async (req, res, next) => {
-  errorHelper.checkUserContext(req.session?.userContext, 'NotUserRegistered', next)
-
-  res.render('user-register', { title: '利用登録' })
-})
-
-router.post('/tenant', helper.isAuthenticated, async (req, res, next) => {
+router.post('/register', helper.isAuthenticated, async (req, res, next) => {
   errorHelper.checkUserContext(req.session?.userContext, 'NotTenantRegistered', next)
 
   errorHelper.checkUserTokens(req.user?.accessToken, req.user?.refreshToken, next)
@@ -77,37 +71,10 @@ router.post('/tenant', helper.isAuthenticated, async (req, res, next) => {
     logger.info({ tenant: req.user?.companyId, user: req.user?.userId }, 'Tenant Registration Succeeded')
 
     req.flash('info', '登録を受け付けました。「お客様番号」を記載したメールを受領後に、登録完了となります。')
-    return res.redirect('/portal')
-  } else {
-    // TODO:20201225
-    // 失敗したら
-    return next(errorHelper.create(500))
-  }
-})
-
-router.post('/user', helper.isAuthenticated, async (req, res, next) => {
-  errorHelper.checkUserContext(req.session?.userContext, 'NotUserRegistered', next)
-
-  errorHelper.checkUserTokens(req.user?.accessToken, req.user?.refreshToken, next)
-
-  // TODO: Subspere経由でSO系にformの内容を送信
-
-  // TODO: DBにセッション内のuser情報を登録
-  let user
-  try {
-    user = await userController.create(req.user.accessToken, req.user.refreshToken)
-  } catch (error) {
-    return next(errorHelper.create(500))
-  }
-
-  if (user !== null) {
-    // ユーザ登録成功したら
-    logger.info({ tenant: req.user.companyId, user: req.user.userId }, 'User Registration Succeeded')
 
     return res.redirect('/portal')
   } else {
     // 失敗したら
-
     return next(errorHelper.create(500))
   }
 })
