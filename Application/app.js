@@ -152,7 +152,6 @@ if (process.env.LOCALLY_HOSTED !== 'true') {
 app.use('/', require('./routes/index'))
 app.use('/portal', require('./routes/portal'))
 app.use('/portal-mock', require('./routes/portal-mock'))
-app.use('/register', require('./routes/register'))
 app.use('/auth', require('./routes/auth'))
 
 app.use('/tenant', require('./routes/tenant'))
