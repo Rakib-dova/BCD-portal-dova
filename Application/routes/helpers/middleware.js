@@ -4,12 +4,15 @@ const userController = require('../../controllers/userController')
 const tenantController = require('../../controllers/tenantController')
 
 const errorHelper = require('./error')
-
+const validate = require('../../lib/validate')
 exports.isAuthenticated = async (req, res, next) => {
-  // if(req.isAuthenticated()) {
   if (req.user?.userId) {
-    // TODO: セッションにユーザ情報が格納されている
-    // TODO: セッション情報に前のアカウント情報が残っているが、新しいアカウントでTradeshiftにログインした場合を判定する
+    // セッションにユーザ情報が格納されている
+    // TODO: 将来的には、セッション情報に前のアカウント情報が残っていて、異なるアカウントでTradeshiftにログインした場合の判定が必要か
+
+    if (!validate.isUUID(req.user?.userId)) {
+      return next(errorHelper.create(500))
+    }
 
     next()
   } else {
@@ -20,75 +23,52 @@ exports.isAuthenticated = async (req, res, next) => {
 }
 
 exports.isTenantRegistered = async (req, res, next) => {
-  // isAuthed? noならreturnしてredirect（後続の処理は行わない）
+  // 認証済みかどうか。未認証であれば/authにredirect（後続の処理は行わない）
   if (!req.user?.userId || !req.user?.companyId) return res.redirect(303, '/auth')
 
-  // isRegistered? テナントがアカウント管理者によって登録されているか
+  if (!validate.isUUID(req.user?.userId) || !validate.isUUID(req.user?.companyId)) {
+    return next(errorHelper.create(500))
+  }
+
+  // テナントがアカウント管理者によって登録されているか
   const tenant = await tenantController.findOne(req.user.companyId)
 
+  // テナントが見つからない場合はnull値
   if (tenant === null) {
-    // ユーザが見つからない場合null値になる
-    // ユーザがDBに登録されていない
-    req.session.userContext = 'NotTenantRegistered'
+    // テナントがDBに登録されていない
+    req.session.userContext = 'NotTenantRegistered' // セッションにテナント未登録のコンテキストを保持
 
     res.redirect(303, '/tenant/register') // registerへリダイレクトさせる
   } else if (tenant.dataValues?.tenantId) {
-    // TODO: userIdがUUIDかどうか
-    // ユーザがDBに登録されている
+    // テナントがDBに登録されている
 
-    // TODO: ユーザの名前、メールアドレスがセッション内の情報と一致するか
-    // TODO: 一致しなければ再度DBに登録しなおす？または利用規約ふみなおさせる？
-
-    next() // register以外のページであれば続行
+    next()
   } else {
-    next(errorHelper.create(500)) // エラーはnextに渡す
+    // dataValuesやtenantIdがundefined（異常系）
+    next(errorHelper.create(500))
   }
 }
 
 exports.isUserRegistered = async (req, res, next) => {
   if (!req.user?.userId) return res.redirect(303, '/auth')
 
-  // isRegistered? テナントがアカウント管理者によって登録されているか
+  if (!validate.isUUID(req.user?.userId)) {
+    return next(errorHelper.create(500))
+  } // userIdのバリデーション
+
+  // isRegistered? ユーザが登録されているか
   const user = await userController.findOne(req.user.userId)
 
+  // ユーザが見つからない場合null値になる
   if (user === null) {
-    // ユーザが見つからない場合null値になる
     // ユーザがDBに登録されていない
-    req.session.userContext = 'NotUserRegistered'
+    req.session.userContext = 'NotUserRegistered' // セッションにユーザ未登録のコンテキストを保持
 
     res.redirect(303, '/user/register') // registerへリダイレクトさせる
   } else if (user.dataValues?.userId) {
-    // TODO: userIdがUUIDかどうか
     // ユーザがDBに登録されている
 
-    // TODO: ユーザの名前、メールアドレスがセッション内の情報と一致するか
-    // TODO: 一致しなければ再度DBに登録しなおす？または利用規約ふみなおさせる？
-
-    next() // register以外のページであれば続行
-  } else {
-    next(errorHelper.create(500)) // エラーはnextに渡す
-  }
-}
-
-exports.isNotTenantRegistered = async (req, res, next) => {
-  if (!req.user?.userId || !req.user?.companyId) return res.redirect(303, '/auth')
-
-  // isRegistered? テナントが登録されているか
-  // tenantControllerでfindOneにするべき？
-  const user = await userController.findByTenantId(req.user.companyId)
-
-  if (user === null) {
-    // ユーザが見つからない場合null値になる
-
-    next() // registerページであれば続行
-  } else if (user.dataValues?.userId) {
-    // TODO: userIdがUUIDかどうか
-    // ユーザがDBに登録されている
-
-    // TODO: ユーザの名前、メールアドレスがセッション内の情報と一致するか
-    // TODO: 一致しなければ再度DBに登録しなおす？または利用規約ふみなおさせる？
-
-    res.redirect(303, '/portal') // registerページであればportalへリダイレクトさせる
+    next()
   } else {
     next(errorHelper.create(500)) // エラーはnextに渡す
   }

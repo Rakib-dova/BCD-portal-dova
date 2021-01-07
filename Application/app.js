@@ -71,15 +71,12 @@ app.use(
       'img-src': ["'self'"],
       'form-action': ["'self'"], // form-actionは自己ドメインに制限
       // bulma-toast、fontawasom、googlefontsを使うためstyle-srcを一部許可
-      // sha256はbulma-toastがinline styeを使用するためハッシュを指定(See common-page.js)
+      // nonceはbulma-toastがinline styeを使用するためハッシュを指定(See common-page.js)
       // prettier-ignore
       'style-src': [
-        "'self' 'unsafe-hashes' " +
-          "'https://cdnjs.cloudflare.com' 'https://use.fontawesome.com' 'https://fonts.googleapis.com'" +
-          "'sha256-UFSdfDBHU2GqtdoDHN2BFW+gCZ9hKcFKzgGr97RwY5o='" +
-          "'sha256-E/nvqET/9zpctDshjbx7JreRM/gAx3JcoKF+f+rglGY='" +
-          "'sha256-oZlOzimqeBC3337zzQaIzbHhSc7p/5AqrpTayBe83Hg='"
+        "'self' https://cdnjs.cloudflare.com https://use.fontawesome.com https://fonts.googleapis.com 'nonce-qv73LoiY5kc+6cd6a4njpw=='"
       ],
+      'script-src': ["'nonce-qv73LoiY5kc+6cd6a4njpw==' 'unsafe-inline' 'unsafe-eval' 'strict-dynamic'"],
       'object-src': ["'self'"],
       'frame-ancestors': [`'self' https://${process.env.TS_HOST}`]
     }
@@ -145,13 +142,12 @@ if (process.env.LOCALLY_HOSTED !== 'true') {
   })
 }
 
-app.use('/', require('./routes/index'))
-app.use('/portal', require('./routes/portal'))
-app.use('/portal-mock', require('./routes/portal-mock'))
-app.use('/auth', require('./routes/auth'))
+app.use('/', require('./routes/index').router)
+app.use('/portal', require('./routes/portal').router)
+app.use('/auth', require('./routes/auth').router)
 
-app.use('/tenant', require('./routes/tenant'))
-app.use('/user', require('./routes/user'))
+app.use('/tenant', require('./routes/tenant').router)
+app.use('/user', require('./routes/user').router)
 
 const errorHelper = require('./routes/helpers/error')
 

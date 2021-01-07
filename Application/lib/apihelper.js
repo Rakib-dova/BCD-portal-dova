@@ -1,5 +1,6 @@
 const axios = require('axios')
 const qs = require('qs')
+const logger = require('./logger')
 
 exports.accessTradeshift = async (accessToken, refreshToken, method, query, body = {}) => {
   // アクセスは2回試す
@@ -38,7 +39,7 @@ exports.accessTradeshift = async (accessToken, refreshToken, method, query, body
         // リフレッシュを試行するフロー
         const appToken = Buffer.from(`${process.env.TS_CLIENT_ID}:${process.env.TS_CLIENT_SECRET}`).toString('base64')
 
-        console.log('Tradeshift API Access: try token refresh...')
+        // console.log('Tradeshift API Access: try token refresh...')
         try {
           const refreshed = await axios.post(
             `https://${process.env.TS_API_HOST}/tradeshift/auth/token`,
@@ -58,12 +59,14 @@ exports.accessTradeshift = async (accessToken, refreshToken, method, query, body
           return access(refreshed.data.access_token, _method, _query, _body)
         } catch (error) {
           // リフレッシュトークンのresponseが200以外で返ってきた
-          console.log('Tradeshift API Access: refresh failure')
+          // console.log('Tradeshift API Access: refresh failure')
+          logger.error({ stack: error.stack }, 'Tradeshift API Access: refresh failure')
           return null
         }
       } else {
         // アクセストークンのresponseが401以外で返ってきた or リフレッシュ後のアクセストークンでもアクセス失敗
-        console.log('Tradeshift API Access: access failure')
+        // console.log('Tradeshift API Access: access failure')
+        logger.error({ stack: error.stack }, 'Tradeshift API Access: access failure')
         return null
       }
     }

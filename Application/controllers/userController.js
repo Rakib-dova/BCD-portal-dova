@@ -3,6 +3,7 @@ const Tenant = require('../models').Tenant
 
 const db = require('../models')
 const apihelper = require('../lib/apihelper')
+const logger = require('../lib/logger')
 
 // リフレッシュトークン暗号化メソッド
 const crypto = require('crypto')
@@ -50,7 +51,9 @@ module.exports = {
     if (user !== null) {
       user.subRefreshToken = user.refreshToken
       const userdata = await apihelper.accessTradeshift(accessToken, newRefreshToken, 'get', '/account/info/user')
-
+      if (!userdata) {
+        return null
+      }
       const iv = Buffer.from(userId.replace(/-/g, ''), 'hex') // _userIdはUUIDで16byteなのでこれを初期ベクトルとする
       // リフレッシュトークンは暗号化してDB保管
       const encryptedRefreshToken = encrypt('aes-256-cbc', password, salt, iv, newRefreshToken)
@@ -78,6 +81,7 @@ module.exports = {
       // TODO:データベース接続回りはtry-catchしておく
       try {
         created = await db.sequelize.transaction(async (t) => {
+          // 外部キー制約によりテナントがなくユーザのみ登録されている状態はない
           await Tenant.findOrCreate({
             where: { tenantId: _tenantId },
             defaults: {
@@ -87,8 +91,9 @@ module.exports = {
             transaction: t
           })
 
-          const user = await User.create(
-            {
+          const user = await User.findOrCreate({
+            where: { userId: _userId },
+            defaults: {
               userId: _userId,
               tenantId: _tenantId,
               userRole: _userRole,
@@ -96,27 +101,23 @@ module.exports = {
               refreshToken: encryptedRefreshToken,
               userStatus: 0
             },
-            { transaction: t }
-          )
+            transaction: t
+          })
 
           return user
         })
       } catch (error) {
-        // TODO:エラー内容はログに吐く
-        console.log(error)
+        // status 0はDBエラー
+        logger.error({ tenant: _tenantId, user: _userId, stack: error.stack, status: 0 }, error.name)
         created = null
       }
 
-      if (created == null) {
-        // TODO: ユーザ作成が失敗したときのエラーハンドリング
-      }
-
+      // ユーザ作成が失敗した場合はnullが入る
       return created
     } else {
-      // TODO: APIからユーザデータが取れなかったときのエラーハンドリング
+      // APIからユーザデータが取れなかった場合はnull
+      return null
     }
-
-    return null
   },
   delete: async (userId) => {
     let deleted
@@ -144,7 +145,8 @@ module.exports = {
       })
     } catch (error) {
       // TODO:ログにエラー吐く
-      console.log(error)
+      // status 0はDBエラー
+      logger.error({ user: userId, stack: error.stack, status: 0 }, error.name)
       deleted = null
     }
     return deleted

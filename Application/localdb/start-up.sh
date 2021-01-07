@@ -1,5 +1,5 @@
 #!/bin/bash
-wait_time=20s
+wait_time=30s
 
 # wait for SQL Server to come up
 echo importing data will start in $wait_time...

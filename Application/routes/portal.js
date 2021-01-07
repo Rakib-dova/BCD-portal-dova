@@ -5,8 +5,7 @@ const helper = require('./helpers/middleware')
 
 const errorHelper = require('./helpers/error')
 
-/* GET users listing. */
-router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, (req, res, next) => {
+const cbGetIndex = (req, res, next) => {
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
@@ -17,6 +16,11 @@ router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUser
     customerId: req.user.userId,
     TS_HOST: process.env.TS_HOST
   })
-})
+}
 
-module.exports = router
+router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetIndex)
+
+module.exports = {
+  router: router,
+  cbGetIndex: cbGetIndex
+}

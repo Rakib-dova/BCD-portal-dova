@@ -8,11 +8,7 @@ const errorHelper = require('./helpers/error')
 // Require our controllers.
 const userController = require('../controllers/userController.js')
 
-// /authにアクセスした時
-router.get('/', passport.authenticate('tradeshift', { scope: 'openid offline' }))
-
-// /auth/callbackにアクセスした時
-router.get('/callback', passport.authenticate('tradeshift', { failureRedirect: '/auth/failuer' }), async (req, res, next) => {
+const cbGetCallback = async (req, res, next) => {
   if (!req.user?.companyId || !req.user?.userId || !req.user?.refreshToken) {
     return next(errorHelper.create(500)) // エラーはnextに渡す
   }
@@ -25,10 +21,20 @@ router.get('/callback', passport.authenticate('tradeshift', { failureRedirect: '
   // portalにリダイレクトさせる
   // portalでユーザ登録/テナント登録を判定する
   res.redirect('/portal') // portalへリダイレクトさせる
-})
+}
 
-router.get('/failure', (req, res, next) => {
+const cbGetFailure = (req, res, next) => {
   next(errorHelper.create(500)) // エラーはnextに渡す
-})
+}
 
-module.exports = router
+router.get('/', passport.authenticate('tradeshift', { scope: 'openid offline' }))
+
+router.get('/callback', passport.authenticate('tradeshift', { failureRedirect: '/auth/failuer' }), cbGetCallback)
+
+router.get('/failure', cbGetFailure)
+
+module.exports = {
+  router: router,
+  cbGetCallback: cbGetCallback,
+  cbGetFailure: cbGetFailure
+}

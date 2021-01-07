@@ -27,7 +27,7 @@ module.exports = {
     return e
   },
   render: (err, req, res, next) => {
-    let errorStatus, errorTitle, errorMessage
+    let errorStatus, errorTitle, errorMessage, errorDescription
 
     if (!err.status) {
       const dummyErr = module.exports.create(500)
@@ -40,6 +40,7 @@ module.exports = {
       errorTitle = err.name
     }
 
+    if (err.desc) errorDescription = err.desc
     // render page
     res.status(errorStatus)
 
@@ -48,6 +49,7 @@ module.exports = {
       title: errorTitle,
       message: errorMessage,
       status: errorStatus,
+      description: !errorDescription ? null : errorDescription,
       error: process.env.LOCALLY_HOSTED === 'true' ? err : {}
     })
 
@@ -68,17 +70,6 @@ module.exports = {
       } else {
         logger.warn({ status: errorStatus }, err.name)
       }
-    }
-  },
-  checkUserContext: (userContext, requiredContext, next) => {
-    if (userContext !== requiredContext) {
-      return next(module.exports.create(400))
-    }
-  },
-  checkUserTokens: (accessToken, refreshToken, next) => {
-    // TODO: uuidのバリデーションチェック
-    if (!accessToken || !refreshToken) {
-      return next(module.exports.create(500))
     }
   }
 }

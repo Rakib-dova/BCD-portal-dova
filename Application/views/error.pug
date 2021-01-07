@@ -7,5 +7,7 @@ block content
         .colum.has-text-centered
           h1.title= status+" "+title
           p.subtitle= message
+          - if (description)
+          p.subtitle.is-6= description
       - if (error.stack) 
         pre #{error.stack}
