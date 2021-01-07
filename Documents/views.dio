@@ -1,0 +1,120 @@
+<mxfile host="65bd71144e" modified="2021-01-06T07:21:49.848Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.52.1 Chrome/83.0.4103.122 Electron/9.3.5 Safari/537.36" etag="AmOue0tLs2FMYV06RVCl" version="13.10.0" type="embed">
+    <diagram id="jZcPVDb7O-awAezXT4eu" name="Page-1">
+        <mxGraphModel dx="861" dy="598" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="61" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="59" target="60">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="59" value="Tradeshift" style="whiteSpace=wrap;html=1;aspect=fixed;dashed=1;" vertex="1" parent="1">
+                    <mxGeometry x="29" y="102" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="65" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="60" target="64">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="78" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="60" target="76">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="60" value="テナント/ユーザ&lt;br&gt;登録判定" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="211" y="112" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="62" value="アプリ選択" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="119" y="121" width="80" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="64" value="ポータル&lt;br&gt;portal.pub" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+                    <mxGeometry x="719" y="102" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="86" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="66">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="639" y="272" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="66" value="テナント登録&lt;br&gt;tenant-register.pub" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+                    <mxGeometry x="511" y="232" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="67" value="GET: /auth" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="236" y="91" width="70" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="68" value="/portal" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="734" y="80" width="50" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="69" value="GET: /tenant/register" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="486" y="208" width="130" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="70" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="60" target="66">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="341" y="152" as="sourcePoint"/>
+                        <mxPoint x="461" y="152" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="87" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="71">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="639" y="382" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="71" value="ユーザ登録&lt;br&gt;user-register.pub" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+                    <mxGeometry x="511" y="342" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="72" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="60" target="71">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="311" y="182" as="sourcePoint"/>
+                        <mxPoint x="461" y="282" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="73" value="&lt;font style=&quot;font-size: 10px&quot;&gt;ユーザ：未登録&lt;br&gt;テナント：未登録&lt;br&gt;権限：アカウント管理者&lt;br&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="356" y="222" width="130" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="74" value="&lt;font style=&quot;font-size: 10px&quot;&gt;ユーザ：未登録&lt;br&gt;テナント：登録済&lt;br&gt;権限：一般ユーザ&lt;br&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="371" y="332" width="100" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="76" value="403エラー&lt;br&gt;error.pub" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+                    <mxGeometry x="511" y="452" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="79" value="&lt;font style=&quot;font-size: 10px&quot;&gt;ユーザ：未登録&lt;br&gt;テナント：未登録&lt;br&gt;権限：一般ユーザ&lt;br&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="371" y="442" width="100" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="80" value="GET: /user/register" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="491" y="322" width="120" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="82" value="&lt;font style=&quot;font-size: 10px&quot;&gt;ユーザ：登録済&lt;br&gt;テナント：登録済&lt;br&gt;権限：ANY&lt;br&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="371" y="91" width="100" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="89" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" target="64">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="709" y="272" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="90" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.588;entryY=0.988;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="64">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="709" y="382" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="91" value="&lt;font style=&quot;font-size: 9px&quot;&gt;テナント/ユーザ&lt;br&gt;DB登録&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="639" y="253" width="70" height="38" as="geometry"/>
+                </mxCell>
+                <mxCell id="92" value="ユーザ&lt;br style=&quot;font-size: 10px;&quot;&gt;DB登録" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="639" y="364" width="70" height="38" as="geometry"/>
+                </mxCell>
+                <mxCell id="94" value="POST: /tenant/register" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="603" y="233" width="130" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="95" value="POST: /user/register" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="608" y="342" width="120" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="96" value="ポータル&lt;br&gt;portal.pub" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+                    <mxGeometry x="39" y="740" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="97" value="コムサポートサイト" style="whiteSpace=wrap;html=1;aspect=fixed;dashed=1;" vertex="1" parent="1">
+                    <mxGeometry x="310" y="680" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="98" value="トレードシフト" style="whiteSpace=wrap;html=1;aspect=fixed;dashed=1;" vertex="1" parent="1">
+                    <mxGeometry x="310" y="820" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="99" value="/portal" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;" vertex="1" parent="1">
+                    <mxGeometry x="54" y="718" width="50" height="20" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
