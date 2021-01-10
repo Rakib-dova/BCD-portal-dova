@@ -2,7 +2,7 @@ const User = require('../models').User
 const Tenant = require('../models').Tenant
 
 const db = require('../models')
-const apihelper = require('../lib/apihelper')
+const apiManager = require('./apiManager')
 const logger = require('../lib/logger')
 
 // リフレッシュトークン暗号化メソッド
@@ -25,110 +25,120 @@ const encrypt = (algorithm, password, salt, iv, data) => {
 
 module.exports = {
   findOne: async (userId) => {
-    const user = await User.findOne({
-      where: {
-        userId: userId
-      }
-    })
+    // データベース接続回りはtry-catch
+    try {
+      const user = await User.findOne({
+        where: {
+          userId: userId
+        }
+      })
 
-    return user
-  },
-  findByTenantId: async (companyId) => {
-    const user = await User.findOne({
-      where: {
-        tenantId: companyId
-      }
-    })
-
-    return user
+      return user
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ user: userId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
   },
   findAndUpdate: async (userId, accessToken, newRefreshToken) => {
-    const user = await User.findOne({
-      where: {
-        userId: userId
-      }
-    })
-    if (user !== null) {
-      user.subRefreshToken = user.refreshToken
-      const userdata = await apihelper.accessTradeshift(accessToken, newRefreshToken, 'get', '/account/info/user')
-      if (!userdata) {
+    // データベース接続回りはtry-catch
+    try {
+      const user = await User.findOne({
+        where: {
+          userId: userId
+        }
+      })
+
+      if (user !== null) {
+        user.subRefreshToken = user.refreshToken
+
+        const userdata = await apiManager.accessTradeshift(accessToken, newRefreshToken, 'get', '/account/info/user')
+        // Tradeshift APIへのアクセスエラーでは、エラーオブジェクトが返る
+        if (userdata instanceof Error) {
+          // userdataにはエラーオブジェクトが入っている
+          return userdata
+        }
+
+        const iv = Buffer.from(userId.replace(/-/g, ''), 'hex') // _userIdはUUIDで16byteなのでこれを初期ベクトルとする
+        // リフレッシュトークンは暗号化してDB保管
+        const encryptedRefreshToken = encrypt('aes-256-cbc', password, salt, iv, newRefreshToken)
+        user.refreshToken = encryptedRefreshToken
+        // UserRoleは最新化する
+        user.userRole = userdata.Memberships[0].Role
+        user.save()
+        return user
+      } else {
+        // ユーザが見つからない場合nullが返る
         return null
       }
-      const iv = Buffer.from(userId.replace(/-/g, ''), 'hex') // _userIdはUUIDで16byteなのでこれを初期ベクトルとする
-      // リフレッシュトークンは暗号化してDB保管
-      const encryptedRefreshToken = encrypt('aes-256-cbc', password, salt, iv, newRefreshToken)
-      user.refreshToken = encryptedRefreshToken
-      // UserRoleは最新化する
-      user.userRole = userdata.Memberships[0].Role
-      user.save()
-      return user
-    } else {
-      return null
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ user: userId, stack: error.stack, status: 0 }, error.name)
+      return error
     }
   },
   create: async (accessToken, refreshToken) => {
-    const userdata = await apihelper.accessTradeshift(accessToken, refreshToken, 'get', '/account/info/user')
+    const userdata = await apiManager.accessTradeshift(accessToken, refreshToken, 'get', '/account/info/user')
+    // Tradeshift APIへのアクセスエラーでは、エラーオブジェクトが返る
+    if (userdata instanceof Error) {
+      // userdataにはエラーオブジェクトが入っている
+      return userdata
+    }
 
-    if (userdata !== null) {
-      const _tenantId = userdata.CompanyAccountId
-      const _userId = userdata.Memberships[0].UserId
-      const _userRole = userdata.Memberships[0].Role
+    const _tenantId = userdata.CompanyAccountId
+    const _userId = userdata.Memberships[0].UserId
+    const _userRole = userdata.Memberships[0].Role
+    // データベース接続回りはtry-catchしておく
 
+    try {
+      /* リフレッシュトークンは暗号化して保管 */
       const iv = Buffer.from(_userId.replace(/-/g, ''), 'hex') // _userIdはUUIDで16byteなのでこれを初期ベクトルとする
-      // リフレッシュトークンは暗号化してDB保管
       const encryptedRefreshToken = encrypt('aes-256-cbc', password, salt, iv, refreshToken)
-      let created
-      // TODO:データベース接続回りはtry-catchしておく
-      try {
-        created = await db.sequelize.transaction(async (t) => {
-          // 外部キー制約によりテナントがなくユーザのみ登録されている状態はない
-          await Tenant.findOrCreate({
-            where: { tenantId: _tenantId },
-            defaults: {
-              tenantId: _tenantId,
-              registeredBy: _userId
-            },
-            transaction: t
-          })
 
-          const user = await User.findOrCreate({
-            where: { userId: _userId },
-            defaults: {
-              userId: _userId,
-              tenantId: _tenantId,
-              userRole: _userRole,
-              appVersion: process.env.TS_APP_VERSION,
-              refreshToken: encryptedRefreshToken,
-              userStatus: 0
-            },
-            transaction: t
-          })
-
-          return user
+      /* トランザクション */
+      const created = await db.sequelize.transaction(async (t) => {
+        // 外部キー制約によりテナントがなくユーザのみ登録されている状態はない
+        await Tenant.findOrCreate({
+          where: { tenantId: _tenantId },
+          defaults: {
+            tenantId: _tenantId,
+            registeredBy: _userId
+          },
+          transaction: t
         })
-      } catch (error) {
-        // status 0はDBエラー
-        logger.error({ tenant: _tenantId, user: _userId, stack: error.stack, status: 0 }, error.name)
-        created = null
-      }
 
-      // ユーザ作成が失敗した場合はnullが入る
+        const user = await User.findOrCreate({
+          where: { userId: _userId },
+          defaults: {
+            userId: _userId,
+            tenantId: _tenantId,
+            userRole: _userRole,
+            appVersion: process.env.TS_APP_VERSION,
+            refreshToken: encryptedRefreshToken,
+            userStatus: 0
+          },
+          transaction: t
+        })
+
+        return user
+      })
+
       return created
-    } else {
-      // APIからユーザデータが取れなかった場合はnull
-      return null
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ tenant: _tenantId, user: _userId, stack: error.stack, status: 0 }, error.name)
+      return error
     }
   },
   delete: async (userId) => {
-    let deleted
-    // TODO:データベース接続回りはtry-catchしておく
+    // データベース接続回りはtry-catch
     try {
-      deleted = await db.sequelize.transaction(async (t) => {
+      const deleted = await db.sequelize.transaction(async (t) => {
         const user = await User.findOne({
           where: { userId: userId }
         })
 
-        const deleted = await User.destroy({
+        const destroy = await User.destroy({
           where: { userId: userId }
         })
 
@@ -141,14 +151,14 @@ module.exports = {
             where: { tenantId: user.tenantId }
           })
         }
-        return deleted
+        return destroy
       })
+
+      return deleted
     } catch (error) {
-      // TODO:ログにエラー吐く
       // status 0はDBエラー
       logger.error({ user: userId, stack: error.stack, status: 0 }, error.name)
-      deleted = null
+      return error
     }
-    return deleted
   }
 }

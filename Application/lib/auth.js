@@ -4,8 +4,8 @@ const jwt = require('jwt-simple')
 
 const parseIdToken = (token) => {
   const decoded = Buffer.from(token.split('.')[1], 'base64').toString()
-  const { companyId, sub: email, userId } = JSON.parse(decoded)
-  return { companyId, email, userId }
+  const { companyId: tenantId, sub: email, userId } = JSON.parse(decoded)
+  return { tenantId, email, userId }
 }
 
 const authToken = Buffer.from(process.env.TS_CLIENT_ID + ':' + process.env.TS_CLIENT_SECRET).toString('base64')
@@ -17,9 +17,9 @@ const oauthStrategy = new OAuth2Strategy(
     callbackURL: `https://${process.env.HOST}/auth/callback/`
   },
   (accessToken, refreshToken, params, profile, done) => {
-    const { companyId, email, userId } = parseIdToken(params.id_token)
+    const { tenantId, email, userId } = parseIdToken(params.id_token)
     const user = {
-      companyId,
+      tenantId,
       email,
       userId,
       accessToken,

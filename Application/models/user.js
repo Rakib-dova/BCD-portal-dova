@@ -10,7 +10,6 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       // https://qiita.com/NewGyu/items/83390aa17dce1ffb4cd3
-      // TODO:試す
       User.belongsTo(models.Tenant, {
         foreignKey: 'tenantId', // k1を指定
         targetKey: 'tenantId' // k2を指定

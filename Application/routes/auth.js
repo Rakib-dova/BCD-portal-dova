@@ -9,14 +9,17 @@ const errorHelper = require('./helpers/error')
 const userController = require('../controllers/userController.js')
 
 const cbGetCallback = async (req, res, next) => {
-  if (!req.user?.companyId || !req.user?.userId || !req.user?.refreshToken) {
+  if (!req.user?.tenantId || !req.user?.userId || !req.user?.refreshToken || !req.user?.accessToken) {
     return next(errorHelper.create(500)) // エラーはnextに渡す
   }
 
-  logger.info({ tenant: req.user.companyId, user: req.user.userId }, 'Tradeshift Authentication Succeeded')
-
   // ユーザの登録が見つかったら更新
-  await userController.findAndUpdate(req.user.userId, req.user.accessToken, req.user.refreshToken)
+  const user = await userController.findAndUpdate(req.user.userId, req.user.accessToken, req.user.refreshToken)
+
+  // データベースまたはAPIエラーの場合、エラーオブジェクトが入っている
+  if (user instanceof Error) return next(errorHelper.create(500))
+
+  logger.info({ tenant: req.user.tenantId, user: req.user.userId }, 'Tradeshift Authentication Succeeded')
 
   // portalにリダイレクトさせる
   // portalでユーザ登録/テナント登録を判定する

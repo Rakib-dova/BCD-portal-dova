@@ -1,13 +1,20 @@
 const Tenant = require('../models').Tenant
+const logger = require('../lib/logger')
 
 module.exports = {
   findOne: async (tenantId) => {
-    const tenant = await Tenant.findOne({
-      where: {
-        tenantId: tenantId
-      }
-    })
+    try {
+      const tenant = await Tenant.findOne({
+        where: {
+          tenantId: tenantId
+        }
+      })
 
-    return tenant
+      return tenant
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
   }
 }

@@ -9,7 +9,6 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      // TODO:試す
       Tenant.hasMany(models.User, {
         foreignKey: 'tenantId' // k1
       })

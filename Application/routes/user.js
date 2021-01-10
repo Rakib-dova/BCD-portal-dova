@@ -26,15 +26,14 @@ const cbPostRegister = async (req, res, next) => {
   if (!req.user?.accessToken || !req.user?.refreshToken) {
     return next(errorHelper.create(500))
   }
-  // TODO: Subspere経由でSO系にformの内容を送信
+  // TODO: SO系にフォームの内容を送信
+  // （サービス仕様の確定によっては上記不要）
 
-  // TODO: DBにセッション内のuser情報を登録
-  let user
-  try {
-    user = await userController.create(req.user.accessToken, req.user.refreshToken)
-  } catch (error) {
-    return next(errorHelper.create(500))
-  }
+  // DBにセッション内のuser情報を登録
+  const user = await userController.create(req.user.accessToken, req.user.refreshToken)
+
+  // データベースエラーは、エラーオブジェクトが返る
+  if (user instanceof Error) return next(errorHelper.create(500))
 
   // ユーザはfindOrCreateで登録されるため戻り値userには配列が入る
   if (user !== null && validate.isArray(user)) {
@@ -50,7 +49,7 @@ const cbPostRegister = async (req, res, next) => {
 
     if (user[0].dataValues?.userId !== req.user.userId) return next(errorHelper.create(500))
     // ユーザ登録成功
-    logger.info({ tenant: req.user.companyId, user: req.user.userId }, 'User Registration Succeeded')
+    logger.info({ tenant: req.user.tenantId, user: req.user.userId }, 'User Registration Succeeded')
     req.session.userContext = 'UserRegistrationCompleted'
     req.flash('info', '利用登録が完了いたしました。')
 
@@ -63,13 +62,17 @@ const cbPostRegister = async (req, res, next) => {
 }
 
 const cbGetDelete = async (req, res, next) => {
+  // TODO: ユーザを削除するための動作確認用。リリース時は削除。
   const deleted = await userController.delete(req.user.userId)
 
+  // データベースエラーは、エラーオブジェクトが返る
+  if (deleted instanceof Error) return next(errorHelper.create(500))
+
   if (Number(deleted) === 1) {
-    logger.info({ tenant: req.user.companyId, user: req.user.userId }, 'User deleted successfully')
+    logger.info({ tenant: req.user.tenantId, user: req.user.userId }, 'User deleted successfully')
     res.send('User deleted successfully')
   } else {
-    logger.warn({ tenant: req.user.companyId, user: req.user.userId }, 'Failed to delete user')
+    logger.warn({ tenant: req.user.tenantId, user: req.user.userId }, 'Failed to delete user')
     res.send('Failed to delete user')
   }
 }
@@ -78,7 +81,7 @@ router.get('/register', helper.isAuthenticated, cbGetRegister)
 
 router.post('/register', helper.isAuthenticated, cbPostRegister)
 
-router.get('/delete', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetDelete)
+router.get('/delete', helper.isAuthenticated, helper.isUserRegistered, cbGetDelete)
 
 module.exports = {
   router: router,

@@ -24,14 +24,17 @@ exports.isAuthenticated = async (req, res, next) => {
 
 exports.isTenantRegistered = async (req, res, next) => {
   // 認証済みかどうか。未認証であれば/authにredirect（後続の処理は行わない）
-  if (!req.user?.userId || !req.user?.companyId) return res.redirect(303, '/auth')
+  if (!req.user?.userId || !req.user?.tenantId) return res.redirect(303, '/auth')
 
-  if (!validate.isUUID(req.user?.userId) || !validate.isUUID(req.user?.companyId)) {
+  if (!validate.isUUID(req.user?.userId) || !validate.isUUID(req.user?.tenantId)) {
     return next(errorHelper.create(500))
   }
 
   // テナントがアカウント管理者によって登録されているか
-  const tenant = await tenantController.findOne(req.user.companyId)
+  const tenant = await tenantController.findOne(req.user.tenantId)
+
+  // データベースエラーは、エラーオブジェクトが返る
+  if (tenant instanceof Error) return next(errorHelper.create(500))
 
   // テナントが見つからない場合はnull値
   if (tenant === null) {
@@ -58,6 +61,9 @@ exports.isUserRegistered = async (req, res, next) => {
 
   // isRegistered? ユーザが登録されているか
   const user = await userController.findOne(req.user.userId)
+
+  // データベースエラーは、エラーオブジェクトが返る
+  if (user instanceof Error) return next(errorHelper.create(500))
 
   // ユーザが見つからない場合null値になる
   if (user === null) {

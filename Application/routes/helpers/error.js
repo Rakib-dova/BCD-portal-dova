@@ -55,14 +55,14 @@ module.exports = {
 
     // output log
     // ログには生のエラー情報を吐く
-    if (req.user?.userId && req.user?.companyId) {
+    if (req.user?.userId && req.user?.tenantId) {
       if (errorStatus >= 500) {
         logger.error(
-          { tenant: req.user.companyId, user: req.user.userId, stack: err.stack, status: errorStatus },
+          { tenant: req.user.tenantId, user: req.user.userId, stack: err.stack, status: errorStatus },
           err.name
         )
       } else {
-        logger.warn({ tenant: req.user.companyId, user: req.user.userId, status: errorStatus }, err.name)
+        logger.warn({ tenant: req.user.tenantId, user: req.user.userId, status: errorStatus }, err.name)
       }
     } else {
       if (errorStatus >= 500) {
