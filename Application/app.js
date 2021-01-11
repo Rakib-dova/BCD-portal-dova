@@ -94,8 +94,10 @@ app.use(
     name: 'bcd.sid',
     cookie: {
       httpOnly: true,
-      secure: false, // リバースプロキシやローバラから使えなくなるためfalseとしておく
-      maxAge: 1000 * 60 * 30
+      secure: true, // trueの場合、リバースプロキシやローバラがhttp通信では使えなくなる可能性あり？
+      maxAge: 1000 * 60 * 30,
+      sameSite: 'none' // secureがfalseの場合、機能しない
+      // トレードシフトアプリはiframe経由でcookieを読み込むため、sameSiteをnoneに設定する必要がある
     }
   })
 )

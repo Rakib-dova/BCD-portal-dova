@@ -5,23 +5,7 @@ const db = require('../models')
 const apiManager = require('./apiManager')
 const logger = require('../lib/logger')
 
-// リフレッシュトークン暗号化メソッド
-const crypto = require('crypto')
-// AES-256-CBCで暗号化
-const password = process.env.TOKEN_ENC_PASS // 鍵長 32byte 次で生成したもの: console.log(crypto.randomBytes(32).toString('base64'))
-const salt = process.env.TOKEN_ENC_SALT // ソルト 16byte 次で生成したもの: console.log(crypto.randomBytes(16).toString('base64'))
-
-const encrypt = (algorithm, password, salt, iv, data) => {
-  // 鍵を生成
-  const key = crypto.scryptSync(password, salt, 32)
-  // 暗号器を生成
-  const cipher = crypto.createCipheriv(algorithm, key, iv)
-  // data を暗号化
-  let encryptedData = cipher.update(data, 'utf8', 'base64')
-  encryptedData += cipher.final('base64')
-
-  return encryptedData
-}
+const tokenenc = require('../lib/tokenenc')
 
 module.exports = {
   findOne: async (userId) => {
@@ -59,9 +43,8 @@ module.exports = {
           return userdata
         }
 
-        const iv = Buffer.from(userId.replace(/-/g, ''), 'hex') // _userIdはUUIDで16byteなのでこれを初期ベクトルとする
         // リフレッシュトークンは暗号化してDB保管
-        const encryptedRefreshToken = encrypt('aes-256-cbc', password, salt, iv, newRefreshToken)
+        const encryptedRefreshToken = tokenenc.encrypt('aes-256-cbc', userId, newRefreshToken)
         user.refreshToken = encryptedRefreshToken
         // UserRoleは最新化する
         user.userRole = userdata.Memberships[0].Role
@@ -92,8 +75,7 @@ module.exports = {
 
     try {
       /* リフレッシュトークンは暗号化して保管 */
-      const iv = Buffer.from(_userId.replace(/-/g, ''), 'hex') // _userIdはUUIDで16byteなのでこれを初期ベクトルとする
-      const encryptedRefreshToken = encrypt('aes-256-cbc', password, salt, iv, refreshToken)
+      const encryptedRefreshToken = tokenenc.encrypt('aes-256-cbc', _userId, refreshToken)
 
       /* トランザクション */
       const created = await db.sequelize.transaction(async (t) => {
