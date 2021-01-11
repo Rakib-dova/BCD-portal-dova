@@ -82,7 +82,7 @@ app.use(
     }
   })
 )
-
+app.set('trust proxy', 2)
 // session
 const session = require('express-session')
 app.use(
