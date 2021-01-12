@@ -29,7 +29,7 @@ describe('indexのテスト', () => {
   })
 
   describe('コールバック', () => {
-    test('portalにリダイレクトされることを確認', async () => {
+    test('authにリダイレクトされることを確認', async () => {
       await index.cbGetIndex(request, response, next)
       expect(response.redirect).toHaveBeenCalled()
       expect(response.redirect).toHaveBeenCalledWith('/auth')
