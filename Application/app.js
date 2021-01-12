@@ -82,7 +82,13 @@ app.use(
     }
   })
 )
+
+// cookieはSSL必須のsecure: true, sameSite: noneに設定しているため以下の設定が必要
 app.set('trust proxy', 2)
+// Azure Web App for containerではLBの終端でhttp通信となるため、上記trust proxy設定が必要となる
+// LBとコンテナの入力2ホップをtrust proxyとして設定
+// https://stackoverflow.com/questions/63831794/how-to-pass-samesite-none-from-dockerized-node-app-running-on-azure-appservice
+
 // session
 const session = require('express-session')
 app.use(
