@@ -3,6 +3,8 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.env' })
 }
 
+require('./lib/setenv').config(process.env)
+
 const express = require('express')
 const path = require('path')
 const bodyParser = require('body-parser')
@@ -91,11 +93,35 @@ app.set('trust proxy', 2)
 
 // session
 const session = require('express-session')
+
+const redis = require('redis')
+const RedisStore = require('connect-redis')(session)
+
+const redisOptions =
+  process.env.LOCALLY_HOSTED !== 'true'
+    ? {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASS,
+        tls: { servername: process.env.REDIS_HOST }
+      }
+    : {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT,
+        password: process.env.REDIS_PASS
+      }
+
+const redisClient = redis.createClient(redisOptions)
+
 app.use(
   session({
     secret: 'bcd pentas',
     resave: false,
     saveUninitialized: false,
+    store: new RedisStore({
+      ttl: process.env.REDIS_TTL,
+      client: redisClient
+    }),
     rolling: true,
     name: 'bcd.sid',
     cookie: {
