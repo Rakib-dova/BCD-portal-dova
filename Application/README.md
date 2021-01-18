@@ -10,6 +10,7 @@
 
 - Node.js v14
 - docker
+- Python v2.7
 
 # ローカル環境での起動手順
 
