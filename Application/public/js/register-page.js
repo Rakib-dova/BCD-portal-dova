@@ -8,6 +8,7 @@ document.getElementById('check').onclick = function () {
 }
 
 document.getElementById('next-btn').onclick = function () {
+  /*
   const elements = document.querySelectorAll('input[type="text"]')
   const elementsArr = Array.prototype.slice.call(elements)
   elementsArr.forEach(function (element) {
@@ -15,7 +16,7 @@ document.getElementById('next-btn').onclick = function () {
     const td = document.getElementById(target)
     td.innerHTML = element.value
   })
-
+*/
   const elementCheckbox = document.querySelector('input[type="checkbox"]')
   const targetCheckbox = elementCheckbox.name
 

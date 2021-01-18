@@ -9,6 +9,7 @@ const validate = require('../lib/validate')
 const logger = require('../lib/logger')
 
 const errorHelper = require('./helpers/error')
+const tenantController = require('../controllers/tenantController')
 
 const cbGetRegister = async (req, res, next) => {
   if (req.session?.userContext !== 'NotUserRegistered') {
@@ -28,6 +29,10 @@ const cbPostRegister = async (req, res, next) => {
   }
   // TODO: SO系にフォームの内容を送信
   // （サービス仕様の確定によっては上記不要）
+
+  // TX依頼後：テナントがnullの場合は登録しないようにする
+  const tenant = await tenantController.findOne(req.user?.tenantId)
+  if (!tenant) return next(errorHelper.create(500))
 
   // DBにセッション内のuser情報を登録
   const user = await userController.create(req.user.accessToken, req.user.refreshToken)
@@ -81,7 +86,8 @@ router.get('/register', helper.isAuthenticated, cbGetRegister)
 
 router.post('/register', helper.isAuthenticated, cbPostRegister)
 
-router.get('/delete', helper.isAuthenticated, helper.isUserRegistered, cbGetDelete)
+// TX依頼後：ユニットテスト外だがテナントが登録されていない場合には削除できないようにする
+router.get('/delete', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetDelete)
 
 module.exports = {
   router: router,
