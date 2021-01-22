@@ -2,22 +2,23 @@
 const iframe = document.getElementById('terms-of-service')
 // iframeの高さ
 const height = iframe.offsetHeight
+// iframe内のHTMLのDOMツリーが読み込み完了した時に実行される
+iframe.onload = () => {
+  // スクロールイベントを定義
+  iframe.contentDocument.onscroll = function () {
+    const scrollHeight = iframe.contentDocument.body.scrollHeight
+    const scrollTop = iframe.contentDocument.body.scrollTop
 
-// スクロールイベントを定義
-iframe.contentDocument.onscroll = function () {
-  const scrollHeight = iframe.contentDocument.body.scrollHeight
-  const scrollTop = iframe.contentDocument.body.scrollTop
+    // 現在の表示位置の高さ
+    const scrollPosition = height + scrollTop
 
-  // 現在の表示位置の高さ
-  const scrollPosition = height + scrollTop
+    const proximity = 0
 
-  const proximity = 0
-
-  if ((scrollHeight - scrollPosition) / scrollHeight <= proximity) {
-    document.getElementById('check').removeAttribute('disabled')
+    if ((scrollHeight - scrollPosition) / scrollHeight <= proximity) {
+      document.getElementById('check').removeAttribute('disabled')
+    }
   }
 }
-
 // ----チェックボックスがオンになれば「次へ」ボタンを有効化
 document.getElementById('check').onclick = function () {
   const btn = document.getElementById('next-btn')
