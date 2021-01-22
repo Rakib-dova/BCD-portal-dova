@@ -2,8 +2,8 @@
 const iframe = document.getElementById('terms-of-service')
 // iframeの高さ
 const height = iframe.offsetHeight
-// iframe内のHTMLのDOMツリーが読み込み完了した時に実行される
-iframe.onload = () => {
+
+function scrollEvent() {
   // スクロールイベントを定義
   iframe.contentDocument.onscroll = function () {
     const scrollHeight = iframe.contentDocument.body.scrollHeight
@@ -12,6 +12,7 @@ iframe.onload = () => {
     // 現在の表示位置の高さ
     const scrollPosition = height + scrollTop
 
+    console.log(scrollPosition)
     const proximity = 0
 
     if ((scrollHeight - scrollPosition) / scrollHeight <= proximity) {
@@ -19,6 +20,19 @@ iframe.onload = () => {
     }
   }
 }
+
+// iframeのonloadはchromeしか動かないためsetIntervalで監視する
+// iframe.onload = scrollEvent
+
+const timer = setInterval(function () {
+  const iframeDoc = iframe.contentDocument
+  // Check if loading is complete
+  if (iframeDoc.readyState === 'complete' || iframeDoc.readyState === 'interactive') {
+    scrollEvent()
+    return clearInterval(timer)
+  }
+}, 1000)
+
 // ----チェックボックスがオンになれば「次へ」ボタンを有効化
 document.getElementById('check').onclick = function () {
   const btn = document.getElementById('next-btn')
