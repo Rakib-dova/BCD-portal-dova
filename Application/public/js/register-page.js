@@ -1,3 +1,24 @@
+// ----利用規約を最後までスクロールしないとチェックボックスが有効化しない
+const iframe = document.getElementById('terms-of-service')
+// iframeの高さ
+const height = iframe.offsetHeight
+
+// スクロールイベントを定義
+iframe.contentDocument.onscroll = function () {
+  const scrollHeight = iframe.contentDocument.body.scrollHeight
+  const scrollTop = iframe.contentDocument.body.scrollTop
+
+  // 現在の表示位置の高さ
+  const scrollPosition = height + scrollTop
+
+  const proximity = 0
+
+  if ((scrollHeight - scrollPosition) / scrollHeight <= proximity) {
+    document.getElementById('check').removeAttribute('disabled')
+  }
+}
+
+// ----チェックボックスがオンになれば「次へ」ボタンを有効化
 document.getElementById('check').onclick = function () {
   const btn = document.getElementById('next-btn')
   if (this.checked) {
@@ -7,6 +28,7 @@ document.getElementById('check').onclick = function () {
   }
 }
 
+// ----「次へ」ボタンが押された際のバリデーションチェック
 document.getElementById('next-btn').onclick = function () {
   /*
   const elements = document.querySelectorAll('input[type="text"]')
