@@ -11,8 +11,6 @@ function scrollEvent() {
 
     // 現在の表示位置の高さ
     const scrollPosition = height + scrollTop
-
-    console.log(scrollPosition)
     const proximity = 0
 
     if ((scrollHeight - scrollPosition) / scrollHeight <= proximity) {
