@@ -1,11 +1,12 @@
 import * as bulmaToast from './bulma-toast.js'
 
-// Clipboard APIを利用
-document.getElementById('copy-btn').onclick = function () {
-  const textbox = document.getElementById('tenantId')
-  textbox.select()
-  navigator.clipboard.writeText(textbox.value).then(
-    function () {
+// Clipboard APIを利用したいがiframeの外側（トレードシフト）から使えない
+// execCommandは今後ブラウザの機能から削除され、使用不可になる
+if (typeof document.execCommand === 'function') {
+  document.getElementById('copy-btn').onclick = function () {
+    const textbox = document.getElementById('tenantId')
+    textbox.select()
+    if (document.execCommand('copy')) {
       bulmaToast.toast({
         message: 'お客様番号をコピーしました',
         duration: 2000,
@@ -15,11 +16,22 @@ document.getElementById('copy-btn').onclick = function () {
         position: 'top-center',
         animate: { in: 'fadeIn', out: 'fadeOut' }
       })
-    },
-    function (err) {
-      console.error('Async: Could not copy text: ', err)
+    } else {
+      bulmaToast.toast({
+        message: 'コピーに失敗しました',
+        duration: 2000,
+        type: 'is-info',
+        dismissible: true,
+        closeOnClick: true,
+        position: 'top-center',
+        animate: { in: 'fadeIn', out: 'fadeOut' }
+      })
     }
-  )
+  }
+} else {
+  // クリップボードコピーが機能しない場合はコピーボタンを削除
+  const elm = document.getElementById('copy-btn')
+  if (elm) elm.parentNode.removeChild(elm)
 }
 
 // フラッシュメッセージがあれば表示
