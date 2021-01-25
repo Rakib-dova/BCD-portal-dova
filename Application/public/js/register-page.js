@@ -70,11 +70,11 @@ document.getElementById('next-btn').onclick = function () {
       return false
     }
   }
-
   // return falseで返すとバリデーションの結果が画面表示されないためコメントアウト
   // return false;
 }
 
+// ----動的なフォーム入力のバリデーションチェック
 addEvent(document, 'change', function (e, target) {
   instantValidation(target)
 })
@@ -114,4 +114,9 @@ function instantValidation(field) {
       field.setAttribute('aria-invalid', 'true')
     }
   }
+}
+
+// ---- 登録ボタン押下時のフロント側での二重送信防止
+document.getElementById('form').onsubmit = function () {
+  document.getElementById('submit').setAttribute('disabled', 'disabled')
 }

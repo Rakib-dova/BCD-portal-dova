@@ -79,7 +79,7 @@ block content
               //p ※登録したメールアドレスに「お客様番号」を記載した登録完了メールを送付いたします。配信ドメイン「〇〇」を受信できるよう設定してください。
 
             footer.modal-card-foot
-              button.button.is-success(type="submit" formaction="/tenant/register" formmethod="POST") 登録
+              button.button.is-success#submit(type="submit" formaction="/tenant/register" formmethod="POST") 登録
               a.button.cancel-button(data-target='confirmregister-modal') キャンセル
 
       include footer
