@@ -1,4 +1,4 @@
-FROM registry.redhat.io/ubi8/nodejs-14
+FROM node:14
 LABEL maintainer="NTT Communications Corporation"
 
 # Create app directory
