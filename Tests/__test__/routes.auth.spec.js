@@ -111,6 +111,47 @@ describe('authのテスト', () => {
       expect(response.getHeader('Location')).toEqual('/portal')
     })
 
-    test('正常：userController.findAndUpdateの呼び出しにユーザが見つかった場合', async () => {})
+    test('正常：userController.findAndUpdateの呼び出しにユーザが見つかった場合', async () => {
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      findAndUpdateSpy.mockReturnValue(() => {
+        return {
+          userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: 'dummyRefreshToken',
+          userStatus: 0
+        }
+      })
+      await auth.cbGetCallback(request, response, next)
+
+      // 500エラーではない
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // 認証成功のログが出力されている
+      expect(infoSpy).toHaveBeenCalled()
+      expect(infoSpy).toHaveBeenCalledWith(
+        { tenant: request.user.tenantId, user: request.user.userId },
+        'Tradeshift Authentication Succeeded'
+      )
+      // ポータルにリダイレクト
+      expect(response.redirect).toHaveBeenCalledWith('/portal')
+      expect(response.getHeader('Location')).toEqual('/portal')
+    })
+  })
+
+  describe('コールバック cbGetFailure', () => {
+    test('500エラー：呼ばれた場合は必ず', async () => {
+      await auth.cbGetFailure(request, response, next)
+
+      // 500エラーがエラーハンドリングされる
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
   })
 })
