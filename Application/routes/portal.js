@@ -5,15 +5,27 @@ const helper = require('./helpers/middleware')
 
 const errorHelper = require('./helpers/error')
 
-const cbGetIndex = (req, res, next) => {
+const userController = require('../controllers/userController.js')
+
+const cbGetIndex = async (req, res, next) => {
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
 
+  // portal遷移前にはuserは取得できることは確定
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // portalではuser未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
   req.session.userContext = 'LoggedIn'
+  req.session.userRole = user.dataValues?.userRole
+
+  // TX依頼後に改修 ユーザ権限も画面に送る
   res.render('portal', {
     title: 'ポータル',
-    customerId: req.user.userId,
+    tenantId: req.user.tenantId,
+    userRole: req.session.userRole,
     TS_HOST: process.env.TS_HOST
   })
 }

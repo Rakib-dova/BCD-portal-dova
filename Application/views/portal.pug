@@ -58,7 +58,7 @@ block content
     
     .modal#support-modal
       .modal-background.cancel-button(data-target='support-modal')
-      .modal-card
+      .modal-card.is-family-noto-sans
         header.modal-card-head
           p.modal-card-title サポート
           button.delete(data-target="support-modal")
@@ -68,15 +68,39 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p よくある質問（日本語）を参照する
-            a.panel-block(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank')
+            a.panel-block.show-modal(data-target='support-confirmation-modal')
               span.panel-icon
                 i.fas.fa-file
               p 設定方法、ご利用方法のお問い合わせ
         footer.modal-card-foot
 
-    .modal.modal-fx-fadeInScale#createdocument-modal
+            //a.panel-block(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank')
+
+    .modal#support-confirmation-modal
+      .modal-background.cancel-button(data-target='support-confirmation-modal')
+      .modal-content.is-family-noto-sans
+        .card
+          .card-content
+            if userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d"
+              p お問い合わせの際は、以下のお客様番号をご入力ください。
+              .field.has-addons
+                .control.is-expanded
+                  input.input#tenantId(type='text' value='BCD-F-01-'+tenantId)
+                .control
+                  a.button#copy-btn(data-clipboard-target="#tenantId")
+                    | Copy                
+              a.button.is-success.is-pulled-right(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank') お問い合わせページを開く
+            else
+              p お問い合わせは、アカウント管理者のみ可能です。
+              p ※一般ユーザからお問い合わせの際には、アカウント管理者よりBCDから始まるお客様番号を共有頂いた上でご利用ください。
+              a.button.is-success.is-pulled-right(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank') お問い合わせページを開く
+          footer.card-footer
+            p.card-footer-item
+
+
+    .modal#createdocument-modal
       .modal-background.cancel-button(data-target='createdocument-modal')
-      .modal-card
+      .modal-card.is-family-noto-sans
         header.modal-card-head
           p.modal-card-title 文書の新規作成
           button.delete(data-target="createdocument-modal")
@@ -97,16 +121,6 @@ block content
         footer.modal-card-foot
 
   include footer
-//-
-    .modal.modal-fx-fadeInScale#documentmanager-modal
-      .modal-background.cancel-button(data-target='documentmanager-modal')
-      .modal-card
-        header.modal-card-head
-          p.modal-card-title 文書管理
-          button.delete(data-target='documentmanager-modal')
-        section.modal-card-body
-          p 「開く」をクリックすると別ウィンドウで表示します。
-        footer.modal-card-foot
-          a.button.is-success(href='https://go.tradeshift.com/#/Tradeshift.DocumentManager' target='_blank') 開く
-          a.button.cancel-button(data-target='documentmanager-modal') キャンセル
-//-
+
+block append scripts
+  script(src="/js/portal-page.js" nonce="qv73LoiY5kc+6cd6a4njpw==")
