@@ -18,7 +18,18 @@ const cbGetIndex = async (req, res, next) => {
   // portalではuser未登録の場合もエラーを上げる
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
 
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、403エラーとする
+  if (user.dataValues?.userStatus !== 0) {
+    const e = new Error('ご利用のアカウントは無効になっています')
+    e.name = 'Forbidden'
+    e.status = 403
+    e.desc = 'ご不明点がございましたら、アカウント管理者経由でお問い合わせください'
+    return next(e)
+  }
+
   req.session.userContext = 'LoggedIn'
+
+  // TX依頼後に改修、ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
 
   // TX依頼後に改修 ユーザ権限も画面に送る
