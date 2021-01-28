@@ -9,7 +9,7 @@ module.exports = {
     let e
     switch (status) {
       case 400:
-        e = new Error('不正なリクエストが実行されました。')
+        e = new Error('不正なページからアクセスされたか、セッションタイムアウトが発生しました。')
         e.name = 'Bad Request'
         e.status = 400
         break
