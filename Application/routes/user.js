@@ -84,7 +84,8 @@ const cbGetDelete = async (req, res, next) => {
 
 router.get('/register', helper.isAuthenticated, cbGetRegister)
 
-router.post('/register', helper.isAuthenticated, cbPostRegister)
+// TX依頼後に改修。helper.isAuthenticatedがミドルウェアとして入っているとセッションタイムアウトが判定できない
+router.post('/register', cbPostRegister)
 
 // TX依頼後：ユニットテスト外だがテナントが登録されていない場合には削除できないようにする
 router.get('/delete', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetDelete)
