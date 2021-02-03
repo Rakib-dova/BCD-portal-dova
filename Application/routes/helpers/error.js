@@ -14,9 +14,11 @@ module.exports = {
         e.status = 400
         break
       case 404:
+        // TX依頼後に改修 404時の画面下部に文言追加
         e = new Error('お探しのページは見つかりませんでした。')
         e.name = 'Not Found'
         e.status = 404
+        e.desc = '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
         break
       default:
         e = new Error('サーバ内部でエラーが発生しました。')
