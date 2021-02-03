@@ -14,7 +14,7 @@ const logger = require('../../Application/lib/logger.js')
 if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.env' })
 }
-let request, response, infoSpy, findOneSpy, error403
+let request, response, infoSpy, findOneSpy
 describe('portalのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -30,11 +30,10 @@ describe('portalのテスト', () => {
     findOneSpy.mockRestore()
   })
 
-  // 403エラー定義
-  const error403 = new Error('ご利用のアカウントは無効になっています')
-  error403.name = 'Forbidden'
-  error403.status = 403
-  error403.desc = 'ご不明点がございましたら、アカウント管理者経由でお問い合わせください'
+  // 404エラー定義
+  const error404 = new Error('お探しのページは見つかりませんでした。')
+  error404.name = 'Not Found'
+  error404.status = 404
 
   describe('ルーティング', () => {
     test('portalのルーティングを確認', async () => {
@@ -79,8 +78,8 @@ describe('portalのテスト', () => {
       await portal.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 403，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error403)
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
@@ -132,8 +131,8 @@ describe('portalのテスト', () => {
       await portal.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 403エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error403)
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
       // userContextがLoggedInになって「いない」
@@ -160,8 +159,8 @@ describe('portalのテスト', () => {
       await portal.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 403エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error403)
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
       // userContextがLoggedInになって「いない」
@@ -172,7 +171,7 @@ describe('portalのテスト', () => {
       expect(response.render).not.toHaveBeenCalled()
     })
 
-    test('403エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
+    test('404エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {
@@ -201,10 +200,11 @@ describe('portalのテスト', () => {
       await portal.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 403エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(error403)
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      console.log(request.session?.userContext)
       // userContextがLoggedInになって「いない」
       expect(request.session?.userContext).not.toBe('LoggedIn')
       // session.userRoleが初期値のままになっている

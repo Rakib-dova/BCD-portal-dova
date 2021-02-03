@@ -122,7 +122,7 @@ const cbPostRegister = async (req, res, next) => {
 
 router.get('/register', helper.isAuthenticated, cbGetRegister)
 
-// TX依頼後に改修。helper.isAuthenticatedがミドルウェアとして入っているとセッションタイムアウトが判定できない
+// helper.isAuthenticatedがミドルウェアとして入っているとセッションタイムアウトが判定できない
 router.post('/register', cbPostRegister)
 
 module.exports = {

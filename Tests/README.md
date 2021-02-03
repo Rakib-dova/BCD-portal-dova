@@ -63,3 +63,30 @@ $ npm run test:coverage -- routes.index.spec.js
 - 変数名・関数名の命名はローワーキャメルケース（先頭小文字）
 
 VSCode の開発では ESLint および Prettier 拡張機能の使用を推奨（別紙参照）
+
+## インテグレーションテストテストの実行方法
+
+- インテグレーションテストでは、別途 DB＆ローカルサーバを立てておく必要あり
+
+```
+$ cd ..\Application\
+$ npm run run start:local
+```
+
+- ./**integration_tests**配下の全テストコードの実行（カバレッジ算出なし）
+
+```
+$ npm run test:integration
+```
+
+- インテグレーションテストの jest の設定値はユニットテストと違う設定ファイルを使用
+
+```
+jest.config.e2e.js
+```
+
+- jest で使っている puppeteer の設定は下記に使用
+
+```
+jest-puppeteer.config.js
+```
