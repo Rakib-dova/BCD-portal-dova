@@ -43,81 +43,50 @@ describe('authのテスト', () => {
   describe('ルーティング', () => {
     test('authのルーティングを確認', async () => {
       expect(auth.router.get).toBeCalledWith('/', expect.any(Function))
-      expect(auth.router.get).toBeCalledWith('/callback', expect.any(Function), expect.any(Function))
-      expect(auth.router.get).toBeCalledWith('/failure', expect.any(Function))
+      expect(auth.router.get).toBeCalledWith('/callback', expect.any(Function), auth.cbGetCallback)
+      expect(auth.router.get).toBeCalledWith('/failure', auth.cbGetFailure)
     })
   })
+
   describe('コールバック cbGetCallback', () => {
-    test('500エラー：セッション内のユーザ情報(req.user)に何も入っていない', async () => {
-      await auth.cbGetCallback(request, response, next)
-
-      // 500エラーがエラーハンドリングされる
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-
-      // 認証成功のログが出力「されない」
-      expect(infoSpy).not.toHaveBeenCalled()
-
-      // ポータルにリダイレクト「されない」
-      expect(response.redirect).not.toHaveBeenCalledWith('/portal')
-      expect(response.getHeader('Location')).not.toEqual('/portal')
-    })
-
-    test('500エラー：userController.findAndUpdateの呼び出しにデータベースエラー発生', async () => {
-      request.user = {
-        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
-        accessToken: 'dummyAccessToken',
-        refreshToken: 'dummyRefreshToken'
-      }
-
-      findAndUpdateSpy.mockReturnValue(new Error('DB error mock'))
-
-      await auth.cbGetCallback(request, response, next)
-
-      // 500エラーがエラーハンドリングされる
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-
-      // 認証成功のログが出力「されない」
-      expect(infoSpy).not.toHaveBeenCalled()
-
-      // ポータルにリダイレクト「されない」
-      expect(response.redirect).not.toHaveBeenCalledWith('/portal')
-      expect(response.getHeader('Location')).not.toEqual('/portal')
-    })
-
     test('正常：userController.findAndUpdateの呼び出しにユーザが見つからない場合（null）', async () => {
+      // 準備
+      // request.userには正常値を想定する
       request.user = {
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
         userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
         accessToken: 'dummyAccessToken',
         refreshToken: 'dummyRefreshToken'
       }
-
+      // DBからのユーザが見つからない場合を想定する
       findAndUpdateSpy.mockReturnValue(null)
 
+      // 試験実施
       await auth.cbGetCallback(request, response, next)
 
-      // 500エラーではない
+      // 期待結果
+      // 500エラーがエラーハンドリングされ「ない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-
       // 認証成功のログが出力されている
-      expect(infoSpy).toHaveBeenCalled()
       expect(infoSpy).toHaveBeenCalledWith(
         { tenant: request.user.tenantId, user: request.user.userId },
         'Tradeshift Authentication Succeeded'
       )
-      // ポータルにリダイレクト
-      expect(response.redirect).toHaveBeenCalledWith('/portal')
+      // ポータルにリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
       expect(response.getHeader('Location')).toEqual('/portal')
     })
 
     test('正常：userController.findAndUpdateの呼び出しにユーザが見つかった場合', async () => {
+      // 準備
+      // request.userには正常値を想定する
       request.user = {
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
         userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
         accessToken: 'dummyAccessToken',
         refreshToken: 'dummyRefreshToken'
       }
+      // DBからの正常なユーザデータ取得を想定する
       findAndUpdateSpy.mockReturnValue(() => {
         return {
           userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
@@ -129,28 +98,76 @@ describe('authのテスト', () => {
           userStatus: 0
         }
       })
+
+      // 試験実施
       await auth.cbGetCallback(request, response, next)
 
-      // 500エラーではない
+      // 期待結果
+      // 500エラーがエラーハンドリングされ「ない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-
-      // 認証成功のログが出力されている
-      expect(infoSpy).toHaveBeenCalled()
+      // 認証成功のINFOログが呼ばれ「る」
       expect(infoSpy).toHaveBeenCalledWith(
         { tenant: request.user.tenantId, user: request.user.userId },
         'Tradeshift Authentication Succeeded'
       )
-      // ポータルにリダイレクト
-      expect(response.redirect).toHaveBeenCalledWith('/portal')
+      // ポータルにリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
       expect(response.getHeader('Location')).toEqual('/portal')
+    })
+
+    test('500エラー：セッション内のユーザ情報(req.user)に何も入っていない', async () => {
+      // 準備
+      // userを意図的に用意しない
+
+      // 試験実施
+      await auth.cbGetCallback(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリングされ「る」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      // INFOログが呼ばれ「ない」
+      expect(infoSpy).not.toHaveBeenCalled()
+      // ポータルにリダイレクトされ「ない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/portal')
+      expect(response.getHeader('Location')).not.toEqual('/portal')
+    })
+
+    test('500エラー：userController.findAndUpdateの呼び出しにデータベースエラー発生', async () => {
+      // 準備
+      // request.userには正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // DBからの応答がエラーの場合を想定する
+      findAndUpdateSpy.mockReturnValue(new Error('DB error mock'))
+
+      // 試験実施
+      await auth.cbGetCallback(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリングされ「る」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      // INFOログが呼ばれ「ない」
+      expect(infoSpy).not.toHaveBeenCalled()
+      // ポータルにリダイレクトされ「ない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/portal')
+      expect(response.getHeader('Location')).not.toEqual('/portal')
     })
   })
 
   describe('コールバック cbGetFailure', () => {
-    test('500エラー：呼ばれた場合は必ず', async () => {
+    test('正常：500エラーを返す', async () => {
+      // 準備
+      // なし
+
+      // 試験実施
       await auth.cbGetFailure(request, response, next)
 
-      // 500エラーがエラーハンドリングされる
+      // 期待結果
+      // 500エラーがエラーハンドリングされ「る」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })

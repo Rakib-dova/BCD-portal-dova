@@ -20,10 +20,10 @@ module.exports = {
   collectCoverage: false,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
-  collectCoverageFrom: ['<rootDir>/Application/routes/**', '<rootDir>/Application/controllers/**'],
+  // collectCoverageFrom: ['<rootDir>/Application/routes/**', '<rootDir>/Application/controllers/**'],
 
   // The directory where Jest should output its coverage files
-  coverageDirectory: '<rootDir>/Tests/coverage',
+  // coverageDirectory: '<rootDir>/Tests/coverage',
 
   // An array of regexp pattern strings used to skip coverage collection
   coveragePathIgnorePatterns: ['\\\\node_modules\\\\'],
@@ -91,6 +91,7 @@ module.exports = {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
+  preset: 'jest-puppeteer'
   // Run tests from one or more projects
   // projects: undefined,
 
@@ -110,10 +111,10 @@ module.exports = {
   // restoreMocks: false,
 
   // The root directory that Jest should scan for tests and modules within
-  rootDir: '../',
+  // rootDir: '../',
 
   // A list of paths to directories that Jest should use to search for files in
-  roots: ['<rootDir>/Tests'],
+  // roots: ['<rootDir>/Tests'],
 
   // Allows you to use a custom runner instead of Jest's default test runner
   // runner: "jest-runner",
@@ -131,7 +132,6 @@ module.exports = {
   // snapshotSerializers: [],
 
   // The test environment that will be used for testing
-  testEnvironment: 'node'
 
   // Options that will be passed to the testEnvironment
   // testEnvironmentOptions: {},

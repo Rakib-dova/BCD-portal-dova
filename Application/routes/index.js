@@ -6,7 +6,7 @@ const router = express.Router()
 const cbGetIndex = (req, res, next) => {
   // 将来的にポータルがトレードシフトから切り離される場合に備えて、indexを確保
   // 現在はポータルへのリダイレクトのみとする
-  res.redirect('/auth')
+  res.redirect(303, '/auth')
 }
 
 router.get('/', cbGetIndex)

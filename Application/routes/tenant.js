@@ -113,7 +113,7 @@ const cbPostRegister = async (req, res, next) => {
     req.session.userContext = 'TenantRegistrationCompleted'
     req.flash('info', '利用登録が完了いたしました。')
 
-    return res.redirect('/portal')
+    return res.redirect(303, '/portal')
   } else {
     // 失敗したら
     return next(errorHelper.create(500))

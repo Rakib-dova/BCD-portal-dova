@@ -24,7 +24,7 @@ describe('indexのテスト', () => {
 
   describe('ルーティング', () => {
     test('indexのルーティングを確認', async () => {
-      expect(index.router.get).toBeCalledWith('/', expect.any(Function))
+      expect(index.router.get).toBeCalledWith('/', index.cbGetIndex)
     })
   })
 
@@ -32,7 +32,7 @@ describe('indexのテスト', () => {
     test('authにリダイレクトされることを確認', async () => {
       await index.cbGetIndex(request, response, next)
       expect(response.redirect).toHaveBeenCalled()
-      expect(response.redirect).toHaveBeenCalledWith('/auth')
+      expect(response.redirect).toHaveBeenCalledWith(303, '/auth')
       expect(response.getHeader('Location')).toEqual('/auth')
     })
   })

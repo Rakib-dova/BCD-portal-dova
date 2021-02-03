@@ -176,6 +176,12 @@ if (process.env.LOCALLY_HOSTED !== 'true') {
   })
 }
 
+// クローラーにページをインデックスしないよう指示
+app.use(function (req, res, next) {
+  res.header('X-Robots-Tag', 'noindex')
+  next()
+})
+
 app.use('/', require('./routes/index').router)
 app.use('/portal', require('./routes/portal').router)
 app.use('/auth', require('./routes/auth').router)
