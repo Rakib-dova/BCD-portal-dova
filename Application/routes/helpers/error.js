@@ -43,9 +43,6 @@ module.exports = {
     }
 
     if (err.desc) errorDescription = err.desc
-    // render page
-    res.status(errorStatus)
-
     // エラーページには詳細な情報は提示しない
     res.render('error', {
       title: errorTitle,
@@ -73,5 +70,8 @@ module.exports = {
         logger.warn({ status: errorStatus }, err.name)
       }
     }
+    // TX依頼後に改修 脆弱性対策のため、エラーがあっても200で返却する
+    res.status(200)
+
   }
 }
