@@ -2,7 +2,7 @@ import * as bulmaToast from './bulma-toast.js'
 
 // Clipboard APIを利用したいがiframeの外側（トレードシフト）から使えない
 // execCommandは今後ブラウザの機能から削除され、使用不可になる
-if (typeof document.execCommand === 'function') {
+if (typeof document.execCommand === 'function' && document.getElementById('copy-btn')) {
   document.getElementById('copy-btn').onclick = function () {
     const textbox = document.getElementById('tenantId')
     textbox.select()
