@@ -30,7 +30,7 @@ const cbPostRegister = async (req, res, next) => {
   // TODO: SO系にフォームの内容を送信
   // （サービス仕様の確定によっては上記不要）
 
-  // TX依頼後：テナントがnullの場合は登録しないようにする
+  // テナントがnullの場合は登録しないようにする
   const tenant = await tenantController.findOne(req.user?.tenantId)
   if (!tenant) return next(errorHelper.create(500))
 
@@ -84,10 +84,10 @@ const cbGetDelete = async (req, res, next) => {
 
 router.get('/register', helper.isAuthenticated, cbGetRegister)
 
-// TX依頼後に改修。helper.isAuthenticatedがミドルウェアとして入っているとセッションタイムアウトが判定できない
+// helper.isAuthenticatedがミドルウェアとして入っているとセッションタイムアウトが判定できない
 router.post('/register', cbPostRegister)
 
-// TX依頼後：ユニットテスト外だがテナントが登録されていない場合には削除できないようにする
+// ユニットテスト外だがテナントが登録されていない場合には削除できないようにする
 router.get('/delete', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetDelete)
 
 module.exports = {

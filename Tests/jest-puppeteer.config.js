@@ -1,7 +1,6 @@
 module.exports = {
   launch: {
-    ignoreHTTPSErrors: true,
-    args: ['--incognito']
+    ignoreHTTPSErrors: true
   },
   browser: 'chromium',
   browserContext: 'default'

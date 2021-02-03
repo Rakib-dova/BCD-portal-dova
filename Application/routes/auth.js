@@ -32,7 +32,7 @@ const cbGetFailure = (req, res, next) => {
 
 router.get('/', passport.authenticate('tradeshift', { scope: 'openid offline' }))
 
-router.get('/callback', passport.authenticate('tradeshift', { failureRedirect: '/auth/failuer' }), cbGetCallback)
+router.get('/callback', passport.authenticate('tradeshift', { failureRedirect: '/auth/failure' }), cbGetCallback)
 
 router.get('/failure', cbGetFailure)
 
