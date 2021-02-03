@@ -29,53 +29,49 @@ module.exports = {
     return e
   },
   render: (err, req, res, next) => {
-    // TX依頼後に改修 エラー画面には「404 Not Found」等のタイトルを表示しない
-    let errorStatus, errorMessage, errorDescription
+    let errorStatus, errorTitle, errorMessage, errorDescription
 
     if (!err.status) {
       const dummyErr = module.exports.create(500)
       errorStatus = dummyErr.status
       errorMessage = dummyErr.message
+      errorTitle = dummyErr.name
     } else {
       errorStatus = err.status
       errorMessage = err.message
+      errorTitle = err.name
     }
+
+    if (err.desc) errorDescription = err.desc
+    // エラーページには詳細な情報は提示しない
+    res.render('error', {
+      title: errorTitle,
+      message: errorMessage,
+      status: errorStatus,
+      description: !errorDescription ? null : errorDescription,
+      error: process.env.LOCALLY_HOSTED === 'true' ? err : {}
+    })
 
     // output log
     // ログには生のエラー情報を吐く
-    // TX依頼後に改修 ローカル環境でのエラー時にはpathを吐く
-    const logMessage = { status: errorStatus }
-    if (process.env.LOCALLY_HOSTED === 'true') logMessage.path = req.path
-
-    // ログインしていればユーザID、テナントIDを吐く
     if (req.user?.userId && req.user?.tenantId) {
-      logMessage.tenant = req.user.tenantId
-      logMessage.user = req.user.userId
-    }
-
-    // error発生時のみstackを吐く
-    if (errorStatus >= 500) {
-      logMessage.stack = err.stack
-      logger.error(logMessage, err.name)
+      if (errorStatus >= 500) {
+        logger.error(
+          { tenant: req.user.tenantId, user: req.user.userId, stack: err.stack, status: errorStatus },
+          err.name
+        )
+      } else {
+        logger.warn({ tenant: req.user.tenantId, user: req.user.userId, status: errorStatus }, err.name)
+      }
     } else {
-      logger.warn(logMessage, err.name)
+      if (errorStatus >= 500) {
+        logger.error({ stack: err.stack, status: errorStatus }, err.name)
+      } else {
+        logger.warn({ status: errorStatus }, err.name)
+      }
     }
-
-    // TX依頼後に改修 脆弱性対策のため、実際のエラーに関わらず画面には404エラーの文言を表示する
-    if (errorStatus !== 404) {
-      errorMessage = 'お探しのページは見つかりませんでした。'
-      errorDescription = '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
-    } else if (err.desc) {
-      errorDescription = err.desc
-    }
-
     // TX依頼後に改修 脆弱性対策のため、エラーがあっても200で返却する
     res.status(200)
 
-    // TX依頼後に改修 エラーページには詳細な情報は提示しない
-    res.render('error', {
-      message: errorMessage,
-      description: !errorDescription ? null : errorDescription
-    })
   }
 }
