@@ -25,6 +25,17 @@ module.exports = {
     }
   },
   findAndUpdate: async (userId, accessToken, newRefreshToken) => {
+    // 暗号化回りはtry-catch
+    let encryptedRefreshToken
+    try {
+      /* リフレッシュトークン暗号化 */
+      encryptedRefreshToken = tokenenc.encrypt('aes-256-cbc', userId, newRefreshToken)
+    } catch (error) {
+      // status 2は暗号化エラー
+      logger.error({ user: userId, stack: error.stack, status: 2 }, error.name)
+      return error
+    }
+
     // データベース接続回りはtry-catch
     try {
       const user = await User.findOne({
@@ -43,8 +54,7 @@ module.exports = {
           return userdata
         }
 
-        // リフレッシュトークンは暗号化してDB保管
-        const encryptedRefreshToken = tokenenc.encrypt('aes-256-cbc', userId, newRefreshToken)
+        // 暗号化したリフレッシュトークンをDB保管
         user.refreshToken = encryptedRefreshToken
         // UserRoleは最新化する
         user.userRole = userdata.Memberships[0].Role
@@ -71,12 +81,19 @@ module.exports = {
     const _tenantId = userdata.CompanyAccountId
     const _userId = userdata.Memberships[0].UserId
     const _userRole = userdata.Memberships[0].Role
-    // データベース接続回りはtry-catchしておく
 
+    // 暗号化回りはtry-catchしておく
+    let encryptedRefreshToken
     try {
-      /* リフレッシュトークンは暗号化して保管 */
-      const encryptedRefreshToken = tokenenc.encrypt('aes-256-cbc', _userId, refreshToken)
-
+      /* リフレッシュトークンを暗号化 */
+      encryptedRefreshToken = tokenenc.encrypt('aes-256-cbc', _userId, refreshToken)
+    } catch (error) {
+      // status 2は暗号化エラー
+      logger.error({ tenant: _tenantId, user: _userId, stack: error.stack, status: 2 }, error.name)
+      return error
+    }
+    // データベース接続回りはtry-catchしておく
+    try {
       /* トランザクション */
       const created = await db.sequelize.transaction(async (t) => {
         // 外部キー制約によりテナントがなくユーザのみ登録されている状態はない

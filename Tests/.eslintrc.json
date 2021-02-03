@@ -11,5 +11,11 @@
   },
   "rules": {
     "space-before-function-paren": 0
+  },
+  "globals": {
+    "page": true,
+    "browser": true,
+    "context": true,
+    "jestPuppeteer": true
   }
 }
