@@ -10,7 +10,7 @@
   "description": "bcd-portal",
   "dependencies": {
     "applicationinsights": "^1.8.8",
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.14",
     "connect-redis": "^5.0.0",

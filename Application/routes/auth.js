@@ -23,7 +23,7 @@ const cbGetCallback = async (req, res, next) => {
 
   // portalにリダイレクトさせる
   // portalでユーザ登録/テナント登録を判定する
-  res.redirect('/portal') // portalへリダイレクトさせる
+  res.redirect(303, '/portal') // portalへリダイレクトさせる
 }
 
 const cbGetFailure = (req, res, next) => {
