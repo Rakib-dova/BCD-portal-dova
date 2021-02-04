@@ -42,9 +42,7 @@ module.exports = {
 
     // output log
     // ログには生のエラー情報を吐く
-    const logMessage = { status: errorStatus }
-    // ローカル環境でのエラー時にはpathを含める
-    if (process.env.LOCALLY_HOSTED === 'true') logMessage.path = req.path
+    const logMessage = { status: errorStatus, path: req.path }
 
     // ログインしていればユーザID、テナントIDを吐く
     if (req.user?.userId && req.user?.tenantId) {
@@ -61,7 +59,7 @@ module.exports = {
     }
 
     // 脆弱性対策のため、500エラーの時は404エラーの文言を画面に表示する
-    if (errorStatus >= 500 && process.env.LOCALLY_HOSTED !== 'true') {
+    if (errorStatus >= 500) {
       errorMessage = 'お探しのページは見つかりませんでした。'
       errorDescription = '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
     } else if (err.desc) {
