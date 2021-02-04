@@ -41,6 +41,7 @@ describe('helpers/errorのテスト', () => {
       // 期待結果
       // 400エラーが返される
       expect(result).toEqual(new Error('不正なページからアクセスされたか、セッションタイムアウトが発生しました。'))
+      expect(result.desc).toBe('上部メニューのHOMEボタンを押下し、再度操作をやり直してください。')
       expect(result.name).toBe('Bad Request')
       expect(result.status).toBe(400)
     })

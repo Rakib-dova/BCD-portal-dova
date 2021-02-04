@@ -12,7 +12,7 @@ module.exports = {
         e = new Error('不正なページからアクセスされたか、セッションタイムアウトが発生しました。')
         e.name = 'Bad Request'
         e.status = 400
-        e.desc = '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
+        e.desc = '上部メニューのHOMEボタンを押下し、再度操作をやり直してください。'
         break
       case 404:
         e = new Error('お探しのページは見つかりませんでした。')
