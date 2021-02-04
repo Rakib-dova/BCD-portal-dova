@@ -12,7 +12,8 @@
   },
   "scripts": {
     "test": "cross-env LOCALLY_HOSTED=true jest --silent=false --verbose",
-    "test:coverage": "cross-env LOCALLY_HOSTED=true jest --silent=false --verbose --coverage"
+    "test:coverage": "cross-env LOCALLY_HOSTED=true jest --silent=false --verbose --coverage",
+    "test:integration": "cross-env LOCALLY_HOSTED=true jest --silent=false --verbose --config jest.config.e2e.js"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
