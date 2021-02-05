@@ -1,1366 +1,499 @@
-<html>
-
-<head>
-<style>
-<!--
- /* Font Definitions */
- @font-face
-	{font-family:"ＭＳ 明朝";
-	panose-1:2 2 6 9 4 2 5 8 3 4;}
-@font-face
-	{font-family:"ＭＳ ゴシック";
-	panose-1:2 11 6 9 7 2 5 8 2 4;}
-@font-face
-	{font-family:Century;
-	panose-1:2 4 6 4 5 5 5 2 3 4;}
-@font-face
-	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;}
-@font-face
-	{font-family:游ゴシック;
-	panose-1:2 11 4 0 0 0 0 0 0 0;}
-@font-face
-	{font-family:HG明朝B;
-	panose-1:2 2 8 9 0 0 0 0 0 0;}
-@font-face
-	{font-family:"Segoe UI";
-	panose-1:2 11 5 2 4 2 4 2 2 3;}
-@font-face
-	{font-family:メイリオ;
-	panose-1:2 11 6 4 3 5 4 4 2 4;}
-@font-face
-	{font-family:"ＭＳ Ｐゴシック";
-	panose-1:2 11 6 0 7 2 5 8 2 4;}
-@font-face
-	{font-family:Tahoma;
-	panose-1:2 11 6 4 3 5 4 4 2 4;}
-@font-face
-	{font-family:"\@游ゴシック";
-	panose-1:2 11 4 0 0 0 0 0 0 0;}
-@font-face
-	{font-family:"\@メイリオ";}
-@font-face
-	{font-family:"\@ＭＳ 明朝";
-	panose-1:2 2 6 9 4 2 5 8 3 4;}
-@font-face
-	{font-family:"\@ＭＳ Ｐゴシック";}
-@font-face
-	{font-family:"\@ＭＳ ゴシック";
-	panose-1:2 11 6 9 7 2 5 8 2 4;}
-@font-face
-	{font-family:"\@HG明朝B";}
- /* Style Definitions */
- p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	line-height:110%;
-	layout-grid-mode:char;
-	font-size:10.0pt;
-	font-family:メイリオ;}
-h2
-	{mso-style-link:"見出し 1 \(文字\)";
-	margin:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	line-height:110%;
-	page-break-after:avoid;
-	layout-grid-mode:char;
-	font-size:14.0pt;
-	font-family:メイリオ;
-	color:#333333;
-	letter-spacing:.5pt;
-	font-weight:normal;}
-h3
-	{mso-style-link:"見出し 2 \(文字\)";
-	margin-top:5.0pt;
-	margin-right:0mm;
-	margin-bottom:0mm;
-	margin-left:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	text-indent:0mm;
-	line-height:110%;
-	page-break-after:avoid;
-	layout-grid-mode:char;
-	font-size:14.0pt;
-	font-family:メイリオ;
-	color:#3F51B5;
-	font-weight:bold;}
-h4
-	{mso-style-link:"見出し 3 \(文字\)";
-	margin-top:5.0pt;
-	margin-right:0mm;
-	margin-bottom:0mm;
-	margin-left:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	text-indent:0mm;
-	line-height:110%;
-	page-break-after:avoid;
-	layout-grid-mode:char;
-	font-size:10.0pt;
-	font-family:メイリオ;
-	font-weight:bold;
-	text-decoration:underline;}
-h4
-	{mso-style-link:"見出し 4 \(文字\)";
-	margin:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	text-indent:0mm;
-	line-height:110%;
-	page-break-after:avoid;
-	layout-grid-mode:char;
-	font-size:10.0pt;
-	font-family:メイリオ;
-	font-weight:normal;}
-h5
-	{mso-style-link:"見出し 5 \(文字\)";
-	margin:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	text-indent:0mm;
-	line-height:110%;
-	page-break-after:avoid;
-	layout-grid-mode:char;
-	font-size:10.0pt;
-	font-family:"Segoe UI",sans-serif;
-	font-weight:normal;}
-h6
-	{mso-style-link:"見出し 6 \(文字\)";
-	margin-top:0mm;
-	margin-right:0mm;
-	margin-bottom:0mm;
-	margin-left:40.0pt;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	line-height:110%;
-	page-break-after:avoid;
-	layout-grid-mode:char;
-	font-size:10.0pt;
-	font-family:メイリオ;
-	font-weight:bold;}
-p.MsoCommentText, li.MsoCommentText, div.MsoCommentText
-	{mso-style-link:"コメント文字列 \(文字\)";
-	margin:0mm;
-	margin-bottom:.0001pt;
-	layout-grid-mode:char;
-	font-size:10.0pt;
-	font-family:游ゴシック;}
-p.MsoHeader, li.MsoHeader, div.MsoHeader
-	{mso-style-link:"ヘッダー \(文字\)";
-	margin:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	line-height:110%;
-	layout-grid-mode:char;
-	font-size:10.0pt;
-	font-family:メイリオ;}
-p.MsoFooter, li.MsoFooter, div.MsoFooter
-	{mso-style-link:"フッター \(文字\)";
-	margin:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	line-height:110%;
-	layout-grid-mode:char;
-	font-size:10.0pt;
-	font-family:メイリオ;}
-p.MsoEnvelopeAddress, li.MsoEnvelopeAddress, div.MsoEnvelopeAddress
-	{margin-top:0mm;
-	margin-right:0mm;
-	margin-bottom:0mm;
-	margin-left:144.0pt;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	font-size:8.0pt;
-	font-family:"ＭＳ 明朝",serif;}
-span.MsoCommentReference
-	{font-family:メイリオ;}
-p.MsoBodyTextIndent, li.MsoBodyTextIndent, div.MsoBodyTextIndent
-	{mso-style-link:"本文インデント \(文字\)";
-	margin-top:0mm;
-	margin-right:0mm;
-	margin-bottom:0mm;
-	margin-left:19.3pt;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	text-indent:-19.3pt;
-	font-size:10.5pt;
-	font-family:"Century",serif;}
-a:link, span.MsoHyperlink
-	{color:blue;
-	text-decoration:underline;}
-a:visited, span.MsoHyperlinkFollowed
-	{color:purple;
-	text-decoration:underline;}
-p.MsoPlainText, li.MsoPlainText, div.MsoPlainText
-	{mso-style-link:"書式なし \(文字\)";
-	margin:0mm;
-	margin-bottom:.0001pt;
-	font-size:11.0pt;
-	font-family:游ゴシック;}
-p
-	{margin-right:0mm;
-	margin-left:0mm;
-	font-size:12.0pt;
-	font-family:"ＭＳ Ｐゴシック";}
-p.MsoCommentSubject, li.MsoCommentSubject, div.MsoCommentSubject
-	{mso-style-link:"コメント内容 \(文字\)";
-	margin:0mm;
-	margin-bottom:.0001pt;
-	line-height:110%;
-	layout-grid-mode:char;
-	font-size:10.0pt;
-	font-family:游ゴシック;
-	font-weight:bold;}
-p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
-	{mso-style-link:"吹き出し \(文字\)";
-	margin:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	layout-grid-mode:char;
-	font-size:9.0pt;
-	font-family:"Segoe UI",sans-serif;}
-p.MsoRMPane, li.MsoRMPane, div.MsoRMPane
-	{margin:0mm;
-	margin-bottom:.0001pt;
-	font-size:10.0pt;
-	font-family:メイリオ;}
-p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
-	{margin-top:0mm;
-	margin-right:0mm;
-	margin-bottom:0mm;
-	margin-left:42.0pt;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	font-size:10.5pt;
-	font-family:"Segoe UI",sans-serif;}
-span.a
-	{mso-style-name:"ヘッダー \(文字\)";
-	mso-style-link:ヘッダー;}
-span.a0
-	{mso-style-name:"フッター \(文字\)";
-	mso-style-link:フッター;}
-span.2
-	{mso-style-name:"見出し 2 \(文字\)";
-	mso-style-link:"見出し 2";
-	font-family:メイリオ;
-	color:#3F51B5;
-	font-weight:bold;}
-span.3
-	{mso-style-name:"見出し 3 \(文字\)";
-	mso-style-link:"見出し 3";
-	font-family:メイリオ;
-	font-weight:bold;
-	text-decoration:underline;}
-span.4
-	{mso-style-name:"見出し 4 \(文字\)";
-	mso-style-link:"見出し 4";
-	font-family:メイリオ;}
-span.5
-	{mso-style-name:"見出し 5 \(文字\)";
-	mso-style-link:"見出し 5";
-	font-family:"Segoe UI",sans-serif;}
-span.1
-	{mso-style-name:"見出し 1 \(文字\)";
-	mso-style-link:"見出し 1";
-	font-family:メイリオ;
-	color:#333333;
-	letter-spacing:.5pt;}
-span.6
-	{mso-style-name:"見出し 6 \(文字\)";
-	mso-style-link:"見出し 6";
-	font-family:メイリオ;
-	font-weight:bold;}
-span.a1
-	{mso-style-name:"本文インデント \(文字\)";
-	mso-style-link:本文インデント;
-	font-family:"Century",serif;}
-span.a2
-	{mso-style-name:"コメント文字列 \(文字\)";
-	mso-style-link:コメント文字列;
-	font-family:游ゴシック;}
-span.a3
-	{mso-style-name:"吹き出し \(文字\)";
-	mso-style-link:吹き出し;
-	font-family:"Segoe UI",sans-serif;}
-span.a4
-	{mso-style-name:"コメント内容 \(文字\)";
-	mso-style-link:コメント内容;
-	font-family:游ゴシック;
-	font-weight:bold;}
-span.a5
-	{mso-style-name:"書式なし \(文字\)";
-	mso-style-link:書式なし;
-	font-family:游ゴシック;}
-span.10
-	{mso-style-name:未解決のメンション1;
-	color:#605E5C;
-	background:#E1DFDD;}
-p.ExAHeading1, li.ExAHeading1, div.ExAHeading1
-	{mso-style-name:"ExA Heading 1";
-	margin-top:6.0pt;
-	margin-right:0mm;
-	margin-bottom:0mm;
-	margin-left:-9.0pt;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	text-indent:36.0pt;
-	font-size:8.0pt;
-	font-family:"ＭＳ 明朝",serif;}
-p.ExAHeading2, li.ExAHeading2, div.ExAHeading2
-	{mso-style-name:"ExA Heading 2";
-	margin-top:6.0pt;
-	margin-right:0mm;
-	margin-bottom:0mm;
-	margin-left:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	text-indent:72.0pt;
-	font-size:8.0pt;
-	font-family:"ＭＳ 明朝",serif;}
-p.ExAHeading3, li.ExAHeading3, div.ExAHeading3
-	{mso-style-name:"ExA Heading 3";
-	margin-top:6.0pt;
-	margin-right:0mm;
-	margin-bottom:0mm;
-	margin-left:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	text-indent:126.0pt;
-	font-size:8.0pt;
-	font-family:"ＭＳ 明朝",serif;}
-p.ExAHeading4, li.ExAHeading4, div.ExAHeading4
-	{mso-style-name:"ExA Heading 4";
-	margin-top:6.0pt;
-	margin-right:0mm;
-	margin-bottom:0mm;
-	margin-left:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	text-indent:144.0pt;
-	font-size:8.0pt;
-	font-family:"ＭＳ 明朝",serif;}
-p.ExAHeading5, li.ExAHeading5, div.ExAHeading5
-	{mso-style-name:"ExA Heading 5";
-	margin-top:6.0pt;
-	margin-right:0mm;
-	margin-bottom:0mm;
-	margin-left:0mm;
-	margin-bottom:.0001pt;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	text-indent:180.0pt;
-	font-size:8.0pt;
-	font-family:"ＭＳ 明朝",serif;}
-p.SmallHeading2, li.SmallHeading2, div.SmallHeading2
-	{mso-style-name:"Small Heading 2";
-	margin-top:3.0pt;
-	margin-right:0mm;
-	margin-bottom:3.0pt;
-	margin-left:0mm;
-	text-align:justify;
-	text-justify:inter-ideograph;
-	font-size:8.0pt;
-	font-family:"ＭＳ 明朝",serif;}
-.MsoChpDefault
-	{font-family:"Segoe UI",sans-serif;}
- /* Page Definitions */
- @page WordSection1
-	{size:595.3pt 841.9pt;
-	margin:72.0pt 79.4pt 72.0pt 53.85pt;
-	layout-grid:18.0pt;}
-div.WordSection1
-	{page:WordSection1;}
- /* List Definitions */
- ol
-	{margin-bottom:0mm;}
-ul
-	{margin-bottom:0mm;}
--->
-</style>
-
-</head>
-
-<body lang=JA link=blue vlink=purple style='text-justify-trim:punctuation'>
-
-<div class=WordSection1 style='layout-grid:18.0pt'>
-
-<h2 style='page-break-after:auto'><span lang=EN-US style='font-family:游ゴシック'>BConnection</span><span
-style='font-family:游ゴシック'>デジタルトレードサービス利用規約</span></h2>
-
-<h3 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black'>第1章 </span><span
-style='font-family:游ゴシック'>総則</span></h3>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第1条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:游ゴシック'>規約の制定目的</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>当社は契約者に<span lang=EN-US>BConnection</span>デジタルトレードサービス（以下「本サービス」といいます。）を提供するための条件として、<span
-lang=EN-US>BConnection</span>デジタルトレードサービス利用規約（重要事項説明書、別紙を含みます。以下「本規約」といいます。）を定めます。</span></p>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第2条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:游ゴシック'>本規約の変更</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>当社は本規約を変更することがあります。当該変更を行うときは、当該変更後の本規約の内容及びその効力発生時期を、当社の<span
-lang=EN-US>Web</span>サイト上<span lang=EN-US>(https://www.ntt.com/about-us/disclosure/tariff.html)</span>への掲載その他の適切な方法により周知します。</span></p>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第3条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:游ゴシック'>定義</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>本規約において用いる用語の意味は次のとおりです。</span></p>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(1) </span><span style='font-family:游ゴシック'>「本サービス」とは、<span
-lang=EN-US>Tradeshift</span>にて契約者が取引先から受領した<span style='color:#333333'>請求書に、必要な会計情報の付与や支払い要求稟議の回覧・承認等を実施するサービス（以下、「支払依頼承認フローサービス」といいます。）、文書データ・管理データ等を契約者の運用するシステムに連携するためのデータ変換サービス（以下、「データ連携サービス」といいます。）及びオプションメニューの総称</span>をいいます。なお、<span
-style='color:#333333'>支払依頼承認フローサービスとデータ連携サービスの総称を</span>「アプリサービス」といいます。</span></h5>
-
-<h5 style='page-break-after:auto'><span lang=EN-US style='font-family:游ゴシック;
-color:#333333'>(2)</span><span style='font-family:游ゴシック;color:#333333'>「オプションメニュー」とは、契約者における本サービスの導入支援を実施するサービス（以下、「サプライヤー導入支援」といいます。）及び、本サービスの利用開始以降の運用安定化の支援サービス（以下、「導入後安定サポート」といいます。）の総称をいいます。</span></h5>
-
-<p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック'>(3)</span><span
-style='font-family:游ゴシック'>「</span><span lang=EN-US style='line-height:110%;
-font-family:游ゴシック'>Tradeshift</span><span style='font-family:游ゴシック;color:#333333'>」とは、</span><span
-lang=EN-US style='font-family:游ゴシック'>Tradeshift</span><span lang=EN-US
-style='line-height:110%;font-family:游ゴシック'> </span><span lang=EN-US
-style='line-height:110%;font-family:游ゴシック'>Holdings</span><span lang=EN-US
-style='line-height:110%;font-family:游ゴシック'> I</span><span lang=EN-US
-style='font-family:游ゴシック'>nc.</span><span style='font-family:游ゴシック'>及びその子会社<span
-style='color:#333333'>（以下、「</span><span lang=EN-US>Tradeshift Inc</span><span
-style='color:#333333'>」といいます。）</span>の提供する</span><span style='line-height:110%;
-font-family:游ゴシック'>電子取引（<span lang=EN-US>EDI</span>）サービスを</span><span
-style='font-family:游ゴシック;color:#333333'>いいます。契約者は、本サービス</span><span
-style='line-height:110%;font-family:游ゴシック'>の利用にあたり、</span><span lang=EN-US
-style='font-family:游ゴシック'>Tradeshift Inc</span><span style='font-family:游ゴシック'>の提供する</span><span
-style='line-height:110%;font-family:游ゴシック'>サービス規約及び関連規約（以下、「</span><span
-lang=EN-US style='font-family:游ゴシック'>Tradeshift</span><span style='font-family:
-游ゴシック'>規約</span><span style='line-height:110%;font-family:游ゴシック'>」といいます。）に同意し、</span><span
-lang=EN-US style='font-family:游ゴシック'>Tradeshift Inc</span><span
-style='font-family:游ゴシック'>から</span><span lang=EN-US style='line-height:110%;
-font-family:游ゴシック'>Tradeshift</span><span style='line-height:110%;font-family:
-游ゴシック'>の提供を受ける必要があります</span><span style='font-family:游ゴシック'>。<span lang=EN-US>Tradeshift</span>規約は、<span
-lang=EN-US>Tradeshift Inc</span>により、<span lang=EN-US>Tradeshift Inc</span>のウェブサイトに掲示されます。</span><span
-style='font-family:游ゴシック'>なお、</span><span lang=EN-US style='font-family:游ゴシック'>Tradeshift</span><span
-style='font-family:游ゴシック'>規約は<span lang=EN-US>Tradeshift Inc</span>により、適宜変更されるものとします。</span></p>
-
-<h5 style='page-break-after:auto'><span lang=EN-US style='font-family:游ゴシック'>(4)</span><span
-style='font-family:游ゴシック'>「利用開始日」とは、当社が契約者と契約時に合意した、本サービスを構成する各サービスの提供開始日をいいます。なお、利用開始日は本契約成立から<span
-lang=EN-US>1</span>か月後以降とします。</span></h5>
-
-<h5 style='page-break-after:auto'><span lang=EN-US style='font-family:游ゴシック'>(5)</span><span
-lang=EN-US> </span><span style='font-family:メイリオ'>「</span><span
-style='font-family:游ゴシック'>月額利用料」とは、「別紙 料金表」に基づき算出されるアプリサービスに係る契約金額（以下「アプリサービス契約金額」といいます。）を<span
-lang=EN-US>24</span>で除した金額をいい、契約者は、第<span lang=EN-US>5</span>条第<span
-lang=EN-US>1</span>項に定めるアプリサービス契約期間においてアプリサービス契約金額を月々分割して支払うものとします。</span></h5>
-
-<h3 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black'>第2章 </span><span
-style='font-family:游ゴシック'>契約</span></h3>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第4条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:游ゴシック'>申込みと承諾</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>本サービスの利用を希望する場合は、本規約に同意の上、当社所定の方法により申し込むものとします。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>当社が申込みに対して承諾した時をもって契約の成立とします。成立した当該契約を以下「本契約」といいます。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>契約者は、本サービスの申込みにあたり、当社の指示に基づき、必要な情報を適宜提供するものとします</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>4<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>当社は、次の各号に該当すると判断したときは、申込みを承諾しない場合があります。</span></h4>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(1) </span><span style='font-family:游ゴシック'>申込者が要望するサービスの提供が技術上、その他の理由により著しく困難なとき</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(2) </span><span style='font-family:游ゴシック'>本サービスの申込者が、本サービス又は当社の提供するサービスの料金又は手続に関する費用等その他の債務の支払を現に怠り、又は怠るおそれがあると当社が判断したとき</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(3) </span><span style='font-family:游ゴシック'>本サービスの申込者が、本規約に反する行為を行った又は行う恐れがあると当社が判断したとき</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(4) </span><span style='font-family:游ゴシック'>申込書に虚偽の記載がなされたとき</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(5) </span><span style='font-family:游ゴシック'>本サービスの申込者が、当社からのサービス種別の指定、申込みに係る内容の確認又は変更要請に対し、当社が指定する期日までに回答しないとき</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(6) </span><span style='font-family:游ゴシック'>前各号に定めるほか、当社の業務に支障があるとき、又は支障があるおそれがあると当社が判断したとき</span></h5>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>5<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>当社は当社の承諾後であっても、前項各号に該当することが明らかになった場合には第<span
-lang=EN-US>2</span>項の承諾を取り消す場合があります。この場合、当社は取消により契約者が被った損害についての責任を負わないものとし、契約者はそれまでに当社に生じた費用を負担するものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>6<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>当社が申込みを承諾しない場合には、当社は申込者に対しその旨を通知します。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第5条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:游ゴシック'>契約期間</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>アプリサービスの契約期間（以下「アプリサービス契約期間」といいます。）は、利用開始日から<span
-lang=EN-US>2</span>年間となります。なお、契約者が第<span lang=EN-US>8</span>条に定める通知を行わない限り、アプリサービス契約期間満了後、同一条件で更に<span
-lang=EN-US>2</span>年間アプリサービス契約期間を自動的に更新するものとします。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>オプションメニューの契約期間は、当社と申込者が別途合意する期間とします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>契約者は、アプリサービス契約期間内にアプリサービスに係る契約の解約があった場合は、当社が指定する期日までに、当該解約があった日からアプリサービス契約期間末日までの残余の期間（<span
-lang=EN-US>1</span>ヵ月未満の期間は<span lang=EN-US>1</span>ヵ月とみなします。）に相当する月額利用料及びこれに対する消費税等相当額を合算一括して支払うものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>4<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>前項の定めは、第<span lang=EN-US>1</span>項に定めるアプリサービス契約期間の自動更新後にも適用するものとします。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第6条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:游ゴシック'>契約者の地位の承継</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>法人の合併若しくは分割により契約者の地位の承継があったときは、合併後存続する法人、合併により設立された法人若しくは分割によりその利用権の全てを承継した法人は、その契約者の地位を承継するものとします。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>前項の規定により、契約者の地位を承継した者は、当社所定の書面にこれを証明する書類を添えて当社に届け出ていただきます。なお、地位を承継した者が<span
-lang=EN-US>2</span>人以上あるときは、そのうち<span lang=EN-US>1</span>人を当社に対する代表者と定め、これを届け出ていただきます。これを変更したときも同様とします。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第7条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:游ゴシック'>契約上の地位の譲渡</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>契約者は、本契約上の地位を譲渡することができません。ただし当社が譲渡を承認した場合はこの限りではありません。</span></p>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第8条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:游ゴシック'>契約者が行う本契約の解約</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>契約者は本契約を解約しようとするときは、契約期間が満了する<span
-lang=EN-US>3</span>か月前までに、その旨をあらかじめ当社所定の様式に記入の上、当社に書面により通知していただきます。</span></p>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第9条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:游ゴシック'>当社が行う本契約の解約</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>当社は次のいずれかに該当するときは、あらかじめ契約者にそのことを通知の上、本契約を解約することがあります。</span></p>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(1) </span><span style='font-family:游ゴシック'>第<span
-lang=EN-US>11</span>条の規定により本サービスの利用を停止された契約者が、なおその利用停止の原因となる事実を解消しないとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(2) </span><span style='font-family:游ゴシック'>当社が別に定める期日を経過してもなお、契約者が本サービス料金又は手続きに関する費用等その他の債務を支払わないとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(3) </span><span style='font-family:游ゴシック'>契約者が第<span
-lang=EN-US>4</span>条に基づき当社に申し出た内容に虚偽の内容を記載したとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(4) </span><span style='font-family:游ゴシック'>本規約に反する行為を行った又は行う恐れがあると当社が判断したとき。
-</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(5) </span><span style='font-family:游ゴシック'>第<span
-lang=EN-US>24</span>条第<span lang=EN-US>1</span>項に該当し又は該当するおそれがあると当社が判断したとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(6) </span><span style='font-family:游ゴシック'>契約者又はその役員が暴力団、暴力団員、暴力団関係企業、総会屋、社会活動標榜ゴロ、特殊知能暴力集団若しくはそれらの関係者（以下、総じて「反社会的勢力」といいます。）に該当し、又は反社会的勢力との取引若しくは人的、資金的関係があると当社が判断したとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(7) </span><span style='font-family:游ゴシック'>契約者が自ら又は反社会的勢力を利用して、当社に対して詐術、暴力的行為又は脅迫的言辞を用いたとき</span></h5>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>前項にかかわらず、当社は、次のいずれかに該当するときは、あらかじめ通知をせずに、本契約を解約することがあります。</span></h4>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(1) </span><span style='font-family:游ゴシック'>緊急又はやむを得ない場合</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(2) </span><span style='font-family:游ゴシック'>民事再生手続きの開始、会社更生手続の開始、破産若しくは競売を申し立てられ、又は自ら、私的整理の開始、民事再生の開始会社更生手続の開始若しくは破産申し立てをしたとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(3) </span><span style='font-family:游ゴシック'>手形交換所の取引停止処分若しくは資産差押又は滞納処分を受けたとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(4) </span><span style='font-family:游ゴシック'>資本の減少、営業の廃止若しくは変更、又は解散の決議をしたとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(5) </span><span style='font-family:游ゴシック'>前各号に定めるほか、資産、信用及び支払能力等に重大な変更を生じ、又はその恐れがあると認められる相当の事由があるとき。</span></h5>
-
-<h3 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black'>第3章 </span><span
-style='font-family:游ゴシック'>利用中止等</span></h3>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第10条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>利用中止</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>当社は次の場合には本サービスの一部又は全部の利用を中止することがあります。</span></p>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(1) </span><span style='font-family:游ゴシック'>本サービスを提供するための設備の保守上、工事上又はサービス提供上やむを得ないとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(2) </span><span style='font-family:游ゴシック'>本サービスを提供するための設備を不正アクセスから防御するために必要なとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(3) </span><span style='font-family:游ゴシック'>天災、事変、その他の非常事態が発生し、又は発生するおそれがあるとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(4) </span><span style='font-family:游ゴシック'>本サービスが正常に動作せず、本サービスを継続して提供することが困難であるとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(5) </span><span style='font-family:游ゴシック'>法令等に基づく要請等により本サービスを提供することが困難となったとき。</span></h5>
-
-<h5 style='margin-left:9.0pt;text-indent:-9.0pt;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(6) </span><span lang=EN-US
-style='font-family:游ゴシック'>Tradeshift</span><span style='font-family:游ゴシック'>に起因して本サービスを提供することが困難となったとき。</span></h5>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>当社は前項の規定により本サービスの利用を中止するときは、あらかじめ契約者にそのことを通知します。ただし緊急又はやむを得ない場合はこの限りではありません。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><a
-name="_Ref508109097"><span lang=EN-US style='font-family:游ゴシック;color:black;
-text-decoration:none'>第11条<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span><span style='font-family:游ゴシック'>利用停止</span></a></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>当社は契約者が次のいずれかに該当するときは、本サービスの利用を停止することがあります。</span></p>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(1) </span><span style='font-family:游ゴシック'>料金その他の債務について、支払期日を経過してもなお支払わないとき又は支払われないことが合理的に見込まれるとき。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(2) </span><span style='font-family:游ゴシック'>本規約に反する行為を行ったとき。</span></h5>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>当社は、前項の規定により本サービスの利用を停止するときは、あらかじめその理由、利用停止をする日及び期間を契約者に通知します。ただし、緊急又はやむを得ない場合は、この限りではありません。</span></h4>
-
-<h3 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black'>第4章 </span><span
-style='font-family:游ゴシック'>料金等</span></h3>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第12条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>料金</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>本サービスの料金は、「別紙　料金表」に定めるところによります。</span></p>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第13条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>料金の支払義務</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>契約者は、前条に定める料金の支払いを要します。なお、支払方法は、「別紙
-料金表」に定めるところによります。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>利用中止又は利用停止があったときは、本サービスに係る契約者は、その期間中の料金の支払を要します。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>契約者が利用料金の支払を不法に免れた場合、当社はその免れた額のほか、免れた額（消費税相当額を加算しない額とします。）の<span
-lang=EN-US>2</span>倍に相当する額に消費税相当額を加算した額を割増金として請求できるものとします。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第14条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>初期費用及びオプションメニュー料金の支払義務</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>契約者は、本契約成立後、利用開始日前に契約者の責めに帰すべき事由により本契約の解約があった場合、初期費用及びオプションメニューに関するすべての費用の支払を要します。当社は、解約時点で契約者が支払済みのオプションメニュー料金について返金はいたしません。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>当社は、アプリサービス毎の利用開始日までに初期導入作業を、各オプションメニューの利用開始日までに各オプションメニューの提供のために必要な事前作業を完了させるものとします。ただし、契約者の責めに帰すべき事由により各利用開始日が延期される場合、延期に伴い発生する費用（当初予定していた利用開始日以降に発生する初期費用及びオプションメニューに関する費用を含むがこれらに限られない）について、当社は契約者に請求できるものとします。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第15条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>延滞利息</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>当社は、料金その他の債務（延滞利息を除きます。）について支払期日を経過してもなお契約者から支払がない場合には、支払期日の翌日から支払の日の前日までの日数について、年<span
-lang=EN-US>14.5</span>％の割合で計算して得た額を延滞利息として請求できるものとします。</span></p>
-
-<h3 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black'>第5章 </span><span
-style='font-family:游ゴシック'>データの取扱い</span></h3>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第16条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>データに関する責任</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>第<span lang=EN-US>20</span>条の規定にかかわらず、当社は、当社の電気通信設備に保存されているデータ（以下「保存データ」といいます。）、本サービスの利用により生成、提供又は伝送されたデータ（コンテンツを含みます。以下、「生成等データ」といいます。）、および第<span
-lang=EN-US>17</span>条第<span lang=EN-US>3</span>項に定める顧客データが滅失、毀損若しくは漏洩した場合又は滅失、毀損、漏洩その他の事由により本来の利用目的以外に使用された場合、これにより契約者又は第三者に発生した直接あるいは間接の損害について、原因の如何を問わず責任を負わないものとします。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>前項の規定は、当社の故意若しくは重過失によるものである場合、又は第<span
-lang=EN-US>17</span>条第<span lang=EN-US>3</span>項に定める顧客データが個人情報に該当する場合は適用しないものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>生成等データについては、当社はその内容等について保証を行わず、また、それに起因する損害についても責任を負わないものとします。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第17条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>データの確認・複製</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>当社は、当社の電気通信設備の故障若しくは停止等の復旧等の設備保全又は本サービスの維持運営、使用状況の計測・分析及び新機能開発のため、保存データを確認、複写又は複製することがあります。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>当社は、前項の用途以外で保存データにアクセス又は利用しないものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>契約者は、当社が、<span lang=EN-US>Tradeshift
-Inc</span>から、<span lang=EN-US>Tradeshift Inc</span>が<span lang=EN-US>Tradeshift</span>規約に基づき保有する契約者のデータ（<span
-lang=EN-US>Tradeshift</span>規約に定める「顧客データ」を指し、以下、本規約においても「顧客データ」といいます。）の提供を受けることを許諾します。当社は、当社の指定するタイミングで、<span
-lang=EN-US>Tradeshift Inc</span>の定める方法により、<span lang=EN-US>Tradeshift Inc</span>から顧客データの提供を受け、保存します。</span></h4>
-
-<p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック'>&nbsp;</span></p>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第18条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>データの削除</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>当社は、第<span lang=EN-US>23</span>条による本サービスの廃止のほか、当社は第<span
-lang=EN-US>8</span>条又は第<span lang=EN-US>9</span>条の契約の解約があったとき、又は期間の満了により本契約が終了したときは、保存データを削除します。この場合において、当社は、保存データの削除に起因する契約者又は第三者に発生した直接又は間接の損害についての責任を負わないものとします。</span></p>
-
-<p class=MsoNormal><b><span lang=EN-US style='font-family:游ゴシック'>2</span></b><span
-lang=EN-US style='font-family:游ゴシック'> </span><span style='font-family:游ゴシック'>当社は、本サービスの廃止、契約の解約又は終了後においても、顧客データを第<span
-lang=EN-US>28</span>条に定める範囲で引き続き利用いたします。</span></p>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第19条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>データのバックアップ</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>契約者は、自らの責任で保存データ及び生成等データのバックアップを取るものとし、当社は、契約者がバックアップを行わなかったこと、またバックアップ行った際の方法およびその結果について責任も負わないものとします。</span></p>
-
-<p class=MsoNormal><b><span lang=EN-US style='font-family:游ゴシック'>2</span></b><span
-style='font-family:游ゴシック'>当社は、当社と契約者の間で別途保存データ及び生成等データのバックアップにかかる契約がある場合に限り、保存データ及び生成等データのバックアップを行います。この場合、保存データ及び生成等データのバックアップ等にかかる損害について、当社は当該契約に定められた範囲で責任を負います。<b><span
-lang=EN-US>3</span></b><span lang=EN-US> </span>契約者は、本サービスに係る契約が終了等するときには、保存データ及び生成等データを、自己の責任と費用負担において、必要に応じ退避するものとします。</span></p>
-
-<p class=MsoNormal><b><span lang=EN-US style='font-family:游ゴシック'>4</span></b><span
-lang=EN-US style='font-family:游ゴシック'> </span><span style='font-family:游ゴシック'>当社は消去された保存データ及び生成等データは修復しません。</span></p>
-
-<h3 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black'>第6章 </span><span
-style='font-family:游ゴシック'>損害賠償等</span></h3>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第20条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>責任の制限</span></h4>
-
-<p class=MsoListParagraph align=left style='margin-left:0mm;text-align:left'><span
-style='font-size:10.0pt;font-family:游ゴシック'>当社は、アプリサービスを提供すべき場合において、当社の責めに帰すべき理由によりその提供をしなかったときは、アプリサービスが全く利用できない状態（全く利用できない状態と同程度の場合を含みます。以下同じとします。）にあることを当社が知った時刻から起算して<span
-lang=EN-US>24</span>時間以上その状態が連続した場合に限り、これに起因して契約者に生じた</span><span
-style='font-size:10.0pt;font-family:游ゴシック'>逸失利益、派生損害等を除く</span><span
-style='font-size:10.0pt;font-family:游ゴシック'>通常の損害に限り、賠償する責任を負うものとします。</span><span
-style='font-size:10.0pt;font-family:游ゴシック'>なお、当社は予見の有無、予見すべき場合を問わず、特別の事情から生じた損害については、責任を負わないものとします。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>前項により、当社が契約者に対し賠償責任を負う場合において、当社はアプリサービスが全く利用できない状態にあることを当社が知った時刻以降のその状態が連続した時間（<span
-lang=EN-US>24</span>時間の倍数である部分に限ります。）について、<span lang=EN-US>24</span>時間ごとに日数を計算し、その日数に対応するアプリサービスに係る年間利用料金の金額を発生した損害とみなし、その額に限って賠償します。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>当社は、オプションメニューに関して当社の過失により契約者に生じた損害について、逸失利益、派生損害等を除く通常の損害に限り、賠償する責任を負うものとします。なお、当社は予見の有無、予見すべき場合を問わず、特別の事情から生じた損害については、責任を負わないものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>4<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>当社の故意又は重大な過失により本サービスを提供しなかったときは、前３項の規定は適用しないものとします。但し、</span><span
-style='line-height:110%;font-family:游ゴシック'>当社が契約者に対して負う損害賠償責任の総額は、当該損害賠償請求に先立つ直近<span
-lang=EN-US>12</span>か月間に、本契約に基づき契約者が当社に支払った又は契約者が当社に対して支払義務を負った合計金額を超えないものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>5<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>前<span
-lang=EN-US>4</span>項の規定にかかわらず、</span><span lang=EN-US style='line-height:110%;
-font-family:游ゴシック'>Tradeshift</span><span style='line-height:110%;font-family:
-游ゴシック'>において</span><span lang=EN-US style='font-family:游ゴシック'>Tradeshift Inc</span><span
-style='font-family:游ゴシック'>の責に起因して契約者に生じた損害については、<span lang=EN-US>Tradeshift</span>規約が適用されるものとし、当社は契約者の損害を賠償する責任を負わないものとします。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第21条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>サービス品質保証</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>当社は、アプリサービスについて、次のとおりサービス品質保証（以下「<span
-lang=EN-US>SLA</span>」といいます。）を適用します。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック;color:#333333'>2<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></b><span
-style='font-family:游ゴシック'>当社の責めに帰すべき理由により、当社の提供するアプリサービスに関する「月間のアプリサービス利用可能時間」が下表に定める値を下回った</span><span
-style='line-height:110%;font-family:游ゴシック;color:#333333'>場合、契約者はその旨を当社へ通知することにより、</span><span
-style='font-family:游ゴシック'>下表に定める</span><span style='line-height:110%;
-font-family:游ゴシック;color:#333333'>「月額利用料に対する返金率」に応じた料金について、当社が当該通知を受けた以降に発行する請求において、割引額として反映されるものとします。</span></h4>
-
-<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
- style='margin-left:56.45pt;border-collapse:collapse;border:none'>
- <tr>
-  <td width=274 valign=top style='width:205.55pt;border:solid windowtext 1.0pt;
-  background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:游ゴシック'>月間のアプリサービス利用可能時間の割合</span></p>
-  </td>
-  <td width=208 valign=top style='width:155.95pt;border:solid windowtext 1.0pt;
-  border-left:none;background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:游ゴシック;color:black'>月額利用料に対する返金率</span></p>
-  </td>
- </tr>
- <tr>
-  <td width=274 valign=top style='width:205.55pt;border:solid windowtext 1.0pt;
-  border-top:none;background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US style='line-height:110%;font-family:游ゴシック;
-  color:#333333'>99</span><span style='line-height:110%;font-family:游ゴシック;
-  color:#333333'>％以上<span lang=EN-US>99.5</span>％未満</span></p>
-  </td>
-  <td width=208 valign=top style='width:155.95pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US style='line-height:110%;font-family:游ゴシック;
-  color:#333333'>25%</span></p>
-  </td>
- </tr>
- <tr>
-  <td width=274 valign=top style='width:205.55pt;border:solid windowtext 1.0pt;
-  border-top:none;background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US style='line-height:110%;font-family:游ゴシック;
-  color:#333333'>98.0%</span><span style='line-height:110%;font-family:游ゴシック;
-  color:#333333'>以上<span lang=EN-US>99%</span>未満</span></p>
-  </td>
-  <td width=208 valign=top style='width:155.95pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US style='line-height:110%;font-family:游ゴシック;
-  color:#333333'>50%</span></p>
-  </td>
- </tr>
- <tr>
-  <td width=274 valign=top style='width:205.55pt;border:solid windowtext 1.0pt;
-  border-top:none;background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US style='line-height:110%;font-family:游ゴシック;
-  color:#333333'>98.0%</span><span style='line-height:110%;font-family:游ゴシック;
-  color:#333333'>未満</span></p>
-  </td>
-  <td width=208 valign=top style='width:155.95pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US style='line-height:110%;font-family:游ゴシック;
-  color:#333333'>100%</span></p>
-  </td>
- </tr>
-</table>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>月間のアプリサービス利用可能時間の割合は次の式に従って算出します。</span></h4>
-
-<h4 style='page-break-after:auto'><span style='line-height:110%;font-family:
-游ゴシック;color:#333333'>アプリサービス利用可能</span><span style='line-height:110%;
-font-family:游ゴシック'>時間の割合（％）＝（月の総利用可能時間（分））<span style='color:#333333'>－（月の累積故障時間（契約者が当社に対して、</span></span><span
-style='font-family:游ゴシック'>アプリ</span><span style='line-height:110%;font-family:
-游ゴシック;color:#333333'>サービスにアクセスできないことを知らせた時点からその状態が是正された時点までの時間（分））÷</span><span
-style='line-height:110%;font-family:游ゴシック'>月の総利用可能時間（分）×１００　</span></h4>
-
-<h4 style='page-break-after:auto'><span style='line-height:110%;font-family:
-游ゴシック'>なお、</span><span style='font-family:游ゴシック'>月の総利用可能時間（分）とは、<span
-lang=EN-US>43,200</span>分とします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック;color:#333333'>4<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></b><span
-style='line-height:110%;font-family:游ゴシック;color:#333333'>月の累積故障時間には、<span
-lang=EN-US> (i) </span>予定された作業、リリース又はメンテナンスのための時間、<span lang=EN-US>(ii) </span>不可抗力により利用が不能となる時間、<span
-lang=EN-US>(iii) </span>契約者の作為又は不作為によってアクセスできなくなった時間は適用されないものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック;color:#333333'>5<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></b><span
-style='line-height:110%;font-family:游ゴシック;color:#333333'>契約者が第<span lang=EN-US>2</span>項の定めに従い当社へ返金を求めるための手続は、以下のとおりとする。</span></h4>
-
-<h4 style='page-break-after:auto'><span lang=EN-US style='line-height:110%;
-font-family:游ゴシック;color:#333333'>-</span><span style='line-height:110%;
-font-family:游ゴシック;color:#333333'>契約者は当社に対して、</span><span style='font-family:
-游ゴシック'>アプリ<span style='color:#333333'>サービス</span></span><span style='line-height:
-110%;font-family:游ゴシック;color:#333333'>の利用不能が生じた月の末日から<span lang=EN-US>2</span>営業日以内に、利用不能が起こった日と時間の双方を書面または電磁的方法により通知するものとします。当社による当該通知を確認した後、割引額を契約者へ通知するものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>6<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span lang=EN-US style='font-family:游ゴシック'>SLA</span><span
-style='font-family:游ゴシック'>に基づく料金の返還を受けた契約者は、当該<span lang=EN-US>SLA</span>事由に係る損害賠償を請求しないものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>7<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>第<span lang=EN-US>20</span>条に基づき損害の賠償を受けた契約者は、同じ事由により本条に定める料金の割引を請求できないものとします。</span></h4>
-
-<p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック'>&nbsp;</span></p>
-
-<h3 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black'>第7章 </span><span
-style='font-family:游ゴシック'>雑則</span></h3>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第22条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>免責</span></h4>
-
-<p class=MsoBodyTextIndent style='margin-left:0mm;text-indent:0mm'><span
-style='font-size:10.0pt;font-family:游ゴシック'>当社は本規約で特に定める場合を除き、契約者に係る損害を賠償しないものとし、契約者は当社にその損害についての請求をしないものとします。また、契約者は、本サービスの利用により第三者に対し損害を与えた場合、自己の責任でこれを解決し、当社に責任も負担させないものとします。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>当社は、本サービスの利用により生じる結果について、契約者に対し、本サービスの提供に必要な設備の不具合、故障、第三者による不正侵入、商取引上の紛争、法令等に基づく強制的な処分又はその他の原因を問わず、責任も負わないものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>当社は、本規約の変更等により契約者が本サービスを利用するにあたり当社が提供することとなっている設備、端末等以外の設備、端末等の改造又は変更（以下、この条において「改造等」といいます。）を要する場合であっても、その改造等に要する費用については負担しません。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>4<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>本規約に定める免責に関する事項は、本規約の準拠法で強行規定として定められる、法的に免責又は制限できない範囲を免責することまでを目的とはしていません。そのため、準拠法の強行規定の定めを超える免責事項が本規約に含まれる場合には、準拠法にて許容される最大限の範囲にて当社は免責されます。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第23条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>本サービスの廃止</span></h4>
-
-<p class=MsoListParagraph align=left style='margin-left:0mm;text-align:left'><span
-style='font-size:10.0pt;font-family:游ゴシック'>当社は本サービスの一部又は全部を廃止することがあります。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>前項の規定による本サービスの一部又は全部の廃止があったときは、本サービスの一部又は全部に係る契約は終了するものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>当社は、本サービスの一部又は全部の廃止に伴い、契約者又は第三者に発生する損害については、責任を負わないものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>4<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>当社は、本サービスの一部又は全部を廃止しようとするときは、その旨を相当な期間をおいて、あらかじめ契約者に通知します。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第24条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>契約者の義務</span></h4>
-
-<p class=MsoNormal align=left style='text-align:left'><span style='line-height:
-110%;font-family:游ゴシック'>契約者は次のことを守っていただきます。</span></p>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>(1) </span><span
-style='line-height:110%;font-family:游ゴシック'>当社又は第三者の著作権その他の権利を侵害する行為をしないこと</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>(2) </span><span
-lang=EN-US style='font-family:游ゴシック'>Tradeshift</span><span style='font-family:
-游ゴシック'>規約の定めに反する行為を行わないこと</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>(3) </span><span
-style='line-height:110%;font-family:游ゴシック'>本サービスによりアクセス可能な当社又は第三者のデータの改ざん、消去等をしないこと</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>(4) </span><span
-style='line-height:110%;font-family:游ゴシック'>第三者になりすまして本サービスを利用する行為をしないこと</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>(5) </span><span
-style='line-height:110%;font-family:游ゴシック'>意図的に有害なコンピュータプログラム等を送信しないこと</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>(6) </span><span
-style='line-height:110%;font-family:游ゴシック'>当社の設備に無権限でアクセスし、その利用又は運営に支障を与える行為をしないこと</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>(7) </span><span
-style='line-height:110%;font-family:游ゴシック'>本人の同意を得ることなく、又は詐欺的な手段により第三者の個人情報を収集する行為をしないこと</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>(8) </span><span
-style='line-height:110%;font-family:游ゴシック'>利用申込みの際又はその後に当社に届け出た事項について変更が生じた場合、遅滞なくその旨を当社所定の方法により届け出ること</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>(9) </span><span
-style='line-height:110%;font-family:游ゴシック'>法令、本規約若しくは公序良俗に反する行為、サービスの運営を妨害する行為、当社の信用を毀損する行為、又は当社若しくは第三者に不利益を与える行為をしないこと</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>(10) </span><span
-style='line-height:110%;font-family:游ゴシック'>前各号に該当するおそれのある行為又はこれに類する行為をしないこと</span></h5>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>契約者は前項の規定に違反して本サービスに係る当社の設備等を毀損したときには、当社が指定する期日までにその修繕その他の工事等に必要な費用を支払っていただきます。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>当社は、契約者の本条に規定する義務違反により契約者又はその他の者に発生する損害について責任を負わないものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>4<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>契約者は、本サービスに係る<span
-lang=EN-US>ID</span>及びパスワード（以下「<span lang=EN-US>ID</span>等」といいます。）を管理する責任を負うものとし、その内容をみだりに第三者に知らせてはならないものとします。当社は、<span
-lang=EN-US>ID</span>等の一致を確認した場合、当該<span lang=EN-US>ID</span>等を保有する者として登録された契約者が本サービスを利用したものとみなします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='line-height:110%;font-family:游ゴシック'>5<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>契約者が前項の規定に違反して本サービスに係る当社の業務遂行又は当社の設備に著しい支障を及ぼし、又は及ぼすおそれがあると当社が判断した場合、当社<span
-lang=EN-US>ID</span>等の変更その他必要な措置をとる場合があります。当該措置により契約者に発生する損害について、当社は責任を負わないものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>6<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='line-height:110%;font-family:游ゴシック'>当社は、前項の規定により必要な措置をとる場合は、あらかじめ理由を添えてその旨を契約者に通知します。ただし、緊急又はやむを得ない場合はこの限りではありません。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第25条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>契約者に対する通知</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>契約者に対する通知は、当社の判断により、次のいずれかの方法で行うことができるものとします。</span></p>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(1) </span><span style='font-family:游ゴシック'>当社の<span
-lang=EN-US>Web</span>サイト上に掲載して行います。この場合は、掲載された時をもって契約者に対する通知が完了したものとみなします。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(2) </span><span style='font-family:游ゴシック'>契約者が利用申込みの際又はその後に当社に届け出た契約者の電子メールアドレス宛に電子メールを送信し、又は<span
-lang=EN-US>FAX</span>番号宛に<span lang=EN-US>FAX</span>を送信して行います。この場合は、契約者の電子メールアドレス宛に電子メールを送信した時又は契約者の<span
-lang=EN-US>FAX</span>番号宛に<span lang=EN-US>FAX</span>を送信した時をもって契約者に対する通知が完了したものとみなします。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(3) </span><span style='font-family:游ゴシック'>契約者が利用申込みの際又はその後に当社に届け出た契約者の住所宛に郵送して行います。この場合は、郵便物が契約者の住所に到達した時をもって契約者に対する通知が完了したものとみなします。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(4) </span><span style='font-family:游ゴシック'>その他、当社が適切と判断する方法で行います。この場合は、当該通知の中で当社が指定した時をもって契約者に対する通知が完了したものとみなします。</span></h5>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第26条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>当社の知的財産権</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>本サービスの提供に関連して当社が契約者に貸与又は提示するソフトウェア等のプログラム又は物品（本規約、サービス仕様書、取扱マニュアル等を含みます。以下この条において「プログラム等」といいます。）に関する著作権及びそれに含まれるノウハウ等一切の知的財産権は当社又は当社の指定する者に帰属するものとします。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>当社は、本規約等において許諾等することを定めている権利を除き、契約者に対して、いかなる知的財産権その他の権利も許諾または譲渡するものではなく、契約者はこれに承諾するものとします。</span></h4>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>3<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>契約者はプログラム等につき次の事項を遵守するものとします。</span></h4>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(1) </span><span style='font-family:游ゴシック'>本サービスの利用目的以外に使用しないこと。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(2) </span><span style='font-family:游ゴシック'>複製・改変・編集等を行わず、また、リバースエンジニアリング、逆コンパイル又は逆アセンブルを行わないこと、</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(3) </span><span style='font-family:游ゴシック'>営利目的の有無を問わず、第三者に貸与・譲渡・担保設定等しないこと。</span></h5>
-
-<h5 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック'>(4) </span><span style='font-family:游ゴシック'>当社又は当社の指定する者が表示した著作権表示を削除または変更しないこと</span></h5>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>4<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>本条の規定は本契約の終了後も効力を有するものとします。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第27条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>日本国外における利用</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>契約者が本サービスを日本国外にて利用する場合、それにより生じる責任は契約者にて負うものとします。</span></p>
-
-<p class=MsoNormal><b><span style='font-family:游ゴシック'>２</span></b><span
-style='font-family:游ゴシック'>　契約者が本サービスを日本国外にて利用した場合、追加の料金が発生することがあります。契約者は当該料金の支払いに応じるものとします。</span></p>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第28条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>個人情報の取扱い</span></h4>
-
-<p class=MsoNormal><span style='line-height:110%;font-family:游ゴシック'>当社は本規約に基づき、当社が取得する個人情報の取扱いについては、当社が定める「プライバシーポリシー」（</span><span
-lang=EN-US><a href="https://www.ntt.com/about-us/hp/privacy.html"><span
-style='line-height:110%;font-family:游ゴシック'>https://www.ntt.com/about-us/hp/privacy.html</span></a></span><span
-style='line-height:110%;font-family:游ゴシック'>）によります。</span></p>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第29条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>第三者への委託</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>契約者は、当社が本サービスを提供するのに必要な範囲で、本サービスの全部又は一部を当社の指定する第三者に委託することを了承するものとします。</span></p>
-
-<h4 style='margin-left:0mm;text-indent:0mm;page-break-after:auto'><b><span
-lang=EN-US style='font-family:游ゴシック'>2<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></span></b><span style='font-family:游ゴシック'>当社は、前項に基づき、当社が再委託した場合の再委託先の選任及び監督について、第<span
-lang=EN-US>20</span>条に定める範囲で責任を負うものとします。</span></h4>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第30条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>管轄裁判所</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>契約者と当社との間で本サービスに関して紛争が生じた場合、東京地方裁判所を第一審の専属的合意管轄裁判所とします。</span></p>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第31条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>分離可能性</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>本規約の条項の一部が、管轄権を持つ裁判所によって違法、無効又は法的拘束力がないと判断された場合であっても、他の条項は影響を受けず有効に存続するものとします。</span></p>
-
-<h4 style='margin-top:18.0pt;margin-right:0mm;margin-bottom:0mm;margin-left:
-0mm;margin-bottom:.0001pt;text-indent:0mm;page-break-after:auto'><span
-lang=EN-US style='font-family:游ゴシック;color:black;text-decoration:none'>第32条<span
-style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span><span
-style='font-family:游ゴシック'>準拠法</span></h4>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>本規約の解釈および適用に関する準拠法は日本法とします。</span></p>
-
-<span lang=EN-US style='font-size:10.0pt;font-family:游ゴシック'><br clear=all
-style='page-break-before:always'>
-</span>
-
-<p class=MsoNormal align=left style='text-align:left;line-height:normal;
-layout-grid-mode:both'><span lang=EN-US style='font-family:游ゴシック'>&nbsp;</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>別紙　料金表</span></p>
-
-<p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック'>&nbsp;</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>第１表 料金表</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・本サービスに係る料金は、以下のとおりとします。</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・当社は、料金その他の計算において、その計算結果に<span
-lang=EN-US>1</span>円未満の端数が生じた場合は、その端数を切り捨てます。</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・本規約により支払いを要するものと定められている料金は、原則この料金表に定める料金額に消費税相当額を加算した額とします。</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・支払いを要することとなった額（税込価格）は、料金表に表示された額の合計と異なる場合があります。</span></p>
-
-<p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック'>&nbsp;</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>１．料金</span></p>
-
-<p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック'>1-1</span><span
-style='font-family:游ゴシック'>　初期費用</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・初期費用は、当社が別に提示するものとします。</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・初期費用は、アプリサービス毎に発生します。</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・初期費用は、</span><span
-style='line-height:110%;font-family:游ゴシック;color:#333333'>利用開始日が属する月の翌月以降、月額利用料に全額を一括合算のうえ請求します。</span></p>
-
-<p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック;color:#333333'>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック'>1-2</span><span
-style='font-family:游ゴシック'>　年間利用料金</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・アプリ<span style='color:#333333'>サービス</span>に係る利用料金は下表に定めるものとします。</span></p>
-
-<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0 width=633
- style='width:474.65pt;border-collapse:collapse;border:none'>
- <tr style='height:7.05pt'>
-  <td width=217 valign=top style='width:162.8pt;border:solid windowtext 1.0pt;
-  background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt;height:7.05pt'>
-  <p class=MsoNormal><span style='font-family:游ゴシック'>サービス名</span></p>
-  </td>
-  <td width=170 valign=top style='width:127.55pt;border:solid windowtext 1.0pt;
-  border-left:none;background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt;height:7.05pt'>
-  <p class=MsoNormal><span style='font-family:游ゴシック;color:black'>単位</span></p>
-  </td>
-  <td width=246 valign=top style='width:184.3pt;border:solid windowtext 1.0pt;
-  border-left:none;background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt;height:7.05pt'>
-  <p class=MsoNormal><span style='font-family:游ゴシック;color:black'>年間料金額（税込価格）</span></p>
-  </td>
- </tr>
- <tr>
-  <td width=217 valign=top style='width:162.8pt;border:solid windowtext 1.0pt;
-  border-top:none;background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:游ゴシック;color:black'>支払依頼承認フローサービス</span></p>
-  </td>
-  <td width=170 valign=top style='width:127.55pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:游ゴシック;color:black'>請求書<span
-  lang=EN-US>1,000</span>件毎 ※１</span></p>
-  </td>
-  <td width=246 valign=top style='width:184.3pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック;color:black'>120,000</span><span
-  style='font-family:游ゴシック;color:black'>円（<span lang=EN-US>132,000</span>円）※３</span></p>
-  </td>
- </tr>
- <tr>
-  <td width=217 valign=top style='width:162.8pt;border:solid windowtext 1.0pt;
-  border-top:none;background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:游ゴシック;color:black'>データ連携サービス</span></p>
-  </td>
-  <td width=170 valign=top style='width:127.55pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:游ゴシック;color:black'>案件毎※２</span></p>
-  </td>
-  <td width=246 valign=top style='width:184.3pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック;color:black'>1,200,000</span><span
-  style='font-family:游ゴシック;color:black'>円（<span lang=EN-US>1,320,000</span>円）</span></p>
-  </td>
- </tr>
- <tr>
-  <td width=633 colspan=3 valign=top style='width:474.65pt;border:solid windowtext 1.0pt;
-  border-top:none;background:#FAFAFA;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック;color:black'>[</span><span
-  style='font-family:游ゴシック;color:black'>備考<span lang=EN-US>]</span></span></p>
-  <p class=MsoNormal><span style='font-family:游ゴシック;color:black'>※１　請求書<span
-  lang=EN-US>1,000</span>件単位での計算となります。請求書<span lang=EN-US>1</span>件毎の清算は対応しておりません。</span></p>
-  <p class=MsoNormal><span style='font-family:游ゴシック;color:black'>※２　案件とは契約者による申込み数をいいます。</span></p>
-  <p class=MsoNormal><span style='font-family:游ゴシック;color:black'>※３　契約時にお申込みいただいた請求書数を超えたご利用はできません。追加の利用をご希望される場合は、請求書<span
-  lang=EN-US>1,000</span>件毎につき<span lang=EN-US>120,000</span>円（税込価格<span
-  lang=EN-US>132,000</span>円）の追加申込みが必要となります。この場合、追加申込みいただいた部分にかかる利用料金を、お申込みいただいた月におけるアプリサービス契約期間の残余期間で除した金額を、月額利用料に加算いたします。なお、残余期間中に追加申込分を解約された場合は、第<span
-  lang=EN-US>5</span>条第<span lang=EN-US>3</span>項の定めに従うものとします。</span></p>
-  </td>
- </tr>
-</table>
-
-<p class=MsoNormal><span style='font-family:游ゴシック;color:black'>・契約者は、利用開始日が属する月から第</span><span
-lang=EN-US style='font-family:游ゴシック'>5</span><span style='font-family:游ゴシック'>条に定める契約期間において、月額利用料の支払いを要します。</span></p>
-
-<p class=MsoNormal><s><span lang=EN-US style='font-family:游ゴシック'><span
- style='text-decoration:none'>&nbsp;</span></span></s></p>
-
-<p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック'>1-3 </span><span
-style='font-family:游ゴシック'>オプションメニュー料金</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・オプションメニューは、以下の通りです。</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>　－サプライヤー導入支援</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>　－導入後安定サポート</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・オプションメニュー料金は、当社が別に提示するものとします。</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・アプリサービスのお申込みと同時にオプションメニューをお申込みいただく場合、アプリサービスの利用開始日が属する月の翌月以降に、月額</span><span
-style='line-height:110%;font-family:游ゴシック;color:#333333'>利用料全額と合算のうえ請求します</span><span
-style='font-family:游ゴシック'>。</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・アプリサービス契約期間内にオプションメニューを追加でお申込みいただく場合、第４条第<span
-lang=EN-US>2</span>項の定めに従いオプションメニューに係る本契約が成立した日の属する月の翌月以降に、オプションメニュー料金を全額一括で請求します。</span></p>
-
-<p class=MsoNormal><span lang=EN-US style='font-family:游ゴシック'>&nbsp;</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>２．支払方法</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>・当社は、契約者に対し、上記に定める料金につき、当社が定める期日までに請求書を発行するものとし、契約者は、当該請求書に記載の支払い期日までに、当社が指定する方法により支払を行うものとします。<span
-lang=EN-US><br clear=all style='page-break-before:always'>
-</span></span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>附則（令和<span lang=EN-US>2</span>年<span
-lang=EN-US>11</span>月<span lang=EN-US>5</span>日 <span lang=EN-US>APS</span>２サ<span
-lang=EN-US>00708932</span>号）</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>（実施期日）</span></p>
-
-<p class=MsoNormal><span style='font-family:游ゴシック'>この規約は、令和<span lang=EN-US>2</span>年<span
-lang=EN-US>11</span>月<span lang=EN-US>12</span>日から実施します。</span></p>
-
-</div>
-
-</body>
-
-</html>
+<h2><strong>BConnectionデジタルトレードサービス利用規約</strong></h2>
+<p><br /></p>
+<p>第1章 総則</p>
+<p>第1条&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;規約の制定目的</p>
+<p>
+  当社は契約者にBConnectionデジタルトレードサービス（以下「本サービス」といいます。）を提供するための条件として、BConnectionデジタルトレードサービス利用規約（重要事項説明書、別紙を含みます。以下「本規約」といいます。）を定めます。
+</p>
+<p><br /></p>
+<p>第2条&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本規約の変更</p>
+<p>
+  当社は本規約を変更することがあります。当該変更を行うときは、当該変更後の本規約の内容及びその効力発生時期を、当社のWebサイト上(https://www.ntt.com/about-us/disclosure/tariff.html)への掲載その他の適切な方法により周知します。
+</p>
+<p><br /></p>
+<p>第3条&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;定義</p>
+<p>本規約において用いる用語の意味は次のとおりです。</p>
+<p><br /></p>
+<p>
+  (1)
+  「本サービス」とは、Tradeshiftにて契約者が取引先から受領した請求書に、必要な会計情報の付与や支払い要求稟議の回覧・承認等を実施するサービス（以下、「支払依頼承認フローサービス」といいます。）、文書データ・管理データ等を契約者の運用するシステムに連携するためのデータ変換サービス（以下、「データ連携サービス」といいます。）及びオプションメニューの総称をいいます。なお、支払依頼承認フローサービスとデータ連携サービスの総称を「アプリサービス」といいます。
+</p>
+<p>
+  (2)「オプションメニュー」とは、契約者における本サービスの導入支援を実施するサービス（以下、「サプライヤー導入支援」といいます。）及び、本サービスの利用開始以降の運用安定化の支援サービス（以下、「導入後安定サポート」といいます。）の総称をいいます。
+</p>
+<p>
+  (3)「Tradeshift」とは、Tradeshift Holdings Inc.及びその子会社（以下、「Tradeshift
+  Inc」といいます。）の提供する電子取引（EDI）サービスをいいます。契約者は、本サービスの利用にあたり、Tradeshift
+  Incの提供するサービス規約及び関連規約（以下、「Tradeshift規約」といいます。）に同意し、Tradeshift
+  IncからTradeshiftの提供を受ける必要があります。Tradeshift規約は、Tradeshift Incにより、Tradeshift
+  Incのウェブサイトに掲示されます。なお、Tradeshift規約はTradeshift Incにより、適宜変更されるものとします。
+</p>
+<p><br /></p>
+<p>
+  (4)「利用開始日」とは、当社が契約者と契約時に合意した、本サービスを構成する各サービスの提供開始日をいいます。なお、利用開始日は本契約成立から1か月後以降とします。
+</p>
+<p>
+  (5) 「月額利用料」とは、「別紙
+  料金表」に基づき算出されるアプリサービスに係る契約金額（以下「アプリサービス契約金額」といいます。）を24で除した金額をいい、契約者は、第5条第1項に定めるアプリサービス契約期間においてアプリサービス契約金額を月々分割して支払うものとします。
+</p>
+<p>第2章 契約</p>
+<p>第4条&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;申込みと承諾</p>
+<p>本サービスの利用を希望する場合は、本規約に同意の上、当社所定の方法により申し込むものとします。</p>
+<p><br /></p>
+<p>
+  2&nbsp;&nbsp;&nbsp;当社が申込みに対して承諾した時をもって契約の成立とします。成立した当該契約を以下「本契約」といいます。
+</p>
+<p>3&nbsp;&nbsp;&nbsp;契約者は、本サービスの申込みにあたり、当社の指示に基づき、必要な情報を適宜提供するものとします</p>
+<p>4&nbsp;&nbsp;&nbsp;当社は、次の各号に該当すると判断したときは、申込みを承諾しない場合があります。</p>
+<p>(1) 申込者が要望するサービスの提供が技術上、その他の理由により著しく困難なとき</p>
+<p>
+  (2)
+  本サービスの申込者が、本サービス又は当社の提供するサービスの料金又は手続に関する費用等その他の債務の支払を現に怠り、又は怠るおそれがあると当社が判断したとき
+</p>
+<p>(3) 本サービスの申込者が、本規約に反する行為を行った又は行う恐れがあると当社が判断したとき</p>
+<p>(4) 申込書に虚偽の記載がなされたとき</p>
+<p>
+  (5)
+  本サービスの申込者が、当社からのサービス種別の指定、申込みに係る内容の確認又は変更要請に対し、当社が指定する期日までに回答しないとき
+</p>
+<p>(6) 前各号に定めるほか、当社の業務に支障があるとき、又は支障があるおそれがあると当社が判断したとき</p>
+<p>
+  5&nbsp;&nbsp;&nbsp;当社は当社の承諾後であっても、前項各号に該当することが明らかになった場合には第2項の承諾を取り消す場合があります。この場合、当社は取消により契約者が被った損害についての責任を負わないものとし、契約者はそれまでに当社に生じた費用を負担するものとします。
+</p>
+<p>6&nbsp;&nbsp;&nbsp;当社が申込みを承諾しない場合には、当社は申込者に対しその旨を通知します。</p>
+<p>第5条&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;契約期間</p>
+<p>
+  アプリサービスの契約期間（以下「アプリサービス契約期間」といいます。）は、利用開始日から2年間となります。なお、契約者が第8条に定める通知を行わない限り、アプリサービス契約期間満了後、同一条件で更に2年間アプリサービス契約期間を自動的に更新するものとします。
+</p>
+<p><br /></p>
+<p>2&nbsp;&nbsp;&nbsp;オプションメニューの契約期間は、当社と申込者が別途合意する期間とします。</p>
+<p>
+  3&nbsp;&nbsp;&nbsp;契約者は、アプリサービス契約期間内にアプリサービスに係る契約の解約があった場合は、当社が指定する期日までに、当該解約があった日からアプリサービス契約期間末日までの残余の期間（1ヵ月未満の期間は1ヵ月とみなします。）に相当する月額利用料及びこれに対する消費税等相当額を合算一括して支払うものとします。
+</p>
+<p>4&nbsp;&nbsp;&nbsp;前項の定めは、第1項に定めるアプリサービス契約期間の自動更新後にも適用するものとします。</p>
+<p>第6条&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;契約者の地位の承継</p>
+<p>
+  法人の合併若しくは分割により契約者の地位の承継があったときは、合併後存続する法人、合併により設立された法人若しくは分割によりその利用権の全てを承継した法人は、その契約者の地位を承継するものとします。
+</p>
+<p><br /></p>
+<p>
+  2&nbsp;&nbsp;&nbsp;前項の規定により、契約者の地位を承継した者は、当社所定の書面にこれを証明する書類を添えて当社に届け出ていただきます。なお、地位を承継した者が2人以上あるときは、そのうち1人を当社に対する代表者と定め、これを届け出ていただきます。これを変更したときも同様とします。
+</p>
+<p>第7条&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;契約上の地位の譲渡</p>
+<p>契約者は、本契約上の地位を譲渡することができません。ただし当社が譲渡を承認した場合はこの限りではありません。</p>
+<p><br /></p>
+<p>第8条&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;契約者が行う本契約の解約</p>
+<p>
+  契約者は本契約を解約しようとするときは、契約期間が満了する3か月前までに、その旨をあらかじめ当社所定の様式に記入の上、当社に書面により通知していただきます。
+</p>
+<p><br /></p>
+<p>第9条&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当社が行う本契約の解約</p>
+<p>当社は次のいずれかに該当するときは、あらかじめ契約者にそのことを通知の上、本契約を解約することがあります。</p>
+<p><br /></p>
+<p>(1) 第11条の規定により本サービスの利用を停止された契約者が、なおその利用停止の原因となる事実を解消しないとき。</p>
+<p>
+  (2) 当社が別に定める期日を経過してもなお、契約者が本サービス料金又は手続きに関する費用等その他の債務を支払わないとき。
+</p>
+<p>(3) 契約者が第4条に基づき当社に申し出た内容に虚偽の内容を記載したとき。</p>
+<p>(4) 本規約に反する行為を行った又は行う恐れがあると当社が判断したとき。</p>
+<p>(5) 第24条第1項に該当し又は該当するおそれがあると当社が判断したとき。</p>
+<p>
+  (6)
+  契約者又はその役員が暴力団、暴力団員、暴力団関係企業、総会屋、社会活動標榜ゴロ、特殊知能暴力集団若しくはそれらの関係者（以下、総じて「反社会的勢力」といいます。）に該当し、又は反社会的勢力との取引若しくは人的、資金的関係があると当社が判断したとき。
+</p>
+<p>(7) 契約者が自ら又は反社会的勢力を利用して、当社に対して詐術、暴力的行為又は脅迫的言辞を用いたとき</p>
+<p>
+  2&nbsp;&nbsp;&nbsp;前項にかかわらず、当社は、次のいずれかに該当するときは、あらかじめ通知をせずに、本契約を解約することがあります。
+</p>
+<p>(1) 緊急又はやむを得ない場合</p>
+<p>
+  (2)
+  民事再生手続きの開始、会社更生手続の開始、破産若しくは競売を申し立てられ、又は自ら、私的整理の開始、民事再生の開始会社更生手続の開始若しくは破産申し立てをしたとき。
+</p>
+<p>(3) 手形交換所の取引停止処分若しくは資産差押又は滞納処分を受けたとき。</p>
+<p>(4) 資本の減少、営業の廃止若しくは変更、又は解散の決議をしたとき。</p>
+<p>
+  (5)
+  前各号に定めるほか、資産、信用及び支払能力等に重大な変更を生じ、又はその恐れがあると認められる相当の事由があるとき。
+</p>
+<p>第3章 利用中止等</p>
+<p>第10条&nbsp;&nbsp;&nbsp;利用中止</p>
+<p>当社は次の場合には本サービスの一部又は全部の利用を中止することがあります。</p>
+<p><br /></p>
+<p>(1) 本サービスを提供するための設備の保守上、工事上又はサービス提供上やむを得ないとき。</p>
+<p>(2) 本サービスを提供するための設備を不正アクセスから防御するために必要なとき。</p>
+<p>(3) 天災、事変、その他の非常事態が発生し、又は発生するおそれがあるとき。</p>
+<p>(4) 本サービスが正常に動作せず、本サービスを継続して提供することが困難であるとき。</p>
+<p>(5) 法令等に基づく要請等により本サービスを提供することが困難となったとき。</p>
+<p>(6) Tradeshiftに起因して本サービスを提供することが困難となったとき。</p>
+<p>
+  2&nbsp;&nbsp;&nbsp;当社は前項の規定により本サービスの利用を中止するときは、あらかじめ契約者にそのことを通知します。ただし緊急又はやむを得ない場合はこの限りではありません。
+</p>
+<p>第11条&nbsp;&nbsp;&nbsp;利用停止</p>
+<p>当社は契約者が次のいずれかに該当するときは、本サービスの利用を停止することがあります。</p>
+<p><br /></p>
+<p>
+  (1) 料金その他の債務について、支払期日を経過してもなお支払わないとき又は支払われないことが合理的に見込まれるとき。
+</p>
+<p>(2) 本規約に反する行為を行ったとき。</p>
+<p>
+  2&nbsp;&nbsp;&nbsp;当社は、前項の規定により本サービスの利用を停止するときは、あらかじめその理由、利用停止をする日及び期間を契約者に通知します。ただし、緊急又はやむを得ない場合は、この限りではありません。
+</p>
+<p>第4章 料金等</p>
+<p>第12条&nbsp;&nbsp;&nbsp;料金</p>
+<p>本サービスの料金は、「別紙　料金表」に定めるところによります。</p>
+<p><br /></p>
+<p>第13条&nbsp;&nbsp;&nbsp;料金の支払義務</p>
+<p>契約者は、前条に定める料金の支払いを要します。なお、支払方法は、「別紙 料金表」に定めるところによります。</p>
+<p><br /></p>
+<p>
+  2&nbsp;&nbsp;&nbsp;利用中止又は利用停止があったときは、本サービスに係る契約者は、その期間中の料金の支払を要します。
+</p>
+<p>
+  3&nbsp;&nbsp;&nbsp;契約者が利用料金の支払を不法に免れた場合、当社はその免れた額のほか、免れた額（消費税相当額を加算しない額とします。）の2倍に相当する額に消費税相当額を加算した額を割増金として請求できるものとします。
+</p>
+<p>第14条&nbsp;&nbsp;&nbsp;初期費用及びオプションメニュー料金の支払義務</p>
+<p>
+  契約者は、本契約成立後、利用開始日前に契約者の責めに帰すべき事由により本契約の解約があった場合、初期費用及びオプションメニューに関するすべての費用の支払を要します。当社は、解約時点で契約者が支払済みのオプションメニュー料金について返金はいたしません。
+</p>
+<p><br /></p>
+<p>
+  2&nbsp;&nbsp;&nbsp;当社は、アプリサービス毎の利用開始日までに初期導入作業を、各オプションメニューの利用開始日までに各オプションメニューの提供のために必要な事前作業を完了させるものとします。ただし、契約者の責めに帰すべき事由により各利用開始日が延期される場合、延期に伴い発生する費用（当初予定していた利用開始日以降に発生する初期費用及びオプションメニューに関する費用を含むがこれらに限られない）について、当社は契約者に請求できるものとします。
+</p>
+<p>第15条&nbsp;&nbsp;&nbsp;延滞利息</p>
+<p>
+  当社は、料金その他の債務（延滞利息を除きます。）について支払期日を経過してもなお契約者から支払がない場合には、支払期日の翌日から支払の日の前日までの日数について、年14.5％の割合で計算して得た額を延滞利息として請求できるものとします。
+</p>
+<p><br /></p>
+<p>第5章 データの取扱い</p>
+<p>第16条&nbsp;&nbsp;&nbsp;データに関する責任</p>
+<p>
+  第20条の規定にかかわらず、当社は、当社の電気通信設備に保存されているデータ（以下「保存データ」といいます。）、本サービスの利用により生成、提供又は伝送されたデータ（コンテンツを含みます。以下、「生成等データ」といいます。）、および第17条第3項に定める顧客データが滅失、毀損若しくは漏洩した場合又は滅失、毀損、漏洩その他の事由により本来の利用目的以外に使用された場合、これにより契約者又は第三者に発生した直接あるいは間接の損害について、原因の如何を問わず責任を負わないものとします。
+</p>
+<p><br /></p>
+<p>
+  2&nbsp;&nbsp;&nbsp;前項の規定は、当社の故意若しくは重過失によるものである場合、又は第17条第3項に定める顧客データが個人情報に該当する場合は適用しないものとします。
+</p>
+<p>
+  3&nbsp;&nbsp;&nbsp;生成等データについては、当社はその内容等について保証を行わず、また、それに起因する損害についても責任を負わないものとします。
+</p>
+<p>第17条&nbsp;&nbsp;&nbsp;データの確認・複製</p>
+<p>
+  当社は、当社の電気通信設備の故障若しくは停止等の復旧等の設備保全又は本サービスの維持運営、使用状況の計測・分析及び新機能開発のため、保存データを確認、複写又は複製することがあります。
+</p>
+<p><br /></p>
+<p>2&nbsp;&nbsp;&nbsp;当社は、前項の用途以外で保存データにアクセス又は利用しないものとします。</p>
+<p>
+  3&nbsp;&nbsp;&nbsp;契約者は、当社が、Tradeshift Incから、Tradeshift
+  IncがTradeshift規約に基づき保有する契約者のデータ（Tradeshift規約に定める「顧客データ」を指し、以下、本規約においても「顧客データ」といいます。）の提供を受けることを許諾します。当社は、当社の指定するタイミングで、Tradeshift
+  Incの定める方法により、Tradeshift Incから顧客データの提供を受け、保存します。
+</p>
+<p>&nbsp;</p>
+<p><br /></p>
+<p>第18条&nbsp;&nbsp;&nbsp;データの削除</p>
+<p>
+  当社は、第23条による本サービスの廃止のほか、当社は第8条又は第9条の契約の解約があったとき、又は期間の満了により本契約が終了したときは、保存データを削除します。この場合において、当社は、保存データの削除に起因する契約者又は第三者に発生した直接又は間接の損害についての責任を負わないものとします。
+</p>
+<p><br /></p>
+<p>
+  2 当社は、本サービスの廃止、契約の解約又は終了後においても、顧客データを第28条に定める範囲で引き続き利用いたします。
+</p>
+<p><br /></p>
+<p>第19条&nbsp;&nbsp;&nbsp;データのバックアップ</p>
+<p>
+  契約者は、自らの責任で保存データ及び生成等データのバックアップを取るものとし、当社は、契約者がバックアップを行わなかったこと、またバックアップ行った際の方法およびその結果について責任も負わないものとします。
+</p>
+<p><br /></p>
+<p>
+  2当社は、当社と契約者の間で別途保存データ及び生成等データのバックアップにかかる契約がある場合に限り、保存データ及び生成等データのバックアップを行います。この場合、保存データ及び生成等データのバックアップ等にかかる損害について、当社は当該契約に定められた範囲で責任を負います。3
+  契約者は、本サービスに係る契約が終了等するときには、保存データ及び生成等データを、自己の責任と費用負担において、必要に応じ退避するものとします。
+</p>
+<p><br /></p>
+<p>4 当社は消去された保存データ及び生成等データは修復しません。</p>
+<p><br /></p>
+<p>第6章 損害賠償等</p>
+<p>第20条&nbsp;&nbsp;&nbsp;責任の制限</p>
+<p>
+  当社は、アプリサービスを提供すべき場合において、当社の責めに帰すべき理由によりその提供をしなかったときは、アプリサービスが全く利用できない状態（全く利用できない状態と同程度の場合を含みます。以下同じとします。）にあることを当社が知った時刻から起算して24時間以上その状態が連続した場合に限り、これに起因して契約者に生じた逸失利益、派生損害等を除く通常の損害に限り、賠償する責任を負うものとします。なお、当社は予見の有無、予見すべき場合を問わず、特別の事情から生じた損害については、責任を負わないものとします。
+</p>
+<p><br /></p>
+<p>
+  2&nbsp;&nbsp;&nbsp;前項により、当社が契約者に対し賠償責任を負う場合において、当社はアプリサービスが全く利用できない状態にあることを当社が知った時刻以降のその状態が連続した時間（24時間の倍数である部分に限ります。）について、24時間ごとに日数を計算し、その日数に対応するアプリサービスに係る年間利用料金の金額を発生した損害とみなし、その額に限って賠償します。
+</p>
+<p>
+  3&nbsp;&nbsp;&nbsp;当社は、オプションメニューに関して当社の過失により契約者に生じた損害について、逸失利益、派生損害等を除く通常の損害に限り、賠償する責任を負うものとします。なお、当社は予見の有無、予見すべき場合を問わず、特別の事情から生じた損害については、責任を負わないものとします。
+</p>
+<p>
+  4&nbsp;&nbsp;&nbsp;当社の故意又は重大な過失により本サービスを提供しなかったときは、前３項の規定は適用しないものとします。但し、当社が契約者に対して負う損害賠償責任の総額は、当該損害賠償請求に先立つ直近12か月間に、本契約に基づき契約者が当社に支払った又は契約者が当社に対して支払義務を負った合計金額を超えないものとします。
+</p>
+<p>
+  5&nbsp;&nbsp;&nbsp;前4項の規定にかかわらず、TradeshiftにおいてTradeshift
+  Incの責に起因して契約者に生じた損害については、Tradeshift規約が適用されるものとし、当社は契約者の損害を賠償する責任を負わないものとします。
+</p>
+<p>第21条&nbsp;&nbsp;&nbsp;サービス品質保証</p>
+<p>当社は、アプリサービスについて、次のとおりサービス品質保証（以下「SLA」といいます。）を適用します。</p>
+<p><br /></p>
+<p>
+  2&nbsp;&nbsp;&nbsp;当社の責めに帰すべき理由により、当社の提供するアプリサービスに関する「月間のアプリサービス利用可能時間」が下表に定める値を下回った場合、契約者はその旨を当社へ通知することにより、下表に定める「月額利用料に対する返金率」に応じた料金について、当社が当該通知を受けた以降に発行する請求において、割引額として反映されるものとします。
+</p>
+<p>月間のアプリサービス利用可能時間の割合</p>
+<p><br /></p>
+<p>月額利用料に対する返金率</p>
+<p><br /></p>
+<p>99％以上99.5％未満</p>
+<p><br /></p>
+<p>25%</p>
+<p><br /></p>
+<p>98.0%以上99%未満</p>
+<p><br /></p>
+<p>50%</p>
+<p><br /></p>
+<p>98.0%未満</p>
+<p><br /></p>
+<p>100%</p>
+<p><br /></p>
+<p>3&nbsp;&nbsp;&nbsp;月間のアプリサービス利用可能時間の割合は次の式に従って算出します。</p>
+<p>
+  アプリサービス利用可能時間の割合（％）＝（月の総利用可能時間（分））－（月の累積故障時間（契約者が当社に対して、アプリサービスにアクセスできないことを知らせた時点からその状態が是正された時点までの時間（分））÷月の総利用可能時間（分）×１００
+</p>
+<p>なお、月の総利用可能時間（分）とは、43,200分とします。</p>
+<p>
+  4&nbsp;&nbsp;&nbsp;月の累積故障時間には、 (i) 予定された作業、リリース又はメンテナンスのための時間、(ii)
+  不可抗力により利用が不能となる時間、(iii)
+  契約者の作為又は不作為によってアクセスできなくなった時間は適用されないものとします。
+</p>
+<p>5&nbsp;&nbsp;&nbsp;契約者が第2項の定めに従い当社へ返金を求めるための手続は、以下のとおりとする。</p>
+<p>
+  -契約者は当社に対して、アプリサービスの利用不能が生じた月の末日から2営業日以内に、利用不能が起こった日と時間の双方を書面または電磁的方法により通知するものとします。当社による当該通知を確認した後、割引額を契約者へ通知するものとします。
+</p>
+<p>6&nbsp;&nbsp;&nbsp;SLAに基づく料金の返還を受けた契約者は、当該SLA事由に係る損害賠償を請求しないものとします。</p>
+<p>
+  7&nbsp;&nbsp;&nbsp;第20条に基づき損害の賠償を受けた契約者は、同じ事由により本条に定める料金の割引を請求できないものとします。
+</p>
+<p>&nbsp;</p>
+<p><br /></p>
+<p>第7章 雑則</p>
+<p>第22条&nbsp;&nbsp;&nbsp;免責</p>
+<p>
+  当社は本規約で特に定める場合を除き、契約者に係る損害を賠償しないものとし、契約者は当社にその損害についての請求をしないものとします。また、契約者は、本サービスの利用により第三者に対し損害を与えた場合、自己の責任でこれを解決し、当社に責任も負担させないものとします。
+</p>
+<p><br /></p>
+<p>
+  2&nbsp;&nbsp;&nbsp;当社は、本サービスの利用により生じる結果について、契約者に対し、本サービスの提供に必要な設備の不具合、故障、第三者による不正侵入、商取引上の紛争、法令等に基づく強制的な処分又はその他の原因を問わず、責任も負わないものとします。
+</p>
+<p>
+  3&nbsp;&nbsp;&nbsp;当社は、本規約の変更等により契約者が本サービスを利用するにあたり当社が提供することとなっている設備、端末等以外の設備、端末等の改造又は変更（以下、この条において「改造等」といいます。）を要する場合であっても、その改造等に要する費用については負担しません。
+</p>
+<p>
+  4&nbsp;&nbsp;&nbsp;本規約に定める免責に関する事項は、本規約の準拠法で強行規定として定められる、法的に免責又は制限できない範囲を免責することまでを目的とはしていません。そのため、準拠法の強行規定の定めを超える免責事項が本規約に含まれる場合には、準拠法にて許容される最大限の範囲にて当社は免責されます。
+</p>
+<p>第23条&nbsp;&nbsp;&nbsp;本サービスの廃止</p>
+<p>当社は本サービスの一部又は全部を廃止することがあります。</p>
+<p><br /></p>
+<p>
+  2&nbsp;&nbsp;&nbsp;前項の規定による本サービスの一部又は全部の廃止があったときは、本サービスの一部又は全部に係る契約は終了するものとします。
+</p>
+<p>
+  3&nbsp;&nbsp;&nbsp;当社は、本サービスの一部又は全部の廃止に伴い、契約者又は第三者に発生する損害については、責任を負わないものとします。
+</p>
+<p>
+  4&nbsp;&nbsp;&nbsp;当社は、本サービスの一部又は全部を廃止しようとするときは、その旨を相当な期間をおいて、あらかじめ契約者に通知します。
+</p>
+<p>第24条&nbsp;&nbsp;&nbsp;契約者の義務</p>
+<p>契約者は次のことを守っていただきます。</p>
+<p><br /></p>
+<p>(1) 当社又は第三者の著作権その他の権利を侵害する行為をしないこと</p>
+<p>(2) Tradeshift規約の定めに反する行為を行わないこと</p>
+<p>(3) 本サービスによりアクセス可能な当社又は第三者のデータの改ざん、消去等をしないこと</p>
+<p>(4) 第三者になりすまして本サービスを利用する行為をしないこと</p>
+<p>(5) 意図的に有害なコンピュータプログラム等を送信しないこと</p>
+<p>(6) 当社の設備に無権限でアクセスし、その利用又は運営に支障を与える行為をしないこと</p>
+<p>(7) 本人の同意を得ることなく、又は詐欺的な手段により第三者の個人情報を収集する行為をしないこと</p>
+<p>
+  (8)
+  利用申込みの際又はその後に当社に届け出た事項について変更が生じた場合、遅滞なくその旨を当社所定の方法により届け出ること
+</p>
+<p>
+  (9)
+  法令、本規約若しくは公序良俗に反する行為、サービスの運営を妨害する行為、当社の信用を毀損する行為、又は当社若しくは第三者に不利益を与える行為をしないこと
+</p>
+<p>(10) 前各号に該当するおそれのある行為又はこれに類する行為をしないこと</p>
+<p>
+  2&nbsp;&nbsp;&nbsp;契約者は前項の規定に違反して本サービスに係る当社の設備等を毀損したときには、当社が指定する期日までにその修繕その他の工事等に必要な費用を支払っていただきます。
+</p>
+<p>
+  3&nbsp;&nbsp;&nbsp;当社は、契約者の本条に規定する義務違反により契約者又はその他の者に発生する損害について責任を負わないものとします。
+</p>
+<p>
+  4&nbsp;&nbsp;&nbsp;契約者は、本サービスに係るID及びパスワード（以下「ID等」といいます。）を管理する責任を負うものとし、その内容をみだりに第三者に知らせてはならないものとします。当社は、ID等の一致を確認した場合、当該ID等を保有する者として登録された契約者が本サービスを利用したものとみなします。
+</p>
+<p>
+  5&nbsp;&nbsp;&nbsp;契約者が前項の規定に違反して本サービスに係る当社の業務遂行又は当社の設備に著しい支障を及ぼし、又は及ぼすおそれがあると当社が判断した場合、当社ID等の変更その他必要な措置をとる場合があります。当該措置により契約者に発生する損害について、当社は責任を負わないものとします。
+</p>
+<p>
+  6&nbsp;&nbsp;&nbsp;当社は、前項の規定により必要な措置をとる場合は、あらかじめ理由を添えてその旨を契約者に通知します。ただし、緊急又はやむを得ない場合はこの限りではありません。
+</p>
+<p>第25条&nbsp;&nbsp;&nbsp;契約者に対する通知</p>
+<p>契約者に対する通知は、当社の判断により、次のいずれかの方法で行うことができるものとします。</p>
+<p><br /></p>
+<p>
+  (1)
+  当社のWebサイト上に掲載して行います。この場合は、掲載された時をもって契約者に対する通知が完了したものとみなします。
+</p>
+<p>
+  (2)
+  契約者が利用申込みの際又はその後に当社に届け出た契約者の電子メールアドレス宛に電子メールを送信し、又はFAX番号宛にFAXを送信して行います。この場合は、契約者の電子メールアドレス宛に電子メールを送信した時又は契約者のFAX番号宛にFAXを送信した時をもって契約者に対する通知が完了したものとみなします。
+</p>
+<p>
+  (3)
+  契約者が利用申込みの際又はその後に当社に届け出た契約者の住所宛に郵送して行います。この場合は、郵便物が契約者の住所に到達した時をもって契約者に対する通知が完了したものとみなします。
+</p>
+<p>
+  (4)
+  その他、当社が適切と判断する方法で行います。この場合は、当該通知の中で当社が指定した時をもって契約者に対する通知が完了したものとみなします。
+</p>
+<p>第26条&nbsp;&nbsp;&nbsp;当社の知的財産権</p>
+<p>
+  本サービスの提供に関連して当社が契約者に貸与又は提示するソフトウェア等のプログラム又は物品（本規約、サービス仕様書、取扱マニュアル等を含みます。以下この条において「プログラム等」といいます。）に関する著作権及びそれに含まれるノウハウ等一切の知的財産権は当社又は当社の指定する者に帰属するものとします。
+</p>
+<p><br /></p>
+<p>
+  2&nbsp;&nbsp;&nbsp;当社は、本規約等において許諾等することを定めている権利を除き、契約者に対して、いかなる知的財産権その他の権利も許諾または譲渡するものではなく、契約者はこれに承諾するものとします。
+</p>
+<p>3&nbsp;&nbsp;&nbsp;契約者はプログラム等につき次の事項を遵守するものとします。</p>
+<p>(1) 本サービスの利用目的以外に使用しないこと。</p>
+<p>(2) 複製・改変・編集等を行わず、また、リバースエンジニアリング、逆コンパイル又は逆アセンブルを行わないこと、</p>
+<p>(3) 営利目的の有無を問わず、第三者に貸与・譲渡・担保設定等しないこと。</p>
+<p>(4) 当社又は当社の指定する者が表示した著作権表示を削除または変更しないこと</p>
+<p>4&nbsp;&nbsp;&nbsp;本条の規定は本契約の終了後も効力を有するものとします。</p>
+<p>第27条&nbsp;&nbsp;&nbsp;日本国外における利用</p>
+<p>契約者が本サービスを日本国外にて利用する場合、それにより生じる責任は契約者にて負うものとします。</p>
+<p><br /></p>
+<p>
+  ２　契約者が本サービスを日本国外にて利用した場合、追加の料金が発生することがあります。契約者は当該料金の支払いに応じるものとします。
+</p>
+<p><br /></p>
+<p>第28条&nbsp;&nbsp;&nbsp;個人情報の取扱い</p>
+<p>
+  当社は本規約に基づき、当社が取得する個人情報の取扱いについては、当社が定める「プライバシーポリシー」（https://www.ntt.com/about-us/hp/privacy.html）によります。
+</p>
+<p><br /></p>
+<p>第29条&nbsp;&nbsp;&nbsp;第三者への委託</p>
+<p>
+  契約者は、当社が本サービスを提供するのに必要な範囲で、本サービスの全部又は一部を当社の指定する第三者に委託することを了承するものとします。
+</p>
+<p><br /></p>
+<p>
+  2&nbsp;&nbsp;&nbsp;当社は、前項に基づき、当社が再委託した場合の再委託先の選任及び監督について、第20条に定める範囲で責任を負うものとします。
+</p>
+<p>第30条&nbsp;&nbsp;&nbsp;管轄裁判所</p>
+<p>契約者と当社との間で本サービスに関して紛争が生じた場合、東京地方裁判所を第一審の専属的合意管轄裁判所とします。</p>
+<p><br /></p>
+<p>第31条&nbsp;&nbsp;&nbsp;分離可能性</p>
+<p>
+  本規約の条項の一部が、管轄権を持つ裁判所によって違法、無効又は法的拘束力がないと判断された場合であっても、他の条項は影響を受けず有効に存続するものとします。
+</p>
+<p><br /></p>
+<p>第32条&nbsp;&nbsp;&nbsp;準拠法</p>
+<p>本規約の解釈および適用に関する準拠法は日本法とします。</p>
+<p><br /></p>
+<p><br /></p>
+<p>&nbsp;</p>
+<p><br /></p>
+<p>別紙　料金表</p>
+<p><br /></p>
+<p>&nbsp;</p>
+<p><br /></p>
+<p>第１表 料金表</p>
+<p><br /></p>
+<p>・本サービスに係る料金は、以下のとおりとします。</p>
+<p><br /></p>
+<p>・当社は、料金その他の計算において、その計算結果に1円未満の端数が生じた場合は、その端数を切り捨てます。</p>
+<p><br /></p>
+<p>
+  ・本規約により支払いを要するものと定められている料金は、原則この料金表に定める料金額に消費税相当額を加算した額とします。
+</p>
+<p><br /></p>
+<p>・支払いを要することとなった額（税込価格）は、料金表に表示された額の合計と異なる場合があります。</p>
+<p><br /></p>
+<p>&nbsp;</p>
+<p><br /></p>
+<p>１．料金</p>
+<p><br /></p>
+<p>1-1　初期費用</p>
+<p><br /></p>
+<p>・初期費用は、当社が別に提示するものとします。</p>
+<p><br /></p>
+<p>・初期費用は、アプリサービス毎に発生します。</p>
+<p><br /></p>
+<p>・初期費用は、利用開始日が属する月の翌月以降、月額利用料に全額を一括合算のうえ請求します。</p>
+<p><br /></p>
+<p>&nbsp;</p>
+<p><br /></p>
+<p>1-2　年間利用料金</p>
+<p><br /></p>
+<p>・アプリサービスに係る利用料金は下表に定めるものとします。</p>
+<p><br /></p>
+<p>サービス名</p>
+<p><br /></p>
+<p>単位</p>
+<p><br /></p>
+<p>年間料金額（税込価格）</p>
+<p><br /></p>
+<p>支払依頼承認フローサービス</p>
+<p><br /></p>
+<p>請求書1,000件毎 ※１</p>
+<p><br /></p>
+<p>120,000円（132,000円）※３</p>
+<p><br /></p>
+<p>データ連携サービス</p>
+<p><br /></p>
+<p>案件毎※２</p>
+<p><br /></p>
+<p>1,200,000円（1,320,000円）</p>
+<p><br /></p>
+<p>[備考]</p>
+<p><br /></p>
+<p>※１　請求書1,000件単位での計算となります。請求書1件毎の清算は対応しておりません。</p>
+<p><br /></p>
+<p>※２　案件とは契約者による申込み数をいいます。</p>
+<p><br /></p>
+<p>
+  ※３　契約時にお申込みいただいた請求書数を超えたご利用はできません。追加の利用をご希望される場合は、請求書1,000件毎につき120,000円（税込価格132,000円）の追加申込みが必要となります。この場合、追加申込みいただいた部分にかかる利用料金を、お申込みいただいた月におけるアプリサービス契約期間の残余期間で除した金額を、月額利用料に加算いたします。なお、残余期間中に追加申込分を解約された場合は、第5条第3項の定めに従うものとします。
+</p>
+<p><br /></p>
+<p>・契約者は、利用開始日が属する月から第5条に定める契約期間において、月額利用料の支払いを要します。</p>
+<p><br /></p>
+<p>&nbsp;</p>
+<p><br /></p>
+<p>1-3 オプションメニュー料金</p>
+<p><br /></p>
+<p>・オプションメニューは、以下の通りです。</p>
+<p><br /></p>
+<p>－サプライヤー導入支援</p>
+<p><br /></p>
+<p>－導入後安定サポート</p>
+<p><br /></p>
+<p>・オプションメニュー料金は、当社が別に提示するものとします。</p>
+<p><br /></p>
+<p>
+  ・アプリサービスのお申込みと同時にオプションメニューをお申込みいただく場合、アプリサービスの利用開始日が属する月の翌月以降に、月額利用料全額と合算のうえ請求します。
+</p>
+<p><br /></p>
+<p>
+  ・アプリサービス契約期間内にオプションメニューを追加でお申込みいただく場合、第４条第2項の定めに従いオプションメニューに係る本契約が成立した日の属する月の翌月以降に、オプションメニュー料金を全額一括で請求します。
+</p>
+<p><br /></p>
+<p>&nbsp;</p>
+<p><br /></p>
+<p>２．支払方法</p>
+<p><br /></p>
+<p>
+  ・当社は、契約者に対し、上記に定める料金につき、当社が定める期日までに請求書を発行するものとし、契約者は、当該請求書に記載の支払い期日までに、当社が指定する方法により支払を行うものとします。
+</p>
+<p><br /></p>
+<p>附則（令和2年11月5日 APS２サ00708932号）</p>
+<p><br /></p>
+<p>（実施期日）</p>
+<p><br /></p>
+<p>この規約は、令和2年11月12日から実施します。</p>
