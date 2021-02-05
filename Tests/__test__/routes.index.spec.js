@@ -8,6 +8,7 @@ const Response = require('jest-express').Response
 const next = require('jest-express').Next
 
 if (process.env.LOCALLY_HOSTED === 'true') {
+  // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
 let request, response

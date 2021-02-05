@@ -43,9 +43,9 @@ describe('ルーティングのインテグレーションテスト', () => {
   describe('前準備', () => {
     test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
       // --------------------アカウント管理者のCookieを取得---------------
-      acCookies = await getCookies('hirokit.watanabe@ntt.com', 'watta05250525') // update me
+      acCookies = await getCookies('xxxxxx@xxxxxxx', 'xxxxxxxx') // update me
       // ---------------------一般ユーザのCookieを取得--------------------
-      userCookies = await getCookies('ts.ntt.test+mem@gmail.com', 'ts00330033') // update me
+      userCookies = await getCookies('xxxxxx@xxxxxxx', 'xxxxxxxx') // update me
 
       // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
 

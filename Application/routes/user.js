@@ -65,20 +65,23 @@ const cbPostRegister = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 }
-
 const cbGetDelete = async (req, res, next) => {
-  // TODO: ユーザを削除するための動作確認用。リリース時は削除。
-  const deleted = await userController.delete(req.user.userId)
-
-  // データベースエラーは、エラーオブジェクトが返る
-  if (deleted instanceof Error) return next(errorHelper.create(500))
-
-  if (Number(deleted) === 1) {
-    logger.info({ tenant: req.user.tenantId, user: req.user.userId }, 'User deleted successfully')
-    res.send('User deleted successfully')
+  // ユーザを削除するための動作確認用。開発環境のみ動作。
+  if (process.env.NODE_ENV !== 'development') {
+    return next(errorHelper.create(500))
   } else {
-    logger.warn({ tenant: req.user.tenantId, user: req.user.userId }, 'Failed to delete user')
-    res.send('Failed to delete user')
+    const deleted = await userController.delete(req.user.userId)
+
+    // データベースエラーは、エラーオブジェクトが返る
+    if (deleted instanceof Error) return next(errorHelper.create(500))
+
+    if (Number(deleted) === 1) {
+      logger.info({ tenant: req.user.tenantId, user: req.user.userId }, 'User deleted successfully')
+      return res.send('User deleted successfully')
+    } else {
+      logger.warn({ tenant: req.user.tenantId, user: req.user.userId }, 'Failed to delete user')
+      return res.send('Failed to delete user')
+    }
   }
 }
 
@@ -87,8 +90,10 @@ router.get('/register', helper.isAuthenticated, cbGetRegister)
 // helper.isAuthenticatedがミドルウェアとして入っているとセッションタイムアウトが判定できない
 router.post('/register', cbPostRegister)
 
-// ユニットテスト外だがテナントが登録されていない場合には削除できないようにする
-router.get('/delete', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetDelete)
+// 開発環境のみ動作。テナントが登録されていない場合には削除できないようにする
+if (process.env.NODE_ENV === 'development') {
+  router.get('/delete', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetDelete)
+}
 
 module.exports = {
   router: router,
