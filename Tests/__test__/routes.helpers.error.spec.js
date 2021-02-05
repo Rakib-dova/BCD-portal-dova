@@ -6,11 +6,11 @@ jest.mock('../../Application/node_modules/express', () => {
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
-const helper = require('../../Application/routes/helpers/middleware')
 const errorHelper = require('../../Application/routes/helpers/error')
 const logger = require('../../Application/lib/logger.js')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
+  // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
 let request, response, warnSpy, errorSpy, env
@@ -33,7 +33,7 @@ describe('helpers/errorのテスト', () => {
 
   describe('create', () => {
     test('400エラー：400を指定した場合', async () => {
-      //準備
+      // 準備
 
       // 試験実施
       const result = errorHelper.create(400)
@@ -47,7 +47,7 @@ describe('helpers/errorのテスト', () => {
     })
 
     test('404エラー：404を指定した場合', async () => {
-      //準備
+      // 準備
 
       // 試験実施
       const result = errorHelper.create(404)
@@ -64,7 +64,7 @@ describe('helpers/errorのテスト', () => {
     })
 
     test('500エラー：400,404以外を指定した場合', async () => {
-      //準備
+      // 準備
 
       // 試験実施
       const result = errorHelper.create(500)
@@ -88,7 +88,7 @@ describe('helpers/errorのテスト', () => {
   })
   describe('render', () => {
     test('Errorログ:userId&tenantIdがあり、500エラーを指定した場合', async () => {
-      //準備
+      // 準備
       // userId,tenantIdに正常値を入れる
       request.user = {
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
@@ -130,7 +130,7 @@ describe('helpers/errorのテスト', () => {
     })
 
     test('Errorログ:userId&tenantIdがなく、500エラーを指定した場合', async () => {
-      //準備
+      // 準備
       // userにnullを入れる
       request.user = null
       request.path = '/dummy'
@@ -167,7 +167,7 @@ describe('helpers/errorのテスト', () => {
     })
 
     test('WARNログ:userId&tenantIdがあり、400エラーを指定した場合', async () => {
-      //準備
+      // 準備
       // userId,tenantIdに正常値を入れる
       request.user = {
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
@@ -208,7 +208,7 @@ describe('helpers/errorのテスト', () => {
     })
 
     test('WARNログ:userId&tenantIdがなく、400エラーを指定した場合', async () => {
-      //準備
+      // 準備
       // userにnullを入れる
       request.user = null
       request.path = '/dummy'
@@ -244,7 +244,7 @@ describe('helpers/errorのテスト', () => {
     })
 
     test('Errorログ:情報の少ないエラーを指定した場合', async () => {
-      //準備
+      // 準備
       // userにnullを入れる
       request.user = null
       // 試験で引数に渡すエラーを用意する

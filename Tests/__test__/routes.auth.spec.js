@@ -16,6 +16,7 @@ const next = require('jest-express').Next
 const errorHelper = require('../../Application/routes/helpers/error')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
+  // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
 let request, response, findAndUpdateSpy, infoSpy

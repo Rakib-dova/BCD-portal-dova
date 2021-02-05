@@ -5,6 +5,9 @@ jest.mock('../../Application/node_modules/express', () => {
 jest.mock('../../Application/controllers/userController.js', () => ({
   create: (accessToken, refreshToken) => {
     return null
+  },
+  delete: (accessToken, refreshToken) => {
+    return null
   }
 }))
 
@@ -19,6 +22,7 @@ const userController = require('../../Application/controllers/userController.js'
 const logger = require('../../Application/lib/logger.js')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
+  // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
 
@@ -42,10 +46,11 @@ describe('userのテスト', () => {
     infoSpy.mockRestore()
   })
 
-  describe('ルーティング', () => {
+  describe('ルーティング（開発環境）', () => {
     test('userのルーティングを確認', async () => {
       expect(routesUser.router.get).toBeCalledWith('/register', helper.isAuthenticated, routesUser.cbGetRegister)
       expect(routesUser.router.post).toBeCalledWith('/register', routesUser.cbPostRegister)
+      // deleteは呼ばれ「る」
       expect(routesUser.router.get).toBeCalledWith(
         '/delete',
         helper.isAuthenticated,
@@ -443,6 +448,63 @@ describe('userのテスト', () => {
       // ポータルにリダイレクト「されない」
       expect(response.redirect).not.toHaveBeenCalledWith(303, '/portal')
       expect(response.getHeader('Location')).not.toEqual('/portal')
+    })
+  })
+
+  // 以降NODE_ENV=productionの条件で再モック化している
+  describe('本番環境では/deleteが無効', () => {
+    // mockされているモジュールをリセット
+    jest.resetModules()
+
+    process.env.NODE_ENV = 'production'
+
+    const routesUserForProd = require('../../Application/routes/user')
+    const helperForProd = require('../../Application/routes/helpers/middleware')
+    const nextForProd = require('jest-express').Next
+    const errorHelperForProd = require('../../Application/routes/helpers/error')
+    const RequestForProd = require('jest-express').Request
+    const ResponseForProd = require('jest-express').Response
+    const userControllerForProd = require('../../Application/controllers/userController.js')
+    console.log(userControllerForProd)
+    let requestForProd, responseForProd, deleteSpyForProd
+    beforeEach(() => {
+      requestForProd = new RequestForProd()
+      responseForProd = new ResponseForProd()
+      deleteSpyForProd = jest.spyOn(userControllerForProd, 'delete')
+    })
+    afterEach(() => {
+      requestForProd.resetMocked()
+      responseForProd.resetMocked()
+      nextForProd.mockReset()
+      deleteSpyForProd.mockRestore()
+    })
+    afterAll(() => {
+      process.env.NODE_ENV = 'development'
+    })
+    test('userのルーティングを確認（deleteはルーティングしない）', async () => {
+      expect(routesUserForProd.router.get).toBeCalledWith(
+        '/register',
+        helperForProd.isAuthenticated,
+        routesUserForProd.cbGetRegister
+      )
+      expect(routesUserForProd.router.post).toBeCalledWith('/register', routesUserForProd.cbPostRegister)
+      // ルーティング./deleteは呼ばれ「ない」
+      expect(routesUserForProd.router.get).not.toBeCalledWith(
+        '/delete',
+        helperForProd.isAuthenticated,
+        helperForProd.isTenantRegistered,
+        helperForProd.isUserRegistered,
+        routesUserForProd.cbGetDelete
+      )
+    })
+    test('cbGetDeleteは機能しない', async () => {
+      await routesUserForProd.cbGetDelete(request, response, nextForProd)
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(nextForProd).toHaveBeenCalledWith(errorHelperForProd.create(500))
+
+      // deleteは呼ばれ「ない」
+      expect(deleteSpyForProd).not.toHaveBeenCalledWith()
     })
   })
 })
