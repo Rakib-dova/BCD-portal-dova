@@ -76,9 +76,9 @@ app.use(
       // nonceはbulma-toastがinline styeを使用するためハッシュを指定(See common-page.js)
       // prettier-ignore
       'style-src': [
-        "'self' https://cdnjs.cloudflare.com https://use.fontawesome.com https://fonts.googleapis.com 'nonce-qv73LoiY5kc+6cd6a4njpw=='"
+        "'self' https://use.fontawesome.com https://fonts.googleapis.com"
       ],
-      'script-src': ["'nonce-qv73LoiY5kc+6cd6a4njpw==' 'unsafe-inline' 'unsafe-eval' 'strict-dynamic'"],
+      'script-src': ["'self'"],
       'object-src': ["'self'"],
       'frame-ancestors': [`'self' https://${process.env.TS_HOST}`]
     }

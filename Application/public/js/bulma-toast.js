@@ -40,9 +40,7 @@ function findOrCreateContainer(position, offsetTop, offsetBottom, offsetLeft, of
   const container = doc.createElement('div')
 
   // modified
-  // Content-Security-Policyをnonceで対応
-  container.setAttribute('nonce', 'qv73LoiY5kc+6cd6a4njpw==')
-  // setAttributeを使わずCSSOMでstyleを展開（Content-Security-PolicyのnonceがsetAttributeを使うと適用されないため）
+  // setAttributeを使わずCSSOMでstyleを展開するとContent-Security-Policyのinline制約は対象とならない
   ;(COMMON_STYLES + CONTAINER_STYLES(position, offsetTop, offsetBottom, offsetLeft, offsetRight))
     .split(';')
     .map((item) => {
@@ -145,9 +143,7 @@ class Toast {
     }
 
     // modified
-    // Content-Security-Policyをnonceで対応
-    this.element.setAttribute('nonce', 'qv73LoiY5kc+6cd6a4njpw==')
-    // setAttributeを使わずCSSOMでstyleを展開（Content-Security-PolicyのnonceがsetAttributeを使うと適用されないため）
+    // setAttributeを使わずCSSOMでstyleを展開するとContent-Security-Policyのinline制約は対象とならない
     style.split(';').map((item) => {
       const s = item.split(':')
       this.element.style[s[0]] = s[1]
