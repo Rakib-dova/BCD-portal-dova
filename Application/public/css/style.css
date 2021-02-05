@@ -67,6 +67,10 @@ iframe {
   border: 1px gray solid;
 }
 
+img.logo-ncom {
+    height: 3rem;
+    max-height: 3rem; /* override bulma.css */
+}
 .app-icon {
     height: 5rem;
     width: 5rem;
@@ -76,7 +80,7 @@ iframe {
 }
 
 .hero-body {
-    background-image: url('../image/bannerTop.png');
+    background-image: url('../image/ts-app-digitaltrade-banner.svg');
     width: 100%;
     background-repeat: no-repeat;
     background-position: center top;

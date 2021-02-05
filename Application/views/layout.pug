@@ -15,13 +15,15 @@ html
   body.has-navbar-fixed-top
     .navbar.is-dark.is-fixed-top
         .navbar-brand.is-family-noto-sans-bold
-          a.navbar-item(href='/') BConnectionデジタルトレード
+          .navbar-item BConnectionデジタルトレード
           //a.navbar-brand(href='/') BConnectionデジタルトレード
-        .navbar-menu.is-family-noto-sans
-          .navbar-start
-            a.navbar-item(href='/') 
-              span.fas.fa-home
-              | Home
+          a.navbar-item(href='/') 
+            span.fas.fa-home
+            | Home
+        .navbar-menu
+          .navbar-end
+            .navbar-item.is-hidden-touch.p-0
+              img.logo-ncom(src='../image/ts-app-digitaltrade-ncom-logo.svg')
         if customerId != 'none'
           .navbar-end
             .navbar-item
