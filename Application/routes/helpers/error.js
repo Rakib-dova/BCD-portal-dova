@@ -12,11 +12,13 @@ module.exports = {
         e = new Error('不正なページからアクセスされたか、セッションタイムアウトが発生しました。')
         e.name = 'Bad Request'
         e.status = 400
+        e.desc = '上部メニューのHOMEボタンを押下し、再度操作をやり直してください。'
         break
       case 404:
         e = new Error('お探しのページは見つかりませんでした。')
         e.name = 'Not Found'
         e.status = 404
+        e.desc = '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
         break
       default:
         e = new Error('サーバ内部でエラーが発生しました。')
@@ -27,49 +29,56 @@ module.exports = {
     return e
   },
   render: (err, req, res, next) => {
-    let errorStatus, errorTitle, errorMessage, errorDescription
+    let errorStatus, errorMessage, errorDescription
 
     if (!err.status) {
       const dummyErr = module.exports.create(500)
       errorStatus = dummyErr.status
       errorMessage = dummyErr.message
-      errorTitle = dummyErr.name
     } else {
       errorStatus = err.status
       errorMessage = err.message
-      errorTitle = err.name
     }
-
-    if (err.desc) errorDescription = err.desc
-    // render page
-    res.status(errorStatus)
-
-    // エラーページには詳細な情報は提示しない
-    res.render('error', {
-      title: errorTitle,
-      message: errorMessage,
-      status: errorStatus,
-      description: !errorDescription ? null : errorDescription,
-      error: process.env.LOCALLY_HOSTED === 'true' ? err : {}
-    })
 
     // output log
     // ログには生のエラー情報を吐く
+    const logMessage = { status: errorStatus, path: req.path }
+
+    // ログインしていればユーザID、テナントIDを吐く
     if (req.user?.userId && req.user?.tenantId) {
-      if (errorStatus >= 500) {
-        logger.error(
-          { tenant: req.user.tenantId, user: req.user.userId, stack: err.stack, status: errorStatus },
-          err.name
-        )
-      } else {
-        logger.warn({ tenant: req.user.tenantId, user: req.user.userId, status: errorStatus }, err.name)
-      }
-    } else {
-      if (errorStatus >= 500) {
-        logger.error({ stack: err.stack, status: errorStatus }, err.name)
-      } else {
-        logger.warn({ status: errorStatus }, err.name)
-      }
+      logMessage.tenant = req.user.tenantId
+      logMessage.user = req.user.userId
     }
+
+    // error発生時のみstackを吐く
+    if (errorStatus >= 500) {
+      logMessage.stack = err.stack
+      logger.error(logMessage, err.name)
+    } else {
+      logger.warn(logMessage, err.name)
+    }
+
+    // 脆弱性対策のため、500エラーの時は404エラーの文言を画面に表示する
+    if (errorStatus >= 500) {
+      errorMessage = 'お探しのページは見つかりませんでした。'
+      errorDescription = '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
+    } else if (err.desc) {
+      errorDescription = err.desc
+    }
+
+    // ステータスコードの設定
+    if (process.env.LOCALLY_HOSTED === 'true') {
+      // ローカル環境ではそのまま返す
+      res.status(errorStatus)
+    } else {
+      // 脆弱性対策のため200で返却する
+      res.status(200)
+    }
+
+    // エラーページには詳細な情報は提示しない
+    res.render('error', {
+      message: errorMessage,
+      description: !errorDescription ? null : errorDescription
+    })
   }
 }

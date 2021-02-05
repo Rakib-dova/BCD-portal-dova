@@ -41,6 +41,7 @@ describe('helpers/errorのテスト', () => {
       // 期待結果
       // 400エラーが返される
       expect(result).toEqual(new Error('不正なページからアクセスされたか、セッションタイムアウトが発生しました。'))
+      expect(result.desc).toBe('上部メニューのHOMEボタンを押下し、再度操作をやり直してください。')
       expect(result.name).toBe('Bad Request')
       expect(result.status).toBe(400)
     })
@@ -53,6 +54,10 @@ describe('helpers/errorのテスト', () => {
 
       // 期待結果
       // 404エラーが返される
+      const error = new Error('お探しのページは見つかりませんでした。')
+      error.name = 'Not Found'
+      error.status = 404
+      error.desc = '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
       expect(result).toEqual(new Error('お探しのページは見つかりませんでした。'))
       expect(result.name).toBe('Not Found')
       expect(result.status).toBe(404)
@@ -89,6 +94,7 @@ describe('helpers/errorのテスト', () => {
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
         userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13'
       }
+      request.path = '/dummy'
       // env.LOCALLY_HOSTEDを'false'にする
       process.env.LOCALLY_HOSTED = 'false'
       // エラーを用意する
@@ -101,15 +107,12 @@ describe('helpers/errorのテスト', () => {
       errorHelper.render(dummyError, request, response, next)
 
       // 期待結果
-      // response.statusで用意したエラーのstatusが呼ばれ「る」
-      expect(response.status).toHaveBeenCalledWith(dummyError.status)
-      // 用意したエラー情報でrenderが呼ばれ「る」
+      // response.statusで用意したエラーのstatusが呼ばれ「ない」（ローカル環境ではないため200となる）
+      expect(response.status).toHaveBeenCalledWith(200)
+      // 用意したエラー情報でrenderが呼ばれ「ない」（500エラーの時は404のメッセージとなる）
       expect(response.render).toHaveBeenCalledWith('error', {
-        title: dummyError.name,
-        message: dummyError.message,
-        status: dummyError.status,
-        description: dummyError.desc,
-        error: {}
+        message: 'お探しのページは見つかりませんでした。',
+        description: '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
       })
       // warnログは呼ばれ「ない」
       expect(warnSpy).not.toHaveBeenCalled()
@@ -119,7 +122,8 @@ describe('helpers/errorのテスト', () => {
           tenant: request.user.tenantId,
           user: request.user.userId,
           stack: dummyError.stack,
-          status: dummyError.status
+          status: dummyError.status,
+          path: '/dummy'
         },
         dummyError.name
       )
@@ -129,6 +133,7 @@ describe('helpers/errorのテスト', () => {
       //準備
       // userにnullを入れる
       request.user = null
+      request.path = '/dummy'
       // env.LOCALLY_HOSTEDを'false'にする
       process.env.LOCALLY_HOSTED = 'false'
       // エラーを用意する
@@ -141,15 +146,12 @@ describe('helpers/errorのテスト', () => {
       errorHelper.render(dummyError, request, response, next)
 
       // 期待結果
-      // response.statusで用意したエラーのstatusが呼ばれ「る」
-      expect(response.status).toHaveBeenCalledWith(dummyError.status)
-      // 用意したエラー情報でrenderが呼ばれ「る」
+      // response.statusで用意したエラーのstatusが呼ばれ「ない」（ローカル環境ではないため200となる）
+      expect(response.status).toHaveBeenCalledWith(200)
+      // 用意したエラー情報でrenderが呼ばれ「ない」（500エラーの時は404のメッセージとなる）
       expect(response.render).toHaveBeenCalledWith('error', {
-        title: dummyError.name,
-        message: dummyError.message,
-        status: dummyError.status,
-        description: dummyError.desc,
-        error: {}
+        message: 'お探しのページは見つかりませんでした。',
+        description: '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
       })
       // warnログは呼ばれ「ない」
       expect(warnSpy).not.toHaveBeenCalled()
@@ -157,7 +159,8 @@ describe('helpers/errorのテスト', () => {
       expect(errorSpy).toHaveBeenCalledWith(
         {
           stack: dummyError.stack,
-          status: dummyError.status
+          status: dummyError.status,
+          path: '/dummy'
         },
         dummyError.name
       )
@@ -170,6 +173,7 @@ describe('helpers/errorのテスト', () => {
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
         userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13'
       }
+      request.path = '/dummy'
       // env.LOCALLY_HOSTEDを'false'にする
       process.env.LOCALLY_HOSTED = 'false'
       // エラーを用意する
@@ -182,15 +186,12 @@ describe('helpers/errorのテスト', () => {
       errorHelper.render(dummyError, request, response, next)
 
       // 期待結果
-      // response.statusで用意したエラーのstatusが呼ばれ「る」
-      expect(response.status).toHaveBeenCalledWith(dummyError.status)
+      // response.statusで用意したエラーのstatusが呼ばれ「ない」(ローカル環境ではないため200となる)
+      expect(response.status).toHaveBeenCalledWith(200)
       // 用意したエラー情報でrenderが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('error', {
-        title: dummyError.name,
         message: dummyError.message,
-        status: dummyError.status,
-        description: dummyError.desc,
-        error: {}
+        description: dummyError.desc
       })
       // errorログは呼ばれ「ない」
       expect(errorSpy).not.toHaveBeenCalled()
@@ -199,7 +200,8 @@ describe('helpers/errorのテスト', () => {
         {
           tenant: request.user.tenantId,
           user: request.user.userId,
-          status: dummyError.status
+          status: dummyError.status,
+          path: '/dummy'
         },
         dummyError.name
       )
@@ -209,6 +211,7 @@ describe('helpers/errorのテスト', () => {
       //準備
       // userにnullを入れる
       request.user = null
+      request.path = '/dummy'
       // env.LOCALLY_HOSTEDを'false'にする
       process.env.LOCALLY_HOSTED = 'false'
       // エラーを用意する
@@ -221,22 +224,20 @@ describe('helpers/errorのテスト', () => {
       errorHelper.render(dummyError, request, response, next)
 
       // 期待結果
-      // response.statusで用意したエラーのstatusが呼ばれ「る」
-      expect(response.status).toHaveBeenCalledWith(dummyError.status)
+      // response.statusで用意したエラーのstatusが呼ばれ「ない」(ローカル環境ではないため200となる)
+      expect(response.status).toHaveBeenCalledWith(200)
       // 用意したエラー情報でrenderが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('error', {
-        title: dummyError.name,
         message: dummyError.message,
-        status: dummyError.status,
-        description: dummyError.desc,
-        error: {}
+        description: dummyError.desc
       })
       // errorログは呼ばれ「ない」
       expect(errorSpy).not.toHaveBeenCalled()
       // warnログが表示れ「る」
       expect(warnSpy).toHaveBeenCalledWith(
         {
-          status: dummyError.status
+          status: dummyError.status,
+          path: '/dummy'
         },
         dummyError.name
       )
@@ -259,16 +260,10 @@ describe('helpers/errorのテスト', () => {
       // 期待結果
       // response.statusで500が呼ばれ「る」
       expect(response.status).toHaveBeenCalledWith(error500.status)
-      // 以下の情報でrenderが呼ばれ「る」
-      // title,message,statusには、create(500)のエラー情報※渡したエラーにstatusがないため
-      // descriptionはnull※desc情報がないため
-      // errorには渡したエラー情報※env.LOCALLY_HOSTEDがtrueのため
+      // 用意したエラー情報でrenderが呼ばれ「ない」（500エラーの時は404のメッセージとなる）
       expect(response.render).toHaveBeenCalledWith('error', {
-        title: error500.name,
-        message: error500.message,
-        status: error500.status,
-        description: null,
-        error: dummyError
+        message: 'お探しのページは見つかりませんでした。',
+        description: '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
       })
       // warnログは呼ばれ「ない」
       expect(warnSpy).not.toHaveBeenCalled()
@@ -276,7 +271,80 @@ describe('helpers/errorのテスト', () => {
       expect(errorSpy).toHaveBeenCalledWith(
         {
           stack: dummyError.stack,
-          status: error500.status
+          status: error500.status,
+          path: ''
+        },
+        dummyError.name
+      )
+    })
+    test('ローカル環境ではステータスコードがそのまま返却される', async () => {
+      // 準備
+      // userにnullを入れる
+      request.user = null
+      request.path = '/dummy'
+      // env.LOCALLY_HOSTEDを'true'にする
+      process.env.LOCALLY_HOSTED = 'true'
+      // エラーを用意する
+      const dummyError = new Error('dummy')
+      dummyError.name = 'Dummy name'
+      dummyError.status = 500
+      dummyError.desc = 'Dummy desc'
+
+      // 試験実施
+      errorHelper.render(dummyError, request, response, next)
+
+      // 期待結果
+      // response.statusで用意したエラーのstatusが呼ばれ「る」
+      expect(response.status).toHaveBeenCalledWith(dummyError.status)
+      // 用意したエラー情報でrenderが呼ばれ「ない」（500エラーの時は404のメッセージとなる）
+      expect(response.render).toHaveBeenCalledWith('error', {
+        message: 'お探しのページは見つかりませんでした。',
+        description: '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
+      })
+      // warnログは呼ばれ「ない」
+      expect(warnSpy).not.toHaveBeenCalled()
+      // errorログが表示されれ「る」
+      expect(errorSpy).toHaveBeenCalledWith(
+        {
+          stack: dummyError.stack,
+          status: dummyError.status,
+          path: '/dummy'
+        },
+        dummyError.name
+      )
+    })
+    test('ローカル環境以外ではステータスコードが200で返却される', async () => {
+      // 準備
+      // userにnullを入れる
+      request.user = null
+      request.path = '/dummy'
+      // env.LOCALLY_HOSTEDを'false'にする
+      process.env.LOCALLY_HOSTED = 'false'
+      // エラーを用意する
+      const dummyError = new Error('dummy')
+      dummyError.name = 'Dummy name'
+      dummyError.status = 500
+      dummyError.desc = 'Dummy desc'
+
+      // 試験実施
+      errorHelper.render(dummyError, request, response, next)
+
+      // 期待結果
+      // response.statusで用意したエラーのstatusが呼ばれ「ない」（200で返却される）
+      expect(response.status).toHaveBeenCalledWith(200)
+      // 用意したエラー情報でrenderが呼ばれ「ない」（500エラーの時は404のメッセージとなる）
+      expect(response.render).toHaveBeenCalledWith('error', {
+        message: 'お探しのページは見つかりませんでした。',
+        description: '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
+      })
+      // warnログは呼ばれ「ない」
+      expect(warnSpy).not.toHaveBeenCalled()
+      // errorログが表示されれ「る」
+      expect(errorSpy).toHaveBeenCalledWith(
+        {
+          stack: dummyError.stack,
+          status: dummyError.status,
+          path: '/dummy'
         },
         dummyError.name
       )
