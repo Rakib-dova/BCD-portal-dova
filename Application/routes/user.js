@@ -11,12 +11,16 @@ const logger = require('../lib/logger')
 const errorHelper = require('./helpers/error')
 const tenantController = require('../controllers/tenantController')
 
+// CSR対策
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetRegister = async (req, res, next) => {
   if (req.session?.userContext !== 'NotUserRegistered') {
     return next(errorHelper.create(400))
   }
 
-  res.render('user-register', { title: '利用登録' })
+  res.render('user-register', { title: '利用登録', csrfToken: req.csrfToken() })
 }
 
 const cbPostRegister = async (req, res, next) => {
@@ -27,8 +31,8 @@ const cbPostRegister = async (req, res, next) => {
   if (!req.user?.accessToken || !req.user?.refreshToken) {
     return next(errorHelper.create(500))
   }
-  // TODO: SO系にフォームの内容を送信
-  // （サービス仕様の確定によっては上記不要）
+
+  if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))
 
   // テナントがnullの場合は登録しないようにする
   const tenant = await tenantController.findOne(req.user?.tenantId)
@@ -85,10 +89,10 @@ const cbGetDelete = async (req, res, next) => {
   }
 }
 
-router.get('/register', helper.isAuthenticated, cbGetRegister)
+router.get('/register', helper.isAuthenticated, csrfProtection, cbGetRegister)
 
 // helper.isAuthenticatedがミドルウェアとして入っているとセッションタイムアウトが判定できない
-router.post('/register', cbPostRegister)
+router.post('/register', csrfProtection, cbPostRegister)
 
 // 開発環境のみ動作。テナントが登録されていない場合には削除できないようにする
 if (process.env.NODE_ENV === 'development') {

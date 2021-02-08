@@ -58,10 +58,14 @@ module.exports = {
       logger.warn(logMessage, err.name)
     }
 
-    // 脆弱性対策のため、500エラーの時は404エラーの文言を画面に表示する
     if (errorStatus >= 500) {
+      // 脆弱性対策のため、500エラーの時は404エラーの文言を画面に表示する
       errorMessage = 'お探しのページは見つかりませんでした。'
       errorDescription = '上部メニューのHOMEボタンを押下し、トップページへお戻りください。'
+    } else if (err.code === 'EBADCSRFTOKEN') {
+      // csurfモジュールによる403エラーの時は400エラーの文言を画面に表示する
+      errorMessage = '不正なページからアクセスされたか、セッションタイムアウトが発生しました。'
+      errorDescription = '上部メニューのHOMEボタンを押下し、再度操作をやり直してください。'
     } else if (err.desc) {
       errorDescription = err.desc
     }

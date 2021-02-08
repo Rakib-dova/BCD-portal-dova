@@ -73,7 +73,6 @@ app.use(
       'img-src': ["'self'"],
       'form-action': ["'self'"], // form-actionは自己ドメインに制限
       // bulma-toast、fontawasom、googlefontsを使うためstyle-srcを一部許可
-      // nonceはbulma-toastがinline styeを使用するためハッシュを指定(See common-page.js)
       // prettier-ignore
       'style-src': [
         "'self' https://use.fontawesome.com https://fonts.googleapis.com"

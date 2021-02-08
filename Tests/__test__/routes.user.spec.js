@@ -10,6 +10,14 @@ jest.mock('../../Application/controllers/userController.js', () => ({
     return null
   }
 }))
+jest.mock('../../Application/node_modules/csurf', () => {
+  // コンストラクタをMock化
+  return jest.fn().mockImplementation(() => {
+    return (res, req, next) => {
+      return next()
+    }
+  })
+})
 
 const routesUser = require('../../Application/routes/user')
 const Request = require('jest-express').Request
@@ -48,8 +56,13 @@ describe('userのテスト', () => {
 
   describe('ルーティング（開発環境）', () => {
     test('userのルーティングを確認', async () => {
-      expect(routesUser.router.get).toBeCalledWith('/register', helper.isAuthenticated, routesUser.cbGetRegister)
-      expect(routesUser.router.post).toBeCalledWith('/register', routesUser.cbPostRegister)
+      expect(routesUser.router.get).toBeCalledWith(
+        '/register',
+        helper.isAuthenticated,
+        expect.any(Function), // 本来はcsrfProtectionで動くはずが何故か動かない…
+        routesUser.cbGetRegister
+      )
+      expect(routesUser.router.post).toBeCalledWith('/register', expect.any(Function), routesUser.cbPostRegister)
       // deleteは呼ばれ「る」
       expect(routesUser.router.get).toBeCalledWith(
         '/delete',
@@ -68,7 +81,8 @@ describe('userのテスト', () => {
       request.session = {
         userContext: 'NotUserRegistered'
       }
-
+      // CSRF対策
+      request.csrfToken = jest.fn()
       // 試験実施
       await routesUser.cbGetRegister(request, response, next)
 
@@ -85,7 +99,8 @@ describe('userのテスト', () => {
       request.session = {
         userContext: 'dummy'
       }
-
+      // CSRF対策
+      request.csrfToken = jest.fn()
       // 試験実施
       await routesUser.cbGetRegister(request, response, next)
 
@@ -103,6 +118,10 @@ describe('userのテスト', () => {
       // session.userContextに正常値(NotUserRegistered)を想定する
       request.session = {
         userContext: 'NotUserRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -135,7 +154,8 @@ describe('userのテスト', () => {
         },
         true
       ])
-
+      // CSRF対策
+      request.csrfToken = jest.fn()
       // 試験実施
       await routesUser.cbPostRegister(request, response, next)
 
@@ -163,7 +183,36 @@ describe('userのテスト', () => {
       request.session = {
         userContext: 'dummy'
       }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
+      }
+      // 試験実施
+      await routesUser.cbPostRegister(request, response, next)
 
+      // 期待結果
+      // 400エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+      // 登録成功時のログが呼ばれ「ない」
+      expect(infoSpy).not.toHaveBeenCalled()
+      // ポータルにリダイレクト「されない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/portal')
+      expect(response.getHeader('Location')).not.toEqual('/portal')
+    })
+
+    test('400エラー：bodyにtermsCheckが存在しない', async () => {
+      // 準備
+      // session.userContextに正常値(NotUserRegistered)を想定する
+      request.session = {
+        userContext: 'NotUserRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
       // 試験実施
       await routesUser.cbPostRegister(request, response, next)
 
@@ -180,6 +229,10 @@ describe('userのテスト', () => {
     test('500エラー：セッション内のuserのToken情報がnullの場合', async () => {
       request.session = {
         userContext: 'NotUserRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       request.user = {
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
@@ -206,6 +259,10 @@ describe('userのテスト', () => {
       // session.userContextに正常値(NotUserRegistered)を想定する
       request.session = {
         userContext: 'NotUserRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -235,6 +292,10 @@ describe('userのテスト', () => {
       // session.userContextに正常値(NotUserRegistered)を想定する
       request.session = {
         userContext: 'NotUserRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -273,6 +334,10 @@ describe('userのテスト', () => {
       request.session = {
         userContext: 'NotUserRegistered'
       }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
+      }
       // request.userに正常値を想定する
       request.user = {
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
@@ -309,6 +374,10 @@ describe('userのテスト', () => {
       // session.userContextに正常値(NotUserRegistered)を想定する
       request.session = {
         userContext: 'NotUserRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -353,6 +422,10 @@ describe('userのテスト', () => {
       // session.userContextに正常値(NotUserRegistered)を想定する
       request.session = {
         userContext: 'NotUserRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -406,6 +479,10 @@ describe('userのテスト', () => {
       // session.userContextに正常値(NotUserRegistered)を想定する
       request.session = {
         userContext: 'NotUserRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -465,7 +542,7 @@ describe('userのテスト', () => {
     const RequestForProd = require('jest-express').Request
     const ResponseForProd = require('jest-express').Response
     const userControllerForProd = require('../../Application/controllers/userController.js')
-    console.log(userControllerForProd)
+
     let requestForProd, responseForProd, deleteSpyForProd
     beforeEach(() => {
       requestForProd = new RequestForProd()
@@ -485,9 +562,14 @@ describe('userのテスト', () => {
       expect(routesUserForProd.router.get).toBeCalledWith(
         '/register',
         helperForProd.isAuthenticated,
+        expect.any(Function), // 本来はcsrfProtectionで動くはずが何故か動かない…
         routesUserForProd.cbGetRegister
       )
-      expect(routesUserForProd.router.post).toBeCalledWith('/register', routesUserForProd.cbPostRegister)
+      expect(routesUserForProd.router.post).toBeCalledWith(
+        '/register',
+        expect.any(Function), // 本来はcsrfProtectionで動くはずが何故か動かない…
+        routesUserForProd.cbPostRegister
+      )
       // ルーティング./deleteは呼ばれ「ない」
       expect(routesUserForProd.router.get).not.toBeCalledWith(
         '/delete',

@@ -1,25 +1,23 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
 
 .is-family-noto-sans {
-    font-family: "Noto Sans JP";
+  font-family: 'Noto Sans JP';
 }
 .is-family-noto-sans-bold {
-    font-family: "Noto Sans JP";
-    font-weight: bold;
+  font-family: 'Noto Sans JP';
+  font-weight: bold;
 }
 
 html,
 body {
-    height: 100%;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    background-color: #fafafa;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background-color: #fafafa;
 }
 
-input[type=checkbox]
-{
+input[type='checkbox'] {
   /* Double-sized Checkboxes */
   -ms-transform: scale(2); /* IE */
   -moz-transform: scale(2); /* FF */
@@ -30,37 +28,37 @@ input[type=checkbox]
 }
 
 /* Might want to wrap a span around your checkbox text */
-.checkboxtext
-{
+.checkboxtext {
   /* Checkbox text */
   font-size: 110%;
   display: inline;
-  padding-left: 10px
+  padding-left: 10px;
 }
 
 /*register*/
-input[aria-invalid="true"], textarea[aria-invalid="true"] {
-    border: 1px solid #f00;
-    box-shadow: 0 0 4px 0 #f00;
+input[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+  border: 1px solid #f00;
+  box-shadow: 0 0 4px 0 #f00;
 }
 input:invalid:focus {
-    border: 1px solid #f00;
-    box-shadow: 0 0 4px 0 #f00;
+  border: 1px solid #f00;
+  box-shadow: 0 0 4px 0 #f00;
 }
 
-input[readonly]{
-    background-color:whitesmoke;
-    border-color:whitesmoke;
-    box-shadow: none;
-    color:#7a7a7a;
-    cursor: not-allowed;
+input[readonly] {
+  background-color: whitesmoke;
+  border-color: whitesmoke;
+  box-shadow: none;
+  color: #7a7a7a;
+  cursor: not-allowed;
 }
 
 .appdesc {
   color: hsl(0, 0%, 21%);
 }
 .appdesc:hover {
-    color: hsl(217, 71%, 53%)
+  color: hsl(217, 71%, 53%);
 }
 
 iframe {
@@ -68,85 +66,48 @@ iframe {
 }
 
 .app-icon {
-    height: 5rem;
-    width: 5rem;
+  height: 80px;
+  width: 80px;
+}
+.ncom-logo {
+  height: 28px;
 }
 .panel {
-    background-color: white;
+  background-color: white;
 }
 
 .hero-body {
-    background-image: url('../image/ts-app-digitaltrade-banner.svg');
-    width: 100%;
-    background-repeat: no-repeat;
-    background-position: center top;
-    background-size: contain;
+  background-image: url('../image/ts-app-digitaltrade-banner.svg');
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: contain;
 }
 .main-container {
-    background-repeat: no-repeat;
-    height: 380px;
-    width: 100%;
-    background-color: white;
-    color: white;
-    padding-top: 30px;
-    box-sizing: border-box;
-    overflow-y: hidden;
-    overflow-x: hidden;
-    font-family: "NotoSansCJKjp-Reqular";
-    padding: 80px;
-    margin-bottom: 30px;
-}
-
-.cloud-image {
-    padding-bottom: 20px;
-    margin: auto;
-}
-
-    .cloud-image img {
-        width: 100%;
-        height: 100%;
-    }
-
-.success-text {
-    padding-bottom: 20px;
-    font-size: 45px;
-    line-height: 54px;
-    text-align: center;
-}
-
-.description {
-    font-size: 18px;
-    line-height: 24px;
-    text-align: center;
-}
-
-.content {
-    box-sizing: border-box;
-    max-width: 450px;
-    position: relative;
-    margin: auto;
-}
-
-.tweet-container {
-    height: 30px;
-    width: 30px;
-    min-width: 30px;
-    min-height: 50px;
-    margin: 0 20px;
-    position: absolute;
-    left: -55px;
-    top: 90px;
-}
-
-    .tweet-container img {
-        width: 100%;
-        height: 100%;
-    }
-
-.content-body {
-    min-width: 400px;
+  background-repeat: no-repeat;
+  height: 380px;
+  width: 100%;
+  background-color: white;
+  color: white;
+  padding-top: 30px;
+  box-sizing: border-box;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  font-family: 'NotoSansCJKjp-Reqular';
+  padding: 80px;
+  margin-bottom: 30px;
 }
 
 .col-md-4 {
-    color: black;
+  color: black;
+}
+
+/* navbar-itemをひとつ右寄せするための設定 */
+.navbar-item.right {
+  margin-left: auto;
+}
+/* navbarを上書き */
+.navbar {
+  align-items: stretch;
+  display: block;
 }
