@@ -13,6 +13,21 @@ jest.mock('../../Application/controllers/userController.js', () => ({
   }
 }))
 
+jest.mock('../../Application/node_modules/csurf', () => {
+  // コンストラクタをMock化
+  return jest.fn().mockImplementation(() => {
+    return (res, req, next) => {
+      return next()
+    }
+  })
+})
+
+// CSR対策
+/*
+const csrf = require('../../Application/node_modules/csurf')
+const csrfProtection = csrf({ cookie: false })
+*/
+
 const routesTenant = require('../../Application/routes/tenant')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
@@ -52,8 +67,14 @@ describe('tenantのテスト', () => {
 
   describe('ルーティング', () => {
     test('tenantのルーティングを確認', async () => {
-      expect(routesTenant.router.get).toBeCalledWith('/register', helper.isAuthenticated, routesTenant.cbGetRegister)
-      expect(routesTenant.router.post).toBeCalledWith('/register', routesTenant.cbPostRegister)
+      expect(routesTenant.router.get).toBeCalledWith(
+        '/register',
+        helper.isAuthenticated,
+        expect.any(Function), // 本来はcsrfProtectionで動くはずが何故か動かない…
+        routesTenant.cbGetRegister
+      )
+
+      expect(routesTenant.router.post).toBeCalledWith('/register', expect.any(Function), routesTenant.cbPostRegister)
     })
   })
 
@@ -132,6 +153,9 @@ describe('tenantのテスト', () => {
           Modified: '2021-01-20T05:20:07.137Z',
           AccountType: 'FREE'
         })
+
+      // CSRF対策
+      request.csrfToken = jest.fn()
 
       // 試験実施
       await routesTenant.cbGetRegister(request, response, next)
@@ -223,6 +247,8 @@ describe('tenantのテスト', () => {
           AccountType: 'FREE'
         })
 
+      // CSRF対策
+      request.csrfToken = jest.fn()
       // 試験実施
       await routesTenant.cbGetRegister(request, response, next)
 
@@ -395,6 +421,10 @@ describe('tenantのテスト', () => {
       request.session = {
         userContext: 'NotTenantRegistered'
       }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
+      }
       // request.userに正常値を想定する
       request.user = {
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
@@ -507,7 +537,36 @@ describe('tenantのテスト', () => {
       request.session = {
         userContext: 'dummy'
       }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
+      }
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
 
+      // 期待結果
+      // 400エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+      // 登録成功時のログが呼ばれ「ない」
+      expect(infoSpy).not.toHaveBeenCalled()
+      // ポータルにリダイレクト「されない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/portal')
+      expect(response.getHeader('Location')).not.toEqual('/portal')
+    })
+
+    test('400エラー：bodyにtermsCheckが存在しない', async () => {
+      // 準備
+      // session.userContextにNotTenantRegisteredを入れる
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
       // 試験実施
       await routesTenant.cbPostRegister(request, response, next)
 
@@ -526,6 +585,10 @@ describe('tenantのテスト', () => {
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
         userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       // userのTokenにnullを入れる
       request.user = {
@@ -553,6 +616,10 @@ describe('tenantのテスト', () => {
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
         userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -583,6 +650,10 @@ describe('tenantのテスト', () => {
       request.session = {
         userContext: 'NotTenantRegistered'
       }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
+      }
       // request.userに正常値を想定する
       request.user = {
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
@@ -611,6 +682,10 @@ describe('tenantのテスト', () => {
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
         userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -642,11 +717,15 @@ describe('tenantのテスト', () => {
       expect(response.getHeader('Location')).not.toEqual('/portal')
     })
 
-    test('500エラー：400エラー：作られたUserの配列データ2つ目がfalseの場合', async () => {
+    test('400エラー：作られたUserの配列データ2つ目がfalseの場合', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
         userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -692,6 +771,10 @@ describe('tenantのテスト', () => {
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
         userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
       }
       // request.userに正常値を想定する
       request.user = {

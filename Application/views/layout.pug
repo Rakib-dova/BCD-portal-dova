@@ -16,36 +16,12 @@ html
     .navbar.is-dark.is-fixed-top
         .navbar-brand.is-family-noto-sans-bold
           .navbar-item BConnectionデジタルトレード
-          //a.navbar-brand(href='/') BConnectionデジタルトレード
+          //- a.navbar-brand(href='/') BConnectionデジタルトレード
           a.navbar-item(href='/') 
             span.fas.fa-home
-            | Home
-        .navbar-menu
-          .navbar-end
-            .navbar-item.is-hidden-touch.p-0
-              img.logo-ncom(src='../image/ts-app-digitaltrade-ncom-logo.svg')
-        if customerId != 'none'
-          .navbar-end
-            .navbar-item
-              //a.button.is-info.show-modal(data-target='accountinfo-modal') アカウント情報
-    
-    .modal.modal-fx-fadeInScale#accountinfo-modal
-      .modal-background.cancel-button(data-target='accountinfo-modal')
-      .modal-card
-        header.modal-card-head
-          p.modal-card-title アカウント情報
-          button.delete(data-target="accountinfo-modal")
-        section.modal-card-body
-          //p サポートアプリより問い合わせの際は、以下のお客様番号をご利用ください。
-          table.table
-            tbody
-            -var aryLabel = ["お客様番号"]
-            -var aryDataTarget = [customerId]
-              each val, index in aryLabel
-                tr
-                  th #{val}
-                  td #{aryDataTarget[index]}
-        footer.modal-card-foot
+              | Home
+          .navbar-item.right
+            img.ncom-logo(src='../image/ts-app-dititaltrade-ncom-logo.svg')
     
     block content
 

@@ -11,6 +11,10 @@ const logger = require('../lib/logger')
 
 const errorHelper = require('./helpers/error')
 
+// CSR対策
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetRegister = async (req, res, next) => {
   if (req.session?.userContext !== 'NotTenantRegistered') {
     return next(errorHelper.create(400))
@@ -69,7 +73,8 @@ const cbGetRegister = async (req, res, next) => {
     email: email,
     zip: zip,
     address: address,
-    customerId: 'none'
+    customerId: 'none',
+    csrfToken: req.csrfToken()
   })
 }
 
@@ -81,11 +86,8 @@ const cbPostRegister = async (req, res, next) => {
   if (!req.user?.accessToken || !req.user?.refreshToken) {
     return next(errorHelper.create(500))
   }
-  // TODO: フォームから送信された値のバリデーションチェック
-  // （サービス仕様が未確定のため現時点では実装しない）
 
-  // TODO: SO系にフォームの内容を送信
-  // （サービス仕様の確定によっては上記不要）
+  if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))
 
   // ユーザ登録と同時にテナント登録も行われる
   const user = await userController.create(req.user.accessToken, req.user.refreshToken)
@@ -120,10 +122,10 @@ const cbPostRegister = async (req, res, next) => {
   }
 }
 
-router.get('/register', helper.isAuthenticated, cbGetRegister)
+router.get('/register', helper.isAuthenticated, csrfProtection, cbGetRegister)
 
 // helper.isAuthenticatedがミドルウェアとして入っているとセッションタイムアウトが判定できない
-router.post('/register', cbPostRegister)
+router.post('/register', csrfProtection, cbPostRegister)
 
 module.exports = {
   router: router,

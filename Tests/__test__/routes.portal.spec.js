@@ -205,7 +205,7 @@ describe('portalのテスト', () => {
       expect(next).toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      console.log(request.session?.userContext)
+
       // userContextがLoggedInになって「いない」
       expect(request.session?.userContext).not.toBe('LoggedIn')
       // session.userRoleが初期値のままになっている
