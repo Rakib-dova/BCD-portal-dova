@@ -6,9 +6,9 @@ block content
       .container
 
   .container.is-max-widescreen
-    .level-left.is-family-sans-serif
-      .level-item
-        p.title.mb-4 Apps
+    //- .level-left.is-family-sans-serif
+    //-   .level-item
+    //-     p.title.mb-4 Apps
     .columns.is-desktop.is-family-noto-sans
       .column.hvr-float
         .box
@@ -78,7 +78,8 @@ block content
       .modal-background.cancel-button(data-target='support-confirmation-modal')
       .modal-content.is-family-noto-sans
         .card
-          .card-content
+          .card-content.notification.m-0
+            button.delete(data-target="support-confirmation-modal")
             if userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d"
               p お問い合わせの際は、問い合わせフォームに以下のお客様番号をご入力ください。
               .field.has-addons
