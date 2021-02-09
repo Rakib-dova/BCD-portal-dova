@@ -88,12 +88,10 @@ block content
                 .control
                   a.button#copy-btn(data-clipboard-target="#tenantId")
                     | Copy                
-              a.button.is-success.is-pulled-right(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank') お問い合わせページを開く
+              a.button.is-success.is-pulled-right.mb-3(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank') お問い合わせページを開く
             else
               p お問い合わせは、アカウント管理者のみ可能です。
-              p ※一般ユーザからお問い合わせの際には、アカウント管理者にご相談の上、お問い合わせください。
-          footer.card-footer
-            p.card-footer-item
+              p アカウント管理者にご相談の上、お問い合わせください。
 
   //-
     .modal#createdocument-modal
@@ -122,3 +120,4 @@ block content
 
 block append scripts
   script(src="/js/portal-page.js")
+  // End of DigitalTrade Portal Page
