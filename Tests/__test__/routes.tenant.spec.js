@@ -567,6 +567,29 @@ describe('tenantのテスト', () => {
         accessToken: 'dummyAccessToken',
         refreshToken: 'dummyRefreshToken'
       }
+      // Tradeshiftから正常なユーザデータ取得を想定する
+      accessTradeshiftSpy.mockReturnValueOnce({
+        Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        CompanyName: 'UnitTestCompany',
+        Username: 'dummy@example.com',
+        Language: 'ja',
+        TimeZone: 'Asia/Tokyo',
+        Memberships: [
+          {
+            UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+          }
+        ],
+        Created: '2021-01-20T05:11:15.177Z',
+        State: 'ACTIVE',
+        Type: 'PERSON',
+        FirstName: 'Yamada',
+        LastName: 'Taro',
+        Visible: true
+      })
+
       // 試験実施
       await routesTenant.cbPostRegister(request, response, next)
 
@@ -611,6 +634,86 @@ describe('tenantのテスト', () => {
       expect(response.getHeader('Location')).not.toEqual('/portal')
     })
 
+    test('500エラー：userdata取得時にAPIアクセスエラーが発生した場合', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshiftアクセスでのエラーを想定する
+      accessTradeshiftSpy.mockReturnValue(new Error('Access error mock'))
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      // 登録成功時のログが呼ばれ「ない」
+      expect(infoSpy).not.toHaveBeenCalled()
+      // ポータルにリダイレクト「されない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/portal')
+      expect(response.getHeader('Location')).not.toEqual('/portal')
+    })
+
+    test('403エラー：アカウント管理者権限のないユーザで操作した場合', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshiftの応答で、管理者権限(Role: a6a3edcd-00d9-427c-bf03-4ef0112ba16d)がない状態にする
+      accessTradeshiftSpy.mockReturnValue({
+        Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        Memberships: [
+          {
+            UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            Role: 'abcdefcd-00d9-427c-bf03-4ef0112ba16d'
+          }
+        ]
+      })
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 403エラーが返される
+      const expectError = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
+      expectError.name = 'Forbidden'
+      expectError.status = 403
+      expectError.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
+      expect(next).toHaveBeenCalledWith(expectError)
+      // 登録成功時のログが呼ばれ「ない」
+      expect(infoSpy).not.toHaveBeenCalled()
+      // ポータルにリダイレクト「されない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/portal')
+      expect(response.getHeader('Location')).not.toEqual('/portal')
+    })
+
     test('500エラー：データベースエラーが発生した場合', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
@@ -628,6 +731,28 @@ describe('tenantのテスト', () => {
         accessToken: 'dummyAccessToken',
         refreshToken: 'dummyRefreshToken'
       }
+      // Tradeshiftから正常なユーザデータ取得を想定する
+      accessTradeshiftSpy.mockReturnValueOnce({
+        Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        CompanyName: 'UnitTestCompany',
+        Username: 'dummy@example.com',
+        Language: 'ja',
+        TimeZone: 'Asia/Tokyo',
+        Memberships: [
+          {
+            UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+          }
+        ],
+        Created: '2021-01-20T05:11:15.177Z',
+        State: 'ACTIVE',
+        Type: 'PERSON',
+        FirstName: 'Yamada',
+        LastName: 'Taro',
+        Visible: true
+      })
       // DBのデータ取得時にエラーを想定する
       createSpy.mockReturnValue(new Error('DB error mock'))
 
@@ -661,6 +786,28 @@ describe('tenantのテスト', () => {
         accessToken: 'dummyAccessToken',
         refreshToken: 'dummyRefreshToken'
       }
+      // Tradeshiftから正常なユーザデータ取得を想定する
+      accessTradeshiftSpy.mockReturnValueOnce({
+        Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        CompanyName: 'UnitTestCompany',
+        Username: 'dummy@example.com',
+        Language: 'ja',
+        TimeZone: 'Asia/Tokyo',
+        Memberships: [
+          {
+            UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+          }
+        ],
+        Created: '2021-01-20T05:11:15.177Z',
+        State: 'ACTIVE',
+        Type: 'PERSON',
+        FirstName: 'Yamada',
+        LastName: 'Taro',
+        Visible: true
+      })
       // DBからのデータ取得ができなかった場合を想定する
       createSpy.mockReturnValue(null)
 
@@ -694,6 +841,28 @@ describe('tenantのテスト', () => {
         accessToken: 'dummyAccessToken',
         refreshToken: 'dummyRefreshToken'
       }
+      // Tradeshiftから正常なユーザデータ取得を想定する
+      accessTradeshiftSpy.mockReturnValueOnce({
+        Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        CompanyName: 'UnitTestCompany',
+        Username: 'dummy@example.com',
+        Language: 'ja',
+        TimeZone: 'Asia/Tokyo',
+        Memberships: [
+          {
+            UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+          }
+        ],
+        Created: '2021-01-20T05:11:15.177Z',
+        State: 'ACTIVE',
+        Type: 'PERSON',
+        FirstName: 'Yamada',
+        LastName: 'Taro',
+        Visible: true
+      })
       // DBからの取得データが配列ではなかった場合を想定する
       createSpy.mockReturnValue({
         userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
@@ -734,6 +903,28 @@ describe('tenantのテスト', () => {
         accessToken: 'dummyAccessToken',
         refreshToken: 'dummyRefreshToken'
       }
+      // Tradeshiftから正常なユーザデータ取得を想定する
+      accessTradeshiftSpy.mockReturnValueOnce({
+        Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        CompanyName: 'UnitTestCompany',
+        Username: 'dummy@example.com',
+        Language: 'ja',
+        TimeZone: 'Asia/Tokyo',
+        Memberships: [
+          {
+            UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+          }
+        ],
+        Created: '2021-01-20T05:11:15.177Z',
+        State: 'ACTIVE',
+        Type: 'PERSON',
+        FirstName: 'Yamada',
+        LastName: 'Taro',
+        Visible: true
+      })
       // DBからの取得データの配列2つ目がfalseの場合を想定する
       createSpy.mockReturnValue([
         {
@@ -783,6 +974,28 @@ describe('tenantのテスト', () => {
         accessToken: 'dummyAccessToken',
         refreshToken: 'dummyRefreshToken'
       }
+      // Tradeshiftから正常なユーザデータ取得を想定する
+      accessTradeshiftSpy.mockReturnValueOnce({
+        Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        CompanyName: 'UnitTestCompany',
+        Username: 'dummy@example.com',
+        Language: 'ja',
+        TimeZone: 'Asia/Tokyo',
+        Memberships: [
+          {
+            UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+          }
+        ],
+        Created: '2021-01-20T05:11:15.177Z',
+        State: 'ACTIVE',
+        Type: 'PERSON',
+        FirstName: 'Yamada',
+        LastName: 'Taro',
+        Visible: true
+      })
       // DBからの取得データのuserIdがrequestのuserIdと異なる場合を想定する
       createSpy.mockReturnValue([
         {

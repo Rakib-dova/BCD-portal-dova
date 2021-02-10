@@ -1,7 +1,7 @@
 'use strict'
-
 const app = require('../../Application/app')
 const request = require('supertest')
+const { JSDOM } = require('jsdom')
 
 jest.setTimeout(40000) // jestのタイムアウトを40秒とする
 
@@ -19,7 +19,11 @@ const getCookies = async (username, password) => {
   await page.type('input[name="j_password"]', password)
 
   // await page.click('body button#proceed') //page.clickで何故か押せない…
-  await page.evaluate((body) => body.querySelector('button#proceed').click(), await page.$('body'))
+  // await page.evaluate((body) => body.querySelector('button#proceed').click(), await page.$('body'))
+  // クッキー使用の許諾をクリック
+  await page.click('#cookie-consent-accept-all')
+  // 進むボタンをクリック（クッキー許諾後は、page.click使用可能）
+  await page.click('#proceed')
 
   // Oauth2認証後、ヘッドレスブラウザ内ではアプリにリダイレクトしている
   await page.waitForTimeout(10000) // 10秒待つことにする
@@ -42,10 +46,16 @@ describe('ルーティングのインテグレーションテスト', () => {
 
   describe('前準備', () => {
     test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      const options = require('minimist')(process.argv.slice(2))
+      const adminId = options.adminid
+      const adminSecret = options.adminsecret
+      const userId = options.userid
+      const userSecret = options.usersecret
       // --------------------アカウント管理者のCookieを取得---------------
-      acCookies = await getCookies('xxxxxx@xxxxxxx', 'xxxxxxxx') // update me
+      acCookies = await getCookies(adminId, adminSecret)
       // ---------------------一般ユーザのCookieを取得--------------------
-      userCookies = await getCookies('xxxxxx@xxxxxxx', 'xxxxxxxx') // update me
+      userCookies = await getCookies(userId, userSecret)
 
       // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
 
@@ -61,17 +71,120 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
   })
 
-  describe('DBにアカウント管理者・一般ユーザ登録なし/アカウント管理者としてリクエスト', () => {
-    test('/indexにアクセス：/portalにリダイレクト', async () => {
+  describe('DBにアカウント管理者・一般ユーザ共に登録なし/一般ユーザとしてリクエスト', () => {
+    // DB状態:
+    //   テナント：
+    //    試験前：未登録
+    //    試験後(期待値)：未登録
+    //
+    //   アカウント管理者：
+    //    試験前：未登録
+    //    試験後(期待値)：未登録
+    //
+    //   一般ユーザ：
+    //    試験前：未登録
+    //    試験後(期待値)：未登録
+
+    // /authにリダイレクトする
+    test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
+      const res = await request(app)
+        .get('/')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(303)
+
+      expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
+    })
+
+    // テナント未登録のため、テナントの利用登録画面にリダイレクトする
+    test('/portalにアクセス：303ステータスと/tenant/registerにリダイレクト', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(303)
+
+      expect(res.header.location).toBe('/tenant/register') // リダイレクト先は/tenant/register
+    })
+
+    let userCsrf, tenantCsrf
+    // userContextが'NotUserRegistered'(tenant側の登録が先に必要)のため、アクセスできない
+    test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/user/register')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(400)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/user/register')
+        .type('form')
+        .send({ _csrf: userCsrf, termsCheck: 'on' })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 管理者権限がないため、アクセスできない
+    test('/tenant/registerにアクセス：管理者権限不足による403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/tenant/register')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(403)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/tenant/register')
+        .type('form')
+        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+  })
+
+  describe('DBにアカウント管理者・一般ユーザ共に登録なし/アカウント管理者としてリクエスト', () => {
+    // DB状態:
+    //   テナント：
+    //    試験前：未登録
+    //    試験後(期待値)：登録
+    //
+    //   アカウント管理者：
+    //    試験前：未登録
+    //    試験後(期待値)：登録
+    //
+    //   一般ユーザ：
+    //    試験前：未登録
+    //    試験後(期待値)：未登録
+
+    // /authにリダイレクトする
+    test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
       const res = await request(app)
         .get('/')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(303)
 
-      expect(res.header.location).toBe('/auth') // リダイレクト先は/tenant/register
+      expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
     })
 
-    test('/portalにアクセス：/tenant/registerにリダイレクト', async () => {
+    // テナント未登録のため、テナントの利用登録画面にリダイレクトする
+    test('/portalにアクセス：303ステータスと/tenant/registerにリダイレクト', async () => {
       const res = await request(app)
         .get('/portal')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -80,59 +193,596 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/tenant/register') // リダイレクト先は/tenant/register
     })
 
-    // アカウント管理者のためuser/registerはアクセスできない
-    test('/user/registerにアクセス：400 エラー', async () => {
+    let userCsrf, tenantCsrf
+    // userContextが'NotUserRegistered'(tenant側の登録が先に必要)のため、アクセスできない
+    test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/user/register')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
-    // アカウント管理者のためuser/registerにポストできない
-    test('/user/registerにPOST：400 エラー', async () => {
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
-        .send({ termsCheck: 'on' })
+        .send({ _csrf: userCsrf, termsCheck: 'on' })
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(403)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
-    test('/tenant/registerにアクセス：200 OK', async () => {
+    // テナントの利用登録録画面が正常に表示される
+    test('/tenant/registerにアクセス：200ステータスとテナントの利用登録画面表示', async () => {
       const res = await request(app)
         .get('/tenant/register')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
       expect(res.text).toMatch(/利用登録 - BConnectionデジタルトレード/i) // タイトル
     })
 
-    test('/tenant/registerにPOST：/portalにリダイレクト', async () => {
+    // 正常にテナントが登録され、ポータルにリダイレクトされる
+    test('/tenant/registerにPOST：303ステータスと/portalにリダイレクト(アカウント管理者とテナント登録成功)', async () => {
       const res = await request(app)
         .post('/tenant/register')
         .type('form')
-        .send({ termsCheck: 'on' })
+        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(303) // 303リダイレクトに直す？
 
       expect(res.header.location).toBe('/portal') // リダイレクト先は/portal
-
-      // expect(portalRes.text).not.toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
   })
+
+  describe('DBにアカウント管理者のみ登録・一般ユーザ登録なし/アカウント管理者としてリクエスト', () => {
+    // DB状態:
+    //   テナント：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+    //
+    //   アカウント管理者：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+    //
+    //   一般ユーザ：
+    //    試験前：未登録
+    //    試験後(期待値)：未登録
+
+    // /authにリダイレクトする
+    test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
+      const res = await request(app)
+        .get('/')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(303)
+
+      expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
+    })
+
+    // (登録画面には遷移せず)正常にportalが表示される
+    test('/portalにアクセス：200ステータスとportal画面表示', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+    })
+
+    let userCsrf, tenantCsrf
+    // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
+    test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/user/register')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(400)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/user/register')
+        .type('form')
+        .send({ _csrf: userCsrf, termsCheck: 'on' })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
+    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/tenant/register')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(400)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/tenant/register')
+        .type('form')
+        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+  })
+
   describe('DBにアカウント管理者のみ登録・一般ユーザ登録なし/一般ユーザとしてリクエスト', () => {
-    // ひとつ前のテストにより既にアカウント管理者がDBに登録されている
-    test('/indexにアクセス：/portalにリダイレクト', async () => {
+    // DB状態:
+    //   テナント：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+    //
+    //   アカウント管理者：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+    //
+    //   一般ユーザ：
+    //    試験前：未登録
+    //    試験後(期待値)：登録
+
+    // /authにリダイレクトする
+    test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
       const res = await request(app)
         .get('/')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(303)
 
-      expect(res.header.location).toBe('/auth') // リダイレクト先は/tenant/register
+      expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
+    })
+
+    // テナント登録済/ユーザ未登録のため、ユーザの利用登録画面にリダイレクトする
+    test('/portalにアクセス：303ステータスと/user/registerにリダイレクト', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(303)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.header.location).toBe('/user/register') // リダイレクト先は/user/register
+    })
+
+    let userCsrf, tenantCsrf
+    // ユーザの利用登録画面が正常に表示される
+    test('/user/registerにアクセス：200ステータスとユーザの利用登録画面表示', async () => {
+      const res = await request(app)
+        .get('/user/register')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/利用登録 - BConnectionデジタルトレード/i) // タイトル
+    })
+
+    // 正常に一般ユーザが登録され、/portalにリダイレクトする
+    test('/user/registerにPOST：303ステータスと/portalにリダイレクト(一般ユーザ登録成功)', async () => {
+      const res = await request(app)
+        .post('/user/register')
+        .type('form')
+        .send({ _csrf: userCsrf, termsCheck: 'on' })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(303)
+
+      expect(res.header.location).toBe('/portal') // リダイレクト先は/portal
+    })
+
+    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
+    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/tenant/register')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(400)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/tenant/register')
+        .type('form')
+        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+  })
+
+  describe('DBにアカウント管理者・一般ユーザ共に登録済/アカウント管理者としてリクエスト', () => {
+    // DB状態:
+    //   テナント：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+    //
+    //   アカウント管理者：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+    //
+    //   一般ユーザ：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+
+    // /authにリダイレクトする
+    test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
+      const res = await request(app)
+        .get('/')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(303)
+
+      expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
+    })
+
+    // (登録画面に遷移せず)正常にportal画面が表示される
+    test('/portalにアクセス：200ステータスとportal画面表示', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+    })
+
+    let userCsrf, tenantCsrf
+    // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
+    test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/user/register')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(400)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/user/register')
+        .type('form')
+        .send({ _csrf: userCsrf, termsCheck: 'on' })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
+    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/tenant/register')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(400)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/tenant/register')
+        .type('form')
+        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+  })
+
+  describe('DBにアカウント管理者・一般ユーザ共に登録済/一般ユーザとしてリクエスト', () => {
+    // DB状態:
+    //   テナント：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+    //
+    //   アカウント管理者：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+    //
+    //   一般ユーザ：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+
+    // /authにリダイレクトする
+    test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
+      const res = await request(app)
+        .get('/')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(303)
+
+      expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
+    })
+
+    // (登録画面に遷移せず)正常にportal画面が表示される
+    test('/portalにアクセス：200ステータスとportal画面表示', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+    })
+
+    let userCsrf, tenantCsrf
+    // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
+    test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/user/register')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(400)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/user/register')
+        .type('form')
+        .send({ _csrf: userCsrf, termsCheck: 'on' })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
+    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/tenant/register')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(400)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/tenant/register')
+        .type('form')
+        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+  })
+
+  describe('DBに一般ユーザのみ登録・アカウント管理者登録なし/一般ユーザとしてリクエスト', () => {
+    // DB状態:
+    //   テナント：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+    //
+    //   アカウント管理者：
+    //    試験前：削除
+    //    試験後(期待値)：未登録
+    //
+    //   一般ユーザ：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+
+    test('DB削除', async () => {
+      // アカウント管理者を削除
+      await request(app)
+        .get('/user/delete')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+    })
+
+    // /authにリダイレクトする
+    test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
+      const res = await request(app)
+        .get('/')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(303)
+
+      expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
+    })
+
+    // (登録画面に遷移せず)正常にportal画面が表示される
+    test('/portalにアクセス：200ステータスとportal画面表示', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+    })
+
+    let userCsrf, tenantCsrf
+    // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
+    test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/user/register')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(400)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/user/register')
+        .type('form')
+        .send({ _csrf: userCsrf, termsCheck: 'on' })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
+    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/tenant/register')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(400)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/tenant/register')
+        .type('form')
+        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+  })
+
+  describe('DBに一般ユーザのみ登録・アカウント管理者登録なし/アカウント管理者としてリクエスト', () => {
+    // DB状態:
+    //   テナント：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+    //
+    //   アカウント管理者：
+    //    試験前：未登録
+    //    試験後(期待値)：登録
+    //
+    //   一般ユーザ：
+    //    試験前：登録済
+    //    試験後(期待値)：登録済
+
+    // /authにリダイレクトする
+    test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
+      const res = await request(app)
+        .get('/')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(303)
+
+      expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
+    })
+
+    // テナント登録済/ユーザ未登録のため、ユーザの利用登録画面にリダイレクトする
+    test('/portalにアクセス：303ステータスと/user/registerにリダイレクト', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(303)
+
+      expect(res.header.location).toBe('/user/register') // リダイレクト先は/user/register
+    })
+
+    let userCsrf, tenantCsrf
+    // ユーザの利用登録画面が正常に表示される
+    test('/user/registerにアクセス：200ステータスとユーザの利用登録画面表示', async () => {
+      const res = await request(app)
+        .get('/user/register')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/利用登録 - BConnectionデジタルトレード/i) // タイトル
+    })
+
+    // 正常にアカウント管理者が登録され、/portalにリダイレクトする
+    test('/user/registerにPOST：303ステータスと/portalにリダイレクト(アカウント管理者登録成功)', async () => {
+      const res = await request(app)
+        .post('/user/register')
+        .type('form')
+        .send({ _csrf: userCsrf, termsCheck: 'on' })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(303)
+
+      expect(res.header.location).toBe('/portal') // リダイレクト先は/portal
+    })
+
+    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
+    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .get('/tenant/register')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(400)
+
+      // CSRFのワンタイムトークン取得
+      const dom = new JSDOM(res.text)
+      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正しいCSRFトークンを取得していないため、アクセスできない
+    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+      const res = await request(app)
+        .post('/tenant/register')
+        .type('form')
+        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(403)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
   })
 })
