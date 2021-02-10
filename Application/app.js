@@ -188,6 +188,9 @@ app.use('/auth', require('./routes/auth').router)
 app.use('/tenant', require('./routes/tenant').router)
 app.use('/user', require('./routes/user').router)
 
+// faviconは設置しないので204(No Content)を返す
+app.get('/favicon.ico', (req, res) => res.status(204))
+
 const errorHelper = require('./routes/helpers/error')
 
 // catch 404 and forward to error handler
