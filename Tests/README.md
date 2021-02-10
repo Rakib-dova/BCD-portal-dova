@@ -76,7 +76,7 @@ $ npm run run start:local
 - ./**integration_tests**配下の全テストコードの実行（カバレッジ算出なし）
 
 ```
-$ npm run test:integration
+$ npm run test:integration -- --adminid=xxx@xxx.com --adminsecret=xxx --userid=xxx@xxx.com --usersecret=xxx
 ```
 
 - インテグレーションテストの jest の設定値はユニットテストと違う設定ファイルを使用
