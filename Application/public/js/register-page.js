@@ -58,7 +58,10 @@ document.getElementById('next-btn').onclick = function () {
   if (document.getElementById('form').checkValidity()) {
     if (elementCheckbox.value === 'on') {
       const tdCheckbox = document.getElementById(targetCheckbox)
-      tdCheckbox.innerHTML = '同意する'
+
+      // 権限に応じて同意文言を変える
+      const isUser = document.getElementById('submit').getAttribute('formAction').includes('/user')
+      tdCheckbox.innerHTML = isUser ? '確認しました' : '同意する'
       const modal = document.getElementById('confirmregister-modal')
       if (modal) modal.classList.toggle('is-active')
 

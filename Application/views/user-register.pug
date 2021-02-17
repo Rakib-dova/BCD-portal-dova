@@ -13,8 +13,9 @@ block content
           .panel-block
             .container
               .columns.is-centered: .column.is-four-fifths
-                .field.is-grouped.is-grouped-left
-                  label.label 免責事項
+                .field.is-grouped.is-grouped-left.is-block
+                  label.label 確認事項
+                  span 下記の規約に基づいてご契約をいただいております。ご利用前に確認をお願いします。
                 iframe#terms-of-service(src="../html/terms-of-service20201203.html" width="100%" height="600px")
                 //- iframe(src="" width="100%" height="200px")
 
@@ -24,7 +25,7 @@ block content
                     //- CSRF対策
                     input(type="hidden" name="_csrf" value=csrfToken)
                     input.is-normal#check(name="termsCheck" type="checkbox" required="required" disabled="disabled")
-                  span.checkboxtext 免責事項を承諾しました（最後まで免責事項をスクロールしてください）
+                  span.checkboxtext 確認しました（最後まで利用規約をスクロールしてください）
               .columns.is-centered: .column.is-four-fifths
                 .field.is-grouped.is-grouped-centered
                   .control
@@ -39,7 +40,7 @@ block content
             section.modal-card-body
               table.table
                 tbody
-                -var aryLabel = ["免責事項"]
+                -var aryLabel = ["利用規約"]
                 -var aryFormName = ["termsCheck"]
                   each val, index in aryLabel
                     tr
