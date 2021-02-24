@@ -90,3 +90,11 @@ jest.config.e2e.js
 ```
 jest-puppeteer.config.js
 ```
+
+- azure 上のインスタンスに対してインテグレーションテスト
+
+インテグレーションテスト先のインスタンス URL を返る場合は、az_integration.spec.js 内で指定している URL を変更する
+
+```
+$ npm run test:integration -- az_integration.spec.js --adminid=xxx@xxx.com --adminsecret=xxx --userid=xxx@xxx.com --usersecret=xxx
+```
