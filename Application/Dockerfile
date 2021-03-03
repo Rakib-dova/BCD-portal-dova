@@ -7,5 +7,5 @@ WORKDIR /app
 # Bundle app source
 COPY . .
 
-EXPOSE 8080 80
-CMD [ "npm", "start" ]
+EXPOSE 3000
+CMD [ "npm", "run", "start:local" ]

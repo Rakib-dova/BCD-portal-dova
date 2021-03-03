@@ -66,23 +66,12 @@ VSCode の開発では ESLint および Prettier 拡張機能の使用を推奨�
 
 ## インテグレーションテストテストの実行方法
 
-- インテグレーションテストでは、別途 DB＆ローカルサーバを立てておく必要あり
-
-```
-$ cd ..\Application\
-$ npm run run start:local
-```
-
-- ./**integration_tests**配下の全テストコードの実行（カバレッジ算出なし）
-
-```
-$ npm run test:integration -- --adminid=xxx@xxx.com --adminsecret=xxx --userid=xxx@xxx.com --usersecret=xxx
-```
+- テストコードは./**integration_tests**配下
 
 - インテグレーションテストの jest の設定値はユニットテストと違う設定ファイルを使用
 
 ```
-jest.config.e2e.js
+jest.config.integration.js
 ```
 
 - jest で使っている puppeteer の設定は下記に使用
@@ -91,10 +80,25 @@ jest.config.e2e.js
 jest-puppeteer.config.js
 ```
 
-- azure 上のインスタンスに対してインテグレーションテスト
+```
+$ cd ..\Application\
+$ npm run run start:local
+```
 
-インテグレーションテスト先のインスタンス URL を返る場合は、az_integration.spec.js 内で指定している URL を変更する
+1. localhost に対するインテグレーションテスト（integration.spec.js）
+
+- localhost へのインテグレーションテストでは、別途 DB＆ローカルサーバを立てておく必要あり
 
 ```
-$ npm run test:integration -- az_integration.spec.js --adminid=xxx@xxx.com --adminsecret=xxx --userid=xxx@xxx.com --usersecret=xxx
+$ npm run test:integration -- ./integration.spec.js --adminid=xxx@xxx.com --adminsecret=xxx --userid=xxx@xxx.com --usersecret=xxx
+```
+
+2. azure 上のインスタンスに対してインテグレーションテスト
+
+- azure 上のインスタンスにアクセスしてインテグレーションテスト
+- インテグレーションテスト先のインスタンス URL を変更する場合は、az_integration.spec.js 内で指定している URL を変更する
+- 本番環境は user/delete のエンドポイントを閉塞しているため動作しない
+
+```
+$ npm run test:integration -- ./az_integration.spec.js --adminid=xxx@xxx.com --adminsecret=xxx --userid=xxx@xxx.com --usersecret=xxx
 ```
