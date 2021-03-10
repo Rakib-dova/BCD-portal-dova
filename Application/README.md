@@ -128,6 +128,14 @@ https://sandbox.tradeshift.com/#/apps/Tradeshift.AppStore/apps/BCDdev.PortalAppL
 または以下の URL にアクセスし、利用登録画面が表示されることを確認する
 https://sandbox.tradeshift.com/#/BCDdev.PortalAppL
 
+## localhost では自己署名証明書を使っていることの留意点
+
+- ブラウザで sandbox 環境でアプリを開いた際に localhost に接続できない場合、\
+  一度、localhost:3000 で自己署名証明書のエラーを解消してからアクセスすると表示される
+
+- 利用規約 pdf のダウンロードは自己署名証明書を使っているため不可。\
+  （Azure 環境にデプロイしてから確認すること）
+
 # コーディング規約
 
 - Javascript Standard Style 準拠
@@ -157,14 +165,3 @@ VSCode の開発では ESLint および Prettier 拡張機能の使用を推奨�
   一般ユーザは上記アカウント管理者以外のユーザとなる。\
   アカウントを作成したユーザは、最初のアカウント管理者となる。それ以外のユーザは会社プロフィールでユーザ追加時に設定する。\
   ユーザ追加時にユーザの権限としてアカウント管理者を設定すると、一つのテナントに対して複数のアカウント管理者が存在することもある。
-
-# Docker コンテナでの動作確認
-
-Application/Dockerfile を用いたコンテナ化の確認
-
-## docker login https://registry.redhat.io
-
-DB と redis の接続先を次に返る
-host.docker.internal
-
-docker build -t node14:test .

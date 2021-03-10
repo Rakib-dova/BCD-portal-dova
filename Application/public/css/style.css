@@ -66,8 +66,8 @@ iframe {
 }
 
 img.logo-ncom {
-    height: 3rem;
-    max-height: 3rem; /* override bulma.css */
+  height: 3rem;
+  max-height: 3rem; /* override bulma.css */
 }
 .app-icon {
   height: 80px;

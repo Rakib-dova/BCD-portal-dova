@@ -6,8 +6,8 @@ const height = iframe.offsetHeight
 function scrollEvent() {
   // スクロールイベントを定義
   iframe.contentDocument.onscroll = function () {
-    const scrollHeight = iframe.contentDocument.body.scrollHeight
-    const scrollTop = iframe.contentDocument.body.scrollTop
+    const scrollHeight = iframe.contentDocument.body.scrollHeight || iframe.contentDocument.documentElement.scrollHeight
+    const scrollTop = iframe.contentDocument.body.scrollTop || iframe.contentDocument.documentElement.scrollTop
 
     // 現在の表示位置の高さ
     const scrollPosition = height + scrollTop
