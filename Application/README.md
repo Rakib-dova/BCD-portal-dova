@@ -93,8 +93,8 @@ $ docker-compose down --volume
 
 ## DB マイグレーション
 
-docker-compose 時のデータインポートではテーブルのみを作成した状態のため\
-DB マイグレーションでスキーマを作成する。
+docker-compose 時のデータインポートではデータベースのみを作成した状態のため\
+DB マイグレーションでテーブルを作成する。
 
 Application ディレクトリ配下で以下を実行。
 
