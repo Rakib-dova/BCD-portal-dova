@@ -1,0 +1,64 @@
+trigger:
+  branches:
+    include:
+    - refs/heads/master
+  paths:
+    include:
+    - /
+    exclude:
+    - /Documents
+    - /Tests
+  batch: True
+name: $(date:yyyyMMdd)$(rev:.r)
+jobs:
+- job: Phase_1
+  displayName: Agent job 1
+  timeoutInMinutes: 0
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - checkout: self
+  - task: NodeTool@0
+    displayName: Use Node 14.x
+    inputs:
+      versionSpec: 14.x
+  - task: Npm@0
+    displayName: Install application dependencies
+    inputs:
+      cwd: Application
+      arguments: --force
+  - task: Npm@0
+    displayName: Install test dependencies
+    inputs:
+      cwd: Tests
+      arguments: --force
+  - task: gulp@0
+    displayName: Run unit tests
+    enabled: False
+    inputs:
+      gulpFile: Tests/gulpfile.js
+      targets: unittest
+      gulpjs: Tests/node_modules/gulp/bin/gulp.js
+      publishJUnitResults: true
+  - task: Docker@1
+    displayName: Build an image
+    inputs:
+      containerregistrytype: Container Registry
+      dockerRegistryEndpoint: 76513984-c592-4030-baa7-017bf2ad83ef
+      imageName: bcdportal:$(Build.BuildId)
+      useDefaultContext: false
+      buildContext: $(System.DefaultWorkingDirectory)/Application
+  - task: Docker@2
+    displayName: Tag an image
+    inputs:
+      command: tag
+      arguments: registry.redhat.io/bcdportal:$(Build.BuildId) bcdportalacrstg.azurecr.io/bcdportal:$(Build.BuildId)
+  - task: Docker@1
+    displayName: Push an image
+    inputs:
+      azureSubscriptionEndpoint: 618b928f-caaf-412f-97f6-60aa6ee5ae7c
+      azureContainerRegistry: bcdportalacrstg.azurecr.io
+      command: push
+      imageName: bcdportal:$(Build.BuildId)
+      buildContext: '**'
+...
