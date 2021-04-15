@@ -1,6 +1,6 @@
 * {
   padding: 4px;
-}
+  font-family: sans-serif;}
 h2 {
   margin: 10px 10px 15px 10px;
   font-weight: bold;
@@ -22,7 +22,11 @@ p.indent {
   padding-left: 1.8em;
   text-indent: -1.8em;
 }
-span.title {
+span.title_h3 {
+  margin: 30px 10px 5px 10px;
+  color: #5e6ec1;
+}
+span.title_h4 {
   margin: 30px 10px 5px 20px;
   text-decoration: underline;
 }
@@ -30,3 +34,4 @@ span.inum {
   margin: 5px 10px 5px -4px;
   font-weight: bold;
 }
+
