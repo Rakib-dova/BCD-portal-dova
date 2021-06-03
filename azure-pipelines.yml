@@ -60,6 +60,12 @@ stages:
             publishJUnitResults: true
           enabled: false
 
+        - task: Npm@1
+          inputs:
+            command: 'custom'
+            workingDir: 'Tests'
+            customCommand: 'run test'
+
         - task: Docker@1
           displayName: 'Build an image'
           inputs:
