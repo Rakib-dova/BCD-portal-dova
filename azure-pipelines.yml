@@ -4,11 +4,15 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-  branches:  
-    include:  
-    - '*'  
-    exclude:  
-    - '*'
+  branches:
+    include:
+    - refs/heads/master
+  paths:
+    include:
+    - /
+    exclude:
+    - /Documents
+    - /Tests
 
 parameters:
   - name: Environment
