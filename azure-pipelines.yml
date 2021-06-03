@@ -25,6 +25,8 @@ parameters:
 
 variables:
   - group: ${{ parameters.Environment }}
+  - name: isDev
+    value: $[eq('${{ parameters.Environment }}','dev')]
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -106,10 +108,21 @@ stages:
                       containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
 
       - job: Confirmation
+        condition: $(isDev)
         pool: server
         steps:
         - task: ManualValidation@0
+          displayName: Confirm before running integration tests
           inputs:
             notifyUsers: 'A100673@eclnttcom000670.onmicrosoft.com'
             instructions: 'Make sure that test accounts should be agreed with terms of service'
-            
+        
+      - job: IntegrationTest
+        condition: $(isDev)
+        steps:
+        - task: Npm@1
+          displayName: 'Run integration tests'
+          inputs:
+            command: 'custom'
+            workingDir: 'Tests'
+            customCommand: 'run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)'
