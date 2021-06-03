@@ -105,10 +105,11 @@ stages:
                       appName: '$(portalAppName)'
                       containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
 
-      - job: IntegrationTest
+      - job: Confirmation
+        pool: server
         steps:
         - task: ManualIntervention@8
           displayName: Confirm before running integration test
           inputs:
-            instructions: 'Be sure that test accounts should be agreed with terms of service'
+            instructions: 'Make sure that test accounts should be agreed with terms of service'
             
