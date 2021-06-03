@@ -25,6 +25,8 @@ parameters:
 
 variables:
   - group: ${{ parameters.Environment }}
+  - name: isDev
+    value: $[eq('${{ parameters.Environment }}','dev')]
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -104,3 +106,36 @@ stages:
                       azureSubscription: '$(azureSubscriptionEndpoint)'
                       appName: '$(portalAppName)'
                       containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
+
+      - job: Confirmation
+        condition: variables.isDev
+        dependsOn: Deploy
+        pool: server
+        steps:
+        - task: ManualValidation@0
+          displayName: Confirm before running integration tests
+          inputs:
+            notifyUsers: 'A100673@eclnttcom000670.onmicrosoft.com'
+            instructions: 'Make sure that test accounts should be agreed with terms of service'
+          enabled: false
+
+      - job: IntegrationTest
+        condition: variables.isDev
+        dependsOn: Confirmation
+        pool: 
+          vmImage: 'windows-latest'
+        steps:
+        - task: Npm@0
+          displayName: 'Install test dependencies'
+          inputs:
+            cwd: Tests
+            arguments: '--force'
+          enabled: false
+
+        - task: Npm@1
+          displayName: 'Run integration tests'
+          inputs:
+            command: 'custom'
+            workingDir: 'Tests'
+            customCommand: 'run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)'
+          enabled: false
