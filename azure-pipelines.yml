@@ -109,6 +109,7 @@ stages:
 
       - job: Confirmation
         condition: variables.isDev
+        dependsOn: Deploy
         pool: server
         steps:
         - task: ManualValidation@0
@@ -119,6 +120,7 @@ stages:
         
       - job: IntegrationTest
         condition: variables.isDev
+        dependsOn: Deploy
         steps:
         - task: Npm@1
           displayName: 'Run integration tests'
