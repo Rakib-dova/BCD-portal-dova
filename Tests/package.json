@@ -19,7 +19,7 @@
     "test:coverage": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose --coverage",
     "test:integration": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose --config jest.config.integration.js",
     "test:tools": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose --config jest.config.tools.js",
-    "test:ci": "npm run test -- --watchAll=false --reporters=default --reporters=jest-junit"
+    "test:ci": "npm run test -- --watchAll=false"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
@@ -28,12 +28,6 @@
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "jest-junit": "^12.1.0"
-  },
-  "jest-junit": {
-    "suiteNameTemplate": "{filepath}",
-    "outputDirectory": ".",
-    "outputName": "junit.xml"
+    "eslint-plugin-promise": "^4.2.1"
   }
 }
