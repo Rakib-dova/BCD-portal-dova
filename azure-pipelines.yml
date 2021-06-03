@@ -111,3 +111,4 @@ stages:
           displayName: Confirm before running integration test
           inputs:
             instructions: 'Be sure that test accounts should be agreed with terms of service'
+            
