@@ -74,10 +74,10 @@ stages:
         strategy:
             runOnce:
                 deploy:
-                    steps:
-                    - task: AzureWebAppContainer@1
-                      displayName: 'Azure Web App on Container Deploy: BCD-portal-dev'
-                      inputs:
-                        azureSubscription: 'Microsoft Azure (開発環境)'
-                        appName: 'BCD-portal-dev'
-                        containers: 'bcdportaldevacr.azurecr.io/bcdportaldev:$(Build.BuildId)'
+                  steps:
+                  - task: AzureWebAppContainer@1
+                    displayName: 'Azure Web App on Container Deploy: BCD-portal-dev'
+                    inputs:
+                      azureSubscription: 'Microsoft Azure (開発環境)'
+                      appName: 'BCD-portal-dev'
+                      containers: 'bcdportaldevacr.azurecr.io/bcdportaldev:$(Build.BuildId)'
