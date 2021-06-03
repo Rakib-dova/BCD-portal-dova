@@ -122,6 +122,12 @@ stages:
         condition: variables.isDev
         dependsOn: Confirmation
         steps:
+        - task: Npm@0
+          displayName: 'Install test dependencies'
+          inputs:
+            cwd: Tests
+            arguments: '--force'
+            
         - task: Npm@1
           displayName: 'Run integration tests'
           inputs:
