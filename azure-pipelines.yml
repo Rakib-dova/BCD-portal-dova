@@ -10,6 +10,18 @@ trigger:
     exclude:  
     - '*'
 
+parameters:
+  - name: Environment
+    type: string
+    default: dev
+    values:
+    - dev
+    - stg
+    - prd
+
+variables:
+  - group: ${{ parameters.Environment }}
+
 pool:
   vmImage: 'ubuntu-16.04'
 
