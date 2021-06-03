@@ -120,7 +120,7 @@ stages:
         
       - job: IntegrationTest
         condition: variables.isDev
-        dependsOn: Deploy
+        dependsOn: Confirmation
         steps:
         - task: Npm@1
           displayName: 'Run integration tests'
