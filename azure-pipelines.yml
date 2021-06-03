@@ -78,7 +78,7 @@ stages:
         - task: Docker@1
           displayName: 'Push an image'
           inputs:
-            azureSubscriptionEndpoint: 'Microsoft Azure (開発環境)'
+            azureSubscriptionEndpoint: '$(azureSubscriptionEndpoint)'
             azureContainerRegistry: $(azureContainerResistoryName).azurecr.io
             command: push
             imageName: '$(repositoryName):$(Build.BuildId)'
@@ -94,6 +94,6 @@ stages:
                   - task: AzureWebAppContainer@1
                     displayName: 'Azure Web App on Container Deploy: $(portalAppName)'
                     inputs:
-                      azureSubscription: 'Microsoft Azure (開発環境)'
+                      azureSubscription: '$(azureSubscriptionEndpoint)'
                       appName: '$(portalAppName)'
                       containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
