@@ -108,8 +108,8 @@ stages:
       - job: Confirmation
         pool: server
         steps:
-        - task: ManualIntervention@8
-          displayName: Confirm before running integration test
+        - task: ManualValidation@0
           inputs:
+            notifyUsers: 'A100673@eclnttcom000670.onmicrosoft.com'
             instructions: 'Make sure that test accounts should be agreed with terms of service'
             
