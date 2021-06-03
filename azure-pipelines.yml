@@ -117,7 +117,8 @@ stages:
           inputs:
             notifyUsers: 'A100673@eclnttcom000670.onmicrosoft.com'
             instructions: 'Make sure that test accounts should be agreed with terms of service'
-        
+          enabled: false
+
       - job: IntegrationTest
         condition: variables.isDev
         dependsOn: Confirmation
@@ -129,10 +130,12 @@ stages:
           inputs:
             cwd: Tests
             arguments: '--force'
-            
+          enabled: false
+
         - task: Npm@1
           displayName: 'Run integration tests'
           inputs:
             command: 'custom'
             workingDir: 'Tests'
             customCommand: 'run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)'
+          enabled: false
