@@ -108,7 +108,7 @@ stages:
                       containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
 
       - job: Confirmation
-        condition: $[isDev]
+        condition: variables.isDev
         pool: server
         steps:
         - task: ManualValidation@0
@@ -118,7 +118,7 @@ stages:
             instructions: 'Make sure that test accounts should be agreed with terms of service'
         
       - job: IntegrationTest
-        condition: $[isDev]
+        condition: variables.isDev
         steps:
         - task: Npm@1
           displayName: 'Run integration tests'
