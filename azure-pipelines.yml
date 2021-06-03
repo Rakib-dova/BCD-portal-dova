@@ -65,7 +65,7 @@ stages:
           inputs:
             containerregistrytype: 'Container Registry'
             dockerRegistryEndpoint: 'Redhat Container Registry'
-            imageName: 'bcdportaldev:$(Build.BuildId)'
+            imageName: '$(repositoryName):$(Build.BuildId)'
             useDefaultContext: false
             buildContext: '$(System.DefaultWorkingDirectory)/Application'
 
@@ -73,15 +73,15 @@ stages:
           displayName: 'Tag an image'
           inputs:
             command: tag
-            arguments: 'registry.redhat.io/bcdportaldev:$(Build.BuildId) bcdportaldevacr.azurecr.io/bcdportaldev:$(Build.BuildId)'
+            arguments: 'registry.redhat.io/$(repositoryName):$(Build.BuildId) $(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
 
         - task: Docker@1
           displayName: 'Push an image'
           inputs:
             azureSubscriptionEndpoint: 'Microsoft Azure (開発環境)'
-            azureContainerRegistry: bcdportaldevacr.azurecr.io
+            azureContainerRegistry: $(azureContainerResistoryName).azurecr.io
             command: push
-            imageName: 'bcdportaldev:$(Build.BuildId)'
+            imageName: '$(repositoryName):$(Build.BuildId)'
 
   - stage: Deploy
     jobs:
@@ -92,8 +92,8 @@ stages:
                 deploy:
                   steps:
                   - task: AzureWebAppContainer@1
-                    displayName: 'Azure Web App on Container Deploy: BCD-portal-dev'
+                    displayName: 'Azure Web App on Container Deploy: $(portalAppName)'
                     inputs:
                       azureSubscription: 'Microsoft Azure (開発環境)'
-                      appName: 'BCD-portal-dev'
-                      containers: 'bcdportaldevacr.azurecr.io/bcdportaldev:$(Build.BuildId)'
+                      appName: '$(portalAppName)'
+                      containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
