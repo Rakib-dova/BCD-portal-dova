@@ -65,7 +65,7 @@ stages:
           inputs:
             command: 'custom'
             workingDir: 'Tests'
-            customCommand: 'run test -- --watchAll=false'
+            customCommand: 'run test:ci'
 
         - task: Docker@1
           displayName: 'Build an image'
