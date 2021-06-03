@@ -1,0 +1,99 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  branches:
+    include:
+    - refs/heads/master
+  paths:
+    include:
+    - /
+    exclude:
+    - /Documents
+    - /Tests
+
+parameters:
+  - name: Environment
+    type: string
+    default: dev
+    values:
+    - dev
+    - stg
+    - prd
+
+variables:
+  - group: ${{ parameters.Environment }}
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+stages:
+  - stage: BuildandPush
+    jobs:
+      - job: 
+        steps:
+        - task: NodeTool@0
+          displayName: 'Use Node 14.x'
+          inputs:
+            versionSpec: 14.x
+      
+        - task: Npm@0
+          displayName: 'Install application dependencies'
+          inputs:
+            cwd: Application
+            arguments: '--force'
+
+        - task: Npm@0
+          displayName: 'Install test dependencies'
+          inputs:
+            cwd: Tests
+            arguments: '--force'
+
+        - task: gulp@0
+          displayName: 'Run unit tests'
+          inputs:
+            gulpFile: Tests/gulpfile.js
+            targets: unittest
+            gulpjs: 'Tests/node_modules/gulp/bin/gulp.js'
+            publishJUnitResults: true
+          enabled: false
+
+        - task: Docker@1
+          displayName: 'Build an image'
+          inputs:
+            containerregistrytype: 'Container Registry'
+            dockerRegistryEndpoint: 'Redhat Container Registry'
+            imageName: '$(repositoryName):$(Build.BuildId)'
+            useDefaultContext: false
+            buildContext: '$(System.DefaultWorkingDirectory)/Application'
+
+        - task: Docker@2
+          displayName: 'Tag an image'
+          inputs:
+            command: tag
+            arguments: 'registry.redhat.io/$(repositoryName):$(Build.BuildId) $(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
+
+        - task: Docker@1
+          displayName: 'Push an image'
+          inputs:
+            azureSubscriptionEndpoint: '$(azureSubscriptionEndpoint)'
+            azureContainerRegistry: $(azureContainerResistoryName).azurecr.io
+            command: push
+            imageName: '$(repositoryName):$(Build.BuildId)'
+
+  - stage: Deploy
+    jobs:
+      - deployment: Deploy
+        environment: dev
+        strategy:
+            runOnce:
+                deploy:
+                  steps:
+                  - task: AzureWebAppContainer@1
+                    displayName: 'Azure Web App on Container Deploy: $(portalAppName)'
+                    inputs:
+                      azureSubscription: '$(azureSubscriptionEndpoint)'
+                      appName: '$(portalAppName)'
+                      containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
