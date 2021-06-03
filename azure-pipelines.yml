@@ -1,0 +1,68 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  branches:  
+    include:  
+    - '*'  
+    exclude:  
+    - '*'
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+stages:
+  - stage: Commit
+    jobs:
+      - job: 
+        steps:
+        - task: NodeTool@0
+          displayName: 'Use Node 14.x'
+          inputs:
+            versionSpec: 14.x
+      
+        - task: Npm@0
+          displayName: 'Install application dependencies'
+          inputs:
+            cwd: Application
+            arguments: '--force'
+
+        - task: Npm@0
+          displayName: 'Install test dependencies'
+          inputs:
+            cwd: Tests
+            arguments: '--force'
+
+        - task: gulp@0
+          displayName: 'Run unit tests'
+          inputs:
+            gulpFile: Tests/gulpfile.js
+            targets: unittest
+            gulpjs: 'Tests/node_modules/gulp/bin/gulp.js'
+            publishJUnitResults: true
+          enabled: false
+
+        - task: Docker@1
+          displayName: 'Build an image'
+          inputs:
+            containerregistrytype: 'Container Registry'
+            dockerRegistryEndpoint: 'Redhat Container Registry'
+            imageName: 'bcdportaldev:$(Build.BuildId)'
+            useDefaultContext: false
+            buildContext: '$(System.DefaultWorkingDirectory)/Application'
+
+        - task: Docker@2
+          displayName: 'Tag an image'
+          inputs:
+            command: tag
+            arguments: 'registry.redhat.io/bcdportaldev:$(Build.BuildId) bcdportaldevacr.azurecr.io/bcdportaldev:$(Build.BuildId)'
+
+        - task: Docker@1
+          displayName: 'Push an image'
+          inputs:
+            azureSubscriptionEndpoint: 'Microsoft Azure (開発環境)'
+            azureContainerRegistry: bcdportaldevacr.azurecr.io
+            command: push
+            imageName: 'bcdportaldev:$(Build.BuildId)'
