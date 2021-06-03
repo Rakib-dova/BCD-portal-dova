@@ -121,7 +121,8 @@ stages:
       - job: IntegrationTest
         condition: variables.isDev
         dependsOn: Confirmation
-        pool: 'windows-latest'
+        pool: 
+          vmImage: 'windows-latest'
         steps:
         - task: Npm@0
           displayName: 'Install test dependencies'
