@@ -117,20 +117,27 @@ stages:
           inputs:
             notifyUsers: 'A100673@eclnttcom000670.onmicrosoft.com'
             instructions: 'Make sure that test accounts should be agreed with terms of service'
-          enabled: false
+          enabled: true
 
       - job: IntegrationTest
         condition: variables.isDev
         dependsOn: Confirmation
-        pool: 
-          vmImage: 'windows-latest'
         steps:
+        - script: |
+            printenv
+          
         - task: Npm@0
           displayName: 'Install test dependencies'
           inputs:
             cwd: Tests
             arguments: '--force'
-          enabled: false
+          enabled: true
+
+        - task: Npm@0
+          displayName: 'Install application dependencies'
+          inputs:
+            cwd: Application
+            arguments: '--force'
 
         - task: Npm@1
           displayName: 'Run integration tests'
@@ -138,4 +145,4 @@ stages:
             command: 'custom'
             workingDir: 'Tests'
             customCommand: 'run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)'
-          enabled: false
+          enabled: true
