@@ -115,16 +115,34 @@ stages:
         - task: ManualValidation@0
           displayName: Confirm before running integration tests
           inputs:
-            notifyUsers: 'A100673@eclnttcom000670.onmicrosoft.com'
+            notifyUsers: '$(BUILD_REQUESTEDFOREMAIL)'
             instructions: 'Make sure that test accounts should be agreed with terms of service'
-        
+          enabled: true
+
       - job: IntegrationTest
         condition: variables.isDev
-        dependsOn: Deploy
+        dependsOn: Confirmation
         steps:
+        - script: |
+            printenv
+          
+        - task: Npm@0
+          displayName: 'Install test dependencies'
+          inputs:
+            cwd: Tests
+            arguments: '--force'
+          enabled: true
+
+        - task: Npm@0
+          displayName: 'Install application dependencies'
+          inputs:
+            cwd: Application
+            arguments: '--force'
+
         - task: Npm@1
           displayName: 'Run integration tests'
           inputs:
             command: 'custom'
             workingDir: 'Tests'
             customCommand: 'run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)'
+          enabled: true
