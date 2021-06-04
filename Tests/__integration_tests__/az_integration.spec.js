@@ -15,7 +15,8 @@ const getCookies = async (username, password) => {
 
   await page.goto(res.headers.location) // Tradeshift Oauth2認証ログインページをヘッドレスブラウザで開く
 
-  expect(await page.title()).toBe('ログイン | Tradeshift')
+  // expect(await page.title()).toBe('ログイン | Tradeshift')
+  expect(await page.title()).toMatch('| Tradeshift') // パイプラインのテストでは期待値が 「Log in | Tradeshift」になることの対応
   console.log('次のページに遷移しました：' + (await page.title())) // 「ログイン | Tradeshift」のはず
 
   await page.type('input[name="j_username"]', username)
