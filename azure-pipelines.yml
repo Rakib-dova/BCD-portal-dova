@@ -123,7 +123,7 @@ stages:
         condition: variables.isDev
         dependsOn: Confirmation
         pool:
-          vmImage: 'windows-latest'
+          name: Default
         steps:
         - task: Npm@0
           displayName: 'Install test dependencies'
