@@ -115,7 +115,7 @@ stages:
         - task: ManualValidation@0
           displayName: Confirm before running integration tests
           inputs:
-            notifyUsers: 'A100673@eclnttcom000670.onmicrosoft.com'
+            notifyUsers: '$(BUILD_REQUESTEDFOREMAIL)'
             instructions: 'Make sure that test accounts should be agreed with terms of service'
           enabled: true
 
