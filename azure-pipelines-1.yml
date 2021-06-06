@@ -42,7 +42,7 @@ steps:
   enabled: false
 
 - script: |
-    'node $(System.DefaultWorkingDirectory)\Tests\__integration_tests__\nakamura_test.spec.js ''$(Build.ArtifactStagingDirectory)/output.txt'''
+    'node $(System.DefaultWorkingDirectory)/Tests/__integration_tests__/nakamura_test.spec.js ''$(Build.ArtifactStagingDirectory)/output.txt'''
 
 - task: PublishBuildArtifacts@1
   inputs:
