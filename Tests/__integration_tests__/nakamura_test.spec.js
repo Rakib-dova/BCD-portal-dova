@@ -18,7 +18,7 @@ const fs = require('fs')
     return item.innerHTML
   })
   try {
-    fs.writeFileSync('C:\\Users\\dahli\\OneDrive\\デスクトップ\\temp\\テストoutput2.txt', html)
+    fs.writeFileSync(process.argv[2], html)
     console.log('write end')
   } catch (e) {
     console.log(e)
