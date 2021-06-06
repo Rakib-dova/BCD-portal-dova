@@ -1,0 +1,47 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- nakamura
+
+pool:
+  vmImage: ubuntu-latest
+
+parameters:
+  - name: Environment
+    type: string
+    default: dev
+    values:
+    - dev
+    - stg
+    - prd
+
+variables:
+  - group: ${{ parameters.Environment }}
+  - name: isDev
+    value: $[eq('${{ parameters.Environment }}','dev')]
+
+steps:
+- task: NodeTool@0
+  displayName: 'Use Node 14.x'
+  inputs:
+    versionSpec: 14.x
+
+- task: Npm@0
+  displayName: 'Install test dependencies'
+  inputs:
+    cwd: Tests
+    arguments: '--force'
+
+- task: Npm@1
+  inputs:
+    command: 'custom'
+    customCommand: 'node Tests\__integration_tests__\nakamura_test.spec.js ''$(Build.ArtifactStagingDirectory)/output.txt'''
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
