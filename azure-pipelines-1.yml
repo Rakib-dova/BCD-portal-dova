@@ -42,6 +42,7 @@ steps:
   enabled: false
 
 - script: |
+    'ls -a'
     'node $(System.DefaultWorkingDirectory)/Tests/__integration_tests__/nakamura_test.spec.js ''$(Build.ArtifactStagingDirectory)/output.txt'''
 
 - task: PublishBuildArtifacts@1
