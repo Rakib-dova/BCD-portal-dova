@@ -38,11 +38,11 @@ steps:
 - task: Npm@1
   inputs:
     command: 'custom'
-    customCommand: 'node $(System.DefaultWorkingDirectory)\Tests\__integration_tests__\nakamura_test.spec.js ''$(Build.ArtifactStagingDirectory)\output.txt'''
+    customCommand: 'node Tests\__integration_tests__\nakamura_test.spec.js ''$(Build.ArtifactStagingDirectory)\output.txt'''
   enabled: false
 
 - script: |
-    'node Tests\__integration_tests__\nakamura_test.spec.js ''$(Build.ArtifactStagingDirectory)/output.txt'''
+    'node $(System.DefaultWorkingDirectory)\Tests\__integration_tests__\nakamura_test.spec.js ''$(Build.ArtifactStagingDirectory)/output.txt'''
 
 - task: PublishBuildArtifacts@1
   inputs:
