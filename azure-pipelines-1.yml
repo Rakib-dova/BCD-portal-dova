@@ -42,11 +42,14 @@ steps:
   enabled: false
 
 - script: |
-    'ls'
-    'node Tests/__integration_tests__/nakamura_test.spec.js ''$(Build.ArtifactStagingDirectory)/output.txt'''
+    ls
+    cd Tests
+    cd __integration_tests__
+    node nakamura_test.spec.js '$(Build.ArtifactStagingDirectory)/output.txt'
 
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
     publishLocation: 'Container'
+
