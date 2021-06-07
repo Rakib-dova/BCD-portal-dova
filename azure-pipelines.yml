@@ -116,7 +116,14 @@ stages:
           displayName: Confirm before running integration tests
           inputs:
             notifyUsers: '$(BUILD.REQUESTEDFOREMAIL)'
-            instructions: 'Make sure that test accounts should be agreed with terms of service'
+            instructions: |
+              'Make sure that test accounts should be agreed with terms of service'
+              'Pease login to Tradeshift'
+              'https://sandbox.tradeshift.com/?currentScreen=0'
+              'Username:$(adminid)'
+              'password:$(adminsecret)'
+              'and access digital trade page'
+              'https://sandbox.tradeshift.com/#/apps/Tradeshift.AppStore/apps/BCDdev.PortalApp'
           enabled: true
 
       - job: IntegrationTest
