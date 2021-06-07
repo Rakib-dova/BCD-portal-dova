@@ -120,6 +120,8 @@ stages:
           enabled: true
 
       - job: IntegrationTest
+        pool:
+          vmImage: 'windows-latest'
         condition: variables.isDev
         dependsOn: Confirmation
         steps:
@@ -135,6 +137,7 @@ stages:
           inputs:
             cwd: Application
             arguments: '--force'
+          enabled: false
 
         - task: Npm@1
           displayName: 'Run integration tests'
