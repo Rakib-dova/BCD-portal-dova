@@ -7,6 +7,7 @@ trigger:
   branches:
     include:
     - refs/heads/master
+    - refs/heads/snake_case
   paths:
     include:
     - /
@@ -32,7 +33,11 @@ parameters:
 
 variables:
   - group: ${{ parameters.Environment }}
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> e805f88e44995118d75a728755e5250dcb9cafc3
 pool:
   vmImage: 'ubuntu-latest'
 
@@ -111,6 +116,7 @@ stages:
                       azureSubscription: '$(azureSubscriptionEndpoint)'
                       appName: '$(portalAppName)'
                       containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
+<<<<<<< HEAD
 
       - job: Confirmation
         condition: eq('${{parameters.IntegrationTest}}', 'yes')
@@ -199,3 +205,5 @@ stages:
               --policy-name '$(WAFname)' `
               --resource-group '$(bcd_portal_rg_name)'
 
+=======
+>>>>>>> e805f88e44995118d75a728755e5250dcb9cafc3
