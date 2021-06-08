@@ -32,9 +32,7 @@ parameters:
 
 variables:
   - group: ${{ parameters.Environment }}
-  - name: IntegrationTest
-    value: $[eq('${{ parameters.IntegrationTest }}','yes')]
-
+  
 pool:
   vmImage: 'ubuntu-latest'
 
