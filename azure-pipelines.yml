@@ -139,6 +139,8 @@ stages:
             scriptType: 'ps'
             scriptLocation: 'inlineScript'
             inlineScript: |
+              #Install Azure CLI extention without prompt
+              az config set extension.use_dynamic_install=yes_without_prompt
               #Get Outbound IP address of Azure pipelines
               $ip=Invoke-RestMethod https://ipinfo.io/json | select -exp ip
               Write-Output -------Create front-door waf-policy rule-------
