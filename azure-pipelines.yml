@@ -23,10 +23,19 @@ parameters:
     - stg
     - prd
 
+  - name: IntegrationTest
+    type: string
+    default: no
+    values:
+    - yes
+    - no
+
 variables:
   - group: ${{ parameters.Environment }}
   - name: isDev
     value: $[eq('${{ parameters.Environment }}','dev')]
+  - name: IntegrationTest
+    value: $[eq('${{ parameters.IntegrationTest }}','yes')]
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -108,7 +117,7 @@ stages:
                       containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
 
       - job: Confirmation
-        condition: variables.isDev
+        condition: variables.IntegrationTest
         dependsOn: Deploy
         pool: server
         steps:
@@ -125,14 +134,14 @@ stages:
               Username:$(adminid)
               password:$(adminsecret)
               and access digital trade page
-              https://sandbox.tradeshift.com/#/BCDdev.PortalApp
+              $(digitaltradeURL)
               and if register page are displayed ,agree with terms of service (In case portal page are displayed, you have no actions)
           enabled: true
 
       - job: IntegrationTest
         pool:
           vmImage: 'windows-latest'
-        condition: variables.isDev
+        condition: variables.IntegrationTest
         dependsOn: Confirmation
         steps:
         - task: AzureCLI@2
