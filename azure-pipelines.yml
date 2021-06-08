@@ -24,9 +24,20 @@ parameters:
     - stg
     - prd
 
+  - name: IntegrationTest
+    type: string
+    default: no
+    values:
+    - yes
+    - no
+
 variables:
   - group: ${{ parameters.Environment }}
+<<<<<<< HEAD
+  
+=======
 
+>>>>>>> e805f88e44995118d75a728755e5250dcb9cafc3
 pool:
   vmImage: 'ubuntu-latest'
 
@@ -105,3 +116,94 @@ stages:
                       azureSubscription: '$(azureSubscriptionEndpoint)'
                       appName: '$(portalAppName)'
                       containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
+<<<<<<< HEAD
+
+      - job: Confirmation
+        condition: eq('${{parameters.IntegrationTest}}', 'yes')
+        dependsOn: Deploy
+        pool: server
+        steps:
+        - task: ManualValidation@0
+          displayName: Confirm before running integration tests
+          inputs:
+            notifyUsers: '$(BUILD.REQUESTEDFOREMAIL)'
+            instructions: |
+              Make sure that test accounts should be agreed with terms of service
+              
+              Procedure
+              Please login to Tradeshift
+              https://sandbox.tradeshift.com/?currentScreen=0
+              Username:$(adminid)
+              password:$(adminsecret)
+              and access digital trade page
+              $(digitaltradeURL)
+              and if register page are displayed ,agree with terms of service (In case portal page are displayed, you have no actions)
+          enabled: true
+
+      - job: IntegrationTest
+        pool:
+          vmImage: 'windows-latest'
+        condition: eq('${{parameters.IntegrationTest}}', 'yes')
+        dependsOn: Confirmation
+        steps:
+        - task: AzureCLI@2
+          displayName: 'Create front-door waf-policy rule to allow access from Azure pipeline'
+          inputs:
+            azureSubscription: '$(azureSubscriptionEndpoint)'
+            scriptType: 'ps'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              #Install Azure CLI extention without prompt
+              az config set extension.use_dynamic_install=yes_without_prompt
+              #Get Outbound IP address of Azure pipelines
+              $ip=Invoke-RestMethod https://ipinfo.io/json | select -exp ip
+              Write-Output -------Create front-door waf-policy rule-------
+              az network front-door waf-policy rule create `
+              --name temporaryAllowFromAzurePipelines `
+              --priority 10 `
+              --rule-type MatchRule `
+              --action Allow `
+              --resource-group '$(bcd_portal_rg_name)' `
+              --policy-name '$(WAFname)' --defer
+              Write-Output -------Add IPAdress to front-door waf-policy rule-------
+              az network front-door waf-policy rule match-condition add `
+              --match-variable RemoteAddr `
+              --operator IPMatch `
+              --values $ip `
+              --name temporaryAllowFromAzurePipelines `
+              --resource-group '$(bcd_portal_rg_name)' `
+              --policy-name '$(WAFname)'
+              Write-Output -------Wait for 3 minutes to apply change-------
+              Start-Sleep -s 180
+
+        - task: Npm@0
+          displayName: 'Install test dependencies'
+          inputs:
+            cwd: Tests
+            arguments: '--force'
+          enabled: true
+
+        - task: Npm@1
+          displayName: 'Run integration tests'
+          continueOnError: true
+          inputs:
+            command: 'custom'
+            workingDir: 'Tests'
+            customCommand: 'run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)'
+          enabled: true
+
+        - task: AzureCLI@2
+          displayName: 'Delete front-door waf-policy rule'
+          inputs:
+            azureSubscription: '$(azureSubscriptionEndpoint)'
+            scriptType: 'ps'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              Write-Output -------Delete front-door waf-policy rule-------
+              az network front-door waf-policy rule delete `
+              --name temporaryAllowFromAzurePipelines `
+              --policy-name '$(WAFname)' `
+              --resource-group '$(bcd_portal_rg_name)'
+
+=======
+>>>>>>> e805f88e44995118d75a728755e5250dcb9cafc3
