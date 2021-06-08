@@ -118,12 +118,15 @@ stages:
             notifyUsers: '$(BUILD.REQUESTEDFOREMAIL)'
             instructions: |
               Make sure that test accounts should be agreed with terms of service
-              Pease login to Tradeshift
+              
+              Procedure
+              Please login to Tradeshift
               https://sandbox.tradeshift.com/?currentScreen=0
               Username:$(adminid)
               password:$(adminsecret)
               and access digital trade page
               https://sandbox.tradeshift.com/#/BCDdev.PortalApp
+              and agree with terms of service
           enabled: true
 
       - job: IntegrationTest
