@@ -117,13 +117,13 @@ stages:
           inputs:
             notifyUsers: '$(BUILD.REQUESTEDFOREMAIL)'
             instructions: |
-              'Make sure that test accounts should be agreed with terms of service'
-              'Pease login to Tradeshift'
-              'https://sandbox.tradeshift.com/?currentScreen=0'
-              'Username:$(adminid)'
-              'password:$(adminsecret)'
-              'and access digital trade page'
-              'https://sandbox.tradeshift.com/#/apps/Tradeshift.AppStore/apps/BCDdev.PortalApp'
+              Make sure that test accounts should be agreed with terms of service
+              Pease login to Tradeshift
+              https://sandbox.tradeshift.com/?currentScreen=0
+              Username:$(adminid)
+              password:$(adminsecret)
+              and access digital trade page
+              https://sandbox.tradeshift.com/#/BCDdev.PortalApp
           enabled: true
 
       - job: IntegrationTest
@@ -139,9 +139,9 @@ stages:
             scriptType: 'ps'
             scriptLocation: 'inlineScript'
             inlineScript: |
-              #AzurePipelinesのOutbound IPを取得
+              #Get Outbound IP address of Azure pipelines
               $ip=Invoke-RestMethod https://ipinfo.io/json | select -exp ip
-              Write-Output -------WAFポリシーカスタムルール作成-------
+              Write-Output -------Create front-door waf-policy rule-------
               az network front-door waf-policy rule create `
               --name temporaryAllowFromAzurePipelines `
               --priority 10 `
@@ -149,7 +149,7 @@ stages:
               --action Allow `
               --resource-group '$(bcd_portal_rg_name)' `
               --policy-name '$(WAFname)' --defer
-              Write-Output -------WAFポリシーカスタムルールIPアドレス追加-------
+              Write-Output -------Add IPAdress to front-door waf-policy rule-------
               az network front-door waf-policy rule match-condition add `
               --match-variable RemoteAddr `
               --operator IPMatch `
@@ -157,7 +157,7 @@ stages:
               --name temporaryAllowFromAzurePipelines `
               --resource-group '$(bcd_portal_rg_name)' `
               --policy-name '$(WAFname)'
-              Write-Output -------WAFポリシー変更反映まで3分待機-------
+              Write-Output -------Wait for 3 minutes to apply change-------
               Start-Sleep -s 180
 
         - task: Npm@0
@@ -183,7 +183,7 @@ stages:
             scriptType: 'ps'
             scriptLocation: 'inlineScript'
             inlineScript: |
-              Write-Output -------WAFポリシーカスタムルール削除-------
+              Write-Output -------Delete front-door waf-policy rule-------
               az network front-door waf-policy rule delete `
               --name temporaryAllowFromAzurePipelines `
               --policy-name '$(WAFname)' `
