@@ -132,6 +132,34 @@ stages:
         condition: variables.isDev
         dependsOn: Confirmation
         steps:
+        - task: AzureCLI@2
+          displayName: 'Create front-door waf-policy rule to allow access from Azure pipeline'
+          inputs:
+            azureSubscription: '$(azureSubscriptionEndpoint)'
+            scriptType: 'ps'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              #AzurePipelinesのOutbound IPを取得
+              $ip=Invoke-RestMethod https://ipinfo.io/json | select -exp ip
+              Write-Output -------WAFポリシーカスタムルール作成-------
+              az network front-door waf-policy rule create `
+              --name temporaryAllowFromAzurePipelines `
+              --priority 10 `
+              --rule-type MatchRule `
+              --action Allow `
+              --resource-group '$(bcd_portal_rg_name)' `
+              --policy-name '$(WAFname)' --defer
+              Write-Output -------WAFポリシーカスタムルールIPアドレス追加-------
+              az network front-door waf-policy rule match-condition add `
+              --match-variable RemoteAddr `
+              --operator IPMatch `
+              --values $ip `
+              --name temporaryAllowFromAzurePipelines `
+              --resource-group '$(bcd_portal_rg_name)' `
+              --policy-name '$(WAFname)'
+              Write-Output -------WAFポリシー変更反映まで3分待機-------
+              Start-Sleep -s 180
+
         - task: Npm@0
           displayName: 'Install test dependencies'
           inputs:
@@ -139,17 +167,25 @@ stages:
             arguments: '--force'
           enabled: true
 
-        - task: Npm@0
-          displayName: 'Install application dependencies'
-          inputs:
-            cwd: Application
-            arguments: '--force'
-          enabled: false
-
         - task: Npm@1
           displayName: 'Run integration tests'
+          continueOnError: true
           inputs:
             command: 'custom'
             workingDir: 'Tests'
             customCommand: 'run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)'
           enabled: true
+
+        - task: AzureCLI@2
+          displayName: 'Delete front-door waf-policy rule'
+          inputs:
+            azureSubscription: '$(azureSubscriptionEndpoint)'
+            scriptType: 'ps'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              Write-Output -------WAFポリシーカスタムルール削除-------
+              az network front-door waf-policy rule delete `
+              --name temporaryAllowFromAzurePipelines `
+              --policy-name '$(WAFname)' `
+              --resource-group '$(bcd_portal_rg_name)'
+
