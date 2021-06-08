@@ -107,7 +107,17 @@ stages:
             deploy:
               steps:
                 - task: AzureWebAppContainer@1
+                  condition: eq('${{parameters.Environment}}', 'dev')
+                  displayName: "Azure Web App on Container Deploy: $(portalAppName)"
+                  inputs:
+                    azureSubscription: "$(azureSubscriptionEndpoint)"
+                    appName: "$(portalAppName)"
+                    containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
+                  enabled: false
+
+                - task: AzureWebAppContainer@1
                   displayName: 'Deploy web app container to staging slot'
+                  condition: eq('${{parameters.Environment}}', 'stg')
                   inputs:
                     azureSubscription: '$(azureSubscriptionEndpoint)'
                     appName: '$(portalAppName)'
@@ -118,21 +128,13 @@ stages:
                 
                 - task: AzureAppServiceManage@0
                   displayName: 'Swap slots'
+                  condition: eq('${{parameters.Environment}}', 'stg')
                   inputs:
                     azureSubscription: '$(azureSubscriptionEndpoint)'
                     Action: 'Swap Slots'
                     WebAppName: '$(portalAppName)'
                     ResourceGroupName: '$(bcd_portal_rg_name)'
                     SourceSlot: 'staging'
-
-
-                - task: AzureWebAppContainer@1
-                  displayName: "Azure Web App on Container Deploy: $(portalAppName)"
-                  inputs:
-                    azureSubscription: "$(azureSubscriptionEndpoint)"
-                    appName: "$(portalAppName)"
-                    containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
-                  enabled: false
 
       - job: Confirmation
         condition: eq('${{parameters.IntegrationTest}}', 'yes')
