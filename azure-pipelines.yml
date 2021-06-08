@@ -126,7 +126,7 @@ stages:
               password:$(adminsecret)
               and access digital trade page
               https://sandbox.tradeshift.com/#/BCDdev.PortalApp
-              and agree with terms of service
+              and if register page are displayed ,agree with terms of service (In case portal page are displayed, you have no actions)
           enabled: true
 
       - job: IntegrationTest
