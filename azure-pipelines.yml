@@ -7,7 +7,7 @@ trigger:
   branches:
     include:
     - refs/heads/master
-    - refs/heads/develop
+    - refs/heads/snake_case
   paths:
     include:
     - /
