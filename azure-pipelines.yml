@@ -115,7 +115,7 @@ stages:
                       containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
 
       - job: Confirmation
-        condition: $[eq('${{ parameters.IntegrationTest }}','yes')]
+        condition: eq(parameters.IntegrationTest, 'yes')
         dependsOn: Deploy
         pool: server
         steps:
@@ -139,7 +139,7 @@ stages:
       - job: IntegrationTest
         pool:
           vmImage: 'windows-latest'
-        condition: $[eq('${{ parameters.IntegrationTest }}','yes')]
+        condition: eq(parameters.IntegrationTest, 'yes')
         dependsOn: Confirmation
         steps:
         - task: AzureCLI@2
