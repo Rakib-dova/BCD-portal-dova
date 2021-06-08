@@ -113,7 +113,7 @@ stages:
                     azureSubscription: "$(azureSubscriptionEndpoint)"
                     appName: "$(portalAppName)"
                     containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
-                  enabled: false
+                  enabled: true
 
                 - task: AzureWebAppContainer@1
                   displayName: 'Deploy web app container to staging slot'
