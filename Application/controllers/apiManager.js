@@ -1,8 +1,6 @@
 const axios = require('axios')
 const qs = require('qs')
 const logger = require('../lib/logger')
-const httpsAgent = require('https-proxy-agent')
-const agent = new httpsAgent('http://192.168.10.11:8080')
 exports.accessTradeshift = async (accessToken, refreshToken, method, query, body = {}, config = {}) => {
   // アクセスは2回試す
   // 1回目は受け取ったアクセストークンで試行

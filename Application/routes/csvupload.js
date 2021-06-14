@@ -181,6 +181,7 @@ module.exports = {
   cbPostUpload: cbPostUpload,
   cbUploadCsv: cbUploadCsv,
   cbRemoveCsv: cbRemoveCsv,
-  cbExtractInvoice: cbExtractInvoice
+  cbExtractInvoice: cbExtractInvoice,
+  getTimeStamp: getTimeStamp
   // cbPostUpload, cbUploadCsv, cbRemoveCsv, cbExtractInvoiceはUTテストのため追加
 }
