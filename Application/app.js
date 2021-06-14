@@ -188,6 +188,9 @@ app.use('/auth', require('./routes/auth').router)
 app.use('/tenant', require('./routes/tenant').router)
 app.use('/user', require('./routes/user').router)
 
+// csvupload
+app.use('/csvupload', require('./routes/csvupload').router)
+
 const errorHelper = require('./routes/helpers/error')
 
 // catch 404 and forward to error handler

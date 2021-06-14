@@ -115,3 +115,87 @@ img.logo-ncom {
   align-items: stretch;
   display: block;
 }
+
+.hero.is-com {
+  background-color: #044484;
+  color: #fff;
+}
+.hero.is-com .title {
+  color: #fff;
+}
+.hero.is-com .subtitle {
+  color: #fff;
+}
+
+/* columns -0.75rem を上書き */
+.columns {
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.uploader {
+    display: flex;
+    clear: both;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 600px;
+}
+
+.uploader div {
+  margin: 0 0 .5rem;
+  color: #5f6982;
+}
+
+.uploader .btn {
+  display: inline-block;
+  margin: .5rem .5rem 1rem;
+  clear: both;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  text-transform: none;
+  border-radius: .2rem;
+  outline: none;
+  padding: 0 1rem;
+  height: 36px;
+  line-height: 36px;
+  color: #fff;
+  -webkit-transition: all .2s ease-in-out;
+  transition: all .2s ease-in-out;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  background: #454cad;
+  border: #454cad;
+  cursor: pointer;
+}
+
+.label {
+    float: left;
+    clear: both;
+    width: 100%;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    background: #fff;
+    border-radius: 7px;
+    border: 3px solid #eee;
+    -webkit-transition: all .2s ease;
+    transition: all .2s ease;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#file-upload {
+  display: none;
+}
+
+.response {
+  display: none;
+}
+
+.box-large {
+  width: 600px;
+}

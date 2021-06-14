@@ -15,11 +15,11 @@
     "supertest": "^6.0.1"
   },
   "scripts": {
-    "test": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose",
+    "test": "cross-env LOCALLY_HOSTED=true NODE_ENV=development INVOICE_UPLOAD_PATH=/home/upload jest --silent=false --verbose",
     "test:coverage": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose --coverage",
     "test:integration": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose --config jest.config.integration.js",
     "test:tools": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose --config jest.config.tools.js",
-    "test:ci": "npm run test -- --watchAll=false"
+    "testST": "standard && node my-tests.js"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
@@ -28,6 +28,10 @@
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1"
+    "eslint-plugin-promise": "^4.2.1",
+    "standard": "^16.0.3"
+  },
+  "standard": {
+    "env": "jest"
   }
 }

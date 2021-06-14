@@ -21,40 +21,17 @@ block content
                 p 設定方法、利用方法に関するお問い合わせが無料で利用できます。
                 p その他FAQを参照できます。
                 //- p.tag.is-link.is-normal 有効化されています
-      .column
+      .column.hvr-float
+        .box
+          a(href='csvupload')
+            .media.appdesc
+              .media-left
+                img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_upload-type2c.svg')
+              .media-content
+                p.title.is-5 請求書一括作成
+                p 指定ファイルをアプロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
       .column
 
-    //- .level-left.is-family-sans-serif
-    //-   .level-item
-    //-     p.title.mb-4 Tools
-
-    //- .columns.is-desktop.is-family-noto-sans
-    //-   .column.hvr-float
-    //-     .box
-    //-       a.show-modal(data-target='createdocument-modal')
-    //-         .media.appdesc
-    //-           .media-left
-    //-             img.app-icon(src='../image/ts-app-createdocument.svg')
-    //-           .media-content
-    //-             p.title.is-5 文書の新規作成
-    //-             p Tradeshiftの画面で文書を作成します。
-    //-             br
-    //-             p 
-    //-             p.tag.is-link.is-normal Powered by Tradeshift
-    
-    //-   .column.hvr-float
-    //-     .box
-    //-       a(href='https://'+TS_HOST+'/#/Tradeshift.DocumentManager' target='_blank')
-    //-         .media.appdesc
-    //-           .media-left
-    //-             img.app-icon(src='../image/ts-app-documentmanager.svg')
-    //-           .media-content
-    //-             p.title.is-5 文書管理
-    //-             p Tradeshiftの画面で文書を管理します。
-    //-             br
-    //-             p 
-    //-             p.tag.is-link.is-normal Powered by Tradeshift
-    //-   .column
     
     .modal#support-modal
       .modal-background.cancel-button(data-target='support-modal')
@@ -96,30 +73,6 @@ block content
             else
               p お問い合わせは、アカウント管理者のみ可能です。
               p アカウント管理者にご相談の上、お問い合わせください。
-
-  //-
-    .modal#createdocument-modal
-      .modal-background.cancel-button(data-target='createdocument-modal')
-      .modal-card.is-family-noto-sans
-        header.modal-card-head
-          p.modal-card-title 文書の新規作成
-          button.delete(data-target="createdocument-modal")
-        section.modal-card-body
-          nav.panel
-            a.panel-block(href='https://'+TS_HOST+'/#/Tradeshift.InvoiceLG/create' target='_blank') 
-              span.panel-icon
-                i.fas.fa-file
-              p 請求書を作成する
-            a.panel-block(href='https://'+TS_HOST+'/#/Tradeshift.OrderLG' target='_blank')
-              span.panel-icon
-                i.fas.fa-file
-              p 注文書を作成する
-            a.panel-block(href='https://'+TS_HOST+'/#/Tradeshift.QuoteLG/create' target='_blank')
-              span.panel-icon
-                i.fas.fa-file
-              p 見積書を作成する
-        footer.modal-card-foot
-
   include footer
 
 block append scripts

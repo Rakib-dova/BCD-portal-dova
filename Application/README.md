@@ -20,7 +20,26 @@
 $ npm install
 ```
 
+## Application配下をローカル環境へクローン
+
+### guiでクローンやり方
+Repos＞Clone＞HTTPSでURLをコピー＞VisualStudioCode＞Cntl＋Shift＋P＞Git:Clone＞ペースト
+
+### cliでクロースやり方
+「Windwos + R」キーを押下して、「CMD.exe」を起動する。
+
+「CMD.exe」で「cd c:\Users\ユーザ名\dev\」へ移動する。 
+　※「c:\Users\ユーザ名\dev」はローカル環境構築のため、ソースを配置する場所である。
+
+「CMD.exe」で「git clone https://BCDdev@dev.azure.com/BCDdev/BCD-portal/_git/BCD-portal」を入力する。
+
+「c:\Users\ユーザ名\dev\BCD-portal」が作成されたことを確認する。
+　※「CMD.exe」で「cd c:\Users\ユーザ名\dev\BCD-portal\Application && code」を入力すると「Visual studio code」が起動される。
+
+
 ## ローカル DB の立ち上げ
+
+localdb 配下のstart-up.shの文字コードをLFに変更し上書き保存する。
 
 localdb ディレクトリ配下に移動し、docker-compose
 
@@ -128,6 +147,8 @@ https://sandbox.tradeshift.com/#/apps/Tradeshift.AppStore/apps/BCDdev.PortalAppL
 または以下の URL にアクセスし、利用登録画面が表示されることを確認する
 https://sandbox.tradeshift.com/#/BCDdev.PortalAppL
 
+ユーザ削除して利用規約を再度出す場合。https://localhost:3000/user/delete とする。
+
 ## localhost では自己署名証明書を使っていることの留意点
 
 - ブラウザで sandbox 環境でアプリを開いた際に localhost に接続できない場合、\
@@ -138,12 +159,13 @@ https://sandbox.tradeshift.com/#/BCDdev.PortalAppL
 
 # コーディング規約
 
-- Javascript Standard Style 準拠
+- Javascript Standard Style 準拠(https://standardjs.com/readme-ja.html)
 - ESLint 使用（設定値は.eslintrc.json）
 - フォーマッターは prettier 使用（設定値は.prettierrc.js）
 - モジュールのインポートは Common.js（require）
 - 文末セミコロンなし
 - 変数名・関数名の命名はローワーキャメルケース（先頭小文字）
+- コード内にコメントを残す
 
 VSCode の開発では ESLint および Prettier 拡張機能の使用を推奨（別紙参照）
 

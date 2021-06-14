@@ -513,6 +513,16 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
+
+    // 正常にportal画面が表示された後csvuploadページに遷移する。
+    test('/csvuploadにGET：正常にportal画面が表示された後csvuploadページに遷移する', async () => {
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトルが含まれていること
+    })
   })
 
   describe('DBにアカウント管理者・一般ユーザ共に登録済/一般ユーザとしてリクエスト', () => {
