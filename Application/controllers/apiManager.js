@@ -24,7 +24,6 @@ exports.accessTradeshift = async (accessToken, refreshToken, method, query, body
 
         const res = await axios[_method](
           `https://${process.env.TS_API_HOST}/tradeshift/rest/external${_query}`,
-          //qs.stringify(_body),
           _body,
           _config
         )
