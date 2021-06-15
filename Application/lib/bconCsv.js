@@ -28,7 +28,12 @@ class Invoice {
     },
     ID: { value: null },
     IssueDate: { value: null },
-    InvoiceTypeCode: { value: '380', listID: 'UN/ECE 1001 Subset', listAgencyID: '6', listVersionID: 'D08B' },
+    InvoiceTypeCode: { 
+      value: '380',
+      listID: 'UN/ECE 1001 Subset', 
+      listAgencyID: '6', 
+      listVersionID: 'D08B' 
+    },
     DocumentCurrencyCode: { value: 'JPY' },
     Note: [],
     AdditionalDocumentReference: [],
@@ -59,7 +64,14 @@ class Invoice {
 
   #AccountingCustomerParty = {
     Party: {
-      PartyIdentification: [{ ID: { value: null, schemeID: 'TS:ID', schemeName: 'Tradeshift identifier' } }],
+      PartyIdentification: [
+        { ID: { 
+            value: null, 
+            schemeID: 'TS:ID', 
+            schemeName: 'Tradeshift identifier' 
+          } 
+        }
+      ],
       PartyName: [
         {
           Name: { value: null }
@@ -86,17 +98,33 @@ class Invoice {
 
   #InvoiceLine = {
     ID: { value: '1' },
-    InvoicedQuantity: { value: null, unitCode: null },
-    LineExtensionAmount: { value: null, currencyID: 'JPY' },
+    InvoicedQuantity: { 
+      value: null, 
+      unitCode: null 
+    },
+    LineExtensionAmount: { 
+      value: null, 
+      currencyID: 'JPY' 
+    },
     TaxTotal: [
       {
         TaxSubtotal: [
           {
             TaxCategory: {
-              ID: { value: 'S', schemeID: 'UN/ECE 5305', schemeAgencyID: '6', schemeVersionID: 'D08B' },
+              ID: { 
+                value: 'S', 
+                schemeID: 'UN/ECE 5305', 
+                schemeAgencyID: '6', 
+                schemeVersionID: 'D08B' 
+              },
               Percent: { value: 10 },
               TaxScheme: {
-                ID: { value: 'VAT', schemeID: 'UN/ECE 5153 Subset', schemeAgencyID: '6', schemeVersionID: 'D08B' },
+                ID: { 
+                  value: 'VAT', 
+                  schemeID: 'UN/ECE 5153 Subset', 
+                  schemeAgencyID: '6', 
+                  schemeVersionID: 'D08B' 
+                },
                 Name: { value: 'JP 消費税 10%' }
               }
             }
@@ -104,16 +132,37 @@ class Invoice {
         ]
       }
     ],
-    Item: { Name: { value: null }, SellersItemIdentification: { ID: { value: null } }, Description: [{ value: null }] },
+    Item: { 
+      Name: { 
+        value: null 
+      }, 
+      SellersItemIdentification: { 
+        ID: { 
+          value: null 
+        } 
+      }, 
+      Description: [
+        { value: null }
+      ] 
+    },
     Price: {
-      PriceAmount: { value: null, currencyID: 'JPY' },
-      BaseQuantity: { value: null, unitCode: null },
+      PriceAmount: { 
+        value: null, 
+        currencyID: 'JPY' 
+      },
+      BaseQuantity: { 
+        value: null, 
+        unitCode: null 
+      },
       OrderableUnitFactorRate: { value: null }
     },
     DocumentReference: [
       {
         ID: { value: null },
-        DocumentTypeCode: { value: 'File ID', listID: 'urn:tradeshift.com:api:1.0:documenttypecode' }
+        DocumentTypeCode: { 
+          value: 'File ID', 
+          listID: 'urn:tradeshift.com:api:1.0:documenttypecode' 
+        }
       }
     ]
   }
@@ -139,7 +188,10 @@ class Invoice {
   }
 
   #PaymentMeans = {
-    PaymentMeansCode: { value: 42, listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode' },
+    PaymentMeansCode: { 
+      value: 42, 
+      listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
+    },
     PaymentDueDate: { value: null },
     PayeeFinancialAccount: {
       FinancialInstitutionBranch: {

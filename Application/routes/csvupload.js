@@ -80,65 +80,53 @@ const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
   const filename = _filename
   const uploadData = _uploadCsvData
   const writeFile = () => {
-    try {
-      fs.writeFileSync(uploadPath + filename, uploadData, 'utf8')
-      return true
-    } catch (error) {
-      //logger.error(constantsDefine.logMessage.ERROR*:q''
-      return false
-    }
+    fs.writeFileSync(uploadPath + filename, uploadData, 'utf8')
   }
   // ユーザディレクトリが存在すること確認
   if (fs.existsSync(uploadPath)) {
     // ユーザディレクトリが存在している場合、CSVファイルを保存する
-    try {
-      return writeFile()
-    } catch (error) {
-      return false
-    }
+    writeFile()
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadCsv')
+    return true
   } else {
     // ユーザディレクトリが存在しない場合、ユーザディレクトリ作成
-    try {
-      fs.mkdirSync(uploadPath)
-      return writeFile()
-    } catch {
-      return false
-    }
+    fs.mkdirSync(uploadPath)
+    return writeFile()
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadCsv')
+    return true
   }
-  logger.info('cbPostUploadCsv' + constantsDefine.logMessage.INF001)   
 }
 
 // CSVファイル削除機能
 const cbRemoveCsv = (_deleteDataPath, _filename) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv') 
+  logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
   const deleteFile = path.join(_deleteDataPath, '/' + _filename)
 
   if (fs.existsSync(deleteFile)) {
     try {
       fs.unlinkSync(deleteFile)
-      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')   
+      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
       return true
     } catch (error) {
-      //logger.warn(constantsDefine.logMessage. + 'cbRemoveCsv')   
-      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')   
+      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
       return false
     }
   } else {
     // 削除対象がない場合、サーバーエラー画面表示
-    //logger.warn(constantsDefine.logMessage.WARN00 + 'cbRemoveCsv')
+    logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
     return false
   }
 }
 
 const cbExtractInvoice = (_extractDir, _filename, _user) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')   
+  logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
   const csvObj = new bconCsv(extractFullpathFile)
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
-  let setHeaders = {}
-  setHeaders['Accepts'] = 'application/json'
-  setHeaders['Authorization'] = `Bearer ${_user.accessToken}`
+  const setHeaders = {}
+  setHeaders.Accepts = 'application/json'
+  setHeaders.Authorization = `Bearer ${_user.accessToken}`
   setHeaders['Content-Type'] = 'application/json'
   for (let idx = 0; idx < invoiceCnt; idx++) {
     const res = apiManager.accessTradeshift(
@@ -153,7 +141,7 @@ const cbExtractInvoice = (_extractDir, _filename, _user) => {
     )
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
-  return 
+  return true
 }
 
 const getTimeStamp = () => {
@@ -183,5 +171,5 @@ module.exports = {
   cbRemoveCsv: cbRemoveCsv,
   cbExtractInvoice: cbExtractInvoice,
   getTimeStamp: getTimeStamp
-  // cbPostUpload, cbUploadCsv, cbRemoveCsv, cbExtractInvoiceはUTテストのため追加
+  // cbPostUpload, cbUploadCsv, cbRemoveCsv, cbExtractInvoice, getTimeStampはUTテストのため追加
 }
