@@ -82,18 +82,22 @@ const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
   const writeFile = () => {
     fs.writeFileSync(uploadPath + filename, uploadData, 'utf8')
   }
-  // ユーザディレクトリが存在すること確認
-  if (fs.existsSync(uploadPath)) {
-    // ユーザディレクトリが存在している場合、CSVファイルを保存する
-    writeFile()
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadCsv')
-    return true
-  } else {
-    // ユーザディレクトリが存在しない場合、ユーザディレクトリ作成
-    fs.mkdirSync(uploadPath)
-    return writeFile()
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadCsv')
-    return true
+  try {
+    // ユーザディレクトリが存在すること確認
+    if (fs.existsSync(uploadPath)) {
+      // ユーザディレクトリが存在している場合、CSVファイルを保存する
+      writeFile()
+      logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadCsv')
+      return true
+    } else {
+      // ユーザディレクトリが存在しない場合、ユーザディレクトリ作成
+      fs.mkdirSync(uploadPath)
+      writeFile()
+      logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadCsv')
+      return true
+    }
+  } catch (error) {
+    return false
   }
 }
 
