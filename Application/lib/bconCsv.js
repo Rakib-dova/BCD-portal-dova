@@ -268,13 +268,11 @@ class bconCsv {
 
   convertTradeshiftInvoice() {
     const invoiceData = this.#csvFile.getRows()
-    const invoiceLength = invoiceData.length
     let listIdx = 0
     for (let idx = 0; invoiceData[idx] !== undefined; listIdx++) {
       const parentInvoiceDocNo = invoiceData[idx].docNo
       const rows = invoiceData[idx].rows
       const column = rows.split(',')
-      const invoice = new Invoice()
       this.#invoiceDocumentList.push(new Invoice())
       this.#invoiceDocumentList[listIdx].setIssueDate(column[0])
       this.#invoiceDocumentList[listIdx].setInvoiceNumber(column[1])
