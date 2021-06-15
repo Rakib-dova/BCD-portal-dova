@@ -59,6 +59,9 @@ stages:
               cwd: Tests
               arguments: "--force"
 
+          - bash: sudo mkdir /home/upload
+            displayName: Make directory for upload files
+
           - task: gulp@0
             displayName: "Run unit tests"
             inputs:
