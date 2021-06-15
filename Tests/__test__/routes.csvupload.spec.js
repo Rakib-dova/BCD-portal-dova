@@ -81,7 +81,6 @@ describe('csvuploadのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue({
         dataValues: {
-          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
           userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
           appVersion: '0.0.1',
@@ -174,16 +173,29 @@ describe('csvuploadのテスト', () => {
       await csvupload.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-      // userContextがLoggedInになって「いない」
-      expect(request.session?.userContext).not.toBe('LoggedIn')
-      // session.userRoleが初期値のままになっている
-      expect(request.session?.userRole).toBe('dummy')
-      // response.renderが呼ばれ「ない」
-      expect(response.render).not.toHaveBeenCalled()
+    })
+
+    test('500エラー：DBエラーの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからのユーザデータの取得でエラーが発生した場合を想定する
+      const spy = jest.spyOn(csvupload, 'cbPostUpload').mockReturnValue(404)
+      // 試験実施
+      await csvupload.cbGetIndex(request, response, next)
+
+      spy.mockRestore()
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('404エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
@@ -199,16 +211,7 @@ describe('csvuploadのテスト', () => {
       // DBから取得したユーザデータのuserStatusが0以外の場合を想定する
       findOneSpy.mockReturnValue({
         dataValues: {
-          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
-          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-          appVersion: '0.0.1',
-          refreshToken: 'dummyRefreshToken',
-          subRefreshToken: null,
-          userStatus: 1,
-          lastRefreshedAt: null,
-          createdAt: '2021-06-07T08:45:49.803Z',
-          updatedAt: '2021-06-07T08:45:49.803Z'
+          userStatus: 1
         }
       })
       // 試験実施
@@ -217,15 +220,6 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       // 404エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-
-      // userContextがLoggedInになって「いない」
-      expect(request.session?.userContext).not.toBe('LoggedIn')
-      // session.userRoleが初期値のままになっている
-      expect(request.session?.userRole).toBe('dummy')
-      // response.renderが呼ばれ「ない」
-      expect(response.render).not.toHaveBeenCalled()
     })
   })
 
@@ -244,7 +238,6 @@ describe('csvuploadのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue({
         dataValues: {
-          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
           userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
           appVersion: '0.0.1',
@@ -265,22 +258,21 @@ describe('csvuploadのテスト', () => {
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('正常', async () => {
-      // 準備
+    test('Upload File is Empty.(error)', async () => {
       // requestのuserIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue({
         dataValues: {
-          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
           tenantId: null,
           userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
           appVersion: '0.0.1',
@@ -301,6 +293,10 @@ describe('csvuploadのテスト', () => {
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('500エラー：DBからユーザが取得できなかった(null)場合', async () => {
@@ -320,19 +316,13 @@ describe('csvuploadのテスト', () => {
       await csvupload.cbPostUpload(request, response, next)
 
       // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-      // userContextがLoggedInになって「いない」
-      expect(request.session?.userContext).not.toBe('LoggedIn')
-      // session.userRoleが初期値のままになっている
-      expect(request.session?.userRole).toBe('dummy')
-      // response.renderが呼ばれ「ない」
-      expect(response.render).not.toHaveBeenCalled()
     })
 
     test('404エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
+      // userStatus : 0（正常）、1（解約（停止））
+
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {
@@ -345,7 +335,6 @@ describe('csvuploadのテスト', () => {
       // DBから取得したユーザデータのuserStatusが0以外の場合を想定する
       findOneSpy.mockReturnValue({
         dataValues: {
-          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
           userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
           appVersion: '0.0.1',
@@ -363,15 +352,6 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       // 404エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-
-      // userContextがLoggedInになって「いない」
-      expect(request.session?.userContext).not.toBe('LoggedIn')
-      // session.userRoleが初期値のままになっている
-      expect(request.session?.userRole).toBe('dummy')
-      // response.renderが呼ばれ「ない」
-      expect(response.render).not.toHaveBeenCalled()
     })
   })
 
@@ -398,6 +378,11 @@ describe('csvuploadのテスト', () => {
 
       // returnがtrueであること
       expect(result).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('CSV File Upload failed.(error)', async () => {
@@ -415,7 +400,7 @@ describe('csvuploadのテスト', () => {
       // 試験実施
       const result = await csvupload.cbUploadCsv('/home/upload', null, null)
 
-      // returnがtrueであること
+      // returnがfalseであること
       expect(result).toBeFalsy()
     })
 
@@ -438,7 +423,7 @@ describe('csvuploadのテスト', () => {
       // 試験実施
       const result = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
 
-      // returnがtrueであること
+      // returnがfalseであること
       expect(result).toBeFalsy()
     })
 
@@ -461,7 +446,7 @@ describe('csvuploadのテスト', () => {
       // 試験実施
       const result = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
 
-      // returnがtrueであること
+      // returnがfalseであること
       expect(result).toBeFalsy()
     })
   })
@@ -501,6 +486,11 @@ describe('csvuploadのテスト', () => {
 
       const result_rem = csvupload.cbRemoveCsv(filePath, filename)
       expect(result_rem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
     })
   })
 
@@ -531,6 +521,11 @@ describe('csvuploadのテスト', () => {
 
       // returnがtrueであること
       expect(result).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('ファイルが存在しない場合', async () => {
