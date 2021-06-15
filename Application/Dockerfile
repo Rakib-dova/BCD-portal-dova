@@ -3,6 +3,7 @@ LABEL maintainer="NTT Communications Corporation"
 
 # Create temporary directory for uploding files
 RUN mkdir /tmp/upload
+VOLUME /tmp/upload
 
 # Create app directory
 WORKDIR /app
