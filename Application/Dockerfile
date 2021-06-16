@@ -2,8 +2,9 @@ FROM registry.redhat.io/ubi8/nodejs-14
 LABEL maintainer="NTT Communications Corporation"
 
 # Create temporary directory for uploding files
-RUN mkdir /home/upload
-VOLUME /home/upload
+RUN mkdir /tmp/upload
+RUN chmod 777 /tmp/upload
+VOLUME /tmp/upload
 
 # Create app directory
 WORKDIR /app
