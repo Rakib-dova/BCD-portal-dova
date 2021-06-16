@@ -5,6 +5,7 @@ LABEL maintainer="NTT Communications Corporation"
 RUN mkdir /tmp/upload
 RUN chmod 777 /tmp/upload
 VOLUME /tmp/upload
+COPY sshd_config /etc/ssh/
 
 # Create app directory
 WORKDIR /app
@@ -13,4 +14,4 @@ WORKDIR /app
 COPY . .
 
 EXPOSE 3000 2222
-CMD [ "npm", "start" ]
+CMD [ "/usr/sbin/sshd" ]
