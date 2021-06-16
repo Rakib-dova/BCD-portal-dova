@@ -5,7 +5,7 @@ LABEL maintainer="NTT Communications Corporation"
 RUN mkdir /tmp/upload
 RUN chmod 777 /tmp/upload
 VOLUME /tmp/upload
-RUN apt add openssh \
+RUN yum install openssh \
      && echo "root:Docker!" | chpasswd
 COPY sshd_config /etc/ssh/
 
