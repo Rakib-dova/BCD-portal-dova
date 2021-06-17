@@ -7,7 +7,8 @@ const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const userController = require('../controllers/userController.js')
 const logger = require('../lib/logger')
-const filePath = process.env.INVOICE_UPLOAD_PATH
+// const filePath = process.env.INVOICE_UPLOAD_PATH
+const filePath = '/home/upload'
 
 const bodyParser = require('body-parser')
 router.use(
