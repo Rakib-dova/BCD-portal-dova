@@ -9,37 +9,132 @@ block content
     .container.is-max-widescreen.is-family-noto-sans
       form#form(action="#")
         article.panel.is-info
-          h2.panel-heading デジタルトレードアプリご利用にあたって
+          h2.panel-heading デジタルトレードアプリ（PoC）ご利用にあたって
           .panel-block
             .container
-              p.ml-4 利用規約に同意し、「次へ」ボタンを押してください。
-              //-
-                p.ml-4.mb-4 ※法人名、担当者名、メールアドレスはTradeshiftのプロフィール情報より取得しております。
+              p.ml-4 必要項目を入力後、利用規約に同意して「次へ」ボタンを押してください。
+
+                //- p.ml-4.mb-4 ※法人名、担当者名、メールアドレスはTradeshiftのプロフィール情報より取得しております。
                 .columns.is-centered: .column.is-four-fifths
-                  .field.is-horizontal
-                    .field-label: label.label 法人名
-                    .field-body: .field: p.control: input.input.is-rounded(name="companyName" type="text" value=companyName readonly) 
-                  .field.is-horizontal
-                    .field-label: label.label 郵便番号
-                    .field-body: .field.is-narrow: p.control: input.input.is-rounded(name="zipCode" type="text" value=zip required="required" pattern="^\\d{7}$" placeholder="例：1234567" maxlength='7')
-                  .field.is-horizontal
-                    .field-label: label.label 住所
-                    .field-body: .field: p.control: input.input.is-rounded(name="addressLine1" type="text" value=address required="required")
-                  .field.is-horizontal
-                    .field-label: label.label 住所（ビル名等）
-                    .field-body: .field: p.control: input.input.is-rounded(name="addressLine2" type="text")
-                  .field.is-horizontal
-                    .field-label: label.label 部署名
-                    .field-body: .field: p.control: input.input.is-rounded(name="departmentName" type="text" required="required")
-                  .field.is-horizontal
-                    .field-label: label.label 担当者名
-                    .field-body: .field: p.control: input.input.is-rounded(name="userName" type="text" value=userName readonly) 
-                  .field.is-horizontal
-                    .field-label: label.label 電話番号
-                    .field-body: .field: p.control: input.input.is-rounded(name="tel" type="text" required="required" pattern="^0\\d{9,10}$" placeholder="例：0001112222" maxlength='11')
-                  .field.is-horizontal
-                    .field-label: label.label メールアドレス
-                    .field-body: .field: p.control: input.input.is-rounded(name="email" type="text" value=email readonly) 
+                  //- .field.is-horizontal.row
+                  .field.card
+                    .card-content
+                      .title.is-4 契約者名
+                      .field
+                        label(for="contractName") 契約者名（企業名）（必須）
+                        //- .field-body: input.control#contractName(type="text" name="contractName" value="" required)
+                        .control
+                          input.input#contractName(type="text" name="contractName" value="" required)
+                      .field
+                        label(for="contractKanaName") 契約者カナ名（企業名）（必須）
+                        .control
+                          input.input#contractKanaName(type="text" name="contractKanaName" value="" required)
+                  
+                  .field.card
+                    .card-content
+                      .title.is-4 契約者住所
+                      .field
+                        label(for="postalNumber") 郵便番号（必須）
+                        .control
+                          input.input#postalNumber(type="text" name="postalNumber" value="" required)
+                      .field
+                        label(for="contractAddressTo") 都道府県（必須）
+                        .control
+                        select.select-register#contractAddressTo(type="select" placeholder='選択してください' name="contractAddressTo" value='' required)
+                          option(value='') 都道府県を選択してください
+                          option(value='北海道') 北海道
+                          option(value='青森県') 青森県
+                          option(value='岩手県') 岩手県
+                          option(value='宮城県') 宮城県
+                          option(value='秋田県') 秋田県
+                          option(value='山形県') 山形県
+                          option(value='福島県') 福島県
+                          option(value='茨城県') 茨城県
+                          option(value='栃木県') 栃木県
+                          option(value='群馬県') 群馬県
+                          option(value='埼玉県') 埼玉県
+                          option(value='千葉県') 千葉県
+                          option(value='東京都') 東京都
+                          option(value='神奈川県') 神奈川県
+                          option(value='新潟県') 新潟県
+                          option(value='富山県') 富山県
+                          option(value='石川県') 石川県
+                          option(value='福井県') 福井県
+                          option(value='山梨県') 山梨県
+                          option(value='長野県') 長野県
+                          option(value='岐阜県') 岐阜県
+                          option(value='静岡県') 静岡県
+                          option(value='愛知県') 愛知県
+                          option(value='三重県') 三重県
+                          option(value='滋賀県') 滋賀県
+                          option(value='京都府') 京都府
+                          option(value='大阪府') 大阪府
+                          option(value='兵庫県') 兵庫県
+                          option(value='奈良県') 奈良県
+                          option(value='和歌山県') 和歌山県
+                          option(value='鳥取県') 鳥取県
+                          option(value='島根県') 島根県
+                          option(value='岡山県') 岡山県
+                          option(value='広島県') 広島県
+                          option(value='山口県') 山口県
+                          option(value='徳島県') 徳島県
+                          option(value='香川県') 香川県
+                          option(value='愛媛県') 愛媛県
+                          option(value='高知県') 高知県
+                          option(value='福岡県') 福岡県
+                          option(value='佐賀県') 佐賀県
+                          option(value='長崎県') 長崎県
+                          option(value='熊本県') 熊本県
+                          option(value='大分県') 大分県
+                          option(value='宮崎県') 宮崎県
+                          option(value='鹿児島県') 鹿児島県
+                          option(value='沖縄県') 沖縄県
+                      .field
+                        label(for="contractAddressSi") 市町村（必須）
+                        .control
+                          input.input#contractAddressSi(type="text" name="contractAddressSi" value="" required)
+                      .field
+                        label(for="contractAddressCho") 丁目（必須）
+                        .control
+                          input.input#contractAddressCho(type="text" name="contractAddressCho" value="" required)
+                      .field
+                        label(for="banch1") 番地
+                        .control
+                          input.input#banch1(type="text" name="banch1" value="")
+                      .field
+                        label(for="tatemono1") 建物等
+                        .control
+                          input.input#tatemono1(type="text" name="tatemono1" value="")
+                  
+                  .field.card
+                    .card-content
+                      .title.is-4 契約者連絡先
+                      .field
+                        label(for="contractPersonName") 連絡先担当者名（必須）
+                        .control
+                          input.input#contractPersonName(type="text" name="contractPersonName" value="" required)
+                      .field
+                        label(for="contractPhoneNumber") 連絡先電話番号（必須）
+                        .control
+                          input.input#contractPhoneNumber(type="text" name="contractPhoneNumber" value="" required)
+                      .field
+                        label(for="contractMail") 連絡先メールアドレス（必須）
+                        .control
+                          input.input#contractMail(type="text" name="contractMail" value="" required)
+
+                  .field.card
+                    .card-content
+                      .title.is-4 パスワード
+                      p ※登録終了後、開通案内を送信します。
+                      p   開通案内メールにて本パスワードを使用いただきます。
+                      .field
+                        label(for="password") パスワード（必須）
+                        .control
+                          input.input#password.form-control(type="password" name="password" value="" required)
+                      .field
+                        label(for="passwordConfirm") パスワード確認（必須）
+                        .control 
+                          input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" required)
 
               .columns.is-centered: .column.is-four-fifths
                 .field.is-grouped.is-grouped-left
