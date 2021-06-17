@@ -69,18 +69,14 @@ const cbPostUpload = async (req, res, next) => {
 
 // csvアップロード
 const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
-  logger.info('DEBUG:::::_filePath::::' + _filePath)
   const uploadPath = path.join(_filePath, '/')
-  logger.info('DEBUG:::::uploadPath::::' + uploadPath)
   const filename = _filename
-  logger.info('DEBUG:::::filename::::' + filename)
   const uploadData = _uploadCsvData
   const writeFile = () => {
     try {
       fs.writeFileSync(uploadPath + filename, uploadData, 'utf8')
       return true
     } catch (error) {
-      logger.info('DEBUG:::::writeFile::::false')
       return false
     }
   }
@@ -90,7 +86,6 @@ const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
     try {
       return writeFile()
     } catch (error) {
-      logger.info('DEBUG:::::existsSync::::false')
       return false
     }
   } else {
@@ -99,7 +94,6 @@ const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
       fs.mkdirSync(uploadPath)
       return writeFile()
     } catch {
-      logger.info('DEBUG:::::mkdirSync::::false')
       return false
     }
   }
