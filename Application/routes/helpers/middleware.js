@@ -1,8 +1,7 @@
-﻿'use strict'
+'use strict'
 // Require our controllers.
 const userController = require('../../controllers/userController')
 const tenantController = require('../../controllers/tenantController')
-const apiManager = require('../../controllers/apiManager')
 
 const errorHelper = require('./error')
 const validate = require('../../lib/validate')
@@ -65,9 +64,8 @@ exports.isUserRegistered = async (req, res, next) => {
   const user = await userController.findOne(req.user.userId)
 
   // データベースエラーは、エラーオブジェクトが返る
-  //if (user instanceof Error) return next(errorHelper.create(500))
   if (tenant instanceof Error) return next(errorHelper.create(500))
-  
+
   // テナントが見つからない場合はnull値
   if (tenant === null) {
     // テナントがDBに登録されていない
@@ -76,7 +74,7 @@ exports.isUserRegistered = async (req, res, next) => {
     e.status = 403
     e.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
     return next(e)
-  } else if (tenant.dataValues?.tenantId)  {
+  } else if (tenant.dataValues?.tenantId) {
     // テナントがDBに登録されている
     if (user === null) await userController.create(req.user.accessToken, req.user.refreshToken)
     next()
@@ -84,5 +82,4 @@ exports.isUserRegistered = async (req, res, next) => {
     // dataValuesやtenantIdがundefined（異常系）
     next(errorHelper.create(500))
   }
-
 }
