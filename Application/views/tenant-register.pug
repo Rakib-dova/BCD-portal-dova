@@ -161,68 +161,68 @@ block content
               p.modal-card-title 以下の内容で利用登録します。
               button.delete(type="button" data-target="confirmregister-modal")
             section.modal-card-body
-             -var aryFormName = ["recontractName","recontractKanaName","repostalNumber​","recontractAddressTo","recontractAddressSi","recontractAddressCho","rebanch1​","retatemono1​","recontractPersonName​","recontractPhoneNumber​","recontractMail​","repassword","termsCheck"]
               table.table.is-fullwidth.is-bordered
                 tbody
                   tr
                     th(colspan="3") 契約者名
                   tr
-                    td(colspan="2" width="45%") 契約者名（企業名）
-                    td(id= aryFormName["0"])
+                    td.confirmation-item(colspan="2") 契約者名（企業名）
+                    td#recontractName.checkData
                   tr 
-                    td(colspan="2")  契約者カナ名（企業名）
-                    td(id= aryFormName[1])
+                    td.confirmation-item(colspan="2")  契約者カナ名（企業名）
+                    td#recontractKanaName.checkData
+        
               table.table.is-fullwidth.is-bordered
                 tbody
                   tr
                     th(colspan="3") 契約者住所
                   tr
-                    td(colspan="2" width="45%") 郵便番号
-                    td(id= aryFormName[2])
+                    td.confirmation-item(colspan="2") 郵便番号
+                    td#repostalNumber.checkData
                   tr 
                     td(rowspan="5") 住所
                     td 都道府県
-                    td(id= aryFormName[3])
+                    td#recontractAddressTo.confirmation-content
                   tr 
                     td 市町村
-                    td(id= aryFormName[4])
+                    td#recontractAddressSi.checkData
                   tr
                     td 丁目
-                    td(id= aryFormName[5])
+                    td#recontractAddressCho.checkData
                   tr
                     td 番地
-                    td(id= aryFormName[6])
+                    td#rebanch1.checkData
                   tr
                     td 建物等
-                    td(id= aryFormName[7])
-
+                    td#retatemono1.checkData
+              
               table.table.is-fullwidth.is-bordered
                 tbody
                   tr
                     th(colspan="3") 契約者連絡先
                   tr
-                    td(colspan="2" width="45%") 連絡先担当者名
-                    td(id= aryFormName[8])
+                    td.confirmation-item(colspan="2") 連絡先担当者名
+                    td#recontractPersonName.checkData
                   tr 
-                    td(colspan="2") 連絡先電話番号
-                    td(id= aryFormName[9])
+                    td.confirmation-item(colspan="2") 連絡先電話番号
+                    td#recontractPhoneNumber.checkData
                   tr
-                    td(colspan="2") 連絡先メールアドレス
-                    td(id= aryFormName[10])
-              
+                    td.confirmation-item(colspan="2") 連絡先メールアドレス
+                    td#recontractMail.checkData
+                                  
               table.table.is-fullwidth.is-bordered
                 tbody
                   tr 
                     th(colspan="3") 契約者パスワード
                   tr 
-                    td(colspan="2" width="45%") パスワード
-                    td(id= aryFormName[11])
+                    td.confirmation-item(colspan="2") パスワード
+                    td#repassword.confirmation-content
 
               table.table.is-fullwidth.is-bordered
                 tbody
                   tr
-                    th(colspan="2" width="45%") 利用規約
-                    td(id= aryFormName[12])
+                    th.confirmation-item(colspan="2") 利用規約
+                    td#termsCheck.confirmation-content
 
             footer.modal-card-foot
               button.button.is-success#submit(type="submit" formaction="/tenant/register" formmethod="POST") 登録

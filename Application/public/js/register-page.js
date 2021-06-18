@@ -46,23 +46,10 @@ document.getElementById('next-btn').onclick = function () {
   const elements = document.querySelectorAll('input[type="text"]')
 
   // 確認項目（type="text）
-  const formNameArr = [
-    'recontractName',
-    'recontractKanaName',
-    'repostalNumber​',
-    'recontractAddressSi',
-    'recontractAddressCho',
-    'rebanch1​',
-    'retatemono1​',
-    'recontractPersonName​',
-    'recontractPhoneNumber​',
-    'recontractMail​'
-  ]
-
   let index = 0
   const elementsArr = Array.prototype.slice.call(elements)
   elementsArr.forEach(function (element) {
-    document.getElementById(formNameArr[index]).innerHTML = element.value
+    document.getElementsByClassName('checkData').item(index).innerHTML = element.value
     index = index + 1
   })
 
