@@ -43,15 +43,33 @@ document.getElementById('check').onclick = function () {
 
 // ----「次へ」ボタンが押された際のバリデーションチェック
 document.getElementById('next-btn').onclick = function () {
-  /*
   const elements = document.querySelectorAll('input[type="text"]')
+
+  // 確認項目（type="text）
+  const formNameArr = [
+    'recontractName',
+    'recontractKanaName',
+    'repostalNumber​',
+    'recontractAddressSi',
+    'recontractAddressCho',
+    'rebanch1​',
+    'retatemono1​',
+    'recontractPersonName​',
+    'recontractPhoneNumber​',
+    'recontractMail​'
+  ]
+
+  let index = 0
   const elementsArr = Array.prototype.slice.call(elements)
   elementsArr.forEach(function (element) {
-    const target = element.name
-    const td = document.getElementById(target)
-    td.innerHTML = element.value
+    document.getElementById(formNameArr[index]).innerHTML = element.value
+    index = index + 1
   })
-*/
+
+  // 確認項目（type="select"、type="password"）
+  document.getElementById('recontractAddressTo').innerHTML = document.getElementById('contractAddressTo').value
+  document.getElementById('repassword').innerHTML = document.getElementById('password').value
+
   const elementCheckbox = document.querySelector('input[type="checkbox"]')
   const targetCheckbox = elementCheckbox.name
 
