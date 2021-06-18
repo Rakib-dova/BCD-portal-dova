@@ -8,10 +8,26 @@ jest.mock('../../Application/controllers/tenantController.js', () => ({
   }
 }))
 jest.mock('../../Application/controllers/userController.js', () => ({
+  create: (accessToken, refreshToken) => {
+    return null
+  },
   findOne: (userId) => {
     return null
   }
 }))
+jest.mock('../../Application/controllers/apiManager.js', () => ({
+  accessTradeshift: (accessToken, refreshToken, method, query, body = {}) => {
+    return null
+  }
+}))
+jest.mock('../../Application/node_modules/csurf', () => {
+  // コンストラクタをMock化
+  return jest.fn().mockImplementation(() => {
+    return (res, req, next) => {
+      return next()
+    }
+  })
+})
 
 const middleware = require('../../Application/routes/helpers/middleware')
 const Request = require('jest-express').Request
@@ -20,23 +36,30 @@ const next = require('jest-express').Next
 const errorHelper = require('../../Application/routes/helpers/error')
 const tenantController = require('../../Application/controllers/tenantController.js')
 const userController = require('../../Application/controllers/userController.js')
+const apiManager = require('../../Application/controllers/apiManager.js')
+const routesTenant = require('../../Application/routes/tenant')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
-let request, response, tenantFindOneSpy, userFindOneSpy
+let request, response, accessTradeshiftSpy, tenantFindOneSpy, userFindOneSpy, createSpy, infoSpy
 describe('helpers/middlewareのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
     tenantFindOneSpy = jest.spyOn(tenantController, 'findOne')
     userFindOneSpy = jest.spyOn(userController, 'findOne')
+    accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
+    createSpy = jest.spyOn(userController, 'create')
+    const logger = require('../../Application/lib/logger.js')
+    infoSpy = jest.spyOn(logger, 'info')
   })
   afterEach(() => {
     request.resetMocked()
     response.resetMocked()
     next.mockReset()
+    accessTradeshiftSpy.mockRestore()
     tenantFindOneSpy.mockRestore()
     userFindOneSpy.mockRestore()
   })
@@ -161,6 +184,299 @@ describe('helpers/middlewareのテスト', () => {
       // 303エラーでauthに飛ばされ「る」
       expect(response.redirect).toHaveBeenCalledWith(303, '/auth')
       expect(response.getHeader('Location')).toEqual('/auth')
+    })
+
+    // #675、【実装】トレシフユーザロールによって、画面表示を制御する　#1
+    test('利用登録画面 (条件：テナント管理者、利用登録されていない)', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+
+      // CSRF対策
+      request.csrfToken = jest.fn() 
+
+      // 試験実施
+      await middleware.isTenantRegistered(request, response, next)
+      await routesTenant.cbGetRegister(request, response, next)
+
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 利用登録が以下の情報でレンダー「される」
+      expect(response.render).toHaveBeenCalledWith('tenant-register', {
+        title: '利用登録',
+        companyName: 'UnitTestCompany',
+        userName: 'Taro Yamada',
+        email: 'dummy@example.com',
+        zip: '1050000',
+        address: '東京都 港区',
+        customerId: 'none'
+      })
+    })
+
+    // #675、【実装】トレシフユーザロールによって、画面表示を制御する　#2
+    test('利用登録画面（条件：他のテナント管理者のロール, 利用登録されていない）', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '98677ae6-f468-4be4-857a-cfa5dce6aca6',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '98677ae6-f468-4be4-857a-cfa5dce6aca6',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '98677ae6-f468-4be4-857a-cfa5dce6aca6',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+
+      // CSRF対策
+      request.csrfToken = jest.fn() 
+
+      // 試験実施
+      await middleware.isTenantRegistered(request, response, next)
+      await routesTenant.cbGetRegister(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 利用登録が以下の情報でレンダー「される」
+      expect(response.render).toHaveBeenCalledWith('tenant-register', {
+        title: '利用登録',
+        companyName: 'UnitTestCompany',
+        userName: 'Taro Yamada',
+        email: 'dummy@example.com',
+        zip: '1050000',
+        address: '東京都 港区',
+        customerId: 'none'
+      })
+    })
+
+    // #675、【実装】トレシフユーザロールによって、画面表示を制御する　#3
+    test('403管理者問い合わせ画面（条件：一般ユーザ, 利用登録されていない）', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '96616a8d-bb2c-4d10-9634-6c98ac0405a4',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'abcdefcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+
+      // CSRF対策
+      request.csrfToken = jest.fn() 
+
+      // 試験実施
+      await middleware.isTenantRegistered(request, response, next)
+      await routesTenant.cbGetRegister(request, response, next)
+
+      // 期待結果
+      // 403エラーが返される
+      const expectError = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
+      expectError.name = 'Forbidden'
+      expectError.status = 403
+      expectError.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
+      expect(next).toHaveBeenCalledWith(expectError)
+      // response.renderが呼ばれ「ない」
+      expect(response.render).not.toHaveBeenCalled()
     })
 
     test('500エラー: tenantIdのUUIDが不正な場合', async () => {
@@ -455,5 +771,6 @@ describe('helpers/middlewareのテスト', () => {
       expect(response.redirect).not.toHaveBeenCalledWith(303, '/user/register')
       expect(response.getHeader('Location')).not.toEqual('/user/register')
     })
+
   })
 })
