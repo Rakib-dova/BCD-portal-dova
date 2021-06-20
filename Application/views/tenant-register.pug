@@ -24,11 +24,11 @@ block content
                         label(for="contractName") 契約者名（企業名）（必須）
                         //- .field-body: input.control#contractName(type="text" name="contractName" value="" required)
                         .control
-                          input.input#contractName(type="text" name="contractName" value="" required)
+                          input.input#contractName(type="text" name="contractName" value="" pattern=inputPattarnZenkakuHiragana maxlength="80")
                       .field
                         label(for="contractKanaName") 契約者カナ名（企業名）（必須）
                         .control
-                          input.input#contractKanaName(type="text" name="contractKanaName" value="" required)
+                          input.input#contractKanaName(type="text" name="contractKanaName" value="" required pattern=inputPattarnZenkakuKatakana maxlength="80")
                   
                   .field.card
                     .card-content
@@ -130,7 +130,7 @@ block content
                       .field
                         label(for="password") パスワード（必須）
                         .control
-                          input.input#password.form-control(type="password" name="password" value="" required)
+                          input.input#password.form-control(type="password" name="password" value="" required pattern=inputPatternKaituPW)
                       .field
                         label(for="passwordConfirm") パスワード確認（必須）
                         .control 
