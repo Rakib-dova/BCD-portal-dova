@@ -106,9 +106,7 @@ class Invoice {
     ],
     Item: { Name: { value: null }, SellersItemIdentification: { ID: { value: null } }, Description: [{ value: null }] },
     Price: {
-      PriceAmount: { value: null, currencyID: 'JPY' },
-      BaseQuantity: { value: null, unitCode: null },
-      OrderableUnitFactorRate: { value: null }
+      PriceAmount: { value: null, currencyID: 'JPY' }
     },
     DocumentReference: [
       {
@@ -123,7 +121,6 @@ class Invoice {
     _quantityValue,
     _quantityUnitCode,
     _priceValue,
-    _orderUnitFactorRate,
     _taxRate,
     _description
   ) {
@@ -132,7 +129,6 @@ class Invoice {
     this.#InvoiceLine.InvoicedQuantity.value = parseInt(_quantityValue, 10)
     this.#InvoiceLine.InvoicedQuantity.unitCode = _quantityUnitCode
     this.#InvoiceLine.Price.PriceAmount.value = _priceValue
-    this.#InvoiceLine.Price.OrderableUnitFactorRate.value = _orderUnitFactorRate
     this.#InvoiceLine.TaxTotal[0].TaxSubtotal[0].TaxCategory.Percent.value = _taxRate
     this.#InvoiceLine.DocumentReference[0].ID.value = _description
     this.appendDocumentInvoice(JSON.parse(JSON.stringify(this.#InvoiceLine)))
@@ -295,8 +291,7 @@ class bconCsv {
         column[15],
         column[16],
         column[17],
-        column[18],
-        column[19]
+        column[18]
       )
       let checkedIdx = invoiceData[idx].idx
       let checkedSubIdx = null
@@ -314,8 +309,7 @@ class bconCsv {
             subColumn[15],
             subColumn[16],
             subColumn[17],
-            subColumn[18],
-            subColumn[19]
+            subColumn[18]
           )
           checkedIdx++
         } else {
