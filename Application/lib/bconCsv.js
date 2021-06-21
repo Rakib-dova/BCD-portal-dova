@@ -28,12 +28,7 @@ class Invoice {
     },
     ID: { value: null },
     IssueDate: { value: null },
-    InvoiceTypeCode: { 
-      value: '380',
-      listID: 'UN/ECE 1001 Subset', 
-      listAgencyID: '6', 
-      listVersionID: 'D08B' 
-    },
+    InvoiceTypeCode: { value: '380', listID: 'UN/ECE 1001 Subset', listAgencyID: '6', listVersionID: 'D08B' },
     DocumentCurrencyCode: { value: 'JPY' },
     Note: [],
     AdditionalDocumentReference: [],
@@ -64,14 +59,7 @@ class Invoice {
 
   #AccountingCustomerParty = {
     Party: {
-      PartyIdentification: [
-        { ID: { 
-            value: null, 
-            schemeID: 'TS:ID', 
-            schemeName: 'Tradeshift identifier' 
-          } 
-        }
-      ],
+      PartyIdentification: [{ ID: { value: null, schemeID: 'TS:ID', schemeName: 'Tradeshift identifier' } }],
       PartyName: [
         {
           Name: { value: null }
@@ -98,33 +86,17 @@ class Invoice {
 
   #InvoiceLine = {
     ID: { value: '1' },
-    InvoicedQuantity: { 
-      value: null, 
-      unitCode: null 
-    },
-    LineExtensionAmount: { 
-      value: null, 
-      currencyID: 'JPY' 
-    },
+    InvoicedQuantity: { value: null, unitCode: null },
+    LineExtensionAmount: { value: null, currencyID: 'JPY' },
     TaxTotal: [
       {
         TaxSubtotal: [
           {
             TaxCategory: {
-              ID: { 
-                value: 'S', 
-                schemeID: 'UN/ECE 5305', 
-                schemeAgencyID: '6', 
-                schemeVersionID: 'D08B' 
-              },
+              ID: { value: 'S', schemeID: 'UN/ECE 5305', schemeAgencyID: '6', schemeVersionID: 'D08B' },
               Percent: { value: 10 },
               TaxScheme: {
-                ID: { 
-                  value: 'VAT', 
-                  schemeID: 'UN/ECE 5153 Subset', 
-                  schemeAgencyID: '6', 
-                  schemeVersionID: 'D08B' 
-                },
+                ID: { value: 'VAT', schemeID: 'UN/ECE 5153 Subset', schemeAgencyID: '6', schemeVersionID: 'D08B' },
                 Name: { value: 'JP 消費税 10%' }
               }
             }
@@ -132,37 +104,16 @@ class Invoice {
         ]
       }
     ],
-    Item: { 
-      Name: { 
-        value: null 
-      }, 
-      SellersItemIdentification: { 
-        ID: { 
-          value: null 
-        } 
-      }, 
-      Description: [
-        { value: null }
-      ] 
-    },
+    Item: { Name: { value: null }, SellersItemIdentification: { ID: { value: null } }, Description: [{ value: null }] },
     Price: {
-      PriceAmount: { 
-        value: null, 
-        currencyID: 'JPY' 
-      },
-      BaseQuantity: { 
-        value: null, 
-        unitCode: null 
-      },
+      PriceAmount: { value: null, currencyID: 'JPY' },
+      BaseQuantity: { value: null, unitCode: null },
       OrderableUnitFactorRate: { value: null }
     },
     DocumentReference: [
       {
         ID: { value: null },
-        DocumentTypeCode: { 
-          value: 'File ID', 
-          listID: 'urn:tradeshift.com:api:1.0:documenttypecode' 
-        }
+        DocumentTypeCode: { value: 'File ID', listID: 'urn:tradeshift.com:api:1.0:documenttypecode' }
       }
     ]
   }
@@ -188,10 +139,7 @@ class Invoice {
   }
 
   #PaymentMeans = {
-    PaymentMeansCode: { 
-      value: 42, 
-      listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
-    },
+    PaymentMeansCode: { value: 42, listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode' },
     PaymentDueDate: { value: null },
     PayeeFinancialAccount: {
       FinancialInstitutionBranch: {
@@ -246,12 +194,41 @@ class bconCsv {
     fd: null,
     status: null,
     data: null,
-    rows: null,
+    rows: [],
     invoiceCnt: null,
     setData(_data) {
       this.data = _data
-      this.rows = this.data.split(/\r?\n|\r/).slice(1)
+    },
+    getData() {
+      return this.data
+    },
+    setRows(_data) {
+      const tmpRows = _data.split(/\r?\n|\r/).slice(1)
+      for (let idx = 0; idx < tmpRows.length; idx++) {
+        if (tmpRows[idx].trim()) {
+          this.rows.push({
+            idx: idx,
+            docNo: tmpRows[idx].split(',')[1],
+            rows: tmpRows[idx]
+          })
+        }
+      }
       this.invoiceCnt = this.rows.length
+      this.rows.sort((a, b) => {
+        if (a.docNo > b.docNo) {
+          return 1
+        } else if (a.docNo < b.docNo) {
+          return -1
+        } else {
+          if (a.idx > b.idx) {
+            return 1
+          } else if (a.idx < b.idx) {
+            return -1
+          } else {
+            return 0
+          }
+        }
+      })
     },
     setFile(_filePath) {
       this.setStatus(this.fileStatusEnum.LOADING)
@@ -262,15 +239,19 @@ class bconCsv {
         if (err) {
         }
       })
+      this.setRows(this.getData())
     },
     setStatus(_statuscode) {
       this.status = _statuscode
     },
-    getRows(idx) {
+    getRow(idx) {
       if (idx > this.invoiceCnt) {
         return null
       }
       return this.rows[idx]
+    },
+    getRows() {
+      return this.rows
     }
   }
   getCSVFile() {
@@ -278,6 +259,7 @@ class bconCsv {
   }
 
   #invoiceDocumentList = []
+  #failedInvoiceList = []
 
   constructor(fullFilePath) {
     this.#csvFile.setFile(fullFilePath)
@@ -285,18 +267,28 @@ class bconCsv {
   }
 
   convertTradeshiftInvoice() {
-    for (let idx = 0; idx < this.#csvFile.invoiceCnt; idx++) {
-      let rows = this.#csvFile.getRows(idx)
-      let column = rows.split(',')
+    const invoiceData = this.#csvFile.getRows()
+    let listIdx = 0
+    for (let idx = 0; invoiceData[idx] !== undefined; listIdx++) {
+      const parentInvoiceDocNo = invoiceData[idx].docNo
+      const rows = invoiceData[idx].rows
+      const column = rows.split(',')
       this.#invoiceDocumentList.push(new Invoice())
-      this.#invoiceDocumentList[idx].setIssueDate(column[0])
-      this.#invoiceDocumentList[idx].setInvoiceNumber(column[1])
-      this.#invoiceDocumentList[idx].setCustomerTennant(column[2])
-      this.#invoiceDocumentList[idx].setDelivery(column[4])
-      this.#invoiceDocumentList[idx].setAdditionalDocumentReference(column[5])
-      this.#invoiceDocumentList[idx].setPaymentMeans(column[3], column[6], column[7], column[8], column[9], column[10])
-      this.#invoiceDocumentList[idx].setNote(column[11])
-      this.#invoiceDocumentList[idx].setInvoiceLine(
+      this.#invoiceDocumentList[listIdx].setIssueDate(column[0])
+      this.#invoiceDocumentList[listIdx].setInvoiceNumber(column[1])
+      this.#invoiceDocumentList[listIdx].setCustomerTennant(column[2])
+      this.#invoiceDocumentList[listIdx].setDelivery(column[4])
+      this.#invoiceDocumentList[listIdx].setAdditionalDocumentReference(column[5])
+      this.#invoiceDocumentList[listIdx].setPaymentMeans(
+        column[3],
+        column[6],
+        column[7],
+        column[8],
+        column[9],
+        column[10]
+      )
+      this.#invoiceDocumentList[listIdx].setNote(column[11])
+      this.#invoiceDocumentList[listIdx].setInvoiceLine(
         column[12],
         column[13],
         column[14],
@@ -306,6 +298,31 @@ class bconCsv {
         column[18],
         column[19]
       )
+      let checkedIdx = invoiceData[idx].idx
+      let checkedSubIdx = null
+      for (
+        let subIdx = idx + 1;
+        invoiceData[subIdx] !== undefined && parentInvoiceDocNo === invoiceData[subIdx].docNo;
+        subIdx++, checkedSubIdx = subIdx
+      ) {
+        const subColumn = invoiceData[subIdx].rows.split(',')
+        if (invoiceData[subIdx].idx - checkedIdx === 1) {
+          this.#invoiceDocumentList[listIdx].setInvoiceLine(
+            subColumn[12],
+            subColumn[13],
+            subColumn[14],
+            subColumn[15],
+            subColumn[16],
+            subColumn[17],
+            subColumn[18],
+            subColumn[19]
+          )
+          checkedIdx++
+        } else {
+          this.#failedInvoiceList.push(invoiceData[subIdx])
+        }
+      }
+      idx = checkedSubIdx
     }
   }
 
