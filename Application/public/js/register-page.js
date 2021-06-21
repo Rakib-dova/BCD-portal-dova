@@ -43,15 +43,20 @@ document.getElementById('check').onclick = function () {
 
 // ----「次へ」ボタンが押された際のバリデーションチェック
 document.getElementById('next-btn').onclick = function () {
-  /*
   const elements = document.querySelectorAll('input[type="text"]')
+
+  // 確認項目（type="text）
+  let index = 0
   const elementsArr = Array.prototype.slice.call(elements)
   elementsArr.forEach(function (element) {
-    const target = element.name
-    const td = document.getElementById(target)
-    td.innerHTML = element.value
+    document.getElementsByClassName('checkData').item(index).innerHTML = element.value
+    index = index + 1
   })
-*/
+
+  // 確認項目（type="select"、type="password"）
+  document.getElementById('recontractAddressTo').innerHTML = document.getElementById('contractAddressTo').value
+  document.getElementById('repassword').innerHTML = document.getElementById('password').value
+
   const elementCheckbox = document.querySelector('input[type="checkbox"]')
   const targetCheckbox = elementCheckbox.name
 
