@@ -38,6 +38,10 @@ const tenantController = require('../../Application/controllers/tenantController
 const userController = require('../../Application/controllers/userController.js')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const routesTenant = require('../../Application/routes/tenant')
+const expectError = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
+expectError.name = 'Forbidden'
+expectError.status = 403
+expectError.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
@@ -470,10 +474,6 @@ describe('helpers/middlewareのテスト', () => {
 
       // 期待結果
       // 403エラーが返される
-      const expectError = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-      expectError.name = 'Forbidden'
-      expectError.status = 403
-      expectError.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
       expect(next).toHaveBeenCalledWith(expectError)
       // response.renderが呼ばれ「ない」
       expect(response.render).not.toHaveBeenCalled()
@@ -625,18 +625,10 @@ describe('helpers/middlewareのテスト', () => {
       await middleware.isUserRegistered(request, response, next)
 
       // 期待結果
-      // 引数なしでnextが呼ばれ「る」
-      expect(next).toHaveBeenCalledWith()
-      // 303エラーでauthに飛ばされ「ない」
-      expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
-      expect(response.getHeader('Location')).not.toEqual('/auth')
-      // 500エラーがエラーハンドリングされ「ない」
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // request.session.userContextが'NotUserRegistered'になってい「ない」
-      expect(request.session.userContext).not.toBe('NotUserRegistered')
-      // 303エラーで/user/registerに飛ばされ「ない」
-      expect(response.redirect).not.toHaveBeenCalledWith(303, '/user/register')
-      expect(response.getHeader('Location')).not.toEqual('/user/register')
+      // 403エラーが返される
+      expect(next).toHaveBeenCalledWith(expectError)
+      // response.renderが呼ばれ「ない」
+      expect(response.render).not.toHaveBeenCalled()
     })
 
     test('303エラー: userIdがnullの場合', async () => {
@@ -677,15 +669,15 @@ describe('helpers/middlewareのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('500エラー: DBエラーの場合', async () => {
+    test('403エラー: DBエラーの場合', async () => {
       // 準備
       // request.userのuserIdに正常なUUIDを想定する
       request.user = {
-        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
       }
-      // DBからユーザデータ取得時のエラーを想定する
-      userFindOneSpy.mockReturnValue(new Error('DB error mock'))
-
+      // DBからテナントデータが取得できなかった場合を想定する
+      tenantFindOneSpy.mockReturnValue(new Error())
       // 試験実施
       await middleware.isUserRegistered(request, response, next)
 
@@ -699,59 +691,62 @@ describe('helpers/middlewareのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('303エラー: DBからuserが見つからない場合', async () => {
+    test('portal画面へ移動、 DBからuserが見つからない場合', async () => {
       // 準備
       // request.userのuserIdに正常なUUIDを想定する
       request.user = {
-        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
       }
       // userContextに値が取れていることを想定する
       request.session = {
         userContext: 'dummy'
       }
-      // DBからユーザデータの取得ができなかった場合を想定する
+      // DBからテナント情報は取得、ユーザデータの取得ができなかった場合を想定する
+      tenantFindOneSpy.mockReturnValue({
+        dataValues: { 
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          registeredBy: '12345678-cb0b-48ad-857d-4b42a44ede13', 
+          customerId: null,
+          createdAt: '2021-01-25T10:15:15.035Z',
+          updatedAt: '2021-01-25T10:15:15.035Z' 
+        }
+      })
       userFindOneSpy.mockReturnValue(null)
+
+      request.csrfToken = jest.fn()
 
       // 試験実施
       await middleware.isUserRegistered(request, response, next)
 
       // 期待結果
       // 引数なしでnextが呼ばれ「ない」
-      expect(next).not.toHaveBeenCalledWith()
+      expect(next).toHaveBeenCalledWith()
       // 303エラーでauthに飛ばされ「ない」
       expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
       expect(response.getHeader('Location')).not.toEqual('/auth')
       // 500エラーがエラーハンドリングされ「ない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // request.session.userContextが'NotUserRegistered'になっている
-      expect(request.session.userContext).toBe('NotUserRegistered')
-      // 303エラーで/user/registerに飛ばされ「る」
-      expect(response.redirect).toHaveBeenCalledWith(303, '/user/register')
-      expect(response.getHeader('Location')).toEqual('/user/register')
     })
 
     test('500エラー: DBから取得したuserデータがdataValuesに入っていない場合', async () => {
       // 準備
       // request.userのuserIdに正常なUUIDを想定する
       request.user = {
-        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
       }
       // userContextに値が取れていることを想定する
       request.session = {
         userContext: 'dummy'
       }
-      // DBから取得したユーザデータがdataValuesに入っていない場合を想定する
-      userFindOneSpy.mockReturnValue({
-        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+      // DBから取得したテナントデータがdataValuesに入っていない場合を想定する
+      tenantFindOneSpy.mockReturnValue({
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        appVersion: '0.0.1',
-        refreshToken: 'dummyRefreshToken',
-        subRefreshToken: null,
-        userStatus: 0,
-        lastRefreshedAt: null,
-        createdAt: '2021-01-25T10:15:15.086Z',
-        updatedAt: '2021-01-25T10:15:15.086Z'
+        registeredBy: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        customerId: null,
+        createdAt: '2021-01-25T10:15:15.035Z',
+        updateAt: '2021-01-25T10:15:16.035Z'
       })
 
       // 試験実施
@@ -765,11 +760,6 @@ describe('helpers/middlewareのテスト', () => {
       expect(response.getHeader('Location')).not.toEqual('/auth')
       // 500エラーがエラーハンドリングされ「る」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-      // request.session.userContextが'NotUserRegistered'になってい「ない」
-      expect(request.session.userContext).not.toBe('NotUserRegistered')
-      // 303エラーで/user/registerに飛ばされ「ない」
-      expect(response.redirect).not.toHaveBeenCalledWith(303, '/user/register')
-      expect(response.getHeader('Location')).not.toEqual('/user/register')
     })
 
   })
