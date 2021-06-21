@@ -22,7 +22,7 @@ block content
                       .field
                         label(for="contractName") 契約者名（企業名）（必須）
                         .control
-                          input.input#contractName(type="text" name="contractName" value="" required maxlength=80)
+                          input.input#contractName(type="text" name="contractName" value="" pattern=inputPattarnZenkaku required maxlength=80)
                       .field
                         label(for="contractKanaName") 契約者カナ名（企業名）（必須）
                         .control

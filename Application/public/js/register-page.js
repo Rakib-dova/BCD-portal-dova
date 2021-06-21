@@ -47,16 +47,18 @@ document.getElementById('next-btn').onclick = function () {
   const elements = document.querySelectorAll('input[type="text"]')
   const passwords = document.querySelectorAll('input[type="password"]')
   const elementsArr = Array.prototype.slice.call(elements)
+
   const invalidElements = elementsArr.filter(el => el.getAttribute('aria-invalid') === 'true')
   if (invalidElements.length > 0) {
-    alert('必須項目の漏れまたは、要求された形式に一致されないところがあります。')
+    alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
     invalidElements[0].focus()
     return false
   }
 
   const contractAddressTo = document.querySelectorAll('select[type="select"]')
+
   if (contractAddressTo.value === '') {
-    alert('必須項目の漏れまたは、要求された形式に一致されないところがあります。')
+    alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
     contractAddressTo.focus()
     return false
   }
@@ -68,7 +70,7 @@ document.getElementById('next-btn').onclick = function () {
   
   const contractAddress = contractAddressAddr[0].value + contractAddressAddr[1].value + contractAddressTo[0].options[contractAddressTo[0].selectedIndex].value + ''
   if (contractAddress.length > 46) {
-    alert('契約者住所（丁目まで）の文字数が46桁を超えました。')
+    alert('契約者情報の住所は46文字以内で入力してください。※[都道府県][市町村][丁目]の合計文字数となります。')
     return false
   }
   // password確認
