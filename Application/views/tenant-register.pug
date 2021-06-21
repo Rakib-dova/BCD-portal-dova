@@ -110,11 +110,11 @@ block content
                       .field
                         label(for="contractPersonName") 連絡先担当者名（必須）
                         .control
-                          input.input#contractPersonName(type="text" name="contractPersonName" value="" required)
+                          input.input#contractPersonName(type="text" name="contractPersonName" value="" required maxlength=10)
                       .field
                         label(for="contractPhoneNumber") 連絡先電話番号（必須）
                         .control
-                          input.input#contractPhoneNumber(type="text" name="contractPhoneNumber" value="" pattern=inputPattarnTellNumber required)
+                          input.input#contractPhoneNumber(type="text" name="contractPhoneNumber" value="" pattern=inputPattarnTellNumber required maxlength=13)
                       .field
                         label(for="contractMail") 連絡先メールアドレス（必須）
                         .control
@@ -128,11 +128,11 @@ block content
                       .field
                         label(for="password") パスワード（必須）
                         .control
-                          input.input#password.form-control(type="password" name="password" value="" pattern=inputPatternKaituPW required)
+                          input.input#password.form-control(type="password" name="password" value="" pattern=inputPatternKaituPW required maxlength=10)
                       .field
                         label(for="passwordConfirm") パスワード確認（必須）
                         .control 
-                          input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" title="パスワードが間違っています。" required)
+                          input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" title="パスワードが間違っています。" required maxlength=10)
 
               .columns.is-centered: .column.is-four-fifths
                 .field.is-grouped.is-grouped-left
