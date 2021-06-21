@@ -7,7 +7,9 @@ const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const userController = require('../controllers/userController.js')
 const logger = require('../lib/logger')
+const apiManager = require('../controllers/apiManager')
 const filePath = process.env.INVOICE_UPLOAD_PATH
+const constantsDefine = require('../constants')
 
 const bodyParser = require('body-parser')
 router.use(
@@ -19,6 +21,7 @@ router.use(
 const bconCsv = require('../lib/bconCsv')
 
 const cbGetIndex = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
@@ -38,16 +41,18 @@ const cbGetIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   // ユーザ権限も画面に送る
   res.render('csvupload')
+  logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
 const cbPostUpload = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostUpload')
   if (!req.session || !req.user?.userId) {
-    //    return next(errorHelper.create(500))
+    return next(errorHelper.create(500))
   }
 
   const user = await userController.findOne(req.user.userId)
-  // if (user instanceof Error || user === null) return next(errorHelper.create(500))
-  // if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
@@ -64,65 +69,87 @@ const cbPostUpload = async (req, res, next) => {
   // csv削除
   if (cbRemoveCsv(filePath, filename) === false) return next(errorHelper.create(500))
 
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
   return res.status(200).send('OK')
 }
 
 // csvアップロード
 const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostUploadCsv')
   const uploadPath = path.join(_filePath, '/')
   const filename = _filename
   const uploadData = _uploadCsvData
   const writeFile = () => {
-    try {
-      fs.writeFileSync(uploadPath + filename, uploadData, 'utf8')
-      return true
-    } catch (error) {
-      return false
-    }
+    fs.writeFileSync(uploadPath + filename, uploadData, 'utf8')
   }
-  // ユーザディレクトリが存在すること確認
-  if (fs.existsSync(uploadPath)) {
-    // ユーザディレクトリが存在している場合、CSVファイルを保存する
-    try {
-      return writeFile()
-    } catch (error) {
-      return false
-    }
-  } else {
-    // ユーザディレクトリが存在しない場合、ユーザディレクトリ作成
-    try {
+  try {
+    // ユーザディレクトリが存在すること確認
+    if (fs.existsSync(uploadPath)) {
+      // ユーザディレクトリが存在している場合、CSVファイルを保存する
+      writeFile()
+      logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadCsv')
+      return true
+    } else {
+      // ユーザディレクトリが存在しない場合、ユーザディレクトリ作成
       fs.mkdirSync(uploadPath)
-      return writeFile()
-    } catch {
-      return false
+      writeFile()
+      logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadCsv')
+      return true
     }
+  } catch (error) {
+    return false
   }
 }
 
 // CSVファイル削除機能
 const cbRemoveCsv = (_deleteDataPath, _filename) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
   const deleteFile = path.join(_deleteDataPath, '/' + _filename)
 
   if (fs.existsSync(deleteFile)) {
     try {
       fs.unlinkSync(deleteFile)
+      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
       return true
     } catch (error) {
+      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
       return false
     }
   } else {
     // 削除対象がない場合、サーバーエラー画面表示
+    logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
     return false
   }
 }
 
-const cbExtractInvoice = (_extractDir, _filename, user) => {
+const cbExtractInvoice = (_extractDir, _filename, _user) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
   const csvObj = new bconCsv(extractFullpathFile)
-  logger.info(csvObj.sendInvoice(user))
+  const invoiceList = csvObj.getInvoiceList()
+  const invoiceCnt = invoiceList.length
+  const setHeaders = {}
+  setHeaders.Accepts = 'application/json'
+  setHeaders.Authorization = `Bearer ${_user.accessToken}`
+  setHeaders['Content-Type'] = 'application/json'
+  for (let idx = 0; idx < invoiceCnt; idx++) {
+    const res = apiManager.accessTradeshift(
+      _user.accessToken,
+      _user.refreshToken,
+      'put',
+      '/documents/' + invoiceList[idx].getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
+      JSON.stringify(invoiceList[idx].getDocument()),
+      {
+        headers: setHeaders
+      }
+    )
+  }
+  logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
+  return true
 }
 
 const getTimeStamp = () => {
+  logger.info(constantsDefine.logMessage.INF000 + 'getTimeStamp')
   const now = new Date()
   const stamp =
     now.getFullYear() +
@@ -132,6 +159,7 @@ const getTimeStamp = () => {
     (now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()) +
     (now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()) +
     (now.getMilliseconds() < 10 ? '0' + now.getMilliseconds() : now.getMilliseconds())
+  logger.info(constantsDefine.logMessage.INF001 + 'getTimeStamp')
   return stamp
 }
 
