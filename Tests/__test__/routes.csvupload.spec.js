@@ -76,25 +76,34 @@ describe('csvuploadのテスト', () => {
     }
   }
   // ファイルパス設定
-  const filePath = '/home/upload'
+  const filePath = process.env.INVOICE_UPLOAD_PATH
   // ファイルデータ
-  //一般の場合
+  // 請求書が1つの場合
   const fileData = Buffer.from(decodeURIComponent(`発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
-    2021-06-14,TEST1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト`), 'utf8').toString('base64')
+    2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト`), 'utf8').toString('base64')
 
-  //上の2行が一致する場合
+  // 請求書が２つ以上、請求書番号が一致していない
   const fileData2 = Buffer.from(decodeURIComponent(`発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
-    2021-06-14,TEST1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト
-    2021-06-14,TEST1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト
-    2021-06-15,TEST2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test112,testsiten,testbank,General,11111,kim_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト
-    2021-06-15,TEST3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-19,test113,testsiten,testbank,General,11111,kim_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト`), 'utf8').toString('base64')
+    2021-06-14,UT_TEST_INVOICE_2_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト
+    2021-06-14,UT_TEST_INVOICE_2_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,002,ノートパソコン,100,EA,100000,10,アップロードテスト
+    2021-06-15,UT_TEST_INVOICE_2_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test112,testsiten,testbank,General,11111,kim_test,特記事項テストです。,003,周辺機器,100,EA,100000,10,アップロードテスト
+    2021-06-15,UT_TEST_INVOICE_2_4,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-19,test113,testsiten,testbank,General,11111,kim_test,特記事項テストです。,004,プリント用紙,100,EA,100000,10,アップロードテスト`), 'utf8').toString('base64')
 
-  //下の2行が一致する場合
+  // 請求書が２つ以上、請求書番号が一致していて、順番になっている
   const fileData3 = Buffer.from(decodeURIComponent(`発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
-    2021-06-15,TEST2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test112,testsiten,testbank,General,11111,kim_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト
-    2021-06-15,TEST3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-19,test113,testsiten,testbank,General,11111,kim_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト
-    2021-06-14,TEST1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト
-    2021-06-14,TEST1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト`), 'utf8').toString('base64')
+    2021-06-15,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test112,testsiten,testbank,General,11111,kim_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト
+    2021-06-15,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-19,test113,testsiten,testbank,General,11111,kim_test,特記事項テストです。,002,ノートパソコン,100,EA,100000,10,アップロードテスト
+    2021-06-14,UT_TEST_INVOICE_3_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,001,ST001S,100,EA,100000,10,アップロードテスト
+    2021-06-14,UT_TEST_INVOICE_3_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,002,ST001M,100,EA,100000,10,アップロードテスト`), 'utf8').toString('base64')
+
+  // 請求書が２つ以上、請求書番号が順番になっていること、請求書番号が割り込んでいる
+  const fileData4 = Buffer.from(decodeURIComponent(`発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    2021-06-15,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test112,testsiten,testbank,General,11111,kim_test,特記事項テストです。,001,PC,100,EA,100000,10,アップロードテスト
+    2021-06-15,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-19,test113,testsiten,testbank,General,11111,kim_test,特記事項テストです。,002,ノートパソコン,100,EA,100000,10,アップロードテスト
+    2021-06-14,UT_TEST_INVOICE_3_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,001,ST001S,100,EA,100000,10,アップロードテスト
+    2021-06-14,UT_TEST_INVOICE_3_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,002,ST002M,100,EA,100000,10,アップロードテスト
+    2021-06-14,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,003,マウス,100,EA,100000,10,アップロードテスト
+    2021-06-14,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,004,キーボード,100,EA,100000,10,アップロードテスト`), 'utf8').toString('base64')
 
   // 異常系データ定義
   // userIdがnullの場合
@@ -268,7 +277,7 @@ describe('csvuploadのテスト', () => {
 
   // cbPostUploadの確認
   describe('cbPostUpload', () => {
-    test('正常', async () => {
+    test('正常:請求書が１つの場合', async () => {
       // 準備
       // requestのuserIdに正常値を入れる
       request.session = {
@@ -292,7 +301,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('正常：上の2行が一致する場合', async () => {
+    test('正常：請求書が番号２つ以上、請求書番号が一致している', async () => {
       // 準備
       // requestのuserIdに正常値を入れる
       request.session = {
@@ -317,7 +326,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('正常：下の2行が一致する場合', async () => {
+    test('正常：請求書番号２つ以上、請求書番号が順番になっている', async () => {
       // 準備
       // requestのuserIdに正常値を入れる
       request.session = {
@@ -331,6 +340,31 @@ describe('csvuploadのテスト', () => {
       // ファイルデータを設定
       request.body = {
         fileData3
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('正常：請求書番号２つ以上、請求書番号が割り込んでいる', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+
+      // ファイルデータを設定
+      request.body = {
+        fileData4
       }
 
       // 試験実施
@@ -501,14 +535,14 @@ describe('csvuploadのテスト', () => {
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
 
       // 試験実施
-      const result_upl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
-      expect(result_upl).toBeTruthy()
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
 
-      const result_ext = csvupload.cbExtractInvoice(filePath, filename, userToken)
-      expect(result_ext).toBeTruthy()
+      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken)
+      expect(resultExt).toBeTruthy()
 
-      const result_rem = csvupload.cbRemoveCsv(filePath, filename)
-      expect(result_rem).toBeTruthy()
+      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
