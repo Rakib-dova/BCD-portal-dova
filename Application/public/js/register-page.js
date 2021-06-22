@@ -43,15 +43,55 @@ document.getElementById('check').onclick = function () {
 
 // ----「次へ」ボタンが押された際のバリデーションチェック
 document.getElementById('next-btn').onclick = function () {
-  /*
+  // 各項目チェック
   const elements = document.querySelectorAll('input[type="text"]')
+  const passwords = document.querySelectorAll('input[type="password"]')
   const elementsArr = Array.prototype.slice.call(elements)
-  elementsArr.forEach(function (element) {
-    const target = element.name
-    const td = document.getElementById(target)
-    td.innerHTML = element.value
+
+  const invalidElements = elementsArr.filter(el => el.getAttribute('aria-invalid') === 'true')
+  if (invalidElements.length > 0) {
+    alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
+    invalidElements[0].focus()
+    return false
+  }
+
+  const contractAddressTo = document.querySelectorAll('select[type="select"]')
+
+  if (contractAddressTo.value === '') {
+    alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
+    contractAddressTo.focus()
+    return false
+  }
+
+  // 契約者住所（丁目まで)のサイズ​が全角46桁かチェック
+  const contractAddressAddr = elementsArr.filter(el => {
+    if (el.id === 'contractAddressSi'|| el.id === 'contractAddressCho') return el
   })
-*/
+  
+  const contractAddress = contractAddressAddr[0].value + contractAddressAddr[1].value + contractAddressTo[0].options[contractAddressTo[0].selectedIndex].value + ''
+  if (contractAddress.length > 46) {
+    alert('契約者情報の住所は46文字以内で入力してください。※[都道府県][市町村][丁目]の合計文字数となります。')
+    return false
+  }
+  // password確認
+  const passwordsArr = Array.prototype.slice.call(passwords)
+  if (passwordsArr[0].value !== passwordsArr[1].value) {
+    alert('パスワードが一致しません。')
+    document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'true')
+    return false
+  }
+
+  // 確認項目（type="text）
+  let index = 0
+  elementsArr.forEach(function (element) {
+    document.getElementsByClassName('checkData').item(index).innerHTML = element.value
+    index = index + 1
+  })
+
+  // 確認項目（type="select"、type="password"）
+  document.getElementById('recontractAddressTo').innerHTML = document.getElementById('contractAddressTo').value
+  document.getElementById('repassword').innerHTML = document.getElementById('password').value
+
   const elementCheckbox = document.querySelector('input[type="checkbox"]')
   const targetCheckbox = elementCheckbox.name
 
@@ -122,4 +162,15 @@ function instantValidation(field) {
 // ---- 登録ボタン押下時のフロント側での二重送信防止
 document.getElementById('form').onsubmit = function () {
   document.getElementById('submit').setAttribute('disabled', 'disabled')
+}
+
+document.getElementById('passwordConfirm').onkeyup = function () {
+  // password確認
+  const passwords = document.querySelectorAll('input[type="password"]')
+  const passwordsArr = Array.prototype.slice.call(passwords)
+  if (passwordsArr[0].value !== passwordsArr[1].value) {
+    document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'true')
+  } else {
+    document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'false')
+  }
 }

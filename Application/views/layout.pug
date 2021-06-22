@@ -1,15 +1,5 @@
-﻿doctype html
-
-block variables
-  - var inputPattarnZenkakuHiragana = '^[^ -~｡-ﾟ\t]+$';　// 全角ひらがな
-  - var inputPattarnZenkaku = '[^\x01-\x7E\xA1-\xDF]'; // 全角文字
-  - var inputPattarnZenkakuKatakana = '^[ァ-ヶー　]+$';　// 全角カタカナ
-  - var inputPattarnHankakuNumber = '[0-9]{7}'; //半角数値　7文字固定
-  - var inputPattarnTellNumber = '^0\d{2,3}-\d{1,4}-\d{4}$' // 電話番号（-あり）
-  - var inputPattarnMailAddress = '^[a-zA-Z0-9-_\.]+@[a-zA-Z0-9-_\.]+$' // メールアドレス（緩めの条件）
-  - var inputPatternKaituPW = '^([a-zA-Z0-9]{4,10})$' // 開通パスワード 半角英数4～10文字
-
-
+﻿
+doctype html
 html
   head
     block head
@@ -34,6 +24,15 @@ html
           .navbar-item.right
             img.ncom-logo(src='../image/ts-app-digitaltrade-ncom-logo.svg')
     
+    block vars
+      - var inputPattarnZenkakuHiragana = '^[^ -~｡-ﾟ\t]+$'　// 全角ひらがな
+      - var inputPattarnZenkaku = '[^\x01-\x7E\xA1-\xDF]+$' // 全角文字
+      - var inputPattarnZenkakuKatakana = '^[ァ-ヶー　]+$'　// 全角カタカナ
+      - var inputPattarnHankakuNumber = '[0-9]{7}' //半角数値　7文字固定
+      - var inputPattarnTellNumber = '^([0-9]{1,4})-([0-9]{1,4})-([0-9]{1,4})'// 電話番号（-あり）
+      - var inputPattarnMailAddress = '^[a-zA-Z0-9-.]+@[a-zA-Z0-9-.]+$' // メールアドレス（緩めの条件）
+      - var inputPatternKaituPW = '^([a-zA-Z0-9]{4,10})$' // 開通パスワード 半角英数4～10文字
+    
     block content
 
     if messages.info
@@ -41,4 +40,3 @@ html
     
     block scripts
       script(src="/js/common-page.js")
-      

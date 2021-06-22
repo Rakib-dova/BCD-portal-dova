@@ -210,3 +210,17 @@ img.logo-ncom {
   color: #363636;
   height: 3em;
 }
+
+.confirmation-item {
+  width: 45%;
+  max-width: 45%;
+  min-width: 45%;
+}
+
+.confirmation-content,
+.checkData {
+  width: 55%;
+  max-width: 55%;
+  min-width: 55%;
+  word-break: break-all;
+}
