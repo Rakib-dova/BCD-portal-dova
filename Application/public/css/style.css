@@ -224,3 +224,7 @@ img.logo-ncom {
   min-width: 55%;
   word-break: break-all;
 }
+
+.hidetext {
+  -webkit-text-security: disc;
+}
