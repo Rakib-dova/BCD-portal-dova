@@ -12,6 +12,7 @@ const logger = require('../lib/logger')
 const errorHelper = require('./helpers/error')
 
 const contractInformation = require('../constants/contractInformation.json')
+const orderType = require('../constants/orderType.json')
 
 // CSR対策
 const csrf = require('csurf')
@@ -114,7 +115,7 @@ const cbPostRegister = async (req, res, next) => {
 
   // contractBasicInfo 設定
   contractInformation.contractBasicInfo.sysManagedId = req.user.tenantId
-  contractInformation.contractBasicInfo.sysManagedId = req.user.tenantId
+  contractInformation.contractBasicInfo.orderType = orderType.new
   contractInformation.contractBasicInfo.kaianPassword = req.body.password
 
   // contractorName
