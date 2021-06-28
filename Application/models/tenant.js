@@ -23,7 +23,9 @@ module.exports = (sequelize, DataTypes) => {
       registeredBy: {
         type: DataTypes.UUID
       },
-      customerId: DataTypes.STRING
+      customerId: {
+        type: DataTypes.STRING
+      }
     },
     {
       sequelize,
