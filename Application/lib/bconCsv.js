@@ -1,11 +1,8 @@
 'use strict'
 
 const fs = require('fs')
-const apiManager = require('../controllers/apiManager')
 const { v4: uuidv4 } = require('uuid')
 const logger = require('./logger')
-const axios = require('axios')
-const { col } = require('sequelize')
 class Invoice {
   #DocumentId = null
   constructor() {
@@ -94,10 +91,10 @@ class Invoice {
           {
             TaxCategory: {
               ID: { value: 'S', schemeID: 'UN/ECE 5305', schemeAgencyID: '6', schemeVersionID: 'D08B' },
-              Percent: { value: 10 },
+              Percent: { value: null },
               TaxScheme: {
                 ID: { value: 'VAT', schemeID: 'UN/ECE 5153 Subset', schemeAgencyID: '6', schemeVersionID: 'D08B' },
-                Name: { value: 'JP 消費税 10%' }
+                Name: { value: null }
               }
             }
           }
@@ -106,7 +103,7 @@ class Invoice {
     ],
     Item: { Name: { value: null }, SellersItemIdentification: { ID: { value: null } }, Description: [{ value: null }] },
     Price: {
-      PriceAmount: { value: null, currencyID: 'JPY' }
+      PriceAmount: { value: null, currencyID: 'JPY' },
     },
     DocumentReference: [
       {
@@ -129,7 +126,8 @@ class Invoice {
     this.#InvoiceLine.InvoicedQuantity.value = parseInt(_quantityValue, 10)
     this.#InvoiceLine.InvoicedQuantity.unitCode = _quantityUnitCode
     this.#InvoiceLine.Price.PriceAmount.value = _priceValue
-    this.#InvoiceLine.TaxTotal[0].TaxSubtotal[0].TaxCategory.Percent.value = _taxRate
+    this.#InvoiceLine.TaxTotal[0].TaxSubtotal[0].TaxCategory.Percent.value = ~~_taxRate.replace(/[^0-9]/g, '')
+    this.#InvoiceLine.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.Name.value = _taxRate
     this.#InvoiceLine.DocumentReference[0].ID.value = _description
     this.appendDocumentInvoice(JSON.parse(JSON.stringify(this.#InvoiceLine)))
   }
