@@ -25,6 +25,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       customerId: {
         type: DataTypes.STRING
+      },
+      deleteFlag: {
+        type: DataTypes.BOOLEAN
       }
     },
     {

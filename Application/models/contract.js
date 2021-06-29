@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       tenantId: DataTypes.UUID,
       numberN: DataTypes.STRING,
       contractStatus: DataTypes.STRING,
-      deleteFlag: DataTypes.INTEGER,
+      deleteFlag: DataTypes.BOOLEAN,
       createdAt: DataTypes.DATE,
       updatedAt: DataTypes.DATE
     },

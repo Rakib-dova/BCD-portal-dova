@@ -8,7 +8,7 @@ const apiManager = require('./apiManager')
 const logger = require('../lib/logger')
 
 const tokenenc = require('../lib/tokenenc')
-const { v4: uuidv4 } = require("uuid")
+const { v4: uuidv4 } = require('uuid')
 
 const contractStatus = require('../constants/contractStatus.json')
 const deleteFlg = require('../constants/deleteFlg.json')
@@ -109,7 +109,7 @@ module.exports = {
           defaults: {
             tenantId: _tenantId,
             registeredBy: _userId,
-            deleteFlg: parseInt(deleteFlg.notDeleted)
+            deleteFlag: parseInt(deleteFlg.notDeleted)
           },
           transaction: t
         })
@@ -140,7 +140,7 @@ module.exports = {
             tenantId: _tenantId,
             numberN: '',
             contractStatus: contractStatus.newContract.requestContract,
-            deleteFlg: parseInt(deleteFlg.notDeleted),
+            deleteFlag: parseInt(deleteFlg.notDeleted),
             createdAt: _date,
             updatedAt: _date
           },
@@ -153,7 +153,6 @@ module.exports = {
           defaults: {
             contractId: _contractId,
             tenantId: _tenantId,
-            numberNForOrder: '',
             orderType: orderType.new,
             orderData: JSON.stringify(contractInformation)
           },

@@ -12,10 +12,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'contractId',
         targetKey: 'contractId'
       }),
-      Order.belongsTo(models.Contract, {
-        foreignKey: 'tenantId',
-        targetKey: 'tenantId'
-      })
+        Order.belongsTo(models.Contract, {
+          foreignKey: 'tenantId',
+          targetKey: 'tenantId'
+        })
     }
   }
   Order.init(
@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true
       },
       tenantId: DataTypes.UUID,
-      orderType: DataTypes.INTEGER,
+      orderType: DataTypes.STRING,
       orderData: DataTypes.STRING(4000),
       createdAt: DataTypes.DATE,
       updatedAt: DataTypes.DATE

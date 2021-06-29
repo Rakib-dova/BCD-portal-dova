@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -21,7 +21,7 @@ module.exports = {
       },
       deleteFlag: {
         allowNull: false,
-        type: Sequelize.INTEGER,
+        type: Sequelize.BOOLEAN,
         defaultValue: 0
       },
       createdAt: {
@@ -38,4 +38,4 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('Contracts')
   }
-};
+}

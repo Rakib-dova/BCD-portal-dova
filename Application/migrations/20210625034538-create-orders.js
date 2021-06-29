@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -13,7 +13,7 @@ module.exports = {
         type: Sequelize.UUID
       },
       orderType: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       orderData: {
         type: Sequelize.STRING(4000)
@@ -32,4 +32,4 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('Orders')
   }
-};
+}
