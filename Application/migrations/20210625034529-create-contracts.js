@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-'use strict';
-=======
 'use strict'
->>>>>>> origin/ST#738_pyo_PB#581
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -17,22 +13,6 @@ module.exports = {
         type: Sequelize.UUID
       },
       numberN: {
-<<<<<<< HEAD
-        type: Sequelize.STRING(255)
-      },
-      lastRefreshedAt: {
-        type: Sequelize.DATE
-      },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      terminatedAt: {
-=======
         type: Sequelize.STRING
       },
       contractStatus: {
@@ -49,7 +29,6 @@ module.exports = {
         type: Sequelize.DATE
       },
       updatedAt: {
->>>>>>> origin/ST#738_pyo_PB#581
         allowNull: false,
         type: Sequelize.DATE
       }
@@ -59,8 +38,4 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('Contracts')
   }
-<<<<<<< HEAD
-};
-=======
 }
->>>>>>> origin/ST#738_pyo_PB#581
