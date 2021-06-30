@@ -29,7 +29,8 @@
     "qs": "^6.9.4",
     "redis": "^3.0.2",
     "sequelize": "^6.3.5",
-    "tedious": "^9.2.1"
+    "tedious": "^9.2.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "bulma": "^0.9.1",

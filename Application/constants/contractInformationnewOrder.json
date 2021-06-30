@@ -1,0 +1,40 @@
+{
+  "contractBasicInfo": {
+    "sysManagedId": "",
+    "orderId": "",
+    "orderType": "",
+    "contractChangeName": "",
+    "contractChangeAddress": "",
+    "contractChangeContact": "",
+    "appDate": "",
+    "OpeningDate": "",
+    "contracutNumber": "",
+    "salesChannelCode": "",
+    "kaianPassword": ""
+  },
+  
+  "contractAccountInfo": {
+    "contractAccountId": "",
+    "customerType": "",
+    "commonCustomerId": "",
+    "contractorName": "",
+    "contractorKanaName": "",
+    "postalNumber": "",
+    "contractAddress": "",
+    "banch1": "",
+    "tatemono1": "" 
+  },
+  
+  "contractList": [{
+    "contractType": "",
+    "contractPersonName": "",
+    "contractPhoneNumber": "",
+    "contractMail":""
+  }],
+  
+  "prdtList": [{
+    "prdctCode": "BF1021000000100",
+    "appType": "010"
+  
+  }]
+}
