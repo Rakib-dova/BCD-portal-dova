@@ -11,7 +11,7 @@ const logger = require('../lib/logger')
 
 const errorHelper = require('./helpers/error')
 
-const contractInformation = require('../constants/contractInformation.json')
+const contractInformationnewOrder = require('../constants/contractInformationnewOrder.json')
 const orderType = require('../constants/orderType.json')
 
 // CSR対策
@@ -114,33 +114,33 @@ const cbPostRegister = async (req, res, next) => {
   if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))
 
   // contractBasicInfo 設定
-  contractInformation.contractBasicInfo.sysManagedId = req.user.tenantId
-  contractInformation.contractBasicInfo.orderType = orderType.new
-  contractInformation.contractBasicInfo.kaianPassword = req.body.password
+  contractInformationnewOrder.contractBasicInfo.sysManagedId = req.user.tenantId
+  contractInformationnewOrder.contractBasicInfo.orderType = orderType.new
+  contractInformationnewOrder.contractBasicInfo.kaianPassword = req.body.password
 
   // contractorName
-  contractInformation.contractAccountInfo.contractorName = req.body.contractName
+  contractInformationnewOrder.contractAccountInfo.contractorName = req.body.contractName
   // contractorKanaName
-  contractInformation.contractAccountInfo.contractorKanaName = req.body.contractKanaName
+  contractInformationnewOrder.contractAccountInfo.contractorKanaName = req.body.contractKanaName
   // postalName
-  contractInformation.contractAccountInfo.postalNumber = req.body.postalNumber
+  contractInformationnewOrder.contractAccountInfo.postalNumber = req.body.postalNumber
   // contractAddress
   const contractAddressTo = req.body.contractAddressTo
   const contractAddressSi = req.body.contractAddressSi
   const contractAddressCho = req.body.contractAddressCho
-  contractInformation.contractAccountInfo.contractAddress = `${contractAddressTo} ${contractAddressSi} ${contractAddressCho}`
+  contractInformationnewOrder.contractAccountInfo.contractAddress = `${contractAddressTo} ${contractAddressSi} ${contractAddressCho}`
   // banchi1
-  contractInformation.contractAccountInfo.banch1 = req.body.banch1
+  contractInformationnewOrder.contractAccountInfo.banch1 = req.body.banch1
   // tatemono1
-  contractInformation.contractAccountInfo.tatemono1 = req.body.tatemono1
+  contractInformationnewOrder.contractAccountInfo.tatemono1 = req.body.tatemono1
 
   // contractPersonName
-  contractInformation.contractList[0].contractPersonName = req.body.contractPersonName
-  contractInformation.contractList[0].contractPhoneNumber = req.body.contractPhoneNumber
-  contractInformation.contractList[0].contractMail = req.body.contractMail
-  console.log(contractInformation)
+  contractInformationnewOrder.contractList[0].contractPersonName = req.body.contractPersonName
+  contractInformationnewOrder.contractList[0].contractPhoneNumber = req.body.contractPhoneNumber
+  contractInformationnewOrder.contractList[0].contractMail = req.body.contractMail
+ 
   // ユーザ登録と同時にテナント登録も行われる
-  const user = await userController.create(req.user.accessToken, req.user.refreshToken, contractInformation)
+  const user = await userController.create(req.user.accessToken, req.user.refreshToken, contractInformationnewOrder)
 
   // データベースエラーは、エラーオブジェクトが返る
   if (user instanceof Error) return next(errorHelper.create(500))

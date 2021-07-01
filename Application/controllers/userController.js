@@ -77,7 +77,7 @@ module.exports = {
       return error
     }
   },
-  create: async (accessToken, refreshToken, contractInformation) => {
+  create: async (accessToken, refreshToken, contractInformationnewOrder) => {
     const userdata = await apiManager.accessTradeshift(accessToken, refreshToken, 'get', '/account/info/user')
     // Tradeshift APIへのアクセスエラーでは、エラーオブジェクトが返る
     if (userdata instanceof Error) {
@@ -154,7 +154,7 @@ module.exports = {
             contractId: _contractId,
             tenantId: _tenantId,
             orderType: orderType.new,
-            orderData: JSON.stringify(contractInformation)
+            orderData: JSON.stringify(contractInformationnewOrder)
           },
           transaction: t
         })
