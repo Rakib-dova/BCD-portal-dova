@@ -1,11 +1,18 @@
 const User = require('../models').User
 const Tenant = require('../models').Tenant
+const Contract = require('../models').Contract
+const Order = require('../models').Order
 
 const db = require('../models')
 const apiManager = require('./apiManager')
 const logger = require('../lib/logger')
 
 const tokenenc = require('../lib/tokenenc')
+const { v4: uuidv4 } = require('uuid')
+
+const contractStatus = require('../constants/contractStatus.json')
+const deleteFlg = require('../constants/deleteFlg.json')
+const orderType = require('../constants/orderType.json')
 
 module.exports = {
   findOne: async (userId) => {
@@ -70,7 +77,7 @@ module.exports = {
       return error
     }
   },
-  create: async (accessToken, refreshToken) => {
+  create: async (accessToken, refreshToken, contractInformationnewOrder) => {
     const userdata = await apiManager.accessTradeshift(accessToken, refreshToken, 'get', '/account/info/user')
     // Tradeshift APIへのアクセスエラーでは、エラーオブジェクトが返る
     if (userdata instanceof Error) {
@@ -101,7 +108,8 @@ module.exports = {
           where: { tenantId: _tenantId },
           defaults: {
             tenantId: _tenantId,
-            registeredBy: _userId
+            registeredBy: _userId,
+            deleteFlag: parseInt(deleteFlg.notDeleted)
           },
           transaction: t
         })
@@ -119,6 +127,37 @@ module.exports = {
           transaction: t
         })
 
+        // contractId uuidで生成
+        const _contractId = uuidv4()
+        // contractテーブルのdate
+        const _date = new Date()
+
+        // Contractテーブルに入力
+        await Contract.findOrCreate({
+          where: { contractId: _contractId },
+          defaults: {
+            contractId: _contractId,
+            tenantId: _tenantId,
+            numberN: '',
+            contractStatus: contractStatus.newContract.requestContract,
+            deleteFlag: parseInt(deleteFlg.notDeleted),
+            createdAt: _date,
+            updatedAt: _date
+          },
+          transaction: t
+        })
+
+        // Orderテーブルに入力
+        await Order.findOrCreate({
+          where: { contractId: _contractId },
+          defaults: {
+            contractId: _contractId,
+            tenantId: _tenantId,
+            orderType: orderType.new,
+            orderData: JSON.stringify(contractInformationnewOrder)
+          },
+          transaction: t
+        })
         return user
       })
 

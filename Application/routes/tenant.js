@@ -11,6 +11,9 @@ const logger = require('../lib/logger')
 
 const errorHelper = require('./helpers/error')
 
+const contractInformationnewOrder = require('../constants/contractInformationnewOrder.json')
+const orderType = require('../constants/orderType.json')
+
 // CSR対策
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
@@ -30,8 +33,11 @@ const cbGetRegister = async (req, res, next) => {
     'get',
     '/account/info/user'
   )
+
   // Tradeshift APIへのアクセスエラーは、エラーオブジェクトが返る
-  if (userdata instanceof Error) return next(errorHelper.create(500))
+  if (userdata instanceof Error) {
+    return next(errorHelper.create(500))
+  }
 
   if (userdata.Memberships?.[0].Role?.toLowerCase() !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d') {
     // TODO: 画面文言は変更の可能性あり。
@@ -107,8 +113,34 @@ const cbPostRegister = async (req, res, next) => {
 
   if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))
 
+  // contractBasicInfo 設定
+  contractInformationnewOrder.contractBasicInfo.sysManagedId = req.user.tenantId
+  contractInformationnewOrder.contractBasicInfo.orderType = orderType.new
+  contractInformationnewOrder.contractBasicInfo.kaianPassword = req.body.password
+
+  // contractorName
+  contractInformationnewOrder.contractAccountInfo.contractorName = req.body.contractName
+  // contractorKanaName
+  contractInformationnewOrder.contractAccountInfo.contractorKanaName = req.body.contractKanaName
+  // postalName
+  contractInformationnewOrder.contractAccountInfo.postalNumber = req.body.postalNumber
+  // contractAddress
+  const contractAddressTo = req.body.contractAddressTo
+  const contractAddressSi = req.body.contractAddressSi
+  const contractAddressCho = req.body.contractAddressCho
+  contractInformationnewOrder.contractAccountInfo.contractAddress = `${contractAddressTo} ${contractAddressSi} ${contractAddressCho}`
+  // banchi1
+  contractInformationnewOrder.contractAccountInfo.banch1 = req.body.banch1
+  // tatemono1
+  contractInformationnewOrder.contractAccountInfo.tatemono1 = req.body.tatemono1
+
+  // contractPersonName
+  contractInformationnewOrder.contractList[0].contractPersonName = req.body.contractPersonName
+  contractInformationnewOrder.contractList[0].contractPhoneNumber = req.body.contractPhoneNumber
+  contractInformationnewOrder.contractList[0].contractMail = req.body.contractMail
+ 
   // ユーザ登録と同時にテナント登録も行われる
-  const user = await userController.create(req.user.accessToken, req.user.refreshToken)
+  const user = await userController.create(req.user.accessToken, req.user.refreshToken, contractInformationnewOrder)
 
   // データベースエラーは、エラーオブジェクトが返る
   if (user instanceof Error) return next(errorHelper.create(500))
