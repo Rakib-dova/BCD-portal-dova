@@ -103,7 +103,7 @@ class Invoice {
     ],
     Item: { Name: { value: null }, SellersItemIdentification: { ID: { value: null } }, Description: [{ value: null }] },
     Price: {
-      PriceAmount: { value: null, currencyID: 'JPY' },
+      PriceAmount: { value: null, currencyID: 'JPY' }
     },
     DocumentReference: [
       {
