@@ -81,7 +81,7 @@ stages:
             displayName: "Publish Test Report"
             inputs:
               codeCoverageTool: Cobertura
-              summaryFileLocation: $(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml
+              summaryFileLocation: $(System.DefaultWorkingDirectory)/Tests/coverage/cobertura-coverage.xml
               
           - task: Docker@1
             displayName: "Build an image"
