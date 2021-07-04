@@ -12,8 +12,7 @@ trigger:
     include:
       - /
     exclude:
-      - /Documents
-      - /Tests
+      - /
 
 parameters:
   - name: Environment
@@ -77,6 +76,7 @@ stages:
           - task: PublishTestResults@2
             displayName: 'Publish test results'
             inputs:
+              testRunTitle: '${{ parameters.Environment }}'
               testResultsFormat: 'JUnit'
               testResultsFiles: '$(System.DefaultWorkingDirectory)/Tests/coverage/junit.xml'
 
