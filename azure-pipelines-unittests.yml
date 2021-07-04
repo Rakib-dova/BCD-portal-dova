@@ -68,10 +68,16 @@ stages:
               npm run test:ci
             displayName: "Run unit tests"
             
-          - task: PublishTestResults@2
-            displayName: 'Supply npm test results to pipelines'
-            condition: succeededOrFailed() # because otherwise we won't know what tests failed
+          - task: PublishCodeCoverageResults@1
+            displayName: 'Publish code coverage'
             inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: $(System.DefaultWorkingDirectory)/Tests/coverage/cobertura-coverage.xml
+          
+          - task: PublishTestResults@2
+            displayName: 'Publish test results'
+            inputs:
+              testResultsFormat: 'JUnit'
               testResultsFiles: '$(System.DefaultWorkingDirectory)/Tests/coverage/junit.xml'
 
           - task: Docker@1
