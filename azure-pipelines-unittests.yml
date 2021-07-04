@@ -66,8 +66,10 @@ stages:
             displayName: "Run unit tests"
             inputs:
               command: "custom"
-              workingDir: "Tests"
-              customCommand: "run test:ci"
+              workingDir: "."
+              customCommand: |
+                npm install jest-junit --save-dev
+                npm run test:ci
             
           - task: PublishTestResults@2
             displayName: 'Supply npm test results to pipelines'
