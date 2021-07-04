@@ -62,15 +62,11 @@ stages:
           - bash: sudo mkdir /home/upload
             displayName: Make directory for upload files
 
-          - task: Npm@1
+          - bash: |
+              npm install jest-junit --save-dev
+              cd ./Tests
+              npm run test:ci
             displayName: "Run unit tests"
-            inputs:
-              command: "custom"
-              workingDir: "."
-              customCommand: |
-                npm install jest-junit --save-dev
-                cd ./Tests
-                npm run test:ci
             
           - task: PublishTestResults@2
             displayName: 'Supply npm test results to pipelines'
