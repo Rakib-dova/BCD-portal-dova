@@ -69,6 +69,7 @@ stages:
               workingDir: "."
               customCommand: |
                 npm install jest-junit --save-dev
+                cd ./Tests
                 npm run test:ci
             
           - task: PublishTestResults@2
