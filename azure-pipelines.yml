@@ -58,6 +58,7 @@ stages:
             inputs:
               cwd: Tests
               arguments: "--force"
+
           - bash: sudo mkdir /home/upload
             displayName: Make directory for upload files
 
@@ -77,12 +78,6 @@ stages:
               workingDir: "Tests"
               customCommand: "run test:ci"
 
-          - task: PublishCodeCoverageResults@1
-            displayName: "Publish Test Report"
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: $(System.DefaultWorkingDirectory)/Tests/coverage/cobertura-coverage.xml
-              
           - task: Docker@1
             displayName: "Build an image"
             inputs:
