@@ -61,18 +61,21 @@ block content
         .card
           .card-content.notification.m-0
             button.delete(data-target="support-confirmation-modal")
-            if userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d"
+            if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN !== null)
               p お問い合わせの際は、問い合わせフォームに以下のお客様番号をご入力ください。
               .field.has-addons
                 .control.is-expanded
-                  input.input#tenantId(type='text' value='BCD-F-00-'+tenantId)
+                  input.input#numberN(type='text' value='BCD-F-00-'+numberN)
                 .control
-                  a.button#copy-btn(data-clipboard-target="#tenantId")
+                  a.button#copy-btn(data-clipboard-target="#numberN")
                     | Copy                
               a.button.is-success.is-pulled-right.mb-3(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank') お問い合わせページを開く
+            else if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN === null)
+              p 現在お客様番号払出中です。
+              p 払出後、本画面からお問い合わせが可能となります。
             else
-              p お問い合わせは、アカウント管理者のみ可能です。
-              p アカウント管理者にご相談の上、お問い合わせください。
+              p お問い合わせは、テナント管理者のみ可能です。
+              p テナント管理者にご相談の上、お問い合わせください。
   include footer
 
 block append scripts
