@@ -1,4 +1,5 @@
 const Contract = require('../models').Contract
+const deleteFlg = require('../constants/deleteFlg.json')
 const logger = require('../lib/logger')
 
 module.exports = {
@@ -6,7 +7,8 @@ module.exports = {
     try {
       const contract = await Contract.findOne({
         where: {
-          tenantId: tenantId
+          tenantId: tenantId,
+          deleteFlag: parseInt(deleteFlg.notDeleted)
         }
       })
 

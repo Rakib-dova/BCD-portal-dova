@@ -19,6 +19,8 @@ describe('contractControllerのテスト', () => {
   })
   tenantId = '12345678-bdac-4195-80b9-1ea64b8cb70c'
 
+  const contractInfoDataCount0 = {}
+
   const contractInfoDataNotNumberN = {
     contractId: '87654321-fbe6-4864-a866-7a3ce9aa517e',
     tenantId: tenantId,
@@ -64,6 +66,20 @@ describe('contractControllerのテスト', () => {
       // 期待結果
       // 想定した契約情報がReturnされていること
       expect(result).toEqual(contractInfoData)
+    })
+
+    test('正常：データ０件', async () => {
+      // 準備
+      // DBから取得したデータが「０件」を想定する
+      findOneSpy.mockReturnValueOnce(contractInfoDataCount0)
+
+      // 試験実施
+      const result = await contractController.findOne(tenantId)
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(contractInfoDataCount0)
+      expect(result.length).toEqual(undefined)
     })
 
     test('status 0のErrorログ: DBエラー時', async () => {
