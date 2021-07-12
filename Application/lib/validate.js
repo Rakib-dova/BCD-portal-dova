@@ -73,6 +73,11 @@ const isUUID = (uuid) => {
   else return true
 }
 
+const isPostalNumber = (postalNumber) => {
+  if (postalNumber) return true
+  else return false
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -81,5 +86,6 @@ module.exports = {
   isString: isString,
   isStrings: isStrings,
   isFunction: isFunction,
-  isUUID: isUUID
+  isUUID: isUUID,
+  isPostalNumber: isPostalNumber
 }
