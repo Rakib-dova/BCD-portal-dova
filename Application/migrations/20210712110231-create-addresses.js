@@ -5,7 +5,7 @@ module.exports = {
       addressKey: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID
+        type: Sequelize.STRING
       },
       state: {
         type: Sequelize.STRING
@@ -20,7 +20,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       postalCode: {
-        type: Sequelize.UUID
+        type: Sequelize.STRING
       }
     })
   },
