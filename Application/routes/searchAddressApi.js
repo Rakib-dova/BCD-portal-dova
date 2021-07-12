@@ -4,7 +4,7 @@ const express = require('express')
 const router = express.Router()
 const validate = require('../lib/validate')
 const postalNumberController = require('../controllers/postalNumberController.js')
-const tmpAddress = { address: null }
+const resultAddress = { addressList: [] }
 
 const bodyParser = require('body-parser')
 router.use(
@@ -14,7 +14,7 @@ router.use(
   })
 )
 
-const cbSearchAddress = (req, res, next) => {
+const cbSearchAddress = async (req, res, next) => {
   if (req.session?.userContext !== 'NotUserRegistered') {
     res.status(400).send()
   }
@@ -29,9 +29,9 @@ const cbSearchAddress = (req, res, next) => {
 
   if (!validate.isPostalNumber(req.body.postalNumber)) res.status(400).send()
 
-  tmpAddress.address = postalNumberController.findOne(req.body.postalNumber)
+  resultAddress.addressList = await postalNumberController.findOne(req.body.postalNumber)
   // レスポンスを返す
-  res.status(200).send(tmpAddress)
+  res.status(200).send(resultAddress)
 }
 
 router.post('/', cbSearchAddress)
