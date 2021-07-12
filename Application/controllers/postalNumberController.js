@@ -1,25 +1,54 @@
-// const logger = require('../lib/logger')
+const logger = require('../lib/logger')
+const DB_NAME =  process.env.DB_NAME
+const DB_USER =  process.env.DB_USER
+const DB_PASS =  process.env.DB_PASS
+const DB_HOST =  process.env.DB_HOST
+const config = {
+  authentication: {
+    options: { userName: DB_USER, password: DB_PASS },
+    type: 'default'
+  },
+  server: DB_HOST,
+  options: { database: DB_NAME, encrypt: DB_HOST !== 'localhost', validateBulkLoadParameters: false, rowCollectionOnRequestCompletion: true }
+} 
+const { Connection, Request } = require('tedious')
 
 module.exports = {
-  findOne: (postalNumber) => {
-    const result = []
-    try {
-      tmpAddress = {
-        '001': { 3530000: '埼玉県和光市白子1丁目' },
-        '002': { 3530000: '埼玉県和光市白子2丁目' },
-        '003': { 3530000: '埼玉県和光市白子3丁目' },
-        '004': { 3530001: '埼玉県和光市黒子1丁目' },
-        '005': { 3530002: '埼玉県和光市赤子' }
-      }
-      for (const pNumber in tmpAddress) {
-        if (tmpAddress[pNumber][postalNumber]) {
-          result.push(tmpAddress[pNumber][postalNumber])
+  findOne:function (postalNumber) {
+    return new Promise((resolve, reject) => {      
+      const connection = new Connection(config)
+      const result = []
+     
+      connection.on('connect', async (err) => {
+        if (err) {
+          logger.error(err)
+        } else {
+          logger.info('connected')
+          execStatement()
         }
-      }
-      return result
-    } catch (err) {
-      console.log(err)
-      return null
-    }
+      })
+      
+      connection.connect()
+     
+      function execStatement() {
+        const request = new Request(`SELECT CONCAT(state, city, address1, address2) address FROM Addresses WHERE postalCode = '${postalNumber}'`, (err, rowCount, rows) => {
+          if (err) {
+            logger.error(err)
+            reject(err)
+          } else if (rowCount > 0) {
+            rows.forEach((row) => {
+              result.push({'address': row[0].value})
+            })
+          }
+          resolve(result)
+        })
+        
+        request.on('requestCompleted', function() {
+         connection.close()
+        })
+        
+        connection.execSql(request) 
+     }      
+    })
   }
 }
