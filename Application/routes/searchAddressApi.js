@@ -2,9 +2,10 @@
 
 const express = require('express')
 const router = express.Router()
+const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const postalNumberController = require('../controllers/postalNumberController.js')
-const resultAddress = { addressList: [] }
+let resultAddress = { addressList: [] }
 
 const bodyParser = require('body-parser')
 router.use(
@@ -14,24 +15,45 @@ router.use(
   })
 )
 
-const cbSearchAddress = async (req, res, next) => {
+let resultStatusCode 
+
+const cbSearchAddress = async (req, res) => {
+  let result
   if (req.session?.userContext !== 'NotUserRegistered') {
-    res.status(400).send()
+    resultStatusCode = 403 
+    return res.status(resultStatusCode).send()
   }
 
-  if (!req.user?.accessToken || !req.user?.refreshToken) {
-    res.status(500).send()
+  if (req.body.postalNumber === undefined) {
+    resultStatusCode = 400 
+    return res.status(resultStatusCode).send()
   }
 
-  if (req.body?.termsCheck !== 'on') res.status(400).send()
+  if (!validate.isPostalNumber(req.body.postalNumber)) {
+    resultStatusCode = 400 
+    return res.status(resultStatusCode).send()
+  }
+  
+  result = await postalNumberController.findOne(req.body.postalNumber)
+           .catch((error) => { return error })
 
-  if (req.body.postalNumber === undefined) res.status(400).send()
-
-  if (!validate.isPostalNumber(req.body.postalNumber)) res.status(400).send()
-
-  resultAddress.addressList = await postalNumberController.findOne(req.body.postalNumber)
+  switch(result.statuscode) {
+    case 200:
+      resultStatusCode = 200
+      resultAddress.addressList = result.value       
+      break
+    case 501:
+      resultStatusCode = 500
+      resultAddress = null 
+      break
+    case 502:
+      resultStatusCode = 500
+      resultAddress = null 
+      break
+    }
+   
   // レスポンスを返す
-  res.status(200).send(resultAddress)
+  return res.status(resultStatusCode).send(resultAddress)
 }
 
 router.post('/', cbSearchAddress)
