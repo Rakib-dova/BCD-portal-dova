@@ -1,3 +1,4 @@
+const { Connection, Request } = require('tedious')
 const logger = require('../lib/logger')
 const DB_NAME =  process.env.DB_NAME
 const DB_USER =  process.env.DB_USER
@@ -11,7 +12,6 @@ const config = {
   server: DB_HOST,
   options: { database: DB_NAME, encrypt: DB_HOST !== 'localhost', validateBulkLoadParameters: false, rowCollectionOnRequestCompletion: true }
 } 
-const { Connection, Request } = require('tedious')
 
 module.exports = {
   findOne:function (postalNumber) {
@@ -22,8 +22,9 @@ module.exports = {
       connection.on('connect', async (err) => {
         if (err) {
           logger.error(err)
+          reject({ statuscode: 501, value: 'failed connected'})
         } else {
-          logger.info('connected')
+          logger.info('success connect')
           execStatement()
         }
       })
@@ -34,13 +35,13 @@ module.exports = {
         const request = new Request(`SELECT CONCAT(state, city, address1, address2) address FROM Addresses WHERE postalCode = '${postalNumber}'`, (err, rowCount, rows) => {
           if (err) {
             logger.error(err)
-            reject(err)
+            reject({ statuscode: 502, value: 'statement error'})
           } else if (rowCount > 0) {
             rows.forEach((row) => {
               result.push({'address': row[0].value})
             })
           }
-          resolve(result)
+          resolve({statuscode: 200, value: result})
         })
         
         request.on('requestCompleted', function() {

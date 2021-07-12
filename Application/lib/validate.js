@@ -74,7 +74,7 @@ const isUUID = (uuid) => {
 }
 
 const isPostalNumber = (postalNumber) => {
-  if (postalNumber) return true
+  if (isString(postalNumber) && postalNumber.length === 7 && ~~postalNumber > 0) return true
   else return false
 }
 
