@@ -9,19 +9,21 @@ const next = require('jest-express').Next
 const helper = require('../../Application/routes/helpers/middleware')
 const errorHelper = require('../../Application/routes/helpers/error')
 const userController = require('../../Application/controllers/userController.js')
+const contractController = require('../../Application/controllers/contractController.js')
 const logger = require('../../Application/lib/logger.js')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
-let request, response, infoSpy, findOneSpy
+let request, response, infoSpy, findOneSpy, findOneSpyContracts
 describe('portalのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
     infoSpy = jest.spyOn(logger, 'info')
     findOneSpy = jest.spyOn(userController, 'findOne')
+    findOneSpyContracts = jest.spyOn(contractController, 'findOne')
   })
   afterEach(() => {
     request.resetMocked()
@@ -29,6 +31,7 @@ describe('portalのテスト', () => {
     next.mockReset()
     infoSpy.mockRestore()
     findOneSpy.mockRestore()
+    findOneSpyContracts.mockRestore()
   })
 
   // 404エラー定義
@@ -74,6 +77,17 @@ describe('portalのテスト', () => {
           updatedAt: '2021-01-25T08:45:49.803Z'
         }
       })
+      findOneSpyContracts.mockReturnValue({
+        dataValues: {
+          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: '0000011111',
+          contractStatus: '10',
+          deleteFlag: false,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
 
       // 試験実施
       await portal.cbGetIndex(request, response, next)
@@ -91,6 +105,7 @@ describe('portalのテスト', () => {
         title: 'ポータル',
         tenantId: request.user.tenantId,
         userRole: request.session.userRole,
+        numberN: '0000011111',
         TS_HOST: process.env.TS_HOST
       })
     })
