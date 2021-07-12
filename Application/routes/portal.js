@@ -6,6 +6,7 @@ const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 
 const userController = require('../controllers/userController.js')
+const contractController = require('../controllers/contractController.js')
 
 const cbGetIndex = async (req, res, next) => {
   if (!req.session || !req.user?.userId) {
@@ -26,11 +27,18 @@ const cbGetIndex = async (req, res, next) => {
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
 
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
   // ユーザ権限も画面に送る
   res.render('portal', {
     title: 'ポータル',
     tenantId: req.user.tenantId,
     userRole: req.session.userRole,
+    numberN: contract.dataValues?.numberN,
     TS_HOST: process.env.TS_HOST
   })
 }

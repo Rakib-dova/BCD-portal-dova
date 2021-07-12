@@ -4,7 +4,7 @@ import * as bulmaToast from './bulma-toast.js'
 // execCommandは今後ブラウザの機能から削除され、使用不可になる
 if (typeof document.execCommand === 'function' && document.getElementById('copy-btn')) {
   document.getElementById('copy-btn').onclick = function () {
-    const textbox = document.getElementById('tenantId')
+    const textbox = document.getElementById('numberN')
     textbox.select()
     if (document.execCommand('copy')) {
       bulmaToast.toast({
