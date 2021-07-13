@@ -3,7 +3,6 @@ jest.mock('../../Application/models')
 jest.mock('../../Application/lib/logger')
 
 const contractController = require('../../Application/controllers/contractController')
-// const constantStatus = require('../../Application/constants/contractStatus.json')
 const constantsDefine = require('../../Application/constants')
 
 let findOneSpy, errorSpy, tenantId

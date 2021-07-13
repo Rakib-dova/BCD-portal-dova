@@ -11,8 +11,6 @@ const tokenenc = require('../lib/tokenenc')
 const { v4: uuidv4 } = require('uuid')
 
 const constantsDefine = require('../constants')
-// const deleteFlg = require('../constants/deleteFlg.json')
-// const orderType = require('../constants/orderType.json')
 
 module.exports = {
   findOne: async (userId) => {

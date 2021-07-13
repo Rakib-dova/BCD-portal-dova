@@ -13,7 +13,6 @@ const errorHelper = require('./helpers/error')
 
 const constantsDefine = require('../constants')
 const contractInformationnewOrder = require('../orderTemplate/contractInformationnewOrder.json')
-// const orderType = require('../constants/orderType.json')
 
 // CSR対策
 const csrf = require('csurf')
