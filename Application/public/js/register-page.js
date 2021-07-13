@@ -174,3 +174,27 @@ document.getElementById('passwordConfirm').onkeyup = function () {
     document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'false')
   }
 }
+
+// modal toggle 追加
+$ = (tagObjName) => {
+  const classNameReg = new RegExp(/\.+[a-zA-Z0-9]/)
+  const idNameReg = new RegExp(/\#+[a-zA-Z0-9]/)
+
+  if (classNameReg.test(tagObjName)) {
+    tagObjName = tagObjName.replace(/\./g,'')
+    return documnet.getElementsByClassName(tagObjName)
+  }
+
+  if (idNameReg.test(tagObjName)) {
+    tagObjName = tagObjName.replace(/\#/g,'')
+    return document.getElementById(tagObjName)
+  }
+}
+
+$('#postalSearchBtn').onclick = function () {
+  $(this.getAttribute('data-target')).classList.toggle('is-active')
+}
+
+$('#btnConfirmPostalNumber').onclick = function () {
+  $('#'+this.getAttribute('data-target')).classList.toggle('is-active')
+}
