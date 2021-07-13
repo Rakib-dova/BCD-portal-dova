@@ -6,6 +6,7 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const postalNumberController = require('../controllers/postalNumberController.js')
 let resultAddress = { addressList: [] }
+const constantsDefine = require('../constants')
 
 const bodyParser = require('body-parser')
 router.use(
@@ -15,43 +16,45 @@ router.use(
   })
 )
 
-let resultStatusCode 
+let resultStatusCode
 
 const cbSearchAddress = async (req, res) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbSearchAddress')
   let result
   if (req.session?.userContext !== 'NotUserRegistered') {
-    resultStatusCode = 403 
+    resultStatusCode = 403
     return res.status(resultStatusCode).send()
   }
 
   if (req.body.postalNumber === undefined) {
-    resultStatusCode = 400 
+    resultStatusCode = 400
     return res.status(resultStatusCode).send()
   }
 
   if (!validate.isPostalNumber(req.body.postalNumber)) {
-    resultStatusCode = 400 
+    resultStatusCode = 400
     return res.status(resultStatusCode).send()
   }
-  
+
   result = await postalNumberController.findOne(req.body.postalNumber)
            .catch((error) => { return error })
 
-  switch(result.statuscode) {
+  switch (result.statuscode) {
     case 200:
       resultStatusCode = 200
-      resultAddress.addressList = result.value       
+      resultAddress.addressList = result.value
       break
     case 501:
       resultStatusCode = 500
-      resultAddress = null 
+      resultAddress = null
       break
     case 502:
       resultStatusCode = 500
-      resultAddress = null 
+      resultAddress = null
       break
-    }
-   
+  }
+
+  logger.info(constantsDefine.logMessage.INF001 + 'cbSearchAddress')
   // レスポンスを返す
   return res.status(resultStatusCode).send(resultAddress)
 }

@@ -74,8 +74,11 @@ const isUUID = (uuid) => {
 }
 
 const isPostalNumber = (postalNumber) => {
-  if (isString(postalNumber) && postalNumber.length === 7 && ~~postalNumber > 0) return true
-  else return false
+  const pattern = '[0-9]{7}'
+  const regex = new RegExp(pattern)
+
+  // test()結果はtrue又はfalseになる。
+  return regex.test(postalNumber)
 }
 
 module.exports = {

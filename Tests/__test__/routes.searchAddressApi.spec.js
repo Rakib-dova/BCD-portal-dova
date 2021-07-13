@@ -15,11 +15,6 @@ if (process.env.LOCALLY_HOSTED === 'true') {
 let postalNumberSpy
 let request, response
 
-// DBの変数
-process.env.DB_USER = 'sa'
-process.env.DB_PASS = 'YiK5XRBYniKP'
-process.env.DB_HOST = 'localhost'
-process.env.DB_NAME = 'PortalAppDB'
 describe('searchAddressApiのテスト', () => {
   beforeEach(() => {
     request = new Request()
