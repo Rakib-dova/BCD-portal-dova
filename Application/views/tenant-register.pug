@@ -34,11 +34,11 @@ block content
                       .field
                         label(for="postalNumber") 郵便番号（必須）
                         .control
-                          .columns
-                            .column.is-four-fifths
+                          .columns.ml-0.pl-0
+                            .column.is-four-fifths.pl-0
                               input.input#postalNumber(type="text" name="postalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7)
                             .column 
-                              .button.is-link#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal") 検索
+                              .button.is-link#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled="disaabled") 検索
                       .field
                         label(for="contractAddressTo") 都道府県（必須）
                         .control
@@ -158,6 +158,7 @@ block content
 
         .modal.modal-fx-fadeInScale#confirmregister-modal
           .modal-background.cancel-button(data-target='confirmregister-modal')
+
           .modal-card
             header.modal-card-head
               p.modal-card-title 以下の内容で利用登録します。
