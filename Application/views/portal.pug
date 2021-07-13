@@ -61,7 +61,7 @@ block content
         .card
           .card-content.notification.m-0
             button.delete(data-target="support-confirmation-modal")
-            if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN !== null)
+            if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN !== '')
               p お問い合わせの際は、問い合わせフォームに以下のお客様番号をご入力ください。
               .field.has-addons
                 .control.is-expanded
@@ -70,7 +70,7 @@ block content
                   a.button#copy-btn(data-clipboard-target="#numberN")
                     | Copy                
               a.button.is-success.is-pulled-right.mb-3(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank') お問い合わせページを開く
-            else if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN === null)
+            else if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN === '')
               p 現在お客様番号払出中です。
               p 払出後、本画面からお問い合わせが可能となります。
             else

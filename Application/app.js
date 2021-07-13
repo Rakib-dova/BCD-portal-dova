@@ -187,6 +187,7 @@ app.use('/auth', require('./routes/auth').router)
 
 app.use('/tenant', require('./routes/tenant').router)
 app.use('/user', require('./routes/user').router)
+app.use('/searchAddress', require('./routes/searchAddressApi').router)
 
 // csvupload
 app.use('/csvupload', require('./routes/csvupload').router)

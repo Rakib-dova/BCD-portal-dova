@@ -174,3 +174,78 @@ document.getElementById('passwordConfirm').onkeyup = function () {
     document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'false')
   }
 }
+
+// modal toggle 追加
+$ = (tagObjName) => {
+  const classNameReg = new RegExp(/\.+[a-zA-Z0-9]/)
+  const idNameReg = new RegExp(/\#+[a-zA-Z0-9]/)
+
+  if (classNameReg.test(tagObjName)) {
+    tagObjName = tagObjName.replace(/\./g,'')
+    return documnet.getElementsByClassName(tagObjName)
+  }
+
+  if (idNameReg.test(tagObjName)) {
+    tagObjName = tagObjName.replace(/\#/g,'')
+    return document.getElementById(tagObjName)
+  }
+}
+
+$('#postalNumber').onkeyup = function () {
+  const postalNumberReg = new RegExp(/^[0-9]{7}$/)
+  if (!(postalNumberReg.test(this.value))) {
+    $('#postalSearchBtn').setAttribute('disabled', 'disabled')
+    $('#postalSearchBtn').onclick = null
+    return
+  }
+  $('#postalSearchBtn').removeAttribute('disabled')
+  $('#postalSearchBtn').onclick = function () {
+    const postalNumber = $("#postalNumber").value
+    const sendData = { postalNumber: null }
+    const modalCardBody = $('#modal-card-result')
+    if (!(postalNumberReg.test(postalNumber))) { return }
+
+    // 郵便番号検索結果modalのtoggle
+    $(this.getAttribute('data-target')).classList.toggle('is-active')
+
+    modalCardBody.innerHTML = ''
+    sendData.postalNumber = postalNumber
+    const requestAddressApi = new XMLHttpRequest()
+    requestAddressApi.open('POST', '/searchAddress/', true)
+    requestAddressApi.setRequestHeader('Content-Type', 'application/json')
+    requestAddressApi.onreadystatechange = function () {
+      if (requestAddressApi.readyState === requestAddressApi.DONE) {
+        if (requestAddressApi.status === 200) {
+          const resultAddress = JSON.parse(requestAddressApi.responseText)
+          if (resultAddress.addressList.length === 0) {
+            modalCardBody.innerHTML = '該当する住所が見つかりませんでした。'
+          } else {
+            resultAddress.addressList.forEach((obj) => {
+              modalCardBody.innerHTML += obj.address + '<br>'
+            })
+          }
+        } else {
+          const errStatus = requestAddressApi.status
+          switch(errStatus) {
+            case 403:
+              modalCardBody.innerHTML = 'ログインユーザーではありません。'
+              break
+            case 400:
+              modalCardBody.innerHTML = '正しい郵便番号を入力してください。'
+              break
+            case 500:
+              modalCardBody.innerHTML = 'システムエラーが発生しました。'
+              break
+          }
+        }
+      }
+    }
+    requestAddressApi.send(JSON.stringify(sendData))
+  }
+}
+
+$('#btnConfirmPostalNumber').onclick = function () {
+  // 郵便番号検索結果modalのtoggle
+  $('#'+this.getAttribute('data-target')).classList.toggle('is-active')
+}
+

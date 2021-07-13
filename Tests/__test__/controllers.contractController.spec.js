@@ -24,7 +24,7 @@ describe('contractControllerのテスト', () => {
   const contractInfoDataNotNumberN = {
     contractId: '87654321-fbe6-4864-a866-7a3ce9aa517e',
     tenantId: tenantId,
-    numberN: null,
+    numberN: '',
     contractStatus: constantsDefine.statusConstants.contractStatusNewContractReceive,
     deleteFlag: false,
     createdAt: '2021-07-09T04:30:00.000Z',
