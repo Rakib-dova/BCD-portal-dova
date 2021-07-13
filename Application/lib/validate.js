@@ -74,7 +74,7 @@ const isUUID = (uuid) => {
 }
 
 const isPostalNumber = (postalNumber) => {
-  const pattern = '[0-9]{7}'
+  const pattern = '^[0-9]{7}$'
   const regex = new RegExp(pattern)
 
   // test()結果はtrue又はfalseになる。
