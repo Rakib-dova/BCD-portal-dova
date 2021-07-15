@@ -125,10 +125,7 @@ const cbPostRegister = async (req, res, next) => {
   // postalName
   contractInformationnewOrder.contractAccountInfo.postalNumber = req.body.postalNumber
   // contractAddress
-  const contractAddressTo = req.body.contractAddressTo
-  const contractAddressSi = req.body.contractAddressSi
-  const contractAddressCho = req.body.contractAddressCho
-  contractInformationnewOrder.contractAccountInfo.contractAddress = `${contractAddressTo} ${contractAddressSi} ${contractAddressCho}`
+  contractInformationnewOrder.contractAccountInfo.contractAddress = req.body.contractAddress
   // banchi1
   contractInformationnewOrder.contractAccountInfo.banch1 = req.body.banch1
   // tatemono1
