@@ -126,6 +126,18 @@ block content
 
                   .field.card
                     .card-content
+                      .title.is-4 キャンペーンコード
+                      p キャンペーンコードをお持ちの方は入力してください。
+                      .field
+                        .control
+                          .columns.ml-0.pl-0
+                            .column.is-one-quarter.pl-0
+                              label(for="campaignCode") キャンペーンコード
+                            .column 
+                              input.input#campaignCode(type="text" name="campaignCode" value="" pattern=inputPatternCampaignCode maxlength=10)
+
+                  .field.card
+                    .card-content
                       .title.is-4 パスワード
                       p ※登録終了後、開通案内を送信します。
                       p   開通案内メールにて本パスワードを使用いただきます。
@@ -212,7 +224,15 @@ block content
                   tr
                     td.confirmation-item(colspan="2") 連絡先メールアドレス
                     td#recontractMail.checkData
-                                  
+
+              table.table.is-fullwidth.is-bordered
+                tbody
+                  tr
+                    th(colspan="3") キャンペーンコード
+                  tr
+                    td.confirmation-item(colspan="2") キャンペーンコード
+                    td#recampaignCode.checkData
+
               table.table.is-fullwidth.is-bordered
                 tbody
                   tr 
