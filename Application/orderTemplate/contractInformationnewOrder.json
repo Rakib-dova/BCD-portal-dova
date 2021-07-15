@@ -10,9 +10,10 @@
     "OpeningDate": "",
     "contracutNumber": "",
     "salesChannelCode": "",
+    "campaignCode": "",
     "kaianPassword": ""
   },
-  
+
   "contractAccountInfo": {
     "contractAccountId": "",
     "customerType": "",
@@ -22,19 +23,22 @@
     "postalNumber": "",
     "contractAddress": "",
     "banch1": "",
-    "tatemono1": "" 
+    "tatemono1": ""
   },
-  
-  "contractList": [{
-    "contractType": "",
-    "contractPersonName": "",
-    "contractPhoneNumber": "",
-    "contractMail":""
-  }],
-  
-  "prdtList": [{
-    "prdctCode": "BF1021000000100",
-    "appType": "010"
-  
-  }]
+
+  "contractList": [
+    {
+      "contractType": "",
+      "contractPersonName": "",
+      "contractPhoneNumber": "",
+      "contractMail": ""
+    }
+  ],
+
+  "prdtList": [
+    {
+      "prdctCode": "BF1021000000100",
+      "appType": "010"
+    }
+  ]
 }
