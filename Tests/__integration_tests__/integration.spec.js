@@ -12,7 +12,7 @@ const getCookies = async (username, password) => {
 
   await page.goto(res.headers.location) // Tradeshift Oauth2認証ログインページをヘッドレスブラウザで開く
 
-  expect(await page.title()).toBe('Log in | Tradeshift')
+  expect(await page.title()).toBe('ログイン | Tradeshift')
   console.log('次のページに遷移しました：' + (await page.title())) // 「ログイン | Tradeshift」のはず
 
   await page.type('input[name="j_username"]', username)
@@ -108,11 +108,15 @@ describe('ルーティングのインテグレーションテスト', () => {
     // 住所検索成功
     test('住所検索', async () => {
       const res = await request(app)
-        .post('/searchAddressApi')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .send({ postalNumber: '0600012' })
+        .post('/searchAddress')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .set('Content-Type', 'application/json')
+        .send({ postalNumber: '0600000' })
         .expect(200)
+
       expect(res.header.status).toBe(200)
+      expect(res.body.addressList[0].address).toBe('北海道札幌市中央区')
+      expect(res.body.addressList[1].address).toBe('北海道札幌市中央区円山')
     })
 
     let userCsrf, tenantCsrf
