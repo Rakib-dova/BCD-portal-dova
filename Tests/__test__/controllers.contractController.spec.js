@@ -3,7 +3,7 @@ jest.mock('../../Application/models')
 jest.mock('../../Application/lib/logger')
 
 const contractController = require('../../Application/controllers/contractController')
-const constantStatus = require('../../Application/constants/contractStatus.json')
+const constantsDefine = require('../../Application/constants')
 
 let findOneSpy, errorSpy, tenantId
 describe('contractControllerのテスト', () => {
@@ -25,7 +25,7 @@ describe('contractControllerのテスト', () => {
     contractId: '87654321-fbe6-4864-a866-7a3ce9aa517e',
     tenantId: tenantId,
     numberN: '',
-    contractStatus: constantStatus.newContract.receivedContract,
+    contractStatus: constantsDefine.statusConstants.contractStatusNewContractReceive,
     deleteFlag: false,
     createdAt: '2021-07-09T04:30:00.000Z',
     updatedAt: '2021-07-09T04:30:00.000Z'
@@ -35,7 +35,7 @@ describe('contractControllerのテスト', () => {
     contractId: '87654321-fbe6-4864-a866-7a3ce9aa517e',
     tenantId: tenantId,
     numberN: '1234567890',
-    contractStatus: constantStatus.newContract.receivedContract,
+    contractStatus: constantsDefine.statusConstants.contractStatusNewContractReceive,
     deleteFlag: false,
     createdAt: '2021-07-09T04:30:00.000Z',
     updatedAt: '2021-07-09T04:30:00.000Z'
