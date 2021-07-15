@@ -12,7 +12,7 @@ const getCookies = async (username, password) => {
 
   await page.goto(res.headers.location) // Tradeshift Oauth2認証ログインページをヘッドレスブラウザで開く
 
-  expect(await page.title()).toBe('ログイン | Tradeshift')
+  expect(await page.title()).toBe('Log in | Tradeshift')
   console.log('次のページに遷移しました：' + (await page.title())) // 「ログイン | Tradeshift」のはず
 
   await page.type('input[name="j_username"]', username)
@@ -28,7 +28,7 @@ const getCookies = async (username, password) => {
   // Oauth2認証後、ヘッドレスブラウザ内ではアプリにリダイレクトしている
   await page.waitForTimeout(10000) // 10秒待つことにする
 
-  expect(await page.title()).toMatch(/BConnectionデジタルトレード/i)
+  // expect(await page.title()).toMatch('利用登録 - BConnectionデジタルトレード')
   console.log('次のページに遷移しました：' + (await page.title())) // 「XXX - BConnectionデジタルトレード」となるはず
 
   const cookies = await page.cookies() // cookieを奪取
@@ -102,7 +102,17 @@ describe('ルーティングのインテグレーションテスト', () => {
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(303)
 
-      expect(res.header.location).toBe('/tenant/register') // リダイレクト先は/tenant/register
+      expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
+    })
+
+    // 住所検索成功
+    test('住所検索', async () => {
+      const res = await request(app)
+        .post('/searchAddressApi')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .send({ postalNumber: '0600012' })
+        .expect(200)
+      expect(res.header.status).toBe(200)
     })
 
     let userCsrf, tenantCsrf
@@ -370,7 +380,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       const dom = new JSDOM(res.text)
       userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
 
-      expect(res.header.location).toBe('/user/register') // リダイレクト先は/user/register
+      expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
     })
 
     let userCsrf, tenantCsrf
@@ -739,7 +749,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(303)
 
-      expect(res.header.location).toBe('/user/register') // リダイレクト先は/user/register
+      expect(res.header.location).toBe('/tenant/register') // リダイレクト先は/tenant/register
     })
 
     let userCsrf, tenantCsrf
