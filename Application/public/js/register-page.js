@@ -55,21 +55,17 @@ document.getElementById('next-btn').onclick = function () {
     return false
   }
 
-  const contractAddressTo = document.querySelectorAll('select[type="select"]')
-
-  if (contractAddressTo.value === '') {
+  const contractAddressToSi = $('#contractAddressToSi') 
+  const banch1 = $('#banch1')
+ 
+  if (contractAddressToSi.value.length === 0 || banch1.value.length === 0 ) {
     alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
-    contractAddressTo.focus()
+    $('#postalNumber').focus()
     return false
   }
 
   // 契約者住所（丁目まで)のサイズ​が全角46桁かチェック
-  const contractAddressAddr = elementsArr.filter(el => {
-    if (el.id === 'contractAddressSi'|| el.id === 'contractAddressCho') return el
-  })
-  
-  const contractAddress = contractAddressAddr[0].value + contractAddressAddr[1].value + contractAddressTo[0].options[contractAddressTo[0].selectedIndex].value + ''
-  if (contractAddress.length > 46) {
+  if (contractAddressToSi.value.length > 46) {
     alert('契約者情報の住所は46文字以内で入力してください。※[都道府県][市町村][丁目]の合計文字数となります。')
     return false
   }
@@ -84,12 +80,23 @@ document.getElementById('next-btn').onclick = function () {
   // 確認項目（type="text）
   let index = 0
   elementsArr.forEach(function (element) {
-    document.getElementsByClassName('checkData').item(index).innerHTML = element.value
-    index = index + 1
+    if (element.id.toString() !== "banch1" && element.id.toString() !== "tatemono1" && element.id.toString() !== "contractAddressToSi") {
+      $('.checkData').item(index).innerHTML = element.value
+      index++
+    } else {
+      if (element.id.toString() === "contractAddressToSi") {
+        $('.checkData').item(index).innerHTML = element.value
+      } else {
+        $('.checkData').item(index).innerHTML += element.value
+      }
+      if (element.id.toString() === "tatemono1") {
+        $('#contractAddress').value = $('.checkData').item(index).innerHTML
+        index++
+      }
+    }
   })
 
   // 確認項目（type="select"、type="password"）
-  document.getElementById('recontractAddressTo').innerHTML = document.getElementById('contractAddressTo').value
   document.getElementById('repassword').innerHTML = document.getElementById('password').value
 
   const elementCheckbox = document.querySelector('input[type="checkbox"]')
@@ -176,18 +183,17 @@ document.getElementById('passwordConfirm').onkeyup = function () {
 }
 
 // modal toggle 追加
-$ = (tagObjName) => {
+function $ (tagObjName) {
   const classNameReg = new RegExp(/\.+[a-zA-Z0-9]/)
   const idNameReg = new RegExp(/\#+[a-zA-Z0-9]/)
-
+  
   if (classNameReg.test(tagObjName)) {
-    tagObjName = tagObjName.replace(/\./g,'')
-    return documnet.getElementsByClassName(tagObjName)
-  }
-
-  if (idNameReg.test(tagObjName)) {
-    tagObjName = tagObjName.replace(/\#/g,'')
+    return document.querySelectorAll(tagObjName)
+  } else if (idNameReg.test(tagObjName)) {
+    tagObjName = tagObjName.replace(/\#/, '')
     return document.getElementById(tagObjName)
+  } else {
+    return null
   }
 }
 
@@ -221,7 +227,13 @@ $('#postalNumber').onkeyup = function () {
             modalCardBody.innerHTML = '該当する住所が見つかりませんでした。'
           } else {
             resultAddress.addressList.forEach((obj) => {
-              modalCardBody.innerHTML += obj.address + '<br>'
+              modalCardBody.innerHTML += '<a class="resultAddress" data-target="#searchPostalNumber-modal">' + obj.address + '<br>'
+            })
+            $('.resultAddress').forEach((ele) => {
+              ele.onclick = () => {
+                $(ele.getAttribute('data-target')).classList.toggle('is-active')
+                $('#contractAddressToSi').value = ele.innerHTML.replace('\<br\>','')
+              }
             })
           }
         } else {
@@ -243,9 +255,3 @@ $('#postalNumber').onkeyup = function () {
     requestAddressApi.send(JSON.stringify(sendData))
   }
 }
-
-$('#btnConfirmPostalNumber').onclick = function () {
-  // 郵便番号検索結果modalのtoggle
-  $('#'+this.getAttribute('data-target')).classList.toggle('is-active')
-}
-
