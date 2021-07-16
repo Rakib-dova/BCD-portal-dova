@@ -116,6 +116,7 @@ const cbPostRegister = async (req, res, next) => {
   // contractBasicInfo 設定
   contractInformationnewOrder.contractBasicInfo.sysManagedId = req.user.tenantId
   contractInformationnewOrder.contractBasicInfo.orderType = constantsDefine.statusConstants.orderTypeNewOrder
+  contractInformationnewOrder.contractBasicInfo.campaignCode = req.body.campaignCode
   contractInformationnewOrder.contractBasicInfo.kaianPassword = req.body.password
 
   // contractorName
