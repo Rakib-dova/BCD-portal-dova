@@ -55,20 +55,15 @@ document.getElementById('next-btn').onclick = function () {
     return false
   }
 
-  const contractAddressToSi = $('#contractAddressToSi') 
+  const contractAddressVal = $('#contractAddressVal')
   const banch1 = $('#banch1')
  
-  if (contractAddressToSi.value.length === 0 || banch1.value.length === 0 ) {
+  if (contractAddressVal.value.length === 0 || banch1.value.length === 0 ) {
     alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
     $('#postalNumber').focus()
     return false
   }
 
-  // 契約者住所（丁目まで)のサイズ​が全角46桁かチェック
-  if (contractAddressToSi.value.length > 46) {
-    alert('契約者情報の住所は46文字以内で入力してください。※[都道府県][市町村][丁目]の合計文字数となります。')
-    return false
-  }
   // password確認
   const passwordsArr = Array.prototype.slice.call(passwords)
   if (passwordsArr[0].value !== passwordsArr[1].value) {
@@ -80,17 +75,16 @@ document.getElementById('next-btn').onclick = function () {
   // 確認項目（type="text）
   let index = 0
   elementsArr.forEach(function (element) {
-    if (element.id.toString() !== "banch1" && element.id.toString() !== "tatemono1" && element.id.toString() !== "contractAddressToSi") {
+    if (element.id.toString() !== "banch1" && element.id.toString() !== "tatemono1" && element.id.toString() !== "contractAddressVal") {
       $('.checkData').item(index).innerHTML = element.value
       index++
     } else {
-      if (element.id.toString() === "contractAddressToSi") {
+      if (element.id.toString() === "contractAddressVal") {
         $('.checkData').item(index).innerHTML = element.value
       } else {
         $('.checkData').item(index).innerHTML += element.value
       }
       if (element.id.toString() === "tatemono1") {
-        $('#contractAddress').value = $('.checkData').item(index).innerHTML
         index++
       }
     }
@@ -232,7 +226,7 @@ $('#postalNumber').onkeyup = function () {
             $('.resultAddress').forEach((ele) => {
               ele.onclick = () => {
                 $(ele.getAttribute('data-target')).classList.toggle('is-active')
-                $('#contractAddressToSi').value = ele.innerHTML.replace('\<br\>','')
+                $('#contractAddressVal').value = ele.innerHTML.replace('\<br\>','')
               }
             })
           }

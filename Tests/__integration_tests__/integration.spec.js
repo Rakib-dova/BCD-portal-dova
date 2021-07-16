@@ -106,17 +106,52 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 住所検索成功
-    test('住所検索', async () => {
+    test('住所検索：1件以上', async () => {
       const res = await request(app)
         .post('/searchAddress')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .set('Content-Type', 'application/json')
         .send({ postalNumber: '0600000' })
         .expect(200)
-
-      expect(res.header.status).toBe(200)
+      expect(res.status).toBe(200)
       expect(res.body.addressList[0].address).toBe('北海道札幌市中央区')
       expect(res.body.addressList[1].address).toBe('北海道札幌市中央区円山')
+    })
+
+    test('住所検索:結果0件', async () => {
+      const res = await request(app)
+        .post('/searchAddress')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .set('Content-Type', 'application/json')
+        .send({ postalNumber: '1234567' })
+        .expect(200)
+
+      expect(res.status).toBe(200)
+      expect(res.body.addressList.length).toBe(0)
+    })
+
+    // 住所検索失敗
+    test('住所検索失敗-パラメータなし', async () => {
+      const res = await request(app)
+        .post('/searchAddress')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .set('Content-Type', 'application/json')
+        .send({ postalNumberl: '1234567' })
+        .expect(400)
+
+      expect(res.status).toBe(400)
+    })
+
+    // 住所検索失敗
+    test('住所検索失敗-正しくないパラメータ値', async () => {
+      const res = await request(app)
+        .post('/searchAddress')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .set('Content-Type', 'application/json')
+        .send({ postalNumberl: '123456a' })
+        .expect(400)
+
+      expect(res.status).toBe(400)
     })
 
     let userCsrf, tenantCsrf

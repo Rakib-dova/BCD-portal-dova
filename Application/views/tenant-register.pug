@@ -40,10 +40,9 @@ block content
                             .column 
                               .button.is-link#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
                       .field
-                        label(for="contractAddress") 住所(必須）
+                        label(for="contractAddressVal") 住所(必須）
                         .control
-                          input.input#contractAddressToSi(type="text" name="contractAddressToSi" value readonly required)
-                          input.input#contractAddress(type="hidden" name="contractAddress" value)
+                          input.input#contractAddressVal(type="text" name="contractAddressVal" value readonly required)
                       .field
                         label(for="banch1") 番地(必須)
                         .control
@@ -173,7 +172,7 @@ block content
             section.modal-card-body
               p.modal-card-result#modal-card-result
             footer.modal-card-foot
-              a.button.cancel-button(data-target='searchPostalNumber-modall') キャンセル
+              a.button.cancel-button(data-target='searchPostalNumber-modal') キャンセル
 
       include footer
 
