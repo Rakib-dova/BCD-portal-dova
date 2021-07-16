@@ -297,8 +297,6 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.header.location).toBe('/portal') // リダイレクト先は/portal
     })
-
-
   })
 
   describe('DBにアカウント管理者のみ登録・一般ユーザ登録なし/アカウント管理者としてリクエスト', () => {
