@@ -226,7 +226,6 @@ $('#postalSearchBtn').addEventListener('click', function () {
       if (requestAddressApi.status === 200) {
         const resultAddress = JSON.parse(requestAddressApi.responseText)
         if (resultAddress.addressList.length === 0) {
-          $(dataTarget).classList.toggle('is-active')
           modalCardBody.innerHTML = '該当する住所が見つかりませんでした。'
         } else {
           const resultLength = resultAddress.addressList.length
@@ -235,15 +234,14 @@ $('#postalSearchBtn').addEventListener('click', function () {
             $('#banch1').value = ''
             $('#tatemono1').value = ''
           } else {
-            $(dataTarget).classList.toggle('is-active')
+            $(dataTarget).classList.add('is-active')
             resultAddress.addressList.forEach((obj) => {
               modalCardBody.innerHTML +=
                 '<a class="resultAddress" data-target="#searchPostalNumber-modal">' + obj.address + '<br>'
             })
             $('.resultAddress').forEach((ele) => {
-              $(dataTarget).classList.toggle('is-active')
               ele.onclick = () => {
-                $(ele.getAttribute('data-target')).classList.toggle('is-active')
+                $(ele.getAttribute('data-target')).classList.remove('is-active')
                 $('#contractAddressVal').value = ele.innerHTML.replace('<br>', '')
                 $('#banch1').value = ''
                 $('#tatemono1').value = ''
@@ -253,7 +251,7 @@ $('#postalSearchBtn').addEventListener('click', function () {
         }
       } else {
         const errStatus = requestAddressApi.status
-        $(dataTarget).classList.toggle('is-active')
+        $(dataTarget).classList.add('is-active')
         switch (errStatus) {
           case 403:
             modalCardBody.innerHTML = 'ログインユーザーではありません。'
