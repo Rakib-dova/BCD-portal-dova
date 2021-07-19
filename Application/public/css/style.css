@@ -223,12 +223,18 @@ img.logo-ncom {
   max-width: 55%;
   min-width: 55%;
   word-break: break-all;
+  height: 41px;
 }
 
 .hidetext {
   -webkit-text-security: disc;
   -moz-text-security: disc;
   -ms-text-serurity: disc;
+}
+
+.modal-address-foot {
+  border-top: 1px solid #fff;
+  background-color: #fff;
 }
 
 .btnMarginLeft {
