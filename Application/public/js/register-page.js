@@ -48,7 +48,7 @@ document.getElementById('next-btn').onclick = function () {
   const passwords = document.querySelectorAll('input[type="password"]')
   const elementsArr = Array.prototype.slice.call(elements)
 
-  const invalidElements = elementsArr.filter(el => el.getAttribute('aria-invalid') === 'true')
+  const invalidElements = elementsArr.filter((el) => el.getAttribute('aria-invalid') === 'true')
   if (invalidElements.length > 0) {
     alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
     invalidElements[0].focus()
@@ -57,8 +57,8 @@ document.getElementById('next-btn').onclick = function () {
 
   const contractAddressVal = $('#contractAddressVal')
   const banch1 = $('#banch1')
- 
-  if (contractAddressVal.value.length === 0 || banch1.value.length === 0 ) {
+
+  if (contractAddressVal.value.length === 0 || banch1.value.length === 0) {
     alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
     $('#postalNumber').focus()
     return false
@@ -75,16 +75,20 @@ document.getElementById('next-btn').onclick = function () {
   // 確認項目（type="text）
   let index = 0
   elementsArr.forEach(function (element) {
-    if (element.id.toString() !== "banch1" && element.id.toString() !== "tatemono1" && element.id.toString() !== "contractAddressVal") {
+    if (
+      element.id.toString() !== 'banch1' &&
+      element.id.toString() !== 'tatemono1' &&
+      element.id.toString() !== 'contractAddressVal'
+    ) {
       $('.checkData').item(index).innerHTML = element.value
       index++
     } else {
-      if (element.id.toString() === "contractAddressVal") {
+      if (element.id.toString() === 'contractAddressVal') {
         $('.checkData').item(index).innerHTML = element.value
       } else {
         $('.checkData').item(index).innerHTML += element.value
       }
-      if (element.id.toString() === "tatemono1") {
+      if (element.id.toString() === 'tatemono1') {
         index++
       }
     }
@@ -177,10 +181,10 @@ document.getElementById('passwordConfirm').onkeyup = function () {
 }
 
 // modal toggle 追加
-function $ (tagObjName) {
+function $(tagObjName) {
   const classNameReg = new RegExp(/\.+[a-zA-Z0-9]/)
   const idNameReg = new RegExp(/\#+[a-zA-Z0-9]/)
-  
+
   if (classNameReg.test(tagObjName)) {
     return document.querySelectorAll(tagObjName)
   } else if (idNameReg.test(tagObjName)) {
@@ -193,20 +197,19 @@ function $ (tagObjName) {
 
 $('#postalNumber').onkeyup = function () {
   const postalNumberReg = new RegExp(/^[0-9]{7}$/)
-  if (!(postalNumberReg.test(this.value))) {
+  if (!postalNumberReg.test(this.value)) {
     $('#postalSearchBtn').setAttribute('disabled', 'disabled')
     $('#postalSearchBtn').onclick = null
     return
   }
   $('#postalSearchBtn').removeAttribute('disabled')
   $('#postalSearchBtn').onclick = function () {
-    const postalNumber = $("#postalNumber").value
+    const postalNumber = $('#postalNumber').value
     const sendData = { postalNumber: null }
     const modalCardBody = $('#modal-card-result')
-    if (!(postalNumberReg.test(postalNumber))) { return }
-
-    // 郵便番号検索結果modalのtoggle
-    $(this.getAttribute('data-target')).classList.toggle('is-active')
+    if (!postalNumberReg.test(postalNumber)) {
+      return
+    }
 
     modalCardBody.innerHTML = ''
     sendData.postalNumber = postalNumber
@@ -214,25 +217,40 @@ $('#postalNumber').onkeyup = function () {
     requestAddressApi.open('POST', '/searchAddress/', true)
     requestAddressApi.setRequestHeader('Content-Type', 'application/json')
     requestAddressApi.onreadystatechange = function () {
+      const dataTarget = $('#postalSearchBtn').getAttribute('data-target')
       if (requestAddressApi.readyState === requestAddressApi.DONE) {
         if (requestAddressApi.status === 200) {
           const resultAddress = JSON.parse(requestAddressApi.responseText)
           if (resultAddress.addressList.length === 0) {
+            $(dataTarget).classList.toggle('is-active')
             modalCardBody.innerHTML = '該当する住所が見つかりませんでした。'
           } else {
-            resultAddress.addressList.forEach((obj) => {
-              modalCardBody.innerHTML += '<a class="resultAddress" data-target="#searchPostalNumber-modal">' + obj.address + '<br>'
-            })
-            $('.resultAddress').forEach((ele) => {
-              ele.onclick = () => {
-                $(ele.getAttribute('data-target')).classList.toggle('is-active')
-                $('#contractAddressVal').value = ele.innerHTML.replace('\<br\>','')
-              }
-            })
+            const resultLength = resultAddress.addressList.length
+            if (resultLength === 1) {
+              $('#contractAddressVal').value = resultAddress.addressList[0].address
+              $('#banch1').value = ''
+              $('#tatemono1').value = ''
+            } else {
+              $(dataTarget).classList.toggle('is-active')
+              resultAddress.addressList.forEach((obj) => {
+                modalCardBody.innerHTML +=
+                  '<a class="resultAddress" data-target="#searchPostalNumber-modal">' + obj.address + '<br>'
+              })
+              $('.resultAddress').forEach((ele) => {
+                $(dataTarget).classList.toggle('is-active')
+                ele.onclick = () => {
+                  $(ele.getAttribute('data-target')).classList.toggle('is-active')
+                  $('#contractAddressVal').value = ele.innerHTML.replace('<br>', '')
+                  $('#banch1').value = ''
+                  $('#tatemono1').value = ''
+                }
+              })
+            }
           }
         } else {
           const errStatus = requestAddressApi.status
-          switch(errStatus) {
+          $(dataTarget).classList.toggle('is-active')
+          switch (errStatus) {
             case 403:
               modalCardBody.innerHTML = 'ログインユーザーではありません。'
               break
