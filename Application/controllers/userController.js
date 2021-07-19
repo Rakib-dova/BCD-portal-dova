@@ -125,37 +125,49 @@ module.exports = {
           transaction: t
         })
 
-        // contractId uuidで生成
-        const _contractId = uuidv4()
-        // contractテーブルのdate
-        const _date = new Date()
-
-        // Contractテーブルに入力
-        await Contract.findOrCreate({
-          where: { contractId: _contractId },
-          defaults: {
-            contractId: _contractId,
-            tenantId: _tenantId,
-            numberN: '',
-            contractStatus: constantsDefine.statusConstants.contractStatusNewContractOrder,
-            deleteFlag: false,
-            createdAt: _date,
-            updatedAt: _date
-          },
-          transaction: t
+        /** Contracts,Ordersにデータを登録する。
+         * 該当テナントの契約情報が存在しない場合、登録を実施する。※テナント管理者の契約情報入力時。
+         * ※一般利用者の新規登録時には契約情報がすでに存在している。
+         */
+        // 新規登録テナントに対し、Contractsテーブルにデータが登録済みかを確認
+        const contract = await Contract.findOne({
+          where: { tenantId: _tenantId, deleteFlag: false }
         })
+        console.info('デバック：' + contract)
+        // Contractsにデータが登録されていない場合、登録を実施
+        if (contract === null) {
+          // contractId uuidで生成
+          const _contractId = uuidv4()
+          // contractテーブルのdate
+          const _date = new Date()
 
-        // Orderテーブルに入力
-        await Order.findOrCreate({
-          where: { contractId: _contractId },
-          defaults: {
-            contractId: _contractId,
-            tenantId: _tenantId,
-            orderType: constantsDefine.statusConstants.orderTypeNewOrder,
-            orderData: JSON.stringify(contractInformationnewOrder)
-          },
-          transaction: t
-        })
+          // Contractテーブルに入力
+          await Contract.findOrCreate({
+            where: { tenantId: _tenantId, deleteFlag: false },
+            defaults: {
+              contractId: _contractId,
+              tenantId: _tenantId,
+              numberN: '',
+              contractStatus: constantsDefine.statusConstants.contractStatusNewContractOrder,
+              deleteFlag: false,
+              createdAt: _date,
+              updatedAt: _date
+            },
+            transaction: t
+          })
+
+          // 新規オーダーの場合、Contractsと同時にOrdersも登録
+          await Order.findOrCreate({
+            where: { contractId: _contractId },
+            defaults: {
+              contractId: _contractId,
+              tenantId: _tenantId,
+              orderType: constantsDefine.statusConstants.orderTypeNewOrder,
+              orderData: JSON.stringify(contractInformationnewOrder)
+            },
+            transaction: t
+          })
+        }
         return user
       })
 
