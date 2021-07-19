@@ -44,8 +44,8 @@ describe('cancellationsControllerのテスト', () => {
     test('正常：created', async () => {
       // 準備
       // DBからの正常解約情報の取得を想定する
-      findContractSpy.mockReturnValueOnce(dbReturnValue)
-      updateStatusSpy.mockReturnValueOnce(1)
+      findContractSpy.mockReturnValue(dbReturnValue)
+      updateStatusSpy.mockReturnValue(1)
 
       // 試験実施
       const result = await cancellationsController.create(tenantId, cancelData)
@@ -64,7 +64,10 @@ describe('cancellationsControllerのテスト', () => {
       const result = await cancellationsController.create(tenantIdNotExist, cancelData)
       // 期待結果
       // 想定した契約情報がReturnされていること
-      expect(errorSpy).toHaveBeenCalledWith({ user: tenantIdNotExist, stack: expect.anything(), status: 0 }, expect.anything())
+      expect(errorSpy).toHaveBeenCalledWith(
+        { user: tenantIdNotExist, stack: expect.anything(), status: 0 },
+        expect.anything()
+      )
       expect(result).toEqual({ statuscode: '051', value: new Error('ERR051 Not Founded ContractId') })
       // expect(result.length).toEqual(undefined)
     })
@@ -92,8 +95,8 @@ describe('cancellationsControllerのテスト', () => {
       // 1回目のアクセストークンによるアクセスは401エラーを想定する
       // const dbError = new Error('ERR052 Not updated ContratStatus')
       // findContractSpy.mockReturnValueOnce({ contractId: '' })
-      findContractSpy.mockReturnValueOnce(dbReturnValue)
-      updateStatusSpy.mockReturnValueOnce(null)
+      findContractSpy.mockReturnValue(dbReturnValue)
+      updateStatusSpy.mockReturnValue(null)
       // 試験実施
       const result = await cancellationsController.create(tenantId, cancelData)
 
