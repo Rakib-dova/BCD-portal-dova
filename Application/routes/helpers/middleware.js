@@ -5,6 +5,7 @@ const tenantController = require('../../controllers/tenantController')
 
 const errorHelper = require('./error')
 const validate = require('../../lib/validate')
+
 exports.isAuthenticated = async (req, res, next) => {
   if (req.user?.userId) {
     // セッションにユーザ情報が格納されている
@@ -36,8 +37,9 @@ exports.isTenantRegistered = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   if (tenant instanceof Error) return next(errorHelper.create(500))
 
-  // テナントが見つからない場合はnull値
-  if (tenant === null) {
+  // テナントが見つからない場合はnull値 or テナントがDBに登録されていて解約されている
+  // TODO：契約テーブルのdeleteFlagも要確認
+  if (tenant === null || (tenant.dataValues?.tenantId && tenant.dataValues.deleteFlag)) {
     // テナントがDBに登録されていない
     req.session.userContext = 'NotTenantRegistered' // セッションにテナント未登録のコンテキストを保持
 
