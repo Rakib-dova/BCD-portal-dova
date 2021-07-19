@@ -195,7 +195,7 @@ function $(tagObjName) {
   }
 }
 
-$('#postalNumber').onkeyup = function () {
+$('#postalNumber').addEventListener('input', function () {
   const postalNumberReg = new RegExp(/^[0-9]{7}$/)
   if (!postalNumberReg.test(this.value)) {
     $('#postalSearchBtn').setAttribute('disabled', 'disabled')
@@ -203,67 +203,70 @@ $('#postalNumber').onkeyup = function () {
     return
   }
   $('#postalSearchBtn').removeAttribute('disabled')
-  $('#postalSearchBtn').onclick = function () {
-    const postalNumber = $('#postalNumber').value
-    const sendData = { postalNumber: null }
-    const modalCardBody = $('#modal-card-result')
-    if (!postalNumberReg.test(postalNumber)) {
-      return
-    }
+})
 
-    modalCardBody.innerHTML = ''
-    sendData.postalNumber = postalNumber
-    const requestAddressApi = new XMLHttpRequest()
-    requestAddressApi.open('POST', '/searchAddress/', true)
-    requestAddressApi.setRequestHeader('Content-Type', 'application/json')
-    requestAddressApi.onreadystatechange = function () {
-      const dataTarget = $('#postalSearchBtn').getAttribute('data-target')
-      if (requestAddressApi.readyState === requestAddressApi.DONE) {
-        if (requestAddressApi.status === 200) {
-          const resultAddress = JSON.parse(requestAddressApi.responseText)
-          if (resultAddress.addressList.length === 0) {
-            $(dataTarget).classList.toggle('is-active')
-            modalCardBody.innerHTML = '該当する住所が見つかりませんでした。'
-          } else {
-            const resultLength = resultAddress.addressList.length
-            if (resultLength === 1) {
-              $('#contractAddressVal').value = resultAddress.addressList[0].address
-              $('#banch1').value = ''
-              $('#tatemono1').value = ''
-            } else {
-              $(dataTarget).classList.toggle('is-active')
-              resultAddress.addressList.forEach((obj) => {
-                modalCardBody.innerHTML +=
-                  '<a class="resultAddress" data-target="#searchPostalNumber-modal">' + obj.address + '<br>'
-              })
-              $('.resultAddress').forEach((ele) => {
-                $(dataTarget).classList.toggle('is-active')
-                ele.onclick = () => {
-                  $(ele.getAttribute('data-target')).classList.toggle('is-active')
-                  $('#contractAddressVal').value = ele.innerHTML.replace('<br>', '')
-                  $('#banch1').value = ''
-                  $('#tatemono1').value = ''
-                }
-              })
-            }
-          }
-        } else {
-          const errStatus = requestAddressApi.status
+$('#postalSearchBtn').addEventListener('click', function () {
+  const postalNumber = $('#postalNumber').value
+  const sendData = { postalNumber: null }
+  const modalCardBody = $('#modal-card-result')
+  const postalNumberReg = new RegExp(/^[0-9]{7}$/)
+
+  if (!postalNumberReg.test(postalNumber)) {
+    return
+  }
+
+  modalCardBody.innerHTML = ''
+  sendData.postalNumber = postalNumber
+  const requestAddressApi = new XMLHttpRequest()
+  requestAddressApi.open('POST', '/searchAddress/', true)
+  requestAddressApi.setRequestHeader('Content-Type', 'application/json')
+  requestAddressApi.onreadystatechange = function () {
+    const dataTarget = $('#postalSearchBtn').getAttribute('data-target')
+    if (requestAddressApi.readyState === requestAddressApi.DONE) {
+      if (requestAddressApi.status === 200) {
+        const resultAddress = JSON.parse(requestAddressApi.responseText)
+        if (resultAddress.addressList.length === 0) {
           $(dataTarget).classList.toggle('is-active')
-          switch (errStatus) {
-            case 403:
-              modalCardBody.innerHTML = 'ログインユーザーではありません。'
-              break
-            case 400:
-              modalCardBody.innerHTML = '正しい郵便番号を入力してください。'
-              break
-            case 500:
-              modalCardBody.innerHTML = 'システムエラーが発生しました。'
-              break
+          modalCardBody.innerHTML = '該当する住所が見つかりませんでした。'
+        } else {
+          const resultLength = resultAddress.addressList.length
+          if (resultLength === 1) {
+            $('#contractAddressVal').value = resultAddress.addressList[0].address
+            $('#banch1').value = ''
+            $('#tatemono1').value = ''
+          } else {
+            $(dataTarget).classList.toggle('is-active')
+            resultAddress.addressList.forEach((obj) => {
+              modalCardBody.innerHTML +=
+                '<a class="resultAddress" data-target="#searchPostalNumber-modal">' + obj.address + '<br>'
+            })
+            $('.resultAddress').forEach((ele) => {
+              $(dataTarget).classList.toggle('is-active')
+              ele.onclick = () => {
+                $(ele.getAttribute('data-target')).classList.toggle('is-active')
+                $('#contractAddressVal').value = ele.innerHTML.replace('<br>', '')
+                $('#banch1').value = ''
+                $('#tatemono1').value = ''
+              }
+            })
           }
+        }
+      } else {
+        const errStatus = requestAddressApi.status
+        $(dataTarget).classList.toggle('is-active')
+        switch (errStatus) {
+          case 403:
+            modalCardBody.innerHTML = 'ログインユーザーではありません。'
+            break
+          case 400:
+            modalCardBody.innerHTML = '正しい郵便番号を入力してください。'
+            break
+          case 500:
+            modalCardBody.innerHTML = 'システムエラーが発生しました。'
+            break
         }
       }
     }
-    requestAddressApi.send(JSON.stringify(sendData))
   }
-}
+  requestAddressApi.send(JSON.stringify(sendData))
+})
