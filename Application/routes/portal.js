@@ -4,9 +4,12 @@ const router = express.Router()
 const helper = require('./helpers/middleware')
 
 const errorHelper = require('./helpers/error')
+const noticeHelper = require('./helpers/notice')
 
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
+
+const constantsDefine = require('../constants')
 
 const cbGetIndex = async (req, res, next) => {
   if (!req.session || !req.user?.userId) {
@@ -22,16 +25,24 @@ const cbGetIndex = async (req, res, next) => {
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
-  req.session.userContext = 'LoggedIn'
-
-  // ユーザ権限を取得
-  req.session.userRole = user.dataValues?.userRole
-
   // DBから契約情報取得
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  req.session.userContext = 'LoggedIn'
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+
+  if (
+    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder ||
+      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationReceive) &&
+    !contract.dataValues.deleteFlag
+  ) {
+    return next(noticeHelper.create('cancelprocedure'))
+  }
 
   // ユーザ権限も画面に送る
   res.render('portal', {
