@@ -5,7 +5,6 @@ const router = express.Router()
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const postalNumberController = require('../controllers/postalNumberController.js')
-let resultAddress = { addressList: [] }
 const constantsDefine = require('../constants')
 
 const bodyParser = require('body-parser')
@@ -16,9 +15,9 @@ router.use(
   })
 )
 
-let resultStatusCode
-
 const cbSearchAddress = async (req, res) => {
+  let resultAddress = { addressList: [] }
+  let resultStatusCode
   logger.info(constantsDefine.logMessage.INF000 + 'cbSearchAddress')
   let result
   if (req.session?.userContext !== 'NotTenantRegistered') {
@@ -36,8 +35,9 @@ const cbSearchAddress = async (req, res) => {
     return res.status(resultStatusCode).send()
   }
 
-  result = await postalNumberController.findOne(req.body.postalNumber)
-           .catch((error) => { return error })
+  result = await postalNumberController.findOne(req.body.postalNumber).catch((error) => {
+    return error
+  })
 
   switch (result.statuscode) {
     case 200:
