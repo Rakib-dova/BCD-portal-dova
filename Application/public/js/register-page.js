@@ -226,6 +226,7 @@ $('#postalSearchBtn').addEventListener('click', function () {
       if (requestAddressApi.status === 200) {
         const resultAddress = JSON.parse(requestAddressApi.responseText)
         if (resultAddress.addressList.length === 0) {
+          $(dataTarget).classList.add('is-active')
           modalCardBody.innerHTML = '該当する住所が見つかりませんでした。'
         } else {
           const resultLength = resultAddress.addressList.length
