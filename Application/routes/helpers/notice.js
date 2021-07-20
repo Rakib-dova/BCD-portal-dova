@@ -16,7 +16,7 @@ module.exports = {
       description2 = 'またのご利用を心よりお待ちしております。'
     } else if (messageStatus === 'cancelprocedure') {
       // 解約手続き中画面を表示する
-      message = '現在解約手続き中です'
+      message = '現在解約手続き中です。'
       description1 = '解約手続き完了後、再度ご利用開始いただけます。'
       description2 = null
     } else {
