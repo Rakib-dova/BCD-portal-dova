@@ -236,3 +236,11 @@ img.logo-ncom {
   border-top: 1px solid #fff;
   background-color: #fff;
 }
+
+.btnMarginLeft {
+  margin-left: 20px;
+}
+
+.btnMarginRight {
+  margin-right: 20px;
+}
