@@ -29,10 +29,10 @@ const cbGetIndex = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 
-  // portal遷移前にはuserは取得できることは確定
+  // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
-  // portalではuser未登録の場合もエラーを上げる
+  // user未登録の場合もエラーを上げる
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
@@ -50,10 +50,9 @@ const cbGetIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
 
   if (
-    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder &&
-      !contract.dataValues.deleteFlag) ||
-    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationReceive &&
-      !contract.dataValues.deleteFlag)
+    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder ||
+      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationReceive) &&
+    !contract.dataValues.deleteFlag
   ) {
     return next(noticeHelper.create('cancelprocedure'))
   }

@@ -1,4 +1,5 @@
 ﻿extends layout
+
 block content
   .hero.is-large
     .hero-body
@@ -6,7 +7,7 @@ block content
 
   .section.is-overlay.mt-6
     .container.is-max-widescreen.is-family-noto-sans
-      form#form(action="#")
+      form#form(action="#").marginBottom
         article.panel.is-info
           h2.panel-heading 解約
           .panel-block
@@ -45,6 +46,7 @@ block content
             footer.modal-card-foot
               button.button.is-success#submit(type="submit" formaction="/cancellation" formmethod="POST") 解約
               a.button.cancel-button(data-target='cancellation-modal') キャンセル
+     
       include footer
 
 block append scripts

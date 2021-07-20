@@ -37,10 +37,9 @@ const cbGetIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
 
   if (
-    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder &&
-      !contract.dataValues.deleteFlag) ||
-    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationReceive &&
-      !contract.dataValues.deleteFlag)
+    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder ||
+      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationReceive) &&
+    !contract.dataValues.deleteFlag
   ) {
     return next(noticeHelper.create('cancelprocedure'))
   }
