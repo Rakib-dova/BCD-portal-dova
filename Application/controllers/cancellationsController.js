@@ -2,7 +2,7 @@
 
 const logger = require('../lib/logger')
 const Order = require('../models').Order
-const Cancellations = require('../models').Cancellations
+const Cancellations = require('../models').Cancellation
 let errorStatus = '050'
 const Contract = require('./contractController')
 const { v4: uuidv4 } = require('uuid')
