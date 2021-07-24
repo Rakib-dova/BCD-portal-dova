@@ -23,6 +23,7 @@ parameters:
       - dev
       - stg
       - prd
+      - test
 
   - name: IntegrationTest
     type: string
