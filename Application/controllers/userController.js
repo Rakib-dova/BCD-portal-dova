@@ -133,7 +133,7 @@ module.exports = {
         const contract = await Contract.findOne({
           where: { tenantId: _tenantId, deleteFlag: false }
         })
-        console.info('デバック：' + contract)
+
         // Contractsにデータが登録されていない場合、登録を実施
         if (contract === null) {
           // contractId uuidで生成
