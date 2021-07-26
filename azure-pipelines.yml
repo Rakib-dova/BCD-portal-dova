@@ -26,7 +26,7 @@ parameters:
 
   - name: IntegrationTest
     type: string
-    default: no
+    default: yes
     values:
       - yes
       - no
