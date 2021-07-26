@@ -1,55 +1,26 @@
-const { Connection, Request } = require('tedious')
 const logger = require('../lib/logger')
-const DB_NAME =  process.env.DB_NAME
-const DB_USER =  process.env.DB_USER
-const DB_PASS =  process.env.DB_PASS
-const DB_HOST =  process.env.DB_HOST
-const config = {
-  authentication: {
-    options: { userName: DB_USER, password: DB_PASS },
-    type: 'default'
-  },
-  server: DB_HOST,
-  options: { database: DB_NAME, encrypt: DB_HOST !== 'localhost', validateBulkLoadParameters: false, rowCollectionOnRequestCompletion: true }
-} 
+const Address = require('../models/index').Address
 
 module.exports = {
-  findOne:function (postalNumber) {
-    return new Promise((resolve, reject) => {      
-      const connection = new Connection(config)
-      const result = []
-     
-      connection.on('connect', async (err) => {
-        if (err) {
-          logger.error(err)
-          reject({ statuscode: 501, value: 'failed connected'})
-        } else {
-          logger.info('success connect')
-          execStatement()
-        }
+  findOne: async (postalNumber) => {
+    const resultAddressList = {
+      statuscode: 200,
+      value: []
+    }
+    try {
+      const addresses = await Address.findAll({ where: { postalCode: postalNumber } })
+      addresses.forEach((address) => {
+        const state = address.dataValues.state
+        const city = address.dataValues.city
+        const address1 = address.dataValues.address1 === null ? '' : address.dataValues.address1
+        const address2 = address.dataValues.address2 === null ? '' : address.dataValues.address2
+        resultAddressList.value.push({ address: ''.concat(state, city, address1, address2) })
       })
-      
-      connection.connect()
-     
-      function execStatement() {
-        const request = new Request(`SELECT CONCAT(state, city, address1, address2) address FROM Addresses WHERE postalCode = '${postalNumber}'`, (err, rowCount, rows) => {
-          if (err) {
-            logger.error(err)
-            reject({ statuscode: 502, value: 'statement error'})
-          } else if (rowCount > 0) {
-            rows.forEach((row) => {
-              result.push({'address': row[0].value})
-            })
-          }
-          resolve({statuscode: 200, value: result})
-        })
-        
-        request.on('requestCompleted', function() {
-         connection.close()
-        })
-        
-        connection.execSql(request) 
-     }      
-    })
+      return resultAddressList
+    } catch (error) {
+      logger.error({ postalNumber: postalNumber, stack: error.stack, status: 0 }, error.name)
+      resultAddressList.statuscode = 500
+      return resultAddressList
+    }
   }
 }
