@@ -217,6 +217,12 @@ stages:
               arguments: "--force"
             enabled: true
 
+          - bash: | 
+              npm install jest-junit --save-dev
+              cd ./Tests
+              npm run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)
+            displayName: "Run integration tests" 
+
           - task: Npm@1
             displayName: "Run integration tests"
             continueOnError: true
@@ -224,7 +230,7 @@ stages:
               command: "custom"
               workingDir: "Tests"
               customCommand: "run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)"
-            enabled: true
+            enabled: false
 
           - task: AzureCLI@2
             displayName: "Delete front-door waf-policy rule"
