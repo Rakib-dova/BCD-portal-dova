@@ -120,7 +120,6 @@ stages:
     jobs:
       - deployment: Deploy
         environment: dev
-        condition: ne('${{parameters.IntegrationTest}}', 'only')
         strategy:
           runOnce:
             deploy:
