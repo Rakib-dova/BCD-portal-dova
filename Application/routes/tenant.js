@@ -11,8 +11,8 @@ const logger = require('../lib/logger')
 
 const errorHelper = require('./helpers/error')
 
-const constantsDefine = require('../constants')
-const contractInformationnewOrder = require('../orderTemplate/contractInformationnewOrder.json')
+const contractInformationnewOrder = require('../constants/contractInformationnewOrder.json')
+const orderType = require('../constants/orderType.json')
 
 // CSR対策
 const csrf = require('csurf')
@@ -115,8 +115,7 @@ const cbPostRegister = async (req, res, next) => {
 
   // contractBasicInfo 設定
   contractInformationnewOrder.contractBasicInfo.sysManagedId = req.user.tenantId
-  contractInformationnewOrder.contractBasicInfo.orderType = constantsDefine.statusConstants.orderTypeNewOrder
-  contractInformationnewOrder.contractBasicInfo.campaignCode = req.body.campaignCode
+  contractInformationnewOrder.contractBasicInfo.orderType = orderType.new
   contractInformationnewOrder.contractBasicInfo.kaianPassword = req.body.password
 
   // contractorName
@@ -126,7 +125,10 @@ const cbPostRegister = async (req, res, next) => {
   // postalName
   contractInformationnewOrder.contractAccountInfo.postalNumber = req.body.postalNumber
   // contractAddress
-  contractInformationnewOrder.contractAccountInfo.contractAddress = req.body.contractAddressVal
+  const contractAddressTo = req.body.contractAddressTo
+  const contractAddressSi = req.body.contractAddressSi
+  const contractAddressCho = req.body.contractAddressCho
+  contractInformationnewOrder.contractAccountInfo.contractAddress = `${contractAddressTo} ${contractAddressSi} ${contractAddressCho}`
   // banchi1
   contractInformationnewOrder.contractAccountInfo.banch1 = req.body.banch1
   // tatemono1
@@ -136,7 +138,7 @@ const cbPostRegister = async (req, res, next) => {
   contractInformationnewOrder.contractList[0].contractPersonName = req.body.contractPersonName
   contractInformationnewOrder.contractList[0].contractPhoneNumber = req.body.contractPhoneNumber
   contractInformationnewOrder.contractList[0].contractMail = req.body.contractMail
-
+ 
   // ユーザ登録と同時にテナント登録も行われる
   const user = await userController.create(req.user.accessToken, req.user.refreshToken, contractInformationnewOrder)
 

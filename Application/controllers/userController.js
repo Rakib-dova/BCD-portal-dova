@@ -10,7 +10,9 @@ const logger = require('../lib/logger')
 const tokenenc = require('../lib/tokenenc')
 const { v4: uuidv4 } = require('uuid')
 
-const constantsDefine = require('../constants')
+const contractStatus = require('../constants/contractStatus.json')
+const deleteFlg = require('../constants/deleteFlg.json')
+const orderType = require('../constants/orderType.json')
 
 module.exports = {
   findOne: async (userId) => {
@@ -107,7 +109,7 @@ module.exports = {
           defaults: {
             tenantId: _tenantId,
             registeredBy: _userId,
-            deleteFlag: false
+            deleteFlag: parseInt(deleteFlg.notDeleted)
           },
           transaction: t
         })
@@ -137,8 +139,8 @@ module.exports = {
             contractId: _contractId,
             tenantId: _tenantId,
             numberN: '',
-            contractStatus: constantsDefine.statusConstants.contractStatusNewContractOrder,
-            deleteFlag: false,
+            contractStatus: contractStatus.newContract.requestContract,
+            deleteFlag: parseInt(deleteFlg.notDeleted),
             createdAt: _date,
             updatedAt: _date
           },
@@ -151,7 +153,7 @@ module.exports = {
           defaults: {
             contractId: _contractId,
             tenantId: _tenantId,
-            orderType: constantsDefine.statusConstants.orderTypeNewOrder,
+            orderType: orderType.new,
             orderData: JSON.stringify(contractInformationnewOrder)
           },
           transaction: t

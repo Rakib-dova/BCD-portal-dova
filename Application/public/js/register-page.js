@@ -48,22 +48,31 @@ document.getElementById('next-btn').onclick = function () {
   const passwords = document.querySelectorAll('input[type="password"]')
   const elementsArr = Array.prototype.slice.call(elements)
 
-  const invalidElements = elementsArr.filter((el) => el.getAttribute('aria-invalid') === 'true')
+  const invalidElements = elementsArr.filter(el => el.getAttribute('aria-invalid') === 'true')
   if (invalidElements.length > 0) {
     alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
     invalidElements[0].focus()
     return false
   }
 
-  const contractAddressVal = $('#contractAddressVal')
-  const banch1 = $('#banch1')
+  const contractAddressTo = document.querySelectorAll('select[type="select"]')
 
-  if (contractAddressVal.value.length === 0 || banch1.value.length === 0) {
+  if (contractAddressTo.value === '') {
     alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
-    $('#postalNumber').focus()
+    contractAddressTo.focus()
     return false
   }
 
+  // 契約者住所（丁目まで)のサイズ​が全角46桁かチェック
+  const contractAddressAddr = elementsArr.filter(el => {
+    if (el.id === 'contractAddressSi'|| el.id === 'contractAddressCho') return el
+  })
+  
+  const contractAddress = contractAddressAddr[0].value + contractAddressAddr[1].value + contractAddressTo[0].options[contractAddressTo[0].selectedIndex].value + ''
+  if (contractAddress.length > 46) {
+    alert('契約者情報の住所は46文字以内で入力してください。※[都道府県][市町村][丁目]の合計文字数となります。')
+    return false
+  }
   // password確認
   const passwordsArr = Array.prototype.slice.call(passwords)
   if (passwordsArr[0].value !== passwordsArr[1].value) {
@@ -75,26 +84,12 @@ document.getElementById('next-btn').onclick = function () {
   // 確認項目（type="text）
   let index = 0
   elementsArr.forEach(function (element) {
-    if (
-      element.id.toString() !== 'banch1' &&
-      element.id.toString() !== 'tatemono1' &&
-      element.id.toString() !== 'contractAddressVal'
-    ) {
-      $('.checkData').item(index).innerHTML = element.value
-      index++
-    } else {
-      if (element.id.toString() === 'contractAddressVal') {
-        $('.checkData').item(index).innerHTML = element.value
-      } else {
-        $('.checkData').item(index).innerHTML += element.value
-      }
-      if (element.id.toString() === 'tatemono1') {
-        index++
-      }
-    }
+    document.getElementsByClassName('checkData').item(index).innerHTML = element.value
+    index = index + 1
   })
 
   // 確認項目（type="select"、type="password"）
+  document.getElementById('recontractAddressTo').innerHTML = document.getElementById('contractAddressTo').value
   document.getElementById('repassword').innerHTML = document.getElementById('password').value
 
   const elementCheckbox = document.querySelector('input[type="checkbox"]')
@@ -179,93 +174,3 @@ document.getElementById('passwordConfirm').onkeyup = function () {
     document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'false')
   }
 }
-
-// modal toggle 追加
-function $(tagObjName) {
-  const classNameReg = new RegExp(/\.+[a-zA-Z0-9]/)
-  const idNameReg = new RegExp(/\#+[a-zA-Z0-9]/)
-
-  if (classNameReg.test(tagObjName)) {
-    return document.querySelectorAll(tagObjName)
-  } else if (idNameReg.test(tagObjName)) {
-    tagObjName = tagObjName.replace(/\#/, '')
-    return document.getElementById(tagObjName)
-  } else {
-    return null
-  }
-}
-
-$('#postalNumber').addEventListener('input', function () {
-  const postalNumberReg = new RegExp(/^[0-9]{7}$/)
-  if (!postalNumberReg.test(this.value)) {
-    $('#postalSearchBtn').setAttribute('disabled', 'disabled')
-    $('#postalSearchBtn').onclick = null
-    return
-  }
-  $('#postalSearchBtn').removeAttribute('disabled')
-})
-
-$('#postalSearchBtn').addEventListener('click', function () {
-  const postalNumber = $('#postalNumber').value
-  const sendData = { postalNumber: null }
-  const modalCardBody = $('#modal-card-result')
-  const postalNumberReg = new RegExp(/^[0-9]{7}$/)
-
-  if (!postalNumberReg.test(postalNumber)) {
-    return
-  }
-
-  modalCardBody.innerHTML = ''
-  sendData.postalNumber = postalNumber
-  const requestAddressApi = new XMLHttpRequest()
-  requestAddressApi.open('POST', '/searchAddress/', true)
-  requestAddressApi.setRequestHeader('Content-Type', 'application/json')
-  requestAddressApi.onreadystatechange = function () {
-    const dataTarget = $('#postalSearchBtn').getAttribute('data-target')
-    if (requestAddressApi.readyState === requestAddressApi.DONE) {
-      if (requestAddressApi.status === 200) {
-        const resultAddress = JSON.parse(requestAddressApi.responseText)
-        if (resultAddress.addressList.length === 0) {
-          $(dataTarget).classList.add('is-active')
-          modalCardBody.innerHTML = '該当する住所が見つかりませんでした。'
-        } else {
-          const resultLength = resultAddress.addressList.length
-          if (resultLength === 1) {
-            $('#contractAddressVal').value = resultAddress.addressList[0].address
-            $('#banch1').value = ''
-            $('#tatemono1').value = ''
-          } else {
-            $(dataTarget).classList.add('is-active')
-            resultAddress.addressList.forEach((obj) => {
-              modalCardBody.innerHTML +=
-                '<a class="resultAddress" data-target="#searchPostalNumber-modal">' + obj.address + '<br>'
-            })
-            $('.resultAddress').forEach((ele) => {
-              ele.onclick = () => {
-                $(ele.getAttribute('data-target')).classList.remove('is-active')
-                $('#contractAddressVal').value = ele.innerHTML.replace('<br>', '')
-                $('#banch1').value = ''
-                $('#tatemono1').value = ''
-              }
-            })
-          }
-        }
-      } else {
-        const errStatus = requestAddressApi.status
-        $(dataTarget).classList.add('is-active')
-        switch (errStatus) {
-          case 403:
-            modalCardBody.innerHTML = 'ログインユーザーではありません。'
-            break
-          case 400:
-            modalCardBody.innerHTML = '正しい郵便番号を入力してください。'
-            break
-          case 500:
-            modalCardBody.innerHTML = 'システムエラーが発生しました。'
-            break
-        }
-      }
-    }
-  }
-  requestAddressApi.send(JSON.stringify(sendData))
-})

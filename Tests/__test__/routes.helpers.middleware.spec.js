@@ -47,7 +47,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
-let request, response, accessTradeshiftSpy, tenantFindOneSpy, userFindOneSpy
+let request, response, accessTradeshiftSpy, tenantFindOneSpy, userFindOneSpy, createSpy, infoSpy
 describe('helpers/middlewareのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -55,6 +55,9 @@ describe('helpers/middlewareのテスト', () => {
     tenantFindOneSpy = jest.spyOn(tenantController, 'findOne')
     userFindOneSpy = jest.spyOn(userController, 'findOne')
     accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
+    createSpy = jest.spyOn(userController, 'create')
+    const logger = require('../../Application/lib/logger.js')
+    infoSpy = jest.spyOn(logger, 'info')
   })
   afterEach(() => {
     request.resetMocked()
@@ -187,7 +190,7 @@ describe('helpers/middlewareのテスト', () => {
       expect(response.getHeader('Location')).toEqual('/auth')
     })
 
-    // #675、【実装】トレシフユーザロールによって、画面表示を制御する#1
+    // #675、【実装】トレシフユーザロールによって、画面表示を制御する　#1
     test('利用登録画面 (条件：テナント管理者、利用登録されていない)', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
@@ -264,11 +267,12 @@ describe('helpers/middlewareのテスト', () => {
         })
 
       // CSRF対策
-      request.csrfToken = jest.fn()
+      request.csrfToken = jest.fn() 
 
       // 試験実施
       await middleware.isTenantRegistered(request, response, next)
       await routesTenant.cbGetRegister(request, response, next)
+
 
       // 期待結果
       // 400,500エラーがエラーハンドリング「されない」
@@ -286,7 +290,7 @@ describe('helpers/middlewareのテスト', () => {
       })
     })
 
-    // #675、【実装】トレシフユーザロールによって、画面表示を制御する#2
+    // #675、【実装】トレシフユーザロールによって、画面表示を制御する　#2
     test('利用登録画面（条件：他のテナント管理者のロール, 利用登録されていない）', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
@@ -363,7 +367,7 @@ describe('helpers/middlewareのテスト', () => {
         })
 
       // CSRF対策
-      request.csrfToken = jest.fn()
+      request.csrfToken = jest.fn() 
 
       // 試験実施
       await middleware.isTenantRegistered(request, response, next)
@@ -385,7 +389,7 @@ describe('helpers/middlewareのテスト', () => {
       })
     })
 
-    // #675、【実装】トレシフユーザロールによって、画面表示を制御する#3
+    // #675、【実装】トレシフユーザロールによって、画面表示を制御する　#3
     test('403管理者問い合わせ画面（条件：一般ユーザ, 利用登録されていない）', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
@@ -462,7 +466,7 @@ describe('helpers/middlewareのテスト', () => {
         })
 
       // CSRF対策
-      request.csrfToken = jest.fn()
+      request.csrfToken = jest.fn() 
 
       // 試験実施
       await middleware.isTenantRegistered(request, response, next)
@@ -532,47 +536,6 @@ describe('helpers/middlewareのテスト', () => {
       }
       // DBからテナントデータが取得できなかった場合を想定する
       tenantFindOneSpy.mockReturnValue(null)
-
-      // 試験実施
-      await middleware.isTenantRegistered(request, response, next)
-
-      // 期待結果
-      // 引数なしでnextが呼ばれ「ない」
-      expect(next).not.toHaveBeenCalledWith()
-      // 303エラーでauthに飛ばされ「ない」
-      expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
-      expect(response.getHeader('Location')).not.toEqual('/auth')
-      // 500エラーがエラーハンドリングされ「ない」
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // request.session.userContextが'NotTenantRegistered'になっている
-      expect(request.session.userContext).toBe('NotTenantRegistered')
-      // 303エラーで/tenant/registerに飛ばされ「る」
-      expect(response.redirect).toHaveBeenCalledWith(303, '/tenant/register')
-      expect(response.getHeader('Location')).toEqual('/tenant/register')
-    })
-
-    test('303エラー: DBから取得したtenantのdeleteFlagがtrueの場合', async () => {
-      // 準備
-      // request.userのuserId、tenantIdに正常なUUIDを想定する
-      request.user = {
-        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
-        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
-      }
-      // userContextに値が取れていることを想定する
-      request.session = {
-        userContext: 'dummy'
-      }
-      // DBからテナントデータが取得できなかった場合を想定する
-      tenantFindOneSpy.mockReturnValue({
-        dataValues: {
-          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          registeredBy: '12345678-cb0b-48ad-857d-4b42a44ede13',
-          customerId: null,
-          createdAt: '2021-01-25T10:15:15.035Z',
-          updatedAt: '2021-01-25T10:15:15.035Z',
-          deleteFlag: true
-        }
-      })
 
       // 試験実施
       await middleware.isTenantRegistered(request, response, next)
@@ -741,12 +704,12 @@ describe('helpers/middlewareのテスト', () => {
       }
       // DBからテナント情報は取得、ユーザデータの取得ができなかった場合を想定する
       tenantFindOneSpy.mockReturnValue({
-        dataValues: {
+        dataValues: { 
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          registeredBy: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          registeredBy: '12345678-cb0b-48ad-857d-4b42a44ede13', 
           customerId: null,
           createdAt: '2021-01-25T10:15:15.035Z',
-          updatedAt: '2021-01-25T10:15:15.035Z'
+          updatedAt: '2021-01-25T10:15:15.035Z' 
         }
       })
       userFindOneSpy.mockReturnValue(null)
@@ -798,5 +761,6 @@ describe('helpers/middlewareのテスト', () => {
       // 500エラーがエラーハンドリングされ「る」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
+
   })
 })

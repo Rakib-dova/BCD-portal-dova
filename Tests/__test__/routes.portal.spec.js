@@ -7,24 +7,21 @@ const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
 const helper = require('../../Application/routes/helpers/middleware')
-const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
 const userController = require('../../Application/controllers/userController.js')
-const contractController = require('../../Application/controllers/contractController.js')
 const logger = require('../../Application/lib/logger.js')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
-let request, response, infoSpy, findOneSpy, findOneSpyContracts
+let request, response, infoSpy, findOneSpy
 describe('portalのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
     infoSpy = jest.spyOn(logger, 'info')
     findOneSpy = jest.spyOn(userController, 'findOne')
-    findOneSpyContracts = jest.spyOn(contractController, 'findOne')
   })
   afterEach(() => {
     request.resetMocked()
@@ -32,7 +29,6 @@ describe('portalのテスト', () => {
     next.mockReset()
     infoSpy.mockRestore()
     findOneSpy.mockRestore()
-    findOneSpyContracts.mockRestore()
   })
 
   // 404エラー定義
@@ -78,17 +74,6 @@ describe('portalのテスト', () => {
           updatedAt: '2021-01-25T08:45:49.803Z'
         }
       })
-      findOneSpyContracts.mockReturnValue({
-        dataValues: {
-          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
-          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          numberN: '0000011111',
-          contractStatus: '10',
-          deleteFlag: false,
-          createdAt: '2021-01-25T08:45:49.803Z',
-          updatedAt: '2021-01-25T08:45:49.803Z'
-        }
-      })
 
       // 試験実施
       await portal.cbGetIndex(request, response, next)
@@ -106,113 +91,8 @@ describe('portalのテスト', () => {
         title: 'ポータル',
         tenantId: request.user.tenantId,
         userRole: request.session.userRole,
-        numberN: '0000011111',
         TS_HOST: process.env.TS_HOST
       })
-    })
-
-    test('正常：解約申込中の場合', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = {
-        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
-      }
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue({
-        dataValues: {
-          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
-          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-          appVersion: '0.0.1',
-          refreshToken: 'dummyRefreshToken',
-          subRefreshToken: null,
-          userStatus: 0,
-          lastRefreshedAt: null,
-          createdAt: '2021-01-25T08:45:49.803Z',
-          updatedAt: '2021-01-25T08:45:49.803Z'
-        }
-      })
-      findOneSpyContracts.mockReturnValue({
-        dataValues: {
-          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
-          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          numberN: '0000011111',
-          contractStatus: '30',
-          deleteFlag: false,
-          createdAt: '2021-01-25T08:45:49.803Z',
-          updatedAt: '2021-01-25T08:45:49.803Z'
-        }
-      })
-
-      // 試験実施
-      await portal.cbGetIndex(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // 解約手続き中画面が表示「される」
-      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
-    })
-
-    test('正常：解約受取中の場合', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = {
-        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
-      }
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue({
-        dataValues: {
-          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
-          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-          appVersion: '0.0.1',
-          refreshToken: 'dummyRefreshToken',
-          subRefreshToken: null,
-          userStatus: 0,
-          lastRefreshedAt: null,
-          createdAt: '2021-01-25T08:45:49.803Z',
-          updatedAt: '2021-01-25T08:45:49.803Z'
-        }
-      })
-      findOneSpyContracts.mockReturnValue({
-        dataValues: {
-          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
-          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          numberN: '0000011111',
-          contractStatus: '31',
-          deleteFlag: false,
-          createdAt: '2021-01-25T08:45:49.803Z',
-          updatedAt: '2021-01-25T08:45:49.803Z'
-        }
-      })
-
-      // 試験実施
-      await portal.cbGetIndex(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // 解約手続き中画面が表示「される」
-      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
@@ -247,17 +127,6 @@ describe('portalのテスト', () => {
       }
       // DBからのユーザデータの取得ができなかった(null)場合を想定する
       findOneSpy.mockReturnValue(null)
-      findOneSpyContracts.mockReturnValue({
-        dataValues: {
-          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
-          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          numberN: '0000011111',
-          contractStatus: '31',
-          deleteFlag: false,
-          createdAt: '2021-01-25T08:45:49.803Z',
-          updatedAt: '2021-01-25T08:45:49.803Z'
-        }
-      })
 
       // 試験実施
       await portal.cbGetIndex(request, response, next)
@@ -275,7 +144,7 @@ describe('portalのテスト', () => {
       expect(response.render).not.toHaveBeenCalled()
     })
 
-    test('500エラー：DBから契約情報が取得できなかった(null)場合', async () => {
+    test('500エラー：DBエラーの場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {
@@ -285,109 +154,8 @@ describe('portalのテスト', () => {
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
-      // DBからの契約情報が取得できなかった(null)場合を想定する
-      findOneSpy.mockReturnValue({
-        dataValues: {
-          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
-          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-          appVersion: '0.0.1',
-          refreshToken: 'dummyRefreshToken',
-          subRefreshToken: null,
-          userStatus: 0,
-          lastRefreshedAt: null,
-          createdAt: '2021-01-25T08:45:49.803Z',
-          updatedAt: '2021-01-25T08:45:49.803Z'
-        }
-      })
-      findOneSpyContracts.mockReturnValue(null)
-
-      // 試験実施
-      await portal.cbGetIndex(request, response, next)
-
-      // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-      // userContextがLoggedInになって「いない」
-      expect(request.session?.userContext).not.toBe('LoggedIn')
-      // session.userRoleが初期値のままになっている
-      expect(request.session?.userRole).toBe('dummy')
-      // response.renderが呼ばれ「ない」
-      expect(response.render).not.toHaveBeenCalled()
-    })
-
-    test('500エラー：ユーザDBエラーの場合', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = {
-        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
-      }
-
-      findOneSpyContracts.mockReturnValue({
-        dataValues: {
-          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
-          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          numberN: '0000011111',
-          contractStatus: '31',
-          deleteFlag: false,
-          createdAt: '2021-01-25T08:45:49.803Z',
-          updatedAt: '2021-01-25T08:45:49.803Z'
-        }
-      })
       // DBからのユーザデータの取得でエラーが発生した場合を想定する
       findOneSpy.mockReturnValue(new Error('DB error mock'))
-
-      // 試験実施
-      await portal.cbGetIndex(request, response, next)
-
-      // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-      // userContextがLoggedInになって「いない」
-      expect(request.session?.userContext).not.toBe('LoggedIn')
-      // session.userRoleが初期値のままになっている
-      expect(request.session?.userRole).toBe('dummy')
-      // response.renderが呼ばれ「ない」
-      expect(response.render).not.toHaveBeenCalled()
-    })
-
-    test('500エラー：契約DBエラーの場合', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = {
-        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
-      }
-
-      findOneSpy.mockReturnValue({
-        dataValues: {
-          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
-          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-          appVersion: '0.0.1',
-          refreshToken: 'dummyRefreshToken',
-          subRefreshToken: null,
-          userStatus: 0,
-          lastRefreshedAt: null,
-          createdAt: '2021-01-25T08:45:49.803Z',
-          updatedAt: '2021-01-25T08:45:49.803Z'
-        }
-      })
-
-      // DBからの契約情報取得でエラーが発生した場合を想定する
-      findOneSpyContracts.mockReturnValue(new Error('DB error mock'))
-
       // 試験実施
       await portal.cbGetIndex(request, response, next)
 

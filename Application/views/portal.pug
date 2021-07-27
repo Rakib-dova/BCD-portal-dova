@@ -30,17 +30,7 @@ block content
               .media-content
                 p.title.is-5 請求書一括作成
                 p 指定ファイルをアプロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
-      .column.hvr-float
-        if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
-          .box
-            a.show-modal(data-target='config-modal')
-              .media.appdesc
-                .media-left
-                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
-                .media-content
-                  p.title.is-5 設定
-                  p 契約情報変更と解約を行うことができます。
-                  p 解約の場合は取り消しはできません。
+      .column
 
     
     .modal#support-modal
@@ -71,39 +61,18 @@ block content
         .card
           .card-content.notification.m-0
             button.delete(data-target="support-confirmation-modal")
-            if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN !== '')
+            if userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d"
               p お問い合わせの際は、問い合わせフォームに以下のお客様番号をご入力ください。
               .field.has-addons
                 .control.is-expanded
-                  input.input#numberN(type='text' value=numberN)
+                  input.input#tenantId(type='text' value='BCD-F-00-'+tenantId)
                 .control
-                  a.button#copy-btn(data-clipboard-target="#numberN")
+                  a.button#copy-btn(data-clipboard-target="#tenantId")
                     | Copy                
               a.button.is-success.is-pulled-right.mb-3(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank') お問い合わせページを開く
-            else if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN === '')
-              p 現在お客様番号払出中です。
-              p 払出後、本画面からお問い合わせが可能となります。
             else
-              p お問い合わせは、テナント管理者のみ可能です。
-              p テナント管理者にご相談の上、お問い合わせください。
-
-    .modal#config-modal
-      .modal-background.cancel-button(data-target='config-modal')
-      .modal-card.is-family-noto-sans
-        header.modal-card-head
-          p.modal-card-title 設定
-          button.delete(data-target="config-modal")
-        section.modal-card-body
-          nav.panel
-            a.panel-block(href='#')
-              span.panel-icon
-                i.fas.fa-file
-              p 契約情報変更
-            a.panel-block(href='cancellation') 
-              span.panel-icon
-                i.fas.fa-file
-              p 解約
-        footer.modal-card-foot
+              p お問い合わせは、アカウント管理者のみ可能です。
+              p アカウント管理者にご相談の上、お問い合わせください。
   include footer
 
 block append scripts

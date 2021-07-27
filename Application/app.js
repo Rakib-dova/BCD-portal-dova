@@ -187,16 +187,9 @@ app.use('/auth', require('./routes/auth').router)
 
 app.use('/tenant', require('./routes/tenant').router)
 app.use('/user', require('./routes/user').router)
-app.use('/searchAddress', require('./routes/searchAddressApi').router)
 
 // csvupload
 app.use('/csvupload', require('./routes/csvupload').router)
-
-// cancellation
-app.use('/cancellation', require('./routes/cancellation').router)
-
-// notice
-const noticeHelper = require('./routes/helpers/notice')
 
 const errorHelper = require('./routes/helpers/error')
 
@@ -206,7 +199,6 @@ app.use((req, res, next) => {
 })
 
 // error handler
-app.use(noticeHelper.render)
 app.use(errorHelper.render)
 
 app.set('port', process.env.PORT || 3000)

@@ -23,7 +23,6 @@ parameters:
       - dev
       - stg
       - prd
-      - test
 
   - name: IntegrationTest
     type: string
@@ -72,24 +71,12 @@ stages:
               publishJUnitResults: true
             enabled: false
 
-          - bash: | 
-              npm install jest-junit --save-dev
-              cd ./Tests
-              npm run test:ci
+          - task: Npm@1
             displayName: "Run unit tests"
-            
-          - task: PublishCodeCoverageResults@1
-            displayName: 'Publish code coverage'
             inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: $(System.DefaultWorkingDirectory)/Tests/coverage/cobertura-coverage.xml
-          
-          - task: PublishTestResults@2
-            displayName: 'Publish test results'
-            inputs:
-              testRunTitle: '${{ parameters.Environment }}'
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '$(System.DefaultWorkingDirectory)/Tests/coverage/junit.xml'
+              command: "custom"
+              workingDir: "Tests"
+              customCommand: "run test:ci"
 
           - task: Docker@1
             displayName: "Build an image"
@@ -123,7 +110,7 @@ stages:
             deploy:
               steps:
                 - task: AzureWebAppContainer@1
-                  condition: eq('${{parameters.Environment}}', 'test')
+                  condition: eq('${{parameters.Environment}}', 'dev')
                   displayName: "Azure Web App on Container Deploy: $(portalAppName)"
                   inputs:
                     azureSubscription: "$(azureSubscriptionEndpoint)"
@@ -217,12 +204,6 @@ stages:
               arguments: "--force"
             enabled: true
 
-          - bash: | 
-              npm install jest-junit --save-dev
-              cd ./Tests
-              npm run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)
-            displayName: "Run integration tests" 
-
           - task: Npm@1
             displayName: "Run integration tests"
             continueOnError: true
@@ -230,7 +211,7 @@ stages:
               command: "custom"
               workingDir: "Tests"
               customCommand: "run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)"
-            enabled: false
+            enabled: true
 
           - task: AzureCLI@2
             displayName: "Delete front-door waf-policy rule"

@@ -73,14 +73,6 @@ const isUUID = (uuid) => {
   else return true
 }
 
-const isPostalNumber = (postalNumber) => {
-  const pattern = '^[0-9]{7}$'
-  const regex = new RegExp(pattern)
-
-  // test()結果はtrue又はfalseになる。
-  return regex.test(postalNumber)
-}
-
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -89,6 +81,5 @@ module.exports = {
   isString: isString,
   isStrings: isStrings,
   isFunction: isFunction,
-  isUUID: isUUID,
-  isPostalNumber: isPostalNumber
+  isUUID: isUUID
 }
