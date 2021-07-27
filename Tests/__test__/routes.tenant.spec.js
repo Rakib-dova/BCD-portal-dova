@@ -429,14 +429,13 @@ describe('tenantのテスト', () => {
         contractName: '市江素',
         contractKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddressTo: '東京都',
-        contractAddessSi: '渋谷区',
-        contractAddressCho: '1',
-        banch1: '1番地',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
         tatemono1: '銀王ビル',
         contractPersonName: 'トレド',
         contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com'
+        contractMaile: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -558,14 +557,13 @@ describe('tenantのテスト', () => {
         contractName: '市江素',
         contractKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddressTo: '東京都',
-        contractAddessSi: '渋谷区',
-        contractAddressCho: '1',
-        banch1: '1番地',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
         tatemono1: '銀王ビル',
         contractPersonName: 'トレド',
         contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com'
+        contractMaile: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // 試験実施
       await routesTenant.cbPostRegister(request, response, next)
@@ -592,14 +590,13 @@ describe('tenantのテスト', () => {
         contractName: '市江素',
         contractKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddressTo: '東京都',
-        contractAddessSi: '渋谷区',
-        contractAddressCho: '1',
-        banch1: '1番地',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
         tatemono1: '銀王ビル',
         contractPersonName: 'トレド',
         contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com'
+        contractMaile: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -658,14 +655,13 @@ describe('tenantのテスト', () => {
         contractName: '市江素',
         contractKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddressTo: '東京都',
-        contractAddessSi: '渋谷区',
-        contractAddressCho: '1',
-        banch1: '1番地',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
         tatemono1: '銀王ビル',
         contractPersonName: 'トレド',
         contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com'
+        contractMaile: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // userのTokenにnullを入れる
       request.user = {
@@ -702,14 +698,13 @@ describe('tenantのテスト', () => {
         contractName: '市江素',
         contractKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddressTo: '東京都',
-        contractAddessSi: '渋谷区',
-        contractAddressCho: '1',
-        banch1: '1番地',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
         tatemono1: '銀王ビル',
         contractPersonName: 'トレド',
         contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com'
+        contractMaile: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -748,14 +743,13 @@ describe('tenantのテスト', () => {
         contractName: '市江素',
         contractKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddressTo: '東京都',
-        contractAddessSi: '渋谷区',
-        contractAddressCho: '1',
-        banch1: '1番地',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
         tatemono1: '銀王ビル',
         contractPersonName: 'トレド',
         contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com'
+        contractMaile: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -808,14 +802,13 @@ describe('tenantのテスト', () => {
         contractName: '市江素',
         contractKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddressTo: '東京都',
-        contractAddessSi: '渋谷区',
-        contractAddressCho: '1',
-        banch1: '1番地',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
         tatemono1: '銀王ビル',
         contractPersonName: 'トレド',
         contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com'
+        contractMaile: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -876,14 +869,13 @@ describe('tenantのテスト', () => {
         contractName: '市江素',
         contractKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddressTo: '東京都',
-        contractAddessSi: '渋谷区',
-        contractAddressCho: '1',
-        banch1: '1番地',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
         tatemono1: '銀王ビル',
         contractPersonName: 'トレド',
         contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com'
+        contractMaile: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -944,14 +936,13 @@ describe('tenantのテスト', () => {
         contractName: '市江素',
         contractKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddressTo: '東京都',
-        contractAddessSi: '渋谷区',
-        contractAddressCho: '1',
-        banch1: '1番地',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
         tatemono1: '銀王ビル',
         contractPersonName: 'トレド',
         contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com'
+        contractMaile: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -1019,14 +1010,13 @@ describe('tenantのテスト', () => {
         contractName: '市江素',
         contractKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddressTo: '東京都',
-        contractAddessSi: '渋谷区',
-        contractAddressCho: '1',
-        banch1: '1番地',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
         tatemono1: '銀王ビル',
         contractPersonName: 'トレド',
         contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com'
+        contractMaile: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -1103,14 +1093,13 @@ describe('tenantのテスト', () => {
         contractName: '市江素',
         contractKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddressTo: '東京都',
-        contractAddessSi: '渋谷区',
-        contractAddressCho: '1',
-        banch1: '1番地',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
         tatemono1: '銀王ビル',
         contractPersonName: 'トレド',
         contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com'
+        contractMaile: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {

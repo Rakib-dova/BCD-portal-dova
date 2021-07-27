@@ -26,7 +26,7 @@ parameters:
 
   - name: IntegrationTest
     type: string
-    default: no
+    default: yes
     values:
       - yes
       - no
@@ -71,12 +71,24 @@ stages:
               publishJUnitResults: true
             enabled: false
 
-          - task: Npm@1
+          - bash: | 
+              npm install jest-junit --save-dev
+              cd ./Tests
+              npm run test:ci
             displayName: "Run unit tests"
+            
+          - task: PublishCodeCoverageResults@1
+            displayName: 'Publish code coverage'
             inputs:
-              command: "custom"
-              workingDir: "Tests"
-              customCommand: "run test:ci"
+              codeCoverageTool: Cobertura
+              summaryFileLocation: $(System.DefaultWorkingDirectory)/Tests/coverage/cobertura-coverage.xml
+          
+          - task: PublishTestResults@2
+            displayName: 'Publish test results'
+            inputs:
+              testRunTitle: '${{ parameters.Environment }}'
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '$(System.DefaultWorkingDirectory)/Tests/coverage/junit.xml'
 
           - task: Docker@1
             displayName: "Build an image"
