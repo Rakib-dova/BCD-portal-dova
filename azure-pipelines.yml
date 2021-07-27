@@ -41,9 +41,9 @@ pool:
 
 stages:
   - stage: BuildandPush
-    condition: ne('${{parameters.IntegrationTest}}', 'only')
     jobs:
       - job:
+        condition: ne('${{parameters.IntegrationTest}}', 'only')
         steps:
           - task: NodeTool@0
             displayName: "Use Node 14.x"
@@ -119,6 +119,7 @@ stages:
   - stage: Deploy
     jobs:
       - deployment: Deploy
+        condition: ne('${{parameters.IntegrationTest}}', 'only')
         environment: dev
         strategy:
           runOnce:
