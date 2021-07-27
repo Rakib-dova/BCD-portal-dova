@@ -192,6 +192,10 @@ stages:
               inlineScript: |
                 #Install Azure CLI extention without prompt
                 az config set extension.use_dynamic_install=yes_without_prompt
+                #Delete temporaryWAF if it exists
+                [string]$resources=az network front-door waf-policy rule list --policy-name '$(WAFname)' `
+                 --resource-group '$(bcd_portal_rg_name)'
+                ConvertFrom-json $resources|Where-Object {$_.name -eq 'temporaryAllowFromAzurePipelines'}
                 #Get Outbound IP address of Azure pipelines
                 $ip=Invoke-RestMethod https://ipinfo.io/json | select -exp ip
                 Write-Output -------Create front-door waf-policy rule-------
