@@ -14,6 +14,7 @@ trigger:
     exclude:
       - /Documents
       - /Tests
+      - /*.yaml
 
 parameters:
   - name: Environment
@@ -30,6 +31,7 @@ parameters:
     values:
       - yes
       - no
+      - only
 
 variables:
   - group: ${{ parameters.Environment }}
@@ -39,6 +41,7 @@ pool:
 
 stages:
   - stage: BuildandPush
+    condition: ne('${{parameters.IntegrationTest}}', 'only')
     jobs:
       - job:
         steps:
@@ -117,6 +120,7 @@ stages:
     jobs:
       - deployment: Deploy
         environment: dev
+        condition: ne('${{parameters.IntegrationTest}}', 'only')
         strategy:
           runOnce:
             deploy:
@@ -152,7 +156,7 @@ stages:
                     SourceSlot: 'staging'
 
       - job: Confirmation
-        condition: eq('${{parameters.IntegrationTest}}', 'yes')
+        condition: or(eq('${{parameters.IntegrationTest}}', 'yes'),eq('${{parameters.IntegrationTest}}', 'only'))
         dependsOn: Deploy
         pool: server
         steps:
@@ -176,7 +180,7 @@ stages:
       - job: IntegrationTest
         pool:
           vmImage: "windows-latest"
-        condition: eq('${{parameters.IntegrationTest}}', 'yes')
+        condition: or(eq('${{parameters.IntegrationTest}}', 'yes'),eq('${{parameters.IntegrationTest}}', 'only'))
         dependsOn: Confirmation
         steps:
           - task: AzureCLI@2
@@ -224,7 +228,7 @@ stages:
               workingDir: "Tests"
               customCommand: "run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)"
             enabled: false
-          
+
           - bash: | 
               npm install jest-junit --save-dev
               cd ./Tests
