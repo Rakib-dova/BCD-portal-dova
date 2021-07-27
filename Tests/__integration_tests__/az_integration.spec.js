@@ -6,7 +6,7 @@ const { JSDOM } = require('jsdom')
 const app = 'https://bcd-portal.tsdev.biz'
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-jest.setTimeout(40000) // jestのタイムアウトを40秒とする
+jest.setTimeout(60000) // jestのタイムアウトを60秒とする
 
 const getCookies = async (username, password) => {
   const page = await browser.newPage()
