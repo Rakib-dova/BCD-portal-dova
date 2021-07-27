@@ -184,6 +184,7 @@ stages:
         dependsOn: Confirmation
         steps:
           - task: AzureCLI@2
+            enabled: false
             displayName: "Create front-door waf-policy rule to allow access from Azure pipeline"
             inputs:
               azureSubscription: "$(azureSubscriptionEndpoint)"
@@ -247,6 +248,7 @@ stages:
 
           - task: AzureCLI@2
             displayName: "Delete front-door waf-policy rule"
+            enabled: false
             continueOnError: true
             inputs:
               azureSubscription: "$(azureSubscriptionEndpoint)"
