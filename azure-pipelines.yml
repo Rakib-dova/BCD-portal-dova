@@ -126,7 +126,7 @@ stages:
             deploy:
               steps:
                 - task: AzureWebAppContainer@1
-                  condition: eq('${{parameters.Environment}}', 'dev')
+                  condition: or(eq('${{parameters.Environment}}', 'dev'),eq('${{parameters.Environment}}', 'test'))
                   displayName: "Azure Web App on Container Deploy: $(portalAppName)"
                   inputs:
                     azureSubscription: "$(azureSubscriptionEndpoint)"
