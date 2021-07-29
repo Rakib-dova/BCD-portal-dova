@@ -114,7 +114,7 @@ const cbPostRegister = async (req, res, next) => {
   if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))
 
   // contractBasicInfo 設定
-  contractInformationnewOrder.contractBasicInfo.sysManagedId = req.user.tenantId
+  contractInformationnewOrder.contractBasicInfo.sysManageId = req.user.tenantId
   contractInformationnewOrder.contractBasicInfo.orderType = constantsDefine.statusConstants.orderTypeNewOrder
   contractInformationnewOrder.contractBasicInfo.campaignCode = req.body.campaignCode
   contractInformationnewOrder.contractBasicInfo.kaianPassword = req.body.password

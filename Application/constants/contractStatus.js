@@ -14,5 +14,8 @@ constantsDefine({
   orderTypeNewOrder: '010',
   orderTypeChangeOrder: '020',
   orderTypeCancelOrder: '030',
-  orderTypeSimpleChangeOrder: '040'
+  orderTypeSimpleChangeOrder: '040',
+
+  // 変更有無
+  contractChange: '1'
 })
