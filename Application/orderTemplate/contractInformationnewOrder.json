@@ -1,6 +1,6 @@
 {
   "contractBasicInfo": {
-    "sysManagedId": "",
+    "sysManageId": "",
     "orderId": "",
     "orderType": "",
     "contractChangeName": "",
@@ -37,7 +37,7 @@
 
   "prdtList": [
     {
-      "prdctCode": "BF1021000000100",
+      "prdtCode": "BF1021000000100",
       "appType": "010"
     }
   ]
