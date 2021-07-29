@@ -25,7 +25,7 @@ parameters:
       - stg
       - prd
       - test
-      - test-sec
+      - 'testSec'
 
   - name: IntegrationTest
     type: string
