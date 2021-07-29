@@ -51,6 +51,20 @@ const cbGetChangeIndex = async (req, res, next) => {
     !contract.dataValues.deleteFlag
   ) {
     return next(noticeHelper.create('cancelprocedure'))
+  } else if (
+    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusNewContractOrder ||
+      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusNewContractReceive) &&
+    !contract.dataValues.deleteFlag
+  ) {
+    return next(noticeHelper.create('registerprocedure'))
+  } else if (
+    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusChangeContractOrder ||
+      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusChangeContractReceive) &&
+    !contract.dataValues.deleteFlag
+  ) {
+    return next(noticeHelper.create('changeprocedure'))
+  } else if (user.dataValues?.userRole !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d' && !contract.dataValues.deleteFlag) {
+    return next(noticeHelper.create('generaluser'))
   }
 
   // ユーザ権限も画面に送る
