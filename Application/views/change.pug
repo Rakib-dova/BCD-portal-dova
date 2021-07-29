@@ -16,26 +16,26 @@ block content
                   .columns.is-centered.column.is-three-quarters
                     .column
                       label.checkbox
-                        input#modify_name(type='checkbox' name='chkContractName' checked=false required)
-                        label(for='modify_name') 契約者名変更
+                        input#chkContractName(type='checkbox' name='chkContractName' checked=false required)
+                        label(for='chkContractName') 契約者名変更
               
-              .field.card
+              .field.card.is-invisible#cardContractName
                 .card-content
                   .title.is-4  契約者名変更
                   .field
                     .control
                       label.is-one-third(for='contractName') 契約者名（企業名）（必須）
-                      input.input#contractName.is-one-third(type='text' name='contractName' value pattern=inputPattarnZenkaku required)
+                      input.input#contractName.is-one-third(type='text' name='contractName' value pattern=inputPattarnZenkaku required placeholder='全角文字')
                       
                   .field
                     .control
-                      label(for='contractKanaName') 契約者名（企業名）（必須）
-                      input.input#contractKanaName(type='text' name="contractKanaName"  value pattern=inputPattarnZenkakuKatakana required)
+                      label(for='contractKanaName') 契約者カナ名（企業名）（必須）
+                      input.input#contractKanaName(type='text' name="contractKanaName"  value pattern=inputPattarnZenkakuKatakana required placeholder='カタカナ')
               .columns.is-centered
                 .control
                   .column
                     a.button.is-link#return-btn.ml-3.mr-3(href="portal") 戻る
-                    button.button.is-success#next-btn.ml-3.mr-3(type="button" data-target="confirmmodify-modal") 確認
+                    button.button.is-success#next-btn.ml-3.mr-3(type="button" data-target="confirmmodify-modal" disabled) 確認
        
             .modal.modal-fx-fadeInscale#confirmmodify-modal
               .modal-background.cancel-button(data-target="confirmmodify-modal")
