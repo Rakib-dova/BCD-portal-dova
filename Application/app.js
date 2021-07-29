@@ -195,6 +195,9 @@ app.use('/csvupload', require('./routes/csvupload').router)
 // cancellation
 app.use('/cancellation', require('./routes/cancellation').router)
 
+// 契約者情報の修正
+app.use('/change', require('./routes/change').router)
+
 // notice
 const noticeHelper = require('./routes/helpers/notice')
 
