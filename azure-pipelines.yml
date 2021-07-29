@@ -25,6 +25,7 @@ parameters:
       - stg
       - prd
       - test
+      - test-sec
 
   - name: IntegrationTest
     type: string
@@ -127,7 +128,7 @@ stages:
             deploy:
               steps:
                 - task: AzureWebAppContainer@1
-                  condition: or(eq('${{parameters.Environment}}', 'dev'),eq('${{parameters.Environment}}', 'test'))
+                  condition: or(eq('${{parameters.Environment}}', 'dev'),eq('${{parameters.Environment}}', 'test'),eq('${{parameters.Environment}}', 'test-sec'))
                   displayName: "Azure Web App on Container Deploy: $(portalAppName)"
                   inputs:
                     azureSubscription: "$(azureSubscriptionEndpoint)"
