@@ -244,3 +244,11 @@ img.logo-ncom {
 .btnMarginRight {
   margin-right: 20px;
 }
+
+.is-invisible {
+  display: none;
+}
+
+.chkMarginLeft {
+  margin-left: 20px;
+}

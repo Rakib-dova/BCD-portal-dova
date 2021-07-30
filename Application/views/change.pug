@@ -1,0 +1,117 @@
+﻿extends layout
+block content
+  .hero.is-large
+    .hero-body
+      .container
+
+  .section.is-overlay.mt-6
+    .container.is-max-widescreen.is-family-noto-sans
+      form#form(action="#")
+        article.panel.is-info
+          h2.panel-heading 契約情報変更
+          .panel-block
+            .container  
+              .field.card
+                .card-content
+                  .columns.is-centered.column.is-three-quarters
+                    .column
+                      label.checkbox
+                        input#chkContractName(type='checkbox' name='chkContractName' checked=false required)
+                        label(for='chkContractName') 契約者名変更
+                        input.chkMarginLeft#chkContractAddress(type='checkbox' name='chkContractAddress' checked=false required)
+                        label(for='chkContractAddress') 契約者住所変更
+              
+              .field.card.is-invisible#cardContractName
+                .card-content
+                  .title.is-4  契約者名変更
+                  .field
+                    .control
+                      label.is-one-third(for='contractName') 契約者名（企業名）（必須）
+                      input.input#contractName.is-one-third(type='text' name='contractName' value pattern=inputPattarnZenkaku required placeholder='全角文字')
+                      
+                  .field
+                    .control
+                      label(for='contractKanaName') 契約者カナ名（企業名）（必須）
+                      input.input#contractKanaName(type='text' name="contractKanaName"  value pattern=inputPattarnZenkakuKatakana required placeholder='カタカナ')
+
+              .field.card
+                .card-content
+                  .title.is-4  契約者住所変更
+                  .field
+                    .control
+                      label(for="postalNumber") 郵便番号（必須）
+                      .control
+                        .columns.ml-0.pl-0
+                          .column.is-one-third.pl-0
+                            input.input#postalNumber(type="text" name="postalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7  placeholder='半角数字かつハイフンなし')
+                          .column 
+                            .button.is-link#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
+                  .field
+                    label(for="contractAddressVal") 住所(必須）
+                    .control
+                      input.input#contractAddressVal(type="text" name="contractAddressVal" value readonly required)
+                  .field
+                    label(for="banch1") 番地(必須)
+                    .control
+                      input.input#banch1(type="text" name="banch1" value="" pattern=inputPattarnZenkaku maxlength=20 required placeholder='全角文字')
+                  .field
+                    label(for="tatemono1") 建物等
+                    .control
+                      input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角文字')
+              .columns.is-centered
+                .control
+                  .column
+                    a.button.is-link#return-btn.ml-3.mr-3(href="portal") 戻る
+                    button.button.is-success#next-btn.ml-3.mr-3(type="button" data-target="confirmmodify-modal" disabled) 確認
+       
+            .modal.modal-fx-fadeInscale#confirmmodify-modal
+              .modal-background.cancel-button(data-target="confirmmodify-modal")
+              .modal-card
+                header.modal-card-head
+                  p.modal-card-title 契約者名変更
+                  button.delete(type="button" data-target="confirmmodify-modal")
+                section.modal-card-body
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th(colspan="3") 契約者名
+                      tr
+                        td.confirmation-item(colspan="2") 契約者名（企業名）
+                        td#recontractName.checkData
+                      tr 
+                        td.confirmation-item(colspan="2")  契約者カナ名（企業名）
+                        td#recontractKanaName.checkData
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th(colspan="3") 契約者住所変更
+                      tr
+                        td.confirmation-item(colspan="2") 郵便番号（必須）
+                        td#repostalNumber.checkData
+                      tr 
+                        td.confirmation-item(colspan="2")  住所（必須）
+                        td#recontractAddressVal.checkData
+                      tr 
+                        td.confirmation-item(colspan="2")  番地（必須）
+                        td#rebanch1.checkData
+                      tr 
+                        td.confirmation-item(colspan="2")  建物等
+                        td#retatemono1.checkData
+                footer.modal-card-foot
+                  a.button.cancel-button(data-target='confirmmodify-modal') 修正
+                  button.button.is-success#submit(type="submit" formaction="/change" formmethod="POST") 変更
+
+            .modal.modal-fx-fadeInscale#searchPostalNumber-modal
+              .modal-background.cancel-button(data-target="searchPostalNumber-modal")
+              .modal-card
+                header.modal-card-head
+                  p.modal-card-title 住所の検索結果
+                  button.delete(type="button" data-target="searchPostalNumber-modal")
+                section.modal-card-body
+                  p.modal-card-result#modal-card-result
+                footer.modal-card-foot.modal-address-foot
+                    
+      include footer
+
+block append scripts
+  script(src="/js/change-page.js")
