@@ -5,6 +5,11 @@ const { JSDOM } = require('jsdom')
 
 jest.setTimeout(40000) // jestのタイムアウトを40秒とする
 
+/**
+ * プルリク作成のための変更です。 本変更はマージしないでください。
+ * プルリクに気になる点をしておきます。
+ */
+
 const getCookies = async (username, password) => {
   const page = await browser.newPage()
 
