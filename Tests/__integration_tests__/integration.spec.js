@@ -2,6 +2,7 @@
 const app = require('../../Application/app')
 const request = require('supertest')
 const { JSDOM } = require('jsdom')
+const testTenantId = '221559d0-53aa-44a2-ab29-0c4a6cb02bde'
 
 jest.setTimeout(40000) // jestのタイムアウトを40秒とする
 
@@ -398,6 +399,9 @@ describe('ルーティングのインテグレーションテスト', () => {
     //    試験前：未登録
     //    試験後(期待値)：登録
 
+    // DB操作用
+    const db = require('../../Application/models')
+
     // /authにリダイレクトする
     test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
       const res = await request(app)
@@ -474,6 +478,56 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
+
+    // 正常にportal画面から契約者変更へ遷移する
+    test('管理者、契約ステータス：10, /change', async () => {
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：11, /change', async () => {
+      // 契約ステータス変更(受け取り完了)
+      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：00, /change', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/契約情報変更/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：00, 利用者情報変更, /change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractName: 'on',
+          contractName: '変更名',
+          contractKanaName: 'ヘンコウメイ'
+        })
+        .expect(302)
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('ContractとOrderデータ削除', async () => {
+      await db.Contract.destroy({ where: { tenantId: testTenantId } })
+      await db.Order.destroy({ where: { tenantId: testTenantId } })
+    })
   })
 
   describe('DBにアカウント管理者・一般ユーザ共に登録済/アカウント管理者としてリクエスト', () => {
@@ -490,6 +544,23 @@ describe('ルーティングのインテグレーションテスト', () => {
     //    試験前：登録済
     //    試験後(期待値)：登録済
 
+    // DB操作用
+    const db = require('../../Application/models')
+
+    // ContractとOrder作成
+    test('orderTable初期化', async () => {
+      await db.Contract.create({
+        contractId: '38de83da-cb64-459b-1234-3b2790b08a9e',
+        tenantId: testTenantId,
+        contractStatus: '10'
+      })
+      await db.Order.create({
+        contractId: '38de83da-cb64-459b-1234-3b2790b08a9e',
+        tenantId: testTenantId,
+        orderType: '10',
+        orderData: ` {"contractBasicInfo":{"sysManageId":"${testTenantId}","orderId":"","orderType":"010","contractChangeName":"","contractChangeAddress":"","contractChangeContact":"","appDate":"","OpeningDate":"","contractNumber":"","salesChannelCode":""},"contractAccountInfo":{"contractAccountId":"","customerType":"","commonCustomerId":""},"contractList":[{"contractType":""}],"prdtList":[{"prdtCode":"BF1021000000100","appType":"010"}]}`
+      })
+    })
     // /authにリダイレクトする
     test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
       const res = await request(app)
@@ -571,6 +642,210 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(200)
 
       expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトルが含まれていること
+    })
+
+    // 契約者情報変更
+    test('管理者、契約ステータス：10, /change', async () => {
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：11, /change', async () => {
+      // 契約ステータス変更(受け取り完了)
+      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
+    })
+
+    // 正常にportal画面から契約者変更へ遷移する
+    test('管理者、契約ステータス：20, /change', async () => {
+      await db.Contract.update({ contractStatus: '20' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：21, /change', async () => {
+      // 契約ステータス変更(受け取り完了)
+      await db.Contract.update({ contractStatus: '21' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：20, /portal', async () => {
+      await db.Contract.update({ contractStatus: '20' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：21, /portal', async () => {
+      // 契約ステータス変更(受け取り完了)
+      await db.Contract.update({ contractStatus: '21' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：20, /change', async () => {
+      await db.Contract.update({ contractStatus: '20' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：21, /change', async () => {
+      await db.Contract.update({ contractStatus: '21' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：20、/portal', async () => {
+      await db.Contract.update({ contractStatus: '20' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：21、/portal', async () => {
+      await db.Contract.update({ contractStatus: '21' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：00, /change', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/契約情報変更/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：00、, /change', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/本機能はご利用いただけません。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：00、 契約名変更、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractName: 'on',
+          contractName: '変更名',
+          contractKanaName: 'ヘンコウメイ'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：30、/change', async () => {
+      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：31、/change', async () => {
+      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/>現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：30、, /change', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：31、, /change', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：99、/change', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '99', deleteFlag: 'true' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(400)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
+    })
+
+    test('一般ユーザ、契約ステータス：99、, /change', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '99' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(400)
+
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
   })
 
