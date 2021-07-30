@@ -31,13 +31,16 @@ $('#contractKanaName').addEventListener('input', function () {
 })
 
 // 確認ボタン押下するとmodalに契約者名が表示処理
-$('#next-btn').onclick = function () {
+$('#form').addEventListener('submit', function (event) {
   $('#confirmmodify-modal').classList.toggle('is-active')
   if ($('#chkContractName').checked) {
     $('#recontractName').innerHTML = $('#contractName').value
     $('#recontractKanaName').innerHTML = $('#contractKanaName').value
   }
-}
+  if (event.submitter.id === 'next-btn') {
+    event.preventDefault()
+  }
+})
 
 // 契約者名変更欄表示
 $('#chkContractName').addEventListener('change', function () {

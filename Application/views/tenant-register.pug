@@ -22,11 +22,11 @@ block content
                       .field
                         label(for="contractName") 契約者名（企業名）（必須）
                         .control
-                          input.input#contractName(type="text" name="contractName" value="" pattern=inputPattarnZenkaku required maxlength=80)
+                          input.input#contractName(type="text" name="contractName" value="" pattern=inputPattarnZenkaku required maxlength=80 placeholder='全角文字')
                       .field
                         label(for="contractKanaName") 契約者カナ名（企業名）（必須）
                         .control
-                          input.input#contractKanaName(type="text" name="contractKanaName" value="" pattern=inputPattarnZenkakuKatakana required maxlength=80)
+                          input.input#contractKanaName(type="text" name="contractKanaName" value="" pattern=inputPattarnZenkakuKatakana required maxlength=80 placeholder='カタカナ')
                   
                   .field.card
                     .card-content
@@ -46,11 +46,11 @@ block content
                       .field
                         label(for="banch1") 番地(必須)
                         .control
-                          input.input#banch1(type="text" name="banch1" value="" pattern=inputPattarnZenkaku maxlength=20 required)
+                          input.input#banch1(type="text" name="banch1" value="" pattern=inputPattarnZenkaku maxlength=20 required placeholder='全角文字')
                       .field
                         label(for="tatemono1") 建物等
                         .control
-                          input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=16)
+                          input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角文字')
                   
                   .field.card
                     .card-content

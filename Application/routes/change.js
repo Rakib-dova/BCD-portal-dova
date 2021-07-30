@@ -118,7 +118,7 @@ const cbPostChangeIndex = async (req, res, next) => {
       JSON.parse(JSON.stringify(contractInformationchangeOrderContractAccountInfo))
     )
   }
-  // 変更登録も行われる
+  // 契約者情報変更の受付を行う
   const changeOrder = await changeOrderController.create(req.user.tenantId, contractInformationchangeOrder)
 
   if (changeOrder instanceof Error || changeOrder === null) return next(errorHelper.create(500))
