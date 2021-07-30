@@ -248,3 +248,7 @@ img.logo-ncom {
 .is-invisible {
   display: none;
 }
+
+.changeConfirm {
+  min-height: 100px;
+}
