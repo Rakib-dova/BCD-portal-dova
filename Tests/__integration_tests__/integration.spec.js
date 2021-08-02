@@ -557,7 +557,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       await db.Order.create({
         contractId: '38de83da-cb64-459b-1234-3b2790b08a9e',
         tenantId: testTenantId,
-        orderType: '10',
+        orderType: '010',
         orderData: ` {"contractBasicInfo":{"sysManageId":"${testTenantId}","orderId":"","orderType":"010","contractChangeName":"","contractChangeAddress":"","contractChangeContact":"","appDate":"","OpeningDate":"","contractNumber":"","salesChannelCode":""},"contractAccountInfo":{"contractAccountId":"","customerType":"","commonCustomerId":""},"contractList":[{"contractType":""}],"prdtList":[{"prdtCode":"BF1021000000100","appType":"010"}]}`
       })
     })
@@ -681,27 +681,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       await db.Contract.update({ contractStatus: '21' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/change')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：20, /portal', async () => {
-      await db.Contract.update({ contractStatus: '20' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：21, /portal', async () => {
-      // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '21' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 

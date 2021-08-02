@@ -42,12 +42,6 @@ const cbGetIndex = async (req, res, next) => {
     !contract.dataValues.deleteFlag
   ) {
     return next(noticeHelper.create('cancelprocedure'))
-  } else if (
-    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusChangeContractOrder ||
-      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusChangeContractReceive) &&
-    !contract.dataValues.deleteFlag
-  ) {
-    return next(noticeHelper.create('changeprocedure'))
   }
 
   // ユーザ権限も画面に送る
