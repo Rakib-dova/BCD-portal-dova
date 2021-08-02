@@ -1,4 +1,8 @@
 'use strict'
+
+// TODO : 契約ステータス変更操作（DB操作）が必要なテストケースはintegration.spec.jsのみ実施
+// 該当ソースは2021/8/2基準、integration.spec.jsの403行目、481行目～489行目、492行目～530行目、548行目～562行目、648行目～828行目
+
 // const app = require('../../Application/app')
 const request = require('supertest')
 const { JSDOM } = require('jsdom')

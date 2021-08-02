@@ -164,7 +164,7 @@ describe('cancellationのテスト', () => {
     }
   }
 
-  const contractInfoDatatoBeReceiptChage = {
+  const contractInfoDatatoBeReceiptChange = {
     dataValues: {
       contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
@@ -176,7 +176,7 @@ describe('cancellationのテスト', () => {
     }
   }
 
-  const contractInfoDatatoBeReceiptingChage = {
+  const contractInfoDatatoBeReceiptingChange = {
     dataValues: {
       contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
@@ -346,7 +346,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptChage)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptChange)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -371,7 +371,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingChage)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingChange)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
