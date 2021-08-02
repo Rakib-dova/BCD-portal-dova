@@ -707,26 +707,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
     })
 
-    test('一般ユーザ、契約ステータス：20、/portal', async () => {
-      await db.Contract.update({ contractStatus: '20' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：21、/portal', async () => {
-      await db.Contract.update({ contractStatus: '21' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
-    })
-
     test('管理者、契約ステータス：00, /change', async () => {
       // 契約ステータス変更(利用登録済み)
       await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
