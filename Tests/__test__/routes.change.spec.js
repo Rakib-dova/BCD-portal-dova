@@ -104,7 +104,7 @@ describe('cancellationのテスト', () => {
     }
   }
 
-  const contractInfoDatatoBeunderContract = {
+  const contractInfoDatatoBeUnderContract = {
     dataValues: {
       contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
@@ -216,7 +216,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeunderContract)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -396,7 +396,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoDataUserRoleNotTenantAdmin)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeunderContract)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -423,7 +423,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeunderContract)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -472,7 +472,7 @@ describe('cancellationのテスト', () => {
         userId: null
       }
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeunderContract)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -497,7 +497,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからのユーザデータの取得ができなかった(null)場合を想定する
       findOneSpy.mockReturnValue(null)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeunderContract)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -545,7 +545,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからのユーザデータの取得でエラーが発生した場合を想定する
       findOneSpy.mockReturnValue(new Error('DB error mock'))
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeunderContract)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
 
@@ -598,7 +598,7 @@ describe('cancellationのテスト', () => {
       request.flash = jest.fn()
 
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeunderContract)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
 
       // 試験実施
@@ -629,7 +629,7 @@ describe('cancellationのテスト', () => {
       request.flash = jest.fn()
 
       findOneSpy.mockReturnValue(userInfoDataUserRoleErr)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeunderContract)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
 
       // 試験実施
@@ -654,7 +654,7 @@ describe('cancellationのテスト', () => {
       }
 
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeunderContract)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(new Error('DB error mock'))
 
       // 試験実施
@@ -679,7 +679,7 @@ describe('cancellationのテスト', () => {
       }
 
       findOneSpy.mockReturnValue(null)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeunderContract)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
 
       // 試験実施
@@ -754,7 +754,7 @@ describe('cancellationのテスト', () => {
       }
 
       findOneSpy.mockReturnValue(new Error('DB error mock'))
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeunderContract)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
 
       // 試験実施
