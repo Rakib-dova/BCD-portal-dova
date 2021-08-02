@@ -612,6 +612,75 @@ describe('cancellationのテスト', () => {
       expect(response.getHeader('Location')).toEqual('/portal')
     })
 
+    test('正常：契約者住所変更のみ', async () => {
+      // 準備
+      // requestのtenantIdに正常値を入れる
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      request.body = {
+        postalNumber: '0100000',
+        contractAddressVal: 'テスト県テスト市',
+        banch1: '１２３番',
+        tatemono1: 'テスト',
+        chkContractAddress: 'on'
+      }
+
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
+      createSpy.mockReturnValue(createData)
+
+      // 試験実施
+      await change.cbPostChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // ポータルにリダイレクト「される」
+      expect(response.getHeader('Location')).toEqual('/portal')
+    })
+
+    test('正常：契約者名、契約者住所変更', async () => {
+      // 準備
+      // requestのtenantIdに正常値を入れる
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      request.body = {
+        contractName: 'テスト１',
+        contractKanaName: 'テスト２',
+        chkContractName: 'on',
+        postalNumber: '0100000',
+        contractAddressVal: 'テスト県テスト市',
+        banch1: '１２３番',
+        tatemono1: 'テスト',
+        chkContractAddress: 'on'
+      }
+
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
+      createSpy.mockReturnValue(createData)
+
+      // 試験実施
+      await change.cbPostChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // ポータルにリダイレクト「される」
+      expect(response.getHeader('Location')).toEqual('/portal')
+    })
+
     test('403エラー：UerRole不一致', async () => {
       // 準備
       // requestのtenantIdに正常値を入れる
