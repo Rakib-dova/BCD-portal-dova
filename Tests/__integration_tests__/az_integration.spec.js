@@ -1,4 +1,8 @@
 'use strict'
+
+// TODO : 契約ステータス変更操作（DB操作）が必要なテストケースはintegration.spec.jsのみ実施
+// 該当ソースは2021/8/2基準、integration.spec.jsの403行目、481行目～489行目、492行目～530行目、548行目～562行目、648行目～828行目
+
 // const app = require('../../Application/app')
 const request = require('supertest')
 const { JSDOM } = require('jsdom')
@@ -495,6 +499,9 @@ describe('ルーティングのインテグレーションテスト', () => {
     //    試験前：登録済
     //    試験後(期待値)：登録済
 
+    // DB操作用
+    // const db = require('../../Application/models')
+
     // /authにリダイレクトする
     test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
       const res = await request(app)
@@ -566,6 +573,16 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(200) // az環境は403でなく200が返る
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正常にportal画面から契約者変更へ遷移する
+    test('管理者、契約ステータス：10, /change', async () => {
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
     })
   })
 
@@ -654,6 +671,15 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(200) // az環境は403でなく200が返る
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+    // 契約者情報変更
+    test('管理者、契約ステータス：10, /change', async () => {
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
     })
   })
 

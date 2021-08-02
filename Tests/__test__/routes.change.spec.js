@@ -89,7 +89,22 @@ describe('cancellationのテスト', () => {
     }
   }
 
-  const contractInfoData = {
+  const userInfoDataUserRoleNotTenantAdmin = {
+    dataValues: {
+      userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+      userRole: 'test',
+      appVersion: '0.0.1',
+      refreshToken: 'dummyRefreshToken',
+      subRefreshToken: null,
+      userStatus: 0,
+      lastRefreshedAt: null,
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const contractInfoDatatoBeUnderContract = {
     dataValues: {
       contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
@@ -101,7 +116,7 @@ describe('cancellationのテスト', () => {
     }
   }
 
-  const contractInfoData2 = {
+  const contractInfoDatatoBeReceiptCancel = {
     dataValues: {
       contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
@@ -113,12 +128,60 @@ describe('cancellationのテスト', () => {
     }
   }
 
-  const contractInfoData3 = {
+  const contractInfoDatatoBeReceiptingCancel = {
     dataValues: {
       contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
       numberN: '0000011111',
       contractStatus: '31',
+      deleteFlag: false,
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const contractInfoDatatoBeReceiptContract = {
+    dataValues: {
+      contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+      numberN: '0000011111',
+      contractStatus: '10',
+      deleteFlag: false,
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const contractInfoDatatoBeReceiptingContract = {
+    dataValues: {
+      contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+      numberN: '0000011111',
+      contractStatus: '11',
+      deleteFlag: false,
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const contractInfoDatatoBeReceiptChange = {
+    dataValues: {
+      contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+      numberN: '0000011111',
+      contractStatus: '20',
+      deleteFlag: false,
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const contractInfoDatatoBeReceiptingChange = {
+    dataValues: {
+      contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+      numberN: '0000011111',
+      contractStatus: '21',
       deleteFlag: false,
       createdAt: '2021-01-25T08:45:49.803Z',
       updatedAt: '2021-01-25T08:45:49.803Z'
@@ -153,7 +216,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -183,7 +246,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoData2)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -208,7 +271,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoData3)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingCancel)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -219,6 +282,131 @@ describe('cancellationのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('正常：登録申込中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptContract)
+
+      // 試験実施
+      await change.cbGetChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 登録中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
+    })
+
+    test('正常：登録受取中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingContract)
+
+      // 試験実施
+      await change.cbGetChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 登録中画面が表示画「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
+    })
+
+    test('正常：変更申込中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptChange)
+
+      // 試験実施
+      await change.cbGetChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 変更中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('changeprocedure'))
+    })
+
+    test('正常：変更受取中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingChange)
+
+      // 試験実施
+      await change.cbGetChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 変更中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('changeprocedure'))
+    })
+
+    test('正常：一般ユーザーの場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoDataUserRoleNotTenantAdmin)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
+
+      // 試験実施
+      await change.cbGetChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
     })
 
     test('400エラー：requestのsessionのuserConteがLoggedInじゃない場合', async () => {
@@ -235,7 +423,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -284,7 +472,7 @@ describe('cancellationのテスト', () => {
         userId: null
       }
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -309,7 +497,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからのユーザデータの取得ができなかった(null)場合を想定する
       findOneSpy.mockReturnValue(null)
-      findOneSpyContracts.mockReturnValue(contractInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -357,7 +545,7 @@ describe('cancellationのテスト', () => {
       }
       // DBからのユーザデータの取得でエラーが発生した場合を想定する
       findOneSpy.mockReturnValue(new Error('DB error mock'))
-      findOneSpyContracts.mockReturnValue(contractInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
 
@@ -410,7 +598,7 @@ describe('cancellationのテスト', () => {
       request.flash = jest.fn()
 
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
 
       // 試験実施
@@ -441,7 +629,7 @@ describe('cancellationのテスト', () => {
       request.flash = jest.fn()
 
       findOneSpy.mockReturnValue(userInfoDataUserRoleErr)
-      findOneSpyContracts.mockReturnValue(contractInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
 
       // 試験実施
@@ -466,7 +654,7 @@ describe('cancellationのテスト', () => {
       }
 
       findOneSpy.mockReturnValue(userInfoData)
-      findOneSpyContracts.mockReturnValue(contractInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(new Error('DB error mock'))
 
       // 試験実施
@@ -491,7 +679,7 @@ describe('cancellationのテスト', () => {
       }
 
       findOneSpy.mockReturnValue(null)
-      findOneSpyContracts.mockReturnValue(contractInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
 
       // 試験実施
@@ -566,7 +754,7 @@ describe('cancellationのテスト', () => {
       }
 
       findOneSpy.mockReturnValue(new Error('DB error mock'))
-      findOneSpyContracts.mockReturnValue(contractInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
 
       // 試験実施
