@@ -30,17 +30,44 @@ $('#contractKanaName').addEventListener('input', function () {
   }
 })
 
-// 確認ボタン押下するとmodalに契約者名が表示処理
+// 契約者住所変更時確認ボタン活性化イベント
+$('#postalNumber').addEventListener('input', function () {
+  if (!this.value || !$('#contractAddressVal').value || !$('#banch1').value) {
+    $('#next-btn').setAttribute('disabled', '')
+  } else {
+    $('#next-btn').removeAttribute('disabled')
+  }
+})
+
+$('#contractAddressVal').addEventListener('input', function () {
+  if (!this.value || !$('#postalNumber').value || !$('#banch1').value) {
+    $('#next-btn').setAttribute('disabled', '')
+  } else {
+    $('#next-btn').removeAttribute('disabled')
+  }
+})
+
+$('#banch1').addEventListener('input', function () {
+  if (!this.value || !$('#postalNumber').value || !$('#contractAddressVal').value) {
+    $('#next-btn').setAttribute('disabled', '')
+  } else {
+    $('#next-btn').removeAttribute('disabled')
+  }
+})
+
+// 確認ボタン押下するとmodalに契約者名・契約者住所が表示処理
 $('#form').addEventListener('submit', function (event) {
   $('#confirmmodify-modal').classList.toggle('is-active')
   if ($('#chkContractName').checked) {
     $('#recontractName').innerHTML = $('#contractName').value
     $('#recontractKanaName').innerHTML = $('#contractKanaName').value
   }
-  $('#repostalNumber').innerHTML = $('#postalNumber').value
-  $('#recontractAddressVal').innerHTML = $('#contractAddressVal').value
-  $('#rebanch1').innerHTML = $('#banch1').value
-  $('#retatemono1').innerHTML = $('#tatemono1').value
+  if ($('#chkContractAddress').checked) {
+    $('#repostalNumber').innerHTML = $('#postalNumber').value
+    $('#recontractAddressVal').innerHTML = $('#contractAddressVal').value
+    $('#rebanch1').innerHTML = $('#banch1').value
+    $('#retatemono1').innerHTML = $('#tatemono1').value
+  }
   if (event.submitter.id === 'next-btn') {
     event.preventDefault()
   }
@@ -49,18 +76,58 @@ $('#form').addEventListener('submit', function (event) {
 // 契約者名変更欄表示
 $('#chkContractName').addEventListener('change', function () {
   $('#cardContractName').classList.toggle('is-invisible')
+  $('#modalContractName').classList.toggle('is-invisible')
   if (this.checked) {
     if ($('#contractName').value && $('#contractKanaName').value) {
       $('#next-btn').removeAttribute('disabled')
     }
     $('#contractName').setAttribute('name', 'contractName')
     $('#contractKanaName').setAttribute('name', 'contractKanaName')
+    $('#contractName').required = true
+    $('#contractKanaName').required = true
   } else {
     $('#contractName').removeAttribute('name')
     $('#contractKanaName').removeAttribute('name')
-    $('#next-btn').setAttribute('disabled', '')
     $('#recontractName').innerHTML = ''
     $('#recontractKanaName').innerHTML = ''
+    $('#contractName').required = false
+    $('#contractKanaName').required = false
+    if (!$('#chkContractAddress').checked) {
+      $('#next-btn').setAttribute('disabled', '')
+    }
+  }
+})
+
+// 契約者住所変更欄表示
+$('#chkContractAddress').addEventListener('change', function () {
+  $('#cardContractAddress').classList.toggle('is-invisible')
+  $('#modalContractAddress').classList.toggle('is-invisible')
+  if (this.checked) {
+    if ($('#postalNumber').value && $('#contractAddressVal').value && $('#banch1').value) {
+      $('#next-btn').removeAttribute('disabled')
+    }
+    $('#postalNumber').setAttribute('name', 'postalNumber')
+    $('#contractAddressVal').setAttribute('name', 'contractAddressVal')
+    $('#banch1').setAttribute('name', 'banch1')
+    $('#tatemono1').setAttribute('name', 'tatemono1')
+    $('#postalNumber').required = true
+    $('#contractAddressVal').required = true
+    $('#banch1').required = true
+  } else {
+    $('#postalNumber').removeAttribute('name')
+    $('#contractAddressVal').removeAttribute('name')
+    $('#banch1').removeAttribute('name')
+    $('#tatemono1').removeAttribute('name')
+    $('#repostalNumber').innerHTML = ''
+    $('#recontractAddressVal').innerHTML = ''
+    $('#rebanch1').innerHTML = ''
+    $('#retatemono1').innerHTML = ''
+    $('#postalNumber').required = false
+    $('#contractAddressVal').required = false
+    $('#banch1').required = false
+    if (!$('#chkContractName').checked) {
+      $('#next-btn').setAttribute('disabled', '')
+    }
   }
 })
 
