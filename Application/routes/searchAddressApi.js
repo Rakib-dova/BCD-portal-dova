@@ -20,7 +20,7 @@ const cbSearchAddress = async (req, res) => {
   let resultStatusCode
   logger.info(constantsDefine.logMessage.INF000 + 'cbSearchAddress')
   let result
-  if (req.session?.userContext !== 'NotTenantRegistered') {
+  if (!req.session || !req.user?.userId) {
     resultStatusCode = 403
     return res.status(resultStatusCode).send()
   }

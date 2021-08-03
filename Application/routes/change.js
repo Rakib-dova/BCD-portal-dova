@@ -10,11 +10,9 @@ const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const changeOrderController = require('../controllers/changeOrderController.js')
 const logger = require('../lib/logger')
-const contractInformationchangeOrderContractBasicInfo = require('../orderTemplate/contractInformationchangeOrder_contractBasicInfo.json')
-const contractInformationchangeOrderContractAccountInfo = require('../orderTemplate/contractInformationchangeOrder_contractAccountInfo.json')
+const contractBasicInfoTemplate = require('../orderTemplate/contractInformationchangeOrder_contractBasicInfo.json')
+const contractAccountInfoTemplate = require('../orderTemplate/contractInformationchangeOrder_contractAccountInfo.json')
 const constantsDefine = require('../constants')
-
-let contractInformationchangeOrder
 
 const cbGetChangeIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetChangeIndex')
@@ -80,6 +78,35 @@ const cbGetChangeIndex = async (req, res, next) => {
 const cbPostChangeIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostChangeIndex')
 
+  const contractInformationchangeOrderContractBasicInfo = JSON.parse(JSON.stringify(contractBasicInfoTemplate))
+  const contractInformationchangeOrderContractAccountInfo = JSON.parse(JSON.stringify(contractAccountInfoTemplate))
+
+  let contractInformationchangeOrder
+
+  // ContractNameデータ設定
+  const makeContractNameJson = (contractName, contractKanaName) => {
+    // contractBasicInfo 設定
+    contractInformationchangeOrderContractBasicInfo.contractBasicInfo.contractChangeName =
+      constantsDefine.statusConstants.contractChange
+
+    // contractAccountInfo 設定
+    contractInformationchangeOrderContractAccountInfo.contractAccountInfo.contractorName = contractName
+    contractInformationchangeOrderContractAccountInfo.contractAccountInfo.contractorKanaName = contractKanaName
+  }
+
+  // ContractAddressデータ設定
+  const makeContractAddressJson = (postalNumber, contractAddressVal, banch1, tatemono1) => {
+    // contractBasicInfo 設定
+    contractInformationchangeOrderContractBasicInfo.contractBasicInfo.contractChangeAddress =
+      constantsDefine.statusConstants.contractChange
+
+    // contractAccountInfo 設定
+    contractInformationchangeOrderContractAccountInfo.contractAccountInfo.postalNumber = postalNumber
+    contractInformationchangeOrderContractAccountInfo.contractAccountInfo.contractAddress = contractAddressVal
+    contractInformationchangeOrderContractAccountInfo.contractAccountInfo.banch1 = banch1
+    contractInformationchangeOrderContractAccountInfo.contractAccountInfo.tatemono1 = tatemono1
+  }
+
   const userTenantId = req.user.tenantId
   const userId = req.user.userId
 
@@ -99,25 +126,29 @@ const cbPostChangeIndex = async (req, res, next) => {
   }
 
   // 修正内容をDBに反映
-  // 「契約者名変更」がチェックされている場合
-  if (req.body.chkContractName === 'on') {
-    // contractBasicInfo 設定
-    contractInformationchangeOrderContractBasicInfo.contractBasicInfo.sysManageId = userTenantId
-    contractInformationchangeOrderContractBasicInfo.contractBasicInfo.contractChangeName =
-      constantsDefine.statusConstants.contractChange
-    contractInformationchangeOrderContractBasicInfo.contractBasicInfo.orderType =
-      constantsDefine.statusConstants.orderTypeChangeOrder
-    contractInformationchangeOrderContractBasicInfo.contractBasicInfo.contractNumber = contract.dataValues?.numberN
+  // contractBasicInfo 基本情報設定
+  contractInformationchangeOrderContractBasicInfo.contractBasicInfo.sysManageId = userTenantId
+  contractInformationchangeOrderContractBasicInfo.contractBasicInfo.orderType =
+    constantsDefine.statusConstants.orderTypeChangeOrder
+  contractInformationchangeOrderContractBasicInfo.contractBasicInfo.contractNumber = contract.dataValues?.numberN
 
-    // contractAccountInfo 設定
-    contractInformationchangeOrderContractAccountInfo.contractAccountInfo.contractorName = req.body.contractName
-    contractInformationchangeOrderContractAccountInfo.contractAccountInfo.contractorKanaName = req.body.contractKanaName
+  // 「契約者名変更」、「契約者住所変更」、「契約者名変更、契約者住所変更」がチェックされている場合
+  if (req.body.chkContractName === 'on' && req.body.chkContractAddress === undefined) {
+    makeContractNameJson(req.body.contractName, req.body.contractKanaName)
+  } else if (req.body.chkContractAddress === 'on' && req.body.chkContractName === undefined) {
+    makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
+  } else if (req.body.chkContractName === 'on' && req.body.chkContractAddress === 'on') {
+    makeContractNameJson(req.body.contractName, req.body.contractKanaName)
+    makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
+  }
 
+  if (req.body.chkContractName === 'on' || req.body.chkContractAddress === 'on') {
     contractInformationchangeOrder = Object.assign(
       JSON.parse(JSON.stringify(contractInformationchangeOrderContractBasicInfo)),
       JSON.parse(JSON.stringify(contractInformationchangeOrderContractAccountInfo))
     )
   }
+
   // 契約者情報変更の受付を行う
   const changeOrder = await changeOrderController.create(req.user.tenantId, contractInformationchangeOrder)
 
