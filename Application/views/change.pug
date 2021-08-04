@@ -70,17 +70,17 @@ block content
                   .title.is-4  契約者連絡先変更
                   .field
                     .control
-                      label(for="contractPersonName") 連絡先担当者名（必須）
+                      label(for="contactPersonName") 連絡先担当者名（必須）
                       .control
-                        input.input#contractPersonName(type="text" name="contractPersonName" value="" maxlength=10 placeholder='')
+                        input.input#contactPersonName(type="text" name="contactPersonName" value="" maxlength=10 placeholder='')
                   .field
-                    label(for="contractPhoneNumber") 連絡先電話番号（必須）
+                    label(for="contactPhoneNumber") 連絡先電話番号（必須）
                     .control
-                      input.input#contractPhoneNumber(type="text" name="contractPhoneNumber" value="" pattern=inputPattarnTellNumber maxlength=13)
+                      input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber maxlength=13)
                   .field
-                    label(for="contractMail") 連絡先メールアドレス（必須）
+                    label(for="contactMail") 連絡先メールアドレス（必須）
                     .control
-                      input.input#contractMail(type="text" name="contractMail" value="" pattern=inputPattarnMailAddress maxlength=82 placeholder='')
+                      input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress maxlength=82 placeholder='')
         
               .columns.is-centered.changeConfirm
                 .control
@@ -129,13 +129,13 @@ block content
                         th(colspan="3") 契約者連絡先変更
                       tr
                         td.confirmation-item(colspan="2") 連絡先担当者名（必須）
-                        td#recontractPersonName.checkData
+                        td#recontactPersonName.checkData
                       tr 
                         td.confirmation-item(colspan="2") 連絡先電話番号（必須）
-                        td#recontractPhoneNumber.checkData
+                        td#recontactPhoneNumber.checkData
                       tr 
                         td.confirmation-item(colspan="2")  連絡先メールアドレス（必須）
-                        td#recontractMail.checkData    
+                        td#recontactMail.checkData    
                 footer.modal-card-foot
                   a.button.cancel-button(data-target='confirmmodify-modal') 修正
                   button.button.is-success#submit(type="submit" formaction="/change" formmethod="POST") 変更

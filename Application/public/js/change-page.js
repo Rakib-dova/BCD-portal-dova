@@ -27,9 +27,9 @@ $('#form').addEventListener('submit', function (event) {
     $('#retatemono1').innerHTML = $('#tatemono1').value
   }
   if ($('#chkContractContact').checked) {
-    $('#recontractPersonName').innerHTML = $('#contractPersonName').value
-    $('#recontractPhoneNumber').innerHTML = $('#contractPhoneNumber').value
-    $('#recontractMail').innerHTML = $('#contractMail').value
+    $('#recontactPersonName').innerHTML = $('#contactPersonName').value
+    $('#recontactPhoneNumber').innerHTML = $('#contactPhoneNumber').value
+    $('#recontactMail').innerHTML = $('#contactMail').value
   }
   if (event.submitter.id === 'next-btn') {
     event.preventDefault()
@@ -142,12 +142,12 @@ $('#chkContractContact').addEventListener('change', function () {
     } else if (!$('#chkContractAddress').checked) {
       $('#chkContractAddress').required = false
     }
-    $('#contractPersonName').setAttribute('name', 'contractPersonName')
-    $('#contractPhoneNumber').setAttribute('name', 'contractPhoneNumber')
-    $('#contractMail').setAttribute('name', 'contractMail')
-    $('#contractPersonName').required = true
-    $('#contractPhoneNumber').required = true
-    $('#contractMail').required = true
+    $('#contactPersonName').setAttribute('name', 'contactPersonName')
+    $('#contactPhoneNumber').setAttribute('name', 'contactPhoneNumber')
+    $('#contactMail').setAttribute('name', 'contactMail')
+    $('#contactPersonName').required = true
+    $('#contactPhoneNumber').required = true
+    $('#contactMail').required = true
   } else {
     if (!$('#chkContractName').checked && !$('#chkContractAddress').checked) {
       $('#chkContractName').required = true
@@ -155,15 +155,15 @@ $('#chkContractContact').addEventListener('change', function () {
     } else {
       this.required = false
     }
-    $('#contractPersonName').removeAttribute('name')
-    $('#contractPhoneNumber').removeAttribute('name')
-    $('#contractMail').removeAttribute('name')
-    $('#recontractPersonName').innerHTML = ''
-    $('#recontractPhoneNumber').innerHTML = ''
-    $('#recontractMail').innerHTML = ''
-    $('#contractPersonName').required = false
-    $('#contractPhoneNumber').required = false
-    $('#contractMail').required = false
+    $('#contactPersonName').removeAttribute('name')
+    $('#contactPhoneNumber').removeAttribute('name')
+    $('#contactMail').removeAttribute('name')
+    $('#recontactPersonName').innerHTML = ''
+    $('#recontactPhoneNumber').innerHTML = ''
+    $('#recontactMail').innerHTML = ''
+    $('#contactPersonName').required = false
+    $('#contactPhoneNumber').required = false
+    $('#contactMail').required = false
   }
 })
 
