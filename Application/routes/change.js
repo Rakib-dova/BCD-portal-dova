@@ -12,6 +12,7 @@ const changeOrderController = require('../controllers/changeOrderController.js')
 const logger = require('../lib/logger')
 const contractBasicInfoTemplate = require('../orderTemplate/contractInformationchangeOrder_contractBasicInfo.json')
 const contractAccountInfoTemplate = require('../orderTemplate/contractInformationchangeOrder_contractAccountInfo.json')
+const contractContactListTemplate = require('../orderTemplate/contractInformationchangeOrder_contactList.json')
 const constantsDefine = require('../constants')
 
 const cbGetChangeIndex = async (req, res, next) => {
@@ -80,6 +81,7 @@ const cbPostChangeIndex = async (req, res, next) => {
 
   const contractInformationchangeOrderContractBasicInfo = JSON.parse(JSON.stringify(contractBasicInfoTemplate))
   const contractInformationchangeOrderContractAccountInfo = JSON.parse(JSON.stringify(contractAccountInfoTemplate))
+  const contractInformationchangeOrderContactList = JSON.parse(JSON.stringify(contractContactListTemplate))
 
   let contractInformationchangeOrder
 
@@ -107,6 +109,18 @@ const cbPostChangeIndex = async (req, res, next) => {
     contractInformationchangeOrderContractAccountInfo.contractAccountInfo.tatemono1 = tatemono1
   }
 
+  // ContractContactデータ設定
+  const makeContractContactJson = (contactPersonName, contactPhoneNumber, contactMail) => {
+    // contractBasicInfo 設定
+    contractInformationchangeOrderContractBasicInfo.contractBasicInfo.contractChangeContact =
+      constantsDefine.statusConstants.contractChange
+
+    // contactList設定
+    contractInformationchangeOrderContactList.contactList.contactPersonName = contactPersonName
+    contractInformationchangeOrderContactList.contactList.contactPhoneNumber = contactPhoneNumber
+    contractInformationchangeOrderContactList.contactList.contactMail = contactMail
+  }
+
   const userTenantId = req.user.tenantId
   const userId = req.user.userId
 
@@ -125,34 +139,63 @@ const cbPostChangeIndex = async (req, res, next) => {
     return next(errorHelper.create(403))
   }
 
-  // 修正内容をDBに反映
-  // contractBasicInfo 基本情報設定
-  contractInformationchangeOrderContractBasicInfo.contractBasicInfo.sysManageId = userTenantId
-  contractInformationchangeOrderContractBasicInfo.contractBasicInfo.orderType =
-    constantsDefine.statusConstants.orderTypeChangeOrder
-  contractInformationchangeOrderContractBasicInfo.contractBasicInfo.contractNumber = contract.dataValues?.numberN
+  if (req.body.chkContractName === 'on' || req.body.chkContractAddress === 'on' || req.body.chkContractContact === 'on') {
+    // 修正内容をDBに反映
+    // contractBasicInfo 基本情報設定
+    contractInformationchangeOrderContractBasicInfo.contractBasicInfo.sysManageId = userTenantId
+    contractInformationchangeOrderContractBasicInfo.contractBasicInfo.orderType =
+      constantsDefine.statusConstants.orderTypeChangeOrder
+    contractInformationchangeOrderContractBasicInfo.contractBasicInfo.contractNumber = contract.dataValues?.numberN
 
-  // 「契約者名変更」、「契約者住所変更」、「契約者名変更、契約者住所変更」がチェックされている場合
-  if (req.body.chkContractName === 'on' && req.body.chkContractAddress === undefined) {
-    makeContractNameJson(req.body.contractName, req.body.contractKanaName)
-  } else if (req.body.chkContractAddress === 'on' && req.body.chkContractName === undefined) {
-    makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
-  } else if (req.body.chkContractName === 'on' && req.body.chkContractAddress === 'on') {
-    makeContractNameJson(req.body.contractName, req.body.contractKanaName)
-    makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
+    // 「契約者名変更」、「契約者住所変更」、「契約者連絡先変更」
+    // 「契約者名変更、契約者住所変更」「契約者名変更、契約者連絡先変更」「契約者住所変更、契約者連絡先変更」
+    // 「契約者名変更、契約者住所変更、契約者連絡先変更」がチェックされている場合
+    if (req.body.chkContractName === 'on' && req.body.chkContractAddress === undefined && req.body.chkContractContact === undefined) {
+      makeContractNameJson(req.body.contractName, req.body.contractKanaName)
+    } else if (req.body.chkContractAddress === 'on' && req.body.chkContractName === undefined && req.body.chkContractContact === undefined) {
+      makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
+    } else if (req.body.chkContractContact === 'on' && req.body.chkContractName === undefined && req.body.chkContractAddress === undefined) {
+      makeContractContactJson(req.body.contactPersonName, req.body.contactPhoneNumber, req.body.contactMail)
+    } else if (req.body.chkContractName === 'on' && req.body.chkContractAddress === 'on' && req.body.chkContractContact === undefined) {
+      makeContractNameJson(req.body.contractName, req.body.contractKanaName)
+      makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
+    } else if (req.body.chkContractName === 'on' && req.body.chkContractAddress === undefined && req.body.chkContractContact === 'on') {
+      makeContractNameJson(req.body.contractName, req.body.contractKanaName)
+      makeContractContactJson(req.body.contactPersonName, req.body.contactPhoneNumber, req.body.contactMail)
+    } else if (req.body.chkContractName === undefined && req.body.chkContractAddress === 'on' && req.body.chkContractContact === 'on') {
+      makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
+      makeContractContactJson(req.body.contactPersonName, req.body.contactPhoneNumber, req.body.contactMail)
+    } else if (req.body.chkContractName === 'on' && req.body.chkContractAddress === 'on' && req.body.chkContractContact === 'on') {
+      makeContractNameJson(req.body.contractName, req.body.contractKanaName)
+      makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
+      makeContractContactJson(req.body.contactPersonName, req.body.contactPhoneNumber, req.body.contactMail)
+    }
+
+    if ((req.body.chkContractName === 'on' || req.body.chkContractAddress === 'on') && req.body.chkContractContact === undefined) {
+      contractInformationchangeOrder = Object.assign(
+        JSON.parse(JSON.stringify(contractInformationchangeOrderContractBasicInfo)),
+        JSON.parse(JSON.stringify(contractInformationchangeOrderContractAccountInfo))
+      )
+    } else if ((req.body.chkContractName === 'on' || req.body.chkContractAddress === 'on') && req.body.chkContractContact === 'on') {
+      contractInformationchangeOrder = Object.assign(
+        JSON.parse(JSON.stringify(contractInformationchangeOrderContractBasicInfo)),
+        JSON.parse(JSON.stringify(contractInformationchangeOrderContractAccountInfo)),
+        JSON.parse(JSON.stringify(contractInformationchangeOrderContactList))
+      )
+    } else if (req.body.chkContractName === undefined && req.body.chkContractAddress === undefined && req.body.chkContractContact === 'on') {
+      contractInformationchangeOrder = Object.assign(
+        JSON.parse(JSON.stringify(contractInformationchangeOrderContractBasicInfo)),
+        JSON.parse(JSON.stringify(contractInformationchangeOrderContactList))
+      )
+    }
+
+    // 契約者情報変更の受付を行う
+    const changeOrder = await changeOrderController.create(req.user.tenantId, contractInformationchangeOrder)
+
+    if (changeOrder instanceof Error || changeOrder === null) return next(errorHelper.create(500))
+  } else {
+    return next(errorHelper.create(400))
   }
-
-  if (req.body.chkContractName === 'on' || req.body.chkContractAddress === 'on') {
-    contractInformationchangeOrder = Object.assign(
-      JSON.parse(JSON.stringify(contractInformationchangeOrderContractBasicInfo)),
-      JSON.parse(JSON.stringify(contractInformationchangeOrderContractAccountInfo))
-    )
-  }
-
-  // 契約者情報変更の受付を行う
-  const changeOrder = await changeOrderController.create(req.user.tenantId, contractInformationchangeOrder)
-
-  if (changeOrder instanceof Error || changeOrder === null) return next(errorHelper.create(500))
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostChangeIndex')
   req.flash('info', '契約者情報変更を受け付けました。')
