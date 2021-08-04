@@ -13,73 +13,6 @@ function $(tagObjName) {
   }
 }
 
-// 契約者名変更時確認ボタン活性化イベント
-$('#contractName').addEventListener('input', function () {
-  if (!this.value || !$('#contractKanaName').value) {
-    $('#next-btn').setAttribute('disabled', '')
-  } else {
-    $('#next-btn').removeAttribute('disabled')
-  }
-})
-
-$('#contractKanaName').addEventListener('input', function () {
-  if (!this.value || !$('#contractName').value) {
-    $('#next-btn').setAttribute('disabled', '')
-  } else {
-    $('#next-btn').removeAttribute('disabled')
-  }
-})
-
-// 契約者住所変更時確認ボタン活性化イベント
-$('#postalNumber').addEventListener('input', function () {
-  if (!this.value || !$('#contractAddressVal').value || !$('#banch1').value) {
-    $('#next-btn').setAttribute('disabled', '')
-  } else {
-    $('#next-btn').removeAttribute('disabled')
-  }
-})
-
-$('#contractAddressVal').addEventListener('input', function () {
-  if (!this.value || !$('#postalNumber').value || !$('#banch1').value) {
-    $('#next-btn').setAttribute('disabled', '')
-  } else {
-    $('#next-btn').removeAttribute('disabled')
-  }
-})
-
-$('#banch1').addEventListener('input', function () {
-  if (!this.value || !$('#postalNumber').value || !$('#contractAddressVal').value) {
-    $('#next-btn').setAttribute('disabled', '')
-  } else {
-    $('#next-btn').removeAttribute('disabled')
-  }
-})
-
-// 契約者連絡先変更時確認ボタン活性化イベント
-$('#contractPersonName').addEventListener('input', function () {
-  if (!this.value || !$('#contractPhoneNumber').value || !$('#contractMail').value) {
-    $('#next-btn').setAttribute('disabled', '')
-  } else {
-    $('#next-btn').removeAttribute('disabled')
-  }
-})
-
-$('#contractPhoneNumber').addEventListener('input', function () {
-  if (!this.value || !$('#contractPersonName').value || !$('#contractMail').value) {
-    $('#next-btn').setAttribute('disabled', '')
-  } else {
-    $('#next-btn').removeAttribute('disabled')
-  }
-})
-
-$('#contractMail').addEventListener('input', function () {
-  if (!this.value || !$('#contractPersonName').value || !$('#contractPhoneNumber').value) {
-    $('#next-btn').setAttribute('disabled', '')
-  } else {
-    $('#next-btn').removeAttribute('disabled')
-  }
-})
-
 // 確認ボタン押下するとmodalに契約者名・契約者住所が表示処理
 $('#form').addEventListener('submit', function (event) {
   $('#confirmmodify-modal').classList.toggle('is-active')
@@ -105,36 +38,61 @@ $('#form').addEventListener('submit', function (event) {
 
 // 契約者名変更欄表示
 $('#chkContractName').addEventListener('change', function () {
+  if (this.checked || $('#chkContractAddress').checked || $('#chkContractContact').checked) {
+    $('#next-btn').removeAttribute('disabled')
+  } else {
+    $('#next-btn').setAttribute('disabled', '')
+  }
   $('#cardContractName').classList.toggle('is-invisible')
   $('#modalContractName').classList.toggle('is-invisible')
   if (this.checked) {
-    if ($('#contractName').value && $('#contractKanaName').value) {
-      $('#next-btn').removeAttribute('disabled')
+    this.required = true
+    if (!$('#chkContractAddress').checked && !$('#chkContractContact').checked) {
+      $('#chkContractAddress').required = false
+      $('#chkContractContact').required = false
+    } else if (!$('#chkContractAddress').checked) {
+      $('#chkContractAddress').required = false
+    } else if (!$('#chkContractContact').checked) {
+      $('#chkContractContact').required = false
     }
     $('#contractName').setAttribute('name', 'contractName')
     $('#contractKanaName').setAttribute('name', 'contractKanaName')
     $('#contractName').required = true
     $('#contractKanaName').required = true
   } else {
+    if (!$('#chkContractAddress').checked && !$('#chkContractContact').checked) {
+      $('#chkContractAddress').required = true
+      $('#chkContractContact').required = true
+    } else {
+      this.required = false
+    }
     $('#contractName').removeAttribute('name')
     $('#contractKanaName').removeAttribute('name')
     $('#recontractName').innerHTML = ''
     $('#recontractKanaName').innerHTML = ''
     $('#contractName').required = false
     $('#contractKanaName').required = false
-    if (!$('#chkContractAddress').checked) {
-      $('#next-btn').setAttribute('disabled', '')
-    }
   }
 })
 
 // 契約者住所変更欄表示
 $('#chkContractAddress').addEventListener('change', function () {
+  if (this.checked || $('#chkContractName').checked || $('#chkContractContact').checked) {
+    $('#next-btn').removeAttribute('disabled')
+  } else {
+    $('#next-btn').setAttribute('disabled', '')
+  }
   $('#cardContractAddress').classList.toggle('is-invisible')
   $('#modalContractAddress').classList.toggle('is-invisible')
   if (this.checked) {
-    if ($('#postalNumber').value && $('#contractAddressVal').value && $('#banch1').value) {
-      $('#next-btn').removeAttribute('disabled')
+    this.required = true
+    if (!$('#chkContractName').checked && !$('#chkContractContact').checked) {
+      $('#chkContractName').required = false
+      $('#chkContractContact').required = false
+    } else if (!$('#chkContractName').checked) {
+      $('#chkContractName').required = false
+    } else if (!$('#chkContractContact').checked) {
+      $('#chkContractContact').required = false
     }
     $('#postalNumber').setAttribute('name', 'postalNumber')
     $('#contractAddressVal').setAttribute('name', 'contractAddressVal')
@@ -144,6 +102,12 @@ $('#chkContractAddress').addEventListener('change', function () {
     $('#contractAddressVal').required = true
     $('#banch1').required = true
   } else {
+    if (!$('#chkContractName').checked && !$('#chkContractContact').checked) {
+      $('#chkContractName').required = true
+      $('#chkContractContact').required = true
+    } else {
+      this.required = false
+    }
     $('#postalNumber').removeAttribute('name')
     $('#contractAddressVal').removeAttribute('name')
     $('#banch1').removeAttribute('name')
@@ -155,9 +119,51 @@ $('#chkContractAddress').addEventListener('change', function () {
     $('#postalNumber').required = false
     $('#contractAddressVal').required = false
     $('#banch1').required = false
-    if (!$('#chkContractName').checked) {
-      $('#next-btn').setAttribute('disabled', '')
+  }
+})
+
+// 契約者連絡先変更欄表示
+$('#chkContractContact').addEventListener('change', function () {
+  if (this.checked || $('#chkContractName').checked || $('#chkContractAddress').checked) {
+    $('#next-btn').removeAttribute('disabled')
+  } else {
+    $('#next-btn').setAttribute('disabled', '')
+  }
+  $('#cardContractContact').classList.toggle('is-invisible')
+  $('#modalContractContact').classList.toggle('is-invisible')
+
+  if (this.checked) {
+    this.required = true
+    if (!$('#chkContractName').checked && !$('#chkContractAddress').checked) {
+      $('#chkContractName').required = false
+      $('#chkContractAddress').required = false
+    } else if (!$('#chkContractName').checked) {
+      $('#chkContractName').required = false
+    } else if (!$('#chkContractAddress').checked) {
+      $('#chkContractAddress').required = false
     }
+    $('#contractPersonName').setAttribute('name', 'contractPersonName')
+    $('#contractPhoneNumber').setAttribute('name', 'contractPhoneNumber')
+    $('#contractMail').setAttribute('name', 'contractMail')
+    $('#contractPersonName').required = true
+    $('#contractPhoneNumber').required = true
+    $('#contractMail').required = true
+  } else {
+    if (!$('#chkContractName').checked && !$('#chkContractAddress').checked) {
+      $('#chkContractName').required = true
+      $('#chkContractAddress').required = true
+    } else {
+      this.required = false
+    }
+    $('#contractPersonName').removeAttribute('name')
+    $('#contractPhoneNumber').removeAttribute('name')
+    $('#contractMail').removeAttribute('name')
+    $('#recontractPersonName').innerHTML = ''
+    $('#recontractPhoneNumber').innerHTML = ''
+    $('#recontractMail').innerHTML = ''
+    $('#contractPersonName').required = false
+    $('#contractPhoneNumber').required = false
+    $('#contractMail').required = false
   }
 })
 
