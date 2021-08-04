@@ -84,7 +84,7 @@ const cbPostChangeIndex = async (req, res, next) => {
   let contractInformationchangeOrder
 
   // contractorNameデータ設定
-  const makecontractorNameJson = (contractorName, contractorKanaName) => {
+  const makeContractorNameJson = (contractorName, contractorKanaName) => {
     // contractBasicInfo 設定
     contractInformationchangeOrderContractBasicInfo.contractBasicInfo.contractChangeName =
       constantsDefine.statusConstants.contractChange
@@ -134,11 +134,11 @@ const cbPostChangeIndex = async (req, res, next) => {
 
   // 「契約者名変更」、「契約者住所変更」、「契約者名変更、契約者住所変更」がチェックされている場合
   if (req.body.chkContractorName === 'on' && req.body.chkContractAddress === undefined) {
-    makecontractorNameJson(req.body.contractorName, req.body.contractorKanaName)
+    makeContractorNameJson(req.body.contractorName, req.body.contractorKanaName)
   } else if (req.body.chkContractAddress === 'on' && req.body.chkContractorName === undefined) {
     makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
   } else if (req.body.chkContractorName === 'on' && req.body.chkContractAddress === 'on') {
-    makecontractorNameJson(req.body.contractorName, req.body.contractorKanaName)
+    makeContractorNameJson(req.body.contractorName, req.body.contractorKanaName)
     makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
   }
 
