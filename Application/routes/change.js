@@ -116,9 +116,9 @@ const cbPostChangeIndex = async (req, res, next) => {
       constantsDefine.statusConstants.contractChange
 
     // contactList設定
-    contractInformationchangeOrderContactList.contactList.contactPersonName = contactPersonName
-    contractInformationchangeOrderContactList.contactList.contactPhoneNumber = contactPhoneNumber
-    contractInformationchangeOrderContactList.contactList.contactMail = contactMail
+    contractInformationchangeOrderContactList.contactList[0].contactPersonName = contactPersonName
+    contractInformationchangeOrderContactList.contactList[0].contactPhoneNumber = contactPhoneNumber
+    contractInformationchangeOrderContactList.contactList[0].contactMail = contactMail
   }
 
   const userTenantId = req.user.tenantId
@@ -139,7 +139,11 @@ const cbPostChangeIndex = async (req, res, next) => {
     return next(errorHelper.create(403))
   }
 
-  if (req.body.chkContractName === 'on' || req.body.chkContractAddress === 'on' || req.body.chkContractContact === 'on') {
+  if (
+    req.body.chkContractName === 'on' ||
+    req.body.chkContractAddress === 'on' ||
+    req.body.chkContractContact === 'on'
+  ) {
     // 修正内容をDBに反映
     // contractBasicInfo 基本情報設定
     contractInformationchangeOrderContractBasicInfo.contractBasicInfo.sysManageId = userTenantId
@@ -150,39 +154,77 @@ const cbPostChangeIndex = async (req, res, next) => {
     // 「契約者名変更」、「契約者住所変更」、「契約者連絡先変更」
     // 「契約者名変更、契約者住所変更」「契約者名変更、契約者連絡先変更」「契約者住所変更、契約者連絡先変更」
     // 「契約者名変更、契約者住所変更、契約者連絡先変更」がチェックされている場合
-    if (req.body.chkContractName === 'on' && req.body.chkContractAddress === undefined && req.body.chkContractContact === undefined) {
+    if (
+      req.body.chkContractName === 'on' &&
+      req.body.chkContractAddress === undefined &&
+      req.body.chkContractContact === undefined
+    ) {
       makeContractNameJson(req.body.contractName, req.body.contractKanaName)
-    } else if (req.body.chkContractAddress === 'on' && req.body.chkContractName === undefined && req.body.chkContractContact === undefined) {
+    } else if (
+      req.body.chkContractAddress === 'on' &&
+      req.body.chkContractName === undefined &&
+      req.body.chkContractContact === undefined
+    ) {
       makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
-    } else if (req.body.chkContractContact === 'on' && req.body.chkContractName === undefined && req.body.chkContractAddress === undefined) {
+    } else if (
+      req.body.chkContractContact === 'on' &&
+      req.body.chkContractName === undefined &&
+      req.body.chkContractAddress === undefined
+    ) {
       makeContractContactJson(req.body.contactPersonName, req.body.contactPhoneNumber, req.body.contactMail)
-    } else if (req.body.chkContractName === 'on' && req.body.chkContractAddress === 'on' && req.body.chkContractContact === undefined) {
+    } else if (
+      req.body.chkContractName === 'on' &&
+      req.body.chkContractAddress === 'on' &&
+      req.body.chkContractContact === undefined
+    ) {
       makeContractNameJson(req.body.contractName, req.body.contractKanaName)
       makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
-    } else if (req.body.chkContractName === 'on' && req.body.chkContractAddress === undefined && req.body.chkContractContact === 'on') {
+    } else if (
+      req.body.chkContractName === 'on' &&
+      req.body.chkContractAddress === undefined &&
+      req.body.chkContractContact === 'on'
+    ) {
       makeContractNameJson(req.body.contractName, req.body.contractKanaName)
       makeContractContactJson(req.body.contactPersonName, req.body.contactPhoneNumber, req.body.contactMail)
-    } else if (req.body.chkContractName === undefined && req.body.chkContractAddress === 'on' && req.body.chkContractContact === 'on') {
+    } else if (
+      req.body.chkContractName === undefined &&
+      req.body.chkContractAddress === 'on' &&
+      req.body.chkContractContact === 'on'
+    ) {
       makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
       makeContractContactJson(req.body.contactPersonName, req.body.contactPhoneNumber, req.body.contactMail)
-    } else if (req.body.chkContractName === 'on' && req.body.chkContractAddress === 'on' && req.body.chkContractContact === 'on') {
+    } else if (
+      req.body.chkContractName === 'on' &&
+      req.body.chkContractAddress === 'on' &&
+      req.body.chkContractContact === 'on'
+    ) {
       makeContractNameJson(req.body.contractName, req.body.contractKanaName)
       makeContractAddressJson(req.body.postalNumber, req.body.contractAddressVal, req.body.banch1, req.body.tatemono1)
       makeContractContactJson(req.body.contactPersonName, req.body.contactPhoneNumber, req.body.contactMail)
     }
 
-    if ((req.body.chkContractName === 'on' || req.body.chkContractAddress === 'on') && req.body.chkContractContact === undefined) {
+    if (
+      (req.body.chkContractName === 'on' || req.body.chkContractAddress === 'on') &&
+      req.body.chkContractContact === undefined
+    ) {
       contractInformationchangeOrder = Object.assign(
         JSON.parse(JSON.stringify(contractInformationchangeOrderContractBasicInfo)),
         JSON.parse(JSON.stringify(contractInformationchangeOrderContractAccountInfo))
       )
-    } else if ((req.body.chkContractName === 'on' || req.body.chkContractAddress === 'on') && req.body.chkContractContact === 'on') {
+    } else if (
+      (req.body.chkContractName === 'on' || req.body.chkContractAddress === 'on') &&
+      req.body.chkContractContact === 'on'
+    ) {
       contractInformationchangeOrder = Object.assign(
         JSON.parse(JSON.stringify(contractInformationchangeOrderContractBasicInfo)),
         JSON.parse(JSON.stringify(contractInformationchangeOrderContractAccountInfo)),
         JSON.parse(JSON.stringify(contractInformationchangeOrderContactList))
       )
-    } else if (req.body.chkContractName === undefined && req.body.chkContractAddress === undefined && req.body.chkContractContact === 'on') {
+    } else if (
+      req.body.chkContractName === undefined &&
+      req.body.chkContractAddress === undefined &&
+      req.body.chkContractContact === 'on'
+    ) {
       contractInformationchangeOrder = Object.assign(
         JSON.parse(JSON.stringify(contractInformationchangeOrderContractBasicInfo)),
         JSON.parse(JSON.stringify(contractInformationchangeOrderContactList))
