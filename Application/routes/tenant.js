@@ -114,15 +114,15 @@ const cbPostRegister = async (req, res, next) => {
   if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))
 
   // contractBasicInfo 設定
-  contractInformationnewOrder.contractBasicInfo.sysManageId = req.user.tenantId
+  contractInformationnewOrder.contractBasicInfo.tradeshiftId = req.user.tenantId
   contractInformationnewOrder.contractBasicInfo.orderType = constantsDefine.statusConstants.orderTypeNewOrder
   contractInformationnewOrder.contractBasicInfo.campaignCode = req.body.campaignCode
   contractInformationnewOrder.contractBasicInfo.kaianPassword = req.body.password
 
   // contractorName
-  contractInformationnewOrder.contractAccountInfo.contractorName = req.body.contractName
+  contractInformationnewOrder.contractAccountInfo.contractorName = req.body.contractorName
   // contractorKanaName
-  contractInformationnewOrder.contractAccountInfo.contractorKanaName = req.body.contractKanaName
+  contractInformationnewOrder.contractAccountInfo.contractorKanaName = req.body.contractorKanaName
   // postalName
   contractInformationnewOrder.contractAccountInfo.postalNumber = req.body.postalNumber
   // contractAddress
@@ -133,9 +133,9 @@ const cbPostRegister = async (req, res, next) => {
   contractInformationnewOrder.contractAccountInfo.tatemono1 = req.body.tatemono1
 
   // contractPersonName
-  contractInformationnewOrder.contractList[0].contractPersonName = req.body.contractPersonName
-  contractInformationnewOrder.contractList[0].contractPhoneNumber = req.body.contractPhoneNumber
-  contractInformationnewOrder.contractList[0].contractMail = req.body.contractMail
+  contractInformationnewOrder.contactList[0].contractPersonName = req.body.contractPersonName
+  contractInformationnewOrder.contactList[0].contractPhoneNumber = req.body.contractPhoneNumber
+  contractInformationnewOrder.contactList[0].contractMail = req.body.contractMail
 
   // ユーザ登録と同時にテナント登録も行われる
   const user = await userController.create(req.user.accessToken, req.user.refreshToken, contractInformationnewOrder)

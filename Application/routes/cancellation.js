@@ -71,7 +71,7 @@ const cbPostCancellation = async (req, res, next) => {
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
   // contractBasicInfo 設定
-  contractInformationcancelOrder.contractBasicInfo.sysManageId = req.user.tenantId
+  contractInformationcancelOrder.contractBasicInfo.tradeshiftId = req.user.tenantId
   contractInformationcancelOrder.contractBasicInfo.orderType = constantsDefine.statusConstants.orderTypeCancelOrder
   contractInformationcancelOrder.contractBasicInfo.contractNumber = contract.dataValues?.numberN
 
