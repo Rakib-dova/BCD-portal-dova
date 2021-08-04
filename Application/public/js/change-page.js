@@ -55,6 +55,31 @@ $('#banch1').addEventListener('input', function () {
   }
 })
 
+// 契約者連絡先変更時確認ボタン活性化イベント
+$('#contractPersonName').addEventListener('input', function () {
+  if (!this.value || !$('#contractPhoneNumber').value || !$('#contractMail').value) {
+    $('#next-btn').setAttribute('disabled', '')
+  } else {
+    $('#next-btn').removeAttribute('disabled')
+  }
+})
+
+$('#contractPhoneNumber').addEventListener('input', function () {
+  if (!this.value || !$('#contractPersonName').value || !$('#contractMail').value) {
+    $('#next-btn').setAttribute('disabled', '')
+  } else {
+    $('#next-btn').removeAttribute('disabled')
+  }
+})
+
+$('#contractMail').addEventListener('input', function () {
+  if (!this.value || !$('#contractPersonName').value || !$('#contractPhoneNumber').value) {
+    $('#next-btn').setAttribute('disabled', '')
+  } else {
+    $('#next-btn').removeAttribute('disabled')
+  }
+})
+
 // 確認ボタン押下するとmodalに契約者名・契約者住所が表示処理
 $('#form').addEventListener('submit', function (event) {
   $('#confirmmodify-modal').classList.toggle('is-active')
@@ -67,6 +92,11 @@ $('#form').addEventListener('submit', function (event) {
     $('#recontractAddressVal').innerHTML = $('#contractAddressVal').value
     $('#rebanch1').innerHTML = $('#banch1').value
     $('#retatemono1').innerHTML = $('#tatemono1').value
+  }
+  if ($('#chkContractContact').checked) {
+    $('#recontractPersonName').innerHTML = $('#contractPersonName').value
+    $('#recontractPhoneNumber').innerHTML = $('#contractPhoneNumber').value
+    $('#recontractMail').innerHTML = $('#contractMail').value
   }
   if (event.submitter.id === 'next-btn') {
     event.preventDefault()
