@@ -32,6 +32,7 @@ const routesTenant = require('../../Application/routes/tenant')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
+const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
 const helper = require('../../Application/routes/helpers/middleware')
 
@@ -334,7 +335,7 @@ describe('tenantのテスト', () => {
       expect(response.render).not.toHaveBeenCalled()
     })
 
-    test('403エラー：アカウント管理者権限のないユーザで操作した場合', async () => {
+    test('「テナント管理者権限のあるユーザで再度操作をお試しください。」の画面表示：アカウント管理者権限のないユーザで操作した場合', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
@@ -364,12 +365,8 @@ describe('tenantのテスト', () => {
       await routesTenant.cbGetRegister(request, response, next)
 
       // 期待結果
-      // 403エラーが返される
-      const expectError = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-      expectError.name = 'Forbidden'
-      expectError.status = 403
-      expectError.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-      expect(next).toHaveBeenCalledWith(expectError)
+      // 一般ユーザで使用できない
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
       // response.renderが呼ばれ「ない」
       expect(response.render).not.toHaveBeenCalled()
     })
@@ -426,15 +423,15 @@ describe('tenantのテスト', () => {
         termsCheck: 'on',
         // 入力フォームデータ
         password: '1q2w3e4r5t',
-        contractName: '市江素',
-        contractKanaName: 'シエス',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
         postalNumber: '1234567',
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -554,15 +551,15 @@ describe('tenantのテスト', () => {
         termsCheck: 'on',
         // 入力フォームデータ
         password: '1q2w3e4r5t',
-        contractName: '市江素',
-        contractKanaName: 'シエス',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
         postalNumber: '1234567',
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // 試験実施
@@ -587,15 +584,15 @@ describe('tenantのテスト', () => {
       request.body = {
         // 入力フォームデータ
         password: '1q2w3e4r5t',
-        contractName: '市江素',
-        contractKanaName: 'シエス',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
         postalNumber: '1234567',
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -652,15 +649,15 @@ describe('tenantのテスト', () => {
         termsCheck: 'on',
         // 入力フォームデータ
         password: '1q2w3e4r5t',
-        contractName: '市江素',
-        contractKanaName: 'シエス',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
         postalNumber: '1234567',
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // userのTokenにnullを入れる
@@ -695,15 +692,15 @@ describe('tenantのテスト', () => {
         termsCheck: 'on',
         // 入力フォームデータ
         password: '1q2w3e4r5t',
-        contractName: '市江素',
-        contractKanaName: 'シエス',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
         postalNumber: '1234567',
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -729,7 +726,7 @@ describe('tenantのテスト', () => {
       expect(response.getHeader('Location')).not.toEqual('/portal')
     })
 
-    test('403エラー：アカウント管理者権限のないユーザで操作した場合', async () => {
+    test('「テナント管理者権限のあるユーザで再度操作をお試しください。」の画面表示：アカウント管理者権限のないユーザで操作した場合', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
@@ -740,15 +737,15 @@ describe('tenantのテスト', () => {
         termsCheck: 'on',
         // 入力フォームデータ
         password: '1q2w3e4r5t',
-        contractName: '市江素',
-        contractKanaName: 'シエス',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
         postalNumber: '1234567',
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -775,12 +772,9 @@ describe('tenantのテスト', () => {
       await routesTenant.cbPostRegister(request, response, next)
 
       // 期待結果
-      // 403エラーが返される
-      const expectError = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-      expectError.name = 'Forbidden'
-      expectError.status = 403
-      expectError.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-      expect(next).toHaveBeenCalledWith(expectError)
+      // 一般ユーザで使用できない
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
+
       // 登録成功時のログが呼ばれ「ない」
       expect(infoSpy).not.toHaveBeenCalled()
       // ポータルにリダイレクト「されない」
@@ -799,15 +793,15 @@ describe('tenantのテスト', () => {
         termsCheck: 'on',
         // 入力フォームデータ
         password: '1q2w3e4r5t',
-        contractName: '市江素',
-        contractKanaName: 'シエス',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
         postalNumber: '1234567',
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -866,15 +860,15 @@ describe('tenantのテスト', () => {
         termsCheck: 'on',
         // 入力フォームデータ
         password: '1q2w3e4r5t',
-        contractName: '市江素',
-        contractKanaName: 'シエス',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
         postalNumber: '1234567',
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -933,15 +927,15 @@ describe('tenantのテスト', () => {
         termsCheck: 'on',
         // 入力フォームデータ
         password: '1q2w3e4r5t',
-        contractName: '市江素',
-        contractKanaName: 'シエス',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
         postalNumber: '1234567',
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -1007,15 +1001,15 @@ describe('tenantのテスト', () => {
         termsCheck: 'on',
         // 入力フォームデータ
         password: '1q2w3e4r5t',
-        contractName: '市江素',
-        contractKanaName: 'シエス',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
         postalNumber: '1234567',
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -1090,15 +1084,15 @@ describe('tenantのテスト', () => {
         termsCheck: 'on',
         // 入力フォームデータ
         password: '1q2w3e4r5t',
-        contractName: '市江素',
-        contractKanaName: 'シエス',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
         postalNumber: '1234567',
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する

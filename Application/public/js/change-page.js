@@ -14,16 +14,16 @@ function $(tagObjName) {
 }
 
 // 契約者名変更時確認ボタン活性化イベント
-$('#contractName').addEventListener('input', function () {
-  if (!this.value || !$('#contractKanaName').value) {
+$('#contractorName').addEventListener('input', function () {
+  if (!this.value || !$('#contractorKanaName').value) {
     $('#next-btn').setAttribute('disabled', '')
   } else {
     $('#next-btn').removeAttribute('disabled')
   }
 })
 
-$('#contractKanaName').addEventListener('input', function () {
-  if (!this.value || !$('#contractName').value) {
+$('#contractorKanaName').addEventListener('input', function () {
+  if (!this.value || !$('#contractorName').value) {
     $('#next-btn').setAttribute('disabled', '')
   } else {
     $('#next-btn').removeAttribute('disabled')
@@ -58,9 +58,9 @@ $('#banch1').addEventListener('input', function () {
 // 確認ボタン押下するとmodalに契約者名・契約者住所が表示処理
 $('#form').addEventListener('submit', function (event) {
   $('#confirmmodify-modal').classList.toggle('is-active')
-  if ($('#chkContractName').checked) {
-    $('#recontractName').innerHTML = $('#contractName').value
-    $('#recontractKanaName').innerHTML = $('#contractKanaName').value
+  if ($('#chkContractorName').checked) {
+    $('#recontractorName').innerHTML = $('#contractorName').value
+    $('#recontractorKanaName').innerHTML = $('#contractorKanaName').value
   }
   if ($('#chkContractAddress').checked) {
     $('#repostalNumber').innerHTML = $('#postalNumber').value
@@ -74,24 +74,24 @@ $('#form').addEventListener('submit', function (event) {
 })
 
 // 契約者名変更欄表示
-$('#chkContractName').addEventListener('change', function () {
-  $('#cardContractName').classList.toggle('is-invisible')
-  $('#modalContractName').classList.toggle('is-invisible')
+$('#chkContractorName').addEventListener('change', function () {
+  $('#cardContractorName').classList.toggle('is-invisible')
+  $('#modalContractorName').classList.toggle('is-invisible')
   if (this.checked) {
-    if ($('#contractName').value && $('#contractKanaName').value) {
+    if ($('#contractorName').value && $('#contractorKanaName').value) {
       $('#next-btn').removeAttribute('disabled')
     }
-    $('#contractName').setAttribute('name', 'contractName')
-    $('#contractKanaName').setAttribute('name', 'contractKanaName')
-    $('#contractName').required = true
-    $('#contractKanaName').required = true
+    $('#contractorName').setAttribute('name', 'contractorName')
+    $('#contractorKanaName').setAttribute('name', 'contractorKanaName')
+    $('#contractorName').required = true
+    $('#contractorKanaName').required = true
   } else {
-    $('#contractName').removeAttribute('name')
-    $('#contractKanaName').removeAttribute('name')
-    $('#recontractName').innerHTML = ''
-    $('#recontractKanaName').innerHTML = ''
-    $('#contractName').required = false
-    $('#contractKanaName').required = false
+    $('#contractorName').removeAttribute('name')
+    $('#contractorKanaName').removeAttribute('name')
+    $('#recontractorName').innerHTML = ''
+    $('#recontractorKanaName').innerHTML = ''
+    $('#contractorName').required = false
+    $('#contractorKanaName').required = false
     if (!$('#chkContractAddress').checked) {
       $('#next-btn').setAttribute('disabled', '')
     }
@@ -125,7 +125,7 @@ $('#chkContractAddress').addEventListener('change', function () {
     $('#postalNumber').required = false
     $('#contractAddressVal').required = false
     $('#banch1').required = false
-    if (!$('#chkContractName').checked) {
+    if (!$('#chkContractorName').checked) {
       $('#next-btn').setAttribute('disabled', '')
     }
   }

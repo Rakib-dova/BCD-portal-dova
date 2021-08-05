@@ -33,6 +33,7 @@ const middleware = require('../../Application/routes/helpers/middleware')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
+const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
 const tenantController = require('../../Application/controllers/tenantController.js')
 const userController = require('../../Application/controllers/userController.js')
@@ -385,8 +386,8 @@ describe('helpers/middlewareのテスト', () => {
       })
     })
 
-    // #675、【実装】トレシフユーザロールによって、画面表示を制御する#3
-    test('403管理者問い合わせ画面（条件：一般ユーザ, 利用登録されていない）', async () => {
+    // #1156、【実装】一般ユーザ向け画面制御
+    test('「テナント管理者権限のあるユーザで再度操作をお試しください。」の画面表示（条件：一般ユーザ, 利用登録されていない）', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
@@ -469,8 +470,8 @@ describe('helpers/middlewareのテスト', () => {
       await routesTenant.cbGetRegister(request, response, next)
 
       // 期待結果
-      // 403エラーが返される
-      expect(next).toHaveBeenCalledWith(expectError)
+      // 「テナント管理者権限のあるユーザで再度操作をお試しください。」の画面表示される
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
       // response.renderが呼ばれ「ない」
       expect(response.render).not.toHaveBeenCalled()
     })
