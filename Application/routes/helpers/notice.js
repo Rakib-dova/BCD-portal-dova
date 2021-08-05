@@ -32,7 +32,7 @@ module.exports = {
     } else if (messageStatus === 'generaluser') {
       // 解約手続き中画面を表示する
       message = '本機能はご利用いただけません。'
-      description1 = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
+      description1 = 'テナント管理者権限のあるユーザで再度操作をお試しください。'
       description2 = null
     } else {
       return next(errorHelper.create(400))

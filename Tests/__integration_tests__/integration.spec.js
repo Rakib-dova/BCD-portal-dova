@@ -541,6 +541,21 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/portal')
     })
 
+    test('管理者、契約ステータス：00、 連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractContact: 'on',
+          contractPersonName: '連絡先コントラクター',
+          contractPhoneNumber: '080-1234-5678',
+          contractMail: 'changeContractor@test.com'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
     test('管理者、契約ステータス：00、 契約名・住所変更、/change', async () => {
       const res = await request(app)
         .post('/change')
@@ -554,6 +569,67 @@ describe('ルーティングのインテグレーションテスト', () => {
           contractAddressVal: '東京都',
           banch1: '１',
           tatemono1: '建物１'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 契約名・連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractName: 'on',
+          contractName: 'インテグレーションテスター',
+          contractKanaName: 'インテグレーションテスター',
+          chkContractContact: 'on',
+          contactPersonName: '連絡先コントラクター',
+          contactPhoneNumber: '080-1234-5678',
+          contactMail: 'changeContractor@test.com'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 住所変更・連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractAddress: 'on',
+          postalNumber: '0601233',
+          contractAddressVal: '東京都',
+          banch1: '１',
+          tatemono1: '建物１',
+          chkContractContact: 'on',
+          contactPersonName: '連絡先コントラクター',
+          contactPhoneNumber: '080-1234-5678',
+          contactMail: 'changeContractor@test.com'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 契約名・住所変更・連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          cchkContractName: 'on',
+          contractName: 'インテグレーションテスター',
+          contractKanaName: 'インテグレーションテスター',
+          chkContractAddress: 'on',
+          postalNumber: '0601233',
+          contractAddressVal: '東京都',
+          banch1: '１',
+          tatemono1: '建物１',
+          chkContractContact: 'on',
+          contactPersonName: '連絡先コントラクター',
+          contactPhoneNumber: '080-1234-5678',
+          contactMail: 'changeContractor@test.com'
         })
         .expect(302)
 
@@ -751,7 +827,10 @@ describe('ルーティングのインテグレーションテスト', () => {
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/契約情報変更/i) // 画面内容
+      expect(res.text).toMatch(/契約情報変更/i)
+      expect(res.text).toMatch(/契約者名変更/i)
+      expect(res.text).toMatch(/契約者住所変更/i)
+      expect(res.text).toMatch(/契約者連絡先変更/i)
     })
 
     test('一般ユーザ、契約ステータス：00、 /change', async () => {
@@ -795,6 +874,21 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/portal')
     })
 
+    test('管理者、契約ステータス：00、 連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractContact: 'on',
+          contactPersonName: '連絡先コントラクター',
+          contactPhoneNumber: '080-1234-5678',
+          contactMail: 'changeContractor@test.com'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
     test('管理者、契約ステータス：00、 契約名・住所変更、/change', async () => {
       const res = await request(app)
         .post('/change')
@@ -808,6 +902,67 @@ describe('ルーティングのインテグレーションテスト', () => {
           contractAddressVal: '東京都',
           banch1: '１',
           tatemono1: '建物１'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 契約名・連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractName: 'on',
+          contractName: 'インテグレーションテスター',
+          contractKanaName: 'インテグレーションテスター',
+          chkContractContact: 'on',
+          contactPersonName: '連絡先コントラクター',
+          contactPhoneNumber: '080-1234-5678',
+          contactMail: 'changeContractor@test.com'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 住所変更・連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractAddress: 'on',
+          postalNumber: '0601233',
+          contractAddressVal: '東京都',
+          banch1: '１',
+          tatemono1: '建物１',
+          chkContractContact: 'on',
+          contactPersonName: '連絡先コントラクター',
+          contactPhoneNumber: '080-1234-5678',
+          contactMail: 'changeContractor@test.com'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 契約名・住所変更・連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          cchkContractName: 'on',
+          contractName: 'インテグレーションテスター',
+          contractKanaName: 'インテグレーションテスター',
+          chkContractAddress: 'on',
+          postalNumber: '0601233',
+          contractAddressVal: '東京都',
+          banch1: '１',
+          tatemono1: '建物１',
+          chkContact: 'on',
+          contactPersonName: '連絡先コントラクター',
+          contactPhoneNumber: '080-1234-5678',
+          contactMail: 'changeContact@test.com'
         })
         .expect(302)
 
