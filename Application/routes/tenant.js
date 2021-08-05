@@ -7,6 +7,7 @@ const helper = require('./helpers/middleware')
 const userController = require('../controllers/userController.js')
 const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
+const noticeHelper = require('./helpers/notice')
 const logger = require('../lib/logger')
 
 const errorHelper = require('./helpers/error')
@@ -40,12 +41,7 @@ const cbGetRegister = async (req, res, next) => {
   }
 
   if (userdata.Memberships?.[0].Role?.toLowerCase() !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d') {
-    // TODO: 画面文言は変更の可能性あり。
-    const e = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-    e.name = 'Forbidden'
-    e.status = 403
-    e.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-    return next(e)
+    return next(noticeHelper.create('generaluser'))
   }
   const companyName = userdata.CompanyName
   const userName = userdata.LastName + ' ' + userdata.FirstName
@@ -103,26 +99,21 @@ const cbPostRegister = async (req, res, next) => {
   if (userdata instanceof Error) return next(errorHelper.create(500))
 
   if (userdata.Memberships?.[0].Role?.toLowerCase() !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d') {
-    // TODO: 画面文言は変更の可能性あり。
-    const e = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-    e.name = 'Forbidden'
-    e.status = 403
-    e.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-    return next(e)
+    return next(noticeHelper.create('generaluser'))
   }
 
   if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))
 
   // contractBasicInfo 設定
-  contractInformationnewOrder.contractBasicInfo.sysManageId = req.user.tenantId
+  contractInformationnewOrder.contractBasicInfo.tradeshiftId = req.user.tenantId
   contractInformationnewOrder.contractBasicInfo.orderType = constantsDefine.statusConstants.orderTypeNewOrder
   contractInformationnewOrder.contractBasicInfo.campaignCode = req.body.campaignCode
   contractInformationnewOrder.contractBasicInfo.kaianPassword = req.body.password
 
   // contractorName
-  contractInformationnewOrder.contractAccountInfo.contractorName = req.body.contractName
+  contractInformationnewOrder.contractAccountInfo.contractorName = req.body.contractorName
   // contractorKanaName
-  contractInformationnewOrder.contractAccountInfo.contractorKanaName = req.body.contractKanaName
+  contractInformationnewOrder.contractAccountInfo.contractorKanaName = req.body.contractorKanaName
   // postalName
   contractInformationnewOrder.contractAccountInfo.postalNumber = req.body.postalNumber
   // contractAddress
@@ -132,10 +123,10 @@ const cbPostRegister = async (req, res, next) => {
   // tatemono1
   contractInformationnewOrder.contractAccountInfo.tatemono1 = req.body.tatemono1
 
-  // contractPersonName
-  contractInformationnewOrder.contractList[0].contractPersonName = req.body.contractPersonName
-  contractInformationnewOrder.contractList[0].contractPhoneNumber = req.body.contractPhoneNumber
-  contractInformationnewOrder.contractList[0].contractMail = req.body.contractMail
+  // contactPersonName
+  contractInformationnewOrder.contactList[0].contactPersonName = req.body.contactPersonName
+  contractInformationnewOrder.contactList[0].contactPhoneNumber = req.body.contactPhoneNumber
+  contractInformationnewOrder.contactList[0].contactMail = req.body.contactMail
 
   // ユーザ登録と同時にテナント登録も行われる
   const user = await userController.create(req.user.accessToken, req.user.refreshToken, contractInformationnewOrder)

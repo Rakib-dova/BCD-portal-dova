@@ -589,9 +589,9 @@ describe('cancellationのテスト', () => {
       }
 
       request.body = {
-        contractName: 'テスト１',
-        contractKanaName: 'テスト２',
-        chkContractName: 'on'
+        contractorName: 'テスト１',
+        contractorKanaName: 'テスト２',
+        chkContractorName: 'on'
       }
 
       // request.flashは関数なのでモックする。返り値は必要ないので処理は空
@@ -685,9 +685,9 @@ describe('cancellationのテスト', () => {
       }
 
       request.body = {
-        contractName: 'テスト１',
-        contractKanaName: 'テスト２',
-        chkContractName: 'on',
+        contractorName: 'テスト１',
+        contractorKanaName: 'テスト２',
+        chkContractorName: 'on',
         postalNumber: '0100000',
         contractAddressVal: 'テスト県テスト市',
         banch1: '１２３番',
@@ -721,9 +721,9 @@ describe('cancellationのテスト', () => {
       }
 
       request.body = {
-        contractName: 'テスト１',
-        contractKanaName: 'テスト２',
-        chkContractName: 'on',
+        contractorName: 'テスト１',
+        contractorKanaName: 'テスト２',
+        chkContractorName: 'on',
         contactPersonName: 'テスト連絡先',
         contactPhoneNumber: '123-456-789',
         contactMail: 'test@co.jp',
@@ -793,9 +793,9 @@ describe('cancellationのテスト', () => {
       }
 
       request.body = {
-        contractName: 'テスト１',
-        contractKanaName: 'テスト２',
-        chkContractName: 'on',
+        contractorName: 'テスト１',
+        contractorKanaName: 'テスト２',
+        chkContractorName: 'on',
         postalNumber: '0100000',
         contractAddressVal: 'テスト県テスト市',
         banch1: '１２３番',
@@ -833,9 +833,9 @@ describe('cancellationのテスト', () => {
       }
 
       request.body = {
-        contractName: 'テスト１',
-        contractKanaName: 'テスト２',
-        chkContractName: undefined,
+        contractorName: 'テスト１',
+        contractorKanaName: 'テスト２',
+        chkContractorName: undefined,
         postalNumber: '0100000',
         contractAddressVal: 'テスト県テスト市',
         banch1: '１２３番',
@@ -870,9 +870,9 @@ describe('cancellationのテスト', () => {
       }
 
       request.body = {
-        contractName: 'テスト１',
-        contractKanaName: 'テスト２',
-        chkContractName: 'on'
+        contractorName: 'テスト１',
+        contractorKanaName: 'テスト２',
+        chkContractorName: 'on'
       }
 
       // request.flashは関数なのでモックする。返り値は必要ないので処理は空
@@ -898,9 +898,9 @@ describe('cancellationのテスト', () => {
       }
 
       request.body = {
-        contractName: 'テスト１',
-        contractKanaName: 'テスト２',
-        chkContractName: 'on'
+        contractorName: 'テスト１',
+        contractorKanaName: 'テスト２',
+        chkContractorName: 'on'
       }
 
       findOneSpy.mockReturnValue(userInfoData)
@@ -923,9 +923,9 @@ describe('cancellationのテスト', () => {
       }
 
       request.body = {
-        contractName: 'テスト１',
-        contractKanaName: 'テスト２',
-        chkContractName: 'on'
+        contractorName: 'テスト１',
+        contractorKanaName: 'テスト２',
+        chkContractorName: 'on'
       }
 
       findOneSpy.mockReturnValue(null)
@@ -948,9 +948,9 @@ describe('cancellationのテスト', () => {
       }
 
       request.body = {
-        contractName: 'テスト１',
-        contractKanaName: 'テスト２',
-        chkContractName: 'on'
+        contractorName: 'テスト１',
+        contractorKanaName: 'テスト２',
+        chkContractorName: 'on'
       }
 
       findOneSpy.mockReturnValue(userInfoData)
@@ -973,9 +973,9 @@ describe('cancellationのテスト', () => {
       }
 
       request.body = {
-        contractName: 'テスト１',
-        contractKanaName: 'テスト２',
-        chkContractName: 'on'
+        contractorName: 'テスト１',
+        contractorKanaName: 'テスト２',
+        chkContractorName: 'on'
       }
 
       findOneSpy.mockReturnValue(userInfoData)
@@ -998,9 +998,9 @@ describe('cancellationのテスト', () => {
       }
 
       request.body = {
-        contractName: 'テスト１',
-        contractKanaName: 'テスト２',
-        chkContractName: 'on'
+        contractorName: 'テスト１',
+        contractorKanaName: 'テスト２',
+        chkContractorName: 'on'
       }
 
       findOneSpy.mockReturnValue(new Error('DB error mock'))

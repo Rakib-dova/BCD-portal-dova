@@ -219,9 +219,9 @@ img.logo-ncom {
 
 .confirmation-content,
 .checkData {
-  width: 55%;
-  max-width: 55%;
-  min-width: 55%;
+  width: 50%;
+  max-width: 50%;
+  min-width: 50%;
   word-break: break-all;
   height: 41px;
 }

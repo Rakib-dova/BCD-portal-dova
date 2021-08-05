@@ -516,9 +516,9 @@ describe('ルーティングのインテグレーションテスト', () => {
         .post('/change')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
-          chkContractName: 'on',
-          contractName: 'インテグレーションテスター',
-          contractKanaName: 'インテグレーションテスター'
+          chkContractorName: 'on',
+          contractorName: 'インテグレーションテスター',
+          contractorKanaName: 'インテグレーションテスター'
         })
         .expect(302)
 
@@ -561,9 +561,9 @@ describe('ルーティングのインテグレーションテスト', () => {
         .post('/change')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
-          chkContractName: 'on',
-          contractName: 'インテグレーションテスター',
-          contractKanaName: 'インテグレーションテスター',
+          chkContractorName: 'on',
+          contractorName: 'インテグレーションテスター',
+          contractorKanaName: 'インテグレーションテスター',
           chkContractAddress: 'on',
           postalNumber: '0601233',
           contractAddressVal: '東京都',
@@ -670,7 +670,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         contractId: '38de83da-cb64-459b-1234-3b2790b08a9e',
         tenantId: testTenantId,
         orderType: '010',
-        orderData: ` {"contractBasicInfo":{"sysManageId":"${testTenantId}","orderId":"","orderType":"010","contractChangeName":"","contractChangeAddress":"","contractChangeContact":"","appDate":"","OpeningDate":"","contractNumber":"","salesChannelCode":""},"contractAccountInfo":{"contractAccountId":"","customerType":"","commonCustomerId":""},"contractList":[{"contractType":""}],"prdtList":[{"prdtCode":"BF1021000000100","appType":"010"}]}`
+        orderData: ` {"contractBasicInfo":{"tradeshiftId":"${testTenantId}","orderId":"","orderType":"010","contractChangeName":"","contractChangeAddress":"","contractChangeContact":"","appDate":"","OpeningDate":"","contractNumber":"","salesChannelCode":""},"contractAccountInfo":{"contractAccountId":"","customerType":"","commonCustomerId":""},"contactList":[{"contactType":""}],"prdtList":[{"prdtCode":"BF1021000000100","appType":"010"}]}`
       })
     })
     // /authにリダイレクトする
@@ -849,9 +849,9 @@ describe('ルーティングのインテグレーションテスト', () => {
         .post('/change')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
-          chkContractName: 'on',
-          contractName: 'インテグレーションテスター',
-          contractKanaName: 'インテグレーションテスター'
+          chkContractorName: 'on',
+          contractorName: 'インテグレーションテスター',
+          contractorKanaName: 'インテグレーションテスター'
         })
         .expect(302)
 
@@ -894,9 +894,9 @@ describe('ルーティングのインテグレーションテスト', () => {
         .post('/change')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
-          chkContractName: 'on',
-          contractName: 'インテグレーションテスター',
-          contractKanaName: 'インテグレーションテスター',
+          chkContractorName: 'on',
+          contractorName: 'インテグレーションテスター',
+          contractorKanaName: 'インテグレーションテスター',
           chkContractAddress: 'on',
           postalNumber: '0601233',
           contractAddressVal: '東京都',

@@ -19,8 +19,8 @@ block content
                       h5.subtitle.is-5 変更パターン
                     .column.is-three-quarters
                       label.checkbox
-                        input#chkContractName(type='checkbox' name='chkContractName' checked=false required)
-                        label(for='chkContractName') 契約者名変更
+                        input#chkContractorName(type='checkbox' name='chkContractorName' checked=false required)
+                        label(for='chkContractorName') 契約者名変更
                       label.checkbox.ml-5 
                         input#chkContractAddress(type='checkbox' name='chkContractAddress' checked=false required)
                         label(for='chkContractAddress') 契約者住所変更
@@ -28,17 +28,17 @@ block content
                         input#chkContractContact(type='checkbox' name='chkContractContact' checked=false required)
                         label(for='chkContractContact') 契約者連絡先変更
 
-              .field.card.is-invisible#cardContractName
+              .field.card.is-invisible#cardContractorName
                 .card-content
                   .title.is-4  契約者名変更
                   .field
                     .control
-                      label.is-one-third(for='contractName') 契約者名（企業名）（必須）
-                      input.input#contractName.is-one-third(type='text' name='contractName' value pattern=inputPattarnZenkaku placeholder='全角文字')
+                      label.is-one-third(for='contractorName') 契約者名（企業名）（必須）
+                      input.input#contractorName.is-one-third(type='text' name='contractorName' value pattern=inputPattarnZenkaku placeholder='全角文字')
                   .field
                     .control
-                      label(for='contractKanaName') 契約者カナ名（企業名）（必須）
-                      input.input#contractKanaName(type='text' name="contractKanaName"  value pattern=inputPattarnZenkakuKatakana placeholder='カタカナ')
+                      label(for='contractorKanaName') 契約者カナ名（企業名）（必須）
+                      input.input#contractorKanaName(type='text' name="contractorKanaName"  value pattern=inputPattarnZenkakuKatakana placeholder='カタカナ')
               
               .field.card.is-invisible#cardContractAddress
                 .card-content
@@ -96,15 +96,15 @@ block content
                   button.delete(type="button" data-target="confirmmodify-modal")
                 section.modal-card-body
                   table.table.is-fullwidth.is-bordered
-                    tbody.is-invisible#modalContractName
+                    tbody.is-invisible#modalContractorName
                       tr
                         th(colspan="3") 契約者名変更
                       tr
                         td.confirmation-item(colspan="2") 契約者名（企業名）（必須）
-                        td#recontractName.checkData
+                        td#recontractorName.checkData
                       tr 
                         td.confirmation-item(colspan="2")  契約者カナ名（企業名）（必須）
-                        td#recontractKanaName.checkData
+                        td#recontractorKanaName.checkData
 
                   table.table.is-fullwidth.is-bordered
                     tbody.is-invisible#modalContractAddress
