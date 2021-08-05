@@ -1,4 +1,3 @@
-// modal toggle 追加
 function $(tagObjName) {
   const classNameReg = new RegExp(/\.+[a-zA-Z0-9]/)
   const idNameReg = new RegExp(/\#+[a-zA-Z0-9]/)
@@ -15,7 +14,6 @@ function $(tagObjName) {
 
 // 確認ボタン押下するとmodalに契約者名・契約者住所が表示処理
 $('#form').addEventListener('submit', function (event) {
-  $('#confirmmodify-modal').classList.toggle('is-active')
   if ($('#chkContractName').checked) {
     $('#recontractName').innerHTML = $('#contractName').value
     $('#recontractKanaName').innerHTML = $('#contractKanaName').value
@@ -34,6 +32,7 @@ $('#form').addEventListener('submit', function (event) {
   if (event.submitter.id === 'next-btn') {
     event.preventDefault()
   }
+  $('#confirmmodify-modal').classList.toggle('is-active')
 })
 
 // 契約者名変更欄表示

@@ -72,15 +72,15 @@ block content
                     .control
                       label(for="contactPersonName") 連絡先担当者名（必須）
                       .control
-                        input.input#contactPersonName(type="text" name="contactPersonName" value="" maxlength=10 placeholder='')
+                        input.input#contactPersonName(type="text" name="contactPersonName" value="" maxlength=10 placeholder='全角・半角文字')
                   .field
                     label(for="contactPhoneNumber") 連絡先電話番号（必須）
                     .control
-                      input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber maxlength=13)
+                      input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber maxlength=13 placeholder='半角数字かつハイフンあり')
                   .field
                     label(for="contactMail") 連絡先メールアドレス（必須）
                     .control
-                      input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress maxlength=82 placeholder='')
+                      input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress maxlength=82 placeholder='メールアドレス')
         
               .columns.is-centered.changeConfirm
                 .control
