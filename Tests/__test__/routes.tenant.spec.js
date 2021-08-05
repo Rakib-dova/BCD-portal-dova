@@ -335,7 +335,7 @@ describe('tenantのテスト', () => {
       expect(response.render).not.toHaveBeenCalled()
     })
 
-    test('403エラー：アカウント管理者権限のないユーザで操作した場合', async () => {
+    test('「テナント管理者権限のあるユーザで再度操作をお試しください。」の画面表示：アカウント管理者権限のないユーザで操作した場合', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
@@ -726,7 +726,7 @@ describe('tenantのテスト', () => {
       expect(response.getHeader('Location')).not.toEqual('/portal')
     })
 
-    test('403エラー：アカウント管理者権限のないユーザで操作した場合', async () => {
+    test('「テナント管理者権限のあるユーザで再度操作をお試しください。」の画面表示：アカウント管理者権限のないユーザで操作した場合', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
