@@ -32,6 +32,7 @@ const routesTenant = require('../../Application/routes/tenant')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
+const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
 const helper = require('../../Application/routes/helpers/middleware')
 
@@ -364,12 +365,8 @@ describe('tenantのテスト', () => {
       await routesTenant.cbGetRegister(request, response, next)
 
       // 期待結果
-      // 403エラーが返される
-      const expectError = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-      expectError.name = 'Forbidden'
-      expectError.status = 403
-      expectError.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-      expect(next).toHaveBeenCalledWith(expectError)
+      // 一般ユーザで使用できない
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
       // response.renderが呼ばれ「ない」
       expect(response.render).not.toHaveBeenCalled()
     })
@@ -775,12 +772,9 @@ describe('tenantのテスト', () => {
       await routesTenant.cbPostRegister(request, response, next)
 
       // 期待結果
-      // 403エラーが返される
-      const expectError = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-      expectError.name = 'Forbidden'
-      expectError.status = 403
-      expectError.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-      expect(next).toHaveBeenCalledWith(expectError)
+      // 一般ユーザで使用できない
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
+
       // 登録成功時のログが呼ばれ「ない」
       expect(infoSpy).not.toHaveBeenCalled()
       // ポータルにリダイレクト「されない」

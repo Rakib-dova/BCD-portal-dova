@@ -7,6 +7,7 @@ const helper = require('./helpers/middleware')
 const userController = require('../controllers/userController.js')
 const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
+const noticeHelper = require('./helpers/notice')
 const logger = require('../lib/logger')
 
 const errorHelper = require('./helpers/error')
@@ -40,12 +41,7 @@ const cbGetRegister = async (req, res, next) => {
   }
 
   if (userdata.Memberships?.[0].Role?.toLowerCase() !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d') {
-    // TODO: 画面文言は変更の可能性あり。
-    const e = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-    e.name = 'Forbidden'
-    e.status = 403
-    e.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-    return next(e)
+    return next(noticeHelper.create('generaluser'))
   }
   const companyName = userdata.CompanyName
   const userName = userdata.LastName + ' ' + userdata.FirstName
@@ -103,12 +99,7 @@ const cbPostRegister = async (req, res, next) => {
   if (userdata instanceof Error) return next(errorHelper.create(500))
 
   if (userdata.Memberships?.[0].Role?.toLowerCase() !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d') {
-    // TODO: 画面文言は変更の可能性あり。
-    const e = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-    e.name = 'Forbidden'
-    e.status = 403
-    e.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-    return next(e)
+    return next(noticeHelper.create('generaluser'))
   }
 
   if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))
