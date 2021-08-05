@@ -123,10 +123,10 @@ const cbPostRegister = async (req, res, next) => {
   // tatemono1
   contractInformationnewOrder.contractAccountInfo.tatemono1 = req.body.tatemono1
 
-  // contractPersonName
-  contractInformationnewOrder.contactList[0].contractPersonName = req.body.contractPersonName
-  contractInformationnewOrder.contactList[0].contractPhoneNumber = req.body.contractPhoneNumber
-  contractInformationnewOrder.contactList[0].contractMail = req.body.contractMail
+  // contactPersonName
+  contractInformationnewOrder.contactList[0].contactPersonName = req.body.contactPersonName
+  contractInformationnewOrder.contactList[0].contactPhoneNumber = req.body.contactPhoneNumber
+  contractInformationnewOrder.contactList[0].contactMail = req.body.contactMail
 
   // ユーザ登録と同時にテナント登録も行われる
   const user = await userController.create(req.user.accessToken, req.user.refreshToken, contractInformationnewOrder)

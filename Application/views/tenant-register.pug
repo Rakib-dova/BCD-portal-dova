@@ -56,17 +56,17 @@ block content
                     .card-content
                       .title.is-4 契約者連絡先
                       .field
-                        label(for="contractPersonName") 連絡先担当者名（必須）
+                        label(for="contactPersonName") 連絡先担当者名（必須）
                         .control
-                          input.input#contractPersonName(type="text" name="contractPersonName" value="" required maxlength=10)
+                          input.input#contactPersonName(type="text" name="contactPersonName" value="" required maxlength=10)
                       .field
-                        label(for="contractPhoneNumber") 連絡先電話番号（必須）
+                        label(for="contactPhoneNumber") 連絡先電話番号（必須）
                         .control
-                          input.input#contractPhoneNumber(type="text" name="contractPhoneNumber" value="" pattern=inputPattarnTellNumber required maxlength=13)
+                          input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber required maxlength=13)
                       .field
-                        label(for="contractMail") 連絡先メールアドレス（必須）
+                        label(for="contactMail") 連絡先メールアドレス（必須）
                         .control
-                          input.input#contractMail(type="text" name="contractMail" value="" pattern=inputPattarnMailAddress required maxlength=82)
+                          input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress required maxlength=82)
 
                   .field.card
                     .card-content
@@ -149,13 +149,13 @@ block content
                     th(colspan="3") 契約者連絡先
                   tr
                     td.confirmation-item(colspan="2") 連絡先担当者名
-                    td#recontractPersonName.checkData
+                    td#recontactPersonName.checkData
                   tr 
                     td.confirmation-item(colspan="2") 連絡先電話番号
-                    td#recontractPhoneNumber.checkData
+                    td#recontactPhoneNumber.checkData
                   tr
                     td.confirmation-item(colspan="2") 連絡先メールアドレス
-                    td#recontractMail.checkData
+                    td#recontactMail.checkData
 
               table.table.is-fullwidth.is-bordered
                 tbody

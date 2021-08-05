@@ -429,9 +429,9 @@ describe('tenantのテスト', () => {
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -557,9 +557,9 @@ describe('tenantのテスト', () => {
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // 試験実施
@@ -590,9 +590,9 @@ describe('tenantのテスト', () => {
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -655,9 +655,9 @@ describe('tenantのテスト', () => {
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // userのTokenにnullを入れる
@@ -698,9 +698,9 @@ describe('tenantのテスト', () => {
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -743,9 +743,9 @@ describe('tenantのテスト', () => {
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -799,9 +799,9 @@ describe('tenantのテスト', () => {
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -866,9 +866,9 @@ describe('tenantのテスト', () => {
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -933,9 +933,9 @@ describe('tenantのテスト', () => {
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -1007,9 +1007,9 @@ describe('tenantのテスト', () => {
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
@@ -1090,9 +1090,9 @@ describe('tenantのテスト', () => {
         contractAddress: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
-        contractPersonName: 'トレド',
-        contractPhoneNumber: '080-1234-5678',
-        contractMaile: 'example@example.com',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
         campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
