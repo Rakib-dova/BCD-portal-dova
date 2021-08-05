@@ -1,6 +1,6 @@
 {
   "contractBasicInfo": {
-    "sysManageId": "",
+    "tradeshiftId": "",
     "orderId": "",
     "orderType": "",
     "contractChangeName": "",
@@ -26,9 +26,9 @@
     "tatemono1": ""
   },
 
-  "contractList": [
+  "contactList": [
     {
-      "contractType": "",
+      "contactType": "",
       "contractPersonName": "",
       "contractPhoneNumber": "",
       "contractMail": ""
