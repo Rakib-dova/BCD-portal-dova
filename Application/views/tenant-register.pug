@@ -36,7 +36,7 @@ block content
                         .control
                           .columns.ml-0.pl-0
                             .column.is-one-third.pl-0
-                              input.input#postalNumber(type="text" name="postalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7)
+                              input.input#postalNumber(type="text" name="postalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7 placeholder='半角数字かつハイフンなし')
                             .column 
                               .button.is-link#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
                       .field
@@ -58,15 +58,15 @@ block content
                       .field
                         label(for="contactPersonName") 連絡先担当者名（必須）
                         .control
-                          input.input#contactPersonName(type="text" name="contactPersonName" value="" required maxlength=10)
+                          input.input#contactPersonName(type="text" name="contactPersonName" value="" pattern=inputPattarnZenkaku required maxlength=10 placeholder='全角文字')
                       .field
                         label(for="contactPhoneNumber") 連絡先電話番号（必須）
                         .control
-                          input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber required maxlength=13)
+                          input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber required maxlength=13 placeholder='半角数字かつハイフンあり')
                       .field
                         label(for="contactMail") 連絡先メールアドレス（必須）
                         .control
-                          input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress required maxlength=82)
+                          input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress required maxlength=82 placeholder='メールアドレス')
 
                   .field.card
                     .card-content

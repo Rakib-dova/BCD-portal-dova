@@ -72,7 +72,7 @@ block content
                     .control
                       label(for="contactPersonName") 連絡先担当者名（必須）
                       .control
-                        input.input#contactPersonName(type="text" name="contactPersonName" value="" maxlength=10 placeholder='全角・半角文字')
+                        input.input#contactPersonName(type="text" name="contactPersonName" value="" pattern=inputPattarnZenkaku maxlength=10 placeholder='全角文字')
                   .field
                     label(for="contactPhoneNumber") 連絡先電話番号（必須）
                     .control

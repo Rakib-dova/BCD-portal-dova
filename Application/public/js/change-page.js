@@ -53,24 +53,24 @@ $('#chkContractorName').addEventListener('change', function () {
       $('#chkContractAddress').required = false
     } else if (!$('#chkContractContact').checked) {
       $('#chkContractContact').required = false
-      $('#contractorName').setAttribute('name', 'contractorName')
-      $('#contractorKanaName').setAttribute('name', 'contractorKanaName')
-      $('#contractorName').required = true
-      $('#contractorKanaName').required = true
-    } else {
-      if (!$('#chkContractAddress').checked && !$('#chkContractContact').checked) {
-        $('#chkContractAddress').required = true
-        $('#chkContractContact').required = true
-      } else {
-        this.required = false
-      }
-      $('#contractorName').removeAttribute('name')
-      $('#contractorKanaName').removeAttribute('name')
-      $('#recontractorName').innerHTML = ''
-      $('#recontractorKanaName').innerHTML = ''
-      $('#contractorName').required = false
-      $('#contractorKanaName').required = false
     }
+    $('#contractorName').setAttribute('name', 'contractorName')
+    $('#contractorKanaName').setAttribute('name', 'contractorKanaName')
+    $('#contractorName').required = true
+    $('#contractorKanaName').required = true
+  } else {
+    if (!$('#chkContractAddress').checked && !$('#chkContractContact').checked) {
+      $('#chkContractAddress').required = true
+      $('#chkContractContact').required = true
+    } else {
+      this.required = false
+    }
+    $('#contractorName').removeAttribute('name')
+    $('#contractorKanaName').removeAttribute('name')
+    $('#recontractorName').innerHTML = ''
+    $('#recontractorKanaName').innerHTML = ''
+    $('#contractorName').required = false
+    $('#contractorKanaName').required = false
   }
 })
 
