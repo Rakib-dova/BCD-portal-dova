@@ -33,6 +33,7 @@ const middleware = require('../../Application/routes/helpers/middleware')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
+const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
 const tenantController = require('../../Application/controllers/tenantController.js')
 const userController = require('../../Application/controllers/userController.js')
@@ -470,7 +471,7 @@ describe('helpers/middlewareのテスト', () => {
 
       // 期待結果
       // 403エラーが返される
-      expect(next).toHaveBeenCalledWith(expectError)
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
       // response.renderが呼ばれ「ない」
       expect(response.render).not.toHaveBeenCalled()
     })
