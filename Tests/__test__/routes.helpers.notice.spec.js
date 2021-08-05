@@ -157,7 +157,7 @@ describe('helpers/errorのテスト', () => {
       // 用意したエラー情報でrenderが呼ばれ「ない」（500エラーの時は404のメッセージとなる）
       expect(response.render).toHaveBeenCalledWith('notice', {
         message: '本機能はご利用いただけません。',
-        description1: 'アカウント管理者権限のあるユーザで再度操作をお試しください。',
+        description1: 'テナント管理者権限のあるユーザで再度操作をお試しください。',
         description2: null
       })
     })
