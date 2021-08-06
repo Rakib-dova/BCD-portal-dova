@@ -6,6 +6,7 @@ const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const cancellationsController = require('../controllers/cancellationsController.js')
 const logger = require('../lib/logger')
+const validate = require('../lib/validate')
 
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
@@ -41,13 +42,23 @@ const cbGetCancellation = async (req, res, next) => {
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
 
-  if (
-    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder ||
-      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationReceive) &&
-    !contract.dataValues.deleteFlag
-  ) {
+  if (!validate.checkStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
+  }
+
+  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
+    return next(noticeHelper.create('generaluser'))
+  }
+
+  if (!validate.checkStatusForRegister(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('registerprocedure'))
+  }
+
+  if (!validate.checkStatusForChange(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('changeprocedure'))
   }
 
   // ユーザ権限も画面に送る

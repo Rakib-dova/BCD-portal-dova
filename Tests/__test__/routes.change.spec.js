@@ -234,7 +234,7 @@ describe('cancellationのテスト', () => {
       })
     })
 
-    test('正常', async () => {
+    test('正常：解約申込中の場合', async () => {
       // 準備
       // session.userContextに正常値(LoggedIn)を想定する
       request.session = {
