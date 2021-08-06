@@ -514,6 +514,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 契約名変更、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
           chkContractorName: 'on',
@@ -528,6 +529,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 住所変更、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
           chkContractAddress: 'on',
@@ -544,6 +546,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
           chkContractContact: 'on',
@@ -559,6 +562,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 契約名・住所変更、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
           chkContractorName: 'on',
@@ -578,9 +582,10 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 契約名・連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
-          chkContractName: 'on',
+          chkContractorName: 'on',
           contractName: 'インテグレーションテスター',
           contractKanaName: 'インテグレーションテスター',
           chkContractContact: 'on',
@@ -596,6 +601,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 住所変更・連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
           chkContractAddress: 'on',
@@ -616,9 +622,10 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 契約名・住所変更・連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
-          cchkContractName: 'on',
+          chkContractorName: 'on',
           contractName: 'インテグレーションテスター',
           contractKanaName: 'インテグレーションテスター',
           chkContractAddress: 'on',
@@ -778,8 +785,8 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正常にportal画面から契約者変更へ遷移する
-    test('管理者、契約ステータス：20, /change', async () => {
-      await db.Contract.update({ contractStatus: '20' }, { where: { tenantId: testTenantId } })
+    test('管理者、契約ステータス：40, /change', async () => {
+      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/change')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -788,9 +795,9 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
     })
 
-    test('管理者、契約ステータス：21, /change', async () => {
+    test('管理者、契約ステータス：41, /change', async () => {
       // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '21' }, { where: { tenantId: testTenantId } })
+      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/change')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -799,8 +806,8 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
     })
 
-    test('一般ユーザ、契約ステータス：20, /change', async () => {
-      await db.Contract.update({ contractStatus: '20' }, { where: { tenantId: testTenantId } })
+    test('一般ユーザ、契約ステータス：40, /change', async () => {
+      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/change')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
@@ -809,8 +816,8 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
     })
 
-    test('一般ユーザ、契約ステータス：21, /change', async () => {
-      await db.Contract.update({ contractStatus: '21' }, { where: { tenantId: testTenantId } })
+    test('一般ユーザ、契約ステータス：41, /change', async () => {
+      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/change')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
@@ -835,7 +842,6 @@ describe('ルーティングのインテグレーションテスト', () => {
 
     test('一般ユーザ、契約ステータス：00、 /change', async () => {
       // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/change')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
@@ -847,6 +853,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 契約名変更、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
           chkContractorName: 'on',
@@ -861,6 +868,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 住所変更、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
           chkContractAddress: 'on',
@@ -877,6 +885,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
           chkContractContact: 'on',
@@ -892,6 +901,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 契約名・住所変更、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
           chkContractorName: 'on',
@@ -911,9 +921,10 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 契約名・連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
-          chkContractName: 'on',
+          chkContractorName: 'on',
           contractName: 'インテグレーションテスター',
           contractKanaName: 'インテグレーションテスター',
           chkContractContact: 'on',
@@ -929,6 +940,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 住所変更・連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
           chkContractAddress: 'on',
@@ -949,9 +961,10 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('管理者、契約ステータス：00、 契約名・住所変更・連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
+        .type('form')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .send({
-          cchkContractName: 'on',
+          chkContractorName: 'on',
           contractName: 'インテグレーションテスター',
           contractKanaName: 'インテグレーションテスター',
           chkContractAddress: 'on',

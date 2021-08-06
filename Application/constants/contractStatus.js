@@ -5,10 +5,10 @@ constantsDefine({
   canceledContract: '99',
   contractStatusNewContractOrder: '10',
   contractStatusNewContractReceive: '11',
-  contractStatusChangeContractOrder: '20',
-  contractStatusChangeContractReceive: '21',
   contractStatusCancellationOrder: '30',
   contractStatusCancellationReceive: '31',
+  contractStatusSimpleChangeContractOrder: '40',
+  contractStatusSimpleChangeContractReceive: '41',
 
   // orderType
   orderTypeNewOrder: '010',

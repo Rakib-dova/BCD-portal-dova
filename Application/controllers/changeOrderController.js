@@ -16,7 +16,7 @@ module.exports = {
 
       const updateContract = await Contract.updateStatus(
         contract.dataValues.contractId,
-        constantsDefine.statusConstants.contractStatusChangeContractOrder
+        constantsDefine.statusConstants.contractStatusSimpleChangeContractOrder
       )
 
       if (updateContract === undefined || updateContract === null || updateContract === 0) {
@@ -30,7 +30,7 @@ module.exports = {
         defaults: {
           contractId: contract.contractId,
           tenantId: _tenantId,
-          orderType: constantsDefine.statusConstants.orderTypeChangeOrder,
+          orderType: constantsDefine.statusConstants.orderTypeSimpleChangeOrder,
           orderData: JSON.stringify(contractInformationcancelOrder)
         }
       })

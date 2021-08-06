@@ -57,8 +57,9 @@ const cbGetChangeIndex = async (req, res, next) => {
   ) {
     return next(noticeHelper.create('registerprocedure'))
   } else if (
-    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusChangeContractOrder ||
-      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusChangeContractReceive) &&
+    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusSimpleChangeContractOrder ||
+      contract.dataValues.contractStatus ===
+        constantsDefine.statusConstants.contractStatusSimpleChangeContractReceive) &&
     !contract.dataValues.deleteFlag
   ) {
     return next(noticeHelper.create('changeprocedure'))
@@ -148,7 +149,7 @@ const cbPostChangeIndex = async (req, res, next) => {
     // contractBasicInfo 基本情報設定
     contractInformationchangeOrderContractBasicInfo.contractBasicInfo.tradeshiftId = userTenantId
     contractInformationchangeOrderContractBasicInfo.contractBasicInfo.orderType =
-      constantsDefine.statusConstants.orderTypeChangeOrder
+      constantsDefine.statusConstants.orderTypeSimpleChangeOrder
     contractInformationchangeOrderContractBasicInfo.contractBasicInfo.contractNumber = contract.dataValues?.numberN
 
     // 「契約者名変更」、「契約者住所変更」、「契約者連絡先変更」

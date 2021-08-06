@@ -44,7 +44,7 @@ describe('changOrderControllerのテスト', () => {
     contractBasicInfo: {
       tradeshiftId: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
       orderId: '',
-      orderType: '020',
+      orderType: '040',
       contractChangeName: '1',
       contractChangeAddress: '',
       contractChangeContact: '',
