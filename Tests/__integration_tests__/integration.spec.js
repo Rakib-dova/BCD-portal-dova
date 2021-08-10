@@ -400,8 +400,6 @@ describe('ルーティングのインテグレーションテスト', () => {
     //    試験前：未登録
     //    試験後(期待値)：登録
 
-    // DB操作用
-
     // /authにリダイレクトする
     test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
       const res = await request(app)
@@ -493,8 +491,6 @@ describe('ルーティングのインテグレーションテスト', () => {
     //   一般ユーザ：
     //    試験前：登録済
     //    試験後(期待値)：登録済
-
-    // DB操作用
 
     // ContractとOrder作成
     test('orderTable初期化', async () => {
@@ -634,7 +630,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/テナント管理者権限のあるユーザで再度操作をお試しください。/i) // 画面内容
     })
 
-    // 正常にportal画面から契約者変更へ遷移する
     test('管理者、契約ステータス：40, /change', async () => {
       await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -849,7 +844,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/>現在解約手続き中です。/i) // 画面内容
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
     })
 
     test('一般ユーザ、契約ステータス：30, /change', async () => {
@@ -937,7 +932,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/テナント管理者権限のあるユーザで再度操作をお試しください。/i) // 画面内容
     })
 
-    // 正常にportal画面から契約者変更へ遷移する
     test('管理者、契約ステータス：40, /cancellation', async () => {
       await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -1018,7 +1012,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/>現在解約手続き中です。/i) // 画面内容
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
     })
 
     test('一般ユーザ、契約ステータス：30, /cancellation', async () => {
@@ -1110,7 +1104,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/csv upload/i)
     })
 
-    // 正常にportal画面から契約者変更へ遷移する
     test('管理者、契約ステータス：40, /csvupload', async () => {
       await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -1196,7 +1189,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/>現在解約手続き中です。/i) // 画面内容
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
     })
 
     test('一般ユーザ、契約ステータス：30, /csvupload', async () => {
@@ -1292,7 +1285,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/設定/i)
     })
 
-    // 正常にportal画面から契約者変更へ遷移する
     test('管理者、契約ステータス：40, /portal', async () => {
       await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -1384,7 +1376,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/>現在解約手続き中です。/i) // 画面内容
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
     })
 
     test('一般ユーザ、契約ステータス：30, /portal', async () => {
