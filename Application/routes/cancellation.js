@@ -45,7 +45,7 @@ const cbGetCancellation = async (req, res, next) => {
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
 
-  if (!validate.checkStatusForCancel(contractStatus, deleteFlag)) {
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
@@ -53,11 +53,11 @@ const cbGetCancellation = async (req, res, next) => {
     return next(noticeHelper.create('generaluser'))
   }
 
-  if (!validate.checkStatusForRegister(contractStatus, deleteFlag)) {
+  if (!validate.isStatusForRegister(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('registerprocedure'))
   }
 
-  if (!validate.checkStatusForChange(contractStatus, deleteFlag)) {
+  if (!validate.isStatusForSimpleChange(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('changeprocedure'))
   }
 

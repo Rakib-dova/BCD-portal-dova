@@ -47,7 +47,7 @@ const cbGetChangeIndex = async (req, res, next) => {
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
 
-  if (!validate.checkStatusForCancel(contractStatus, deleteFlag)) {
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
@@ -55,11 +55,11 @@ const cbGetChangeIndex = async (req, res, next) => {
     return next(noticeHelper.create('generaluser'))
   }
 
-  if (!validate.checkStatusForRegister(contractStatus, deleteFlag)) {
+  if (!validate.isStatusForRegister(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('registerprocedure'))
   }
 
-  if (!validate.checkStatusForChange(contractStatus, deleteFlag)) {
+  if (!validate.isStatusForSimpleChange(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('changeprocedure'))
   }
 
@@ -131,9 +131,10 @@ const cbPostChangeIndex = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   // ユーザ未登録の場合もエラーを上げる
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
+  const deleteFlag = contract.dataValues.deleteFlag
 
-  if (user.dataValues.userRole !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d') {
-    return next(errorHelper.create(403))
+  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
+    return next(noticeHelper.create('generaluser'))
   }
 
   if (

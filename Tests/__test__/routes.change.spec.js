@@ -74,21 +74,6 @@ describe('cancellationのテスト', () => {
     }
   }
 
-  const userInfoDataUserRoleErr = {
-    dataValues: {
-      userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
-      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-      userRole: 'test',
-      appVersion: '0.0.1',
-      refreshToken: 'dummyRefreshToken',
-      subRefreshToken: null,
-      userStatus: 1,
-      lastRefreshedAt: null,
-      createdAt: '2021-01-25T08:45:49.803Z',
-      updatedAt: '2021-01-25T08:45:49.803Z'
-    }
-  }
-
   const userInfoDataUserRoleNotTenantAdmin = {
     dataValues: {
       userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
@@ -825,6 +810,32 @@ describe('cancellationのテスト', () => {
       expect(response.getHeader('Location')).toEqual('/portal')
     })
 
+    test('正常：一般ユーザーの場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoDataUserRoleNotTenantAdmin)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
+      createSpy.mockReturnValue(createData)
+
+      // 試験実施
+      await change.cbPostChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
+    })
+
     test('400エラー：契約者名、契約者住所、契約者連絡先変更ーチェックなし', async () => {
       // 準備
       // requestのtenantIdに正常値を入れる
@@ -860,34 +871,6 @@ describe('cancellationのテスト', () => {
       // 期待結果
       // 400エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
-    })
-
-    test('403エラー：UerRole不一致', async () => {
-      // 準備
-      // requestのtenantIdに正常値を入れる
-      request.user = {
-        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
-      }
-
-      request.body = {
-        contractorName: 'テスト１',
-        contractorKanaName: 'テスト２',
-        chkContractorName: 'on'
-      }
-
-      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
-      request.flash = jest.fn()
-
-      findOneSpy.mockReturnValue(userInfoDataUserRoleErr)
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
-      createSpy.mockReturnValue(createData)
-
-      // 試験実施
-      await change.cbPostChangeIndex(request, response, next)
-
-      // 期待結果
-      // 400,500エラーがエラーハンドリング「されない」
-      expect(next).toHaveBeenCalledWith(errorHelper.create(403))
     })
 
     test('500エラー：OderDBエラーの場合', async () => {

@@ -90,40 +90,37 @@ const isTenantManager = function (userRole, deleteFlag) {
   return true
 }
 
-const checkStatusForRegister = function (contractStatus, deleteFlag) {
+const isStatusForRegister = function (contractStatus, deleteFlag) {
   if (
     (contractStatus === constantsDefine.statusConstants.contractStatusNewContractOrder ||
       contractStatus === constantsDefine.statusConstants.contractStatusNewContractReceive) &&
     !deleteFlag
   ) {
     return false
-  } else {
-    return true
   }
+  return true
 }
 
-const checkStatusForCancel = function (contractStatus, deleteFlag) {
+const isStatusForCancel = function (contractStatus, deleteFlag) {
   if (
     (contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder ||
       contractStatus === constantsDefine.statusConstants.contractStatusCancellationReceive) &&
     !deleteFlag
   ) {
     return false
-  } else {
-    return true
   }
+  return true
 }
 
-const checkStatusForChange = function (contractStatus, deleteFlag) {
+const isStatusForSimpleChange = function (contractStatus, deleteFlag) {
   if (
     (contractStatus === constantsDefine.statusConstants.contractStatusSimpleChangeContractOrder ||
       contractStatus === constantsDefine.statusConstants.contractStatusSimpleChangeContractReceive) &&
     !deleteFlag
   ) {
     return false
-  } else {
-    return true
   }
+  return true
 }
 
 module.exports = {
@@ -137,7 +134,7 @@ module.exports = {
   isUUID: isUUID,
   isPostalNumber: isPostalNumber,
   isTenantManager: isTenantManager,
-  checkStatusForRegister: checkStatusForRegister,
-  checkStatusForCancel: checkStatusForCancel,
-  checkStatusForChange: checkStatusForChange
+  isStatusForRegister: isStatusForRegister,
+  isStatusForCancel: isStatusForCancel,
+  isStatusForSimpleChange: isStatusForSimpleChange
 }

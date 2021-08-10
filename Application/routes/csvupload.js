@@ -52,7 +52,7 @@ const cbGetIndex = async (req, res, next) => {
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
 
-  if (!validate.checkStatusForCancel(contractStatus, deleteFlag)) {
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
