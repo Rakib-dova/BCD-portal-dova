@@ -18,7 +18,7 @@ const bodyParser = require('body-parser')
 router.use(
   bodyParser.json({
     type: 'application/json',
-    limit: '100KB'
+    limit: '5120KB'
   })
 )
 const bconCsv = require('../lib/bconCsv')
@@ -79,15 +79,29 @@ const cbPostUpload = async (req, res, next) => {
     accessToken: req.user.accessToken,
     refreshToken: req.user.refreshToken
   }
+  let errorText = null
   // csvアップロード
   if (cbUploadCsv(filePath, filename, uploadCsvData) === false) return next(errorHelper.create(500))
   // csvからデータ抽出
-  if (cbExtractInvoice(filePath, filename, userToken) === false) return next(errorHelper.create(500))
+  switch (cbExtractInvoice(filePath, filename, userToken)) {
+    case 101:
+      errorText = '請求書101件以上です。'
+      break
+    case 102:
+      errorText = '明細数201件以上です。'
+      break
+    default:
+      break
+  }
+
   // csv削除
   if (cbRemoveCsv(filePath, filename) === false) return next(errorHelper.create(500))
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
-  return res.status(200).send('OK')
+
+  if (errorText === null) return res.status(200).send('OK')
+
+  return res.status(200).send(errorText)
 }
 
 // csvアップロード
@@ -149,19 +163,37 @@ const cbExtractInvoice = (_extractDir, _filename, _user) => {
   setHeaders.Accepts = 'application/json'
   setHeaders.Authorization = `Bearer ${_user.accessToken}`
   setHeaders['Content-Type'] = 'application/json'
+  let meisaiFlag = 0
+  if (invoiceCnt > 100) {
+    logger.error(constantsDefine.logMessage.ERR001 + 'invoiceToomuch Error')
+    return 101
+  }
+
   for (let idx = 0; idx < invoiceCnt; idx++) {
-    const res = apiManager.accessTradeshift(
-      _user.accessToken,
-      _user.refreshToken,
-      'put',
-      '/documents/' + invoiceList[idx].getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
-      JSON.stringify(invoiceList[idx].getDocument()),
-      {
-        headers: setHeaders
-      }
-    )
+    // 明細check
+    const meisaiLength = invoiceList[idx].getDocument().InvoiceLine.length
+    if (meisaiLength > 200) {
+      logger.error(
+        constantsDefine.logMessage.ERR001 + invoiceList[idx].getDocument().ID.value + ' - specificToomuch Error'
+      )
+      meisaiFlag = 1
+    } else {
+      const res = apiManager.accessTradeshift(
+        _user.accessToken,
+        _user.refreshToken,
+        'put',
+        '/documents/' + invoiceList[idx].getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
+        JSON.stringify(invoiceList[idx].getDocument()),
+        {
+          headers: setHeaders
+        }
+      )
+    }
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
+
+  if (meisaiFlag === 1) return 102
+
   return true
 }
 
