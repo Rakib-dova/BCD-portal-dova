@@ -83,12 +83,15 @@ const cbPostUpload = async (req, res, next) => {
   // csvアップロード
   if (cbUploadCsv(filePath, filename, uploadCsvData) === false) return next(errorHelper.create(500))
   // csvからデータ抽出
-  switch (cbExtractInvoice(filePath, filename, userToken)) {
+  switch (await cbExtractInvoice(filePath, filename, userToken)) {
     case 101:
       errorText = '請求書101件以上です。'
       break
     case 102:
       errorText = '明細数201件以上です。'
+      break
+    case 103:
+      errorText = '重複請求書がありました。'
       break
     default:
       break
@@ -153,7 +156,7 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
-const cbExtractInvoice = (_extractDir, _filename, _user) => {
+const cbExtractInvoice = async (_extractDir, _filename, _user) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
   const csvObj = new bconCsv(extractFullpathFile)
@@ -163,13 +166,35 @@ const cbExtractInvoice = (_extractDir, _filename, _user) => {
   setHeaders.Accepts = 'application/json'
   setHeaders.Authorization = `Bearer ${_user.accessToken}`
   setHeaders['Content-Type'] = 'application/json'
+
   let meisaiFlag = 0
+
+  // トレードシフトからドキュメントを取得
+  let documentsList
+  const documentIds = []
+  let numPages
+  let currPage
+  let documentsURL = '/documents?stag=draft&stag=outbox&limit=10000'
+  do {
+    if (Object.prototype.toString.call(currPage) !== '[object Undefined]') {
+      currPage++
+      documentsURL = `/documents?stag=draft&stag=outbox&limit=10000&page=${currPage}`
+    }
+    documentsList = await apiManager.accessTradeshift(_user.accessToken, _user.refreshToken, 'get', documentsURL)
+    documentsList.Document.forEach((document) => {
+      documentIds.push(document.ID)
+    })
+    numPages = documentsList.numPages
+    currPage = documentsList.pageId
+  } while (currPage < numPages)
+
   if (invoiceCnt > 100) {
     logger.error(constantsDefine.logMessage.ERR001 + 'invoiceToomuch Error')
     return 101
   }
 
-  for (let idx = 0; idx < invoiceCnt; idx++) {
+  let idx = 0
+  while (invoiceList[idx]) {
     // 明細check
     const meisaiLength = invoiceList[idx].getDocument().InvoiceLine.length
     if (meisaiLength > 200) {
@@ -178,23 +203,41 @@ const cbExtractInvoice = (_extractDir, _filename, _user) => {
       )
       meisaiFlag = 1
     } else {
-      const res = apiManager.accessTradeshift(
-        _user.accessToken,
-        _user.refreshToken,
-        'put',
-        '/documents/' + invoiceList[idx].getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
-        JSON.stringify(invoiceList[idx].getDocument()),
-        {
-          headers: setHeaders
+      // アップロードするドキュメントが重複のチェック
+      const docNo = invoiceList[idx].getDocument().ID.value
+      documentIds.forEach((id) => {
+        if (docNo === id) {
+          delete invoiceList[idx]
         }
-      )
+      })
+      if (invoiceList[idx]) {
+        const res = await apiManager.accessTradeshift(
+          _user.accessToken,
+          _user.refreshToken,
+          'put',
+          '/documents/' + invoiceList[idx].getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
+          JSON.stringify(invoiceList[idx].getDocument()),
+          {
+            headers: setHeaders
+          }
+        )
+        logger.info(res)
+      } else {
+        meisaiFlag = 2
+      }
+      idx++
     }
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
 
-  if (meisaiFlag === 1) return 102
+  switch (meisaiFlag) {
+    case 1:
+      return 102
+    case 2:
+      return 103
+  }
 
-  return true
+  return 0
 }
 
 const getTimeStamp = () => {
