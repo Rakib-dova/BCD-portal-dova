@@ -30,6 +30,7 @@ const next = require('jest-express').Next
 const helper = require('../../Application/routes/helpers/middleware')
 const errorHelper = require('../../Application/routes/helpers/error')
 const noticeHelper = require('../../Application/routes/helpers/notice')
+const apiManager = require('../../Application/controllers/apiManager.js')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const logger = require('../../Application/lib/logger.js')
@@ -38,7 +39,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
-let request, response, infoSpy, findOneSpy, findOneSpyContracts
+let request, response, infoSpy, findOneSpy, findOneSpyContracts, accessTradeshiftSpy
 describe('csvuploadのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -46,6 +47,7 @@ describe('csvuploadのテスト', () => {
     infoSpy = jest.spyOn(logger, 'info')
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
+    accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
   })
   afterEach(() => {
     request.resetMocked()
@@ -54,6 +56,7 @@ describe('csvuploadのテスト', () => {
     infoSpy.mockRestore()
     findOneSpy.mockRestore()
     findOneSpyContracts.mockRestore()
+    accessTradeshiftSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -117,6 +120,13 @@ describe('csvuploadのテスト', () => {
   2021-06-14,UT_TEST_INVOICE_3_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,002,ST002M,100,EA,100000,JP 不課税 0%,アップロードテスト
   2021-06-14,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,003,マウス,100,EA,100000,JP 免税 0%,アップロードテスト
   2021-06-14,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,004,キーボード,100,EA,100000,JP 非課税 0%,アップロードテスト`
+  ).toString('base64')
+
+  // 既に登録済みの請求書番号
+  const fileData5 = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+  2021-06-15,UT_TEST_INVOICE_5_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test112,testsiten,testbank,General,11111,kim_test,特記事項テストです。,001,PC,100,EA,100000,JP 消費税 10%,アップロードテスト
+  2021-06-14,UT_TEST_INVOICE_3_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,001,ST001S,100,EA,100000,JP 消費税(軽減税率) 8%,アップロードテスト`
   ).toString('base64')
 
   // 請求書が100件
@@ -741,6 +751,41 @@ describe('csvuploadのテスト', () => {
   2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test201,testsiten,testbank,General,11310,kim_test,201件テストです。,201,PC,100,EA,100000,JP 消費税 10%,アップロードテスト`
   ).toString('base64')
 
+  // 登録済みのドキュメントデータ
+  const documentListData = {
+    itemsPerPage: 10000,
+    itemCount: 1,
+    indexing: false,
+    numPages: 1,
+    pageId: 1,
+    Document: [
+      {
+        DocumentId: '06051d44-fc05-4b89-9ba6-89594e4d7b9b',
+        ID: 'UT_TEST_INVOICE_5_1',
+        URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/06051d44-fc05-4b89-9ba6-89594e4d7b9b',
+        DocumentType: [Object],
+        State: 'LOCKED',
+        CreatedDateTime: '2021-06-22T09:05:50.759Z',
+        LastEdit: '2021-08-13T10:07:03.485Z',
+        Actor: [Object],
+        ConversationId: 'dd255507-3e97-4342-8df1-5d128d1c14bc',
+        ReceiverCompanyName: 'test',
+        Tags: [Object],
+        ItemInfos: [Array],
+        LatestDispatch: [Object],
+        SentReceivedTimestamp: '2021-08-13T10:07:05.233Z',
+        ProcessState: 'OVERDUE',
+        ConversationStates: [Array],
+        UnifiedState: 'OVERDUE',
+        CopyIndicator: false,
+        Deleted: false,
+        DueDate: '2021-05-31',
+        TenantId: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
+        Properties: []
+      }
+    ]
+  }
+
   // 異常系データ定義
   // userIdがnullの場合
   const usernull = {
@@ -1060,6 +1105,8 @@ describe('csvuploadのテスト', () => {
         fileData: fileData
       }
 
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
 
@@ -1084,6 +1131,8 @@ describe('csvuploadのテスト', () => {
       request.body = {
         fileData: fileData2
       }
+
+      accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -1110,6 +1159,8 @@ describe('csvuploadのテスト', () => {
         fileData: fileData3
       }
 
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
 
@@ -1134,6 +1185,8 @@ describe('csvuploadのテスト', () => {
       request.body = {
         fileData: fileData4
       }
+
+      accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -1238,6 +1291,8 @@ describe('csvuploadのテスト', () => {
         fileData: fileData100
       }
 
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
 
@@ -1263,6 +1318,8 @@ describe('csvuploadのテスト', () => {
         fileData: fileData200
       }
 
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
 
@@ -1270,30 +1327,6 @@ describe('csvuploadのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-    })
-
-    test('準正常：明細数201件以上の場合', async () => {
-      // 準備
-      // requestのuserIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-
-      // ファイルデータを設定
-      request.body = {
-        fileData: fileData201
-      }
-
-      // 試験実施
-      await csvupload.cbPostUpload(request, response, next)
-
-      // 期待結果
-      expect(response.statusCode).toBe(200)
-      expect(response.body).toBe('明細数201件以上です。')
     })
 
     test('準正常：請求書数101件以上の場合', async () => {
@@ -1312,6 +1345,8 @@ describe('csvuploadのテスト', () => {
         fileData: fileData101
       }
 
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
 
@@ -1319,6 +1354,58 @@ describe('csvuploadのテスト', () => {
       // statusCode 200，bodyが合ってること
       expect(response.statusCode).toBe(200)
       expect(response.body).toBe('請求書101件以上です。')
+    })
+
+    test('準正常：明細数201件以上の場合', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+
+      // ファイルデータを設定
+      request.body = {
+        fileData: fileData201
+      }
+
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toBe('明細数201件以上です。')
+    })
+
+    test('準正常：既に登録済みの請求書番号', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+
+      // ファイルデータを設定
+      request.body = {
+        fileData: fileData5
+      }
+
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toBe('重複の請求書番号があります。')
     })
   })
 
@@ -1401,6 +1488,8 @@ describe('csvuploadのテスト', () => {
 
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
 
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
       // 試験実施
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
@@ -1427,6 +1516,8 @@ describe('csvuploadのテスト', () => {
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData100), 'base64').toString('utf8')
+
+      accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
@@ -1482,11 +1573,13 @@ describe('csvuploadのテスト', () => {
 
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData101), 'base64').toString('utf8')
 
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
       // 試験実施
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -1510,11 +1603,13 @@ describe('csvuploadのテスト', () => {
 
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData201), 'base64').toString('utf8')
 
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
       // 試験実施
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)

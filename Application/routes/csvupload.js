@@ -197,6 +197,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user) => {
   while (invoiceList[idx]) {
     // 明細check
     const meisaiLength = invoiceList[idx].getDocument().InvoiceLine.length
+
     if (meisaiLength > 200) {
       logger.error(
         constantsDefine.logMessage.ERR001 + invoiceList[idx].getDocument().ID.value + ' - specificToomuch Error'
@@ -211,7 +212,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user) => {
         }
       })
       if (invoiceList[idx]) {
-        const res = await apiManager.accessTradeshift(
+        await apiManager.accessTradeshift(
           _user.accessToken,
           _user.refreshToken,
           'put',
@@ -221,12 +222,11 @@ const cbExtractInvoice = async (_extractDir, _filename, _user) => {
             headers: setHeaders
           }
         )
-        logger.info(res)
       } else {
         meisaiFlag = 2
       }
-      idx++
     }
+    idx++
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
 
