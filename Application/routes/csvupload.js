@@ -91,7 +91,7 @@ const cbPostUpload = async (req, res, next) => {
       errorText = '明細数201件以上です。'
       break
     case 103:
-      errorText = '重複請求書がありました。'
+      errorText = '重複の請求書番号があります。'
       break
     default:
       break
