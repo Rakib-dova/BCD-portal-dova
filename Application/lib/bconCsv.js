@@ -3,6 +3,7 @@
 const fs = require('fs')
 const { v4: uuidv4 } = require('uuid')
 const logger = require('./logger')
+
 class Invoice {
   #DocumentId = null
   constructor() {
@@ -112,15 +113,7 @@ class Invoice {
       }
     ]
   }
-  setInvoiceLine(
-    _sellersItemNum,
-    _itemName,
-    _quantityValue,
-    _quantityUnitCode,
-    _priceValue,
-    _taxRate,
-    _description
-  ) {
+  setInvoiceLine(_sellersItemNum, _itemName, _quantityValue, _quantityUnitCode, _priceValue, _taxRate, _description) {
     this.#InvoiceLine.Item.SellersItemIdentification.ID.value = _sellersItemNum
     this.#InvoiceLine.Item.Name.value = _itemName
     this.#InvoiceLine.InvoicedQuantity.value = parseInt(_quantityValue, 10)
@@ -177,6 +170,7 @@ class Invoice {
     this.#Document.Note.push(JSON.parse(JSON.stringify(this.#Note)))
   }
 }
+
 class bconCsv {
   #csvFile = {
     fileStatusEnum: {
@@ -202,6 +196,7 @@ class bconCsv {
         if (tmpRows[idx].trim()) {
           this.rows.push({
             idx: idx,
+            invoiceGroup: null,
             docNo: tmpRows[idx].split(',')[1],
             rows: tmpRows[idx]
           })
@@ -209,19 +204,20 @@ class bconCsv {
       }
       this.invoiceCnt = this.rows.length
       this.rows.sort((a, b) => {
-        if (a.docNo > b.docNo) {
+        if (a.idx > b.idx) {
           return 1
-        } else if (a.docNo < b.docNo) {
-          return -1
         } else {
-          if (a.idx > b.idx) {
-            return 1
-          } else if (a.idx < b.idx) {
-            return -1
-          } else {
-            return 0
-          }
+          return -1
         }
+      })
+      let groupNumber = 0
+      this.rows.reduce((docNo, cur, idx) => {
+        if (docNo !== cur.docNo) {
+          cur.invoiceGroup = groupNumber++
+        } else {
+          cur.invoiceGroup = groupNumber
+        }
+        return cur.docNo
       })
     },
     setFile(_filePath) {
@@ -262,60 +258,35 @@ class bconCsv {
 
   convertTradeshiftInvoice() {
     const invoiceData = this.#csvFile.getRows()
-    let listIdx = 0
-    for (let idx = 0; invoiceData[idx] !== undefined; listIdx++) {
-      const parentInvoiceDocNo = invoiceData[idx].docNo
-      const rows = invoiceData[idx].rows
-      const column = rows.split(',')
-      this.#invoiceDocumentList.push(new Invoice())
-      this.#invoiceDocumentList[listIdx].setIssueDate(column[0])
-      this.#invoiceDocumentList[listIdx].setInvoiceNumber(column[1])
-      this.#invoiceDocumentList[listIdx].setCustomerTennant(column[2])
-      this.#invoiceDocumentList[listIdx].setDelivery(column[4])
-      this.#invoiceDocumentList[listIdx].setAdditionalDocumentReference(column[5])
-      this.#invoiceDocumentList[listIdx].setPaymentMeans(
-        column[3],
-        column[6],
-        column[7],
-        column[8],
-        column[9],
-        column[10]
-      )
-      this.#invoiceDocumentList[listIdx].setNote(column[11])
-      this.#invoiceDocumentList[listIdx].setInvoiceLine(
-        column[12],
-        column[13],
-        column[14],
-        column[15],
-        column[16],
-        column[17],
-        column[18]
-      )
-      let checkedIdx = invoiceData[idx].idx
-      let checkedSubIdx = null
-      for (
-        let subIdx = idx + 1;
-        invoiceData[subIdx] !== undefined && parentInvoiceDocNo === invoiceData[subIdx].docNo;
-        subIdx++, checkedSubIdx = subIdx
+    let parentInvoice = null
+    invoiceData.forEach((element) => {
+      let invoiceNoOverlapFlag = false
+      const column = element.rows.split(',')
+      if (
+        Object.prototype.toString.call(parentInvoice) === '[object Null]' ||
+        parentInvoice.getInvoiceNumber().value !== element.docNo
       ) {
-        const subColumn = invoiceData[subIdx].rows.split(',')
-        if (invoiceData[subIdx].idx - checkedIdx === 1) {
-          this.#invoiceDocumentList[listIdx].setInvoiceLine(
-            subColumn[12],
-            subColumn[13],
-            subColumn[14],
-            subColumn[15],
-            subColumn[16],
-            subColumn[17],
-            subColumn[18]
-          )
-          checkedIdx++
-        } else {
-          this.#failedInvoiceList.push(invoiceData[subIdx])
+        parentInvoice = new Invoice()
+        parentInvoice.setIssueDate(column[0])
+        parentInvoice.setInvoiceNumber(column[1])
+        parentInvoice.setCustomerTennant(column[2])
+        parentInvoice.setDelivery(column[4])
+        parentInvoice.setAdditionalDocumentReference(column[5])
+        parentInvoice.setPaymentMeans(column[3], column[6], column[7], column[8], column[9], column[10])
+        parentInvoice.setNote(column[11])
+        parentInvoice.setInvoiceLine(column[12], column[13], column[14], column[15], column[16], column[17], column[18])
+        this.#invoiceDocumentList.forEach((ele) => {
+          if (ele.getDocument().ID.value === element.docNo) {
+            invoiceNoOverlapFlag = true
+          }
+        })
+        if (!invoiceNoOverlapFlag) {
+          this.#invoiceDocumentList.push(parentInvoice)
         }
+      } else {
+        parentInvoice.setInvoiceLine(column[12], column[13], column[14], column[15], column[16], column[17], column[18])
       }
-      idx = checkedSubIdx
-    }
+    })
   }
 
   getInvoice(idx) {

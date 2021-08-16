@@ -25,15 +25,14 @@ block content
         .mt-1.has-text-right
           a.button.is-link.is-light(href="#") 取り込み結果一覧 →
 
-      //- 20210607、洪、アップロードprogress画面追加
-      .modal#progress-modal 
-        .modal-background
-        .modal-card.is-family-noto-sans 
-          header.modal-card-head 
-            p.modal-card-title アップロード中
-          section.modal-card-body 
-            p CSVファイルをアップロード中です。
-          footer.modal-card-foot
+      .modal.modal-fx-fadeInscale#upload-progress-modal
+          .modal-card
+            header.modal-card-head
+              p.modal-card-title
+            section.modal-card-body
+              center
+                p.modal-card-result#modal-card-result アップロード中
+            footer.modal-card-foot
 
     include footer
 
