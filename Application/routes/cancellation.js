@@ -74,12 +74,41 @@ const cbGetCancellation = async (req, res, next) => {
 const cbPostCancellation = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostCancellation')
 
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
   // DBから契約情報取得
   const contract = await contractController.findOne(req.user.tenantId)
-
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = helper.checkContractStatus
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('cancelprocedure'))
+  }
+
+  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
+    return next(noticeHelper.create('generaluser'))
+  }
+
+  if (checkContractStatus === null || checkContractStatus === 999) {
+    return next(errorHelper.create(500))
+  }
+
+  if (!validate.isStatusForRegister(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('registerprocedure'))
+  }
+
+  if (!validate.isStatusForSimpleChange(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('changeprocedure'))
+  }
 
   // contractBasicInfo 設定
   contractInformationcancelOrder.contractBasicInfo.tradeshiftId = req.user.tenantId
@@ -96,7 +125,7 @@ const cbPostCancellation = async (req, res, next) => {
 }
 
 router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetCancellation)
-router.post('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbPostCancellation)
+router.post('/', helper.isAuthenticated, cbPostCancellation)
 
 module.exports = {
   router: router,
