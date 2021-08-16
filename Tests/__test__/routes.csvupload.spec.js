@@ -330,7 +330,7 @@ describe('csvuploadのテスト', () => {
     2021-06-14,UT_TEST_INVOICE_3_101,3cfebb4f-2338-4dc7-9523-5423a027a880,2021/3/31,2021/3/17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,002,ST002M,100,EA,100000,JP 不課税 0%,アップロードテスト`
   ).toString('base64')
 
-  // 請求書が200件
+  // 明細書：200件
   const fileData200 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
     2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,General,11111,kim_test,200件テストです。,001,PC,100,EA,100000,JP 消費税 10%,アップロードテスト
@@ -535,7 +535,7 @@ describe('csvuploadのテスト', () => {
   2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,General,11310,kim_test,200件テストです。,200,PC,100,EA,100000,JP 消費税 10%,アップロードテスト`
   ).toString('base64')
 
-  // 請求書が201件
+  // 明細書：201件
   const fileData201 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
     2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,General,11111,kim_test,200件テストです。,001,PC,100,EA,100000,JP 消費税 10%,アップロードテスト
