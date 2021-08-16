@@ -70,6 +70,12 @@ const cbPostUpload = async (req, res, next) => {
   const user = await userController.findOne(req.user.userId)
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+
+  const checkContractStatus = helper.checkContractStatus
+  if (checkContractStatus === null || checkContractStatus === 999) {
+    return next(errorHelper.create(500))
+  }
+
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
@@ -180,7 +186,7 @@ const getTimeStamp = () => {
   return stamp
 }
 
-router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetIndex)
+router.get('/', helper.isAuthenticated, cbGetIndex)
 
 router.post('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbPostUpload)
 
