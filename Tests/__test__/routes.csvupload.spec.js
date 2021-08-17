@@ -34,6 +34,7 @@ const apiManager = require('../../Application/controllers/apiManager.js')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const logger = require('../../Application/lib/logger.js')
+const constantsDefine = require('../../Application/constants')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
@@ -1353,7 +1354,7 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       // statusCode 200，bodyが合ってること
       expect(response.statusCode).toBe(200)
-      expect(response.body).toBe('請求書101件以上です。')
+      expect(response.body).toBe(constantsDefine.statusConstants.INVOICE_FAILED)
     })
 
     test('準正常：明細数201件以上の場合', async () => {
@@ -1379,7 +1380,7 @@ describe('csvuploadのテスト', () => {
 
       // 期待結果
       expect(response.statusCode).toBe(200)
-      expect(response.body).toBe('明細数201件以上です。')
+      expect(response.body).toBe(constantsDefine.statusConstants.OVER_SPECIFICATION)
     })
 
     test('準正常：既に登録済みの請求書番号', async () => {
@@ -1405,7 +1406,7 @@ describe('csvuploadのテスト', () => {
 
       // 期待結果
       expect(response.statusCode).toBe(200)
-      expect(response.body).toBe('重複の請求書番号があります。')
+      expect(response.body).toBe(constantsDefine.statusConstants.OVERLAPPED_INVOICE)
     })
   })
 
