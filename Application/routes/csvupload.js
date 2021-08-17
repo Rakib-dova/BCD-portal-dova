@@ -18,7 +18,7 @@ const bodyParser = require('body-parser')
 router.use(
   bodyParser.json({
     type: 'application/json',
-    limit: '5120KB'
+    limit: '6826KB'
   })
 )
 const bconCsv = require('../lib/bconCsv')
@@ -85,13 +85,13 @@ const cbPostUpload = async (req, res, next) => {
   // csvからデータ抽出
   switch (await cbExtractInvoice(filePath, filename, userToken)) {
     case 101:
-      errorText = '請求書101件以上です。'
+      errorText = constantsDefine.statusConstants.INVOICE_FAILED
       break
     case 102:
-      errorText = '明細数201件以上です。'
+      errorText = constantsDefine.statusConstants.OVER_SPECIFICATION
       break
     case 103:
-      errorText = '重複の請求書番号があります。'
+      errorText = constantsDefine.statusConstants.OVERLAPPED_INVOICE
       break
     default:
       break
@@ -102,7 +102,7 @@ const cbPostUpload = async (req, res, next) => {
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
 
-  if (errorText === null) return res.status(200).send('OK')
+  if (errorText === null) return res.status(200).send(constantsDefine.statusConstants.SUCCESS)
 
   return res.status(200).send(errorText)
 }
