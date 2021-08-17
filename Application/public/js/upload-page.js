@@ -11,7 +11,13 @@ fileUpload.addEventListener('change', function (e) {
   if (targetFile !== null) {
     fileReader = new FileReader()
     fileReader.readAsBinaryString(targetFile)
-    startUploadBtn.removeAttribute('Disabled')
+    fileReader.onload = function () {
+      if (btoa(fileReader.result).length > 6826) {
+        alert('ファイルサイズが5MB超えています。\nCSVファイルを確認後もう一度アップロードしてください。')
+      } else {
+        startUploadBtn.removeAttribute('Disabled')
+      }
+    }
   } else {
     startUploadBtn.setAttribute('Disabled', 'Disabled')
   }
@@ -44,6 +50,9 @@ startUploadBtn.onclick = (() => {
             modal.classList.remove('is-active')
             startUploadBtn.setAttribute('Disabled', 'Disabled')
             alert(sender.responseText)
+          } else {
+            modal.classList.remove('is-active')
+            startUploadBtn.setAttribute('Disabled', 'Disabled')
           }
         }
       }
