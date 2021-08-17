@@ -66,12 +66,12 @@ exports.isUserRegistered = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   if (user instanceof Error) return next(errorHelper.create(500))
 
-  // テナントが見つからない場合はnull値
+  // ユーザが見つからない場合はnull値
   if (user === null) {
-    // テナントがDBに登録されていない
+    // ユーザがDBに登録されていない
     await userController.create(req.user.accessToken, req.user.refreshToken)
   } else if (user.dataValues?.tenantId) {
-    // テナントがDBに登録されている
+    // ユーザがDBに登録されている
     next()
   } else {
     // dataValuesやtenantIdがundefined（異常系）

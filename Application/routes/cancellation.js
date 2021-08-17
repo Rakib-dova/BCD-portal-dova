@@ -44,6 +44,11 @@ const cbGetCancellation = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = helper.checkContractStatus
+
+  if (checkContractStatus === null || checkContractStatus === 999) {
+    return next(errorHelper.create(500))
+  }
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
@@ -90,6 +95,10 @@ const cbPostCancellation = async (req, res, next) => {
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = helper.checkContractStatus
 
+  if (checkContractStatus === null || checkContractStatus === 999) {
+    return next(errorHelper.create(500))
+  }
+
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
   }
@@ -97,11 +106,6 @@ const cbPostCancellation = async (req, res, next) => {
   if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
     return next(noticeHelper.create('generaluser'))
   }
-
-  if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
-  }
-
   if (!validate.isStatusForRegister(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('registerprocedure'))
   }
@@ -124,7 +128,7 @@ const cbPostCancellation = async (req, res, next) => {
   return next(noticeHelper.create('cancellation'))
 }
 
-router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetCancellation)
+router.get('/', helper.isAuthenticated, cbGetCancellation)
 router.post('/', helper.isAuthenticated, cbPostCancellation)
 
 module.exports = {
