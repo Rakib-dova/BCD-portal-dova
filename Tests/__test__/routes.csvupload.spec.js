@@ -151,7 +151,7 @@ describe('csvuploadのテスト', () => {
       updatedAt: '2021-01-25T08:45:49.803Z'
     }
   }
-  // response.renderでcancellationが呼ばれ「る」
+
   const contractdataValues2 = {
     dataValues: {
       contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
@@ -189,13 +189,7 @@ describe('csvuploadのテスト', () => {
 
   describe('ルーティング', () => {
     test('csvuploadのルーティングを確認', async () => {
-      expect(csvupload.router.get).toBeCalledWith(
-        '/',
-        helper.isAuthenticated,
-        helper.isTenantRegistered,
-        helper.isUserRegistered,
-        csvupload.cbGetIndex
-      )
+      expect(csvupload.router.get).toBeCalledWith('/', helper.isAuthenticated, csvupload.cbGetIndex)
     })
   })
 
@@ -522,6 +516,33 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
     })
 
+    test('500エラー:不正なContractデータの場合', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // ファイルデータを設定
+      request.body = {
+        fileData
+      }
+
+      helper.checkContractStatus = 999
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「されない」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
     test('500エラー：cbUploadCsv return false', async () => {
       // 準備
       // requestのuserIdに正常値を入れる
@@ -537,6 +558,8 @@ describe('csvuploadのテスト', () => {
       request.body = {
         fileData
       }
+
+      helper.checkContractStatus = 0
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
