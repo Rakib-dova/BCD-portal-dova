@@ -43,6 +43,20 @@ const cbGetRegister = async (req, res, next) => {
   if (userdata.Memberships?.[0].Role?.toLowerCase() !== constantsDefine.userRoleConstants.tenantManager) {
     return next(noticeHelper.create('generaluser'))
   }
+
+  switch (await helper.checkContractStatus(req, res, next)) {
+    case '00':
+    case '10':
+    case '11':
+    case '30':
+    case '31':
+    case '40':
+    case '41':
+      return next(errorHelper.create(500))
+    default:
+      break
+  }
+
   const companyName = userdata.CompanyName
   const userName = userdata.LastName + ' ' + userdata.FirstName
   const email = userdata.Username // TradeshiftのAPIではUsernameにemailが入っている
@@ -100,6 +114,19 @@ const cbPostRegister = async (req, res, next) => {
 
   if (userdata.Memberships?.[0].Role?.toLowerCase() !== constantsDefine.userRoleConstants.tenantManager) {
     return next(noticeHelper.create('generaluser'))
+  }
+
+  switch (await helper.checkContractStatus(req, res, next)) {
+    case '00':
+    case '10':
+    case '11':
+    case '30':
+    case '31':
+    case '40':
+    case '41':
+      return next(errorHelper.create(500))
+    default:
+      break
   }
 
   if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))

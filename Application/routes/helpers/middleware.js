@@ -70,6 +70,7 @@ exports.isUserRegistered = async (req, res, next) => {
   if (user === null) {
     // テナントがDBに登録されていない
     await userController.create(req.user.accessToken, req.user.refreshToken)
+    next()
   } else if (user.dataValues?.tenantId) {
     // テナントがDBに登録されている
     next()
@@ -92,7 +93,7 @@ exports.checkContractStatus = async (req, res, next) => {
   // DB検索エラーの場合
   if (tenant instanceof Error) return next(errorHelper.create(500))
 
-  let tenantId = tenant.dataValues?.tenantId
+  let tenantId = tenant?.dataValues.tenantId
 
   if (!tenantId) {
     tenantId = req.user.tenantId
