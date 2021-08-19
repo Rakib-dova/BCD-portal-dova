@@ -123,6 +123,23 @@ const isStatusForSimpleChange = function (contractStatus, deleteFlag) {
   return true
 }
 
+// CSVファイルのバリデーションチェック（現在行～）
+const isInvoiceId = function (invoiceId) {
+  if (invoiceId.length > constantsDefine.invoiceValidDefine.INVOICEID_VALUE || invoiceId.length < 1) {
+    return 'INVOICEIDERR000'
+  }
+
+  return ''
+}
+
+const isBankName = function (bankName) {
+  if (bankName.length > constantsDefine.invoiceValidDefine.BANKNAME_VALUE || bankName.length < 1) {
+    return 'BANKNAMEERR000'
+  }
+
+  return ''
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -136,5 +153,7 @@ module.exports = {
   isTenantManager: isTenantManager,
   isStatusForRegister: isStatusForRegister,
   isStatusForCancel: isStatusForCancel,
-  isStatusForSimpleChange: isStatusForSimpleChange
+  isStatusForSimpleChange: isStatusForSimpleChange,
+  isInvoiceId: isInvoiceId,
+  isBankName: isBankName
 }

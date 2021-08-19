@@ -40,7 +40,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
-let request, response, infoSpy, findOneSpy, findOneSpyContracts, accessTradeshiftSpy
+let request, response, infoSpy, findOneSpy, findOneSpyContracts, accessTradeshiftSpy, invoiceListSpy
 describe('csvuploadのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -48,6 +48,7 @@ describe('csvuploadのテスト', () => {
     infoSpy = jest.spyOn(logger, 'info')
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
+    invoiceListSpy = jest.spyOn(csvupload, 'cbExtractInvoice')
     accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
   })
   afterEach(() => {
@@ -57,6 +58,7 @@ describe('csvuploadのテスト', () => {
     infoSpy.mockRestore()
     findOneSpy.mockRestore()
     findOneSpyContracts.mockRestore()
+    invoiceListSpy.mockRestore()
     accessTradeshiftSpy.mockRestore()
   })
 
@@ -751,6 +753,24 @@ describe('csvuploadのテスト', () => {
   2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,General,11310,kim_test,200件テストです。,200,PC,100,EA,100000,JP 消費税 10%,アップロードテスト
   2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test201,testsiten,testbank,General,11310,kim_test,201件テストです。,201,PC,100,EA,100000,JP 消費税 10%,アップロードテスト`
   ).toString('base64')
+
+  const fileDataInvoiceIDlessthanequal101 = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    2021-06-15,UT_TEST_INVOICE_5_10000000000000000000000000000000000000000000000000000000000000000000000000000000001,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,General,11111,kim_test,200件テストです。,001,PC,100,EA,100000,JP 消費税 10%,アップロードテスト`
+  ).toString('base64')
+
+  const fileDataBankNamelessthanequal101 = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    2021-06-15,UT_TEST_INVOICE_6_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,BANK1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,General,11111,kim_test,200件テストです。,001,PC,100,EA,100000,JP 消費税 10%,アップロードテスト`
+  ).toString('base64')
+
+  const invoiceListData = {
+    invoicesDetailId: '1043daee-40e5-495f-b9de-de07dfbb7b9d',
+    invoicesId: 'UT_TEST_INVOICE_6_2',
+    lines: 3,
+    status: -1,
+    errorData: '001、銀行名は、100文字以内で入力してください。'
+  }
 
   // 登録済みのドキュメントデータ
   const documentListData = {
@@ -1623,6 +1643,66 @@ describe('csvuploadのテスト', () => {
       expect(resultExt).toBe(102)
     })
 
+    test('準正常：請求書番号バリデーションチェック：101文字以上', async () => {
+      // 準備
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataInvoiceIDlessthanequal101), 'base64').toString('utf8')
+
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken)
+      expect(resultExt).toBeTruthy()
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      expect(infoSpy).toHaveBeenCalledWith('001、請求書番号は、100文字以内で入力してください。')
+    })
+
+    test('準正常：銀行名バリデーションチェック：101文字以上', async () => {
+      // 準備
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataBankNamelessthanequal101), 'base64').toString('utf8')
+
+      accessTradeshiftSpy.mockReturnValue(documentListData)
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken)
+      expect(resultExt).toBeTruthy()
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      expect(infoSpy).toHaveBeenCalledWith('001、銀行名は、100文字以内で入力してください。')
+    })
+
     test('正常 : bconCsv内容確認', async () => {
       // 準備
       request.user = user
@@ -1642,7 +1722,7 @@ describe('csvuploadのテスト', () => {
 
       // 期待結果
       // JSONの内容が正しいこと
-      expect(JSON.stringify(invoiceList[0].getDocument())).toBe(returnBconCsv)
+      expect(JSON.stringify(invoiceList[0].INVOICE.getDocument())).toBe(returnBconCsv)
     })
   })
 

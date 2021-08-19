@@ -196,34 +196,41 @@ const cbExtractInvoice = async (_extractDir, _filename, _user) => {
   let idx = 0
   while (invoiceList[idx]) {
     // 明細check
-    const meisaiLength = invoiceList[idx].getDocument().InvoiceLine.length
+    const meisaiLength = invoiceList[idx].INVOICE.getDocument().InvoiceLine.length
 
     if (meisaiLength > 200) {
       logger.error(
-        constantsDefine.logMessage.ERR001 + invoiceList[idx].getDocument().ID.value + ' - specificToomuch Error'
+        constantsDefine.logMessage.ERR001 + invoiceList[idx].INVOICE.getDocument().ID.value + ' - specificToomuch Error'
       )
       meisaiFlag = 1
     } else {
       // アップロードするドキュメントが重複のチェック
-      const docNo = invoiceList[idx].getDocument().ID.value
+      const docNo = invoiceList[idx].INVOICE.getDocument().ID.value
       documentIds.forEach((id) => {
-        if (docNo === id) {
-          delete invoiceList[idx]
+        if (docNo === id && invoiceList[idx].status !== -1) {
+          invoiceList[idx].status = 1
         }
       })
-      if (invoiceList[idx]) {
-        await apiManager.accessTradeshift(
-          _user.accessToken,
-          _user.refreshToken,
-          'put',
-          '/documents/' + invoiceList[idx].getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
-          JSON.stringify(invoiceList[idx].getDocument()),
-          {
-            headers: setHeaders
-          }
-        )
-      } else {
-        meisaiFlag = 2
+      switch (invoiceList[idx].status) {
+        case 0:
+          await apiManager.accessTradeshift(
+            _user.accessToken,
+            _user.refreshToken,
+            'put',
+            '/documents/' +
+              invoiceList[idx].INVOICE.getDocumentId() +
+              '?draft=true&documentProfileId=tradeshift.invoice.1.0',
+            JSON.stringify(invoiceList[idx].INVOICE.getDocument()),
+            {
+              headers: setHeaders
+            }
+          )
+          break
+        case 1:
+          meisaiFlag = 2
+          break
+        case -1:
+          logger.info(invoiceList[idx].errorData)
       }
     }
     idx++
