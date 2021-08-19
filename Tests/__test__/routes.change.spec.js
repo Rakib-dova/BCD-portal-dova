@@ -20,7 +20,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
 }
 
 let request, response, infoSpy, findOneSpy, findOneSpyContracts, createSpy
-describe('cancellationのテスト', () => {
+describe('changeのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
@@ -208,7 +208,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // response.renderでcancellationが呼ばれ「る」
+      // response.renderでchangeが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('change', {
         tenantId: request.user.tenantId,
         userRole: request.session.userRole,
@@ -388,7 +388,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 利用不可画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
     })
 
@@ -443,7 +443,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // response.renderでcancellationが呼ばれ「る」
+      // response.renderでchangeが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('change', {
         tenantId: request.user.tenantId,
         userRole: request.session.userRole,
@@ -1046,7 +1046,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 利用不可画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
     })
 

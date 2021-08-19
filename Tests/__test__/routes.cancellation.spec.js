@@ -290,7 +290,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 利用登録手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
     })
 
@@ -315,7 +315,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 利用登録手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
     })
 
@@ -340,7 +340,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 契約情報変更手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('changeprocedure'))
     })
 
@@ -365,7 +365,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 契約情報変更手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('changeprocedure'))
     })
 
@@ -390,7 +390,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 利用不可画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
     })
 
@@ -683,7 +683,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 利用登録手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
     })
 
@@ -709,7 +709,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 利用登録手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
     })
 
@@ -735,7 +735,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 契約情報変更手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('changeprocedure'))
     })
 
@@ -761,7 +761,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 契約情報変更手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('changeprocedure'))
     })
 
@@ -787,7 +787,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 利用不可画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
     })
 
