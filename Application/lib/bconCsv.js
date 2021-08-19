@@ -3,6 +3,8 @@
 const fs = require('fs')
 const { v4: uuidv4 } = require('uuid')
 const logger = require('./logger')
+const validate = require('./validate')
+const constants = require('../constants')
 
 class Invoice {
   #DocumentId = null
@@ -187,6 +189,7 @@ class bconCsv {
     setData(_data) {
       this.data = _data
     },
+
     getData() {
       return this.data
     },
@@ -210,6 +213,7 @@ class bconCsv {
           return -1
         }
       })
+
       let groupNumber = 0
       this.rows.reduce((docNo, cur, idx) => {
         if (docNo !== cur.docNo) {
@@ -220,6 +224,7 @@ class bconCsv {
         return cur.docNo
       })
     },
+
     setFile(_filePath) {
       this.setStatus(this.fileStatusEnum.LOADING)
       this.fd = fs.openSync(_filePath, 'r')
@@ -231,25 +236,28 @@ class bconCsv {
       })
       this.setRows(this.getData())
     },
+
     setStatus(_statuscode) {
       this.status = _statuscode
     },
+
     getRow(idx) {
       if (idx > this.invoiceCnt) {
         return null
       }
       return this.rows[idx]
     },
+
     getRows() {
       return this.rows
     }
   }
+
   getCSVFile() {
     return this.#csvFile
   }
 
   #invoiceDocumentList = []
-  #failedInvoiceList = []
 
   constructor(fullFilePath) {
     this.#csvFile.setFile(fullFilePath)
@@ -257,35 +265,81 @@ class bconCsv {
   }
 
   convertTradeshiftInvoice() {
+    // CSVカーラム
+    //   発行日, 請求書番号, テナントID, 支払期日, 納品日, 備考, 銀行名, 支店名, 科目, 口座番号, 口座名義, その他特記事項
+    //   明細-項目ID, 明細-内容, 明細-数量, 明細-単位, 明細-単価, 明細-税, 明細-備考
+    const resultConvert = {
+      invoicesDetailId: null,
+      invoicesId: null,
+      lines: null,
+      status: null,
+      errorData: null,
+      INVOICE: null
+    }
     const invoiceData = this.#csvFile.getRows()
     let parentInvoice = null
     invoiceData.forEach((element) => {
-      let invoiceNoOverlapFlag = false
-      const column = element.rows.split(',')
-      if (
-        Object.prototype.toString.call(parentInvoice) === '[object Null]' ||
-        parentInvoice.getInvoiceNumber().value !== element.docNo
-      ) {
+      const csvColumn = element.rows.split(',')
+      resultConvert.invoicesDetailId = uuidv4()
+      resultConvert.lines = element.idx + 2
+      resultConvert.status = 0
+      resultConvert.errorData = ''
+      if (parentInvoice?.getInvoiceNumber().value !== element.docNo) {
         parentInvoice = new Invoice()
-        parentInvoice.setIssueDate(column[0])
-        parentInvoice.setInvoiceNumber(column[1])
-        parentInvoice.setCustomerTennant(column[2])
-        parentInvoice.setDelivery(column[4])
-        parentInvoice.setAdditionalDocumentReference(column[5])
-        parentInvoice.setPaymentMeans(column[3], column[6], column[7], column[8], column[9], column[10])
-        parentInvoice.setNote(column[11])
-        parentInvoice.setInvoiceLine(column[12], column[13], column[14], column[15], column[16], column[17], column[18])
+        parentInvoice.setIssueDate(csvColumn[0])
+
+        switch (validate.isInvoiceId(csvColumn[1])) {
+          case '':
+            break
+          default:
+            resultConvert.errorData += `${constants.invoiceErrMsg[validate.isInvoiceId(csvColumn[1])]}`
+            resultConvert.status = -1
+            break
+        }
+        resultConvert.invoicesId = element.docNo
+        parentInvoice.setInvoiceNumber(csvColumn[1])
+
+        parentInvoice.setCustomerTennant(csvColumn[2])
+        parentInvoice.setDelivery(csvColumn[4])
+        parentInvoice.setAdditionalDocumentReference(csvColumn[5])
+
+        switch (validate.isBankName(csvColumn[7])) {
+          case '':
+            break
+          default:
+            resultConvert.errorData += `${constants.invoiceErrMsg[validate.isBankName(csvColumn[7])]}`
+            resultConvert.status = -1
+            break
+        }
+
+        parentInvoice.setPaymentMeans(
+          csvColumn[3],
+          csvColumn[6],
+          csvColumn[7],
+          csvColumn[8],
+          csvColumn[9],
+          csvColumn[10]
+        )
+        parentInvoice.setNote(csvColumn[11])
         this.#invoiceDocumentList.forEach((ele) => {
-          if (ele.getDocument().ID.value === element.docNo) {
-            invoiceNoOverlapFlag = true
+          if (ele.INVOICE.getDocument().ID.value === element.docNo) {
+            resultConvert.status = 1
           }
         })
-        if (!invoiceNoOverlapFlag) {
-          this.#invoiceDocumentList.push(parentInvoice)
-        }
-      } else {
-        parentInvoice.setInvoiceLine(column[12], column[13], column[14], column[15], column[16], column[17], column[18])
+        this.#invoiceDocumentList.push({
+          ...resultConvert,
+          INVOICE: parentInvoice
+        })
       }
+      parentInvoice.setInvoiceLine(
+        csvColumn[12],
+        csvColumn[13],
+        csvColumn[14],
+        csvColumn[15],
+        csvColumn[16],
+        csvColumn[17],
+        csvColumn[18]
+      )
     })
   }
 
