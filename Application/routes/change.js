@@ -46,6 +46,11 @@ const cbGetChangeIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = helper.checkContractStatus
+
+  if (checkContractStatus === null || checkContractStatus === 999) {
+    return next(errorHelper.create(500))
+  }
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
@@ -75,6 +80,43 @@ const cbGetChangeIndex = async (req, res, next) => {
 
 const cbPostChangeIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostChangeIndex')
+
+  const userTenantId = req.user.tenantId
+  const userId = req.user.userId
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(userTenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  const user = await userController.findOne(userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // ユーザ未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = helper.checkContractStatus
+
+  if (checkContractStatus === null || checkContractStatus === 999) {
+    return next(errorHelper.create(500))
+  }
+  
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('cancelprocedure'))
+  }
+
+  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
+    return next(noticeHelper.create('generaluser'))
+  }
+  if (!validate.isStatusForRegister(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('registerprocedure'))
+  }
+
+  if (!validate.isStatusForSimpleChange(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('changeprocedure'))
+  }
 
   const contractInformationchangeOrderContractBasicInfo = JSON.parse(JSON.stringify(contractBasicInfoTemplate))
   const contractInformationchangeOrderContractAccountInfo = JSON.parse(JSON.stringify(contractAccountInfoTemplate))
@@ -116,25 +158,6 @@ const cbPostChangeIndex = async (req, res, next) => {
     contractInformationchangeOrderContactList.contactList[0].contactPersonName = contactPersonName
     contractInformationchangeOrderContactList.contactList[0].contactPhoneNumber = contactPhoneNumber
     contractInformationchangeOrderContactList.contactList[0].contactMail = contactMail
-  }
-
-  const userTenantId = req.user.tenantId
-  const userId = req.user.userId
-
-  // DBから契約情報取得
-  const contract = await contractController.findOne(userTenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
-
-  const user = await userController.findOne(userId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // ユーザ未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
-  const deleteFlag = contract.dataValues.deleteFlag
-
-  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
-    return next(noticeHelper.create('generaluser'))
   }
 
   if (
@@ -242,8 +265,8 @@ const cbPostChangeIndex = async (req, res, next) => {
   return res.redirect('/portal')
 }
 
-router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetChangeIndex)
-router.post('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbPostChangeIndex)
+router.get('/', helper.isAuthenticated, cbGetChangeIndex)
+router.post('/', helper.isAuthenticated, cbPostChangeIndex)
 
 module.exports = {
   router: router,
