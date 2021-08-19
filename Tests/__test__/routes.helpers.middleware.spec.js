@@ -37,6 +37,7 @@ const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
 const tenantController = require('../../Application/controllers/tenantController.js')
 const userController = require('../../Application/controllers/userController.js')
+const contractController = require('../../Application/controllers/contractController.js')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const routesTenant = require('../../Application/routes/tenant')
 const expectError = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
@@ -48,13 +49,15 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
-let request, response, accessTradeshiftSpy, tenantFindOneSpy, userFindOneSpy
+let request, response, accessTradeshiftSpy, tenantFindOneSpy, userFindOneSpy, userCreateSpy, findContractSpy
 describe('helpers/middlewareのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
     tenantFindOneSpy = jest.spyOn(tenantController, 'findOne')
     userFindOneSpy = jest.spyOn(userController, 'findOne')
+    userCreateSpy = jest.spyOn(userController, 'create')
+    findContractSpy = jest.spyOn(contractController, 'findContract')
     accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
   })
   afterEach(() => {
@@ -64,6 +67,8 @@ describe('helpers/middlewareのテスト', () => {
     accessTradeshiftSpy.mockRestore()
     tenantFindOneSpy.mockRestore()
     userFindOneSpy.mockRestore()
+    userCreateSpy.mockRestore()
+    findContractSpy.mockRestore()
   })
 
   describe('isAuthenticated', () => {
@@ -663,10 +668,10 @@ describe('helpers/middlewareのテスト', () => {
       await middleware.isUserRegistered(request, response, next)
 
       // 期待結果
-      // 403エラーが返される
-      expect(next).toHaveBeenCalledWith(expectError)
-      // response.renderが呼ばれ「ない」
-      expect(response.render).not.toHaveBeenCalled()
+      // 500エラーがエラーハンドリングされ「ない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 引数なしでnextが呼ばれ「る」
+      expect(next).toHaveBeenCalledWith()
     })
 
     test('303エラー: userIdがnullの場合', async () => {
@@ -707,7 +712,7 @@ describe('helpers/middlewareのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('403エラー: DBエラーの場合', async () => {
+    test('500エラー: DBエラーの場合', async () => {
       // 準備
       // request.userのuserIdに正常なUUIDを想定する
       request.user = {
@@ -715,7 +720,7 @@ describe('helpers/middlewareのテスト', () => {
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
       }
       // DBからテナントデータが取得できなかった場合を想定する
-      tenantFindOneSpy.mockReturnValue(new Error())
+      userFindOneSpy.mockReturnValue(new Error())
       // 試験実施
       await middleware.isUserRegistered(request, response, next)
 
@@ -740,17 +745,22 @@ describe('helpers/middlewareのテスト', () => {
       request.session = {
         userContext: 'dummy'
       }
-      // DBからテナント情報は取得、ユーザデータの取得ができなかった場合を想定する
-      tenantFindOneSpy.mockReturnValue({
+
+      userFindOneSpy.mockReturnValue(null)
+      userCreateSpy.mockReturnValue({
         dataValues: {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-          registeredBy: '12345678-cb0b-48ad-857d-4b42a44ede13',
-          customerId: null,
-          createdAt: '2021-01-25T10:15:15.035Z',
-          updatedAt: '2021-01-25T10:15:15.035Z'
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: null,
+          userStatus: 0,
+          lastRefreshedAt: null,
+          createdAt: '2021-01-25T10:15:15.086Z',
+          updatedAt: '2021-01-25T10:15:15.086Z'
         }
       })
-      userFindOneSpy.mockReturnValue(null)
 
       request.csrfToken = jest.fn()
 
@@ -759,7 +769,7 @@ describe('helpers/middlewareのテスト', () => {
 
       // 期待結果
       // 引数なしでnextが呼ばれ「ない」
-      expect(next).toHaveBeenCalledWith()
+      expect(next).not.toHaveBeenCalledWith()
       // 303エラーでauthに飛ばされ「ない」
       expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
       expect(response.getHeader('Location')).not.toEqual('/auth')
@@ -779,12 +789,17 @@ describe('helpers/middlewareのテスト', () => {
         userContext: 'dummy'
       }
       // DBから取得したテナントデータがdataValuesに入っていない場合を想定する
-      tenantFindOneSpy.mockReturnValue({
+      userFindOneSpy.mockReturnValue({
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
         tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-        registeredBy: '12345678-cb0b-48ad-857d-4b42a44ede13',
-        customerId: null,
-        createdAt: '2021-01-25T10:15:15.035Z',
-        updateAt: '2021-01-25T10:15:16.035Z'
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: 'dummyRefreshToken',
+        subRefreshToken: null,
+        userStatus: 0,
+        lastRefreshedAt: null,
+        createdAt: '2021-01-25T10:15:15.086Z',
+        updatedAt: '2021-01-25T10:15:15.086Z'
       })
 
       // 試験実施
@@ -798,6 +813,366 @@ describe('helpers/middlewareのテスト', () => {
       expect(response.getHeader('Location')).not.toEqual('/auth')
       // 500エラーがエラーハンドリングされ「る」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+  })
+
+  // ----------------------------
+
+  describe('checkContractStatus', () => {
+    test('正常', async () => {
+      // 準備
+      // request.userのuserIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      // DBから正常なテナントデータの取得を想定する
+      tenantFindOneSpy.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          registeredBy: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          customerId: null,
+          createdAt: '2021-01-25T10:15:15.035Z',
+          updatedAt: '2021-01-25T10:15:15.035Z'
+        }
+      })
+
+      // DBから正常な契約データの取得を想定する
+      findContractSpy.mockReturnValue({
+        dataValues: {
+          contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: 'numberN',
+          contractStatus: '00',
+          deleteFlag: false,
+          createdAt: '2021-07-15 17:41:38',
+          updatedAt: '2021-07-15 17:41:38',
+          contractedAt: '2021-07-15 17:41:38',
+          canceledAt: ''
+        }
+      })
+
+      // 試験実施
+      const result = await middleware.checkContractStatus(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリングされ「ない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // return値がcontractStatusであること
+      expect(result).toBe('00')
+    })
+
+    test('303エラー: userIdがnullの場合', async () => {
+      // 準備
+      // request.userのuserIdが取れていない場合を想定する
+      request.user = {
+        userId: null
+      }
+
+      // 試験実施
+      await middleware.checkContractStatus(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「ない」
+      expect(next).not.toHaveBeenCalledWith()
+      // 303エラーでauthに飛ばされ「る」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/auth')
+      expect(response.getHeader('Location')).toEqual('/auth')
+    })
+
+    test('500エラー: userIdのUUIDが不正な場合', async () => {
+      // 準備
+      // request.userのuserIdのUUIDが不正な場合を想定する
+      request.user = {
+        userId: 'dummy'
+      }
+
+      // 試験実施
+      await middleware.checkContractStatus(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「ない」
+      expect(next).not.toHaveBeenCalledWith()
+      // 303エラーでauthに飛ばされ「ない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
+      expect(response.getHeader('Location')).not.toEqual('/auth')
+      // 500エラーがエラーハンドリングされ「る」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー: DBエラーの場合（tenantsテーブル）', async () => {
+      // 準備
+      // request.userのuserIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+      // DBからテナントデータが取得できなかった場合を想定する
+      tenantFindOneSpy.mockReturnValue(new Error())
+
+      // 試験実施
+      await middleware.checkContractStatus(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「ない」
+      expect(next).not.toHaveBeenCalledWith()
+      // 303エラーでauthに飛ばされ「ない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
+      expect(response.getHeader('Location')).not.toEqual('/auth')
+      // 500エラーがエラーハンドリングされ「る」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー: DBエラーの場合（contractsテーブル）', async () => {
+      // 準備
+      // request.userのuserIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+      // DBから正常なテナントデータの取得を想定する
+      tenantFindOneSpy.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          registeredBy: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          customerId: null,
+          createdAt: '2021-01-25T10:15:15.035Z',
+          updatedAt: '2021-01-25T10:15:15.035Z'
+        }
+      })
+
+      // DBから正常な契約データの取得を想定する
+      findContractSpy.mockReturnValue(new Error())
+
+      // 試験実施
+      await middleware.checkContractStatus(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「ない」
+      expect(next).not.toHaveBeenCalledWith()
+      // 303エラーでauthに飛ばされ「ない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
+      expect(response.getHeader('Location')).not.toEqual('/auth')
+      // 500エラーがエラーハンドリングされ「る」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('DBからtenantデータが見つからない場合', async () => {
+      // 準備
+      // request.userのuserIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      // DBから正常なテナントデータの取得を想定する
+      tenantFindOneSpy.mockReturnValue({
+        dataValues: {}
+      })
+
+      // DBから正常な契約データの取得を想定する
+      findContractSpy.mockReturnValue({
+        dataValues: {
+          contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: 'numberN',
+          contractStatus: '00',
+          deleteFlag: false,
+          createdAt: '2021-07-15 17:41:38',
+          updatedAt: '2021-07-15 17:41:38',
+          contractedAt: '2021-07-15 17:41:38',
+          canceledAt: ''
+        }
+      })
+
+      request.csrfToken = jest.fn()
+
+      // 試験実施
+      await middleware.checkContractStatus(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「ない」
+      expect(next).not.toHaveBeenCalledWith()
+      // 303エラーでauthに飛ばされ「ない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
+      expect(response.getHeader('Location')).not.toEqual('/auth')
+      // 500エラーがエラーハンドリングされ「ない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('DBからcontractデータのdeleteFlagがtrueの場合', async () => {
+      // 準備
+      // request.userのuserIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      // DBから正常なテナントデータの取得を想定する
+      tenantFindOneSpy.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          registeredBy: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          customerId: null,
+          createdAt: '2021-01-25T10:15:15.035Z',
+          updatedAt: '2021-01-25T10:15:15.035Z'
+        }
+      })
+
+      // DBから正常な契約データの取得を想定する
+      findContractSpy.mockReturnValue({
+        dataValues: {
+          contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: 'numberN',
+          contractStatus: '00',
+          deleteFlag: true,
+          createdAt: '2021-07-15 17:41:38',
+          updatedAt: '2021-07-15 17:41:38',
+          contractedAt: '2021-07-15 17:41:38',
+          canceledAt: ''
+        }
+      })
+
+      request.csrfToken = jest.fn()
+
+      // 試験実施
+      await middleware.checkContractStatus(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「ない」
+      expect(next).not.toHaveBeenCalledWith()
+      // 303エラーでauthに飛ばされ「ない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
+      expect(response.getHeader('Location')).not.toEqual('/auth')
+      // 500エラーがエラーハンドリングされ「ない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('DBからtenantデータ、contractデータがない場合', async () => {
+      // 準備
+      // request.userのuserIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      // DBから正常なテナントデータの取得を想定する
+      tenantFindOneSpy.mockReturnValue({
+        dataValues: {}
+      })
+
+      // DBから正常な契約データの取得を想定する
+      findContractSpy.mockReturnValue({
+        dataValues: {}
+      })
+
+      // 試験実施
+      const result = await middleware.checkContractStatus(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「ない」
+      expect(next).not.toHaveBeenCalledWith()
+      // 303エラーでauthに飛ばされ「ない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
+      expect(response.getHeader('Location')).not.toEqual('/auth')
+      // 500エラーがエラーハンドリングされ「ない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // return値が999であること
+      expect(result).toBe(999)
+    })
+
+    test('DBから取得したデータがnullの場合', async () => {
+      // 準備
+      // request.userのuserIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      // DBから正常なテナントデータの取得を想定する
+      tenantFindOneSpy.mockReturnValue(null)
+
+      // DBから正常な契約データの取得を想定する
+      findContractSpy.mockReturnValue(null)
+
+      // 試験実施
+      const result = await middleware.checkContractStatus(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「ない」
+      expect(next).not.toHaveBeenCalledWith()
+      // 303エラーでauthに飛ばされ「ない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
+      expect(response.getHeader('Location')).not.toEqual('/auth')
+      // 500エラーがエラーハンドリングされ「ない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // return値が999であること
+      expect(result).toBe(null)
+    })
+
+    test('DBから取得したcontractデータが２つの場合', async () => {
+      // 準備
+      // request.userのuserIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      // DBから正常なテナントデータの取得を想定する
+      tenantFindOneSpy.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          registeredBy: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          customerId: null,
+          createdAt: '2021-01-25T10:15:15.035Z',
+          updatedAt: '2021-01-25T10:15:15.035Z'
+        }
+      })
+
+      // DBから正常な契約データの取得を想定する
+      findContractSpy.mockReturnValue([
+        {
+          dataValues: {
+            contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            numberN: 'numberN',
+            contractStatus: '10',
+            deleteFlag: false,
+            createdAt: '2021-07-15 17:41:38',
+            updatedAt: '2021-07-15 17:41:38',
+            contractedAt: '2021-07-15 17:41:38',
+            canceledAt: ''
+          }
+        },
+        {
+          dataValues: {
+            contractId: '134d9315-46e3-4032-8258-8e30b417f1b1',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            numberN: 'numberN',
+            contractStatus: '99',
+            deleteFlag: true,
+            createdAt: '2021-07-15 17:41:38',
+            updatedAt: '2021-07-15 17:41:38',
+            contractedAt: '2021-07-15 17:41:38',
+            canceledAt: ''
+          }
+        }
+      ])
+
+      // 試験実施
+      const result = await middleware.checkContractStatus(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「ない」
+      expect(next).not.toHaveBeenCalledWith()
+      // 303エラーでauthに飛ばされ「ない」
+      expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
+      expect(response.getHeader('Location')).not.toEqual('/auth')
+      // 500エラーがエラーハンドリングされ「ない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // return値が999であること
+      expect(result).toBe('10')
     })
   })
 })
