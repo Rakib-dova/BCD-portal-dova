@@ -70,6 +70,7 @@ exports.isUserRegistered = async (req, res, next) => {
   if (user === null) {
     // ユーザがDBに登録されていない
     await userController.create(req.user.accessToken, req.user.refreshToken)
+    next()
   } else if (user.dataValues?.tenantId) {
     // ユーザがDBに登録されている
     next()
