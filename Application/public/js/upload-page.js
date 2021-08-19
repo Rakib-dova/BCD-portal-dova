@@ -22,7 +22,7 @@ $('#file-upload').addEventListener('change', function (e) {
     fileReader = new FileReader()
     fileReader.readAsBinaryString(targetFile)
     fileReader.onload = function () {
-      if (btoa(fileReader.result).length > 6826000) {
+      if (btoa(fileReader.result).length > 5120000) {
         alert('ファイルサイズが5MB超えています。\nCSVファイルを確認後もう一度アップロードしてください。')
         $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
       } else {
