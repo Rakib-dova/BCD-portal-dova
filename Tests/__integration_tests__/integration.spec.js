@@ -128,7 +128,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     //    試験前：未登録
     //    試験後(期待値)：未登録
 
-    // authにリダイレクトする
+    // /authにリダイレクトする
     test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
       const res = await request(app)
         .get('/')
@@ -199,7 +199,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
     let userCsrf, tenantCsrf
     // userContextが'NotUserRegistered'(tenant側の登録が先に必要)のため、アクセスできない
-    test('/user/registerにアクセス：userContext不一致によるシステムエラー', async () => {
+    test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/user/register')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
@@ -213,7 +213,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによるシステムエラー', async () => {
+    test('/user/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
@@ -225,7 +225,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 管理者権限がないため、アクセスできない
-    test('/tenant/registerにアクセス：管理者権限不足によるシステムエラー', async () => {
+    test('/tenant/registerにアクセス：管理者権限不足による利用不可画面表示', async () => {
       const res = await request(app)
         .get('/tenant/register')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
@@ -239,7 +239,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによるシステムエラー', async () => {
+    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/tenant/register')
         .type('form')
@@ -251,7 +251,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 利用登録をしていないため、請求書一括アップロードページ利用できない
-    test('/csvuploadにGET：制御によるシステムエラー', async () => {
+    test('/csvuploadにGET：制御による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/csvupload')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -261,7 +261,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 利用登録をしていないため、請求書一括アップロード機能利用できない
-    test('/csvuploadにPOST：制御によるシステムエラー', async () => {
+    test('/csvuploadにPOST：制御による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/csvupload')
         .set('Content-Type', 'application/json')
@@ -273,7 +273,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 利用登録をしていないため、変更ページ利用できない
-    test('/changeにGET：制御によるシステムエラー', async () => {
+    test('/changeにGET：制御による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/change')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -283,7 +283,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 利用登録をしていないため、変更機能利用できない
-    test('/changeにPOST：制御によるシステムエラー', async () => {
+    test('/changeにPOST：制御による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/change')
         .send({ ...changeData })
@@ -294,7 +294,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 利用登録をしていないため、解約ページ利用できない
-    test('/cancellationにGET：制御によるシステムエラー', async () => {
+    test('/cancellationにGET：制御による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/cancellation')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -304,7 +304,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 利用登録をしていないため、解約機能利用できない
-    test('/cancellationにPOST：制御によるシステムエラー', async () => {
+    test('/cancellationにPOST：制御による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/cancellation')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -350,7 +350,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
     let userCsrf, tenantCsrf
     // userContextが'NotUserRegistered'(tenant側の登録が先に必要)のため、アクセスできない
-    test('/user/registerにアクセス：userContext不一致によるシステムエラー', async () => {
+    test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/user/register')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -364,7 +364,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによるシステム', async () => {
+    test('/user/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
@@ -401,7 +401,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/portal') // リダイレクト先は/portal
     })
 
-    test('/tenant/registerにアクセス：ステータス「新規申込」、システムエラー', async () => {
+    test('/tenant/registerにアクセス：ステータス「新規申込」、400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/tenant/register')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -410,7 +410,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
-    test('/tenant/registerにPOST：ステータス「新規申込」、新規登録、システムエラー', async () => {
+    test('/tenant/registerにPOST：ステータス「新規申込」、新規登録、400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/tenant/register')
         .type('form')
@@ -501,7 +501,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // テナントステータスが「新規受付」、利用登録ページ利用できない
-    test('/tenant/registerにアクセス：ステータス「新規受付」、システムエラー', async () => {
+    test('/tenant/registerにアクセス：ステータス「新規受付」、400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/tenant/register')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -510,7 +510,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
-    test('/tenant/registerにPOST：ステータス「新規受付」、新規登録、システムエラー', async () => {
+    test('/tenant/registerにPOST：ステータス「新規受付」、新規登録、400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/tenant/register')
         .type('form')
@@ -645,7 +645,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('/user/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
@@ -671,7 +671,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/tenant/register')
         .type('form')
@@ -722,8 +722,8 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     let userCsrf, tenantCsrf
-    // ユーザの利用登録画面が正常に表示される
-    test('/user/registerにアクセス：200ステータスとユーザの利用登録画面表示', async () => {
+    // ユーザの利用登録画面が表示されない
+    test('/user/registerにアクセス：400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/user/register')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
@@ -736,8 +736,8 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
-    // 正常に一般ユーザが登録され、/portalにリダイレクトする
-    test('/user/registerにPOST：303ステータスと/portalにリダイレクト(一般ユーザ登録成功)', async () => {
+    // 一般ユーザが登録されない、アクセスできない
+    test('/user/registerにPOST：400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
@@ -763,7 +763,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/tenant/register')
         .type('form')
@@ -825,7 +825,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによるシステムエラー', async () => {
+    test('/user/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
@@ -851,7 +851,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによるシステムエラー', async () => {
+    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/tenant/register')
         .type('form')
@@ -1759,7 +1759,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('/user/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
@@ -1785,7 +1785,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/tenant/register')
         .type('form')
@@ -1854,7 +1854,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによるシステムエラー', async () => {
+    test('/user/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
@@ -1866,7 +1866,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致によるシステムエラー', async () => {
+    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/tenant/register')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
@@ -1880,7 +1880,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによるシステムエラー', async () => {
+    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/tenant/register')
         .type('form')
@@ -1943,7 +1943,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/tenant/register')
         .type('form')
