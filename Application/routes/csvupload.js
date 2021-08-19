@@ -81,7 +81,7 @@ const cbPostUpload = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
-  
+
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
 

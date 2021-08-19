@@ -49,7 +49,14 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
-let request, response, accessTradeshiftSpy, tenantFindOneSpy, userFindOneSpy, userCreateSpy, findContractSpy
+let request,
+  response,
+  accessTradeshiftSpy,
+  tenantFindOneSpy,
+  userFindOneSpy,
+  userCreateSpy,
+  findContractSpy,
+  checkContractStatusSpy
 describe('helpers/middlewareのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -59,6 +66,7 @@ describe('helpers/middlewareのテスト', () => {
     userCreateSpy = jest.spyOn(userController, 'create')
     findContractSpy = jest.spyOn(contractController, 'findContract')
     accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
+    checkContractStatusSpy = jest.spyOn(middleware, 'checkContractStatus')
   })
   afterEach(() => {
     request.resetMocked()
@@ -69,6 +77,7 @@ describe('helpers/middlewareのテスト', () => {
     userFindOneSpy.mockRestore()
     userCreateSpy.mockRestore()
     findContractSpy.mockRestore()
+    checkContractStatusSpy.mockRestore()
   })
 
   describe('isAuthenticated', () => {
@@ -193,7 +202,7 @@ describe('helpers/middlewareのテスト', () => {
       expect(response.getHeader('Location')).toEqual('/auth')
     })
 
-    // #675、【実装】トレシフユーザロールによって、画面表示を制御する#1
+    // トレシフユーザロールによって、画面表示を制御する#1
     test('利用登録画面 (条件：テナント管理者、利用登録されていない)', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
@@ -268,6 +277,8 @@ describe('helpers/middlewareのテスト', () => {
           Modified: '2021-01-20T05:20:07.137Z',
           AccountType: 'FREE'
         })
+
+      checkContractStatusSpy.mockReturnValue(null)
 
       // CSRF対策
       request.csrfToken = jest.fn()
@@ -368,6 +379,8 @@ describe('helpers/middlewareのテスト', () => {
           AccountType: 'FREE'
         })
 
+      checkContractStatusSpy.mockReturnValue(null)
+
       // CSRF対策
       request.csrfToken = jest.fn()
 
@@ -466,6 +479,8 @@ describe('helpers/middlewareのテスト', () => {
           Modified: '2021-01-20T05:20:07.137Z',
           AccountType: 'FREE'
         })
+
+      checkContractStatusSpy.mockReturnValue(null)
 
       // CSRF対策
       request.csrfToken = jest.fn()
@@ -768,8 +783,8 @@ describe('helpers/middlewareのテスト', () => {
       await middleware.isUserRegistered(request, response, next)
 
       // 期待結果
-      // 引数なしでnextが呼ばれ「ない」
-      expect(next).not.toHaveBeenCalledWith()
+      // 引数なしでnextが呼ばれ「る」
+      expect(next).toHaveBeenCalledWith()
       // 303エラーでauthに飛ばされ「ない」
       expect(response.redirect).not.toHaveBeenCalledWith(303, '/auth')
       expect(response.getHeader('Location')).not.toEqual('/auth')
