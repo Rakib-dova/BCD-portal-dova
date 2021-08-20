@@ -33,14 +33,19 @@ const noticeHelper = require('../../Application/routes/helpers/notice')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
+const invocesController = require('../../Application/controllers/invoiceController.js')
+const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
+const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
 const constantsDefine = require('../../Application/constants')
+const invoiceController = require('../../Application/controllers/invoiceController.js')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
 let request, response, infoSpy, findOneSpy, findOneSpyContracts, accessTradeshiftSpy, invoiceListSpy
+let createSpyInvoices, createSpyinvoicesDetail, findOneSpyInvoice, findOneSypTenant
 describe('csvuploadのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -50,6 +55,10 @@ describe('csvuploadのテスト', () => {
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     invoiceListSpy = jest.spyOn(csvupload, 'cbExtractInvoice')
     accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
+    createSpyInvoices = jest.spyOn(invoiceController, 'insert')
+    createSpyinvoicesDetail = jest.spyOn(invoceDetailController, 'insert')
+    findOneSpyInvoice = jest.spyOn(invocesController, 'findInvoice')
+    findOneSypTenant = jest.spyOn(tenantController, 'findOne')
   })
   afterEach(() => {
     request.resetMocked()
@@ -60,6 +69,9 @@ describe('csvuploadのテスト', () => {
     findOneSpyContracts.mockRestore()
     invoiceListSpy.mockRestore()
     accessTradeshiftSpy.mockRestore()
+    createSpyInvoices.mockRestore()
+    createSpyinvoicesDetail.mockRestore()
+    findOneSpyInvoice.mockRestore()
   })
 
   // 404エラー定義
@@ -71,7 +83,8 @@ describe('csvuploadのテスト', () => {
   // email,userId正常値
   const user = {
     email: 'dummy@testdummy.com',
-    userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+    userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+    tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
   }
   // DBの正常なユーザデータ
   const dataValues = {
@@ -764,14 +777,6 @@ describe('csvuploadのテスト', () => {
     2021-06-15,UT_TEST_INVOICE_6_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,BANK1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,General,11111,kim_test,200件テストです。,001,PC,100,EA,100000,JP 消費税 10%,アップロードテスト`
   ).toString('base64')
 
-  const invoiceListData = {
-    invoicesDetailId: '1043daee-40e5-495f-b9de-de07dfbb7b9d',
-    invoicesId: 'UT_TEST_INVOICE_6_2',
-    lines: 3,
-    status: -1,
-    errorData: '001、銀行名は、100文字以内で入力してください。'
-  }
-
   // 登録済みのドキュメントデータ
   const documentListData = {
     itemsPerPage: 10000,
@@ -868,6 +873,33 @@ describe('csvuploadのテスト', () => {
   const useremailerr = {
     email: '/',
     userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+  }
+
+  const now = new Date()
+  const invoiceData = {
+    dataValues: {
+      invoicesId: '40e8909d-2bc6-4296-aba4-994df26ec353',
+      tenantId: user.tenantId,
+      csvFileName: null,
+      successCount: -1,
+      failCount: -1,
+      skipCount: -1,
+      createdAt: now,
+      updatedAt: now
+    }
+  }
+
+  const invoiceDetailData = {
+    dataValues: {
+      invoiceDetailId: '994df26e-aba4-2bc6-aba4-40e8909dc353',
+      invoicesId: '40e8909d-2bc6-4296-aba4-994df26ec353',
+      invoiceId: 'UT_TEST_INVOICE_6_2',
+      lines: 2,
+      status: '-1',
+      errorData: '001、銀行名は、100文字以内で入力してください。',
+      updatedAt: now,
+      createdAt: now
+    }
   }
 
   // 結果値
@@ -1121,11 +1153,13 @@ describe('csvuploadのテスト', () => {
       request.user = user
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
       // ファイルデータを設定
       request.body = {
         fileData: fileData
       }
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
@@ -1147,12 +1181,14 @@ describe('csvuploadのテスト', () => {
       request.user = user
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
 
       // ファイルデータを設定
       request.body = {
         fileData: fileData2
       }
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
@@ -1174,12 +1210,14 @@ describe('csvuploadのテスト', () => {
       request.user = user
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
 
       // ファイルデータを設定
       request.body = {
         fileData: fileData3
       }
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
@@ -1201,12 +1239,14 @@ describe('csvuploadのテスト', () => {
       request.user = user
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
 
       // ファイルデータを設定
       request.body = {
         fileData: fileData4
       }
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
@@ -1306,12 +1346,14 @@ describe('csvuploadのテスト', () => {
       request.user = user
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
 
       // ファイルデータを設定
       request.body = {
         fileData: fileData100
       }
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
@@ -1333,12 +1375,14 @@ describe('csvuploadのテスト', () => {
       request.user = user
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
 
       // ファイルデータを設定
       request.body = {
         fileData: fileData200
       }
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
@@ -1360,12 +1404,14 @@ describe('csvuploadのテスト', () => {
       request.user = user
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
 
       // ファイルデータを設定
       request.body = {
         fileData: fileData101
       }
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
@@ -1387,12 +1433,14 @@ describe('csvuploadのテスト', () => {
       request.user = user
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
 
       // ファイルデータを設定
       request.body = {
         fileData: fileData201
       }
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
@@ -1413,12 +1461,14 @@ describe('csvuploadのテスト', () => {
       request.user = user
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
 
       // ファイルデータを設定
       request.body = {
         fileData: fileData5
       }
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
@@ -1510,6 +1560,7 @@ describe('csvuploadのテスト', () => {
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
 
       accessTradeshiftSpy.mockReturnValue(documentListData)
+      accessTradeshiftSpy.mockReturnValue('')
 
       // 試験実施
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
@@ -1539,6 +1590,7 @@ describe('csvuploadのテスト', () => {
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData100), 'base64').toString('utf8')
 
       accessTradeshiftSpy.mockReturnValue(documentListData)
+      accessTradeshiftSpy.mockReturnValue('')
 
       // 試験実施
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
@@ -1594,6 +1646,7 @@ describe('csvuploadのテスト', () => {
 
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData101), 'base64').toString('utf8')
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
@@ -1624,6 +1677,7 @@ describe('csvuploadのテスト', () => {
 
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData201), 'base64').toString('utf8')
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
 
       // 試験実施
@@ -1652,9 +1706,21 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataInvoiceIDlessthanequal101), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataInvoiceIDlessthanequal101), 'base64').toString(
+        'utf8'
+      )
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
+
+      createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
+      findOneSpyInvoice.mockReturnValue(invoiceData)
+      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      findOneSypTenant.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+      })
 
       // 試験実施
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
@@ -1670,7 +1736,6 @@ describe('csvuploadのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      expect(infoSpy).toHaveBeenCalledWith('001、請求書番号は、100文字以内で入力してください。')
     })
 
     test('準正常：銀行名バリデーションチェック：101文字以上', async () => {
@@ -1684,7 +1749,17 @@ describe('csvuploadのテスト', () => {
 
       const uploadCsvData = Buffer.from(decodeURIComponent(fileDataBankNamelessthanequal101), 'base64').toString('utf8')
 
+      accessTradeshiftSpy.mockReturnValue(200)
       accessTradeshiftSpy.mockReturnValue(documentListData)
+
+      createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
+      findOneSpyInvoice.mockReturnValue(invoiceData)
+      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      findOneSypTenant.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+      })
 
       // 試験実施
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
@@ -1700,7 +1775,6 @@ describe('csvuploadのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      expect(infoSpy).toHaveBeenCalledWith('001、銀行名は、100文字以内で入力してください。')
     })
 
     test('正常 : bconCsv内容確認', async () => {

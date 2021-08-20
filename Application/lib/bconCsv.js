@@ -269,8 +269,9 @@ class bconCsv {
     //   発行日, 請求書番号, テナントID, 支払期日, 納品日, 備考, 銀行名, 支店名, 科目, 口座番号, 口座名義, その他特記事項
     //   明細-項目ID, 明細-内容, 明細-数量, 明細-単位, 明細-単価, 明細-税, 明細-備考
     const resultConvert = {
-      invoicesDetailId: null,
-      invoicesId: null,
+      invoiceDetailId: null, // invoiceDetailテーブルのinvoiceDetailIdカーラム
+      invoicesId: null, // invoicesテーブルとinvoiceDetailテーブルの紐づくため、invoicesのinvoicesId
+      invoiceId: null, // 請求書番号
       lines: null,
       status: null,
       errorData: null,
@@ -280,7 +281,8 @@ class bconCsv {
     let parentInvoice = null
     invoiceData.forEach((element) => {
       const csvColumn = element.rows.split(',')
-      resultConvert.invoicesDetailId = uuidv4()
+      resultConvert.invoiceDetailId = uuidv4()
+      resultConvert.invoiceId = csvColumn[1]
       resultConvert.lines = element.idx + 2
       resultConvert.status = 0
       resultConvert.errorData = ''

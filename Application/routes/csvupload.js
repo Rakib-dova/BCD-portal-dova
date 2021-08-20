@@ -13,6 +13,7 @@ const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const constantsDefine = require('../constants')
+const { v4: uuidv4 } = require('uuid')
 
 const bodyParser = require('body-parser')
 router.use(
@@ -62,7 +63,9 @@ const cbGetIndex = async (req, res, next) => {
 }
 
 const cbPostUpload = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbPostUpload')
+  const functionName = 'cbPostUpload'
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+  const invoiceController = require('../controllers/invoiceController')
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
@@ -82,8 +85,21 @@ const cbPostUpload = async (req, res, next) => {
   let errorText = null
   // csvアップロード
   if (cbUploadCsv(filePath, filename, uploadCsvData) === false) return next(errorHelper.create(500))
+  const resultInvoice = await invoiceController.insert({
+    invoicesId: uuidv4(),
+    tenantId: req.user.tenantId,
+    csvFileName: req.body.filename,
+    successCount: -1,
+    failCount: -1,
+    skipCount: -1
+  })
+
+  if (!resultInvoice?.dataValues) {
+    logger.info(`${constantsDefine.logMessage.DBINF001}${functionName}`)
+  }
+
   // csvからデータ抽出
-  switch (await cbExtractInvoice(filePath, filename, userToken)) {
+  switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice.dataValues)) {
     case 101:
       errorText = constantsDefine.statusConstants.INVOICE_FAILED
       break
@@ -156,8 +172,9 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
-const cbExtractInvoice = async (_extractDir, _filename, _user) => {
+const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
+  const invoiceDetailController = require('../controllers/invoiceDetailController')
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
   const csvObj = new bconCsv(extractFullpathFile)
   const invoiceList = csvObj.getInvoiceList()
@@ -230,8 +247,16 @@ const cbExtractInvoice = async (_extractDir, _filename, _user) => {
           meisaiFlag = 2
           break
         case -1:
-          logger.info(invoiceList[idx].errorData)
+          break
       }
+      await invoiceDetailController.insert({
+        invoiceDetailId: invoiceList[idx].invoiceDetailId,
+        invoicesId: _invoices.invoicesId,
+        invoiceId: invoiceList[idx].invoiceId,
+        lines: invoiceList[idx].lines,
+        status: invoiceList[idx].status,
+        errorData: invoiceList[idx].errorData
+      })
     }
     idx++
   }
