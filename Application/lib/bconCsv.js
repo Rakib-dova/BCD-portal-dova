@@ -302,6 +302,21 @@ class bconCsv {
         resultConvert.invoicesId = element.docNo
         parentInvoice.setInvoiceNumber(csvColumn[1])
 
+        const resultcheckNetworkConnection = validate.checkNetworkConnection(
+          bconCsv.prototype.companyNetworkConnectionList,
+          csvColumn[2]
+        )
+        switch (resultcheckNetworkConnection) {
+          case '':
+            break
+          case 'INTERNALERR000':
+            resultConvert.status = -1
+            break
+          default:
+            resultConvert.errorData += `${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
+            resultConvert.status = -1
+            break
+        }
         parentInvoice.setCustomerTennant(csvColumn[2])
         parentInvoice.setDelivery(csvColumn[4])
         parentInvoice.setAdditionalDocumentReference(csvColumn[5])
@@ -336,6 +351,7 @@ class bconCsv {
           INVOICE: parentInvoice
         }
         this.#invoiceDocumentList.push(indexObj)
+        resultConvert.errorData = ''
       }
 
       switch (validate.isUnitcode(csvColumn[15])) {
@@ -365,7 +381,7 @@ class bconCsv {
         csvColumn[17],
         csvColumn[18]
       )
-      this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData = resultConvert.errorData
+      this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData += resultConvert.errorData
     })
   }
 

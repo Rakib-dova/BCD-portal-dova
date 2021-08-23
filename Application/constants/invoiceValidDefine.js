@@ -18,5 +18,8 @@ module.exports = {
   TAX_VALUE: 11,
 
   // 単位
-  UNITCODE_KEY: '単位'
+  UNITCODE_KEY: '単位',
+
+  // ネットワーク
+  NETWORK_KEY: 'テナントID'
 }
