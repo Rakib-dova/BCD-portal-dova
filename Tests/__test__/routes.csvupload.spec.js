@@ -871,6 +871,14 @@ describe('csvuploadのテスト', () => {
     2021-08-12,税テスト15,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,センチリットル,100000,非課税1,アップロードテスト1`
   ).toString('base64')
 
+  const networkCheckData = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    2021-08-12,ネットワーク確認テスト1,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,人月,100000,消費税,アップロードテスト1
+    2021-08-12,ネットワーク確認テスト2,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ボトル,100000,消費税,アップロードテスト1
+    2021-08-12,ネットワーク確認テスト11,927635b5-f469-493b-9ce0-000000000000,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,人月,100000,消費税,アップロードテスト1
+    2021-08-12,ネットワーク確認テスト12,927635b5-f469-493b-9ce0-000000000000,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ボトル,100000,消費税,アップロードテスト1`
+  ).toString('base64')
+
   // 登録済みのドキュメントデータ
   const documentListData = {
     itemsPerPage: 10000,
@@ -2000,6 +2008,74 @@ describe('csvuploadのテスト', () => {
         )
       }
       expect(resultInvoiceDetailController.length).toBe(5)
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      invoiceController.insert = tmpInsert
+      invoceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('準正常：ネットワーク確認バリデーションチェック', async () => {
+      // 準備
+      const invoiceController = require('../../Application/controllers/invoiceController.js')
+      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
+      const apiManager = require('../../Application/controllers/apiManager.js')
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
+        switch (method) {
+          case 'get':
+            if (query.match(/^\/documents\?stag\=draft\&stag\=outbox\&limit=10000/i)) {
+              return documentListData
+            }
+            break
+          case 'put':
+            return 200
+        }
+      })
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoceDetailController.insert = jest.fn((values) => {
+        if (values.errorData) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(networkCheckData), 'base64').toString('utf8')
+
+      // 試験実施
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
+      expect(resultExt).toBe(0)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      for (let idx = 0; idx < 2; idx++) {
+        expect(resultInvoiceDetailController[idx].invoiceId).toEqual(`ネットワーク確認テスト${idx + 11}`)
+        expect(resultInvoiceDetailController[idx].errorData).toEqual(
+          '006、テナントIDは、ネットワーク接続済みのものを入力してください。'
+        )
+      }
+      expect(resultInvoiceDetailController.length).toBe(38)
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       invoiceController.insert = tmpInsert
