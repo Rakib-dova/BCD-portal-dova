@@ -148,6 +148,58 @@ const isBankName = function (bankName) {
   return ''
 }
 
+const isIssueDate = function (issueDate) {
+  // 年/月/日の形式のみ許容する
+  if (!issueDate.match(/^\d{4}\-\d{1,2}\-\d{1,2}$/)) {
+    return 'ISSUEDATEERR001'
+  }
+
+  // 日付変換された日付が入力値と同じ事を確認
+  // new Date()の引数に不正な日付が入力された場合、相当する日付に変換されてしまうため
+  const date = new Date(issueDate)
+  if (
+    date.getFullYear() !== parseInt(issueDate.split('-')[0]) ||
+    date.getMonth() !== parseInt(issueDate.split('-')[1]) - 1 ||
+    date.getDate() !== parseInt(issueDate.split('-')[2])
+  ) {
+    return 'ISSUEDATEERR000'
+  }
+
+  return ''
+}
+
+const isSellersItemNum = function (sellersItemNum) {
+  if (sellersItemNum.length > constantsDefine.invoiceValidDefine.SELLERSITEMNUM_VALUE || sellersItemNum.length < 1) {
+    return 'SELLERSITEMNUMERR000'
+  }
+
+  return ''
+}
+
+const isItemName = function (itemName) {
+  if (itemName.length > constantsDefine.invoiceValidDefine.ITEMNAME_VALUE || itemName.length < 1) {
+    return 'ITEMNAMEERR000'
+  }
+
+  return ''
+}
+
+const isQuantityValue = function (quantityValue) {
+  if (quantityValue > constantsDefine.invoiceValidDefine.QUANTITYVALUE_VALUE || quantityValue.length < 1) {
+    return 'QUANTITYVALUEERR000'
+  }
+
+  return ''
+}
+
+const isPriceValue = function (priceValue) {
+  if (priceValue > constantsDefine.invoiceValidDefine.PRICEVALUE_VALUE || priceValue.length < 1) {
+    return 'PRICEVALUEERR000'
+  }
+
+  return ''
+}
+
 const isTaxCategori = function (category) {
   const taxCategory = require('./bconCsvTax')
 
@@ -206,6 +258,11 @@ module.exports = {
   isStatusForSimpleChange: isStatusForSimpleChange,
   isInvoiceId: isInvoiceId,
   isBankName: isBankName,
+  isIssueDate: isIssueDate,
+  isSellersItemNum: isSellersItemNum,
+  isItemName: isItemName,
+  isQuantityValue: isQuantityValue,
+  isPriceValue: isPriceValue,
   isTaxCategori: isTaxCategori,
   isUnitcode: isUnitcode,
   checkNetworkConnection: checkNetworkConnection,

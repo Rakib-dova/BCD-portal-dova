@@ -289,6 +289,18 @@ class bconCsv {
       resultConvert.errorData = ''
       if (parentInvoice?.getInvoiceNumber().value !== element.docNo) {
         parentInvoice = new Invoice()
+        csvColumn[0] = csvColumn[0].replace(/\//g, '-')
+        let issueDateArray = csvColumn[0].split('-')
+        csvColumn[0] =
+          issueDateArray[0] + '-' + `0${issueDateArray[1]}`.slice(-2) + '-' + `0${issueDateArray[2]}`.slice(-2)
+        switch (validate.isIssueDate(csvColumn[0])) {
+          case '':
+            break
+          default:
+            resultConvert.errorData += `${constants.invoiceErrMsg[validate.isIssueDate(csvColumn[0])]}`
+            resultConvert.status = -1
+            break
+        }
         parentInvoice.setIssueDate(csvColumn[0])
 
         switch (validate.isInvoiceId(csvColumn[1])) {
@@ -317,15 +329,20 @@ class bconCsv {
             resultConvert.status = -1
             break
         }
+
+        if (!validate.isUUID(csvColumn[2])) {
+          resultConvert.errorData += `${constants.invoiceErrMsg['TENANTERR000']}`
+          resultConvert.status = -1
+        }
         parentInvoice.setCustomerTennant(csvColumn[2])
         parentInvoice.setDelivery(csvColumn[4])
         parentInvoice.setAdditionalDocumentReference(csvColumn[5])
 
-        switch (validate.isBankName(csvColumn[7])) {
+        switch (validate.isBankName(csvColumn[6])) {
           case '':
             break
           default:
-            resultConvert.errorData += `${constants.invoiceErrMsg[validate.isBankName(csvColumn[7])]}`
+            resultConvert.errorData += `${constants.invoiceErrMsg[validate.isBankName(csvColumn[6])]}`
             resultConvert.status = -1
             break
         }
@@ -345,7 +362,6 @@ class bconCsv {
             resultConvert.status = 1
           }
         })
-
         indexObj = {
           ...resultConvert,
           INVOICE: parentInvoice
@@ -354,11 +370,47 @@ class bconCsv {
         resultConvert.errorData = ''
       }
 
+      switch (validate.isSellersItemNum(csvColumn[12])) {
+        case '':
+          break
+        default:
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isSellersItemNum(csvColumn[12])]}`
+          resultConvert.status = -1
+          break
+      }
+
+      switch (validate.isItemName(csvColumn[13])) {
+        case '':
+          break
+        default:
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isItemName(csvColumn[13])]}`
+          resultConvert.status = -1
+          break
+      }
+
+      switch (validate.isQuantityValue(csvColumn[14])) {
+        case '':
+          break
+        default:
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isQuantityValue(csvColumn[14])]}`
+          resultConvert.status = -1
+          break
+      }
+
       switch (validate.isUnitcode(csvColumn[15])) {
         case '':
           break
         default:
           resultConvert.errorData += `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
+          resultConvert.status = -1
+          break
+      }
+
+      switch (validate.isPriceValue(csvColumn[16])) {
+        case '':
+          break
+        default:
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isPriceValue(csvColumn[16])]}`
           resultConvert.status = -1
           break
       }
@@ -372,16 +424,25 @@ class bconCsv {
           break
       }
 
-      parentInvoice.setInvoiceLine(
-        csvColumn[12],
-        csvColumn[13],
-        csvColumn[14],
-        csvColumn[15],
-        csvColumn[16],
-        csvColumn[17],
-        csvColumn[18]
-      )
-      this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData += resultConvert.errorData
+      if (resultConvert.status !== -1) {
+        parentInvoice.setInvoiceLine(
+          csvColumn[12],
+          csvColumn[13],
+          csvColumn[14],
+          csvColumn[15],
+          csvColumn[16],
+          csvColumn[17],
+          csvColumn[18]
+        )
+      } else {
+        if (this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData === '') {
+          this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData +=
+            resultConvert.errorData
+        } else {
+          this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData +=
+            ',' + resultConvert.errorData
+        }
+      }
     })
   }
 
