@@ -879,6 +879,8 @@ describe('csvuploadのテスト', () => {
     2021-08-12,ネットワーク確認テスト12,927635b5-f469-493b-9ce0-000000000000,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ボトル,100000,消費税,アップロードテスト1`
   ).toString('base64')
 
+  const resultNetworkConnection = ['927635b5-f469-493b-9ce0-b2bfc4062959', '927635b5-f469-493b-9ce0-b2bfc4062951']
+
   // 登録済みのドキュメントデータ
   const documentListData = {
     itemsPerPage: 10000,
@@ -1892,7 +1894,7 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
         switch (method) {
           case 'get':
-            if (query.match(/^\/documents\?stag\=draft\&stag\=outbox\&limit=10000/i)) {
+            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
               return documentListData
             }
             break
@@ -1960,7 +1962,7 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
         switch (method) {
           case 'get':
-            if (query.match(/^\/documents\?stag\=draft\&stag\=outbox\&limit=10000/i)) {
+            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
               return documentListData
             }
             break
@@ -2024,11 +2026,14 @@ describe('csvuploadのテスト', () => {
       const tmpdetailInsert = invoceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
+      const bconCsv = require('../../Application/lib/bconCsv')
+
+      bconCsv.prototype.companyNetworkConnectionList = resultNetworkConnection
 
       apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
         switch (method) {
           case 'get':
-            if (query.match(/^\/documents\?stag\=draft\&stag\=outbox\&limit=10000/i)) {
+            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
               return documentListData
             }
             break
@@ -2037,15 +2042,21 @@ describe('csvuploadのテスト', () => {
         }
       })
       invoiceController.insert = jest.fn((values) => {
-        return values
+        const { v4: uuidv4 } = require('uuid')
+        return {
+          dataValues: {
+            ...values,
+            invoicesId: uuidv4()
+          }
+        }
       })
       invoiceController.findInvoice = jest.fn((invoice) => {
-        return invoice
+        return { dataValues: invoice }
       })
       invoceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
-          return values
+          return { dataValues: values }
         }
       })
       request.user = user
@@ -2070,12 +2081,12 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       for (let idx = 0; idx < 2; idx++) {
-        expect(resultInvoiceDetailController[idx].invoiceId).toEqual(`ネットワーク確認テスト${idx + 11}`)
+        expect(resultInvoiceDetailController[idx]?.invoiceId).toEqual(`ネットワーク確認テスト1${idx + 1}`)
         expect(resultInvoiceDetailController[idx].errorData).toEqual(
-          '006、テナントIDは、ネットワーク接続済みのものを入力してください。'
+          '006, テナントIDは、ネットワーク接続済みのものを入力してください。'
         )
       }
-      expect(resultInvoiceDetailController.length).toBe(38)
+      expect(resultInvoiceDetailController.length).toBe(2)
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       invoiceController.insert = tmpInsert
