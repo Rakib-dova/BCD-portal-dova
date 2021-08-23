@@ -777,6 +777,100 @@ describe('csvuploadのテスト', () => {
     2021-06-15,UT_TEST_INVOICE_6_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,BANK1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,General,11111,kim_test,200件テストです。,001,PC,100,EA,100000,JP 消費税 10%,アップロードテスト`
   ).toString('base64')
 
+  const unitcodeData = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    2021-08-12,単位テスト1,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,人月,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト2,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ボトル,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト3,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,コスト,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト4,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,コンテナ,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト5,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,センチリットル,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト6,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,平方センチメートル,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト7,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,立方センチメートル,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト8,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,センチメートル,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト9,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ケース,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト10,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,カートン,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト11,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,日,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト12,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,デシリットル,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト13,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,デシメートル,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト14,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,グロス・キログラム,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト15,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,個,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト16,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,フィート,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト17,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ガロン,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト18,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,グラム,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト19,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,総トン,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト20,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,時間,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト21,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,キログラム,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト22,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,キロメートル,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト23,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,キロワット時,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト24,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ポンド,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト25,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,リットル,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト26,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ミリグラム,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト27,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ミリリットル,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト28,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ミリメートル,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト29,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,月,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト30,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,平方メートル,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト31,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,立方メートル,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト32,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,メーター,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト33,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,純トン,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト34,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,包,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト35,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,巻,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト36,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,式,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト37,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,トン,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト38,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,その他,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト101,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,人月1,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト102,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ボトル1,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト103,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,コスト1,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト104,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,コンテナ1,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト105,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,センチリットル1,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト106,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,平方センチメートル1,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト107,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,立方センチメートル1,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト108,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,センチメートル1,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト109,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ケース1,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト110,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,カートン1,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト111,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,日1,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト112,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,デシリットル1,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト113,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,デシメートル1,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト114,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,グロス・キログラム1,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト115,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,個1,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト116,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,フィート1,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト117,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ガロン1,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト118,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,グラム1,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト119,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,総トン1,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト120,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,時間1,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト121,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,キログラム1,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト122,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,キロメートル1,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト123,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,キロワット時1,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト124,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ポンド1,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト125,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,リットル1,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト126,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ミリグラム1,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト127,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ミリリットル1,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト128,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ミリメートル1,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト129,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,月1,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト130,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,平方メートル1,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト131,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,立方メートル1,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト132,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,メーター1,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト133,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,純トン1,100000,不課税,アップロードテスト1
+    2021-08-12,単位テスト134,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,包1,100000,免税,アップロードテスト1
+    2021-08-12,単位テスト135,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,巻1,100000,非課税,アップロードテスト1
+    2021-08-12,単位テスト136,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,式1,100000,消費税,アップロードテスト1
+    2021-08-12,単位テスト137,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,トン1,100000,軽減税率,アップロードテスト1
+    2021-08-12,単位テスト138,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,その他1,100000,不課税,アップロードテスト1`
+  ).toString('base64')
+
+  const taxData = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    2021-08-12,税テスト1,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,人月,100000,消費税,アップロードテスト1
+    2021-08-12,税テスト2,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ボトル,100000,軽減税率,アップロードテスト1
+    2021-08-12,税テスト3,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,コスト,100000,不課税,アップロードテスト1
+    2021-08-12,税テスト4,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,コンテナ,100000,免税,アップロードテスト1
+    2021-08-12,税テスト5,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,センチリットル,100000,非課税,アップロードテスト1
+    2021-08-12,税テスト11,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,人月,100000,消費税1,アップロードテスト1
+    2021-08-12,税テスト12,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,ボトル,100000,軽減税率1,アップロードテスト1
+    2021-08-12,税テスト13,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,コスト,100000,不課税1,アップロードテスト1
+    2021-08-12,税テスト14,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,コンテナ,100000,免税1,アップロードテスト1
+    2021-08-12,税テスト15,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,General,22222,test1,特記事項テスト1です。,001,PC,100,センチリットル,100000,非課税1,アップロードテスト1`
+  ).toString('base64')
+
   // 登録済みのドキュメントデータ
   const documentListData = {
     itemsPerPage: 10000,
@@ -1775,6 +1869,142 @@ describe('csvuploadのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('準正常：単位バリデーションチェック', async () => {
+      // 準備
+      const invoiceController = require('../../Application/controllers/invoiceController.js')
+      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
+      const apiManager = require('../../Application/controllers/apiManager.js')
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
+        switch (method) {
+          case 'get':
+            if (query.match(/^\/documents\?stag\=draft\&stag\=outbox\&limit=10000/i)) {
+              return documentListData
+            }
+            break
+          case 'put':
+            return 200
+        }
+      })
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoceDetailController.insert = jest.fn((values) => {
+        if (values.errorData) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(unitcodeData), 'base64').toString('utf8')
+
+      // 試験実施
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
+      expect(resultExt).toBe(0)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      for (let idx = 0; idx < 38; idx++) {
+        expect(resultInvoiceDetailController[idx].invoiceId).toEqual(`単位テスト${idx + 101}`)
+        expect(resultInvoiceDetailController[idx].errorData).toEqual(
+          '009、単位は、マニュアルに定義されたものの中から選択してください。'
+        )
+      }
+      expect(resultInvoiceDetailController.length).toBe(38)
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      invoiceController.insert = tmpInsert
+      invoceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('準正常：税バリデーションチェック', async () => {
+      // 準備
+      const invoiceController = require('../../Application/controllers/invoiceController.js')
+      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
+      const apiManager = require('../../Application/controllers/apiManager.js')
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
+        switch (method) {
+          case 'get':
+            if (query.match(/^\/documents\?stag\=draft\&stag\=outbox\&limit=10000/i)) {
+              return documentListData
+            }
+            break
+          case 'put':
+            return 200
+        }
+      })
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoceDetailController.insert = jest.fn((values) => {
+        if (values.errorData) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(taxData), 'base64').toString('utf8')
+
+      // 試験実施
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
+      expect(resultExt).toBe(0)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      for (let idx = 0; idx < 5; idx++) {
+        expect(resultInvoiceDetailController[idx].invoiceId).toEqual(`税テスト${idx + 11}`)
+        expect(resultInvoiceDetailController[idx].errorData).toEqual(
+          '009、税は、マニュアルに定義されたものの中から選択してください。'
+        )
+      }
+      expect(resultInvoiceDetailController.length).toBe(5)
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      invoiceController.insert = tmpInsert
+      invoceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
     })
 
     test('正常 : bconCsv内容確認', async () => {
