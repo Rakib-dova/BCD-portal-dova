@@ -7,5 +7,11 @@ constantsDefine({
 
   // 銀行名エラーメッセージ
   BANKNAMEERR000: `001、${invoiceValidDefine.BANKNAME_KEY}は、${invoiceValidDefine.BANKNAME_VALUE}文字以内で入力してください。`,
-  BANKNAMEERR001: `002、${invoiceValidDefine.BANKNAME_KEY}は、${invoiceValidDefine.BANKNAME_VALUE}文字で入力してください。`
+  BANKNAMEERR001: `002、${invoiceValidDefine.BANKNAME_KEY}は、${invoiceValidDefine.BANKNAME_VALUE}文字で入力してください。`,
+
+  // 税エラーメッセージ
+  TAXERR000: `009、${invoiceValidDefine.TAX_KEY}は、マニュアルに定義されたものの中から選択してください。`,
+
+  // 単位エラーメッセージ
+  UNITERR000: `009、${invoiceValidDefine.UNITCODE_KEY}は、マニュアルに定義されたものの中から選択してください。`
 })

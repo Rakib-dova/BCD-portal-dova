@@ -140,6 +140,30 @@ const isBankName = function (bankName) {
   return ''
 }
 
+const isTaxCategori = function (category) {
+  const taxCategory = require('./bconCsvTax')
+
+  if (
+    taxCategory.length > constantsDefine.invoiceValidDefine.TAX_VALUE ||
+    taxCategory.length < 1 ||
+    !taxCategory[category]
+  ) {
+    return 'TAXERR000'
+  }
+
+  return ''
+}
+
+const isUnitcode = function (unitCode) {
+  const unitcodeCategory = require('./bconCsvUnitcode')
+
+  if (unitCode.length < 1 || !unitcodeCategory[unitCode]) {
+    return 'UNITERR000'
+  }
+
+  return ''
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -155,5 +179,7 @@ module.exports = {
   isStatusForCancel: isStatusForCancel,
   isStatusForSimpleChange: isStatusForSimpleChange,
   isInvoiceId: isInvoiceId,
-  isBankName: isBankName
+  isBankName: isBankName,
+  isTaxCategori: isTaxCategori,
+  isUnitcode: isUnitcode
 }

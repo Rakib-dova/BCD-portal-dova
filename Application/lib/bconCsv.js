@@ -279,6 +279,7 @@ class bconCsv {
     }
     const invoiceData = this.#csvFile.getRows()
     let parentInvoice = null
+    let indexObj = null
     invoiceData.forEach((element) => {
       const csvColumn = element.rows.split(',')
       resultConvert.invoiceDetailId = uuidv4()
@@ -323,16 +324,38 @@ class bconCsv {
           csvColumn[10]
         )
         parentInvoice.setNote(csvColumn[11])
+
         this.#invoiceDocumentList.forEach((ele) => {
           if (ele.INVOICE.getDocument().ID.value === element.docNo) {
             resultConvert.status = 1
           }
         })
-        this.#invoiceDocumentList.push({
+
+        indexObj = {
           ...resultConvert,
           INVOICE: parentInvoice
-        })
+        }
+        this.#invoiceDocumentList.push(indexObj)
       }
+
+      switch (validate.isUnitcode(csvColumn[15])) {
+        case '':
+          break
+        default:
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
+          resultConvert.status = -1
+          break
+      }
+
+      switch (validate.isTaxCategori(csvColumn[17])) {
+        case '':
+          break
+        default:
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
+          resultConvert.status = -1
+          break
+      }
+
       parentInvoice.setInvoiceLine(
         csvColumn[12],
         csvColumn[13],
@@ -342,6 +365,7 @@ class bconCsv {
         csvColumn[17],
         csvColumn[18]
       )
+      this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData = resultConvert.errorData
     })
   }
 
