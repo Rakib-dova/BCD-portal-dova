@@ -140,24 +140,24 @@ const isBankName = function (bankName) {
   return ''
 }
 
-const isIssueDate = function (issueDate) {
+const isDate = function (isDate) {
   // 年/月/日の形式のみ許容する
-  if (!issueDate.match(/^\d{4}\-\d{1,2}\-\d{1,2}$/)) {
-    return 'ISSUEDATEERR001'
+  if (!isDate.match(/^\d{4}-\d{1,2}-\d{1,2}$/)) {
+    return 1
   }
 
   // 日付変換された日付が入力値と同じ事を確認
   // new Date()の引数に不正な日付が入力された場合、相当する日付に変換されてしまうため
-  const date = new Date(issueDate)
+  const date = new Date(isDate)
   if (
-    date.getFullYear() !== parseInt(issueDate.split('-')[0]) ||
-    date.getMonth() !== parseInt(issueDate.split('-')[1]) - 1 ||
-    date.getDate() !== parseInt(issueDate.split('-')[2])
+    date.getFullYear() !== parseInt(isDate.split('-')[0]) ||
+    date.getMonth() !== parseInt(isDate.split('-')[1]) - 1 ||
+    date.getDate() !== parseInt(isDate.split('-')[2])
   ) {
-    return 'ISSUEDATEERR000'
+    return 2
   }
 
-  return ''
+  return 0
 }
 
 const isSellersItemNum = function (sellersItemNum) {
@@ -177,6 +177,10 @@ const isItemName = function (itemName) {
 }
 
 const isQuantityValue = function (quantityValue) {
+  if (isNaN(quantityValue)) {
+    return 'QUANTITYVALUEERR001'
+  }
+
   if (quantityValue > constantsDefine.invoiceValidDefine.QUANTITYVALUE_VALUE || quantityValue.length < 1) {
     return 'QUANTITYVALUEERR000'
   }
@@ -185,6 +189,10 @@ const isQuantityValue = function (quantityValue) {
 }
 
 const isPriceValue = function (priceValue) {
+  if (isNaN(priceValue)) {
+    return 'PRICEVALUEERR001'
+  }
+
   if (priceValue > constantsDefine.invoiceValidDefine.PRICEVALUE_VALUE || priceValue.length < 1) {
     return 'PRICEVALUEERR000'
   }
@@ -216,6 +224,67 @@ const isUnitcode = function (unitCode) {
   return ''
 }
 
+const isFinancialInstitution = function (financialInstitution) {
+  if (financialInstitution.length > constantsDefine.invoiceValidDefine.FINANCIALINSTITUTION_VALUE) {
+    return 'FINANCIALINSTITUTIONERR000'
+  }
+
+  return ''
+}
+
+const isFinancialName = function (financialName) {
+  if (financialName.length > constantsDefine.invoiceValidDefine.FINANCIALNAME_VALUE) {
+    return 'FINANCIALNAMEERR000'
+  }
+
+  return ''
+}
+
+const isAccountType = function (accountType) {
+  const unitcodeCategory = require('./bconCsvAccountType')
+
+  if (!unitcodeCategory[accountType]) {
+    return 1
+  }
+
+  return unitcodeCategory[accountType]
+}
+
+const isAccountId = function (accountId) {
+  if (isNaN(accountId)) {
+    return 'ACCOUNTIDERR001'
+  }
+  if (accountId.length > constantsDefine.invoiceValidDefine.ACCOUNTID_VALUE) {
+    return 'ACCOUNTIDERR000'
+  }
+
+  return ''
+}
+
+const isAccountName = function (accountName) {
+  if (accountName.length > constantsDefine.invoiceValidDefine.ACCOUNTNAME_VALUE) {
+    return 'ACCOUNTNAMEERR000'
+  }
+
+  return ''
+}
+
+const isNote = function (note) {
+  if (note.length > constantsDefine.invoiceValidDefine.NOTE_VALUE) {
+    return 'NOTEERR000'
+  }
+
+  return ''
+}
+
+const isDescription = function (description) {
+  if (description.length > constantsDefine.invoiceValidDefine.DESCRIPTION_VALUE) {
+    return 'DESCRIPTIONERR000'
+  }
+
+  return ''
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -232,11 +301,18 @@ module.exports = {
   isStatusForSimpleChange: isStatusForSimpleChange,
   isInvoiceId: isInvoiceId,
   isBankName: isBankName,
-  isIssueDate: isIssueDate,
+  isDate: isDate,
   isSellersItemNum: isSellersItemNum,
   isItemName: isItemName,
   isQuantityValue: isQuantityValue,
   isPriceValue: isPriceValue,
   isTaxCategori: isTaxCategori,
-  isUnitcode: isUnitcode
+  isUnitcode: isUnitcode,
+  isFinancialInstitution: isFinancialInstitution,
+  isFinancialName: isFinancialName,
+  isAccountType: isAccountType,
+  isAccountId: isAccountId,
+  isAccountName: isAccountName,
+  isNote: isNote,
+  isDescription: isDescription
 }
