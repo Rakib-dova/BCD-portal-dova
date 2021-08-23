@@ -34,5 +34,8 @@ constantsDefine({
   TAXERR000: `009、${invoiceValidDefine.TAX_KEY}は、マニュアルに定義されたものの中から選択してください。`,
 
   // 単位エラーメッセージ
-  UNITERR000: `009、${invoiceValidDefine.UNITCODE_KEY}は、マニュアルに定義されたものの中から選択してください。`
+  UNITERR000: `009、${invoiceValidDefine.UNITCODE_KEY}は、マニュアルに定義されたものの中から選択してください。`,
+
+  // ネットワーク接続エラーメッセージ
+  NETERR000: `006, ${invoiceValidDefine.NETWORK_KEY}は、ネットワーク接続済みのものを入力してください。`
 })

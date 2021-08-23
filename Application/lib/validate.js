@@ -75,6 +75,14 @@ const isUUID = (uuid) => {
   else return true
 }
 
+const isUndefined = (target) => {
+  if (Object.prototype.toString.call(target) !== '[object Undefined]') {
+    return true
+  }
+
+  return false
+}
+
 const isPostalNumber = (postalNumber) => {
   const pattern = '^[0-9]{7}$'
   const regex = new RegExp(pattern)
@@ -216,6 +224,24 @@ const isUnitcode = function (unitCode) {
   return ''
 }
 
+const checkNetworkConnection = function (companyNetworkConnectionList, targetConnectionId) {
+  let connectionFlag = false
+  try {
+    companyNetworkConnectionList.forEach((connectionId) => {
+      if (targetConnectionId === connectionId) {
+        connectionFlag = true
+      }
+    })
+  } catch (error) {
+    return 'INTERNALERR000'
+  }
+
+  if (!connectionFlag) {
+    return 'NETERR000'
+  }
+  return ''
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -238,5 +264,7 @@ module.exports = {
   isQuantityValue: isQuantityValue,
   isPriceValue: isPriceValue,
   isTaxCategori: isTaxCategori,
-  isUnitcode: isUnitcode
+  isUnitcode: isUnitcode,
+  checkNetworkConnection: checkNetworkConnection,
+  isUndefined: isUndefined
 }

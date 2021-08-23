@@ -318,6 +318,23 @@ class bconCsv {
           resultConvert.errorData += `${constants.invoiceErrMsg['TENANTERR000']}`
           resultConvert.status = -1
         }
+
+        const resultcheckNetworkConnection = validate.checkNetworkConnection(
+          bconCsv.prototype.companyNetworkConnectionList,
+          csvColumn[2]
+        )
+        switch (resultcheckNetworkConnection) {
+          case '':
+            break
+          case 'INTERNALERR000':
+            resultConvert.status = -1
+            break
+          default:
+            resultConvert.errorData += `${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
+            resultConvert.status = -1
+            break
+        }
+
         parentInvoice.setCustomerTennant(csvColumn[2])
         parentInvoice.setDelivery(csvColumn[4])
         parentInvoice.setAdditionalDocumentReference(csvColumn[5])
@@ -351,6 +368,7 @@ class bconCsv {
           INVOICE: parentInvoice
         }
         this.#invoiceDocumentList.push(indexObj)
+        resultConvert.errorData = ''
       }
 
       switch (validate.isSellersItemNum(csvColumn[12])) {

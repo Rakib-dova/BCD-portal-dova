@@ -22,7 +22,7 @@ router.use(
     limit: '6826KB'
   })
 )
-const bconCsv = require('../lib/bconCsv')
+const BconCsv = require('../lib/bconCsv')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -57,6 +57,13 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  BconCsv.prototype.companyNetworkConnectionList = getNetwork({
+    accessToken: req.user.accessToken,
+    refreshToken: req.user.refreshToken
+  }).then((result) => {
+    return result
+  })
+
   // ユーザ権限も画面に送る
   res.render('csvupload')
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -83,6 +90,9 @@ const cbPostUpload = async (req, res, next) => {
     refreshToken: req.user.refreshToken
   }
   let errorText = null
+  if (validate.isUndefined(BconCsv.prototype.companyNetworkConnectionList)) {
+    BconCsv.prototype.companyNetworkConnectionList = await getNetwork(userToken)
+  }
   // csvアップロード
   if (cbUploadCsv(filePath, filename, uploadCsvData) === false) return next(errorHelper.create(500))
   const resultInvoice = await invoiceController.insert({
@@ -176,7 +186,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
   const invoiceDetailController = require('../controllers/invoiceDetailController')
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
-  const csvObj = new bconCsv(extractFullpathFile)
+  const csvObj = new BconCsv(extractFullpathFile)
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
   const setHeaders = {}
@@ -287,6 +297,35 @@ const getTimeStamp = () => {
   return stamp
 }
 
+// 会社のネットワーク情報を取得
+const getNetwork = async (_userToken) => {
+  const connections = []
+  let numPages
+  let currPage
+  let documentsURL = '/network?limit=100'
+  do {
+    if (Object.prototype.toString.call(currPage) !== '[object Undefined]') {
+      currPage++
+      documentsURL = `/network?limit=100&page=${currPage}`
+    }
+    let result
+    try {
+      result = await apiManager.accessTradeshift(_userToken.accessToken, _userToken.refreshToken, 'get', documentsURL)
+      result.Connections.Connection.forEach((connection) => {
+        connections.push(connection.ConnectionId)
+      })
+    } catch (err) {
+      logger.error(err)
+      return
+    }
+
+    numPages = result.numPages
+    currPage = result.pageId
+  } while (currPage < numPages)
+
+  return connections
+}
+
 router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetIndex)
 
 router.post('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbPostUpload)
@@ -298,6 +337,7 @@ module.exports = {
   cbUploadCsv: cbUploadCsv,
   cbRemoveCsv: cbRemoveCsv,
   cbExtractInvoice: cbExtractInvoice,
-  getTimeStamp: getTimeStamp
+  getTimeStamp: getTimeStamp,
   // cbPostUpload, cbUploadCsv, cbRemoveCsv, cbExtractInvoice, getTimeStampはUTテストのため追加
+  getNetwork: getNetwork
 }
