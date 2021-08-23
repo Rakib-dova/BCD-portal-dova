@@ -314,6 +314,11 @@ class bconCsv {
         resultConvert.invoicesId = element.docNo
         parentInvoice.setInvoiceNumber(csvColumn[1])
 
+        if (!validate.isUUID(csvColumn[2])) {
+          resultConvert.errorData += `${constants.invoiceErrMsg['TENANTERR000']}`
+          resultConvert.status = -1
+        }
+
         const resultcheckNetworkConnection = validate.checkNetworkConnection(
           bconCsv.prototype.companyNetworkConnectionList,
           csvColumn[2]
@@ -330,10 +335,6 @@ class bconCsv {
             break
         }
 
-        if (!validate.isUUID(csvColumn[2])) {
-          resultConvert.errorData += `${constants.invoiceErrMsg['TENANTERR000']}`
-          resultConvert.status = -1
-        }
         parentInvoice.setCustomerTennant(csvColumn[2])
         parentInvoice.setDelivery(csvColumn[4])
         parentInvoice.setAdditionalDocumentReference(csvColumn[5])

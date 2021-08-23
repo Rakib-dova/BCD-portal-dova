@@ -22,7 +22,7 @@ router.use(
     limit: '6826KB'
   })
 )
-const bconCsv = require('../lib/bconCsv')
+const BconCsv = require('../lib/bconCsv')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -57,7 +57,7 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  bconCsv.prototype.companyNetworkConnectionList = getNetwork({
+  BconCsv.prototype.companyNetworkConnectionList = getNetwork({
     accessToken: req.user.accessToken,
     refreshToken: req.user.refreshToken
   }).then((result) => {
@@ -90,8 +90,8 @@ const cbPostUpload = async (req, res, next) => {
     refreshToken: req.user.refreshToken
   }
   let errorText = null
-  if (validate.isUndefined(bconCsv.prototype.companyNetworkConnectionList)) {
-    bconCsv.prototype.companyNetworkConnectionList = await getNetwork(userToken)
+  if (validate.isUndefined(BconCsv.prototype.companyNetworkConnectionList)) {
+    BconCsv.prototype.companyNetworkConnectionList = await getNetwork(userToken)
   }
   // csvアップロード
   if (cbUploadCsv(filePath, filename, uploadCsvData) === false) return next(errorHelper.create(500))
@@ -186,7 +186,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
   const invoiceDetailController = require('../controllers/invoiceDetailController')
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
-  const csvObj = new bconCsv(extractFullpathFile)
+  const csvObj = new BconCsv(extractFullpathFile)
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
   const setHeaders = {}
