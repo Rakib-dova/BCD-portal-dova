@@ -428,7 +428,7 @@ class bconCsv {
         if (csvColumn[8] !== '') {
           switch (validate.isAccountType(csvColumn[8])) {
             case 1:
-              resultConvert.errorData += `${constants.invoiceErrMsg[validate.isAccountType(csvColumn[8])]}`
+              resultConvert.errorData += `${constants.invoiceErrMsg['ACCOUNTTYPEERR000']}`
               resultConvert.status = -1
               break
             default:
