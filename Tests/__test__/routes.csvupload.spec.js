@@ -983,7 +983,7 @@ describe('csvuploadのテスト', () => {
       updatedAt: '2021-01-25T08:45:49.803Z'
     }
   }
-  // response.renderでcancellationが呼ばれ「る」
+
   const contractdataValues2 = {
     dataValues: {
       contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
@@ -1002,6 +1002,18 @@ describe('csvuploadのテスト', () => {
       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
       numberN: '0000011111',
       contractStatus: '31',
+      deleteFlag: false,
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const contractdataValues4 = {
+    dataValues: {
+      contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+      numberN: '0000011111',
+      contractStatus: null,
       deleteFlag: false,
       createdAt: '2021-01-25T08:45:49.803Z',
       updatedAt: '2021-01-25T08:45:49.803Z'
@@ -1048,13 +1060,7 @@ describe('csvuploadのテスト', () => {
 
   describe('ルーティング', () => {
     test('csvuploadのルーティングを確認', async () => {
-      expect(csvupload.router.get).toBeCalledWith(
-        '/',
-        helper.isAuthenticated,
-        helper.isTenantRegistered,
-        helper.isUserRegistered,
-        csvupload.cbGetIndex
-      )
+      expect(csvupload.router.get).toBeCalledWith('/', helper.isAuthenticated, csvupload.cbGetIndex)
     })
   })
 
@@ -1146,11 +1152,39 @@ describe('csvuploadのテスト', () => {
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
 
+    test('500エラー:不正なContractデータの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの不正な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues4)
+
+      helper.checkContractStatus = 999
+
+      // 試験実施
+      await csvupload.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
       // 準備
       // requestのsession,userIdにnullを入れる
       request.session = null
       request.user = usernull
+
+      helper.checkContractStatus = 10
 
       // 試験実施
       await csvupload.cbGetIndex(request, response, next)
@@ -1293,6 +1327,9 @@ describe('csvuploadのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
       // ファイルデータを設定
       request.body = {
         fileData: fileData
@@ -1321,6 +1358,8 @@ describe('csvuploadのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
 
       // ファイルデータを設定
       request.body = {
@@ -1350,6 +1389,8 @@ describe('csvuploadのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
 
       // ファイルデータを設定
       request.body = {
@@ -1379,6 +1420,8 @@ describe('csvuploadのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
 
       // ファイルデータを設定
       request.body = {
@@ -1397,6 +1440,95 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
     })
 
+    test('正常：解約申込中の場合', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues2)
+
+      // ファイルデータを設定
+      request.body = {
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('正常：解約受取中の場合', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues3)
+
+      // ファイルデータを設定
+      request.body = {
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('500エラー:不正なContractデータの場合', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの不正な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues4)
+
+      // ファイルデータを設定
+      request.body = {
+        fileData
+      }
+
+      helper.checkContractStatus = 999
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
     test('500エラー：cbUploadCsv return false', async () => {
       // 準備
       // requestのuserIdに正常値を入れる
@@ -1412,6 +1544,8 @@ describe('csvuploadのテスト', () => {
       request.body = {
         fileData: fileData
       }
+
+      helper.checkContractStatus = 0
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -1486,6 +1620,8 @@ describe('csvuploadのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
 
       // ファイルデータを設定
       request.body = {
@@ -1515,6 +1651,8 @@ describe('csvuploadのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
 
       // ファイルデータを設定
       request.body = {
@@ -1544,6 +1682,8 @@ describe('csvuploadのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
 
       // ファイルデータを設定
       request.body = {
@@ -1573,6 +1713,8 @@ describe('csvuploadのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
 
       // ファイルデータを設定
       request.body = {
@@ -1601,6 +1743,8 @@ describe('csvuploadのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
 
       // ファイルデータを設定
       request.body = {

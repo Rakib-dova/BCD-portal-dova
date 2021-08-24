@@ -52,6 +52,11 @@ const cbGetIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = helper.checkContractStatus
+
+  if (checkContractStatus === null || checkContractStatus === 999) {
+    return next(errorHelper.create(500))
+  }
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
@@ -80,6 +85,25 @@ const cbPostUpload = async (req, res, next) => {
   const user = await userController.findOne(req.user.userId)
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+
+  const checkContractStatus = helper.checkContractStatus
+  if (checkContractStatus === null || checkContractStatus === 999) {
+    return next(errorHelper.create(500))
+  }
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('cancelprocedure'))
+  }
+
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
@@ -326,9 +350,8 @@ const getNetwork = async (_userToken) => {
   return connections
 }
 
-router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetIndex)
-
-router.post('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbPostUpload)
+router.get('/', helper.isAuthenticated, cbGetIndex)
+router.post('/', helper.isAuthenticated, cbPostUpload)
 
 module.exports = {
   router: router,

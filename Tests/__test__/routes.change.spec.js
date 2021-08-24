@@ -20,7 +20,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
 }
 
 let request, response, infoSpy, findOneSpy, findOneSpyContracts, createSpy
-describe('cancellationのテスト', () => {
+describe('changeのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
@@ -173,17 +173,15 @@ describe('cancellationのテスト', () => {
     }
   }
 
+  const contractInfoNoData = {
+    dataValues: {}
+  }
+
   const createData = { statuscode: 200, value: 'success' }
 
   describe('ルーティング', () => {
     test('changeのルーティングを確認', async () => {
-      expect(change.router.get).toBeCalledWith(
-        '/',
-        helper.isAuthenticated,
-        helper.isTenantRegistered,
-        helper.isUserRegistered,
-        change.cbGetChangeIndex
-      )
+      expect(change.router.get).toBeCalledWith('/', helper.isAuthenticated, change.cbGetChangeIndex)
     })
   })
 
@@ -210,7 +208,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // response.renderでcancellationが呼ばれ「る」
+      // response.renderでchangeが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('change', {
         tenantId: request.user.tenantId,
         userRole: request.session.userRole,
@@ -390,8 +388,68 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 利用不可画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
+    })
+
+    test('500エラー：不正なContractデータの場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoNoData)
+      helper.checkContractStatus = 999
+
+      // 試験実施
+      await change.cbGetChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+  })
+
+  describe('cbGetChangeIndex', () => {
+    test('正常', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
+      helper.checkContractStatus = 0
+
+      // 試験実施
+      await change.cbGetChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // response.renderでchangeが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('change', {
+        tenantId: request.user.tenantId,
+        userRole: request.session.userRole,
+        numberN: '0000011111',
+        TS_HOST: process.env.TS_HOST
+      })
     })
 
     test('400エラー：requestのsessionのuserConteがLoggedInじゃない場合', async () => {
@@ -810,6 +868,162 @@ describe('cancellationのテスト', () => {
       expect(response.getHeader('Location')).toEqual('/portal')
     })
 
+    test('正常：解約申込中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
+      createSpy.mockReturnValue(createData)
+
+      // 試験実施
+      await change.cbPostChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('正常：解約受取中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingCancel)
+      createSpy.mockReturnValue(createData)
+
+      // 試験実施
+      await change.cbPostChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('正常：登録申込中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptContract)
+      createSpy.mockReturnValue(createData)
+
+      // 試験実施
+      await change.cbPostChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 登録中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
+    })
+
+    test('正常：登録受取中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingContract)
+      createSpy.mockReturnValue(createData)
+
+      // 試験実施
+      await change.cbPostChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 登録中画面が表示画「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
+    })
+
+    test('正常：変更申込中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptChange)
+      createSpy.mockReturnValue(createData)
+
+      // 試験実施
+      await change.cbPostChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 変更中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('changeprocedure'))
+    })
+
+    test('正常：変更受取中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingChange)
+      createSpy.mockReturnValue(createData)
+
+      // 試験実施
+      await change.cbPostChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 変更中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('changeprocedure'))
+    })
+
     test('正常：一般ユーザーの場合', async () => {
       // 準備
       // session.userContextに正常値(LoggedIn)を想定する
@@ -832,7 +1046,7 @@ describe('cancellationのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
+      // 利用不可画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
     })
 
@@ -873,6 +1087,33 @@ describe('cancellationのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
     })
 
+    test('500エラー：不正なContractデータの場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoNoData)
+      createSpy.mockReturnValue(createData)
+      helper.checkContractStatus = 999
+
+      // 試験実施
+      await change.cbPostChangeIndex(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
     test('500エラー：OderDBエラーの場合', async () => {
       // 準備
       // requestのtenantIdに正常値を入れる
@@ -889,6 +1130,7 @@ describe('cancellationのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(new Error('DB error mock'))
+      helper.checkContractStatus = 0
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
