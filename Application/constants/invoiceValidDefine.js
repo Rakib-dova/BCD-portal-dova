@@ -76,5 +76,8 @@ module.exports = {
 
   // 明細-備考
   DESCRIPTION_KEY: '明細-備考',
-  DESCRIPTION_VALUE: 100
+  DESCRIPTION_VALUE: 100,
+
+  // ネットワーク
+  NETWORK_KEY: 'テナントID'
 }

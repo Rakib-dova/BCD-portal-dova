@@ -142,7 +142,11 @@ class Invoice {
     }
   }
   setPaymentMeans(_paymentDate, _financialInstitution, _financialName, _accountType, _accountId, _accountName) {
-    this.#PaymentMeans.PaymentDueDate.value = _paymentDate
+    if (_paymentDate !== '') {
+      this.#PaymentMeans.PaymentDueDate.value = _paymentDate
+    } else {
+      delete this.#PaymentMeans.PaymentDueDate
+    }
     this.#PaymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.FinancialInstitution.Name.value =
       _financialInstitution
     this.#PaymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.Name.value = _financialName
@@ -154,7 +158,11 @@ class Invoice {
 
   #Delivery = { ActualDeliveryDate: { value: null } }
   setDelivery(_deliveryDate) {
-    this.#Delivery.ActualDeliveryDate.value = _deliveryDate
+    if (_deliveryDate !== '') {
+      this.#Delivery.ActualDeliveryDate.value = _deliveryDate
+    } else {
+      delete this.#Delivery.ActualDeliveryDate
+    }
     this.#Document.Delivery.push(JSON.parse(JSON.stringify(this.#Delivery)))
   }
 
@@ -195,7 +203,6 @@ class bconCsv {
       return this.data
     },
     setRows(_data) {
-      // const tmpRows = _data.split(/\r?\n|\r/).slice(1)
       const tmpRows = _data.split(/\r?\n|\r/)
       for (let idx = 0; idx < tmpRows.length; idx++) {
         if (tmpRows[idx].trim()) {
@@ -283,7 +290,9 @@ class bconCsv {
     let parentInvoice = null
     let indexObj = null
     let headerchk = true
-    // invoiceData.forEach((element) => {
+    let headerFlag = true
+    let setInvoiceLineErrCnt = 0
+    let setInvoiceLineCnt = 0
     invoiceData.some((element) => {
       const csvColumn = element.rows.split(',')
       resultConvert.invoiceDetailId = uuidv4()
@@ -292,6 +301,9 @@ class bconCsv {
       resultConvert.status = 0
       resultConvert.errorData = ''
       if (parentInvoice?.getInvoiceNumber().value !== element.docNo) {
+        headerFlag = true
+        setInvoiceLineErrCnt = 0
+        setInvoiceLineCnt = 0
         parentInvoice = new Invoice()
 
         if (csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE && headerchk) {
@@ -307,7 +319,9 @@ class bconCsv {
         } else if (csvColumn.length === constants.invoiceValidDefine.COLUMN_VALUE && headerchk) {
           headerchk = false
           return
-        } else if (csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE) {
+        }
+
+        if (csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE) {
           resultConvert.errorData += `${constants.invoiceErrMsg['COLUMNERR000']}`
           resultConvert.status = -1
         }
@@ -346,6 +360,24 @@ class bconCsv {
           resultConvert.errorData += `${constants.invoiceErrMsg['TENANTERR000']}`
           resultConvert.status = -1
         }
+
+        const resultcheckNetworkConnection = validate.checkNetworkConnection(
+          bconCsv.prototype.companyNetworkConnectionList,
+          csvColumn[2]
+        )
+
+        switch (resultcheckNetworkConnection) {
+          case '':
+            break
+          case 'INTERNALERR000':
+            resultConvert.status = -1
+            break
+          default:
+            resultConvert.errorData += `${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
+            resultConvert.status = -1
+            break
+        }
+
         parentInvoice.setCustomerTennant(csvColumn[2])
 
         if (csvColumn[3] !== '') {
@@ -490,8 +522,12 @@ class bconCsv {
           INVOICE: parentInvoice
         }
         this.#invoiceDocumentList.push(indexObj)
-        resultConvert.status = 0
+
+        resultConvert.errorData = ''
+        if (resultConvert.status === -1) headerFlag = false
       }
+
+      setInvoiceLineCnt++
 
       switch (validate.isSellersItemNum(csvColumn[12])) {
         case '':
@@ -499,6 +535,7 @@ class bconCsv {
         default:
           resultConvert.errorData += `${constants.invoiceErrMsg[validate.isSellersItemNum(csvColumn[12])]}`
           resultConvert.status = -1
+          setInvoiceLineErrCnt++
           break
       }
 
@@ -508,6 +545,7 @@ class bconCsv {
         default:
           resultConvert.errorData += `${constants.invoiceErrMsg[validate.isItemName(csvColumn[13])]}`
           resultConvert.status = -1
+          setInvoiceLineErrCnt++
           break
       }
 
@@ -517,6 +555,7 @@ class bconCsv {
         default:
           resultConvert.errorData += `${constants.invoiceErrMsg[validate.isQuantityValue(csvColumn[14])]}`
           resultConvert.status = -1
+          setInvoiceLineErrCnt++
           break
       }
 
@@ -526,6 +565,7 @@ class bconCsv {
         default:
           resultConvert.errorData += `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
           resultConvert.status = -1
+          setInvoiceLineErrCnt++
           break
       }
 
@@ -535,6 +575,7 @@ class bconCsv {
         default:
           resultConvert.errorData += `${constants.invoiceErrMsg[validate.isPriceValue(csvColumn[16])]}`
           resultConvert.status = -1
+          setInvoiceLineErrCnt++
           break
       }
 
@@ -544,6 +585,7 @@ class bconCsv {
         default:
           resultConvert.errorData += `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
           resultConvert.status = -1
+          setInvoiceLineErrCnt++
           break
       }
 
@@ -554,11 +596,12 @@ class bconCsv {
           default:
             resultConvert.errorData += `${constants.invoiceErrMsg[validate.isDescription(csvColumn[18])]}`
             resultConvert.status = -1
+            setInvoiceLineErrCnt++
             break
         }
       }
 
-      if (resultConvert.status !== -1) {
+      if (resultConvert.status !== -1 && headerFlag) {
         parentInvoice.setInvoiceLine(
           csvColumn[12],
           csvColumn[13],
@@ -568,11 +611,22 @@ class bconCsv {
           csvColumn[17],
           csvColumn[18]
         )
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
       } else {
-        if (this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData === '') {
+        if (setInvoiceLineCnt === 1 && headerFlag) {
+          this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
           this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData +=
             resultConvert.errorData
-        } else {
+        } else if (
+          this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData === '' &&
+          setInvoiceLineErrCnt > 0
+        ) {
+          this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData +=
+            resultConvert.errorData
+        } else if (
+          this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData !== '' &&
+          setInvoiceLineErrCnt > 0
+        ) {
           this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData +=
             ',' + resultConvert.errorData
         }

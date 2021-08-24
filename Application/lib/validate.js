@@ -75,6 +75,14 @@ const isUUID = (uuid) => {
   else return true
 }
 
+const isUndefined = (target) => {
+  if (Object.prototype.toString.call(target) !== '[object Undefined]') {
+    return true
+  }
+
+  return false
+}
+
 const isPostalNumber = (postalNumber) => {
   const pattern = '^[0-9]{7}$'
   const regex = new RegExp(pattern)
@@ -254,7 +262,7 @@ const isAccountId = function (accountId) {
   if (isNaN(accountId)) {
     return 'ACCOUNTIDERR001'
   }
-  if (accountId.length > constantsDefine.invoiceValidDefine.ACCOUNTID_VALUE) {
+  if (accountId.length !== constantsDefine.invoiceValidDefine.ACCOUNTID_VALUE) {
     return 'ACCOUNTIDERR000'
   }
 
@@ -281,7 +289,24 @@ const isDescription = function (description) {
   if (description.length > constantsDefine.invoiceValidDefine.DESCRIPTION_VALUE) {
     return 'DESCRIPTIONERR000'
   }
+  return ''
+}
 
+const checkNetworkConnection = function (companyNetworkConnectionList, targetConnectionId) {
+  let connectionFlag = false
+  try {
+    companyNetworkConnectionList.forEach((connectionId) => {
+      if (targetConnectionId === connectionId) {
+        connectionFlag = true
+      }
+    })
+  } catch (error) {
+    return 'INTERNALERR000'
+  }
+
+  if (!connectionFlag) {
+    return 'NETERR000'
+  }
   return ''
 }
 
@@ -314,5 +339,7 @@ module.exports = {
   isAccountId: isAccountId,
   isAccountName: isAccountName,
   isNote: isNote,
-  isDescription: isDescription
+  isDescription: isDescription,
+  checkNetworkConnection: checkNetworkConnection,
+  isUndefined: isUndefined
 }

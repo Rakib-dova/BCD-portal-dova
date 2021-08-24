@@ -64,7 +64,7 @@ constantsDefine({
   ACCOUNTTYPEERR000: `009、${invoiceValidDefine.ACCOUNTTYPE_KEY}は、マニュアルに定義されたものの中から選択してください。`,
 
   // 口座番号エラーメッセージ
-  ACCOUNTIDERR000: `001、${invoiceValidDefine.ACCOUNTID_KEY}は、${invoiceValidDefine.ACCOUNTID_VALUE}文字以内で入力してください。`,
+  ACCOUNTIDERR000: `001、${invoiceValidDefine.ACCOUNTID_KEY}は、${invoiceValidDefine.ACCOUNTID_VALUE}文字で入力してください。`,
   ACCOUNTIDERR001: `002、${invoiceValidDefine.ACCOUNTID_KEY}は、${invoiceValidDefine.ACCOUNTID_NUM}で入力してください。`,
 
   // 口座名義エラーメッセージ
@@ -77,5 +77,8 @@ constantsDefine({
 
   // 明細-備考
   DESCRIPTIONERR000: `001、${invoiceValidDefine.DESCRIPTION_KEY}は、${invoiceValidDefine.DESCRIPTION_VALUE}文字以内で入力してください。`,
-  DESCRIPTIONERR001: `002、${invoiceValidDefine.DESCRIPTION_KEY}は、${invoiceValidDefine.DESCRIPTION_VALUE}文字で入力してください。`
+  DESCRIPTIONERR001: `002、${invoiceValidDefine.DESCRIPTION_KEY}は、${invoiceValidDefine.DESCRIPTION_VALUE}文字で入力してください。`,
+
+  // ネットワーク接続エラーメッセージ
+  NETERR000: `006, ${invoiceValidDefine.NETWORK_KEY}は、ネットワーク接続済みのものを入力してください。`
 })
