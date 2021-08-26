@@ -22,13 +22,13 @@ module.exports = {
     const invoicesId = values?.invoicesId
 
     if (!invoicesId) {
-      logger.error(`${constantsDefine.logMessage.CMMERR000}${functionName}:25行`)
+      logger.error(`${constantsDefine.logMessage.CMMERR000}${functionName}`)
       return
     }
     const invoiceRow = await invoiceController.findInvoice(invoicesId)
 
     if (!invoiceRow?.dataValues.invoicesId) {
-      logger.info(`${constantsDefine.logMessage.DBINF000}${functionName}:31行`)
+      logger.info(`${constantsDefine.logMessage.DBINF000}${functionName}`)
       return
     }
 

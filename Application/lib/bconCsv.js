@@ -619,15 +619,16 @@ class bconCsv {
       }
 
       switch (validate.isUnitcode(csvColumn[15])) {
-        case '':
-          break
-        default:
+        case 'UNITERR000':
           resultConvert.errorData += resultConvert.errorData
             ? `,${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
             : `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
 
           resultConvert.status = -1
           setInvoiceLineErrCnt++
+          break
+        default:
+          csvColumn[15] = validate.isUnitcode(csvColumn[15])
           break
       }
 
@@ -645,15 +646,16 @@ class bconCsv {
       }
 
       switch (validate.isTaxCategori(csvColumn[17])) {
-        case '':
-          break
-        default:
+        case 'TAXERR000':
           resultConvert.errorData += resultConvert.errorData
             ? `,${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
             : `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
 
           resultConvert.status = -1
           setInvoiceLineErrCnt++
+          break
+        default:
+          csvColumn[17] = validate.isTaxCategori(csvColumn[17])
           break
       }
 

@@ -219,7 +219,7 @@ const isTaxCategori = function (category) {
     return 'TAXERR000'
   }
 
-  return ''
+  return taxCategory[category]
 }
 
 const isUnitcode = function (unitCode) {
@@ -229,7 +229,7 @@ const isUnitcode = function (unitCode) {
     return 'UNITERR000'
   }
 
-  return ''
+  return unitcodeCategory[unitCode]
 }
 
 const isFinancialInstitution = function (financialInstitution) {

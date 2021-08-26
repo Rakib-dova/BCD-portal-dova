@@ -21,14 +21,14 @@ module.exports = {
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     const userTenantId = values?.tenantId
     if (!userTenantId) {
-      logger.error(`${constantsDefine.logMessage.CMMERR000}${functionName}:25行`)
+      logger.error(`${constantsDefine.logMessage.CMMERR000}${functionName}`)
       return
     }
     const tenantRow = await tenantController.findOne(userTenantId)
     const tenantId = tenantRow?.dataValues?.tenantId
 
     if (!tenantId) {
-      logger.info(`${constantsDefine.logMessage.DBINF000}${functionName}:31行`)
+      logger.info(`${constantsDefine.logMessage.DBINF000}${functionName}`)
       return
     }
 

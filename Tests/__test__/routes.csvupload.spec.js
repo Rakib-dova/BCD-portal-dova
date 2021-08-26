@@ -33,8 +33,7 @@ const noticeHelper = require('../../Application/routes/helpers/notice')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
-const invocesController = require('../../Application/controllers/invoiceController.js')
-const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
+const invoiceDetailController = require('../../Application/controllers/invoiceDetailController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
 const constantsDefine = require('../../Application/constants')
@@ -72,8 +71,8 @@ describe('csvuploadのテスト', () => {
       }
     })
     createSpyInvoices = jest.spyOn(invoiceController, 'insert')
-    createSpyinvoicesDetail = jest.spyOn(invoceDetailController, 'insert')
-    findOneSpyInvoice = jest.spyOn(invocesController, 'findInvoice')
+    createSpyinvoicesDetail = jest.spyOn(invoiceDetailController, 'insert')
+    findOneSpyInvoice = jest.spyOn(invoiceController, 'findInvoice')
     findOneSypTenant = jest.spyOn(tenantController, 'findOne')
   })
   afterEach(() => {
@@ -809,17 +808,17 @@ describe('csvuploadのテスト', () => {
 2021-08-20,UT_TEST_INVOICE_9_1,test,2021-08-16,2021-08-16,PBI318_手動試験,手動銀行,手動支店,普通,1234567,手動,請求書一括作成_1.csv,1,明細,1,個,100000,消費税,PBI318_手動試験`
   ).toString('base64')
 
-  const fileDataSellersItemNumlessthanequa101 = Buffer.from(
+  const fileDataSellersItemNumlessthanequal101 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
 2021-06-15,UT_TEST_INVOICE_10_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,SELLERSITEMNUM_00000000000000000000000000000000000000000000000000000000000000000000000000000000000001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
-  const fileDataItemNamelessthanequa101 = Buffer.from(
+  const fileDataItemNamelessthanequal101 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
 2021-06-15,UT_TEST_INVOICE_11_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,ITEMNAME_00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
-  const fileDataQuantityValuelessthanequa1000000000001 = Buffer.from(
+  const fileDataQuantityValuelessthanequal1000000000001 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
 2021-06-15,UT_TEST_INVOICE_12_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,1000000000001,個,100000,消費税,アップロードテスト`
   ).toString('base64')
@@ -829,7 +828,7 @@ describe('csvuploadのテスト', () => {
 2021-06-15,UT_TEST_INVOICE_12_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,abc,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
-  const fileDataPriceValuelessthanequa1000000000001 = Buffer.from(
+  const fileDataPriceValuelessthanequal1000000000001 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,1000000000001,消費税,アップロードテスト`
   ).toString('base64')
@@ -971,12 +970,12 @@ describe('csvuploadのテスト', () => {
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,20210331,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
-  const financialInstitutionlessthanequa101 = Buffer.from(
+  const financialInstitutionlessthanequal101 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,TEST1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
-  const financialNamelessthanequa101 = Buffer.from(
+  const financialNamelessthanequal101 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testbank,TEST1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
@@ -986,7 +985,7 @@ describe('csvuploadのテスト', () => {
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,test,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
-  const accountIdlessthanequa8 = Buffer.from(
+  const accountIdlessthanequal8 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,12345678,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
@@ -996,17 +995,17 @@ describe('csvuploadのテスト', () => {
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,abcdefg,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
-  const accountNamelessthanequa101 = Buffer.from(
+  const accountNamelessthanequal101 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,TEST1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
-  const notelessthanequa101 = Buffer.from(
+  const notelessthanequal101 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,test,TEST1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
-  const descriptionlessthanequa101 = Buffer.from(
+  const descriptionlessthanequal101 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,test,テストです。,001,PC,100,個,11,消費税,TEST1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001`
   ).toString('base64')
@@ -1169,7 +1168,7 @@ describe('csvuploadのテスト', () => {
   // 結果値
   // bconCsvの結果値
   const returnBconCsv =
-    '{"DocumentType":"InvoiceType","UBLVersionID":{"value":"2.0"},"CustomizationID":{"value":"urn:tradeshift.com:ubl-2.0-customizations:2010-06"},"ProfileID":{"value":"urn:www.cenbii.eu:profile:bii04:ver1.0","schemeID":"CWA 16073:2010","schemeAgencyID":"CEN/ISSS WS/BII","schemeVersionID":"1"},"ID":{"value":"UT_TEST_INVOICE_1_1"},"IssueDate":{"value":"2021-06-14"},"InvoiceTypeCode":{"value":"380","listID":"UN/ECE 1001 Subset","listAgencyID":"6","listVersionID":"D08B"},"DocumentCurrencyCode":{"value":"JPY"},"Note":[{"value":"特記事項テストです。"}],"AdditionalDocumentReference":[{"ID":{"value":"test111"},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}],"AccountingCustomerParty":{"Party":{"PartyIdentification":[{"ID":{"value":"3cfebb4f-2338-4dc7-9523-5423a027a880","schemeID":"TS:ID","schemeName":"Tradeshift identifier"}}],"PartyName":[{"Name":{"value":null}}],"PostalAddress":{"StreetName":{"value":null},"BuildingNumber":{"value":null},"CityName":{"value":null},"PostalZone":{"value":null},"Country":{"IdentificationCode":{"value":"JP"}}},"Contact":{"ElectronicMail":{"value":null}}}},"Delivery":[{"ActualDeliveryDate":{"value":"2021-03-17"}}],"PaymentMeans":[{"PaymentMeansCode":{"value":42,"listID":"urn:tradeshift.com:api:1.0:paymentmeanscode"},"PaymentDueDate":{"value":"2021-03-31"},"PayeeFinancialAccount":{"FinancialInstitutionBranch":{"FinancialInstitution":{"Name":{"value":"testsiten"}},"Name":{"value":"testbank"}},"AccountTypeCode":{"value":"General"},"ID":{"value":"1111111"},"Name":{"value":"kang_test"}}}],"InvoiceLine":[{"ID":{"value":"1"},"InvoicedQuantity":{"value":100,"unitCode":"個"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"消費税"}}}}]}],"Item":{"Name":{"value":"PC"},"SellersItemIdentification":{"ID":{"value":"001"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"100000","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":"アップロードテスト"},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]}]}'
+    '{"DocumentType":"InvoiceType","UBLVersionID":{"value":"2.0"},"CustomizationID":{"value":"urn:tradeshift.com:ubl-2.0-customizations:2010-06"},"ProfileID":{"value":"urn:www.cenbii.eu:profile:bii04:ver1.0","schemeID":"CWA 16073:2010","schemeAgencyID":"CEN/ISSS WS/BII","schemeVersionID":"1"},"ID":{"value":"UT_TEST_INVOICE_1_1"},"IssueDate":{"value":"2021-06-14"},"InvoiceTypeCode":{"value":"380","listID":"UN/ECE 1001 Subset","listAgencyID":"6","listVersionID":"D08B"},"DocumentCurrencyCode":{"value":"JPY"},"Note":[{"value":"特記事項テストです。"}],"AdditionalDocumentReference":[{"ID":{"value":"test111"},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}],"AccountingCustomerParty":{"Party":{"PartyIdentification":[{"ID":{"value":"3cfebb4f-2338-4dc7-9523-5423a027a880","schemeID":"TS:ID","schemeName":"Tradeshift identifier"}}],"PartyName":[{"Name":{"value":null}}],"PostalAddress":{"StreetName":{"value":null},"BuildingNumber":{"value":null},"CityName":{"value":null},"PostalZone":{"value":null},"Country":{"IdentificationCode":{"value":"JP"}}},"Contact":{"ElectronicMail":{"value":null}}}},"Delivery":[{"ActualDeliveryDate":{"value":"2021-03-17"}}],"PaymentMeans":[{"PaymentMeansCode":{"value":42,"listID":"urn:tradeshift.com:api:1.0:paymentmeanscode"},"PaymentDueDate":{"value":"2021-03-31"},"PayeeFinancialAccount":{"FinancialInstitutionBranch":{"FinancialInstitution":{"Name":{"value":"testsiten"}},"Name":{"value":"testbank"}},"AccountTypeCode":{"value":"General"},"ID":{"value":"1111111"},"Name":{"value":"kang_test"}}}],"InvoiceLine":[{"ID":{"value":"1"},"InvoicedQuantity":{"value":100,"unitCode":"EA"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":10},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"JP 消費税 10%"}}}}]}],"Item":{"Name":{"value":"PC"},"SellersItemIdentification":{"ID":{"value":"001"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"100000","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":"アップロードテスト"},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]}]}'
 
   describe('ルーティング', () => {
     test('csvuploadのルーティングを確認', async () => {
@@ -2060,10 +2059,8 @@ describe('csvuploadのテスト', () => {
 
     test('準正常：請求書番号バリデーションチェック：101文字以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2073,7 +2070,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2118,16 +2115,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('001、請求書番号は、100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：銀行名バリデーションチェック：101文字以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2137,7 +2132,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2180,16 +2175,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('001、銀行名は、100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：発行日バリデーションチェック：日付', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2199,7 +2192,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2242,16 +2235,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('004、発行日は、有効な日付を入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：発行日バリデーションチェック：形式', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2261,7 +2252,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2304,16 +2295,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('005、発行日は、yyyy/mm/dd/形式で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：テナントバリデーションチェック：形式', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2323,7 +2312,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2368,16 +2357,14 @@ describe('csvuploadのテスト', () => {
         '010、テナントIDは、正しいテナントIDを入力してください。,006, テナントIDは、ネットワーク接続済みのものを入力してください。'
       )
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-項目IDバリデーションチェック：101文字以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2387,7 +2374,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2401,7 +2388,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataSellersItemNumlessthanequa101), 'base64').toString(
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataSellersItemNumlessthanequal101), 'base64').toString(
         'utf8'
       )
 
@@ -2432,16 +2419,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('001、明細-項目IDは、100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-内容バリデーションチェック：101文字以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2451,7 +2436,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2465,7 +2450,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataItemNamelessthanequa101), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataItemNamelessthanequal101), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -2494,16 +2479,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('001、明細-内容は、100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-数量バリデーションチェック：1000000000001以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2513,7 +2496,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2528,7 +2511,7 @@ describe('csvuploadのテスト', () => {
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
       const uploadCsvData = Buffer.from(
-        decodeURIComponent(fileDataQuantityValuelessthanequa1000000000001),
+        decodeURIComponent(fileDataQuantityValuelessthanequal1000000000001),
         'base64'
       ).toString('utf8')
 
@@ -2558,19 +2541,17 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(
-        '011、明細-数量は、0 ~ 1000000000000範囲で入力してください。'
+        '011、明細-数量は、0 ~ 1000000000000の範囲で入力してください。'
       )
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-数量バリデーションチェック：形式', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2580,7 +2561,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2623,16 +2604,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('002、明細-数量は、数字で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-単価バリデーションチェック：1000000000001以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2642,7 +2621,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2657,7 +2636,7 @@ describe('csvuploadのテスト', () => {
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
       const uploadCsvData = Buffer.from(
-        decodeURIComponent(fileDataPriceValuelessthanequa1000000000001),
+        decodeURIComponent(fileDataPriceValuelessthanequal1000000000001),
         'base64'
       ).toString('utf8')
 
@@ -2687,19 +2666,17 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(
-        '011、明細-単価は、0 ~ 1000000000000範囲で入力してください。'
+        '011、明細-単価は、0 ~ 1000000000000の範囲で入力してください。'
       )
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-単価バリデーションチェック：形式', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2709,7 +2686,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2752,16 +2729,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('002、明細-単価は、数字で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：支払期日バリデーションチェック：日付', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2771,7 +2746,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2814,16 +2789,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('004、支払期日は、有効な日付を入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：支払期日バリデーションチェック：形式', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2833,7 +2806,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2876,16 +2849,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('005、支払期日は、yyyy/mm/dd/形式で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：納品日バリデーションチェック：日付', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2895,7 +2866,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -2938,16 +2909,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('004、納品日は、有効な日付を入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：納品日バリデーションチェック：形式', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -2957,7 +2926,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3000,16 +2969,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('005、納品日は、yyyy/mm/dd/形式で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：備考バリデーションチェック：101文字以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3019,7 +2986,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3033,7 +3000,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(financialInstitutionlessthanequa101), 'base64').toString(
+      const uploadCsvData = Buffer.from(decodeURIComponent(financialInstitutionlessthanequal101), 'base64').toString(
         'utf8'
       )
 
@@ -3064,16 +3031,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('001、備考は、100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：支店名バリデーションチェック：101文字以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3083,7 +3048,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3097,7 +3062,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(financialNamelessthanequa101), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(financialNamelessthanequal101), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -3126,16 +3091,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('001、支店名は、100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：科目バリデーションチェック', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3145,7 +3108,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3190,16 +3153,14 @@ describe('csvuploadのテスト', () => {
         '009、科目は、マニュアルに定義されたものの中から選択してください。'
       )
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：口座番号バリデーションチェック：8文字以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3209,7 +3170,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3223,7 +3184,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(accountIdlessthanequa8), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(accountIdlessthanequal8), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -3252,16 +3213,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('001、口座番号は、7文字で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：口座番号バリデーションチェック：形式', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3271,7 +3230,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3314,16 +3273,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('002、口座番号は、数字で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：口座名義バリデーションチェック：101文字以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3333,7 +3290,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3347,7 +3304,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(accountNamelessthanequa101), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(accountNamelessthanequal101), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -3376,16 +3333,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('001、口座名義は、100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：その他特事項バリデーションチェック：101文字以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3395,7 +3350,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3409,7 +3364,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(notelessthanequa101), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(notelessthanequal101), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -3438,16 +3393,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('001、その他特事項は、100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：明細-備考バリデーションチェック：101文字以上', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3457,7 +3410,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3471,7 +3424,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(descriptionlessthanequa101), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(descriptionlessthanequal101), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -3500,16 +3453,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('001、明細-備考は、100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：ヘッダーバリデーションチェック', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3519,7 +3470,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3562,16 +3513,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('007、ヘッダーが指定のものと異なります。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：項目数バリデーションチェック', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3581,7 +3530,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3624,16 +3573,14 @@ describe('csvuploadのテスト', () => {
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('008、項目数が異なります。')
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：単位バリデーションチェック', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3643,7 +3590,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3682,16 +3629,14 @@ describe('csvuploadのテスト', () => {
         )
       }
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：税バリデーションチェック', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3701,7 +3646,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return invoice
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return values
@@ -3740,16 +3685,14 @@ describe('csvuploadのテスト', () => {
         )
       }
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
     test('準正常：ネットワーク確認バリデーションチェック', async () => {
       // 準備
-      const invoiceController = require('../../Application/controllers/invoiceController.js')
-      const invoceDetailController = require('../../Application/controllers/invoiceDetailController.js')
       const tmpInsert = invoiceController.insert
-      const tmpdetailInsert = invoceDetailController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
       const tmpApiManager = apiManager.accessTradeshift
       const resultInvoiceDetailController = []
 
@@ -3765,7 +3708,7 @@ describe('csvuploadのテスト', () => {
       invoiceController.findInvoice = jest.fn((invoice) => {
         return { dataValues: invoice }
       })
-      invoceDetailController.insert = jest.fn((values) => {
+      invoiceDetailController.insert = jest.fn((values) => {
         if (values.errorData) {
           resultInvoiceDetailController.push(values)
           return { dataValues: values }
@@ -3804,7 +3747,7 @@ describe('csvuploadのテスト', () => {
         )
       }
       invoiceController.insert = tmpInsert
-      invoceDetailController.insert = tmpdetailInsert
+      invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
