@@ -88,7 +88,7 @@ describe('invoiceControllerのテスト', () => {
   describe('findOne', () => {
     test('正常', async () => {
       // 準備
-      // DBからの正常契約情報の取得を想定する
+      // DBからの正常データ取得を想定する
       createSpy.mockReturnValue(resultInvoiceDetail)
       findInvoiceSpy.mockReturnValue(resultInvoice)
 
@@ -96,13 +96,13 @@ describe('invoiceControllerのテスト', () => {
       const result = await invoiceDetailController.insert(value)
 
       // 期待結果
-      // 想定した契約情報がReturnされていること
+      // 想定した情報がreturnされる
       expect(result).toEqual(resultInvoiceDetail)
     })
 
     test('エラー：パラメータInvoiceIdがNullの場合', async () => {
       // 準備
-      // 1回目のアクセストークンによるアクセスは401エラーを想定する
+      // DBからの正常データ取得を想定する
       createSpy.mockReturnValue(resultInvoiceDetail)
       findInvoiceSpy.mockReturnValue(resultInvoice)
 
@@ -116,7 +116,7 @@ describe('invoiceControllerのテスト', () => {
 
     test('エラー：DBから取得したInvoiceIdがNullの場合', async () => {
       // 準備
-      // 1回目のアクセストークンによるアクセスは401エラーを想定する
+      // DBからのInvoiceInvoicesIdがないデータ取得を想定する
       createSpy.mockReturnValue(resultInvoiceDetail)
       findInvoiceSpy.mockReturnValue(resultInvoiceInvoicesIdNull)
 
@@ -130,8 +130,7 @@ describe('invoiceControllerのテスト', () => {
 
     test('エラー：DBエラーの場合', async () => {
       // 準備
-      // 1回目のアクセストークンによるアクセスは401エラーを想定する
-
+      // DBエラーの想定する
       const dbError = new Error('DB error mock')
       createSpy.mockImplementation(() => {
         throw dbError
