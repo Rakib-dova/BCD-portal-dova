@@ -13,6 +13,7 @@ const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const constantsDefine = require('../constants')
+const { v4: uuidv4 } = require('uuid')
 
 const bodyParser = require('body-parser')
 router.use(
@@ -21,7 +22,7 @@ router.use(
     limit: '6826KB'
   })
 )
-const bconCsv = require('../lib/bconCsv')
+const BconCsv = require('../lib/bconCsv')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -61,13 +62,22 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  BconCsv.prototype.companyNetworkConnectionList = getNetwork({
+    accessToken: req.user.accessToken,
+    refreshToken: req.user.refreshToken
+  }).then((result) => {
+    return result
+  })
+
   // ユーザ権限も画面に送る
   res.render('csvupload')
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
 const cbPostUpload = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbPostUpload')
+  const functionName = 'cbPostUpload'
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+  const invoiceController = require('../controllers/invoiceController')
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
@@ -104,10 +114,26 @@ const cbPostUpload = async (req, res, next) => {
     refreshToken: req.user.refreshToken
   }
   let errorText = null
+  if (validate.isUndefined(BconCsv.prototype.companyNetworkConnectionList)) {
+    BconCsv.prototype.companyNetworkConnectionList = await getNetwork(userToken)
+  }
   // csvアップロード
   if (cbUploadCsv(filePath, filename, uploadCsvData) === false) return next(errorHelper.create(500))
+  const resultInvoice = await invoiceController.insert({
+    invoicesId: uuidv4(),
+    tenantId: req.user.tenantId,
+    csvFileName: req.body.filename,
+    successCount: -1,
+    failCount: -1,
+    skipCount: -1
+  })
+
+  if (!resultInvoice?.dataValues) {
+    logger.info(`${constantsDefine.logMessage.DBINF001}${functionName}`)
+  }
+
   // csvからデータ抽出
-  switch (await cbExtractInvoice(filePath, filename, userToken)) {
+  switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice.dataValues)) {
     case 101:
       errorText = constantsDefine.statusConstants.INVOICE_FAILED
       break
@@ -180,10 +206,11 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
-const cbExtractInvoice = async (_extractDir, _filename, _user) => {
+const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
+  const invoiceDetailController = require('../controllers/invoiceDetailController')
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
-  const csvObj = new bconCsv(extractFullpathFile)
+  const csvObj = new BconCsv(extractFullpathFile)
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
   const setHeaders = {}
@@ -220,35 +247,50 @@ const cbExtractInvoice = async (_extractDir, _filename, _user) => {
   let idx = 0
   while (invoiceList[idx]) {
     // 明細check
-    const meisaiLength = invoiceList[idx].getDocument().InvoiceLine.length
+    const meisaiLength = invoiceList[idx].INVOICE.getDocument().InvoiceLine.length
 
     if (meisaiLength > 200) {
       logger.error(
-        constantsDefine.logMessage.ERR001 + invoiceList[idx].getDocument().ID.value + ' - specificToomuch Error'
+        constantsDefine.logMessage.ERR001 + invoiceList[idx].INVOICE.getDocument().ID.value + ' - specificToomuch Error'
       )
       meisaiFlag = 1
     } else {
       // アップロードするドキュメントが重複のチェック
-      const docNo = invoiceList[idx].getDocument().ID.value
+      const docNo = invoiceList[idx].INVOICE.getDocument().ID.value
       documentIds.forEach((id) => {
-        if (docNo === id) {
-          delete invoiceList[idx]
+        if (docNo === id && invoiceList[idx].status !== -1) {
+          invoiceList[idx].status = 1
         }
       })
-      if (invoiceList[idx]) {
-        await apiManager.accessTradeshift(
-          _user.accessToken,
-          _user.refreshToken,
-          'put',
-          '/documents/' + invoiceList[idx].getDocumentId() + '?draft=true&documentProfileId=tradeshift.invoice.1.0',
-          JSON.stringify(invoiceList[idx].getDocument()),
-          {
-            headers: setHeaders
-          }
-        )
-      } else {
-        meisaiFlag = 2
+      switch (invoiceList[idx].status) {
+        case 0:
+          await apiManager.accessTradeshift(
+            _user.accessToken,
+            _user.refreshToken,
+            'put',
+            '/documents/' +
+              invoiceList[idx].INVOICE.getDocumentId() +
+              '?draft=true&documentProfileId=tradeshift.invoice.1.0',
+            JSON.stringify(invoiceList[idx].INVOICE.getDocument()),
+            {
+              headers: setHeaders
+            }
+          )
+          break
+        case 1:
+          meisaiFlag = 2
+          break
+        case -1:
+          break
       }
+      await invoiceDetailController.insert({
+        invoiceDetailId: invoiceList[idx].invoiceDetailId,
+        invoicesId: _invoices.invoicesId,
+        invoiceId: invoiceList[idx].invoiceId,
+        lines: invoiceList[idx].lines,
+        status: invoiceList[idx].status,
+        errorData: invoiceList[idx].errorData
+      })
     }
     idx++
   }
@@ -279,6 +321,35 @@ const getTimeStamp = () => {
   return stamp
 }
 
+// 会社のネットワーク情報を取得
+const getNetwork = async (_userToken) => {
+  const connections = []
+  let numPages
+  let currPage
+  let documentsURL = '/network?limit=100'
+  do {
+    if (Object.prototype.toString.call(currPage) !== '[object Undefined]') {
+      currPage++
+      documentsURL = `/network?limit=100&page=${currPage}`
+    }
+    let result
+    try {
+      result = await apiManager.accessTradeshift(_userToken.accessToken, _userToken.refreshToken, 'get', documentsURL)
+      result.Connections.Connection.forEach((connection) => {
+        connections.push(connection.ConnectionId)
+      })
+    } catch (err) {
+      logger.error(err)
+      return
+    }
+
+    numPages = result.numPages
+    currPage = result.pageId
+  } while (currPage < numPages)
+
+  return connections
+}
+
 router.get('/', helper.isAuthenticated, cbGetIndex)
 router.post('/', helper.isAuthenticated, cbPostUpload)
 
@@ -289,6 +360,7 @@ module.exports = {
   cbUploadCsv: cbUploadCsv,
   cbRemoveCsv: cbRemoveCsv,
   cbExtractInvoice: cbExtractInvoice,
-  getTimeStamp: getTimeStamp
+  getTimeStamp: getTimeStamp,
   // cbPostUpload, cbUploadCsv, cbRemoveCsv, cbExtractInvoice, getTimeStampはUTテストのため追加
+  getNetwork: getNetwork
 }
