@@ -284,7 +284,10 @@ class bconCsv {
       lines: null,
       status: null,
       errorData: null,
-      INVOICE: null
+      INVOICE: null,
+      successCount: 0,
+      failCount: 0,
+      skipCount: 0
     }
     const invoiceData = this.#csvFile.getRows()
     let parentInvoice = null
@@ -332,17 +335,11 @@ class bconCsv {
           issueDateArray[0] + '-' + `0${issueDateArray[1]}`.slice(-2) + '-' + `0${issueDateArray[2]}`.slice(-2)
         switch (validate.isDate(csvColumn[0])) {
           case 1:
-            resultConvert.errorData += resultConvert.errorData
-              ? `,${constants.invoiceErrMsg['ISSUEDATEERR001']}`
-              : `${constants.invoiceErrMsg['ISSUEDATEERR001']}`
-
+            resultConvert.errorData += `${constants.invoiceErrMsg['ISSUEDATEERR001']}`
             resultConvert.status = -1
             break
           case 2:
-            resultConvert.errorData += resultConvert.errorData
-              ? `,${constants.invoiceErrMsg['ISSUEDATEERR000']}`
-              : `${constants.invoiceErrMsg['ISSUEDATEERR000']}`
-
+            resultConvert.errorData += `${constants.invoiceErrMsg['ISSUEDATEERR000']}`
             resultConvert.status = -1
             break
           default:
@@ -355,10 +352,7 @@ class bconCsv {
           case '':
             break
           default:
-            resultConvert.errorData += resultConvert.errorData
-              ? `,${constants.invoiceErrMsg[validate.isInvoiceId(csvColumn[1])]}`
-              : `${constants.invoiceErrMsg[validate.isInvoiceId(csvColumn[1])]}`
-
+            resultConvert.errorData += `${constants.invoiceErrMsg[validate.isInvoiceId(csvColumn[1])]}`
             resultConvert.status = -1
             break
         }
@@ -366,10 +360,7 @@ class bconCsv {
         parentInvoice.setInvoiceNumber(csvColumn[1])
 
         if (!validate.isUUID(csvColumn[2])) {
-          resultConvert.errorData += resultConvert.errorData
-            ? `,${constants.invoiceErrMsg['TENANTERR000']}`
-            : `${constants.invoiceErrMsg['TENANTERR000']}`
-
+          resultConvert.errorData += `${constants.invoiceErrMsg['TENANTERR000']}`
           resultConvert.status = -1
         }
 
@@ -385,10 +376,7 @@ class bconCsv {
             resultConvert.status = -1
             break
           default:
-            resultConvert.errorData += resultConvert.errorData
-              ? `,${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
-              : `${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
-
+            resultConvert.errorData += `${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
             resultConvert.status = -1
             break
         }
@@ -402,17 +390,11 @@ class bconCsv {
             paymentDateArray[0] + '-' + `0${paymentDateArray[1]}`.slice(-2) + '-' + `0${paymentDateArray[2]}`.slice(-2)
           switch (validate.isDate(csvColumn[3])) {
             case 1:
-              resultConvert.errorData += resultConvert.errorData
-                ? `,${constants.invoiceErrMsg['PAYMENTDATEERR001']}`
-                : `${constants.invoiceErrMsg['PAYMENTDATEERR001']}`
-
+              resultConvert.errorData += `${constants.invoiceErrMsg['PAYMENTDATEERR001']}`
               resultConvert.status = -1
               break
             case 2:
-              resultConvert.errorData += resultConvert.errorData
-                ? `,${constants.invoiceErrMsg['PAYMENTDATEERR000']}`
-                : `${constants.invoiceErrMsg['PAYMENTDATEERR000']}`
-
+              resultConvert.errorData += `${constants.invoiceErrMsg['PAYMENTDATEERR000']}`
               resultConvert.status = -1
               break
             default:
@@ -431,17 +413,11 @@ class bconCsv {
             `0${deliveryDateArray[2]}`.slice(-2)
           switch (validate.isDate(csvColumn[4])) {
             case 1:
-              resultConvert.errorData += resultConvert.errorData
-                ? `,${constants.invoiceErrMsg['DELIVERYDATEERR001']}`
-                : `${constants.invoiceErrMsg['DELIVERYDATEERR001']}`
-
+              resultConvert.errorData += `${constants.invoiceErrMsg['DELIVERYDATEERR001']}`
               resultConvert.status = -1
               break
             case 2:
-              resultConvert.errorData += resultConvert.errorData
-                ? `,${constants.invoiceErrMsg['DELIVERYDATEERR000']}`
-                : `${constants.invoiceErrMsg['DELIVERYDATEERR000']}`
-
+              resultConvert.errorData += `${constants.invoiceErrMsg['DELIVERYDATEERR000']}`
               resultConvert.status = -1
               break
             default:
@@ -455,10 +431,7 @@ class bconCsv {
             case '':
               break
             default:
-              resultConvert.errorData += resultConvert.errorData
-                ? `,${constants.invoiceErrMsg[validate.isFinancialInstitution(csvColumn[5])]}`
-                : `${constants.invoiceErrMsg[validate.isFinancialInstitution(csvColumn[5])]}`
-
+              resultConvert.errorData += `${constants.invoiceErrMsg[validate.isFinancialInstitution(csvColumn[5])]}`
               resultConvert.status = -1
               break
           }
@@ -470,10 +443,7 @@ class bconCsv {
             case '':
               break
             default:
-              resultConvert.errorData += resultConvert.errorData
-                ? `,${constants.invoiceErrMsg[validate.isBankName(csvColumn[6])]}`
-                : `${constants.invoiceErrMsg[validate.isBankName(csvColumn[6])]}`
-
+              resultConvert.errorData += `${constants.invoiceErrMsg[validate.isBankName(csvColumn[6])]}`
               resultConvert.status = -1
               break
           }
@@ -484,13 +454,8 @@ class bconCsv {
             case '':
               break
             default:
-              resultConvert.errorData += resultConvert.errorData
-                ? `,${constants.invoiceErrMsg[validate.isFinancialName(csvColumn[7])]}`
-                : `${constants.invoiceErrMsg[validate.isFinancialName(csvColumn[7])]}`
-
+              resultConvert.errorData += `${constants.invoiceErrMsg[validate.isFinancialName(csvColumn[7])]}`
               resultConvert.status = -1
-
-              console.log(resultConvert.errorData)
               break
           }
         }
@@ -498,10 +463,7 @@ class bconCsv {
         if (csvColumn[8] !== '') {
           switch (validate.isAccountType(csvColumn[8])) {
             case 1:
-              resultConvert.errorData += resultConvert.errorData
-                ? `,${constants.invoiceErrMsg['ACCOUNTTYPEERR000']}`
-                : `${constants.invoiceErrMsg['ACCOUNTTYPEERR000']}`
-
+              resultConvert.errorData += `${constants.invoiceErrMsg['ACCOUNTTYPEERR000']}`
               resultConvert.status = -1
               break
             default:
@@ -515,10 +477,7 @@ class bconCsv {
             case '':
               break
             default:
-              resultConvert.errorData += resultConvert.errorData
-                ? `,${constants.invoiceErrMsg[validate.isAccountId(csvColumn[9])]}`
-                : `${constants.invoiceErrMsg[validate.isAccountId(csvColumn[9])]}`
-
+              resultConvert.errorData += `${constants.invoiceErrMsg[validate.isAccountId(csvColumn[9])]}`
               resultConvert.status = -1
               break
           }
@@ -529,10 +488,7 @@ class bconCsv {
             case '':
               break
             default:
-              resultConvert.errorData += resultConvert.errorData
-                ? `,${constants.invoiceErrMsg[validate.isAccountName(csvColumn[10])]}`
-                : `${constants.invoiceErrMsg[validate.isAccountName(csvColumn[10])]}`
-
+              resultConvert.errorData += `${constants.invoiceErrMsg[validate.isAccountName(csvColumn[10])]}`
               resultConvert.status = -1
               break
           }
@@ -552,10 +508,7 @@ class bconCsv {
             case '':
               break
             default:
-              resultConvert.errorData += resultConvert.errorData
-                ? `,${constants.invoiceErrMsg[validate.isNote(csvColumn[11])]}`
-                : `${constants.invoiceErrMsg[validate.isNote(csvColumn[11])]}`
-
+              resultConvert.errorData += `${constants.invoiceErrMsg[validate.isNote(csvColumn[11])]}`
               resultConvert.status = -1
               break
           }
@@ -583,10 +536,7 @@ class bconCsv {
         case '':
           break
         default:
-          resultConvert.errorData += resultConvert.errorData
-            ? `,${constants.invoiceErrMsg[validate.isSellersItemNum(csvColumn[12])]}`
-            : `${constants.invoiceErrMsg[validate.isSellersItemNum(csvColumn[12])]}`
-
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isSellersItemNum(csvColumn[12])]}`
           resultConvert.status = -1
           setInvoiceLineErrCnt++
           break
@@ -596,10 +546,7 @@ class bconCsv {
         case '':
           break
         default:
-          resultConvert.errorData += resultConvert.errorData
-            ? `,${constants.invoiceErrMsg[validate.isItemName(csvColumn[13])]}`
-            : `${constants.invoiceErrMsg[validate.isItemName(csvColumn[13])]}`
-
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isItemName(csvColumn[13])]}`
           resultConvert.status = -1
           setInvoiceLineErrCnt++
           break
@@ -609,26 +556,19 @@ class bconCsv {
         case '':
           break
         default:
-          resultConvert.errorData += resultConvert.errorData
-            ? `,${constants.invoiceErrMsg[validate.isQuantityValue(csvColumn[14])]}`
-            : `${constants.invoiceErrMsg[validate.isQuantityValue(csvColumn[14])]}`
-
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isQuantityValue(csvColumn[14])]}`
           resultConvert.status = -1
           setInvoiceLineErrCnt++
           break
       }
 
       switch (validate.isUnitcode(csvColumn[15])) {
-        case 'UNITERR000':
-          resultConvert.errorData += resultConvert.errorData
-            ? `,${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
-            : `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
-
-          resultConvert.status = -1
-          setInvoiceLineErrCnt++
+        case '':
           break
         default:
-          csvColumn[15] = validate.isUnitcode(csvColumn[15])
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
+          resultConvert.status = -1
+          setInvoiceLineErrCnt++
           break
       }
 
@@ -636,26 +576,19 @@ class bconCsv {
         case '':
           break
         default:
-          resultConvert.errorData += resultConvert.errorData
-            ? `,${constants.invoiceErrMsg[validate.isPriceValue(csvColumn[16])]}`
-            : `${constants.invoiceErrMsg[validate.isPriceValue(csvColumn[16])]}`
-
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isPriceValue(csvColumn[16])]}`
           resultConvert.status = -1
           setInvoiceLineErrCnt++
           break
       }
 
       switch (validate.isTaxCategori(csvColumn[17])) {
-        case 'TAXERR000':
-          resultConvert.errorData += resultConvert.errorData
-            ? `,${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
-            : `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
-
-          resultConvert.status = -1
-          setInvoiceLineErrCnt++
+        case '':
           break
         default:
-          csvColumn[17] = validate.isTaxCategori(csvColumn[17])
+          resultConvert.errorData += `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
+          resultConvert.status = -1
+          setInvoiceLineErrCnt++
           break
       }
 
@@ -664,10 +597,7 @@ class bconCsv {
           case '':
             break
           default:
-            resultConvert.errorData += resultConvert.errorData
-              ? `,${constants.invoiceErrMsg[validate.isDescription(csvColumn[18])]}`
-              : `${constants.invoiceErrMsg[validate.isDescription(csvColumn[18])]}`
-
+            resultConvert.errorData += `${constants.invoiceErrMsg[validate.isDescription(csvColumn[18])]}`
             resultConvert.status = -1
             setInvoiceLineErrCnt++
             break
@@ -703,6 +633,14 @@ class bconCsv {
           this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData +=
             ',' + resultConvert.errorData
         }
+      }
+
+      if ((resultConvert.status = 0)) {
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].successCount += 1
+      } else if ((resultConvert.status = 1)) {
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].skipCount += 1
+      } else if ((resultConvert.status = -1)) {
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].failCount += 1
       }
     })
   }
