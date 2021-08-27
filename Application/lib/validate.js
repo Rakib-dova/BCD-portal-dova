@@ -91,6 +91,13 @@ const isPostalNumber = (postalNumber) => {
   return regex.test(postalNumber)
 }
 
+const isNumberRegular = (regNumber) => {
+  const regex = new RegExp(/^[-]?[0-9]*$/)
+
+  // test()結果はtrue又はfalseになる。
+  return regex.test(regNumber)
+}
+
 const isTenantManager = function (userRole, deleteFlag) {
   if (userRole !== constantsDefine.userRoleConstants.tenantManager && !deleteFlag) {
     return false
@@ -185,7 +192,7 @@ const isItemName = function (itemName) {
 }
 
 const isQuantityValue = function (quantityValue) {
-  if (isNaN(quantityValue)) {
+  if (!isNumberRegular(quantityValue)) {
     return 'QUANTITYVALUEERR001'
   }
 
@@ -197,7 +204,7 @@ const isQuantityValue = function (quantityValue) {
 }
 
 const isPriceValue = function (priceValue) {
-  if (isNaN(priceValue)) {
+  if (!isNumberRegular(priceValue)) {
     return 'PRICEVALUEERR001'
   }
 
@@ -259,7 +266,7 @@ const isAccountType = function (accountType) {
 }
 
 const isAccountId = function (accountId) {
-  if (isNaN(accountId)) {
+  if (!isNumberRegular(accountId)) {
     return 'ACCOUNTIDERR001'
   }
   if (accountId.length !== constantsDefine.invoiceValidDefine.ACCOUNTID_VALUE) {
@@ -341,5 +348,6 @@ module.exports = {
   isNote: isNote,
   isDescription: isDescription,
   checkNetworkConnection: checkNetworkConnection,
-  isUndefined: isUndefined
+  isUndefined: isUndefined,
+  isNumberRegular: isNumberRegular
 }
