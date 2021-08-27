@@ -336,7 +336,12 @@ const getNetwork = async (_userToken) => {
     try {
       result = await apiManager.accessTradeshift(_userToken.accessToken, _userToken.refreshToken, 'get', documentsURL)
       result.Connections.Connection.forEach((connection) => {
-        connections.push(connection.ConnectionId)
+        if (
+          Object.prototype.toString.call(connection.State) !== '[object Undefined]' &&
+          connection.State === 'ACCEPTED'
+        ) {
+          connections.push(connection.CompanyAccountId)
+        }
       })
     } catch (err) {
       logger.error(err)
