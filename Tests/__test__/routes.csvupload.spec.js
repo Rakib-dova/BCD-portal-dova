@@ -1021,9 +1021,9 @@ describe('csvuploadのテスト', () => {
     pageId: 1,
     Connections: {
       Connection: [
-        { ConnectionId: '927635b5-f469-493b-9ce0-b2bfc4062959' },
-        { ConnectionId: '927635b5-f469-493b-9ce0-b2bfc4062951' },
-        { ConnectionId: '3cfebb4f-2338-4dc7-9523-5423a027a880' }
+        { State: 'ACCEPTED', CompanyAccountId: '927635b5-f469-493b-9ce0-b2bfc4062959' },
+        { State: 'ACCEPTED', CompanyAccountId: '927635b5-f469-493b-9ce0-b2bfc4062951' },
+        { State: 'ACCEPTED', CompanyAccountId: '3cfebb4f-2338-4dc7-9523-5423a027a880' }
       ]
     }
   }
