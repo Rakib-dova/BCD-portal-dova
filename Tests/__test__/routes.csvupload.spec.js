@@ -1017,23 +1017,23 @@ describe('csvuploadのテスト', () => {
 2021/06/14,UT_TEST_INVOICE_1_1,927635b5-f469-493b-9ce0-b2bfc4062959,2021/03/31,2021/03/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
-  const resultGetNetwork = [
-    '927635b5-f469-493b-9ce0-b2bfc4062959',
-    '927635b5-f469-493b-9ce0-b2bfc4062951',
-    '3cfebb4f-2338-4dc7-9523-5423a027a880'
-  ]
+  // const resultNetworkConnection  = [
+  //   '927635b5-f469-493b-9ce0-b2bfc4062959',
+  //   '927635b5-f469-493b-9ce0-b2bfc4062951',
+  //   '3cfebb4f-2338-4dc7-9523-5423a027a880'
+  // ]
 
-  // const resultGetNetwork = {
-  //   numPages: 1,
-  //   pageId: 1,
-  //   Connections: {
-  //     Connection: [
-  //       { State: 'ACCEPTED', CompanyAccountId: '927635b5-f469-493b-9ce0-b2bfc4062959' },
-  //       { State: 'ACCEPTED', CompanyAccountId: '927635b5-f469-493b-9ce0-b2bfc4062951' },
-  //       { State: 'ACCEPTED', CompanyAccountId: '3cfebb4f-2338-4dc7-9523-5423a027a880' }
-  //     ]
-  //   }
-  // }
+  const resultGetNetwork = {
+    numPages: 1,
+    pageId: 1,
+    Connections: {
+      Connection: [
+        { State: 'ACCEPTED', CompanyAccountId: '927635b5-f469-493b-9ce0-b2bfc4062959' },
+        { State: 'ACCEPTED', CompanyAccountId: '927635b5-f469-493b-9ce0-b2bfc4062951' },
+        { State: 'ACCEPTED', CompanyAccountId: '3cfebb4f-2338-4dc7-9523-5423a027a880' }
+      ]
+    }
+  }
 
   // 登録済みのドキュメントデータ
   const documentListData = {
@@ -3800,23 +3800,17 @@ describe('csvuploadのテスト', () => {
 
       // 期待結果
       // JSONの内容が正しいこと
-      console.log(JSON.stringify(invoiceList))
-
-      console.log('===' + invoiceList[0].successCount)
-      console.log('===' + invoiceList[0].skipCount)
-      console.log('===' + invoiceList[0].failCount)
-
       expect(invoiceList[0].successCount).toBe(1)
       expect(invoiceList[0].skipCount).toBe(0)
       expect(invoiceList[0].failCount).toBe(0)
 
-      expect(invoiceList[0].successCount).toBe(0)
-      expect(invoiceList[0].skipCount).toBe(0)
-      expect(invoiceList[0].failCount).toBe(1)
+      expect(invoiceList[1].successCount).toBe(0)
+      expect(invoiceList[1].skipCount).toBe(0)
+      expect(invoiceList[1].failCount).toBe(1)
 
-      expect(invoiceList[0].successCount).toBe(0)
-      expect(invoiceList[0].skipCount).toBe(1)
-      expect(invoiceList[0].failCount).toBe(0)
+      expect(invoiceList[2].successCount).toBe(0)
+      expect(invoiceList[2].skipCount).toBe(1)
+      expect(invoiceList[2].failCount).toBe(0)
     })
   })
 
