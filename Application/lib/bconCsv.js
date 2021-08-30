@@ -322,8 +322,18 @@ class bconCsv {
         }
 
         if (csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE) {
-          resultConvert.errorData += `${constants.invoiceErrMsg['COLUMNERR000']}`
+          resultConvert.errorData += resultConvert.errorData
+            ? `,${constants.invoiceErrMsg['COLUMNERR000']}`
+            : `${constants.invoiceErrMsg['COLUMNERR000']}`
           resultConvert.status = -1
+
+          indexObj = {
+            ...resultConvert,
+            INVOICE: parentInvoice
+          }
+          this.#invoiceDocumentList.push(indexObj)
+
+          return
         }
 
         csvColumn[0] = csvColumn[0].replace(/\//g, '-')
@@ -489,8 +499,6 @@ class bconCsv {
                 : `${constants.invoiceErrMsg[validate.isFinancialName(csvColumn[7])]}`
 
               resultConvert.status = -1
-
-              console.log(resultConvert.errorData)
               break
           }
         }
