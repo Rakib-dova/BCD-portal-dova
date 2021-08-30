@@ -947,9 +947,14 @@ describe('csvuploadのテスト', () => {
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
-  const invoiceListCloumnErr = Buffer.from(
+  const invoiceListCloumnErr20 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト,テスト`
+  ).toString('base64')
+
+  const invoiceListCloumnErr18 = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税`
   ).toString('base64')
 
   const paymentDateleap = Buffer.from(
@@ -2116,7 +2121,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('001、請求書番号は、100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('請求書番号は100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2176,7 +2181,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('001、銀行名は、100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('銀行名は100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2236,7 +2241,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('004、発行日は、有効な日付を入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('発行日は有効な日付を入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2296,7 +2301,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('005、発行日は、yyyy/mm/dd/形式で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('発行日はyyyy/mm/dd/形式で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2357,7 +2362,7 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(
-        '010、テナントIDは、正しいテナントIDを入力してください。,006, テナントIDは、ネットワーク接続済みのものを入力してください。'
+        'テナントIDは正しいテナントIDを入力してください。,テナントIDはネットワーク接続済みのものを入力してください。'
       )
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
@@ -2420,7 +2425,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('001、明細-項目IDは、100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-項目IDは100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2480,7 +2485,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('001、明細-内容は、100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-内容は100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2544,7 +2549,7 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(
-        '011、明細-数量は、0 ~ 1000000000000の範囲で入力してください。'
+        '明細-数量は「0 ~ 1000000000000」の範囲で入力してください。'
       )
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
@@ -2605,7 +2610,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('002、明細-数量は、数字で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-数量は数字で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2669,7 +2674,7 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(
-        '011、明細-単価は、0 ~ 1000000000000の範囲で入力してください。'
+        '明細-単価は「0 ~ 1000000000000」の範囲で入力してください。'
       )
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
@@ -2730,7 +2735,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('002、明細-単価は、数字で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-単価は数字で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2790,7 +2795,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('004、支払期日は、有効な日付を入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('支払期日は有効な日付を入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2850,7 +2855,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('005、支払期日は、yyyy/mm/dd/形式で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('支払期日はyyyy/mm/dd/形式で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2910,7 +2915,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('004、納品日は、有効な日付を入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('納品日は有効な日付を入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2970,7 +2975,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('005、納品日は、yyyy/mm/dd/形式で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('納品日はyyyy/mm/dd/形式で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -3032,7 +3037,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('001、備考は、100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('備考は100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -3092,7 +3097,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('001、支店名は、100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('支店名は100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -3153,7 +3158,7 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(
-        '009、科目は、マニュアルに定義されたものの中から選択してください。'
+        '科目はマニュアルに定義されたものの中から選択してください。'
       )
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
@@ -3214,7 +3219,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('001、口座番号は、7文字で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('口座番号は数字で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -3274,7 +3279,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('002、口座番号は、数字で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('口座番号は数字で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -3334,7 +3339,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('001、口座名義は、100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('口座名義は100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -3394,7 +3399,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('001、その他特事項は、100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('その他特事項は100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -3454,7 +3459,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('001、明細-備考は、100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-備考は100文字以内で入力してください。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -3514,13 +3519,13 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('007、ヘッダーが指定のものと異なります。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('ヘッダーが指定のものと異なります。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：項目数バリデーションチェック', async () => {
+    test('準正常：20項目数バリデーションチェック', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -3547,7 +3552,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(invoiceListCloumnErr), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(invoiceListCloumnErr20), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -3574,7 +3579,67 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('008、項目数が異なります。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual('項目数が異なります。')
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('準正常：18項目数バリデーションチェック', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (values.errorData) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(invoiceListCloumnErr18), 'base64').toString('utf8')
+
+      createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
+      findOneSpyInvoice.mockReturnValue(invoiceData)
+      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      findOneSypTenant.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+      })
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
+      expect(resultExt).toBeTruthy()
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // エラーメッセージが予定通りにある
+      expect(resultInvoiceDetailController[0].errorData).toEqual('項目数が異なります。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -3594,7 +3659,10 @@ describe('csvuploadのテスト', () => {
         return invoice
       })
       invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
+        if (
+          values.errorData !== '正常に取込ました。' &&
+          values.errorData !== '取込済みのため、処理をスキップしました。'
+        ) {
           resultInvoiceDetailController.push(values)
           return values
         }
@@ -3628,7 +3696,7 @@ describe('csvuploadのテスト', () => {
       for (let idx = 0; idx < 38; idx++) {
         expect(resultInvoiceDetailController[idx].invoiceId).toEqual(`単位テスト${idx + 101}`)
         expect(resultInvoiceDetailController[idx].errorData).toEqual(
-          '009、単位は、マニュアルに定義されたものの中から選択してください。'
+          '単位はマニュアルに定義されたものの中から選択してください。'
         )
       }
       invoiceController.insert = tmpInsert
@@ -3650,7 +3718,10 @@ describe('csvuploadのテスト', () => {
         return invoice
       })
       invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
+        if (
+          values.errorData !== '正常に取込ました。' &&
+          values.errorData !== '取込済みのため、処理をスキップしました。'
+        ) {
           resultInvoiceDetailController.push(values)
           return values
         }
@@ -3684,7 +3755,7 @@ describe('csvuploadのテスト', () => {
       for (let idx = 0; idx < 5; idx++) {
         expect(resultInvoiceDetailController[idx].invoiceId).toEqual(`税テスト${idx + 11}`)
         expect(resultInvoiceDetailController[idx].errorData).toEqual(
-          '009、税は、マニュアルに定義されたものの中から選択してください。'
+          '税はマニュアルに定義されたものの中から選択してください。'
         )
       }
       invoiceController.insert = tmpInsert
@@ -3712,9 +3783,12 @@ describe('csvuploadのテスト', () => {
         return { dataValues: invoice }
       })
       invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
+        if (
+          values.errorData !== '正常に取込ました。' &&
+          values.errorData !== '取込済みのため、処理をスキップしました。'
+        ) {
           resultInvoiceDetailController.push(values)
-          return { dataValues: values }
+          return values
         }
       })
       request.user = user
@@ -3746,7 +3820,7 @@ describe('csvuploadのテスト', () => {
       for (let idx = 0; idx < 2; idx++) {
         expect(resultInvoiceDetailController[idx]?.invoiceId).toEqual(`ネットワーク確認テスト1${idx + 1}`)
         expect(resultInvoiceDetailController[idx].errorData).toEqual(
-          '006, テナントIDは、ネットワーク接続済みのものを入力してください。'
+          'テナントIDはネットワーク接続済みのものを入力してください。'
         )
       }
       invoiceController.insert = tmpInsert
