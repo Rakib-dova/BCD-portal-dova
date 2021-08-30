@@ -55,5 +55,25 @@ module.exports = {
     }
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return invoice
+  },
+  updateCount: async (_invoicesId, _successCount, _failCount, _skipCount) => {
+    try {
+      const invoice = await Invoice.update(
+        {
+          successCount: _successCount,
+          failCount: _failCount,
+          skipCount: _skipCount
+        },
+        {
+          where: {
+            invoicesId: _invoicesId
+          }
+        }
+      )
+      return invoice
+    } catch (error) {
+      logger.error({ invoicesId: _invoicesId, stack: error.stack, status: 0 })
+      return error
+    }
   }
 }

@@ -284,7 +284,10 @@ class bconCsv {
       lines: null,
       status: null,
       errorData: null,
-      INVOICE: null
+      INVOICE: null,
+      successCount: 0,
+      failCount: 0,
+      skipCount: 0
     }
     const invoiceData = this.#csvFile.getRows()
     let parentInvoice = null
@@ -711,6 +714,14 @@ class bconCsv {
           this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].errorData +=
             ',' + resultConvert.errorData
         }
+      }
+
+      if (resultConvert.status === 0) {
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].successCount += 1
+      } else if (resultConvert.status === 1) {
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].skipCount += 1
+      } else if (resultConvert.status === -1) {
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].failCount += 1
       }
     })
   }
