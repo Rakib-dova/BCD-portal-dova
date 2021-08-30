@@ -37,11 +37,11 @@ constantsDefine({
   TENANTERR000: `${invoiceValidDefine.TENANT_KEY}は正しいテナントIDを入力してください。`,
 
   // 明細-数量エラーメッセージ
-  QUANTITYVALUEERR000: `${invoiceValidDefine.QUANTITYVALUE_KEY}は「0 ~ ${invoiceValidDefine.QUANTITYVALUE_VALUE}」の範囲で入力してください。`,
+  QUANTITYVALUEERR000: `${invoiceValidDefine.QUANTITYVALUE_KEY}は「0 ~ ${invoiceValidDefine.QUANTITYVALUE_MAX_VALUE}」の範囲で入力してください。`,
   QUANTITYVALUEERR001: `${invoiceValidDefine.QUANTITYVALUE_KEY}は${invoiceValidDefine.QUANTITYVALUE_NUM}で入力してください。`,
 
   // 明細-単価エラーメッセージ
-  PRICEVALUEERR000: `${invoiceValidDefine.PRICEVALUE_KEY}は「0 ~ ${invoiceValidDefine.PRICEVALUE_VALUE}」の範囲で入力してください。`,
+  PRICEVALUEERR000: `${invoiceValidDefine.PRICEVALUE_KEY}は「${invoiceValidDefine.PRICEVALUE_MIN_VALUE} ~ ${invoiceValidDefine.PRICEVALUE_MAX_VALUE}」の範囲で入力してください。`,
   PRICEVALUEERR001: `${invoiceValidDefine.PRICEVALUE_KEY}は${invoiceValidDefine.PRICEVALUE_NUM}で入力してください。`,
 
   // 税エラーメッセージ

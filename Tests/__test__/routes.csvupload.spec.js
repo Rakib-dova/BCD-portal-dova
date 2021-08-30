@@ -788,9 +788,9 @@ describe('csvuploadのテスト', () => {
 2021-06-15,UT_TEST_INVOICE_5_10000000000000000000000000000000000000000000000000000000000000000000000000000000001,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
-  const fileDataBankNamelessthanequal101 = Buffer.from(
+  const fileDataBankNamelessthanequal201 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
-2021-06-15,UT_TEST_INVOICE_6_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,BANK1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,testsiten,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
+2021-06-15,UT_TEST_INVOICE_6_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本ぎ,testsiten,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataIssueDateleap = Buffer.from(
@@ -808,18 +808,19 @@ describe('csvuploadのテスト', () => {
 2021-08-20,UT_TEST_INVOICE_9_1,test,2021-08-16,2021-08-16,PBI318_手動試験,手動銀行,手動支店,普通,1234567,手動,請求書一括作成_1.csv,1,明細,1,個,100000,消費税,PBI318_手動試験`
   ).toString('base64')
 
-  const fileDataSellersItemNumlessthanequal101 = Buffer.from(
+  const fileDataSellersItemNumlessthanequal201 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
-2021-06-15,UT_TEST_INVOICE_10_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,SELLERSITEMNUM_00000000000000000000000000000000000000000000000000000000000000000000000000000000000001,PC,100,個,100000,消費税,アップロードテスト`
+2021-06-15,UT_TEST_INVOICE_10_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,アイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
-  const fileDataItemNamelessthanequal101 = Buffer.from(
+  const fileDataItemNamelessthanequal501 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
-2021-06-15,UT_TEST_INVOICE_11_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,ITEMNAME_00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,100,個,100000,消費税,アップロードテスト`
+2021-06-15,UT_TEST_INVOICE_11_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
-  const fileDataQuantityValuelessthanequal1000000000001 = Buffer.from(
+  const fileDataQuantityValueBetween0and1000000000001 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+2021-06-15,UT_TEST_INVOICE_12_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,-1,個,100000,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_12_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,1000000000001,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
@@ -829,8 +830,9 @@ describe('csvuploadのテスト', () => {
 2021-06-15,UT_TEST_INVOICE_12_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten, testbank,普通,1111111,kim_test,200件テストです。,001,PC,0.5,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
-  const fileDataPriceValuelessthanequal1000000000001 = Buffer.from(
+  const fileDataPriceValueBetweenminus1000000000000andplus100000000000 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,-1000000000001,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,1000000000001,消費税,アップロードテスト`
   ).toString('base64')
 
@@ -977,14 +979,14 @@ describe('csvuploadのテスト', () => {
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,20210331,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
-  const financialInstitutionlessthanequal101 = Buffer.from(
+  const financialInstitutionlessthanequal201 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
-2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,TEST1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
+2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,備考欄桁数は２００以内にバリデーションチェックする。以上の場合、エラーが発生します。備考欄桁数は２００以内にバリデーションチェックする。以上の場合、エラーが発生します。備考欄桁数は２００以内にバリデーションチェックする。以上の場合、エラーが発生します。備考欄桁数は２００以内にバリデーションチェックする。以上の場合、エラーが発生します。備考欄桁数は２００以内にバリデーションチェックする。以上の場合、エ,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
-  const financialNamelessthanequal101 = Buffer.from(
+  const financialNamelessthanequal201 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
-2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testbank,TEST1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
+2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testbank,東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号１００号１００号号,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const accountTypeErr = Buffer.from(
@@ -1003,19 +1005,19 @@ describe('csvuploadのテスト', () => {
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,0.5,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
-  const accountNamelessthanequal101 = Buffer.from(
+  const accountNamelessthanequal201 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
-2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,TEST1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
+2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
-  const notelessthanequal101 = Buffer.from(
+  const notelessthanequal1001 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
-2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,test,TEST1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001,001,PC,100,個,11,消費税,アップロードテスト`
+2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,test,その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１００,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const descriptionlessthanequal101 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
-2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,test,テストです。,001,PC,100,個,11,消費税,TEST1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001`
+2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,test,テストです。,001,PC,100,個,11,消費税,明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いない`
   ).toString('base64')
 
   // const resultNetworkConnection = [
@@ -2127,7 +2129,7 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：銀行名バリデーションチェック：101文字以上', async () => {
+    test('準正常：銀行名バリデーションチェック：201文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -2154,7 +2156,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataBankNamelessthanequal101), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataBankNamelessthanequal201), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -2181,7 +2183,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('銀行名は100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.BANKNAMEERR000)
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2369,7 +2371,7 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：明細-項目IDバリデーションチェック：101文字以上', async () => {
+    test('準正常：明細-項目IDバリデーションチェック：201文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -2396,7 +2398,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataSellersItemNumlessthanequal101), 'base64').toString(
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataSellersItemNumlessthanequal201), 'base64').toString(
         'utf8'
       )
 
@@ -2425,13 +2427,13 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-項目IDは100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.SELLERSITEMNUMERR000)
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：明細-内容バリデーションチェック：101文字以上', async () => {
+    test('準正常：明細-内容バリデーションチェック：501文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -2458,7 +2460,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataItemNamelessthanequal101), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataItemNamelessthanequal501), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -2485,13 +2487,13 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-内容は100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.ITEMNAMEERR000)
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：明細-数量バリデーションチェック：1000000000001以上', async () => {
+    test('準正常：明細-数量バリデーションチェック：範囲以外', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -2519,13 +2521,13 @@ describe('csvuploadのテスト', () => {
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
       const uploadCsvData = Buffer.from(
-        decodeURIComponent(fileDataQuantityValuelessthanequal1000000000001),
+        decodeURIComponent(fileDataQuantityValueBetween0and1000000000001),
         'base64'
       ).toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
-      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      createSpyinvoicesDetail.mockReturnValue([invoiceDetailData, invoiceDetailData])
       findOneSypTenant.mockReturnValue({
         dataValues: {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
@@ -2548,9 +2550,12 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual(
-        '明細-数量は「0 ~ 1000000000000」の範囲で入力してください。'
-      )
+      resultInvoiceDetailController.forEach((invoiceDetail) => {
+        expect(invoiceDetail.errorData).toEqual(
+          `${constantsDefine.invoiceErrMsg.QUANTITYVALUEERR001},${constantsDefine.invoiceErrMsg.QUANTITYVALUEERR000}`
+        )
+      })
+
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2616,7 +2621,7 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：明細-単価バリデーションチェック：1000000000001以上', async () => {
+    test('準正常：明細-単価バリデーションチェック：範囲以外', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -2644,7 +2649,7 @@ describe('csvuploadのテスト', () => {
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
       const uploadCsvData = Buffer.from(
-        decodeURIComponent(fileDataPriceValuelessthanequal1000000000001),
+        decodeURIComponent(fileDataPriceValueBetweenminus1000000000000andplus100000000000),
         'base64'
       ).toString('utf8')
 
@@ -2674,7 +2679,7 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(
-        '明細-単価は「0 ~ 1000000000000」の範囲で入力してください。'
+        `${constantsDefine.invoiceErrMsg.PRICEVALUEERR000},${constantsDefine.invoiceErrMsg.PRICEVALUEERR000}`
       )
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
@@ -2981,7 +2986,7 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：備考バリデーションチェック：101文字以上', async () => {
+    test('準正常：備考バリデーションチェック：201文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -3008,7 +3013,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(financialInstitutionlessthanequal101), 'base64').toString(
+      const uploadCsvData = Buffer.from(decodeURIComponent(financialInstitutionlessthanequal201), 'base64').toString(
         'utf8'
       )
 
@@ -3037,13 +3042,15 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('備考は100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual(
+        constantsDefine.invoiceErrMsg.FINANCIALINSTITUTIONERR000
+      )
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：支店名バリデーションチェック：101文字以上', async () => {
+    test('準正常：支店名バリデーションチェック：201文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -3070,7 +3077,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(financialNamelessthanequal101), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(financialNamelessthanequal201), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -3097,7 +3104,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('支店名は100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.FINANCIALNAMEERR000)
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -3285,7 +3292,7 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：口座名義バリデーションチェック：101文字以上', async () => {
+    test('準正常：口座名義バリデーションチェック：201文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -3312,7 +3319,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(accountNamelessthanequal101), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(accountNamelessthanequal201), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -3339,13 +3346,13 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('口座名義は100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.ACCOUNTNAMEERR000)
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：その他特事項バリデーションチェック：101文字以上', async () => {
+    test('準正常：その他特事項バリデーションチェック：1001文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -3372,7 +3379,7 @@ describe('csvuploadのテスト', () => {
       }
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const uploadCsvData = Buffer.from(decodeURIComponent(notelessthanequal101), 'base64').toString('utf8')
+      const uploadCsvData = Buffer.from(decodeURIComponent(notelessthanequal1001), 'base64').toString('utf8')
 
       createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
       findOneSpyInvoice.mockReturnValue(invoiceData)
@@ -3399,13 +3406,13 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('その他特事項は100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.NOTEERR000)
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：明細-備考バリデーションチェック：101文字以上', async () => {
+    test('準正常：明細-備考バリデーションチェック：1001文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -3459,7 +3466,7 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
 
       // エラーメッセージが予定通りにある
-      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-備考は100文字以内で入力してください。')
+      expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.DESCRIPTIONERR000)
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
