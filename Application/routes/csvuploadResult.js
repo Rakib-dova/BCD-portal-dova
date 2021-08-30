@@ -14,6 +14,7 @@ const apiManager = require('../controllers/apiManager')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const constantsDefine = require('../constants')
 const { v4: uuidv4 } = require('uuid')
+const invoiceController = require('../controllers/invoiceController')
 
 const bodyParser = require('body-parser')
 router.use(
@@ -57,112 +58,47 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  const csvuploadResultArr = [
-    {
-      index : '1',
-      date : '2021/03/04 11:00:00',
-      filename : 'filename001.csv',
-      invoicesAll :  '10件',
-      invoicesSuccess :  '8件',
-      invoicesSkip : '-',
-      invoicesFail : '2件',
-      status: 'false'
-    },
-    {
-      index : '2',
-      date : '2021/03/04 11:00:00',
-      filename : 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.csv',
-      invoicesAll :  '10件',
-      invoicesSuccess :  '10件',
-      invoicesSkip : '-',
-      invoicesFail : '-',
-      status: 'true'
-    },
-    {
-      index : '3',
-      date : '2021/03/04 11:00:00',
-      filename : 'filename003filename003filename003filename003filename003filename003filename003filename003filename003filename003filename003filename003filename003filename003filename003filename003filename003.csv',
-      invoicesAll :  '10件',
-      invoicesSuccess :  '8件',
-      invoicesSkip : '1件',
-      invoicesFail : '1件',
-      status: 'false'
-    },
-        {
-      index : '4',
-      date : '2021/03/04 11:00:00',
-      filename : 'ああああああああああああああああああああああああああああああああああああああああああああああああああ.csv',
-      invoicesAll :  '10件',
-      invoicesSuccess :  '8件',
-      invoicesSkip : '1件',
-      invoicesFail : '1件',
-      status: 'false'
-    },
-        {
-      index : '5',
-      date : '2021/03/04 11:00:00',
-      filename : 'filename003.csv',
-      invoicesAll :  '10件',
-      invoicesSuccess :  '8件',
-      invoicesSkip : '1件',
-      invoicesFail : '1件',
-      status: 'false'
-    },
-        {
-      index : '6',
-      date : '2021/03/04 11:00:00',
-      filename : 'filename003.csv',
-      invoicesAll :  '10件',
-      invoicesSuccess :  '8件',
-      invoicesSkip : '1件',
-      invoicesFail : '1件',
-      status: 'false'
-    },
-        {
-      index : '7',
-      date : '2021/03/04 11:00:00',
-      filename : 'filename003.csv',
-      invoicesAll :  '10件',
-      invoicesSuccess :  '8件',
-      invoicesSkip : '1件',
-      invoicesFail : '1件',
-      status: 'false'
-    },
-        {
-      index : '8',
-      date : '2021/03/04 11:00:00',
-      filename : 'filename003.csv',
-      invoicesAll :  '10件',
-      invoicesSuccess :  '8件',
-      invoicesSkip : '1件',
-      invoicesFail : '1件',
-      status: 'false'
-    },
-        {
-      index : '9',
-      date : '2021/03/04 11:00:00',
-      filename : 'filename003.csv',
-      invoicesAll :  '10件',
-      invoicesSuccess :  '8件',
-      invoicesSkip : '1件',
-      invoicesFail : '1件',
-      status: 'false'
-    },
-        {
-      index : '10',
-      date : '2021/03/04 11:00:00',
-      filename : 'filename003.csv',
-      invoicesAll :  '10件',
-      invoicesSuccess :  '8件',
-      invoicesSkip : '2件',
-      invoicesFail : '-',
-      status: 'true'
-    }    
-  ]
+  const csvuploadResultArr = []
+  const result = await invoiceController.findforTenant(req.user.tenantId)
+  try {
+    const timeStamp = (date) => {
+      logger.info(constantsDefine.logMessage.INF000 + 'getTimeStamp')
+      const now = new Date(date)
+      const year = now.getFullYear()
+      const month = now.getMonth() + 1 < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1
+      const day = now.getDate() < 10 ? '0' + now.getDate() : now.getDate()
+      const hour = now.getHours() < 10 ? '0' + now.getHours() : now.getHours()
+      const min = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()
+      const sec = now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()
+      const stamp = `${year}/${month}/ ${day} ${hour}:${min}:${sec}`
+      logger.info(constantsDefine.logMessage.INF001 + 'getTimeStamp')
+      return stamp
+    }
+
+    result.reduce((acc, currVal, currIdx, arr) => {
+      const invoice = currVal
+      const invoiceAll = ~~invoice.dataValues.successCount + ~~invoice.dataValues.failCount
+      const status = invoice.dataValues.failCount === 0
+      csvuploadResultArr.push({
+        index: currIdx + 1,
+        date: timeStamp(invoice.dataValues.updatedAt),
+        filename: invoice.dataValues.csvFileName,
+        invoicesAll: invoiceAll,
+        invoicesSuccess: invoice.dataValues.successCount,
+        invoicesSkip: invoice.dataValues.skipCount,
+        invoicesFail: invoice.dataValues.failCount,
+        status: status
+      })
+      return ''
+    })
+  } catch (error) {
+    logger.error({ page: 'csvuploadResult', msg: '請求書を取得失敗しました。' })
+    logger.error(error)
+  }
 
   // ユーザ権限も画面に送る
   res.render('csvuploadResult', {
-    csvuploadResultArr:csvuploadResultArr
+    csvuploadResultArr: csvuploadResultArr
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
