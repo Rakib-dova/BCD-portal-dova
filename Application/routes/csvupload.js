@@ -208,6 +208,7 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
 
 const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
+  const invoiceController = require('../controllers/invoiceController')
   const invoiceDetailController = require('../controllers/invoiceDetailController')
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
   const csvObj = new BconCsv(extractFullpathFile)
@@ -245,6 +246,9 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
   }
 
   let idx = 0
+  let successCount = 0
+  let failCount = 0
+  let skipCount = 0
   while (invoiceList[idx]) {
     // 明細check
     const meisaiLength = invoiceList[idx].INVOICE.getDocument().InvoiceLine.length
@@ -294,8 +298,19 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
         errorData: invoiceList[idx].errorData
       })
     }
+    successCount += invoiceList[idx].successCount
+    failCount += invoiceList[idx].failCount
+    skipCount += invoiceList[idx].skipCount
     idx++
   }
+
+  await invoiceController.updateCount({
+    invoicesId: _invoices.invoicesId,
+    successCount: successCount,
+    failCount: failCount,
+    skipCount: skipCount
+  })
+
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
 
   switch (meisaiFlag) {
