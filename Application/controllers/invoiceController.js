@@ -56,6 +56,23 @@ module.exports = {
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return invoice
   },
+  findforTenant: async (tenantId) => {
+    const functionName = 'invoiceController.findforTenant'
+    let result
+    logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+    try {
+      result = Invoice.findAll({
+        where: {
+          tenantId: tenantId
+        },
+        order: [['updatedAt', 'DESC']]
+      })
+    } catch (error) {
+      logger.error({ tenantId: tenantId, stack: error.stack, status: 0 })
+      result = error
+    }
+    return result
+  },
   updateCount: async (_invoicesId, _successCount, _failCount, _skipCount) => {
     try {
       const invoice = await Invoice.update(
