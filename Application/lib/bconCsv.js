@@ -635,11 +635,11 @@ class bconCsv {
         }
       }
 
-      if ((resultConvert.status = 0)) {
+      if (resultConvert.status === 0) {
         this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].successCount += 1
-      } else if ((resultConvert.status = 1)) {
+      } else if (resultConvert.status === 1) {
         this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].skipCount += 1
-      } else if ((resultConvert.status = -1)) {
+      } else if (resultConvert.status === -1) {
         this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].failCount += 1
       }
     })
