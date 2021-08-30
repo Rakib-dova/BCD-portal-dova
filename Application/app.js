@@ -192,6 +192,9 @@ app.use('/searchAddress', require('./routes/searchAddressApi').router)
 // csvupload
 app.use('/csvupload', require('./routes/csvupload').router)
 
+// csvuploadResult
+app.use('/csvuploadResult', require('./routes/csvuploadResult').router)
+
 // cancellation
 app.use('/cancellation', require('./routes/cancellation').router)
 
