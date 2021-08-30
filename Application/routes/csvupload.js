@@ -276,9 +276,11 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
               headers: setHeaders
             }
           )
+          invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SUCCESS
           break
         case 1:
           meisaiFlag = 2
+          invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SKIP
           break
         case -1:
           break
