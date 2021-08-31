@@ -4,6 +4,7 @@ const statusConstants = require('./contractStatus.js')
 const userRoleConstants = require('./userRole.js')
 const invoiceErrMsg = require('./invoiceErrMsg.js')
 const invoiceValidDefine = require('./invoiceValidDefine')
+const portalMsg = require('./portalMsg.js')
 
 module.exports = {
   logMessage,
@@ -11,5 +12,6 @@ module.exports = {
   statusConstants,
   userRoleConstants,
   invoiceErrMsg,
-  invoiceValidDefine
+  invoiceValidDefine,
+  portalMsg
 }
