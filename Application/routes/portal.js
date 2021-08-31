@@ -54,7 +54,7 @@ const cbGetIndex = async (req, res, next) => {
   let newsDataArrSize
 
   await parser
-    .parseURL('https://support.ntt.com/maintenance/list/rss/ipoeadvance')
+    .parseURL('https://support.ntt.com/informationRss/goods/rss/mail')
     .then((feed) => {
       newsDataArrSize = feed.items.length
       if (newsDataArrSize === 0) {

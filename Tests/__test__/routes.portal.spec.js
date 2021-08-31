@@ -55,83 +55,83 @@ describe('portalのテスト', () => {
   })
 
   describe('コールバック:cbGetIndex', () => {
-    // test('正常', async () => {
-    //   // 準備
-    //   // requestのsession,userIdに正常値を入れる
-    //   request.session = {
-    //     userContext: 'NotLoggedIn',
-    //     userRole: 'dummy'
-    //   }
-    //   request.user = {
-    //     userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
-    //   }
-    //   // DBからの正常なユーザデータの取得を想定する
-    //   findOneSpy.mockReturnValue({
-    //     dataValues: {
-    //       userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
-    //       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-    //       userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-    //       appVersion: '0.0.1',
-    //       refreshToken: 'dummyRefreshToken',
-    //       subRefreshToken: null,
-    //       userStatus: 0,
-    //       lastRefreshedAt: null,
-    //       createdAt: '2021-01-25T08:45:49.803Z',
-    //       updatedAt: '2021-01-25T08:45:49.803Z'
-    //     }
-    //   })
-    //   findOneSpyContracts.mockReturnValue({
-    //     dataValues: {
-    //       contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
-    //       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-    //       numberN: '0000011111',
-    //       contractStatus: '10',
-    //       deleteFlag: false,
-    //       createdAt: '2021-01-25T08:45:49.803Z',
-    //       updatedAt: '2021-01-25T08:45:49.803Z'
-    //     }
-    //   })
+    test('正常', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue({
+        dataValues: {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: null,
+          userStatus: 0,
+          lastRefreshedAt: null,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
+      findOneSpyContracts.mockReturnValue({
+        dataValues: {
+          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: '0000011111',
+          contractStatus: '10',
+          deleteFlag: false,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
 
-    //   const newsDataArrData = [
-    //     {
-    //       date: '2019年11月14日',
-    //       link: 'http://support.ntt.com/mail/information/detail/pid2500000nrk',
-    //       title: 'メールかんたん設定ツール（Windows10専用）アップデート版の提供開始について'
-    //     },
-    //     {
-    //       date: '2019年8月23日',
-    //       link: 'http://support.ntt.com/mail/information/detail/pid2500000gri',
-    //       title: 'OCNメールのリニューアルに関するお知らせ'
-    //     },
-    //     {
-    //       date: '2019年7月19日',
-    //       link: 'http://support.ntt.com/mail/information/detail/pid2500000kqa',
-    //       title: 'OCNメールをメールソフトでご利用いただく際の設定について'
-    //     }
-    //   ]
+      const newsDataArrData = [
+        {
+          date: '2019年11月14日',
+          link: 'http://support.ntt.com/mail/information/detail/pid2500000nrk',
+          title: 'メールかんたん設定ツール（Windows10専用）アップデート版の提供開始について'
+        },
+        {
+          date: '2019年8月23日',
+          link: 'http://support.ntt.com/mail/information/detail/pid2500000gri',
+          title: 'OCNメールのリニューアルに関するお知らせ'
+        },
+        {
+          date: '2019年7月19日',
+          link: 'http://support.ntt.com/mail/information/detail/pid2500000kqa',
+          title: 'OCNメールをメールソフトでご利用いただく際の設定について'
+        }
+      ]
 
-    //   // 試験実施
-    //   await portal.cbGetIndex(request, response, next)
+      // 試験実施
+      await portal.cbGetIndex(request, response, next)
 
-    //   // 期待結果
-    //   // 404，500エラーがエラーハンドリング「されない」
-    //   expect(next).not.toHaveBeenCalledWith(error404)
-    //   expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-    //   // userContextがLoggedInになっている
-    //   expect(request.session?.userContext).toBe('LoggedIn')
-    //   // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-    //   expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-    //   // response.renderでportalが呼ばれ「る」
-    //   expect(response.render).toHaveBeenCalledWith('portal', {
-    //     newsDataArr: newsDataArrData,
-    //     newsDataArrSize: 15,
-    //     title: 'ポータル',
-    //     tenantId: request.user.tenantId,
-    //     userRole: request.session.userRole,
-    //     numberN: '0000011111',
-    //     TS_HOST: process.env.TS_HOST
-    //   })
-    // })
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでportalが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('portal', {
+        newsDataArr: newsDataArrData,
+        newsDataArrSize: 15,
+        title: 'ポータル',
+        tenantId: request.user.tenantId,
+        userRole: request.session.userRole,
+        numberN: '0000011111',
+        TS_HOST: process.env.TS_HOST
+      })
+    })
 
     test('正常：解約申込中の場合', async () => {
       // 準備
