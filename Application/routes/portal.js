@@ -54,7 +54,7 @@ const cbGetIndex = async (req, res, next) => {
   let newsDataArrSize
 
   await parser
-    .parseURL('https://localhost:3000')
+    .parseURL('https://support.ntt.com/mail/information/search?targetYear=2021&parentGoodsCode=511')
     .then((feed) => {
       newsDataArrSize = feed.items.length
       if (newsDataArrSize === 0) {
