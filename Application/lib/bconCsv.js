@@ -291,6 +291,7 @@ class bconCsv {
     }
     const invoiceData = this.#csvFile.getRows()
     let parentInvoice = null
+    let parentInvoiceStatus = 0
     let indexObj = null
     let headerchk = true
     let headerFlag = true
@@ -300,7 +301,7 @@ class bconCsv {
       const csvColumn = element.rows.split(',')
       resultConvert.invoiceDetailId = uuidv4()
       resultConvert.invoiceId = csvColumn[1]
-      resultConvert.lines = element.idx + 1
+      resultConvert.lines = element.idx
       resultConvert.status = 0
       resultConvert.errorData = ''
       if (parentInvoice?.getInvoiceNumber().value !== element.docNo) {
@@ -308,6 +309,7 @@ class bconCsv {
         setInvoiceLineErrCnt = 0
         setInvoiceLineCnt = 0
         parentInvoice = new Invoice()
+        parentInvoiceStatus = 0
 
         if (csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE && headerchk) {
           resultConvert.errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
@@ -566,7 +568,6 @@ class bconCsv {
               resultConvert.errorData += resultConvert.errorData
                 ? `,${constants.invoiceErrMsg[validate.isNote(csvColumn[11])]}`
                 : `${constants.invoiceErrMsg[validate.isNote(csvColumn[11])]}`
-
               resultConvert.status = -1
               break
           }
@@ -576,6 +577,7 @@ class bconCsv {
         this.#invoiceDocumentList.forEach((ele) => {
           if (ele.INVOICE.getDocument().ID.value === element.docNo) {
             resultConvert.status = 1
+            parentInvoiceStatus = 1
           }
         })
         indexObj = {
@@ -695,7 +697,9 @@ class bconCsv {
           csvColumn[17],
           csvColumn[18]
         )
-        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
+        if (parentInvoiceStatus !== 1) {
+          this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
+        }
       } else {
         if (setInvoiceLineCnt === 1 && headerFlag) {
           this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
@@ -716,9 +720,9 @@ class bconCsv {
         }
       }
 
-      if (resultConvert.status === 0) {
+      if (resultConvert.status === 0 && parentInvoiceStatus === 0) {
         this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].successCount += 1
-      } else if (resultConvert.status === 1) {
+      } else if (parentInvoiceStatus === 1) {
         this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].skipCount += 1
       } else if (resultConvert.status === -1) {
         this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].failCount += 1

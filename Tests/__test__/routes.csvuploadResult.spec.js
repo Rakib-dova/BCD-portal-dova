@@ -56,6 +56,9 @@ describe('csvuploadResultのテスト', () => {
     })
     invoicesController.findforTenant = jest.fn((tenantId) => {
       const result = []
+      if (tenantId.match('76543210-7777-44a2-ab29-999999999999')) {
+        return new Error('invoice controller error')
+      }
       invoicesDB.forEach((recod) => {
         if (recod.tenantId === tenantId) {
           result.push({ dataValues: recod })
@@ -131,6 +134,11 @@ describe('csvuploadResultのテスト', () => {
       userId: '88888888-8888-48ad-857d-4b42a44ede88',
       tenantId: '76543210-7777-44a2-ab29-0c4a6cb02bd1',
       userStatus: 1
+    },
+    '88888888-8888-48ad-857d-4b42a44ede89': {
+      ...userTemplate,
+      userId: '88888888-8888-48ad-857d-4b42a44ede89',
+      tenantId: '76543210-7777-44a2-ab29-999999999999'
     }
   }
 
@@ -225,6 +233,12 @@ describe('csvuploadResultのテスト', () => {
     tenantId: '76543210-7777-44a2-ab29-0c4a6cb02bd1'
   }
 
+  const userInvoceError = {
+    email: 'dummy@testdummy.com',
+    userId: '88888888-8888-48ad-857d-4b42a44ede89',
+    tenantId: '76543210-7777-44a2-ab29-999999999999'
+  }
+
   // 異常系データ定義
   // userIdがnullの場合
   const usernull = {
@@ -299,12 +313,25 @@ describe('csvuploadResultのテスト', () => {
     }
   }
 
+  const contractdataValues6 = {
+    dataValues: {
+      contractId: '87654321-cb0b-48ad-857d-4b42a44ede14',
+      tenantId: '76543210-7777-44a2-ab29-999999999999',
+      numberN: '0000011111',
+      contractStatus: '00',
+      deleteFlag: false,
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
   const contractDB = [
     contractdataValues,
     contractdataValues2,
     contractdataValues3,
     contractdataValues4,
-    contractdataValues5
+    contractdataValues5,
+    contractdataValues6
   ]
   describe('ルーティング', () => {
     test('csvuploadのルーティングを確認', async () => {
@@ -331,8 +358,8 @@ describe('csvuploadResultのテスト', () => {
       const csvuploadResultArr = []
       invoicesDB.map((currVal, index) => {
         const invoice = currVal
-        const invoiceAll = ~~invoice.successCount + ~~invoice.failCount
-        const status = invoice.failCount === 0
+        const invoiceAll = ~~invoice.successCount + ~~invoice.skipCount + ~~invoice.failCount
+        const status = ~~invoice.failCount === 0
         csvuploadResultArr.push({
           index: index + 1,
           date: timeStamp(invoice.updatedAt),
@@ -548,6 +575,30 @@ describe('csvuploadResultのテスト', () => {
       // 期待結果
       // 404エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error404)
+    })
+
+    test('準正常：DBから請求書テーブルエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = userInvoceError
+
+      // 試験実施
+      await csvuploadResult.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvuploadが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('csvuploadResult', { csvuploadResultArr: [] })
     })
   })
 })

@@ -19,24 +19,38 @@ module.exports = {
   // }
   insert: async (values) => {
     const functionName = 'invoiceController.insert'
+    let tenantRow
+    let tenantId
+    let resultToInsertInvoice
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     const userTenantId = values?.tenantId
     if (!userTenantId) {
       logger.error(`${constantsDefine.logMessage.CMMERR000}${functionName}`)
       return
     }
-    const tenantRow = await tenantController.findOne(userTenantId)
-    const tenantId = tenantRow?.dataValues?.tenantId
+
+    try {
+      tenantRow = await tenantController.findOne(userTenantId)
+      tenantId = tenantRow?.dataValues?.tenantId
+    } catch (error) {
+      logger.error({ tenantId: userTenantId, stack: error.stack, status: 0 })
+      return
+    }
 
     if (!tenantId) {
       logger.info(`${constantsDefine.logMessage.DBINF000}${functionName}`)
       return
     }
 
-    const resultToInsertInvoice = await Invoice.create({
-      ...values,
-      tenantId: tenantId
-    })
+    try {
+      resultToInsertInvoice = await Invoice.create({
+        ...values,
+        tenantId: tenantId
+      })
+    } catch (error) {
+      logger.error({ tenantId: userTenantId, stack: error.stack, status: 0 })
+      return
+    }
 
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return resultToInsertInvoice

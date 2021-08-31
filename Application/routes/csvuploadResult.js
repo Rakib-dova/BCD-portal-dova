@@ -64,8 +64,13 @@ const cbGetIndex = async (req, res, next) => {
 
     result.map((currVal, index) => {
       const invoice = currVal
-      const invoiceAll = ~~invoice.dataValues.successCount + ~~invoice.dataValues.failCount
-      const status = invoice.dataValues.failCount === 0
+      const invoiceAll =
+        ~~invoice.dataValues.successCount + ~~invoice.dataValues.skipCount + ~~invoice.dataValues.failCount
+      let status = false
+      if (~~invoice.dataValues.failCount === 0 && invoice.dataValues.failCount !== '-') {
+        status = true
+      }
+
       csvuploadResultArr.push({
         index: index + 1,
         date: timeStamp(invoice.dataValues.updatedAt),

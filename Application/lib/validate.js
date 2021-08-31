@@ -76,7 +76,7 @@ const isUUID = (uuid) => {
 }
 
 const isUndefined = (target) => {
-  if (Object.prototype.toString.call(target) !== '[object Undefined]') {
+  if (Object.prototype.toString.call(target) === '[object Undefined]') {
     return true
   }
 
@@ -304,8 +304,8 @@ const isDescription = function (description) {
 const checkNetworkConnection = function (companyNetworkConnectionList, targetConnectionId) {
   let connectionFlag = false
   try {
-    companyNetworkConnectionList.forEach((connectionId) => {
-      if (targetConnectionId === connectionId) {
+    companyNetworkConnectionList.forEach((tenantId) => {
+      if (targetConnectionId === tenantId) {
         connectionFlag = true
       }
     })

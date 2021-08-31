@@ -62,11 +62,9 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  BconCsv.prototype.companyNetworkConnectionList = getNetwork({
+  BconCsv.prototype.companyNetworkConnectionList = await getNetwork({
     accessToken: req.user.accessToken,
     refreshToken: req.user.refreshToken
-  }).then((result) => {
-    return result
   })
 
   // ユーザ権限も画面に送る
@@ -133,7 +131,7 @@ const cbPostUpload = async (req, res, next) => {
   }
 
   // csvからデータ抽出
-  switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice.dataValues)) {
+  switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues)) {
     case 101:
       errorText = constantsDefine.statusConstants.INVOICE_FAILED
       break
@@ -221,6 +219,10 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
 
   let meisaiFlag = 0
 
+  if (validate.isUndefined(_invoices)) {
+    return 101
+  }
+
   // トレードシフトからドキュメントを取得
   let documentsList
   const documentIds = []
@@ -242,6 +244,13 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
 
   if (invoiceCnt > 100) {
     logger.error(constantsDefine.logMessage.ERR001 + 'invoiceToomuch Error')
+    await invoiceController.updateCount({
+      invoicesId: _invoices.invoicesId,
+      successCount: '-',
+      failCount: '-',
+      skipCount: '-',
+      invoiceCount: '0'
+    })
     return 101
   }
 
@@ -249,6 +258,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
   let successCount = 0
   let failCount = 0
   let skipCount = 0
+  let uploadInvoiceCnt = 0
   while (invoiceList[idx]) {
     // 明細check
     const meisaiLength = invoiceList[idx].INVOICE.getDocument().InvoiceLine.length
@@ -257,13 +267,14 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
       logger.error(
         constantsDefine.logMessage.ERR001 + invoiceList[idx].INVOICE.getDocument().ID.value + ' - specificToomuch Error'
       )
+      failCount += meisaiLength
       meisaiFlag = 1
     } else {
       // アップロードするドキュメントが重複のチェック
       const docNo = invoiceList[idx].INVOICE.getDocument().ID.value
       documentIds.forEach((id) => {
         if (docNo === id && invoiceList[idx].status !== -1) {
-          invoiceList[idx].status = 1
+          invoiceList[idx].status = 2
         }
       })
       switch (invoiceList[idx].status) {
@@ -281,12 +292,21 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
             }
           )
           invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SUCCESS
+          successCount += invoiceList[idx].successCount
+          uploadInvoiceCnt++
           break
         case 1:
           meisaiFlag = 2
           invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SKIP
+          skipCount += invoiceList[idx].skipCount
+          break
+        case 2:
+          meisaiFlag = 2
+          invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SKIP
+          skipCount += meisaiLength
           break
         case -1:
+          failCount += invoiceList[idx].failCount
           break
       }
       await invoiceDetailController.insert({
@@ -298,9 +318,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
         errorData: invoiceList[idx].errorData
       })
     }
-    successCount += invoiceList[idx].successCount
-    failCount += invoiceList[idx].failCount
-    skipCount += invoiceList[idx].skipCount
     idx++
   }
 
@@ -309,7 +326,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
     successCount: successCount,
     failCount: failCount,
     skipCount: skipCount,
-    invoiceCount: invoiceCnt
+    invoiceCount: uploadInvoiceCnt
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
