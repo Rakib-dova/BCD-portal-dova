@@ -90,6 +90,12 @@ describe('portalのテスト', () => {
         }
       })
 
+      const newsDataArrData = [
+        {
+          message: '接続エラーが発生しました。'
+        }
+      ]
+
       // 試験実施
       await portal.cbGetIndex(request, response, next)
 
@@ -107,7 +113,9 @@ describe('portalのテスト', () => {
         tenantId: request.user.tenantId,
         userRole: request.session.userRole,
         numberN: '0000011111',
-        TS_HOST: process.env.TS_HOST
+        TS_HOST: process.env.TS_HOST,
+        newsDataArr: newsDataArrData,
+        newsDataArrSize: 0
       })
     })
 
