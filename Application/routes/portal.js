@@ -10,6 +10,13 @@ const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const validate = require('../lib/validate')
 
+const Parser = require('rss-parser')
+const parser = new Parser({
+  headers: {
+    Accept: 'text/html'
+  }
+})
+
 const cbGetIndex = async (req, res, next) => {
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
@@ -41,13 +48,52 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  // お知らせ取得
+  const newsDataArr = []
+  let newsDataArrSize
+
+  await parser
+    .parseURL('https://support.ntt.com/informationRss/goods/rss/mail')
+    .then((feed) => {
+      newsDataArrSize = feed.items.length
+      if (newsDataArrSize === 0) {
+        newsDataArr.push({
+          message: '現在、お知らせはありません。'
+        })
+      } else {
+        let getlength = 3
+        if (newsDataArrSize < 3) {
+          getlength = newsDataArrSize
+        }
+
+        for (let i = 0; i < getlength; i++) {
+          const day = new Date(feed.items[i].date)
+
+          newsDataArr.push({
+            date: day.getFullYear() + '年' + (day.getMonth() + 1) + '月' + day.getDate() + '日',
+            title: feed.items[i].title,
+            link: feed.items[i].link
+          })
+        }
+      }
+    })
+    .catch((error) => {
+      console.error('RSS 取得失敗', error)
+      newsDataArrSize = 0
+      newsDataArr.push({
+        message: '接続エラーが発生しました。'
+      })
+    })
+
   // ユーザ権限も画面に送る
   res.render('portal', {
     title: 'ポータル',
     tenantId: req.user.tenantId,
     userRole: req.session.userRole,
     numberN: contract.dataValues?.numberN,
-    TS_HOST: process.env.TS_HOST
+    TS_HOST: process.env.TS_HOST,
+    newsDataArr: newsDataArr,
+    newsDataArrSize: newsDataArrSize
   })
 }
 
