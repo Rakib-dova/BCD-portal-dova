@@ -9,6 +9,7 @@ const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const validate = require('../lib/validate')
+const constants = require('../constants')
 
 const Parser = require('rss-parser')
 const parser = new Parser({
@@ -58,7 +59,7 @@ const cbGetIndex = async (req, res, next) => {
       newsDataArrSize = feed.items.length
       if (newsDataArrSize === 0) {
         newsDataArr.push({
-          message: '現在、お知らせはありません。'
+          message: constants.portalMsg.NEWS_NONE
         })
       } else {
         let getlength = 3
@@ -81,7 +82,7 @@ const cbGetIndex = async (req, res, next) => {
       console.error('RSS 取得失敗', error)
       newsDataArrSize = 0
       newsDataArr.push({
-        message: '接続エラーが発生しました。'
+        message: constants.portalMsg.NEWS_CONN_ERR
       })
     })
 
