@@ -197,7 +197,7 @@ const isQuantityValue = function (quantityValue) {
     return 'QUANTITYVALUEERR001'
   }
 
-  if (quantityValue > constantsDefine.invoiceValidDefine.QUANTITYVALUE_VALUE || quantityValue.length < 1) {
+  if (quantityValue < 0 || quantityValue > constantsDefine.invoiceValidDefine.QUANTITYVALUE_MAX_VALUE) {
     return 'QUANTITYVALUEERR000'
   }
 
@@ -209,7 +209,10 @@ const isPriceValue = function (priceValue) {
     return 'PRICEVALUEERR001'
   }
 
-  if (priceValue > constantsDefine.invoiceValidDefine.PRICEVALUE_VALUE || priceValue.length < 1) {
+  if (
+    priceValue < constantsDefine.invoiceValidDefine.PRICEVALUE_MIN_VALUE ||
+    priceValue > constantsDefine.invoiceValidDefine.PRICEVALUE_MAX_VALUE
+  ) {
     return 'PRICEVALUEERR000'
   }
 
