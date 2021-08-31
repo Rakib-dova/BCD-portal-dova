@@ -1,23 +1,6 @@
 /* eslint-disable new-cap */
 'use strict'
 
-/*
-
- テスト実施するためにはテストソース「csvupload.js」の最後行の「module.exports」に
- cbPostUpload, cbUploadCsv, cbRemoveCsv, cbExtractInvoice, getTimeStampの登録が必要
-
-  module.exports = {
-    router: router,
-    cbGetIndex: cbGetIndex,
-    cbPostUpload: cbPostUpload,
-    cbUploadCsv: cbUploadCsv,
-    cbRemoveCsv: cbRemoveCsv,
-    cbExtractInvoice: cbExtractInvoice,
-    getTimeStamp: getTimeStamp
-  }
-
-*/
-
 jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
@@ -307,7 +290,7 @@ describe('csvuploadResultのテスト', () => {
     contractdataValues5
   ]
   describe('ルーティング', () => {
-    test('csvuploadのルーティングを確認', async () => {
+    test('csvuploadResultのルーティングを確認', async () => {
       expect(csvuploadResult.router.get).toBeCalledWith(
         '/',
         helper.isAuthenticated,

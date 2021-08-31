@@ -9,7 +9,7 @@ const logger = require('../../Application/lib/logger')
 const Invoice = require('../../Application/models').Invoice
 const { v4: uuidv4 } = require('uuid')
 
-let errorSpy, tenantId, csvFileName, invoiceID, findOneSpy, infoSpy, createSpy, invoiceFindOneSpy, updateCountSpy
+let errorSpy, tenantId, csvFileName, invoiceID, findOneSpy, infoSpy, createSpy, invoiceFindOneSpy, updateSpy
 describe('contractControllerのテスト', () => {
   beforeEach(() => {
     createSpy = jest.spyOn(Invoice, 'create')
@@ -17,7 +17,7 @@ describe('contractControllerのテスト', () => {
     findOneSpy = jest.spyOn(tenantController, 'findOne')
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
-    updateCountSpy = jest.spyOn(invoiceController, 'updateCount')
+    updateSpy = jest.spyOn(Invoice, 'update')
   })
   afterEach(() => {
     invoiceFindOneSpy.mockRestore()
@@ -25,7 +25,7 @@ describe('contractControllerのテスト', () => {
     findOneSpy.mockRestore()
     errorSpy.mockRestore()
     infoSpy.mockRestore()
-    updateCountSpy.mockRestore()
+    updateSpy.mockRestore()
   })
   tenantId = '12345678-bdac-4195-80b9-1ea64b8cb70c'
   csvFileName = 'test.csv'
@@ -206,7 +206,7 @@ describe('contractControllerのテスト', () => {
     test('正常', async () => {
       // 準備
       findOneSpy.mockReturnValue(findOneReturn)
-      updateCountSpy.mockReturnValue(updateCountReturn)
+      updateSpy.mockReturnValue(updateCountReturn)
 
       // 試験実施
       const result = await invoiceController.updateCount({
