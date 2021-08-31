@@ -329,21 +329,21 @@ describe('csvuploadResultのテスト', () => {
       request.user = user
 
       const csvuploadResultArr = []
-      invoicesDB.reduce((acc, currVal, currIdx, arr) => {
+      invoicesDB.map((currVal, index) => {
         const invoice = currVal
         const invoiceAll = ~~invoice.successCount + ~~invoice.failCount
         const status = invoice.failCount === 0
         csvuploadResultArr.push({
-          index: currIdx + 1,
+          index: index + 1,
           date: timeStamp(invoice.updatedAt),
           filename: invoice.csvFileName,
           invoicesAll: invoiceAll,
+          invoicesCount: invoice.invoiceCount,
           invoicesSuccess: invoice.successCount,
           invoicesSkip: invoice.skipCount,
           invoicesFail: invoice.failCount,
           status: status
         })
-        return ''
       })
 
       // 試験実施
@@ -561,6 +561,6 @@ const timeStamp = (date) => {
   const hour = now.getHours() < 10 ? '0' + now.getHours() : now.getHours()
   const min = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()
   const sec = now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()
-  const stamp = `${year}/${month}/ ${day} ${hour}:${min}:${sec}`
+  const stamp = `${year}/${month}/${day} ${hour}:${min}:${sec}`
   return stamp
 }

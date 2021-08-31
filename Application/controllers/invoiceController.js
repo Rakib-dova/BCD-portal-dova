@@ -3,6 +3,7 @@ const logger = require('../lib/logger')
 const tenantController = require('./tenantController')
 const Invoice = db.Invoice
 const constantsDefine = require('../constants')
+const { Op } = require('sequelize')
 
 module.exports = {
   // パラメータ値
@@ -59,13 +60,18 @@ module.exports = {
   findforTenant: async (tenantId) => {
     const functionName = 'invoiceController.findforTenant'
     let result
+    const now = new Date()
+    const beforeOneYear = new Date(`${now.getFullYear() - 1}-${now.getMonth() + 1}-${now.getDate()}`)
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     try {
-      result = Invoice.findAll({
+      result = await Invoice.findAll({
         where: {
-          tenantId: tenantId
+          tenantId: tenantId,
+          createdAt: {
+            [Op.between]: [beforeOneYear, now]
+          }
         },
-        order: [['updatedAt', 'DESC']]
+        order: [['createdAt', 'DESC']]
       })
     } catch (error) {
       logger.error({ tenantId: tenantId, stack: error.stack, status: 0 })
@@ -73,23 +79,24 @@ module.exports = {
     }
     return result
   },
-  updateCount: async (_invoicesId, _successCount, _failCount, _skipCount) => {
+  updateCount: async ({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
     try {
       const invoice = await Invoice.update(
         {
-          successCount: _successCount,
-          failCount: _failCount,
-          skipCount: _skipCount
+          successCount: successCount,
+          failCount: failCount,
+          skipCount: skipCount,
+          invoiceCount: invoiceCount
         },
         {
           where: {
-            invoicesId: _invoicesId
+            invoicesId: invoicesId
           }
         }
       )
       return invoice
     } catch (error) {
-      logger.error({ invoicesId: _invoicesId, stack: error.stack, status: 0 })
+      logger.error({ invoicesId: invoicesId, stack: error.stack, status: 0 })
       return error
     }
   }

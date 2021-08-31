@@ -308,7 +308,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
     invoicesId: _invoices.invoicesId,
     successCount: successCount,
     failCount: failCount,
-    skipCount: skipCount
+    skipCount: skipCount,
+    invoiceCount: invoiceCnt
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')

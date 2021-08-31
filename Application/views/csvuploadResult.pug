@@ -18,6 +18,7 @@ block content
                 th.width-25 ファイル名
                 th.width-10.text-center ステータス
                 th.width-10.text-center 取込件数
+                th.width-10.text-center 請求書作成数
                 th.width-10.text-center 作成完了
                 th.width-10.text-center スキップ
                 th.width-10.text-center 作成失敗
@@ -29,11 +30,12 @@ block content
                   td.text-center= item.date
                   td.td-overflow= item.filename
                   td.text-center
-                    if item.status === 'true'
+                    if item.status === true
                       button.button.is-success OK
                     else
                       button.button.is-danger NG
                   td.text-center= item.invoicesAll
+                  td.text-center= item.invoicesCount
                   td.text-center= item.invoicesSuccess
                   td.text-center= item.invoicesSkip
                   td.text-center= item.invoicesFail

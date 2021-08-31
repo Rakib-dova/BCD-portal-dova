@@ -209,7 +209,13 @@ describe('contractControllerのテスト', () => {
       updateCountSpy.mockReturnValue(updateCountReturn)
 
       // 試験実施
-      const result = await invoiceController.updateCount(invoiceID, 1, 1, 1)
+      const result = await invoiceController.updateCount({
+        invoicesId: invoiceID,
+        successCount: 1,
+        failCount: 1,
+        skipCount: 1,
+        invoiceCount: 1
+      })
 
       // 期待結果
       // 想定した結果がReturnされていること
@@ -225,7 +231,13 @@ describe('contractControllerのテスト', () => {
       }
 
       // 試験実施
-      await invoiceController.updateCount(invoiceID, 1, 1, 1)
+      await invoiceController.updateCount({
+        invoicesId: invoiceID,
+        successCount: 1,
+        failCount: 1,
+        skipCount: 1,
+        invoiceCount: 1
+      })
 
       // 期待結果
       // エラーログが表示される
