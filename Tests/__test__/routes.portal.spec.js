@@ -131,7 +131,7 @@ describe('portalのテスト', () => {
     //     numberN: '0000011111',
     //     TS_HOST: process.env.TS_HOST
     //   })
-    })
+    // })
 
     test('正常：解約申込中の場合', async () => {
       // 準備
