@@ -2,6 +2,7 @@
 jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
+
 const portal = require('../../Application/routes/portal')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
@@ -17,6 +18,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
+
 let request, response, infoSpy, findOneSpy, findOneSpyContracts
 describe('portalのテスト', () => {
   beforeEach(() => {
@@ -90,6 +92,24 @@ describe('portalのテスト', () => {
         }
       })
 
+      const newsDataArrData = [
+        {
+          date: '2019年11月14日',
+          link: 'http://support.ntt.com/mail/information/detail/pid2500000nrk',
+          title: 'メールかんたん設定ツール（Windows10専用）アップデート版の提供開始について'
+        },
+        {
+          date: '2019年8月23日',
+          link: 'http://support.ntt.com/mail/information/detail/pid2500000gri',
+          title: 'OCNメールのリニューアルに関するお知らせ'
+        },
+        {
+          date: '2019年7月19日',
+          link: 'http://support.ntt.com/mail/information/detail/pid2500000kqa',
+          title: 'OCNメールをメールソフトでご利用いただく際の設定について'
+        }
+      ]
+
       // 試験実施
       await portal.cbGetIndex(request, response, next)
 
@@ -103,6 +123,8 @@ describe('portalのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでportalが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('portal', {
+        newsDataArr: newsDataArrData,
+        newsDataArrSize: 15,
         title: 'ポータル',
         tenantId: request.user.tenantId,
         userRole: request.session.userRole,

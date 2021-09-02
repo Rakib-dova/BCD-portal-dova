@@ -262,6 +262,14 @@ img.logo-ncom {
   min-height: 100px;
 }
 
+.newsDate {
+  min-width: 150px;
+}
+
+.newsTitle {
+  min-width: 600px;
+}
+
 .csvuploadResultBox {
   padding-left: 13rem;
   padding-right: 13rem;
