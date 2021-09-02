@@ -34,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
       successCount: DataTypes.INTEGER,
       failCount: DataTypes.INTEGER,
       skipCount: DataTypes.INTEGER,
+      invoiceCount: DataTypes.INTEGER,
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,

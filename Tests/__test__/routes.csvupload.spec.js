@@ -38,6 +38,8 @@ const tenantController = require('../../Application/controllers/tenantController
 const logger = require('../../Application/lib/logger.js')
 const constantsDefine = require('../../Application/constants')
 const invoiceController = require('../../Application/controllers/invoiceController.js')
+const SUCCESSMESSAGE = constantsDefine.invoiceErrMsg.SUCCESS
+const SKIPMESSAGE = constantsDefine.invoiceErrMsg.SKIP
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
@@ -49,7 +51,9 @@ describe('csvuploadのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
-    infoSpy = jest.spyOn(logger, 'info')
+    // infoSpy = jest.spyOn(logger, 'info')
+    logger.info = jest.fn()
+    logger.error = jest.fn()
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     invoiceListSpy = jest.spyOn(csvupload, 'cbExtractInvoice')
@@ -57,12 +61,18 @@ describe('csvuploadのテスト', () => {
       switch (method) {
         case 'get':
           if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
-              return documentListData
+            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+              return documentListData2
             }
             return documentListData
           }
           if (query.match(/^\/network\?limit=100/i)) {
+            if (accToken.match('getNetworkErr')) {
+              return new Error('trade shift api error')
+            }
+            if (query.match(/^\/network\?limit=100&page=/i)) {
+              return resultGetNetwork2
+            }
             return resultGetNetwork
           }
           break
@@ -79,7 +89,7 @@ describe('csvuploadのテスト', () => {
     request.resetMocked()
     response.resetMocked()
     next.mockReset()
-    infoSpy.mockRestore()
+    // infoSpy.mockRestore()
     findOneSpy.mockRestore()
     findOneSpyContracts.mockRestore()
     invoiceListSpy.mockRestore()
@@ -105,7 +115,7 @@ describe('csvuploadのテスト', () => {
   // DBの正常なユーザデータ
   const dataValues = {
     dataValues: {
-      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+      tenantId: '3cfebb4f-2338-4dc7-9523-5423a027a880',
       userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
       appVersion: '0.0.1',
       refreshToken: 'dummyRefreshToken',
@@ -121,13 +131,13 @@ describe('csvuploadのテスト', () => {
   // ファイルデータ
   // 請求書が1つの場合
   const fileData = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   // 請求書が２つ以上、請求書番号が一致していない
   const fileData2 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-14,UT_TEST_INVOICE_2_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
 2021-06-14,UT_TEST_INVOICE_2_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,002,ノートパソコン,100,個,100000,軽減税率,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_2_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test112,testsiten,testbank,普通,1111111,kim_test,特記事項テストです。,003,周辺機器,100,個,100000,不課税,アップロードテスト
@@ -136,7 +146,7 @@ describe('csvuploadのテスト', () => {
 
   // 請求書が２つ以上、請求書番号が一致していて、順番になっている
   const fileData3 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test112,testsiten,testbank,普通,1111111,kim_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-19,test113,testsiten,testbank,普通,1111111,kim_test,特記事項テストです。,002,ノートパソコン,100,個,100000,軽減税率,アップロードテスト
 2021-06-14,UT_TEST_INVOICE_3_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,ST001S,100,個,100000,不課税,アップロードテスト
@@ -145,7 +155,7 @@ describe('csvuploadのテスト', () => {
 
   // 請求書が２つ以上、請求書番号が順番になっていること、請求書番号が割り込んでいる
   const fileData4 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test112,testsiten,testbank,普通,1111111,kim_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-19,test113,testsiten,testbank,普通,1111111,kim_test,特記事項テストです。,002,ノートパソコン,100,個,100000,消費税,アップロードテスト
 2021-06-14,UT_TEST_INVOICE_3_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,ST001S,100,個,100000,消費税,アップロードテスト
@@ -156,14 +166,14 @@ describe('csvuploadのテスト', () => {
 
   // 既に登録済みの請求書番号
   const fileData5 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_5_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test112,testsiten,testbank,普通,1111111,kim_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
 2021-06-14,UT_TEST_INVOICE_3_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,ST001S,100,個,100000,軽減税率,アップロードテスト`
   ).toString('base64')
 
   // 請求書が100件
   const fileData100 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021/3/31,2021/3/18,test112,testsiten,testbank,普通,1111111,kim_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_3_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021/3/31,2021/3/19,test113,testsiten,testbank,普通,1111111,kim_test,特記事項テストです。,002,ノートパソコン,100,個,100000,軽減税率,アップロードテスト
 2021-06-14,UT_TEST_INVOICE_3_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021/3/31,2021/3/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,ST001S,100,個,100000,軽減税率,アップロードテスト
@@ -268,7 +278,7 @@ describe('csvuploadのテスト', () => {
 
   // 請求書が100以上、エラー発生
   const fileData101 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_3_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021/3/31,2021/3/18,test112,testsiten,testbank,普通,1111111,kim_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_3_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021/3/31,2021/3/19,test113,testsiten,testbank,普通,1111111,kim_test,特記事項テストです。,002,ノートパソコン,100,個,100000,軽減税率,アップロードテスト
 2021-06-14,UT_TEST_INVOICE_3_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021/3/31,2021/3/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,ST001S,100,個,100000,軽減税率,アップロードテスト
@@ -374,7 +384,7 @@ describe('csvuploadのテスト', () => {
 
   // 明細書：200件
   const fileData200 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,11112,kim_test,200件テストです。,002,PC,100,個,100000,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,11113,kim_test,200件テストです。,003,PC,100,個,100000,消費税,アップロードテスト
@@ -579,7 +589,7 @@ describe('csvuploadのテスト', () => {
 
   // 明細書：201件
   const fileData201 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111112,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111212,kim_test,200件テストです。,002,PC,100,個,100000,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111312,kim_test,200件テストです。,003,PC,100,個,100000,消費税,アップロードテスト
@@ -784,66 +794,66 @@ describe('csvuploadのテスト', () => {
   ).toString('base64')
 
   const fileDataInvoiceIDlessthanequal101 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_5_10000000000000000000000000000000000000000000000000000000000000000000000000000000001,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataBankNamelessthanequal201 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_6_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本銀行赤銀行緑銀行青い銀行白い銀行黒い銀行日本ぎ,testsiten,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataIssueDateleap = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-02-29,UT_TEST_INVOICE_7_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataIssueDateTypeErr = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 20210229,UT_TEST_INVOICE_8_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataTenantTypeErr = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-08-20,UT_TEST_INVOICE_9_1,test,2021-08-16,2021-08-16,PBI318_手動試験,手動銀行,手動支店,普通,1234567,手動,請求書一括作成_1.csv,1,明細,1,個,100000,消費税,PBI318_手動試験`
   ).toString('base64')
 
   const fileDataSellersItemNumlessthanequal201 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_10_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,アイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過ぎちゃった時バリデーションテストアイテムの番号が２０１桁より過,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataItemNamelessthanequal501 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_11_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５００文字いないバリデーションチェックする。明細書の内容は５,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataQuantityValueBetween0and1000000000001 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_12_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,-1,個,100000,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_12_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,1000000000001,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataQuantityValueTypeErr = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_12_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,abc,個,100000,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_12_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten, testbank,普通,1111111,kim_test,200件テストです。,001,PC,0.5,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataPriceValueBetweenminus1000000000000andplus100000000000 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,-1000000000001,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,1000000000001,消費税,アップロードテスト`
   ).toString('base64')
 
   const fileDataPriceValueTypeErr = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,abc,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_13_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,0.5,消費税,アップロードテスト`
   ).toString('base64')
 
   const unitcodeData = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-08-12,単位テスト1,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,普通,2222222,test1,特記事項テスト1です。,001,PC,100,人月,100000,消費税,アップロードテスト1
 2021-08-12,単位テスト2,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,普通,2222222,test1,特記事項テスト1です。,001,PC,100,ボトル,100000,軽減税率,アップロードテスト1
 2021-08-12,単位テスト3,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,普通,2222222,test1,特記事項テスト1です。,001,PC,100,コスト,100000,不課税,アップロードテスト1
@@ -923,7 +933,7 @@ describe('csvuploadのテスト', () => {
   ).toString('base64')
 
   const taxData = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-08-12,税テスト1,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,普通,2222222,test1,特記事項テスト1です。,001,PC,100,人月,100000,消費税,アップロードテスト1
 2021-08-12,税テスト2,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,普通,2222222,test1,特記事項テスト1です。,001,PC,100,ボトル,100000,軽減税率,アップロードテスト1
 2021-08-12,税テスト3,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,普通,2222222,test1,特記事項テスト1です。,001,PC,100,コスト,100000,不課税,アップロードテスト1
@@ -937,7 +947,7 @@ describe('csvuploadのテスト', () => {
   ).toString('base64')
 
   const networkCheckData = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-08-12,ネットワーク確認テスト1,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,普通,2222222,test1,特記事項テスト1です。,001,PC,100,人月,100000,消費税,アップロードテスト1
 2021-08-12,ネットワーク確認テスト2,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,普通,2222222,test1,特記事項テスト1です。,001,PC,100,ボトル,100000,消費税,アップロードテスト1
 2021-08-12,ネットワーク確認テスト11,927635b5-f469-493b-9ce0-000000000000,2021-06-30,2021-06-30,test222,testsiten,testbank,普通,2222222,test1,特記事項テスト1です。,001,PC,100,人月,100000,消費税,アップロードテスト1
@@ -945,89 +955,90 @@ describe('csvuploadのテスト', () => {
   ).toString('base64')
 
   const headerCloumnErr = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考,明細-テスト
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考,明細-テスト
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const invoiceListCloumnErr20 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト,テスト`
   ).toString('base64')
 
   const invoiceListCloumnErr18 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税`
   ).toString('base64')
 
   const paymentDateleap = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-02-29,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const paymentDateTypeErr = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,20210331,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const deliveryDateleap = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-02-29,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const deliveryDateTypeErr = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,20210331,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const financialInstitutionlessthanequal201 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,備考欄桁数は２００以内にバリデーションチェックする。以上の場合、エラーが発生します。備考欄桁数は２００以内にバリデーションチェックする。以上の場合、エラーが発生します。備考欄桁数は２００以内にバリデーションチェックする。以上の場合、エラーが発生します。備考欄桁数は２００以内にバリデーションチェックする。以上の場合、エラーが発生します。備考欄桁数は２００以内にバリデーションチェックする。以上の場合、エ,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const financialNamelessthanequal201 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testbank,東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号東京都板橋区志村坂上町の渋谷店の金王ビル１００号１００号１００号号,普通,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const accountTypeErr = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,test,1111111,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const accountIdlessthanequal8 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,12345678,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const accountIdTypeErr = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,abcdefg,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,0.5,kim_test,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const accountNamelessthanequal201 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口座の名義は２００以内です。口,200件テストです。,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const notelessthanequal1001 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,test,その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１０００件いないに作成する。その他特事項事項は１００,001,PC,100,個,11,消費税,アップロードテスト`
   ).toString('base64')
 
   const descriptionlessthanequal101 = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税,明細-備考
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-29,2021-03-29,test,testsiten,testbank,普通,1234567,test,テストです。,001,PC,100,個,11,消費税,明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いないいに作成する。明細書の備考の場合、１０００いない`
   ).toString('base64')
 
-  // const resultNetworkConnection = [
-  //   '927635b5-f469-493b-9ce0-b2bfc4062959',
-  //   '927635b5-f469-493b-9ce0-b2bfc4062951',
-  //   '3cfebb4f-2338-4dc7-9523-5423a027a880'
-  // ]
+  const countCheckData = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021/06/14,UT_TEST_INVOICE_1_1,927635b5-f469-493b-9ce0-b2bfc4062959,2021/03/31,2021/03/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021/06/34,UT_TEST_INVOICE_1_2,927635b5-f469-493b-9ce0-b2bfc4062959,2021/03/31,2021/03/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021/06/14,UT_TEST_INVOICE_1_1,927635b5-f469-493b-9ce0-b2bfc4062959,2021/03/31,2021/03/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
+  ).toString('base64')
 
   const resultGetNetwork = {
-    numPages: 1,
+    numPages: 2,
     pageId: 1,
     Connections: {
       Connection: [
@@ -1038,18 +1049,63 @@ describe('csvuploadのテスト', () => {
     }
   }
 
+  const resultGetNetwork2 = {
+    numPages: 2,
+    pageId: 2,
+    Connections: {
+      Connection: [
+        { State: 'ACCEPTED', CompanyAccountId: '927635b5-f469-493b-9ce0-b2bfc4062960' },
+        { State: 'ACCEPTED', CompanyAccountId: '927635b5-f469-493b-9ce0-b2bfc4062961' },
+        { State: 'ACCEPTED', CompanyAccountId: '3cfebb4f-2338-4dc7-9523-5423a027a862' }
+      ]
+    }
+  }
+
   // 登録済みのドキュメントデータ
   const documentListData = {
-    itemsPerPage: 10000,
+    itemsPerPage: 1,
     itemCount: 1,
     indexing: false,
-    numPages: 1,
+    numPages: 2,
     pageId: 1,
     Document: [
       {
         DocumentId: '06051d44-fc05-4b89-9ba6-89594e4d7b9b',
         ID: 'UT_TEST_INVOICE_5_1',
         URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/06051d44-fc05-4b89-9ba6-89594e4d7b9b',
+        DocumentType: [Object],
+        State: 'LOCKED',
+        CreatedDateTime: '2021-06-22T09:05:50.759Z',
+        LastEdit: '2021-08-13T10:07:03.485Z',
+        Actor: [Object],
+        ConversationId: 'dd255507-3e97-4342-8df1-5d128d1c14bc',
+        ReceiverCompanyName: 'test',
+        Tags: [Object],
+        ItemInfos: [Array],
+        LatestDispatch: [Object],
+        SentReceivedTimestamp: '2021-08-13T10:07:05.233Z',
+        ProcessState: 'OVERDUE',
+        ConversationStates: [Array],
+        UnifiedState: 'OVERDUE',
+        CopyIndicator: false,
+        Deleted: false,
+        DueDate: '2021-05-31',
+        TenantId: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
+        Properties: []
+      }
+    ]
+  }
+  const documentListData2 = {
+    itemsPerPage: 1,
+    itemCount: 1,
+    indexing: false,
+    numPages: 2,
+    pageId: 2,
+    Document: [
+      {
+        DocumentId: '06051d44-fc05-4b89-9ba6-89594e4d7b99',
+        ID: 'UT_TEST_INVOICE_5_1',
+        URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/06051d44-fc05-4b89-9ba6-89594e4d7b99',
         DocumentType: [Object],
         State: 'LOCKED',
         CreatedDateTime: '2021-06-22T09:05:50.759Z',
@@ -1153,7 +1209,7 @@ describe('csvuploadのテスト', () => {
     dataValues: {
       invoicesId: '40e8909d-2bc6-4296-aba4-994df26ec353',
       tenantId: user.tenantId,
-      csvFileName: null,
+      csvFileName: test.csv,
       successCount: -1,
       failCount: -1,
       skipCount: -1,
@@ -1173,6 +1229,17 @@ describe('csvuploadのテスト', () => {
       updatedAt: now,
       createdAt: now
     }
+  }
+
+  const invoiceParameta = {
+    invoicesId: '40e8909d-2bc6-4296-aba4-994df26ec353',
+    tenantId: user.tenantId,
+    csvFileName: test.csv,
+    successCount: -1,
+    failCount: -1,
+    skipCount: -1,
+    createdAt: now,
+    updatedAt: now
   }
 
   // 結果値
@@ -1943,7 +2010,7 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
+      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -1972,7 +2039,7 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
+      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -1999,7 +2066,7 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
+      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -2026,7 +2093,7 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -2050,11 +2117,20 @@ describe('csvuploadのテスト', () => {
 
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData201), 'base64').toString('utf8')
 
+      createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
+      findOneSpyInvoice.mockReturnValue(invoiceData)
+      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      findOneSypTenant.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+      })
+
       // 試験実施
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -2081,10 +2157,10 @@ describe('csvuploadのテスト', () => {
         return invoice
       })
       invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
+        if (!values.errorData.match(SUCCESSMESSAGE) && !values.errorData.match(SKIPMESSAGE)) {
           resultInvoiceDetailController.push(values)
-          return values
         }
+        return values
       })
 
       request.user = user
@@ -2108,11 +2184,11 @@ describe('csvuploadのテスト', () => {
       })
 
       // 試験実施
-      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2143,7 +2219,7 @@ describe('csvuploadのテスト', () => {
         return invoice
       })
       invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
+        if (!values.errorData.match(SUCCESSMESSAGE) && !values.errorData.match(SKIPMESSAGE)) {
           resultInvoiceDetailController.push(values)
           return values
         }
@@ -2171,8 +2247,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2203,7 +2279,7 @@ describe('csvuploadのテスト', () => {
         return invoice
       })
       invoiceDetailController.insert = jest.fn((values) => {
-        if (values.errorData) {
+        if (!values.errorData.match(SUCCESSMESSAGE) && !values.errorData.match(SKIPMESSAGE)) {
           resultInvoiceDetailController.push(values)
           return values
         }
@@ -2231,8 +2307,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2291,8 +2367,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2351,8 +2427,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2415,8 +2491,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2475,8 +2551,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2538,8 +2614,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2603,8 +2679,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2666,8 +2742,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2728,8 +2804,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2788,8 +2864,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2848,8 +2924,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2908,8 +2984,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -2968,8 +3044,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3030,8 +3106,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3092,8 +3168,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3152,8 +3228,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3214,8 +3290,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3274,8 +3350,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3334,8 +3410,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3394,8 +3470,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3454,8 +3530,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3514,8 +3590,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3574,8 +3650,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3634,8 +3710,8 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
-      expect(resultExt).toBeTruthy()
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3687,7 +3763,7 @@ describe('csvuploadのテスト', () => {
       const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
       expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -3746,7 +3822,7 @@ describe('csvuploadのテスト', () => {
       const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
       expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -3811,7 +3887,7 @@ describe('csvuploadのテスト', () => {
       const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, 1)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
       expect(resultExt).toBe(0)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -3835,6 +3911,65 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = tmpApiManager
     })
 
+    test('準正常：請求書テーブルDB登録失敗', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const resultInvoiceDetailController = []
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      const getNetworkTestUser = {
+        ...user,
+        accessToken: 'getNetworkErr'
+      }
+      request.user = getNetworkTestUser
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        return undefined
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return { dataValues: invoice }
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (
+          values.errorData !== '正常に取込ました。' &&
+          values.errorData !== '取込済みのため、処理をスキップしました。'
+        ) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+
+      // 試験実施
+      await csvupload.cbGetIndex(request, response, next)
+      // expect(response.render).toHaveBeenCalledWith('csvupload')
+
+      getNetworkTestUser.accessToken = 'dummyAccess'
+      request.user = getNetworkTestUser
+      request.body = {
+        csvFileName: 'getNetwork',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toBe(constantsDefine.statusConstants.INVOICE_FAILED)
+    })
+
     test('正常 : bconCsv内容確認', async () => {
       // 準備
       request.user = user
@@ -3855,6 +3990,39 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       // JSONの内容が正しいこと
       expect(JSON.stringify(invoiceList[0].INVOICE.getDocument())).toBe(returnBconCsv)
+    })
+
+    test('正常 : bconCsv取り込み結果カウント確認', async () => {
+      // 準備
+      request.user = user
+
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+      const uploadCsvData = Buffer.from(decodeURIComponent(countCheckData), 'base64').toString('utf8')
+      const extractFullpathFile = filePath + '/' + filename
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const csvObj = new bconCsv(extractFullpathFile)
+      const invoiceList = csvObj.getInvoiceList()
+
+      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // count数が正しいこと
+      expect(invoiceList[0].successCount).toBe(1)
+      expect(invoiceList[0].skipCount).toBe(0)
+      expect(invoiceList[0].failCount).toBe(0)
+
+      expect(invoiceList[1].successCount).toBe(0)
+      expect(invoiceList[1].skipCount).toBe(0)
+      expect(invoiceList[1].failCount).toBe(1)
+
+      expect(invoiceList[2].successCount).toBe(0)
+      expect(invoiceList[2].skipCount).toBe(1)
+      expect(invoiceList[2].failCount).toBe(0)
     })
   })
 
@@ -3945,6 +4113,73 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       // returnがnullでないこと
       expect(timeStamp).not.toBe(null)
+    })
+  })
+
+  describe('getNetwork', () => {
+    test('準正常', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const resultInvoiceDetailController = []
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      const getNetworkTestUser = {
+        ...user,
+        accessToken: 'getNetworkErr'
+      }
+      request.user = getNetworkTestUser
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const { v4: uuidv4 } = require('uuid')
+        return {
+          dataValues: {
+            ...values,
+            invoicesId: uuidv4()
+          }
+        }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return { dataValues: invoice }
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (
+          values.errorData !== '正常に取込ました。' &&
+          values.errorData !== '取込済みのため、処理をスキップしました。'
+        ) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+
+      // 試験実施
+      await csvupload.cbGetIndex(request, response, next)
+      // expect(response.render).toHaveBeenCalledWith('csvupload')
+
+      getNetworkTestUser.accessToken = 'dummyAccess'
+      request.user = getNetworkTestUser
+      request.body = {
+        csvFileName: 'getNetwork',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toBe('請求書作成が完了しました。')
     })
   })
 })

@@ -33,12 +33,12 @@
    inkscape:snap-nodes="false"
    inkscape:snap-global="false"
    inkscape:zoom="1.4772728"
-   inkscape:cx="3.0461537"
-   inkscape:cy="154.67692"
-   inkscape:window-width="1366"
-   inkscape:window-height="705"
-   inkscape:window-x="-8"
-   inkscape:window-y="-8"
+   inkscape:cx="3.7230767"
+   inkscape:cy="155.01538"
+   inkscape:window-width="1920"
+   inkscape:window-height="986"
+   inkscape:window-x="-11"
+   inkscape:window-y="-11"
    inkscape:window-maximized="1"
    inkscape:current-layer="svg91" />
     <path
@@ -90,7 +90,8 @@
    id="g10860"
    transform="matrix(-0.32747007,0.32717594,-1.297707,-1.2988736,108.23419,82.947849)"
    style="stroke-width:1.48416" /><g
-   id="g8158"><rect
+   id="g8158"
+   transform="translate(0,-32.042391)"><rect
      style="clip-rule:evenodd;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke-width:1.36826;stroke-linejoin:round;stroke-miterlimit:2"
      id="rect2674"
      width="20.524483"
@@ -215,7 +216,7 @@
    transform="matrix(-0.14439019,0.1442605,-0.57219324,-0.57270765,142.41442,45.830053)"
    style="stroke-width:3.36601" /><g
    id="g8146"
-   transform="translate(6.430769,-9.9846151)"><rect
+   transform="translate(6.430769,76.047382)"><rect
      style="clip-rule:evenodd;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke-width:1.36827;stroke-linejoin:round;stroke-miterlimit:2"
      id="rect676"
      width="9.0497856"

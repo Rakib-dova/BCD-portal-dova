@@ -17,13 +17,13 @@ module.exports = {
         type: Sequelize.STRING
       },
       successCount: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       failCount: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       skipCount: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
