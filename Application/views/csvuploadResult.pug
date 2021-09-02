@@ -31,9 +31,9 @@ block content
                   td.td-overflow= item.filename
                   td.text-center
                     if item.status === true
-                      button.button.is-success OK
+                      button.button.is-success.show-modal.btnDetail(data-target="csvuploadDetails-modal") OK
                     else
-                      button.button.is-danger NG
+                      button.button.is-danger.show-modal.btnDetail(data-target="csvuploadDetails-modal") NG
                   td.text-center= item.invoicesAll
                   td.text-center= item.invoicesCount
                   td.text-center= item.invoicesSuccess
@@ -42,21 +42,63 @@ block content
         .mt-1.has-text-left
           a.button.is-link.is-light(href="csvupload") ← csv一括アップロード
 
-      .modal.modal-fx-fadeInscale#upload-progress-modal
-          .modal-background
-          .modal-card
-            header.modal-card-head
-              p.modal-card-title
-            section.modal-card-body
-              center
-                p.modal-card-result#modal-card-result アップロード中
-            footer.modal-card-foot
+    .modal#csvuploadDetails-modal
+      .modal-background.cancel-button(data-target='csvuploadDetails-modal')
+      .modal-card.is-family-noto-sans.width-60
+        header.modal-card-head
+          p.modal-card-title 取込結果詳細
+          button.delete(data-target="csvuploadDetails-modal")
+        section.modal-card-body
+          table.table.is-bordered.width-50
+            thead
+              tr
+                th.width-8.text-center.m-0.p-0 取込件数
+                th.width-8.text-center.m-0.p-0 請求書作成数
+                th.width-8.text-center.is-success.m-0.p-0 成功
+                th.width-8.text-center.is-info.m-0.p-0 スキップ
+                th.width-8.text-center.is-danger.m-0.p-0 失敗
+            tbody
+              tr
+                td#invoicesAll.text-center
+                td#invoicesCount.text-center
+                td#invoicesSuccess.text-center
+                td#invoicesSkip.text-center
+                td#invoicesFail.text-center
+
+          tags.tag.is-centerd 全体
+          tags.tag.is-centerd.is-success 成功
+          tags.tag.is-centerd.is-info スキップ
+          tags.tag.is-centerd.is-danger 失敗
+
+          table.table.is-fullwidth.is-hoverable.table-fixed
+            thead
+              tr
+                th.width-8.text-center 行数
+                th.width-13.text-center 請求書番号
+                th.width-10.text-center 取込結果
+                th.width-35.text-center 詳細
+            tbody
+              - var detailsList = csvuploadResultDetailsArr
+              each detailsItem in detailsList
+                tr
+                  td.text-center= detailsItem.lines
+                  td.text-center= detailsItem.invoiceId
+                  td.text-center
+                    if detailsItem.status === "成功"
+                     p.status-text.is-success= detailsItem.status
+                    else if detailsItem.status === "スキップ"
+                     p.status-text.is-skip= detailsItem.status
+                    else
+                     p.status-text.is-fail= detailsItem.status
+                  td= detailsItem.errorData
+        footer.modal-card-foot
+           a.button.cancel-button(data-target='csvuploadDetails-modal') 閉じる
+           p ※再アップロード時は、取込成功した明細行は除いてアップロードしてください。
 
     include footer
 
 block append scripts
   script(src="/js/portal-page.js")
   // End of DigitalTrade Portal Page
-  script(src="/js/upload-page.js") 
-  // CSV アップロード
-
+  script(src="/js/csvuploadResultDetail.js")
+  // ResultDetail

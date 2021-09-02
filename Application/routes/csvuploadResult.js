@@ -45,6 +45,7 @@ const cbGetIndex = async (req, res, next) => {
   }
 
   const csvuploadResultArr = []
+  const csvuploadResultDetailsArr = []
   const result = await invoiceController.findforTenant(req.user.tenantId)
 
   try {
@@ -89,9 +90,31 @@ const cbGetIndex = async (req, res, next) => {
     logger.error(error)
   }
 
+  csvuploadResultDetailsArr.push({
+    lines: 2,
+    invoiceId: 'A-00001',
+    status: '成功',
+    errorData: '正常に取込ました。'
+  })
+
+  csvuploadResultDetailsArr.push({
+    lines: 3,
+    invoiceId: 'A-00002',
+    status: 'スキップ',
+    errorData: '取込済みのため、処理をスキップしました。'
+  })
+
+  csvuploadResultDetailsArr.push({
+    lines: 4,
+    invoiceId: 'A-00003',
+    status: '失敗',
+    errorData: '発行日はyyyy/mm/dd/形式で入力してください。'
+  })
+
   // ユーザ権限も画面に送る
   res.render('csvuploadResult', {
-    csvuploadResultArr: csvuploadResultArr
+    csvuploadResultArr: csvuploadResultArr,
+    csvuploadResultDetailsArr: csvuploadResultDetailsArr
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
