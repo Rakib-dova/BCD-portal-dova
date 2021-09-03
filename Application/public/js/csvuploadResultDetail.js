@@ -56,11 +56,11 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
                 $('#errormessage').innerHTML = ''
 
                 if (obj.status === '成功') {
-                  detail += `<tr class="tr-success"><td class="text-center">${obj.lines}</td><td class="text-center">${obj.invoiceId}</td><td class="text-center"><p class="status-text is-success">${obj.status}</p></td>`
+                  detail += `<tr class="tr-success"><td class="text-center">${obj.lines}</td><td class="text-center td-overflow">${obj.invoiceId}</td><td class="text-center"><p class="status-text is-success">${obj.status}</p></td>`
                 } else if (obj.status === 'スキップ') {
-                  detail += `<tr class="tr-skip"><td class="text-center">${obj.lines}</td><td class="text-center">${obj.invoiceId}</td><td class="text-center"><p class="status-text is-skip">${obj.status}</p></td>`
+                  detail += `<tr class="tr-skip"><td class="text-center">${obj.lines}</td><td class="text-center td-overflow">${obj.invoiceId}</td><td class="text-center"><p class="status-text is-skip">${obj.status}</p></td>`
                 } else {
-                  detail += `<tr class="tr-fail"><td class="text-center">${obj.lines}</td><td class="text-center">${obj.invoiceId}</td><td class="text-center"><p class="status-text is-fail">${obj.status}</p></td>`
+                  detail += `<tr class="tr-fail"><td class="text-center">${obj.lines}</td><td class="text-center td-overflow">${obj.invoiceId}</td><td class="text-center"><p class="status-text is-fail">${obj.status}</p></td>`
                 }
                 detail += `<td>${obj.errorData}</td></tr>`
               }
