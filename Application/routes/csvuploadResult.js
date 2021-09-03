@@ -58,7 +58,6 @@ const cbGetIndex = async (req, res, next) => {
 
   try {
     const timeStamp = (date) => {
-      logger.info(constantsDefine.logMessage.INF000 + 'getTimeStamp')
       const now = new Date(date)
       const year = now.getFullYear()
       const month = now.getMonth() + 1 < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1
@@ -67,7 +66,6 @@ const cbGetIndex = async (req, res, next) => {
       const min = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()
       const sec = now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()
       const stamp = `${year}/${month}/${day} ${hour}:${min}:${sec}`
-      logger.info(constantsDefine.logMessage.INF001 + 'getTimeStamp')
       return stamp
     }
 

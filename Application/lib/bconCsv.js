@@ -319,6 +319,7 @@ class bconCsv {
             ...resultConvert,
             INVOICE: parentInvoice
           }
+          parentInvoice.setInvoiceLine('', '', '', '', '', '')
           this.#invoiceDocumentList.push(indexObj)
           return true
         } else if (csvColumn.length === constants.invoiceValidDefine.COLUMN_VALUE && headerchk) {
@@ -336,6 +337,7 @@ class bconCsv {
             ...resultConvert,
             INVOICE: parentInvoice
           }
+          parentInvoice.setInvoiceLine('', '', '', '', '', '')
           this.#invoiceDocumentList.push(indexObj)
 
           return
@@ -687,16 +689,16 @@ class bconCsv {
         }
       }
 
+      parentInvoice.setInvoiceLine(
+        csvColumn[12],
+        csvColumn[13],
+        csvColumn[14],
+        csvColumn[15],
+        csvColumn[16],
+        csvColumn[17],
+        csvColumn[18]
+      )
       if (resultConvert.status !== -1 && headerFlag) {
-        parentInvoice.setInvoiceLine(
-          csvColumn[12],
-          csvColumn[13],
-          csvColumn[14],
-          csvColumn[15],
-          csvColumn[16],
-          csvColumn[17],
-          csvColumn[18]
-        )
         if (parentInvoiceStatus !== 1) {
           this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
         }

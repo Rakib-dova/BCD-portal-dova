@@ -16,21 +16,21 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
     const tr = clickBtn.parentNode.parentNode
     const td = tr.children
 
-    document.getElementById('invoicesAll').innerHTML = td[4].innerHTML + '件'
-    document.getElementById('invoicesCount').innerHTML = td[5].innerHTML + '件'
-    document.getElementById('invoicesSuccess').innerHTML = td[6].innerHTML + '件'
-    document.getElementById('invoicesSkip').innerHTML = td[7].innerHTML + '件'
-    document.getElementById('invoicesFail').innerHTML = td[8].innerHTML + '件'
+    $('#invoicesAll').innerHTML = td[4].innerHTML + '件'
+    $('#invoicesCount').innerHTML = td[5].innerHTML + '件'
+    $('#invoicesSuccess').innerHTML = td[6].innerHTML + '件'
+    $('#invoicesSkip').innerHTML = td[7].innerHTML + '件'
+    $('#invoicesFail').innerHTML = td[8].innerHTML + '件'
 
     // invoiceDetail検索
     const invoicsesId = td[9].defaultValue
     const sendData = { invoicsesId: null }
-    const reultDetailTable = document.getElementById('reultDetail')
-    let Detail = ''
+    const resultDetailTable = $('#resultDetail')
+    let detail = ''
     sendData.invoicsesId = invoicsesId
 
-    while (reultDetailTable.hasChildNodes()) {
-      reultDetailTable.removeChild(reultDetailTable.firstChild)
+    while (resultDetailTable.hasChildNodes()) {
+      resultDetailTable.removeChild(resultDetailTable.firstChild)
     }
     const requestInvoiceDetail = new XMLHttpRequest()
     requestInvoiceDetail.open('POST', '/csvuploadResult/', true)
@@ -56,22 +56,16 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
                 $('#errormessage').innerHTML = ''
 
                 if (obj.status === '成功') {
-                  Detail += '<tr class="tr-success"><td class="text-center">' + obj.lines + '</td>'
-                  Detail += '<td class="text-center">' + obj.invoiceId + '</td>'
-                  Detail += '<td class="text-center"><p class="status-text is-success">' + obj.status + '</p></td>'
+                  detail += `<tr class="tr-success"><td class="text-center">${obj.lines}</td><td class="text-center">${obj.invoiceId}</td><td class="text-center"><p class="status-text is-success">${obj.status}</p></td>`
                 } else if (obj.status === 'スキップ') {
-                  Detail += '<tr class="tr-skip"><td class="text-center">' + obj.lines + '</td>'
-                  Detail += '<td class="text-center">' + obj.invoiceId + '</td>'
-                  Detail += '<td class="text-center"><p class="status-text is-skip">' + obj.status + '</p></td>'
+                  detail += `<tr class="tr-skip"><td class="text-center">${obj.lines}</td><td class="text-center">${obj.invoiceId}</td><td class="text-center"><p class="status-text is-skip">${obj.status}</p></td>`
                 } else {
-                  Detail += '<tr class="tr-fail"><td class="text-center">' + obj.lines + '</td>'
-                  Detail += '<td class="text-center">' + obj.invoiceId + '</td>'
-                  Detail += '<td class="text-center "><p class="status-text is-fail">' + obj.status + '</p></td>'
+                  detail += `<tr class="tr-fail"><td class="text-center">${obj.lines}</td><td class="text-center">${obj.invoiceId}</td><td class="text-center"><p class="status-text is-fail">${obj.status}</p></td>`
                 }
-                Detail += '<td>' + obj.errorData + '</td></tr>'
+                detail += `<td>${obj.errorData}</td></tr>`
               }
             })
-            reultDetailTable.innerHTML += Detail
+            resultDetailTable.innerHTML += detail
           }
         } else {
           const errStatus = requestInvoiceDetail.status
@@ -95,7 +89,7 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
 })
 
 // タブ押下 - 全体
-document.getElementById('btnTabAll').onclick = function () {
+$('#btnTabAll').onclick = function () {
   Array.prototype.forEach.call($('.tr-success'), function (ele) {
     ele.classList.remove('is-invisible')
   })
@@ -110,7 +104,7 @@ document.getElementById('btnTabAll').onclick = function () {
 }
 
 // タブ押下 - 成功
-document.getElementById('btnTabSuccess').onclick = function () {
+$('#btnTabSuccess').onclick = function () {
   Array.prototype.forEach.call($('.tr-success'), function (ele) {
     ele.classList.remove('is-invisible')
   })
@@ -125,7 +119,7 @@ document.getElementById('btnTabSuccess').onclick = function () {
 }
 
 // タブ押下 - スキップ
-document.getElementById('btnTabSkip').onclick = function () {
+$('#btnTabSkip').onclick = function () {
   Array.prototype.forEach.call($('.tr-success'), function (ele) {
     ele.classList.add('is-invisible')
   })
@@ -140,7 +134,7 @@ document.getElementById('btnTabSkip').onclick = function () {
 }
 
 // タブ押下 - 失敗
-document.getElementById('btnTabFail').onclick = function () {
+$('#btnTabFail').onclick = function () {
   Array.prototype.forEach.call($('.tr-success'), function (ele) {
     ele.classList.add('is-invisible')
   })
