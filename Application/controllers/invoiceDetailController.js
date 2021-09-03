@@ -16,6 +16,23 @@ module.exports = {
   //   createdAt,
   //   updatedAt
   // }
+  findInvoiceDetail: async (invoicesId) => {
+    const functionName = 'invoiceDetailController.findInvoiceDetail'
+    logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+    let InvoiceResultDetail
+    try {
+      InvoiceResultDetail = await InvoiceDetail.findAll({
+        where: {
+          invoicesId: invoicesId
+        },
+        order: [['lines', 'ASC']]
+      })
+    } catch (error) {
+      logger.error({ invoicesId: invoicesId, stack: error.stack, status: 0 })
+    }
+    logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+    return InvoiceResultDetail
+  },
   insert: async (values) => {
     const functionName = 'invoiceDetailController.insert'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)

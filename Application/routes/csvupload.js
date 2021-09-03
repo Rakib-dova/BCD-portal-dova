@@ -269,6 +269,22 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
       )
       failCount += meisaiLength
       meisaiFlag = 1
+      const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
+      const invoiceId = invoiceList[idx].invoiceId
+      const status = -1
+      const errorData = '明細数の上限を超えています。'
+      const lines = invoiceList[idx].lines
+      invoiceLines.map((ele, idx) => {
+        invoiceDetailController.insert({
+          invoiceDetailId: uuidv4(),
+          invoicesId: _invoices.invoicesId,
+          invoiceId: invoiceId,
+          lines: lines + idx,
+          status: status,
+          errorData: errorData
+        })
+        return ''
+      })
     } else {
       // アップロードするドキュメントが重複のチェック
       const docNo = invoiceList[idx].INVOICE.getDocument().ID.value
@@ -295,27 +311,39 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
           successCount += invoiceList[idx].successCount
           uploadInvoiceCnt++
           break
+        // 請求書の重複
         case 1:
           meisaiFlag = 2
           invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SKIP
           skipCount += invoiceList[idx].skipCount
           break
+        // アップロードの重複
         case 2:
           meisaiFlag = 2
           invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SKIP
           skipCount += meisaiLength
+          invoiceList[idx].status = 1
           break
         case -1:
           failCount += invoiceList[idx].failCount
           break
       }
-      await invoiceDetailController.insert({
-        invoiceDetailId: invoiceList[idx].invoiceDetailId,
-        invoicesId: _invoices.invoicesId,
-        invoiceId: invoiceList[idx].invoiceId,
-        lines: invoiceList[idx].lines,
-        status: invoiceList[idx].status,
-        errorData: invoiceList[idx].errorData
+
+      const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
+      const invoiceId = invoiceList[idx].invoiceId
+      const status = invoiceList[idx].status
+      const errorData = invoiceList[idx].errorData
+      const lines = invoiceList[idx].lines
+      invoiceLines.map((ele, idx) => {
+        invoiceDetailController.insert({
+          invoiceDetailId: uuidv4(),
+          invoicesId: _invoices.invoicesId,
+          invoiceId: invoiceId,
+          lines: lines + idx,
+          status: status,
+          errorData: errorData
+        })
+        return ''
       })
     }
     idx++

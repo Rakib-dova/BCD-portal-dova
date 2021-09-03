@@ -1887,6 +1887,168 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/設定/i)
     })
 
+    test('管理者、契約ステータス：00、/csvuploadResultの詳細ポップアップのタブ選択', async () => {
+      const now = new Date()
+      const testData = {
+        invoicesId: '00715217-a241-4f84-a6cf-f8d786e43cf5',
+        tenantId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+        csvFileName: 'インテグレーションテスト.csv',
+        successCount: '-',
+        failCount: '-',
+        skipCount: '-',
+        invoiceCount: '0',
+        createdAt: `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}T00:00:00.000Z`,
+        updatedAt: `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}T00:00:00.000Z`
+      }
+
+      const resultInvoice = await db.Invoice.findOne({
+        where: {
+          tenantId: testTenantId
+        }
+      })
+
+      // 請求書テーブルにデータがない場合テストデータを追加する
+      if (!resultInvoice) {
+        await db.Invoice.create({
+          testData,
+          tenantId: testTenantId
+        })
+      }
+      let clickResult
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/csvuploadResult')
+      if (page.url() === 'https://localhost:3000/csvuploadResult') {
+        const selector = await page.$(
+          'body > div.max-width > div.columns.is-centered > div > div.box.csvuploadResultBox > table > tbody > tr:nth-child(1) > td:nth-child(4) > button'
+        )
+        await selector.click({ clickCount: 1 })
+        clickResult = await page.evaluate(() => {
+          if (document.querySelector('#csvuploadDetails-modal').attributes[0].value.match(/is-active/) !== null) {
+            return document.querySelector('#csvuploadDetails-modal').attributes[0].value.match(/is-active/)[0]
+          }
+          return null
+        })
+      }
+      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
+
+      await page.waitForTimeout(3000)
+
+      const tabSelector = await page.$('#btnTabSuccess')
+
+      await tabSelector.click({ clickCount: 1 })
+
+      const tabClickResult = await page.evaluate(() => {
+        const checkedResult = []
+        const failedResult = []
+        const skipResult = []
+        const failedRowTag = document.querySelectorAll('.tr-fail')
+        const skipRowTag = document.querySelectorAll('.tr-skip')
+
+        if (failedRowTag.length !== 0) {
+          Array.prototype.forEach.call(failedRowTag, (ele) => {
+            failedResult.push(ele.classList.value)
+          })
+        }
+        checkedResult.push(failedResult)
+
+        if (skipRowTag.length !== 0) {
+          Array.prototype.forEach.call(skipRowTag, (ele) => skipResult.push(ele.classList.value))
+        }
+        checkedResult.push(skipResult)
+
+        return checkedResult
+      })
+
+      tabClickResult.forEach((failedAndSkip) => {
+        failedAndSkip.forEach((listOfClass) => {
+          expect(listOfClass).toMatch(/is-invisible/i)
+        })
+      })
+    })
+
+    test('一般ユーザ、契約ステータス：00、/csvuploadResultの詳細ポップアップのタブ選択', async () => {
+      const now = new Date()
+      const testData = {
+        invoicesId: '00715217-a241-4f84-a6cf-f8d786e43cf5',
+        tenantId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+        csvFileName: 'インテグレーションテスト.csv',
+        successCount: '-',
+        failCount: '-',
+        skipCount: '-',
+        invoiceCount: '0',
+        createdAt: `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}T00:00:00.000Z`,
+        updatedAt: `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}T00:00:00.000Z`
+      }
+
+      const resultInvoice = await db.Invoice.findOne({
+        where: {
+          tenantId: testTenantId
+        }
+      })
+
+      // 請求書テーブルにデータがない場合テストデータを追加する
+      if (!resultInvoice) {
+        await db.Invoice.create({
+          testData,
+          tenantId: testTenantId
+        })
+      }
+      let clickResult
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto('https://localhost:3000/csvuploadResult')
+      if (page.url() === 'https://localhost:3000/csvuploadResult') {
+        const selector = await page.$(
+          'body > div.max-width > div.columns.is-centered > div > div.box.csvuploadResultBox > table > tbody > tr:nth-child(1) > td:nth-child(4) > button'
+        )
+        await selector.click({ clickCount: 1 })
+        clickResult = await page.evaluate(() => {
+          if (document.querySelector('#csvuploadDetails-modal').attributes[0].value.match(/is-active/) !== null) {
+            return document.querySelector('#csvuploadDetails-modal').attributes[0].value.match(/is-active/)[0]
+          }
+          return null
+        })
+      }
+      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
+
+      await page.waitForTimeout(3000)
+
+      const tabSelector = await page.$('#btnTabSuccess')
+
+      await tabSelector.click({ clickCount: 1 })
+
+      const tabClickResult = await page.evaluate(() => {
+        const checkedResult = []
+        const failedResult = []
+        const skipResult = []
+        const failedRowTag = document.querySelectorAll('.tr-fail')
+        const skipRowTag = document.querySelectorAll('.tr-skip')
+
+        if (failedRowTag.length !== 0) {
+          Array.prototype.forEach.call(failedRowTag, (ele) => {
+            failedResult.push(ele.classList.value)
+          })
+        }
+        checkedResult.push(failedResult)
+
+        if (skipRowTag.length !== 0) {
+          Array.prototype.forEach.call(skipRowTag, (ele) => skipResult.push(ele.classList.value))
+        }
+        checkedResult.push(skipResult)
+
+        return checkedResult
+      })
+
+      tabClickResult.forEach((failedAndSkip) => {
+        failedAndSkip.forEach((listOfClass) => {
+          expect(listOfClass).toMatch(/is-invisible/i)
+        })
+      })
+    })
+
     test('管理者、契約ステータス：30, /portal', async () => {
       await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
