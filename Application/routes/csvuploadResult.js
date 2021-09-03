@@ -153,7 +153,7 @@ const cbPostIndex = async (req, res, next) => {
 
   const csvuploadResultDetailsArr = []
 
-  //　データを取得し、格納
+  // データを取得し、格納
   try {
     const result = await invoiceDetailController.findInvoiceDetail(invoicesId)
     resultStatusCode = 200
@@ -163,7 +163,7 @@ const cbPostIndex = async (req, res, next) => {
 
       switch (invoiceDetail.dataValues.status) {
         case '1':
-          status = 'スッキプ'
+          status = 'スキップ'
           break
         case '0':
           status = '成功'

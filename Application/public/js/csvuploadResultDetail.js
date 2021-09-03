@@ -58,7 +58,7 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
                 Detail += '<td class="text-center">' + obj.invoiceId + '</td>'
                 if (obj.status === '成功') {
                   Detail += '<td class="text-center"><p class="status-text is-success">' + obj.status + '</p></td>'
-                } else if (obj.status === 'スッキプ') {
+                } else if (obj.status === 'スキップ') {
                   Detail += '<td class="text-center"><p class="status-text is-skip">' + obj.status + '</p></td>'
                 } else {
                   Detail += '<td class="text-center "><p class="status-text is-fail">' + obj.status + '</p></td>'
