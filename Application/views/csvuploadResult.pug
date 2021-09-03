@@ -39,6 +39,8 @@ block content
                   td.text-center= item.invoicesSuccess
                   td.text-center= item.invoicesSkip
                   td.text-center= item.invoicesFail
+                  input(type="hidden" value= item.invoiceId)
+
         .mt-1.has-text-left
           a.button.is-link.is-light(href="csvupload") ← csv一括アップロード
 
@@ -48,7 +50,8 @@ block content
         header.modal-card-head
           p.modal-card-title 取込結果詳細
           button.delete(data-target="csvuploadDetails-modal")
-        section.modal-card-body
+        section.modal-card-body#detailsModalBody
+          p#errormessage
           table.table.is-bordered.width-50
             thead
               tr
@@ -65,32 +68,20 @@ block content
                 td#invoicesSkip.text-center
                 td#invoicesFail.text-center
 
-          tags.tag.is-centerd 全体
-          tags.tag.is-centerd.is-success 成功
-          tags.tag.is-centerd.is-info スキップ
-          tags.tag.is-centerd.is-danger 失敗
+          div#tabs.is-invisible
+            tags.tag.is-centerd 全体
+            tags.tag.is-centerd.is-success 成功
+            tags.tag.is-centerd.is-info スキップ
+            tags.tag.is-centerd.is-danger 失敗
 
-          table.table.is-fullwidth.is-hoverable.table-fixed
+          table.table.is-fullwidth.is-hoverable.table-fixed.is-invisible#detailTable
             thead
               tr
                 th.width-8.text-center 行数
                 th.width-13.text-center 請求書番号
                 th.width-10.text-center 取込結果
                 th.width-35.text-center 詳細
-            tbody
-              - var detailsList = csvuploadResultDetailsArr
-              each detailsItem in detailsList
-                tr
-                  td.text-center= detailsItem.lines
-                  td.text-center= detailsItem.invoiceId
-                  td.text-center
-                    if detailsItem.status === "成功"
-                     p.status-text.is-success= detailsItem.status
-                    else if detailsItem.status === "スキップ"
-                     p.status-text.is-skip= detailsItem.status
-                    else
-                     p.status-text.is-fail= detailsItem.status
-                  td= detailsItem.errorData
+            tbody#reultDetail
         footer.modal-card-foot
            a.button.cancel-button(data-target='csvuploadDetails-modal') 閉じる
            p ※再アップロード時は、取込成功した明細行は除いてアップロードしてください。
