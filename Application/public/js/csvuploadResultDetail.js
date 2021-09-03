@@ -54,13 +54,18 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
                 $('#tabs').classList.remove('is-invisible')
                 $('#detailTable').classList.remove('is-invisible')
                 $('#errormessage').innerHTML = ''
-                Detail += '<tr><td class="text-center">' + obj.lines + '</td>'
-                Detail += '<td class="text-center">' + obj.invoiceId + '</td>'
+
                 if (obj.status === '成功') {
+                  Detail += '<tr class="tr-success"><td class="text-center">' + obj.lines + '</td>'
+                  Detail += '<td class="text-center">' + obj.invoiceId + '</td>'
                   Detail += '<td class="text-center"><p class="status-text is-success">' + obj.status + '</p></td>'
                 } else if (obj.status === 'スキップ') {
+                  Detail += '<tr class="tr-skip"><td class="text-center">' + obj.lines + '</td>'
+                  Detail += '<td class="text-center">' + obj.invoiceId + '</td>'
                   Detail += '<td class="text-center"><p class="status-text is-skip">' + obj.status + '</p></td>'
                 } else {
+                  Detail += '<tr class="tr-fail"><td class="text-center">' + obj.lines + '</td>'
+                  Detail += '<td class="text-center">' + obj.invoiceId + '</td>'
                   Detail += '<td class="text-center "><p class="status-text is-fail">' + obj.status + '</p></td>'
                 }
                 Detail += '<td>' + obj.errorData + '</td></tr>'
@@ -88,3 +93,63 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
     requestInvoiceDetail.send(JSON.stringify(sendData))
   }
 })
+
+// タブ押下 - 全体
+document.getElementById('btnTabAll').onclick = function () {
+  Array.prototype.forEach.call($('.tr-success'), function (ele) {
+    ele.classList.remove('is-invisible')
+  })
+
+  Array.prototype.forEach.call($('.tr-skip'), function (ele) {
+    ele.classList.remove('is-invisible')
+  })
+
+  Array.prototype.forEach.call($('.tr-fail'), function (ele) {
+    ele.classList.remove('is-invisible')
+  })
+}
+
+// タブ押下 - 成功
+document.getElementById('btnTabSuccess').onclick = function () {
+  Array.prototype.forEach.call($('.tr-success'), function (ele) {
+    ele.classList.remove('is-invisible')
+  })
+
+  Array.prototype.forEach.call($('.tr-skip'), function (ele) {
+    ele.classList.add('is-invisible')
+  })
+
+  Array.prototype.forEach.call($('.tr-fail'), function (ele) {
+    ele.classList.add('is-invisible')
+  })
+}
+
+// タブ押下 - スキップ
+document.getElementById('btnTabSkip').onclick = function () {
+  Array.prototype.forEach.call($('.tr-success'), function (ele) {
+    ele.classList.add('is-invisible')
+  })
+
+  Array.prototype.forEach.call($('.tr-skip'), function (ele) {
+    ele.classList.remove('is-invisible')
+  })
+
+  Array.prototype.forEach.call($('.tr-fail'), function (ele) {
+    ele.classList.add('is-invisible')
+  })
+}
+
+// タブ押下 - 失敗
+document.getElementById('btnTabFail').onclick = function () {
+  Array.prototype.forEach.call($('.tr-success'), function (ele) {
+    ele.classList.add('is-invisible')
+  })
+
+  Array.prototype.forEach.call($('.tr-skip'), function (ele) {
+    ele.classList.add('is-invisible')
+  })
+
+  Array.prototype.forEach.call($('.tr-fail'), function (ele) {
+    ele.classList.remove('is-invisible')
+  })
+}
