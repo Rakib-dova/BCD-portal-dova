@@ -15,6 +15,7 @@ const noticeHelper = require('../../Application/routes/helpers/notice')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const invoicesController = require('../../Application/controllers/invoiceController')
+const invoiceDetailController = require('../../Application/controllers/invoiceDetailController')
 const logger = require('../../Application/lib/logger.js')
 const { v4: uuidv4 } = require('uuid')
 
@@ -61,6 +62,19 @@ describe('csvuploadResultのテスト', () => {
       })
       if (result.length === 0) return null
       return result[0]
+    })
+    invoiceDetailController.findInvoiceDetail = jest.fn((invoicesId) => {
+      const result = []
+      if (invoicesId === 'error') {
+        return new Error()
+      }
+      invoiceDetailDB.forEach((recod) => {
+        if (recod.dataValues.invoicesId === invoicesId) {
+          result.push({ ...recod })
+        }
+      })
+      if (result.length === 0) return null
+      return result
     })
   })
 
@@ -316,6 +330,93 @@ describe('csvuploadResultのテスト', () => {
     contractdataValues5,
     contractdataValues6
   ]
+
+  const invoiceDetaildataValues = {
+    dataValues: {
+      invoiceDetailId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+      invoicesId: '461b75dd-01d5-4cd4-8284-067c60fe2e3d',
+      lines: 1,
+      invoiceId: '00',
+      status: 'スキップ',
+      errorData: 'errorData',
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const invoiceDetaildataValues2 = {
+    dataValues: {
+      invoiceDetailId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+      invoicesId: '461b75dd-01d5-4cd4-8284-067c60fe2e3d',
+      lines: 2,
+      invoiceId: '00',
+      status: 'スキップ',
+      errorData: 'errorData',
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const invoiceDetaildataValues3 = {
+    dataValues: {
+      invoiceDetailId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+      invoicesId: '461b75dd-01d5-4cd4-8284-067c60fe2e3d',
+      lines: 3,
+      invoiceId: '00',
+      status: 'スキップ',
+      errorData: 'errorData',
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const invoiceDetaildataValues4 = {
+    dataValues: {
+      invoiceDetailId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+      invoicesId: '461b75dd-01d5-4cd4-8284-067c60fe2e3d',
+      lines: 4,
+      invoiceId: '00',
+      status: 'スキップ',
+      errorData: 'errorData',
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const invoiceDetaildataValues5 = {
+    dataValues: {
+      invoiceDetailId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+      invoicesId: '461b75dd-01d5-4cd4-8284-067c60fe2e3d',
+      lines: 5,
+      invoiceId: '00',
+      status: 'スキップ',
+      errorData: 'errorData',
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const invoiceDetaildataValues6 = {
+    dataValues: {
+      invoiceDetailId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+      invoicesId: '461b75dd-01d5-4cd4-8284-067c60fe2e3d',
+      lines: 6,
+      invoiceId: '00',
+      status: 'スキップ',
+      errorData: 'errorData',
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const invoiceDetailDB = [
+    invoiceDetaildataValues,
+    invoiceDetaildataValues2,
+    invoiceDetaildataValues3,
+    invoiceDetaildataValues4,
+    invoiceDetaildataValues5,
+    invoiceDetaildataValues6
+  ]
   describe('ルーティング', () => {
     test('csvuploadResultのルーティングを確認', async () => {
       expect(csvuploadResult.router.get).toBeCalledWith(
@@ -352,7 +453,8 @@ describe('csvuploadResultのテスト', () => {
           invoicesSuccess: invoice.successCount,
           invoicesSkip: invoice.skipCount,
           invoicesFail: invoice.failCount,
-          status: status
+          status: status,
+          invoiceId: invoice.invoicesId
         })
       })
 
@@ -439,6 +541,8 @@ describe('csvuploadResultのテスト', () => {
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
+
+
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
       // 準備
@@ -582,6 +686,292 @@ describe('csvuploadResultのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvuploadが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('csvuploadResult', { csvuploadResultArr: [] })
+    })
+  })
+
+  describe('コールバック:cbPostIndex', () => {
+    test('正常：CSVuploadResultPost', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+      }
+      request.user = user
+      request.body = {
+        invoicsesId: '461b75dd-01d5-4cd4-8284-067c60fe2e3d'
+      }
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      // expect(request.session?.userContext).toBe('NotLoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(response.status).toHaveBeenCalledWith(200)
+    })
+
+    test('正常：解約申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user30
+      request.body = {
+        invoicsesId: uuidv4()
+      }
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('正常：解約受取中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user31
+      request.body = {
+        invoicsesId: uuidv4()
+      }
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      // expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('403エラー：requestのsession,userIdがnullの場合', async () => {
+      // 準備
+      // requestのsession,userIdにnullを入れる
+      delete request.session
+      delete request.user
+
+      helper.checkContractStatus = 10
+
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 403エラーがエラーハンドリング「される」
+      expect(response.status).toHaveBeenCalledWith(403)
+      // userContextがLoggedInになって「いない」
+      // expect(request.session?.userContext).not.toBe('LoggedIn')
+      // response.renderが呼ばれ「ない」
+      expect(response.render).not.toHaveBeenCalled()
+    })
+
+    test('400エラー：requestのinvoiceIdがundefinedの場合', async () => {
+      // 準備
+      // requestのsession,userIdにnullを入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = userInvoceError
+      request.body = {
+        invoicsesId: undefined
+      }
+
+      // helper.checkContractStatus = 10
+
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 403エラーがエラーハンドリング「される」
+      expect(response.status).toHaveBeenCalledWith(400)
+      // userContextがLoggedInになって「いない」
+      // expect(request.session?.userContext).not.toBe('LoggedIn')
+      // response.renderが呼ばれ「ない」
+      expect(response.render).not.toHaveBeenCalled()
+    })
+
+    test('400エラー：requestのinvoiceIdがuuid形式ではない場合', async () => {
+      // 準備
+      // requestのsession,userIdにnullを入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = userInvoceError
+      request.body = {
+        invoicsesId: '11111111'
+      }
+
+      // helper.checkContractStatus = 10
+
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「される」
+      expect(response.status).toHaveBeenCalledWith(400)
+      // userContextがLoggedInになって「いない」
+      // expect(request.session?.userContext).not.toBe('LoggedIn')
+      // response.renderが呼ばれ「ない」
+      expect(response.render).not.toHaveBeenCalled()
+    })
+    test('500エラー：DBからユーザが取得できなかった(null)場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = usernull
+      request.body = {
+        invoicsesId: uuidv4()
+      }
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになって「いない」
+      // expect(request.session?.userContext).not.toBe('LoggedIn')
+      // session.userRoleが初期値のままになっている
+      expect(request.session?.userRole).toBe('dummy')
+      // response.renderが呼ばれ「ない」
+      expect(response.render).not.toHaveBeenCalled()
+    })
+
+    test('500エラー：DBから契約情報が取得できなかった(null)場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = userContractNull
+      request.body = {
+        invoicsesId: uuidv4()
+      }
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになって「いない」
+      expect(request.session?.userContext).not.toBe('LoggedIn')
+      // session.userRoleが初期値のままになっている
+      expect(request.session?.userRole).toBe('dummy')
+      // response.renderが呼ばれ「ない」
+      expect(response.render).not.toHaveBeenCalled()
+    })
+
+    test('500エラー：ユーザDBエラーの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = userError
+      request.body = {
+        invoicsesId: uuidv4()
+      }
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：契約DBエラーの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = userContractError
+      request.body = {
+        invoicsesId: uuidv4()
+      }
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('404エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = userStatusNotZero
+      request.body = {
+        invoicsesId: uuidv4()
+      }
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error404)
+    })
+
+    test('500エラー：請求書を取得失敗', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+      }
+      request.user = user
+      request.body = {
+        invoicsesId: uuidv4()
+      }
+      // 試験実施
+      await csvuploadResult.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      // expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvuploadが呼ばれ「る」
+      expect(response.status).toHaveBeenCalledWith(500)
     })
   })
 })

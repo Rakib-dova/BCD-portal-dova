@@ -196,5 +196,6 @@ router.post('/', helper.isAuthenticated, cbPostIndex)
 
 module.exports = {
   router: router,
-  cbGetIndex: cbGetIndex
+  cbGetIndex: cbGetIndex,
+  cbPostIndex: cbPostIndex
 }
