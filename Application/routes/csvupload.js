@@ -141,6 +141,9 @@ const cbPostUpload = async (req, res, next) => {
     case 103:
       errorText = constantsDefine.statusConstants.OVERLAPPED_INVOICE
       break
+    case 104:
+      errorText = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
+      break
     default:
       break
   }
@@ -307,7 +310,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
               headers: setHeaders
             }
           )
-          invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SUCCESS
           successCount += invoiceList[idx].successCount
           uploadInvoiceCnt++
           break
@@ -325,6 +327,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
           invoiceList[idx].status = 1
           break
         case -1:
+          meisaiFlag = 3
           failCount += invoiceList[idx].failCount
           break
       }
@@ -332,30 +335,59 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
       const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
       const invoiceId = invoiceList[idx].invoiceId
       const status = invoiceList[idx].status
-      const errorData = invoiceList[idx].errorData
+      const errorData = invoiceList[idx].error
       const lines = invoiceList[idx].lines
-      invoiceLines.map((ele, idx) => {
-        invoiceDetailController.insert({
-          invoiceDetailId: uuidv4(),
+
+      let messageIdx = 0
+      if (invoiceList[idx].lines !== 0) {
+        messageIdx = invoiceList[idx].lines - 1
+        await invoiceController.updateCount({
           invoicesId: _invoices.invoicesId,
-          invoiceId: invoiceId,
-          lines: lines + idx,
-          status: status,
-          errorData: errorData
+          successCount: successCount,
+          failCount: failCount,
+          skipCount: skipCount,
+          invoiceCount: uploadInvoiceCnt
         })
-        return ''
-      })
+      } else {
+        await invoiceController.updateCount({
+          invoicesId: _invoices.invoicesId,
+          successCount: '-',
+          failCount: '-',
+          skipCount: '-',
+          invoiceCount: '0'
+        })
+        messageIdx = invoiceList[idx].lines
+      }
+
+      if (meisaiFlag === 2) {
+        const errorDataSkip = invoiceList[idx].errorData
+        invoiceLines.map((ele, idx) => {
+          invoiceDetailController.insert({
+            invoiceDetailId: uuidv4(),
+            invoicesId: _invoices.invoicesId,
+            invoiceId: invoiceId,
+            lines: lines + idx,
+            status: status,
+            errorData: errorDataSkip
+          })
+          return ''
+        })
+      } else {
+        invoiceLines.map((ele, idx) => {
+          invoiceDetailController.insert({
+            invoiceDetailId: uuidv4(),
+            invoicesId: _invoices.invoicesId,
+            invoiceId: invoiceId,
+            lines: lines + idx,
+            status: status,
+            errorData: errorData[messageIdx + idx].errorData
+          })
+          return ''
+        })
+      }
     }
     idx++
   }
-
-  await invoiceController.updateCount({
-    invoicesId: _invoices.invoicesId,
-    successCount: successCount,
-    failCount: failCount,
-    skipCount: skipCount,
-    invoiceCount: uploadInvoiceCnt
-  })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
 
@@ -364,9 +396,11 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
       return 102
     case 2:
       return 103
+    case 3:
+      return 104
+    default:
+      return 0
   }
-
-  return 0
 }
 
 const getTimeStamp = () => {
