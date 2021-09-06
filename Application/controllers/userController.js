@@ -100,9 +100,10 @@ module.exports = {
     // データベース接続回りはtry-catchしておく
     try {
       /* トランザクション */
+      const Op = await db.Sequelize.Op
       const created = await db.sequelize.transaction(async (t) => {
         // 外部キー制約によりテナントがなくユーザのみ登録されている状態はない
-        await Tenant.findOrCreate({
+        const tenant = await Tenant.findOrCreate({
           where: { tenantId: _tenantId },
           defaults: {
             tenantId: _tenantId,
@@ -131,7 +132,13 @@ module.exports = {
          */
         // 新規登録テナントに対し、Contractsテーブルにデータが登録済みかを確認
         const contract = await Contract.findOne({
-          where: { tenantId: _tenantId, deleteFlag: false }
+          where: {
+            tenantId: _tenantId,
+            contractStatus: {
+              [Op.ne]: ['99']
+            },
+            deleteFlag: false
+          }
         })
 
         // Contractsにデータが登録されていない場合、登録を実施
@@ -156,6 +163,15 @@ module.exports = {
             transaction: t
           })
 
+          if (tenant[0].dataValues?.deleteFlag) {
+            const tenantController = require('./tenantController')
+            const tenantId = tenant[0].dataValues.tenantId
+            await tenantController.updateStatus({
+              tenantId: tenantId,
+              transaction: t
+            })
+          }
+
           // 新規オーダーの場合、Contractsと同時にOrdersも登録
           await Order.findOrCreate({
             where: { contractId: _contractId },
@@ -167,7 +183,11 @@ module.exports = {
             },
             transaction: t
           })
+        } else {
+          //
+          return null
         }
+
         return user
       })
 

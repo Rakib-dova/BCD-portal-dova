@@ -16,5 +16,26 @@ module.exports = {
       logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
       return error
     }
+  },
+  updateStatus: async (values) => {
+    try {
+      const tenant = await Tenant.update(
+        {
+          deleteFlag: false
+        },
+        {
+          where: {
+            tenantId: values.tenantId
+          }
+        },
+        {
+          transaction: values.transaction
+        }
+      )
+      return tenant
+    } catch (error) {
+      logger.error({ user: values.tenantId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
   }
 }
