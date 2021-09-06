@@ -295,7 +295,6 @@ class bconCsv {
     let indexObj = null
     let headerchk = true
     let headerFlag = true
-    let setInvoiceLineErrCnt = 0
     let setInvoiceLineCnt = 0
     let errorData = ''
     invoiceData.some((element) => {
@@ -307,7 +306,6 @@ class bconCsv {
       errorData = ''
       if (parentInvoice?.getInvoiceNumber().value !== element.docNo) {
         headerFlag = true
-        setInvoiceLineErrCnt = 0
         setInvoiceLineCnt = 0
         parentInvoice = new Invoice()
         parentInvoiceStatus = 0
@@ -619,7 +617,6 @@ class bconCsv {
             : `${constants.invoiceErrMsg[validate.isSellersItemNum(csvColumn[12])]}`
 
           resultConvert.status = -1
-          setInvoiceLineErrCnt++
           break
       }
 
@@ -632,7 +629,6 @@ class bconCsv {
             : `${constants.invoiceErrMsg[validate.isItemName(csvColumn[13])]}`
 
           resultConvert.status = -1
-          setInvoiceLineErrCnt++
           break
       }
 
@@ -645,7 +641,6 @@ class bconCsv {
             : `${constants.invoiceErrMsg[validate.isQuantityValue(csvColumn[14])]}`
 
           resultConvert.status = -1
-          setInvoiceLineErrCnt++
           break
       }
 
@@ -656,7 +651,6 @@ class bconCsv {
             : `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
 
           resultConvert.status = -1
-          setInvoiceLineErrCnt++
           break
         default:
           csvColumn[15] = validate.isUnitcode(csvColumn[15])
@@ -672,7 +666,6 @@ class bconCsv {
             : `${constants.invoiceErrMsg[validate.isPriceValue(csvColumn[16])]}`
 
           resultConvert.status = -1
-          setInvoiceLineErrCnt++
           break
       }
 
@@ -683,7 +676,6 @@ class bconCsv {
             : `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
 
           resultConvert.status = -1
-          setInvoiceLineErrCnt++
           break
         default:
           csvColumn[17] = validate.isTaxCategori(csvColumn[17])
@@ -700,7 +692,6 @@ class bconCsv {
               : `${constants.invoiceErrMsg[validate.isDescription(csvColumn[18])]}`
 
             resultConvert.status = -1
-            setInvoiceLineErrCnt++
             break
         }
       }
@@ -732,13 +723,11 @@ class bconCsv {
         }
       }
 
-      if (resultConvert.status === 0 && parentInvoiceStatus === 0) {
-        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
-        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].successCount += 1
-      } else if (parentInvoiceStatus === 1) {
-        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
-        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].skipCount += 1
-      } else if (resultConvert.status === -1) {
+      if (
+        resultConvert.status === -1 ||
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].failCount !== 0
+      ) {
+        resultConvert.status = -1
         this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
         if (this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].successCount !== 0) {
           this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].failCount +=
@@ -747,6 +736,12 @@ class bconCsv {
         } else {
           this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].failCount += 1
         }
+      } else if (resultConvert.status === 0 && parentInvoiceStatus === 0) {
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].successCount += 1
+      } else if (parentInvoiceStatus === 1) {
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
+        this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].skipCount += 1
       }
 
       resultConvert.error.push({
