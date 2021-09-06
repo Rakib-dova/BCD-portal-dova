@@ -727,8 +727,8 @@ class bconCsv {
           resultConvert.status = -1
           this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
           errorData += errorData
-            ? `,${csvColumn[1] + constants.invoiceErrMsg['HEADERERR001']}`
-            : `${csvColumn[1] + constants.invoiceErrMsg['HEADERERR001']}`
+            ? `,${csvColumn[1] + constants.invoiceErrMsg['HEADERBEFORERR']}`
+            : `${csvColumn[1] + constants.invoiceErrMsg['HEADERBEFORERR']}`
         }
       }
 
