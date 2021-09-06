@@ -42,14 +42,14 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
           if (resultDetail.length === 0) {
             $('#tabs').classList.add('is-invisible')
             $('#detailTable').classList.add('is-invisible')
-            $('#errormessage').innerHTML = '<h3>検索データがありません。</h3><br>'
+            $('#errormessage').innerHTML =
+              '<h3>請求書が100件超えています。</h3><h3>CSVファイルを確認後もう一度アップロードしてください。</h3><br>'
           } else {
             resultDetail.forEach((obj) => {
               if (~~obj.lines === 0) {
                 $('#tabs').classList.add('is-invisible')
                 $('#detailTable').classList.add('is-invisible')
-                $('#errormessage').innerHTML =
-                  '<h3>請求書が100件超えています。</h3><h3>CSVファイルを確認後もう一度アップロードしてください。</h3><br>'
+                $('#errormessage').innerHTML = `<h3>${obj.errorData}</h3><br>`
               } else {
                 $('#tabs').classList.remove('is-invisible')
                 $('#detailTable').classList.remove('is-invisible')
