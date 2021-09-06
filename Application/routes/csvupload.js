@@ -262,6 +262,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
   let failCount = 0
   let skipCount = 0
   let uploadInvoiceCnt = 0
+  let headerErrorFlag = 0
   while (invoiceList[idx]) {
     // 明細check
     const meisaiLength = invoiceList[idx].INVOICE.getDocument().InvoiceLine.length
@@ -337,26 +338,12 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
       const status = invoiceList[idx].status
       const errorData = invoiceList[idx].error
       const lines = invoiceList[idx].lines
-
       let messageIdx = 0
       if (invoiceList[idx].lines !== 0) {
         messageIdx = invoiceList[idx].lines - 1
-        await invoiceController.updateCount({
-          invoicesId: _invoices.invoicesId,
-          successCount: successCount,
-          failCount: failCount,
-          skipCount: skipCount,
-          invoiceCount: uploadInvoiceCnt
-        })
       } else {
-        await invoiceController.updateCount({
-          invoicesId: _invoices.invoicesId,
-          successCount: '-',
-          failCount: '-',
-          skipCount: '-',
-          invoiceCount: '0'
-        })
         messageIdx = invoiceList[idx].lines
+        headerErrorFlag = 1
       }
 
       if (meisaiFlag === 2) {
@@ -387,6 +374,23 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
       }
     }
     idx++
+  }
+  if (headerErrorFlag === 1) {
+    await invoiceController.updateCount({
+      invoicesId: _invoices.invoicesId,
+      successCount: '-',
+      failCount: '-',
+      skipCount: '-',
+      invoiceCount: '0'
+    })
+  } else {
+    await invoiceController.updateCount({
+      invoicesId: _invoices.invoicesId,
+      successCount: successCount,
+      failCount: failCount,
+      skipCount: skipCount,
+      invoiceCount: uploadInvoiceCnt
+    })
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
