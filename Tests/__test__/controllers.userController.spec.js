@@ -47,6 +47,7 @@ const userRecord = {
   updatedAt: null
 }
 const contractDB = []
+
 const contractRecord = {
   contractId: null,
   tenantId: null,
@@ -56,6 +57,7 @@ const contractRecord = {
   createdAt: null,
   updatedAt: null
 }
+
 describe('userControllerのテスト', () => {
   beforeEach(() => {
     process.env.TS_APP_VERSION = '0.0.1'
@@ -152,13 +154,13 @@ describe('userControllerのテスト', () => {
               recordFlag = true
             }
           } else {
-            const kyeOfKey = Object.keys(where[key])
-            switch (typeof kyeOfKey) {
+            const keyOfKey = Object.keys(where[key])
+            switch (typeof keyOfKey) {
               case 'symbol':
-                switch (kyeOfKey.toString()) {
+                switch (keyOfKey.toString()) {
                   case 'Symbol(ne)':
                     tmpResult.map((record, idx, result) => {
-                      if (record[key] === where[key][kyeOfKey]) {
+                      if (record[key] === where[key][keyOfKey]) {
                         delete result[idx]
                       }
                       return ''
@@ -192,8 +194,13 @@ describe('userControllerのテスト', () => {
     })
     db.transaction = jest.fn(async (callback) => {
       const transactionObj = {}
-      const result = await callback(transactionObj)
-      return await result
+      try {
+        const result = await callback(transactionObj)
+        return await result
+      } catch (error) {
+        const dbError = new Error('DB error')
+        throw dbError
+      }
     })
   })
   afterEach(() => {
@@ -469,15 +476,64 @@ describe('userControllerのテスト', () => {
         Visible: true
       })
 
-      const contractInformationnewOrder = require('../../Application/orderTemplate/contractInformationnewOrder.json')
+      const contractInformationNewOrder = require('../../Application/orderTemplate/contractInformationnewOrder.json')
       // リフレッシュトークンの正常な暗号化ができた場合を想定する
       encryptSpy.mockReturnValue('dummyEncryptedRefreshToken')
 
       // 試験実施
-      const result = await userController.create(accessToken, refreshToken, contractInformationnewOrder)
+      const result = await userController.create(accessToken, refreshToken, contractInformationNewOrder)
 
       // 期待結果
       // DBから取得した情報がReturnされていること
+      expect(result).toEqual({
+        dataValues: {
+          appVersion: '0.0.1',
+          createdAt: result.dataValues.createdAt,
+          lastRefreshedAt: null,
+          refreshToken: 'dummyEncryptedRefreshToken',
+          subRefreshToken: null,
+          tenantId: '12345678-8ba0-42a4-8582-b234cb4a2089',
+          updatedAt: result.dataValues.updatedAt,
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          userStatus: 0
+        }
+      })
+    })
+
+    test('正常：Tenant.findOrCreateがnullの場合', async () => {
+      // 準備
+      // Tradeshiftからの正常なユーザデータ(必要最小限)の取得を想定する
+      accessTradeshiftSpy.mockReturnValue({
+        CompanyAccountId: null,
+        Memberships: [
+          {
+            UserId: userId,
+            Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+          }
+        ]
+      })
+      // リフレッシュトークンの正常な暗号化ができた場合を想定する
+      encryptSpy.mockReturnValue('dummyEncryptedRefreshToken')
+      // DBエラーを想定する
+      Tenant.findOrCreate = jest.fn((values) => {
+        const result = [
+          {
+            dataValues: {
+              deleteFlag: true
+            }
+          }
+        ]
+        return result
+      })
+
+      const contractInformationNewOrder = require('../../Application/orderTemplate/contractInformationnewOrder.json')
+
+      // 試験実施
+      const result = await userController.create(accessToken, refreshToken, contractInformationNewOrder)
+
+      // 期待結果
+      // 想定したデータが返ること
       expect(result).toEqual({
         dataValues: {
           appVersion: '0.0.1',
@@ -526,10 +582,10 @@ describe('userControllerのテスト', () => {
         throw encryptError
       })
 
-      const contractInformationnewOrder = require('../../Application/orderTemplate/contractInformationnewOrder.json')
+      const contractInformationNewOrder = require('../../Application/orderTemplate/contractInformationnewOrder.json')
 
       // 試験実施
-      const result = await userController.create(accessToken, refreshToken, contractInformationnewOrder)
+      const result = await userController.create(accessToken, refreshToken, contractInformationNewOrder)
 
       // 期待結果
       // Catchした暗号化エラーが返ること
@@ -561,10 +617,10 @@ describe('userControllerのテスト', () => {
         throw dbError
       })
 
-      const contractInformationnewOrder = require('../../Application/orderTemplate/contractInformationnewOrder.json')
+      const contractInformationNewOrder = require('../../Application/orderTemplate/contractInformationnewOrder.json')
 
       // 試験実施
-      const result = await userController.create(accessToken, refreshToken, contractInformationnewOrder)
+      const result = await userController.create(accessToken, refreshToken, contractInformationNewOrder)
 
       // 期待結果
       // CatchしたDBエラーが返ること
@@ -574,55 +630,6 @@ describe('userControllerのテスト', () => {
         { tenant: null, user: userId, stack: dbError.stack, status: 0 },
         dbError.name
       )
-    })
-
-    test('Tenant.findOrCreateがnullの場合: DBエラー時(db.sequelize.transaction)', async () => {
-      // 準備
-      // Tradeshiftからの正常なユーザデータ(必要最小限)の取得を想定する
-      accessTradeshiftSpy.mockReturnValue({
-        CompanyAccountId: null,
-        Memberships: [
-          {
-            UserId: userId,
-            Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
-          }
-        ]
-      })
-      // リフレッシュトークンの正常な暗号化ができた場合を想定する
-      encryptSpy.mockReturnValue('dummyEncryptedRefreshToken')
-      // DBエラーを想定する
-      Tenant.findOrCreate = jest.fn((values) => {
-        const result = [
-          {
-            dataValues: {
-              deleteFlag: true
-            }
-          }
-        ]
-        return result
-      })
-
-      const contractInformationnewOrder = require('../../Application/orderTemplate/contractInformationnewOrder.json')
-
-      // 試験実施
-      const result = await userController.create(accessToken, refreshToken, contractInformationnewOrder)
-
-      // 期待結果
-      // CatchしたDBエラーが返ること
-      expect(result).toEqual({
-        dataValues: {
-          appVersion: '0.0.1',
-          createdAt: result.dataValues.createdAt,
-          lastRefreshedAt: null,
-          refreshToken: 'dummyEncryptedRefreshToken',
-          subRefreshToken: null,
-          tenantId: '12345678-8ba0-42a4-8582-b234cb4a2089',
-          updatedAt: result.dataValues.updatedAt,
-          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
-          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-          userStatus: 0
-        }
-      })
     })
 
     test('Contract.findOneがnullの場合: DBエラー時(db.sequelize.transaction)', async () => {
@@ -640,19 +647,19 @@ describe('userControllerのテスト', () => {
       // リフレッシュトークンの正常な暗号化ができた場合を想定する
       encryptSpy.mockReturnValue('dummyEncryptedRefreshToken')
       // DBエラーを想定する
+      const dbError = new Error('DB error')
       Contract.findOne = jest.fn((values) => {
-        const result = { dataValues: null }
-        return result
+        throw dbError
       })
 
-      const contractInformationnewOrder = require('../../Application/orderTemplate/contractInformationnewOrder.json')
+      const contractInformationNewOrder = require('../../Application/orderTemplate/contractInformationnewOrder.json')
 
       // 試験実施
-      const result = await userController.create(accessToken, refreshToken, contractInformationnewOrder)
+      const result = await userController.create(accessToken, refreshToken, contractInformationNewOrder)
 
       // 期待結果
-      // CatchしたDBエラーが返ること
-      expect(result).toEqual(null)
+      // 想定したデータが返ること
+      expect(result).toEqual(dbError)
     })
   })
 })
