@@ -352,7 +352,7 @@ class bconCsv {
           }
 
           this.#invoiceDocumentList.push(indexObj)
-
+          this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].failCount += 1
           return
         }
 
