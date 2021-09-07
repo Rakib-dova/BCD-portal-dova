@@ -160,9 +160,11 @@ const cbPostRegister = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   if (user instanceof Error) return next(errorHelper.create(500))
 
+  if (user === null) return next(errorHelper.create(500))
+
   // ユーザはfindOrCreateで登録されるため戻り値userには配列が入る
   // 重複加入については登録時、userControllerで'99'以外の契約がある場合重複登録に見て、「null」を返して500エラーにする
-  if (user[0].dataValues?.userId !== req.user.userId) return next(errorHelper.create(500))
+  if (user[0]?.dataValues?.userId !== req.user.userId) return next(errorHelper.create(500))
 
   // テナント＆ユーザ登録成功したら
   logger.info({ tenant: req.user?.tenantId, user: req.user?.userId }, 'Tenant Registration Succeeded')
