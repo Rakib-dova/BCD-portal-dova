@@ -43,7 +43,7 @@ block content
                 //- p.tag.is-link.is-normal 有効化されています
       .column.hvr-float
         .box
-          a(href='csvupload')
+          a.show-modal(data-target='csvupload-modal')
             .media.appdesc
               .media-left
                 img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_upload-type2c.svg')
@@ -84,6 +84,28 @@ block content
                 i.fas.fa-file
               p 工事・故障情報を参照する
         footer.modal-card-foot
+      
+      .modal#csvupload-modal
+        .modal-background.cancel-button(data-target='csvupload-modal')
+        .modal-card.is-family-noto-sans
+          header.modal-card-head
+            p.modal-card-title.title.mb-0 請求書一括作成
+            button.delete(data-target="csvupload-modal")
+          section.modal-card-body
+            nav.panel
+              a.panel-block(href='/csvupload') 
+                span.panel-icon
+                  i.fas.fa-file
+                p 請求書一括作成
+              a.panel-block(download href="../html/請求書一括作成フォーマット.csv")
+                span.panel-icon
+                  i.fas.fa-file
+                p アップロード用請求書フォーマットcsvダウンロード
+              a.panel-block(download href="../html/請求書一括作成マニュアル.pdf")
+                span.panel-icon
+                  i.fas.fa-file
+                p 操作マニュアルダウンロード
+          footer.modal-card-foot
 
     .modal#support-confirmation-modal
       .modal-background.cancel-button(data-target='support-confirmation-modal')
