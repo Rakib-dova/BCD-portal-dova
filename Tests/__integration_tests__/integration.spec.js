@@ -2049,6 +2049,282 @@ describe('ルーティングのインテグレーションテスト', () => {
       })
     })
 
+    test('管理者、契約ステータス：00、請求書一括作成のポップアップ及びcsvフォーマットダウンロード', async () => {
+      let clickResult
+      const path = require('path')
+      const downloadPath = path.resolve('./kanri_download')
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        // ページのローディングが終わるまで待つ
+        const selector = await page.$(
+          'body > div.container.is-max-widescreen > div.columns.is-desktop.is-family-noto-sans > div:nth-child(2) > div > a'
+        )
+        await selector.click({ clickCount: 1 })
+        await page.waitForTimeout(1000)
+        clickResult = await page.evaluate(() => {
+          if (document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/) !== null) {
+            return document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/)[0]
+          }
+          return null
+        })
+      }
+      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
+
+      await page.waitForTimeout(3000)
+
+      // ダウンロードフォルダ設定
+      await page._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: downloadPath
+      })
+
+      const csvFormatDownloadSelector = await page.$(
+        '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(2)'
+      )
+
+      const fileName = await page.evaluate(() => {
+        const href = decodeURI(
+          document.querySelector(
+            '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(2)'
+          ).href
+        ).toString()
+        const startIdx = href.lastIndexOf('/')
+        const lastIdx = href.length
+        return `${href.substr(startIdx, lastIdx)}`
+      })
+
+      await csvFormatDownloadSelector.click({ clickCount: 1 })
+
+      // ダウンロード終わってからテスト（待機時間：2秒）
+      setTimeout(() => {
+        const fs = require('fs')
+        const downloadFilePath = path.resolve(`${downloadPath}\\${fileName}`)
+        const downloadFile = fs.readFileSync(downloadFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        const originFilePath = path.resolve('../Application/public/html/請求書一括作成フォーマット.csv')
+        const originFile = fs.readFileSync(originFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        expect(originFile).toBe(downloadFile)
+      }, 2000)
+    })
+
+    test('管理者、契約ステータス：00、請求書一括作成のポップアップ及びマニュアルダウンロード', async () => {
+      let clickResult
+      const path = require('path')
+      const downloadPath = path.resolve('./kanri_download')
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        // ページのローディングが終わるまで待つ
+        const selector = await page.$(
+          'body > div.container.is-max-widescreen > div.columns.is-desktop.is-family-noto-sans > div:nth-child(2) > div > a'
+        )
+        await selector.click({ clickCount: 1 })
+        await page.waitForTimeout(1000)
+        clickResult = await page.evaluate(() => {
+          if (document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/) !== null) {
+            return document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/)[0]
+          }
+          return null
+        })
+      }
+      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
+
+      await page.waitForTimeout(3000)
+
+      // ダウンロードフォルダ設定
+      await page._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: downloadPath
+      })
+
+      const csvFormatDownloadSelector = await page.$(
+        '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(3)'
+      )
+
+      const fileName = await page.evaluate(() => {
+        const href = decodeURI(
+          document.querySelector(
+            '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(3)'
+          ).href
+        ).toString()
+        const startIdx = href.lastIndexOf('/')
+        const lastIdx = href.length
+        return `${href.substr(startIdx, lastIdx)}`
+      })
+
+      await csvFormatDownloadSelector.click({ clickCount: 1 })
+
+      // ダウンロード終わってからテスト（待機時間：2秒）
+      setTimeout(() => {
+        const fs = require('fs')
+        const downloadFilePath = path.resolve(`${downloadPath}\\${fileName}`)
+        const downloadFile = fs.readFileSync(downloadFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        const originFilePath = path.resolve('../Application/public/html/請求書一括作成マニュアル.pdf')
+        const originFile = fs.readFileSync(originFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        expect(originFile).toBe(downloadFile)
+      }, 2000)
+    })
+
+    test('一般ユーザ、契約ステータス：00、請求書一括作成のポップアップ及びcsvフォーマットダウンロード', async () => {
+      let clickResult
+      const path = require('path')
+      const downloadPath = path.resolve('./ippan_download')
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        // ページのローディングが終わるまで待つ
+        const selector = await page.$(
+          'body > div.container.is-max-widescreen > div.columns.is-desktop.is-family-noto-sans > div:nth-child(2) > div > a'
+        )
+        await selector.click({ clickCount: 1 })
+        await page.waitForTimeout(1000)
+        clickResult = await page.evaluate(() => {
+          if (document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/) !== null) {
+            return document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/)[0]
+          }
+          return null
+        })
+      }
+      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
+
+      await page.waitForTimeout(3000)
+
+      // ダウンロードフォルダ設定
+      await page._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: downloadPath
+      })
+
+      const csvFormatDownloadSelector = await page.$(
+        '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(2)'
+      )
+
+      const fileName = await page.evaluate(() => {
+        const href = decodeURI(
+          document.querySelector(
+            '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(2)'
+          ).href
+        ).toString()
+        const startIdx = href.lastIndexOf('/')
+        const lastIdx = href.length
+        return `${href.substr(startIdx, lastIdx)}`
+      })
+
+      await csvFormatDownloadSelector.click({ clickCount: 1 })
+
+      // ダウンロード終わってからテスト（待機時間：2秒）
+      setTimeout(() => {
+        const fs = require('fs')
+        const downloadFilePath = path.resolve(`${downloadPath}\\${fileName}`)
+        const downloadFile = fs.readFileSync(downloadFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        const originFilePath = path.resolve('../Application/public/html/請求書一括作成フォーマット.csv')
+        const originFile = fs.readFileSync(originFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        expect(originFile).toBe(downloadFile)
+      }, 2000)
+    })
+
+    test('一般ユーザ、契約ステータス：00、請求書一括作成のポップアップ及びマニュアルダウンロード', async () => {
+      let clickResult
+      const path = require('path')
+      const downloadPath = path.resolve('./ippan_download')
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        // ページのローディングが終わるまで待つ
+        const selector = await page.$(
+          'body > div.container.is-max-widescreen > div.columns.is-desktop.is-family-noto-sans > div:nth-child(2) > div > a'
+        )
+        await selector.click({ clickCount: 1 })
+        await page.waitForTimeout(1000)
+        clickResult = await page.evaluate(() => {
+          if (document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/) !== null) {
+            return document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/)[0]
+          }
+          return null
+        })
+      }
+      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
+
+      await page.waitForTimeout(3000)
+
+      // ダウンロードフォルダ設定
+      await page._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: downloadPath
+      })
+
+      const csvFormatDownloadSelector = await page.$(
+        '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(3)'
+      )
+
+      const fileName = await page.evaluate(() => {
+        const href = decodeURI(
+          document.querySelector(
+            '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(3)'
+          ).href
+        ).toString()
+        const startIdx = href.lastIndexOf('/')
+        const lastIdx = href.length
+        return `${href.substr(startIdx, lastIdx)}`
+      })
+
+      await csvFormatDownloadSelector.click({ clickCount: 1 })
+
+      // ダウンロード終わってからテスト（待機時間：2秒）
+      setTimeout(() => {
+        const fs = require('fs')
+        const downloadFilePath = path.resolve(`${downloadPath}\\${fileName}`)
+        const downloadFile = fs.readFileSync(downloadFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        const originFilePath = path.resolve('../Application/public/html/請求書一括作成マニュアル.pdf')
+        const originFile = fs.readFileSync(originFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        expect(originFile).toBe(downloadFile)
+      }, 2000)
+    })
+
     test('管理者、契約ステータス：30, /portal', async () => {
       await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
