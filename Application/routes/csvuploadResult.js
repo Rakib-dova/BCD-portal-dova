@@ -58,7 +58,8 @@ const cbGetIndex = async (req, res, next) => {
 
   try {
     const timeStamp = (date) => {
-      const now = new Date(date)
+      const getDate = new Date(date)
+      const now = new Date(getDate.getTime() - (-540 * 60 * 1000))
       const year = now.getFullYear()
       const month = now.getMonth() + 1 < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1
       const day = now.getDate() < 10 ? '0' + now.getDate() : now.getDate()
