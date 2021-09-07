@@ -5,7 +5,6 @@ const router = express.Router()
 const helper = require('./helpers/middleware')
 // Require our controllers.
 const userController = require('../controllers/userController.js')
-const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const noticeHelper = require('./helpers/notice')
 const logger = require('../lib/logger')
@@ -161,31 +160,18 @@ const cbPostRegister = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   if (user instanceof Error) return next(errorHelper.create(500))
 
+  if (user === null) return next(errorHelper.create(500))
+
   // ユーザはfindOrCreateで登録されるため戻り値userには配列が入る
-  if (user !== null && validate.isArray(user)) {
-    // userの配列[0]にオブジェクト、配列[1]にcreatedのtrue or false
-    // falseの場合は、フォームの二重送信に該当
+  // 重複加入については登録時、userControllerで'99'以外の契約がある場合重複登録に見て、「null」を返して500エラーにする
+  if (user[0]?.dataValues?.userId !== req.user.userId) return next(errorHelper.create(500))
 
-    if (user[1] === false) {
-      const e = new Error('データが二重送信された可能性があります。')
-      e.name = 'Bad Request'
-      e.status = 400
-      e.desc = '既にご利用のユーザーの登録は完了しています。'
-      return next(e)
-    }
+  // テナント＆ユーザ登録成功したら
+  logger.info({ tenant: req.user?.tenantId, user: req.user?.userId }, 'Tenant Registration Succeeded')
+  req.session.userContext = 'TenantRegistrationCompleted'
+  req.flash('info', '利用登録が完了いたしました。')
 
-    if (user[0].dataValues?.userId !== req.user.userId) return next(errorHelper.create(500))
-
-    // テナント＆ユーザ登録成功したら
-    logger.info({ tenant: req.user?.tenantId, user: req.user?.userId }, 'Tenant Registration Succeeded')
-    req.session.userContext = 'TenantRegistrationCompleted'
-    req.flash('info', '利用登録が完了いたしました。')
-
-    return res.redirect(303, '/portal')
-  } else {
-    // 失敗したら
-    return next(errorHelper.create(500))
-  }
+  return res.redirect(303, '/portal')
 }
 
 router.get('/register', helper.isAuthenticated, csrfProtection, cbGetRegister)

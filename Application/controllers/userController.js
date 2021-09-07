@@ -100,9 +100,10 @@ module.exports = {
     // データベース接続回りはtry-catchしておく
     try {
       /* トランザクション */
+      const Op = await db.Sequelize.Op
       const created = await db.sequelize.transaction(async (t) => {
         // 外部キー制約によりテナントがなくユーザのみ登録されている状態はない
-        await Tenant.findOrCreate({
+        const tenant = await Tenant.findOrCreate({
           where: { tenantId: _tenantId },
           defaults: {
             tenantId: _tenantId,
@@ -131,43 +132,60 @@ module.exports = {
          */
         // 新規登録テナントに対し、Contractsテーブルにデータが登録済みかを確認
         const contract = await Contract.findOne({
-          where: { tenantId: _tenantId, deleteFlag: false }
+          where: {
+            tenantId: _tenantId,
+            contractStatus: {
+              [Op.ne]: ['99']
+            },
+            deleteFlag: false
+          }
         })
 
-        // Contractsにデータが登録されていない場合、登録を実施
-        if (contract === null) {
-          // contractId uuidで生成
-          const _contractId = uuidv4()
-          // contractテーブルのdate
-          const _date = new Date()
+        // 契約テーブルに検索結果がある場合は契約中（契約受付～解約済みまえ）を想定し、レコードがある場合、契約テーブル登録を拒否する。
+        if (contract !== null) {
+          return null
+        }
+        // contractId uuidで生成
+        const _contractId = uuidv4()
+        // contractテーブルのdate
+        const _date = new Date()
 
-          // Contractテーブルに入力
-          await Contract.findOrCreate({
-            where: { tenantId: _tenantId, deleteFlag: false },
-            defaults: {
-              contractId: _contractId,
-              tenantId: _tenantId,
-              numberN: '',
-              contractStatus: constantsDefine.statusConstants.contractStatusNewContractOrder,
-              deleteFlag: false,
-              createdAt: _date,
-              updatedAt: _date
-            },
-            transaction: t
-          })
+        // Contractテーブルに入力
+        await Contract.findOrCreate({
+          where: { tenantId: _tenantId, deleteFlag: false },
+          defaults: {
+            contractId: _contractId,
+            tenantId: _tenantId,
+            numberN: '',
+            contractStatus: constantsDefine.statusConstants.contractStatusNewContractOrder,
+            deleteFlag: false,
+            createdAt: _date,
+            updatedAt: _date
+          },
+          transaction: t
+        })
 
-          // 新規オーダーの場合、Contractsと同時にOrdersも登録
-          await Order.findOrCreate({
-            where: { contractId: _contractId },
-            defaults: {
-              contractId: _contractId,
-              tenantId: _tenantId,
-              orderType: constantsDefine.statusConstants.orderTypeNewOrder,
-              orderData: JSON.stringify(contractInformationnewOrder)
-            },
+        if (tenant[0].dataValues?.deleteFlag) {
+          const tenantController = require('./tenantController')
+          const tenantId = tenant[0].dataValues.tenantId
+          await tenantController.updateDeleteFlag({
+            tenantId: tenantId,
             transaction: t
           })
         }
+
+        // 新規オーダーの場合、Contractsと同時にOrdersも登録
+        await Order.findOrCreate({
+          where: { contractId: _contractId },
+          defaults: {
+            contractId: _contractId,
+            tenantId: _tenantId,
+            orderType: constantsDefine.statusConstants.orderTypeNewOrder,
+            orderData: JSON.stringify(contractInformationnewOrder)
+          },
+          transaction: t
+        })
+
         return user
       })
 

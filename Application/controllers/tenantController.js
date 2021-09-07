@@ -4,16 +4,34 @@ const logger = require('../lib/logger')
 module.exports = {
   findOne: async (tenantId) => {
     try {
-      const tenant = await Tenant.findOne({
+      return await Tenant.findOne({
         where: {
           tenantId: tenantId
         }
       })
-
-      return tenant
     } catch (error) {
       // status 0はDBエラー
       logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
+  },
+  updateDeleteFlag: async (values) => {
+    try {
+      return await Tenant.update(
+        {
+          deleteFlag: false
+        },
+        {
+          where: {
+            tenantId: values.tenantId
+          }
+        },
+        {
+          transaction: values.transaction
+        }
+      )
+    } catch (error) {
+      logger.error({ user: values.tenantId, stack: error.stack, status: 0 }, error.name)
       return error
     }
   }
