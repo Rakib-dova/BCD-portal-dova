@@ -4,19 +4,25 @@ jest.mock('../../Application/lib/logger')
 
 const tenantController = require('../../Application/controllers/tenantController')
 
-let findOneSpy, errorSpy, tenantId
+let findOneSpy, errorSpy, tenantId, updateStatusSpy
 describe('tenantControllerのテスト', () => {
   beforeEach(() => {
     const Tenant = require('../../Application/models').Tenant
     const logger = require('../../Application/lib/logger')
     findOneSpy = jest.spyOn(Tenant, 'findOne')
+    updateStatusSpy = jest.spyOn(Tenant, 'update')
     errorSpy = jest.spyOn(logger, 'error')
   })
   afterEach(() => {
     findOneSpy.mockRestore()
+    updateStatusSpy.mockRestore()
     errorSpy.mockRestore()
   })
   tenantId = '12345678-bdac-4195-80b9-1ea64b8cb70c'
+
+  const values = {
+    tenantId: tenantId
+  }
 
   describe('findOne', () => {
     test('正常', async () => {
@@ -43,6 +49,7 @@ describe('tenantControllerのテスト', () => {
         updatedAt: '2021-01-25T10:15:15.035Z'
       })
     })
+
     test('status 0のErrorログ: DBエラー時', async () => {
       // 準備
       // 1回目のアクセストークンによるアクセスは401エラーを想定する
@@ -58,6 +65,45 @@ describe('tenantControllerのテスト', () => {
       // status: 0のErrorログ出力が呼ばれること
       expect(errorSpy).toHaveBeenCalledWith({ user: tenantId, stack: expect.anything(), status: 0 }, expect.anything())
       // DBErrorが返されること
+      expect(result).toEqual(dbError)
+    })
+
+    test('正常：再登録', async () => {
+      // 準備
+      // DBからの正常テナントデータの取得を想定する
+
+      updateStatusSpy.mockReturnValueOnce({
+        tenantId: tenantId,
+        transaction: []
+      })
+
+      // 試験実施
+      const result = await tenantController.updateDeleteFlag(values)
+
+      // 期待結果
+      // 取得したテナントデータがReturnされていること
+      expect(result).toEqual({
+        tenantId: tenantId,
+        transaction: []
+      })
+    })
+
+    test('異常：再登録', async () => {
+      // 準備
+      // DBからの異常テナントデータの取得を想定する
+      const dbError = new TypeError(`Cannot read property 'tenantId' of null`)
+
+      updateStatusSpy.mockImplementation(() => {
+        throw dbError
+      })
+
+      // 試験実施
+      const result = await tenantController.updateDeleteFlag(values)
+
+      // 期待結果
+      // status: 0のErrorログ出力が呼ばれること
+      expect(errorSpy).toHaveBeenCalledWith({ user: tenantId, stack: result.stack, status: 0 }, expect.anything())
+      // 取得したテナントデータがReturnされていないこと
       expect(result).toEqual(dbError)
     })
   })
