@@ -148,6 +148,10 @@ const isInvoiceId = function (invoiceId) {
 }
 
 const isBankName = function (bankName) {
+  // 値の存在有無確認
+  if (bankName.length < 1) {
+    return 'BANKNAMEERR002'
+  }
   if (bankName.length > constantsDefine.invoiceValidDefine.BANKNAME_VALUE || bankName.length < 1) {
     return 'BANKNAMEERR000'
   }
@@ -156,7 +160,7 @@ const isBankName = function (bankName) {
 }
 
 const isDate = function (isDate) {
-  // 年/月/日の形式のみ許容する
+  // 年-月-日の形式のみ許容する
   if (!isDate.match(/^\d{4}-\d{1,2}-\d{1,2}$/)) {
     return 1
   }
@@ -252,6 +256,10 @@ const isFinancialInstitution = function (financialInstitution) {
 }
 
 const isFinancialName = function (financialName) {
+  // 値の存在有無確認
+  if (financialName.length < 1) {
+    return 'FINANCIALNAMEERR002'
+  }
   if (financialName.length > constantsDefine.invoiceValidDefine.FINANCIALNAME_VALUE) {
     return 'FINANCIALNAMEERR000'
   }
@@ -261,6 +269,10 @@ const isFinancialName = function (financialName) {
 
 const isAccountType = function (accountType) {
   const unitcodeCategory = require('./bconCsvAccountType')
+  // 値の存在有無確認
+  if (accountType.length < 1) {
+    return 2
+  }
 
   if (!unitcodeCategory[accountType]) {
     return 1
@@ -271,6 +283,10 @@ const isAccountType = function (accountType) {
 
 const isAccountId = function (accountId) {
   const regex = new RegExp(/^[0-9]{7}$/)
+  // 値の存在有無確認
+  if (accountId.length < 1) {
+    return 'ACCOUNTIDERR002'
+  }
   if (!regex.test(accountId)) {
     return 'ACCOUNTIDERR001'
   }
@@ -282,6 +298,10 @@ const isAccountId = function (accountId) {
 }
 
 const isAccountName = function (accountName) {
+  // 値の存在有無確認
+  if (accountName.length < 1) {
+    return 'ACCOUNTNAMEERR002'
+  }
   if (accountName.length > constantsDefine.invoiceValidDefine.ACCOUNTNAME_VALUE) {
     return 'ACCOUNTNAMEERR000'
   }
