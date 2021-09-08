@@ -51,9 +51,7 @@ describe('csvuploadのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
-    // infoSpy = jest.spyOn(logger, 'info')
-    logger.info = jest.fn()
-    logger.error = jest.fn()
+    infoSpy = jest.spyOn(logger, 'info')
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     invoiceListSpy = jest.spyOn(csvupload, 'cbExtractInvoice')
@@ -89,7 +87,7 @@ describe('csvuploadのテスト', () => {
     request.resetMocked()
     response.resetMocked()
     next.mockReset()
-    // infoSpy.mockRestore()
+    infoSpy.mockRestore()
     findOneSpy.mockRestore()
     findOneSpyContracts.mockRestore()
     invoiceListSpy.mockRestore()
@@ -2704,6 +2702,7 @@ describe('csvuploadのテスト', () => {
       expect(resultUpl).toBeTruthy()
 
       const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBeTruthy()
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
@@ -3865,6 +3864,169 @@ describe('csvuploadのテスト', () => {
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('準正常：銀行支払い方法制御処理チェック', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'paymentMeansTest.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      const paymentMeansTestUser = {
+        ...user,
+        accessToken: 'getNetworkErr'
+      }
+      request.user = paymentMeansTestUser
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+
+      // 試験実施
+      // await csvupload.cbGetIndex(request, response, next)
+      // expect(response.render).toHaveBeenCalledWith('csvupload')
+
+      paymentMeansTestUser.accessToken = 'dummyAccess'
+      request.user = paymentMeansTestUser
+      request.body = {
+        filename: 'paymentMeansTest.csv',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      expect(invoicesDB[0].csvFileName).toBe('paymentMeansTest.csv')
+
+      expect(invoiceDetailDB[0].invoicesId).toBe(invoicesDB[0].invoicesId)
+      expect(invoiceDetailDB[0].invoiceId).toBe('paymentMeansTest1')
+      expect(invoiceDetailDB[0].status).toBe(0)
+      expect(invoiceDetailDB[0].errorData).toBe('正常に取込ました。')
+
+      expect(invoiceDetailDB[1].invoicesId).toBe(invoicesDB[0].invoicesId)
+      expect(invoiceDetailDB[1].invoiceId).toBe('paymentMeansTest2')
+      expect(invoiceDetailDB[1].status).toBe(-1)
+      expect(invoiceDetailDB[1].errorData).toBe('支払期日に値が設定されていません。')
+
+      expect(invoiceDetailDB[2].invoicesId).toBe(invoicesDB[0].invoicesId)
+      expect(invoiceDetailDB[2].invoiceId).toBe('paymentMeansTest3')
+      expect(invoiceDetailDB[2].status).toBe(-1)
+      expect(invoiceDetailDB[2].errorData).toBe('銀行名に値が設定されていません。')
+
+      expect(invoiceDetailDB[3].invoicesId).toBe(invoicesDB[0].invoicesId)
+      expect(invoiceDetailDB[3].invoiceId).toBe('paymentMeansTest4')
+      expect(invoiceDetailDB[3].status).toBe(-1)
+      expect(invoiceDetailDB[3].errorData).toBe('支店名に値が設定されていません。')
+
+      expect(invoiceDetailDB[4].invoicesId).toBe(invoicesDB[0].invoicesId)
+      expect(invoiceDetailDB[4].invoiceId).toBe('paymentMeansTest5')
+      expect(invoiceDetailDB[4].status).toBe(-1)
+      expect(invoiceDetailDB[4].errorData).toBe('科目に値が設定されていません。')
+
+      expect(invoiceDetailDB[5].invoicesId).toBe(invoicesDB[0].invoicesId)
+      expect(invoiceDetailDB[5].invoiceId).toBe('paymentMeansTest6')
+      expect(invoiceDetailDB[5].status).toBe(-1)
+      expect(invoiceDetailDB[5].errorData).toBe('口座番号に値が設定されていません。')
     })
 
     test('準正常：ネットワーク確認バリデーションチェック', async () => {
