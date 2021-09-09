@@ -118,25 +118,23 @@ document.getElementById('next-btn').addEventListener('click', function (e) {
   let index = 0
   const inputText = document.querySelectorAll('input[type="text"]')
   const checkData = $('.checkData')
-  Array.prototype.forEach.call(inputText, function (element) {
+  Array.prototype.forEach.call(inputText, function (confirmClientInfo) {
     const targetData = checkData.item(index)
-    console.log(targetData)
-    console.log(element)
-    console.log(index)
+
     if (
-      element.id.toString() !== 'banch1' &&
-      element.id.toString() !== 'tatemono1' &&
-      element.id.toString() !== 'contractAddressVal'
+      confirmClientInfo.id.toString() !== 'banch1' &&
+      confirmClientInfo.id.toString() !== 'tatemono1' &&
+      confirmClientInfo.id.toString() !== 'contractAddressVal'
     ) {
-      targetData.innerHTML = element.value
+      targetData.innerHTML = confirmClientInfo.value
       index++
     } else {
-      if (element.id.toString() === 'contractAddressVal') {
-        targetData.innerHTML = element.value
+      if (confirmClientInfo.id.toString() === 'contractAddressVal') {
+        targetData.innerHTML = confirmClientInfo.value
       } else {
-        targetData.innerHTML += element.value
+        targetData.innerHTML += confirmClientInfo.value
       }
-      if (element.id.toString() === 'tatemono1') {
+      if (confirmClientInfo.id.toString() === 'tatemono1') {
         index++
       }
     }
