@@ -20,8 +20,9 @@ block content
               .columns.is-centered: .column.is-four-fifths
                 .field.is-grouped.is-grouped-centered
                   .control
-                    a.button.cancel-button.btnMarginRight(href='portal') 戻る
-                    a.button.is-success#cancelltion-button.btnMarginLeft(type="submit" ) 解約する
+                    div.button-areas
+                      a.button.is-link#cancelltion-button(type="submit") 次へ
+                      a.button#return-btn.cancel-button(href='portal') 戻る
 
         .modal.modal-fx-fadeInScale#cancellation-modal
           .modal-background.cancel-button(data-target='cancellation-modal')
@@ -44,8 +45,9 @@ block content
               p.has-text-danger 下記の「解約」ボタンを押下した後の取り消しはできません。
 
             footer.modal-card-foot
-              button.button.is-success#submit(type="submit" formaction="/cancellation" formmethod="POST") 解約
-              a.button.cancel-button(data-target='cancellation-modal') キャンセル
+              div.button-area
+                button.button.is-success#submit.success-button(type="submit" formaction="/cancellation" formmethod="POST") 解約
+                a.button.cancel-button(data-target='cancellation-modal') キャンセル
   include footer
 
 block append scripts
