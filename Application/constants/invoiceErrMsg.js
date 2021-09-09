@@ -8,6 +8,7 @@ constantsDefine({
   // 銀行名エラーメッセージ
   BANKNAMEERR000: `${invoiceValidDefine.BANKNAME_KEY}は${invoiceValidDefine.BANKNAME_VALUE}文字以内で入力してください。`,
   BANKNAMEERR001: `${invoiceValidDefine.BANKNAME_KEY}は${invoiceValidDefine.BANKNAME_VALUE}文字で入力してください。`,
+  BANKNAMEERR002: `${invoiceValidDefine.BANKNAME_KEY}が未入力です。`,
 
   // 発行日エラーメッセージ
   ISSUEDATEERR000: `${invoiceValidDefine.ISSUEDATE_KEY}は有効な日付を入力してください。`,
@@ -16,6 +17,7 @@ constantsDefine({
   // 支払期日エラーメッセージ
   PAYMENTDATEERR000: `${invoiceValidDefine.PAYMENTDATE_KEY}は有効な日付を入力してください。`,
   PAYMENTDATEERR001: `${invoiceValidDefine.PAYMENTDATE_KEY}はyyyy/mm/dd/形式で入力してください。`,
+  PAYMENTDATEERR002: `${invoiceValidDefine.PAYMENTDATE_KEY}が未入力です。`,
 
   // 納品日エラーメッセージ
   DELIVERYDATEERR000: `${invoiceValidDefine.DELIVERYDATE_KEY}は有効な日付を入力してください。`,
@@ -59,17 +61,21 @@ constantsDefine({
   // 支店名エラーメッセージ
   FINANCIALNAMEERR000: `${invoiceValidDefine.FINANCIALNAME_KEY}は${invoiceValidDefine.FINANCIALNAME_VALUE}文字以内で入力してください。`,
   FINANCIALNAMEERR001: `${invoiceValidDefine.FINANCIALNAME_KEY}は${invoiceValidDefine.FINANCIALNAME_VALUE}文字で入力してください。`,
+  FINANCIALNAMEERR002: `${invoiceValidDefine.FINANCIALNAME_KEY}が未入力です。`,
 
   // 科目エラーメッセージ
   ACCOUNTTYPEERR000: `${invoiceValidDefine.ACCOUNTTYPE_KEY}はマニュアルに定義されたものの中から選択してください。`,
+  ACCOUNTTYPEERR001: `${invoiceValidDefine.ACCOUNTTYPE_KEY}が未入力です。`,
 
   // 口座番号エラーメッセージ
   ACCOUNTIDERR000: `${invoiceValidDefine.ACCOUNTID_KEY}は${invoiceValidDefine.ACCOUNTID_VALUE}文字で入力してください。`,
   ACCOUNTIDERR001: `${invoiceValidDefine.ACCOUNTID_KEY}は${invoiceValidDefine.ACCOUNTID_NUM}で入力してください。`,
+  ACCOUNTIDERR002: `${invoiceValidDefine.ACCOUNTID_KEY}が未入力です。`,
 
   // 口座名義エラーメッセージ
   ACCOUNTNAMEERR000: `${invoiceValidDefine.ACCOUNTNAME_KEY}は${invoiceValidDefine.ACCOUNTNAME_VALUE}文字以内で入力してください。`,
-  ACCOUNTNAMERR001: `${invoiceValidDefine.ACCOUNTNAME_KEY}は${invoiceValidDefine.ACCOUNTNAME_VALUE}文字で入力してください。`,
+  ACCOUNTNAMEERR001: `${invoiceValidDefine.ACCOUNTNAME_KEY}は${invoiceValidDefine.ACCOUNTNAME_VALUE}文字で入力してください。`,
+  ACCOUNTNAMEERR002: `${invoiceValidDefine.ACCOUNTNAME_KEY}が未入力です。`,
 
   // その他特事項エラーメッセージ
   NOTEERR000: `${invoiceValidDefine.NOTE_KEY}は${invoiceValidDefine.NOTE_VALUE}文字以内で入力してください。`,
