@@ -14,6 +14,9 @@ function $(tagObjName) {
 
 // 確認ボタン押下するとmodalに契約者名・契約者住所が表示処理
 $('#form').addEventListener('submit', function (event) {
+  if (event.submitter.id === 'next-btn') {
+    event.preventDefault()
+  }
   if ($('#chkContractorName').checked) {
     $('#recontractorName').innerHTML = $('#contractorName').value
     $('#recontractorKanaName').innerHTML = $('#contractorKanaName').value
@@ -29,10 +32,18 @@ $('#form').addEventListener('submit', function (event) {
     $('#recontactPhoneNumber').innerHTML = $('#contactPhoneNumber').value
     $('#recontactMail').innerHTML = $('#contactMail').value
   }
-  if (event.submitter.id === 'next-btn') {
-    event.preventDefault()
+  if ($('#chkContractAddress').checked) {
+    const contractAddressVal = $('#contractAddressVal').value
+    // 住所の値が空の場合
+    if (!contractAddressVal) {
+      $('#contractAddressValErrormessage').classList.remove('is-invisible')
+    } else {
+      $('#contractAddressValErrormessage').className = 'is-invisible'
+      $('#confirmmodify-modal').classList.toggle('is-active')
+    }
+  } else {
+    $('#confirmmodify-modal').classList.toggle('is-active')
   }
-  $('#confirmmodify-modal').classList.toggle('is-active')
 })
 
 // 契約者名変更欄表示
@@ -137,7 +148,7 @@ $('#chkContractContact').addEventListener('change', function () {
       $('#chkContractorName').required = false
       $('#chkContractAddress').required = false
     } else if (!$('#chkContractorName').checked) {
-      $('#chkContract0rName').required = false
+      $('#chkContractorName').required = false
     } else if (!$('#chkContractAddress').checked) {
       $('#chkContractAddress').required = false
     }
@@ -217,6 +228,7 @@ $('#postalSearchBtn').addEventListener('click', function () {
                 $('#contractAddressVal').value = ele.innerHTML.replace('<br>', '')
                 $('#banch1').value = ''
                 $('#tatemono1').value = ''
+                $('#contractAddressValErrormessage').className = 'is-invisible'
               }
             })
           }

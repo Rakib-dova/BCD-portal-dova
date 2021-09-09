@@ -42,17 +42,59 @@ document.getElementById('check').onclick = function () {
 }
 
 // ----「次へ」ボタンが押された際のバリデーションチェック
-document.getElementById('next-btn').onclick = function () {
+document.getElementById('next-btn').addEventListener('click', function (e) {
+  e.preventDefault()
   // 各項目チェック
-  const elements = document.querySelectorAll('input[type="text"]')
-  const passwords = document.querySelectorAll('input[type="password"]')
-  const elementsArr = Array.prototype.slice.call(elements)
+  const elements = document.querySelectorAll('input')
+  const invalidCheckTarget = []
+  Array.prototype.forEach.call(elements, (required) => {
+    if (required.getAttribute('required') !== null) {
+      if (
+        required.parentNode.parentNode.childNodes[2] !== undefined &&
+        required.parentNode.parentNode.childNodes[2].getAttribute('id') === 'caution'
+      ) {
+        required.parentNode.parentNode.childNodes[2].remove()
+      }
+      invalidCheckTarget.push(required)
+    }
+  })
 
-  const invalidElements = elementsArr.filter((el) => el.getAttribute('aria-invalid') === 'true')
-  if (invalidElements.length > 0) {
-    alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
-    invalidElements[0].focus()
-    return false
+  let focusFlag = false
+  let focusIdx
+  if (invalidCheckTarget.length > 0) {
+    let idx = 0
+    do {
+      if (
+        invalidCheckTarget[idx].getAttribute('aria-invalid') === 'true' ||
+        invalidCheckTarget[idx].value.length === 0
+      ) {
+        const cautionRequired = document.createElement('div')
+        cautionRequired.classList.add('input-label')
+        cautionRequired.classList.add('input-label-required')
+        cautionRequired.setAttribute('id', 'caution')
+        if (invalidCheckTarget[idx].value.length === 0) {
+          cautionRequired.innerText = '未入力です。'
+        }
+        if (invalidCheckTarget[idx].getAttribute('aria-invalid') === 'true') {
+          cautionRequired.innerText = '入力値が間違いました。'
+        }
+
+        invalidCheckTarget[idx].parentNode.parentNode.appendChild(cautionRequired)
+        invalidCheckTarget[idx].parentNode.parentNode.insertBefore(
+          cautionRequired,
+          invalidCheckTarget[idx].parentNode.parentNode.childNodes[2]
+        )
+        if (!focusFlag) {
+          focusFlag = true
+          focusIdx = idx
+        }
+      }
+      idx++
+    } while (invalidCheckTarget[idx])
+    if (focusIdx) {
+      invalidCheckTarget[focusIdx].focus()
+      return false
+    }
   }
 
   const contractAddressVal = $('#contractAddressVal')
@@ -65,28 +107,34 @@ document.getElementById('next-btn').onclick = function () {
   }
 
   // password確認
-  const passwordsArr = Array.prototype.slice.call(passwords)
-  if (passwordsArr[0].value !== passwordsArr[1].value) {
+  if ($('#password').value !== $('#passwordConfirm').value) {
     alert('パスワードが一致しません。')
     document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'true')
+    document.getElementById('passwordConfirm').focus()
     return false
   }
 
   // 確認項目（type="text）
   let index = 0
-  elementsArr.forEach(function (element) {
+  const inputText = document.querySelectorAll('input[type="text"]')
+  const checkData = $('.checkData')
+  Array.prototype.forEach.call(inputText, function (element) {
+    const targetData = checkData.item(index)
+    console.log(targetData)
+    console.log(element)
+    console.log(index)
     if (
       element.id.toString() !== 'banch1' &&
       element.id.toString() !== 'tatemono1' &&
       element.id.toString() !== 'contractAddressVal'
     ) {
-      $('.checkData').item(index).innerHTML = element.value
+      targetData.innerHTML = element.value
       index++
     } else {
       if (element.id.toString() === 'contractAddressVal') {
-        $('.checkData').item(index).innerHTML = element.value
+        targetData.innerHTML = element.value
       } else {
-        $('.checkData').item(index).innerHTML += element.value
+        targetData.innerHTML += element.value
       }
       if (element.id.toString() === 'tatemono1') {
         index++
@@ -120,7 +168,7 @@ document.getElementById('next-btn').onclick = function () {
   }
   // return falseで返すとバリデーションの結果が画面表示されないためコメントアウト
   // return false;
-}
+})
 
 // ----動的なフォーム入力のバリデーションチェック
 addEvent(document, 'change', function (e, target) {

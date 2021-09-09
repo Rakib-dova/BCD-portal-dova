@@ -59,8 +59,9 @@ block content
                   .field
                     label(for="contractAddressVal").input-label 住所の検索結果
                     p#contractAddressValRequired.input-label-required （必須）
+                    p.is-invisible#contractAddressValErrormessage.input-label-required 郵便番号を検索して、住所を入力してください
                     .control
-                      input.input#contractAddressVal(type="text" name="contractAddressVal" value readonly)
+                      input.input#contractAddressVal(type="text" name="contractAddressVal" value disabled readonly onchange='addressValchange(this)')
                   .field
                     label(for="banch1").input-label 番地
                     p#banch1Required.input-label-required （必須）
