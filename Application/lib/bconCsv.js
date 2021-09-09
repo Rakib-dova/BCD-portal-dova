@@ -366,8 +366,9 @@ class bconCsv {
 
         csvColumn[0] = csvColumn[0].replace(/\//g, '-')
         let issueDateArray = csvColumn[0].split('-')
-        csvColumn[0] =
-          issueDateArray[0] + '-' + `0${issueDateArray[1]}`.slice(-2) + '-' + `0${issueDateArray[2]}`.slice(-2)
+        csvColumn[0] = `${issueDateArray[0]}-${'0'.concat(issueDateArray[1]).slice(-2)}-${'0'
+          .concat(issueDateArray[2])
+          .slice(-2)}`
         switch (validate.isDate(csvColumn[0])) {
           case 1:
             errorData += errorData
@@ -436,12 +437,9 @@ class bconCsv {
         if (csvColumn[4] !== '') {
           csvColumn[4] = csvColumn[4].replace(/\//g, '-')
           let deliveryDateArray = csvColumn[4].split('-')
-          csvColumn[4] =
-            deliveryDateArray[0] +
-            '-' +
-            `0${deliveryDateArray[1]}`.slice(-2) +
-            '-' +
-            `0${deliveryDateArray[2]}`.slice(-2)
+          csvColumn[4] = `${deliveryDateArray[0]}-${'0'.concat(deliveryDateArray[1]).slice(-2)}-${'0'
+            .concat(deliveryDateArray[2])
+            .slice(-2)}`
           switch (validate.isDate(csvColumn[4])) {
             case 1:
               errorData += errorData
@@ -490,13 +488,9 @@ class bconCsv {
           if (csvColumn[3] !== '') {
             csvColumn[3] = csvColumn[3].replace(/\//g, '-')
             let paymentDateArray = csvColumn[3].split('-')
-            csvColumn[3] =
-              paymentDateArray[0] +
-              '-' +
-              `0${paymentDateArray[1]}`.slice(-2) +
-              '-' +
-              `0${paymentDateArray[2]}`.slice(-2)
-
+            csvColumn[3] = `${paymentDateArray[0]}-${'0'.concat(paymentDateArray[1]).slice(-2)}-${'0'
+              .concat(paymentDateArray[2])
+              .slice(-2)}`
             switch (validate.isDate(csvColumn[3])) {
               case 1:
                 errorData += errorData

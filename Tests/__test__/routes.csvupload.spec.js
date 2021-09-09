@@ -3887,11 +3887,7 @@ describe('csvuploadのテスト', () => {
         userContext: 'NotLoggedIn',
         userRole: 'dummy'
       }
-      const paymentMeansTestUser = {
-        ...user,
-        accessToken: 'getNetworkErr'
-      }
-      request.user = paymentMeansTestUser
+
       userController.findOne = jest.fn((userId) => {
         return dataValues
       })
@@ -3981,11 +3977,10 @@ describe('csvuploadのテスト', () => {
         }
       })
 
-      // 試験実施
-      // await csvupload.cbGetIndex(request, response, next)
-      // expect(response.render).toHaveBeenCalledWith('csvupload')
-
-      paymentMeansTestUser.accessToken = 'dummyAccess'
+      const paymentMeansTestUser = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
       request.user = paymentMeansTestUser
       request.body = {
         filename: 'paymentMeansTest.csv',
@@ -4006,27 +4001,32 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[1].invoicesId).toBe(invoicesDB[0].invoicesId)
       expect(invoiceDetailDB[1].invoiceId).toBe('paymentMeansTest2')
       expect(invoiceDetailDB[1].status).toBe(-1)
-      expect(invoiceDetailDB[1].errorData).toBe('支払期日に値が設定されていません。')
+      expect(invoiceDetailDB[1].errorData).toBe('支払期日が未入力です。')
 
       expect(invoiceDetailDB[2].invoicesId).toBe(invoicesDB[0].invoicesId)
       expect(invoiceDetailDB[2].invoiceId).toBe('paymentMeansTest3')
       expect(invoiceDetailDB[2].status).toBe(-1)
-      expect(invoiceDetailDB[2].errorData).toBe('銀行名に値が設定されていません。')
+      expect(invoiceDetailDB[2].errorData).toBe('銀行名が未入力です。')
 
       expect(invoiceDetailDB[3].invoicesId).toBe(invoicesDB[0].invoicesId)
       expect(invoiceDetailDB[3].invoiceId).toBe('paymentMeansTest4')
       expect(invoiceDetailDB[3].status).toBe(-1)
-      expect(invoiceDetailDB[3].errorData).toBe('支店名に値が設定されていません。')
+      expect(invoiceDetailDB[3].errorData).toBe('支店名が未入力です。')
 
       expect(invoiceDetailDB[4].invoicesId).toBe(invoicesDB[0].invoicesId)
       expect(invoiceDetailDB[4].invoiceId).toBe('paymentMeansTest5')
       expect(invoiceDetailDB[4].status).toBe(-1)
-      expect(invoiceDetailDB[4].errorData).toBe('科目に値が設定されていません。')
+      expect(invoiceDetailDB[4].errorData).toBe('科目が未入力です。')
 
       expect(invoiceDetailDB[5].invoicesId).toBe(invoicesDB[0].invoicesId)
       expect(invoiceDetailDB[5].invoiceId).toBe('paymentMeansTest6')
       expect(invoiceDetailDB[5].status).toBe(-1)
-      expect(invoiceDetailDB[5].errorData).toBe('口座番号に値が設定されていません。')
+      expect(invoiceDetailDB[5].errorData).toBe('口座番号が未入力です。')
+
+      expect(invoiceDetailDB[6].invoicesId).toBe(invoicesDB[0].invoicesId)
+      expect(invoiceDetailDB[6].invoiceId).toBe('paymentMeansTest7')
+      expect(invoiceDetailDB[6].status).toBe(-1)
+      expect(invoiceDetailDB[6].errorData).toBe('口座名義が未入力です。')
     })
 
     test('準正常：ネットワーク確認バリデーションチェック', async () => {
