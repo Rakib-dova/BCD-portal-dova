@@ -116,21 +116,25 @@ document.getElementById('next-btn').addEventListener('click', function (e) {
 
   // 確認項目（type="text）
   let index = 0
-  let inputCheckData = $('.checkData').item(index)
-  Array.prototype.forEach.call(elements, function (element) {
+  const inputText = document.querySelectorAll('input[type="text"]')
+  const checkData = $('.checkData')
+  Array.prototype.forEach.call(inputText, function (element) {
+    const targetData = checkData.item(index)
+    console.log(targetData)
     console.log(element)
+    console.log(index)
     if (
       element.id.toString() !== 'banch1' &&
       element.id.toString() !== 'tatemono1' &&
       element.id.toString() !== 'contractAddressVal'
     ) {
-      inputCheckData.innerHTML = element.value
+      targetData.innerHTML = element.value
       index++
     } else {
       if (element.id.toString() === 'contractAddressVal') {
-        inputCheckData.innerHTML = element.value
+        targetData.innerHTML = element.value
       } else {
-        inputCheckData.innerHTML += element.value
+        targetData.innerHTML += element.value
       }
       if (element.id.toString() === 'tatemono1') {
         index++
