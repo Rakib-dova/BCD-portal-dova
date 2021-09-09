@@ -30,8 +30,8 @@ html
       - var inputPattarnZenkakuKatakana = '^[ァ-ヶー　]+$'　// 全角カタカナ
       - var inputPattarnHankakuNumber = '[0-9]{7}' //半角数値　7文字固定
       - var inputPattarnTellNumber = '^([0-9]{1,4})-([0-9]{1,4})-([0-9]{1,4})'// 電話番号（-あり）
-      - var inputPattarnMailAddress = '^[a-zA-Z0-9-.]+@[a-zA-Z0-9-.]+$' // メールアドレス（緩めの条件）
-      - var inputPatternKaituPW = '^([a-zA-Z0-9]{4,10})$' // 開通パスワード 半角英数4～10文字
+      - var inputPattarnMailAddress = '^[a-zA-Z0-9-.]+@[a-zA-Z0-9-.]+$' // メールアドレス（緩めの条件）      
+      - var inputPatternKaituPW = '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$' // 開通パスワード 大文字小文字数字必須 8文字以上      
       - var inputPatternCampaignCode = '^([a-zA-Z0-9]{1,10})$' // キャンペーンコード 半角英数
     
     block content
