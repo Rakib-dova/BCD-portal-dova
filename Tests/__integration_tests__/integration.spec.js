@@ -1912,735 +1912,438 @@ describe('ルーティングのインテグレーションテスト', () => {
     // 契約者名未入力の場合
     test('管理者、契約ステータス：00, 契約者名未入力', async () => {
       await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = ''
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorKanaName', 'テスト')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '２番')
+        await page.type('#contactPersonName', '連絡先担当者名')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('未入力です。') !== null) {
-            return document.getElementById('caution').innerHTML.match('未入力です。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        await page.waitForTimeout(500)
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contractorNameNoInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '未入力です。'があること
-      expect(clickResult).toBe('未入力です。')
     })
 
     // 契約者名不正な値
     test('管理者、契約ステータス：00, 契約者名不正な値', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'abc'
-          document.querySelector('#contractorName').setAttribute('aria-invalid', 'true')
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'abc')
+        await page.type('#contractorKanaName', 'テスト')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '２番')
+        await page.type('#contactPersonName', '連絡先担当者名')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('入力値が間違いました。') !== null) {
-            return document.getElementById('caution').innerHTML.match('入力値が間違いました。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        await page.waitForTimeout(500)
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contractorNameWrongInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '入力値が間違いました。'があること
-      expect(clickResult).toBe('入力値が間違いました。')
     })
 
     // 契約者カナ名未入力
     test('管理者、契約ステータス：00, 契約者カナ名未入力', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = ''
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '２番')
+        await page.type('#contactPersonName', '連絡先担当者名')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('未入力です。') !== null) {
-            return document.getElementById('caution').innerHTML.match('未入力です。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contractorKanaNameNoInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '未入力です。'があること
-      expect(clickResult).toBe('未入力です。')
     })
 
     // 契約者カナ名不正な値
     test('管理者、契約ステータス：00, 契約者カナ名不正な値', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'test'
-          document.querySelector('#contractorKanaName').setAttribute('aria-invalid', 'true')
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '２番')
+        await page.type('#contactPersonName', '連絡先担当者名')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('入力値が間違いました。') !== null) {
-            return document.getElementById('caution').innerHTML.match('入力値が間違いました。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contractorKanaNameWrongInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '入力値が間違いました。'があること
-      expect(clickResult).toBe('入力値が間違いました。')
     })
 
     // 郵便番号未入力
     test('管理者、契約ステータス：00, 郵便番号未入力', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = ''
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#banch1', '２番')
+        await page.type('#contactPersonName', '連絡先担当者名')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('未入力です。') !== null) {
-            return document.getElementById('caution').innerHTML.match('未入力です。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#postalNumberNoInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '未入力です。'があること
-      expect(clickResult).toBe('未入力です。')
     })
 
     // 郵便番号不正な値
     test('管理者、契約ステータス：00, 郵便番号不正な値', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = 'test'
-          document.querySelector('#postalNumber').setAttribute('aria-invalid', 'true')
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', 'aaaaaaa')
+        await page.type('#banch1', '２番')
+        await page.type('#contactPersonName', '連絡先担当者名')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('入力値が間違いました。') !== null) {
-            return document.getElementById('caution').innerHTML.match('入力値が間違いました。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#postalNumberWrongInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '入力値が間違いました。'があること
-      expect(clickResult).toBe('入力値が間違いました。')
     })
 
     // 住所の検索結果未入力
     test('管理者、契約ステータス：00, 住所の検索結果未入力', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = ''
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', '0600000')
+        await page.type('#banch1', '２番')
+        await page.type('#contactPersonName', '連絡先担当者名')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (
-            document
-              .getElementById('contractAddressValErrormessage')
-              .innerHTML.match('郵便番号を検索して、住所を入力してください') !== null
-          ) {
-            return document
-              .getElementById('contractAddressValErrormessage')
-              .innerHTML.match('郵便番号を検索して、住所を入力してください')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contractAddressValErrormessage').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '郵便番号を検索して、住所を入力してください'があること
-      expect(clickResult).toBe('郵便番号を検索して、住所を入力してください')
     })
 
     // 番地未入力
     test('管理者、契約ステータス：00, 番地未入力', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = ''
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#contactPersonName', '連絡先担当者名')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('未入力です。') !== null) {
-            return document.getElementById('caution').innerHTML.match('未入力です。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#banch1NoInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '未入力です。'があること
-      expect(clickResult).toBe('未入力です。')
     })
 
     // 番地不正な値
     test('管理者、契約ステータス：00, 番地不正な値', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = 'test'
-          document.querySelector('#banch1').setAttribute('aria-invalid', 'true')
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '1234')
+        await page.type('#contactPersonName', '連絡先担当者名')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('入力値が間違いました。') !== null) {
-            return document.getElementById('caution').innerHTML.match('入力値が間違いました。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#banch1WrongInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '入力値が間違いました。'があること
-      expect(clickResult).toBe('入力値が間違いました。')
     })
 
     // 連絡先担当者名未入力
     test('管理者、契約ステータス：00, 連絡先担当者名未入力', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = ''
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '1234')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('未入力です。') !== null) {
-            return document.getElementById('caution').innerHTML.match('未入力です。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contactPersonNameNoInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '未入力です。'があること
-      expect(clickResult).toBe('未入力です。')
     })
 
     // 連絡先担当者名不正な値
     test('管理者、契約ステータス：00, 連絡先担当者名不正な値', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = 'test'
-          document.querySelector('#contactPersonName').setAttribute('aria-invalid', 'true')
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '1234')
+        await page.type('#contactPersonName', 'abcd')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('入力値が間違いました。') !== null) {
-            return document.getElementById('caution').innerHTML.match('入力値が間違いました。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contactPersonNameWrongInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '入力値が間違いました。'があること
-      expect(clickResult).toBe('入力値が間違いました。')
     })
 
     // 連絡先電話番号未入力
     test('管理者、契約ステータス：00, 連絡先電話番号未入力', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = ''
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '1234')
+        await page.type('#contactPersonName', '連絡先')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('未入力です。') !== null) {
-            return document.getElementById('caution').innerHTML.match('未入力です。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contactPhoneNumberNoInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '未入力です。'があること
-      expect(clickResult).toBe('未入力です。')
     })
 
     // 連絡先電話番号不正な値
     test('管理者、契約ステータス：00, 連絡先電話番号不正な値', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = 'test'
-          document.querySelector('#contactPhoneNumber').setAttribute('aria-invalid', 'true')
-          document.querySelector('#contactMail').value = 'test@test.co.jp'
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '1234')
+        await page.type('#contactPersonName', '連絡先')
+        await page.type('#contactPhoneNumber', '08000000000')
+        await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('入力値が間違いました。') !== null) {
-            return document.getElementById('caution').innerHTML.match('入力値が間違いました。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contactPhoneNumberWorngInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '入力値が間違いました。'があること
-      expect(clickResult).toBe('入力値が間違いました。')
     })
 
     // 連絡先メールアドレス未入力
     test('管理者、契約ステータス：00, 連絡先メールアドレス未入力', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = ''
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '1234')
+        await page.type('#contactPersonName', '連絡先')
+        await page.type('#contactPhoneNumber', '08000000000')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('未入力です。') !== null) {
-            return document.getElementById('caution').innerHTML.match('未入力です。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contactMailNoInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '未入力です。'があること
-      expect(clickResult).toBe('未入力です。')
     })
 
     // 連絡先メールアドレス不正な値
     test('管理者、契約ステータス：00, 連絡先メールアドレス不正な値', async () => {
-      let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
       if (page.url() === 'https://localhost:3000/change') {
-        await page.evaluate(() => {
-          document.querySelector('#chkContractorName').checked = true
-          document.querySelector('#chkContractAddress').checked = true
-          document.querySelector('#chkContractContact').checked = true
-          document.querySelector('#cardContractorName').classList.toggle('is-invisible')
-          document.querySelector('#cardContractAddress').classList.toggle('is-invisible')
-          document.querySelector('#cardContractContact').classList.toggle('is-invisible')
-          document.querySelector('#contractorName').required = true
-          document.querySelector('#contractorKanaName').required = true
-          document.querySelector('#postalNumber').required = true
-          document.querySelector('#contractAddressVal').required = true
-          document.querySelector('#banch1').required = true
-          document.querySelector('#contactPersonName').required = true
-          document.querySelector('#contactPhoneNumber').required = true
-          document.querySelector('#contactMail').required = true
-          document.querySelector('#next-btn').disabled = false
-          document.querySelector('#contractorName').value = 'テスト'
-          document.querySelector('#contractorKanaName').value = 'テスト'
-          document.querySelector('#postalNumber').value = '0600000'
-          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
-          document.querySelector('#banch1').value = '２番'
-          document.querySelector('#contactPersonName').value = '連絡先担当者名'
-          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
-          document.querySelector('#contactMail').value = 'test'
-          document.querySelector('#contactMail').setAttribute('aria-invalid', 'true')
-        })
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '1234')
+        await page.type('#contactPersonName', '連絡先')
+        await page.type('#contactPhoneNumber', '08000000000')
+        await page.type('#contactMail', 'testtest')
 
         await page.waitForTimeout(500)
 
-        const selector = await page.$('#next-btn')
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.getElementById('caution').innerHTML.match('入力値が間違いました。') !== null) {
-            return document.getElementById('caution').innerHTML.match('入力値が間違いました。')[0]
-          }
-          return null
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contactMailWorongInput').getAttribute('class')
         })
+        expect(checkErrorMessage).toBe('input-label-required')
       }
-      // '入力値が間違いました。'があること
-      expect(clickResult).toBe('入力値が間違いました。')
     })
 
     test('管理者、契約ステータス：30, /change', async () => {
@@ -3180,7 +2883,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('管理者、契約ステータス：99,　/csvuploadResult', async () => {
+    test('管理者、契約ステータス：99, /csvuploadResult', async () => {
       const res = await request(app)
         .get('/csvuploadResult')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)

@@ -14,13 +14,12 @@ function $(tagObjName) {
 
 // 確認ボタン押下するとmodalに契約者名・契約者住所が表示処理
 $('#next-btn').addEventListener('click', function (event) {
-
   const checkValidations = []
   // event.preventDefault()
   let elements = document.querySelectorAll('input[type=text]')
   elements = Array.prototype.slice.call(elements)
-  const requiredList = elements.filter(ele => ele.getAttribute('required') !== null)
-  requiredList.map(ele => {
+  const requiredList = elements.filter((ele) => ele.getAttribute('required') !== null)
+  requiredList.map((ele) => {
     if (ele !== undefined) {
       if (ele.value.length === 0) {
         if (ele.id === 'postalNumber') {
@@ -94,8 +93,8 @@ $('#next-btn').addEventListener('click', function (event) {
   let errormessage = document.querySelectorAll('p[name="errormessage"].input-label-required:not(.is-invisible)')
   errormessage = Array.prototype.slice.call(errormessage)
   const result = []
-  errormessage.map(err => {
-    checkValidations.map(check => {
+  errormessage.map((err) => {
+    checkValidations.map((check) => {
       if (check.id === err.id) {
         result.push(check)
       }
@@ -103,8 +102,6 @@ $('#next-btn').addEventListener('click', function (event) {
   })
   if (result.length === 0) {
     $('#confirmmodify-modal').classList.toggle('is-active')
-  } else {
-    alert('入力されていない必須項目、または、入力形式に誤りがある項目があります')
   }
 })
 
