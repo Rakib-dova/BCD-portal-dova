@@ -1964,9 +1964,6 @@ describe('ルーティングのインテグレーションテスト', () => {
 
         await page.click('#next-btn')
         await page.waitForTimeout(500)
-        await page.on('dialog', async (dialog) => {
-          await dialog.accept()
-        })
         const checkErrorMessage = await page.evaluate(() => {
           return document.querySelector('#contractorNameWrongInput').getAttribute('class')
         })
