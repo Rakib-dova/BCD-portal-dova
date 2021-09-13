@@ -4225,7 +4225,7 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('500エラー：APIエラー', async () => {
+    test('500エラー：システムエラー', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       const fs = require('fs')
