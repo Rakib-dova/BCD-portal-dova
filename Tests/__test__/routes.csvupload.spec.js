@@ -56,6 +56,7 @@ describe('csvuploadのテスト', () => {
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     invoiceListSpy = jest.spyOn(csvupload, 'cbExtractInvoice')
     apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
+      let result
       switch (method) {
         case 'get':
           if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
@@ -75,7 +76,18 @@ describe('csvuploadのテスト', () => {
           }
           break
         case 'put':
-          return 200
+          {
+            const invoice = JSON.parse(body)
+            if (invoice.ID.value === 'api500error') {
+              const error500 = new Error('Server Internel Error')
+              error500.status = 500
+              error500.data = 'Server Internel Error'
+              result = error500
+            } else {
+              result = 200
+            }
+          }
+          return result
       }
     })
     createSpyInvoices = jest.spyOn(invoiceController, 'insert')
@@ -2698,7 +2710,7 @@ describe('csvuploadのテスト', () => {
       })
 
       // 試験実施
-      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
       const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
@@ -3427,7 +3439,7 @@ describe('csvuploadのテスト', () => {
       })
 
       // 試験実施
-      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
       const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
@@ -4151,6 +4163,202 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       expect(response.statusCode).toBe(200)
       expect(response.body).toBe(constantsDefine.statusConstants.INVOICE_FAILED)
+    })
+
+    test('400エラー：APIエラー', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(networkCheckData), 'base64').toString('utf8')
+
+      // 試験実施
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      // 期待結果
+      const expectError = new Error()
+      expectError.name = 'Bad Request'
+      expectError.status = 400
+      expectError.message = 'Bad Request 400'
+
+      apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
+        switch (method) {
+          case 'get':
+            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
+              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+                return documentListData2
+              }
+              return documentListData
+            }
+            if (query.match(/^\/network\?limit=100/i)) {
+              if (accToken.match('getNetworkErr')) {
+                return new Error('trade shift api error')
+              }
+              if (query.match(/^\/network\?limit=100&page=/i)) {
+                return resultGetNetwork2
+              }
+              return resultGetNetwork
+            }
+            break
+          case 'put':
+            return expectError
+        }
+      })
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('500エラー：システムエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'api500error.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+
+      const api500ErrUser = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = api500ErrUser
+      request.body = {
+        filename: 'api500error.csv',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      expect(invoicesDB[0].csvFileName).toBe('api500error.csv')
+      expect(invoicesDB[0].failCount).toBe(1)
+      expect(invoicesDB[0].successCount).toBe(0)
+      expect(invoicesDB[0].skipCount).toBe(0)
+      expect(invoicesDB[0].invoiceCount).toBe(0)
+      expect(invoiceDetailDB[0].invoicesId).toBe(invoicesDB[0].invoicesId)
+      expect(invoiceDetailDB[0].invoiceId).toBe('api500error')
+      expect(invoiceDetailDB[0].status).toBe(-1)
+      expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SYSERROR)
     })
 
     test('正常 : bconCsv内容確認', async () => {
