@@ -297,9 +297,11 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
           invoiceList[idx].status = 2
         }
       })
+
+      let apiResult
       switch (invoiceList[idx].status) {
         case 0:
-          await apiManager.accessTradeshift(
+          apiResult = await apiManager.accessTradeshift(
             _user.accessToken,
             _user.refreshToken,
             'put',
@@ -311,8 +313,47 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
               headers: setHeaders
             }
           )
-          successCount += invoiceList[idx].successCount
-          uploadInvoiceCnt++
+
+          if (!(apiResult instanceof Error)) {
+            successCount += invoiceList[idx].successCount
+            uploadInvoiceCnt++
+          } else {
+            // apiエラーの場合、すべて失敗にカウントする
+            meisaiFlag = 2
+            failCount += invoiceList[idx].successCount
+            invoiceList[idx].status = -1
+
+            if (String(apiResult?.status).slice(0, 1) === '4') {
+              // 400番エラーの場合
+              invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.APIERROR
+
+              logger.error(
+                {
+                  tenant: _user.tenantId,
+                  user: _user.userId,
+                  csvfile: extractFullpathFile,
+                  invoiceID: invoiceList[idx].invoiceId,
+                  status: 2
+                },
+                apiResult.name
+              )
+            } else if (String(apiResult?.status).slice(0, 1) === '5') {
+              // 500番エラーの場合
+              invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SYSERROR
+
+              logger.error(
+                {
+                  tenant: _user.tenantId,
+                  user: _user.userId,
+                  csvfile: extractFullpathFile,
+                  invoiceID: invoiceList[idx].invoiceId,
+                  status: 2
+                },
+                apiResult.toString()
+              )
+            }
+          }
+
           break
         // 請求書の重複
         case 1:
