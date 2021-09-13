@@ -313,27 +313,45 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
               headers: setHeaders
             }
           )
+
           if (!(apiResult instanceof Error)) {
             successCount += invoiceList[idx].successCount
             uploadInvoiceCnt++
-          } else if (String(apiResult.response?.status).slice(0, 1) === '4') {
-            // 400番エラーの場合
-            logger.error(
-              {
-                tenant: _req.user.tenantId,
-                user: _req.user.userId,
-                csvfile: extractFullpathFile,
-                invoiceID: invoiceList[idx].invoiceId,
-                status: 2
-              },
-              apiResult.name
-            )
-
+          } else {
             // apiエラーの場合、すべて失敗にカウントする
             meisaiFlag = 4
-            invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.APIERROR
             failCount += invoiceList[idx].successCount
             invoiceList[idx].status = -1
+
+            if (String(apiResult.response?.status).slice(0, 1) === '4') {
+              // 400番エラーの場合
+              invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.APIERROR
+
+              logger.error(
+                {
+                  tenant: _req.user.tenantId,
+                  user: _req.user.userId,
+                  csvfile: extractFullpathFile,
+                  invoiceID: invoiceList[idx].invoiceId,
+                  status: 2
+                },
+                apiResult.name
+              )
+            } else if (String(apiResult.response?.status).slice(0, 1) === '5') {
+              // 500番エラーの場合
+              invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SYSERROR
+
+              logger.error(
+                {
+                  tenant: _req.user.tenantId,
+                  user: _req.user.userId,
+                  csvfile: extractFullpathFile,
+                  invoiceID: invoiceList[idx].invoiceId,
+                  status: 2
+                },
+                apiResult.toString()
+              )
+            }
           }
 
           break
