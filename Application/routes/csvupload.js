@@ -131,7 +131,7 @@ const cbPostUpload = async (req, res, next) => {
   }
 
   // csvからデータ抽出
-  switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues)) {
+  switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req)) {
     case 101:
       errorText = constantsDefine.statusConstants.INVOICE_FAILED
       break
@@ -207,7 +207,7 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
-const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
+const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
   const invoiceController = require('../controllers/invoiceController')
   const invoiceDetailController = require('../controllers/invoiceDetailController')
@@ -320,8 +320,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
             // 400番エラーの場合
             logger.error(
               {
-                tenant: _user.tenantId,
-                user: _user.userId,
+                tenant: _req.user.tenantId,
+                user: _req.user.userId,
                 csvfile: extractFullpathFile,
                 invoiceID: invoiceList[idx].invoiceId,
                 status: 2
