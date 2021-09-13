@@ -316,7 +316,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
           if (!(apiResult instanceof Error)) {
             successCount += invoiceList[idx].successCount
             uploadInvoiceCnt++
-          } else if (String(apiResult?.status).slice(0, 1) === '4') {
+          } else if (String(apiResult.response?.status).slice(0, 1) === '4') {
             // 400番エラーの場合
             logger.error(
               {
@@ -330,7 +330,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
             )
 
             // apiエラーの場合、すべて失敗にカウントする
-            meisaiFlag = 2
+            meisaiFlag = 4
             invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.APIERROR
             failCount += invoiceList[idx].successCount
             invoiceList[idx].status = -1
@@ -382,6 +382,19 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
           })
           return ''
         })
+      } else if (meisaiFlag === 4) {
+        const errorDataErr = invoiceList[idx].errorData
+        invoiceLines.map((ele, idx) => {
+          invoiceDetailController.insert({
+            invoiceDetailId: uuidv4(),
+            invoicesId: _invoices.invoicesId,
+            invoiceId: invoiceId,
+            lines: lines + idx,
+            status: status,
+            errorData: errorDataErr
+          })
+          return ''
+        })
       } else {
         invoiceLines.map((ele, idx) => {
           invoiceDetailController.insert({
@@ -424,6 +437,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
     case 2:
       return 103
     case 3:
+      return 104
+    case 4:
       return 104
     default:
       return 0
