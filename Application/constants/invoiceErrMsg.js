@@ -91,5 +91,8 @@ constantsDefine({
   // アップロード成功、スキップメッセージ
   SUCCESS: '正常に取込ました。',
   SKIP: '取込済みのため、処理をスキップしました。',
-  HEADERBEFORERR: 'の先頭行にて不備があります。'
+  HEADERBEFORERR: 'の先頭行にて不備があります。',
+
+  // APIエラーメッセージ
+  APIERROR: 'APIエラーです、時間を空けて再度実行をお願いいたします。'
 })
