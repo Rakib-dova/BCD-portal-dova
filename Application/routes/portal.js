@@ -86,30 +86,36 @@ const cbGetIndex = async (req, res, next) => {
       })
     })
 
-  
   // 工事・故障情報取得
-  const constructDataArr = []
-  let constructDataArrSize
+  let constructDataArr = []
 
-  constructDataArr.push({
-    date: '2021年9月13日',
-    title: '工事情報',
-    link: ''
-  })
-
-  constructDataArr.push({
-    date: '2021年9月13日',
-    title: '故障情報',
-    link: ''
-  })
-
-  constructDataArr.push({
-    date: '2021年9月13日',
-    title: 'その他情報',
-    link: ''
-  })
-  constructDataArrSize = 3
-
+  await parser
+    .parseURL('https://support.ntt.com/informationRss/goods/rss/mail')
+    .then((feed) => {
+      if (feed.items.length === 0) {
+        constructDataArr.push({
+          message: constants.portalMsg.NEWS_NONE
+        })
+      } else {
+        const newsLimit = 3
+        constructDataArr = feed.items.map((item) => {
+          const day = new Date(item.date)
+          return {
+            date: `${day.getFullYear()}年${day.getMonth() + 1}月${day.getDate()}日`,
+            title: item.title,
+            link: item.link
+          }
+        })
+        constructDataArr.length = newsLimit
+      }
+    })
+    .catch((error) => {
+      console.error('RSS 取得失敗', error)
+      constructDataArr.length = 0
+      constructDataArr.push({
+        message: constants.portalMsg.NEWS_CONN_ERR
+      })
+    })
 
   // ユーザ権限も画面に送る
   res.render('portal', {
@@ -121,7 +127,7 @@ const cbGetIndex = async (req, res, next) => {
     newsDataArr: newsDataArr,
     newsDataArrSize: newsDataArrSize,
     constructDataArr: constructDataArr,
-    constructDataArrSize: constructDataArrSize
+    constructDataArrSize: constructDataArr.length
   })
 }
 
