@@ -313,11 +313,10 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
               headers: setHeaders
             }
           )
-
           if (!(apiResult instanceof Error)) {
             successCount += invoiceList[idx].successCount
             uploadInvoiceCnt++
-          } else if (apiResult.response?.status.slice(0, 1) === '4') {
+          } else if (String(apiResult?.status).slice(0, 1) === '4') {
             // 400番エラーの場合
             logger.error(
               {
@@ -327,7 +326,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices) => {
                 invoiceID: invoiceList[idx].invoiceId,
                 status: 2
               },
-              apiResult.err.name
+              apiResult.name
             )
 
             // apiエラーの場合、すべて失敗にカウントする
