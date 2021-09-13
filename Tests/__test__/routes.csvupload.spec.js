@@ -79,8 +79,8 @@ describe('csvuploadのテスト', () => {
           {
             const invoice = JSON.parse(body)
             if (invoice.ID.value === 'api500error') {
-              const error500 = new Error('Server Internel Error')
-              error500.status = 500
+              let error500 = new Error('Server Internel Error')
+              error500.response = { status: 500 }
               error500.data = 'Server Internel Error'
               result = error500
             } else {
@@ -4171,10 +4171,22 @@ describe('csvuploadのテスト', () => {
       const tmpdetailInsert = invoiceDetailController.insert
 
       request.user = user
+
       const userToken = {
         accessToken: 'dummyAccessToken',
         refreshToken: 'dummyRefreshToken'
       }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
       const uploadCsvData = Buffer.from(decodeURIComponent(networkCheckData), 'base64').toString('utf8')
@@ -4186,7 +4198,7 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       const expectError = new Error()
       expectError.name = 'Bad Request'
-      expectError.status = 400
+      expectError.response = { status: 400 }
       expectError.message = 'Bad Request 400'
 
       apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
@@ -4216,7 +4228,7 @@ describe('csvuploadのテスト', () => {
       invoiceDetailController.insert = tmpdetailInsert
 
       const tmpApiManager = apiManager.accessTradeshift
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
