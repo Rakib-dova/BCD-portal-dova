@@ -86,6 +86,31 @@ const cbGetIndex = async (req, res, next) => {
       })
     })
 
+  
+  // 工事・故障情報取得
+  const constructDataArr = []
+  let constructDataArrSize
+
+  constructDataArr.push({
+    date: '2021年9月13日',
+    title: '工事情報',
+    link: ''
+  })
+
+  constructDataArr.push({
+    date: '2021年9月13日',
+    title: '故障情報',
+    link: ''
+  })
+
+  constructDataArr.push({
+    date: '2021年9月13日',
+    title: 'その他情報',
+    link: ''
+  })
+  constructDataArrSize = 3
+
+
   // ユーザ権限も画面に送る
   res.render('portal', {
     title: 'ポータル',
@@ -94,7 +119,9 @@ const cbGetIndex = async (req, res, next) => {
     numberN: contract.dataValues?.numberN,
     TS_HOST: process.env.TS_HOST,
     newsDataArr: newsDataArr,
-    newsDataArrSize: newsDataArrSize
+    newsDataArrSize: newsDataArrSize,
+    constructDataArr: constructDataArr,
+    constructDataArrSize: constructDataArrSize
   })
 }
 
