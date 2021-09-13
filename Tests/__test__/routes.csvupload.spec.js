@@ -4095,6 +4095,7 @@ describe('csvuploadのテスト', () => {
     })
 
     test('準正常：請求書テーブルDB登録失敗', async () => {
+      
       // 準備
       // requestのsession,userIdに正常値を入れる
       const resultInvoiceDetailController = []
@@ -4151,6 +4152,66 @@ describe('csvuploadのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       expect(response.statusCode).toBe(200)
       expect(response.body).toBe(constantsDefine.statusConstants.INVOICE_FAILED)
+    })
+
+    test('400エラー：APIエラー', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(networkCheckData), 'base64').toString('utf8')
+
+      // 試験実施
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      // 期待結果
+      const expectError = new Error()
+      expectError.name = 'Bad Request'
+      expectError.status = 400
+      expectError.message = 'Bad Request 400'
+
+      apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
+        switch (method) {
+          case 'get':
+            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
+              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+                return documentListData2
+              }
+              return documentListData
+            }
+            if (query.match(/^\/network\?limit=100/i)) {
+              if (accToken.match('getNetworkErr')) {
+                return new Error('trade shift api error')
+              }
+              if (query.match(/^\/network\?limit=100&page=/i)) {
+                return resultGetNetwork2
+              }
+              return resultGetNetwork
+            }
+            break
+          case 'put':
+            return expectError
+        }
+      })
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      apiManager.accessTradeshift = tmpApiManager
     })
 
     test('正常 : bconCsv内容確認', async () => {
