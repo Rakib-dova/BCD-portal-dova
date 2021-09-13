@@ -246,14 +246,6 @@ img.logo-ncom {
   background-color: #fff;
 }
 
-.btnMarginLeft {
-  margin-left: 20px;
-}
-
-.btnMarginRight {
-  margin-right: 20px;
-}
-
 .is-invisible {
   display: none;
 }
@@ -360,4 +352,24 @@ img.logo-ncom {
   background-color: #3298dc;
   border-color: transparent;
   color: #fff;
+}
+
+.input-label {
+  float: left;
+}
+
+.input-label-required {
+  color: red;
+}
+
+.button-area {
+  margin: 0 auto;
+}
+
+.button.is-success {
+  margin-right: 60px !important;
+}
+
+.button.is-link {
+  margin-right: 60px !important;
 }

@@ -8,7 +8,7 @@ block content
     .container.is-max-widescreen.is-family-noto-sans
       form#form(action="#")
         article.panel.is-info
-          h2.panel-heading デジタルトレードアプリ（PoC）ご利用にあたって
+          h2.panel-heading デジタルトレードアプリご利用にあたって
           .panel-block
             .container
               p.ml-4 必要項目を入力後、利用規約に同意して「次へ」ボタンを押してください。
@@ -20,53 +20,61 @@ block content
                     .card-content
                       .title.is-4 契約者名
                       .field
-                        label(for="contractorName") 契約者名（企業名）（必須）
+                        label(for="contractorName").input-label 契約者名（企業名）
+                        p#contractorNameRequired.input-label-required.input-label （必須）
                         .control
-                          input.input#contractorName(type="text" name="contractorName" value="" pattern=inputPattarnZenkaku required maxlength=80 placeholder='全角文字')
+                          input.input#contractorName(type="text" name="contractorName" value="" pattern=inputPattarnZenkaku required maxlength=80 placeholder='全角80文字まで')
                       .field
-                        label(for="contractorKanaName") 契約者カナ名（企業名）（必須）
+                        label(for="contractorKanaName").input-label 契約者カナ名（企業名）
+                        p#contractorKanaNameRequired.input-label-required.input-label （必須）
                         .control
-                          input.input#contractorKanaName(type="text" name="contractorKanaName" value="" pattern=inputPattarnZenkakuKatakana required maxlength=80 placeholder='カタカナ')
+                          input.input#contractorKanaName(type="text" name="contractorKanaName" value="" pattern=inputPattarnZenkakuKatakana required maxlength=80 placeholder='全角80文字まで')
                   
                   .field.card
                     .card-content
                       .title.is-4 契約者住所
                       .field
-                        label(for="postalNumber") 郵便番号（必須）
+                        label(for="postalNumber").input-label 郵便番号
+                        p#postalNumberRequired.input-label-required.input-label （必須）
                         .control
                           .columns.ml-0.pl-0
                             .column.is-one-third.pl-0
-                              input.input#postalNumber(type="text" name="postalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7 placeholder='半角数字かつハイフンなし')
+                              input.input#postalNumber(type="text" name="postalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7 placeholder='例：1234567')
                             .column 
                               .button.is-link#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
                       .field
-                        label(for="contractAddressVal") 住所(必須）
+                        label(for="contractAddressVal").input-label 住所の検索結果
+                        p#contractAddressValRequired.input-label-required.input-label （必須）
                         .control
                           input.input#contractAddressVal(type="text" name="contractAddressVal" value readonly required)
                       .field
-                        label(for="banch1") 番地(必須)
+                        label(for="banch1").input-label 番地
+                        p#banch1Required.input-label-required.input-label （必須）
                         .control
-                          input.input#banch1(type="text" name="banch1" value="" pattern=inputPattarnZenkaku maxlength=20 required placeholder='全角文字')
+                          input.input#banch1(type="text" name="banch1" value="" pattern=inputPattarnZenkaku maxlength=20 required placeholder='全角20文字まで')
                       .field
                         label(for="tatemono1") 建物等
                         .control
-                          input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角文字')
+                          input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=80 placeholder='全角80文字まで')
                   
                   .field.card
                     .card-content
                       .title.is-4 契約者連絡先
                       .field
-                        label(for="contactPersonName") 連絡先担当者名（必須）
+                        label(for="contactPersonName").input-label 連絡先担当者名
+                        p#contactPersonNameRequired.input-label-required.input-label （必須）
                         .control
-                          input.input#contactPersonName(type="text" name="contactPersonName" value="" pattern=inputPattarnZenkaku required maxlength=10 placeholder='全角文字')
+                          input.input#contactPersonName(type="text" name="contactPersonName" value="" pattern=inputPattarnZenkaku required maxlength=80 placeholder='全角80文字まで')
                       .field
-                        label(for="contactPhoneNumber") 連絡先電話番号（必須）
+                        label(for="contactPhoneNumber").input-label 連絡先電話番号
+                        p#contactPhoneNumberRequired.input-label-required.input-label （必須）
                         .control
-                          input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber required maxlength=13 placeholder='半角数字かつハイフンあり')
+                          input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber required maxlength=13 placeholder='例：000-0000-0000')
                       .field
-                        label(for="contactMail") 連絡先メールアドレス（必須）
+                        label(for="contactMail").input-label 連絡先メールアドレス
+                        p#contactMailRequired.input-label-required.input-label （必須）
                         .control
-                          input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress required maxlength=82 placeholder='メールアドレス')
+                          input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress required maxlength=82 placeholder='例：bcd@gma.com')
 
                   .field.card
                     .card-content
@@ -78,7 +86,7 @@ block content
                             .column.is-one-quarter.pl-0
                               label(for="campaignCode") キャンペーンコード
                             .column 
-                              input.input#campaignCode(type="text" name="campaignCode" value="" pattern=inputPatternCampaignCode maxlength=10)
+                              input.input#campaignCode(type="text" name="campaignCode" value="" pattern=inputPatternCampaignCode maxlength=10 placeholder='半角英数10桁まで')
 
                   .field.card
                     .card-content
@@ -86,13 +94,15 @@ block content
                       p ※登録終了後、開通案内を送信します。
                       p   開通案内メールにて本パスワードを使用いただきます。
                       .field
-                        label(for="password") パスワード（必須）
+                        label(for="password").input-label パスワード
+                        p#passwordRequired.input-label-required.input-label （必須）
                         .control
-                          input.input#password.form-control(type="password" name="password" value="" pattern=inputPatternKaituPW required maxlength=10)
+                          input.input#password.form-control(type="password" name="password" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
                       .field
-                        label(for="passwordConfirm") パスワード確認（必須）
+                        label(for="passwordConfirm").input-label パスワード確認
+                        p#passwordConfirmRequired.input-label-required.input-label （必須）
                         .control 
-                          input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" title="パスワードが間違っています。" required maxlength=10)
+                          input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" title="パスワードが間違っています。" required maxlength=10 placeholder='例：Abcd1234')
 
               .columns.is-centered: .column.is-four-fifths
                 .field.is-grouped.is-grouped-left
@@ -180,8 +190,9 @@ block content
                     td#termsCheck.confirmation-content
 
             footer.modal-card-foot
-              button.button.is-success#submit(type="submit" formaction="/tenant/register" formmethod="POST") 登録
-              a.button.cancel-button(data-target='confirmregister-modal') キャンセル
+              div.button-area
+                button.button.is-success#submit.success-button(type="submit" formaction="/tenant/register" formmethod="POST") 登録
+                a.button.cancel-button(data-target='confirmregister-modal') キャンセル
 
         .modal.modal-fx-fadeInscale#searchPostalNumber-modal
           .modal-background.cancel-button(data-target="searchPostalNumber-modal")

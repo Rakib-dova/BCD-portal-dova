@@ -13,26 +13,96 @@ function $(tagObjName) {
 }
 
 // 確認ボタン押下するとmodalに契約者名・契約者住所が表示処理
-$('#form').addEventListener('submit', function (event) {
+$('#next-btn').addEventListener('click', function (event) {
+  const checkValidations = []
+  // event.preventDefault()
+  let elements = document.querySelectorAll('input[type=text]')
+  elements = Array.prototype.slice.call(elements)
+  const requiredList = elements.filter((ele) => ele.getAttribute('required') !== null)
+  requiredList.map((ele) => {
+    if (ele !== undefined) {
+      if (ele.value.length === 0) {
+        if (ele.id === 'postalNumber') {
+          ele.parentNode.parentNode.parentNode.parentNode.childNodes[2].classList.remove('is-invisible')
+          ele.parentNode.parentNode.parentNode.parentNode.childNodes[3].classList.add('is-invisible')
+        } else {
+          ele.parentNode.parentNode.childNodes[2].classList.remove('is-invisible')
+          ele.parentNode.parentNode.childNodes[3].classList.add('is-invisible')
+        }
+      } else if (ele.getAttribute('aria-invalid') === 'true') {
+        if (ele.id === 'postalNumber') {
+          ele.parentNode.parentNode.parentNode.parentNode.childNodes[3].classList.remove('is-invisible')
+          ele.parentNode.parentNode.parentNode.parentNode.childNodes[2].classList.add('is-invisible')
+        } else {
+          ele.parentNode.parentNode.childNodes[3].classList.remove('is-invisible')
+          ele.parentNode.parentNode.childNodes[2].classList.add('is-invisible')
+        }
+      } else {
+        if (ele.id === 'postalNumber') {
+          ele.parentNode.parentNode.parentNode.parentNode.childNodes[3].classList.add('is-invisible')
+          ele.parentNode.parentNode.parentNode.parentNode.childNodes[2].classList.add('is-invisible')
+        } else {
+          ele.parentNode.parentNode.childNodes[3].classList.add('is-invisible')
+          ele.parentNode.parentNode.childNodes[2].classList.add('is-invisible')
+        }
+      }
+    }
+  })
+
+  if ($('#chkContractAddress').checked) {
+    const contractAddressVal = $('#contractAddressVal').value
+    // 住所の値が空の場合
+    if (!contractAddressVal) {
+      $('#contractAddressValErrormessage').classList.remove('is-invisible')
+    } else {
+      $('#contractAddressValErrormessage').classList.add('is-invisible')
+    }
+  }
+
   if ($('#chkContractorName').checked) {
     $('#recontractorName').innerHTML = $('#contractorName').value
     $('#recontractorKanaName').innerHTML = $('#contractorKanaName').value
+    checkValidations.push($('#contractorNameNoInput'))
+    checkValidations.push($('#contractorNameWrongInput'))
+    checkValidations.push($('#contractorKanaNameNoInput'))
+    checkValidations.push($('#contractorKanaNameWrongInput'))
   }
   if ($('#chkContractAddress').checked) {
     $('#repostalNumber').innerHTML = $('#postalNumber').value
     $('#recontractAddressVal').innerHTML = $('#contractAddressVal').value
     $('#rebanch1').innerHTML = $('#banch1').value
     $('#retatemono1').innerHTML = $('#tatemono1').value
+    checkValidations.push($('#postalNumberNoInput'))
+    checkValidations.push($('#postalNumberWrongInput'))
+    checkValidations.push($('#contractAddressValErrormessage'))
+    checkValidations.push($('#banch1NoInput'))
+    checkValidations.push($('#banch1WrongInput'))
   }
   if ($('#chkContractContact').checked) {
     $('#recontactPersonName').innerHTML = $('#contactPersonName').value
     $('#recontactPhoneNumber').innerHTML = $('#contactPhoneNumber').value
     $('#recontactMail').innerHTML = $('#contactMail').value
+    checkValidations.push($('#contactPersonNameNoInput'))
+    checkValidations.push($('#contactPersonNameWrongInput'))
+    checkValidations.push($('#contactPhoneNumberNoInput'))
+    checkValidations.push($('#contactPhoneNumberWorngInput'))
+    checkValidations.push($('#contactMailNoInput'))
+    checkValidations.push($('#contactMailWorongInput'))
   }
-  if (event.submitter.id === 'next-btn') {
-    event.preventDefault()
+
+  let errormessage = document.querySelectorAll('p[name="errormessage"].input-label-required:not(.is-invisible)')
+  errormessage = Array.prototype.slice.call(errormessage)
+  const result = []
+  errormessage.map((err) => {
+    checkValidations.map((check) => {
+      if (check.id === err.id) {
+        result.push(check)
+      }
+    })
+  })
+  if (result.length === 0) {
+    $('#confirmmodify-modal').classList.toggle('is-active')
   }
-  $('#confirmmodify-modal').classList.toggle('is-active')
 })
 
 // 契約者名変更欄表示
@@ -98,7 +168,7 @@ $('#chkContractAddress').addEventListener('change', function () {
     $('#banch1').setAttribute('name', 'banch1')
     $('#tatemono1').setAttribute('name', 'tatemono1')
     $('#postalNumber').required = true
-    $('#contractAddressVal').required = true
+    // $('#contractAddressVal').required = true
     $('#banch1').required = true
   } else {
     if (!$('#chkContractorName').checked && !$('#chkContractContact').checked) {
@@ -116,7 +186,7 @@ $('#chkContractAddress').addEventListener('change', function () {
     $('#rebanch1').innerHTML = ''
     $('#retatemono1').innerHTML = ''
     $('#postalNumber').required = false
-    $('#contractAddressVal').required = false
+    // $('#contractAddressVal').required = false
     $('#banch1').required = false
   }
 })
@@ -137,7 +207,7 @@ $('#chkContractContact').addEventListener('change', function () {
       $('#chkContractorName').required = false
       $('#chkContractAddress').required = false
     } else if (!$('#chkContractorName').checked) {
-      $('#chkContract0rName').required = false
+      $('#chkContractorName').required = false
     } else if (!$('#chkContractAddress').checked) {
       $('#chkContractAddress').required = false
     }
@@ -217,6 +287,7 @@ $('#postalSearchBtn').addEventListener('click', function () {
                 $('#contractAddressVal').value = ele.innerHTML.replace('<br>', '')
                 $('#banch1').value = ''
                 $('#tatemono1').value = ''
+                $('#contractAddressValErrormessage').classList.add('is-invisible')
               }
             })
           }
@@ -240,3 +311,44 @@ $('#postalSearchBtn').addEventListener('click', function () {
   }
   requestAddressApi.send(JSON.stringify(sendData))
 })
+
+addEvent(document, 'change', function (e, target) {
+  instantValidation(target)
+})
+
+function addEvent(node, type, callback) {
+  if (node.addEventListener) {
+    node.addEventListener(
+      type,
+      function (e) {
+        callback(e, e.target)
+      },
+      false
+    )
+  } else if (node.attachEvent) {
+    node.attachEvent('on' + type, function (e) {
+      callback(e, e.srcElement)
+    })
+  }
+}
+
+function shouldBeValidated(field) {
+  return (
+    !(field.getAttribute('readonly') || field.readonly) &&
+    !(field.getAttribute('disabled') || field.disabled) &&
+    (field.getAttribute('pattern') || field.getAttribute('required'))
+  )
+}
+
+function instantValidation(field) {
+  if (shouldBeValidated(field)) {
+    const invalid =
+      (field.getAttribute('required') && !field.value) ||
+      (field.getAttribute('pattern') && field.value && !new RegExp(field.getAttribute('pattern')).test(field.value))
+    if (!invalid && field.getAttribute('aria-invalid')) {
+      field.removeAttribute('aria-invalid')
+    } else if (invalid && !field.getAttribute('aria-invalid')) {
+      field.setAttribute('aria-invalid', 'true')
+    }
+  }
+}
