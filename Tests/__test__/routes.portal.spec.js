@@ -112,19 +112,19 @@ describe('portalのテスト', () => {
 
       const constructDataArr = [
         {
-          date: '2019年11月14日',
-          link: 'http://support.ntt.com/mail/information/detail/pid2500000nrk',
-          title: 'メールかんたん設定ツール（Windows10専用）アップデート版の提供開始について'
+          date: '2021年09月08日',
+          link: 'http://support.ntt.com/maintenance/service/mainteDetail/77128',
+          title: '【工事情報】050 plus　システムメンテナンスのお知らせ'
         },
         {
-          date: '2019年8月23日',
-          link: 'http://support.ntt.com/mail/information/detail/pid2500000gri',
-          title: 'OCNメールのリニューアルに関するお知らせ'
+          date: '2021年09月07日',
+          link: 'http://support.ntt.com/maintenance/service/troubleDetail/35965',
+          title: '【故障回復】【訂正】【恐れ】GW設備故障【発生/回復】'
         },
         {
-          date: '2019年7月19日',
-          link: 'http://support.ntt.com/mail/information/detail/pid2500000kqa',
-          title: 'OCNメールをメールソフトでご利用いただく際の設定について'
+          date: '2021年09月02日',
+          link: 'http://support.ntt.com/maintenance/service/mainteDetail/12751',
+          title: '【工事情報】050 plus　システムメンテナンスのお知らせ'
         }
       ]
 
