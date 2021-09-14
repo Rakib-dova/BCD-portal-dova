@@ -36,6 +36,7 @@ block content
                       .field
                         label(for="postalNumber").input-label 郵便番号
                         p#postalNumberRequired.input-label-required.input-label （必須）
+                        p.input-label ※数字7桁　
                         .control
                           .columns.ml-0.pl-0
                             .column.is-one-third.pl-0
@@ -43,7 +44,7 @@ block content
                             .column 
                               .button.is-link#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
                       .field
-                        label(for="contractAddressVal").input-label 住所の検索結果
+                        label(for="contractAddressVal").input-label 住所
                         p#contractAddressValRequired.input-label-required.input-label （必須）
                         .control
                           input.input#contractAddressVal(type="text" name="contractAddressVal" value readonly required)
@@ -53,7 +54,7 @@ block content
                         .control
                           input.input#banch1(type="text" name="banch1" value="" pattern=inputPattarnZenkaku maxlength=20 required placeholder='全角20文字まで')
                       .field
-                        label(for="tatemono1") 建物等
+                        label(for="tatemono1").input-label 建物等　
                         .control
                           input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=80 placeholder='全角80文字まで')
                   
@@ -68,11 +69,13 @@ block content
                       .field
                         label(for="contactPhoneNumber").input-label 連絡先電話番号
                         p#contactPhoneNumberRequired.input-label-required.input-label （必須）
+                        p.input-label ※ハイフン含む13桁まで　
                         .control
                           input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber required maxlength=13 placeholder='例：000-0000-0000')
                       .field
                         label(for="contactMail").input-label 連絡先メールアドレス
                         p#contactMailRequired.input-label-required.input-label （必須）
+                        p.input-label ※メールアドレス　
                         .control
                           input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress required maxlength=82 placeholder='例：bcd@gma.com')
 
@@ -81,12 +84,9 @@ block content
                       .title.is-4 キャンペーンコード
                       p キャンペーンコードをお持ちの方は入力してください。
                       .field
+                        label(for="campaignCode").input-label キャンペーンコード　
                         .control
-                          .columns.ml-0.pl-0
-                            .column.is-one-quarter.pl-0
-                              label(for="campaignCode") キャンペーンコード
-                            .column 
-                              input.input#campaignCode(type="text" name="campaignCode" value="" pattern=inputPatternCampaignCode maxlength=10 placeholder='半角英数10桁まで')
+                          input.input#campaignCode(type="text" name="campaignCode" value="" pattern=inputPatternCampaignCode maxlength=10 placeholder='半角英数10桁まで')
 
                   .field.card
                     .card-content
@@ -96,13 +96,15 @@ block content
                       .field
                         label(for="password").input-label パスワード
                         p#passwordRequired.input-label-required.input-label （必須）
+                        p.input-label ※半角英数8桁以上　
                         .control
                           input.input#password.form-control(type="password" name="password" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
                       .field
                         label(for="passwordConfirm").input-label パスワード確認
                         p#passwordConfirmRequired.input-label-required.input-label （必須）
+                        p.input-label ※半角英数8桁以上　
                         .control 
-                          input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" title="パスワードが間違っています。" required maxlength=10 placeholder='例：Abcd1234')
+                          input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
 
               .columns.is-centered: .column.is-four-fifths
                 .field.is-grouped.is-grouped-left
