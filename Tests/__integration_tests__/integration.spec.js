@@ -644,8 +644,8 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(clickResult).toBe('入力値が間違いました。')
     })
 
-    // 住所の検索結果未入力
-    test('/tenant/registerにアクセス：住所の検索結果未入力', async () => {
+    // 住所未入力
+    test('/tenant/registerにアクセス：住所未入力', async () => {
       let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
@@ -2083,8 +2083,8 @@ describe('ルーティングのインテグレーションテスト', () => {
       }
     })
 
-    // 住所の検索結果未入力
-    test('管理者、契約ステータス：00, 住所の検索結果未入力', async () => {
+    // 住所未入力
+    test('管理者、契約ステータス：00, 住所未入力', async () => {
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
