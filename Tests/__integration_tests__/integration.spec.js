@@ -1656,6 +1656,228 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(hrefResult).toBe('https://support.ntt.com/mail/information/search?parentGoodsCode=512')
     })
 
+    test('管理者, お知らせ-工事情報表示及び「もっと見る」ボタンで遷移', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+
+      const httpsUrl = 'https://localhost:3000'
+      const sitePath = `${httpsUrl}${res.req.path}`
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`${sitePath}`, {
+        waitUntil: 'networkidle0'
+      })
+      if (page.url() === `${sitePath}`) {
+        await page.click('#constructTab')
+        await page.waitForTimeout(500)
+
+        const constructInformation = await page.evaluate(() => {
+          return document
+            .querySelector(
+              'body > div.container.is-max-widescreen > columns > div > div > div > div.tabs.is-centered.is-boxed.is-medium > ul > li:nth-child(2)'
+            )
+            .getAttribute('class')
+        })
+        expect(constructInformation).toBe('is-active')
+
+        const consturctRssUrl = 'https://support.ntt.com/informationRss/goods/rss/mail'
+        const checkedPage = await browser.newPage()
+        await checkedPage.goto(`${consturctRssUrl}`, {
+          waitUntil: 'networkidle0'
+        })
+        const constructUrlRss = await checkedPage.evaluate(() => {
+          const date1 = new Date(document.body.children[0].children[1].children[2].innerText)
+          const date2 = new Date(document.body.children[0].children[2].children[2].innerText)
+          const date3 = new Date(document.body.children[0].children[3].children[2].innerText)
+          const doc = [
+            {
+              title: document.body.children[0].children[1].children[0].innerText,
+              link: document.body.children[0].children[1].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date1.getFullYear()}年${date1.getMonth() + 1}月${date1.getDate()}日`
+            },
+            {
+              title: document.body.children[0].children[2].children[0].innerText,
+              link: document.body.children[0].children[2].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date2.getFullYear()}年${date2.getMonth() + 1}月${date2.getDate()}日`
+            },
+            {
+              title: document.body.children[0].children[3].children[0].innerText,
+              link: document.body.children[0].children[3].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date3.getFullYear()}年${date3.getMonth() + 1}月${date3.getDate()}日`
+            }
+          ]
+          return doc
+        })
+
+        const constructRss = await page.evaluate(() => {
+          return [
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsDate').innerText
+            },
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsDate').innerText
+            },
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsDate').innerText
+            }
+          ]
+        })
+
+        await checkedPage.close()
+
+        let idx = 0
+        constructRss.forEach((item) => {
+          expect(item.title).toBe(constructUrlRss[idx].title)
+          expect(item.link).toBe(constructUrlRss[idx].link)
+          expect(item.date).toBe(constructUrlRss[idx].date)
+          idx++
+        })
+
+        const constructUrl = await page.evaluate(() => {
+          return document.querySelector('#constructTab > div > a').href
+        })
+        page.click('#constructTab > div > a')
+        await page.waitForTimeout(500)
+        const pages = await browser.pages()
+        const newTapPage = pages[pages.length - 1]
+        expect(newTapPage.url()).toBe(constructUrl)
+        await browser.close()
+      }
+    })
+
+    test('一般ユーザ, お知らせ-工事情報表示及び「もっと見る」ボタンで遷移', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+
+      const httpsUrl = 'https://localhost:3000'
+      const sitePath = `${httpsUrl}${res.req.path}`
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto(`${sitePath}`, {
+        waitUntil: 'networkidle0'
+      })
+      if (page.url() === `${sitePath}`) {
+        await page.click('#constructTab')
+        await page.waitForTimeout(500)
+
+        const constructInformation = await page.evaluate(() => {
+          return document
+            .querySelector(
+              'body > div.container.is-max-widescreen > columns > div > div > div > div.tabs.is-centered.is-boxed.is-medium > ul > li:nth-child(2)'
+            )
+            .getAttribute('class')
+        })
+        expect(constructInformation).toBe('is-active')
+
+        const consturctRssUrl = 'https://support.ntt.com/informationRss/goods/rss/mail'
+        const checkedPage = await browser.newPage()
+        await checkedPage.goto(`${consturctRssUrl}`, {
+          waitUntil: 'networkidle0'
+        })
+        const constructUrlRss = await checkedPage.evaluate(() => {
+          const date1 = new Date(document.body.children[0].children[1].children[2].innerText)
+          const date2 = new Date(document.body.children[0].children[2].children[2].innerText)
+          const date3 = new Date(document.body.children[0].children[3].children[2].innerText)
+          const doc = [
+            {
+              title: document.body.children[0].children[1].children[0].innerText,
+              link: document.body.children[0].children[1].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date1.getFullYear()}年${date1.getMonth() + 1}月${date1.getDate()}日`
+            },
+            {
+              title: document.body.children[0].children[2].children[0].innerText,
+              link: document.body.children[0].children[2].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date2.getFullYear()}年${date2.getMonth() + 1}月${date2.getDate()}日`
+            },
+            {
+              title: document.body.children[0].children[3].children[0].innerText,
+              link: document.body.children[0].children[3].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date3.getFullYear()}年${date3.getMonth() + 1}月${date3.getDate()}日`
+            }
+          ]
+          return doc
+        })
+
+        const constructRss = await page.evaluate(() => {
+          return [
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsDate').innerText
+            },
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsDate').innerText
+            },
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsDate').innerText
+            }
+          ]
+        })
+
+        await checkedPage.close()
+
+        let idx = 0
+        constructRss.forEach((item) => {
+          expect(item.title).toBe(constructUrlRss[idx].title)
+          expect(item.link).toBe(constructUrlRss[idx].link)
+          expect(item.date).toBe(constructUrlRss[idx].date)
+          idx++
+        })
+
+        const constructUrl = await page.evaluate(() => {
+          return document.querySelector('#constructTab > div > a').href
+        })
+        page.click('#constructTab > div > a')
+        await page.waitForTimeout(500)
+        const pages = await browser.pages()
+        const newTapPage = pages[pages.length - 1]
+        expect(newTapPage.url()).toBe(constructUrl)
+        await browser.close()
+      }
+    })
+
     let userCsrf, tenantCsrf
     // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
