@@ -96,13 +96,13 @@ block content
                       .field
                         label(for="password").input-label パスワード
                         p#passwordRequired.input-label-required.input-label （必須）
-                        p.input-label ※半角英数8桁以上　
+                        p.input-label ※半角英数8桁以上（大・小文字数字必須）
                         .control
                           input.input#password.form-control(type="password" name="password" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
                       .field
                         label(for="passwordConfirm").input-label パスワード確認
                         p#passwordConfirmRequired.input-label-required.input-label （必須）
-                        p.input-label ※半角英数8桁以上　
+                        p.input-label ※半角英数8桁以上（大・小文字数字必須）
                         .control 
                           input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
 
