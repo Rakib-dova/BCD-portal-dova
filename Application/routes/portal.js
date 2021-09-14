@@ -106,7 +106,7 @@ const cbGetIndex = async (req, res, next) => {
             link: item.link
           }
         })
-        constructDataArr.length = newsLimit
+        constructDataArr.length = newsLimit < feed.items.length ? newsLimit : feed.items.length
       }
     })
     .catch((error) => {
@@ -127,7 +127,7 @@ const cbGetIndex = async (req, res, next) => {
     newsDataArr: newsDataArr,
     newsDataArrSize: newsDataArrSize,
     constructDataArr: constructDataArr,
-    constructDataArrSize: constructDataArr.length
+    constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0
   })
 }
 
