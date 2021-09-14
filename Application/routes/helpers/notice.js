@@ -34,6 +34,8 @@ module.exports = {
       message = '本機能はご利用いただけません。'
       description1 = 'テナント管理者権限のあるユーザで再度操作をお試しください。'
       description2 = null
+    } else if (messageStatus.status === 500) {
+      return next(errorHelper.create(500))
     } else {
       return next(errorHelper.create(400))
     }
