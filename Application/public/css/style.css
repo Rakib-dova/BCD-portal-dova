@@ -365,3 +365,28 @@ img.logo-ncom {
 .button-area {
   margin: 0 auto;
 }
+
+.button.is-success {
+  margin-right: 60px !important;
+}
+
+.button.is-link {
+  margin-right: 60px !important;
+}
+
+.tabs {
+  margin-bottom: -1px !important;
+}
+
+.tab-content {
+  border: 1px solid #dbdbdb;
+  padding: 30px;
+}
+
+.tab-pane {
+  display: none;
+}
+
+.is-active {
+  display: initial;
+}
