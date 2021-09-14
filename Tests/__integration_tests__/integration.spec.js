@@ -73,7 +73,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     filename: 'integration_test_csv_file',
     fileData: Buffer.from(
       `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特異事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
-    2021-06-14,INTE_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,General,11111,kang_test,特記事項テストです。,001,PC,100,EA,100000,JP 消費税 10%,アップロードテスト`
+    2021-06-14,INTE_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1230012,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
     ).toString('base64')
   }
 
@@ -1598,6 +1598,62 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(200)
 
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+    })
+
+    // (登録画面に遷移せず)正常にお知らせ画面が表示される
+    test('管理者、/portalにアクセス：お知らせ画面が表示されること', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/お知らせ/i) // タイトルが含まれていること
+    })
+
+    // (登録画面に遷移せず)正常にお知らせ画面が表示される
+    test('一般ユーザ、、/portalにアクセス：お知らせ画面が表示されること', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/お知らせ/i) // タイトルが含まれていること
+    })
+
+    test('管理者、/portalにアクセス：もっと見るボタンのリンク確認', async () => {
+      let hrefResult
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        hrefResult = await page.evaluate(() => {
+          if (document.querySelector('#informationTab > div > a').href !== null) {
+            return document.querySelector('#informationTab > div > a').href
+          }
+          return null
+        })
+      }
+
+      expect(hrefResult).toBe('https://support.ntt.com/mail/information/search?parentGoodsCode=512')
+    })
+
+    test('一般ユーザ、/portalにアクセス：もっと見るボタンのリンク確認', async () => {
+      let hrefResult
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        hrefResult = await page.evaluate(() => {
+          if (document.querySelector('#informationTab > div > a').href !== null) {
+            return document.querySelector('#informationTab > div > a').href
+          }
+          return null
+        })
+      }
+
+      expect(hrefResult).toBe('https://support.ntt.com/mail/information/search?parentGoodsCode=512')
     })
 
     let userCsrf, tenantCsrf
