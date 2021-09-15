@@ -323,9 +323,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
             failCount += invoiceList[idx].successCount
             invoiceList[idx].status = -1
 
-            // システムエラー発生テスト用（要削除）
-            apiResult.response.status = 500
-
             if (String(apiResult.response?.status).slice(0, 1) === '4') {
               // 400番エラーの場合
               invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.APIERROR
@@ -352,8 +349,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
                   invoiceID: invoiceList[idx].invoiceId,
                   status: 2
                 },
-                // apiResult.toString()
-                'Error: Request failed with status code 500'
+                apiResult.toString()
               )
             }
           }
