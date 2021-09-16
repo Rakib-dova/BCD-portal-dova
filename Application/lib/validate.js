@@ -139,14 +139,21 @@ const isStatusForSimpleChange = function (contractStatus, deleteFlag) {
 }
 
 // CSVファイルのバリデーションチェック（現在行～）
+// 請求書番号
 const isInvoiceId = function (invoiceId) {
-  if (invoiceId.length > constantsDefine.invoiceValidDefine.INVOICEID_VALUE || invoiceId.length < 1) {
+  // 値の存在有無確認
+  if (invoiceId.length < 1) {
+    return 'INVOICEIDERR002'
+  }
+
+  if (invoiceId.length > constantsDefine.invoiceValidDefine.INVOICEID_VALUE) {
     return 'INVOICEIDERR000'
   }
 
   return ''
 }
 
+// 銀行名
 const isBankName = function (bankName) {
   // 値の存在有無確認
   if (bankName.length < 1) {
@@ -159,6 +166,7 @@ const isBankName = function (bankName) {
   return ''
 }
 
+// 発行日、支払期日、納品日
 const isDate = function (isDate) {
   // 年-月-日の形式のみ許容する
   if (!isDate.match(/^\d{4}-\d{1,2}-\d{1,2}$/)) {
@@ -179,7 +187,12 @@ const isDate = function (isDate) {
   return 0
 }
 
+// 明細-項目ID
 const isSellersItemNum = function (sellersItemNum) {
+  // 値の存在有無確認
+  if (sellersItemNum.length < 1) {
+    return 'SELLERSITEMNUMERR002'
+  }
   if (sellersItemNum.length > constantsDefine.invoiceValidDefine.SELLERSITEMNUM_VALUE || sellersItemNum.length < 1) {
     return 'SELLERSITEMNUMERR000'
   }
@@ -187,15 +200,26 @@ const isSellersItemNum = function (sellersItemNum) {
   return ''
 }
 
+// 明細-内容
 const isItemName = function (itemName) {
-  if (itemName.length > constantsDefine.invoiceValidDefine.ITEMNAME_VALUE || itemName.length < 1) {
+  // 値の存在有無確認
+  if (itemName.length < 1) {
+    return 'ITEMNAMEERR002'
+  }
+  if (itemName.length > constantsDefine.invoiceValidDefine.ITEMNAME_VALUE) {
     return 'ITEMNAMEERR000'
   }
 
   return ''
 }
 
+// 明細-数量
 const isQuantityValue = function (quantityValue) {
+  // 値の存在有無確認
+  if (quantityValue.length < 1) {
+    return 'QUANTITYVALUEERR002'
+  }
+
   const regex = new RegExp(/^[0-9]+$/)
   if (!regex.test(quantityValue)) {
     return 'QUANTITYVALUEERR001'
@@ -208,7 +232,12 @@ const isQuantityValue = function (quantityValue) {
   return ''
 }
 
+// 明細-単価
 const isPriceValue = function (priceValue) {
+  // 値の存在有無確認
+  if (priceValue.length < 1) {
+    return 'PRICEVALUEERR002'
+  }
   if (!isNumberRegular(priceValue)) {
     return 'PRICEVALUEERR001'
   }
@@ -223,24 +252,30 @@ const isPriceValue = function (priceValue) {
   return ''
 }
 
+// 明細-税
 const isTaxCategori = function (category) {
   const taxCategory = require('./bconCsvTax')
+  // 値の存在有無確認
+  if (category.length < 1) {
+    return 'TAXERR001'
+  }
 
-  if (
-    taxCategory.length > constantsDefine.invoiceValidDefine.TAX_VALUE ||
-    taxCategory.length < 1 ||
-    !taxCategory[category]
-  ) {
+  if (taxCategory.length > constantsDefine.invoiceValidDefine.TAX_VALUE || !taxCategory[category]) {
     return 'TAXERR000'
   }
 
   return taxCategory[category]
 }
 
+// 明細-単位
 const isUnitcode = function (unitCode) {
   const unitcodeCategory = require('./bconCsvUnitcode')
+  // 値の存在有無確認
+  if (unitCode.length < 1) {
+    return 'UNITERR001'
+  }
 
-  if (unitCode.length < 1 || !unitcodeCategory[unitCode]) {
+  if (!unitcodeCategory[unitCode]) {
     return 'UNITERR000'
   }
 
@@ -255,6 +290,7 @@ const isFinancialInstitution = function (financialInstitution) {
   return ''
 }
 
+// 支店名
 const isFinancialName = function (financialName) {
   // 値の存在有無確認
   if (financialName.length < 1) {
@@ -267,6 +303,7 @@ const isFinancialName = function (financialName) {
   return ''
 }
 
+// 科目
 const isAccountType = function (accountType) {
   const unitcodeCategory = require('./bconCsvAccountType')
   // 値の存在有無確認
@@ -281,6 +318,7 @@ const isAccountType = function (accountType) {
   return unitcodeCategory[accountType]
 }
 
+// 口座番号
 const isAccountId = function (accountId) {
   const regex = new RegExp(/^[0-9]{7}$/)
   // 値の存在有無確認
@@ -297,6 +335,7 @@ const isAccountId = function (accountId) {
   return ''
 }
 
+// 口座名義
 const isAccountName = function (accountName) {
   // 値の存在有無確認
   if (accountName.length < 1) {
@@ -309,6 +348,7 @@ const isAccountName = function (accountName) {
   return ''
 }
 
+// その他特記事項
 const isNote = function (note) {
   if (note.length > constantsDefine.invoiceValidDefine.NOTE_VALUE) {
     return 'NOTEERR000'
@@ -317,6 +357,7 @@ const isNote = function (note) {
   return ''
 }
 
+// 明細-備考
 const isDescription = function (description) {
   if (description.length > constantsDefine.invoiceValidDefine.DESCRIPTION_VALUE) {
     return 'DESCRIPTIONERR000'
@@ -324,6 +365,7 @@ const isDescription = function (description) {
   return ''
 }
 
+// ネットワーク接続
 const checkNetworkConnection = function (companyNetworkConnectionList, targetConnectionId) {
   let connectionFlag = false
   try {
