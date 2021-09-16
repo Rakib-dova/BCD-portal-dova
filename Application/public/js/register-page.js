@@ -47,16 +47,45 @@ document.getElementById('next-btn').addEventListener('click', function (e) {
   // 各項目チェック
   const elements = document.querySelectorAll('input')
   const invalidCheckTarget = []
-  Array.prototype.forEach.call(elements, (required) => {
-    if (required.getAttribute('required') !== null) {
+  Array.prototype.forEach.call(elements, (checkTarget) => {
+    if (checkTarget.getAttribute('name') === 'postalNumber') {
       if (
-        required.parentNode.parentNode.childNodes[2] !== undefined &&
-        required.parentNode.parentNode.childNodes[2].getAttribute('id') === 'caution'
+        checkTarget.parentNode.parentNode.parentNode.parentNode.childNodes[3] !== undefined &&
+        checkTarget.parentNode.parentNode.parentNode.parentNode.childNodes[3].getAttribute('id') === 'caution'
       ) {
-        required.parentNode.parentNode.childNodes[2].remove()
+        checkTarget.parentNode.parentNode.parentNode.parentNode.childNodes[3].remove()
       }
-      invalidCheckTarget.push(required)
+    } else if (
+      checkTarget.getAttribute('name') === 'contactPhoneNumber' ||
+      checkTarget.getAttribute('name') === 'contactMail' ||
+      checkTarget.getAttribute('name') === 'password' ||
+      checkTarget.getAttribute('name') === 'passwordConfirm'
+    ) {
+      if (
+        checkTarget.parentNode.parentNode.childNodes[3] !== undefined &&
+        checkTarget.parentNode.parentNode.childNodes[3].getAttribute('id') === 'caution'
+      ) {
+        checkTarget.parentNode.parentNode.childNodes[3].remove()
+      }
+    } else if (
+      checkTarget.getAttribute('name') === 'tatemono1' ||
+      checkTarget.getAttribute('name') === 'campaignCode'
+    ) {
+      if (
+        checkTarget.parentNode.parentNode.childNodes[1] !== undefined &&
+        checkTarget.parentNode.parentNode.childNodes[1].getAttribute('id') === 'caution'
+      ) {
+        checkTarget.parentNode.parentNode.childNodes[1].remove()
+      }
+    } else {
+      if (
+        checkTarget.parentNode.parentNode.childNodes[2] !== undefined &&
+        checkTarget.parentNode.parentNode.childNodes[2].getAttribute('id') === 'caution'
+      ) {
+        checkTarget.parentNode.parentNode.childNodes[2].remove()
+      }
     }
+    invalidCheckTarget.push(checkTarget)
   })
 
   let focusFlag = false
@@ -72,21 +101,54 @@ document.getElementById('next-btn').addEventListener('click', function (e) {
         cautionRequired.classList.add('input-label')
         cautionRequired.classList.add('input-label-required')
         cautionRequired.setAttribute('id', 'caution')
-        if (invalidCheckTarget[idx].value.length === 0) {
+        if (invalidCheckTarget[idx].getAttribute('required') !== null && invalidCheckTarget[idx].value.length === 0) {
           cautionRequired.innerText = '未入力です。'
         }
         if (invalidCheckTarget[idx].getAttribute('aria-invalid') === 'true') {
           cautionRequired.innerText = '入力値が間違いました。'
         }
 
-        invalidCheckTarget[idx].parentNode.parentNode.appendChild(cautionRequired)
-        invalidCheckTarget[idx].parentNode.parentNode.insertBefore(
-          cautionRequired,
-          invalidCheckTarget[idx].parentNode.parentNode.childNodes[2]
-        )
-        if (!focusFlag) {
-          focusFlag = true
-          focusIdx = idx
+        if (invalidCheckTarget[idx].getAttribute('name') === 'postalNumber') {
+          invalidCheckTarget[idx].parentNode.parentNode.parentNode.parentNode.appendChild(cautionRequired)
+          invalidCheckTarget[idx].parentNode.parentNode.parentNode.parentNode.insertBefore(
+            cautionRequired,
+            invalidCheckTarget[idx].parentNode.parentNode.parentNode.parentNode.childNodes[3]
+          )
+        } else if (
+          invalidCheckTarget[idx].getAttribute('name') === 'contactPhoneNumber' ||
+          invalidCheckTarget[idx].getAttribute('name') === 'contactMail' ||
+          invalidCheckTarget[idx].getAttribute('name') === 'password' ||
+          invalidCheckTarget[idx].getAttribute('name') === 'passwordConfirm'
+        ) {
+          invalidCheckTarget[idx].parentNode.parentNode.appendChild(cautionRequired)
+          invalidCheckTarget[idx].parentNode.parentNode.insertBefore(
+            cautionRequired,
+            invalidCheckTarget[idx].parentNode.parentNode.childNodes[3]
+          )
+        } else if (
+          invalidCheckTarget[idx].getAttribute('name') === 'tatemono1' ||
+          invalidCheckTarget[idx].getAttribute('name') === 'campaignCode'
+        ) {
+          if (cautionRequired.innerText !== '') {
+            invalidCheckTarget[idx].parentNode.parentNode.appendChild(cautionRequired)
+            invalidCheckTarget[idx].parentNode.parentNode.insertBefore(
+              cautionRequired,
+              invalidCheckTarget[idx].parentNode.parentNode.childNodes[1]
+            )
+          }
+        } else {
+          invalidCheckTarget[idx].parentNode.parentNode.appendChild(cautionRequired)
+          invalidCheckTarget[idx].parentNode.parentNode.insertBefore(
+            cautionRequired,
+            invalidCheckTarget[idx].parentNode.parentNode.childNodes[2]
+          )
+        }
+
+        if (cautionRequired.innerText !== '') {
+          if (!focusFlag) {
+            focusFlag = true
+            focusIdx = idx
+          }
         }
       }
       idx++
@@ -213,17 +275,6 @@ function instantValidation(field) {
 // ---- 登録ボタン押下時のフロント側での二重送信防止
 document.getElementById('form').onsubmit = function () {
   document.getElementById('submit').setAttribute('disabled', 'disabled')
-}
-
-document.getElementById('passwordConfirm').onkeyup = function () {
-  // password確認
-  const passwords = document.querySelectorAll('input[type="password"]')
-  const passwordsArr = Array.prototype.slice.call(passwords)
-  if (passwordsArr[0].value !== passwordsArr[1].value) {
-    document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'true')
-  } else {
-    document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'false')
-  }
 }
 
 // modal toggle 追加

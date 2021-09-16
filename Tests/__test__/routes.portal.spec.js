@@ -110,6 +110,24 @@ describe('portalのテスト', () => {
         }
       ]
 
+      const constructDataArr = [
+        {
+          date: '2021年9月8日',
+          link: 'http://support.ntt.com/maintenance/service/mainteDetail/77128',
+          title: '【工事情報】050 plus　システムメンテナンスのお知らせ'
+        },
+        {
+          date: '2021年9月7日',
+          link: 'http://support.ntt.com/maintenance/service/troubleDetail/35965',
+          title: '【故障回復】【訂正】【恐れ】GW設備故障【発生/回復】'
+        },
+        {
+          date: '2021年9月2日',
+          link: 'http://support.ntt.com/maintenance/service/mainteDetail/12751',
+          title: '【工事情報】050 plus　システムメンテナンスのお知らせ'
+        }
+      ]
+
       // 試験実施
       await portal.cbGetIndex(request, response, next)
 
@@ -123,6 +141,8 @@ describe('portalのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでportalが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('portal', {
+        constructDataArr: constructDataArr,
+        constructDataArrSize: 3,
         newsDataArr: newsDataArrData,
         newsDataArrSize: 15,
         title: 'ポータル',

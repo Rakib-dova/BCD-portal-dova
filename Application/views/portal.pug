@@ -14,20 +14,43 @@ block content
       .column.is-12
         .box
           .media-content
-            p.title.is-5 お知らせ
-            if newsDataArrSize==0
-              p.text-center=newsDataArr[0].message
-            else
-              table.table.is-fullwidth.table-fixed
-                tbody
-                  each item in newsDataArr
-                    tr
-                      td.newsDate=item.date
-                      td.newsTitle
-                        a.has-text-right(href=item.link target='_blank')=item.title
-              
-          .mt-1.has-text-right
-            a.button.is-link.is-light(href='https://support.ntt.com/mail/information/search?parentGoodsCode=512' target='_blank') もっと見る 
+            .tabs.is-centered.is-boxed.is-medium
+              ul
+                li.is-active
+                  a#informationTab
+                    span お知らせ
+                li
+                  a#constructTab
+                    span 工事・故障情報
+            .tab-content
+              .tab-pane.is-active#informationTab
+                if newsDataArrSize==0
+                  p.text-center=newsDataArr[0].message
+                else
+                  table.table.is-fullwidth.table-fixed
+                    tbody
+                      each item in newsDataArr
+                        tr
+                          td.newsDate=item.date
+                          td.newsTitle
+                            a.has-text-right(href=item.link target='_blank')=item.title
+                .mt-1.has-text-right
+                  a.button.is-link.is-light(href='https://support.ntt.com/mail/information/search?parentGoodsCode=512' target='_blank') もっと見る 
+
+              .tab-pane#constructTab
+                if constructDataArrSize==0
+                  p.text-center=constructDataArr[0].message
+                else
+                  table.table.is-fullwidth.table-fixed
+                    tbody
+                      each item in constructDataArr
+                        tr
+                          td.newsDate=item.date
+                          td.newsTitle
+                            a.has-text-right(href=item.link target='_blank')=item.title
+                .mt-1.has-text-right
+                  a.button.is-link.is-light(href='https://support.ntt.com/maintenance/service/mail?parentGoodsCode=511' target='_blank') もっと見る 
+
 
     .columns.is-desktop.is-family-noto-sans
       .column.hvr-float
@@ -62,7 +85,6 @@ block content
                   p 契約情報変更と解約を行うことができます。
                   p 解約の場合は取り消しはできません。
 
-    
     .modal#support-modal
       .modal-background.cancel-button(data-target='support-modal')
       .modal-card.is-family-noto-sans
@@ -79,10 +101,6 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 設定方法、ご利用方法のお問い合わせ
-            a.panel-block(href='https://support.ntt.com/maintenance/service/bconnection' target='_blank') 
-              span.panel-icon
-                i.fas.fa-file
-              p 工事・故障情報を参照する
         footer.modal-card-foot
       
       .modal#csvupload-modal

@@ -23,24 +23,37 @@ $('#next-btn').addEventListener('click', function (event) {
     if (ele !== undefined) {
       if (ele.value.length === 0) {
         if (ele.id === 'postalNumber') {
-          ele.parentNode.parentNode.parentNode.parentNode.childNodes[2].classList.remove('is-invisible')
-          ele.parentNode.parentNode.parentNode.parentNode.childNodes[3].classList.add('is-invisible')
+          ele.parentNode.parentNode.parentNode.parentNode.childNodes[3].classList.remove('is-invisible')
+          ele.parentNode.parentNode.parentNode.parentNode.childNodes[4].classList.add('is-invisible')
+        } else if (ele.id === 'contactPhoneNumber' || ele.id === 'contactMail') {
+          ele.parentNode.parentNode.childNodes[3].classList.remove('is-invisible')
+          ele.parentNode.parentNode.childNodes[4].classList.add('is-invisible')
         } else {
           ele.parentNode.parentNode.childNodes[2].classList.remove('is-invisible')
           ele.parentNode.parentNode.childNodes[3].classList.add('is-invisible')
         }
       } else if (ele.getAttribute('aria-invalid') === 'true') {
         if (ele.id === 'postalNumber') {
-          ele.parentNode.parentNode.parentNode.parentNode.childNodes[3].classList.remove('is-invisible')
-          ele.parentNode.parentNode.parentNode.parentNode.childNodes[2].classList.add('is-invisible')
+          ele.parentNode.parentNode.parentNode.parentNode.childNodes[4].classList.remove('is-invisible')
+          ele.parentNode.parentNode.parentNode.parentNode.childNodes[3].classList.add('is-invisible')
+        } else if (ele.id === 'tatemono1') {
+          ele.parentNode.parentNode.childNodes[1].classList.remove('is-invisible')
+        } else if (ele.id === 'contactPhoneNumber' || ele.id === 'contactMail') {
+          ele.parentNode.parentNode.childNodes[4].classList.remove('is-invisible')
+          ele.parentNode.parentNode.childNodes[3].classList.add('is-invisible')
         } else {
           ele.parentNode.parentNode.childNodes[3].classList.remove('is-invisible')
           ele.parentNode.parentNode.childNodes[2].classList.add('is-invisible')
         }
       } else {
         if (ele.id === 'postalNumber') {
+          ele.parentNode.parentNode.parentNode.parentNode.childNodes[4].classList.add('is-invisible')
           ele.parentNode.parentNode.parentNode.parentNode.childNodes[3].classList.add('is-invisible')
-          ele.parentNode.parentNode.parentNode.parentNode.childNodes[2].classList.add('is-invisible')
+        } else if (ele.id === 'tatemono1') {
+          ele.parentNode.parentNode.childNodes[1].classList.add('is-invisible')
+        } else if (ele.id === 'contactPhoneNumber' || ele.id === 'contactMail') {
+          ele.parentNode.parentNode.childNodes[4].classList.add('is-invisible')
+          ele.parentNode.parentNode.childNodes[3].classList.add('is-invisible')
         } else {
           ele.parentNode.parentNode.childNodes[3].classList.add('is-invisible')
           ele.parentNode.parentNode.childNodes[2].classList.add('is-invisible')
@@ -56,6 +69,13 @@ $('#next-btn').addEventListener('click', function (event) {
       $('#contractAddressValErrormessage').classList.remove('is-invisible')
     } else {
       $('#contractAddressValErrormessage').classList.add('is-invisible')
+    }
+
+    // 建物等が形式に合わない場合
+    if ($('#tatemono1').getAttribute('aria-invalid') === 'true') {
+      $('#tatemono1WrongInput').classList.remove('is-invisible')
+    } else {
+      $('#tatemono1WrongInput').classList.add('is-invisible')
     }
   }
 
@@ -77,6 +97,7 @@ $('#next-btn').addEventListener('click', function (event) {
     checkValidations.push($('#contractAddressValErrormessage'))
     checkValidations.push($('#banch1NoInput'))
     checkValidations.push($('#banch1WrongInput'))
+    checkValidations.push($('#tatemono1WrongInput'))
   }
   if ($('#chkContractContact').checked) {
     $('#recontactPersonName').innerHTML = $('#contactPersonName').value

@@ -20,8 +20,8 @@ block content
               .columns.is-centered: .column.is-four-fifths
                 .field.is-grouped.is-grouped-centered
                   .control
-                    div.button-areas
-                      a.button.is-link#cancelltion-button(type="submit") 次へ
+                    div.button-area
+                      a.button.is-link.mr-6#cancelltion-button(type="submit") 次へ
                       a.button#return-btn.cancel-button(href='portal') 戻る
 
         .modal.modal-fx-fadeInScale#cancellation-modal
@@ -46,7 +46,7 @@ block content
 
             footer.modal-card-foot
               div.button-area
-                button.button.is-success#submit.success-button(type="submit" formaction="/cancellation" formmethod="POST") 解約
+                button.button.is-success.mr-6#submit.success-button(type="submit" formaction="/cancellation" formmethod="POST") 解約
                 a.button.cancel-button(data-target='cancellation-modal') キャンセル
   include footer
 

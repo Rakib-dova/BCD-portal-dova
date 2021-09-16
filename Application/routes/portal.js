@@ -86,6 +86,37 @@ const cbGetIndex = async (req, res, next) => {
       })
     })
 
+  // 工事・故障情報取得
+  let constructDataArr = []
+
+  await parser
+    .parseURL('https://support.ntt.com/maintenance/service/rss/050plus')
+    .then((feed) => {
+      if (feed.items.length === 0) {
+        constructDataArr.push({
+          message: constants.portalMsg.NEWS_NONE
+        })
+      } else {
+        const newsLimit = 3
+        constructDataArr = feed.items.map((item) => {
+          const day = new Date(item.date)
+          return {
+            date: `${day.getFullYear()}年${day.getMonth() + 1}月${day.getDate()}日`,
+            title: item.title,
+            link: item.link
+          }
+        })
+        constructDataArr.length = newsLimit < feed.items.length ? newsLimit : feed.items.length
+      }
+    })
+    .catch((error) => {
+      console.error('RSS 取得失敗', error)
+      constructDataArr.length = 0
+      constructDataArr.push({
+        message: constants.portalMsg.NEWS_CONN_ERR
+      })
+    })
+
   // ユーザ権限も画面に送る
   res.render('portal', {
     title: 'ポータル',
@@ -94,7 +125,9 @@ const cbGetIndex = async (req, res, next) => {
     numberN: contract.dataValues?.numberN,
     TS_HOST: process.env.TS_HOST,
     newsDataArr: newsDataArr,
-    newsDataArrSize: newsDataArrSize
+    newsDataArrSize: newsDataArrSize,
+    constructDataArr: constructDataArr,
+    constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0
   })
 }
 

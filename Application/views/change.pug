@@ -53,6 +53,7 @@ block content
                   .field
                     label(for='postalNumber').input-label 郵便番号
                     p#postalNumberRequired.input-label-required.input-label （必須）
+                    p.input-label ※数字7桁　
                     p#postalNumberNoInput.is-invisible.input-label-required(name='errormessage') 未入力です。
                     p#postalNumberWrongInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。
                     .control
@@ -63,9 +64,9 @@ block content
                           .button.is-link#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
 
                   .field
-                    label(for="contractAddressVal").input-label 住所の検索結果
+                    label(for="contractAddressVal").input-label 住所
                     p#contractAddressValRequired.input-label-required.input-label （必須）
-                    p#contractAddressValErrormessage.is-invisible.input-label-required(name='errormessage') 郵便番号を検索して、住所を入力してください
+                    p#contractAddressValErrormessage.is-invisible.input-label-required(name='errormessage') 未入力です。
                     .control
                       input.input#contractAddressVal(type="text" name="contractAddressVal" value readonly)
                   .field
@@ -76,7 +77,8 @@ block content
                     .control
                       input.input#banch1(type="text" name="banch1" value="" pattern=inputPattarnZenkaku maxlength=20 placeholder='全角20文字まで')
                   .field
-                    label(for="tatemono1") 建物等
+                    label(for="tatemono1").input-label 建物等　
+                    p#tatemono1WrongInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。
                     .control
                       input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=80 placeholder='全角80文字まで')
               
@@ -93,6 +95,7 @@ block content
                   .field
                     label(for="contactPhoneNumber").input-label 連絡先電話番号
                     p#contactPhoneNumberRequired.input-label-required.input-label （必須）
+                    p.input-label ※ハイフン含む13桁まで　
                     p#contactPhoneNumberNoInput.is-invisible.input-label-required(name='errormessage') 未入力です。
                     p#contactPhoneNumberWorngInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。                   
                     .control
@@ -100,6 +103,7 @@ block content
                   .field
                     label(for="contactMail").input-label 連絡先メールアドレス
                     p#contactMailRequired.input-label-required.input-label （必須）
+                    p.input-label ※メールアドレス　
                     p#contactMailNoInput.is-invisible.input-label-required(name='errormessage') 未入力です。
                     p#contactMailWorongInput.is-invisible.input-label-required(name='errormessage') 入力値が間違いました。
                     .control
@@ -109,7 +113,7 @@ block content
                 .control
                   .column
                     div.button-area
-                      button.button.is-link#next-btn.success-button(type="button" data-target="confirmmodify-modal" disabled) 確認
+                      button.button.is-link.mr-6#next-btn.success-button(type="button" data-target="confirmmodify-modal" disabled) 確認
                       a.button#return-btn.cancel-button(href="portal") 戻る
                       
             .modal.modal-fx-fadeInscale#confirmmodify-modal
@@ -162,7 +166,7 @@ block content
                         td#recontactMail.checkData    
                 footer.modal-card-foot
                   div.button-area
-                    button.button.is-success#submit.success-button(type="submit" formaction="/change" formmethod="POST") 変更
+                    button.button.is-success.mr-6#submit.success-button(type="submit" formaction="/change" formmethod="POST") 変更
                     a.button.cancel-button(data-target='confirmmodify-modal') キャンセル
 
             .modal.modal-fx-fadeInscale#searchPostalNumber-modal
