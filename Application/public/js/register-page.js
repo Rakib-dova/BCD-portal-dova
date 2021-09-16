@@ -44,6 +44,12 @@ document.getElementById('check').onclick = function () {
 // ----「次へ」ボタンが押された際のバリデーションチェック
 document.getElementById('next-btn').addEventListener('click', function (e) {
   e.preventDefault()
+  // 各項目チェック前にpasswordチェック
+  if ($('#password').value !== $('#passwordConfirm').value) {
+    document.getElementById('password').setAttribute('aria-invalid', 'true')
+    document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'true')
+  }
+
   // 各項目チェック
   const elements = document.querySelectorAll('input')
   const invalidCheckTarget = []
@@ -165,14 +171,6 @@ document.getElementById('next-btn').addEventListener('click', function (e) {
   if (contractAddressVal.value.length === 0 || banch1.value.length === 0) {
     alert('入力されていない必須項目、または、入力形式に誤りがある項目があります。')
     $('#postalNumber').focus()
-    return false
-  }
-
-  // password確認
-  if ($('#password').value !== $('#passwordConfirm').value) {
-    alert('パスワードが一致しません。')
-    document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'true')
-    document.getElementById('passwordConfirm').focus()
     return false
   }
 
