@@ -79,7 +79,7 @@ describe('csvuploadのテスト', () => {
           {
             const invoice = JSON.parse(body)
             if (invoice.ID.value === 'api500error') {
-              let error500 = new Error('Server Internel Error')
+              const error500 = new Error('Server Internel Error')
               error500.response = { status: 500 }
               error500.data = 'Server Internel Error'
               result = error500
@@ -1113,7 +1113,7 @@ describe('csvuploadのテスト', () => {
     Document: [
       {
         DocumentId: '06051d44-fc05-4b89-9ba6-89594e4d7b99',
-        ID: 'UT_TEST_INVOICE_5_1',
+        ID: 'UT_TEST_INVOICE_5_2',
         URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/06051d44-fc05-4b89-9ba6-89594e4d7b99',
         DocumentType: [Object],
         State: 'LOCKED',
@@ -1958,6 +1958,1494 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       expect(response.statusCode).toBe(200)
       expect(response.body).toBe(constantsDefine.statusConstants.OVERLAPPED_INVOICE)
+    })
+
+    test('hotfix1483：請求書【スキップ、成功、スキップ】', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'hotfix1483_1.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+
+      const hotfix1483User = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = hotfix1483User
+      request.body = {
+        filename: 'hotfix1483_1.csv',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      // 請求書テーブルの内容確認
+      expect(invoicesDB[0].csvFileName).toBe('hotfix1483_1.csv')
+      expect(invoicesDB[0].successCount).toBe(2)
+      expect(invoicesDB[0].failCount).toBe(0)
+      expect(invoicesDB[0].skipCount).toBe(4)
+      expect(invoicesDB[0].invoiceCount).toBe(1)
+
+      // 請求書テーブルの内容確認
+      expect(invoiceDetailDB[0].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[0].lines).toBe(1)
+      expect(invoiceDetailDB[0].status).toBe(1)
+      expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[1].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[1].lines).toBe(2)
+      expect(invoiceDetailDB[1].status).toBe(1)
+      expect(invoiceDetailDB[1].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_hotfix_1483_1_success')
+      expect(invoiceDetailDB[2].lines).toBe(3)
+      expect(invoiceDetailDB[2].status).toBe(0)
+      expect(invoiceDetailDB[2].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+
+      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_hotfix_1483_1_success')
+      expect(invoiceDetailDB[3].lines).toBe(4)
+      expect(invoiceDetailDB[3].status).toBe(0)
+      expect(invoiceDetailDB[3].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+
+      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_INVOICE_5_2')
+      expect(invoiceDetailDB[4].lines).toBe(5)
+      expect(invoiceDetailDB[4].status).toBe(1)
+      expect(invoiceDetailDB[4].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_INVOICE_5_2')
+      expect(invoiceDetailDB[5].lines).toBe(6)
+      expect(invoiceDetailDB[5].status).toBe(1)
+      expect(invoiceDetailDB[5].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+    })
+
+    test('hotfix1483：請求書【スキップ、失敗、スキップ】', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'hotfix1483_2.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+
+      const hotfix1483User = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = hotfix1483User
+      request.body = {
+        filename: 'hotfix1483_2.csv',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      // 請求書テーブルの内容確認
+      expect(invoicesDB[0].csvFileName).toBe('hotfix1483_2.csv')
+      expect(invoicesDB[0].successCount).toBe(0)
+      expect(invoicesDB[0].failCount).toBe(2)
+      expect(invoicesDB[0].skipCount).toBe(4)
+      expect(invoicesDB[0].invoiceCount).toBe(0)
+
+      // 請求書テーブルの内容確認
+      expect(invoiceDetailDB[0].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[0].lines).toBe(1)
+      expect(invoiceDetailDB[0].status).toBe(1)
+      expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[1].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[1].lines).toBe(2)
+      expect(invoiceDetailDB[1].status).toBe(1)
+      expect(invoiceDetailDB[1].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_hotfix_1483_2_fail')
+      expect(invoiceDetailDB[2].lines).toBe(3)
+      expect(invoiceDetailDB[2].status).toBe(-1)
+      expect(invoiceDetailDB[2].errorData).toBe(`${constantsDefine.invoiceErrMsg.TAXERR000}`)
+
+      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_hotfix_1483_2_fail')
+      expect(invoiceDetailDB[3].lines).toBe(4)
+      expect(invoiceDetailDB[3].status).toBe(-1)
+      expect(invoiceDetailDB[3].errorData).toBe(`${constantsDefine.invoiceErrMsg.UNITERR000}`)
+
+      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_INVOICE_5_2')
+      expect(invoiceDetailDB[4].lines).toBe(5)
+      expect(invoiceDetailDB[4].status).toBe(1)
+      expect(invoiceDetailDB[4].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_INVOICE_5_2')
+      expect(invoiceDetailDB[5].lines).toBe(6)
+      expect(invoiceDetailDB[5].status).toBe(1)
+      expect(invoiceDetailDB[5].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+    })
+
+    test('hotfix1483：請求書【スキップ、スキップ、スキップ】', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'hotfix1483_3.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+
+      const hotfix1483User = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = hotfix1483User
+      request.body = {
+        filename: 'hotfix1483_3.csv',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      // 請求書テーブルの内容確認
+      expect(invoicesDB[0].csvFileName).toBe('hotfix1483_3.csv')
+      expect(invoicesDB[0].successCount).toBe(0)
+      expect(invoicesDB[0].failCount).toBe(0)
+      expect(invoicesDB[0].skipCount).toBe(6)
+      expect(invoicesDB[0].invoiceCount).toBe(0)
+
+      // 請求書テーブルの内容確認
+      expect(invoiceDetailDB[0].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[0].lines).toBe(1)
+      expect(invoiceDetailDB[0].status).toBe(1)
+      expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[1].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[1].lines).toBe(2)
+      expect(invoiceDetailDB[1].status).toBe(1)
+      expect(invoiceDetailDB[1].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_INVOICE_5_2')
+      expect(invoiceDetailDB[2].lines).toBe(3)
+      expect(invoiceDetailDB[2].status).toBe(1)
+      expect(invoiceDetailDB[2].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_INVOICE_5_2')
+      expect(invoiceDetailDB[3].lines).toBe(4)
+      expect(invoiceDetailDB[3].status).toBe(1)
+      expect(invoiceDetailDB[3].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[4].lines).toBe(5)
+      expect(invoiceDetailDB[4].status).toBe(1)
+      expect(invoiceDetailDB[4].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[5].lines).toBe(6)
+      expect(invoiceDetailDB[5].status).toBe(1)
+      expect(invoiceDetailDB[5].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+    })
+
+    test('hotfix1483：請求書【スキップ、成功、成功】', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'hotfix1483_4.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+
+      const hotfix1483User = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = hotfix1483User
+      request.body = {
+        filename: 'hotfix1483_4.csv',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      // 請求書テーブルの内容確認
+      expect(invoicesDB[0].csvFileName).toBe('hotfix1483_4.csv')
+      expect(invoicesDB[0].successCount).toBe(4)
+      expect(invoicesDB[0].failCount).toBe(0)
+      expect(invoicesDB[0].skipCount).toBe(2)
+      expect(invoicesDB[0].invoiceCount).toBe(2)
+
+      // 請求書テーブルの内容確認
+      expect(invoiceDetailDB[0].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[0].lines).toBe(1)
+      expect(invoiceDetailDB[0].status).toBe(1)
+      expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[1].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[1].lines).toBe(2)
+      expect(invoiceDetailDB[1].status).toBe(1)
+      expect(invoiceDetailDB[1].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_hotfix_1483_4_success_1')
+      expect(invoiceDetailDB[2].lines).toBe(3)
+      expect(invoiceDetailDB[2].status).toBe(0)
+      expect(invoiceDetailDB[2].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+
+      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_hotfix_1483_4_success_1')
+      expect(invoiceDetailDB[3].lines).toBe(4)
+      expect(invoiceDetailDB[3].status).toBe(0)
+      expect(invoiceDetailDB[3].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+
+      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_4_success_2')
+      expect(invoiceDetailDB[4].lines).toBe(5)
+      expect(invoiceDetailDB[4].status).toBe(0)
+      expect(invoiceDetailDB[4].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+
+      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_hotfix_1483_4_success_2')
+      expect(invoiceDetailDB[5].lines).toBe(6)
+      expect(invoiceDetailDB[5].status).toBe(0)
+      expect(invoiceDetailDB[5].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+    })
+
+    test('hotfix1483：請求書【スキップ、失敗、成功】', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'hotfix1483_5.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+
+      const hotfix1483User = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = hotfix1483User
+      request.body = {
+        filename: 'hotfix1483_5.csv',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      // 請求書テーブルの内容確認
+      expect(invoicesDB[0].csvFileName).toBe('hotfix1483_5.csv')
+      expect(invoicesDB[0].successCount).toBe(2)
+      expect(invoicesDB[0].failCount).toBe(2)
+      expect(invoicesDB[0].skipCount).toBe(2)
+      expect(invoicesDB[0].invoiceCount).toBe(1)
+
+      // 請求書テーブルの内容確認
+      expect(invoiceDetailDB[0].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[0].lines).toBe(1)
+      expect(invoiceDetailDB[0].status).toBe(1)
+      expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[1].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[1].lines).toBe(2)
+      expect(invoiceDetailDB[1].status).toBe(1)
+      expect(invoiceDetailDB[1].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_hotfix_1483_5_fail_1')
+      expect(invoiceDetailDB[2].lines).toBe(3)
+      expect(invoiceDetailDB[2].status).toBe(-1)
+      expect(invoiceDetailDB[2].errorData).toBe(constantsDefine.invoiceErrMsg.BANKNAMEERR002)
+
+      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_hotfix_1483_5_fail_1')
+      expect(invoiceDetailDB[3].lines).toBe(4)
+      expect(invoiceDetailDB[3].status).toBe(-1)
+      expect(invoiceDetailDB[3].errorData).toBe(
+        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[3].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+      )
+
+      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_5_success_1')
+      expect(invoiceDetailDB[4].lines).toBe(5)
+      expect(invoiceDetailDB[4].status).toBe(0)
+      expect(invoiceDetailDB[4].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+
+      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_hotfix_1483_5_success_1')
+      expect(invoiceDetailDB[5].lines).toBe(6)
+      expect(invoiceDetailDB[5].status).toBe(0)
+      expect(invoiceDetailDB[5].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+    })
+
+    test('hotfix1483：請求書【スキップ、スキップ、成功】', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'hotfix1483_6.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+
+      const hotfix1483User = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = hotfix1483User
+      request.body = {
+        filename: 'hotfix1483_6.csv',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      // 請求書テーブルの内容確認
+      expect(invoicesDB[0].csvFileName).toBe('hotfix1483_6.csv')
+      expect(invoicesDB[0].successCount).toBe(2)
+      expect(invoicesDB[0].failCount).toBe(0)
+      expect(invoicesDB[0].skipCount).toBe(4)
+      expect(invoicesDB[0].invoiceCount).toBe(1)
+
+      // 請求書テーブルの内容確認
+      expect(invoiceDetailDB[0].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[0].lines).toBe(1)
+      expect(invoiceDetailDB[0].status).toBe(1)
+      expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[1].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[1].lines).toBe(2)
+      expect(invoiceDetailDB[1].status).toBe(1)
+      expect(invoiceDetailDB[1].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_INVOICE_5_2')
+      expect(invoiceDetailDB[2].lines).toBe(3)
+      expect(invoiceDetailDB[2].status).toBe(1)
+      expect(invoiceDetailDB[2].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_INVOICE_5_2')
+      expect(invoiceDetailDB[3].lines).toBe(4)
+      expect(invoiceDetailDB[3].status).toBe(1)
+      expect(invoiceDetailDB[3].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_6_success_1')
+      expect(invoiceDetailDB[4].lines).toBe(5)
+      expect(invoiceDetailDB[4].status).toBe(0)
+      expect(invoiceDetailDB[4].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+
+      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_hotfix_1483_6_success_1')
+      expect(invoiceDetailDB[5].lines).toBe(6)
+      expect(invoiceDetailDB[5].status).toBe(0)
+      expect(invoiceDetailDB[5].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+    })
+
+    test('hotfix1483：請求書【スキップ、成功、失敗】', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'hotfix1483_7.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+
+      const hotfix1483User = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = hotfix1483User
+      request.body = {
+        filename: 'hotfix1483_7.csv',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      // 請求書テーブルの内容確認
+      expect(invoicesDB[0].csvFileName).toBe('hotfix1483_7.csv')
+      expect(invoicesDB[0].successCount).toBe(2)
+      expect(invoicesDB[0].failCount).toBe(2)
+      expect(invoicesDB[0].skipCount).toBe(2)
+      expect(invoicesDB[0].invoiceCount).toBe(1)
+
+      // 請求書テーブルの内容確認
+      expect(invoiceDetailDB[0].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[0].lines).toBe(1)
+      expect(invoiceDetailDB[0].status).toBe(1)
+      expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[1].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[1].lines).toBe(2)
+      expect(invoiceDetailDB[1].status).toBe(1)
+      expect(invoiceDetailDB[1].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_hotfix_1483_7_success_1')
+      expect(invoiceDetailDB[2].lines).toBe(3)
+      expect(invoiceDetailDB[2].status).toBe(0)
+      expect(invoiceDetailDB[2].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+
+      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_hotfix_1483_7_success_1')
+      expect(invoiceDetailDB[3].lines).toBe(4)
+      expect(invoiceDetailDB[3].status).toBe(0)
+      expect(invoiceDetailDB[3].errorData).toBe(constantsDefine.invoiceErrMsg.SUCCESS)
+
+      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_7_fail_1')
+      expect(invoiceDetailDB[4].lines).toBe(5)
+      expect(invoiceDetailDB[4].status).toBe(-1)
+      expect(invoiceDetailDB[4].errorData).toBe(`${constantsDefine.invoiceErrMsg.BANKNAMEERR002}`)
+
+      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_hotfix_1483_7_fail_1')
+      expect(invoiceDetailDB[5].lines).toBe(6)
+      expect(invoiceDetailDB[5].status).toBe(-1)
+      expect(invoiceDetailDB[5].errorData).toBe(
+        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[5].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+      )
+    })
+
+    test('hotfix1483：請求書【スキップ、失敗、失敗】', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'hotfix1483_8.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+
+      const hotfix1483User = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = hotfix1483User
+      request.body = {
+        filename: 'hotfix1483_8.csv',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      // 請求書テーブルの内容確認
+      expect(invoicesDB[0].csvFileName).toBe('hotfix1483_8.csv')
+      expect(invoicesDB[0].successCount).toBe(0)
+      expect(invoicesDB[0].failCount).toBe(4)
+      expect(invoicesDB[0].skipCount).toBe(2)
+      expect(invoicesDB[0].invoiceCount).toBe(0)
+
+      // 請求書テーブルの内容確認
+      expect(invoiceDetailDB[0].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[0].lines).toBe(1)
+      expect(invoiceDetailDB[0].status).toBe(1)
+      expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[1].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[1].lines).toBe(2)
+      expect(invoiceDetailDB[1].status).toBe(1)
+      expect(invoiceDetailDB[1].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_hotfix_1483_8_fail_1')
+      expect(invoiceDetailDB[2].lines).toBe(3)
+      expect(invoiceDetailDB[2].status).toBe(-1)
+      expect(invoiceDetailDB[2].errorData).toBe(constantsDefine.invoiceErrMsg.BANKNAMEERR002)
+
+      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_hotfix_1483_8_fail_1')
+      expect(invoiceDetailDB[3].lines).toBe(4)
+      expect(invoiceDetailDB[3].status).toBe(-1)
+      expect(invoiceDetailDB[3].errorData).toBe(
+        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[3].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+      )
+
+      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_8_fail_2')
+      expect(invoiceDetailDB[4].lines).toBe(5)
+      expect(invoiceDetailDB[4].status).toBe(-1)
+      expect(invoiceDetailDB[4].errorData).toBe(constantsDefine.invoiceErrMsg.BANKNAMEERR002)
+
+      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_hotfix_1483_8_fail_2')
+      expect(invoiceDetailDB[5].lines).toBe(6)
+      expect(invoiceDetailDB[5].status).toBe(-1)
+      expect(invoiceDetailDB[5].errorData).toBe(
+        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[5].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+      )
+    })
+
+    test('hotfix1483：請求書【スキップ、スキップ、失敗】', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const fs = require('fs')
+      const path = require('path')
+      const fileName = 'hotfix1483_9.csv'
+      const filePath = path.resolve(`./testData/${fileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(filePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString('base64')
+
+      const invoicesDB = []
+      const invoiceDetailDB = []
+
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      invoiceController.insert = jest.fn((values) => {
+        const userTenantId = values?.tenantId
+        let tenantRow
+        let tenantId
+        let resultToInsertInvoice
+        if (!userTenantId) {
+          return
+        }
+        try {
+          tenantRow = tenantController.findOne(userTenantId)
+          tenantId = tenantRow?.dataValues?.tenantId
+        } catch (error) {
+          return
+        }
+
+        if (!tenantId) {
+          return
+        }
+
+        try {
+          resultToInsertInvoice = {
+            ...values,
+            tenantId: tenantId
+          }
+          invoicesDB.push(resultToInsertInvoice)
+        } catch (error) {
+          return
+        }
+        return { dataValues: resultToInsertInvoice }
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        const result = { dataValues: null }
+        invoicesDB.forEach((invoiceElement) => {
+          if (invoiceElement.invoicesId === invoice) {
+            result.dataValues = invoiceElement
+          }
+        })
+        return result
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        const invoicesId = values?.invoicesId
+
+        if (!invoicesId) {
+          return
+        }
+
+        const invoiceRow = invoiceController.findInvoice(invoicesId)
+
+        if (!invoiceRow?.dataValues.invoicesId) {
+          return
+        }
+
+        let resultToInsertInvoiceDetail
+
+        try {
+          resultToInsertInvoiceDetail = {
+            ...values,
+            invoicesId: invoiceRow?.dataValues.invoicesId
+          }
+          invoiceDetailDB.push(resultToInsertInvoiceDetail)
+        } catch (error) {}
+        return { dataValues: resultToInsertInvoiceDetail }
+      })
+      invoiceController.updateCount = jest.fn(({ invoicesId, successCount, failCount, skipCount, invoiceCount }) => {
+        try {
+          const invoice = [1]
+          invoicesDB.forEach((invoiceElement) => {
+            if (invoiceElement.invoicesId === invoicesId) {
+              invoiceElement.successCount = successCount
+              invoiceElement.failCount = failCount
+              invoiceElement.skipCount = skipCount
+              invoiceElement.invoiceCount = invoiceCount
+            }
+          })
+          return invoice
+        } catch (error) {
+          return error
+        }
+      })
+
+      const hotfix1483User = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = hotfix1483User
+      request.body = {
+        filename: 'hotfix1483_9.csv',
+        fileData: fileData
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+      // 期待結果
+      // DB内容
+      // 請求書テーブルの内容確認
+      expect(invoicesDB[0].csvFileName).toBe('hotfix1483_9.csv')
+      expect(invoicesDB[0].successCount).toBe(0)
+      expect(invoicesDB[0].failCount).toBe(4)
+      expect(invoicesDB[0].skipCount).toBe(2)
+      expect(invoicesDB[0].invoiceCount).toBe(0)
+
+      // 請求書テーブルの内容確認
+      expect(invoiceDetailDB[0].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[0].lines).toBe(1)
+      expect(invoiceDetailDB[0].status).toBe(1)
+      expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[1].invoiceId).toBe('UT_TEST_INVOICE_5_1')
+      expect(invoiceDetailDB[1].lines).toBe(2)
+      expect(invoiceDetailDB[1].status).toBe(1)
+      expect(invoiceDetailDB[1].errorData).toBe(constantsDefine.invoiceErrMsg.SKIP)
+
+      expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_hotfix_1483_9_fail_1')
+      expect(invoiceDetailDB[2].lines).toBe(3)
+      expect(invoiceDetailDB[2].status).toBe(-1)
+      expect(invoiceDetailDB[2].errorData).toBe(constantsDefine.invoiceErrMsg.BANKNAMEERR002)
+
+      expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_hotfix_1483_9_fail_1')
+      expect(invoiceDetailDB[3].lines).toBe(4)
+      expect(invoiceDetailDB[3].status).toBe(-1)
+      expect(invoiceDetailDB[3].errorData).toBe(
+        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[3].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+      )
+
+      expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_9_fail_2')
+      expect(invoiceDetailDB[4].lines).toBe(5)
+      expect(invoiceDetailDB[4].status).toBe(-1)
+      expect(invoiceDetailDB[4].errorData).toBe(constantsDefine.invoiceErrMsg.BANKNAMEERR002)
+
+      expect(invoiceDetailDB[5].invoiceId).toBe('UT_TEST_hotfix_1483_9_fail_2')
+      expect(invoiceDetailDB[5].lines).toBe(6)
+      expect(invoiceDetailDB[5].status).toBe(-1)
+      expect(invoiceDetailDB[5].errorData).toBe(
+        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[5].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+      )
     })
   })
 
