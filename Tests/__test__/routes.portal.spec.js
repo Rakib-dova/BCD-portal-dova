@@ -112,6 +112,11 @@ describe('portalのテスト', () => {
 
       const constructDataArr = [
         {
+          date: '2021年9月15日',
+          link: 'http://support.ntt.com/maintenance/service/mainteDetail/03597',
+          title: '【工事情報】050 plus　システムメンテナンスのお知らせ'
+        },
+        {
           date: '2021年9月8日',
           link: 'http://support.ntt.com/maintenance/service/mainteDetail/77128',
           title: '【工事情報】050 plus　システムメンテナンスのお知らせ'
@@ -120,11 +125,6 @@ describe('portalのテスト', () => {
           date: '2021年9月7日',
           link: 'http://support.ntt.com/maintenance/service/troubleDetail/35965',
           title: '【故障回復】【訂正】【恐れ】GW設備故障【発生/回復】'
-        },
-        {
-          date: '2021年9月2日',
-          link: 'http://support.ntt.com/maintenance/service/mainteDetail/12751',
-          title: '【工事情報】050 plus　システムメンテナンスのお知らせ'
         }
       ]
 
