@@ -220,7 +220,10 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
   setHeaders.Authorization = `Bearer ${_user.accessToken}`
   setHeaders['Content-Type'] = 'application/json'
 
+  // 明細表示フラグ
   let meisaiFlag = 0
+  // 結果表示フラグ
+  let resultFlag = 0
 
   if (validate.isUndefined(_invoices)) {
     return 101
@@ -267,12 +270,15 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
     // 明細check
     const meisaiLength = invoiceList[idx].INVOICE.getDocument().InvoiceLine.length
 
+    meisaiFlag = 0
+
     if (meisaiLength > 200) {
       logger.error(
         constantsDefine.logMessage.ERR001 + invoiceList[idx].INVOICE.getDocument().ID.value + ' - specificToomuch Error'
       )
       failCount += meisaiLength
       meisaiFlag = 1
+      resultFlag = 1
       const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
       const invoiceId = invoiceList[idx].invoiceId
       const status = -1
@@ -320,6 +326,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
           } else {
             // apiエラーの場合、すべて失敗にカウントする
             meisaiFlag = 4
+            resultFlag = 4
             failCount += invoiceList[idx].successCount
             invoiceList[idx].status = -1
 
@@ -358,18 +365,21 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
         // 請求書の重複
         case 1:
           meisaiFlag = 2
+          resultFlag = 2
           invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SKIP
           skipCount += invoiceList[idx].skipCount
           break
         // アップロードの重複
         case 2:
           meisaiFlag = 2
+          resultFlag = 2
           invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.SKIP
           skipCount += meisaiLength
           invoiceList[idx].status = 1
           break
         case -1:
           meisaiFlag = 3
+          resultFlag = 3
           failCount += invoiceList[idx].failCount
           break
       }
@@ -449,7 +459,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
 
-  switch (meisaiFlag) {
+  switch (resultFlag) {
     case 1:
       return 102
     case 2:
