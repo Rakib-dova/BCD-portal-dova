@@ -2315,12 +2315,12 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[2].invoiceId).toBe('UT_TEST_hotfix_1483_2_fail')
       expect(invoiceDetailDB[2].lines).toBe(3)
       expect(invoiceDetailDB[2].status).toBe(-1)
-      expect(invoiceDetailDB[2].errorData).toBe(`${constantsDefine.invoiceErrMsg.TAXERR000}`)
+      expect(invoiceDetailDB[2].errorData).toBe(`${constantsDefine.invoiceErrMsg.TAXERR001}`)
 
       expect(invoiceDetailDB[3].invoiceId).toBe('UT_TEST_hotfix_1483_2_fail')
       expect(invoiceDetailDB[3].lines).toBe(4)
       expect(invoiceDetailDB[3].status).toBe(-1)
-      expect(invoiceDetailDB[3].errorData).toBe(`${constantsDefine.invoiceErrMsg.UNITERR000}`)
+      expect(invoiceDetailDB[3].errorData).toBe(`${constantsDefine.invoiceErrMsg.UNITERR001}`)
 
       expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_INVOICE_5_2')
       expect(invoiceDetailDB[4].lines).toBe(5)
@@ -2813,7 +2813,7 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[3].lines).toBe(4)
       expect(invoiceDetailDB[3].status).toBe(-1)
       expect(invoiceDetailDB[3].errorData).toBe(
-        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[3].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+        `${constantsDefine.invoiceErrMsg.UNITERR001},${invoiceDetailDB[3].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
       )
 
       expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_5_success_1')
@@ -3153,7 +3153,7 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[5].lines).toBe(6)
       expect(invoiceDetailDB[5].status).toBe(-1)
       expect(invoiceDetailDB[5].errorData).toBe(
-        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[5].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+        `${constantsDefine.invoiceErrMsg.UNITERR001},${invoiceDetailDB[5].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
       )
     })
 
@@ -3309,7 +3309,7 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[3].lines).toBe(4)
       expect(invoiceDetailDB[3].status).toBe(-1)
       expect(invoiceDetailDB[3].errorData).toBe(
-        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[3].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+        `${constantsDefine.invoiceErrMsg.UNITERR001},${invoiceDetailDB[3].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
       )
 
       expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_8_fail_2')
@@ -3321,7 +3321,7 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[5].lines).toBe(6)
       expect(invoiceDetailDB[5].status).toBe(-1)
       expect(invoiceDetailDB[5].errorData).toBe(
-        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[5].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+        `${constantsDefine.invoiceErrMsg.UNITERR001},${invoiceDetailDB[5].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
       )
     })
 
@@ -3477,7 +3477,7 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[3].lines).toBe(4)
       expect(invoiceDetailDB[3].status).toBe(-1)
       expect(invoiceDetailDB[3].errorData).toBe(
-        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[3].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+        `${constantsDefine.invoiceErrMsg.UNITERR001},${invoiceDetailDB[3].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
       )
 
       expect(invoiceDetailDB[4].invoiceId).toBe('UT_TEST_hotfix_1483_9_fail_2')
@@ -3489,7 +3489,7 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[5].lines).toBe(6)
       expect(invoiceDetailDB[5].status).toBe(-1)
       expect(invoiceDetailDB[5].errorData).toBe(
-        `${constantsDefine.invoiceErrMsg.UNITERR000},${invoiceDetailDB[5].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
+        `${constantsDefine.invoiceErrMsg.UNITERR001},${invoiceDetailDB[5].invoiceId}${constantsDefine.invoiceErrMsg.HEADERBEFORERR}`
       )
     })
   })
