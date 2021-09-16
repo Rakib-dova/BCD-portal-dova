@@ -45,8 +45,8 @@ module.exports = {
   ACCOUNTNAME_KEY: '口座名義',
   ACCOUNTNAME_VALUE: 200,
 
-  // その他特事項
-  NOTE_KEY: 'その他特事項',
+  // その他特記事項
+  NOTE_KEY: 'その他特記事項',
   NOTE_VALUE: 1000,
 
   // 明細-項目ID
@@ -68,12 +68,12 @@ module.exports = {
   PRICEVALUE_MAX_VALUE: 1000000000000,
   PRICEVALUE_NUM: '数字',
 
-  // 税
-  TAX_KEY: '税',
+  // 明細-税（消費税／軽減税率／不課税／免税／非課税）
+  TAX_KEY: '明細-税（消費税／軽減税率／不課税／免税／非課税）',
   TAX_VALUE: 11,
 
-  // 単位
-  UNITCODE_KEY: '単位',
+  // 明細-単位
+  UNITCODE_KEY: '明細-単位',
 
   // 明細-備考
   DESCRIPTION_KEY: '明細-備考',
