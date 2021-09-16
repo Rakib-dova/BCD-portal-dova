@@ -44,11 +44,6 @@ document.getElementById('check').onclick = function () {
 // ----「次へ」ボタンが押された際のバリデーションチェック
 document.getElementById('next-btn').addEventListener('click', function (e) {
   e.preventDefault()
-  // 各項目チェック前にpasswordチェック
-  if ($('#password').value !== $('#passwordConfirm').value) {
-    document.getElementById('password').setAttribute('aria-invalid', 'true')
-    document.getElementById('passwordConfirm').setAttribute('aria-invalid', 'true')
-  }
 
   // 各項目チェック
   const elements = document.querySelectorAll('input')
@@ -163,6 +158,49 @@ document.getElementById('next-btn').addEventListener('click', function (e) {
       invalidCheckTarget[focusIdx].focus()
       return false
     }
+  }
+
+  // 各項目チェック前にpasswordチェック
+  if ($('#password').value !== $('#passwordConfirm').value) {
+    if (
+      !(
+        $('#password').parentNode.parentNode.childNodes[3] !== undefined &&
+        $('#password').parentNode.parentNode.childNodes[3].getAttribute('id') === 'caution'
+      )
+    ) {
+      const cautionRequired = document.createElement('div')
+      cautionRequired.classList.add('input-label')
+      cautionRequired.classList.add('input-label-required')
+      cautionRequired.setAttribute('id', 'caution')
+      cautionRequired.innerText = '入力されたパスワードが一致しません。'
+
+      $('#password').parentNode.parentNode.appendChild(cautionRequired)
+      $('#password').parentNode.parentNode.insertBefore(
+        cautionRequired,
+        $('#password').parentNode.parentNode.childNodes[3]
+      )
+    }
+
+    if (
+      !(
+        $('#passwordConfirm').parentNode.parentNode.childNodes[3] !== undefined &&
+        $('#passwordConfirm').parentNode.parentNode.childNodes[3].getAttribute('id') === 'caution'
+      )
+    ) {
+      const cautionRequired = document.createElement('div')
+      cautionRequired.classList.add('input-label')
+      cautionRequired.classList.add('input-label-required')
+      cautionRequired.setAttribute('id', 'caution')
+      cautionRequired.innerText = '入力されたパスワードが一致しません。'
+
+      $('#passwordConfirm').parentNode.parentNode.appendChild(cautionRequired)
+      $('#passwordConfirm').parentNode.parentNode.insertBefore(
+        cautionRequired,
+        $('#passwordConfirm').parentNode.parentNode.childNodes[3]
+      )
+    }
+    $('#password').focus()
+    return false
   }
 
   const contractAddressVal = $('#contractAddressVal')

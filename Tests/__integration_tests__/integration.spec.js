@@ -251,84 +251,84 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 利用登録をしていないため、請求書一括アップロードページ利用できない
-    test('/csvuploadにGET：制御による400ステータスとエラーメッセージ', async () => {
+    test('/csvuploadにGET：制御による500ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/csvupload')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
     })
 
     // 利用登録をしていないため、請求書一括アップロード機能利用できない
-    test('/csvuploadにPOST：制御による400ステータスとエラーメッセージ', async () => {
+    test('/csvuploadにPOST：制御による500ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/csvupload')
         .set('Content-Type', 'application/json')
         .send({ ...csvData })
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
     })
 
-    test('/csvuploadResultにGET：制御による400ステータスとエラーメッセージ:管理者', async () => {
+    test('/csvuploadResultにGET：制御による500ステータスとエラーメッセージ:管理者', async () => {
       const res = await request(app)
         .get('/csvupload')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
     })
 
-    test('/csvuploadResultにGET：制御による400ステータスとエラーメッセージ:一般ユーザー', async () => {
+    test('/csvuploadResultにGET：制御による500ステータスとエラーメッセージ:一般ユーザー', async () => {
       const res = await request(app)
         .get('/csvupload')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
     })
 
     // 利用登録をしていないため、変更ページ利用できない
-    test('/changeにGET：制御による400ステータスとエラーメッセージ', async () => {
+    test('/changeにGET：制御による500ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/change')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
     })
 
     // 利用登録をしていないため、変更機能利用できない
-    test('/changeにPOST：制御による400ステータスとエラーメッセージ', async () => {
+    test('/changeにPOST：制御による500ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/change')
         .send({ ...changeData })
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
     })
 
     // 利用登録をしていないため、解約ページ利用できない
-    test('/cancellationにGET：制御による400ステータスとエラーメッセージ', async () => {
+    test('/cancellationにGET：制御による500ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .get('/cancellation')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
     })
 
     // 利用登録をしていないため、解約機能利用できない
-    test('/cancellationにPOST：制御による400ステータスとエラーメッセージ', async () => {
+    test('/cancellationにPOST：制御による500ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/cancellation')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
     })
   })
 
@@ -1116,6 +1116,45 @@ describe('ルーティングのインテグレーションテスト', () => {
       }
       // '入力値が間違いました。'があること
       expect(clickResult).toBe('入力値が間違いました。')
+    })
+
+    // パスワード一致しない場合
+    test('/tenant/registerにアクセス：パスワード不一致', async () => {
+      let clickResult
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/tenant/register')
+      if (page.url() === 'https://localhost:3000/tenant/register') {
+        await page.evaluate(() => {
+          document.querySelector('#contractorName').value = 'テスト'
+          document.querySelector('#contractorKanaName').value = 'テスト'
+          document.querySelector('#postalNumber').value = '0600000'
+          document.querySelector('#contractAddressVal').value = '北海道札幌市中央区'
+          document.querySelector('#banch1').value = '２番'
+          document.querySelector('#contactPersonName').value = '連絡先担当者名'
+          document.querySelector('#contactPhoneNumber').value = '080-0000-0000'
+          document.querySelector('#contactMail').value = 'test@test.co.jp'
+          document.querySelector('#password').value = 'Abcd1234'
+          document.querySelector('#passwordConfirm').value = 'Abcd12345'
+          document.querySelector('#check').disabled = false
+          document.querySelector('#check').checked = true
+          document.querySelector('#check').value = 'on'
+          document.querySelector('#next-btn').disabled = false
+        })
+
+        await page.waitForTimeout(500)
+
+        const selector = await page.$('#next-btn')
+        await selector.click({ clickCount: 1 })
+        clickResult = await page.evaluate(() => {
+          if (document.getElementById('caution').innerHTML.match('入力されたパスワードが一致しません。') !== null) {
+            return document.getElementById('caution').innerHTML.match('入力されたパスワードが一致しません。')[0]
+          }
+          return null
+        })
+      }
+      // '入力されたパスワードが一致しません。'があること
+      expect(clickResult).toBe('入力されたパスワードが一致しません。')
     })
 
     // 正常にテナントが登録され、ポータルにリダイレクトされる
@@ -2670,9 +2709,9 @@ describe('ルーティングのインテグレーションテスト', () => {
       const res = await request(app)
         .get('/change')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
     test('一般ユーザ、契約ステータス：99, /change', async () => {
@@ -2681,9 +2720,9 @@ describe('ルーティングのインテグレーションテスト', () => {
       const res = await request(app)
         .get('/change')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
     test('管理者、契約ステータス：10, /cancellation', async () => {
@@ -2832,9 +2871,9 @@ describe('ルーティングのインテグレーションテスト', () => {
       const res = await request(app)
         .get('/cancellation')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
     test('一般ユーザ、契約ステータス：99, /cancellation', async () => {
@@ -2843,9 +2882,9 @@ describe('ルーティングのインテグレーションテスト', () => {
       const res = await request(app)
         .get('/cancellation')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
     test('管理者、契約ステータス：10, /csvupload', async () => {
@@ -3156,18 +3195,18 @@ describe('ルーティングのインテグレーションテスト', () => {
       const res = await request(app)
         .get('/csvupload')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
     test('管理者、契約ステータス：99, /csvuploadResult', async () => {
       const res = await request(app)
         .get('/csvuploadResult')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
     test('一般ユーザ、契約ステータス：99, /csvupload', async () => {
@@ -3176,18 +3215,18 @@ describe('ルーティングのインテグレーションテスト', () => {
       const res = await request(app)
         .get('/csvupload')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
     test('一般ユーザ、契約ステータス：99, /csvuploadResult', async () => {
       const res = await request(app)
         .get('/csvuploadResult')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
     test('管理者、契約ステータス：10, /portal', async () => {
@@ -3799,9 +3838,9 @@ describe('ルーティングのインテグレーションテスト', () => {
       const res = await request(app)
         .get('/portal')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
     test('一般ユーザ、契約ステータス：99, /portal', async () => {
@@ -3810,9 +3849,9 @@ describe('ルーティングのインテグレーションテスト', () => {
       const res = await request(app)
         .get('/portal')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
   })
 
