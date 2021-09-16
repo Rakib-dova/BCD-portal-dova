@@ -79,7 +79,7 @@ describe('csvuploadのテスト', () => {
           {
             const invoice = JSON.parse(body)
             if (invoice.ID.value === 'api500error') {
-              let error500 = new Error('Server Internel Error')
+              const error500 = new Error('Server Internel Error')
               error500.response = { status: 500 }
               error500.data = 'Server Internel Error'
               result = error500
@@ -803,6 +803,11 @@ describe('csvuploadのテスト', () => {
 2021-06-15,UT_TEST_INVOICE_4_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test201,testsiten,testbank,普通,1131012,kim_test,201件テストです。,201,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
+  const fileDataNoInvoiceID = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021-08-20,,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-08-16,2021-08-16,PBI318_手動試験,手動銀行,手動支店,普通,1234567,手動,請求書一括作成_1.csv,1,明細,1,個,100000,消費税,PBI318_手動試験`
+  ).toString('base64')
+
   const fileDataInvoiceIDlessthanequal101 = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-15,UT_TEST_INVOICE_5_10000000000000000000000000000000000000000000000000000000000000000000000000000000001,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
@@ -818,6 +823,11 @@ describe('csvuploadのテスト', () => {
 2021-02-29,UT_TEST_INVOICE_7_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
+  const fileDataNoIssueDate = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+,UT_TEST_INVOICE_7_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
+  ).toString('base64')
+
   const fileDataIssueDateTypeErr = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 20210229,UT_TEST_INVOICE_8_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
@@ -826,6 +836,11 @@ describe('csvuploadのテスト', () => {
   const fileDataTenantTypeErr = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-08-20,UT_TEST_INVOICE_9_1,test,2021-08-16,2021-08-16,PBI318_手動試験,手動銀行,手動支店,普通,1234567,手動,請求書一括作成_1.csv,1,明細,1,個,100000,消費税,PBI318_手動試験`
+  ).toString('base64')
+
+  const fileDataNoTenant = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021-08-20,UT_TEST_INVOICE_9_1,,2021-08-16,2021-08-16,PBI318_手動試験,手動銀行,手動支店,普通,1234567,手動,請求書一括作成_1.csv,1,明細,1,個,100000,消費税,PBI318_手動試験`
   ).toString('base64')
 
   const fileDataSellersItemNumlessthanequal201 = Buffer.from(
@@ -1044,6 +1059,36 @@ describe('csvuploadのテスト', () => {
 2021/06/14,UT_TEST_INVOICE_1_1,927635b5-f469-493b-9ce0-b2bfc4062959,2021/03/31,2021/03/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
 2021/06/34,UT_TEST_INVOICE_1_2,927635b5-f469-493b-9ce0-b2bfc4062959,2021/03/31,2021/03/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
 2021/06/14,UT_TEST_INVOICE_1_1,927635b5-f469-493b-9ce0-b2bfc4062959,2021/03/31,2021/03/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
+  ).toString('base64')
+
+  const fileDataNoSellersItemNum = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021/06/14,UT_TEST_INVOICE_1_1,927635b5-f469-493b-9ce0-b2bfc4062959,2021/03/31,2021/03/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,,PC,100,個,100000,消費税,アップロードテスト`
+  ).toString('base64')
+
+  const fileDataNoItemName = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021/06/14,UT_TEST_INVOICE_1_1,927635b5-f469-493b-9ce0-b2bfc4062959,2021/03/31,2021/03/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,,100,個,100000,消費税,アップロードテスト`
+  ).toString('base64')
+
+  const fileDataNoQuantityValue = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021/06/14,UT_TEST_INVOICE_1_1,927635b5-f469-493b-9ce0-b2bfc4062959,2021/03/31,2021/03/17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,スマートフォン,,個,100000,消費税,アップロードテスト`
+  ).toString('base64')
+
+  const fileDataNoPriceValue = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021-06-15,UT_TEST_INVOICE_13_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-18,test200,testsiten,testbank,普通,1111111,kim_test,200件テストです。,001,PC,100,個,,消費税,アップロードテスト`
+  ).toString('base64')
+
+  const noTaxData = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021-08-12,税テスト1,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,普通,2222222,test1,特記事項テスト1です。,001,PC,100,人月,100000,,アップロードテスト1`
+  ).toString('base64')
+
+  const noUnitcodeData = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021-08-12,税テスト1,927635b5-f469-493b-9ce0-b2bfc4062959,2021-06-30,2021-06-30,test222,testsiten,testbank,普通,2222222,test1,特記事項テスト1です。,001,PC,100,,100000,免税,アップロードテスト1`
   ).toString('base64')
 
   const resultGetNetwork = {
@@ -2179,6 +2224,66 @@ describe('csvuploadのテスト', () => {
       expect(resultExt).toBe(102)
     })
 
+    test('準正常：請求書番号バリデーションチェック：未入力', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (!values.errorData.match(SUCCESSMESSAGE) && !values.errorData.match(SKIPMESSAGE)) {
+          resultInvoiceDetailController.push(values)
+        }
+        return values
+      })
+
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataNoInvoiceID), 'base64').toString('utf8')
+
+      createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
+      findOneSpyInvoice.mockReturnValue(invoiceData)
+      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      findOneSypTenant.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+      })
+
+      // 試験実施
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // エラーメッセージが予定通りにある
+      expect(resultInvoiceDetailController[0].errorData).toEqual('請求書番号が未入力です。')
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
     test('準正常：請求書番号バリデーションチェック：101文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
@@ -2296,6 +2401,66 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.BANKNAMEERR000)
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('準正常：発行日バリデーションチェック：未入力', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (!values.errorData.match(SUCCESSMESSAGE) && !values.errorData.match(SKIPMESSAGE)) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataNoIssueDate), 'base64').toString('utf8')
+
+      createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
+      findOneSpyInvoice.mockReturnValue(invoiceData)
+      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      findOneSypTenant.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+      })
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // エラーメッセージが予定通りにある
+      expect(resultInvoiceDetailController[0].errorData).toEqual('発行日が未入力です。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2421,6 +2586,66 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = tmpApiManager
     })
 
+    test('準正常：テナントバリデーションチェック：未入力', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (values.errorData) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataNoTenant), 'base64').toString('utf8')
+
+      createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
+      findOneSpyInvoice.mockReturnValue(invoiceData)
+      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      findOneSypTenant.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+      })
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // エラーメッセージが予定通りにある
+      expect(resultInvoiceDetailController[0].errorData).toEqual('テナントIDが未入力です。')
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
     test('準正常：テナントバリデーションチェック：形式', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
@@ -2478,6 +2703,66 @@ describe('csvuploadのテスト', () => {
       expect(resultInvoiceDetailController[0].errorData).toEqual(
         'テナントIDは正しいテナントIDを入力してください。,テナントIDはネットワーク接続済みのものを入力してください。'
       )
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('準正常：明細-項目IDバリデーションチェック：未入力', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (values.errorData) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataNoSellersItemNum), 'base64').toString('utf8')
+
+      createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
+      findOneSpyInvoice.mockReturnValue(invoiceData)
+      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      findOneSypTenant.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+      })
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // エラーメッセージが予定通りにある
+      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-項目IDが未入力です。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2545,6 +2830,66 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = tmpApiManager
     })
 
+    test('準正常：明細-内容バリデーションチェック：未入力', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (values.errorData) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataNoItemName), 'base64').toString('utf8')
+
+      createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
+      findOneSpyInvoice.mockReturnValue(invoiceData)
+      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      findOneSypTenant.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+      })
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // エラーメッセージが予定通りにある
+      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-内容が未入力です。')
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
     test('準正常：明細-内容バリデーションチェック：501文字以上', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
@@ -2600,6 +2945,69 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual(constantsDefine.invoiceErrMsg.ITEMNAMEERR000)
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('準正常：明細-数量バリデーションチェック：未入力', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (values.errorData) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataNoQuantityValue), 'base64').toString('utf8')
+
+      createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
+      findOneSpyInvoice.mockReturnValue(invoiceData)
+      createSpyinvoicesDetail.mockReturnValue([invoiceDetailData, invoiceDetailData])
+      findOneSypTenant.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+      })
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // エラーメッセージが予定通りにある
+      resultInvoiceDetailController.forEach((invoiceDetail) => {
+        expect(invoiceDetail.errorData).toEqual('明細-数量が未入力です。')
+      })
+
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -2726,6 +3134,66 @@ describe('csvuploadのテスト', () => {
 
       // エラーメッセージが予定通りにある
       expect(resultInvoiceDetailController[0].errorData).toEqual('明細-数量は数字で入力してください。')
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('準正常：明細-単価バリデーションチェック：未入力', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (values.errorData) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileDataNoPriceValue), 'base64').toString('utf8')
+
+      createSpyInvoices.mockReturnValue({ ...invoiceData, filename: filename })
+      findOneSpyInvoice.mockReturnValue(invoiceData)
+      createSpyinvoicesDetail.mockReturnValue(invoiceDetailData)
+      findOneSypTenant.mockReturnValue({
+        dataValues: {
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+      })
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // エラーメッセージが予定通りにある
+      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-単価が未入力です。')
       invoiceController.insert = tmpInsert
       invoiceDetailController.insert = tmpdetailInsert
       apiManager.accessTradeshift = tmpApiManager
@@ -3760,6 +4228,60 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = tmpApiManager
     })
 
+    test('準正常：単位バリデーションチェック：未入力', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (
+          values.errorData !== '正常に取込ました。' &&
+          values.errorData !== '取込済みのため、処理をスキップしました。'
+        ) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(noUnitcodeData), 'base64').toString('utf8')
+
+      // 試験実施
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(resultInvoiceDetailController.length).toBe(1)
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // エラーメッセージが予定通りにある
+      expect(resultInvoiceDetailController[0].errorData).toEqual('明細-単位が未入力です。')
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
     test('準正常：単位バリデーションチェック', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
@@ -3819,7 +4341,63 @@ describe('csvuploadのテスト', () => {
       apiManager.accessTradeshift = tmpApiManager
     })
 
-    test('準正常：税バリデーションチェック', async () => {
+    test('準正常：明細-税（消費税／軽減税率／不課税／免税／非課税）バリデーションチェック：未入力', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+      const tmpApiManager = apiManager.accessTradeshift
+      const resultInvoiceDetailController = []
+
+      invoiceController.insert = jest.fn((values) => {
+        return values
+      })
+      invoiceController.findInvoice = jest.fn((invoice) => {
+        return invoice
+      })
+      invoiceDetailController.insert = jest.fn((values) => {
+        if (
+          values.errorData !== '正常に取込ました。' &&
+          values.errorData !== '取込済みのため、処理をスキップしました。'
+        ) {
+          resultInvoiceDetailController.push(values)
+          return values
+        }
+      })
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(noTaxData), 'base64').toString('utf8')
+
+      // 試験実施
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta)
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(resultInvoiceDetailController.length).toBe(1)
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
+      // エラーメッセージが予定通りにある
+      expect(resultInvoiceDetailController[0].errorData).toEqual(
+        '明細-税（消費税／軽減税率／不課税／免税／非課税）が未入力です。'
+      )
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('準正常：明細-税（消費税／軽減税率／不課税／免税／非課税）バリデーションチェック', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
