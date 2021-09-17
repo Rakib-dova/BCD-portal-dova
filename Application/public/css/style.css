@@ -329,8 +329,8 @@ img.logo-ncom {
   color: #363636;
   justify-content: center;
   padding-bottom: calc(0.5em - 1px);
-  padding-left: 1em;
-  padding-right: 1em;
+  padding-left: auto;
+  padding-right: auto;
   padding-top: calc(0.5em - 1px);
   text-align: center;
   white-space: nowrap;
@@ -381,4 +381,24 @@ img.logo-ncom {
 
 .is-active {
   display: initial;
+}
+
+#btnTabAll.button:focus,
+.tab-selected {
+  border: 3px solid black;
+}
+
+#btnTabSuccess.button:focus,
+.is-success.tab-selected {
+  border: 3px solid black;
+}
+
+#btnTabSkip.button:focus,
+.is-info.tab-selected {
+  border: 3px solid black;
+}
+
+#btnTabFail.button:focus,
+.is-danger.tab-selected {
+  border: 3px solid black;
 }
