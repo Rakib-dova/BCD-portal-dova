@@ -90,7 +90,8 @@ const cbGetIndex = async (req, res, next) => {
   let constructDataArr = []
 
   await parser
-    .parseURL('https://support.ntt.com/maintenance/service/rss/050plus')
+    // .parseURL('https://support.ntt.com/maintenance/service/rss/050plus')
+    .parseURL('https://support.ntt.com/maintenance/service/rss/ipoeadvance')
     .then((feed) => {
       if (feed.items.length === 0) {
         constructDataArr.push({
