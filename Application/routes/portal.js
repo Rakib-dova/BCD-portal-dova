@@ -94,7 +94,7 @@ const cbGetIndex = async (req, res, next) => {
     .then((feed) => {
       if (feed.items.length === 0) {
         constructDataArr.push({
-          message: constants.portalMsg.NEWS_NONE
+          message: constants.portalMsg.MAINTENANCE_NON
         })
       } else {
         const newsLimit = 3
