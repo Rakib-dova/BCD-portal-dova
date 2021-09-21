@@ -269,7 +269,8 @@ describe('ルーティングのインテグレーションテスト', () => {
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(500)
 
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
+      expect(res.text).toMatch(/システムエラーが発生しました。/i)
+      expect(res.text).toMatch(/時間を空けてもう一度アップロードしてください。/i)
     })
 
     test('/csvuploadResultにGET：制御による500ステータスとエラーメッセージ:管理者', async () => {
