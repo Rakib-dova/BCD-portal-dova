@@ -90,11 +90,12 @@ const cbGetIndex = async (req, res, next) => {
   let constructDataArr = []
 
   await parser
-    .parseURL('https://support.ntt.com/maintenance/service/rss/050plus')
+    // .parseURL('https://support.ntt.com/maintenance/service/rss/050plus')
+    .parseURL('https://support.ntt.com/maintenance/service/rss/ipoeadvance')
     .then((feed) => {
       if (feed.items.length === 0) {
         constructDataArr.push({
-          message: constants.portalMsg.NEWS_NONE
+          message: constants.portalMsg.MAINTENANCE_NON
         })
       } else {
         const newsLimit = 3
