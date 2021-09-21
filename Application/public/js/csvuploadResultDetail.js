@@ -16,11 +16,47 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
     const tr = clickBtn.parentNode.parentNode
     const td = tr.children
 
-    $('#invoicesAll').innerHTML = td[4].innerHTML + '件'
-    $('#invoicesCount').innerHTML = td[5].innerHTML + '件'
-    $('#invoicesSuccess').innerHTML = td[6].innerHTML + '件'
-    $('#invoicesSkip').innerHTML = td[7].innerHTML + '件'
-    $('#invoicesFail').innerHTML = td[8].innerHTML + '件'
+    // 取込件数
+    if (td[4].innerHTML === '-') {
+      $('#invoicesAll').innerHTML = td[4].innerHTML
+    } else {
+      $('#invoicesAll').innerHTML = td[4].innerHTML + '件'
+    }
+
+    // 作成完了
+    if (td[6].innerHTML === '-') {
+      $('#invoicesSuccess').innerHTML = td[6].innerHTML
+    } else {
+      $('#invoicesSuccess').innerHTML = td[6].innerHTML + '件'
+    }
+
+    // スキップ
+    if (td[7].innerHTML === '-') {
+      $('#invoicesSkip').innerHTML = td[7].innerHTML
+    } else {
+      $('#invoicesSkip').innerHTML = td[7].innerHTML + '件'
+    }
+
+    // 作成失敗
+    if (td[7].innerHTML === '-') {
+      $('#invoicesFail').innerHTML = td[8].innerHTML
+    } else {
+      $('#invoicesFail').innerHTML = td[8].innerHTML + '件'
+    }
+
+    // 請求書作成数
+    if (td[5].innerHTML === '-') {
+      $('#invoicesCount').innerHTML = td[5].innerHTML
+    } else if (td[5].innerHTML === '') {
+      $('#invoicesCount').innerHTML = td[5].innerHTML
+      $('#tabs').classList.add('is-invisible')
+      $('#detailTable').classList.add('is-invisible')
+      $('#errormessage').innerHTML =
+        '<h3>システムエラーが発生しました。</h3><h3>CSVファイルを確認後もう一度アップロードしてください。</h3><br>'
+      return
+    } else {
+      $('#invoicesCount').innerHTML = td[5].innerHTML + '件'
+    }
 
     // invoiceDetail検索
     const invoicsesId = td[9].defaultValue

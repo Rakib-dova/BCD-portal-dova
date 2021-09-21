@@ -137,9 +137,9 @@ const cbPostUpload = async (req, res, next) => {
     invoicesId: uuidv4(),
     tenantId: req.user.tenantId,
     csvFileName: req.body.filename,
-    successCount: -1,
-    failCount: -1,
-    skipCount: -1
+    successCount: '-',
+    failCount: '-',
+    skipCount: '-'
   })
 
   if (!resultInvoice?.dataValues) {
