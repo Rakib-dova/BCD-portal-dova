@@ -52,7 +52,7 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
       $('#tabs').classList.add('is-invisible')
       $('#detailTable').classList.add('is-invisible')
       $('#errormessage').innerHTML =
-        '<h3>システムエラーが発生しました。</h3><h3>CSVファイルを確認後もう一度アップロードしてください。</h3><br>'
+        '<h3>システムエラーが発生しました。</h3><h3>CSVファイルをもう一度アップロードしてください。</h3><br>'
       return
     } else {
       $('#invoicesCount').innerHTML = td[5].innerHTML + '件'
