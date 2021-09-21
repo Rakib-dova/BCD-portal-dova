@@ -67,6 +67,10 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
             })
             resultDetailTable.innerHTML += detail
           }
+          $('#btnTabAll').classList.add('tab-selected')
+          $('#btnTabSuccess').classList.remove('tab-selected')
+          $('#btnTabSkip').classList.remove('tab-selected')
+          $('#btnTabFail').classList.remove('tab-selected')
         } else {
           const errStatus = requestInvoiceDetail.status
           switch (errStatus) {
@@ -90,6 +94,11 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
 
 // タブ押下 - 全体
 $('#btnTabAll').onclick = function () {
+  $('#btnTabAll').classList.add('tab-selected')
+  $('#btnTabSuccess').classList.remove('tab-selected')
+  $('#btnTabSkip').classList.remove('tab-selected')
+  $('#btnTabFail').classList.remove('tab-selected')
+
   Array.prototype.forEach.call($('.tr-success'), function (ele) {
     ele.classList.remove('is-invisible')
   })
@@ -105,6 +114,11 @@ $('#btnTabAll').onclick = function () {
 
 // タブ押下 - 成功
 $('#btnTabSuccess').onclick = function () {
+  $('#btnTabAll').classList.remove('tab-selected')
+  $('#btnTabSuccess').classList.add('tab-selected')
+  $('#btnTabSkip').classList.remove('tab-selected')
+  $('#btnTabFail').classList.remove('tab-selected')
+
   Array.prototype.forEach.call($('.tr-success'), function (ele) {
     ele.classList.remove('is-invisible')
   })
@@ -120,6 +134,11 @@ $('#btnTabSuccess').onclick = function () {
 
 // タブ押下 - スキップ
 $('#btnTabSkip').onclick = function () {
+  $('#btnTabAll').classList.remove('tab-selected')
+  $('#btnTabSuccess').classList.remove('tab-selected')
+  $('#btnTabSkip').classList.add('tab-selected')
+  $('#btnTabFail').classList.remove('tab-selected')
+
   Array.prototype.forEach.call($('.tr-success'), function (ele) {
     ele.classList.add('is-invisible')
   })
@@ -135,6 +154,11 @@ $('#btnTabSkip').onclick = function () {
 
 // タブ押下 - 失敗
 $('#btnTabFail').onclick = function () {
+  $('#btnTabAll').classList.remove('tab-selected')
+  $('#btnTabSuccess').classList.remove('tab-selected')
+  $('#btnTabSkip').classList.remove('tab-selected')
+  $('#btnTabFail').classList.add('tab-selected')
+
   Array.prototype.forEach.call($('.tr-success'), function (ele) {
     ele.classList.add('is-invisible')
   })

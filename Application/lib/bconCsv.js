@@ -364,28 +364,36 @@ class bconCsv {
           return
         }
 
-        csvColumn[0] = csvColumn[0].replace(/\//g, '-')
-        let issueDateArray = csvColumn[0].split('-')
-        csvColumn[0] = `${issueDateArray[0]}-${'0'.concat(issueDateArray[1]).slice(-2)}-${'0'
-          .concat(issueDateArray[2])
-          .slice(-2)}`
-        switch (validate.isDate(csvColumn[0])) {
-          case 1:
-            errorData += errorData
-              ? `,${constants.invoiceErrMsg['ISSUEDATEERR001']}`
-              : `${constants.invoiceErrMsg['ISSUEDATEERR001']}`
+        if (csvColumn[0] !== '') {
+          csvColumn[0] = csvColumn[0].replace(/\//g, '-')
+          let issueDateArray = csvColumn[0].split('-')
+          csvColumn[0] = `${issueDateArray[0]}-${'0'.concat(issueDateArray[1]).slice(-2)}-${'0'
+            .concat(issueDateArray[2])
+            .slice(-2)}`
+          switch (validate.isDate(csvColumn[0])) {
+            case 1:
+              errorData += errorData
+                ? `,${constants.invoiceErrMsg['ISSUEDATEERR001']}`
+                : `${constants.invoiceErrMsg['ISSUEDATEERR001']}`
 
-            resultConvert.status = -1
-            break
-          case 2:
-            errorData += errorData
-              ? `,${constants.invoiceErrMsg['ISSUEDATEERR000']}`
-              : `${constants.invoiceErrMsg['ISSUEDATEERR000']}`
+              resultConvert.status = -1
+              break
+            case 2:
+              errorData += errorData
+                ? `,${constants.invoiceErrMsg['ISSUEDATEERR000']}`
+                : `${constants.invoiceErrMsg['ISSUEDATEERR000']}`
 
-            resultConvert.status = -1
-            break
-          default:
-            break
+              resultConvert.status = -1
+              break
+            default:
+              break
+          }
+        } else {
+          errorData += errorData
+            ? `,${constants.invoiceErrMsg['ISSUEDATEERR002']}`
+            : `${constants.invoiceErrMsg['ISSUEDATEERR002']}`
+
+          resultConvert.status = -1
         }
 
         parentInvoice.setIssueDate(csvColumn[0])
@@ -404,32 +412,40 @@ class bconCsv {
         resultConvert.invoicesId = element.docNo
         parentInvoice.setInvoiceNumber(csvColumn[1])
 
-        if (!validate.isUUID(csvColumn[2])) {
+        if (csvColumn[2] !== '') {
+          if (!validate.isUUID(csvColumn[2])) {
+            errorData += errorData
+              ? `,${constants.invoiceErrMsg['TENANTERR000']}`
+              : `${constants.invoiceErrMsg['TENANTERR000']}`
+
+            resultConvert.status = -1
+          }
+
+          const resultcheckNetworkConnection = validate.checkNetworkConnection(
+            bconCsv.prototype.companyNetworkConnectionList,
+            csvColumn[2]
+          )
+
+          switch (resultcheckNetworkConnection) {
+            case '':
+              break
+            case 'INTERNALERR000':
+              resultConvert.status = -1
+              break
+            default:
+              errorData += errorData
+                ? `,${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
+                : `${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
+
+              resultConvert.status = -1
+              break
+          }
+        } else {
           errorData += errorData
-            ? `,${constants.invoiceErrMsg['TENANTERR000']}`
-            : `${constants.invoiceErrMsg['TENANTERR000']}`
+            ? `,${constants.invoiceErrMsg['TENANTERR001']}`
+            : `${constants.invoiceErrMsg['TENANTERR001']}`
 
           resultConvert.status = -1
-        }
-
-        const resultcheckNetworkConnection = validate.checkNetworkConnection(
-          bconCsv.prototype.companyNetworkConnectionList,
-          csvColumn[2]
-        )
-
-        switch (resultcheckNetworkConnection) {
-          case '':
-            break
-          case 'INTERNALERR000':
-            resultConvert.status = -1
-            break
-          default:
-            errorData += errorData
-              ? `,${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
-              : `${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
-
-            resultConvert.status = -1
-            break
         }
 
         parentInvoice.setCustomerTennant(csvColumn[2])
@@ -672,6 +688,13 @@ class bconCsv {
 
           resultConvert.status = -1
           break
+        case 'UNITERR001':
+          errorData += errorData
+            ? `,${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
+            : `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
+
+          resultConvert.status = -1
+          break
         default:
           csvColumn[15] = validate.isUnitcode(csvColumn[15])
           break
@@ -691,6 +714,13 @@ class bconCsv {
 
       switch (validate.isTaxCategori(csvColumn[17])) {
         case 'TAXERR000':
+          errorData += errorData
+            ? `,${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
+            : `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
+
+          resultConvert.status = -1
+          break
+        case 'TAXERR001':
           errorData += errorData
             ? `,${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
             : `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
