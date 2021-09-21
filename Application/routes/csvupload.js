@@ -77,29 +77,41 @@ const cbPostUpload = async (req, res, next) => {
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
   const invoiceController = require('../controllers/invoiceController')
   if (!req.session || !req.user?.userId) {
-    return next(errorHelper.create(500))
+    setErrorLog(req, 500)
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
 
   const user = await userController.findOne(req.user.userId)
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
-  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+
+  if (user instanceof Error || user === null) {
+    setErrorLog(req, 500)
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  }
+  if (user.dataValues?.userStatus !== 0) {
+    setErrorLog(req, 500)
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  }
 
   // DBから契約情報取得
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+  if (contract instanceof Error || contract === null) {
+    setErrorLog(req, 500)
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  }
 
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
 
   const checkContractStatus = helper.checkContractStatus
   if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
+    setErrorLog(req, 500)
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return next(noticeHelper.create('cancelprocedure'))
+    return res.status(400).send()
   }
 
   req.session.userContext = 'LoggedIn'
@@ -116,7 +128,11 @@ const cbPostUpload = async (req, res, next) => {
     BconCsv.prototype.companyNetworkConnectionList = await getNetwork(userToken)
   }
   // csvアップロード
-  if (cbUploadCsv(filePath, filename, uploadCsvData) === false) return next(errorHelper.create(500))
+  if (cbUploadCsv(filePath, filename, uploadCsvData) === false) {
+    setErrorLog(req, 500)
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  }
+
   const resultInvoice = await invoiceController.insert({
     invoicesId: uuidv4(),
     tenantId: req.user.tenantId,
@@ -149,7 +165,10 @@ const cbPostUpload = async (req, res, next) => {
   }
 
   // csv削除
-  if (cbRemoveCsv(filePath, filename) === false) return next(errorHelper.create(500))
+  if (cbRemoveCsv(filePath, filename) === false) {
+    setErrorLog(req, 500)
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
 
@@ -520,6 +539,25 @@ const getNetwork = async (_userToken) => {
   } while (currPage < numPages)
 
   return connections
+}
+
+const setErrorLog = async (req, errorCode) => {
+  const err = errorHelper.create(errorCode)
+  const errorStatus = err.status
+
+  // output log
+  // ログには生のエラー情報を吐く
+  const logMessage = { status: errorStatus, path: req.path }
+
+  // ログインしていればユーザID、テナントIDを吐く
+  if (req.user?.userId && req.user?.tenantId) {
+    logMessage.tenant = req.user.tenantId
+    logMessage.user = req.user.userId
+  }
+
+  logMessage.stack = err.stack
+
+  logger.error(logMessage, err.name)
 }
 
 router.get('/', helper.isAuthenticated, cbGetIndex)

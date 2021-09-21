@@ -1693,12 +1693,12 @@ describe('csvuploadのテスト', () => {
       await csvupload.cbPostUpload(request, response, next)
 
       // 期待結果
-      // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
-      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+      // response.statusが「400」
+      expect(response.status).toHaveBeenCalledWith(400)
+      expect(response.send).toHaveBeenCalledWith()
     })
 
     test('正常：解約受取中の場合', async () => {
@@ -1726,8 +1726,9 @@ describe('csvuploadのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
-      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+      // response.statusが「400」
+      expect(response.status).toHaveBeenCalledWith(400)
+      expect(response.send).toHaveBeenCalledWith()
     })
 
     test('500エラー:不正なContractデータの場合', async () => {
@@ -1756,8 +1757,9 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      // response.statusが「500」で予想したsendデータである
+      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
     })
 
     test('500エラー：cbUploadCsv return false', async () => {
@@ -1782,8 +1784,9 @@ describe('csvuploadのテスト', () => {
       await csvupload.cbPostUpload(request, response, next)
 
       // 期待結果
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      // response.statusが「500」で予想したsendデータである
+      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
     })
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
@@ -1796,8 +1799,9 @@ describe('csvuploadのテスト', () => {
       await csvupload.cbPostUpload(request, response, next)
 
       // 期待結果
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      // response.statusが「500」で予想したsendデータである
+      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
     })
 
     test('500エラー：DBからユーザが取得できなかった(null)場合', async () => {
@@ -1815,8 +1819,9 @@ describe('csvuploadのテスト', () => {
       await csvupload.cbPostUpload(request, response, next)
 
       // 期待結果
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      // response.statusが「500」で予想したsendデータである
+      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
     })
 
     test('404エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
@@ -1836,8 +1841,9 @@ describe('csvuploadのテスト', () => {
       await csvupload.cbPostUpload(request, response, next)
 
       // 期待結果
-      // 404エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(error404)
+      // response.statusが「500」で予想したsendデータである
+      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
     })
 
     test('正常：請求書数100件', async () => {
