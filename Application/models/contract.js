@@ -10,7 +10,9 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Contract.belongsTo(models.Tenant, {
         foreignKey: 'tenantId', // k1を指定
-        targetKey: 'tenantId' // k2を指定
+        targetKey: 'tenantId', // k2を指定
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
       })
     }
   }

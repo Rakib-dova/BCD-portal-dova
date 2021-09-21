@@ -13,7 +13,8 @@ module.exports = (sequelize, DataTypes) => {
       Invoice.belongsTo(models.Tenant, {
         foreignKey: 'tenantId', // k1を指定
         targetKey: 'tenantId', // k2を指定
-        onDelete: 'cascade'
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
       })
     }
   }
