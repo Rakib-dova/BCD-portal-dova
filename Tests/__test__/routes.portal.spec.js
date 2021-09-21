@@ -111,6 +111,7 @@ describe('portalのテスト', () => {
       ]
 
       const constructDataArr = [
+        /*
         {
           date: '2021年9月15日',
           link: 'http://support.ntt.com/maintenance/service/mainteDetail/03597',
@@ -125,6 +126,10 @@ describe('portalのテスト', () => {
           date: '2021年9月7日',
           link: 'http://support.ntt.com/maintenance/service/troubleDetail/35965',
           title: '【故障回復】【訂正】【恐れ】GW設備故障【発生/回復】'
+        }
+        */
+        {
+          message: '現在、工事故障情報はありません。'
         }
       ]
 
@@ -142,7 +147,8 @@ describe('portalのテスト', () => {
       // response.renderでportalが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('portal', {
         constructDataArr: constructDataArr,
-        constructDataArrSize: 3,
+        // constructDataArrSize: 3,
+        constructDataArrSize: 0,
         newsDataArr: newsDataArrData,
         newsDataArrSize: 15,
         title: 'ポータル',
