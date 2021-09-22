@@ -10,12 +10,14 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Order.belongsTo(models.Contract, {
         foreignKey: 'contractId',
-        targetKey: 'contractId'
-      }),
-        Order.belongsTo(models.Contract, {
-          foreignKey: 'tenantId',
-          targetKey: 'tenantId'
-        })
+        targetKey: 'contractId',
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      })
+      Order.belongsTo(models.Contract, {
+        foreignKey: 'tenantId',
+        targetKey: 'tenantId'
+      })
     }
   }
   Order.init(
