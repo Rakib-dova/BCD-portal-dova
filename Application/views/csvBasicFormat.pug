@@ -19,7 +19,7 @@ block content
                     label(for="uploadFormatItemName").input-label 設定名称
                     p#uploadFormatItemNameeRequired.input-label-required.input-label （必須）
                     .control
-                      input.input#uploadFormatItemName(type="text" name="uploadFormatItemName" value="")
+                      input.input#uploadFormatItemName(type="text" name="uploadFormatItemName" value="" required)
                   .field
                     label(for="uploadType").input-label アップロード種別
                     .control
@@ -28,20 +28,20 @@ block content
                     label(for="dataFile").input-label データファイル
                     p#dataFileRequired.input-label-required.input-label （必須）
                     .control
-                     .columns.ml-0.pl-0
-                      .column.pl-0
-                        input.input#dataFileName.td-overflow(type="text" name="dataFileName" value="" readonly)
-                      .column
-                        label.button.is-link(for="dataFile") ファイル選択
-                        input.is-invisible#dataFile(type="file" name="dataFile" accept=".csv")
+                      .columns.ml-0.pl-0
+                        .column.pl-0
+                          input.input#dataFileName.td-overflow(type="text" name="dataFileName" readonly)
+                        .column
+                          label.button.is-link(for="dataFile") ファイル選択
+                          input.is-invisible#dataFile(type="file" name="dataFile" accept=".csv" required)
                   .field.mt-6
                     label.input-label 項目名の行有無
                     p#dataFileRequired.input-label-required.input-label （必須）
                     .control
                       .column
-                        input#checkItemNameLineOn(type='radio' name='checkItemNameLine' value='on' checked)
+                        input#checkItemNameLineOn(type='radio' name='checkItemNameLine' value='on' required checked)
                         label.mr-6(for="checkItemNameLineOn") あり
-                        input#checkItemNameLineOff(type='radio' name='checkItemNameLine' value='off')
+                        input#checkItemNameLineOff(type='radio' name='checkItemNameLine' value='off' required)
                         label(for="checkItemNameLineOff") なし
                   .field
                     label(for="uploadFormatNumber").input-label 項目名の行番号
