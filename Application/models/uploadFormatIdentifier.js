@@ -55,7 +55,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'UploadFormatIdentifier'
+      modelName: 'UploadFormatIdentifier',
+      tableName: 'UploadFormatIdentifier'
     }
   )
   return UploadFormatIdentifier
