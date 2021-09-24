@@ -1,0 +1,222 @@
+﻿extends layout
+
+block content
+  .max-width  
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans プロードフォーマット設定
+        .subtitle.is-family-noto-sans 対応する取込データを設定してください
+    .container
+      .columns
+        .column
+          .title.is-family-noto-sans 取込データ
+          .box
+            table.table.is-fullwidth.is-hoverable
+              thead
+                tr
+                  th.text-center データ番号
+                  th.text-center 項目名
+                  th.text-center データ内容
+              tbody
+                tr
+                  th.text-center 1
+                  th.text-center AAA
+                  th.text-center aaa
+        .column
+          .title.is-family-noto-sans 請求書データ用フォーマット
+          .box
+            table.table.is-fullwidth.is-hoverable
+              thead
+                tr
+                  th.text-center 項目名
+                  th.text-center 対応するデータ番号
+              tbody
+                tr
+                  th 
+                    label.input-label 発行日
+                    p.input-label-required.input-label （必須）
+                    p.errormessage.input-label-required 　
+                  td.text-center
+                    select.is-11.requiredItem#issueDate(name="isssueDate")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+                tr
+                  th
+                    label.input-label 請求書番号
+                    p.input-label-required.input-label （必須）
+                    p.errormessage.input-label-required
+                  td.text-center
+                    select.is-11.requiredItem#invoiceNumber(name="invoiceNumber")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+                tr
+                  th
+                    label.input-label テナントID
+                    p.input-label-required.input-label （必須）
+                    p.errormessage.input-label-required                  
+                  td.text-center
+                    select.is-11.requiredItem#tenantId(name="tenantId")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+                tr
+                  th
+                    label.input-label 支払期日
+                    p.input-label-required.input-label （必須）
+                    p.errormessage.input-label-required 
+                  td.text-center
+                    select.is-11.requiredItem#issueDate(name="isssueDate")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+                tr
+                  th 
+                    label.input-label 納品日
+                    p.input-label-required.input-label （必須）
+                    p.errormessage.input-label-required 
+                  td.text-center
+                    select.is-11.requiredItem#issueDate(name="isssueDate")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+
+                tr
+                  th 
+                    label.input-label 備考
+                    p.errormessage.input-label-required 
+                  td.text-center
+                    select.is-11#issueDate(name="isssueDate")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+
+                tr
+                  th
+                    label.input-label 銀行名
+                    p.errormessage.input-label-required
+                  td.text-center
+                    select.is-11#issueDate(name="isssueDate")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+
+                tr
+                  th
+                    label.input-label 支店名
+                    p.errormessage.input-label-required
+                  td.text-center
+                    select.is-11#issueDate(name="isssueDate")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+
+                tr
+                  th
+                    label.input-label 科目
+                    p.errormessage.input-label-required
+                  td.text-center
+                    select.is-11#issueDate(name="isssueDate")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+
+                tr
+                  th 
+                    label.input-label 口座番号
+                    p.errormessage.input-label-required
+                  td.text-center
+                    select.is-11#issueDate(name="isssueDate")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+
+                tr
+                  th 
+                    label.input-label 口座名義
+                    p.errormessage.input-label-required
+                  td.text-center
+                    select.is-11#issueDate(name="isssueDate")
+                      option(value='') 選択してください 
+                      option(value="1") 1 
+
+                tr
+                  th
+                    label.input-label その他特記事項
+                    p.errormessage.input-label-required
+                  td.text-center
+                    select.is-11#issueDate(name="isssueDate")
+                      option(value='') 選択してください 
+                      option(value="1") 1 
+ 
+                tr
+                  th
+                    label.input-label 明細-項目ID
+                    p.input-label-required.input-label （必須）
+                    p.errormessage.input-label-required
+                  td.text-center
+                    select.is-11.requiredItem#issueDate(name="isssueDate")
+                      option(value='') 選択してください 
+                      option(value="1") 1 
+
+                tr
+                  th
+                    label.input-label 明細-内容
+                    p.input-label-required.input-label （必須）
+                    p.errormessage.input-label-required
+                  td.text-center
+                    select.is-11.requiredItem#issueDate(name="isssueDate")
+                      option(value='') 選択してください 
+                      option(value="1") 1 
+
+                tr
+                  th 
+                    label.input-label 明細-数量
+                    p.input-label-required.input-label （必須）
+                    p.errormessage.input-label-required
+                  td.text-center
+                    select.is-11.requiredItem#issueDate(name="isssueDate")
+                      option(value='') 選択してください 
+                      option(value="1") 1 
+
+                tr
+                  th
+                    label.input-label 明細-単位
+                    p.input-label-required.input-label （必須）
+                    p.errormessage.input-label-required                  
+                  td.text-center
+                    select.is-11.requiredItem#issueDate(name="isssueDate")
+                      option(value='') 選択してください 
+                      option(value="1") 1 
+
+                tr
+                  th
+                    label.input-label 明細-単価
+                    p.input-label-required.input-label （必須）
+                    p.errormessage.input-label-required 
+                  td.text-center
+                    select.is-11.requiredItem#issueDate(name="isssueDate")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+
+                tr
+                  th 
+                    label.input-label 明細-税
+                    p.input-label-required.input-label （必須）
+                    p.errormessage.input-label-required 　
+                    p （消費税／軽減税率／不課税／免税／非課税）
+                  td.text-center
+                    select.is-11.requiredItem#issueDate(name="isssueDate")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+
+                tr
+                  th 
+                    label.input-label 明細-備考
+                    p.errormessage.input-label-required
+                  td.text-center
+                    select.is-11#issueDate(name="isssueDate")
+                      option(value='') 選択してください
+                      option(value="1") 1 
+
+      footer.modal-card-foot
+        div.button-area
+          button.button.mr-6(type="" formaction="/csvBasicFormat" formmethod="") 戻る
+          a.button.is-success.success-button#confirmBtn 確認
+
+    include footer
+
+block append scripts
+  script(src="/js/uploadFormat.js")
+
