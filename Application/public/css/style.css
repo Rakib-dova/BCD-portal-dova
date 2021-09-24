@@ -402,3 +402,7 @@ img.logo-ncom {
 .is-danger.tab-selected {
   border: 3px solid black;
 }
+
+.alignCenterChild:last-child {
+  align-items: center;
+}
