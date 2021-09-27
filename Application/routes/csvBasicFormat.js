@@ -243,5 +243,6 @@ router.post('/', cbPostCsvBasicFormat)
 module.exports = {
   router: router,
   cbGetCsvBasicFormat: cbGetCsvBasicFormat,
-  cbPostCsvBasicFormat: cbPostCsvBasicFormat
+  cbPostCsvBasicFormat: cbPostCsvBasicFormat,
+  fileUpload: fileUpload
 }
