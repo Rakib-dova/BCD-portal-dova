@@ -13,6 +13,7 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const { v4: uuidv4 } = require('uuid')
+const url = require('url')
 
 const cbGetCsvBasicFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvBasicFormat')
@@ -103,7 +104,11 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
     { name: 'その他', id: 'keyOthers' }
   ]
 
-  res.render('csvBasicFormat', { csvTax: csvTax, csvUnit: csvUnit })
+  res.render('csvBasicFormat', { 
+    csvTax: csvTax, 
+    csvUnit: csvUnit,
+    TS_HOST: process.env.TS_HOST 
+  })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetFormtuploadIndex')
 }
 
@@ -116,7 +121,7 @@ const cbPostCsvBasicFormat = async (req, res, next) => {
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
-  const uploadCsvData = Buffer.from(decodeURIComponent(req.body.dataFile), 'base64').toString('utf8')
+  const uploadCsvData = Buffer.from(decodeURIComponent(req.body.hiddenFileData), 'base64').toString('utf8')
 
   const filePath = process.env.INVOICE_UPLOAD_PATH
 
@@ -191,15 +196,18 @@ const cbPostCsvBasicFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostCsvBasicFormat')
 
   // 画面送信
-  res.render('uploadFormat', {
-    tenantId: req.user.tenantId,
-    userRole: req.session.userRole,
-    numberN: contract.dataValues?.numberN,
-    TS_HOST: process.env.TS_HOST,
-    csvBasicArr: csvBasicArr,
-    taxArr: taxArr,
-    unitArr: unitArr
-  })
+  res.redirect(307, url.format({
+    pathname:'/uploadFormat',
+    body: {
+      tenantId: req.user.tenantId,
+      userRole: req.session.userRole,
+      numberN: contract.dataValues?.numberN,
+      TS_HOST: process.env.TS_HOST,
+      csvBasicArr: csvBasicArr,
+      taxArr: taxArr,
+      unitArr: unitArr
+    }
+  }))
 }
 
 const fileUpload = (_filePath, _filename, _uploadCsvData) => {
@@ -230,10 +238,10 @@ const fileUpload = (_filePath, _filename, _uploadCsvData) => {
 }
 
 router.get('/', helper.isAuthenticated, cbGetCsvBasicFormat)
-router.post('/', helper.isAuthenticated, cbPostCsvBasicFormat)
+router.post('/', cbPostCsvBasicFormat)
 
 module.exports = {
   router: router,
-  cbGetChangeIndex: cbGetCsvBasicFormat,
+  cbGetCsvBasicFormat: cbGetCsvBasicFormat,
   cbPostCsvBasicFormat: cbPostCsvBasicFormat
 }
