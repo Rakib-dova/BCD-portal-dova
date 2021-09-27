@@ -18,10 +18,11 @@ block content
                   th.text-center 項目名
                   th.text-center データ内容
               tbody
-                tr
-                  th.text-center 1
-                  th.text-center AAA
-                  th.text-center aaa
+                each content, index in testData
+                  tr
+                    th.text-center= index+1
+                    th.text-center= content.item
+                    th.text-center= content.value
         .column
           .title.is-family-noto-sans 請求書データ用フォーマット
           .box
@@ -39,7 +40,8 @@ block content
                   td.text-center
                     select.is-11.requiredItem#issueDate(name="isssueDate")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
                 tr
                   th
                     label.input-label 請求書番号
@@ -48,7 +50,8 @@ block content
                   td.text-center
                     select.is-11.requiredItem#invoiceNumber(name="invoiceNumber")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
                 tr
                   th
                     label.input-label テナントID
@@ -57,7 +60,8 @@ block content
                   td.text-center
                     select.is-11.requiredItem#tenantId(name="tenantId")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
                 tr
                   th
                     label.input-label 支払期日
@@ -66,7 +70,8 @@ block content
                   td.text-center
                     select.is-11.requiredItem#issueDate(name="isssueDate")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
                 tr
                   th 
                     label.input-label 納品日
@@ -75,7 +80,8 @@ block content
                   td.text-center
                     select.is-11.requiredItem#issueDate(name="isssueDate")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th 
@@ -84,7 +90,8 @@ block content
                   td.text-center
                     select.is-11#issueDate(name="isssueDate")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th
@@ -93,7 +100,8 @@ block content
                   td.text-center
                     select.is-11#issueDate(name="isssueDate")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th
@@ -102,7 +110,8 @@ block content
                   td.text-center
                     select.is-11#issueDate(name="isssueDate")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th
@@ -111,7 +120,8 @@ block content
                   td.text-center
                     select.is-11#issueDate(name="isssueDate")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th 
@@ -120,7 +130,8 @@ block content
                   td.text-center
                     select.is-11#issueDate(name="isssueDate")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th 
@@ -128,8 +139,9 @@ block content
                     p.errormessage.input-label-required
                   td.text-center
                     select.is-11#issueDate(name="isssueDate")
-                      option(value='') 選択してください 
-                      option(value="1") 1 
+                      option(value='') 選択してください
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th
@@ -137,8 +149,9 @@ block content
                     p.errormessage.input-label-required
                   td.text-center
                     select.is-11#issueDate(name="isssueDate")
-                      option(value='') 選択してください 
-                      option(value="1") 1 
+                      option(value='') 選択してください
+                      each content, index in testData
+                        option(value= index)= index+1 
  
                 tr
                   th
@@ -147,8 +160,9 @@ block content
                     p.errormessage.input-label-required
                   td.text-center
                     select.is-11.requiredItem#issueDate(name="isssueDate")
-                      option(value='') 選択してください 
-                      option(value="1") 1 
+                      option(value='') 選択してください
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th
@@ -157,8 +171,9 @@ block content
                     p.errormessage.input-label-required
                   td.text-center
                     select.is-11.requiredItem#issueDate(name="isssueDate")
-                      option(value='') 選択してください 
-                      option(value="1") 1 
+                      option(value='') 選択してください
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th 
@@ -167,8 +182,9 @@ block content
                     p.errormessage.input-label-required
                   td.text-center
                     select.is-11.requiredItem#issueDate(name="isssueDate")
-                      option(value='') 選択してください 
-                      option(value="1") 1 
+                      option(value='') 選択してください
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th
@@ -177,8 +193,9 @@ block content
                     p.errormessage.input-label-required                  
                   td.text-center
                     select.is-11.requiredItem#issueDate(name="isssueDate")
-                      option(value='') 選択してください 
-                      option(value="1") 1 
+                      option(value='') 選択してください
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th
@@ -188,7 +205,8 @@ block content
                   td.text-center
                     select.is-11.requiredItem#issueDate(name="isssueDate")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th 
@@ -199,7 +217,8 @@ block content
                   td.text-center
                     select.is-11.requiredItem#issueDate(name="isssueDate")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
 
                 tr
                   th 
@@ -208,7 +227,8 @@ block content
                   td.text-center
                     select.is-11#issueDate(name="isssueDate")
                       option(value='') 選択してください
-                      option(value="1") 1 
+                      each content, index in testData
+                        option(value= index)= index+1
 
       footer.modal-card-foot
         div.button-area
