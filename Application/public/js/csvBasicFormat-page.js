@@ -1,3 +1,7 @@
+const uploader = document.getElementById('form')
+let fileReader = null
+let targetFile = null
+
 document.getElementById('checkItemNameLineOn').onclick = function () {
   document.getElementById('uploadFormatNumber').readOnly = false
 }
@@ -8,10 +12,19 @@ document.getElementById('checkItemNameLineOff').onclick = function () {
 
 document.getElementById('dataFile').addEventListener('change', function (e) {
   document.getElementById('dataFileName').value = this.files.item(0).name
+
+  targetFile = document.getElementById('dataFile').files.item(0)
+  if (targetFile !== null) {
+    fileReader = new FileReader()
+    fileReader.readAsBinaryString(targetFile)
+    fileReader.onload = function () {
+      document.getElementById('hiddenFileData').value = btoa(fileReader.result)
+      console.log(btoa(fileReader.result))
+    }
+  }
 })
 
 document.getElementById('submit').addEventListener('click', function (e) {
-  e.preventDefault()
 
   // 各項目チェック
   const elements = document.querySelectorAll('input')
