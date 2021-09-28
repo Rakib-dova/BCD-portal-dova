@@ -133,7 +133,9 @@ const cbPostIndex = async (req, res, next) => {
     })
   }
   // 配列に読み込んだcsvデータを入れる。
-  const csvData = headerArr.map((header) => { return { item: header, value: '' } })
+  const csvData = headerArr.map((header) => {
+    return { item: header, value: '' }
+  })
 
   mesaiArr.map((mesai, idx) => {
     csvData[idx].value = mesai
@@ -375,6 +377,8 @@ const cbPostDBIndex = async (req, res, next) => {
 // CSVファイル削除機能
 const cbRemoveCsv = (_deleteDataPath, _filename) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
+  console.log(_deleteDataPath)
+  console.log(_filename)
   const deleteFile = path.join(_deleteDataPath, '/' + _filename)
   if (fs.existsSync(deleteFile)) {
     fs.unlinkSync(deleteFile)
