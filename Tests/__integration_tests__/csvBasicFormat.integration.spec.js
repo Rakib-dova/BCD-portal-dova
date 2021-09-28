@@ -431,7 +431,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       await page.type('#keyTonnage', 'tng')
       await page.type('#keyOthers', 'zz')
 
-      //await page.click('#submit')
+      await page.click('#submit')
       await page.waitForTimeout(3000)
 
       const noInputResult = await page.evaluate(() => {
