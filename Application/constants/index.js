@@ -5,6 +5,7 @@ const userRoleConstants = require('./userRole.js')
 const invoiceErrMsg = require('./invoiceErrMsg.js')
 const invoiceValidDefine = require('./invoiceValidDefine')
 const portalMsg = require('./portalMsg.js')
+const csvFormatDefine = require('./csvFormatDefine.js')
 
 module.exports = {
   logMessage,
@@ -13,5 +14,6 @@ module.exports = {
   userRoleConstants,
   invoiceErrMsg,
   invoiceValidDefine,
-  portalMsg
+  portalMsg,
+  csvFormatDefine
 }

@@ -1,48 +1,59 @@
-const uploader = document.getElementById('form')
 let fileReader = null
 let targetFile = null
 
 document.getElementById('checkItemNameLineOn').onclick = function () {
   document.getElementById('uploadFormatNumber').readOnly = false
+  document.getElementById('uploadFormatNumber').required = true
 }
 
 document.getElementById('checkItemNameLineOff').onclick = function () {
   document.getElementById('uploadFormatNumber').readOnly = true
+  document.getElementById('uploadFormatNumber').required = false
+  document.getElementById('uploadFormatNumber').value = ''
 }
 
 document.getElementById('dataFile').addEventListener('change', function (e) {
-  document.getElementById('dataFileName').value = this.files.item(0).name
-
   targetFile = document.getElementById('dataFile').files.item(0)
   if (targetFile !== null) {
     fileReader = new FileReader()
     fileReader.readAsBinaryString(targetFile)
     fileReader.onload = function () {
-      document.getElementById('hiddenFileData').value = btoa(fileReader.result)
-      console.log(btoa(fileReader.result))
+      if (fileReader.result.length > 5120000) {
+        document.getElementById('dataFile').value = null
+        alert('ファイルサイズが5MB超えています。\nCSVファイルを確認後もう一度アップロードしてください。')
+      } else {
+        document.getElementById('hiddenFileData').value = btoa(fileReader.result)
+        document.getElementById('dataFileName').value = document.getElementById('dataFile').files.item(0).name
+      }
     }
   }
 })
 
 document.getElementById('submit').addEventListener('click', function (e) {
-
   // 各項目チェック
   const elements = document.querySelectorAll('input')
   const invalidCheckTarget = []
   Array.prototype.forEach.call(elements, (checkTarget) => {
     if (checkTarget.getAttribute('name') === 'dataFile') {
       if (
-        checkTarget.parentNode.parentNode.parentNode.parentNode.childNodes[2] !== undefined &&
-        checkTarget.parentNode.parentNode.parentNode.parentNode.childNodes[2].getAttribute('id') === 'caution'
+        checkTarget.closest('.field').childNodes[2] !== undefined &&
+        checkTarget.closest('.field').childNodes[2].getAttribute('id') === 'caution'
       ) {
-        checkTarget.parentNode.parentNode.parentNode.parentNode.childNodes[2].remove()
+        checkTarget.closest('.field').childNodes[2].remove()
+      }
+    } else if (checkTarget.getAttribute('name') === 'uploadFormatNumber' && document.getElementById('uploadFormatNumber').required === true) {
+      if (
+        checkTarget.closest('.field').childNodes[1] !== undefined &&
+        checkTarget.closest('.field').childNodes[1].getAttribute('id') === 'caution'
+      ) {
+        checkTarget.closest('.field').childNodes[1].remove()
       }
     } else if (checkTarget.getAttribute('name') === 'uploadFormatItemName') {
       if (
-        checkTarget.parentNode.parentNode.childNodes[2] !== undefined &&
-        checkTarget.parentNode.parentNode.childNodes[2].getAttribute('id') === 'caution'
+        checkTarget.closest('.field').childNodes[2] !== undefined &&
+        checkTarget.closest('.field').childNodes[2].getAttribute('id') === 'caution'
       ) {
-        checkTarget.parentNode.parentNode.childNodes[2].remove()
+        checkTarget.closest('.field').childNodes[2].remove()
       }
     }
     invalidCheckTarget.push(checkTarget)
@@ -66,16 +77,22 @@ document.getElementById('submit').addEventListener('click', function (e) {
         }
 
         if (invalidCheckTarget[idx].getAttribute('name') === 'dataFile') {
-          invalidCheckTarget[idx].parentNode.parentNode.parentNode.parentNode.appendChild(cautionRequired)
-          invalidCheckTarget[idx].parentNode.parentNode.parentNode.parentNode.insertBefore(
+          invalidCheckTarget[idx].closest('.field').appendChild(cautionRequired)
+          invalidCheckTarget[idx].closest('.field').insertBefore(
             cautionRequired,
-            invalidCheckTarget[idx].parentNode.parentNode.parentNode.parentNode.childNodes[2]
+            invalidCheckTarget[idx].closest('.field').childNodes[2]
+          )
+        } else if (invalidCheckTarget[idx].getAttribute('name') === 'uploadFormatNumber' && document.getElementById('uploadFormatNumber').required === true) {
+          invalidCheckTarget[idx].closest('.field').appendChild(cautionRequired)
+          invalidCheckTarget[idx].closest('.field').insertBefore(
+            cautionRequired,
+            invalidCheckTarget[idx].closest('.field').childNodes[1]
           )
         } else if (invalidCheckTarget[idx].getAttribute('name') === 'uploadFormatItemName') {
-          invalidCheckTarget[idx].parentNode.parentNode.appendChild(cautionRequired)
-          invalidCheckTarget[idx].parentNode.parentNode.insertBefore(
+          invalidCheckTarget[idx].closest('.field').appendChild(cautionRequired)
+          invalidCheckTarget[idx].closest('.field').insertBefore(
             cautionRequired,
-            invalidCheckTarget[idx].parentNode.parentNode.childNodes[2]
+            invalidCheckTarget[idx].closest('.field').childNodes[2]
           )
         }
 

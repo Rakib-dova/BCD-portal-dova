@@ -20,6 +20,8 @@ let globalCsvData = []
 let uploadFormatItemName
 let uploadType
 let csvfilename
+let uploadFormatNumber
+let defaultNumber
 
 let keyConsumptionTax
 let keyReducedTax
@@ -76,25 +78,33 @@ router.use(
 
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
-  let resultStatusCode
   if (!req.session || !req.user?.userId) {
-    resultStatusCode = 403
-    return res.status(resultStatusCode).send()
+    setErrorLog(req, 500)
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+  if (user instanceof Error || user === null) {
+    setErrorLog(req, 500)
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  }
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (user.dataValues?.userStatus !== 0) {
+    setErrorLog(req, 500)
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  }
 
   // DBから契約情報取得
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+  if (contract instanceof Error || contract === null) {
+    setErrorLog(req, 500)
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  }
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
@@ -107,23 +117,27 @@ const cbPostIndex = async (req, res, next) => {
 
   // アプロードしたファイルを読み込む
   csvfilename = req.body.dataFileName
+  uploadFormatNumber = req.body.uploadFormatNumber - 1
+  defaultNumber = req.body.defaultNumber - 1
   const extractFullpathFile = path.join(filePath, '/') + req.body.dataFileName
   const csv = fs.readFileSync(extractFullpathFile, 'utf8')
   const tmpRows = csv.split(/\r?\n|\r/)
-  const headerArr = tmpRows[0].trim().split(',') // 修正必要（項目名の行番号）
-  const mesaiArr = tmpRows[1].trim().split(',') // 修正必要（データ開始行番号）
-
+  const mesaiArr = tmpRows[defaultNumber].trim().split(',') // 修正必要（データ開始行番号）
+  let headerArr = []
+  if (req.body.checkItemNameLine === 'on') {
+    headerArr = tmpRows[uploadFormatNumber].trim().split(',') // 修正必要（項目名の行番号）
+  } else {
+    mesaiArr.map((meisai) => {
+      headerArr.push('')
+      return ''
+    })
+  }
   // 配列に読み込んだcsvデータを入れる。
-  const csvData = []
-
-  headerArr.map((header) => {
-    const newItem = { item: '', value: '' }
-    newItem.item = header
-    csvData.push(newItem)
-  })
+  const csvData = headerArr.map((header) => { return { item: header, value: '' } })
 
   mesaiArr.map((mesai, idx) => {
     csvData[idx].value = mesai
+    return ''
   })
 
   globalCsvData = csvData
@@ -177,7 +191,7 @@ const cbPostIndex = async (req, res, next) => {
   keyTonnage = req.body.keyTonnage
   keyOthers = req.body.keyOthers
   res.render('uploadFormat', {
-    testData: csvData
+    headerItems: csvData
   })
 }
 
@@ -363,14 +377,9 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
   const deleteFile = path.join(_deleteDataPath, '/' + _filename)
   if (fs.existsSync(deleteFile)) {
-    try {
-      fs.unlinkSync(deleteFile)
-      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
-      return true
-    } catch (error) {
-      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
-      return false
-    }
+    fs.unlinkSync(deleteFile)
+    logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
+    return true
   } else {
     // 削除対象がない場合、サーバーエラー画面表示
     logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
@@ -403,5 +412,6 @@ router.post('/cbPostDBIndex', cbPostDBIndex)
 module.exports = {
   router: router,
   cbPostIndex: cbPostIndex,
-  cbPostDBIndex: cbPostDBIndex
+  cbPostDBIndex: cbPostDBIndex,
+  cbRemoveCsv: cbRemoveCsv // UTtestのため
 }

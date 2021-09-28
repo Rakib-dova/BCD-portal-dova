@@ -19,9 +19,7 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvBasicFormat')
 
   // 認証情報取得処理
-  if (!req.session || !req.user?.userId) {
-    return next(errorHelper.create(500))
-  }
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
@@ -31,9 +29,7 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
-  if (req.session?.userContext !== 'LoggedIn') {
-    return next(errorHelper.create(400))
-  }
+  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
 
   // DBから契約情報取得
   const contract = await contractController.findOne(req.user.tenantId)
@@ -47,67 +43,17 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = helper.checkContractStatus
 
-  if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
-  }
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return next(noticeHelper.create('cancelprocedure'))
-  }
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  const csvTax = [
-    { name: '消費税', id: 'keyConsumptionTax' },
-    { name: '軽減税率', id: 'keyReducedTax' },
-    { name: '不課税', id: 'keyFreeTax' },
-    { name: '免税', id: 'keyDutyFree' },
-    { name: '非課税', id: 'keyExemptTax' }
-  ]
+  const csvTax = constantsDefine.csvFormatDefine.csvTax
+  const csvUnit = constantsDefine.csvFormatDefine.csvUnit
 
-  const csvUnit = [
-    { name: '人月', id: 'keyManMonth' },
-    { name: 'ボトル', id: 'keyBottle' },
-    { name: 'コスト', id: 'keyCost' },
-    { name: 'コンテナ', id: 'keyContainer' },
-    { name: 'センチリットル', id: 'keyCentilitre' },
-    { name: '平方センチメートル', id: 'keySquareCentimeter' },
-    { name: '立方センチメートル', id: 'keyCubicCentimeter' },
-    { name: 'センチメートル', id: 'keyCentimeter' },
-    { name: 'ケース', id: 'keyCase' },
-    { name: 'カートン', id: 'keyCarton' },
-    { name: '日', id: 'keyDay' },
-    { name: 'デシリットル', id: 'keyDeciliter' },
-    { name: 'デシメートル', id: 'keyDecimeter' },
-    { name: 'グロス・キログラム', id: 'keyGrossKilogram' },
-    { name: '個', id: 'keyPieces' },
-    { name: 'フィート', id: 'keyFeet' },
-    { name: 'ガロン', id: 'keyGallon' },
-    { name: 'グラム', id: 'keyGram' },
-    { name: '総トン', id: 'keyGrossTonnage' },
-    { name: '時間', id: 'keyHour' },
-    { name: 'キログラム', id: 'keyKilogram' },
-    { name: 'キロメートル', id: 'keyKilometers' },
-    { name: 'キロワット時', id: 'keyKilowattHour' },
-    { name: 'ポンド', id: 'keyPound' },
-    { name: 'リットル', id: 'keyLiter' },
-    { name: 'ミリグラム', id: 'keyMilligram' },
-    { name: 'ミリリットル', id: 'keyMilliliter' },
-    { name: 'ミリメートル', id: 'keyMillimeter' },
-    { name: '月', id: 'keyMonth' },
-    { name: '平方メートル', id: 'keySquareMeter' },
-    { name: '立方メートル', id: 'keyCubicMeter' },
-    { name: 'メーター', id: 'keyMeter' },
-    { name: '純トン', id: 'keyNetTonnage' },
-    { name: '包', id: 'keyPackage' },
-    { name: '巻', id: 'keyRoll' },
-    { name: '式', id: 'keyFormula' },
-    { name: 'トン', id: 'keyTonnage' },
-    { name: 'その他', id: 'keyOthers' }
-  ]
-
-  res.render('csvBasicFormat', { 
-    csvTax: csvTax, 
+  res.render('csvBasicFormat', {
+    csvTax: csvTax,
     csvUnit: csvUnit,
-    TS_HOST: process.env.TS_HOST 
+    TS_HOST: process.env.TS_HOST
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetFormtuploadIndex')
 }
@@ -126,9 +72,7 @@ const cbPostCsvBasicFormat = async (req, res, next) => {
   const filePath = process.env.INVOICE_UPLOAD_PATH
 
   // csvファイルアップロード
-  if (fileUpload(filePath, req.body.dataFileName, uploadCsvData) === false) {
-    return next(errorHelper.create(500))
-  }
+  if (fileUpload(filePath, req.body.dataFileName, uploadCsvData) === false) return next(errorHelper.create(500))
 
   const uploadFormatId = uuidv4()
 
@@ -220,18 +164,14 @@ const fileUpload = (_filePath, _filename, _uploadCsvData) => {
   }
   try {
     // ユーザディレクトリが存在すること確認
-    if (fs.existsSync(uploadPath)) {
-      // ユーザディレクトリが存在している場合、CSVファイルを保存する
-      writeFile()
-      logger.info(constantsDefine.logMessage.INF001 + 'fileUpload')
-      return true
-    } else {
-      // ユーザディレクトリが存在しない場合、ユーザディレクトリ作成
+    if (!fs.existsSync(uploadPath)) {
+    // ユーザディレクトリが存在しない場合、ユーザディレクトリ作成
       fs.mkdirSync(uploadPath)
-      writeFile()
-      logger.info(constantsDefine.logMessage.INF001 + 'fileUpload')
-      return true
     }
+    // CSVファイルを保存する
+    writeFile()
+    logger.info(constantsDefine.logMessage.INF001 + 'fileUpload')
+    return true
   } catch (error) {
     return false
   }
