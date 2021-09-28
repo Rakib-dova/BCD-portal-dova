@@ -116,7 +116,7 @@ const cbPostIndex = async (req, res, next) => {
   // 配列に読み込んだcsvデータを入れる。
   const csvData = []
 
-  headerArr.map(header => {
+  headerArr.map((header) => {
     const newItem = { item: '', value: '' }
     newItem.item = header
     csvData.push(newItem)
@@ -230,7 +230,27 @@ const cbPostDBIndex = async (req, res, next) => {
   }
 
   let iCnt = 1
-  let columnArr = ['発行日', '請求書番号', 'テナントID', '支払期日', '納品日', '備考', '銀行名', '支店名', '科目', '口座番号', '口座名義', 'その他特記事項', '明細-項目ID', '明細-内容','明細-数量','明細-単位','明細-単価','明細-税（消費税／軽減税率／不課税／免税／非課税）','明細-備考']
+  let columnArr = [
+    '発行日',
+    '請求書番号',
+    'テナントID',
+    '支払期日',
+    '納品日',
+    '備考',
+    '銀行名',
+    '支店名',
+    '科目',
+    '口座番号',
+    '口座名義',
+    'その他特記事項',
+    '明細-項目ID',
+    '明細-内容',
+    '明細-数量',
+    '明細-単位',
+    '明細-単価',
+    '明細-税（消費税／軽減税率／不課税／免税／非課税）',
+    '明細-備考'
+  ]
   let resultUploadFormatDetail
   for (let idx = 0; idx < columnArr.length; idx++) {
     if (req.body.formatData[idx].length !== 0) {
