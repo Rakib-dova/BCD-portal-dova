@@ -371,14 +371,14 @@ const cbPostDBIndex = async (req, res, next) => {
     setErrorLog(req, 500)
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
+
+  res.redirect(303, '/portal')
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadFormat')
 }
 
 // CSVファイル削除機能
 const cbRemoveCsv = (_deleteDataPath, _filename) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
-  console.log(_deleteDataPath)
-  console.log(_filename)
   const deleteFile = path.join(_deleteDataPath, '/' + _filename)
   if (fs.existsSync(deleteFile)) {
     fs.unlinkSync(deleteFile)
