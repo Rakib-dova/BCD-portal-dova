@@ -338,7 +338,7 @@ describe('csvBasicFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        testData: [
+        headerItems: [
           { item: '発行日', value: '2021-06-14' },
           { item: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
           { item: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
