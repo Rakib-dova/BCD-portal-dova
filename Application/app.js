@@ -208,6 +208,12 @@ const noticeHelper = require('./routes/helpers/notice')
 
 const errorHelper = require('./routes/helpers/error')
 
+// 基本情報設定画面 設定
+app.use('/csvBasicFormat', require('./routes/csvBasicFormat').router)
+
+// アップロードフォーマット設定
+app.use('/uploadFormat', require('./routes/uploadFormat').router)
+
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
   next(errorHelper.create(404))

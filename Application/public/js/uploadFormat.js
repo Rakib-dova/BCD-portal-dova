@@ -33,7 +33,5 @@ $('#confirmBtn').addEventListener('click', function (e) {
 
   if (!stopFlag) {
     e.preventDefault()
-  } else {
-    window.location.href = '../portal'
   }
 })
