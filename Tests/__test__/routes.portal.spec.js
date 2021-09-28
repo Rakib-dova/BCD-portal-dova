@@ -13,6 +13,13 @@ const errorHelper = require('../../Application/routes/helpers/error')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const logger = require('../../Application/lib/logger.js')
+const constants = require('../../Application/constants')
+const Parser = require('rss-parser')
+const parser = new Parser({
+  headers: {
+    Accept: 'text/html'
+  }
+})
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
@@ -92,41 +99,73 @@ describe('portalのテスト', () => {
         }
       })
 
-      const newsDataArrData = [
-        {
-          date: '2019年11月14日',
-          link: 'http://support.ntt.com/mail/information/detail/pid2500000nrk',
-          title: 'メールかんたん設定ツール（Windows10専用）アップデート版の提供開始について'
-        },
-        {
-          date: '2019年8月23日',
-          link: 'http://support.ntt.com/mail/information/detail/pid2500000gri',
-          title: 'OCNメールのリニューアルに関するお知らせ'
-        },
-        {
-          date: '2019年7月19日',
-          link: 'http://support.ntt.com/mail/information/detail/pid2500000kqa',
-          title: 'OCNメールをメールソフトでご利用いただく際の設定について'
-        }
-      ]
+      // お知らせ取得
+      const newsDataArr = []
+      let newsDataArrSize
 
-      const constructDataArr = [
-        {
-          date: '2021年9月15日',
-          link: 'http://support.ntt.com/maintenance/service/mainteDetail/03597',
-          title: '【工事情報】050 plus　システムメンテナンスのお知らせ'
-        },
-        {
-          date: '2021年9月8日',
-          link: 'http://support.ntt.com/maintenance/service/mainteDetail/77128',
-          title: '【工事情報】050 plus　システムメンテナンスのお知らせ'
-        },
-        {
-          date: '2021年9月7日',
-          link: 'http://support.ntt.com/maintenance/service/troubleDetail/35965',
-          title: '【故障回復】【訂正】【恐れ】GW設備故障【発生/回復】'
-        }
-      ]
+      await parser
+        .parseURL('https://support.ntt.com/informationRss/goods/rss/mail')
+        .then((feed) => {
+          newsDataArrSize = feed.items.length
+          if (newsDataArrSize === 0) {
+            newsDataArr.push({
+              message: constants.portalMsg.NEWS_NONE
+            })
+          } else {
+            let getlength = 3
+            if (newsDataArrSize < 3) {
+              getlength = newsDataArrSize
+            }
+
+            for (let i = 0; i < getlength; i++) {
+              const day = new Date(feed.items[i].date)
+
+              newsDataArr.push({
+                date: day.getFullYear() + '年' + (day.getMonth() + 1) + '月' + day.getDate() + '日',
+                title: feed.items[i].title,
+                link: feed.items[i].link
+              })
+            }
+          }
+        })
+        .catch((error) => {
+          console.error('RSS 取得失敗', error)
+          newsDataArrSize = 0
+          newsDataArr.push({
+            message: constants.portalMsg.NEWS_CONN_ERR
+          })
+        })
+
+      // 工事・故障情報取得
+      let constructDataArr = []
+
+      await parser
+        .parseURL('https://support.ntt.com/maintenance/service/rss/050plus')
+        .then((feed) => {
+          if (feed.items.length === 0) {
+            constructDataArr.push({
+              message: constants.portalMsg.MAINTENANCE_NON
+            })
+          } else {
+            const newsLimit = 3
+            constructDataArr = feed.items.map((item) => {
+              const day = new Date(item.date)
+              return {
+                date: `${day.getFullYear()}年${day.getMonth() + 1}月${day.getDate()}日`,
+                title: item.title,
+                link: item.link
+              }
+            })
+            constructDataArr.length = newsLimit < feed.items.length ? newsLimit : feed.items.length
+          }
+        })
+        .catch((error) => {
+          console.error('RSS 取得失敗', error)
+          constructDataArr.length = 0
+          constructDataArr.push({
+            message: constants.portalMsg.NEWS_CONN_ERR
+          })
+        })
 
       // 試験実施
       await portal.cbGetIndex(request, response, next)
@@ -142,9 +181,9 @@ describe('portalのテスト', () => {
       // response.renderでportalが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('portal', {
         constructDataArr: constructDataArr,
-        constructDataArrSize: 3,
-        newsDataArr: newsDataArrData,
-        newsDataArrSize: 15,
+        constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0,
+        newsDataArr: newsDataArr,
+        newsDataArrSize: newsDataArrSize,
         title: 'ポータル',
         tenantId: request.user.tenantId,
         userRole: request.session.userRole,
