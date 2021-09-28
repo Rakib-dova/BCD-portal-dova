@@ -366,7 +366,7 @@ describe('csvBasicFormatのテスト', () => {
       expect(resultDelFile).toBeTruthy()
     })
 
-    test('異常：csvファイルバリデーションエラー', async () => {
+    test('準正常：解約中', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {

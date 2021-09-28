@@ -31,7 +31,7 @@ describe('uploadFormatControllerのテスト', () => {
 
   const findOneReturn = {
     dataValues: {
-      contractId: '87654321-fbe6-4864-a866-7a3ce9aa517e',
+      contractId: contractId,
       tenantId: tenantId,
       numberN: '1234567890',
       contractStatus: constantsDefine.statusConstants.contractStatusNewContractReceive,
@@ -43,7 +43,7 @@ describe('uploadFormatControllerのテスト', () => {
 
   const findOneResult = {
     uploadFormatId: uploadFormatId,
-    contractId: '87654321-fbe6-4864-a866-7a3ce9aa517e',
+    contractId: contractId,
     setName: 'uploadFormatName',
     uploadType: '',
     createdAt: '2021-07-09T04:30:00.000Z',

@@ -31,7 +31,7 @@ describe('uploadFormatIdentifierControllerのテスト', () => {
   const findUploadFormatResult = {
     dataValues: {
       uploadFormatId: uploadFormatId,
-      contractId: '87654321-fbe6-4864-a866-7a3ce9aa517e',
+      contractId: contractId,
       setName: 'uploadFormatName',
       uploadType: '',
       createdAt: '2021-07-09T04:30:00.000Z',
