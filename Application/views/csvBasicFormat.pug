@@ -1,0 +1,93 @@
+extends layout
+
+block content
+  .hero.is-large
+    .hero-body
+      .container
+
+  .section.is-overlay.mt-6
+    .container.is-max-widescreen.is-family-noto-sans
+      form#form(action="#")
+        article.panel.is-info
+          h2.panel-heading 基本情報設定
+          .panel-block
+            .container
+             .columns.is-centered: .column.is-four-fifths
+              .field.card
+                .card-content
+                  .field
+                    label(for="uploadFormatItemName").input-label 設定名称
+                    p#uploadFormatItemNameeRequired.input-label-required.input-label （必須）
+                    .control
+                      input.input#uploadFormatItemName(type="text" name="uploadFormatItemName" value="" required)
+                  .field
+                    label(for="uploadType").input-label アップロード種別
+                    .control
+                      input.input#uploadType(type="text" name="uploadType" value="")
+                  .field
+                    label(for="dataFile").input-label データファイル
+                    p#dataFileRequired.input-label-required.input-label （必須）
+                    input(id='hiddenFileData' name='hiddenFileData' type="hidden")
+                    .control
+                      .columns.ml-0.pl-0
+                        .column.pl-0
+                          input.input#dataFileName.td-overflow(type="text" name="dataFileName" readonly)
+                        .column
+                          label.button.is-link(for="dataFile") ファイル選択
+                          input.is-invisible#dataFile(type="file" name="dataFile" accept=".csv" required)
+                  .field.mt-6
+                    label.input-label 項目名の行有無
+                    p#dataFileRequired.input-label-required.input-label （必須）
+                    .control
+                      .column
+                        input#checkItemNameLineOn(type='radio' name='checkItemNameLine' value='on' required checked)
+                        label.mr-6(for="checkItemNameLineOn") あり
+                        input#checkItemNameLineOff(type='radio' name='checkItemNameLine' value='off' required)
+                        label(for="checkItemNameLineOff") なし
+                  .field
+                    label(for="uploadFormatNumber").input-label 項目名の行番号　
+                    .control
+                      .columns.ml-0.pl-0.alignCenterChild
+                        .column.is-one-fifth.pl-0
+                          input.input#uploadFormatNumber(type="text" name="uploadFormatNumber" value="" maxlength=7 required) 
+                        .column  
+                          p 行目
+                  .field
+                    label(for="defaultNumber").input-label データ開始行番号
+                    .control
+                      .columns.ml-0.pl-0.alignCenterChild
+                        .column.is-one-fifth.pl-0
+                          input.input#defaultNumber(type="text" name="defaultNumber" value="" maxlength=7)
+                        .column  
+                          p 行目
+            
+              .field.card
+                .card-content
+                  .title.is-5 明細-税 識別子
+                  each tax in csvTax
+                   .field
+                    label(for=tax.id).input-label= tax.name
+                    .control
+                     input.input(id=tax.id type="text" name=tax.id value="")
+
+              .field.card
+                .card-content
+                  .title.is-5 明細-単位 識別子
+                  each unit in csvUnit
+                   .field
+                    label(for=unit.id).input-label= unit.name
+                    .control
+                      input.input(id=unit.id type="text" name=unit.id value="")
+
+             .columns.is-centered.changeConfirm
+              .field.is-grouped.is-grouped-centered
+                .control
+                  .column
+                    div.button-area
+                      button.button.is-link.mr-6#submit(type="submit" formaction="/csvBasicFormat" formmethod="POST") 次へ
+                      a.button#return-btn.cancel-button(href='portal') 戻る
+       
+      include footer
+
+block append scripts
+  script(src="/js/csvBasicFormat-page.js")
