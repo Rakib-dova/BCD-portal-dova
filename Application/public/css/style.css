@@ -406,3 +406,8 @@ img.logo-ncom {
 .alignCenterChild:last-child {
   align-items: center;
 }
+
+.not-input-required::after {
+  content: '未入力です。';
+  color: red;
+}
