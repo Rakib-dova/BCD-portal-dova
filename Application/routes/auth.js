@@ -9,6 +9,7 @@ const errorHelper = require('./helpers/error')
 const userController = require('../controllers/userController.js')
 
 const cbGetCallback = async (req, res, next) => {
+  console.log('/routes/auth.js ::: req.user:', req.user)
   if (!req.user?.tenantId || !req.user?.userId || !req.user?.refreshToken || !req.user?.accessToken) {
     return next(errorHelper.create(500)) // エラーはnextに渡す
   }
