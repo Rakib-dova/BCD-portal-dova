@@ -8,6 +8,8 @@ const parseIdToken = (token) => {
   return { tenantId, email, userId }
 }
 
+console.log('/lib/auth.js ::: TS_CLIENT_ID:', process.env.TS_CLIENT_ID)
+console.log('/lib/auth.js ::: TS_CLIENT_SECRET:', process.env.TS_CLIENT_SECRET)
 const authToken = Buffer.from(process.env.TS_CLIENT_ID + ':' + process.env.TS_CLIENT_SECRET).toString('base64')
 const oauthStrategy = new OAuth2Strategy(
   {
@@ -44,6 +46,7 @@ passport.deserializeUser(function (user, done) {
 /* Setting custom Authorization header */
 oauthStrategy._oauth2.setAuthMethod('Basic')
 oauthStrategy._oauth2._customHeaders = { Authorization: oauthStrategy._oauth2.buildAuthHeader(authToken) }
+console.log('/lib/auth.js ::: oauthStrategy', oauthStrategy)
 passport.use('tradeshift', oauthStrategy)
 
 module.exports = passport
