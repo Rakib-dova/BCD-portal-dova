@@ -211,14 +211,67 @@ describe('csvBasicFormatのテスト', () => {
   // ファイル名設定
   const fileName = dataValues.dataValues.userId + '_UTtest.csv'
 
-  console.log(fileName)
-  // ファイルデータ
+   // ファイルデータ
   // 請求書が1つの場合
   const fileData = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
+  const csvBasicArr = {
+    uploadFormatId: '',
+    uploadFormatItemName: '',
+    dataFileName: '',
+    uploadFormatNumber: '',
+    defaultNumber: ''
+  }
+  const taxArr = {
+    consumptionTax: '',
+    reducedTax: '',
+    freeTax: '',
+    dutyFree: '',
+    exemptTax: ''
+  }
+  const unitArr = {
+    manMonth: '',
+    BO: '',
+    C5: '',
+    CH: '',
+    CLT: '',
+    CMK: '',
+    CMQ: '',
+    CMT: '',
+    CS: '',
+    CT: '',
+    DAY: '',
+    DLT: '',
+    DMT: '',
+    E4: '',
+    EA: '',
+    FOT: '',
+    GLL: '',
+    GRM: '',
+    GT: '',
+    HUR: '',
+    KGM: '',
+    KTM: '',
+    KWH: '',
+    LBR: '',
+    LTR: '',
+    MGM: '',
+    MLT: '',
+    MMT: '',
+    MON: '',
+    MTK: '',
+    MTQ: '',
+    MTR: '',
+    NT: '',
+    PK: '',
+    RO: '',
+    SET: '',
+    TNE: '',
+    ZZ: ''
+  }
   describe('ルーティング', () => {
     test('csvBasicFormatのルーティングを確認', async () => {
       expect(csvBasicFormat.router.get).toBeCalledWith('/', helper.isAuthenticated, csvBasicFormat.cbGetCsvBasicFormat)
@@ -258,6 +311,9 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('csvBasicFormat', {
         csvTax: csvTax,
         csvUnit: csvUnit,
+        csvBasicArr: csvBasicArr,
+        taxArr: taxArr,
+        unitArr: unitArr,
         TS_HOST: process.env.TS_HOST
       })
     })
@@ -616,9 +672,6 @@ describe('csvBasicFormatのテスト', () => {
 
       // 期待結果
       expect(resultUpload).toBeTruthy()
-
-      // テストファイル削除
-      uploadFormat.cbRemoveCsv(filePath, fileName)
     })
 
     test('異常:ファイルパスが存在しない場合', async () => {

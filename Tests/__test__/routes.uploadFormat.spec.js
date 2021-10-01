@@ -104,6 +104,7 @@ describe('csvBasicFormatのテスト', () => {
     dataValues: {
       tenantId: '3cfebb4f-2338-4dc7-9523-5423a027a880',
       userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+      userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
       appVersion: '0.0.1',
       refreshToken: 'dummyRefreshToken',
       subRefreshToken: null,
@@ -294,6 +295,108 @@ describe('csvBasicFormatのテスト', () => {
     keyOthers: '45'
   }
 
+  const taxIds = {
+    keyConsumptionTax: '3',
+    keyDutyFree: '6',
+    keyExemptTax: '7',
+    keyFreeTax: '5',
+    keyReducedTax: '4'
+  }
+  const unitIds = {
+    keyBottle: '9',
+    keyCarton: '17',
+    keyCase: '16',
+    keyCentilitre: '12',
+    keyCentimeter: '15',
+    keyContainer: '11',
+    keyCost: '10',
+    keyCubicCentimeter: '14',
+    keyCubicMeter: '38',
+    keyDay: '18',
+    keyDeciliter: '19',
+    keyDecimeter: '20',
+    keyFeet: '23',
+    keyFormula: '43',
+    keyGallon: '24',
+    keyGram: '25',
+    keyGrossKilogram: '21',
+    keyGrossTonnage: '26',
+    keyHour: '27',
+    keyKilogram: '28',
+    keyKilometers: '29',
+    keyKilowattHour: '30',
+    keyLiter: '32',
+    keyManMonth: '8',
+    keyMeter: '39',
+    keyMilligram: '33',
+    keyMilliliter: '34',
+    keyMillimeter: '35',
+    keyMonth: '36',
+    keyNetTonnage: '40',
+    keyOthers: '45',
+    keyPackage: '41',
+    keyPieces: '22',
+    keyPound: '31',
+    keyRoll: '42',
+    keySquareCentimeter: '13',
+    keySquareMeter: '37',
+    keyTonnage: '44'
+  }
+  
+  const uploadGeneral = {
+    uploadFormatItemName: 'testItemName',
+    uploadType: '',
+  }
+
+  const taxIdsaaaaaa = {
+    keyConsumptionTax: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    keyDutyFree: '6',
+    keyExemptTax: '7',
+    keyFreeTax: '5',
+    keyReducedTax: '4'    
+  }
+
+  const unitIdsaaaaaa =  {
+    keyBottle: '9',
+    keyCarton: '17',
+    keyCase: '16',
+    keyCentilitre: '12',
+    keyCentimeter: '15',
+    keyContainer: '11',
+    keyCost: '10',
+    keyCubicCentimeter: '14',
+    keyCubicMeter: '38',
+    keyDay: '18',
+    keyDeciliter: '19',
+    keyDecimeter: '20',
+    keyFeet: '23',
+    keyFormula: '43',
+    keyGallon: '24',
+    keyGram: '25',
+    keyGrossKilogram: '21',
+    keyGrossTonnage: '26',
+    keyHour: '27',
+    keyKilogram: '28',
+    keyKilometers: '29',
+    keyKilowattHour: '30',
+    keyLiter: '32',
+    keyManMonth: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    keyMeter: '39',
+    keyMilligram: '33',
+    keyMilliliter: '34',
+    keyMillimeter: '35',
+    keyMonth: '36',
+    keyNetTonnage: '40',
+    keyOthers: '45',
+    keyPackage: '41',
+    keyPieces: '22',
+    keyPound: '31',
+    keyRoll: '42',
+    keySquareCentimeter: '13',
+    keySquareMeter: '37',
+    keyTonnage: '44'
+  }
+  
   describe('ルーティング', () => {
     test('uploadFormatのルーティングを確認', async () => {
       expect(uploadFormat.router.post).toBeCalledWith('/', uploadFormat.cbPostIndex)
@@ -312,7 +415,6 @@ describe('csvBasicFormatのテスト', () => {
         userRole: 'dummy'
       }
       request.user = user
-
       // ファイルデータを設定
       request.body = {
         ...reqBodyForCbPostIndex
@@ -342,6 +444,7 @@ describe('csvBasicFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
+        csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
         headerItems: [
           { item: '発行日', value: '2021-06-14' },
           { item: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
@@ -362,12 +465,13 @@ describe('csvBasicFormatのテスト', () => {
           { item: '明細-単価', value: '100000' },
           { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
           { item: '明細-備考', value: 'アップロードテスト' }
-        ]
-      })
+        ],
+        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        taxIds: taxIds,
+        unitIds: unitIds,
+        uploadGeneral: uploadGeneral
 
-      // アップロードしたテスト用csvファイルを削除
-      const resultDelFile = uploadFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest.csv')
-      expect(resultDelFile).toBeTruthy()
+      })
     })
 
     test('準正常：解約中', async () => {
@@ -378,6 +482,7 @@ describe('csvBasicFormatのテスト', () => {
         userRole: 'dummy'
       }
       request.user = user
+      console.log(request.user)
 
       // ファイルデータを設定
       request.body = {
@@ -405,10 +510,6 @@ describe('csvBasicFormatのテスト', () => {
 
       // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
-
-      // アップロードしたテスト用csvファイルを削除
-      const resultDelFile = uploadFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest.csv')
-      expect(resultDelFile).toBeTruthy()
     })
 
     test('準正常：ヘッダありでヘッダ番号の未入力', async () => {
@@ -1171,6 +1272,7 @@ describe('csvBasicFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
+        csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
         headerItems: [
           { item: '発行日', value: '2021-06-14' },
           { item: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
@@ -1191,12 +1293,12 @@ describe('csvBasicFormatのテスト', () => {
           { item: '明細-単価', value: '100000' },
           { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
           { item: '明細-備考', value: 'アップロードテスト' }
-        ]
+        ],
+        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        taxIds: taxIdsaaaaaa,
+        unitIds: unitIds,
+        uploadGeneral: uploadGeneral
       })
-
-      // アップロードしたテスト用csvファイルを削除
-      const resultDelFile = uploadFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest.csv')
-      expect(resultDelFile).toBeTruthy()
     })
 
     test('準正常：税の100文字以上', async () => {
@@ -1333,6 +1435,7 @@ describe('csvBasicFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
+        csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
         headerItems: [
           { item: '発行日', value: '2021-06-14' },
           { item: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
@@ -1353,12 +1456,12 @@ describe('csvBasicFormatのテスト', () => {
           { item: '明細-単価', value: '100000' },
           { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
           { item: '明細-備考', value: 'アップロードテスト' }
-        ]
+        ],
+        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
+        taxIds: taxIds,
+        unitIds: unitIdsaaaaaa,
+        uploadGeneral: uploadGeneral
       })
-
-      // アップロードしたテスト用csvファイルを削除
-      const resultDelFile = uploadFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest.csv')
-      expect(resultDelFile).toBeTruthy()
     })
 
     test('準正常：単位の100文字', async () => {
@@ -1407,338 +1510,4 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.statusCode).toBe(307)
     })
   })
-
-  // -----------------------------------------------------------------------------------------
-  // cbPostDBIndexの確認
-
-  describe('cbPostDBIndex', () => {
-    test('正常:', async () => {
-      // 準備
-      // requestのuserIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      // ファイルデータを設定
-      request.body = {
-        dataFileName: 'uploadFormatTest.csv',
-        formatData: [
-          '0',
-          '1',
-          '2',
-          '3',
-          '4',
-          '5',
-          '6',
-          '7',
-          '8',
-          '9',
-          '10',
-          '11',
-          '12',
-          '13',
-          '14',
-          '15',
-          '16',
-          '17',
-          '18'
-        ]
-      }
-
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        '/home/upload',
-        'uploadFormatTest.csv',
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
-
-      // 試験実施
-      await uploadFormat.cbPostDBIndex(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(error500)
-    })
-
-    test('異常:500エラー（削除対象のファイルがない）', async () => {
-      // 準備
-      // requestのuserIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      // ファイルデータを設定
-      request.body = {
-        dataFileName: 'uploadFormatTest.csv',
-        formatData: [
-          '0',
-          '1',
-          '2',
-          '3',
-          '4',
-          '5',
-          '6',
-          '7',
-          '8',
-          '9',
-          '10',
-          '11',
-          '12',
-          '13',
-          '14',
-          '15',
-          '16',
-          '17',
-          '18'
-        ]
-      }
-
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        '/home/upload',
-        'uploadFormatTest111.csv',
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
-
-      // 試験実施
-      await uploadFormat.cbPostDBIndex(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(error500)
-
-      // アップロードしたテスト用csvファイルを削除
-      const resultDelFile = uploadFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest111.csv')
-      expect(resultDelFile).toBeTruthy()
-    })
-
-    test('異常：500エラー（userデータ取得エラー）', async () => {
-      // 準備
-      // requestのuserIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(null)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      // ファイルデータを設定
-      request.body = {
-        formatData: [
-          '0',
-          '1',
-          '2',
-          '3',
-          '4',
-          '5',
-          '6',
-          '7',
-          '8',
-          '9',
-          '10',
-          '11',
-          '12',
-          '13',
-          '14',
-          '15',
-          '16',
-          '17',
-          '18'
-        ]
-      }
-
-      // 試験実施
-      await uploadFormat.cbPostDBIndex(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(response.status).toHaveBeenCalledWith(500)
-    })
-
-    test('異常：500エラー（userStatusが0以外）', async () => {
-      // 準備
-      // requestのuserIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValuesStatuserr)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      // ファイルデータを設定
-      request.body = {
-        formatData: [
-          '0',
-          '1',
-          '2',
-          '3',
-          '4',
-          '5',
-          '6',
-          '7',
-          '8',
-          '9',
-          '10',
-          '11',
-          '12',
-          '13',
-          '14',
-          '15',
-          '16',
-          '17',
-          '18'
-        ]
-      }
-
-      // 試験実施
-      await uploadFormat.cbPostDBIndex(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(response.status).toHaveBeenCalledWith(500)
-    })
-
-    test('異常:500エラー（Contractsデータエラー）', async () => {
-      // 準備
-      // requestのuserIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(null)
-
-      // ファイルデータを設定
-      request.body = {
-        formatData: [
-          '0',
-          '1',
-          '2',
-          '3',
-          '4',
-          '5',
-          '6',
-          '7',
-          '8',
-          '9',
-          '10',
-          '11',
-          '12',
-          '13',
-          '14',
-          '15',
-          '16',
-          '17',
-          '18'
-        ]
-      }
-
-      // 試験実施
-      await uploadFormat.cbPostDBIndex(request, response, next)
-
-      // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      // 500エラーがエラーハンドリング「される」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(response.status).toHaveBeenCalledWith(500)
-    })
-
-    test('異常：500エラー（不正なContractデータ）', async () => {
-      // 準備
-      // requestのuserIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      // ファイルデータを設定
-      request.body = {
-        formatData: [
-          '0',
-          '1',
-          '2',
-          '3',
-          '4',
-          '5',
-          '6',
-          '7',
-          '8',
-          '9',
-          '10',
-          '11',
-          '12',
-          '13',
-          '14',
-          '15',
-          '16',
-          '17',
-          '18'
-        ]
-      }
-
-      helper.checkContractStatus = 999
-
-      // 試験実施
-      await uploadFormat.cbPostDBIndex(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(response.status).toHaveBeenCalledWith(500)
-    })
-  })
-
-  // // -----------------------------------------------------------------------------------------
-  // // cbRemoveCsvの確認
-
-  describe('cbRemoveCsv', () => {
-    test('正常', async () => {
-      // 準備
-      request.user = user
-
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        '/home/upload',
-        'uploadFormatTest.csv',
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
-
-      // 試験実施
-      const resultRemove = await uploadFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest.csv')
-
-      // 期待結果
-      expect(resultRemove).toBeTruthy()
-    })
-  })
-  // -----------------------------------------------------------------------------------------
 })
