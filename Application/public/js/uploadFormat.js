@@ -16,9 +16,9 @@ $('#confirmBtn').addEventListener('click', function (e) {
     const selectNumber = item.selectedIndex
     const itemValue = item.options[selectNumber].value
     if (itemValue === '') {
-      return item.parentNode.parentNode.children[0].children[2]
+      return item.parentNode.parentNode.children[0].children[1]
     } else {
-      item.parentNode.parentNode.children[0].children[2].innerText = ''
+      item.parentNode.parentNode.children[0].children[1].classList.remove('not-input-required')
     }
   })
 
@@ -26,12 +26,22 @@ $('#confirmBtn').addEventListener('click', function (e) {
 
   notValue.forEach((item) => {
     if (item !== undefined) {
-      item.innerText = '未入力です。'
+      item.parentNode.parentNode.children[0].children[1].classList.add('not-input-required')
       stopFlag = false
+    }
+  })
+
+  Array.prototype.forEach.call(document.querySelectorAll('#dataValue'), (item) => {
+    if (item.value.length > 100) {
+      stopFlag = true
     }
   })
 
   if (!stopFlag) {
     e.preventDefault()
   }
+})
+
+$('#returnBasic').addEventListener('click', () => {
+  history.back()
 })
