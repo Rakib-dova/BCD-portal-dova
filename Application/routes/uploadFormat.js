@@ -116,9 +116,10 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // アプロードしたファイルを読み込む
-  csvfilename = req.body.dataFileName
+  csvfilename = user.dataValues.userId + '_' + req.body.dataFileName
   uploadFormatNumber = req.body.uploadFormatNumber - 1
   defaultNumber = req.body.defaultNumber - 1
+
   if (
     ~~req.body.defaultNumber <= 0 ||
     ~~req.body.uploadFormatNumber <= 0 ||
@@ -127,7 +128,8 @@ const cbPostIndex = async (req, res, next) => {
     const backURL = req.header('Referer') || '/'
     return res.redirect(backURL)
   }
-  const extractFullpathFile = path.join(filePath, '/') + req.body.dataFileName
+  const extractFullpathFile = path.join(filePath, '/') + csvfilename
+
   const csv = fs.readFileSync(extractFullpathFile, 'utf8')
   const tmpRows = csv.split(/\r?\n|\r/)
   const checkRow = []
