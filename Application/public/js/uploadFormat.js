@@ -41,7 +41,3 @@ $('#confirmBtn').addEventListener('click', function (e) {
     e.preventDefault()
   }
 })
-
-$('#returnBasic').addEventListener('click', () => {
-  history.back()
-})

@@ -18,6 +18,15 @@ const url = require('url')
 const cbGetCsvBasicFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvBasicFormat')
 
+  if (!req.session.csvUploadFormatReturnFlag1 || !req.session.csvUploadFormatReturnFlag2) {
+    delete req.session.formData
+    delete req.session.csvUploadFormatReturnFlag1
+    delete req.session.csvUploadFormatReturnFlag2
+  } else {
+    req.session.csvUploadFormatReturnFlag1 = false
+    req.session.csvUploadFormatReturnFlag2 = false
+  }
+
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
@@ -49,10 +58,74 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
 
   const csvTax = constantsDefine.csvFormatDefine.csvTax
   const csvUnit = constantsDefine.csvFormatDefine.csvUnit
+  let csvBasicArr = {
+    uploadFormatId: '',
+    uploadFormatItemName: '',
+    dataFileName: '',
+    uploadFormatNumber: '',
+    defaultNumber: ''
+  }
+  let taxArr = {
+    consumptionTax: '',
+    reducedTax: '',
+    freeTax: '',
+    dutyFree: '',
+    exemptTax: ''
+  }
+
+  let unitArr = {
+    manMonth: '',
+    BO: '',
+    C5: '',
+    CH: '',
+    CLT: '',
+    CMK: '',
+    CMQ: '',
+    CMT: '',
+    CS: '',
+    CT: '',
+    DAY: '',
+    DLT: '',
+    DMT: '',
+    E4: '',
+    EA: '',
+    FOT: '',
+    GLL: '',
+    GRM: '',
+    GT: '',
+    HUR: '',
+    KGM: '',
+    KTM: '',
+    KWH: '',
+    LBR: '',
+    LTR: '',
+    MGM: '',
+    MLT: '',
+    MMT: '',
+    MON: '',
+    MTK: '',
+    MTQ: '',
+    MTR: '',
+    NT: '',
+    PK: '',
+    RO: '',
+    SET: '',
+    TNE: '',
+    ZZ: ''
+  }
+
+  if (req.session.formData) {
+    csvBasicArr = req.session.formData.csvBasicArr
+    taxArr = req.session.formData.taxArr
+    unitArr = req.session.formData.unitArr
+  }
 
   res.render('csvBasicFormat', {
     csvTax: csvTax,
     csvUnit: csvUnit,
+    csvBasicArr: csvBasicArr,
+    taxArr: taxArr,
+    unitArr: unitArr,
     TS_HOST: process.env.TS_HOST
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetFormtuploadIndex')
@@ -159,6 +232,11 @@ const cbPostCsvBasicFormat = async (req, res, next) => {
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostCsvBasicFormat')
 
+  req.session.formData = {
+    csvBasicArr: csvBasicArr,
+    taxArr: taxArr,
+    unitArr: unitArr
+  }
   // 画面送信
   res.redirect(
     307,

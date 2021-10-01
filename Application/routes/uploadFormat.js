@@ -1,6 +1,7 @@
 'use strict'
 const express = require('express')
 const router = express.Router()
+const helper = require('./helpers/middleware')
 const noticeHelper = require('./helpers/notice')
 const errorHelper = require('./helpers/error')
 const userController = require('../controllers/userController.js')
@@ -12,7 +13,6 @@ const fs = require('fs')
 const path = require('path')
 const url = require('url')
 const filePath = process.env.INVOICE_UPLOAD_PATH
-let globalCsvData = []
 let uploadFormatItemName
 let uploadType
 let csvfilename
@@ -74,6 +74,8 @@ router.use(
 
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
+  req.session.csvUploadFormatReturnFlag1 = true
+
   if (!req.session || !req.user?.userId) {
     setErrorLog(req, 500)
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
@@ -117,8 +119,8 @@ const cbPostIndex = async (req, res, next) => {
   defaultNumber = req.body.defaultNumber - 1
 
   if (
+    (req.body.checkItemNameLine === 'on' && ~~req.body.uploadFormatNumber <= 0) ||
     ~~req.body.defaultNumber <= 0 ||
-    ~~req.body.uploadFormatNumber <= 0 ||
     ~~req.body.defaultNumber <= ~~req.body.uploadFormatNumber
   ) {
     const backURL = req.header('Referer') || '/'
@@ -130,7 +132,6 @@ const cbPostIndex = async (req, res, next) => {
   const tmpRows = csv.split(/\r?\n|\r/)
   const checkRow = []
   tmpRows.forEach((row) => {
-    console.log(row)
     if (row.trim() !== '') checkRow.push(row)
   })
 
@@ -175,7 +176,6 @@ const cbPostIndex = async (req, res, next) => {
     return res.redirect(backURL)
   }
 
-  globalCsvData = csvData
   uploadFormatItemName = req.body.uploadFormatItemName
   uploadType = req.body.uploadType
   const uploadGeneral = {
@@ -365,12 +365,19 @@ const cbPostIndex = async (req, res, next) => {
       return res.redirect(backURL)
     }
   }
+
+  const emptyselectedFormatData = []
+  for (let i = 0; i < 19; i++) {
+    emptyselectedFormatData.push('')
+  }
+
   res.render('uploadFormat', {
     headerItems: csvData,
     uploadGeneral: uploadGeneral,
     taxIds: taxIds,
     unitIds: unitIds,
-    csvfilename: csvfilename
+    csvfilename: csvfilename,
+    selectedFormatData: emptyselectedFormatData
   })
 }
 
@@ -413,7 +420,6 @@ const cbPostConfirmIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  // res.redirect(303, '/csvConfirmFormat')
   res.redirect(
     307,
     url.format({
@@ -447,13 +453,58 @@ const setErrorLog = async (req, errorCode) => {
   logger.error(logMessage, err.name)
 }
 
+const cbPostBackIndex = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostBackIndex')
+  req.session.csvUploadFormatReturnFlag2 = true
+
+  if (!req.session.csvUploadFormatReturnFlag1 || req.session.csvUploadFormatReturnFlag2) {
+    delete req.session.formData
+    delete req.session.csvUploadFormatReturnFlag1
+    delete req.session.csvUploadFormatReturnFlag2
+  } else {
+    req.session.csvUploadFormatReturnFlag1 = false
+    req.session.csvUploadFormatReturnFlag2 = false
+  }
+  // 認証情報取得処理
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = helper.checkContractStatus
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+
+  res.redirect('/csvBasicFormat')
+
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostBackIndex')
+}
+
 router.post('/', cbPostIndex)
-// router.post('/cbPostDBIndex', cbPostDBIndex)
 router.post('/cbPostDBIndex', cbPostConfirmIndex)
+router.post('/cbPostBackIndex', cbPostBackIndex)
 
 module.exports = {
   router: router,
   cbPostIndex: cbPostIndex,
-  // cbPostDBIndex: cbPostDBIndex,
   cbPostConfirmIndex: cbPostConfirmIndex
 }
