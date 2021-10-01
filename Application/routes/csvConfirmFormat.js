@@ -311,7 +311,6 @@ const cbPostDBIndex = async (req, res, next) => {
   }
 
   // csv削除
-  console.log(csvfilename)
   if (cbRemoveCsv(filePath, csvfilename) === false) {
     setErrorLog(req, 500)
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
