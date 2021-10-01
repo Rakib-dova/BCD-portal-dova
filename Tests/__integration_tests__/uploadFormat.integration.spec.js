@@ -205,9 +205,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       })
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/csvBasicFormat', {
-        waitUntil: 'networkidle0'
-      })
+      await page.goto('https://localhost:3000/csvBasicFormat')
 
       await page.type('#uploadFormatItemName', 'インテ')
       await page.type('#uploadType', '請求書')
@@ -271,7 +269,8 @@ describe('ルーティングのインテグレーションテスト', () => {
       await page.type('#keyOthers', 'zz')
 
       await page.click('#submit')
-      await page.waitForTimeout(3000)
+
+      await page.waitForTimeout(1000)
 
       expect(await page.url()).toMatch('https://localhost:3000/uploadFormat') // タイトルが含まれていること
 
@@ -322,14 +321,12 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('基本情報設定画面入力：伝送されたCSVファイルチェック、ヘッダ無', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         ignoreHTTPSErrors: true
       })
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/csvBasicFormat', {
-        waitUntil: 'networkidle0'
-      })
+      await page.goto('https://localhost:3000/csvBasicFormat')
 
       await page.type('#uploadFormatItemName', 'インテ')
       await page.type('#uploadType', '請求書')
@@ -345,7 +342,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       await page.waitForTimeout(1000)
 
       await page.click('#checkItemNameLineOff')
-      await page.type('#defaultNumber', '3')
+      await page.type('#defaultNumber', '2')
 
       await page.type('#keyConsumptionTax', 'V')
       await page.type('#keyReducedTax', '8')
@@ -392,7 +389,8 @@ describe('ルーティングのインテグレーションテスト', () => {
       await page.type('#keyOthers', 'zz')
 
       await page.click('#submit')
-      await page.waitForTimeout(3000)
+
+      await page.waitForTimeout(1000)
 
       expect(await page.url()).toMatch('https://localhost:3000/uploadFormat') // タイトルが含まれていること
 
@@ -406,6 +404,15 @@ describe('ルーティングのインテグレーションテスト', () => {
         .trim()
         .split(',')
 
+      const checkPageHeader = await page.evaluate(() => {
+        const pageHeader = document.querySelectorAll('.text-center#dataItem')
+        const result = []
+        pageHeader.forEach((item) => {
+          result.push(item.innerText)
+        })
+        return result
+      })
+
       const checkPageData = await page.evaluate(() => {
         const pageData = document.querySelectorAll('.text-center#dataValue')
         const result = []
@@ -413,6 +420,11 @@ describe('ルーティングのインテグレーションテスト', () => {
           result.push(item.innerText)
         })
         return result
+      })
+
+      checkPageHeader.map((item, index) => {
+        expect(item).toBe('')
+        return ''
       })
 
       targetBody.map((item, index) => {
@@ -425,14 +437,12 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('基本情報設定画面入力：必須項目チェック', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         ignoreHTTPSErrors: true
       })
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/csvBasicFormat', {
-        waitUntil: 'networkidle0'
-      })
+      await page.goto('https://localhost:3000/csvBasicFormat')
 
       await page.type('#uploadFormatItemName', 'インテ')
       await page.type('#uploadType', '請求書')
@@ -447,7 +457,8 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       await page.waitForTimeout(1000)
 
-      await page.click('#checkItemNameLineOff')
+      await page.click('#checkItemNameLineOn')
+      await page.type('#uploadFormatNumber', '1')
       await page.type('#defaultNumber', '3')
 
       await page.type('#keyConsumptionTax', 'V')
@@ -495,7 +506,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       await page.type('#keyOthers', 'zz')
 
       await page.click('#submit')
-      await page.waitForTimeout(3000)
 
       expect(await page.url()).toMatch('https://localhost:3000/uploadFormat') // タイトルが含まれていること
 
@@ -510,7 +520,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         return result
       })
 
-      expect(errormessageTag.length).toBe(11)
+      expect(errormessageTag.length).toBe(9)
 
       errormessageTag.forEach((item) => {
         expect(item).toBe('未入力です。')
