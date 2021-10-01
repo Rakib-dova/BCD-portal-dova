@@ -31,12 +31,6 @@ $('#confirmBtn').addEventListener('click', function (e) {
     }
   })
 
-  Array.prototype.forEach.call(document.querySelectorAll('#dataValue'), (item) => {
-    if (item.value.length > 100) {
-      stopFlag = true
-    }
-  })
-
   if (!stopFlag) {
     e.preventDefault()
   }

@@ -457,14 +457,6 @@ const cbPostBackIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostBackIndex')
   req.session.csvUploadFormatReturnFlag2 = true
 
-  if (!req.session.csvUploadFormatReturnFlag1 || req.session.csvUploadFormatReturnFlag2) {
-    delete req.session.formData
-    delete req.session.csvUploadFormatReturnFlag1
-    delete req.session.csvUploadFormatReturnFlag2
-  } else {
-    req.session.csvUploadFormatReturnFlag1 = false
-    req.session.csvUploadFormatReturnFlag2 = false
-  }
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 

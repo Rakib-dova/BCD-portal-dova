@@ -47,7 +47,7 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
     { name: '免税', id: 'keyDutyFree' },
     { name: '非課税', id: 'keyExemptTax' }
   ]
-  csvTax.map(tax => {
+  csvTax.map((tax) => {
     tax.id = taxIds[tax.id]
     return ''
   })
@@ -91,7 +91,7 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
     { name: 'トン', id: 'keyTonnage' },
     { name: 'その他', id: 'keyOthers' }
   ]
-  csvUnit.map(unit => {
+  csvUnit.map((unit) => {
     unit.id = unitIds[unit.id]
     return ''
   })
@@ -145,6 +145,11 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
 const cbPostDBIndex = async (req, res, next) => {
   const functionName = 'cbPostDBIndex'
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+
+  delete req.session.formData
+  delete req.session.csvUploadFormatReturnFlag1
+  delete req.session.csvUploadFormatReturnFlag2
+
   if (!req.session || !req.user?.userId) {
     setErrorLog(req, 500)
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
