@@ -133,7 +133,7 @@ const cbPostIndex = async (req, res, next) => {
     console.log(row)
     if (row.trim() !== '') checkRow.push(row)
   })
-  
+
   if (checkRow.length < defaultNumber + 1) {
     const backURL = req.header('Referer') || '/'
     return res.redirect(backURL)
@@ -170,18 +170,15 @@ const cbPostIndex = async (req, res, next) => {
     return ''
   })
 
-<<<<<<< HEAD
-=======
   if (duplicateFlag) {
     const backURL = req.header('Referer') || '/'
     return res.redirect(backURL)
   }
 
   globalCsvData = csvData
->>>>>>> bf59967997c66de29eb67d26552a81a5973fd78b
   uploadFormatItemName = req.body.uploadFormatItemName
   uploadType = req.body.uploadType
-  const uploadGeneral= {
+  const uploadGeneral = {
     uploadFormatItemName: uploadFormatItemName,
     uploadType: uploadType
   }
@@ -264,7 +261,6 @@ const cbPostIndex = async (req, res, next) => {
   keyFormula = req.body.keyFormula
   keyTonnage = req.body.keyTonnage
   keyOthers = req.body.keyOthers
-<<<<<<< HEAD
   const unitIds = {
     keyManMonth: keyManMonth,
     keyBottle: keyBottle,
@@ -305,8 +301,6 @@ const cbPostIndex = async (req, res, next) => {
     keyTonnage: keyTonnage,
     keyOthers: keyOthers
   }
-
-=======
 
   {
     const checkDuplicate = [
@@ -371,7 +365,6 @@ const cbPostIndex = async (req, res, next) => {
       return res.redirect(backURL)
     }
   }
->>>>>>> bf59967997c66de29eb67d26552a81a5973fd78b
   res.render('uploadFormat', {
     headerItems: csvData,
     uploadGeneral: uploadGeneral,
@@ -421,15 +414,18 @@ const cbPostConfirmIndex = async (req, res, next) => {
   }
 
   // res.redirect(303, '/csvConfirmFormat')
-  res.redirect(307, url.format({
-    pathname:'/csvConfirmFormat',
-    body: {
-      tenantId: req.user.tenantId,
-      userRole: req.session.userRole,
-      numberN: contract.dataValues?.numberN,
-      TS_HOST: process.env.TS_HOST
-    }
-  }))
+  res.redirect(
+    307,
+    url.format({
+      pathname: '/csvConfirmFormat',
+      body: {
+        tenantId: req.user.tenantId,
+        userRole: req.session.userRole,
+        numberN: contract.dataValues?.numberN,
+        TS_HOST: process.env.TS_HOST
+      }
+    })
+  )
 }
 
 const setErrorLog = async (req, errorCode) => {
