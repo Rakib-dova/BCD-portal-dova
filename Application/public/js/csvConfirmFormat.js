@@ -59,6 +59,11 @@ $('#submit').addEventListener('click', (e) => {
           validationCheckFlag = true
         }
         break
+      case 12:
+        if (item.innerText.length === 0) {
+          validationCheckFlag = true
+        }
+        break
       case 13:
         if (item.innerText.length === 0) {
           validationCheckFlag = true
@@ -84,13 +89,9 @@ $('#submit').addEventListener('click', (e) => {
           validationCheckFlag = true
         }
         break
-      case 18:
-        if (item.innerText.length === 0) {
-          validationCheckFlag = true
-        }
-        break
     }
   })
+  console.log(validationCheckFlag)
   if (validationCheckFlag) {
     e.preventDefault()
   }

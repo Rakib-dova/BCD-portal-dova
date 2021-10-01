@@ -12,7 +12,8 @@ block content
         input.input(type="hidden" name="uploadGeneral" value= uploadGeneral) 
         input.input(type="hidden" name="taxIds" value= taxIds) 
         input.input(type="hidden" name="unitIds" value= unitIds) 
-        input.input(type="hidden" name="csvfilename" value= csvfilename) 
+        input.input(type="hidden" name="csvfilename" value= csvfilename)
+        input.input(type="hidden" name="selectedFormatData" value= selectedFormatData)  
         .columns
           .column
             .title.is-family-noto-sans 取込データ
@@ -47,7 +48,13 @@ block content
                       select.is-11.requiredItem#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[0].length !== 0
+                            if ~~selectedFormatData[0] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1                           
                   tr
                     th
                       label.input-label 請求書番号
@@ -57,7 +64,13 @@ block content
                       select.is-11.requiredItem#invoiceNumber(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[1].length !== 0
+                            if ~~selectedFormatData[1] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
                   tr
                     th
                       label.input-label テナントID
@@ -67,7 +80,13 @@ block content
                       select.is-11.requiredItem#tenantId(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[2].length !== 0
+                            if ~~selectedFormatData[2] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
                   tr
                     th
                       label.input-label 支払期日
@@ -76,7 +95,13 @@ block content
                       select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[3].length !== 0
+                            if ~~selectedFormatData[3] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
                   tr
                     th 
                       label.input-label 納品日
@@ -85,7 +110,13 @@ block content
                       select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[4].length !== 0
+                            if ~~selectedFormatData[4] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
@@ -95,7 +126,13 @@ block content
                       select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[5].length !== 0
+                            if ~~selectedFormatData[5] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
@@ -105,7 +142,13 @@ block content
                       select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[6].length !== 0
+                            if ~~selectedFormatData[6] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1   
 
                   tr
                     th
@@ -115,7 +158,13 @@ block content
                       select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[7].length !== 0
+                            if ~~selectedFormatData[7] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
@@ -125,7 +174,13 @@ block content
                       select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[8].length !== 0
+                            if ~~selectedFormatData[8] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
@@ -135,7 +190,13 @@ block content
                       select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[9].length !== 0
+                            if ~~selectedFormatData[9] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
@@ -145,7 +206,13 @@ block content
                       select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[10].length !== 0
+                            if ~~selectedFormatData[10] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
@@ -155,7 +222,13 @@ block content
                       select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1 
+                          if selectedFormatData[11].length !== 0
+                            if ~~selectedFormatData[11] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
   
                   tr
                     th
@@ -166,7 +239,13 @@ block content
                       select.is-11.requiredItem#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[12].length !== 0
+                            if ~~selectedFormatData[12] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
@@ -177,7 +256,13 @@ block content
                       select.is-11.requiredItem#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[13].length !== 0
+                            if ~~selectedFormatData[13] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
@@ -188,7 +273,13 @@ block content
                       select.is-11.requiredItem#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[14].length !== 0
+                            if ~~selectedFormatData[14] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
@@ -199,7 +290,13 @@ block content
                       select.is-11.requiredItem#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[15].length !== 0
+                            if ~~selectedFormatData[15] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
@@ -210,7 +307,13 @@ block content
                       select.is-11.requiredItem#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[16].length !== 0
+                            if ~~selectedFormatData[16] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
@@ -222,7 +325,13 @@ block content
                       select.is-11.requiredItem#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[17].length !== 0
+                            if ~~selectedFormatData[17] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                            
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
@@ -232,11 +341,17 @@ block content
                       select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[18].length !== 0
+                            if ~~selectedFormatData[18] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
                   
         footer.modal-card-foot
           div.button-area
-            a.button.mr-6#returnBasic 戻る
+            button.button.mr-6#returnBasic(type="submit" formaction="/uploadFormat/cbPostBackIndex" formmethod="POST") 戻る
             button.button.is-success.success-button#confirmBtn(type="submit" formaction="/uploadFormat/cbPostDBIndex" formmethod="POST") 確認
       include footer
 
