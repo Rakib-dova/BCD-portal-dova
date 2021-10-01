@@ -47,8 +47,8 @@ block content
                       td(id= aryFormName[index])
 
             footer.modal-card-foot
-              button.button.is-success.mr-6#submit(type="submit" formaction="/user/register" formmethod="POST") 登録
-              a.button.cancel-button(data-target='confirmregister-modal') キャンセル
+              a.button.cancel-button.mr-6(data-target='confirmregister-modal') キャンセル
+              button.button.is-success#submit(type="submit" formaction="/user/register" formmethod="POST") 登録
       include footer
 
 block append scripts
