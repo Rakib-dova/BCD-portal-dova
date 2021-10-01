@@ -91,7 +91,7 @@ $('#submit').addEventListener('click', (e) => {
         break
     }
   })
-  console.log(validationCheckFlag)
+
   if (validationCheckFlag) {
     e.preventDefault()
   }
