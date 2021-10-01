@@ -46,8 +46,8 @@ block content
 
             footer.modal-card-foot
               div.button-area
-                button.button.is-success.mr-6#submit.success-button(type="submit" formaction="/cancellation" formmethod="POST") 解約
-                a.button.cancel-button(data-target='cancellation-modal') キャンセル
+                a.button.cancel-button.mr-6(data-target='cancellation-modal') キャンセル
+                button.button.is-success#submit.success-button(type="submit" formaction="/cancellation" formmethod="POST") 解約
   include footer
 
 block append scripts
