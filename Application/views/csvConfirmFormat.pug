@@ -18,10 +18,10 @@ block content
                   .title.is-5 基本情報
                   .field
                     label(for="uploadFormatItemName") 設定名称
-                    input.width-50.float-right.margin-right-20(name='uploadFormatItemName' value=uploadFormatItemName readonly)
+                    input.width-50.float-right.margin-right-20#uploadFormatItemName(name='uploadFormatItemName' value=uploadFormatItemName readonly)
                   .field
                     label(for="uploadType").input-label アップロード種別
-                    input.width-50.float-right.margin-right-20(name='uploadType' value=uploadType readonly)
+                    input.width-50.float-right.margin-right-20#uploadType(name='uploadType' value=uploadType readonly)
            
               .field.card
                 .card-content.padding-left-90p
@@ -31,9 +31,9 @@ block content
                       .field
                         label.margin-top-10p(for=tax.id)= tax.name
                         if tax.id==''
-                          input.width-50.float-right.margin-right-20(id=tax.id type="text" name=tax.name value='' readonly)
+                          input.width-50.float-right.margin-right-20.tax(id=tax.id type="text" name=tax.name value='' readonly)
                         else
-                          input.width-50.float-right.margin-right-20(id=tax.id type="text" name=tax.name value=tax.id readonly)
+                          input.width-50.float-right.margin-right-20.tax(id=tax.id type="text" name=tax.name value=tax.id readonly)
               .field.card
                 .card-content.padding-left-90p
                   details(open)
@@ -42,9 +42,9 @@ block content
                       .field 
                         label.margin-top-10p(for=unit.id)= unit.name
                         if unit.id==''
-                          input.width-50.float-right.margin-right-20(id=unit.id type="text" name=unit.name value='' readonly)
+                          input.width-50.float-right.margin-right-20.unit(id=unit.id type="text" name=unit.name value='' readonly)
                         else
-                          input.width-50.float-right.margin-right-20(id=unit.id type="text" name=unit.name value=unit.id readonly)
+                          input.width-50.float-right.margin-right-20.unit(id=unit.id type="text" name=unit.name value=unit.id readonly)
 
 
               .columns
@@ -64,14 +64,14 @@ block content
                             tr 
                               th= column.columnName
                               th →
-                              th.text-center#dataIndex= column.item
-                              th.text-center#dataItem= column.value
+                              th.text-center.dataIndex#dataIndex= column.item
+                              th.text-center.dataItem#dataItem= column.value
                           else 
                             tr
                               th= column.columnName
                               th
-                              th.text-center#dataIndex= column.item
-                              th.text-center#dataItem= column.value
+                              th.text-center.dataIndex#dataIndex= column.item
+                              th.text-center.dataItem#dataItem= column.value
           .field.is-grouped.is-grouped-centered
             .control
               .column
@@ -82,4 +82,4 @@ block content
       include footer
 
 block append scripts
-  script(src="/js/csvBasicFormat-page.js")
+  script(src="/js/csvConfirmFormat.js")
