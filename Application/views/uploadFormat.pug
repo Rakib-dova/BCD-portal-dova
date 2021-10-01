@@ -8,10 +8,15 @@ block content
           .title.is-family-noto-sans 請求書アップロードフォーマット設定
           .subtitle.is-family-noto-sans 対応する取込データを設定してください
       .container
+        input.input(type="hidden" name="headerItems" value= headerItems) 
+        input.input(type="hidden" name="uploadGeneral" value= uploadGeneral) 
+        input.input(type="hidden" name="taxIds" value= taxIds) 
+        input.input(type="hidden" name="unitIds" value= unitIds) 
+        input.input(type="hidden" name="csvfilename" value= csvfilename) 
         .columns
           .column
             .title.is-family-noto-sans 取込データ
-            .box
+            .box              
               table.table.is-fullwidth.is-hoverable
                 thead
                   tr
@@ -229,9 +234,15 @@ block content
                         each content, index in headerItems
                           option(value= index)= index+1
                   
+<<<<<<< HEAD
+        footer.modal-card-foot          
+          div.button-area             
+            button.button.mr-6(type="" formaction="/csvBasicFormat" formmethod="") 戻る
+=======
         footer.modal-card-foot
           div.button-area
             a.button.mr-6#returnBasic 戻る
+>>>>>>> bf59967997c66de29eb67d26552a81a5973fd78b
             button.button.is-success.success-button#confirmBtn(type="submit" formaction="/uploadFormat/cbPostDBIndex" formmethod="POST") 確認
       include footer
 
