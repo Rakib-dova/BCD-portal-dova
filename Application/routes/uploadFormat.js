@@ -72,7 +72,7 @@ const bodyParser = require('body-parser')
 router.use(
   bodyParser.json({
     type: 'application/json',
-    limit: '100KB'
+    limit: '100MB' // フォーマットサイズ５M以上
   })
 )
 
@@ -119,9 +119,31 @@ const cbPostIndex = async (req, res, next) => {
   csvfilename = user.dataValues.userId + '_' + req.body.dataFileName
   uploadFormatNumber = req.body.uploadFormatNumber - 1
   defaultNumber = req.body.defaultNumber - 1
+
+  if (
+    ~~req.body.defaultNumber <= 0 ||
+    ~~req.body.uploadFormatNumber <= 0 ||
+    ~~req.body.defaultNumber <= ~~req.body.uploadFormatNumber
+  ) {
+    const backURL = req.header('Referer') || '/'
+    return res.redirect(backURL)
+  }
   const extractFullpathFile = path.join(filePath, '/') + csvfilename
+
   const csv = fs.readFileSync(extractFullpathFile, 'utf8')
   const tmpRows = csv.split(/\r?\n|\r/)
+  const checkRow = []
+  tmpRows.forEach((row) => {
+    console.log(row)
+    if (row.trim() !== '') checkRow.push(row)
+  })
+  console.log(checkRow)
+  console.log(defaultNumber)
+  console.log(checkRow.length < defaultNumber)
+  if (checkRow.length < defaultNumber + 1) {
+    const backURL = req.header('Referer') || '/'
+    return res.redirect(backURL)
+  }
   const mesaiArr = tmpRows[defaultNumber].trim().split(',') // 修正必要（データ開始行番号）
   let headerArr = []
   if (req.body.checkItemNameLine === 'on') {
@@ -132,15 +154,32 @@ const cbPostIndex = async (req, res, next) => {
       return ''
     })
   }
+  let duplicateFlag = false
   // 配列に読み込んだcsvデータを入れる。
   const csvData = headerArr.map((header) => {
+    if (header.length > 100) {
+      duplicateFlag = true
+    }
     return { item: header, value: '' }
   })
 
+  if (duplicateFlag) {
+    const backURL = req.header('Referer') || '/'
+    return res.redirect(backURL)
+  }
+
   mesaiArr.map((mesai, idx) => {
+    if (mesai.length > 100) {
+      duplicateFlag = true
+    }
     csvData[idx].value = mesai
     return ''
   })
+
+  if (duplicateFlag) {
+    const backURL = req.header('Referer') || '/'
+    return res.redirect(backURL)
+  }
 
   globalCsvData = csvData
   uploadFormatItemName = req.body.uploadFormatItemName
@@ -152,6 +191,31 @@ const cbPostIndex = async (req, res, next) => {
   keyFreeTax = req.body.keyFreeTax
   keyDutyFree = req.body.keyDutyFree
   keyExemptTax = req.body.keyExemptTax
+
+  {
+    const checkDuplicate = [keyConsumptionTax, keyReducedTax, keyFreeTax, keyDutyFree, keyExemptTax]
+    const resultDuplicate = checkDuplicate.map((item, idx, arr) => {
+      if (Object.prototype.toString.call(item) === undefined) {
+        return false
+      }
+      if (item.length > 100) {
+        return true
+      }
+      if (item !== '') {
+        for (let start = idx + 1; start < arr.length; start++) {
+          if (item === arr[start]) {
+            return true
+          }
+        }
+      }
+      return false
+    })
+
+    if (resultDuplicate.indexOf(true) !== -1) {
+      const backURL = req.header('Referer') || '/'
+      return res.redirect(backURL)
+    }
+  }
 
   // unit
   keyManMonth = req.body.keyManMonth
@@ -192,6 +256,70 @@ const cbPostIndex = async (req, res, next) => {
   keyFormula = req.body.keyFormula
   keyTonnage = req.body.keyTonnage
   keyOthers = req.body.keyOthers
+
+  {
+    const checkDuplicate = [
+      keyManMonth,
+      keyBottle,
+      keyCost,
+      keyContainer,
+      keyCentilitre,
+      keySquareCentimeter,
+      keyCubicCentimeter,
+      keyCentimeter,
+      keyCase,
+      keyCarton,
+      keyDay,
+      keyDeciliter,
+      keyDecimeter,
+      keyGrossKilogram,
+      keyPieces,
+      keyFeet,
+      keyGallon,
+      keyGram,
+      keyGrossTonnage,
+      keyHour,
+      keyKilogram,
+      keyKilometers,
+      keyKilowattHour,
+      keyPound,
+      keyLiter,
+      keyMilligram,
+      keyMilliliter,
+      keyMillimeter,
+      keyMonth,
+      keySquareMeter,
+      keyCubicMeter,
+      keyMeter,
+      keyNetTonnage,
+      keyPackage,
+      keyRoll,
+      keyFormula,
+      keyTonnage,
+      keyOthers
+    ]
+    const resultDuplicate = checkDuplicate.map((item, idx, arr) => {
+      if (Object.prototype.toString.call(item) === undefined) {
+        return false
+      }
+      if (item.length > 100) {
+        return true
+      }
+      if (item !== '') {
+        for (let start = idx + 1; start < arr.length; start++) {
+          if (item === arr[start]) {
+            return true
+          }
+        }
+      }
+      return false
+    })
+
+    if (resultDuplicate.indexOf(true) !== -1) {
+      const backURL = req.header('Referer') || '/'
+      return res.redirect(backURL)
+    }
+  }
   res.render('uploadFormat', {
     headerItems: csvData
   })
