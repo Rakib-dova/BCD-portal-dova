@@ -21,49 +21,9 @@ const filePath = process.env.INVOICE_UPLOAD_PATH
 let csvfilename
 let headerItems
 let formatData
-const cbGetCsvConfirmFormat = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvConfirmFormat')
-
-  // 認証情報取得処理
-  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
-
-  // DBからuserデータ取得
-  const user = await userController.findOne(req.user.userId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // user未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
-
-  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
-  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
-
-  // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
-
-  // ユーザ権限を取得
-  req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = helper.checkContractStatus
-
-  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
-
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
-
-  const csvTax = constantsDefine.csvFormatDefine.csvTax
-  const csvUnit = constantsDefine.csvFormatDefine.csvUnit
-
-  csvfilename = req.body.csvfilename
-  res.render('csvConfirmFormat', {
-    csvTax: csvTax,
-    csvUnit: csvUnit,
-    TS_HOST: process.env.TS_HOST
-  })
-  logger.info(constantsDefine.logMessage.INF001 + 'cbGetCsvConfirmFormat')
-}
+let uploadGeneral
+let taxIds
+let unitIds
 
 const cbPostCsvConfirmFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostCsvConfirmFormat')
@@ -73,25 +33,68 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
-
+  csvfilename = req.body.csvfilename
   headerItems = JSON.parse(req.body.headerItems)
   formatData = req.body.formatData
-  const uploadGeneral = JSON.parse(req.body.uploadGeneral)
-  const taxIds = JSON.parse(req.body.taxIds)
-  const unitIds = JSON.parse(req.body.unitIds)
-  const csvTax = constantsDefine.csvFormatDefine.csvTax
-  csvTax.map(tax => {
-    const id = tax.id
-    tax.id = taxIds[id]
+  uploadGeneral = JSON.parse(req.body.uploadGeneral)
+  taxIds = JSON.parse(req.body.taxIds)
+  unitIds = JSON.parse(req.body.unitIds)
+  // const csvTax = constantsDefine.csvFormatDefine.csvTax
+  const csvTax = [
+    { name: '消費税', id: 'keyConsumptionTax' },
+    { name: '軽減税率', id: 'keyReducedTax' },
+    { name: '不課税', id: 'keyFreeTax' },
+    { name: '免税', id: 'keyDutyFree' },
+    { name: '非課税', id: 'keyExemptTax' }
+  ]
+  csvTax.map((tax) => {
+    tax.id = taxIds[tax.id]
     return ''
   })
-  const csvUnit = constantsDefine.csvFormatDefine.csvUnit
-  csvUnit.map(unit => {
-    const id = unit.id
-    unit.id = unitIds[id]
+  const csvUnit = [
+    { name: '人月', id: 'keyManMonth' },
+    { name: 'ボトル', id: 'keyBottle' },
+    { name: 'コスト', id: 'keyCost' },
+    { name: 'コンテナ', id: 'keyContainer' },
+    { name: 'センチリットル', id: 'keyCentilitre' },
+    { name: '平方センチメートル', id: 'keySquareCentimeter' },
+    { name: '立方センチメートル', id: 'keyCubicCentimeter' },
+    { name: 'センチメートル', id: 'keyCentimeter' },
+    { name: 'ケース', id: 'keyCase' },
+    { name: 'カートン', id: 'keyCarton' },
+    { name: '日', id: 'keyDay' },
+    { name: 'デシリットル', id: 'keyDeciliter' },
+    { name: 'デシメートル', id: 'keyDecimeter' },
+    { name: 'グロス・キログラム', id: 'keyGrossKilogram' },
+    { name: '個', id: 'keyPieces' },
+    { name: 'フィート', id: 'keyFeet' },
+    { name: 'ガロン', id: 'keyGallon' },
+    { name: 'グラム', id: 'keyGram' },
+    { name: '総トン', id: 'keyGrossTonnage' },
+    { name: '時間', id: 'keyHour' },
+    { name: 'キログラム', id: 'keyKilogram' },
+    { name: 'キロメートル', id: 'keyKilometers' },
+    { name: 'キロワット時', id: 'keyKilowattHour' },
+    { name: 'ポンド', id: 'keyPound' },
+    { name: 'リットル', id: 'keyLiter' },
+    { name: 'ミリグラム', id: 'keyMilligram' },
+    { name: 'ミリリットル', id: 'keyMilliliter' },
+    { name: 'ミリメートル', id: 'keyMillimeter' },
+    { name: '月', id: 'keyMonth' },
+    { name: '平方メートル', id: 'keySquareMeter' },
+    { name: '立方メートル', id: 'keyCubicMeter' },
+    { name: 'メーター', id: 'keyMeter' },
+    { name: '純トン', id: 'keyNetTonnage' },
+    { name: '包', id: 'keyPackage' },
+    { name: '巻', id: 'keyRoll' },
+    { name: '式', id: 'keyFormula' },
+    { name: 'トン', id: 'keyTonnage' },
+    { name: 'その他', id: 'keyOthers' }
+  ]
+  csvUnit.map((unit) => {
+    unit.id = unitIds[unit.id]
     return ''
   })
-  console.log(formatData)
 
   const columnArr = [
     { columnName: '発行日', item: '', value: '' },
@@ -130,11 +133,11 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
     uploadFormatItemName: uploadGeneral.uploadFormatItemName,
     uploadType: uploadGeneral.uploadType,
     uploadGeneral: uploadGeneral,
-    taxIds: taxIds,
-    unitIds: unitIds,
+    selectedFormatData: formatData,
     csvTax: csvTax,
     csvUnit: csvUnit,
     columnArr: columnArr,
+    csvfilename: csvfilename,
     TS_HOST: process.env.TS_HOST
   })
 }
@@ -142,6 +145,11 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
 const cbPostDBIndex = async (req, res, next) => {
   const functionName = 'cbPostDBIndex'
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+
+  delete req.session.formData
+  delete req.session.csvUploadFormatReturnFlag1
+  delete req.session.csvUploadFormatReturnFlag2
+
   if (!req.session || !req.user?.userId) {
     setErrorLog(req, 500)
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
@@ -188,7 +196,7 @@ const cbPostDBIndex = async (req, res, next) => {
   }
 
   let iCnt = 1
-  let columnArr = [
+  const columnArr = [
     '発行日',
     '請求書番号',
     'テナントID',
@@ -354,14 +362,24 @@ const setErrorLog = async (req, errorCode) => {
   logger.error(logMessage, err.name)
 }
 
+const cbPostBackIndex = async (req, res, next) => {
+  res.render('uploadFormat', {
+    headerItems: headerItems,
+    uploadGeneral: uploadGeneral,
+    taxIds: taxIds,
+    unitIds: unitIds,
+    selectedFormatData: formatData,
+    csvfilename: csvfilename
+  })
+}
 
-router.get('/', helper.isAuthenticated, cbGetCsvConfirmFormat)
 router.post('/', cbPostCsvConfirmFormat)
 router.post('/cbPostDBIndex', cbPostDBIndex)
-
+router.post('/cbPostBackIndex', cbPostBackIndex)
 module.exports = {
   router: router,
-  cbGetCsvConfirmFormat: cbGetCsvConfirmFormat,
   cbPostCsvConfirmFormat: cbPostCsvConfirmFormat,
+  cbPostDBIndex: cbPostDBIndex,
+  cbPostBackIndex: cbPostBackIndex,
   cbRemoveCsv: cbRemoveCsv
 }
