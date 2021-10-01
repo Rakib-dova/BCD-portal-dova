@@ -56,7 +56,8 @@ const cbGetCsvConfirmFormat = async (req, res, next) => {
   const csvTax = constantsDefine.csvFormatDefine.csvTax
   const csvUnit = constantsDefine.csvFormatDefine.csvUnit
 
-  csvfilename = req.body.csvfilename
+
+
   res.render('csvConfirmFormat', {
     csvTax: csvTax,
     csvUnit: csvUnit,
@@ -91,7 +92,6 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
     unit.id = unitIds[id]
     return ''
   })
-  console.log(formatData)
 
   const columnArr = [
     { columnName: '発行日', item: '', value: '' },
@@ -125,7 +125,7 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
       return ''
     }
   })
-
+  csvfilename = req.body.csvfilename
   res.render('csvConfirmFormat', {
     uploadFormatItemName: uploadGeneral.uploadFormatItemName,
     uploadType: uploadGeneral.uploadType,
@@ -311,6 +311,7 @@ const cbPostDBIndex = async (req, res, next) => {
   }
 
   // csv削除
+  console.log(csvfilename)
   if (cbRemoveCsv(filePath, csvfilename) === false) {
     setErrorLog(req, 500)
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
