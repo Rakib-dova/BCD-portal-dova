@@ -1,0 +1,186 @@
+extends layout
+
+block content
+  .hero.is-large
+    .hero-body
+      .container
+
+  .section.is-overlay.mt-6
+    .container.is-max-widescreen.is-family-noto-sans
+      form#form(action="#")
+        article.panel.is-info
+          h2.panel-heading アップロードフォーマット設定 確認
+          .panel-block
+            .container
+             .columns.is-centered: .column.is-four-fifths
+              .field.card
+                .card-content.padding-left-90p
+                  .title.is-5 基本情報
+                  .field
+                    label(for="uploadFormatItemName") 設定名称
+                    div.div-border.width-50.float-right.margin-right-20#uploadFormatItemName 請求書データ 
+                  .field
+                    label(for="uploadType").input-label アップロード種別
+                    div.div-border.width-50.float-right.margin-right-20#uploadType 請求書データ
+           
+              .field.card
+                .card-content.padding-left-90p
+                  details(open)
+                    summary.title.is-5 明細-税 識別子
+                    each tax in csvTax
+                      .field
+                        label.margin-top-10p(for=tax.id)= tax.name
+                        div.div-border.width-50.float-right.margin-right-20(id=tax.id type="text" name=tax.id)= tax.id
+              .field.card
+                .card-content.padding-left-90p
+                  details(open)
+                    summary.title.is-5 明細-単位 識別子
+                    each unit in csvUnit
+                      .field 
+                        label.margin-top-10p(for=unit.id)= unit.name
+                        div.div-border.width-50.float-right.margin-right-20(id=unit.id type="text" name=unit.id)= unit.id
+
+
+              .columns
+                .column                 
+                  .title.text-center.is-5 請求書データ用フォーマット
+                  .box
+                    table.table.is-fullwidth.is-hoverable
+                      thead
+                        tr
+                          th 項目名
+                      tbody
+                        tr
+                          th 
+                            label.input-label 発行日（必須）
+                        tr
+                          th
+                            label.input-label 請求書番号（必須）
+                        tr
+                          th
+                            label.input-label テナントID（必須）
+                        tr
+                          th
+                            label.input-label 支払期日
+                        tr
+                          th 
+                            label.input-label 納品日
+                        tr
+                          th 
+                            label.input-label 備考
+                        tr
+                          th
+                            label.input-label 銀行名
+                        tr
+                          th
+                            label.input-label 支店名
+                        tr
+                          th
+                            label.input-label 科目
+                        tr
+                          th 
+                            label.input-label 口座番号
+                        tr
+                          th 
+                            label.input-label 口座名義
+                        tr
+                          th
+                            label.input-label その他特記事項
+                        tr
+                          th
+                            label.input-label 明細-項目ID（必須）
+                        tr
+                          th
+                            label.input-label 明細-内容（必須）
+                        tr
+                          th 
+                            label.input-label 明細-数量（必須）
+                        tr
+                          th
+                            label.input-label 明細-単位（必須）
+                        tr
+                          th
+                            label.input-label 明細-単価（必須）
+                        tr
+                          th 
+                            label.input-label 明細-税
+                        tr
+                          th
+                            label.input-label 明細-備考
+                .column
+                  .title.text-center.is-5 取込データ
+                  .box
+                    table.table.is-fullwidth.is-hoverable
+                      thead
+                        tr
+                          th.text-center 項目名
+                          th.text-center データ内容
+                      tbody
+                        tr
+                          th.text-center#dataIndex AAA
+                          th.text-center#dataItem aaa
+                        tr
+                          th.text-center#dataIndex BBB
+                          th.text-center#dataItem bbb
+                        tr
+                          th.text-center#dataIndex CCC
+                          th.text-center#dataItem ccc
+                        tr
+                          th.text-center#dataIndex DDD
+                          th.text-center#dataItem ddd
+                        tr
+                          th.text-center#dataIndex EEE
+                          th.text-center#dataItem eee
+                        tr
+                          th.text-center#dataIndex FFF
+                          th.text-center#dataItem fff
+                        tr
+                          th.text-center#dataIndex GGG
+                          th.text-center#dataItem ggg
+                        tr
+                          th.text-center#dataIndex HHH
+                          th.text-center#dataItem hhh
+                        tr
+                          th.text-center#dataIndex III
+                          th.text-center#dataItem iii
+                        tr
+                          th.text-center#dataIndex JJJ
+                          th.text-center#dataItem jjj
+                        tr
+                          th.text-center#dataIndex KKK
+                          th.text-center#dataItem kkk
+                        tr
+                          th.text-center#dataIndex LLL
+                          th.text-center#dataItem lll
+                        tr
+                          th.text-center#dataIndex MMM
+                          th.text-center#dataItem mmm
+                        tr
+                          th.text-center#dataIndex NNN
+                          th.text-center#dataItem nnn
+                        tr
+                          th.text-center#dataIndex OOO
+                          th.text-center#dataItem ooo
+                        tr
+                          th.text-center#dataIndex PPP
+                          th.text-center#dataItem ppp
+                        tr
+                          th.text-center#dataIndex QQQ
+                          th.text-center#dataItem qqq
+                        tr
+                          th.text-center#dataIndex RRR
+                          th.text-center#dataItem rrr
+                        tr
+                          th.text-center#dataIndex SSS
+                          th.text-center#dataItem sss
+          .field.is-grouped.is-grouped-centered
+            .control
+              .column
+                div.button-area
+                  a.button.mr-6#return-btn.cancel-button(href='uploadFormat') 戻る
+                  button.button.is-success.success-button#submit(type="submit" formaction="/csvBasicFormat" formmethod="POST") 設定
+       
+      include footer
+
+block append scripts
+  script(src="/js/csvBasicFormat-page.js")
