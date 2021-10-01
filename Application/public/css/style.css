@@ -426,3 +426,8 @@ img.logo-ncom {
 .padding-left-90p {
   padding-left: 90px;
 }
+
+.not-input-required::after {
+  content: '未入力です。';
+  color: red;
+}
