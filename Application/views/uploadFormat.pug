@@ -66,20 +66,18 @@ block content
                   tr
                     th
                       label.input-label 支払期日
-                      p.input-label-required.input-label （必須）
                       p.errormessage.input-label-required 
                     td.text-center
-                      select.is-11.requiredItem#issueDate(name="formatData")
+                      select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
                           option(value= index)= index+1
                   tr
                     th 
                       label.input-label 納品日
-                      p.input-label-required.input-label （必須）
                       p.errormessage.input-label-required 
                     td.text-center
-                      select.is-11.requiredItem#issueDate(name="formatData")
+                      select.is-11#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
                           option(value= index)= index+1
@@ -233,7 +231,7 @@ block content
                   
         footer.modal-card-foot
           div.button-area
-            button.button.mr-6(type="" formaction="/csvBasicFormat" formmethod="") 戻る
+            a.button.mr-6#returnBasic 戻る
             button.button.is-success.success-button#confirmBtn(type="submit" formaction="/uploadFormat/cbPostDBIndex" formmethod="POST") 確認
       include footer
 

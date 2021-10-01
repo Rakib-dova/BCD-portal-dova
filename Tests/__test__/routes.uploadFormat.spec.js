@@ -324,7 +324,11 @@ describe('csvBasicFormatのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
       // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload('/home/upload', 'uploadFormatTest.csv', Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -386,7 +390,11 @@ describe('csvBasicFormatのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
 
       // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload('/home/upload', 'uploadFormatTest.csv', Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -397,10 +405,1006 @@ describe('csvBasicFormatのテスト', () => {
 
       // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
-      
+
       // アップロードしたテスト用csvファイルを削除
       const resultDelFile = uploadFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest.csv')
       expect(resultDelFile).toBeTruthy()
+    })
+
+    test('準正常：ヘッダありでヘッダ番号の未入力', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        checkItemNameLine: 'on',
+        uploadFormatNumber: ''
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：ヘッダありでヘッダ番号が0の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        checkItemNameLine: 'on',
+        uploadFormatNumber: '0'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：ヘッダありでヘッダの数字>データ開始番号', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        checkItemNameLine: 'on',
+        uploadFormatNumber: '2',
+        defaultNumber: '1'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：ヘッダなしデータ開始番号が0の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        checkItemNameLine: 'off',
+        defaultNumber: '0'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：ヘッダなしデータ開始番号がCSVの行より多いの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        checkItemNameLine: 'off',
+        defaultNumber: '3'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：消費税と軽減税率が重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax: '3',
+        keyReducedTax: '3',
+        keyFreeTax: '5',
+        keyDutyFree: '6',
+        keyExemptTax: '7'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：消費税と不課税が重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax: '3',
+        keyReducedTax: '4',
+        keyFreeTax: '3',
+        keyDutyFree: '6',
+        keyExemptTax: '7'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：消費税と免税が重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax: '3',
+        keyReducedTax: '4',
+        keyFreeTax: '5',
+        keyDutyFree: '3',
+        keyExemptTax: '7'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：消費税と非課税が重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax: '3',
+        keyReducedTax: '4',
+        keyFreeTax: '5',
+        keyDutyFree: '6',
+        keyExemptTax: '3'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：軽減税率と不課税が重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax: '3',
+        keyReducedTax: '4',
+        keyFreeTax: '4',
+        keyDutyFree: '6',
+        keyExemptTax: '7'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：軽減税率と免税が重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax: '3',
+        keyReducedTax: '4',
+        keyFreeTax: '5',
+        keyDutyFree: '4',
+        keyExemptTax: '7'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：軽減税率と非課税が重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax: '3',
+        keyReducedTax: '4',
+        keyFreeTax: '5',
+        keyDutyFree: '6',
+        keyExemptTax: '4'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：不課税と免税が重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax: '3',
+        keyReducedTax: '4',
+        keyFreeTax: '5',
+        keyDutyFree: '5',
+        keyExemptTax: '7'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：不課税と非課税が重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax: '3',
+        keyReducedTax: '4',
+        keyFreeTax: '5',
+        keyDutyFree: '6',
+        keyExemptTax: '5'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：免税と非課税が重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax: '3',
+        keyReducedTax: '4',
+        keyFreeTax: '5',
+        keyDutyFree: '6',
+        keyExemptTax: '6'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：税の100文字', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax:
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('uploadFormat', {
+        headerItems: [
+          { item: '発行日', value: '2021-06-14' },
+          { item: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
+          { item: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
+          { item: '支払期日', value: '2021-03-31' },
+          { item: '納品日', value: '2021-03-17' },
+          { item: '備考', value: 'test111' },
+          { item: '銀行名', value: 'testsiten' },
+          { item: '支店名', value: 'testbank' },
+          { item: '科目', value: '普通' },
+          { item: '口座番号', value: '1111111' },
+          { item: '口座名義', value: 'kang_test' },
+          { item: 'その他特記事項', value: '特記事項テストです。' },
+          { item: '明細-項目ID', value: '001' },
+          { item: '明細-内容', value: 'PC' },
+          { item: '明細-数量', value: '100' },
+          { item: '明細-単位', value: '個' },
+          { item: '明細-単価', value: '100000' },
+          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
+          { item: '明細-備考', value: 'アップロードテスト' }
+        ]
+      })
+
+      // アップロードしたテスト用csvファイルを削除
+      const resultDelFile = uploadFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest.csv')
+      expect(resultDelFile).toBeTruthy()
+    })
+
+    test('準正常：税の100文字以上', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyConsumptionTax:
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：単位が重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyManMonth: '8',
+        keyBottle: '8'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
+    })
+
+    test('準正常：単位の100文字', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyManMonth:
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('uploadFormat', {
+        headerItems: [
+          { item: '発行日', value: '2021-06-14' },
+          { item: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
+          { item: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
+          { item: '支払期日', value: '2021-03-31' },
+          { item: '納品日', value: '2021-03-17' },
+          { item: '備考', value: 'test111' },
+          { item: '銀行名', value: 'testsiten' },
+          { item: '支店名', value: 'testbank' },
+          { item: '科目', value: '普通' },
+          { item: '口座番号', value: '1111111' },
+          { item: '口座名義', value: 'kang_test' },
+          { item: 'その他特記事項', value: '特記事項テストです。' },
+          { item: '明細-項目ID', value: '001' },
+          { item: '明細-内容', value: 'PC' },
+          { item: '明細-数量', value: '100' },
+          { item: '明細-単位', value: '個' },
+          { item: '明細-単価', value: '100000' },
+          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
+          { item: '明細-備考', value: 'アップロードテスト' }
+        ]
+      })
+
+      // アップロードしたテスト用csvファイルを削除
+      const resultDelFile = uploadFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest.csv')
+      expect(resultDelFile).toBeTruthy()
+    })
+
+    test('準正常：単位の100文字', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex,
+        keyManMonth:
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      // uploadFormat.jsが遷移を拒否して、前URLに戻る
+      expect(response.headers.Location).toBe('/')
+      expect(response.statusCode).toBe(307)
     })
   })
 
@@ -425,15 +1429,34 @@ describe('csvBasicFormatのテスト', () => {
       request.body = {
         dataFileName: 'uploadFormatTest.csv',
         formatData: [
-          '0',  '1',  '2',  '3',  '4',
-          '5',  '6',  '7',  '8',  '9',
-          '10', '11', '12', '13', '14',
-          '15', '16', '17', '18'
+          '0',
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+          '17',
+          '18'
         ]
       }
 
       // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload('/home/upload', 'uploadFormatTest.csv', Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
 
       // 試験実施
       await uploadFormat.cbPostDBIndex(request, response, next)
@@ -461,15 +1484,34 @@ describe('csvBasicFormatのテスト', () => {
       request.body = {
         dataFileName: 'uploadFormatTest.csv',
         formatData: [
-          '0',  '1',  '2',  '3',  '4',
-          '5',  '6',  '7',  '8',  '9',
-          '10', '11', '12', '13', '14',
-          '15', '16', '17', '18'
+          '0',
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+          '17',
+          '18'
         ]
       }
 
       // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload('/home/upload', 'uploadFormatTest111.csv', Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest111.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
 
       // 試験実施
       await uploadFormat.cbPostDBIndex(request, response, next)
@@ -500,10 +1542,25 @@ describe('csvBasicFormatのテスト', () => {
       // ファイルデータを設定
       request.body = {
         formatData: [
-          '0',  '1',  '2',  '3',  '4',
-          '5',  '6',  '7',  '8',  '9',
-          '10', '11', '12', '13', '14',
-          '15', '16', '17', '18'
+          '0',
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+          '17',
+          '18'
         ]
       }
 
@@ -532,10 +1589,25 @@ describe('csvBasicFormatのテスト', () => {
       // ファイルデータを設定
       request.body = {
         formatData: [
-          '0',  '1',  '2',  '3',  '4',
-          '5',  '6',  '7',  '8',  '9',
-          '10', '11', '12', '13', '14',
-          '15', '16', '17', '18'
+          '0',
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+          '17',
+          '18'
         ]
       }
 
@@ -564,10 +1636,25 @@ describe('csvBasicFormatのテスト', () => {
       // ファイルデータを設定
       request.body = {
         formatData: [
-          '0',  '1',  '2',  '3',  '4',
-          '5',  '6',  '7',  '8',  '9',
-          '10', '11', '12', '13', '14',
-          '15', '16', '17', '18'
+          '0',
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+          '17',
+          '18'
         ]
       }
 
@@ -597,10 +1684,25 @@ describe('csvBasicFormatのテスト', () => {
       // ファイルデータを設定
       request.body = {
         formatData: [
-          '0',  '1',  '2',  '3',  '4',
-          '5',  '6',  '7',  '8',  '9',
-          '10', '11', '12', '13', '14',
-          '15', '16', '17', '18'
+          '0',
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+          '17',
+          '18'
         ]
       }
 
@@ -623,9 +1725,13 @@ describe('csvBasicFormatのテスト', () => {
     test('正常', async () => {
       // 準備
       request.user = user
-      
+
       // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload('/home/upload', 'uploadFormatTest.csv', Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
 
       // 試験実施
       const resultRemove = await uploadFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest.csv')
