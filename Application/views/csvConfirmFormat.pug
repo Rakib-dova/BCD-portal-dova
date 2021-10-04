@@ -1,0 +1,85 @@
+extends layout
+
+block content
+  .hero.is-large
+    .hero-body
+      .container
+
+  .section.is-overlay.mt-6
+    .container.is-max-widescreen.is-family-noto-sans
+      form#form(action="#")
+        article.panel.is-info
+          h2.panel-heading 請求書アップロードフォーマット設定 確認
+          .panel-block
+            .container
+             .columns.is-centered: .column.is-four-fifths
+              .field.card
+                .card-content.padding-left-90p
+                  .title.is-5 基本情報
+                  .field
+                    label(for="uploadFormatItemName") 設定名称
+                    input.width-50.float-right.margin-right-20#uploadFormatItemName(name='uploadFormatItemName' value=uploadFormatItemName readonly)
+                  .field
+                    label(for="uploadType").input-label アップロード種別
+                    input.width-50.float-right.margin-right-20#uploadType(name='uploadType' value=uploadType readonly)
+           
+              .field.card
+                .card-content.padding-left-90p
+                  details(open)
+                    summary.title.is-5 明細-税 識別子
+                    each tax in csvTax
+                      .field
+                        label.margin-top-10p(for=tax.id)= tax.name
+                        if tax.id==''
+                          input.width-50.float-right.margin-right-20.tax(id=tax.id type="text" name=tax.name value='' readonly)
+                        else
+                          input.width-50.float-right.margin-right-20.tax(id=tax.id type="text" name=tax.name value=tax.id readonly)
+              .field.card
+                .card-content.padding-left-90p
+                  details(open)
+                    summary.title.is-5 明細-単位 識別子
+                    each unit in csvUnit
+                      .field 
+                        label.margin-top-10p(for=unit.id)= unit.name
+                        if unit.id==''
+                          input.width-50.float-right.margin-right-20.unit(id=unit.id type="text" name=unit.name value='' readonly)
+                        else
+                          input.width-50.float-right.margin-right-20.unit(id=unit.id type="text" name=unit.name value=unit.id readonly)
+
+
+              .columns
+                .column                 
+                  .title.text-center.is-5 請求書データ用フォーマット  →  取込データ
+                  .box
+                    table.table.is-fullwidth.is-hoverable
+                      thead
+                        tr
+                          th 項目名
+                          th 
+                          th.text-center 項目名
+                          th.text-center データ内容
+                      tbody
+                        each column in columnArr
+                          if column.item.length !==0
+                            tr 
+                              th= column.columnName
+                              th →
+                              th.text-center.dataIndex#dataIndex= column.item
+                              th.text-center.dataItem#dataItem= column.value
+                          else 
+                            tr
+                              th= column.columnName
+                              th
+                              th.text-center.dataIndex#dataIndex= column.item
+                              th.text-center.dataItem#dataItem= column.value
+          .field.is-grouped.is-grouped-centered
+            .control
+              .column
+                div.button-area
+                  button.button.mr-6#return-btn.cancel-button(type="submit" formaction="/csvConfirmFormat/cbPostBackIndex" formmethod="POST") 戻る
+                  button.button.is-success.success-button#submit(type="submit" formaction="/csvConfirmFormat/cbPostDBIndex" formmethod="POST") 設定
+       
+      include footer
+
+block append scripts
+  script(src="/js/csvConfirmFormat.js")

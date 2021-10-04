@@ -19,11 +19,11 @@ block content
                     label(for="uploadFormatItemName").input-label 設定名称
                     p#uploadFormatItemNameeRequired.input-label-required.input-label （必須）
                     .control
-                      input.input#uploadFormatItemName(type="text" name="uploadFormatItemName" value="" required)
+                      input.input#uploadFormatItemName(type="text" name="uploadFormatItemName" value=csvBasicArr.uploadFormatItemName maxlength=100 required)
                   .field
                     label(for="uploadType").input-label アップロード種別
                     .control
-                      input.input#uploadType(type="text" name="uploadType" value="")
+                      input.input#uploadType(type="text" name="uploadType" value="請求書データ" readonly)
                   .field
                     label(for="dataFile").input-label データファイル
                     p#dataFileRequired.input-label-required.input-label （必須）
@@ -45,39 +45,43 @@ block content
                         input#checkItemNameLineOff(type='radio' name='checkItemNameLine' value='off' required)
                         label(for="checkItemNameLineOff") なし
                   .field
-                    label(for="uploadFormatNumber").input-label 項目名の行番号　
+                    label(for="uploadFormatNumber").input-label 項目名の行番号
+                    p#uploadFormatNumberRequired.input-label-required.input-label （必須）
                     .control
                       .columns.ml-0.pl-0.alignCenterChild
                         .column.is-one-fifth.pl-0
-                          input.input#uploadFormatNumber(type="text" name="uploadFormatNumber" value="" maxlength=7 required) 
+                          input.input#uploadFormatNumber(type="text" name="uploadFormatNumber" value=csvBasicArr.uploadFormatNumber maxlength=7 pattern=inputPattarnHankakuSeisu required) 
                         .column  
                           p 行目
                   .field
                     label(for="defaultNumber").input-label データ開始行番号
+                    p#defaultNumberRequired.input-label-required.input-label （必須）
                     .control
                       .columns.ml-0.pl-0.alignCenterChild
                         .column.is-one-fifth.pl-0
-                          input.input#defaultNumber(type="text" name="defaultNumber" value="" maxlength=7)
+                          input.input#defaultNumber(type="text" name="defaultNumber" value=csvBasicArr.defaultNumber maxlength=7 pattern=inputPattarnHankakuSeisu required) 
                         .column  
                           p 行目
             
               .field.card
                 .card-content
                   .title.is-5 明細-税 識別子
-                  each tax in csvTax
-                   .field
-                    label(for=tax.id).input-label= tax.name
-                    .control
-                     input.input(id=tax.id type="text" name=tax.id value="")
+                  each tax, index in csvTax
+                    - const taxValue = taxArr[Object.keys(taxArr)[index]]
+                    .field
+                      label(for=tax.id).input-label= tax.name
+                      .control
+                        input.input.input-tax(id=tax.id type="text" name=tax.id value=taxValue maxlength=100)
 
               .field.card
                 .card-content
                   .title.is-5 明細-単位 識別子
-                  each unit in csvUnit
-                   .field
-                    label(for=unit.id).input-label= unit.name
-                    .control
-                      input.input(id=unit.id type="text" name=unit.id value="")
+                  each unit, index in csvUnit
+                    - const unitValue = unitArr[Object.keys(unitArr)[index]]
+                    .field
+                      label(for=unit.id).input-label= unit.name
+                      .control
+                        input.input.input-unit(id=unit.id type="text" name=unit.id value=unitValue maxlength=100)
 
              .columns.is-centered.changeConfirm
               .field.is-grouped.is-grouped-centered
