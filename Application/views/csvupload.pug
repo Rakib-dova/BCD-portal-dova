@@ -23,10 +23,10 @@ block content
           .mt-5.has-text-centered
               label.mr470(for='start-upload-select') フォーマット種別
               .control
-                select.select.is-outlined.is-family-noto-sans.box-large(id='start-upload-select')
+                select.select.is-outlined.is-family-noto-sans.box-large(name='uploadFormatId' id='start-upload-select')
                   option(value='' selected) デフォルト
                   each format, index in formatkindsArr
-                    option(value= format.setName)= format.setName
+                    option(value= format.uploadFormatId)= format.setName
           .mt-5.has-text-centered
             .button.is-medium.is-link.is-outlined.is-family-noto-sans.box-large(disabled='disabled', id='start-upload-btn') アップロード開始
         .mt-1.has-text-right
