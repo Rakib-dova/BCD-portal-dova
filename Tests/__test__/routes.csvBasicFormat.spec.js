@@ -5,6 +5,15 @@ jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
 
+jest.mock('../../Application/node_modules/csurf', () => {
+  // コンストラクタをMock化
+  return jest.fn().mockImplementation(() => {
+    return (res, req, next) => {
+      return next()
+    }
+  })
+})
+
 const csvBasicFormat = require('../../Application/routes/csvBasicFormat')
 const uploadFormat = require('../../Application/routes/uploadFormat')
 const Request = require('jest-express').Request
@@ -274,7 +283,12 @@ describe('csvBasicFormatのテスト', () => {
   }
   describe('ルーティング', () => {
     test('csvBasicFormatのルーティングを確認', async () => {
-      expect(csvBasicFormat.router.get).toBeCalledWith('/', helper.isAuthenticated, csvBasicFormat.cbGetCsvBasicFormat)
+      expect(csvBasicFormat.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.any(Function),
+        csvBasicFormat.cbGetCsvBasicFormat
+      )
     })
   })
 
