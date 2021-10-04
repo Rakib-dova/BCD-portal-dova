@@ -18,6 +18,9 @@ const url = require('url')
 const cbGetCsvBasicFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvBasicFormat')
 
+  // 認証情報取得処理
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
   if (!req.session.csvUploadFormatReturnFlag1 || !req.session.csvUploadFormatReturnFlag2) {
     delete req.session.formData
     delete req.session.csvUploadFormatReturnFlag1
@@ -26,9 +29,6 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
     req.session.csvUploadFormatReturnFlag1 = false
     req.session.csvUploadFormatReturnFlag2 = false
   }
-
-  // 認証情報取得処理
-  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)

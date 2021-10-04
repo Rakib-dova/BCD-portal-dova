@@ -13,16 +13,10 @@ const next = require('jest-express').Next
 const helper = require('../../Application/routes/helpers/middleware')
 const errorHelper = require('../../Application/routes/helpers/error')
 const noticeHelper = require('../../Application/routes/helpers/notice')
-const apiManager = require('../../Application/controllers/apiManager.js')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
-const invoiceDetailController = require('../../Application/controllers/invoiceDetailController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
-const constantsDefine = require('../../Application/constants')
-const invoiceController = require('../../Application/controllers/invoiceController.js')
-const SUCCESSMESSAGE = constantsDefine.invoiceErrMsg.SUCCESS
-const SKIPMESSAGE = constantsDefine.invoiceErrMsg.SKIP
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
@@ -115,67 +109,6 @@ describe('csvConfirmFormatのテスト', () => {
     }
   }
 
-  const csvTax = [
-    { name: '消費税', id: 'keyConsumptionTax' },
-    { name: '軽減税率', id: 'keyReducedTax' },
-    { name: '不課税', id: 'keyFreeTax' },
-    { name: '免税', id: 'keyDutyFree' },
-    { name: '非課税', id: 'keyExemptTax' }
-  ]
-
-  const csvUnit = [
-    { name: '人月', id: 'keyManMonth' },
-    { name: 'ボトル', id: 'keyBottle' },
-    { name: 'コスト', id: 'keyCost' },
-    { name: 'コンテナ', id: 'keyContainer' },
-    { name: 'センチリットル', id: 'keyCentilitre' },
-    { name: '平方センチメートル', id: 'keySquareCentimeter' },
-    { name: '立方センチメートル', id: 'keyCubicCentimeter' },
-    { name: 'センチメートル', id: 'keyCentimeter' },
-    { name: 'ケース', id: 'keyCase' },
-    { name: 'カートン', id: 'keyCarton' },
-    { name: '日', id: 'keyDay' },
-    { name: 'デシリットル', id: 'keyDeciliter' },
-    { name: 'デシメートル', id: 'keyDecimeter' },
-    { name: 'グロス・キログラム', id: 'keyGrossKilogram' },
-    { name: '個', id: 'keyPieces' },
-    { name: 'フィート', id: 'keyFeet' },
-    { name: 'ガロン', id: 'keyGallon' },
-    { name: 'グラム', id: 'keyGram' },
-    { name: '総トン', id: 'keyGrossTonnage' },
-    { name: '時間', id: 'keyHour' },
-    { name: 'キログラム', id: 'keyKilogram' },
-    { name: 'キロメートル', id: 'keyKilometers' },
-    { name: 'キロワット時', id: 'keyKilowattHour' },
-    { name: 'ポンド', id: 'keyPound' },
-    { name: 'リットル', id: 'keyLiter' },
-    { name: 'ミリグラム', id: 'keyMilligram' },
-    { name: 'ミリリットル', id: 'keyMilliliter' },
-    { name: 'ミリメートル', id: 'keyMillimeter' },
-    { name: '月', id: 'keyMonth' },
-    { name: '平方メートル', id: 'keySquareMeter' },
-    { name: '立方メートル', id: 'keyCubicMeter' },
-    { name: 'メーター', id: 'keyMeter' },
-    { name: '純トン', id: 'keyNetTonnage' },
-    { name: '包', id: 'keyPackage' },
-    { name: '巻', id: 'keyRoll' },
-    { name: '式', id: 'keyFormula' },
-    { name: 'トン', id: 'keyTonnage' },
-    { name: 'その他', id: 'keyOthers' }
-  ]
-
-  const contractInfoData = {
-    dataValues: {
-      contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
-      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-      numberN: '0000011111',
-      contractStatus: '00',
-      deleteFlag: false,
-      createdAt: '2021-01-25T08:45:49.803Z',
-      updatedAt: '2021-01-25T08:45:49.803Z'
-    }
-  }
-
   const contractdataValues = {
     dataValues: {
       contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
@@ -212,22 +145,6 @@ describe('csvConfirmFormatのテスト', () => {
     }
   }
 
-  const contractInfoDatatoBeReceiptCancel = {
-    dataValues: {
-      contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
-      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-      numberN: '0000011111',
-      contractStatus: '30',
-      deleteFlag: false,
-      createdAt: '2021-01-25T08:45:49.803Z',
-      updatedAt: '2021-01-25T08:45:49.803Z'
-    }
-  }
-
-  // ファイルパス設定
-  const filePath = process.env.INVOICE_UPLOAD_PATH
-  // ファイル名設定
-  const fileName = 'uploadFormatTest.csv'
   // ファイルデータ
   // 請求書が1つの場合
   const fileData = Buffer.from(
@@ -235,72 +152,15 @@ describe('csvConfirmFormatのテスト', () => {
 2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
 
-  // テナントIDがUUID形式出ない
-  const tenantIdTypeErr = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
-2021-06-14,UT_TEST_INVOICE_1_1,3c,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
-  ).toString('base64')
-  const headerItems = '[{"item":"発行日","value":"2021/09/27"},{"item":"請求書番号","value":"PB147500101"},{"item":"テナントID","value":"9bd4923d-1b65-43b9-9b8d-34dbd1c9ac40"},{"item":"支払期日","value":"2022/10/10"},{"item":"納品日","value":"2021/10/10"},{"item":"備考","value":"PBI1475_手動試験"},{"item":"銀行名","value":"手動銀行"},{"item":"支店名","value":"手動支店"},{"item":"科目","value":"普通"},{"item":"口座番号","value":"1234567"},{"item":"口座名義","value":"手動"},{"item":"その他特記事項","value":"請求書一括作成_1.csv"},{"item":"明細-項目ID","value":"1"},{"item":"明細-内容","value":"明細１"},{"item":"明細-数量","value":"1"},{"item":"明細-単位","value":"個"},{"item":"明細-単価","value":"100000"},{"item":"明細-税（消費税／軽減税率／不課税／免税／非課税）","value":"消費税"},{"item":"明細-備考","value":"手動試験データ"},{"item":"備考1","value":"1"},{"item":"備考2","value":"2"},{"item":"備考3","value":"3"}]'
+  const headerItems =
+    '[{"item":"発行日","value":"2021/09/27"},{"item":"請求書番号","value":"PB147500101"},{"item":"テナントID","value":"9bd4923d-1b65-43b9-9b8d-34dbd1c9ac40"},{"item":"支払期日","value":"2022/10/10"},{"item":"納品日","value":"2021/10/10"},{"item":"備考","value":"PBI1475_手動試験"},{"item":"銀行名","value":"手動銀行"},{"item":"支店名","value":"手動支店"},{"item":"科目","value":"普通"},{"item":"口座番号","value":"1234567"},{"item":"口座名義","value":"手動"},{"item":"その他特記事項","value":"請求書一括作成_1.csv"},{"item":"明細-項目ID","value":"1"},{"item":"明細-内容","value":"明細１"},{"item":"明細-数量","value":"1"},{"item":"明細-単位","value":"個"},{"item":"明細-単価","value":"100000"},{"item":"明細-税（消費税／軽減税率／不課税／免税／非課税）","value":"消費税"},{"item":"明細-備考","value":"手動試験データ"},{"item":"備考1","value":"1"},{"item":"備考2","value":"2"},{"item":"備考3","value":"3"}]'
   const taxIds = '{"keyConsumptionTax":"a","keyReducedTax":"","keyFreeTax":"","keyDutyFree":"","keyExemptTax":""}'
-  const unitIds = '{"keyManMonth":"b","keyBottle":"","keyCost":"","keyContainer":"","keyCentilitre":"","keySquareCentimeter":"","keyCubicCentimeter":"","keyCentimeter":"","keyCase":"","keyCarton":"","keyDay":"","keyDeciliter":"","keyDecimeter":"","keyGrossKilogram":"","keyPieces":"","keyFeet":"","keyGallon":"","keyGram":"","keyGrossTonnage":"","keyHour":"","keyKilogram":"","keyKilometers":"","keyKilowattHour":"","keyPound":"","keyLiter":"","keyMilligram":"","keyMilliliter":"","keyMillimeter":"","keyMonth":"","keySquareMeter":"","keyCubicMeter":"","keyMeter":"","keyNetTonnage":"","keyPackage":"","keyRoll":"","keyFormula":"","keyTonnage":"","keyOthers":""}'
+  const unitIds =
+    '{"keyManMonth":"b","keyBottle":"","keyCost":"","keyContainer":"","keyCentilitre":"","keySquareCentimeter":"","keyCubicCentimeter":"","keyCentimeter":"","keyCase":"","keyCarton":"","keyDay":"","keyDeciliter":"","keyDecimeter":"","keyGrossKilogram":"","keyPieces":"","keyFeet":"","keyGallon":"","keyGram":"","keyGrossTonnage":"","keyHour":"","keyKilogram":"","keyKilometers":"","keyKilowattHour":"","keyPound":"","keyLiter":"","keyMilligram":"","keyMilliliter":"","keyMillimeter":"","keyMonth":"","keySquareMeter":"","keyCubicMeter":"","keyMeter":"","keyNetTonnage":"","keyPackage":"","keyRoll":"","keyFormula":"","keyTonnage":"","keyOthers":""}'
 
   const uploadGeneral = '{"uploadFormatItemName":"1","uploadType":"請求書データ"}'
 
-  const taxIdsaaaaaa = {
-    keyConsumptionTax: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    keyDutyFree: '6',
-    keyExemptTax: '7',
-    keyFreeTax: '5',
-    keyReducedTax: '4'    
-  }
-
-  const unitIdsaaaaaa =  {
-    keyBottle: '9',
-    keyCarton: '17',
-    keyCase: '16',
-    keyCentilitre: '12',
-    keyCentimeter: '15',
-    keyContainer: '11',
-    keyCost: '10',
-    keyCubicCentimeter: '14',
-    keyCubicMeter: '38',
-    keyDay: '18',
-    keyDeciliter: '19',
-    keyDecimeter: '20',
-    keyFeet: '23',
-    keyFormula: '43',
-    keyGallon: '24',
-    keyGram: '25',
-    keyGrossKilogram: '21',
-    keyGrossTonnage: '26',
-    keyHour: '27',
-    keyKilogram: '28',
-    keyKilometers: '29',
-    keyKilowattHour: '30',
-    keyLiter: '32',
-    keyManMonth: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    keyMeter: '39',
-    keyMilligram: '33',
-    keyMilliliter: '34',
-    keyMillimeter: '35',
-    keyMonth: '36',
-    keyNetTonnage: '40',
-    keyOthers: '45',
-    keyPackage: '41',
-    keyPieces: '22',
-    keyPound: '31',
-    keyRoll: '42',
-    keySquareCentimeter: '13',
-    keySquareMeter: '37',
-    keyTonnage: '44'
-  }
-
-  const formatData = [
-    '0', '1', '2', '', '',
-    '', '', '', '', '',
-    '', '', '12', '13', '14',
-    '15', '16', '17', ''
-  ]
+  const formatData = ['0', '1', '2', '', '', '', '', '', '', '', '', '', '12', '13', '14', '15', '16', '17', '']
 
   const testfilename = 'testfilename'
   const reqBodyForCbPostIndex = {
@@ -362,7 +222,7 @@ describe('csvConfirmFormatのテスト', () => {
     formatData: formatData,
     csvfilename: testfilename
   }
-  const columnArr  = [
+  const columnArr = [
     { columnName: '発行日', item: '発行日', value: '2021/09/27' },
     { columnName: '請求書番号', item: '請求書番号', value: 'PB147500101' },
     {
@@ -443,97 +303,142 @@ describe('csvConfirmFormatのテスト', () => {
 
   const headerItemsBackResult = [
     {
-     "item": "発行日",
-     "value": "2021/09/27",
-   },
+      item: '発行日',
+      value: '2021/09/27'
+    },
     {
-     "item": "請求書番号",
-     "value": "PB147500101",
-   },
+      item: '請求書番号',
+      value: 'PB147500101'
+    },
     {
-     "item": "テナントID",
-     "value": "9bd4923d-1b65-43b9-9b8d-34dbd1c9ac40",
-   },
+      item: 'テナントID',
+      value: '9bd4923d-1b65-43b9-9b8d-34dbd1c9ac40'
+    },
     {
-     "item": "支払期日",
-     "value": "2022/10/10",
-   },
+      item: '支払期日',
+      value: '2022/10/10'
+    },
     {
-     "item": "納品日",
-     "value": "2021/10/10",
-   },
+      item: '納品日',
+      value: '2021/10/10'
+    },
     {
-     "item": "備考",
-     "value": "PBI1475_手動試験",
-   },
+      item: '備考',
+      value: 'PBI1475_手動試験'
+    },
     {
-     "item": "銀行名",
-     "value": "手動銀行",
-   },
+      item: '銀行名',
+      value: '手動銀行'
+    },
     {
-     "item": "支店名",
-     "value": "手動支店",
-   },
+      item: '支店名',
+      value: '手動支店'
+    },
     {
-     "item": "科目",
-     "value": "普通",
-   },
+      item: '科目',
+      value: '普通'
+    },
     {
-     "item": "口座番号",
-     "value": "1234567",
-   },
+      item: '口座番号',
+      value: '1234567'
+    },
     {
-     "item": "口座名義",
-     "value": "手動",
-   },
+      item: '口座名義',
+      value: '手動'
+    },
     {
-     "item": "その他特記事項",
-     "value": "請求書一括作成_1.csv",
-   },
+      item: 'その他特記事項',
+      value: '請求書一括作成_1.csv'
+    },
     {
-     "item": "明細-項目ID",
-     "value": "1",
-   },
+      item: '明細-項目ID',
+      value: '1'
+    },
     {
-     "item": "明細-内容",
-     "value": "明細１",
-   },
+      item: '明細-内容',
+      value: '明細１'
+    },
     {
-     "item": "明細-数量",
-     "value": "1",
-   },
+      item: '明細-数量',
+      value: '1'
+    },
     {
-     "item": "明細-単位",
-     "value": "個",
-   },
+      item: '明細-単位',
+      value: '個'
+    },
     {
-     "item": "明細-単価",
-     "value": "100000",
-   },
+      item: '明細-単価',
+      value: '100000'
+    },
     {
-     "item": "明細-税（消費税／軽減税率／不課税／免税／非課税）",
-     "value": "消費税",
-   },
+      item: '明細-税（消費税／軽減税率／不課税／免税／非課税）',
+      value: '消費税'
+    },
     {
-     "item": "明細-備考",
-     "value": "手動試験データ",
-   },
+      item: '明細-備考',
+      value: '手動試験データ'
+    },
     {
-     "item": "備考1",
-     "value": "1",
-   },
+      item: '備考1',
+      value: '1'
+    },
     {
-     "item": "備考2",
-     "value": "2",
-   },
+      item: '備考2',
+      value: '2'
+    },
     {
-     "item": "備考3",
-     "value": "3",
-   },
- ]
- const taxIdsBackResult= {"keyConsumptionTax":"a","keyReducedTax":"","keyFreeTax":"","keyDutyFree":"","keyExemptTax":""}
- const unitIdsBackResult = {"keyManMonth":"b","keyBottle":"","keyCost":"","keyContainer":"","keyCentilitre":"","keySquareCentimeter":"","keyCubicCentimeter":"","keyCentimeter":"","keyCase":"","keyCarton":"","keyDay":"","keyDeciliter":"","keyDecimeter":"","keyGrossKilogram":"","keyPieces":"","keyFeet":"","keyGallon":"","keyGram":"","keyGrossTonnage":"","keyHour":"","keyKilogram":"","keyKilometers":"","keyKilowattHour":"","keyPound":"","keyLiter":"","keyMilligram":"","keyMilliliter":"","keyMillimeter":"","keyMonth":"","keySquareMeter":"","keyCubicMeter":"","keyMeter":"","keyNetTonnage":"","keyPackage":"","keyRoll":"","keyFormula":"","keyTonnage":"","keyOthers":""}
- const uploadGeneralBackResult = {"uploadFormatItemName":"1","uploadType":"請求書データ"}
+      item: '備考3',
+      value: '3'
+    }
+  ]
+  const taxIdsBackResult = {
+    keyConsumptionTax: 'a',
+    keyReducedTax: '',
+    keyFreeTax: '',
+    keyDutyFree: '',
+    keyExemptTax: ''
+  }
+  const unitIdsBackResult = {
+    keyManMonth: 'b',
+    keyBottle: '',
+    keyCost: '',
+    keyContainer: '',
+    keyCentilitre: '',
+    keySquareCentimeter: '',
+    keyCubicCentimeter: '',
+    keyCentimeter: '',
+    keyCase: '',
+    keyCarton: '',
+    keyDay: '',
+    keyDeciliter: '',
+    keyDecimeter: '',
+    keyGrossKilogram: '',
+    keyPieces: '',
+    keyFeet: '',
+    keyGallon: '',
+    keyGram: '',
+    keyGrossTonnage: '',
+    keyHour: '',
+    keyKilogram: '',
+    keyKilometers: '',
+    keyKilowattHour: '',
+    keyPound: '',
+    keyLiter: '',
+    keyMilligram: '',
+    keyMilliliter: '',
+    keyMillimeter: '',
+    keyMonth: '',
+    keySquareMeter: '',
+    keyCubicMeter: '',
+    keyMeter: '',
+    keyNetTonnage: '',
+    keyPackage: '',
+    keyRoll: '',
+    keyFormula: '',
+    keyTonnage: '',
+    keyOthers: ''
+  }
+  const uploadGeneralBackResult = { uploadFormatItemName: '1', uploadType: '請求書データ' }
   describe('ルーティング', () => {
     test('uploadFormatのルーティングを確認', async () => {
       expect(csvConfirmFormat.router.post).toBeCalledWith('/', csvConfirmFormat.cbPostCsvConfirmFormat)
@@ -593,7 +498,6 @@ describe('csvConfirmFormatのテスト', () => {
         },
         uploadType: '請求書データ',
         csvfilename: testfilename
-
       })
     })
 
@@ -633,6 +537,176 @@ describe('csvConfirmFormatのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(error500)
+    })
+
+    test('準正常：解約申込中', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues2)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await csvConfirmFormat.cbPostCsvConfirmFormat(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('異常：500エラー（DBからユーザ取得エラー）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(null)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await csvConfirmFormat.cbPostCsvConfirmFormat(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
+    })
+
+    test('404エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValuesStatuserr)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await csvConfirmFormat.cbPostCsvConfirmFormat(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error404)
+    })
+
+    test('異常：400エラー（NotLoggedIn）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await csvConfirmFormat.cbPostCsvConfirmFormat(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+      // response.renderが呼ばれ「ない」
+      expect(response.render).not.toHaveBeenCalled()
+    })
+
+    test('異常：500エラー（不正なContractStatus）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndex
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      helper.checkContractStatus = 999
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+      // 試験実施
+      await csvConfirmFormat.cbPostCsvConfirmFormat(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })
 
@@ -676,50 +750,52 @@ describe('csvConfirmFormatのテスト', () => {
           '17',
           '18'
         ],
-        '消費税': 'a',
-        '軽減税率': '',
-        '不課税': '',
-        '免税': '',
-        '非課税': '',
-        '人月': 'b',
-        'ボトル': '',
-        'コスト': '',
-        'コンテナ': '',
-        'センチリットル': '',
-        '平方センチメートル': '',
-        '立方センチメートル': '',
-        'センチメートル': '',
-        'ケース': '',
-        'カートン': '',
-        '日': '',
-        'デシリットル': '',
-        'デシメートル': '',
+        消費税: 'a',
+        軽減税率: '',
+        不課税: '',
+        免税: '',
+        非課税: '',
+        人月: 'b',
+        ボトル: '',
+        コスト: '',
+        コンテナ: '',
+        センチリットル: '',
+        平方センチメートル: '',
+        立方センチメートル: '',
+        センチメートル: '',
+        ケース: '',
+        カートン: '',
+        日: '',
+        デシリットル: '',
+        デシメートル: '',
         'グロス・キログラム': '',
-        '個': '',
-        'フィート': '',
-        'ガロン': '',
-        'グラム': '',
-        '総トン': '',
-        '時間': '',
-        'キログラム': '',
-        'キロメートル': '',
-        'キロワット時': '',
-        'ポンド': '',
-        'リットル': '',
-        'ミリグラム': '',
-        'ミリリットル': '',
-        'ミリメートル': '',
-        '月': '',
-        '平方メートル': '',
-        '立方メートル': '',
-        'メーター': '',
-        '純トン': '',
-        '包': '',
-        '巻': '',
-        '式': '',
-        'トン': '',
-        'その他': ''
+        個: '',
+        フィート: '',
+        ガロン: '',
+        グラム: '',
+        総トン: '',
+        時間: '',
+        キログラム: '',
+        キロメートル: '',
+        キロワット時: '',
+        ポンド: '',
+        リットル: '',
+        ミリグラム: '',
+        ミリリットル: '',
+        ミリメートル: '',
+        月: '',
+        平方メートル: '',
+        立方メートル: '',
+        メーター: '',
+        純トン: '',
+        包: '',
+        巻: '',
+        式: '',
+        トン: '',
+        その他: ''
       }
+
+      helper.checkContractStatus = 10
 
       // テスト用csvファイルアップロード
       await csvBasicFormat.fileUpload(
@@ -737,22 +813,21 @@ describe('csvConfirmFormatのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(error500)
     })
 
-    test('異常:500エラー（削除対象のファイルがない）', async () => {
+    test('準正常：解約申込中', async () => {
       // 準備
       // requestのuserIdに正常値を入れる
       request.session = {
-        userContext: 'NotLoggedIn',
+        userContext: 'LoggedIn',
         userRole: 'dummy'
       }
       request.user = user
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
+      findOneSpyContracts.mockReturnValue(contractdataValues2)
 
       // ファイルデータを設定
       request.body = {
-        dataFileName: 'uploadFormatTest.csv',
         formatData: [
           '0',
           '1',
@@ -773,58 +848,8 @@ describe('csvConfirmFormatのテスト', () => {
           '16',
           '17',
           '18'
-        ],
-        '消費税': 'a',
-        '軽減税率': '',
-        '不課税': '',
-        '免税': '',
-        '非課税': '',
-        '人月': 'b',
-        'ボトル': '',
-        'コスト': '',
-        'コンテナ': '',
-        'センチリットル': '',
-        '平方センチメートル': '',
-        '立方センチメートル': '',
-        'センチメートル': '',
-        'ケース': '',
-        'カートン': '',
-        '日': '',
-        'デシリットル': '',
-        'デシメートル': '',
-        'グロス・キログラム': '',
-        '個': '',
-        'フィート': '',
-        'ガロン': '',
-        'グラム': '',
-        '総トン': '',
-        '時間': '',
-        'キログラム': '',
-        'キロメートル': '',
-        'キロワット時': '',
-        'ポンド': '',
-        'リットル': '',
-        'ミリグラム': '',
-        'ミリリットル': '',
-        'ミリメートル': '',
-        '月': '',
-        '平方メートル': '',
-        '立方メートル': '',
-        'メーター': '',
-        '純トン': '',
-        '包': '',
-        '巻': '',
-        '式': '',
-        'トン': '',
-        'その他': ''
+        ]
       }
-
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        '/home/upload',
-        'uploadFormatTest111.csv',
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
 
       // 試験実施
       await csvConfirmFormat.cbPostDBIndex(request, response, next)
@@ -832,7 +857,109 @@ describe('csvConfirmFormatのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(error500)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('異常：500エラー（reqエラー）', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = null
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // ファイルデータを設定
+      request.body = {
+        formatData: [
+          '0',
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+          '17',
+          '18'
+        ]
+      }
+
+      // 試験実施
+      await csvConfirmFormat.cbPostDBIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('異常：500エラー（不正なContractStatus）', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues4)
+
+      helper.checkContractStatus = 999
+
+      // ファイルデータを設定
+      request.body = {
+        formatData: [
+          '0',
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+          '17',
+          '18'
+        ]
+      }
+
+      // 試験実施
+      await csvConfirmFormat.cbPostDBIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('異常：500エラー（userデータ取得エラー）', async () => {
@@ -925,8 +1052,8 @@ describe('csvConfirmFormatのテスト', () => {
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      expect(next).toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('異常:500エラー（Contractsデータエラー）', async () => {

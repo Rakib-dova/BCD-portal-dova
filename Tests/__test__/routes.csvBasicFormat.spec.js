@@ -211,7 +211,7 @@ describe('csvBasicFormatのテスト', () => {
   // ファイル名設定
   const fileName = dataValues.dataValues.userId + '_UTtest.csv'
 
-   // ファイルデータ
+  // ファイルデータ
   // 請求書が1つの場合
   const fileData = Buffer.from(
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
@@ -318,6 +318,87 @@ describe('csvBasicFormatのテスト', () => {
       })
     })
 
+    test('正常２：ReturnFlagがtrue', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy',
+        csvUploadFormatReturnFlag1: true,
+        csvUploadFormatReturnFlag2: true
+      }
+      request.user = user
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // 試験実施
+      await csvBasicFormat.cbGetCsvBasicFormat(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('csvBasicFormat', {
+        csvTax: csvTax,
+        csvUnit: csvUnit,
+        csvBasicArr: csvBasicArr,
+        taxArr: taxArr,
+        unitArr: unitArr,
+        TS_HOST: process.env.TS_HOST
+      })
+    })
+
+    test('正常３：Formdataがtrue', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy',
+        csvUploadFormatReturnFlag1: true,
+        csvUploadFormatReturnFlag2: true,
+        formData: {
+          taxArr: taxArr,
+          csvBasicArr: csvBasicArr,
+          unitArr: unitArr
+        }
+      }
+      request.user = user
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // 試験実施
+      await csvBasicFormat.cbGetCsvBasicFormat(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvBasicFormatが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('csvBasicFormat', {
+        csvTax: csvTax,
+        csvUnit: csvUnit,
+        csvBasicArr: csvBasicArr,
+        taxArr: taxArr,
+        unitArr: unitArr,
+        TS_HOST: process.env.TS_HOST
+      })
+    })
+
     test('準正常：解約申込中', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -375,7 +456,7 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).not.toHaveBeenCalled()
     })
 
-    test('404エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
+    test('異常：404エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {
@@ -456,7 +537,7 @@ describe('csvBasicFormatのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの不正な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues4)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
 
       helper.checkContractStatus = 999
 
@@ -612,7 +693,7 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).not.toHaveBeenCalled()
     })
 
-    test('404エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
+    test('異常：404エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {
@@ -669,6 +750,7 @@ describe('csvBasicFormatのテスト', () => {
 
       // 試験実施
       const resultUpload = await csvBasicFormat.fileUpload(filePath, fileName, uploadCsvData)
+      await uploadFormat.cbRemoveCsv(filePath, fileName)
 
       // 期待結果
       expect(resultUpload).toBeTruthy()

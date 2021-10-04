@@ -74,11 +74,13 @@ router.use(
 
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
-  req.session.csvUploadFormatReturnFlag1 = true
 
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
+
+  req.session.csvUploadFormatReturnFlag1 = true
+
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
@@ -89,7 +91,7 @@ const cbPostIndex = async (req, res, next) => {
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) {
-    return next(errorHelper.create(500))
+    return next(errorHelper.create(404))
   }
 
   // DBから契約情報取得
@@ -104,6 +106,9 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = helper.checkContractStatus
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
@@ -145,6 +150,7 @@ const cbPostIndex = async (req, res, next) => {
       return ''
     })
   }
+
   let duplicateFlag = false
   // 配列に読み込んだcsvデータを入れる。
   const csvData = headerArr.map((header) => {
@@ -196,7 +202,7 @@ const cbPostIndex = async (req, res, next) => {
   {
     const checkDuplicate = [keyConsumptionTax, keyReducedTax, keyFreeTax, keyDutyFree, keyExemptTax]
     const resultDuplicate = checkDuplicate.map((item, idx, arr) => {
-      if (Object.prototype.toString.call(item) === undefined) {
+      if (item === undefined) {
         return false
       }
       if (item.length > 100) {
@@ -340,7 +346,7 @@ const cbPostIndex = async (req, res, next) => {
       keyOthers
     ]
     const resultDuplicate = checkDuplicate.map((item, idx, arr) => {
-      if (Object.prototype.toString.call(item) === undefined) {
+      if (item === undefined) {
         return false
       }
       if (item.length > 100) {
@@ -399,7 +405,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) {
-    return next(errorHelper.create(500))
+    return next(errorHelper.create(404))
   }
 
   // DBから契約情報取得
@@ -414,6 +420,9 @@ const cbPostConfirmIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = helper.checkContractStatus
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
@@ -494,5 +503,6 @@ module.exports = {
   router: router,
   cbPostIndex: cbPostIndex,
   cbPostConfirmIndex: cbPostConfirmIndex,
-  cbRemoveCsv: cbRemoveCsv
+  cbRemoveCsv: cbRemoveCsv,
+  cbPostBackIndex: cbPostBackIndex
 }
