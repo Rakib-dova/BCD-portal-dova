@@ -67,8 +67,26 @@ const cbGetIndex = async (req, res, next) => {
     refreshToken: req.user.refreshToken
   })
 
+  // フォーマット種別配列（仮）
+  const formatkindsArr = [
+    {
+      uploadFormatId: 'uploadFormatId1',
+      contractId: 'contractId1',
+      setName: 'ユーザーアップロードフォーマット1',
+      uploadType: '請求書データ'
+    },
+    {
+      uploadFormatId: 'uploadFormatId2',
+      contractId: 'contractId2',
+      setName: 'ユーザーアップロードフォーマット2',
+      uploadType: '請求書データ'
+    }
+  ]
+
   // ユーザ権限も画面に送る
-  res.render('csvupload')
+  res.render('csvupload', {
+    formatkindsArr: formatkindsArr
+  })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
