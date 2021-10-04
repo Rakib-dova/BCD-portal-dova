@@ -80,9 +80,9 @@ describe('ルーティングのインテグレーションテスト', () => {
 
   describe('1.契約ステータス：新規登録', () => {
     // 利用登録前
-    test('請求書アップロードフォーマット設定画面アクセス：異常', async () => {
+    test('アップロードフォーマット設定 確認画面アクセス：異常', async () => {
       const res = await request(app)
-        .get('/uploadFormat')
+        .get('/csvConfirmFormat')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -128,9 +128,9 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   describe('2.契約ステータス：登録申込', () => {
-    test('請求書アップロードフォーマット設定画面アクセス：正常', async () => {
+    test('アップロードフォーマット設定 確認画面アクセス：正常', async () => {
       const res = await request(app)
-        .get('/uploadFormat')
+        .get('/csvConfirmFormat')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -139,7 +139,7 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   describe('3.契約ステータス：登録受付', () => {
-    test('請求書アップロードフォーマット設定画面アクセス：', async () => {
+    test('アップロードフォーマット設定 確認画面アクセス：', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -159,7 +159,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/uploadFormat')
+        .get('/csvConfirmFormat')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -168,7 +168,7 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   describe('4.契約ステータス：契約中', () => {
-    test('請求書アップロードフォーマット設定アクセス：正常', async () => {
+    test('アップロードフォーマット設定 確認アクセス：正常', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -190,14 +190,14 @@ describe('ルーティングのインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/uploadFormat')
+        .get('/csvConfirmFormat')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトルが含まれていること
     })
 
-    test('請求書アップロードフォーマット設定画面入力：伝送されたCSVファイルチェック、ヘッダあり', async () => {
+    test('アップロードフォーマット設定 確認画面確認', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -272,256 +272,60 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       await page.waitForTimeout(1000)
 
-      expect(await page.url()).toMatch('https://localhost:3000/uploadFormat') // タイトルが含まれていること
-
-      const fs = require('fs')
-      const path = require('path')
-      const filePath = path.resolve('testData/csvFormatUpload.csv')
-      const testTargetFile = fs.readFileSync(filePath, { encoding: 'utf8' })
-
-      const targetHeader = testTargetFile
-        .split(/\r?\n|\r/)[0]
-        .trim()
-        .split(',')
-      const targetBody = testTargetFile
-        .split(/\r?\n|\r/)[1]
-        .trim()
-        .split(',')
-
-      const checkPageHeader = await page.evaluate(() => {
-        const pageHeader = document.querySelectorAll('.text-center#dataItem')
-        const result = []
-        pageHeader.forEach((item) => {
-          result.push(item.innerText)
-        })
-        return result
-      })
-
-      const checkPageData = await page.evaluate(() => {
-        const pageData = document.querySelectorAll('.text-center#dataValue')
-        const result = []
-        pageData.forEach((item) => {
-          result.push(item.innerText)
-        })
-        return result
-      })
-
-      targetHeader.map((item, index) => {
-        expect(item).toBe(checkPageHeader[index])
-        return ''
-      })
-      targetBody.map((item, index) => {
-        expect(item).toBe(checkPageData[index])
-        return ''
-      })
-
-      await browser.close()
-    })
-
-    test('請求書アップロードフォーマット設定画面入力：伝送されたCSVファイルチェック、ヘッダ無', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/csvBasicFormat')
-
-      await page.type('#uploadFormatItemName', 'インテ')
-      await page.type('#uploadType', '請求書')
-      const [fileChooser] = await Promise.all([
-        page.waitForFileChooser(),
-        page.click(
-          '#form > article > div > div > div:nth-child(1) > div > div:nth-child(1) > div > div:nth-child(3) > div > div > div:nth-child(2) > label'
-        )
-      ])
-
-      await fileChooser.accept(['./testData/csvFormatUpload.csv'])
-
-      await page.waitForTimeout(1000)
-
-      await page.click('#checkItemNameLineOff')
-      await page.type('#defaultNumber', '2')
-
-      await page.type('#keyConsumptionTax', 'V')
-      await page.type('#keyReducedTax', '8')
-      await page.type('#keyFreeTax', 'X')
-      await page.type('#keyDutyFree', 'F')
-      await page.type('#keyExemptTax', 'FX')
-
-      await page.type('#keyManMonth', 'manpower')
-      await page.type('#keyBottle', 'bot')
-      await page.type('#keyCost', 'cst')
-      await page.type('#keyContainer', 'ctn')
-      await page.type('#keyCentilitre', 'ctr')
-      await page.type('#keySquareCentimeter', 'sqc')
-      await page.type('#keyCubicCentimeter', 'cct')
-      await page.type('#keyCentimeter', 'ctm')
-      await page.type('#keyCase', 'cas')
-      await page.type('#keyCarton', 'cat')
-      await page.type('#keyDay', 'day')
-      await page.type('#keyDeciliter', 'dec')
-      await page.type('#keyDecimeter', 'dem')
-      await page.type('#keyGrossKilogram', 'kg')
-      await page.type('#keyPieces', 'ea')
-      await page.type('#keyFeet', 'fot')
-      await page.type('#keyGallon', 'gal')
-      await page.type('#keyGram', 'grm')
-      await page.type('#keyGrossTonnage', 'ton')
-      await page.type('#keyHour', 'hou')
-      await page.type('#keyKilogram', 'kgm')
-      await page.type('#keyKilometers', 'km')
-      await page.type('#keyKilowattHour', 'kwh')
-      await page.type('#keyPound', 'pnd')
-      await page.type('#keyLiter', 'li')
-      await page.type('#keyMilliliter', 'mli')
-      await page.type('#keyMillimeter', 'mmt')
-      await page.type('#keyMonth', 'mon')
-      await page.type('#keySquareMeter', 'smt')
-      await page.type('#keyCubicMeter', 'cmt')
-      await page.type('#keyMeter', 'met')
-      await page.type('#keyNetTonnage', 'ntn')
-      await page.type('#keyPackage', 'pkg')
-      await page.type('#keyRoll', 'rll')
-      await page.type('#keyFormula', 'fml')
-      await page.type('#keyTonnage', 'tng')
-      await page.type('#keyOthers', 'zz')
-
-      await page.click('#submit')
-
-      await page.waitForTimeout(1000)
-
       expect(await page.url()).toMatch('https://localhost:3000/uploadFormat')
 
-      const fs = require('fs')
-      const path = require('path')
-      const filePath = path.resolve('testData/csvFormatUpload.csv')
-      const testTargetFile = fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' })
-
-      const targetBody = testTargetFile
-        .split(/\r?\n|\r/)[1]
-        .trim()
-        .split(',')
-
-      const checkPageHeader = await page.evaluate(() => {
-        const pageHeader = document.querySelectorAll('.text-center#dataItem')
-        const result = []
-        pageHeader.forEach((item) => {
-          result.push(item.innerText)
-        })
-        return result
-      })
-
-      const checkPageData = await page.evaluate(() => {
-        const pageData = document.querySelectorAll('.text-center#dataValue')
-        const result = []
-        pageData.forEach((item) => {
-          result.push(item.innerText)
-        })
-        return result
-      })
-
-      checkPageHeader.map((item, index) => {
-        expect(item).toBe('')
-        return ''
-      })
-
-      targetBody.map((item, index) => {
-        expect(item).toBe(checkPageData[index])
-        return ''
-      })
-      await browser.close()
-    })
-
-    test('請求書アップロードフォーマット設定画面入力：必須項目チェック', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/csvBasicFormat')
-
-      await page.type('#uploadFormatItemName', 'インテ')
-      await page.type('#uploadType', '請求書')
-      const [fileChooser] = await Promise.all([
-        page.waitForFileChooser(),
-        page.click(
-          '#form > article > div > div > div:nth-child(1) > div > div:nth-child(1) > div > div:nth-child(3) > div > div > div:nth-child(2) > label'
-        )
-      ])
-
-      await fileChooser.accept(['./testData/csvFormatUpload.csv'])
-
-      await page.waitForTimeout(1000)
-
-      await page.click('#checkItemNameLineOn')
-      await page.type('#uploadFormatNumber', '1')
-      await page.type('#defaultNumber', '3')
-
-      await page.type('#keyConsumptionTax', 'V')
-      await page.type('#keyReducedTax', '8')
-      await page.type('#keyFreeTax', 'X')
-      await page.type('#keyDutyFree', 'F')
-      await page.type('#keyExemptTax', 'FX')
-
-      await page.type('#keyManMonth', 'manpower')
-      await page.type('#keyBottle', 'bot')
-      await page.type('#keyCost', 'cst')
-      await page.type('#keyContainer', 'ctn')
-      await page.type('#keyCentilitre', 'ctr')
-      await page.type('#keySquareCentimeter', 'sqc')
-      await page.type('#keyCubicCentimeter', 'cct')
-      await page.type('#keyCentimeter', 'ctm')
-      await page.type('#keyCase', 'cas')
-      await page.type('#keyCarton', 'cat')
-      await page.type('#keyDay', 'day')
-      await page.type('#keyDeciliter', 'dec')
-      await page.type('#keyDecimeter', 'dem')
-      await page.type('#keyGrossKilogram', 'kg')
-      await page.type('#keyPieces', 'ea')
-      await page.type('#keyFeet', 'fot')
-      await page.type('#keyGallon', 'gal')
-      await page.type('#keyGram', 'grm')
-      await page.type('#keyGrossTonnage', 'ton')
-      await page.type('#keyHour', 'hou')
-      await page.type('#keyKilogram', 'kgm')
-      await page.type('#keyKilometers', 'km')
-      await page.type('#keyKilowattHour', 'kwh')
-      await page.type('#keyPound', 'pnd')
-      await page.type('#keyLiter', 'li')
-      await page.type('#keyMilliliter', 'mli')
-      await page.type('#keyMillimeter', 'mmt')
-      await page.type('#keyMonth', 'mon')
-      await page.type('#keySquareMeter', 'smt')
-      await page.type('#keyCubicMeter', 'cmt')
-      await page.type('#keyMeter', 'met')
-      await page.type('#keyNetTonnage', 'ntn')
-      await page.type('#keyPackage', 'pkg')
-      await page.type('#keyRoll', 'rll')
-      await page.type('#keyFormula', 'fml')
-      await page.type('#keyTonnage', 'tng')
-      await page.type('#keyOthers', 'zz')
-
-      await page.click('#submit')
-
-      expect(await page.url()).toMatch('https://localhost:3000/uploadFormat')
+      await page.click('#issueDate')
+      await page.type('#issueDate', '1')
+      await page.click('#invoiceNumber')
+      await page.type('#invoiceNumber', '2')
+      await page.click('#tenantId')
+      await page.type('#tenantId', '3')
+      await page.click('#paymentDate')
+      await page.type('#paymentDate', '4')
+      await page.click('#deliveryDate')
+      await page.type('#deliveryDate', '5')
+      await page.click('#documentDescription')
+      await page.type('#documentDescription', '6')
+      await page.click('#bankName')
+      await page.type('#bankName', '7')
+      await page.click('#financialName')
+      await page.type('#financialName', '8')
+      await page.click('#accountType')
+      await page.type('#accountType', '9')
+      await page.click('#accountId')
+      await page.type('#accountId', '10')
+      await page.click('#accountName')
+      await page.type('#accountName', '11')
+      await page.click('#note')
+      await page.type('#note', '12')
+      await page.click('#sellersItemNum')
+      await page.type('#sellersItemNum', '13')
+      await page.click('#itemName')
+      await page.type('#itemName', '14')
+      await page.click('#quantityValue')
+      await page.type('#quantityValue', '15')
+      await page.click('#quantityUnitCode')
+      await page.type('#quantityUnitCode', '16')
+      await page.click('#priceValue')
+      await page.type('#priceValue', '17')
+      await page.click('#taxRate')
+      await page.type('#taxRate', '18')
+      await page.click('#description')
+      await page.type('#description', '19')
 
       await page.click('#confirmBtn')
 
       await page.waitForTimeout(1000)
 
-      // 必須項目が入力できなかったので画面移動ができていないこと確認
-      expect(await page.url()).toMatch('https://localhost:3000/uploadFormat')
+      // アップロードフォーマット設定 確認画面に移動すること確認
+      expect(await page.url()).toMatch('https://localhost:3000/csvConfirmFormat')
 
       await browser.close()
     })
   })
 
   describe('5.契約ステータス：変更申込', () => {
-    test('請求書アップロードフォーマット設定画面アクセス：正常', async () => {
+    test('アップロードフォーマット設定 確認画面アクセス：正常', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -550,7 +354,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/uploadFormat')
+        .get('/csvConfirmFormat')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -559,7 +363,7 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   describe('6.契約ステータス：変更受付', () => {
-    test('請求書アップロードフォーマット設定画面アクセス：正常', async () => {
+    test('アップロードフォーマット設定 確認画面アクセス：正常', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -579,7 +383,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/uploadFormat')
+        .get('/csvConfirmFormat')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -588,7 +392,7 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   describe('7.契約ステータス：解約申込', () => {
-    test('請求書アップロードフォーマット設定画面アクセス：準正常', async () => {
+    test('アップロードフォーマット設定 確認画面アクセス：準正常', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -624,7 +428,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/uploadFormat')
+        .get('/csvConfirmFormat')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -633,7 +437,7 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   describe('8.契約ステータス：解約受付', () => {
-    test('請求書アップロードフォーマット設定画面アクセス：準正常', async () => {
+    test('アップロードフォーマット設定 確認画面アクセス：準正常', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -654,7 +458,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/uploadFormat')
+        .get('/csvConfirmFormat')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -663,7 +467,7 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   describe('9.契約ステータス：解約', () => {
-    test('請求書アップロードフォーマット設定画面アクセス：準正常', async () => {
+    test('アップロードフォーマット設定 確認画面アクセス：準正常', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -696,7 +500,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/uploadFormat')
+        .get('/csvConfirmFormat')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 

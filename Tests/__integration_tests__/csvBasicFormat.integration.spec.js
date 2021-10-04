@@ -54,7 +54,8 @@ const getCookies = async (username, password) => {
 }
 
 describe('ルーティングのインテグレーションテスト', () => {
-  let acCookies, userCookies
+  let acCookies
+  // let userCookies
 
   describe('0.前準備', () => {
     test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
@@ -62,12 +63,12 @@ describe('ルーティングのインテグレーションテスト', () => {
       const options = require('minimist')(process.argv.slice(2))
       const adminId = options.adminid
       const adminSecret = options.adminsecret
-      const userId = options.userid
-      const userSecret = options.usersecret
+      // const userId = options.userid
+      // const userSecret = options.usersecret
       // --------------------アカウント管理者のCookieを取得---------------
       acCookies = await getCookies(adminId, adminSecret)
       // ---------------------一般ユーザのCookieを取得--------------------
-      userCookies = await getCookies(userId, userSecret)
+      // userCookies = await getCookies(userId, userSecret)
 
       // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
 
