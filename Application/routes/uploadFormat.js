@@ -68,7 +68,7 @@ const bodyParser = require('body-parser')
 router.use(
   bodyParser.json({
     type: 'application/json',
-    limit: '100MB' // フォーマットサイズ５M以上
+    limit: '6826KB' // フォーマットサイズ５M以下
   })
 )
 
@@ -77,22 +77,19 @@ const cbPostIndex = async (req, res, next) => {
   req.session.csvUploadFormatReturnFlag1 = true
 
   if (!req.session || !req.user?.userId) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
   if (user instanceof Error || user === null) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
 
   // DBから契約情報取得
@@ -100,8 +97,7 @@ const cbPostIndex = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
 
   // ユーザ権限を取得
@@ -371,6 +367,11 @@ const cbPostIndex = async (req, res, next) => {
     emptyselectedFormatData.push('')
   }
 
+  // csv削除
+  if (cbRemoveCsv(filePath, csvfilename) === false) {
+    return next(errorHelper.create(500))
+  }
+
   res.render('uploadFormat', {
     headerItems: csvData,
     uploadGeneral: uploadGeneral,
@@ -379,27 +380,26 @@ const cbPostIndex = async (req, res, next) => {
     csvfilename: csvfilename,
     selectedFormatData: emptyselectedFormatData
   })
+
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
 const cbPostConfirmIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostConfirmIndex')
   if (!req.session || !req.user?.userId) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
   if (user instanceof Error || user === null) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
 
   // DBから契約情報取得
@@ -407,8 +407,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
 
   // ユーザ権限を取得
@@ -434,23 +433,19 @@ const cbPostConfirmIndex = async (req, res, next) => {
   )
 }
 
-const setErrorLog = async (req, errorCode) => {
-  const err = errorHelper.create(errorCode)
-  const errorStatus = err.status
-
-  // output log
-  // ログには生のエラー情報を吐く
-  const logMessage = { status: errorStatus, path: req.path }
-
-  // ログインしていればユーザID、テナントIDを吐く
-  if (req.user?.userId && req.user?.tenantId) {
-    logMessage.tenant = req.user.tenantId
-    logMessage.user = req.user.userId
+// CSVファイル削除機能
+const cbRemoveCsv = (_deleteDataPath, _filename) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
+  const deleteFile = path.join(_deleteDataPath, '/' + _filename)
+  if (fs.existsSync(deleteFile)) {
+    fs.unlinkSync(deleteFile)
+    logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
+    return true
+  } else {
+    // 削除対象がない場合、サーバーエラー画面表示
+    logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
+    return false
   }
-
-  logMessage.stack = err.stack
-
-  logger.error(logMessage, err.name)
 }
 
 const cbPostBackIndex = async (req, res, next) => {
@@ -498,5 +493,6 @@ router.post('/cbPostBackIndex', cbPostBackIndex)
 module.exports = {
   router: router,
   cbPostIndex: cbPostIndex,
-  cbPostConfirmIndex: cbPostConfirmIndex
+  cbPostConfirmIndex: cbPostConfirmIndex,
+  cbRemoveCsv: cbRemoveCsv
 }

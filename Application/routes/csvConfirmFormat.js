@@ -3,11 +3,9 @@
 const express = require('express')
 const router = express.Router()
 const helper = require('./helpers/middleware')
-const validate = require('../lib/validate')
 const fs = require('fs')
 const path = require('path')
 const errorHelper = require('./helpers/error')
-const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
@@ -16,7 +14,6 @@ const uploadFormatController = require('../controllers/uploadFormatController')
 const uploadFormatDetailController = require('../controllers/uploadFormatDetailController')
 const uploadFormatIdentifierController = require('../controllers/uploadFormatIdentifierController')
 const { v4: uuidv4 } = require('uuid')
-const url = require('url')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 let csvfilename
 let headerItems
@@ -39,84 +36,21 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
   uploadGeneral = JSON.parse(req.body.uploadGeneral)
   taxIds = JSON.parse(req.body.taxIds)
   unitIds = JSON.parse(req.body.unitIds)
-  // const csvTax = constantsDefine.csvFormatDefine.csvTax
-  const csvTax = [
-    { name: '消費税', id: 'keyConsumptionTax' },
-    { name: '軽減税率', id: 'keyReducedTax' },
-    { name: '不課税', id: 'keyFreeTax' },
-    { name: '免税', id: 'keyDutyFree' },
-    { name: '非課税', id: 'keyExemptTax' }
-  ]
+
+  const csvTax = constantsDefine.csvFormatDefine.csvTax
   csvTax.map((tax) => {
     tax.id = taxIds[tax.id]
     return ''
   })
-  const csvUnit = [
-    { name: '人月', id: 'keyManMonth' },
-    { name: 'ボトル', id: 'keyBottle' },
-    { name: 'コスト', id: 'keyCost' },
-    { name: 'コンテナ', id: 'keyContainer' },
-    { name: 'センチリットル', id: 'keyCentilitre' },
-    { name: '平方センチメートル', id: 'keySquareCentimeter' },
-    { name: '立方センチメートル', id: 'keyCubicCentimeter' },
-    { name: 'センチメートル', id: 'keyCentimeter' },
-    { name: 'ケース', id: 'keyCase' },
-    { name: 'カートン', id: 'keyCarton' },
-    { name: '日', id: 'keyDay' },
-    { name: 'デシリットル', id: 'keyDeciliter' },
-    { name: 'デシメートル', id: 'keyDecimeter' },
-    { name: 'グロス・キログラム', id: 'keyGrossKilogram' },
-    { name: '個', id: 'keyPieces' },
-    { name: 'フィート', id: 'keyFeet' },
-    { name: 'ガロン', id: 'keyGallon' },
-    { name: 'グラム', id: 'keyGram' },
-    { name: '総トン', id: 'keyGrossTonnage' },
-    { name: '時間', id: 'keyHour' },
-    { name: 'キログラム', id: 'keyKilogram' },
-    { name: 'キロメートル', id: 'keyKilometers' },
-    { name: 'キロワット時', id: 'keyKilowattHour' },
-    { name: 'ポンド', id: 'keyPound' },
-    { name: 'リットル', id: 'keyLiter' },
-    { name: 'ミリグラム', id: 'keyMilligram' },
-    { name: 'ミリリットル', id: 'keyMilliliter' },
-    { name: 'ミリメートル', id: 'keyMillimeter' },
-    { name: '月', id: 'keyMonth' },
-    { name: '平方メートル', id: 'keySquareMeter' },
-    { name: '立方メートル', id: 'keyCubicMeter' },
-    { name: 'メーター', id: 'keyMeter' },
-    { name: '純トン', id: 'keyNetTonnage' },
-    { name: '包', id: 'keyPackage' },
-    { name: '巻', id: 'keyRoll' },
-    { name: '式', id: 'keyFormula' },
-    { name: 'トン', id: 'keyTonnage' },
-    { name: 'その他', id: 'keyOthers' }
-  ]
+
+  const csvUnit = constantsDefine.csvFormatDefine.csvUnit
   csvUnit.map((unit) => {
     unit.id = unitIds[unit.id]
     return ''
   })
 
-  const columnArr = [
-    { columnName: '発行日', item: '', value: '' },
-    { columnName: '請求書番号', item: '', value: '' },
-    { columnName: 'テナントID', item: '', value: '' },
-    { columnName: '支払期日', item: '', value: '' },
-    { columnName: '納品日', item: '', value: '' },
-    { columnName: '備考', item: '', value: '' },
-    { columnName: '銀行名', item: '', value: '' },
-    { columnName: '支店名', item: '', value: '' },
-    { columnName: '科目', item: '', value: '' },
-    { columnName: '口座番号', item: '', value: '' },
-    { columnName: '口座名義', item: '', value: '' },
-    { columnName: 'その他特記事項', item: '', value: '' },
-    { columnName: '明細-項目ID', item: '', value: '' },
-    { columnName: '明細-内容', item: '', value: '' },
-    { columnName: '明細-数量', item: '', value: '' },
-    { columnName: '明細-単位', item: '', value: '' },
-    { columnName: '明細-単価', item: '', value: '' },
-    { columnName: '明細-税（消費税／軽減税率／不課税／免税／非課税）', item: '', value: '' },
-    { columnName: '明細-備考', item: '', value: '' }
-  ]
+  const columnArr = constantsDefine.csvFormatDefine.columnArr
+
   formatData.map((format, idx) => {
     if (format.length !== 0) {
       columnArr[idx].item = headerItems[format].item
@@ -151,18 +85,15 @@ const cbPostDBIndex = async (req, res, next) => {
   delete req.session.csvUploadFormatReturnFlag2
 
   if (!req.session || !req.user?.userId) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
 
   const user = await userController.findOne(req.user.userId)
   if (user instanceof Error || user === null) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
   if (user.dataValues?.userStatus !== 0) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
 
   // DBから契約情報取得
@@ -170,14 +101,12 @@ const cbPostDBIndex = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
 
   const checkContractStatus = helper.checkContractStatus
   if (checkContractStatus === null || checkContractStatus === 999) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(500))
   }
 
   req.session.userContext = 'LoggedIn'
@@ -245,6 +174,7 @@ const cbPostDBIndex = async (req, res, next) => {
     { name: '免税', value: req.body['免税'] },
     { name: '非課税', value: req.body['非課税'] }
   ]
+
   for (let idx = 0; idx < csvTax.length; idx++) {
     if (csvTax[idx].value.length !== 0) {
       const resultUploadFormatIdentifier = await uploadFormatIdentifierController.insert({
@@ -318,48 +248,8 @@ const cbPostDBIndex = async (req, res, next) => {
     }
   }
 
-  // csv削除
-  if (cbRemoveCsv(filePath, csvfilename) === false) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
-  }
-
   res.redirect(303, '/portal')
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadFormat')
-}
-
-// CSVファイル削除機能
-const cbRemoveCsv = (_deleteDataPath, _filename) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
-  const deleteFile = path.join(_deleteDataPath, '/' + _filename)
-  if (fs.existsSync(deleteFile)) {
-    fs.unlinkSync(deleteFile)
-    logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
-    return true
-  } else {
-    // 削除対象がない場合、サーバーエラー画面表示
-    logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
-    return false
-  }
-}
-
-const setErrorLog = async (req, errorCode) => {
-  const err = errorHelper.create(errorCode)
-  const errorStatus = err.status
-
-  // output log
-  // ログには生のエラー情報を吐く
-  const logMessage = { status: errorStatus, path: req.path }
-
-  // ログインしていればユーザID、テナントIDを吐く
-  if (req.user?.userId && req.user?.tenantId) {
-    logMessage.tenant = req.user.tenantId
-    logMessage.user = req.user.userId
-  }
-
-  logMessage.stack = err.stack
-
-  logger.error(logMessage, err.name)
 }
 
 const cbPostBackIndex = async (req, res, next) => {
@@ -380,6 +270,5 @@ module.exports = {
   router: router,
   cbPostCsvConfirmFormat: cbPostCsvConfirmFormat,
   cbPostDBIndex: cbPostDBIndex,
-  cbPostBackIndex: cbPostBackIndex,
-  cbRemoveCsv: cbRemoveCsv
+  cbPostBackIndex: cbPostBackIndex
 }

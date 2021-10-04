@@ -58,61 +58,9 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
 
   const csvTax = constantsDefine.csvFormatDefine.csvTax
   const csvUnit = constantsDefine.csvFormatDefine.csvUnit
-  let csvBasicArr = {
-    uploadFormatId: '',
-    uploadFormatItemName: '',
-    dataFileName: '',
-    uploadFormatNumber: '',
-    defaultNumber: ''
-  }
-  let taxArr = {
-    consumptionTax: '',
-    reducedTax: '',
-    freeTax: '',
-    dutyFree: '',
-    exemptTax: ''
-  }
-
-  let unitArr = {
-    manMonth: '',
-    BO: '',
-    C5: '',
-    CH: '',
-    CLT: '',
-    CMK: '',
-    CMQ: '',
-    CMT: '',
-    CS: '',
-    CT: '',
-    DAY: '',
-    DLT: '',
-    DMT: '',
-    E4: '',
-    EA: '',
-    FOT: '',
-    GLL: '',
-    GRM: '',
-    GT: '',
-    HUR: '',
-    KGM: '',
-    KTM: '',
-    KWH: '',
-    LBR: '',
-    LTR: '',
-    MGM: '',
-    MLT: '',
-    MMT: '',
-    MON: '',
-    MTK: '',
-    MTQ: '',
-    MTR: '',
-    NT: '',
-    PK: '',
-    RO: '',
-    SET: '',
-    TNE: '',
-    ZZ: ''
-  }
+  let csvBasicArr = constantsDefine.csvFormatDefine.csvBasicArr
+  let taxArr = constantsDefine.csvFormatDefine.taxArr
+  let unitArr = constantsDefine.csvFormatDefine.unitArr
 
   if (req.session.formData) {
     csvBasicArr = req.session.formData.csvBasicArr
@@ -128,7 +76,7 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
     unitArr: unitArr,
     TS_HOST: process.env.TS_HOST
   })
-  logger.info(constantsDefine.logMessage.INF001 + 'cbGetFormtuploadIndex')
+  logger.info(constantsDefine.logMessage.INF001 + 'cbGetCsvBasicFormat')
 }
 
 const cbPostCsvBasicFormat = async (req, res, next) => {

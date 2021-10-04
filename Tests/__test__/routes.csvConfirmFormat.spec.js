@@ -879,7 +879,7 @@ describe('csvConfirmFormatのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      expect(response.status).toHaveBeenCalledWith(500)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('異常：500エラー（userStatusが0以外）', async () => {
@@ -926,7 +926,7 @@ describe('csvConfirmFormatのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      expect(response.status).toHaveBeenCalledWith(500)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('異常:500エラー（Contractsデータエラー）', async () => {
@@ -974,7 +974,7 @@ describe('csvConfirmFormatのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       // 500エラーがエラーハンドリング「される」
       expect(next).not.toHaveBeenCalledWith(error404)
-      expect(response.status).toHaveBeenCalledWith(500)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('異常：500エラー（不正なContractデータ）', async () => {
@@ -1023,35 +1023,10 @@ describe('csvConfirmFormatのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      expect(response.status).toHaveBeenCalledWith(500)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })
 
-    // // -----------------------------------------------------------------------------------------
-  // // cbRemoveCsvの確認
-
-  describe('cbRemoveCsv', () => {
-    test('正常', async () => {
-      // 準備
-      request.user = user
-
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        '/home/upload',
-        'uploadFormatTest.csv',
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
-
-      // 試験実施
-      const resultRemove = await csvConfirmFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest.csv')
-
-      // 期待結果
-      expect(resultRemove).toBeTruthy()
-    })
-  })
-  // -----------------------------------------------------------------------------------------
-  
-  
   // // -----------------------------------------------------------------------------------------
   // // cbPostBackIndex
   describe('cbPostBackIndex', () => {

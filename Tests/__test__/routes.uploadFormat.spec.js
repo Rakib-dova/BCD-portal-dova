@@ -1510,4 +1510,29 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.statusCode).toBe(307)
     })
   })
+
+  
+  // // -----------------------------------------------------------------------------------------
+  // // cbRemoveCsvの確認
+
+  describe('cbRemoveCsv', () => {
+    test('正常', async () => {
+      // 準備
+      request.user = user
+
+      // テスト用csvファイルアップロード
+      await csvBasicFormat.fileUpload(
+        '/home/upload',
+        'uploadFormatTest.csv',
+        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      )
+
+      // 試験実施
+      const resultRemove = await uploadFormat.cbRemoveCsv('/home/upload', 'uploadFormatTest.csv')
+
+      // 期待結果
+      expect(resultRemove).toBeTruthy()
+    })
+  })
+  // -----------------------------------------------------------------------------------------
 })
