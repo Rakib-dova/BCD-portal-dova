@@ -54,7 +54,8 @@ const getCookies = async (username, password) => {
 }
 
 describe('ルーティングのインテグレーションテスト', () => {
-  let acCookies, userCookies
+  let acCookies
+  // let userCookies
 
   describe('0.前準備', () => {
     test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
@@ -62,12 +63,12 @@ describe('ルーティングのインテグレーションテスト', () => {
       const options = require('minimist')(process.argv.slice(2))
       const adminId = options.adminid
       const adminSecret = options.adminsecret
-      const userId = options.userid
-      const userSecret = options.usersecret
+      // const userId = options.userid
+      // const userSecret = options.usersecret
       // --------------------アカウント管理者のCookieを取得---------------
       acCookies = await getCookies(adminId, adminSecret)
       // ---------------------一般ユーザのCookieを取得--------------------
-      userCookies = await getCookies(userId, userSecret)
+      // userCookies = await getCookies(userId, userSecret)
 
       // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
 
@@ -291,15 +292,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       })
 
       await page.type('#uploadFormatItemName', 'インテ')
-      // await page.type('#uploadType', '請求書')
-      // const [fileChooser] = await Promise.all([
-      //   page.waitForFileChooser(),
-      //   page.click(
-      //     '#form > article > div > div > div:nth-child(1) > div > div:nth-child(1) > div > div:nth-child(3) > div > div > div:nth-child(2) > label'
-      //   )
-      // ])
-
-      // await fileChooser.accept(['./testData/csvFormatUpload.csv'])
 
       await page.waitForTimeout(1000)
 
@@ -448,9 +440,8 @@ describe('ルーティングのインテグレーションテスト', () => {
       })
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/csvBasicFormat', {
-        waitUntil: 'networkidle0'
-      })
+
+      await page.goto('https://localhost:3000/csvBasicFormat')
 
       await page.type('#uploadFormatItemName', 'インテ')
       await page.type('#uploadType', '請求書')
@@ -465,55 +456,13 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       await page.waitForTimeout(1000)
 
-      await page.click('#checkItemNameLineOff')
+      await page.click('#checkItemNameLineOn')
+      await page.type('#uploadFormatNumber', '1')
       await page.type('#defaultNumber', '2')
 
-      await page.type('#keyConsumptionTax', 'V')
-      await page.type('#keyReducedTax', '8')
-      await page.type('#keyFreeTax', 'X')
-      await page.type('#keyDutyFree', 'F')
-      await page.type('#keyExemptTax', 'FX')
-
-      await page.type('#keyManMonth', 'manpower')
-      await page.type('#keyBottle', 'bot')
-      await page.type('#keyCost', 'cst')
-      await page.type('#keyContainer', 'ctn')
-      await page.type('#keyCentilitre', 'ctr')
-      await page.type('#keySquareCentimeter', 'sqc')
-      await page.type('#keyCubicCentimeter', 'cct')
-      await page.type('#keyCentimeter', 'ctm')
-      await page.type('#keyCase', 'cas')
-      await page.type('#keyCarton', 'cat')
-      await page.type('#keyDay', 'day')
-      await page.type('#keyDeciliter', 'dec')
-      await page.type('#keyDecimeter', 'dem')
-      await page.type('#keyGrossKilogram', 'kg')
-      await page.type('#keyPieces', 'ea')
-      await page.type('#keyFeet', 'fot')
-      await page.type('#keyGallon', 'gal')
-      await page.type('#keyGram', 'grm')
-      await page.type('#keyGrossTonnage', 'ton')
-      await page.type('#keyHour', 'hou')
-      await page.type('#keyKilogram', 'kgm')
-      await page.type('#keyKilometers', 'km')
-      await page.type('#keyKilowattHour', 'kwh')
-      await page.type('#keyPound', 'pnd')
-      await page.type('#keyLiter', 'li')
-      await page.type('#keyMilliliter', 'mli')
-      await page.type('#keyMillimeter', 'mmt')
-      await page.type('#keyMonth', 'mon')
-      await page.type('#keySquareMeter', 'smt')
-      await page.type('#keyCubicMeter', 'cmt')
-      await page.type('#keyMeter', 'met')
-      await page.type('#keyNetTonnage', 'ntn')
-      await page.type('#keyPackage', 'pkg')
-      await page.type('#keyRoll', 'rll')
-      await page.type('#keyFormula', 'fml')
-      await page.type('#keyTonnage', 'tng')
-      await page.type('#keyOthers', 'zz')
-
       await page.click('#submit')
-      await page.waitForTimeout(3000)
+
+      await page.waitForTimeout(1000)
 
       expect(await page.url()).toMatch('https://localhost:3000/uploadFormat') // タイトルが含まれていること
     })
