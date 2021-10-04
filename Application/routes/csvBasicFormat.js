@@ -15,21 +15,24 @@ const constantsDefine = require('../constants')
 const { v4: uuidv4 } = require('uuid')
 const url = require('url')
 
+// CSR対策
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetCsvBasicFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvBasicFormat')
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
-  console.log(req.session)
-  // if (!req.session.csvUploadFormatReturnFlag1 || !req.session.csvUploadFormatReturnFlag2) {
-  //   delete req.session.formData
-  //   delete req.session.csvUploadFormatReturnFlag1
-  //   delete req.session.csvUploadFormatReturnFlag2
-  // } else {
-  //   req.session.csvUploadFormatReturnFlag1 = false
-  //   req.session.csvUploadFormatReturnFlag2 = false
-  // }
+  if (!req.session.csvUploadFormatReturnFlag1 || !req.session.csvUploadFormatReturnFlag2) {
+    delete req.session.formData
+    delete req.session.csvUploadFormatReturnFlag1
+    delete req.session.csvUploadFormatReturnFlag2
+  } else {
+    req.session.csvUploadFormatReturnFlag1 = false
+    req.session.csvUploadFormatReturnFlag2 = false
+  }
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
@@ -63,11 +66,11 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
   let taxArr = constantsDefine.csvFormatDefine.taxArr
   let unitArr = constantsDefine.csvFormatDefine.unitArr
 
-  // if (req.session.formData) {
-  //   csvBasicArr = req.session.formData.csvBasicArr
-  //   taxArr = req.session.formData.taxArr
-  //   unitArr = req.session.formData.unitArr
-  // }
+  if (req.session.formData) {
+    csvBasicArr = req.session.formData.csvBasicArr
+    taxArr = req.session.formData.taxArr
+    unitArr = req.session.formData.unitArr
+  }
 
   res.render('csvBasicFormat', {
     csvTax: csvTax,
@@ -227,7 +230,7 @@ const fileUpload = (_filePath, _filename, _uploadCsvData) => {
   }
 }
 
-router.get('/', helper.isAuthenticated, cbGetCsvBasicFormat)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetCsvBasicFormat)
 router.post('/', cbPostCsvBasicFormat)
 
 module.exports = {
