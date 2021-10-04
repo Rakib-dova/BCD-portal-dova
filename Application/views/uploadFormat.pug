@@ -8,10 +8,16 @@ block content
           .title.is-family-noto-sans 請求書アップロードフォーマット設定
           .subtitle.is-family-noto-sans 対応する取込データを設定してください
       .container
+        input.input(type="hidden" name="headerItems" value= headerItems) 
+        input.input(type="hidden" name="uploadGeneral" value= uploadGeneral) 
+        input.input(type="hidden" name="taxIds" value= taxIds) 
+        input.input(type="hidden" name="unitIds" value= unitIds) 
+        input.input(type="hidden" name="csvfilename" value= csvfilename)
+        input.input(type="hidden" name="selectedFormatData" value= selectedFormatData)  
         .columns
           .column
             .title.is-family-noto-sans 取込データ
-            .box
+            .box              
               table.table.is-fullwidth.is-hoverable
                 thead
                   tr
@@ -42,7 +48,13 @@ block content
                       select.is-11.requiredItem#issueDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[0].length !== 0
+                            if ~~selectedFormatData[0] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1                           
                   tr
                     th
                       label.input-label 請求書番号
@@ -52,7 +64,13 @@ block content
                       select.is-11.requiredItem#invoiceNumber(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[1].length !== 0
+                            if ~~selectedFormatData[1] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
                   tr
                     th
                       label.input-label テナントID
@@ -62,97 +80,155 @@ block content
                       select.is-11.requiredItem#tenantId(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[2].length !== 0
+                            if ~~selectedFormatData[2] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
                   tr
                     th
                       label.input-label 支払期日
-                      p.input-label-required.input-label （必須）
                       p.errormessage.input-label-required 
                     td.text-center
-                      select.is-11.requiredItem#issueDate(name="formatData")
+                      select.is-11#paymentDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[3].length !== 0
+                            if ~~selectedFormatData[3] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
                   tr
                     th 
                       label.input-label 納品日
-                      p.input-label-required.input-label （必須）
                       p.errormessage.input-label-required 
                     td.text-center
-                      select.is-11.requiredItem#issueDate(name="formatData")
+                      select.is-11#deliveryDate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[4].length !== 0
+                            if ~~selectedFormatData[4] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
                       label.input-label 備考
                       p.errormessage.input-label-required 
                     td.text-center
-                      select.is-11#issueDate(name="formatData")
+                      select.is-11#documentDescription(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[5].length !== 0
+                            if ~~selectedFormatData[5] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
                       label.input-label 銀行名
                       p.errormessage.input-label-required
                     td.text-center
-                      select.is-11#issueDate(name="formatData")
+                      select.is-11#bankName(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[6].length !== 0
+                            if ~~selectedFormatData[6] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1   
 
                   tr
                     th
                       label.input-label 支店名
                       p.errormessage.input-label-required
                     td.text-center
-                      select.is-11#issueDate(name="formatData")
+                      select.is-11#financialName(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[7].length !== 0
+                            if ~~selectedFormatData[7] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
                       label.input-label 科目
                       p.errormessage.input-label-required
                     td.text-center
-                      select.is-11#issueDate(name="formatData")
+                      select.is-11#accountType(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[8].length !== 0
+                            if ~~selectedFormatData[8] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
                       label.input-label 口座番号
                       p.errormessage.input-label-required
                     td.text-center
-                      select.is-11#issueDate(name="formatData")
+                      select.is-11#accountId(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[9].length !== 0
+                            if ~~selectedFormatData[9] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
                       label.input-label 口座名義
                       p.errormessage.input-label-required
                     td.text-center
-                      select.is-11#issueDate(name="formatData")
+                      select.is-11#accountName(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[10].length !== 0
+                            if ~~selectedFormatData[10] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
                       label.input-label その他特記事項
                       p.errormessage.input-label-required
                     td.text-center
-                      select.is-11#issueDate(name="formatData")
+                      select.is-11#note(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1 
+                          if selectedFormatData[11].length !== 0
+                            if ~~selectedFormatData[11] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
   
                   tr
                     th
@@ -160,10 +236,16 @@ block content
                       p.input-label-required.input-label （必須）
                       p.errormessage.input-label-required
                     td.text-center
-                      select.is-11.requiredItem#issueDate(name="formatData")
+                      select.is-11.requiredItem#sellersItemNum(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[12].length !== 0
+                            if ~~selectedFormatData[12] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
@@ -171,10 +253,16 @@ block content
                       p.input-label-required.input-label （必須）
                       p.errormessage.input-label-required
                     td.text-center
-                      select.is-11.requiredItem#issueDate(name="formatData")
+                      select.is-11.requiredItem#itemName(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[13].length !== 0
+                            if ~~selectedFormatData[13] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
@@ -182,10 +270,16 @@ block content
                       p.input-label-required.input-label （必須）
                       p.errormessage.input-label-required
                     td.text-center
-                      select.is-11.requiredItem#issueDate(name="formatData")
+                      select.is-11.requiredItem#quantityValue(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[14].length !== 0
+                            if ~~selectedFormatData[14] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
@@ -193,10 +287,16 @@ block content
                       p.input-label-required.input-label （必須）
                       p.errormessage.input-label-required                  
                     td.text-center
-                      select.is-11.requiredItem#issueDate(name="formatData")
+                      select.is-11.requiredItem#quantityUnitCode(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[15].length !== 0
+                            if ~~selectedFormatData[15] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
@@ -204,10 +304,16 @@ block content
                       p.input-label-required.input-label （必須）
                       p.errormessage.input-label-required 
                     td.text-center
-                      select.is-11.requiredItem#issueDate(name="formatData")
+                      select.is-11.requiredItem#priceValue(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[16].length !== 0
+                            if ~~selectedFormatData[16] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
@@ -216,24 +322,36 @@ block content
                       p.errormessage.input-label-required 　
                       p （消費税／軽減税率／不課税／免税／非課税）
                     td.text-center
-                      select.is-11.requiredItem#issueDate(name="formatData")
+                      select.is-11.requiredItem#taxRate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[17].length !== 0
+                            if ~~selectedFormatData[17] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                            
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th 
                       label.input-label 明細-備考
                       p.errormessage.input-label-required
                     td.text-center
-                      select.is-11#issueDate(name="formatData")
+                      select.is-11#description(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          option(value= index)= index+1
+                          if selectedFormatData[18].length !== 0
+                            if ~~selectedFormatData[18] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
                   
         footer.modal-card-foot
           div.button-area
-            button.button.mr-6(type="" formaction="/csvBasicFormat" formmethod="") 戻る
+            button.button.mr-6#returnBasic(type="submit" formaction="/uploadFormat/cbPostBackIndex" formmethod="POST") 戻る
             button.button.is-success.success-button#confirmBtn(type="submit" formaction="/uploadFormat/cbPostDBIndex" formmethod="POST") 確認
       include footer
 

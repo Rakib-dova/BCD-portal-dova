@@ -406,3 +406,28 @@ img.logo-ncom {
 .alignCenterChild:last-child {
   align-items: center;
 }
+
+.float-right {
+  float: right;
+}
+
+.margin-right-20 {
+  margin-right: 20%;
+}
+
+.margin-top-10p {
+  margin-top: 10px;
+}
+
+.div-border {
+  border: 1px solid black;
+}
+
+.padding-left-90p {
+  padding-left: 90px;
+}
+
+.not-input-required::after {
+  content: '未入力です。';
+  color: red;
+}
