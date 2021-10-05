@@ -22,49 +22,38 @@ let taxIds
 let unitIds
 
 const cbPostCsvConfirmFormat = async (req, res, next) => {
-  console.log('cbPostCsvConfirmFormat1')
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostCsvConfirmFormat')
 
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
 
-  console.log('cbPostCsvConfirmFormat2')
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
-  console.log('cbPostCsvConfirmFormat3')
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  console.log('cbPostCsvConfirmFormat4')
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
-  console.log('cbPostCsvConfirmFormat5')
   if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
 
   // DBから契約情報取得
-  console.log('cbPostCsvConfirmFormat6')
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる]
-  console.log('cbPostCsvConfirmFormat7')
+  // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
   // ユーザ権限を取得
-  console.log('cbPostCsvConfirmFormat8')
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = helper.checkContractStatus
 
-  console.log('cbPostCsvConfirmFormat9')
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
-  console.log('cbPostCsvConfirmFormat10')
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  console.log('cbPostCsvConfirmForma11')
   csvfilename = req.body.csvfilename
   headerItems = JSON.parse(req.body.headerItems)
   formatData = req.body.formatData
@@ -72,14 +61,11 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
   taxIds = JSON.parse(req.body.taxIds)
   unitIds = JSON.parse(req.body.unitIds)
 
-  console.log('cbPostCsvConfirmFormat12')
   const csvTax = constantsDefine.csvFormatDefine.csvTax
   csvTax.map((tax) => {
     tax.id = taxIds[tax.id]
     return ''
   })
-
-  console.log('cbPostCsvConfirmFormat13')
 
   const csvUnit = constantsDefine.csvFormatDefine.csvUnit
   csvUnit.map((unit) => {
@@ -87,7 +73,6 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
     return ''
   })
 
-  console.log('cbPostCsvConfirmFormat14')
   const columnArr = constantsDefine.csvFormatDefine.columnArr
 
   formatData.map((format, idx) => {
@@ -102,7 +87,6 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
     }
   })
 
-  console.log('cbPostCsvConfirmFormat15')
   res.render('csvConfirmFormat', {
     uploadFormatItemName: uploadGeneral.uploadFormatItemName,
     uploadType: uploadGeneral.uploadType,
@@ -118,58 +102,44 @@ const cbPostCsvConfirmFormat = async (req, res, next) => {
 
 const cbPostDBIndex = async (req, res, next) => {
   const functionName = 'cbPostDBIndex'
-
-  console.log('cbPostDBIndex1')
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
 
-  console.log('cbPostDBIndex2')
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
 
-  console.log('cbPostDBIndex3')
   delete req.session.formData
   delete req.session.csvUploadFormatReturnFlag1
   delete req.session.csvUploadFormatReturnFlag2
 
   // DBからuserデータ取得
-  console.log('cbPostDBIndex4')
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
-  console.log('cbPostDBIndex5')
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  console.log('cbPostDBIndex6')
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
   // DBから契約情報取得
-  console.log('cbPostDBIndex7')
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
-  console.log('cbPostDBIndex8')
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
   // ユーザ権限を取得
-  console.log('cbPostDBIndex9')
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = helper.checkContractStatus
 
-  console.log('cbPostDBIndex10')
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
-  console.log('cbPostDBIndex11')
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  console.log('cbPostDBIndex12')
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
-  console.log('cbPostDBIndex13')
   const uploadFormatId = uuidv4()
   const resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
     uploadFormatId: uploadFormatId,
@@ -178,12 +148,10 @@ const cbPostDBIndex = async (req, res, next) => {
     uploadType: req.body.uploadType
   })
 
-  console.log('cbPostDBIndex14')
   if (!resultUploadFormat?.dataValues) {
     logger.info(`${constantsDefine.logMessage.DBINF001}${functionName}`)
   }
 
-  console.log('cbPostDBIndex15')
   let iCnt = 1
   const columnArr = [
     '発行日',
@@ -206,7 +174,7 @@ const cbPostDBIndex = async (req, res, next) => {
     '明細-税（消費税／軽減税率／不課税／免税／非課税）',
     '明細-備考'
   ]
-  console.log('cbPostDBIndex16')
+
   const globalCsvData = headerItems
   let resultUploadFormatDetail
   for (let idx = 0; idx < columnArr.length; idx++) {
@@ -225,7 +193,7 @@ const cbPostDBIndex = async (req, res, next) => {
       }
     }
   }
-  console.log('cbPostDBIndex17')
+
   iCnt = 1
   const csvTax = [
     { name: '消費税', value: req.body['消費税'] },
@@ -234,7 +202,7 @@ const cbPostDBIndex = async (req, res, next) => {
     { name: '免税', value: req.body['免税'] },
     { name: '非課税', value: req.body['非課税'] }
   ]
-  console.log('cbPostDBIndex18')
+
   for (let idx = 0; idx < csvTax.length; idx++) {
     if (csvTax[idx].value.length !== 0) {
       const resultUploadFormatIdentifier = await uploadFormatIdentifierController.insert({
@@ -251,7 +219,6 @@ const cbPostDBIndex = async (req, res, next) => {
     }
   }
 
-  console.log('cbPostDBIndex19')
   const csvUnit = [
     { name: '人月', value: req.body['人月'] },
     { name: 'ボトル', value: req.body['ボトル'] },
@@ -293,7 +260,6 @@ const cbPostDBIndex = async (req, res, next) => {
     { name: 'その他', value: req.body['その他'] }
   ]
 
-  console.log('cbPostDBIndex20')
   for (let idx = 0; idx < csvUnit.length; idx++) {
     if (csvUnit[idx].value.length !== 0) {
       const resultUploadFormatIdentifier = await uploadFormatIdentifierController.insert({
@@ -310,13 +276,11 @@ const cbPostDBIndex = async (req, res, next) => {
     }
   }
 
-  console.log('cbPostDBIndex21')
   res.redirect(303, '/portal')
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadFormat')
 }
 
 const cbPostBackIndex = async (req, res, next) => {
-  console.log('cbPostBackIndex1')
   res.render('uploadFormat', {
     headerItems: headerItems,
     uploadGeneral: uploadGeneral,
@@ -327,9 +291,9 @@ const cbPostBackIndex = async (req, res, next) => {
   })
 }
 
-router.post('/', helper.isAuthenticated, helper.isTenantRegistered, cbPostCsvConfirmFormat)
-router.post('/cbPostDBIndex', helper.isAuthenticated, helper.isTenantRegistered, cbPostDBIndex)
-router.post('/cbPostBackIndex', helper.isAuthenticated, helper.isTenantRegistered, cbPostBackIndex)
+router.post('/', cbPostCsvConfirmFormat)
+router.post('/cbPostDBIndex', cbPostDBIndex)
+router.post('/cbPostBackIndex', cbPostBackIndex)
 module.exports = {
   router: router,
   cbPostCsvConfirmFormat: cbPostCsvConfirmFormat,
