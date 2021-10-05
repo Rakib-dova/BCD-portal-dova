@@ -15,15 +15,6 @@ const constantsDefine = require('../constants')
 const { v4: uuidv4 } = require('uuid')
 const url = require('url')
 
-const bodyParser = require('body-parser')
-router.use(
-  bodyParser.urlencoded({
-    extended: false,
-    type: '*/*',
-    limit: '6826KB' // フォーマットサイズ５M以下
-  })
-)
-
 const cbGetCsvBasicFormat = async (req, res, next) => {
   console.log('cbGetCsvBasicFormat1')
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvBasicFormat')
@@ -232,7 +223,7 @@ const cbPostCsvBasicFormat = async (req, res, next) => {
   }
   // 画面送信
   console.log('cbPostCsvBasicFormat19')
-  return res.redirect(
+  res.redirect(
     307,
     url.format({
       pathname: '/uploadFormat',
