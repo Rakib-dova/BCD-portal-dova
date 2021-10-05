@@ -2236,165 +2236,165 @@ describe('csvBasicFormatのテスト', () => {
   // -----------------------------------------------------------------------------------------
   // cbPostBackIndexの確認
 
-  describe('cbPostBackIndex', () => {
-    test('正常', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // ファイルデータを設定
-      request.body = {
-        ...reqBodyForCbPostIndexOn
-      }
+  // describe('cbPostBackIndex', () => {
+  //   test('正常', async () => {
+  //     // 準備
+  //     // requestのsession,userIdに正常値を入れる
+  //     request.session = {
+  //       userContext: 'LoggedIn',
+  //       userRole: 'dummy'
+  //     }
+  //     request.user = user
+  //     // ファイルデータを設定
+  //     request.body = {
+  //       ...reqBodyForCbPostIndexOn
+  //     }
 
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
+  //     // DBからの正常なユーザデータの取得を想定する
+  //     findOneSpy.mockReturnValue(dataValues)
+  //     // DBからの正常な契約情報取得を想定する
+  //     findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      helper.checkContractStatus = 10
+  //     helper.checkContractStatus = 10
 
-      // 試験実施
-      await uploadFormat.cbPostBackIndex(request, response, next)
+  //     // 試験実施
+  //     await uploadFormat.cbPostBackIndex(request, response, next)
 
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(error500)
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでcsvConfirmFormatが呼ばれ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/csvBasicFormat')
-    })
+  //     // 期待結果
+  //     // 404，500エラーがエラーハンドリング「されない」
+  //     expect(next).not.toHaveBeenCalledWith(error404)
+  //     expect(next).not.toHaveBeenCalledWith(error500)
+  //     // userContextがLoggedInになっている
+  //     expect(request.session?.userContext).toBe('LoggedIn')
+  //     // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+  //     expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+  //     // response.renderでcsvConfirmFormatが呼ばれ「る」
+  //     expect(response.redirect).toHaveBeenCalledWith('/csvBasicFormat')
+  //   })
 
-    test('準正常：解約中', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
+  //   test('準正常：解約中', async () => {
+  //     // 準備
+  //     // requestのsession,userIdに正常値を入れる
+  //     request.session = {
+  //       userContext: 'LoggedIn',
+  //       userRole: 'dummy'
+  //     }
+  //     request.user = user
 
-      // ファイルデータを設定
-      request.body = {
-        ...reqBodyForCbPostIndexOn
-      }
+  //     // ファイルデータを設定
+  //     request.body = {
+  //       ...reqBodyForCbPostIndexOn
+  //     }
 
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
+  //     // DBからの正常なユーザデータの取得を想定する
+  //     findOneSpy.mockReturnValue(dataValues)
+  //     // DBからの正常な契約情報取得を想定する
+  //     findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
 
-      // 試験実施
-      await uploadFormat.cbPostBackIndex(request, response, next)
+  //     // 試験実施
+  //     await uploadFormat.cbPostBackIndex(request, response, next)
 
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(error500)
+  //     // 期待結果
+  //     // 404，500エラーがエラーハンドリング「されない」
+  //     expect(next).not.toHaveBeenCalledWith(error404)
+  //     expect(next).not.toHaveBeenCalledWith(error500)
 
-      // 解約手続き中画面が表示「される」
-      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
-    })
+  //     // 解約手続き中画面が表示「される」
+  //     expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+  //   })
 
-    test('異常：500エラー（DBからユーザ取得エラー）', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからのユーザデータの取得ができなかった(null)場合を想定する
-      findOneSpy.mockReturnValue(null)
-      findOneSpyContracts.mockReturnValue(contractdataValues)
+  //   test('異常：500エラー（DBからユーザ取得エラー）', async () => {
+  //     // 準備
+  //     // requestのsession,userIdに正常値を入れる
+  //     request.session = {
+  //       userContext: 'LoggedIn',
+  //       userRole: 'dummy'
+  //     }
+  //     request.user = user
+  //     // DBからのユーザデータの取得ができなかった(null)場合を想定する
+  //     findOneSpy.mockReturnValue(null)
+  //     findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // 試験実施
-      await uploadFormat.cbPostBackIndex(request, response, next)
+  //     // 試験実施
+  //     await uploadFormat.cbPostBackIndex(request, response, next)
 
-      // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(error500)
-    })
+  //     // 期待結果
+  //     // 404エラーがエラーハンドリング「されない」
+  //     expect(next).not.toHaveBeenCalledWith(error404)
+  //     // 500エラーがエラーハンドリング「される」
+  //     expect(next).toHaveBeenCalledWith(error500)
+  //   })
 
-    test('異常：404エラーDBから取得したユーザのuserStatusが0以外の場合', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBから取得したユーザデータのuserStatusが0以外の場合を想定する
-      findOneSpy.mockReturnValue(dataValuesStatuserr)
-      findOneSpyContracts.mockReturnValue(contractdataValues)
+  //   test('異常：404エラーDBから取得したユーザのuserStatusが0以外の場合', async () => {
+  //     // 準備
+  //     // requestのsession,userIdに正常値を入れる
+  //     request.session = {
+  //       userContext: 'NotLoggedIn',
+  //       userRole: 'dummy'
+  //     }
+  //     request.user = user
+  //     // DBから取得したユーザデータのuserStatusが0以外の場合を想定する
+  //     findOneSpy.mockReturnValue(dataValuesStatuserr)
+  //     findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // 試験実施
-      await uploadFormat.cbPostBackIndex(request, response, next)
+  //     // 試験実施
+  //     await uploadFormat.cbPostBackIndex(request, response, next)
 
-      // 期待結果
-      // 404エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(error404)
-    })
+  //     // 期待結果
+  //     // 404エラーがエラーハンドリング「される」
+  //     expect(next).toHaveBeenCalledWith(error404)
+  //   })
 
-    test('異常：500エラー（不正なContractStatus）', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
+  //   test('異常：500エラー（不正なContractStatus）', async () => {
+  //     // 準備
+  //     // requestのsession,userIdに正常値を入れる
+  //     request.session = {
+  //       userContext: 'LoggedIn',
+  //       userRole: 'dummy'
+  //     }
+  //     request.user = user
 
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの不正な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(null)
+  //     // DBからの正常なユーザデータの取得を想定する
+  //     findOneSpy.mockReturnValue(dataValues)
+  //     // DBからの不正な契約情報取得を想定する
+  //     findOneSpyContracts.mockReturnValue(null)
 
-      // 試験実施
-      await uploadFormat.cbPostBackIndex(request, response, next)
+  //     // 試験実施
+  //     await uploadFormat.cbPostBackIndex(request, response, next)
 
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(error500)
-    })
+  //     // 期待結果
+  //     // 404，500エラーがエラーハンドリング「されない」
+  //     expect(next).not.toHaveBeenCalledWith(error404)
+  //     // 500エラーがエラーハンドリング「される」
+  //     expect(next).toHaveBeenCalledWith(error500)
+  //   })
 
-    test('異常：500エラー（不正なContractStatus）', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
+  //   test('異常：500エラー（不正なContractStatus）', async () => {
+  //     // 準備
+  //     // requestのsession,userIdに正常値を入れる
+  //     request.session = {
+  //       userContext: 'LoggedIn',
+  //       userRole: 'dummy'
+  //     }
+  //     request.user = user
 
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの不正な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues4)
+  //     // DBからの正常なユーザデータの取得を想定する
+  //     findOneSpy.mockReturnValue(dataValues)
+  //     // DBからの不正な契約情報取得を想定する
+  //     findOneSpyContracts.mockReturnValue(contractdataValues4)
 
-      helper.checkContractStatus = 999
+  //     helper.checkContractStatus = 999
 
-      // 試験実施
-      await uploadFormat.cbPostBackIndex(request, response, next)
+  //     // 試験実施
+  //     await uploadFormat.cbPostBackIndex(request, response, next)
 
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(error500)
+  //     // 期待結果
+  //     // 404，500エラーがエラーハンドリング「されない」
+  //     expect(next).not.toHaveBeenCalledWith(error404)
+  //     // 500エラーがエラーハンドリング「される」
+  //     expect(next).toHaveBeenCalledWith(error500)
 
-      helper.checkContractStatus = 10
-    })
-  })
+  //     helper.checkContractStatus = 10
+  //   })
+  // })
 })
