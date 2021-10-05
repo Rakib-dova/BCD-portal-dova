@@ -40,7 +40,7 @@ const cbGetRegister = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 
-  if (userdata.Memberships?.[0].Role?.toLowerCase() !== constantsDefine.userRoleConstants.tenantManager) {
+  if (userdata.Memberships?.[0].Role?.toLowerCase() !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d') {
     return next(noticeHelper.create('generaluser'))
   }
   const companyName = userdata.CompanyName
@@ -98,7 +98,7 @@ const cbPostRegister = async (req, res, next) => {
   // Tradeshift APIへのアクセスエラーは、エラーオブジェクトが返る
   if (userdata instanceof Error) return next(errorHelper.create(500))
 
-  if (userdata.Memberships?.[0].Role?.toLowerCase() !== constantsDefine.userRoleConstants.tenantManager) {
+  if (userdata.Memberships?.[0].Role?.toLowerCase() !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d') {
     return next(noticeHelper.create('generaluser'))
   }
 

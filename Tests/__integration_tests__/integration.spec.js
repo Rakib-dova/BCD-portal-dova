@@ -3,7 +3,6 @@ const app = require('../../Application/app')
 const request = require('supertest')
 const { JSDOM } = require('jsdom')
 const testTenantId = '221559d0-53aa-44a2-ab29-0c4a6cb02bde'
-const db = require('../../Application/models')
 
 jest.setTimeout(40000) // jestのタイムアウトを40秒とする
 
@@ -400,6 +399,9 @@ describe('ルーティングのインテグレーションテスト', () => {
     //    試験前：未登録
     //    試験後(期待値)：登録
 
+    // DB操作用
+    const db = require('../../Application/models')
+
     // /authにリダイレクトする
     test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
       const res = await request(app)
@@ -476,6 +478,175 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
+
+    // 正常にportal画面から契約者変更へ遷移する
+    test('管理者、契約ステータス：10, /change', async () => {
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：11, /change', async () => {
+      // 契約ステータス変更(受け取り完了)
+      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：00, /change', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/契約情報変更/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：00、 契約名変更、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .type('form')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractorName: 'on',
+          contractorName: 'インテグレーションテスター',
+          contractorKanaName: 'インテグレーションテスター'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 住所変更、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .type('form')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractAddress: 'on',
+          postalNumber: '0601233',
+          contractAddressVal: '東京都',
+          banch1: '１',
+          tatemono1: '建物１'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .type('form')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractContact: 'on',
+          contractPersonName: '連絡先コントラクター',
+          contractPhoneNumber: '080-1234-5678',
+          contractMail: 'changeContractor@test.com'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 契約名・住所変更、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .type('form')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractorName: 'on',
+          contractorName: 'インテグレーションテスター',
+          contractorKanaName: 'インテグレーションテスター',
+          chkContractAddress: 'on',
+          postalNumber: '0601233',
+          contractAddressVal: '東京都',
+          banch1: '１',
+          tatemono1: '建物１'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 契約名・連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .type('form')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractorName: 'on',
+          contractName: 'インテグレーションテスター',
+          contractKanaName: 'インテグレーションテスター',
+          chkContractContact: 'on',
+          contactPersonName: '連絡先コントラクター',
+          contactPhoneNumber: '080-1234-5678',
+          contactMail: 'changeContractor@test.com'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 住所変更・連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .type('form')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractAddress: 'on',
+          postalNumber: '0601233',
+          contractAddressVal: '東京都',
+          banch1: '１',
+          tatemono1: '建物１',
+          chkContractContact: 'on',
+          contactPersonName: '連絡先コントラクター',
+          contactPhoneNumber: '080-1234-5678',
+          contactMail: 'changeContractor@test.com'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('管理者、契約ステータス：00、 契約名・住所変更・連絡先、/change', async () => {
+      const res = await request(app)
+        .post('/change')
+        .type('form')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .send({
+          chkContractorName: 'on',
+          contractName: 'インテグレーションテスター',
+          contractKanaName: 'インテグレーションテスター',
+          chkContractAddress: 'on',
+          postalNumber: '0601233',
+          contractAddressVal: '東京都',
+          banch1: '１',
+          tatemono1: '建物１',
+          chkContractContact: 'on',
+          contactPersonName: '連絡先コントラクター',
+          contactPhoneNumber: '080-1234-5678',
+          contactMail: 'changeContractor@test.com'
+        })
+        .expect(302)
+
+      expect(res.header.location).toBe('/portal')
+    })
+
+    test('ContractとOrderデータ削除', async () => {
+      await db.Contract.destroy({ where: { tenantId: testTenantId } })
+      await db.Order.destroy({ where: { tenantId: testTenantId } })
+    })
   })
 
   describe('DBにアカウント管理者・一般ユーザ共に登録済/アカウント管理者としてリクエスト', () => {
@@ -491,6 +662,9 @@ describe('ルーティングのインテグレーションテスト', () => {
     //   一般ユーザ：
     //    試験前：登録済
     //    試験後(期待値)：登録済
+
+    // DB操作用
+    const db = require('../../Application/models')
 
     // ContractとOrder作成
     test('orderTable初期化', async () => {
@@ -610,26 +784,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
     })
 
-    test('一般ユーザ、契約ステータス：10, /change', async () => {
-      await db.Contract.update({ contractStatus: '10' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/change')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/テナント管理者権限のあるユーザで再度操作をお試しください。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：11, /change', async () => {
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/change')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/テナント管理者権限のあるユーザで再度操作をお試しください。/i) // 画面内容
-    })
-
+    // 正常にportal画面から契約者変更へ遷移する
     test('管理者、契約ステータス：40, /change', async () => {
       await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -658,7 +813,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/テナント管理者権限のあるユーザで再度操作をお試しください。/i) // 画面内容
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
     })
 
     test('一般ユーザ、契約ステータス：41, /change', async () => {
@@ -668,7 +823,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/テナント管理者権限のあるユーザで再度操作をお試しください。/i) // 画面内容
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
     })
 
     test('管理者、契約ステータス：00, /change', async () => {
@@ -695,7 +850,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/本機能はご利用いただけません。/i) // 画面内容
     })
 
-    test('管理者、契約ステータス：00, 契約名変更, /change', async () => {
+    test('管理者、契約ステータス：00、 契約名変更、/change', async () => {
       const res = await request(app)
         .post('/change')
         .type('form')
@@ -710,7 +865,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/portal')
     })
 
-    test('管理者、契約ステータス：00, 住所変更, /change', async () => {
+    test('管理者、契約ステータス：00、 住所変更、/change', async () => {
       const res = await request(app)
         .post('/change')
         .type('form')
@@ -727,7 +882,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/portal')
     })
 
-    test('管理者、契約ステータス：00, 連絡先, /change', async () => {
+    test('管理者、契約ステータス：00、 連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
         .type('form')
@@ -743,7 +898,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/portal')
     })
 
-    test('管理者、契約ステータス：00, 契約名・住所変更, /change', async () => {
+    test('管理者、契約ステータス：00、 契約名・住所変更、/change', async () => {
       const res = await request(app)
         .post('/change')
         .type('form')
@@ -763,7 +918,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/portal')
     })
 
-    test('管理者、契約ステータス：00, 契約名・連絡先, /change', async () => {
+    test('管理者、契約ステータス：00、 契約名・連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
         .type('form')
@@ -782,7 +937,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/portal')
     })
 
-    test('管理者、契約ステータス：00, 住所変更・連絡先, /change', async () => {
+    test('管理者、契約ステータス：00、 住所変更・連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
         .type('form')
@@ -803,7 +958,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/portal')
     })
 
-    test('管理者、契約ステータス：00, 契約名・住所変更・連絡先, /change', async () => {
+    test('管理者、契約ステータス：00、 契約名・住所変更・連絡先、/change', async () => {
       const res = await request(app)
         .post('/change')
         .type('form')
@@ -827,7 +982,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/portal')
     })
 
-    test('管理者、契約ステータス：30, /change', async () => {
+    test('管理者、契約ステータス：30、/change', async () => {
       await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/change')
@@ -837,17 +992,17 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
     })
 
-    test('管理者、契約ステータス：31, /change', async () => {
+    test('管理者、契約ステータス：31、/change', async () => {
       await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/change')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+      expect(res.text).toMatch(/>現在解約手続き中です。/i) // 画面内容
     })
 
-    test('一般ユーザ、契約ステータス：30, /change', async () => {
+    test('一般ユーザ、契約ステータス：30、, /change', async () => {
       // 契約ステータス変更(利用登録済み)
       await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -858,7 +1013,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
     })
 
-    test('一般ユーザ、契約ステータス：31, /change', async () => {
+    test('一般ユーザ、契約ステータス：31、, /change', async () => {
       // 契約ステータス変更(利用登録済み)
       await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -869,7 +1024,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
     })
 
-    test('管理者、契約ステータス：99, /change', async () => {
+    test('管理者、契約ステータス：99、/change', async () => {
       // 契約ステータス変更(利用登録済み)
       await db.Contract.update({ contractStatus: '99', deleteFlag: 'true' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -880,7 +1035,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('一般ユーザ、契約ステータス：99, /change', async () => {
+    test('一般ユーザ、契約ステータス：99、, /change', async () => {
       // 契約ステータス変更(利用登録済み)
       await db.Contract.update({ contractStatus: '99' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -889,543 +1044,6 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(400)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
-    })
-
-    test('管理者、契約ステータス：10, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '10', deleteFlag: 'false' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：11, /cancellation', async () => {
-      // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：10, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '10' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/テナント管理者権限のあるユーザで再度操作をお試しください。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：11, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/テナント管理者権限のあるユーザで再度操作をお試しください。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：40, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：41, /cancellation', async () => {
-      // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：40, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/テナント管理者権限のあるユーザで再度操作をお試しください。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：41, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/テナント管理者権限のあるユーザで再度操作をお試しください。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：00, /cancellation', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/解約/i)
-      expect(res.text).toMatch(/解約する前に以下の内容をご確認ください。/i)
-    })
-
-    test('一般ユーザ、契約ステータス：00, /cancellation', async () => {
-      // 契約ステータス変更(利用登録済み)
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/本機能はご利用いただけません。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：30, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：31, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：30, /cancellation', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：31, /cancellation', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：99, /cancellation', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '99', deleteFlag: 'true' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
-    })
-
-    test('一般ユーザ、契約ステータス：99, /cancellation', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '99' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
-    })
-
-    test('管理者、契約ステータス：10, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '10', deleteFlag: 'false' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('管理者、契約ステータス：11, /csvupload', async () => {
-      // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：10, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '10' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：11, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('管理者、契約ステータス：40, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('管理者、契約ステータス：41, /csvupload', async () => {
-      // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：40, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：41, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('管理者、契約ステータス：00, /csvupload', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：00, /csvupload', async () => {
-      // 契約ステータス変更(利用登録済み)
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('管理者、契約ステータス：30, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：31, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：30, /csvupload', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：31, /csvupload', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：99, /csvupload', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '99', deleteFlag: 'true' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
-    })
-
-    test('一般ユーザ、契約ステータス：99, /csvupload', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '99' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
-    })
-
-    test('管理者、契約ステータス：10, /portal', async () => {
-      await db.Contract.update({ contractStatus: '10', deleteFlag: 'false' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/サポート/i)
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/設定/i)
-    })
-
-    test('管理者、契約ステータス：11, /portal', async () => {
-      // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/サポート/i)
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/設定/i)
-    })
-
-    test('一般ユーザ、契約ステータス：10, /portal', async () => {
-      await db.Contract.update({ contractStatus: '10' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/サポート/i)
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/設定/i)
-    })
-
-    test('一般ユーザ、契約ステータス：11, /portal', async () => {
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/サポート/i)
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/設定/i)
-    })
-
-    test('管理者、契約ステータス：40, /portal', async () => {
-      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/サポート/i)
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/設定/i)
-    })
-
-    test('管理者、契約ステータス：41, /portal', async () => {
-      // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/サポート/i)
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/設定/i)
-    })
-
-    test('一般ユーザ、契約ステータス：40, /portal', async () => {
-      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/サポート/i)
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/設定/i)
-    })
-
-    test('一般ユーザ、契約ステータス：41, /portal', async () => {
-      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/サポート/i)
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/設定/i)
-    })
-
-    test('管理者、契約ステータス：00, /portal', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/サポート/i)
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/設定/i)
-    })
-
-    test('一般ユーザ、契約ステータス：00, /portal', async () => {
-      // 契約ステータス変更(利用登録済み)
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/サポート/i)
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/設定/i)
-    })
-
-    test('管理者、契約ステータス：30, /portal', async () => {
-      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：31, /portal', async () => {
-      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：30, /portal', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：31, /portal', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：99, /portal', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '99', deleteFlag: 'true' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
-    })
-
-    test('一般ユーザ、契約ステータス：99, /portal', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '99' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
-    })
-
-    test('ContractとOrderデータ削除', async () => {
-      await db.Contract.destroy({ where: { tenantId: testTenantId } })
-      await db.Order.destroy({ where: { tenantId: testTenantId } })
     })
   })
 
@@ -1700,11 +1318,6 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
   })
   describe('後処理', () => {
-    test('ContractとOrderデータ削除', async () => {
-      await db.Contract.destroy({ where: { tenantId: testTenantId } })
-      await db.Order.destroy({ where: { tenantId: testTenantId } })
-    })
-
     test('全てのユーザを削除', async () => {
       // アカウント管理者を削除
       await request(app)

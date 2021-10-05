@@ -1,6 +1,4 @@
 // See https://qiita.com/standard-software/items/0b2617062b2e4c7f1abb
-const constantsDefine = require('../constants')
-
 const assert = function (value, message) {
   if (typeof message === 'undefined' || message === null) {
     message = ''
@@ -83,46 +81,6 @@ const isPostalNumber = (postalNumber) => {
   return regex.test(postalNumber)
 }
 
-const isTenantManager = function (userRole, deleteFlag) {
-  if (userRole !== constantsDefine.userRoleConstants.tenantManager && !deleteFlag) {
-    return false
-  }
-  return true
-}
-
-const isStatusForRegister = function (contractStatus, deleteFlag) {
-  if (
-    (contractStatus === constantsDefine.statusConstants.contractStatusNewContractOrder ||
-      contractStatus === constantsDefine.statusConstants.contractStatusNewContractReceive) &&
-    !deleteFlag
-  ) {
-    return false
-  }
-  return true
-}
-
-const isStatusForCancel = function (contractStatus, deleteFlag) {
-  if (
-    (contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder ||
-      contractStatus === constantsDefine.statusConstants.contractStatusCancellationReceive) &&
-    !deleteFlag
-  ) {
-    return false
-  }
-  return true
-}
-
-const isStatusForSimpleChange = function (contractStatus, deleteFlag) {
-  if (
-    (contractStatus === constantsDefine.statusConstants.contractStatusSimpleChangeContractOrder ||
-      contractStatus === constantsDefine.statusConstants.contractStatusSimpleChangeContractReceive) &&
-    !deleteFlag
-  ) {
-    return false
-  }
-  return true
-}
-
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -132,9 +90,5 @@ module.exports = {
   isStrings: isStrings,
   isFunction: isFunction,
   isUUID: isUUID,
-  isPostalNumber: isPostalNumber,
-  isTenantManager: isTenantManager,
-  isStatusForRegister: isStatusForRegister,
-  isStatusForCancel: isStatusForCancel,
-  isStatusForSimpleChange: isStatusForSimpleChange
+  isPostalNumber: isPostalNumber
 }

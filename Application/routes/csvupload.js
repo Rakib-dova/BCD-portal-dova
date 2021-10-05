@@ -9,7 +9,6 @@ const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
-const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const constantsDefine = require('../constants')
@@ -49,10 +48,12 @@ const cbGetIndex = async (req, res, next) => {
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
 
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+  if (
+    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder ||
+      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationReceive) &&
+    !contract.dataValues.deleteFlag
+  ) {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
