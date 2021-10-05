@@ -1156,30 +1156,30 @@ describe('csvConfirmFormatのテスト', () => {
 
   // // -----------------------------------------------------------------------------------------
   // // cbPostBackIndex
-  describe('cbPostBackIndex', () => {
-    test('正常', async () => {
-      // 準備
-      request.user = user
+  // describe('cbPostBackIndex', () => {
+  //   test('正常', async () => {
+  //     // 準備
+  //     request.user = user
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        '/home/upload',
-        'uploadFormatTest.csv',
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
+  //     // テスト用csvファイルアップロード
+  //     await csvBasicFormat.fileUpload(
+  //       '/home/upload',
+  //       'uploadFormatTest.csv',
+  //       Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+  //     )
 
-      // 試験実施
-      await csvConfirmFormat.cbPostBackIndex(request, response, next)
+  //     // 試験実施
+  //     await csvConfirmFormat.cbPostBackIndex(request, response, next)
 
-      // 期待結果
-      expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        headerItems: headerItemsBackResult,
-        uploadGeneral: uploadGeneralBackResult,
-        taxIds: taxIdsBackResult,
-        unitIds: unitIdsBackResult,
-        selectedFormatData: formatData,
-        csvfilename: testfilename
-      })
-    })
-  })
+  //     // 期待結果
+  //     expect(response.render).toHaveBeenCalledWith('uploadFormat', {
+  //       headerItems: headerItemsBackResult,
+  //       uploadGeneral: uploadGeneralBackResult,
+  //       taxIds: taxIdsBackResult,
+  //       unitIds: unitIdsBackResult,
+  //       selectedFormatData: formatData,
+  //       csvfilename: testfilename
+  //     })
+  //   })
+  // })
 })
