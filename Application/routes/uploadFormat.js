@@ -428,18 +428,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  res.redirect(
-    307,
-    url.format({
-      pathname: '/csvConfirmFormat',
-      body: {
-        tenantId: req.user.tenantId,
-        userRole: req.session.userRole,
-        numberN: contract.dataValues?.numberN,
-        TS_HOST: process.env.TS_HOST
-      }
-    })
-  )
+  res.redirect(307, '/csvConfirmFormat')
 }
 
 // CSVファイル削除機能
