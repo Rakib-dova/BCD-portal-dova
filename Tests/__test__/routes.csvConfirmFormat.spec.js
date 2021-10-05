@@ -441,7 +441,7 @@ describe('csvConfirmFormatのテスト', () => {
   const uploadGeneralBackResult = { uploadFormatItemName: '1', uploadType: '請求書データ' }
   describe('ルーティング', () => {
     test('uploadFormatのルーティングを確認', async () => {
-      // expect(csvConfirmFormat.router.post).toBeCalledWith('/', csvConfirmFormat.cbPostCsvConfirmFormat)
+      expect(csvConfirmFormat.router.post).toBeCalledWith('/', csvConfirmFormat.cbPostCsvConfirmFormat)
     })
   })
 

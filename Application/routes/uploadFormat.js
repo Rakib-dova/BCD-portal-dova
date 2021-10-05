@@ -73,79 +73,62 @@ router.use(
 )
 
 const cbPostIndex = async (req, res, next) => {
-  console.log('uploadFormat_cbPostIndex1')
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
 
-  console.log('uploadFormat_cbPostIndex2')
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
 
-  console.log('uploadFormat_cbPostIndex3')
   req.session.csvUploadFormatReturnFlag1 = true
 
   // DBからuserデータ取得
-  console.log('uploadFormat_cbPostIndex4')
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
-  console.log('uploadFormat_cbPostIndex5')
   if (user instanceof Error || user === null) {
     return next(errorHelper.create(500))
   }
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  console.log('uploadFormat_cbPostIndex6')
   if (user.dataValues?.userStatus !== 0) {
     return next(errorHelper.create(404))
   }
 
   // DBから契約情報取得
-  console.log('uploadFormat_cbPostIndex7')
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
-  console.log('uploadFormat_cbPostIndex8')
   if (contract instanceof Error || contract === null) {
     return next(errorHelper.create(500))
   }
 
   // ユーザ権限を取得
-  console.log('uploadFormat_cbPostIndex9')
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = helper.checkContractStatus
 
-  console.log('uploadFormat_cbPostIndex10')
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
-  console.log('uploadFormat_cbPostIndex11')
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
   // アプロードしたファイルを読み込む
-  console.log('uploadFormat_cbPostIndex12')
   csvfilename = user.dataValues.userId + '_' + req.body.dataFileName
   uploadFormatNumber = req.body.uploadFormatNumber - 1
   defaultNumber = req.body.defaultNumber - 1
 
-  console.log('uploadFormat_cbPostIndex13')
   if (
     (req.body.checkItemNameLine === 'on' && ~~req.body.uploadFormatNumber <= 0) ||
     ~~req.body.defaultNumber <= 0 ||
     ~~req.body.defaultNumber <= ~~req.body.uploadFormatNumber
   ) {
-    console.log('uploadFormat_cbPostIndex14')
-    console.log('uploadFormat_cbPostIndex15')
     const backURL = req.header('Referer') || '/'
     return res.redirect(backURL)
   }
-  console.log('uploadFormat_cbPostIndex16')
   const extractFullpathFile = path.join(filePath, '/') + csvfilename
 
-  console.log('uploadFormat_cbPostIndex17')
   const csv = fs.readFileSync(extractFullpathFile, 'utf8')
   const tmpRows = csv.split(/\r?\n|\r/)
   const checkRow = []
@@ -153,27 +136,21 @@ const cbPostIndex = async (req, res, next) => {
     if (row.trim() !== '') checkRow.push(row)
   })
 
-  console.log('uploadFormat_cbPostIndex18')
   if (checkRow.length < defaultNumber + 1) {
     const backURL = req.header('Referer') || '/'
     return res.redirect(backURL)
   }
-  console.log('uploadFormat_cbPostIndex19')
   const mesaiArr = tmpRows[defaultNumber].trim().split(',') // 修正必要（データ開始行番号）
   let headerArr = []
-  console.log('uploadFormat_cbPostIndex20')
   if (req.body.checkItemNameLine === 'on') {
-    console.log('uploadFormat_cbPostIndex21')
     headerArr = tmpRows[uploadFormatNumber].trim().split(',')
   } else {
-    console.log('uploadFormat_cbPostIndex22')
     mesaiArr.map((meisai) => {
       headerArr.push('')
       return ''
     })
   }
 
-  console.log('uploadFormat_cbPostIndex23')
   let duplicateFlag = false
   // 配列に読み込んだcsvデータを入れる。
   const csvData = headerArr.map((header) => {
@@ -183,13 +160,11 @@ const cbPostIndex = async (req, res, next) => {
     return { item: header, value: '' }
   })
 
-  console.log('uploadFormat_cbPostIndex24')
   if (duplicateFlag) {
     const backURL = req.header('Referer') || '/'
     return res.redirect(backURL)
   }
 
-  console.log('uploadFormat_cbPostIndex25')
   mesaiArr.map((mesai, idx) => {
     if (mesai.length > 100) {
       duplicateFlag = true
@@ -198,13 +173,11 @@ const cbPostIndex = async (req, res, next) => {
     return ''
   })
 
-  console.log('uploadFormat_cbPostIndex26')
   if (duplicateFlag) {
     const backURL = req.header('Referer') || '/'
     return res.redirect(backURL)
   }
 
-  console.log('uploadFormat_cbPostIndex27')
   uploadFormatItemName = req.body.uploadFormatItemName
   uploadType = req.body.uploadType
   const uploadGeneral = {
@@ -212,7 +185,6 @@ const cbPostIndex = async (req, res, next) => {
     uploadType: uploadType
   }
 
-  console.log('uploadFormat_cbPostIndex28')
   // tax
   keyConsumptionTax = req.body.keyConsumptionTax
   keyReducedTax = req.body.keyReducedTax
@@ -227,7 +199,6 @@ const cbPostIndex = async (req, res, next) => {
     keyExemptTax: keyExemptTax
   }
 
-  console.log('uploadFormat_cbPostIndex29')
   {
     const checkDuplicate = [keyConsumptionTax, keyReducedTax, keyFreeTax, keyDutyFree, keyExemptTax]
     const resultDuplicate = checkDuplicate.map((item, idx, arr) => {
@@ -252,7 +223,6 @@ const cbPostIndex = async (req, res, next) => {
       return res.redirect(backURL)
     }
   }
-  console.log('uploadFormat_cbPostIndex29')
 
   // unit
   keyManMonth = req.body.keyManMonth
@@ -397,19 +367,17 @@ const cbPostIndex = async (req, res, next) => {
       return res.redirect(backURL)
     }
   }
-  console.log('uploadFormat_cbPostIndex30')
+
   const emptyselectedFormatData = []
   for (let i = 0; i < 19; i++) {
     emptyselectedFormatData.push('')
   }
 
-  console.log('uploadFormat_cbPostIndex31')
   // csv削除
   if (cbRemoveCsv(filePath, csvfilename) === false) {
     return next(errorHelper.create(500))
   }
 
-  console.log('uploadFormat_cbPostIndex32')
   res.render('uploadFormat', {
     headerItems: csvData,
     uploadGeneral: uploadGeneral,
@@ -418,34 +386,29 @@ const cbPostIndex = async (req, res, next) => {
     csvfilename: csvfilename,
     selectedFormatData: emptyselectedFormatData
   })
-  console.log('uploadFormat_cbPostIndex33')
+
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
 const cbPostConfirmIndex = async (req, res, next) => {
-  console.log('uploadFormat_cbPostConfirmIndex1')
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostConfirmIndex')
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
   // DBからuserデータ取得
-  console.log('uploadFormat_cbPostConfirmIndex2')
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
-  console.log('uploadFormat_cbPostConfirmIndex3')
   if (user instanceof Error || user === null) {
     return next(errorHelper.create(500))
   }
 
-  console.log('uploadFormat_cbPostConfirmIndex4')
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) {
     return next(errorHelper.create(404))
   }
 
   // DBから契約情報取得
-  console.log('uploadFormat_cbPostConfirmIndex5')
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
@@ -454,21 +417,17 @@ const cbPostConfirmIndex = async (req, res, next) => {
   }
 
   // ユーザ権限を取得
-  console.log('uploadFormat_cbPostConfirmIndex6')
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = helper.checkContractStatus
 
-  console.log('uploadFormat_cbPostConfirmIndex7')
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
-  console.log('uploadFormat_cbPostConfirmIndex8')
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  console.log('uploadFormat_cbPostConfirmIndex9')
   res.redirect(
     307,
     url.format({
@@ -481,7 +440,6 @@ const cbPostConfirmIndex = async (req, res, next) => {
       }
     })
   )
-  console.log('uploadFormat_cbPostConfirmIndex10')
 }
 
 // CSVファイル削除機能
@@ -500,58 +458,46 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
 }
 
 const cbPostBackIndex = async (req, res, next) => {
-  console.log('uploadFormat_cbPostBackIndex1')
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostBackIndex')
   req.session.csvUploadFormatReturnFlag2 = true
 
   // 認証情報取得処理
-  console.log('uploadFormat_cbPostBackIndex2')
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
   // DBからuserデータ取得
-  console.log('uploadFormat_cbPostBackIndex3')
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
-  console.log('uploadFormat_cbPostBackIndex4')
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  console.log('uploadFormat_cbPostBackIndex5')
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
   if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
 
   // DBから契約情報取得
-  console.log('uploadFormat_cbPostBackIndex6')
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
-  console.log('uploadFormat_cbPostBackIndex7')
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
   // ユーザ権限を取得
-  console.log('uploadFormat_cbPostBackIndex8')
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = helper.checkContractStatus
 
-  console.log('uploadFormat_cbPostBackIndex9')
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
-  console.log('uploadFormat_cbPostBackIndex10')
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  console.log('uploadFormat_cbPostBackIndex11')
   res.redirect('/csvBasicFormat')
 
-  console.log('uploadFormat_cbPostBackIndex12')
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostBackIndex')
 }
 
-router.post('/', helper.isAuthenticated, helper.isTenantRegistered, cbPostIndex)
-router.post('/cbPostDBIndex', helper.isAuthenticated, helper.isTenantRegistered, cbPostConfirmIndex)
-router.post('/cbPostBackIndex', helper.isAuthenticated, helper.isTenantRegistered, cbPostBackIndex)
+router.post('/', cbPostIndex)
+router.post('/cbPostDBIndex', cbPostConfirmIndex)
+router.post('/cbPostBackIndex', cbPostBackIndex)
 
 module.exports = {
   router: router,
