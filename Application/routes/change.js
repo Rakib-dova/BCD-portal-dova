@@ -3,7 +3,6 @@
 const express = require('express')
 const router = express.Router()
 const helper = require('./helpers/middleware')
-const validate = require('../lib/validate')
 
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
@@ -44,23 +43,28 @@ const cbGetChangeIndex = async (req, res, next) => {
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
 
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+  if (
+    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder ||
+      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationReceive) &&
+    !contract.dataValues.deleteFlag
+  ) {
     return next(noticeHelper.create('cancelprocedure'))
-  }
-
-  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
-    return next(noticeHelper.create('generaluser'))
-  }
-
-  if (!validate.isStatusForRegister(contractStatus, deleteFlag)) {
+  } else if (
+    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusNewContractOrder ||
+      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusNewContractReceive) &&
+    !contract.dataValues.deleteFlag
+  ) {
     return next(noticeHelper.create('registerprocedure'))
-  }
-
-  if (!validate.isStatusForSimpleChange(contractStatus, deleteFlag)) {
+  } else if (
+    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusSimpleChangeContractOrder ||
+      contract.dataValues.contractStatus ===
+        constantsDefine.statusConstants.contractStatusSimpleChangeContractReceive) &&
+    !contract.dataValues.deleteFlag
+  ) {
     return next(noticeHelper.create('changeprocedure'))
+  } else if (user.dataValues?.userRole !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d' && !contract.dataValues.deleteFlag) {
+    return next(noticeHelper.create('generaluser'))
   }
 
   // ユーザ権限も画面に送る
@@ -131,10 +135,9 @@ const cbPostChangeIndex = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   // ユーザ未登録の場合もエラーを上げる
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
-  const deleteFlag = contract.dataValues.deleteFlag
 
-  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
-    return next(noticeHelper.create('generaluser'))
+  if (user.dataValues.userRole !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d') {
+    return next(errorHelper.create(403))
   }
 
   if (

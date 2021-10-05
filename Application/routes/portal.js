@@ -8,7 +8,8 @@ const noticeHelper = require('./helpers/notice')
 
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
-const validate = require('../lib/validate')
+
+const constantsDefine = require('../constants')
 
 const cbGetIndex = async (req, res, next) => {
   if (!req.session || !req.user?.userId) {
@@ -34,10 +35,12 @@ const cbGetIndex = async (req, res, next) => {
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
 
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+  if (
+    (contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationOrder ||
+      contract.dataValues.contractStatus === constantsDefine.statusConstants.contractStatusCancellationReceive) &&
+    !contract.dataValues.deleteFlag
+  ) {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
