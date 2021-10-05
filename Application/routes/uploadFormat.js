@@ -457,52 +457,52 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
-const cbPostBackIndex = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbPostBackIndex')
-  // req.session.csvUploadFormatReturnFlag2 = true
+// const cbPostBackIndex = async (req, res, next) => {
+//   logger.info(constantsDefine.logMessage.INF000 + 'cbPostBackIndex')
+//   // req.session.csvUploadFormatReturnFlag2 = true
 
-  // 認証情報取得処理
-  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+//   // 認証情報取得処理
+//   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
-  // DBからuserデータ取得
-  const user = await userController.findOne(req.user.userId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // user未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+//   // DBからuserデータ取得
+//   const user = await userController.findOne(req.user.userId)
+//   // データベースエラーは、エラーオブジェクトが返る
+//   // user未登録の場合もエラーを上げる
+//   if (user instanceof Error || user === null) return next(errorHelper.create(500))
 
-  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
-  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
+//   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+//   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+//   if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
 
-  // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+//   // DBから契約情報取得
+//   const contract = await contractController.findOne(req.user.tenantId)
+//   // データベースエラーは、エラーオブジェクトが返る
+//   // 契約情報未登録の場合もエラーを上げる
+//   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
-  // ユーザ権限を取得
-  req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = helper.checkContractStatus
+//   // ユーザ権限を取得
+//   req.session.userRole = user.dataValues?.userRole
+//   const deleteFlag = contract.dataValues.deleteFlag
+//   const contractStatus = contract.dataValues.contractStatus
+//   const checkContractStatus = helper.checkContractStatus
 
-  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
+//   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+//   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  res.redirect('/csvBasicFormat')
+//   res.redirect('/csvBasicFormat')
 
-  logger.info(constantsDefine.logMessage.INF001 + 'cbPostBackIndex')
-}
+//   logger.info(constantsDefine.logMessage.INF001 + 'cbPostBackIndex')
+// }
 
 router.post('/', cbPostIndex)
-router.post('/cbPostDBIndex', cbPostConfirmIndex)
-router.post('/cbPostBackIndex', cbPostBackIndex)
+router.post('/cbPostConfirmIndex', cbPostConfirmIndex)
+// router.post('/cbPostBackIndex', cbPostBackIndex)
 
 module.exports = {
   router: router,
   cbPostIndex: cbPostIndex,
   cbPostConfirmIndex: cbPostConfirmIndex,
-  cbRemoveCsv: cbRemoveCsv,
-  cbPostBackIndex: cbPostBackIndex
+  cbRemoveCsv: cbRemoveCsv
+  // cbPostBackIndex: cbPostBackIndex
 }

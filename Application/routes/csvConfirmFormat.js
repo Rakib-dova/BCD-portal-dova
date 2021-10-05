@@ -280,24 +280,24 @@ const cbPostDBIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadFormat')
 }
 
-const cbPostBackIndex = async (req, res, next) => {
-  res.render('uploadFormat', {
-    headerItems: headerItems,
-    uploadGeneral: uploadGeneral,
-    taxIds: taxIds,
-    unitIds: unitIds,
-    selectedFormatData: formatData,
-    csvfilename: csvfilename
-  })
-}
+// const cbPostBackIndex = async (req, res, next) => {
+//   res.render('uploadFormat', {
+//     headerItems: headerItems,
+//     uploadGeneral: uploadGeneral,
+//     taxIds: taxIds,
+//     unitIds: unitIds,
+//     selectedFormatData: formatData,
+//     csvfilename: csvfilename
+//   })
+// }
 
 router.post('/', cbPostCsvConfirmFormat)
 router.post('/cbPostDBIndex', cbPostDBIndex)
-router.post('/cbPostBackIndex', cbPostBackIndex)
+// router.post('/cbPostBackIndex', cbPostBackIndex)
 
 module.exports = {
   router: router,
   cbPostCsvConfirmFormat: cbPostCsvConfirmFormat,
-  cbPostDBIndex: cbPostDBIndex,
-  cbPostBackIndex: cbPostBackIndex
+  cbPostDBIndex: cbPostDBIndex
+  // cbPostBackIndex: cbPostBackIndex
 }
