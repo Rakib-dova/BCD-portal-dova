@@ -21,14 +21,14 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
-  if (!req.session.csvUploadFormatReturnFlag1 || !req.session.csvUploadFormatReturnFlag2) {
-    delete req.session.formData
-    delete req.session.csvUploadFormatReturnFlag1
-    delete req.session.csvUploadFormatReturnFlag2
-  } else {
-    req.session.csvUploadFormatReturnFlag1 = false
-    req.session.csvUploadFormatReturnFlag2 = false
-  }
+  // if (!req.session.csvUploadFormatReturnFlag1 || !req.session.csvUploadFormatReturnFlag2) {
+  //   delete req.session.formData
+  //   delete req.session.csvUploadFormatReturnFlag1
+  //   delete req.session.csvUploadFormatReturnFlag2
+  // } else {
+  //   req.session.csvUploadFormatReturnFlag1 = false
+  //   req.session.csvUploadFormatReturnFlag2 = false
+  // }
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
@@ -62,11 +62,11 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
   let taxArr = constantsDefine.csvFormatDefine.taxArr
   let unitArr = constantsDefine.csvFormatDefine.unitArr
 
-  // // if (req.session.formData) {
-  // //   csvBasicArr = req.session.formData.csvBasicArr
-  // //   taxArr = req.session.formData.taxArr
-  // //   unitArr = req.session.formData.unitArr
-  // // }
+  // if (req.session.formData) {
+  //   csvBasicArr = req.session.formData.csvBasicArr
+  //   taxArr = req.session.formData.taxArr
+  //   unitArr = req.session.formData.unitArr
+  // }
 
   res.render('csvBasicFormat', {
     csvTax: csvTax,
