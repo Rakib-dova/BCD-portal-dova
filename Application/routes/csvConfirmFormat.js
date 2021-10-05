@@ -327,9 +327,9 @@ const cbPostBackIndex = async (req, res, next) => {
   })
 }
 
-router.post('/', cbPostCsvConfirmFormat)
-router.post('/cbPostDBIndex', cbPostDBIndex)
-router.post('/cbPostBackIndex', cbPostBackIndex)
+router.post('/', helper.isAuthenticated, helper.isTenantRegistered, cbPostCsvConfirmFormat)
+router.post('/cbPostDBIndex', helper.isAuthenticated, helper.isTenantRegistered, cbPostDBIndex)
+router.post('/cbPostBackIndex', helper.isAuthenticated, helper.isTenantRegistered, cbPostBackIndex)
 module.exports = {
   router: router,
   cbPostCsvConfirmFormat: cbPostCsvConfirmFormat,
