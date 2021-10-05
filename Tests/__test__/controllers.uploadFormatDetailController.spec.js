@@ -7,7 +7,7 @@ const uploadFormatController = require('../../Application/controllers/uploadForm
 const logger = require('../../Application/lib/logger')
 const UploadFormatDetail = require('../../Application/models').UploadFormatDetail
 
-let errorSpy, tenantId, contractId, uploadFormatId, findOneSpy, findAllSpy, findUploadFormatSpy, infoSpy, createSpy
+let errorSpy, contractId, uploadFormatId, findOneSpy, findAllSpy, findUploadFormatSpy, infoSpy, createSpy
 
 describe('uploadFormatDetailControllerのテスト', () => {
   beforeEach(() => {
@@ -26,7 +26,6 @@ describe('uploadFormatDetailControllerのテスト', () => {
     errorSpy.mockRestore()
     infoSpy.mockRestore()
   })
-  tenantId = '12345678-bdac-4195-80b9-1ea64b8cb70c'
   contractId = '87654321-fbe6-4864-a866-7a3ce9aa517e'
   uploadFormatId = '55555555-fbe6-4864-a866-7a3ce9aa517e'
 
