@@ -2,6 +2,7 @@ const db = require('../models')
 const logger = require('../lib/logger')
 const contractController = require('./contractController')
 const Upload = db.UploadFormat
+// const UploadFormat = require('../models').UploadFormat
 const constantsDefine = require('../constants')
 
 module.exports = {
@@ -68,5 +69,18 @@ module.exports = {
     }
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return uploadFormat
+  },
+  findByContractId: async (contractId) => {
+    try {
+      return await Upload.findAll({
+        where: {
+          contractId: contractId
+        }
+      })
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ contractId: contractId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
   }
 }

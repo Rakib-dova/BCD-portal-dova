@@ -2,7 +2,6 @@
 
 const fs = require('fs')
 const { v4: uuidv4 } = require('uuid')
-const logger = require('./logger')
 const validate = require('./validate')
 const constants = require('../constants')
 const { exit } = require('process')
@@ -200,6 +199,7 @@ class bconCsv {
     path: null,
     fd: null,
     status: null,
+    formatFlag: false,
     data: null,
     rows: [],
     invoiceCnt: null,
@@ -210,16 +210,27 @@ class bconCsv {
     getData() {
       return this.data
     },
-    setRows(_data) {
+    setRows(_data, _formatFlag, _uploadFormatDetail) {
       const tmpRows = _data.split(/\r?\n|\r/)
       for (let idx = 0; idx < tmpRows.length; idx++) {
         if (tmpRows[idx].trim()) {
-          this.rows.push({
-            idx: idx,
-            invoiceGroup: null,
-            docNo: tmpRows[idx].split(',')[1],
-            rows: tmpRows[idx]
-          })
+          if (_formatFlag) {
+            let index = _uploadFormatDetail[1].uploadFormatNumber
+            this.rows.push({
+              idx: idx,
+              invoiceGroup: null,
+              docNo: tmpRows[idx].split(',')[index],
+              rows: tmpRows[idx]
+            })
+          } else {
+            this.rows.push({
+              idx: idx,
+              invoiceGroup: null,
+              docNo: tmpRows[idx].split(',')[1],
+              rows: tmpRows[idx]
+            })
+          }
+
         }
       }
       this.invoiceCnt = this.rows.length
@@ -242,8 +253,9 @@ class bconCsv {
       })
     },
 
-    setFile(_filePath) {
+    setFile(_filePath, formatFlag, uploadFormatDetail) {
       this.setStatus(this.fileStatusEnum.LOADING)
+      this.setFormatFlag(formatFlag)
       this.fd = fs.openSync(_filePath, 'r')
       this.setData(fs.readFileSync(_filePath, 'utf8'))
       this.setStatus(this.fileStatusEnum.SUCCESS)
@@ -251,7 +263,15 @@ class bconCsv {
         if (err) {
         }
       })
-      this.setRows(this.getData())
+      this.setRows(this.getData(), formatFlag, uploadFormatDetail)
+    },
+
+    setFormatFlag(formatFlag) {
+      this.formatFlag = formatFlag
+    },
+
+    getFormatFlag() {
+      return this.formatFlag
     },
 
     setStatus(_statuscode) {
@@ -276,15 +296,13 @@ class bconCsv {
 
   #invoiceDocumentList = []
 
-  constructor(fullFilePath) {
-    this.#csvFile.setFile(fullFilePath)
-    this.convertTradeshiftInvoice()
+  constructor(fullFilePath, formatFlag, uploadFormatDetail) {
+    this.#csvFile.setFile(fullFilePath, formatFlag, uploadFormatDetail)
+    this.convertTradeshiftInvoice(uploadFormatDetail)
   }
 
-  convertTradeshiftInvoice() {
+  convertTradeshiftInvoice(uploadFormatDetail) {
     // CSVカーラム
-    //   発行日, 請求書番号, テナントID, 支払期日, 納品日, 備考, 銀行名, 支店名, 科目, 口座番号, 口座名義, その他特記事項
-    //   明細-項目ID, 明細-内容, 明細-数量, 明細-単位, 明細-単価, 明細-税, 明細-備考
     const resultConvert = {
       invoiceDetailId: null, // invoiceDetailテーブルのinvoiceDetailIdカーラム
       invoicesId: null, // invoicesテーブルとinvoiceDetailテーブルの紐づくため、invoicesのinvoicesId
@@ -298,6 +316,7 @@ class bconCsv {
       error: []
     }
     const invoiceData = this.#csvFile.getRows()
+    let formatFlag = this.#csvFile.getFormatFlag()
     let parentInvoice = null
     let parentInvoiceStatus = 0
     let indexObj = null
@@ -305,8 +324,14 @@ class bconCsv {
     let headerFlag = true
     let setInvoiceLineCnt = 0
     let errorData = ''
+    
     invoiceData.some((element) => {
-      const csvColumn = element.rows.split(',')
+      let csvColumn = element.rows.split(',')
+
+      if (formatFlag) {
+        csvColumn = this.convertUserCsvFormat(uploadFormatDetail, csvColumn)
+      }
+      
       resultConvert.invoiceDetailId = uuidv4()
       resultConvert.invoiceId = csvColumn[1]
       resultConvert.lines = element.idx
@@ -318,7 +343,7 @@ class bconCsv {
         parentInvoice = new Invoice()
         parentInvoiceStatus = 0
 
-        if (csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE && headerchk) {
+        if ((csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE && headerchk) && !formatFlag) {
           errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
           resultConvert.status = -1
           headerchk = false
@@ -339,50 +364,53 @@ class bconCsv {
         } else if (csvColumn.length === constants.invoiceValidDefine.COLUMN_VALUE && headerchk) {
           headerchk = false
           return
+        } else if (formatFlag && headerchk) {
+          headerchk = false
+          return 
         }
 
-        if (csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE) {
-          errorData += errorData
-            ? `,${constants.invoiceErrMsg['COLUMNERR000']}`
-            : `${constants.invoiceErrMsg['COLUMNERR000']}`
-
-          resultConvert.status = -1
-
-          resultConvert.error.push({
-            errorData: errorData
-          })
-
-          parentInvoice.setInvoiceLine('', '', '', '', '', '')
-
-          indexObj = {
-            ...resultConvert,
-            INVOICE: parentInvoice
+        if (!formatFlag) {
+          if (csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE) {
+            errorData += errorData
+              ? `,${constants.invoiceErrMsg['COLUMNERR000']}`
+              : `${constants.invoiceErrMsg['COLUMNERR000']}`
+  
+            resultConvert.status = -1
+  
+            resultConvert.error.push({
+              errorData: errorData
+            })
+  
+            parentInvoice.setInvoiceLine('', '', '', '', '', '')
+  
+            indexObj = {
+              ...resultConvert,
+              INVOICE: parentInvoice
+            }
+  
+            this.#invoiceDocumentList.push(indexObj)
+            this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].failCount += 1
+            return
           }
-
-          this.#invoiceDocumentList.push(indexObj)
-          this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].failCount += 1
-          return
         }
-
         if (csvColumn[0] !== '') {
           csvColumn[0] = csvColumn[0].replace(/\//g, '-')
           let issueDateArray = csvColumn[0].split('-')
           csvColumn[0] = `${issueDateArray[0]}-${'0'.concat(issueDateArray[1]).slice(-2)}-${'0'
             .concat(issueDateArray[2])
             .slice(-2)}`
+  
           switch (validate.isDate(csvColumn[0])) {
             case 1:
               errorData += errorData
                 ? `,${constants.invoiceErrMsg['ISSUEDATEERR001']}`
                 : `${constants.invoiceErrMsg['ISSUEDATEERR001']}`
-
               resultConvert.status = -1
               break
             case 2:
               errorData += errorData
                 ? `,${constants.invoiceErrMsg['ISSUEDATEERR000']}`
                 : `${constants.invoiceErrMsg['ISSUEDATEERR000']}`
-
               resultConvert.status = -1
               break
             default:
@@ -392,7 +420,6 @@ class bconCsv {
           errorData += errorData
             ? `,${constants.invoiceErrMsg['ISSUEDATEERR002']}`
             : `${constants.invoiceErrMsg['ISSUEDATEERR002']}`
-
           resultConvert.status = -1
         }
 
@@ -410,6 +437,7 @@ class bconCsv {
             break
         }
         resultConvert.invoicesId = element.docNo
+
         parentInvoice.setInvoiceNumber(csvColumn[1])
 
         if (csvColumn[2] !== '') {
@@ -447,7 +475,6 @@ class bconCsv {
 
           resultConvert.status = -1
         }
-
         parentInvoice.setCustomerTennant(csvColumn[2])
 
         if (csvColumn[4] !== '') {
@@ -731,7 +758,6 @@ class bconCsv {
           csvColumn[17] = validate.isTaxCategori(csvColumn[17])
           break
       }
-
       if (csvColumn[18] !== '') {
         switch (validate.isDescription(csvColumn[18])) {
           case '':
@@ -793,7 +819,7 @@ class bconCsv {
         this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].status = resultConvert.status
         this.#invoiceDocumentList[this.#invoiceDocumentList.lastIndexOf(indexObj)].skipCount += 1
       }
-
+      
       resultConvert.error.push({
         errorData: errorData
       })
@@ -807,5 +833,14 @@ class bconCsv {
   getInvoiceList() {
     return this.#invoiceDocumentList
   }
+
+  convertUserCsvFormat(uploadFormatDetail,csvColumn) {
+    let result= Array(19)
+    uploadFormatDetail.forEach(detail => {
+      result[detail.defaultNumber] = csvColumn[detail.uploadFormatNumber]
+    })
+    return result.toString().split(',')
+  }
+
 }
 module.exports = bconCsv

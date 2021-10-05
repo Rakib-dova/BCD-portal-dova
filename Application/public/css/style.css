@@ -406,3 +406,7 @@ img.logo-ncom {
 .alignCenterChild:last-child {
   align-items: center;
 }
+
+.mr470 {
+  margin-right: 470px;
+}

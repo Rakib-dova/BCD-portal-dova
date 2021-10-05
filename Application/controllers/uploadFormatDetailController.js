@@ -55,5 +55,18 @@ module.exports = {
 
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return resultToInsertUploadFormatDetail
+  },
+  findByUploadFormatId: async (uploadFormatId) => {
+    try {
+      return await UploadDetail.findAll({
+        where: {
+          uploadFormatId: uploadFormatId
+        }
+      })
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ uploadFormatId: uploadFormatId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
   }
 }

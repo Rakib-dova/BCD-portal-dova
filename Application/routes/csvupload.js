@@ -8,6 +8,8 @@ const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
+const uploadFormatController = require('../controllers/uploadFormatController.js')
+const uploadFormatDetailController = require('../controllers/uploadFormatDetailController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
@@ -67,8 +69,13 @@ const cbGetIndex = async (req, res, next) => {
     refreshToken: req.user.refreshToken
   })
 
+  // フォーマット種別配列
+  const formatkindsArr = await uploadFormatController.findByContractId(contract.dataValues.contractId)
+
   // ユーザ権限も画面に送る
-  res.render('csvupload')
+  res.render('csvupload', {
+    formatkindsArr: formatkindsArr
+  })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
@@ -117,6 +124,7 @@ const cbPostUpload = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
+  // CSVfile 読み込む
   const filename = req.user.tenantId + '_' + req.user.email + '_' + getTimeStamp() + '.csv'
   const uploadCsvData = Buffer.from(decodeURIComponent(req.body.fileData), 'base64').toString('utf8')
   const userToken = {
@@ -231,7 +239,14 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
   const invoiceController = require('../controllers/invoiceController')
   const invoiceDetailController = require('../controllers/invoiceDetailController')
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
-  const csvObj = new BconCsv(extractFullpathFile)
+  const uploadFormatId = _req.body.uploadFormatId
+  let formatFlag = false
+  let uploadFormatDetail = []
+  if (uploadFormatId !== null && uploadFormatId.length !== 0) {
+    formatFlag = true
+    uploadFormatDetail = await uploadFormatDetailController.findByUploadFormatId(uploadFormatId)
+  }
+  const csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail)
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
   const setHeaders = {}
@@ -243,7 +258,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
   let meisaiFlag = 0
   // 結果表示フラグ
   let resultFlag = 0
-
   if (validate.isUndefined(_invoices)) {
     return 101
   }
@@ -348,7 +362,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
             resultFlag = 4
             failCount += invoiceList[idx].successCount
             invoiceList[idx].status = -1
-
             if (String(apiResult.response?.status).slice(0, 1) === '4') {
               // 400番エラーの場合
               invoiceList[idx].errorData = constantsDefine.invoiceErrMsg.APIERROR
