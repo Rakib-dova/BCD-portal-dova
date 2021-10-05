@@ -15,10 +15,6 @@ const constantsDefine = require('../constants')
 const { v4: uuidv4 } = require('uuid')
 const url = require('url')
 
-// CSR対策
-const csrf = require('csurf')
-const csrfProtection = csrf({ cookie: false })
-
 const cbGetCsvBasicFormat = async (req, res, next) => {
   console.log('cbGetCsvBasicFormat1')
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvBasicFormat')
@@ -272,8 +268,8 @@ const fileUpload = (_filePath, _filename, _uploadCsvData) => {
   }
 }
 
-router.get('/', helper.isAuthenticated, csrfProtection, cbGetCsvBasicFormat)
-router.post('/', cbPostCsvBasicFormat)
+router.get('/', helper.isAuthenticated, cbGetCsvBasicFormat)
+router.post('/', helper.isAuthenticated, cbPostCsvBasicFormat)
 
 module.exports = {
   router: router,
