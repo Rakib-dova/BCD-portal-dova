@@ -14,13 +14,6 @@ const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const { v4: uuidv4 } = require('uuid')
 const url = require('url')
-const bodyParser = require('body-parser')
-router.use(
-  bodyParser.json({
-    type: 'application/x-www-form-urlencoded',
-    limit: '6826KB' // フォーマットサイズ５M以下
-  })
-)
 
 const cbGetCsvBasicFormat = async (req, res, next) => {
   console.log('cbGetCsvBasicFormat1')
@@ -275,8 +268,8 @@ const fileUpload = (_filePath, _filename, _uploadCsvData) => {
   }
 }
 
-router.get('/', helper.isAuthenticated, cbGetCsvBasicFormat)
-router.post('/', helper.isAuthenticated, cbPostCsvBasicFormat)
+router.get('/', helper.isAuthenticated, helper.isTenantRegistered, cbGetCsvBasicFormat)
+router.post('/', helper.isAuthenticated, helper.isTenantRegistered, cbPostCsvBasicFormat)
 
 module.exports = {
   router: router,

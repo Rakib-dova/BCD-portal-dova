@@ -549,9 +549,9 @@ const cbPostBackIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostBackIndex')
 }
 
-router.post('/', cbPostIndex)
-router.post('/cbPostDBIndex', cbPostConfirmIndex)
-router.post('/cbPostBackIndex', cbPostBackIndex)
+router.post('/', helper.isAuthenticated, helper.isTenantRegistered, cbPostIndex)
+router.post('/cbPostDBIndex', helper.isAuthenticated, helper.isTenantRegistered, cbPostConfirmIndex)
+router.post('/cbPostBackIndex', helper.isAuthenticated, helper.isTenantRegistered, cbPostBackIndex)
 
 module.exports = {
   router: router,
