@@ -180,11 +180,12 @@ const cbPostCsvBasicFormat = async (req, res, next) => {
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostCsvBasicFormat')
 
-  req.session.formData = {
-    csvBasicArr: csvBasicArr,
-    taxArr: taxArr,
-    unitArr: unitArr
-  }
+  // req.session.formData = {
+  //   csvBasicArr: csvBasicArr,
+  //   taxArr: taxArr,
+  //   unitArr: unitArr
+  // }
+  
   // 画面送信
   res.redirect(
     307,

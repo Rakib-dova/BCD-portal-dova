@@ -108,9 +108,9 @@ const cbPostDBIndex = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 
-  delete req.session.formData
-  delete req.session.csvUploadFormatReturnFlag1
-  delete req.session.csvUploadFormatReturnFlag2
+  // delete req.session.formData
+  // delete req.session.csvUploadFormatReturnFlag1
+  // delete req.session.csvUploadFormatReturnFlag2
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
@@ -294,6 +294,7 @@ const cbPostBackIndex = async (req, res, next) => {
 router.post('/', cbPostCsvConfirmFormat)
 router.post('/cbPostDBIndex', cbPostDBIndex)
 router.post('/cbPostBackIndex', cbPostBackIndex)
+
 module.exports = {
   router: router,
   cbPostCsvConfirmFormat: cbPostCsvConfirmFormat,
