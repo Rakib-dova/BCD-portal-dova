@@ -79,7 +79,7 @@ const cbPostIndex = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 
-  req.session.csvUploadFormatReturnFlag1 = true
+  // req.session.csvUploadFormatReturnFlag1 = true
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
@@ -459,7 +459,7 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
 
 const cbPostBackIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostBackIndex')
-  req.session.csvUploadFormatReturnFlag2 = true
+  // req.session.csvUploadFormatReturnFlag2 = true
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
