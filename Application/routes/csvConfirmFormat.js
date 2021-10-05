@@ -317,7 +317,7 @@ const cbPostDBIndex = async (req, res, next) => {
 
 const cbPostBackIndex = async (req, res, next) => {
   console.log('cbPostBackIndex1')
-  return res.render('uploadFormat', {
+  res.render('uploadFormat', {
     headerItems: headerItems,
     uploadGeneral: uploadGeneral,
     taxIds: taxIds,

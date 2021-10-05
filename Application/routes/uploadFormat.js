@@ -469,7 +469,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
   }
 
   console.log('uploadFormat_cbPostConfirmIndex9')
-  return res.redirect(
+  res.redirect(
     307,
     url.format({
       pathname: '/csvConfirmFormat',
@@ -481,6 +481,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
       }
     })
   )
+  console.log('uploadFormat_cbPostConfirmIndex10')
 }
 
 // CSVファイル削除機能
@@ -542,7 +543,10 @@ const cbPostBackIndex = async (req, res, next) => {
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
   console.log('uploadFormat_cbPostBackIndex11')
-  return res.redirect('/csvBasicFormat')
+  res.redirect('/csvBasicFormat')
+
+  console.log('uploadFormat_cbPostBackIndex12')
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostBackIndex')
 }
 
 router.post('/', helper.isAuthenticated, helper.isTenantRegistered, cbPostIndex)
