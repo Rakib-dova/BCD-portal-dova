@@ -16,9 +16,11 @@ const { v4: uuidv4 } = require('uuid')
 const url = require('url')
 
 const cbGetCsvBasicFormat = async (req, res, next) => {
+  console.log('cbGetCsvBasicFormat1')
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvBasicFormat')
 
   // 認証情報取得処理
+  console.log('cbGetCsvBasicFormat2')
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
   // if (!req.session.csvUploadFormatReturnFlag1 || !req.session.csvUploadFormatReturnFlag2) {
@@ -31,31 +33,41 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
   // }
 
   // DBからuserデータ取得
+  console.log('cbGetCsvBasicFormat4')
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
+  console.log('cbGetCsvBasicFormat5')
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  console.log('cbGetCsvBasicFormat6')
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  console.log('cbGetCsvBasicFormat7')
   if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
 
   // DBから契約情報取得
+  console.log('cbGetCsvBasicFormat8')
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
+  console.log('cbGetCsvBasicFormat9')
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
   // ユーザ権限を取得
+  console.log('cbGetCsvBasicFormat10')
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = helper.checkContractStatus
 
+  console.log('cbGetCsvBasicFormat11')
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
+  console.log('cbGetCsvBasicFormat12')
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
+  console.log('cbGetCsvBasicFormat13')
   const csvTax = constantsDefine.csvFormatDefine.csvTax
   const csvUnit = constantsDefine.csvFormatDefine.csvUnit
   let csvBasicArr = constantsDefine.csvFormatDefine.csvBasicArr
@@ -68,6 +80,7 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
   //   unitArr = req.session.formData.unitArr
   // }
 
+  console.log('cbGetCsvBasicFormat15')
   res.render('csvBasicFormat', {
     csvTax: csvTax,
     csvUnit: csvUnit,
@@ -76,49 +89,65 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
     unitArr: unitArr,
     TS_HOST: process.env.TS_HOST
   })
+  console.log('cbGetCsvBasicFormat16')
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCsvBasicFormat')
 }
 
 const cbPostCsvBasicFormat = async (req, res, next) => {
+  console.log('cbPostCsvBasicFormat1')
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostCsvBasicFormat')
 
   // DBからuserデータ取得
+  console.log('cbPostCsvBasicFormat2')
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
+  console.log('cbPostCsvBasicFormat3')
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  console.log('cbPostCsvBasicFormat4')
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
   // DBから契約情報取得
+  console.log('cbPostCsvBasicFormat5')
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
+  console.log('cbPostCsvBasicFormat6')
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
   // ユーザ権限を取得
+  console.log('cbPostCsvBasicFormat7')
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = helper.checkContractStatus
 
+  console.log('cbPostCsvBasicFormat8')
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
+  console.log('cbPostCsvBasicFormat9')
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
+  console.log('cbPostCsvBasicFormat10')
   const uploadCsvData = Buffer.from(decodeURIComponent(req.body.hiddenFileData), 'base64').toString('utf8')
 
+  console.log('cbPostCsvBasicFormat11')
   const filePath = process.env.INVOICE_UPLOAD_PATH
 
+  console.log('cbPostCsvBasicFormat12')
   const dataFileName = user.dataValues.userId + '_' + req.body.dataFileName
 
   // csvファイルアップロード
+  console.log('cbPostCsvBasicFormat13')
   if (fileUpload(filePath, dataFileName, uploadCsvData) === false) return next(errorHelper.create(500))
 
+  console.log('cbPostCsvBasicFormat14')
   const uploadFormatId = uuidv4()
 
   // リクエストボディから連携用データを作成する
   // アップロードフォーマット基本情報
+  console.log('cbPostCsvBasicFormat15')
   const csvBasicArr = {
     uploadFormatId: uploadFormatId,
     uploadFormatItemName: req.body.uploadFormatItemName,
@@ -127,6 +156,7 @@ const cbPostCsvBasicFormat = async (req, res, next) => {
     defaultNumber: req.body.defaultNumber
   }
 
+  console.log('cbPostCsvBasicFormat16')
   // 明細-税 識別子
   const taxArr = {
     consumptionTax: req.body.keyConsumptionTax,
@@ -137,6 +167,7 @@ const cbPostCsvBasicFormat = async (req, res, next) => {
   }
 
   // 明細-単位 識別子
+  console.log('cbPostCsvBasicFormat17')
   const unitArr = {
     manMonth: req.body.keyManMonth,
     BO: req.body.keyBottle,
@@ -179,13 +210,14 @@ const cbPostCsvBasicFormat = async (req, res, next) => {
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostCsvBasicFormat')
-
+  console.log('cbPostCsvBasicFormat18')
   req.session.formData = {
     csvBasicArr: csvBasicArr,
     taxArr: taxArr,
     unitArr: unitArr
   }
   // 画面送信
+  console.log('cbPostCsvBasicFormat19')
   res.redirect(
     307,
     url.format({
@@ -203,6 +235,7 @@ const cbPostCsvBasicFormat = async (req, res, next) => {
   )
 }
 
+console.log('cbPostCsvBasicFormat20')
 const fileUpload = (_filePath, _filename, _uploadCsvData) => {
   logger.info(constantsDefine.logMessage.INF000 + 'fileUpload')
   const uploadPath = path.join(_filePath, '/')
@@ -212,22 +245,26 @@ const fileUpload = (_filePath, _filename, _uploadCsvData) => {
     fs.writeFileSync(uploadPath + filename, uploadData, 'utf8')
   }
   try {
+    console.log('cbPostCsvBasicFormat21')
     // ユーザディレクトリが存在すること確認
     if (!fs.existsSync(uploadPath)) {
+      console.log('cbPostCsvBasicFormat21-1')
       // ユーザディレクトリが存在しない場合、ユーザディレクトリ作成
       fs.mkdirSync(uploadPath)
     }
     // CSVファイルを保存する
     writeFile()
     logger.info(constantsDefine.logMessage.INF001 + 'fileUpload')
+    console.log('cbPostCsvBasicFormat22')
     return true
   } catch (error) {
+    console.log('cbPostCsvBasicFormat21-2')
     return false
   }
 }
 
-router.get('/', helper.isAuthenticated, cbGetCsvBasicFormat)
-router.post('/', cbPostCsvBasicFormat)
+router.get('/', helper.isAuthenticated, helper.isTenantRegistered, cbGetCsvBasicFormat)
+router.post('/', helper.isAuthenticated, helper.isTenantRegistered, cbPostCsvBasicFormat)
 
 module.exports = {
   router: router,
