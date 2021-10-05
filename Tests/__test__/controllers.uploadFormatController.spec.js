@@ -8,12 +8,13 @@ const constantsDefine = require('../../Application/constants')
 const logger = require('../../Application/lib/logger')
 const UploadFormat = require('../../Application/models').UploadFormat
 
-let errorSpy, tenantId, contractId, uploadFormatId, findOneSpy, findContractSpy, infoSpy, createSpy
+let errorSpy, tenantId, contractId, uploadFormatId, uploadFormatId2, findOneSpy, findContractSpy, infoSpy, createSpy, findAllSpy
 
 describe('uploadFormatControllerのテスト', () => {
   beforeEach(() => {
     createSpy = jest.spyOn(UploadFormat, 'create')
     findOneSpy = jest.spyOn(UploadFormat, 'findOne')
+    findAllSpy = jest.spyOn(UploadFormat, 'findAll')
     findContractSpy = jest.spyOn(contractController, 'findContract')
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
@@ -21,6 +22,7 @@ describe('uploadFormatControllerのテスト', () => {
   afterEach(() => {
     createSpy.mockRestore()
     findOneSpy.mockRestore()
+    findAllSpy.mockRestore()
     findContractSpy.mockRestore()
     errorSpy.mockRestore()
     infoSpy.mockRestore()
@@ -28,6 +30,7 @@ describe('uploadFormatControllerのテスト', () => {
   tenantId = '12345678-bdac-4195-80b9-1ea64b8cb70c'
   contractId = '87654321-fbe6-4864-a866-7a3ce9aa517e'
   uploadFormatId = '55555555-fbe6-4864-a866-7a3ce9aa517e'
+  uploadFormatId2 = 'daca9d11-07b4-4a3d-8650-b5b0a6ed059a'
 
   const findOneReturn = {
     dataValues: {
@@ -55,7 +58,7 @@ describe('uploadFormatControllerのテスト', () => {
     setName: 'uploadFormatName',
     uploadType: ''
   }
-  
+
   const uploadFormatDataNotContractId = {
     contractId: null,
     setName: 'uploadFormatName',
@@ -68,6 +71,24 @@ describe('uploadFormatControllerのテスト', () => {
     uploadType: ''
   }
 
+  const findAllResult = [
+    {
+      uploadFormatId: uploadFormatId,
+      contractId: contractId,
+      setName: '請求書フォーマット1',
+      uploadType: '請求書データ',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId2,
+      contractId: contractId,
+      setName: '請求書フォーマット2',
+      uploadType: '請求書データ',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    }
+  ]
 
   describe('insert', () => {
     test('正常', async () => {
@@ -176,6 +197,34 @@ describe('uploadFormatControllerのテスト', () => {
       // 期待結果
       // undefinedが返されること
       expect(result).toEqual(undefined)
+    })
+  })
+
+  describe('findByContractId', () => {
+    test('正常', async () => {
+      // 準備
+      findAllSpy.mockReturnValue(findAllResult)
+
+      // 試験実施
+      const result = await uploadFormatController.findByContractId(contractId)
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(findAllResult)
+    })
+
+    test('異常：uploadFormat.findAll（DB）エラー', async () => {
+      // 準備
+      // DBエラーを想定する
+      const dbError = new Error('DB error mock')
+      findAllSpy.mockImplementation(() => {
+        throw dbError
+      })
+      // 試験実施
+      const result = await uploadFormatController.findByContractId(contractId)
+
+      // 期待結果
+      // undefinedが返されること
+      expect(result).toEqual(dbError)
     })
   })
 })
