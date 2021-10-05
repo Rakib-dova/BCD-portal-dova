@@ -6200,7 +6200,6 @@ describe('csvuploadのテスト', () => {
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
-      // console.log(resultInvoiceDetailController)
       expect(resultInvoiceDetailController.length).toBe(38)
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
@@ -6557,7 +6556,6 @@ describe('csvuploadのテスト', () => {
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
-      // console.log(resultInvoiceDetailController)
       expect(resultInvoiceDetailController.length).toBe(2)
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
