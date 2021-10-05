@@ -64,13 +64,13 @@ let keyFormula
 let keyTonnage
 let keyOthers
 
-const bodyParser = require('body-parser')
-router.use(
-  bodyParser.json({
-    type: 'application/json',
-    limit: '6826KB' // フォーマットサイズ５M以下
-  })
-)
+// const bodyParser = require('body-parser')
+// router.use(
+//   bodyParser.json({
+//     type: 'application/json',
+//     limit: '6826KB' // フォーマットサイズ５M以下
+//   })
+// )
 
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
