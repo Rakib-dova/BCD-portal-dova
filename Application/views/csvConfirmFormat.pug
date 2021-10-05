@@ -76,8 +76,7 @@ block content
             .control
               .column
                 div.button-area
-                  //- button.button.mr-6#return-btn.cancel-button(type="submit" formaction="/csvConfirmFormat/cbPostBackIndex" formmethod="POST") 戻る
-                  a.button#return-btn.cancel-button(href='csvBasicFormat') 戻る
+                  button.button.mr-6#return-btn.cancel-button(type="submit" formaction="/csvConfirmFormat/cbPostBackIndex" formmethod="POST") 戻る
                   button.button.is-success.success-button#submit(type="submit" formaction="/csvConfirmFormat/cbPostDBIndex" formmethod="POST") 設定
        
       include footer
