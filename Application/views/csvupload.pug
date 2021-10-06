@@ -21,6 +21,13 @@ block content
                 .message
               span.btn.btn-primary(id='file-upload-btn') ファイル選択
           .mt-5.has-text-centered
+              label.mr470(for='start-upload-select') フォーマット種別
+              .control
+                select.select.is-outlined.is-family-noto-sans.box-large(name='uploadFormatId' id='start-upload-select')
+                  option(value='' selected) デフォルト
+                  each format, index in formatkindsArr
+                    option(value= format.uploadFormatId)= format.setName
+          .mt-5.has-text-centered
             .button.is-medium.is-link.is-outlined.is-family-noto-sans.box-large(disabled='disabled', id='start-upload-btn') アップロード開始
         .mt-1.has-text-right
           a.button.is-link.is-light(href="csvuploadResult") 取込結果一覧 →

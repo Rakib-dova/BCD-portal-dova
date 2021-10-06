@@ -83,9 +83,12 @@ img.logo-ncom {
 .hero-body {
   background-image: url('../image/ts-app-digitaltrade-banner.svg');
   width: 100%;
+  background-color: #044484;
   background-repeat: no-repeat;
-  background-position: center top;
-  background-size: contain;
+  background-position: center;
+  background-size: 50% 50%;
+  padding-bottom: 11% !important;
+  margin-bottom: 5%;
 }
 
 .hero-body-noImage {
@@ -407,6 +410,9 @@ img.logo-ncom {
   align-items: center;
 }
 
+.mr470 {
+  margin-right: 470px;
+}
 .float-right {
   float: right;
 }

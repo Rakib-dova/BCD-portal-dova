@@ -40,7 +40,8 @@ $('#start-upload-btn').addEventListener('click', () => {
     modal.classList.add('is-active')
     const sendData = {
       filename: null,
-      fileData: null
+      fileData: null,
+      uploadFormatId: null
     }
     if (fileReader.readyState !== 2) {
       return
@@ -48,7 +49,14 @@ $('#start-upload-btn').addEventListener('click', () => {
       sendData.filename = targetFile.name
       sendData.fileData = btoa(fileReader.result)
       fileReader = null
+      const uploadFormatId = $('#start-upload-select').value
+      if (uploadFormatId.length !== 0) {
+        sendData.uploadFormatId = uploadFormatId
+      } else {
+        sendData.uploadFormatId = null
+      }
     }
+
     const sender = new XMLHttpRequest()
     sender.open('POST', uploader.action, true)
     sender.setRequestHeader('Content-Type', 'application/json')
