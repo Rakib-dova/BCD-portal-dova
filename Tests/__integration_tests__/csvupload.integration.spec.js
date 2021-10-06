@@ -117,7 +117,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 利用登録後、一般ユーザ登録
-    test('ユーザコンテキスト変更', async () => {
+    test('一般ユーザ登録', async () => {
       const res = await request(app)
         .get('/portal')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)

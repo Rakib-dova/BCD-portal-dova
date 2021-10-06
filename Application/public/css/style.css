@@ -83,9 +83,12 @@ img.logo-ncom {
 .hero-body {
   background-image: url('../image/ts-app-digitaltrade-banner.svg');
   width: 100%;
+  background-color: #044484;
   background-repeat: no-repeat;
-  background-position: center top;
-  background-size: contain;
+  background-position: center;
+  background-size: 50% 50%;
+  padding-bottom: 11% !important;
+  margin-bottom: 5%;
 }
 
 .hero-body-noImage {
@@ -409,4 +412,28 @@ img.logo-ncom {
 
 .mr470 {
   margin-right: 470px;
+}
+.float-right {
+  float: right;
+}
+
+.margin-right-20 {
+  margin-right: 20%;
+}
+
+.margin-top-10p {
+  margin-top: 10px;
+}
+
+.div-border {
+  border: 1px solid black;
+}
+
+.padding-left-90p {
+  padding-left: 90px;
+}
+
+.not-input-required::after {
+  content: '未入力です。';
+  color: red;
 }
