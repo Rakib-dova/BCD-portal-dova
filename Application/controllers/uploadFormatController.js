@@ -2,7 +2,6 @@ const db = require('../models')
 const logger = require('../lib/logger')
 const contractController = require('./contractController')
 const Upload = db.UploadFormat
-// const UploadFormat = require('../models').UploadFormat
 const constantsDefine = require('../constants')
 
 module.exports = {

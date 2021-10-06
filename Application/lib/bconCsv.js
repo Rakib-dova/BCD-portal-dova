@@ -214,23 +214,18 @@ class bconCsv {
       const tmpRows = _data.split(/\r?\n|\r/)
       for (let idx = 0; idx < tmpRows.length; idx++) {
         if (tmpRows[idx].trim()) {
+          let docIndex
           if (_formatFlag) {
-            let index = _uploadFormatDetail[1].uploadFormatNumber
-            this.rows.push({
-              idx: idx,
-              invoiceGroup: null,
-              docNo: tmpRows[idx].split(',')[index],
-              rows: tmpRows[idx]
-            })
+            docIndex = _uploadFormatDetail[1].uploadFormatNumber
           } else {
-            this.rows.push({
-              idx: idx,
-              invoiceGroup: null,
-              docNo: tmpRows[idx].split(',')[1],
-              rows: tmpRows[idx]
-            })
+            docIndex = 1
           }
-
+          this.rows.push({
+            idx: idx,
+            invoiceGroup: null,
+            docNo: tmpRows[idx].split(',')[docIndex],
+            rows: tmpRows[idx]
+          })
         }
       }
       this.invoiceCnt = this.rows.length
@@ -405,12 +400,14 @@ class bconCsv {
               errorData += errorData
                 ? `,${constants.invoiceErrMsg['ISSUEDATEERR001']}`
                 : `${constants.invoiceErrMsg['ISSUEDATEERR001']}`
+
               resultConvert.status = -1
               break
             case 2:
               errorData += errorData
                 ? `,${constants.invoiceErrMsg['ISSUEDATEERR000']}`
                 : `${constants.invoiceErrMsg['ISSUEDATEERR000']}`
+
               resultConvert.status = -1
               break
             default:
@@ -420,6 +417,7 @@ class bconCsv {
           errorData += errorData
             ? `,${constants.invoiceErrMsg['ISSUEDATEERR002']}`
             : `${constants.invoiceErrMsg['ISSUEDATEERR002']}`
+
           resultConvert.status = -1
         }
 
