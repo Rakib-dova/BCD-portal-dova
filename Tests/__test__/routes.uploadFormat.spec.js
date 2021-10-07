@@ -629,7 +629,7 @@ describe('uploadFormatのテスト', () => {
     uploadType: ''
   }
 
-  const taxIdsaaaaaa = {
+  const taxIds100 = {
     keyConsumptionTax: {
       itemName: '消費税',
       key: 'keyConsumptionTax',
@@ -657,7 +657,7 @@ describe('uploadFormatのテスト', () => {
     }
   }
 
-  const unitIdsaaaaaa = {
+  const unitIds100 = {
     keyBottle: {
       itemName: 'ボトル',
       key: 'keyBottle',
@@ -1151,8 +1151,7 @@ describe('uploadFormatのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = {
         userContext: 'LoggedIn',
-        userRole: 'dummy',
-        adb: 'sdaff'
+        userRole: 'dummy'
       }
 
       request.body = {
@@ -1190,8 +1189,7 @@ describe('uploadFormatのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = {
         userContext: 'LoggedIn',
-        userRole: 'dummy',
-        adb: 'sdaff'
+        userRole: 'dummy'
       }
       request.user = user
 
@@ -2284,7 +2282,7 @@ describe('uploadFormatのテスト', () => {
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-        taxIds: taxIdsaaaaaa,
+        taxIds: taxIds100,
         unitIds: unitIds,
         uploadGeneral: uploadGeneral
       })
@@ -2427,7 +2425,7 @@ describe('uploadFormatのテスト', () => {
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIds,
-        unitIds: unitIdsaaaaaa,
+        unitIds: unitIds100,
         uploadGeneral: uploadGeneral
       })
     })
@@ -2604,7 +2602,6 @@ describe('uploadFormatのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
       pathSpy.mockReturnValue('/test')
-      // pathSpy.mockReturnValue('/home/upload')
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
