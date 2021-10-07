@@ -19,7 +19,7 @@ block content
                     label(for="uploadFormatItemName").input-label 設定名称
                     p#uploadFormatItemNameeRequired.input-label-required.input-label （必須）
                     .control
-                      input.input#uploadFormatItemName(type="text" name="uploadFormatItemName" value='' maxlength=100 required)
+                      input.input#uploadFormatItemName(type="text" name="uploadFormatItemName" value='' maxlength=100 placeholder='文字・数字100桁まで' required)
                   .field
                     label(for="uploadType").input-label アップロード種別
                     .control
@@ -31,7 +31,7 @@ block content
                     .control
                       .columns.ml-0.pl-0
                         .column.pl-0
-                          input.input#dataFileName.td-overflow(type="text" name="dataFileName" readonly)
+                          input.input#dataFileName.td-overflow(type="text" name="dataFileName" placeholder='5MBまで' readonly)
                         .column
                           label.button.is-link(for="dataFile") ファイル選択
                           input.is-invisible#dataFile(type="file" name="dataFile" accept=".csv" required)
@@ -50,7 +50,7 @@ block content
                     .control
                       .columns.ml-0.pl-0.alignCenterChild
                         .column.is-one-fifth.pl-0
-                          input.input#uploadFormatNumber(type="text" name="uploadFormatNumber" value='' maxlength=7 pattern=inputPattarnHankakuSeisu required) 
+                          input.input#uploadFormatNumber(type="text" name="uploadFormatNumber" value='' maxlength=7 placeholder='1 ~ 9999999' pattern=inputPattarnHankakuSeisu required) 
                         .column  
                           p 行目
                   .field
@@ -59,7 +59,7 @@ block content
                     .control
                       .columns.ml-0.pl-0.alignCenterChild
                         .column.is-one-fifth.pl-0
-                          input.input#defaultNumber(type="text" name="defaultNumber" value='' maxlength=7 pattern=inputPattarnHankakuSeisu required) 
+                          input.input#defaultNumber(type="text" name="defaultNumber" value='' maxlength=7 placeholder='1 ~ 9999999' pattern=inputPattarnHankakuSeisu required) 
                         .column  
                           p 行目
             
@@ -70,7 +70,7 @@ block content
                     .field
                       label(for=tax.id).input-label= tax.name
                       .control
-                        input.input.input-tax(id=tax.id type="text" name=tax.id value='' maxlength=100)
+                        input.input.input-tax(id=tax.id type="text" name=tax.id value='' placeholder='文字・数字100桁まで' maxlength=100)
 
               .field.card
                 .card-content
@@ -79,7 +79,7 @@ block content
                     .field
                       label(for=unit.id).input-label= unit.name
                       .control
-                        input.input.input-unit(id=unit.id type="text" name=unit.id value='' maxlength=100)
+                        input.input.input-unit(id=unit.id type="text" name=unit.id value='' placeholder='文字・数字100桁まで' maxlength=100)
 
              .columns.is-centered.changeConfirm
               .field.is-grouped.is-grouped-centered

@@ -20,9 +20,9 @@ block content
                     th.text-center データ内容
                 each content, idx in headerItems
                   tr
-                    th.text-center#dataIndex(name="dataContent")= idx+1
-                    th.text-center#dataItem(name="dataContent")= content.item
-                    th.text-center#dataValue(name="dataContent")= content.value
+                    th.text-center.dataIndex(name="dataContent")= idx+1
+                    th.text-center.dataItem(name="dataContent")= content.item
+                    th.text-center.dataValue(name="dataContent")= content.value
           .column
             .title.is-family-noto-sans 請求書データ用フォーマット
             .box
@@ -344,15 +344,15 @@ block content
                   
         footer.modal-card-foot
           div.button-area
-            button.button.is-success.success-button.mr-6#confirmBtn(type="button" data-target="confirmmodify-modal") 確認
+            button.button.is-success.success-button.mr-6#confirmBtn(type="button" data-target="confirmModify-modal") 確認
             a.button#returnBtn(href="#") 戻る
 
-        .modal.modal-fx-fadeInscale#confirmmodify-modal
-          .modal-background.cancel-button(data-target="confirmmodify-modal")
+        .modal.modal-fx-fadeInscale#confirmModify-modal
+          .modal-background.cancel-button(data-target="confirmModify-modal")
           .modal-card#csvFormatConfirm-modal-card
             header.modal-card-head
               p.modal-card-title 請求書アップロードフォーマット設定 確認
-              button.delete(type="button" data-target="confirmmodify-modal")
+              button.delete(type="button" data-target="confirmModify-modal")
             section.modal-card-body
              .columns.is-mobile.is-centered: .column.is-full
               .field.card
@@ -395,17 +395,17 @@ block content
                        th.text-center ユーザフォーマット項目名
                        th.text-center データ内容
                    tbody
-                    each content, idx in headerItems
+                    each column, idx in columnArr
                       tr
-                        th= content.moto
-                        th →
-                        th.text-center.dataIndex#dataIndex= content.item
-                        th.text-center.dataItem#dataItem= content.value
+                        th= column.columnName
+                        th.checkArrow
+                        th.text-center.checkDataItem
+                        th.text-center.checkDataValue
 
             footer.modal-card-foot
               div.button-area
-                a.button.cancel-button.mr-6(data-target='confirmmodify-modal') キャンセル
-                button.button.is-success.success-button#confirmBtn(type="submit" formaction="/uploadFormat/cbPostConfirmIndex" formmethod="POST") 登録
+                a.button.cancel-button.mr-6(data-target='confirmModify-modal') キャンセル
+                button.button.is-success.success-button#submit(type="submit" formaction="/uploadFormat/cbPostConfirmIndex" formmethod="POST") 登録
       include footer
 
 block append scripts

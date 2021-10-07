@@ -17,6 +17,7 @@ const fs = require('fs')
 const path = require('path')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const bodyParser = require('body-parser')
+
 router.use(
   bodyParser.urlencoded({
     extended: false,
@@ -25,57 +26,56 @@ router.use(
   })
 )
 
+// グローバル変数宣言
 let globalCsvData = []
-let uploadFormatItemName
-let uploadType
-let csvfilename
-let uploadFormatNumber
-let defaultNumber
-
-let keyConsumptionTax
-let keyReducedTax
-let keyFreeTax
-let keyDutyFree
-let keyExemptTax
-
-let keyManMonth
-let keyBottle
-let keyCost
-let keyContainer
-let keyCentilitre
-let keySquareCentimeter
-let keyCubicCentimeter
-let keyCentimeter
-let keyCase
-let keyCarton
-let keyDay
-let keyDeciliter
-let keyDecimeter
-let keyGrossKilogram
-let keyPieces
-let keyFeet
-let keyGallon
-let keyGram
-let keyGrossTonnage
-let keyHour
-let keyKilogram
-let keyKilometers
-let keyKilowattHour
-let keyPound
-let keyLiter
-let keyMilligram
-let keyMilliliter
-let keyMillimeter
-let keyMonth
-let keySquareMeter
-let keyCubicMeter
-let keyMeter
-let keyNetTonnage
-let keyPackage
-let keyRoll
-let keyFormula
-let keyTonnage
-let keyOthers
+let uploadFormatItemName,
+  uploadType,
+  csvfilename,
+  uploadFormatNumber,
+  defaultNumber,
+  keyConsumptionTax,
+  keyReducedTax,
+  keyFreeTax,
+  keyDutyFree,
+  keyExemptTax,
+  keyManMonth,
+  keyBottle,
+  keyCost,
+  keyContainer,
+  keyCentilitre,
+  keySquareCentimeter,
+  keyCubicCentimeter,
+  keyCentimeter,
+  keyCase,
+  keyCarton,
+  keyDay,
+  keyDeciliter,
+  keyDecimeter,
+  keyGrossKilogram,
+  keyPieces,
+  keyFeet,
+  keyGallon,
+  keyGram,
+  keyGrossTonnage,
+  keyHour,
+  keyKilogram,
+  keyKilometers,
+  keyKilowattHour,
+  keyPound,
+  keyLiter,
+  keyMilligram,
+  keyMilliliter,
+  keyMillimeter,
+  keyMonth,
+  keySquareMeter,
+  keyCubicMeter,
+  keyMeter,
+  keyNetTonnage,
+  keyPackage,
+  keyRoll,
+  keyFormula,
+  keyTonnage,
+  keyOthers
 
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
@@ -112,6 +112,7 @@ const cbPostIndex = async (req, res, next) => {
   uploadFormatNumber = req.body.uploadFormatNumber - 1
   defaultNumber = req.body.defaultNumber - 1
 
+  // データ開始行番号、項目名の行番号チェック
   if (
     (req.body.checkItemNameLine === 'on' && ~~req.body.uploadFormatNumber <= 0) ||
     ~~req.body.defaultNumber <= 0 ||
@@ -127,6 +128,7 @@ const cbPostIndex = async (req, res, next) => {
     return res.redirect(backURL)
   }
 
+  // ファイル読み込む
   const extractFullpathFile = path.join(filePath, '/') + csvfilename
 
   const csv = fs.readFileSync(extractFullpathFile, 'utf8')
@@ -154,14 +156,11 @@ const cbPostIndex = async (req, res, next) => {
   let duplicateFlag = false
   // 配列に読み込んだcsvデータを入れる。
   const columnArr = constantsDefine.csvFormatDefine.columnArr
-  const csvData = headerArr.map((header, idx) => {
+  const csvData = headerArr.map((header) => {
     if (header.length > 100) {
       duplicateFlag = true
     }
-
-    const colName = columnArr[idx] === undefined ? '' : columnArr[idx].columnName
-
-    return { item: header, value: '', moto: colName }
+    return { item: header, value: '' }
   })
 
   // csv削除
@@ -169,6 +168,7 @@ const cbPostIndex = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 
+  // 配列に読み込んだcsvデータのエラー発せの場合前画面に移動
   if (duplicateFlag) {
     const backURL = req.header('Referer') || '/'
     return res.redirect(backURL)
@@ -187,6 +187,7 @@ const cbPostIndex = async (req, res, next) => {
     return res.redirect(backURL)
   }
 
+  // 変数にページからもらったデータを格納
   globalCsvData = csvData
   uploadFormatItemName = req.body.uploadFormatItemName
   uploadType = req.body.uploadType
@@ -221,6 +222,7 @@ const cbPostIndex = async (req, res, next) => {
     }
   })
 
+  // taxバリデーションチェック
   {
     const checkDuplicate = [keyConsumptionTax, keyReducedTax, keyFreeTax, keyDutyFree, keyExemptTax]
     const resultDuplicate = checkDuplicate.map((item, idx, arr) => {
@@ -337,6 +339,7 @@ const cbPostIndex = async (req, res, next) => {
     }
   })
 
+  // unitバリデーションチェック
   {
     const checkDuplicate = [
       keyManMonth,
@@ -409,6 +412,7 @@ const cbPostIndex = async (req, res, next) => {
 
   res.render('uploadFormat', {
     headerItems: csvData,
+    columnArr: columnArr,
     uploadGeneral: uploadGeneral,
     taxIds: taxIds,
     unitIds: unitIds,
@@ -449,6 +453,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
+  // uploadFormat登録
   const uploadFormatId = uuidv4()
   const resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
     uploadFormatId: uploadFormatId,
@@ -464,7 +469,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
   let iCnt = 1
   const columnArr = constantsDefine.csvFormatDefine.columnArr
 
-  // uploadFormatDetailController登録
+  // uploadFormatDetail登録
   let resultUploadFormatDetail
   for (let idx = 0; idx < columnArr.length; idx++) {
     if (req.body.formatData[idx].length !== 0) {
@@ -483,6 +488,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
     }
   }
 
+  // uploadFormatIdentifier登録（税）
   iCnt = 1
 
   const taxIds = [
@@ -508,7 +514,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
       }
     }
   }
-
+  // uploadFormatIdentifier登録（単位）
   const unitIds = [
     { name: '人月', value: keyManMonth },
     { name: 'ボトル', value: keyBottle },
@@ -566,6 +572,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
     }
   }
 
+  // 画面移動
   res.redirect(303, '/portal')
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostConfirmIndex')
 }
@@ -574,7 +581,9 @@ const cbPostConfirmIndex = async (req, res, next) => {
 const cbRemoveCsv = (_deleteDataPath, _filename) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
   const deleteFile = path.join(_deleteDataPath, '/' + _filename)
+  // ファイル有無確認
   if (fs.existsSync(deleteFile)) {
+    // ファイル削除
     fs.unlinkSync(deleteFile)
     logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
     return true
