@@ -16,13 +16,14 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
+const path = require('path')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.envUploadFormat' })
 }
 let request, response
-let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts
+let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy
 describe('csvBasicFormatのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -31,6 +32,7 @@ describe('csvBasicFormatのテスト', () => {
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSypTenant = jest.spyOn(tenantController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
+    pathSpy = jest.spyOn(path, 'join')
   })
   afterEach(() => {
     request.resetMocked()
@@ -40,6 +42,7 @@ describe('csvBasicFormatのテスト', () => {
     findOneSpy.mockRestore()
     findOneSypTenant.mockRestore()
     findOneSpyContracts.mockRestore()
+    pathSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -152,6 +155,226 @@ describe('csvBasicFormatのテスト', () => {
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-14,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
+  const taxIds = {
+    keyConsumptionTax: {
+      itemName: '消費税',
+      key: 'keyConsumptionTax',
+      value: '3'
+    },
+    keyDutyFree: {
+      itemName: '免税',
+      key: 'keyDutyFree',
+      value: '6'
+    },
+    keyExemptTax: {
+      itemName: '非課税',
+      key: 'keyExemptTax',
+      value: '7'
+    },
+    keyFreeTax: {
+      itemName: '不課税',
+      key: 'keyFreeTax',
+      value: '5'
+    },
+    keyReducedTax: {
+      itemName: '軽減税率',
+      key: 'keyReducedTax',
+      value: '4'
+    }
+  }
+
+  const unitIds = {
+    keyBottle: {
+      itemName: 'ボトル',
+      key: 'keyBottle',
+      value: '9'
+    },
+    keyCarton: {
+      itemName: 'カートン',
+      key: 'keyCarton',
+      value: '17'
+    },
+    keyCase: {
+      itemName: 'ケース',
+      key: 'keyCase',
+      value: '16'
+    },
+    keyCentilitre: {
+      itemName: 'センチリットル',
+      key: 'keyCentilitre',
+      value: '12'
+    },
+    keyCentimeter: {
+      itemName: 'センチメートル',
+      key: 'keyCentimeter',
+      value: '15'
+    },
+    keyContainer: {
+      itemName: 'コンテナ',
+      key: 'keyContainer',
+      value: '11'
+    },
+    keyCost: {
+      itemName: 'コスト',
+      key: 'keyCost',
+      value: '10'
+    },
+    keyCubicCentimeter: {
+      itemName: '立方センチメートル',
+      key: 'keyCubicCentimeter',
+      value: '14'
+    },
+    keyCubicMeter: {
+      itemName: '立方メートル',
+      key: 'keyCubicMeter',
+      value: '38'
+    },
+    keyDay: {
+      itemName: '日',
+      key: 'keyDay',
+      value: '18'
+    },
+    keyDeciliter: {
+      itemName: 'デシリットル',
+      key: 'keyDeciliter',
+      value: '19'
+    },
+    keyDecimeter: {
+      itemName: 'デシメートル',
+      key: 'keyDecimeter',
+      value: '20'
+    },
+    keyFeet: {
+      itemName: 'フィート',
+      key: 'keyFeet',
+      value: '23'
+    },
+    keyFormula: {
+      itemName: '式',
+      key: 'keyFormula',
+      value: '43'
+    },
+    keyGallon: {
+      itemName: 'ガロン',
+      key: 'keyGallon',
+      value: '24'
+    },
+    keyGram: {
+      itemName: 'グラム',
+      key: 'keyGram',
+      value: '25'
+    },
+    keyGrossKilogram: {
+      itemName: 'グロス・キログラム',
+      key: 'keyGrossKilogram',
+      value: '21'
+    },
+    keyGrossTonnage: {
+      itemName: '総トン',
+      key: 'keyGrossTonnage',
+      value: '26'
+    },
+    keyHour: {
+      itemName: '時間',
+      key: 'keyHour',
+      value: '27'
+    },
+    keyKilogram: {
+      itemName: 'キログラム',
+      key: 'keyKilogram',
+      value: '28'
+    },
+    keyKilometers: {
+      itemName: 'キロメートル',
+      key: 'keyKilometers',
+      value: '29'
+    },
+    keyKilowattHour: {
+      itemName: 'キロワット時',
+      key: 'keyKilowattHour',
+      value: '30'
+    },
+    keyLiter: {
+      itemName: 'リットル',
+      key: 'keyLiter',
+      value: '32'
+    },
+    keyManMonth: {
+      itemName: '人月',
+      key: 'keyManMonth',
+      value: '8'
+    },
+    keyMeter: {
+      itemName: 'メーター',
+      key: 'keyMeter',
+      value: '39'
+    },
+    keyMilligram: {
+      itemName: 'ミリグラム',
+      key: 'keyMilligram',
+      value: '33'
+    },
+    keyMilliliter: {
+      itemName: 'ミリリットル',
+      key: 'keyMilliliter',
+      value: '34'
+    },
+    keyMillimeter: {
+      itemName: 'ミリメートル',
+      key: 'keyMillimeter',
+      value: '35'
+    },
+    keyMonth: {
+      itemName: '月',
+      key: 'keyMonth',
+      value: '36'
+    },
+    keyNetTonnage: {
+      itemName: '純トン',
+      key: 'keyNetTonnage',
+      value: '40'
+    },
+    keyOthers: {
+      itemName: 'その他',
+      key: 'keyOthers',
+      value: '45'
+    },
+    keyPackage: {
+      itemName: '包',
+      key: 'keyPackage',
+      value: '41'
+    },
+    keyPieces: {
+      itemName: '個',
+      key: 'keyPieces',
+      value: '22'
+    },
+    keyPound: {
+      itemName: 'ポンド',
+      key: 'keyPound',
+      value: '31'
+    },
+    keyRoll: {
+      itemName: '巻',
+      key: 'keyRoll',
+      value: '42'
+    },
+    keySquareCentimeter: {
+      itemName: '平方センチメートル',
+      key: 'keySquareCentimeter',
+      value: '13'
+    },
+    keySquareMeter: {
+      itemName: '平方メートル',
+      key: 'keySquareMeter',
+      value: '37'
+    },
+    keyTonnage: {
+      itemName: 'トン',
+      key: 'keyTonnage',
+      value: '44'
+    }
+  }
 
   const reqBodyForCbPostIndexOn = {
     uploadFormatItemName: 'testItemName',
@@ -204,7 +427,8 @@ describe('csvBasicFormatのテスト', () => {
     keyRoll: '42',
     keyFormula: '43',
     keyTonnage: '44',
-    keyOthers: '45'
+    keyOthers: '45',
+    formatData: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19'],
   }
 
   const reqBodyForCbPostIndexOff = {
@@ -380,157 +604,451 @@ describe('csvBasicFormatのテスト', () => {
     keyExemptTax: '7'
   }
 
-  const taxIds = {
-    keyConsumptionTax: '3',
-    keyDutyFree: '6',
-    keyExemptTax: '7',
-    keyFreeTax: '5',
-    keyReducedTax: '4'
-  }
-
-  const unitIds = {
-    keyBottle: '9',
-    keyCarton: '17',
-    keyCase: '16',
-    keyCentilitre: '12',
-    keyCentimeter: '15',
-    keyContainer: '11',
-    keyCost: '10',
-    keyCubicCentimeter: '14',
-    keyCubicMeter: '38',
-    keyDay: '18',
-    keyDeciliter: '19',
-    keyDecimeter: '20',
-    keyFeet: '23',
-    keyFormula: '43',
-    keyGallon: '24',
-    keyGram: '25',
-    keyGrossKilogram: '21',
-    keyGrossTonnage: '26',
-    keyHour: '27',
-    keyKilogram: '28',
-    keyKilometers: '29',
-    keyKilowattHour: '30',
-    keyLiter: '32',
-    keyManMonth: '8',
-    keyMeter: '39',
-    keyMilligram: '33',
-    keyMilliliter: '34',
-    keyMillimeter: '35',
-    keyMonth: '36',
-    keyNetTonnage: '40',
-    keyOthers: '45',
-    keyPackage: '41',
-    keyPieces: '22',
-    keyPound: '31',
-    keyRoll: '42',
-    keySquareCentimeter: '13',
-    keySquareMeter: '37',
-    keyTonnage: '44'
-  }
-
   const uploadGeneral = {
     uploadFormatItemName: 'testItemName',
     uploadType: ''
   }
 
   const taxIdsaaaaaa = {
-    keyConsumptionTax:
-      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    keyDutyFree: '6',
-    keyExemptTax: '7',
-    keyFreeTax: '5',
-    keyReducedTax: '4'
+    keyConsumptionTax: {
+      itemName: '消費税',
+      key: 'keyConsumptionTax',
+      value: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    },
+    keyDutyFree: {
+      itemName: '免税',
+      key: 'keyDutyFree',
+      value: '6'
+    },
+    keyExemptTax: {
+      itemName: '非課税',
+      key: 'keyExemptTax',
+      value: '7'
+    },
+    keyFreeTax: {
+      itemName: '不課税',
+      key: 'keyFreeTax',
+      value: '5'
+    },
+    keyReducedTax: {
+      itemName: '軽減税率',
+      key: 'keyReducedTax',
+      value: '4'
+    }
   }
 
   const unitIdsaaaaaa = {
-    keyBottle: '9',
-    keyCarton: '17',
-    keyCase: '16',
-    keyCentilitre: '12',
-    keyCentimeter: '15',
-    keyContainer: '11',
-    keyCost: '10',
-    keyCubicCentimeter: '14',
-    keyCubicMeter: '38',
-    keyDay: '18',
-    keyDeciliter: '19',
-    keyDecimeter: '20',
-    keyFeet: '23',
-    keyFormula: '43',
-    keyGallon: '24',
-    keyGram: '25',
-    keyGrossKilogram: '21',
-    keyGrossTonnage: '26',
-    keyHour: '27',
-    keyKilogram: '28',
-    keyKilometers: '29',
-    keyKilowattHour: '30',
-    keyLiter: '32',
-    keyManMonth: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    keyMeter: '39',
-    keyMilligram: '33',
-    keyMilliliter: '34',
-    keyMillimeter: '35',
-    keyMonth: '36',
-    keyNetTonnage: '40',
-    keyOthers: '45',
-    keyPackage: '41',
-    keyPieces: '22',
-    keyPound: '31',
-    keyRoll: '42',
-    keySquareCentimeter: '13',
-    keySquareMeter: '37',
-    keyTonnage: '44'
+    keyBottle: {
+      itemName: 'ボトル',
+      key: 'keyBottle',
+      value: '9'
+    },
+    keyCarton: {
+      itemName: 'カートン',
+      key: 'keyCarton',
+      value: '17'
+    },
+    keyCase: {
+      itemName: 'ケース',
+      key: 'keyCase',
+      value: '16'
+    },
+    keyCentilitre: {
+      itemName: 'センチリットル',
+      key: 'keyCentilitre',
+      value: '12'
+    },
+    keyCentimeter: {
+      itemName: 'センチメートル',
+      key: 'keyCentimeter',
+      value: '15'
+    },
+    keyContainer: {
+      itemName: 'コンテナ',
+      key: 'keyContainer',
+      value: '11'
+    },
+    keyCost: {
+      itemName: 'コスト',
+      key: 'keyCost',
+      value: '10'
+    },
+    keyCubicCentimeter: {
+      itemName: '立方センチメートル',
+      key: 'keyCubicCentimeter',
+      value: '14'
+    },
+    keyCubicMeter: {
+      itemName: '立方メートル',
+      key: 'keyCubicMeter',
+      value: '38'
+    },
+    keyDay: {
+      itemName: '日',
+      key: 'keyDay',
+      value: '18'
+    },
+    keyDeciliter: {
+      itemName: 'デシリットル',
+      key: 'keyDeciliter',
+      value: '19'
+    },
+    keyDecimeter: {
+      itemName: 'デシメートル',
+      key: 'keyDecimeter',
+      value: '20'
+    },
+    keyFeet: {
+      itemName: 'フィート',
+      key: 'keyFeet',
+      value: '23'
+    },
+    keyFormula: {
+      itemName: '式',
+      key: 'keyFormula',
+      value: '43'
+    },
+    keyGallon: {
+      itemName: 'ガロン',
+      key: 'keyGallon',
+      value: '24'
+    },
+    keyGram: {
+      itemName: 'グラム',
+      key: 'keyGram',
+      value: '25'
+    },
+    keyGrossKilogram: {
+      itemName: 'グロス・キログラム',
+      key: 'keyGrossKilogram',
+      value: '21'
+    },
+    keyGrossTonnage: {
+      itemName: '総トン',
+      key: 'keyGrossTonnage',
+      value: '26'
+    },
+    keyHour: {
+      itemName: '時間',
+      key: 'keyHour',
+      value: '27'
+    },
+    keyKilogram: {
+      itemName: 'キログラム',
+      key: 'keyKilogram',
+      value: '28'
+    },
+    keyKilometers: {
+      itemName: 'キロメートル',
+      key: 'keyKilometers',
+      value: '29'
+    },
+    keyKilowattHour: {
+      itemName: 'キロワット時',
+      key: 'keyKilowattHour',
+      value: '30'
+    },
+    keyLiter: {
+      itemName: 'リットル',
+      key: 'keyLiter',
+      value: '32'
+    },
+    keyManMonth: {
+      itemName: '人月',
+      key: 'keyManMonth',
+      value: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    },
+    keyMeter: {
+      itemName: 'メーター',
+      key: 'keyMeter',
+      value: '39'
+    },
+    keyMilligram: {
+      itemName: 'ミリグラム',
+      key: 'keyMilligram',
+      value: '33'
+    },
+    keyMilliliter: {
+      itemName: 'ミリリットル',
+      key: 'keyMilliliter',
+      value: '34'
+    },
+    keyMillimeter: {
+      itemName: 'ミリメートル',
+      key: 'keyMillimeter',
+      value: '35'
+    },
+    keyMonth: {
+      itemName: '月',
+      key: 'keyMonth',
+      value: '36'
+    },
+    keyNetTonnage: {
+      itemName: '純トン',
+      key: 'keyNetTonnage',
+      value: '40'
+    },
+    keyOthers: {
+      itemName: 'その他',
+      key: 'keyOthers',
+      value: '45'
+    },
+    keyPackage: {
+      itemName: '包',
+      key: 'keyPackage',
+      value: '41'
+    },
+    keyPieces: {
+      itemName: '個',
+      key: 'keyPieces',
+      value: '22'
+    },
+    keyPound: {
+      itemName: 'ポンド',
+      key: 'keyPound',
+      value: '31'
+    },
+    keyRoll: {
+      itemName: '巻',
+      key: 'keyRoll',
+      value: '42'
+    },
+    keySquareCentimeter: {
+      itemName: '平方センチメートル',
+      key: 'keySquareCentimeter',
+      value: '13'
+    },
+    keySquareMeter: {
+      itemName: '平方メートル',
+      key: 'keySquareMeter',
+      value: '37'
+    },
+    keyTonnage: {
+      itemName: 'トン',
+      key: 'keyTonnage',
+      value: '44'
+    }
   }
 
   const taxIdsUndefined = {
-    keyConsumptionTax: undefined,
-    keyDutyFree: undefined,
-    keyExemptTax: undefined,
-    keyFreeTax: undefined,
-    keyReducedTax: undefined
+    keyConsumptionTax: {
+      itemName: '消費税',
+      key: 'keyConsumptionTax',
+      value: undefined
+    },
+    keyDutyFree: {
+      itemName: '免税',
+      key: 'keyDutyFree',
+      value: undefined
+    },
+    keyExemptTax: {
+      itemName: '非課税',
+      key: 'keyExemptTax',
+      value: undefined
+    },
+    keyFreeTax: {
+      itemName: '不課税',
+      key: 'keyFreeTax',
+      value: undefined
+    },
+    keyReducedTax: {
+      itemName: '軽減税率',
+      key: 'keyReducedTax',
+      value: undefined
+    }
   }
 
   const unitIdsUndefined = {
-    keyBottle: undefined,
-    keyCarton: undefined,
-    keyCase: undefined,
-    keyCentilitre: undefined,
-    keyCentimeter: undefined,
-    keyContainer: undefined,
-    keyCost: undefined,
-    keyCubicCentimeter: undefined,
-    keyCubicMeter: undefined,
-    keyDay: undefined,
-    keyDeciliter: undefined,
-    keyDecimeter: undefined,
-    keyFeet: undefined,
-    keyFormula: undefined,
-    keyGallon: undefined,
-    keyGram: undefined,
-    keyGrossKilogram: undefined,
-    keyGrossTonnage: undefined,
-    keyHour: undefined,
-    keyKilogram: undefined,
-    keyKilometers: undefined,
-    keyKilowattHour: undefined,
-    keyLiter: undefined,
-    keyManMonth: undefined,
-    keyMeter: undefined,
-    keyMilligram: undefined,
-    keyMilliliter: undefined,
-    keyMillimeter: undefined,
-    keyMonth: undefined,
-    keyNetTonnage: undefined,
-    keyOthers: undefined,
-    keyPackage: undefined,
-    keyPieces: undefined,
-    keyPound: undefined,
-    keyRoll: undefined,
-    keySquareCentimeter: undefined,
-    keySquareMeter: undefined,
-    keyTonnage: undefined
+    keyBottle: {
+      itemName: 'ボトル',
+      key: 'keyBottle',
+      value: undefined
+    },
+    keyCarton: {
+      itemName: 'カートン',
+      key: 'keyCarton',
+      value: undefined
+    },
+    keyCase: {
+      itemName: 'ケース',
+      key: 'keyCase',
+      value: undefined
+    },
+    keyCentilitre: {
+      itemName: 'センチリットル',
+      key: 'keyCentilitre',
+      value: undefined
+    },
+    keyCentimeter: {
+      itemName: 'センチメートル',
+      key: 'keyCentimeter',
+      value: undefined
+    },
+    keyContainer: {
+      itemName: 'コンテナ',
+      key: 'keyContainer',
+      value: undefined
+    },
+    keyCost: {
+      itemName: 'コスト',
+      key: 'keyCost',
+      value: undefined
+    },
+    keyCubicCentimeter: {
+      itemName: '立方センチメートル',
+      key: 'keyCubicCentimeter',
+      value: undefined
+    },
+    keyCubicMeter: {
+      itemName: '立方メートル',
+      key: 'keyCubicMeter',
+      value: undefined
+    },
+    keyDay: {
+      itemName: '日',
+      key: 'keyDay',
+      value: undefined
+    },
+    keyDeciliter: {
+      itemName: 'デシリットル',
+      key: 'keyDeciliter',
+      value: undefined
+    },
+    keyDecimeter: {
+      itemName: 'デシメートル',
+      key: 'keyDecimeter',
+      value: undefined
+    },
+    keyFeet: {
+      itemName: 'フィート',
+      key: 'keyFeet',
+      value: undefined
+    },
+    keyFormula: {
+      itemName: '式',
+      key: 'keyFormula',
+      value: undefined
+    },
+    keyGallon: {
+      itemName: 'ガロン',
+      key: 'keyGallon',
+      value: undefined
+    },
+    keyGram: {
+      itemName: 'グラム',
+      key: 'keyGram',
+      value: undefined
+    },
+    keyGrossKilogram: {
+      itemName: 'グロス・キログラム',
+      key: 'keyGrossKilogram',
+      value: undefined
+    },
+    keyGrossTonnage: {
+      itemName: '総トン',
+      key: 'keyGrossTonnage',
+      value: undefined
+    },
+    keyHour: {
+      itemName: '時間',
+      key: 'keyHour',
+      value: undefined
+    },
+    keyKilogram: {
+      itemName: 'キログラム',
+      key: 'keyKilogram',
+      value: undefined
+    },
+    keyKilometers: {
+      itemName: 'キロメートル',
+      key: 'keyKilometers',
+      value: undefined
+    },
+    keyKilowattHour: {
+      itemName: 'キロワット時',
+      key: 'keyKilowattHour',
+      value: undefined
+    },
+    keyLiter: {
+      itemName: 'リットル',
+      key: 'keyLiter',
+      value: undefined
+    },
+    keyManMonth: {
+      itemName: '人月',
+      key: 'keyManMonth',
+      value: undefined
+    },
+    keyMeter: {
+      itemName: 'メーター',
+      key: 'keyMeter',
+      value: undefined
+    },
+    keyMilligram: {
+      itemName: 'ミリグラム',
+      key: 'keyMilligram',
+      value: undefined
+    },
+    keyMilliliter: {
+      itemName: 'ミリリットル',
+      key: 'keyMilliliter',
+      value: undefined
+    },
+    keyMillimeter: {
+      itemName: 'ミリメートル',
+      key: 'keyMillimeter',
+      value: undefined
+    },
+    keyMonth: {
+      itemName: '月',
+      key: 'keyMonth',
+      value: undefined
+    },
+    keyNetTonnage: {
+      itemName: '純トン',
+      key: 'keyNetTonnage',
+      value: undefined
+    },
+    keyOthers: {
+      itemName: 'その他',
+      key: 'keyOthers',
+      value: undefined
+    },
+    keyPackage: {
+      itemName: '包',
+      key: 'keyPackage',
+      value: undefined
+    },
+    keyPieces: {
+      itemName: '個',
+      key: 'keyPieces',
+      value: undefined
+    },
+    keyPound: {
+      itemName: 'ポンド',
+      key: 'keyPound',
+      value: undefined
+    },
+    keyRoll: {
+      itemName: '巻',
+      key: 'keyRoll',
+      value: undefined
+    },
+    keySquareCentimeter: {
+      itemName: '平方センチメートル',
+      key: 'keySquareCentimeter',
+      value: undefined
+    },
+    keySquareMeter: {
+      itemName: '平方メートル',
+      key: 'keySquareMeter',
+      value: undefined
+    },
+    keyTonnage: {
+      itemName: 'トン',
+      key: 'keyTonnage',
+      value: undefined
+    }
   }
 
   describe('ルーティング', () => {
@@ -582,25 +1100,25 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
         csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
         headerItems: [
-          { item: '発行日', value: '2021-06-14' },
-          { item: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
-          { item: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
-          { item: '支払期日', value: '2021-03-31' },
-          { item: '納品日', value: '2021-03-17' },
-          { item: '備考', value: 'test111' },
-          { item: '銀行名', value: 'testsiten' },
-          { item: '支店名', value: 'testbank' },
-          { item: '科目', value: '普通' },
-          { item: '口座番号', value: '1111111' },
-          { item: '口座名義', value: 'kang_test' },
-          { item: 'その他特記事項', value: '特記事項テストです。' },
-          { item: '明細-項目ID', value: '001' },
-          { item: '明細-内容', value: 'PC' },
-          { item: '明細-数量', value: '100' },
-          { item: '明細-単位', value: '個' },
-          { item: '明細-単価', value: '100000' },
-          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
-          { item: '明細-備考', value: 'アップロードテスト' }
+          { item: '発行日', moto: '発行日', value: '2021-06-14' },
+          { item: '請求書番号', moto: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
+          { item: 'テナントID', moto: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
+          { item: '支払期日', moto: '支払期日', value: '2021-03-31' },
+          { item: '納品日', moto: '納品日', value: '2021-03-17' },
+          { item: '備考', moto: '備考', value: 'test111' },
+          { item: '銀行名', moto: '銀行名', value: 'testsiten' },
+          { item: '支店名', moto: '支店名', value: 'testbank' },
+          { item: '科目', moto: '科目', value: '普通' },
+          { item: '口座番号', moto: '口座番号', value: '1111111' },
+          { item: '口座名義', moto: '口座名義', value: 'kang_test' },
+          { item: 'その他特記事項', moto: 'その他特記事項', value: '特記事項テストです。' },
+          { item: '明細-項目ID', moto: '明細-項目ID', value: '001' },
+          { item: '明細-内容', moto: '明細-内容', value: 'PC' },
+          { item: '明細-数量', moto: '明細-数量', value: '100' },
+          { item: '明細-単位', moto: '明細-単位', value: '個' },
+          { item: '明細-単価', moto: '明細-単価', value: '100000' },
+          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', moto: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
+          { item: '明細-備考', moto: '明細-備考', value: 'アップロードテスト' }
         ],
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIds,
@@ -648,25 +1166,25 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
         csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
         headerItems: [
-          { item: '', value: '2021-06-14' },
-          { item: '', value: 'UT_TEST_INVOICE_1_1' },
-          { item: '', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
-          { item: '', value: '2021-03-31' },
-          { item: '', value: '2021-03-17' },
-          { item: '', value: 'test111' },
-          { item: '', value: 'testsiten' },
-          { item: '', value: 'testbank' },
-          { item: '', value: '普通' },
-          { item: '', value: '1111111' },
-          { item: '', value: 'kang_test' },
-          { item: '', value: '特記事項テストです。' },
-          { item: '', value: '001' },
-          { item: '', value: 'PC' },
-          { item: '', value: '100' },
-          { item: '', value: '個' },
-          { item: '', value: '100000' },
-          { item: '', value: '消費税' },
-          { item: '', value: 'アップロードテスト' }
+          { item: '', moto: '発行日', value: '2021-06-14' },
+          { item: '', moto: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
+          { item: '', moto: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
+          { item: '', moto: '支払期日', value: '2021-03-31' },
+          { item: '', moto: '納品日', value: '2021-03-17' },
+          { item: '', moto: '備考', value: 'test111' },
+          { item: '', moto: '銀行名', value: 'testsiten' },
+          { item: '', moto: '支店名', value: 'testbank' },
+          { item: '', moto: '科目', value: '普通' },
+          { item: '', moto: '口座番号', value: '1111111' },
+          { item: '', moto: '口座名義', value: 'kang_test' },
+          { item: '', moto: 'その他特記事項', value: '特記事項テストです。' },
+          { item: '', moto: '明細-項目ID', value: '001' },
+          { item: '', moto: '明細-内容', value: 'PC' },
+          { item: '', moto: '明細-数量', value: '100' },
+          { item: '', moto: '明細-単位', value: '個' },
+          { item: '', moto: '明細-単価', value: '100000' },
+          { item: '', moto: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
+          { item: '', moto: '明細-備考', value: 'アップロードテスト' }
         ],
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIds,
@@ -717,25 +1235,25 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
         csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
         headerItems: [
-          { item: '発行日', value: '2021-06-14' },
-          { item: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
-          { item: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
-          { item: '支払期日', value: '2021-03-31' },
-          { item: '納品日', value: '2021-03-17' },
-          { item: '備考', value: 'test111' },
-          { item: '銀行名', value: 'testsiten' },
-          { item: '支店名', value: 'testbank' },
-          { item: '科目', value: '普通' },
-          { item: '口座番号', value: '1111111' },
-          { item: '口座名義', value: 'kang_test' },
-          { item: 'その他特記事項', value: '特記事項テストです。' },
-          { item: '明細-項目ID', value: '001' },
-          { item: '明細-内容', value: 'PC' },
-          { item: '明細-数量', value: '100' },
-          { item: '明細-単位', value: '個' },
-          { item: '明細-単価', value: '100000' },
-          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
-          { item: '明細-備考', value: 'アップロードテスト' }
+          { item: '発行日', moto: '発行日', value: '2021-06-14' },
+          { item: '請求書番号', moto: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
+          { item: 'テナントID', moto: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
+          { item: '支払期日', moto: '支払期日', value: '2021-03-31' },
+          { item: '納品日', moto: '納品日', value: '2021-03-17' },
+          { item: '備考', moto: '備考', value: 'test111' },
+          { item: '銀行名', moto: '銀行名', value: 'testsiten' },
+          { item: '支店名', moto: '支店名', value: 'testbank' },
+          { item: '科目', moto: '科目', value: '普通' },
+          { item: '口座番号', moto: '口座番号', value: '1111111' },
+          { item: '口座名義', moto: '口座名義', value: 'kang_test' },
+          { item: 'その他特記事項', moto: 'その他特記事項', value: '特記事項テストです。' },
+          { item: '明細-項目ID', moto: '明細-項目ID', value: '001' },
+          { item: '明細-内容', moto: '明細-内容', value: 'PC' },
+          { item: '明細-数量', moto: '明細-数量', value: '100' },
+          { item: '明細-単位', moto: '明細-単位', value: '個' },
+          { item: '明細-単価', moto: '明細-単価', value: '100000' },
+          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', moto: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
+          { item: '明細-備考', moto: '明細-備考', value: 'アップロードテスト' }
         ],
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIdsUndefined,
@@ -786,25 +1304,25 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
         csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
         headerItems: [
-          { item: '発行日', value: '2021-06-14' },
-          { item: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
-          { item: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
-          { item: '支払期日', value: '2021-03-31' },
-          { item: '納品日', value: '2021-03-17' },
-          { item: '備考', value: 'test111' },
-          { item: '銀行名', value: 'testsiten' },
-          { item: '支店名', value: 'testbank' },
-          { item: '科目', value: '普通' },
-          { item: '口座番号', value: '1111111' },
-          { item: '口座名義', value: 'kang_test' },
-          { item: 'その他特記事項', value: '特記事項テストです。' },
-          { item: '明細-項目ID', value: '001' },
-          { item: '明細-内容', value: 'PC' },
-          { item: '明細-数量', value: '100' },
-          { item: '明細-単位', value: '個' },
-          { item: '明細-単価', value: '100000' },
-          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
-          { item: '明細-備考', value: 'アップロードテスト' }
+          { item: '発行日', moto: '発行日', value: '2021-06-14' },
+          { item: '請求書番号', moto: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
+          { item: 'テナントID', moto: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
+          { item: '支払期日', moto: '支払期日', value: '2021-03-31' },
+          { item: '納品日', moto: '納品日', value: '2021-03-17' },
+          { item: '備考', moto: '備考', value: 'test111' },
+          { item: '銀行名', moto: '銀行名', value: 'testsiten' },
+          { item: '支店名', moto: '支店名', value: 'testbank' },
+          { item: '科目', moto: '科目', value: '普通' },
+          { item: '口座番号', moto: '口座番号', value: '1111111' },
+          { item: '口座名義', moto: '口座名義', value: 'kang_test' },
+          { item: 'その他特記事項', moto: 'その他特記事項', value: '特記事項テストです。' },
+          { item: '明細-項目ID', moto: '明細-項目ID', value: '001' },
+          { item: '明細-内容', moto: '明細-内容', value: 'PC' },
+          { item: '明細-数量', moto: '明細-数量', value: '100' },
+          { item: '明細-単位', moto: '明細-単位', value: '個' },
+          { item: '明細-単価', moto: '明細-単価', value: '100000' },
+          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', moto: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
+          { item: '明細-備考', moto: '明細-備考', value: 'アップロードテスト' }
         ],
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIds,
@@ -1690,25 +2208,25 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
         csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
         headerItems: [
-          { item: '発行日', value: '2021-06-14' },
-          { item: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
-          { item: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
-          { item: '支払期日', value: '2021-03-31' },
-          { item: '納品日', value: '2021-03-17' },
-          { item: '備考', value: 'test111' },
-          { item: '銀行名', value: 'testsiten' },
-          { item: '支店名', value: 'testbank' },
-          { item: '科目', value: '普通' },
-          { item: '口座番号', value: '1111111' },
-          { item: '口座名義', value: 'kang_test' },
-          { item: 'その他特記事項', value: '特記事項テストです。' },
-          { item: '明細-項目ID', value: '001' },
-          { item: '明細-内容', value: 'PC' },
-          { item: '明細-数量', value: '100' },
-          { item: '明細-単位', value: '個' },
-          { item: '明細-単価', value: '100000' },
-          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
-          { item: '明細-備考', value: 'アップロードテスト' }
+          { item: '発行日', moto: '発行日', value: '2021-06-14' },
+          { item: '請求書番号', moto: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
+          { item: 'テナントID', moto: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
+          { item: '支払期日', moto: '支払期日', value: '2021-03-31' },
+          { item: '納品日', moto: '納品日', value: '2021-03-17' },
+          { item: '備考', moto: '備考', value: 'test111' },
+          { item: '銀行名', moto: '銀行名', value: 'testsiten' },
+          { item: '支店名', moto: '支店名', value: 'testbank' },
+          { item: '科目', moto: '科目', value: '普通' },
+          { item: '口座番号', moto: '口座番号', value: '1111111' },
+          { item: '口座名義', moto: '口座名義', value: 'kang_test' },
+          { item: 'その他特記事項', moto: 'その他特記事項', value: '特記事項テストです。' },
+          { item: '明細-項目ID', moto: '明細-項目ID', value: '001' },
+          { item: '明細-内容', moto: '明細-内容', value: 'PC' },
+          { item: '明細-数量', moto: '明細-数量', value: '100' },
+          { item: '明細-単位', moto: '明細-単位', value: '個' },
+          { item: '明細-単価', moto: '明細-単価', value: '100000' },
+          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', moto: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
+          { item: '明細-備考', moto: '明細-備考', value: 'アップロードテスト' }
         ],
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIdsaaaaaa,
@@ -1851,25 +2369,25 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
         csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
         headerItems: [
-          { item: '発行日', value: '2021-06-14' },
-          { item: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
-          { item: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
-          { item: '支払期日', value: '2021-03-31' },
-          { item: '納品日', value: '2021-03-17' },
-          { item: '備考', value: 'test111' },
-          { item: '銀行名', value: 'testsiten' },
-          { item: '支店名', value: 'testbank' },
-          { item: '科目', value: '普通' },
-          { item: '口座番号', value: '1111111' },
-          { item: '口座名義', value: 'kang_test' },
-          { item: 'その他特記事項', value: '特記事項テストです。' },
-          { item: '明細-項目ID', value: '001' },
-          { item: '明細-内容', value: 'PC' },
-          { item: '明細-数量', value: '100' },
-          { item: '明細-単位', value: '個' },
-          { item: '明細-単価', value: '100000' },
-          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
-          { item: '明細-備考', value: 'アップロードテスト' }
+          { item: '発行日', moto: '発行日', value: '2021-06-14' },
+          { item: '請求書番号', moto: '請求書番号', value: 'UT_TEST_INVOICE_1_1' },
+          { item: 'テナントID', moto: 'テナントID', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
+          { item: '支払期日', moto: '支払期日', value: '2021-03-31' },
+          { item: '納品日', moto: '納品日', value: '2021-03-17' },
+          { item: '備考', moto: '備考', value: 'test111' },
+          { item: '銀行名', moto: '銀行名', value: 'testsiten' },
+          { item: '支店名', moto: '支店名', value: 'testbank' },
+          { item: '科目', moto: '科目', value: '普通' },
+          { item: '口座番号', moto: '口座番号', value: '1111111' },
+          { item: '口座名義', moto: '口座名義', value: 'kang_test' },
+          { item: 'その他特記事項', moto: 'その他特記事項', value: '特記事項テストです。' },
+          { item: '明細-項目ID', moto: '明細-項目ID', value: '001' },
+          { item: '明細-内容', moto: '明細-内容', value: 'PC' },
+          { item: '明細-数量', moto: '明細-数量', value: '100' },
+          { item: '明細-単位', moto: '明細-単位', value: '個' },
+          { item: '明細-単価', moto: '明細-単価', value: '100000' },
+          { item: '明細-税（消費税／軽減税率／不課税／免税／非課税）', moto: '明細-税（消費税／軽減税率／不課税／免税／非課税）', value: '消費税' },
+          { item: '明細-備考', moto: '明細-備考', value: 'アップロードテスト' }
         ],
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIds,
@@ -1985,7 +2503,7 @@ describe('csvBasicFormatのテスト', () => {
       expect(next).toHaveBeenCalledWith(error404)
     })
 
-    test('異常：500エラー（不正なContractStatus）', async () => {
+    test('異常：500エラー（ContractStatusが取得されない場合）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {
@@ -1996,7 +2514,7 @@ describe('csvBasicFormatのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
-      // DBからの不正な契約情報取得を想定する
+      // DBからの契約情報を取得出来なかったことを想定する
       findOneSpyContracts.mockReturnValue(null)
 
       // 試験実施
@@ -2034,10 +2552,37 @@ describe('csvBasicFormatのテスト', () => {
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
     })
+
+    test('異常：500エラー（csvRemove処理中エラー）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      pathSpy.mockReturnValue('/test')
+      // pathSpy.mockReturnValue('/home/upload')
+
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
+    })
   })
 
   // -----------------------------------------------------------------------------------------
-  // cbPostIndexの確認
+  // cbPostConfirmIndexの確認
 
   describe('cbPostConfirmIndex', () => {
     test('正常', async () => {
@@ -2072,7 +2617,7 @@ describe('csvBasicFormatのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvConfirmFormatが呼ばれ「る」
-      expect(response.redirect).toHaveBeenCalledWith(307, '/csvConfirmFormat')
+      expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
     })
 
     test('準正常：解約中', async () => {
@@ -2226,175 +2771,11 @@ describe('csvBasicFormatのテスト', () => {
       request.user = user
 
       // 試験実施
-      const resultRemove = await uploadFormat.cbRemoveCsv('/test', fileName, uploadFileName)
+      const resultRemove = await uploadFormat.cbRemoveCsv('/test', fileName)
 
       // 期待結果
       expect(resultRemove).toBeFalsy()
     })
   })
 
-  // -----------------------------------------------------------------------------------------
-  // cbPostBackIndexの確認
-
-  // describe('cbPostBackIndex', () => {
-  //   test('正常', async () => {
-  //     // 準備
-  //     // requestのsession,userIdに正常値を入れる
-  //     request.session = {
-  //       userContext: 'LoggedIn',
-  //       userRole: 'dummy'
-  //     }
-  //     request.user = user
-  //     // ファイルデータを設定
-  //     request.body = {
-  //       ...reqBodyForCbPostIndexOn
-  //     }
-
-  //     // DBからの正常なユーザデータの取得を想定する
-  //     findOneSpy.mockReturnValue(dataValues)
-  //     // DBからの正常な契約情報取得を想定する
-  //     findOneSpyContracts.mockReturnValue(contractdataValues)
-
-  //     helper.checkContractStatus = 10
-
-  //     // 試験実施
-  //     await uploadFormat.cbPostBackIndex(request, response, next)
-
-  //     // 期待結果
-  //     // 404，500エラーがエラーハンドリング「されない」
-  //     expect(next).not.toHaveBeenCalledWith(error404)
-  //     expect(next).not.toHaveBeenCalledWith(error500)
-  //     // userContextがLoggedInになっている
-  //     expect(request.session?.userContext).toBe('LoggedIn')
-  //     // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-  //     expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-  //     // response.renderでcsvConfirmFormatが呼ばれ「る」
-  //     expect(response.redirect).toHaveBeenCalledWith('/csvBasicFormat')
-  //   })
-
-  //   test('準正常：解約中', async () => {
-  //     // 準備
-  //     // requestのsession,userIdに正常値を入れる
-  //     request.session = {
-  //       userContext: 'LoggedIn',
-  //       userRole: 'dummy'
-  //     }
-  //     request.user = user
-
-  //     // ファイルデータを設定
-  //     request.body = {
-  //       ...reqBodyForCbPostIndexOn
-  //     }
-
-  //     // DBからの正常なユーザデータの取得を想定する
-  //     findOneSpy.mockReturnValue(dataValues)
-  //     // DBからの正常な契約情報取得を想定する
-  //     findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
-
-  //     // 試験実施
-  //     await uploadFormat.cbPostBackIndex(request, response, next)
-
-  //     // 期待結果
-  //     // 404，500エラーがエラーハンドリング「されない」
-  //     expect(next).not.toHaveBeenCalledWith(error404)
-  //     expect(next).not.toHaveBeenCalledWith(error500)
-
-  //     // 解約手続き中画面が表示「される」
-  //     expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
-  //   })
-
-  //   test('異常：500エラー（DBからユーザ取得エラー）', async () => {
-  //     // 準備
-  //     // requestのsession,userIdに正常値を入れる
-  //     request.session = {
-  //       userContext: 'LoggedIn',
-  //       userRole: 'dummy'
-  //     }
-  //     request.user = user
-  //     // DBからのユーザデータの取得ができなかった(null)場合を想定する
-  //     findOneSpy.mockReturnValue(null)
-  //     findOneSpyContracts.mockReturnValue(contractdataValues)
-
-  //     // 試験実施
-  //     await uploadFormat.cbPostBackIndex(request, response, next)
-
-  //     // 期待結果
-  //     // 404エラーがエラーハンドリング「されない」
-  //     expect(next).not.toHaveBeenCalledWith(error404)
-  //     // 500エラーがエラーハンドリング「される」
-  //     expect(next).toHaveBeenCalledWith(error500)
-  //   })
-
-  //   test('異常：404エラーDBから取得したユーザのuserStatusが0以外の場合', async () => {
-  //     // 準備
-  //     // requestのsession,userIdに正常値を入れる
-  //     request.session = {
-  //       userContext: 'NotLoggedIn',
-  //       userRole: 'dummy'
-  //     }
-  //     request.user = user
-  //     // DBから取得したユーザデータのuserStatusが0以外の場合を想定する
-  //     findOneSpy.mockReturnValue(dataValuesStatuserr)
-  //     findOneSpyContracts.mockReturnValue(contractdataValues)
-
-  //     // 試験実施
-  //     await uploadFormat.cbPostBackIndex(request, response, next)
-
-  //     // 期待結果
-  //     // 404エラーがエラーハンドリング「される」
-  //     expect(next).toHaveBeenCalledWith(error404)
-  //   })
-
-  //   test('異常：500エラー（不正なContractStatus）', async () => {
-  //     // 準備
-  //     // requestのsession,userIdに正常値を入れる
-  //     request.session = {
-  //       userContext: 'LoggedIn',
-  //       userRole: 'dummy'
-  //     }
-  //     request.user = user
-
-  //     // DBからの正常なユーザデータの取得を想定する
-  //     findOneSpy.mockReturnValue(dataValues)
-  //     // DBからの不正な契約情報取得を想定する
-  //     findOneSpyContracts.mockReturnValue(null)
-
-  //     // 試験実施
-  //     await uploadFormat.cbPostBackIndex(request, response, next)
-
-  //     // 期待結果
-  //     // 404，500エラーがエラーハンドリング「されない」
-  //     expect(next).not.toHaveBeenCalledWith(error404)
-  //     // 500エラーがエラーハンドリング「される」
-  //     expect(next).toHaveBeenCalledWith(error500)
-  //   })
-
-  //   test('異常：500エラー（不正なContractStatus）', async () => {
-  //     // 準備
-  //     // requestのsession,userIdに正常値を入れる
-  //     request.session = {
-  //       userContext: 'LoggedIn',
-  //       userRole: 'dummy'
-  //     }
-  //     request.user = user
-
-  //     // DBからの正常なユーザデータの取得を想定する
-  //     findOneSpy.mockReturnValue(dataValues)
-  //     // DBからの不正な契約情報取得を想定する
-  //     findOneSpyContracts.mockReturnValue(contractdataValues4)
-
-  //     helper.checkContractStatus = 999
-
-  //     // 試験実施
-  //     await uploadFormat.cbPostBackIndex(request, response, next)
-
-  //     // 期待結果
-  //     // 404，500エラーがエラーハンドリング「されない」
-  //     expect(next).not.toHaveBeenCalledWith(error404)
-  //     // 500エラーがエラーハンドリング「される」
-  //     expect(next).toHaveBeenCalledWith(error500)
-
-  //     helper.checkContractStatus = 10
-  //   })
-  // })
 })
