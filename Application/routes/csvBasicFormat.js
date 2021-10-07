@@ -12,23 +12,12 @@ const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
-const { v4: uuidv4 } = require('uuid')
-const url = require('url')
 
 const cbGetCsvBasicFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvBasicFormat')
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
-
-  // if (!req.session.csvUploadFormatReturnFlag1 || !req.session.csvUploadFormatReturnFlag2) {
-  //   delete req.session.formData
-  //   delete req.session.csvUploadFormatReturnFlag1
-  //   delete req.session.csvUploadFormatReturnFlag2
-  // } else {
-  //   req.session.csvUploadFormatReturnFlag1 = false
-  //   req.session.csvUploadFormatReturnFlag2 = false
-  // }
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
@@ -58,24 +47,13 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
 
   const csvTax = constantsDefine.csvFormatDefine.csvTax
   const csvUnit = constantsDefine.csvFormatDefine.csvUnit
-  let csvBasicArr = constantsDefine.csvFormatDefine.csvBasicArr
-  let taxArr = constantsDefine.csvFormatDefine.taxArr
-  let unitArr = constantsDefine.csvFormatDefine.unitArr
-
-  // if (req.session.formData) {
-  //   csvBasicArr = req.session.formData.csvBasicArr
-  //   taxArr = req.session.formData.taxArr
-  //   unitArr = req.session.formData.unitArr
-  // }
 
   res.render('csvBasicFormat', {
     csvTax: csvTax,
     csvUnit: csvUnit,
-    csvBasicArr: csvBasicArr,
-    taxArr: taxArr,
-    unitArr: unitArr,
     TS_HOST: process.env.TS_HOST
   })
+
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCsvBasicFormat')
 }
 
@@ -115,93 +93,10 @@ const cbPostCsvBasicFormat = async (req, res, next) => {
   // csvファイルアップロード
   if (fileUpload(filePath, dataFileName, uploadCsvData) === false) return next(errorHelper.create(500))
 
-  const uploadFormatId = uuidv4()
-
-  // リクエストボディから連携用データを作成する
-  // アップロードフォーマット基本情報
-  const csvBasicArr = {
-    uploadFormatId: uploadFormatId,
-    uploadFormatItemName: req.body.uploadFormatItemName,
-    dataFileName: dataFileName,
-    uploadFormatNumber: req.body.uploadFormatNumber,
-    defaultNumber: req.body.defaultNumber
-  }
-
-  // 明細-税 識別子
-  const taxArr = {
-    consumptionTax: req.body.keyConsumptionTax,
-    reducedTax: req.body.keyReducedTax,
-    freeTax: req.body.keyFreeTax,
-    dutyFree: req.body.keyDutyFree,
-    exemptTax: req.body.keyExemptTax
-  }
-
-  // 明細-単位 識別子
-  const unitArr = {
-    manMonth: req.body.keyManMonth,
-    BO: req.body.keyBottle,
-    C5: req.body.keyCost,
-    CH: req.body.keyContainer,
-    CLT: req.body.keyCentilitre,
-    CMK: req.body.keySquareCentimeter,
-    CMQ: req.body.keyCubicCentimeter,
-    CMT: req.body.keyCentimeter,
-    CS: req.body.keyCase,
-    CT: req.body.keyCarton,
-    DAY: req.body.keyDay,
-    DLT: req.body.keyDeciliter,
-    DMT: req.body.keyDecimeter,
-    E4: req.body.keyGrossKilogram,
-    EA: req.body.keyPieces,
-    FOT: req.body.keyFeet,
-    GLL: req.body.keyGallon,
-    GRM: req.body.keyGram,
-    GT: req.body.keyGrossTonnage,
-    HUR: req.body.keyHour,
-    KGM: req.body.keyKilogram,
-    KTM: req.body.keyKilometers,
-    KWH: req.body.keyKilowattHour,
-    LBR: req.body.keyPound,
-    LTR: req.body.keyLiter,
-    MGM: req.body.keyMilligram,
-    MLT: req.body.keyMilliliter,
-    MMT: req.body.keyMillimeter,
-    MON: req.body.keyMonth,
-    MTK: req.body.keySquareMeter,
-    MTQ: req.body.keyCubicMeter,
-    MTR: req.body.keyMeter,
-    NT: req.body.keyNetTonnage,
-    PK: req.body.keyPackage,
-    RO: req.body.keyRoll,
-    SET: req.body.keyFormula,
-    TNE: req.body.keyTonnage,
-    ZZ: req.body.keyOthers
-  }
-
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostCsvBasicFormat')
 
-  // req.session.formData = {
-  //   csvBasicArr: csvBasicArr,
-  //   taxArr: taxArr,
-  //   unitArr: unitArr
-  // }
-  
   // 画面送信
-  res.redirect(
-    307,
-    url.format({
-      pathname: '/uploadFormat',
-      body: {
-        tenantId: req.user.tenantId,
-        userRole: req.session.userRole,
-        numberN: contract.dataValues?.numberN,
-        TS_HOST: process.env.TS_HOST,
-        csvBasicArr: csvBasicArr,
-        taxArr: taxArr,
-        unitArr: unitArr
-      }
-    })
-  )
+  res.redirect(307, '/uploadFormat')
 }
 
 const fileUpload = (_filePath, _filename, _uploadCsvData) => {
