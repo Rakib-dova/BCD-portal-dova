@@ -12,6 +12,8 @@ const $ = function (tagObjName) {
 }
 
 $('#confirmBtn').addEventListener('click', function (e) {
+  e.preventDefault()
+
   const notValue = Array.prototype.map.call($('.requiredItem'), (item) => {
     const selectNumber = item.selectedIndex
     const itemValue = item.options[selectNumber].value
@@ -32,6 +34,9 @@ $('#confirmBtn').addEventListener('click', function (e) {
   })
 
   if (!stopFlag) {
-    e.preventDefault()
+    return false
   }
+
+  const modal = document.getElementById('confirmmodify-modal')
+  if (modal) modal.classList.toggle('is-active')
 })

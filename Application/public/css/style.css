@@ -437,3 +437,7 @@ img.logo-ncom {
   content: '未入力です。';
   color: red;
 }
+
+#csvFormatConfirm-modal-card {
+  width: 100% !important;
+}
