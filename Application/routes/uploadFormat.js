@@ -16,6 +16,14 @@ const constantsDefine = require('../constants')
 const fs = require('fs')
 const path = require('path')
 const filePath = process.env.INVOICE_UPLOAD_PATH
+const bodyParser = require('body-parser')
+router.use(
+  bodyParser.urlencoded({
+    extended: false,
+    type: 'multipart/form-data',
+    limit: '6826KB'
+  })
+)
 
 let globalCsvData = []
 let uploadFormatItemName
@@ -146,7 +154,6 @@ const cbPostIndex = async (req, res, next) => {
   let duplicateFlag = false
   // 配列に読み込んだcsvデータを入れる。
   const columnArr = constantsDefine.csvFormatDefine.columnArr
-
   const csvData = headerArr.map((header, idx) => {
     if (header.length > 100) {
       duplicateFlag = true
@@ -455,9 +462,9 @@ const cbPostConfirmIndex = async (req, res, next) => {
   }
 
   let iCnt = 1
-  let columnArr = constantsDefine.csvFormatDefine.columnArr
+  const columnArr = constantsDefine.csvFormatDefine.columnArr
 
-  //uploadFormatDetailController登録
+  // uploadFormatDetailController登録
   let resultUploadFormatDetail
   for (let idx = 0; idx < columnArr.length; idx++) {
     if (req.body.formatData[idx].length !== 0) {

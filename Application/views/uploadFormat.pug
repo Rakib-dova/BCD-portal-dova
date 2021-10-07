@@ -15,15 +15,14 @@ block content
               table.table.is-fullwidth.is-hoverable
                 thead
                   tr
-                    th.text-center データ番号
-                    th.text-center 項目名
+                    th.text-center データ連番
+                    th.text-center 項目名  
                     th.text-center データ内容
-                tbody
-                  each content, index in headerItems
-                    tr
-                      th.text-center#dataIndex(name="dataContent")= index+1
-                      th.text-center#dataItem(name="dataContent")= content.item
-                      th.text-center#dataValue(name="dataContent")= content.value
+                each content, idx in headerItems
+                  tr
+                    th.text-center#dataIndex(name="dataContent")= idx+1
+                    th.text-center#dataItem(name="dataContent")= content.item
+                    th.text-center#dataValue(name="dataContent")= content.value
           .column
             .title.is-family-noto-sans 請求書データ用フォーマット
             .box
@@ -223,7 +222,7 @@ block content
                               option(value= index)= index+1                                
                           else
                             option(value= index)= index+1    
-  
+
                   tr
                     th
                       label.input-label 明細-項目ID
@@ -339,14 +338,14 @@ block content
                             if ~~selectedFormatData[18] === index
                               option(value= index selected)= index+1
                             else
-                              option(value= index)= index+1                                
+                              option(value= index)= index+1    
                           else
                             option(value= index)= index+1    
                   
         footer.modal-card-foot
           div.button-area
             button.button.is-success.success-button.mr-6#confirmBtn(type="button" data-target="confirmmodify-modal") 確認
-            button.button(type="" formaction="/csvBasicFormat" formmethod="") 戻る
+            a.button#returnBtn(href="#") 戻る
 
         .modal.modal-fx-fadeInscale#confirmmodify-modal
           .modal-background.cancel-button(data-target="confirmmodify-modal")
@@ -391,29 +390,22 @@ block content
                   table.table.is-fullwidth.is-hoverable
                    thead
                      tr
-                       th 項目名
+                       th 標準項目名
                        th
-                       th.text-center 項目名
+                       th.text-center ユーザフォーマット項目名
                        th.text-center データ内容
                    tbody
                     each content, idx in headerItems
-                      if content.item.length !==0
-                        tr
-                          th= content.moto
-                          th →
-                          th.text-center.dataIndex#dataIndex= content.item
-                          th.text-center.dataItem#dataItem= content.value
-                      else
-                        tr
-                          th= content.moto
-                          th
-                          th.text-center.dataIndex#dataIndex= content.item
-                          th.text-center.dataItem#dataItem= content.value
+                      tr
+                        th= content.moto
+                        th →
+                        th.text-center.dataIndex#dataIndex= content.item
+                        th.text-center.dataItem#dataItem= content.value
 
             footer.modal-card-foot
               div.button-area
                 a.button.cancel-button.mr-6(data-target='confirmmodify-modal') キャンセル
-                button.button.is-success.success-button#confirmBtn(type="submit" formaction="/uploadFormat/cbPostConfirmIndex" formmethod="POST") 確認
+                button.button.is-success.success-button#confirmBtn(type="submit" formaction="/uploadFormat/cbPostConfirmIndex" formmethod="POST") 登録
       include footer
 
 block append scripts
