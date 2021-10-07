@@ -1,11 +1,19 @@
 const $ = function (tagObjName) {
-  const classNameReg = new RegExp(/\.+[a-zA-Z0-9]/)
-  const idNameReg = new RegExp(/\#+[a-zA-Z0-9]/)
+  const classPatten = '\\.+[a-zA-Z0-9]'
+  const idPatten = '\\#+[a-zA-Z0-9]'
+  const classNameReg = new RegExp(classPatten)
+  const idNameReg = new RegExp(idPatten)
 
   if (classNameReg.test(tagObjName)) {
-    return document.querySelectorAll(tagObjName)
+    const selectors = document.querySelectorAll(tagObjName)
+    return Object.assign(selectors, Array.prototype, (type, event) => {
+      document.addEventListener(type, event)
+    })
   } else if (idNameReg.test(tagObjName)) {
-    return document.querySelectorAll(tagObjName)[0]
+    const selectors = document.querySelectorAll(tagObjName)[0]
+    return Object.assign(selectors, Array.prototype, (type, event) => {
+      document.addEventListener(type, event)
+    })
   } else {
     return null
   }
@@ -13,7 +21,7 @@ const $ = function (tagObjName) {
 
 $('#confirmBtn').addEventListener('click', function (e) {
   e.preventDefault()
-
+  const modal = document.getElementById('confirmmodify-modal')
   const notValue = Array.prototype.map.call($('.requiredItem'), (item) => {
     const selectNumber = item.selectedIndex
     const itemValue = item.options[selectNumber].value
@@ -34,9 +42,12 @@ $('#confirmBtn').addEventListener('click', function (e) {
   })
 
   if (!stopFlag) {
-    return false
+    modal.classList.remove('is-active')
+  } else {
+    modal.classList.add('is-active')
   }
+})
 
-  const modal = document.getElementById('confirmmodify-modal')
-  if (modal) modal.classList.toggle('is-active')
+$('#returnBtn').addEventListener('click', () => {
+  history.back()
 })
