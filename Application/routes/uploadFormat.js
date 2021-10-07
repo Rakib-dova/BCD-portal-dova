@@ -16,6 +16,14 @@ const constantsDefine = require('../constants')
 const fs = require('fs')
 const path = require('path')
 const filePath = process.env.INVOICE_UPLOAD_PATH
+const bodyParser = require('body-parser')
+router.use(
+  bodyParser.urlencoded({
+    extended: false,
+    type: 'multipart/form-data',
+    limit: '6826KB'
+  })
+)
 
 let globalCsvData = []
 let uploadFormatItemName
