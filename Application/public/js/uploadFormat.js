@@ -1,9 +1,12 @@
 const $ = function (tagObjName) {
-  const classNameReg = new RegExp(/\.+[a-zA-Z0-9]/)
-  const idNameReg = new RegExp(/\#+[a-zA-Z0-9]/)
+  const classPatten = '\\.+[a-zA-Z0-9]'
+  const idPatten = '\\#+[a-zA-Z0-9]'
+  const classNameReg = new RegExp(classPatten)
+  const idNameReg = new RegExp(idPatten)
 
   if (classNameReg.test(tagObjName)) {
-    return document.querySelectorAll(tagObjName)
+    const selectors = document.querySelectorAll(tagObjName)
+    return Object.assign(selectors, Array.prototype)
   } else if (idNameReg.test(tagObjName)) {
     return document.querySelectorAll(tagObjName)[0]
   } else {
@@ -33,5 +36,16 @@ $('#confirmBtn').addEventListener('click', function (e) {
 
   if (!stopFlag) {
     e.preventDefault()
+  } else {
+    // $('#csvFormatConfirm-modal').classList.add('is-active')
+    // const targetDataNumSelect = Object.assign(document.querySelectorAll('select'), Array.prototype)
+    // const displayFormatData = $('.displayFormatData')
+    // const formatDatas = $('.formatDatas')
+    // displayFormatData.forEach((item, idx) => {
+    //   item.innerText =
+    //     targetDataNumSelect[idx].value === '' ? targetDataNumSelect[idx].value : ~~targetDataNumSelect[idx].value + 1
+    //   formatDatas[idx].value = item.innerText
+    // })
+    // e.preventDefault()
   }
 })

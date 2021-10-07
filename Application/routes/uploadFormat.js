@@ -153,11 +153,12 @@ const cbPostIndex = async (req, res, next) => {
 
   let duplicateFlag = false
   // 配列に読み込んだcsvデータを入れる。
-  const csvData = headerArr.map((header) => {
+  const columnArr = constantsDefine.csvFormatDefine.columnArr
+  const csvData = headerArr.map((header, idx) => {
     if (header.length > 100) {
       duplicateFlag = true
     }
-    return { item: header, value: '' }
+    return { item: header, value: '', moto: columnArr[idx].columnName }
   })
 
   if (duplicateFlag) {
