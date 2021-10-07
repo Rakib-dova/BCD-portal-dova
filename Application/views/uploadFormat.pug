@@ -8,12 +8,6 @@ block content
           .title.is-family-noto-sans 請求書アップロードフォーマット設定
           .subtitle.is-family-noto-sans 対応する取込データを設定してください
       .container
-        input.input(type="hidden" id="headerItems" name="headerItems" value= headerItems) 
-        input.input(type="hidden" id="uploadGeneral" name="uploadGeneral" value= uploadGeneral) 
-        input.input(type="hidden" id="taxIds" name="taxIds" value= taxIds) 
-        input.input(type="hidden" id="unitIds" name="unitIds" value= unitIds) 
-        input.input(type="hidden" id="csvfilename" name="csvfilename" value= csvfilename)
-        input.input(type="hidden" id="selectedFormatData" name="selectedFormatData" value= selectedFormatData)  
         .columns
           .column
             .title.is-family-noto-sans 取込データ
@@ -351,11 +345,77 @@ block content
                   
         footer.modal-card-foot
           div.button-area
-            //- button.button.mr-6#returnBasic(type="submit" formaction="/uploadFormat/cbPostBackIndex" formmethod="POST") 戻る
-            a.button#return-btn.cancel-button(href='csvBasicFormat') 戻る
-            button.button.is-success.success-button#confirmBtn(type="submit" formaction="/uploadFormat/cbPostConfirmIndex" formmethod="POST") 確認
+            button.button.is-success.success-button.mr-6#confirmBtn(type="button" data-target="confirmmodify-modal") 確認
+            button.button(type="" formaction="/csvBasicFormat" formmethod="") 戻る
+
+        .modal.modal-fx-fadeInscale#confirmmodify-modal
+          .modal-background.cancel-button(data-target="confirmmodify-modal")
+          .modal-card#csvFormatConfirm-modal-card
+            header.modal-card-head
+              p.modal-card-title 請求書アップロードフォーマット設定 確認
+              button.delete(type="button" data-target="confirmmodify-modal")
+            section.modal-card-body
+             .columns.is-mobile.is-centered: .column.is-full
+              .field.card
+               .card-content
+                .title.is-5 基本情報
+                .field
+                 label(for="uploadFormatItemName") 設定名称
+                 input.width-50.float-right#uploadFormatItemName(type="text" name='uploadFormatItemName' value=uploadGeneral.uploadFormatItemName readonly)
+                .field
+                 label(for="uploadType") アップロード種別
+                 input.width-50.float-right#uploadType(type="text" name='uploadType' value=uploadGeneral.uploadType readonly)
+
+              .field.card
+               .card-content
+                details(open)
+                 summary.title.is-5 明細-税 識別子
+                 each tax in taxIds
+                  .field
+                   label.margin-top-10p(for= key)= tax.itemName
+                     input.width-50.float-right.tax(id=tax.id type="text" name= tax.key value= tax.value readonly)
+
+              .field.card
+               .card-content
+                details(open)
+                 summary.title.is-5 明細-単位 識別子
+                 each unit in unitIds
+                  .field
+                   label.margin-top-10p(for= key)= unit.itemName
+                     input.width-50.float-right.unit(id=unit.id type="text" name= unit.key value= unit.value readonly)
+
+              .field.card
+               .card-content
+                 .title.text-center.is-5 請求書データ用フォーマット  →  取込データ
+                 .box
+                  table.table.is-fullwidth.is-hoverable
+                   thead
+                     tr
+                       th 項目名
+                       th
+                       th.text-center 項目名
+                       th.text-center データ内容
+                   tbody
+                    each content, idx in headerItems
+                      if content.item.length !==0
+                        tr
+                          th= content.moto
+                          th →
+                          th.text-center.dataIndex#dataIndex= content.item
+                          th.text-center.dataItem#dataItem= content.value
+                      else
+                        tr
+                          th= content.moto
+                          th
+                          th.text-center.dataIndex#dataIndex= content.item
+                          th.text-center.dataItem#dataItem= content.value
+
+            footer.modal-card-foot
+              div.button-area
+                a.button.cancel-button.mr-6(data-target='confirmmodify-modal') キャンセル
+                button.button.is-success.success-button#confirmBtn(type="submit" formaction="/uploadFormat/cbPostConfirmIndex" formmethod="POST") 確認
       include footer
 
 block append scripts
-  script(src="/js/uploadFormat.js")
+  script(src="/js/uploadFormat-page.js")
 
