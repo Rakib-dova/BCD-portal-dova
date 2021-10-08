@@ -1209,6 +1209,7 @@ describe('uploadFormatのテスト', () => {
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
     })
+
     test('正常：ヘッダあり', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -2587,7 +2588,7 @@ describe('uploadFormatのテスト', () => {
       expect(next).toHaveBeenCalledWith(error500)
     })
 
-    test('異常：500エラー（csvRemove処理中エラー）', async () => {
+    test('異常：500エラー（読み込むファイルがない場合）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {
@@ -2595,13 +2596,17 @@ describe('uploadFormatのテスト', () => {
         userRole: 'dummy'
       }
       request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndexOn
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      pathSpy.mockReturnValue('/test')
+      helper.checkContractStatus = 10
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
@@ -2635,8 +2640,6 @@ describe('uploadFormatのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      helper.checkContractStatus = 10
 
       // 試験実施
       await uploadFormat.cbPostConfirmIndex(request, response, next)

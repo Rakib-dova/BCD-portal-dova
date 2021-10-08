@@ -129,9 +129,13 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // ファイル読み込む
+  let csv
   const extractFullpathFile = path.join(filePath, '/') + csvfilename
-
-  const csv = fs.readFileSync(extractFullpathFile, 'utf8')
+  try {
+    csv = fs.readFileSync(extractFullpathFile, 'utf8')
+  } catch {
+    return next(errorHelper.create(500))
+  }
   const tmpRows = csv.split(/\r?\n|\r/)
   const checkRow = []
   tmpRows.forEach((row) => {
