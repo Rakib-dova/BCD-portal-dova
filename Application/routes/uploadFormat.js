@@ -16,15 +16,8 @@ const constantsDefine = require('../constants')
 const fs = require('fs')
 const path = require('path')
 const filePath = process.env.INVOICE_UPLOAD_PATH
-const bodyParser = require('body-parser')
-
-router.use(
-  bodyParser.urlencoded({
-    extended: false,
-    type: 'application/x-www-form-urlencoded',
-    limit: '6826KB'
-  })
-)
+const multer = require('multer')
+const upload = multer({ dest: process.env.INVOICE_UPLOAD_PATH })
 
 // グローバル変数宣言
 let globalCsvData = []
@@ -107,8 +100,12 @@ const cbPostIndex = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
+  const originName = path.resolve(filePath, req.file.filename)
+  const newName = path.resolve(filePath, `${user.dataValues.userId}_${req.file.originalname}`)
+  fs.renameSync(originName, newName)
+
   // アプロードしたファイルを読み込む
-  csvfilename = user.dataValues.userId + '_' + req.body.dataFileName
+  csvfilename = newName.replace(filePath, '')
   uploadFormatNumber = req.body.uploadFormatNumber - 1
   defaultNumber = req.body.defaultNumber - 1
 
@@ -131,11 +128,13 @@ const cbPostIndex = async (req, res, next) => {
   // ファイル読み込む
   let csv
   const extractFullpathFile = path.join(filePath, '/') + csvfilename
+
   try {
     csv = fs.readFileSync(extractFullpathFile, 'utf8')
   } catch {
     return next(errorHelper.create(500))
   }
+
   const tmpRows = csv.split(/\r?\n|\r/)
   const checkRow = []
   tmpRows.forEach((row) => {
@@ -146,6 +145,7 @@ const cbPostIndex = async (req, res, next) => {
     const backURL = req.header('Referer') || '/'
     return res.redirect(backURL)
   }
+
   const mesaiArr = tmpRows[defaultNumber].trim().split(',')
   let headerArr = []
   if (req.body.checkItemNameLine === 'on') {
@@ -598,7 +598,7 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
-router.post('/', cbPostIndex)
+router.post('/', upload.single(), cbPostIndex)
 router.post('/cbPostConfirmIndex', cbPostConfirmIndex)
 
 module.exports = {

@@ -17,13 +17,16 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
+const path = require('path')
+const multer = require('multer')
+const upload = multer({ dest: process.env.INVOICE_UPLOAD_PATH })
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
 let request, response
-let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts
+let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy
 describe('csvBasicFormatのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -32,6 +35,7 @@ describe('csvBasicFormatのテスト', () => {
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSypTenant = jest.spyOn(tenantController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
+    pathSpy = jest.spyOn(path, 'resolve')
   })
   afterEach(() => {
     request.resetMocked()
@@ -41,6 +45,7 @@ describe('csvBasicFormatのテスト', () => {
     findOneSpy.mockRestore()
     findOneSypTenant.mockRestore()
     findOneSpyContracts.mockRestore()
+    pathSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -540,235 +545,6 @@ describe('csvBasicFormatのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
-    })
-  })
-
-  // -----------------------------------------------------------------------------------------
-  // cbPostCsvBasicFormatの確認
-
-  describe('cbPostCsvBasicFormat', () => {
-    test('正常:', async () => {
-      // 準備
-      // requestのuserIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      helper.checkContractStatus = 10
-
-      // ファイルデータを設定
-      request.body = {
-        hiddenFileData: fileData,
-        dataFileName: 'UTtest.csv'
-      }
-
-      // 試験実施
-      await csvBasicFormat.cbPostCsvBasicFormat(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(error500)
-    })
-
-    test('準正常：解約申込中', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な申込中の契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues2)
-
-      // 試験実施
-      await csvBasicFormat.cbPostCsvBasicFormat(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 解約手続き中画面が表示「される」
-      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
-    })
-
-    test('異常:500エラー（Contractsデータエラー）', async () => {
-      // 準備
-      // requestのuserIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(null)
-
-      // ファイルデータを設定
-      request.body = {
-        hiddenFileData: fileData,
-        dataFileName: 'UTtest.csv'
-      }
-
-      // 試験実施
-      await csvBasicFormat.cbPostCsvBasicFormat(request, response, next)
-
-      // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      // 500エラーがエラーハンドリング「される」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).toHaveBeenCalledWith(error500)
-    })
-
-    test('異常:500エラー（csvファイルアップロードエラー）', async () => {
-      // 準備
-      // requestのuserIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues4)
-
-      // ファイルデータを設定
-      request.body = {
-        hiddenFileData: fileData,
-        dataFileName: './UTtest.csv'
-      }
-
-      // 試験実施
-      await csvBasicFormat.cbPostCsvBasicFormat(request, response, next)
-
-      // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      // 500エラーがエラーハンドリング「される」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).toHaveBeenCalledWith(error500)
-    })
-
-    test('異常：500エラー（DBからユーザ取得エラー）', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBからのユーザデータの取得ができなかった(null)場合を想定する
-      findOneSpy.mockReturnValue(null)
-      findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      // 試験実施
-      await csvBasicFormat.cbPostCsvBasicFormat(request, response, next)
-
-      // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(error500)
-      // response.renderが呼ばれ「ない」
-      expect(response.render).not.toHaveBeenCalled()
-    })
-
-    test('異常：404エラー：DBから取得したユーザのuserStatusが0以外の場合', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // DBから取得したユーザデータのuserStatusが0以外の場合を想定する
-      findOneSpy.mockReturnValue(dataValuesStatuserr)
-
-      // 試験実施
-      await csvBasicFormat.cbPostCsvBasicFormat(request, response, next)
-
-      // 期待結果
-      // 404エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(error404)
-    })
-
-    test('異常：500エラー（不正なContractStatus）', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの不正な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues4)
-
-      helper.checkContractStatus = 999
-
-      // 試験実施
-      await csvBasicFormat.cbPostCsvBasicFormat(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(error500)
-    })
-  })
-
-  // -----------------------------------------------------------------------------------------
-  // fileUploadの確認
-
-  describe('fileUpload', () => {
-    test('正常', async () => {
-      // 準備
-      request.user = user
-      const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-
-      // 試験実施
-      const resultUpload = await csvBasicFormat.fileUpload(filePath, fileName, uploadCsvData)
-      await uploadFormat.cbRemoveCsv(filePath, fileName)
-
-      // 期待結果
-      expect(resultUpload).toBeTruthy()
-    })
-
-    test('異常:ファイルパスが存在しない場合', async () => {
-      // 準備
-      request.user = user
-      const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-
-      // 試験実施
-      const resultUpload = await csvBasicFormat.fileUpload('/test', fileName, uploadCsvData)
-
-      // 期待結果
-      expect(resultUpload).toBeFalsy()
-    })
-
-    test('異常:アップロードエラー', async () => {
-      // 準備
-      request.user = user
-      const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-
-      // 試験実施
-      const resultUpload = await csvBasicFormat.fileUpload('///', fileName, uploadCsvData)
-
-      // 期待結果
-      expect(resultUpload).toBeFalsy()
     })
   })
   // -----------------------------------------------------------------------------------------

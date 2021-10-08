@@ -7,7 +7,8 @@ block content
 
   .section.is-overlay.mt-6
     .container.is-max-widescreen.is-family-noto-sans
-      form#form(action="#")
+      //- form#form(action="#" enctype="multipart/form-data")
+      form#form(action="#" enctype="multipart/form-data")
         article.panel.is-info
           h2.panel-heading 基本情報設定
           .panel-block
@@ -27,7 +28,6 @@ block content
                   .field
                     label(for="dataFile").input-label データファイル
                     p#dataFileRequired.input-label-required.input-label （必須）
-                    input(id='hiddenFileData' name='hiddenFileData' type="hidden")
                     .control
                       .columns.ml-0.pl-0
                         .column.pl-0
@@ -86,7 +86,7 @@ block content
                 .control
                   .column
                     div.button-area
-                      button.button.is-link.mr-6#submit(type="submit" formaction="/csvBasicFormat" formmethod="POST") 次へ
+                      button.button.is-link.mr-6#submit(type="submit" formaction="/uploadFormat" formmethod="POST") 次へ
                       a.button#return-btn.cancel-button(href='portal') 戻る
        
       include footer
