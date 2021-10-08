@@ -260,7 +260,7 @@ const isTaxCategori = function (category) {
     return 'TAXERR001'
   }
 
-  if (taxCategory.length > constantsDefine.invoiceValidDefine.TAX_VALUE || !taxCategory[category]) {
+  if (category.length > constantsDefine.invoiceValidDefine.TAX_VALUE || !taxCategory[category]) {
     return 'TAXERR000'
   }
 
@@ -274,7 +274,7 @@ const isUserTaxCategori = function (category, bconCsvTaxUser) {
     return 'TAXERR001'
   }
 
-  if (bconCsvTaxUser.length > constantsDefine.invoiceValidDefine.TAX_VALUE || !bconCsvTaxUser[category]) {
+  if (category.length > constantsDefine.invoiceValidDefine.TAX_VALUE || !bconCsvTaxUser[category]) {
     return 'TAXERR002'
   }
 

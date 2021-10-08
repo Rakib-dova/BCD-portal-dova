@@ -5,6 +5,8 @@ const { v4: uuidv4 } = require('uuid')
 const validate = require('./validate')
 const constants = require('../constants')
 const { exit } = require('process')
+const bconCsvTaxDefault = require('./bconCsvTax')
+const bconCsvUnitDefault = require('./bconCsvUnitcode')
 
 class Invoice {
   #DocumentId = null
@@ -896,7 +898,7 @@ class bconCsv {
   }
 
   convertUserTaxidentifier(uploadFormatIdentifier) {
-    let bconCsvTaxUser = require('./bconCsvTax')
+    let bconCsvTaxUser = {...bconCsvTaxDefault}
     const taxidentifier = Object.keys(bconCsvTaxUser)
     uploadFormatIdentifier.map(identifier => {
       if(identifier.extensionType === '0') {
@@ -912,7 +914,7 @@ class bconCsv {
   }
 
   convertUserUnitidentifier(uploadFormatIdentifier) {
-    let bconCsvUnitUser = require('./bconCsvUnitcode')
+    let bconCsvUnitUser = {...bconCsvUnitDefault}
     const unitidentifier = Object.keys(bconCsvUnitUser)
     uploadFormatIdentifier.map(identifier => {
       if(identifier.extensionType === '1') {
