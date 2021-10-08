@@ -36,7 +36,6 @@ document.getElementById('dataFile').addEventListener('change', function (e) {
         document.getElementById('dataFile').value = null
         alert('ファイルサイズが5MB超えています。\nCSVファイルを確認後もう一度アップロードしてください。')
       } else {
-        document.getElementById('hiddenFileData').value = btoa(fileReader.result)
         document.getElementById('dataFileName').value = document.getElementById('dataFile').files.item(0).name
       }
     }

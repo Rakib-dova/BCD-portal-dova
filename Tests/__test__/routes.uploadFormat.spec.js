@@ -6,7 +6,6 @@ jest.mock('../../Application/node_modules/express', () => {
 })
 
 const uploadFormat = require('../../Application/routes/uploadFormat')
-const csvBasicFormat = require('../../Application/routes/csvBasicFormat')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
@@ -15,34 +14,41 @@ const noticeHelper = require('../../Application/routes/helpers/notice')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
+const uploadFormatController = require('../../Application/controllers/uploadFormatController')
 const logger = require('../../Application/lib/logger.js')
 const path = require('path')
+const multer = require('multer')
+const upload = multer({ dest: process.env.INVOICE_UPLOAD_PATH })
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.envUploadFormat' })
 }
 let request, response
-let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy
+let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy, uploadFormatControllerSpy
 describe('uploadFormatのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
-    infoSpy = jest.spyOn(logger, 'info')
+    // infoSpy = jest.spyOn(logger, 'info')
+    logger.info = jest.fn()
+    logger.error = jest.fn()
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSypTenant = jest.spyOn(tenantController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     pathSpy = jest.spyOn(path, 'join')
+    uploadFormatControllerSpy = jest.spyOn(uploadFormatController, 'insert')
   })
   afterEach(() => {
     request.resetMocked()
     response.resetMocked()
     next.mockReset()
-    infoSpy.mockRestore()
+    // infoSpy.mockRestore()
     findOneSpy.mockRestore()
     findOneSypTenant.mockRestore()
     findOneSpyContracts.mockRestore()
     pathSpy.mockRestore()
+    uploadFormatControllerSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -132,12 +138,11 @@ describe('uploadFormatのテスト', () => {
     }
   }
 
-  // ファイルパス設定
-  const filePath = process.env.INVOICE_UPLOAD_PATH
   // ファイル名設定
+  const filePath = process.env.INVOICE_UPLOAD_PATH
   const fileName = 'uploadFormatTest.csv'
   const fileNameErr = 'uploadFormatTest2.csv'
-  const uploadFileName = dataValues.dataValues.userId + '_' + fileName
+
   const uploadFileNameErr = dataValues.dataValues.userId + '_' + fileNameErr
   // ファイルデータ
   // 請求書が1つの場合
@@ -379,7 +384,6 @@ describe('uploadFormatのテスト', () => {
   const reqBodyForCbPostIndexOn = {
     uploadFormatItemName: 'testItemName',
     uploadType: '',
-    hiddenFileData: Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'),
     dataFileName: fileName,
     dataFile: fileName,
     checkItemNameLine: 'on',
@@ -454,7 +458,6 @@ describe('uploadFormatのテスト', () => {
   const reqBodyForCbPostIndexOff = {
     uploadFormatItemName: 'testItemName',
     uploadType: '',
-    hiddenFileData: Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'),
     dataFileName: fileName,
     dataFile: fileName,
     checkItemNameLine: 'off',
@@ -508,7 +511,6 @@ describe('uploadFormatのテスト', () => {
   const reqBodyForCbPostIndexErr = {
     uploadFormatItemName: 'testItemName',
     uploadType: '',
-    hiddenFileData: Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'),
     dataFileName: fileNameErr,
     dataFile: fileNameErr,
     checkItemNameLine: 'on',
@@ -562,7 +564,6 @@ describe('uploadFormatのテスト', () => {
   const reqBodyForCbPostIndexTaxErr = {
     uploadFormatItemName: 'testItemName',
     uploadType: '',
-    hiddenFileData: Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'),
     dataFileName: fileName,
     dataFile: fileName,
     checkItemNameLine: 'on',
@@ -611,7 +612,6 @@ describe('uploadFormatのテスト', () => {
   const reqBodyForCbPostIndexUnitErr = {
     uploadFormatItemName: 'testItemName',
     uploadType: '',
-    hiddenFileData: Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'),
     dataFileName: fileName,
     dataFile: fileName,
     checkItemNameLine: 'on',
@@ -1138,7 +1138,8 @@ describe('uploadFormatのテスト', () => {
 
   describe('ルーティング', () => {
     test('uploadFormatのルーティングを確認', async () => {
-      expect(uploadFormat.router.post).toBeCalledWith('/', uploadFormat.cbPostIndex)
+      expect(uploadFormat.router.post).toHaveBeenCalledTimes(2)
+      expect(uploadFormat.router.post).toHaveBeenLastCalledWith('/cbPostConfirmIndex', uploadFormat.cbPostConfirmIndex)
     })
   })
 
@@ -1159,17 +1160,26 @@ describe('uploadFormatのテスト', () => {
       }
       request.user = user
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/test/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
 
       pathSpy.mockReturnValueOnce('/home/upload/')
       pathSpy.mockReturnValueOnce('/test/')
@@ -1192,13 +1202,34 @@ describe('uploadFormatのテスト', () => {
         userRole: 'dummy'
       }
       request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndexOn,
+        uploadFormatNumber: 3
+      }
+
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      pathSpy.mockReturnValue('/test')
+      pathSpy.mockReturnValueOnce('/test/')
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
@@ -1206,7 +1237,6 @@ describe('uploadFormatのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
     })
 
@@ -1223,38 +1253,38 @@ describe('uploadFormatのテスト', () => {
         ...reqBodyForCbPostIndexOn
       }
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
+      pathSpy.mockReturnValueOnce('/home/upload/')
+      pathSpy.mockReturnValueOnce('/test/')
+
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(error500)
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでcsvBasicFormatが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
-        headerItems: headerItems,
-        columnArr: columnArr,
-        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-        taxIds: taxIds,
-        unitIds: unitIds,
-        uploadGeneral: uploadGeneral
-      })
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
     })
 
     test('正常：ヘッダなし', async () => {
@@ -1270,17 +1300,27 @@ describe('uploadFormatのテスト', () => {
         ...reqBodyForCbPostIndexOff
       }
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1288,20 +1328,6 @@ describe('uploadFormatのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(error500)
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでcsvBasicFormatが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
-        headerItems: headerItemsNoheader,
-        columnArr: columnArr,
-        selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
-        taxIds: taxIds,
-        unitIds: unitIds,
-        uploadGeneral: uploadGeneral
-      })
     })
 
     test('正常：税の入力値がない場合', async () => {
@@ -1320,17 +1346,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1344,7 +1380,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
+        csvfilename: '/' + user.userId + '_UTtest.csv',
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -1370,17 +1406,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1394,7 +1440,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
+        csvfilename: '/' + user.userId + '_UTtest.csv',
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -1423,12 +1469,6 @@ describe('uploadFormatのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1459,6 +1499,22 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
@@ -1466,12 +1522,6 @@ describe('uploadFormatのテスト', () => {
 
       helper.checkContractStatus = 10
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1506,17 +1556,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1552,17 +1612,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1595,17 +1665,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileDataHeaderErr), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileNameErr,
-        Buffer.from(decodeURIComponent(fileDataHeaderErr), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1633,24 +1713,35 @@ describe('uploadFormatのテスト', () => {
 
       // ファイルデータを設定
       request.body = {
-        ...reqBodyForCbPostIndexOn,
+        ...reqBodyForCbPostIndexOff,
         checkItemNameLine: 'off',
-        defaultNumber: '0'
+        defaultNumber: '0',
+        dataFileName: 'headerlessDtaNumZero.csv'
       }
 
       request.Referer = '/csvBasicFormat'
+
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1685,17 +1776,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1723,22 +1824,33 @@ describe('uploadFormatのテスト', () => {
 
       // ファイルデータを設定
       request.body = {
-        ...reqBodyForCbPostIndexErr
+        ...reqBodyForCbPostIndexErr,
+        dataFileName: 'fileDataMesai100over.csv'
       }
 
       request.Referer = '/csvBasicFormat'
+
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileDataMesai), 'base64').toString('utf8'))
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileNameErr,
-        Buffer.from(decodeURIComponent(fileDataMesai), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1778,17 +1890,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1826,17 +1948,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileDataHeaderErr), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1874,17 +2006,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileDataHeaderErr), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1922,17 +2064,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileDataHeaderErr), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1970,17 +2122,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileDataHeaderErr), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2018,17 +2180,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileDataHeaderErr), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2066,17 +2238,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileDataHeaderErr), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2114,17 +2296,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileDataHeaderErr), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2162,17 +2354,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileDataHeaderErr), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2210,17 +2412,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileDataHeaderErr), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2255,17 +2467,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2279,7 +2501,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
+        csvfilename: '/' + user.userId + '_UTtest.csv',
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -2307,17 +2529,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2352,17 +2584,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2397,17 +2639,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2421,7 +2673,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: '12345678-cb0b-48ad-857d-4b42a44ede13_uploadFormatTest.csv',
+        csvfilename: '/' + user.userId + '_UTtest.csv',
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -2449,17 +2701,27 @@ describe('uploadFormatのテスト', () => {
 
       request.Referer = '/csvBasicFormat'
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2601,12 +2863,82 @@ describe('uploadFormatのテスト', () => {
         ...reqBodyForCbPostIndexOn
       }
 
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
+      pathSpy.mockReturnValueOnce('/test')
+
       helper.checkContractStatus = 10
+
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
+    })
+
+    test('異常：500エラー（ファイル削除無）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndexOn,
+        dataFileName: 'noDeletetedFile.csv'
+      }
+
+      request.Referer = '/csvBasicFormat'
+
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      pathSpy.mockReturnValueOnce('/test/')
+
+      helper.checkContractStatus = 10
+
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
@@ -2788,12 +3120,28 @@ describe('uploadFormatのテスト', () => {
       // 準備
       request.user = user
 
-      // テスト用csvファイルアップロード
-      await csvBasicFormat.fileUpload(
-        filePath,
-        uploadFileName,
-        Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      )
+      const uploadFileName = user.userId + '_UTtest.csv'
+
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
 
       // 試験実施
       const resultRemove = await uploadFormat.cbRemoveCsv(filePath, uploadFileName)
