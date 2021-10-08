@@ -21,7 +21,7 @@ const bodyParser = require('body-parser')
 router.use(
   bodyParser.urlencoded({
     extended: false,
-    type: 'multipart/form-data',
+    type: 'application/x-www-form-urlencoded',
     limit: '6826KB'
   })
 )
