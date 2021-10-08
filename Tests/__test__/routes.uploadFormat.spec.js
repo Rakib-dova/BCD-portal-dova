@@ -30,9 +30,7 @@ describe('uploadFormatのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
-    // infoSpy = jest.spyOn(logger, 'info')
-    logger.info = jest.fn()
-    logger.error = jest.fn()
+    infoSpy = jest.spyOn(logger, 'info')
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSypTenant = jest.spyOn(tenantController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
@@ -43,7 +41,7 @@ describe('uploadFormatのテスト', () => {
     request.resetMocked()
     response.resetMocked()
     next.mockReset()
-    // infoSpy.mockRestore()
+    infoSpy.mockRestore()
     findOneSpy.mockRestore()
     findOneSypTenant.mockRestore()
     findOneSpyContracts.mockRestore()
@@ -2938,7 +2936,6 @@ describe('uploadFormatのテスト', () => {
       pathSpy.mockReturnValueOnce('/test/')
 
       helper.checkContractStatus = 10
-
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)

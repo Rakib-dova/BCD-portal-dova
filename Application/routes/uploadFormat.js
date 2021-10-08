@@ -598,7 +598,7 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
-router.post('/', upload.single(), cbPostIndex)
+router.post('/', upload.single('dataFile'), cbPostIndex)
 router.post('/cbPostConfirmIndex', cbPostConfirmIndex)
 
 module.exports = {
