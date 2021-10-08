@@ -311,9 +311,6 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('csvBasicFormat', {
         csvTax: csvTax,
         csvUnit: csvUnit,
-        csvBasicArr: csvBasicArr,
-        taxArr: taxArr,
-        unitArr: unitArr,
         TS_HOST: process.env.TS_HOST
       })
     })
@@ -349,9 +346,6 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('csvBasicFormat', {
         csvTax: csvTax,
         csvUnit: csvUnit,
-        csvBasicArr: csvBasicArr,
-        taxArr: taxArr,
-        unitArr: unitArr,
         TS_HOST: process.env.TS_HOST
       })
     })
@@ -392,9 +386,6 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('csvBasicFormat', {
         csvTax: csvTax,
         csvUnit: csvUnit,
-        csvBasicArr: csvBasicArr,
-        taxArr: taxArr,
-        unitArr: unitArr,
         TS_HOST: process.env.TS_HOST
       })
     })

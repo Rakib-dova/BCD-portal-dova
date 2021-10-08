@@ -8,12 +8,6 @@ block content
           .title.is-family-noto-sans 請求書アップロードフォーマット設定
           .subtitle.is-family-noto-sans 対応する取込データを設定してください
       .container
-        input.input(type="hidden" id="headerItems" name="headerItems" value= headerItems) 
-        input.input(type="hidden" id="uploadGeneral" name="uploadGeneral" value= uploadGeneral) 
-        input.input(type="hidden" id="taxIds" name="taxIds" value= taxIds) 
-        input.input(type="hidden" id="unitIds" name="unitIds" value= unitIds) 
-        input.input(type="hidden" id="csvfilename" name="csvfilename" value= csvfilename)
-        input.input(type="hidden" id="selectedFormatData" name="selectedFormatData" value= selectedFormatData)  
         .columns
           .column
             .title.is-family-noto-sans 取込データ
@@ -21,15 +15,14 @@ block content
               table.table.is-fullwidth.is-hoverable
                 thead
                   tr
-                    th.text-center データ番号
-                    th.text-center 項目名
+                    th.text-center データ連番
+                    th.text-center 項目名  
                     th.text-center データ内容
-                tbody
-                  each content, index in headerItems
-                    tr
-                      th.text-center#dataIndex(name="dataContent")= index+1
-                      th.text-center#dataItem(name="dataContent")= content.item
-                      th.text-center#dataValue(name="dataContent")= content.value
+                each content, idx in headerItems
+                  tr
+                    th.text-center.dataIndex(name="dataContent")= idx+1
+                    th.text-center.dataItem(name="dataContent")= content.item
+                    th.text-center.dataValue(name="dataContent")= content.value
           .column
             .title.is-family-noto-sans 請求書データ用フォーマット
             .box
@@ -229,7 +222,7 @@ block content
                               option(value= index)= index+1                                
                           else
                             option(value= index)= index+1    
-  
+
                   tr
                     th
                       label.input-label 明細-項目ID
@@ -345,17 +338,76 @@ block content
                             if ~~selectedFormatData[18] === index
                               option(value= index selected)= index+1
                             else
-                              option(value= index)= index+1                                
+                              option(value= index)= index+1    
                           else
                             option(value= index)= index+1    
                   
         footer.modal-card-foot
           div.button-area
-            //- button.button.mr-6#returnBasic(type="submit" formaction="/uploadFormat/cbPostBackIndex" formmethod="POST") 戻る
-            a.button#return-btn.cancel-button(href='csvBasicFormat') 戻る
-            button.button.is-success.success-button#confirmBtn(type="submit" formaction="/uploadFormat/cbPostConfirmIndex" formmethod="POST") 確認
+            button.button.is-success.success-button.mr-6#confirmBtn(type="button" data-target="confirmModify-modal") 確認
+            a.button#returnBtn(href="#") 戻る
+
+        .modal.modal-fx-fadeInscale#confirmModify-modal
+          .modal-background.cancel-button(data-target="confirmModify-modal")
+          .modal-card#csvFormatConfirm-modal-card
+            header.modal-card-head
+              p.modal-card-title 請求書アップロードフォーマット設定 確認
+              button.delete(type="button" data-target="confirmModify-modal")
+            section.modal-card-body
+             .columns.is-mobile.is-centered: .column.is-full
+              .field.card
+               .card-content
+                .title.is-5 基本情報
+                .field
+                 label(for="uploadFormatItemName") 設定名称
+                 input.width-50.float-right#uploadFormatItemName(type="text" name='uploadFormatItemName' value=uploadGeneral.uploadFormatItemName readonly)
+                .field
+                 label(for="uploadType") アップロード種別
+                 input.width-50.float-right#uploadType(type="text" name='uploadType' value=uploadGeneral.uploadType readonly)
+
+              .field.card
+               .card-content
+                details(open)
+                 summary.title.is-5 明細-税 識別子
+                 each tax in taxIds
+                  .field
+                   label.margin-top-10p(for= key)= tax.itemName
+                     input.width-50.float-right.tax(id=tax.id type="text" name= tax.key value= tax.value readonly)
+
+              .field.card
+               .card-content
+                details(open)
+                 summary.title.is-5 明細-単位 識別子
+                 each unit in unitIds
+                  .field
+                   label.margin-top-10p(for= key)= unit.itemName
+                     input.width-50.float-right.unit(id=unit.id type="text" name= unit.key value= unit.value readonly)
+
+              .field.card
+               .card-content
+                 .title.text-center.is-5 請求書データ用フォーマット  →  取込データ
+                 .box
+                  table.table.is-fullwidth.is-hoverable
+                   thead
+                     tr
+                       th 標準項目名
+                       th
+                       th.text-center ユーザフォーマット項目名
+                       th.text-center データ内容
+                   tbody
+                    each column, idx in columnArr
+                      tr
+                        th= column.columnName
+                        th.checkArrow
+                        th.text-center.checkDataItem
+                        th.text-center.checkDataValue
+
+            footer.modal-card-foot
+              div.button-area
+                a.button.cancel-button.mr-6(data-target='confirmModify-modal') キャンセル
+                button.button.is-success.success-button#submit(type="submit" formaction="/uploadFormat/cbPostConfirmIndex" formmethod="POST") 登録
       include footer
 
 block append scripts
-  script(src="/js/uploadFormat.js")
+  script(src="/js/uploadFormat-page.js")
 

@@ -132,7 +132,7 @@ document.getElementById('submit').addEventListener('click', function (e) {
           (invalidCheckTarget[idx].getAttribute('name') === 'uploadFormatNumber' ||
             invalidCheckTarget[idx].getAttribute('name') === 'defaultNumber')
         ) {
-          cautionRequired.innerText = '「0 ~ 9999999」の範囲で入力してください。'
+          cautionRequired.innerText = '「1 ~ 9999999」の範囲で入力してください。'
         }
 
         if (invalidCheckTarget[idx].getAttribute('name') === 'dataFile') {
