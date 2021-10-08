@@ -40,8 +40,10 @@ const constantsDefine = require('../../Application/constants')
 const invoiceController = require('../../Application/controllers/invoiceController.js')
 const uploadFormatController = require('../../Application/controllers/uploadFormatController.js')
 const uploadFormatDetailController = require('../../Application/controllers/uploadFormatDetailController.js')
+const uploadFormatIdentifierController = require('../../Application/controllers/uploadFormatIdentifierController.js')
 const SUCCESSMESSAGE = constantsDefine.invoiceErrMsg.SUCCESS
 const SKIPMESSAGE = constantsDefine.invoiceErrMsg.SKIP
+const path = require('path')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
@@ -51,20 +53,25 @@ let request,
   response,
   infoSpy,
   findOneSpy,
+  pathSpy,
   findOneSpyContracts,
   invoiceListSpy,
   findAllByContractIdSpy,
   findByUploadFormatIdSpy
-let createSpyInvoices, createSpyinvoicesDetail, findOneSpyInvoice, findOneSypTenant
+
+let createSpyInvoices, createSpyinvoicesDetail, findOneSpyInvoice, findOneSypTenant, findByUploadFormatIdIdentifierSpy
 describe('csvuploadのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
-    infoSpy = jest.spyOn(logger, 'info')
+    // infoSpy = jest.spyOn(logger, 'info')
+    logger.info = jest.fn()
+    logger.error = jest.fn()
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     findAllByContractIdSpy = jest.spyOn(uploadFormatController, 'findByContractId')
     findByUploadFormatIdSpy = jest.spyOn(uploadFormatDetailController, 'findByUploadFormatId')
+    findByUploadFormatIdIdentifierSpy = jest.spyOn(uploadFormatIdentifierController, 'findByUploadFormatId')
     invoiceListSpy = jest.spyOn(csvupload, 'cbExtractInvoice')
     apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
       let result
@@ -105,12 +112,13 @@ describe('csvuploadのテスト', () => {
     createSpyinvoicesDetail = jest.spyOn(invoiceDetailController, 'insert')
     findOneSpyInvoice = jest.spyOn(invoiceController, 'findInvoice')
     findOneSypTenant = jest.spyOn(tenantController, 'findOne')
+    pathSpy = jest.spyOn(path, 'join')
   })
   afterEach(() => {
     request.resetMocked()
     response.resetMocked()
     next.mockReset()
-    infoSpy.mockRestore()
+    // infoSpy.mockRestore()
     findOneSpy.mockRestore()
     findOneSpyContracts.mockRestore()
     invoiceListSpy.mockRestore()
@@ -119,6 +127,8 @@ describe('csvuploadのテスト', () => {
     findOneSpyInvoice.mockRestore()
     findAllByContractIdSpy.mockRestore()
     findByUploadFormatIdSpy.mockRestore()
+    pathSpy.mockRestore()
+    findByUploadFormatIdIdentifierSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -1423,6 +1433,150 @@ describe('csvuploadのテスト', () => {
       updatedAt: '2021-07-09T04:30:00.000Z'
     }
   ]
+
+  // uploadFormatIdentifier 税データ
+  const uploadFormatIdentifierTaxResult = [
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '1',
+      extensionType: '0',
+      uploadFormatExtension: 'tax1',
+      defaultExtension: '消費税',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '2',
+      extensionType: '0',
+      uploadFormatExtension: 'tax2',
+      defaultExtension: '軽減税率',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '3',
+      extensionType: '0',
+      uploadFormatExtension: 'tax3',
+      defaultExtension: '不課税',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '4',
+      extensionType: '0',
+      uploadFormatExtension: 'tax4',
+      defaultExtension: '免税',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '5',
+      extensionType: '0',
+      uploadFormatExtension: 'tax5',
+      defaultExtension: '非課税',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    }
+  ]
+
+  // uploadFormatIdentifier 単位データ
+  const uploadFormatIdentifierUnit10Result = [
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '1',
+      extensionType: '1',
+      uploadFormatExtension: 'unit1',
+      defaultExtension: '人月',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '2',
+      extensionType: '1',
+      uploadFormatExtension: 'unit2',
+      defaultExtension: 'ボトル',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '3',
+      extensionType: '1',
+      uploadFormatExtension: 'unit3',
+      defaultExtension: 'コスト',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '4',
+      extensionType: '1',
+      uploadFormatExtension: 'unit4',
+      defaultExtension: 'コンテナ',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '5',
+      extensionType: '1',
+      uploadFormatExtension: 'unit5',
+      defaultExtension: 'センチリットル',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '6',
+      extensionType: '1',
+      uploadFormatExtension: 'unit6',
+      defaultExtension: '平方センチメートル',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '7',
+      extensionType: '1',
+      uploadFormatExtension: 'unit7',
+      defaultExtension: '立方センチメートル',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '8',
+      extensionType: '1',
+      uploadFormatExtension: 'unit8',
+      defaultExtension: 'センチメートル',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '9',
+      extensionType: '1',
+      uploadFormatExtension: 'unit9',
+      defaultExtension: 'ケース',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    },
+    {
+      uploadFormatId: uploadFormatId,
+      serialNumber: '10',
+      extensionType: '1',
+      uploadFormatExtension: 'unit10',
+      defaultExtension: 'カートン',
+      createdAt: '2021-07-09T04:30:00.000Z',
+      updatedAt: '2021-07-09T04:30:00.000Z'
+    }
+  ]
+
   // 結果値
   // bconCsvの結果値
   const returnBconCsv =
@@ -1430,6 +1584,13 @@ describe('csvuploadのテスト', () => {
 
   const returnBconCsvUser =
     '{"DocumentType":"InvoiceType","UBLVersionID":{"value":"2.0"},"CustomizationID":{"value":"urn:tradeshift.com:ubl-2.0-customizations:2010-06"},"ProfileID":{"value":"urn:www.cenbii.eu:profile:bii04:ver1.0","schemeID":"CWA 16073:2010","schemeAgencyID":"CEN/ISSS WS/BII","schemeVersionID":"1"},"ID":{"value":"2021-06-14"},"IssueDate":{"value":"UT_TEST_INVOICE_1_1-ed-ed"},"InvoiceTypeCode":{"value":"380","listID":"UN/ECE 1001 Subset","listAgencyID":"6","listVersionID":"D08B"},"DocumentCurrencyCode":{"value":"JPY"},"Note":[{"value":""}],"AdditionalDocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}],"AccountingCustomerParty":{"Party":{"PartyIdentification":[{"ID":{"value":"3cfebb4f-2338-4dc7-9523-5423a027a880","schemeID":"TS:ID","schemeName":"Tradeshift identifier"}}],"PartyName":[{"Name":{"value":null}}],"PostalAddress":{"StreetName":{"value":null},"BuildingNumber":{"value":null},"CityName":{"value":null},"PostalZone":{"value":null},"Country":{"IdentificationCode":{"value":"JP"}}},"Contact":{"ElectronicMail":{"value":null}}}},"Delivery":[{}],"InvoiceLine":[{"ID":{"value":"1"},"InvoicedQuantity":{"value":100,"unitCode":"EA"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":10},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"JP 消費税 10%"}}}}]}],"Item":{"Name":{"value":"PC"},"SellersItemIdentification":{"ID":{"value":"001"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"100000","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]}]}'
+
+  const returnBconCsvUserTax =
+    '{"DocumentType":"InvoiceType","UBLVersionID":{"value":"2.0"},"CustomizationID":{"value":"urn:tradeshift.com:ubl-2.0-customizations:2010-06"},"ProfileID":{"value":"urn:www.cenbii.eu:profile:bii04:ver1.0","schemeID":"CWA 16073:2010","schemeAgencyID":"CEN/ISSS WS/BII","schemeVersionID":"1"},"ID":{"value":"2021-10-05"},"IssueDate":{"value":"TEST20211005-ed-ed"},"InvoiceTypeCode":{"value":"380","listID":"UN/ECE 1001 Subset","listAgencyID":"6","listVersionID":"D08B"},"DocumentCurrencyCode":{"value":"JPY"},"Note":[{"value":""}],"AdditionalDocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}],"AccountingCustomerParty":{"Party":{"PartyIdentification":[{"ID":{"value":"7e5255fe-05e6-4fc9-acf0-076574bc35f7","schemeID":"TS:ID","schemeName":"Tradeshift identifier"}}],"PartyName":[{"Name":{"value":null}}],"PostalAddress":{"StreetName":{"value":null},"BuildingNumber":{"value":null},"CityName":{"value":null},"PostalZone":{"value":null},"Country":{"IdentificationCode":{"value":"JP"}}},"Contact":{"ElectronicMail":{"value":null}}}},"Delivery":[{}],"InvoiceLine":[{"ID":{"value":"1"},"InvoicedQuantity":{"value":1,"unitCode":"EA"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":10},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"JP 消費税 10%"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"1"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1001","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":2,"unitCode":"BO"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":8},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"JP 消費税(軽減税率) 8%"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"2"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1002","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":1,"unitCode":"EA"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"JP 不課税 0%"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"1"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1001","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":2,"unitCode":"BO"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"JP 免税 0%"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"2"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1002","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":1,"unitCode":"EA"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"JP 非課税 0%"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"1"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1001","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]}]}'
+
+  const returnBconCsvUserUnit =
+    '{"DocumentType":"InvoiceType","UBLVersionID":{"value":"2.0"},"CustomizationID":{"value":"urn:tradeshift.com:ubl-2.0-customizations:2010-06"},"ProfileID":{"value":"urn:www.cenbii.eu:profile:bii04:ver1.0","schemeID":"CWA 16073:2010","schemeAgencyID":"CEN/ISSS WS/BII","schemeVersionID":"1"},"ID":{"value":"2021-10-05"},"IssueDate":{"value":"TEST20211005-ed-ed"},"InvoiceTypeCode":{"value":"380","listID":"UN/ECE 1001 Subset","listAgencyID":"6","listVersionID":"D08B"},"DocumentCurrencyCode":{"value":"JPY"},"Note":[{"value":""}],"AdditionalDocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}],"AccountingCustomerParty":{"Party":{"PartyIdentification":[{"ID":{"value":"7e5255fe-05e6-4fc9-acf0-076574bc35f7","schemeID":"TS:ID","schemeName":"Tradeshift identifier"}}],"PartyName":[{"Name":{"value":null}}],"PostalAddress":{"StreetName":{"value":null},"BuildingNumber":{"value":null},"CityName":{"value":null},"PostalZone":{"value":null},"Country":{"IdentificationCode":{"value":"JP"}}},"Contact":{"ElectronicMail":{"value":null}}}},"Delivery":[{}],"InvoiceLine":[{"ID":{"value":"1"},"InvoicedQuantity":{"value":1,"unitCode":"3C"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"消費税"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"1"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1001","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":2,"unitCode":"BO"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"消費税"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"2"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1002","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":3,"unitCode":"C5"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"消費税"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"3"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1003","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":4,"unitCode":"CH"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"消費税"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"4"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1004","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":5,"unitCode":"CLT"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"消費税"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"5"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1005","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":6,"unitCode":"CMK"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"消費税"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"6"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1006","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":7,"unitCode":"CMQ"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"消費税"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"7"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1007","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":8,"unitCode":"CMT"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"消費税"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"8"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1008","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":8,"unitCode":"CS"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"消費税"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"8"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1008","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]},{"ID":{"value":"1"},"InvoicedQuantity":{"value":8,"unitCode":"CT"},"LineExtensionAmount":{"value":null,"currencyID":"JPY"},"TaxTotal":[{"TaxSubtotal":[{"TaxCategory":{"ID":{"value":"S","schemeID":"UN/ECE 5305","schemeAgencyID":"6","schemeVersionID":"D08B"},"Percent":{"value":0},"TaxScheme":{"ID":{"value":"VAT","schemeID":"UN/ECE 5153 Subset","schemeAgencyID":"6","schemeVersionID":"D08B"},"Name":{"value":"消費税"}}}}]}],"Item":{"Name":{"value":"明細"},"SellersItemIdentification":{"ID":{"value":"8"}},"Description":[{"value":null}]},"Price":{"PriceAmount":{"value":"1008","currencyID":"JPY"}},"DocumentReference":[{"ID":{"value":""},"DocumentTypeCode":{"value":"File ID","listID":"urn:tradeshift.com:api:1.0:documenttypecode"}}]}]}'
+
   describe('ルーティング', () => {
     test('csvuploadのルーティングを確認', async () => {
       expect(csvupload.router.get).toBeCalledWith('/', helper.isAuthenticated, csvupload.cbGetIndex)
@@ -1957,6 +2118,39 @@ describe('csvuploadのテスト', () => {
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
 
+      // 期待結果
+      // response.statusが「500」で予想したsendデータである
+      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    })
+
+    test('500エラー：cbRemoveCsv return false', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // ファイルデータを設定
+      request.body = {
+        fileData: fileData,
+        uploadFormatId: ''
+      }
+
+      pathSpy.mockReturnValue('/test')
+      pathSpy.mockReturnValue('/home/upload/')
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
       // 期待結果
       // response.statusが「500」で予想したsendデータである
       expect(response.status).toHaveBeenCalledWith(500)
@@ -6871,34 +7065,6 @@ describe('csvuploadのテスト', () => {
       expect(JSON.stringify(invoiceList[0].INVOICE.getDocument())).toBe(returnBconCsv)
     })
 
-    test('正常 : bconCsv内容確認(ユーザーフォーマット)', async () => {
-      // 準備
-      request.user = user
-      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
-      const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
-      const extractFullpathFile = filePath + '/' + filename
-      uploadFormatDetailController.findByUploadFormatId = jest.fn((uploadFormatId) => {
-        return uploadFormatDetailResult
-      })
-      // 試験実施
-      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
-      expect(resultUpl).toBeTruthy()
-
-      // formatFlag, uploadFormatDetail 設定
-      const formatFlag = true
-      const uploadFormatDetail = uploadFormatDetailResult
-
-      const csvObj = new bconCsv(extractFullpathFile, formatFlag, uploadFormatDetail)
-      const invoiceList = csvObj.getInvoiceList()
-
-      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
-      expect(resultRem).toBeTruthy()
-
-      // 期待結果
-      // JSONの内容が正しいこと
-      expect(JSON.stringify(invoiceList[0].INVOICE.getDocument())).toBe(returnBconCsvUser)
-    })
-
     test('正常 : bconCsv取り込み結果カウント確認', async () => {
       // 準備
       request.user = user
@@ -6911,10 +7077,16 @@ describe('csvuploadのテスト', () => {
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
 
-      const csvObj = new bconCsv(extractFullpathFile)
+      // formatFlag, uploadFormatDetail 設定
+      const formatFlag = false
+      const uploadFormatDetail = []
+      const uploadFormatIdentifier = []
+
+      const csvObj = new bconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier)
       const invoiceList = csvObj.getInvoiceList()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+
       expect(resultRem).toBeTruthy()
 
       // 期待結果
@@ -6930,6 +7102,107 @@ describe('csvuploadのテスト', () => {
       expect(invoiceList[2].successCount).toBe(0)
       expect(invoiceList[2].skipCount).toBe(1)
       expect(invoiceList[2].failCount).toBe(0)
+    })
+
+    test('正常 : bconCsv内容確認(ユーザーフォーマット-アップロードフォーマット)', async () => {
+      // 準備
+      request.user = user
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+      const extractFullpathFile = filePath + '/' + filename
+
+      uploadFormatDetailController.findByUploadFormatId = jest.fn((uploadFormatId) => {
+        return uploadFormatDetailResult
+      })
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      // formatFlag, uploadFormatDetail 設定
+      const formatFlag = true
+      const uploadFormatDetail = uploadFormatDetailResult
+      const uploadFormatIdentifier = []
+
+      const csvObj = new bconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier)
+      const invoiceList = csvObj.getInvoiceList()
+
+      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // JSONの内容が正しいこと
+      expect(JSON.stringify(invoiceList[0].INVOICE.getDocument())).toBe(returnBconCsvUser)
+    })
+
+    test('正常 : bconCsv内容確認(ユーザーフォーマット-税)', async () => {
+      // 準備
+      request.user = user
+      const fs = require('fs')
+      const path = require('path')
+      const testFileName = 'csvUpload_Format_Tax.csv'
+      const TestfilePath = path.resolve(`./testData/${testFileName}`)
+      const fileData = fs.readFileSync(TestfilePath, {
+        encoding: 'utf-8',
+        flag: 'r'
+      })
+
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+      const extractFullpathFile = filePath + '/' + filename
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, fileData)
+      expect(resultUpl).toBeTruthy()
+
+      // formatFlag, uploadFormatDetail 設定
+      const formatFlag = true
+      const uploadFormatDetail = uploadFormatDetailResult
+      const uploadFormatIdentifier = uploadFormatIdentifierTaxResult
+
+      const csvObj = new bconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier)
+
+      const invoiceList = csvObj.getInvoiceList()
+
+      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // JSONの内容が正しいこと
+      expect(JSON.stringify(invoiceList[0].INVOICE.getDocument())).toBe(returnBconCsvUserTax)
+    })
+
+    test('正常 : bconCsv内容確認(ユーザーフォーマット-単位)', async () => {
+      // 準備
+      request.user = user
+      const fs = require('fs')
+      const path = require('path')
+      const testFileName = 'csvUpload_Format_Unit.csv'
+      const TestfilePath = path.resolve(`./testData/${testFileName}`)
+      const fileData = fs.readFileSync(TestfilePath, {
+        encoding: 'utf-8',
+        flag: 'r'
+      })
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+      const extractFullpathFile = filePath + '/' + filename
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, fileData)
+      expect(resultUpl).toBeTruthy()
+
+      // formatFlag, uploadFormatDetail 設定
+      const formatFlag = true
+      const uploadFormatDetail = uploadFormatDetailResult
+      const uploadFormatIdentifier = uploadFormatIdentifierUnit10Result
+
+      const csvObj = new bconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier)
+      const invoiceList = csvObj.getInvoiceList()
+
+      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // JSONの内容が正しいこと
+      expect(JSON.stringify(invoiceList[0].INVOICE.getDocument())).toBe(returnBconCsvUserUnit)
     })
   })
 
