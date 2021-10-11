@@ -19,57 +19,6 @@ const filePath = process.env.INVOICE_UPLOAD_PATH
 const multer = require('multer')
 const upload = multer({ dest: process.env.INVOICE_UPLOAD_PATH })
 
-// グローバル変数宣言
-let globalCsvData = []
-let uploadFormatItemName,
-  uploadType,
-  csvfilename,
-  uploadFormatNumber,
-  defaultNumber,
-  keyConsumptionTax,
-  keyReducedTax,
-  keyFreeTax,
-  keyDutyFree,
-  keyExemptTax,
-  keyManMonth,
-  keyBottle,
-  keyCost,
-  keyContainer,
-  keyCentilitre,
-  keySquareCentimeter,
-  keyCubicCentimeter,
-  keyCentimeter,
-  keyCase,
-  keyCarton,
-  keyDay,
-  keyDeciliter,
-  keyDecimeter,
-  keyGrossKilogram,
-  keyPieces,
-  keyFeet,
-  keyGallon,
-  keyGram,
-  keyGrossTonnage,
-  keyHour,
-  keyKilogram,
-  keyKilometers,
-  keyKilowattHour,
-  keyPound,
-  keyLiter,
-  keyMilligram,
-  keyMilliliter,
-  keyMillimeter,
-  keyMonth,
-  keySquareMeter,
-  keyCubicMeter,
-  keyMeter,
-  keyNetTonnage,
-  keyPackage,
-  keyRoll,
-  keyFormula,
-  keyTonnage,
-  keyOthers
-
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
 
@@ -105,9 +54,9 @@ const cbPostIndex = async (req, res, next) => {
   fs.renameSync(originName, newName)
 
   // アプロードしたファイルを読み込む
-  csvfilename = newName.replace(filePath, '')
-  uploadFormatNumber = req.body.uploadFormatNumber - 1
-  defaultNumber = req.body.defaultNumber - 1
+  const csvfilename = newName.replace(filePath, '')
+  const uploadFormatNumber = req.body.uploadFormatNumber - 1
+  const defaultNumber = req.body.defaultNumber - 1
 
   // データ開始行番号、項目名の行番号チェック
   if (
@@ -192,9 +141,8 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // 変数にページからもらったデータを格納
-  globalCsvData = csvData
-  uploadFormatItemName = req.body.uploadFormatItemName
-  uploadType = req.body.uploadType
+  const uploadFormatItemName = req.body.uploadFormatItemName
+  const uploadType = req.body.uploadType
 
   const uploadGeneral = {
     uploadFormatItemName: uploadFormatItemName,
@@ -202,11 +150,11 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // tax
-  keyConsumptionTax = req.body.keyConsumptionTax
-  keyReducedTax = req.body.keyReducedTax
-  keyFreeTax = req.body.keyFreeTax
-  keyDutyFree = req.body.keyDutyFree
-  keyExemptTax = req.body.keyExemptTax
+  const keyConsumptionTax = req.body.keyConsumptionTax
+  const keyReducedTax = req.body.keyReducedTax
+  const keyFreeTax = req.body.keyFreeTax
+  const keyDutyFree = req.body.keyDutyFree
+  const keyExemptTax = req.body.keyExemptTax
 
   const taxIds = {
     keyConsumptionTax: keyConsumptionTax,
@@ -253,44 +201,44 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // unit
-  keyManMonth = req.body.keyManMonth
-  keyBottle = req.body.keyBottle
-  keyCost = req.body.keyCost
-  keyContainer = req.body.keyContainer
-  keyCentilitre = req.body.keyCentilitre
-  keySquareCentimeter = req.body.keySquareCentimeter
-  keyCubicCentimeter = req.body.keyCubicCentimeter
-  keyCentimeter = req.body.keyCentimeter
-  keyCase = req.body.keyCase
-  keyCarton = req.body.keyCarton
-  keyDay = req.body.keyDay
-  keyDeciliter = req.body.keyDeciliter
-  keyDecimeter = req.body.keyDecimeter
-  keyGrossKilogram = req.body.keyGrossKilogram
-  keyPieces = req.body.keyPieces
-  keyFeet = req.body.keyFeet
-  keyGallon = req.body.keyGallon
-  keyGram = req.body.keyGram
-  keyGrossTonnage = req.body.keyGrossTonnage
-  keyHour = req.body.keyHour
-  keyKilogram = req.body.keyKilogram
-  keyKilometers = req.body.keyKilometers
-  keyKilowattHour = req.body.keyKilowattHour
-  keyPound = req.body.keyPound
-  keyLiter = req.body.keyLiter
-  keyMilligram = req.body.keyMilligram
-  keyMilliliter = req.body.keyMilliliter
-  keyMillimeter = req.body.keyMillimeter
-  keyMonth = req.body.keyMonth
-  keySquareMeter = req.body.keySquareMeter
-  keyCubicMeter = req.body.keyCubicMeter
-  keyMeter = req.body.keyMeter
-  keyNetTonnage = req.body.keyNetTonnage
-  keyPackage = req.body.keyPackage
-  keyRoll = req.body.keyRoll
-  keyFormula = req.body.keyFormula
-  keyTonnage = req.body.keyTonnage
-  keyOthers = req.body.keyOthers
+  const keyManMonth = req.body.keyManMonth
+  const keyBottle = req.body.keyBottle
+  const keyCost = req.body.keyCost
+  const keyContainer = req.body.keyContainer
+  const keyCentilitre = req.body.keyCentilitre
+  const keySquareCentimeter = req.body.keySquareCentimeter
+  const keyCubicCentimeter = req.body.keyCubicCentimeter
+  const keyCentimeter = req.body.keyCentimeter
+  const keyCase = req.body.keyCase
+  const keyCarton = req.body.keyCarton
+  const keyDay = req.body.keyDay
+  const keyDeciliter = req.body.keyDeciliter
+  const keyDecimeter = req.body.keyDecimeter
+  const keyGrossKilogram = req.body.keyGrossKilogram
+  const keyPieces = req.body.keyPieces
+  const keyFeet = req.body.keyFeet
+  const keyGallon = req.body.keyGallon
+  const keyGram = req.body.keyGram
+  const keyGrossTonnage = req.body.keyGrossTonnage
+  const keyHour = req.body.keyHour
+  const keyKilogram = req.body.keyKilogram
+  const keyKilometers = req.body.keyKilometers
+  const keyKilowattHour = req.body.keyKilowattHour
+  const keyPound = req.body.keyPound
+  const keyLiter = req.body.keyLiter
+  const keyMilligram = req.body.keyMilligram
+  const keyMilliliter = req.body.keyMilliliter
+  const keyMillimeter = req.body.keyMillimeter
+  const keyMonth = req.body.keyMonth
+  const keySquareMeter = req.body.keySquareMeter
+  const keyCubicMeter = req.body.keyCubicMeter
+  const keyMeter = req.body.keyMeter
+  const keyNetTonnage = req.body.keyNetTonnage
+  const keyPackage = req.body.keyPackage
+  const keyRoll = req.body.keyRoll
+  const keyFormula = req.body.keyFormula
+  const keyTonnage = req.body.keyTonnage
+  const keyOthers = req.body.keyOthers
 
   const unitIds = {
     keyManMonth: keyManMonth,
@@ -462,8 +410,8 @@ const cbPostConfirmIndex = async (req, res, next) => {
   const resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
     uploadFormatId: uploadFormatId,
     contractId: contract.dataValues.contractId,
-    setName: uploadFormatItemName,
-    uploadType: uploadType
+    setName: req.body.uploadFormatItemName,
+    uploadType: req.body.uploadType
   })
 
   if (!resultUploadFormat?.dataValues) {
@@ -480,7 +428,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
       resultUploadFormatDetail = await uploadFormatDetailController.insert({
         uploadFormatId: uploadFormatId,
         serialNumber: iCnt, // 通番変数,
-        uploadFormatItemName: globalCsvData[req.body.formatData[idx]]?.item, // 左のアイテム名,
+        uploadFormatItemName: req.body.headerItems[req.body.formatData[idx]], // 左のアイテム名,
         uploadFormatNumber: req.body.formatData[idx], // 左の番号,
         defaultItemName: columnArr[idx].columnName, // 右のアイテム名,
         defaultNumber: idx // 右の番号
@@ -496,11 +444,11 @@ const cbPostConfirmIndex = async (req, res, next) => {
   iCnt = 1
 
   const taxIds = [
-    { name: '消費税', value: keyConsumptionTax },
-    { name: '軽減税率', value: keyReducedTax },
-    { name: '不課税', value: keyFreeTax },
-    { name: '免税', value: keyDutyFree },
-    { name: '非課税', value: keyExemptTax }
+    { name: '消費税', value: req.body.keyConsumptionTax },
+    { name: '軽減税率', value: req.body.keyReducedTax },
+    { name: '不課税', value: req.body.keyFreeTax },
+    { name: '免税', value: req.body.keyDutyFree },
+    { name: '非課税', value: req.body.keyExemptTax }
   ]
 
   for (let idx = 0; idx < taxIds.length; idx++) {
@@ -520,44 +468,44 @@ const cbPostConfirmIndex = async (req, res, next) => {
   }
   // uploadFormatIdentifier登録（単位）
   const unitIds = [
-    { name: '人月', value: keyManMonth },
-    { name: 'ボトル', value: keyBottle },
-    { name: 'コスト', value: keyCost },
-    { name: 'コンテナ', value: keyContainer },
-    { name: 'センチリットル', value: keyCentilitre },
-    { name: '平方センチメートル', value: keySquareCentimeter },
-    { name: '立方センチメートル', value: keyCubicCentimeter },
-    { name: 'センチメートル', value: keyCentimeter },
-    { name: 'ケース', value: keyCase },
-    { name: 'カートン', value: keyCarton },
-    { name: '日', value: keyDay },
-    { name: 'デシリットル', value: keyDeciliter },
-    { name: 'デシメートル', value: keyDecimeter },
-    { name: 'グロス・キログラム', value: keyGrossKilogram },
-    { name: '個', value: keyPieces },
-    { name: 'フィート', value: keyFeet },
-    { name: 'ガロン', value: keyGallon },
-    { name: 'グラム', value: keyGram },
-    { name: '総トン', value: keyGrossTonnage },
-    { name: '時間', value: keyHour },
-    { name: 'キログラム', value: keyKilogram },
-    { name: 'キロメートル', value: keyKilometers },
-    { name: 'キロワット時', value: keyKilowattHour },
-    { name: 'ポンド', value: keyPound },
-    { name: 'リットル', value: keyLiter },
-    { name: 'ミリグラム', value: keyMilligram },
-    { name: 'ミリリットル', value: keyMilliliter },
-    { name: 'ミリメートル', value: keyMillimeter },
-    { name: '月', value: keyMonth },
-    { name: '平方メートル', value: keySquareMeter },
-    { name: '立方メートル', value: keyCubicMeter },
-    { name: 'メーター', value: keyMeter },
-    { name: '純トン', value: keyNetTonnage },
-    { name: '包', value: keyPackage },
-    { name: '巻', value: keyRoll },
-    { name: '式', value: keyFormula },
-    { name: 'トン', value: keyTonnage },
-    { name: 'その他', value: keyOthers }
+    { name: '人月', value: req.body.keyManMonth },
+    { name: 'ボトル', value: req.body.keyBottle },
+    { name: 'コスト', value: req.body.keyCost },
+    { name: 'コンテナ', value: req.body.keyContainer },
+    { name: 'センチリットル', value: req.body.keyCentilitre },
+    { name: '平方センチメートル', value: req.body.keySquareCentimeter },
+    { name: '立方センチメートル', value: req.body.keyCubicCentimeter },
+    { name: 'センチメートル', value: req.body.keyCentimeter },
+    { name: 'ケース', value: req.body.keyCase },
+    { name: 'カートン', value: req.body.keyCarton },
+    { name: '日', value: req.body.keyDay },
+    { name: 'デシリットル', value: req.body.keyDeciliter },
+    { name: 'デシメートル', value: req.body.keyDecimeter },
+    { name: 'グロス・キログラム', value: req.body.keyGrossKilogram },
+    { name: '個', value: req.body.keyPieces },
+    { name: 'フィート', value: req.body.keyFeet },
+    { name: 'ガロン', value: req.body.keyGallon },
+    { name: 'グラム', value: req.body.keyGram },
+    { name: '総トン', value: req.body.keyGrossTonnage },
+    { name: '時間', value: req.body.keyHour },
+    { name: 'キログラム', value: req.body.keyKilogram },
+    { name: 'キロメートル', value: req.body.keyKilometers },
+    { name: 'キロワット時', value: req.body.keyKilowattHour },
+    { name: 'ポンド', value: req.body.keyPound },
+    { name: 'リットル', value: req.body.keyLiter },
+    { name: 'ミリグラム', value: req.body.keyMilligram },
+    { name: 'ミリリットル', value: req.body.keyMilliliter },
+    { name: 'ミリメートル', value: req.body.keyMillimeter },
+    { name: '月', value: req.body.keyMonth },
+    { name: '平方メートル', value: req.body.keySquareMeter },
+    { name: '立方メートル', value: req.body.keyCubicMeter },
+    { name: 'メーター', value: req.body.keyMeter },
+    { name: '純トン', value: req.body.keyNetTonnage },
+    { name: '包', value: req.body.keyPackage },
+    { name: '巻', value: req.body.keyRoll },
+    { name: '式', value: req.body.keyFormula },
+    { name: 'トン', value: req.body.keyTonnage },
+    { name: 'その他', value: req.body.keyOthers }
   ]
 
   for (let idx = 0; idx < unitIds.length; idx++) {

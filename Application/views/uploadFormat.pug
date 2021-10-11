@@ -22,6 +22,7 @@ block content
                   tr
                     th.text-center.dataIndex(name="dataContent")= idx+1
                     th.text-center.dataItem(name="dataContent")= content.item
+                    input.input(type="hidden" id="headerItems" name="headerItems" value= content.item)
                     th.text-center.dataValue(name="dataContent")= content.value
           .column
             .title.is-family-noto-sans 請求書データ用フォーマット

@@ -450,6 +450,28 @@ describe('uploadFormatのテスト', () => {
       '17',
       '18',
       '19'
+    ],
+    headerItems: [
+      'テスト',
+      '発行日',
+      '請求書番号',
+      'テナントID',
+      '支払期日',
+      '納品日',
+      '備考',
+      '銀行名',
+      '支店名',
+      '科目',
+      '口座番号',
+      '口座名義',
+      'その他特記事項',
+      '明細-項目ID',
+      '明細-内容',
+      '明細-数量',
+      '明細-単位',
+      '明細-単価',
+      '明細-税（消費税／軽減税率／不課税／免税／非課税）',
+      '明細-備考'
     ]
   }
 
@@ -1091,27 +1113,6 @@ describe('uploadFormatのテスト', () => {
     { item: '明細-備考', value: 'アップロードテスト' }
   ]
 
-  const headerItemsNoheader = [
-    { item: '', value: '2021-06-14' },
-    { item: '', value: 'UT_TEST_INVOICE_1_1' },
-    { item: '', value: '3cfebb4f-2338-4dc7-9523-5423a027a880' },
-    { item: '', value: '2021-03-31' },
-    { item: '', value: '2021-03-17' },
-    { item: '', value: 'test111' },
-    { item: '', value: 'testsiten' },
-    { item: '', value: 'testbank' },
-    { item: '', value: '普通' },
-    { item: '', value: '1111111' },
-    { item: '', value: 'kang_test' },
-    { item: '', value: '特記事項テストです。' },
-    { item: '', value: '001' },
-    { item: '', value: 'PC' },
-    { item: '', value: '100' },
-    { item: '', value: '個' },
-    { item: '', value: '100000' },
-    { item: '', value: '消費税' },
-    { item: '', value: 'アップロードテスト' }
-  ]
   const columnArr = [
     { columnName: '発行日', item: '', value: '' },
     { columnName: '請求書番号', item: '', value: '' },
@@ -1202,52 +1203,6 @@ describe('uploadFormatのテスト', () => {
       request.user = user
       // ファイルデータを設定
       request.body = {
-        ...reqBodyForCbPostIndexOn,
-        uploadFormatNumber: 3
-      }
-
-      // ファイルデータを設定
-      request.file = {
-        fieldname: 'dataFile',
-        originalname: 'UTtest.csv',
-        encoding: '7bit',
-        mimetype: 'application/vnd.ms-excel',
-        destination: filePath,
-        filename: '8d73eae9e5bcd33f5863b9251a76c551',
-        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
-        size: 567
-      }
-
-      const fs = require('fs')
-      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
-
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      pathSpy.mockReturnValueOnce('/test/')
-
-      // 試験実施
-      await uploadFormat.cbPostIndex(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).toHaveBeenCalledWith(error500)
-    })
-
-    test('正常：ヘッダあり', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // ファイルデータを設定
-      request.body = {
         ...reqBodyForCbPostIndexOn
       }
 
@@ -1282,6 +1237,52 @@ describe('uploadFormatのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
+    })
+
+    test('正常：ヘッダあり', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndexOn,
+        uploadFormatNumber: 3
+      }
+
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      pathSpy.mockReturnValueOnce('/test/')
+
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(error500)
     })
 
