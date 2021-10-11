@@ -250,6 +250,13 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
     formatFlag = true
     uploadFormatDetail = await uploadFormatDetailController.findByUploadFormatId(uploadFormatId)
     uploadFormatIdentifier = await uploadFormatIdentifierController.findByUploadFormatId(uploadFormatId)
+
+    // DBエラーの場合
+    if (uploadFormatIdentifier instanceof Error || uploadFormatIdentifier === null) {
+      setErrorLog(_req, 500)
+      return _req.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    }
+
     if (uploadFormatIdentifier.length === 0) {
       uploadFormatIdentifier = []
     }

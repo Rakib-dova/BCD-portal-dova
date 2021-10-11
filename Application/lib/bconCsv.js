@@ -889,6 +889,7 @@ class bconCsv {
     return this.#invoiceDocumentList
   }
 
+  // デフォルトフォーマットをユーザーが登録したアップロードフォーマットに合わせる
   convertUserCsvFormat(uploadFormatDetail,csvColumn) {
     let result= Array(19)
     uploadFormatDetail.forEach(detail => {
@@ -897,6 +898,7 @@ class bconCsv {
     return result.toString().split(',')
   }
 
+  // ユーザーが指定した税の識別子に合わせる
   convertUserTaxidentifier(uploadFormatIdentifier) {
     let bconCsvTaxUser = {...bconCsvTaxDefault}
     const taxidentifier = Object.keys(bconCsvTaxUser)
@@ -913,6 +915,7 @@ class bconCsv {
     return bconCsvTaxUser
   }
 
+  // ユーザーが指定した単位の識別子に合わせる
   convertUserUnitidentifier(uploadFormatIdentifier) {
     let bconCsvUnitUser = {...bconCsvUnitDefault}
     const unitidentifier = Object.keys(bconCsvUnitUser)
