@@ -5,6 +5,8 @@ const { v4: uuidv4 } = require('uuid')
 const validate = require('./validate')
 const constants = require('../constants')
 const { exit } = require('process')
+const bconCsvTaxDefault = require('./bconCsvTax')
+const bconCsvUnitDefault = require('./bconCsvUnitcode')
 
 class Invoice {
   #DocumentId = null
@@ -291,12 +293,12 @@ class bconCsv {
 
   #invoiceDocumentList = []
 
-  constructor(fullFilePath, formatFlag, uploadFormatDetail) {
+  constructor(fullFilePath, formatFlag, uploadFormatDetail, uploadFormatIdentifier) {
     this.#csvFile.setFile(fullFilePath, formatFlag, uploadFormatDetail)
-    this.convertTradeshiftInvoice(uploadFormatDetail)
+    this.convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier)
   }
 
-  convertTradeshiftInvoice(uploadFormatDetail) {
+  convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier) {
     // CSVカーラム
     const resultConvert = {
       invoiceDetailId: null, // invoiceDetailテーブルのinvoiceDetailIdカーラム
@@ -319,12 +321,19 @@ class bconCsv {
     let headerFlag = true
     let setInvoiceLineCnt = 0
     let errorData = ''
+    let bconCsvTaxUser = null
+    let bconCsvUnitUser = null
     
     invoiceData.some((element) => {
       let csvColumn = element.rows.split(',')
 
       if (formatFlag) {
         csvColumn = this.convertUserCsvFormat(uploadFormatDetail, csvColumn)
+        // taxsetting
+        if (uploadFormatIdentifier.length !== 0) {
+          bconCsvTaxUser = this.convertUserTaxidentifier(uploadFormatIdentifier)
+          bconCsvUnitUser = this.convertUserUnitidentifier(uploadFormatIdentifier)
+        }
       }
       
       resultConvert.invoiceDetailId = uuidv4()
@@ -705,25 +714,49 @@ class bconCsv {
           break
       }
 
-      switch (validate.isUnitcode(csvColumn[15])) {
-        case 'UNITERR000':
-          errorData += errorData
-            ? `,${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
-            : `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
-
-          resultConvert.status = -1
-          break
-        case 'UNITERR001':
-          errorData += errorData
-            ? `,${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
-            : `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
-
-          resultConvert.status = -1
-          break
-        default:
-          csvColumn[15] = validate.isUnitcode(csvColumn[15])
-          break
+      // unitValidation
+      if (!bconCsvUnitUser) {
+        switch (validate.isUnitcode(csvColumn[15])) {
+          case 'UNITERR000':
+            errorData += errorData
+              ? `,${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
+              : `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
+  
+            resultConvert.status = -1
+            break
+          case 'UNITERR001':
+            errorData += errorData
+              ? `,${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
+              : `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
+  
+            resultConvert.status = -1
+            break
+          default:
+            csvColumn[15] = validate.isUnitcode(csvColumn[15])
+            break
+        }
+      } else {
+        switch (validate.isUserUnitcode(csvColumn[15],bconCsvUnitUser)) {
+          case 'UNITERR000':
+            errorData += errorData
+              ? `,${constants.invoiceErrMsg[validate.isUserUnitcode(csvColumn[15],bconCsvUnitUser)]}`
+              : `${constants.invoiceErrMsg[validate.isUserUnitcode(csvColumn[15],bconCsvUnitUser)]}`
+  
+            resultConvert.status = -1
+            break
+          case 'UNITERR002':
+            errorData += errorData
+              ? `,${constants.invoiceErrMsg[validate.isUserUnitcode(csvColumn[15],bconCsvUnitUser)]}`
+              : `${constants.invoiceErrMsg[validate.isUserUnitcode(csvColumn[15],bconCsvUnitUser)]}`
+  
+            resultConvert.status = -1
+            break
+          default:
+            csvColumn[15] = validate.isUserUnitcode(csvColumn[15],bconCsvUnitUser)
+            break
+        }        
       }
+
 
       switch (validate.isPriceValue(csvColumn[16])) {
         case '':
@@ -737,25 +770,49 @@ class bconCsv {
           break
       }
 
-      switch (validate.isTaxCategori(csvColumn[17])) {
-        case 'TAXERR000':
-          errorData += errorData
-            ? `,${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
-            : `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
-
-          resultConvert.status = -1
-          break
-        case 'TAXERR001':
-          errorData += errorData
-            ? `,${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
-            : `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
-
-          resultConvert.status = -1
-          break
-        default:
-          csvColumn[17] = validate.isTaxCategori(csvColumn[17])
-          break
+      // taxValidation
+      if (!bconCsvTaxUser) {
+        switch (validate.isTaxCategori(csvColumn[17])) {
+          case 'TAXERR000':
+            errorData += errorData
+              ? `,${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
+              : `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
+  
+            resultConvert.status = -1
+            break
+          case 'TAXERR001':
+            errorData += errorData
+              ? `,${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
+              : `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
+  
+            resultConvert.status = -1
+            break
+          default:
+            csvColumn[17] = validate.isTaxCategori(csvColumn[17])
+            break
+        }
+      } else {
+        switch (validate.isUserTaxCategori(csvColumn[17],bconCsvTaxUser)) {
+          case 'TAXERR000':
+            errorData += errorData
+              ? `,${constants.invoiceErrMsg[validate.isUserTaxCategori(csvColumn[17],bconCsvTaxUser)]}`
+              : `${constants.invoiceErrMsg[validate.isUserTaxCategori(csvColumn[17],bconCsvTaxUser)]}`
+  
+            resultConvert.status = -1
+            break
+          case 'TAXERR002':
+            errorData += errorData
+              ? `,${constants.invoiceErrMsg[validate.isUserTaxCategori(csvColumn[17],bconCsvTaxUser)]}`
+              : `${constants.invoiceErrMsg[validate.isUserTaxCategori(csvColumn[17],bconCsvTaxUser)]}`
+  
+            resultConvert.status = -1
+            break
+          default:
+            csvColumn[17] = validate.isUserTaxCategori(csvColumn[17],bconCsvTaxUser)
+            break
+        }       
       }
+
       if (csvColumn[18] !== '') {
         switch (validate.isDescription(csvColumn[18])) {
           case '':
@@ -832,6 +889,7 @@ class bconCsv {
     return this.#invoiceDocumentList
   }
 
+  // デフォルトフォーマットをユーザーが登録したアップロードフォーマットに合わせる
   convertUserCsvFormat(uploadFormatDetail,csvColumn) {
     let result= Array(19)
     uploadFormatDetail.forEach(detail => {
@@ -840,5 +898,38 @@ class bconCsv {
     return result.toString().split(',')
   }
 
+  // ユーザーが指定した税の識別子に合わせる
+  convertUserTaxidentifier(uploadFormatIdentifier) {
+    let bconCsvTaxUser = {...bconCsvTaxDefault}
+    const taxidentifier = Object.keys(bconCsvTaxUser)
+    uploadFormatIdentifier.map(identifier => {
+      if(identifier.extensionType === '0') {
+        taxidentifier.map(tax => {
+          if(tax === identifier.defaultExtension) {
+            bconCsvTaxUser[identifier.uploadFormatExtension] = bconCsvTaxUser[tax]
+            delete bconCsvTaxUser[tax]
+          }
+        })
+      }
+    })
+    return bconCsvTaxUser
+  }
+
+  // ユーザーが指定した単位の識別子に合わせる
+  convertUserUnitidentifier(uploadFormatIdentifier) {
+    let bconCsvUnitUser = {...bconCsvUnitDefault}
+    const unitidentifier = Object.keys(bconCsvUnitUser)
+    uploadFormatIdentifier.map(identifier => {
+      if(identifier.extensionType === '1') {
+        unitidentifier.map(unit => {
+          if(unit === identifier.defaultExtension) {
+            bconCsvUnitUser[identifier.uploadFormatExtension] = bconCsvUnitUser[unit]
+            delete bconCsvUnitUser[unit]
+          }
+        })
+      }
+    })
+    return bconCsvUnitUser
+  }
 }
 module.exports = bconCsv

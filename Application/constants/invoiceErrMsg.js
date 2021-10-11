@@ -56,10 +56,12 @@ constantsDefine({
   // 税エラーメッセージ
   TAXERR000: `${invoiceValidDefine.TAX_KEY}はマニュアルに定義されたものの中から選択してください。`,
   TAXERR001: `${invoiceValidDefine.TAX_KEY}が未入力です。`,
+  TAXERR002: `${invoiceValidDefine.TAX_KEY}はフォーマットに定義されたものの中から選択してください。`,
 
   // 単位エラーメッセージ
   UNITERR000: `${invoiceValidDefine.UNITCODE_KEY}はマニュアルに定義されたものの中から選択してください。`,
   UNITERR001: `${invoiceValidDefine.UNITCODE_KEY}が未入力です。`,
+  UNITERR002: `${invoiceValidDefine.UNITCODE_KEY}はフォーマットに定義されたものの中から選択してください。`,
 
   // ヘッダーエラーメッセージ
   HEADERERR000: 'ヘッダーが指定のものと異なります。',

@@ -10,6 +10,7 @@ const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const uploadFormatController = require('../controllers/uploadFormatController.js')
 const uploadFormatDetailController = require('../controllers/uploadFormatDetailController.js')
+const uploadFormatIdentifierController = require('../controllers/uploadFormatIdentifierController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
@@ -242,11 +243,25 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
   const uploadFormatId = _req.body.uploadFormatId
   let formatFlag = false
   let uploadFormatDetail = []
+  let uploadFormatIdentifier = []
+
+  // ユーザーがアップロードしたフォーマットでCSVをアップロードする時
   if (uploadFormatId !== null && uploadFormatId.length !== 0) {
     formatFlag = true
     uploadFormatDetail = await uploadFormatDetailController.findByUploadFormatId(uploadFormatId)
+    uploadFormatIdentifier = await uploadFormatIdentifierController.findByUploadFormatId(uploadFormatId)
+
+    // DBエラーの場合
+    if (uploadFormatIdentifier instanceof Error || uploadFormatIdentifier === null) {
+      setErrorLog(_req, 500)
+      return _req.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    }
+
+    if (uploadFormatIdentifier.length === 0) {
+      uploadFormatIdentifier = []
+    }
   }
-  const csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail)
+  const csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier)
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
   const setHeaders = {}
