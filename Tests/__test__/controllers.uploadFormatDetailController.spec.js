@@ -225,7 +225,7 @@ describe('uploadFormatDetailControllerのテスト', () => {
       expect(result).toEqual(findAllResult)
     })
 
-    test('異常：uploadFormat.findAll（DB）エラー', async () => {
+    test('異常：uploadFormatDetail.findAll（DB）エラー', async () => {
       // 準備
       // DBエラーを想定する
       const dbError = new Error('DB error mock')
@@ -233,7 +233,7 @@ describe('uploadFormatDetailControllerのテスト', () => {
         throw dbError
       })
       // 試験実施
-      const result = await uploadFormatController.findByContractId(contractId)
+      const result = await uploadFormatDetailController.findByUploadFormatId(uploadFormatId)
 
       // 期待結果
       // undefinedが返されること

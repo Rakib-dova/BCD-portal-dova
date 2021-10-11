@@ -2403,13 +2403,13 @@ describe('csvuploadのテスト', () => {
         uploadFormatId: ''
       }
 
+      // CSVファイルアップロードパス設定
       pathSpy.mockReturnValue('/test')
       pathSpy.mockReturnValue('/home/upload/')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
 
-      // 期待結果
       // 期待結果
       // response.statusが「500」で予想したsendデータである
       expect(response.status).toHaveBeenCalledWith(500)
@@ -4229,7 +4229,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -4262,10 +4262,10 @@ describe('csvuploadのテスト', () => {
       }
 
       // DB設定
-      findByUploadFormatIdSpy.mockReturnValue(uploadFormatDetailResult)
+      findByUploadFormatIdSpy.mockReturnValue([])
       findByUploadFormatIdIdentifierSpy.mockReturnValue([])
 
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -4296,7 +4296,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -4327,7 +4327,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -4358,7 +4358,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -4399,7 +4399,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBeTruthy()
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
@@ -4458,7 +4458,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -4524,7 +4524,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -4588,7 +4588,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -4652,7 +4652,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -4716,7 +4716,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -4780,7 +4780,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -4844,7 +4844,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -4908,7 +4908,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -4974,7 +4974,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5040,7 +5040,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5104,7 +5104,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5168,7 +5168,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5232,7 +5232,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5302,7 +5302,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5369,7 +5369,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBeTruthy()
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5433,7 +5433,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5500,7 +5500,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5564,7 +5564,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5628,7 +5628,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5692,7 +5692,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5756,7 +5756,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5820,7 +5820,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5886,7 +5886,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -5952,7 +5952,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6016,7 +6016,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6082,7 +6082,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6146,7 +6146,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6210,7 +6210,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6274,7 +6274,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6338,7 +6338,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6402,7 +6402,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6466,7 +6466,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6530,7 +6530,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6587,7 +6587,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6645,7 +6645,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6708,7 +6708,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -6768,7 +6768,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -7007,7 +7007,7 @@ describe('csvuploadのテスト', () => {
         uploadFormatId: uploadFormatId
       }
 
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -7081,7 +7081,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: uploadFormatId
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -7148,7 +7148,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -7299,7 +7299,7 @@ describe('csvuploadのテスト', () => {
       request.body = {
         uploadFormatId: ''
       }
-      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request)
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -7443,6 +7443,81 @@ describe('csvuploadのテスト', () => {
       expect(invoiceDetailDB[0].invoiceId).toBe('api500error')
       expect(invoiceDetailDB[0].status).toBe(-1)
       expect(invoiceDetailDB[0].errorData).toBe(constantsDefine.invoiceErrMsg.SYSERROR)
+    })
+
+    test('500エラー：uploadFormatDetail取得エラー', async () => {
+      // 準備
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      // request uplodadFormatId 空
+      request.body = {
+        uploadFormatId: uploadFormatId
+      }
+
+      // DB取得（updateFormatDetail）
+      // DB設定
+      findByUploadFormatIdSpy.mockReturnValue(null)
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
+      expect(resultExt).toBeTruthy()
+
+      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    })
+
+    test('500エラー：uploadFormatIdentyfier取得エラー', async () => {
+      // 準備
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      // request uplodadFormatId 空
+      request.body = {
+        uploadFormatId: uploadFormatId
+      }
+
+      // DB取得（updateFormatDetail）
+      // DB設定
+      findByUploadFormatIdSpy.mockReturnValue(uploadFormatDetailResult)
+      findByUploadFormatIdIdentifierSpy.mockReturnValue(null)
+
+      const resultExt = await csvupload.cbExtractInvoice(filePath, filename, userToken, invoiceParameta, request, response)
+      expect(resultExt).toBeTruthy()
+
+      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
     })
 
     test('正常 : bconCsv内容確認', async () => {

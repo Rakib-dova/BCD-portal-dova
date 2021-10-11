@@ -156,7 +156,7 @@ const cbPostUpload = async (req, res, next) => {
   }
 
   // csvからデータ抽出
-  switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req)) {
+  switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req, res)) {
     case 101:
       errorText = constantsDefine.statusConstants.INVOICE_FAILED
       break
@@ -235,7 +235,7 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
-const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) => {
+const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, _res) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
   const invoiceController = require('../controllers/invoiceController')
   const invoiceDetailController = require('../controllers/invoiceDetailController')
@@ -248,13 +248,25 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
   // ユーザーがアップロードしたフォーマットでCSVをアップロードする時
   if (uploadFormatId !== null && uploadFormatId.length !== 0) {
     formatFlag = true
+
     uploadFormatDetail = await uploadFormatDetailController.findByUploadFormatId(uploadFormatId)
+
+　　// DBエラー（uploadFormatDetail）の場合
+    if (uploadFormatDetail instanceof Error || uploadFormatDetail === null) {
+      setErrorLog(_req, 500)
+      return _res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    }
+
+    if (uploadFormatDetail.length === 0) {
+      uploadFormatDetail = []
+    }
+    
     uploadFormatIdentifier = await uploadFormatIdentifierController.findByUploadFormatId(uploadFormatId)
 
-    // DBエラーの場合
+    // DBエラー（uploadFormatIdentifier）の場合
     if (uploadFormatIdentifier instanceof Error || uploadFormatIdentifier === null) {
       setErrorLog(_req, 500)
-      return _req.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+      return _res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
     }
 
     if (uploadFormatIdentifier.length === 0) {
