@@ -260,11 +260,25 @@ const isTaxCategori = function (category) {
     return 'TAXERR001'
   }
 
-  if (taxCategory.length > constantsDefine.invoiceValidDefine.TAX_VALUE || !taxCategory[category]) {
+  if (!taxCategory[category]) {
     return 'TAXERR000'
   }
 
   return taxCategory[category]
+}
+
+// 明細-税(ユーザーフォーマット)
+const isUserTaxCategori = function (category, bconCsvTaxUser) {
+  // 値の存在有無確認
+  if (category.length < 1) {
+    return 'TAXERR001'
+  }
+
+  if (!bconCsvTaxUser[category]) {
+    return 'TAXERR002'
+  }
+
+  return bconCsvTaxUser[category]
 }
 
 // 明細-単位
@@ -280,6 +294,20 @@ const isUnitcode = function (unitCode) {
   }
 
   return unitcodeCategory[unitCode]
+}
+
+// 明細-単位(ユーザーフォーマット)
+const isUserUnitcode = function (unitCode, bconCsvUnitUser) {
+  // 値の存在有無確認
+  if (unitCode.length < 1) {
+    return 'UNITERR001'
+  }
+
+  if (!bconCsvUnitUser[unitCode]) {
+    return 'UNITERR002'
+  }
+
+  return bconCsvUnitUser[unitCode]
 }
 
 const isFinancialInstitution = function (financialInstitution) {
@@ -406,6 +434,8 @@ module.exports = {
   isQuantityValue: isQuantityValue,
   isPriceValue: isPriceValue,
   isTaxCategori: isTaxCategori,
+  isUserTaxCategori: isUserTaxCategori,
+  isUserUnitcode: isUserUnitcode,
   isUnitcode: isUnitcode,
   isFinancialInstitution: isFinancialInstitution,
   isFinancialName: isFinancialName,
