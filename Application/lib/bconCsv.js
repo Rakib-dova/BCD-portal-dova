@@ -319,6 +319,7 @@ class bconCsv {
     let indexObj = null
     let headerchk = true
     let headerFlag = true
+    let userHeaderColumns = 0
     let setInvoiceLineCnt = 0
     let errorData = ''
     let bconCsvTaxUser = null
@@ -329,6 +330,7 @@ class bconCsv {
 
       if (formatFlag) {
         csvColumn = this.convertUserCsvFormat(uploadFormatDetail, csvColumn)
+        userHeaderColumns = uploadFormatDetail.length
         // taxsetting
         if (uploadFormatIdentifier.length !== 0) {
           bconCsvTaxUser = this.convertUserTaxidentifier(uploadFormatIdentifier)
@@ -346,6 +348,32 @@ class bconCsv {
         setInvoiceLineCnt = 0
         parentInvoice = new Invoice()
         parentInvoiceStatus = 0
+
+        // ユーザが設定したアップロードフォーマットと項目数が間違い場合
+        if(formatFlag) {
+        let result = csvColumn.filter(col => {
+          if(col) return col
+        })
+        if(result.length < userHeaderColumns) {
+          errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
+          resultConvert.status = -1
+          headerchk = false
+
+          resultConvert.error.push({
+            errorData: errorData
+          })
+
+          parentInvoice.setInvoiceLine('', '', '', '', '', '')
+
+          indexObj = {
+            ...resultConvert,
+            INVOICE: parentInvoice
+          }
+
+          this.#invoiceDocumentList.push(indexObj)
+          return true            
+        }
+        }
 
         if ((csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE && headerchk) && !formatFlag) {
           errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
