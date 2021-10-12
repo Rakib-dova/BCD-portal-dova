@@ -1239,7 +1239,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     // テナントステータスが「新規申込」、変更ページ利用できない
@@ -1489,7 +1489,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
   })
 
@@ -1602,7 +1602,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
   })
 
@@ -3081,7 +3081,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('一般ユーザ、契約ステータス：40, /csvupload', async () => {
@@ -3111,7 +3111,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('管理者、契約ステータス：41, /csvupload', async () => {
@@ -3142,7 +3142,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('一般ユーザ、契約ステータス：41, /csvupload', async () => {
@@ -3172,7 +3172,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('管理者、契約ステータス：00, /csvupload', async () => {
@@ -3203,7 +3203,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('一般ユーザ、契約ステータス：00, /csvupload', async () => {
@@ -3233,7 +3233,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('管理者、契約ステータス：30, /csvupload', async () => {
@@ -3647,10 +3647,10 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
       })
 
-      // await browser.close()
+      await browser.close()
     })
 
-    test.skip('管理者、契約ステータス：00、請求書一括作成のポップアップ及びcsvフォーマットダウンロード', async () => {
+    test('管理者、契約ステータス：00、請求書一括作成のポップアップ及びcsvフォーマットダウンロード', async () => {
       let clickResult
       const path = require('path')
       const downloadPath = path.resolve('./kanri_download')
@@ -3719,7 +3719,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       }, 2000)
     })
 
-    test.skip('管理者、契約ステータス：00、請求書一括作成のポップアップ及びマニュアルダウンロード', async () => {
+    test('管理者、契約ステータス：00、請求書一括作成のポップアップ及びマニュアルダウンロード', async () => {
       let clickResult
       const path = require('path')
       const downloadPath = path.resolve('./kanri_download')
@@ -3788,7 +3788,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       }, 2000)
     })
 
-    test.skip('一般ユーザ、契約ステータス：00、請求書一括作成のポップアップ及びcsvフォーマットダウンロード', async () => {
+    test('一般ユーザ、契約ステータス：00、請求書一括作成のポップアップ及びcsvフォーマットダウンロード', async () => {
       let clickResult
       const path = require('path')
       const downloadPath = path.resolve('./ippan_download')
@@ -3857,7 +3857,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       }, 2000)
     })
 
-    test.skip('一般ユーザ、契約ステータス：00、請求書一括作成のポップアップ及びマニュアルダウンロード', async () => {
+    test('一般ユーザ、契約ステータス：00、請求書一括作成のポップアップ及びマニュアルダウンロード', async () => {
       let clickResult
       const path = require('path')
       const downloadPath = path.resolve('./ippan_download')
@@ -4097,7 +4097,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
   })
 
