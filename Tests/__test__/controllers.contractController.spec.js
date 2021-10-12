@@ -110,7 +110,10 @@ describe('contractControllerのテスト', () => {
       findContractSpy.mockReturnValueOnce(contractInfoDataNotNumberN)
 
       // 試験実施
-      const result = await contractController.findContract({ tenantId: 'tenantId', deleteFlag: false }, 'createdAt DESC')
+      const result = await contractController.findContract(
+        { tenantId: 'tenantId', deleteFlag: false },
+        'createdAt DESC'
+      )
 
       // 期待結果
       // 想定した契約情報がReturnされていること
@@ -123,7 +126,10 @@ describe('contractControllerのテスト', () => {
       findOneSpy.mockReturnValueOnce(contractInfoData)
 
       // 試験実施
-      const result = await contractController.findContract({ tenantId: 'tenantId', deleteFlag: false }, 'createdAt DESC')
+      const result = await contractController.findContract(
+        { tenantId: 'tenantId', deleteFlag: false },
+        'createdAt DESC'
+      )
 
       // 期待結果
       // 想定した契約情報がReturnされていること
@@ -136,7 +142,10 @@ describe('contractControllerのテスト', () => {
       findOneSpy.mockReturnValueOnce(contractInfoDataCount0)
 
       // 試験実施
-      const result = await contractController.findContract({ tenantId: 'tenantId', deleteFlag: false }, 'createdAt DESC')
+      const result = await contractController.findContract(
+        { tenantId: 'tenantId', deleteFlag: false },
+        'createdAt DESC'
+      )
 
       // 期待結果
       // 想定した契約情報がReturnされていること

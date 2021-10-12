@@ -48,16 +48,6 @@ const userRecord = {
 }
 const contractDB = []
 
-const contractRecord = {
-  contractId: null,
-  tenantId: null,
-  numberN: '',
-  contractStatus: null,
-  deleteFlag: null,
-  createdAt: null,
-  updatedAt: null
-}
-
 describe('userControllerのテスト', () => {
   beforeEach(() => {
     process.env.TS_APP_VERSION = '0.0.1'

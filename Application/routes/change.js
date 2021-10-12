@@ -102,7 +102,7 @@ const cbPostChangeIndex = async (req, res, next) => {
   if (checkContractStatus === null || checkContractStatus === 999) {
     return next(errorHelper.create(500))
   }
-  
+
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
   }

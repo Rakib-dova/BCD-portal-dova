@@ -6,7 +6,6 @@ jest.mock('../../Application/node_modules/express', () => {
 })
 
 const csvBasicFormat = require('../../Application/routes/csvBasicFormat')
-const uploadFormat = require('../../Application/routes/uploadFormat')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
@@ -18,8 +17,6 @@ const contractController = require('../../Application/controllers/contractContro
 const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
 const path = require('path')
-const multer = require('multer')
-const upload = multer({ dest: process.env.INVOICE_UPLOAD_PATH })
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
@@ -198,30 +195,6 @@ describe('csvBasicFormatのテスト', () => {
       updatedAt: '2021-01-25T08:45:49.803Z'
     }
   }
-
-  const contractdataValues4 = {
-    dataValues: {
-      contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
-      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-      numberN: '0000011111',
-      contractStatus: null,
-      deleteFlag: false,
-      createdAt: '2021-01-25T08:45:49.803Z',
-      updatedAt: '2021-01-25T08:45:49.803Z'
-    }
-  }
-
-  // ファイルパス設定
-  const filePath = process.env.INVOICE_UPLOAD_PATH
-  // ファイル名設定
-  const fileName = dataValues.dataValues.userId + '_UTtest.csv'
-
-  // ファイルデータ
-  // 請求書が1つの場合
-  const fileData = Buffer.from(
-    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
-2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
-  ).toString('base64')
 
   const csvBasicArr = {
     uploadFormatId: '',

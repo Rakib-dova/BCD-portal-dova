@@ -314,22 +314,29 @@ document.getElementById('form').onsubmit = function () {
 }
 
 // modal toggle 追加
-function $(tagObjName) {
-  const classNameReg = new RegExp(/\.+[a-zA-Z0-9]/)
-  const idNameReg = new RegExp(/\#+[a-zA-Z0-9]/)
+// document.getElementById、document.getElementsByClassName省略
+const $ = function (tagObjName) {
+  const classNamePattern = '\\.+[a-zA-Z0-9]'
+  const idNamePatten = '\\#+[a-zA-Z0-9]'
+  const classNameReg = new RegExp(classNamePattern)
+  const idNameReg = new RegExp(idNamePatten)
+  let selectors
 
   if (classNameReg.test(tagObjName)) {
-    return document.querySelectorAll(tagObjName)
+    selectors = document.querySelectorAll(tagObjName)
   } else if (idNameReg.test(tagObjName)) {
-    tagObjName = tagObjName.replace(/\#/, '')
-    return document.getElementById(tagObjName)
+    selectors = document.querySelectorAll(tagObjName)[0]
   } else {
     return null
   }
+  return Object.assign(selectors, Array.prototype, (type, event) => {
+    document.addEventListener(type, event)
+  })
 }
 
 $('#postalNumber').addEventListener('input', function () {
-  const postalNumberReg = new RegExp(/^[0-9]{7}$/)
+  const postalNumberPatten = '^[0-9]{7}$'
+  const postalNumberReg = new RegExp(postalNumberPatten)
   if (!postalNumberReg.test(this.value)) {
     $('#postalSearchBtn').setAttribute('disabled', 'disabled')
     $('#postalSearchBtn').onclick = null
@@ -342,7 +349,8 @@ $('#postalSearchBtn').addEventListener('click', function () {
   const postalNumber = $('#postalNumber').value
   const sendData = { postalNumber: null }
   const modalCardBody = $('#modal-card-result')
-  const postalNumberReg = new RegExp(/^[0-9]{7}$/)
+  const postalNumberPatten = '^[0-9]{7}$'
+  const postalNumberReg = new RegExp(postalNumberPatten)
 
   if (!postalNumberReg.test(postalNumber)) {
     return

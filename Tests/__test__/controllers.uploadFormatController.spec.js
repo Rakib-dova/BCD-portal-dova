@@ -8,7 +8,16 @@ const constantsDefine = require('../../Application/constants')
 const logger = require('../../Application/lib/logger')
 const UploadFormat = require('../../Application/models').UploadFormat
 
-let errorSpy, tenantId, contractId, uploadFormatId, uploadFormatId2, findOneSpy, findContractSpy, infoSpy, createSpy, findAllSpy
+let errorSpy,
+  tenantId,
+  contractId,
+  uploadFormatId,
+  uploadFormatId2,
+  findOneSpy,
+  findContractSpy,
+  infoSpy,
+  createSpy,
+  findAllSpy
 
 describe('uploadFormatControllerのテスト', () => {
   beforeEach(() => {
@@ -175,7 +184,7 @@ describe('uploadFormatControllerのテスト', () => {
     test('正常', async () => {
       // 準備
       findOneSpy.mockReturnValue(findOneResult)
-      
+
       // 試験実施
       const result = await uploadFormatController.findUploadFormat(uploadFormatId)
 
