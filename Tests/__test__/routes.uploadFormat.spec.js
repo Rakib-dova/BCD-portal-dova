@@ -1216,7 +1216,7 @@ describe('uploadFormatのテスト', () => {
   ]
 
   // ファイルデータ設定
-  const fileDataSeting = {
+  const fileDataSetting = {
     fieldname: 'dataFile',
     originalname: 'UTtest.csv',
     encoding: '7bit',
@@ -1300,7 +1300,9 @@ describe('uploadFormatのテスト', () => {
       }
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -1337,7 +1339,9 @@ describe('uploadFormatのテスト', () => {
       }
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
@@ -1373,7 +1377,9 @@ describe('uploadFormatのテスト', () => {
       }
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
@@ -1412,7 +1418,9 @@ describe('uploadFormatのテスト', () => {
       }
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
@@ -1451,7 +1459,9 @@ describe('uploadFormatのテスト', () => {
       }
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
@@ -1490,7 +1500,9 @@ describe('uploadFormatのテスト', () => {
       }
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
@@ -1529,7 +1541,9 @@ describe('uploadFormatのテスト', () => {
       }
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
@@ -1566,7 +1580,9 @@ describe('uploadFormatのテスト', () => {
       }
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
@@ -1603,7 +1619,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -1657,7 +1675,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -1744,7 +1764,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -1792,7 +1814,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -1836,7 +1860,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -1883,7 +1909,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -1929,7 +1957,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -1974,7 +2004,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2025,7 +2057,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2074,7 +2108,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2123,7 +2159,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2172,7 +2210,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2221,7 +2261,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2270,7 +2312,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2319,7 +2363,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2368,7 +2414,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2417,7 +2465,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2466,7 +2516,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2512,7 +2564,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2568,7 +2622,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2614,7 +2670,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2660,7 +2718,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2716,7 +2776,9 @@ describe('uploadFormatのテスト', () => {
       request.Referer = '/csvBasicFormat'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -2869,7 +2931,9 @@ describe('uploadFormatのテスト', () => {
       }
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
@@ -3100,7 +3164,9 @@ describe('uploadFormatのテスト', () => {
       const uploadFileName = user.userId + '_UTtest.csv'
 
       // ファイルデータを設定
-      request.file = fileDataSeting
+      request.file = {
+        ...fileDataSetting
+      }
 
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
