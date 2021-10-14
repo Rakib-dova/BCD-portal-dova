@@ -57,6 +57,7 @@ const cbPostIndex = async (req, res, next) => {
   const csvfilename = newName.replace(filePath, '')
   let uploadFormatNumber = 0
   let defaultNumber = 0
+
   // ヘッダなしの場合
   if (req.body.checkItemNameLine !== 'on') {
     defaultNumber = req.body.defaultNumber - 1
