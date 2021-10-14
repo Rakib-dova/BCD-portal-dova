@@ -140,6 +140,7 @@ describe('uploadFormatのテスト', () => {
   const fileNameErr = 'uploadFormatTest2.csv'
 
   const uploadFileNameErr = dataValues.dataValues.userId + '_' + fileNameErr
+
   // ファイルデータ
   // 請求書が1つの場合
   const fileData = Buffer.from(
@@ -156,6 +157,22 @@ describe('uploadFormatのテスト', () => {
     `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
 2021-06-14,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
   ).toString('base64')
+
+  const fileDataDataStartRowNo5 = Buffer.from(
+    `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test112,testsiten,testbank,普通,2222222,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_4,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test114,testsiten,testbank,普通,4444444,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
+  ).toString('base64')
+
+  const fileDataItemRowNo4DataStartRowNo3 = Buffer.from(
+    `2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_2,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test112,testsiten,testbank,普通,2222222,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+2021-06-14,UT_TEST_INVOICE_1_3,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test113,testsiten,testbank,普通,3333333,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト
+発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
+  ).toString('base64')
+
   const taxIds = {
     keyConsumptionTax: {
       itemName: '消費税',
@@ -523,7 +540,50 @@ describe('uploadFormatのテスト', () => {
     keyRoll: '42',
     keyFormula: '43',
     keyTonnage: '44',
-    keyOthers: '45'
+    keyOthers: '45',
+    formatData: [
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+      '13',
+      '14',
+      '15',
+      '16',
+      '17',
+      '18',
+      '19'
+    ],
+    headerItems: [
+      'テスト',
+      '発行日',
+      '請求書番号',
+      'テナントID',
+      '支払期日',
+      '納品日',
+      '備考',
+      '銀行名',
+      '支店名',
+      '科目',
+      '口座番号',
+      '口座名義',
+      'その他特記事項',
+      '明細-項目ID',
+      '明細-内容',
+      '明細-数量',
+      '明細-単位',
+      '明細-単価',
+      '明細-税（消費税／軽減税率／不課税／免税／非課税）',
+      '明細-備考'
+    ]
   }
 
   const reqBodyForCbPostIndexErr = {
@@ -1201,6 +1261,53 @@ describe('uploadFormatのテスト', () => {
       request.user = user
       // ファイルデータを設定
       request.body = {
+        ...reqBodyForCbPostIndexOn,
+        uploadFormatNumber: 0
+      }
+
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      pathSpy.mockReturnValueOnce('/test/')
+
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
+    })
+
+    test('正常：ヘッダあり（項目名開始行：1、データ開始行：2）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // ファイルデータを設定
+      request.body = {
         ...reqBodyForCbPostIndexOn
       }
 
@@ -1216,17 +1323,14 @@ describe('uploadFormatのテスト', () => {
         size: 567
       }
 
-      const fs = require('fs')
-      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
-
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      pathSpy.mockReturnValueOnce('/home/upload/')
-      pathSpy.mockReturnValueOnce('/test/')
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
@@ -1234,11 +1338,10 @@ describe('uploadFormatのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(error500)
+      expect(next).not.toHaveBeenCalledWith(error500)
     })
 
-    test('正常：ヘッダあり', async () => {
+    test('正常：ヘッダあり（項目名開始行：1、データ開始行：5）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {
@@ -1249,7 +1352,8 @@ describe('uploadFormatのテスト', () => {
       // ファイルデータを設定
       request.body = {
         ...reqBodyForCbPostIndexOn,
-        uploadFormatNumber: 3
+        uploadFormatNumber: '1',
+        defaultNumber: '5'
       }
 
       // ファイルデータを設定
@@ -1264,16 +1368,17 @@ describe('uploadFormatのテスト', () => {
         size: 567
       }
 
-      const fs = require('fs')
-      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
-
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
-      pathSpy.mockReturnValueOnce('/test/')
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(fileDataDataStartRowNo5), 'base64').toString('utf8')
+      )
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
@@ -1281,7 +1386,55 @@ describe('uploadFormatのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).toHaveBeenCalledWith(error500)
+      expect(next).not.toHaveBeenCalledWith(error500)
+    })
+
+    test('正常：ヘッダあり（項目名開始行：4、データ開始行：3）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndexOn,
+        uploadFormatNumber: '4',
+        defaultNumber: '3'
+      }
+
+      // ファイルデータを設定
+      request.file = {
+        fieldname: 'dataFile',
+        originalname: 'UTtest.csv',
+        encoding: '7bit',
+        mimetype: 'application/vnd.ms-excel',
+        destination: filePath,
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
+        size: 567
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      const fs = require('fs')
+      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(fileDataItemRowNo4DataStartRowNo3), 'base64').toString('utf8')
+      )
+
+      // 試験実施
+      await uploadFormat.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
     })
 
     test('正常：ヘッダなし', async () => {
@@ -1383,7 +1536,10 @@ describe('uploadFormatのテスト', () => {
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIdsUndefined,
         unitIds: unitIds,
-        uploadGeneral: uploadGeneral
+        uploadGeneral: uploadGeneral,
+        checkItemNameLine: reqBodyForCbPostIndexTaxErr.checkItemNameLine,
+        itemRowNo: reqBodyForCbPostIndexTaxErr.uploadFormatNumber,
+        dataStartRowNo: reqBodyForCbPostIndexTaxErr.defaultNumber
       })
     })
 
@@ -1443,7 +1599,10 @@ describe('uploadFormatのテスト', () => {
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIds,
         unitIds: unitIdsUndefined,
-        uploadGeneral: uploadGeneral
+        uploadGeneral: uploadGeneral,
+        checkItemNameLine: reqBodyForCbPostIndexUnitErr.checkItemNameLine,
+        itemRowNo: reqBodyForCbPostIndexUnitErr.uploadFormatNumber,
+        dataStartRowNo: reqBodyForCbPostIndexUnitErr.defaultNumber
       })
     })
 
@@ -1549,62 +1708,6 @@ describe('uploadFormatのテスト', () => {
         ...reqBodyForCbPostIndexOn,
         checkItemNameLine: 'on',
         uploadFormatNumber: '0'
-      }
-
-      request.Referer = '/csvBasicFormat'
-
-      // ファイルデータを設定
-      request.file = {
-        fieldname: 'dataFile',
-        originalname: 'UTtest.csv',
-        encoding: '7bit',
-        mimetype: 'application/vnd.ms-excel',
-        destination: filePath,
-        filename: '8d73eae9e5bcd33f5863b9251a76c551',
-        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
-        size: 567
-      }
-
-      const fs = require('fs')
-      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
-
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      // 試験実施
-      await uploadFormat.cbPostIndex(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(error500)
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // uploadFormat.jsが遷移を拒否して、前URLに戻る
-      expect(response.headers.Location).toBe('/')
-      expect(response.statusCode).toBe(307)
-    })
-
-    test('準正常：ヘッダありでヘッダの数字>データ開始番号', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-
-      // ファイルデータを設定
-      request.body = {
-        ...reqBodyForCbPostIndexOn,
-        checkItemNameLine: 'on',
-        uploadFormatNumber: '2',
-        defaultNumber: '1'
       }
 
       request.Referer = '/csvBasicFormat'
@@ -2504,7 +2607,10 @@ describe('uploadFormatのテスト', () => {
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIds100,
         unitIds: unitIds,
-        uploadGeneral: uploadGeneral
+        uploadGeneral: uploadGeneral,
+        checkItemNameLine: reqBodyForCbPostIndexOn.checkItemNameLine,
+        itemRowNo: reqBodyForCbPostIndexOn.uploadFormatNumber,
+        dataStartRowNo: reqBodyForCbPostIndexOn.defaultNumber
       })
     })
 
@@ -2676,7 +2782,10 @@ describe('uploadFormatのテスト', () => {
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
         taxIds: taxIds,
         unitIds: unitIds100,
-        uploadGeneral: uploadGeneral
+        uploadGeneral: uploadGeneral,
+        checkItemNameLine: reqBodyForCbPostIndexOn.checkItemNameLine,
+        itemRowNo: reqBodyForCbPostIndexOn.uploadFormatNumber,
+        dataStartRowNo: reqBodyForCbPostIndexOn.defaultNumber
       })
     })
 
@@ -2894,64 +3003,13 @@ describe('uploadFormatのテスト', () => {
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
     })
-
-    test('異常：500エラー（ファイル削除無）', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = {
-        userContext: 'LoggedIn',
-        userRole: 'dummy'
-      }
-      request.user = user
-      // ファイルデータを設定
-      request.body = {
-        ...reqBodyForCbPostIndexOn,
-        dataFileName: 'noDeletetedFile.csv'
-      }
-
-      request.Referer = '/csvBasicFormat'
-
-      // ファイルデータを設定
-      request.file = {
-        fieldname: 'dataFile',
-        originalname: 'UTtest.csv',
-        encoding: '7bit',
-        mimetype: 'application/vnd.ms-excel',
-        destination: filePath,
-        filename: '8d73eae9e5bcd33f5863b9251a76c551',
-        path: '/home/upload/8d73eae9e5bcd33f5863b9251a76c551',
-        size: 567
-      }
-
-      const fs = require('fs')
-      const uploadFilePath = path.resolve(filePath + '/8d73eae9e5bcd33f5863b9251a76c551')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
-
-      // DBからの正常なユーザデータの取得を想定する
-      findOneSpy.mockReturnValue(dataValues)
-      // DBからの正常な契約情報取得を想定する
-      findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      pathSpy.mockReturnValueOnce('/test/')
-
-      helper.checkContractStatus = 10
-
-      // 試験実施
-      await uploadFormat.cbPostIndex(request, response, next)
-
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(error500)
-    })
   })
 
   // -----------------------------------------------------------------------------------------
   // cbPostConfirmIndexの確認
 
   describe('cbPostConfirmIndex', () => {
-    test('正常', async () => {
+    test('正常:ヘッダあり', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {
@@ -2962,6 +3020,39 @@ describe('uploadFormatのテスト', () => {
       // ファイルデータを設定
       request.body = {
         ...reqBodyForCbPostIndexOn
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      // 試験実施
+      await uploadFormat.cbPostConfirmIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvConfirmFormatが呼ばれ「る」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
+    })
+
+    test('正常:ヘッダなし', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndexOff
       }
 
       // DBからの正常なユーザデータの取得を想定する
