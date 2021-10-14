@@ -11,6 +11,8 @@ module.exports = {
   //   contractId(FK)=>Contracts(contractIdId),
   //   setName,
   //   uploadType,
+  //   itemRowNo,
+  //   dataStartRowNo,
   //   createdAt,
   //   updatedAt
   // }

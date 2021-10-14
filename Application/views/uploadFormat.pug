@@ -18,6 +18,9 @@ block content
                     th.text-center データ連番
                     th.text-center 項目名  
                     th.text-center データ内容
+                    input.input(type="hidden" id="checkItemNameLine" name="checkItemNameLine" value= checkItemNameLine)
+                    input.input(type="hidden" id="itemRowNo" name="itemRowNo" value= itemRowNo)
+                    input.input(type="hidden" id="dataStartRowNo" name="dataStartRowNo" value= dataStartRowNo)
                 each content, idx in headerItems
                   tr
                     th.text-center.dataIndex(name="dataContent")= idx+1
