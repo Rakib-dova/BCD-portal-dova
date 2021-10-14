@@ -55,14 +55,21 @@ const cbPostIndex = async (req, res, next) => {
 
   // アプロードしたファイルを読み込む
   const csvfilename = newName.replace(filePath, '')
-  const uploadFormatNumber = req.body.uploadFormatNumber - 1
-  const defaultNumber = req.body.defaultNumber - 1
+  let uploadFormatNumber = 0
+  let defaultNumber = 0
+
+  // ヘッダなしの場合
+  if (req.body.checkItemNameLine !== 'on') {
+    defaultNumber = req.body.defaultNumber - 1
+  } else {
+    uploadFormatNumber = req.body.uploadFormatNumber - 1
+    defaultNumber = req.body.defaultNumber - 1
+  }
 
   // データ開始行番号、項目名の行番号チェック
   if (
     (req.body.checkItemNameLine === 'on' && ~~req.body.uploadFormatNumber <= 0) ||
-    ~~req.body.defaultNumber <= 0 ||
-    ~~req.body.defaultNumber <= ~~req.body.uploadFormatNumber
+    ~~req.body.defaultNumber <= 0
   ) {
     // csv削除
     if (cbRemoveCsv(filePath, csvfilename) === false) {
@@ -413,7 +420,6 @@ const cbPostConfirmIndex = async (req, res, next) => {
   const uploadFormatId = uuidv4()
   // 項目名の行有無に夜入力データ変更
   if (req.body.checkItemNameLine === 'on') {
-    console.log('test')
     resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
       uploadFormatId: uploadFormatId,
       contractId: contract.dataValues.contractId,
