@@ -19,7 +19,6 @@ const cbSearchAddress = async (req, res) => {
   let resultAddress = { addressList: [] }
   let resultStatusCode
   logger.info(constantsDefine.logMessage.INF000 + 'cbSearchAddress')
-  let result
   if (!req.session || !req.user?.userId) {
     resultStatusCode = 403
     return res.status(resultStatusCode).send()
@@ -35,7 +34,7 @@ const cbSearchAddress = async (req, res) => {
     return res.status(resultStatusCode).send()
   }
 
-  result = await postalNumberController.findOne(req.body.postalNumber).catch((error) => {
+  const result = await postalNumberController.findOne(req.body.postalNumber).catch((error) => {
     return error
   })
 

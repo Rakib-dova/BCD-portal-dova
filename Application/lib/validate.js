@@ -92,7 +92,8 @@ const isPostalNumber = (postalNumber) => {
 }
 
 const isNumberRegular = (regNumber) => {
-  const regex = new RegExp(/^[-]?[0-9]*(\.?[0-9]*)$/)
+  const isNumberPatten = '^[-]?[0-9]*(\\.?[0-9]*)$'
+  const regex = new RegExp(isNumberPatten)
 
   // test()結果はtrue又はfalseになる。
   return regex.test(regNumber)
@@ -219,8 +220,8 @@ const isQuantityValue = function (quantityValue) {
   if (quantityValue.length < 1) {
     return 'QUANTITYVALUEERR002'
   }
-
-  const regex = new RegExp(/^[0-9]+$/)
+  const isQuantityPatten = '^[0-9]+$'
+  const regex = new RegExp(isQuantityPatten)
   if (!regex.test(quantityValue)) {
     return 'QUANTITYVALUEERR001'
   }
@@ -348,7 +349,8 @@ const isAccountType = function (accountType) {
 
 // 口座番号
 const isAccountId = function (accountId) {
-  const regex = new RegExp(/^[0-9]{7}$/)
+  const isAccountPatten = '^[0-9]+$'
+  const regex = new RegExp(isAccountPatten)
   // 値の存在有無確認
   if (accountId.length < 1) {
     return 'ACCOUNTIDERR002'

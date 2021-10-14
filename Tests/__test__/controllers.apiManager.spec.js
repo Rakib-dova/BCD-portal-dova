@@ -215,7 +215,7 @@ describe('apiManagerのテスト', () => {
       getSpy.mockImplementation(() => {
         throw error401
       })
-      //リフレッシュトークンの取得も401エラーを想定する
+      // リフレッシュトークンの取得も401エラーを想定する
       postSpy.mockImplementation(() => {
         throw error401
       })

@@ -11,7 +11,7 @@ exports.accessTradeshift = async (accessToken, refreshToken, method, query, body
       headers: {
         Accept: 'application/json',
         Authorization: `Bearer ${accessToken}`
-      },
+      }
     }
   }
   const access = async (_accessToken, _method, _query, _body = {}, _config) => {

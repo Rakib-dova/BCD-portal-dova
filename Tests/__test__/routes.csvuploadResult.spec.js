@@ -466,6 +466,7 @@ describe('csvuploadResultのテスト', () => {
           status: status,
           invoiceId: invoice.invoicesId
         })
+        return currVal
       })
 
       // 試験実施

@@ -17,8 +17,6 @@ const tenantController = require('../../Application/controllers/tenantController
 const uploadFormatController = require('../../Application/controllers/uploadFormatController')
 const logger = require('../../Application/lib/logger.js')
 const path = require('path')
-const multer = require('multer')
-const upload = multer({ dest: process.env.INVOICE_UPLOAD_PATH })
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
