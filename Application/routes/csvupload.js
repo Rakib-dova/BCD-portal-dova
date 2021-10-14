@@ -239,11 +239,9 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
   const invoiceController = require('../controllers/invoiceController')
   const invoiceDetailController = require('../controllers/invoiceDetailController')
-  const uploadFormatController = require('../controllers/uploadFormatController')
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
   const uploadFormatId = _req.body.uploadFormatId
   let formatFlag = false
-  let uploadFormat = []
   let uploadFormatDetail = []
   let uploadFormatIdentifier = []
 
@@ -251,18 +249,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   if (uploadFormatId !== null && uploadFormatId.length !== 0) {
     formatFlag = true
 
-    uploadFormat = await uploadFormatController.findUploadFormat(uploadFormatId)
     uploadFormatDetail = await uploadFormatDetailController.findByUploadFormatId(uploadFormatId)
-
-    // DBエラー（uploadFormat）の場合
-    if (uploadFormat instanceof Error || uploadFormat === null) {
-      setErrorLog(_req, 500)
-      return _res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
-    }
-
-    if (uploadFormat.length === 0) {
-      uploadFormat = []
-    }
 
     // DBエラー（uploadFormatDetail）の場合
     if (uploadFormatDetail instanceof Error || uploadFormatDetail === null) {

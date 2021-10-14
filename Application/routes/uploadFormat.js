@@ -56,15 +56,12 @@ const cbPostIndex = async (req, res, next) => {
   // アプロードしたファイルを読み込む
   const csvfilename = newName.replace(filePath, '')
   let uploadFormatNumber = 0
-  let defaultNumber = 0
-
   // ヘッダなしの場合
-  if (req.body.checkItemNameLine !== 'on') {
-    defaultNumber = req.body.defaultNumber - 1
-  } else {
+  if (req.body.checkItemNameLine === 'on') {
     uploadFormatNumber = req.body.uploadFormatNumber - 1
-    defaultNumber = req.body.defaultNumber - 1
   }
+
+  const defaultNumber = req.body.defaultNumber - 1
 
   // データ開始行番号、項目名の行番号チェック
   if (
@@ -75,12 +72,10 @@ const cbPostIndex = async (req, res, next) => {
     if (cbRemoveCsv(filePath, csvfilename) === false) {
       return next(errorHelper.create(500))
     }
-
     // 前の画面に遷移
     const backURL = req.header('Referer') || '/'
     return res.redirect(backURL)
   }
-
   // ファイル読み込む
   let csv
   const extractFullpathFile = path.join(filePath, '/') + csvfilename
@@ -94,7 +89,11 @@ const cbPostIndex = async (req, res, next) => {
   const tmpRows = csv.split(/\r?\n|\r/)
   const checkRow = []
   tmpRows.forEach((row) => {
-    if (row.trim() !== '') checkRow.push(row)
+    if (row.trim() !== '') {
+      checkRow.push(row)
+    } else {
+      checkRow.push('')
+    }
   })
 
   if (checkRow.length < defaultNumber + 1) {
