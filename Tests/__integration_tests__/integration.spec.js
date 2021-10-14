@@ -154,11 +154,11 @@ describe('ルーティングのインテグレーションテスト', () => {
         .post('/searchAddress')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .set('Content-Type', 'application/json')
-        .send({ postalNumber: '0600000' })
+        .send({ postalNumber: '1600000' })
         .expect(200)
       expect(res.status).toBe(200)
-      expect(res.body.addressList[0].address).toBe('北海道札幌市中央区')
-      expect(res.body.addressList[1].address).toBe('北海道札幌市中央区円山')
+      expect(res.body.addressList[0].address).toBe('東京都新宿区')
+      expect(res.body.addressList[1].address).toBe('東京都新宿区霞岳町')
     })
 
     test('住所検索:結果0件', async () => {
@@ -1239,7 +1239,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← csv一括アップロード/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     // テナントステータスが「新規申込」、変更ページ利用できない
@@ -1489,7 +1489,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← csv一括アップロード/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
   })
 
@@ -1602,7 +1602,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← csv一括アップロード/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
   })
 
@@ -2229,6 +2229,13 @@ describe('ルーティングのインテグレーションテスト', () => {
 
     // 契約者名未入力の場合
     test('管理者、契約ステータス：00, 契約者名未入力', async () => {
+
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
       await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
@@ -2256,10 +2263,19 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+    
+      await browser.close()
     })
 
     // 契約者名不正な値
     test('管理者、契約ステータス：00, 契約者名不正な値', async () => {
+      
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2287,10 +2303,17 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+      await browser.close()
     })
 
     // 契約者カナ名未入力
     test('管理者、契約ステータス：00, 契約者カナ名未入力', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2316,10 +2339,17 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+      await browser.close()
     })
 
     // 契約者カナ名不正な値
     test('管理者、契約ステータス：00, 契約者カナ名不正な値', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2346,10 +2376,18 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+      await browser.close()
     })
 
     // 郵便番号未入力
     test('管理者、契約ステータス：00, 郵便番号未入力', async () => {
+
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2372,10 +2410,18 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+      await browser.close()
     })
 
     // 郵便番号不正な値
     test('管理者、契約ステータス：00, 郵便番号不正な値', async () => {
+
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2399,10 +2445,19 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+
+      await browser.close()
     })
 
     // 住所未入力
     test('管理者、契約ステータス：00, 住所未入力', async () => {
+
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2426,10 +2481,19 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+
+      await browser.close()
     })
 
     // 番地未入力
     test('管理者、契約ステータス：00, 番地未入力', async () => {
+
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2455,10 +2519,19 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+
+      await browser.close()
     })
 
     // 番地不正な値
     test('管理者、契約ステータス：00, 番地不正な値', async () => {
+
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2485,10 +2558,18 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+      await browser.close()
     })
 
     // 連絡先担当者名未入力
     test('管理者、契約ステータス：00, 連絡先担当者名未入力', async () => {
+      
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2514,10 +2595,18 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+      await browser.close()
     })
 
     // 連絡先担当者名不正な値
     test('管理者、契約ステータス：00, 連絡先担当者名不正な値', async () => {
+      
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2544,10 +2633,18 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+      await browser.close()
     })
 
     // 連絡先電話番号未入力
     test('管理者、契約ステータス：00, 連絡先電話番号未入力', async () => {
+      
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2557,9 +2654,9 @@ describe('ルーティングのインテグレーションテスト', () => {
         await page.click('#chkContractContact')
         await page.type('#contractorName', 'テスト')
         await page.type('#contractorKanaName', 'abc')
-        await page.type('#postalNumber', '0600000')
+        await page.type('#postalNumber', '1600000')
         await page.click('#postalSearchBtn')
-        await page.waitForTimeout(1000)
+        await page.waitForTimeout(2000)
         await page.click('#modal-card-result > a:nth-child(1)')
         await page.type('#banch1', '1234')
         await page.type('#contactPersonName', '連絡先')
@@ -2573,10 +2670,18 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+      await browser.close()
     })
 
     // 連絡先電話番号不正な値
     test('管理者、契約ステータス：00, 連絡先電話番号不正な値', async () => {
+      
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2586,13 +2691,13 @@ describe('ルーティングのインテグレーションテスト', () => {
         await page.click('#chkContractContact')
         await page.type('#contractorName', 'テスト')
         await page.type('#contractorKanaName', 'abc')
-        await page.type('#postalNumber', '0600000')
+        await page.type('#postalNumber', '1600000')
         await page.click('#postalSearchBtn')
-        await page.waitForTimeout(1000)
+        await page.waitForTimeout(2000)
         await page.click('#modal-card-result > a:nth-child(1)')
         await page.type('#banch1', '1234')
         await page.type('#contactPersonName', '連絡先')
-        await page.type('#contactPhoneNumber', '08000000000')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
         await page.type('#contactMail', 'test@test.co.jp')
 
         await page.waitForTimeout(500)
@@ -2603,10 +2708,18 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+      await browser.close()
     })
 
     // 連絡先メールアドレス未入力
     test('管理者、契約ステータス：00, 連絡先メールアドレス未入力', async () => {
+      
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2616,13 +2729,13 @@ describe('ルーティングのインテグレーションテスト', () => {
         await page.click('#chkContractContact')
         await page.type('#contractorName', 'テスト')
         await page.type('#contractorKanaName', 'abc')
-        await page.type('#postalNumber', '0600000')
+        await page.type('#postalNumber', '1600000')
         await page.click('#postalSearchBtn')
-        await page.waitForTimeout(1000)
+        await page.waitForTimeout(2000)
         await page.click('#modal-card-result > a:nth-child(1)')
         await page.type('#banch1', '1234')
         await page.type('#contactPersonName', '連絡先')
-        await page.type('#contactPhoneNumber', '08000000000')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
 
         await page.waitForTimeout(500)
 
@@ -2632,10 +2745,18 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
+      await browser.close()
     })
 
     // 連絡先メールアドレス不正な値
     test('管理者、契約ステータス：00, 連絡先メールアドレス不正な値', async () => {
+      
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/change')
@@ -2645,14 +2766,14 @@ describe('ルーティングのインテグレーションテスト', () => {
         await page.click('#chkContractContact')
         await page.type('#contractorName', 'テスト')
         await page.type('#contractorKanaName', 'abc')
-        await page.type('#postalNumber', '0600000')
+        await page.type('#postalNumber', '1600000')
         await page.click('#postalSearchBtn')
-        await page.waitForTimeout(1000)
+        await page.waitForTimeout(2000)
         await page.click('#modal-card-result > a:nth-child(1)')
         await page.type('#banch1', '1234')
         await page.type('#contactPersonName', '連絡先')
-        await page.type('#contactPhoneNumber', '08000000000')
-        await page.type('#contactMail', 'testtest')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test')
 
         await page.waitForTimeout(500)
 
@@ -2960,7 +3081,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← csv一括アップロード/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('一般ユーザ、契約ステータス：40, /csvupload', async () => {
@@ -2990,7 +3111,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← csv一括アップロード/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('管理者、契約ステータス：41, /csvupload', async () => {
@@ -3021,7 +3142,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← csv一括アップロード/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('一般ユーザ、契約ステータス：41, /csvupload', async () => {
@@ -3051,7 +3172,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← csv一括アップロード/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('管理者、契約ステータス：00, /csvupload', async () => {
@@ -3082,7 +3203,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← csv一括アップロード/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('一般ユーザ、契約ステータス：00, /csvupload', async () => {
@@ -3112,7 +3233,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← csv一括アップロード/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('管理者、契約ステータス：30, /csvupload', async () => {
@@ -3380,6 +3501,13 @@ describe('ルーティングのインテグレーションテスト', () => {
           tenantId: testTenantId
         })
       }
+
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
       let clickResult
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
@@ -3401,9 +3529,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       await page.waitForTimeout(3000)
 
-      const tabSelector = await page.$('#btnTabSuccess')
-
-      await tabSelector.click({ clickCount: 1 })
+      await page.click('#btnTabSuccess')
 
       const tabClickResult = await page.evaluate(() => {
         const checkedResult = []
@@ -3432,6 +3558,8 @@ describe('ルーティングのインテグレーションテスト', () => {
           expect(listOfClass).toMatch(/is-invisible/i)
         })
       })
+
+      await browser.close()
     })
 
     test('一般ユーザ、契約ステータス：00、/csvuploadResultの詳細ポップアップのタブ選択', async () => {
@@ -3461,6 +3589,13 @@ describe('ルーティングのインテグレーションテスト', () => {
           tenantId: testTenantId
         })
       }
+      
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: false,
+        ignoreHTTPSErrors: true
+      })
+
       let clickResult
       const page = await browser.newPage()
       await page.setCookie(userCookies[0])
@@ -3482,9 +3617,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       await page.waitForTimeout(3000)
 
-      const tabSelector = await page.$('#btnTabSuccess')
-
-      await tabSelector.click({ clickCount: 1 })
+      await page.click('#btnTabSuccess')
 
       const tabClickResult = await page.evaluate(() => {
         const checkedResult = []
@@ -3513,6 +3646,8 @@ describe('ルーティングのインテグレーションテスト', () => {
           expect(listOfClass).toMatch(/is-invisible/i)
         })
       })
+
+      await browser.close()
     })
 
     test('管理者、契約ステータス：00、請求書一括作成のポップアップ及びcsvフォーマットダウンロード', async () => {
@@ -3568,7 +3703,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       // ダウンロード終わってからテスト（待機時間：2秒）
       setTimeout(() => {
         const fs = require('fs')
-        const downloadFilePath = path.resolve(`${downloadPath}\\${fileName}`)
+        const downloadFilePath = path.resolve(`${downloadPath}${path.sep}${fileName}`)
         const downloadFile = fs.readFileSync(downloadFilePath, {
           encoding: 'utf-8',
           flag: 'r'
@@ -3637,7 +3772,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       // ダウンロード終わってからテスト（待機時間：2秒）
       setTimeout(() => {
         const fs = require('fs')
-        const downloadFilePath = path.resolve(`${downloadPath}\\${fileName}`)
+        const downloadFilePath = path.resolve(`${downloadPath}${path.sep}${fileName}`)
         const downloadFile = fs.readFileSync(downloadFilePath, {
           encoding: 'utf-8',
           flag: 'r'
@@ -3706,7 +3841,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       // ダウンロード終わってからテスト（待機時間：2秒）
       setTimeout(() => {
         const fs = require('fs')
-        const downloadFilePath = path.resolve(`${downloadPath}\\${fileName}`)
+        const downloadFilePath = path.resolve(`${downloadPath}${path.sep}${fileName}`)
         const downloadFile = fs.readFileSync(downloadFilePath, {
           encoding: 'utf-8',
           flag: 'r'
@@ -3775,7 +3910,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       // ダウンロード終わってからテスト（待機時間：2秒）
       setTimeout(() => {
         const fs = require('fs')
-        const downloadFilePath = path.resolve(`${downloadPath}\\${fileName}`)
+        const downloadFilePath = path.resolve(`${downloadPath}${path.sep}${fileName}`)
         const downloadFile = fs.readFileSync(downloadFilePath, {
           encoding: 'utf-8',
           flag: 'r'
@@ -3962,7 +4097,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
       expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← csv一括アップロード/i) // CSV一括アップロードに戻るリンク
+      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
   })
 
