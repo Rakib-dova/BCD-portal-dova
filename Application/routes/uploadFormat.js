@@ -369,7 +369,10 @@ const cbPostIndex = async (req, res, next) => {
     taxIds: taxIds,
     unitIds: unitIds,
     csvfilename: csvfilename,
-    selectedFormatData: emptyselectedFormatData
+    selectedFormatData: emptyselectedFormatData,
+    itemRowNo: req.body.uploadFormatNumber,
+    dataStartRowNo: req.body.defaultNumber,
+    checkItemNameLine: req.body.checkItemNameLine
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
@@ -406,22 +409,38 @@ const cbPostConfirmIndex = async (req, res, next) => {
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
   // uploadFormat登録
+  let resultUploadFormat
   const uploadFormatId = uuidv4()
-  const resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
-    uploadFormatId: uploadFormatId,
-    contractId: contract.dataValues.contractId,
-    setName: req.body.uploadFormatItemName,
-    uploadType: req.body.uploadType
-  })
+  // 項目名の行有無に夜入力データ変更
+  if (req.body.checkItemNameLine === 'on') {
+    console.log('test')
+    resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
+      uploadFormatId: uploadFormatId,
+      contractId: contract.dataValues.contractId,
+      setName: req.body.uploadFormatItemName,
+      uploadType: req.body.uploadType,
+      itemRowNo: req.body.itemRowNo,
+      dataStartRowNo: req.body.dataStartRowNo
+    })
+  } else {
+    resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
+      uploadFormatId: uploadFormatId,
+      contractId: contract.dataValues.contractId,
+      setName: req.body.uploadFormatItemName,
+      uploadType: req.body.uploadType,
+      itemRowNo: 0,
+      dataStartRowNo: req.body.dataStartRowNo
+    })
+  }
 
   if (!resultUploadFormat?.dataValues) {
     logger.info(`${constantsDefine.logMessage.DBINF001} + 'cbPostConfirmIndex'`)
   }
 
+  // uploadFormatDetail登録
   let iCnt = 1
   const columnArr = constantsDefine.csvFormatDefine.columnArr
 
-  // uploadFormatDetail登録
   let resultUploadFormatDetail
   for (let idx = 0; idx < columnArr.length; idx++) {
     if (req.body.formatData[idx].length !== 0) {
