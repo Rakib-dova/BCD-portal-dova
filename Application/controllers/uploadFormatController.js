@@ -7,14 +7,14 @@ const constantsDefine = require('../constants')
 module.exports = {
   // パラメータ値
   // values = {
-  //   uploadFormatId(PK),
-  //   contractId(FK)=>Contracts(contractIdId),
-  //   setName,
-  //   uploadType,
-  //   itemRowNo,
-  //   dataStartRowNo,
-  //   createdAt,
-  //   updatedAt
+  //   uploadFormatId(PK) - フォーマットID,
+  //   contractId(FK)=>Contracts(contractIdId) - 契約ID,
+  //   setName - フォーマット名,
+  //   uploadType - フォーマットタイプ,
+  //   itemRowNo　- 項目名の行番号,
+  //   dataStartRowNo - データ開始行番号,
+  //   createdAt - 作成日付,
+  //   updatedAt - 更新日付
   // }
   insert: async (_tenantId, values) => {
     const functionName = 'uploadFormatController.insert'

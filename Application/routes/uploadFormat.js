@@ -64,10 +64,7 @@ const cbPostIndex = async (req, res, next) => {
   const defaultNumber = req.body.defaultNumber - 1
 
   // データ開始行番号、項目名の行番号チェック
-  if (
-    (req.body.checkItemNameLine === 'on' && ~~req.body.uploadFormatNumber <= 0) ||
-    ~~req.body.defaultNumber <= 0
-  ) {
+  if ((req.body.checkItemNameLine === 'on' && ~~req.body.uploadFormatNumber <= 0) || ~~req.body.defaultNumber <= 0) {
     // csv削除
     if (cbRemoveCsv(filePath, csvfilename) === false) {
       return next(errorHelper.create(500))
@@ -417,7 +414,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
   // uploadFormat登録
   let resultUploadFormat
   const uploadFormatId = uuidv4()
-  // 項目名の行有無に夜入力データ変更
+  // 項目名の行有無によるDB入力データ「itemRowNo」の変更
   if (req.body.checkItemNameLine === 'on') {
     resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
       uploadFormatId: uploadFormatId,
