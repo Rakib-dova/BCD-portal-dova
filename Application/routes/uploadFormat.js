@@ -55,25 +55,24 @@ const cbPostIndex = async (req, res, next) => {
 
   // アプロードしたファイルを読み込む
   const csvfilename = newName.replace(filePath, '')
-  const uploadFormatNumber = req.body.uploadFormatNumber - 1
+  let uploadFormatNumber = 0
+  // ヘッダなしの場合
+  if (req.body.checkItemNameLine === 'on') {
+    uploadFormatNumber = req.body.uploadFormatNumber - 1
+  }
+
   const defaultNumber = req.body.defaultNumber - 1
 
   // データ開始行番号、項目名の行番号チェック
-  if (
-    (req.body.checkItemNameLine === 'on' && ~~req.body.uploadFormatNumber <= 0) ||
-    ~~req.body.defaultNumber <= 0 ||
-    ~~req.body.defaultNumber <= ~~req.body.uploadFormatNumber
-  ) {
+  if ((req.body.checkItemNameLine === 'on' && ~~req.body.uploadFormatNumber <= 0) || ~~req.body.defaultNumber <= 0) {
     // csv削除
     if (cbRemoveCsv(filePath, csvfilename) === false) {
       return next(errorHelper.create(500))
     }
-
     // 前の画面に遷移
     const backURL = req.header('Referer') || '/'
     return res.redirect(backURL)
   }
-
   // ファイル読み込む
   let csv
   const extractFullpathFile = path.join(filePath, '/') + csvfilename
@@ -87,7 +86,11 @@ const cbPostIndex = async (req, res, next) => {
   const tmpRows = csv.split(/\r?\n|\r/)
   const checkRow = []
   tmpRows.forEach((row) => {
-    if (row.trim() !== '') checkRow.push(row)
+    if (row.trim() !== '') {
+      checkRow.push(row)
+    } else {
+      checkRow.push('')
+    }
   })
 
   if (checkRow.length < defaultNumber + 1) {
@@ -369,7 +372,10 @@ const cbPostIndex = async (req, res, next) => {
     taxIds: taxIds,
     unitIds: unitIds,
     csvfilename: csvfilename,
-    selectedFormatData: emptyselectedFormatData
+    selectedFormatData: emptyselectedFormatData,
+    itemRowNo: req.body.uploadFormatNumber,
+    dataStartRowNo: req.body.defaultNumber,
+    checkItemNameLine: req.body.checkItemNameLine
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
@@ -406,22 +412,37 @@ const cbPostConfirmIndex = async (req, res, next) => {
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
   // uploadFormat登録
+  let resultUploadFormat
   const uploadFormatId = uuidv4()
-  const resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
-    uploadFormatId: uploadFormatId,
-    contractId: contract.dataValues.contractId,
-    setName: req.body.uploadFormatItemName,
-    uploadType: req.body.uploadType
-  })
+  // 項目名の行有無によるDB入力データ「itemRowNo」の変更
+  if (req.body.checkItemNameLine === 'on') {
+    resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
+      uploadFormatId: uploadFormatId,
+      contractId: contract.dataValues.contractId,
+      setName: req.body.uploadFormatItemName,
+      uploadType: req.body.uploadType,
+      itemRowNo: req.body.itemRowNo,
+      dataStartRowNo: req.body.dataStartRowNo
+    })
+  } else {
+    resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
+      uploadFormatId: uploadFormatId,
+      contractId: contract.dataValues.contractId,
+      setName: req.body.uploadFormatItemName,
+      uploadType: req.body.uploadType,
+      itemRowNo: 0,
+      dataStartRowNo: req.body.dataStartRowNo
+    })
+  }
 
   if (!resultUploadFormat?.dataValues) {
     logger.info(`${constantsDefine.logMessage.DBINF001} + 'cbPostConfirmIndex'`)
   }
 
+  // uploadFormatDetail登録
   let iCnt = 1
   const columnArr = constantsDefine.csvFormatDefine.columnArr
 
-  // uploadFormatDetail登録
   let resultUploadFormatDetail
   for (let idx = 0; idx < columnArr.length; idx++) {
     if (req.body.formatData[idx].length !== 0) {

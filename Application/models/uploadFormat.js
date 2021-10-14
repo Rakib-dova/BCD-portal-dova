@@ -39,6 +39,14 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.STRING
       },
+      itemRowNo: {
+        allowNull: false,
+        type: DataTypes.INTEGER
+      },
+      dataStartRowNo: {
+        allowNull: false,
+        type: DataTypes.INTEGER
+      },
       uploadType: {
         allowNull: false,
         type: DataTypes.STRING
