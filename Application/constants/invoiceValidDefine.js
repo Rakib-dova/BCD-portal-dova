@@ -47,7 +47,7 @@ module.exports = {
 
   // その他特記事項
   NOTE_KEY: 'その他特記事項',
-  NOTE_VALUE: 1000,
+  NOTE_VALUE: 200,
 
   // 明細-項目ID
   SELLERSITEMNUM_KEY: '明細-項目ID',

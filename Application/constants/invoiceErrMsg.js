@@ -3,12 +3,10 @@ const invoiceValidDefine = require('./invoiceValidDefine')
 constantsDefine({
   // 請求書番号エラーメッセージ
   INVOICEIDERR000: `${invoiceValidDefine.INVOICEID_KEY}は${invoiceValidDefine.INVOICEID_VALUE}文字以内で入力してください。`,
-  INVOICEIDERR001: `${invoiceValidDefine.INVOICEID_KEY}は${invoiceValidDefine.INVOICEID_VALUE}文字で入力してください。`,
   INVOICEIDERR002: `${invoiceValidDefine.INVOICEID_KEY}が未入力です。`,
 
   // 銀行名エラーメッセージ
   BANKNAMEERR000: `${invoiceValidDefine.BANKNAME_KEY}は${invoiceValidDefine.BANKNAME_VALUE}文字以内で入力してください。`,
-  BANKNAMEERR001: `${invoiceValidDefine.BANKNAME_KEY}は${invoiceValidDefine.BANKNAME_VALUE}文字で入力してください。`,
   BANKNAMEERR002: `${invoiceValidDefine.BANKNAME_KEY}が未入力です。`,
 
   // 発行日エラーメッセージ
@@ -19,7 +17,6 @@ constantsDefine({
   // 支払期日エラーメッセージ
   PAYMENTDATEERR000: `${invoiceValidDefine.PAYMENTDATE_KEY}は有効な日付を入力してください。`,
   PAYMENTDATEERR001: `${invoiceValidDefine.PAYMENTDATE_KEY}はyyyy/mm/dd/形式で入力してください。`,
-  PAYMENTDATEERR002: `${invoiceValidDefine.PAYMENTDATE_KEY}が未入力です。`,
 
   // 納品日エラーメッセージ
   DELIVERYDATEERR000: `${invoiceValidDefine.DELIVERYDATE_KEY}は有効な日付を入力してください。`,
@@ -27,16 +24,13 @@ constantsDefine({
 
   // 備考
   FINANCIALINSTITUTIONERR000: `${invoiceValidDefine.FINANCIALINSTITUTION_KEY}は${invoiceValidDefine.FINANCIALINSTITUTION_VALUE}文字以内で入力してください。`,
-  FINANCIALINSTITUTIONERR001: `${invoiceValidDefine.FINANCIALINSTITUTION_KEY}は${invoiceValidDefine.FINANCIALINSTITUTION_VALUE}文字で入力してください。`,
 
   // 明細-項目IDエラーメッセージ
   SELLERSITEMNUMERR000: `${invoiceValidDefine.SELLERSITEMNUM_KEY}は${invoiceValidDefine.SELLERSITEMNUM_VALUE}文字以内で入力してください。`,
-  SELLERSITEMNUMERR001: `${invoiceValidDefine.SELLERSITEMNUM_KEY}は${invoiceValidDefine.SELLERSITEMNUM_VALUE}文字で入力してください。`,
   SELLERSITEMNUMERR002: `${invoiceValidDefine.SELLERSITEMNUM_KEY}が未入力です。`,
 
   // 明細-内容エラーメッセージ
   ITEMNAMEERR000: `${invoiceValidDefine.ITEMNAME_KEY}は${invoiceValidDefine.ITEMNAME_VALUE}文字以内で入力してください。`,
-  ITEMNAMEERR001: `${invoiceValidDefine.ITEMNAME_KEY}は${invoiceValidDefine.ITEMNAME_VALUE}文字で入力してください。`,
   ITEMNAMEERR002: `${invoiceValidDefine.ITEMNAME_KEY}が未入力です。`,
 
   // テナントIDエラーメッセージ
@@ -71,7 +65,6 @@ constantsDefine({
 
   // 支店名エラーメッセージ
   FINANCIALNAMEERR000: `${invoiceValidDefine.FINANCIALNAME_KEY}は${invoiceValidDefine.FINANCIALNAME_VALUE}文字以内で入力してください。`,
-  FINANCIALNAMEERR001: `${invoiceValidDefine.FINANCIALNAME_KEY}は${invoiceValidDefine.FINANCIALNAME_VALUE}文字で入力してください。`,
   FINANCIALNAMEERR002: `${invoiceValidDefine.FINANCIALNAME_KEY}が未入力です。`,
 
   // 科目エラーメッセージ
@@ -85,16 +78,13 @@ constantsDefine({
 
   // 口座名義エラーメッセージ
   ACCOUNTNAMEERR000: `${invoiceValidDefine.ACCOUNTNAME_KEY}は${invoiceValidDefine.ACCOUNTNAME_VALUE}文字以内で入力してください。`,
-  ACCOUNTNAMEERR001: `${invoiceValidDefine.ACCOUNTNAME_KEY}は${invoiceValidDefine.ACCOUNTNAME_VALUE}文字で入力してください。`,
   ACCOUNTNAMEERR002: `${invoiceValidDefine.ACCOUNTNAME_KEY}が未入力です。`,
 
   // その他特記事項エラーメッセージ
   NOTEERR000: `${invoiceValidDefine.NOTE_KEY}は${invoiceValidDefine.NOTE_VALUE}文字以内で入力してください。`,
-  NOTEERR001: `${invoiceValidDefine.NOTE_KEY}は${invoiceValidDefine.NOTE_VALUE}文字で入力してください。`,
 
   // 明細-備考
   DESCRIPTIONERR000: `${invoiceValidDefine.DESCRIPTION_KEY}は${invoiceValidDefine.DESCRIPTION_VALUE}文字以内で入力してください。`,
-  DESCRIPTIONERR001: `${invoiceValidDefine.DESCRIPTION_KEY}は${invoiceValidDefine.DESCRIPTION_VALUE}文字で入力してください。`,
 
   // ネットワーク接続エラーメッセージ
   NETERR000: `${invoiceValidDefine.NETWORK_KEY}はネットワーク接続済みのものを入力してください。`,
