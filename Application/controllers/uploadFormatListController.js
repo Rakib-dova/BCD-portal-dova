@@ -7,7 +7,7 @@ const getFormatList = async (tenantId) => {
   const uploadFormats = await uploadFormat.getUploadFormatList(tenantId)
   if (uploadFormats instanceof Error) {
     logger.error(uploadFormats)
-    return []
+    return uploadFormats
   }
 
   const displayList = uploadFormats.map((item, idx) => {
