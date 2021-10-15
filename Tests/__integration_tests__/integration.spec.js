@@ -3778,7 +3778,7 @@ describe('ルーティングのインテグレーションテスト', () => {
           flag: 'r'
         })
 
-        const originFilePath = path.resolve('../Application/public/html/請求書一括作成マニュアル.pdf')
+        const originFilePath = path.resolve('../Application/public/html/【Bconnectionデジタルトレードアプリ】操作マニュアル_請求書一括作成.pdf')
         const originFile = fs.readFileSync(originFilePath, {
           encoding: 'utf-8',
           flag: 'r'
@@ -3916,7 +3916,7 @@ describe('ルーティングのインテグレーションテスト', () => {
           flag: 'r'
         })
 
-        const originFilePath = path.resolve('../Application/public/html/請求書一括作成マニュアル.pdf')
+        const originFilePath = path.resolve('../Application/public/html/【Bconnectionデジタルトレードアプリ】操作マニュアル_請求書一括作成.pdf')
         const originFile = fs.readFileSync(originFilePath, {
           encoding: 'utf-8',
           flag: 'r'
