@@ -23,6 +23,30 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'uploadFormatId' // k1を指定
       })
     }
+
+    static async getUploadFormatList(tenantId) {
+      try {
+        // テナントで契約情報を取得
+        const contractId = await sequelize.models.Contract.findOne({
+          where: {
+            tenantId: tenantId
+          }
+        })
+        // 契約情報でアップロードフォーマットのデータを取得
+        // 作成日が優先順位にして並べる
+        const uploadFormats = await sequelize.models.UploadFormat.findAll({
+          where: {
+            contractId: contractId.contractId
+          },
+          order: [['createdAt', 'DESC']]
+        })
+
+        return uploadFormats
+      } catch (error) {
+        // エラーが発生した場合、エラーObjectを渡す。
+        return error
+      }
+    }
   }
   UploadFormat.init(
     {
