@@ -11,14 +11,6 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 
-const bodyParser = require('body-parser')
-router.use(
-  bodyParser.json({
-    type: 'application/json',
-    limit: '6826KB'
-  })
-)
-
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -62,7 +54,7 @@ const cbGetIndex = async (req, res, next) => {
 
   if (uploadFormatListArr instanceof Error) return next(errorHelper.create(500))
 
-  // ユーザ権限も画面に送る
+  // アップロードフォーマットデータを画面に渡す。
   res.render('uploadFormatList', {
     uploadFormatListArr: uploadFormatListArr
   })
