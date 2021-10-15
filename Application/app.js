@@ -201,6 +201,9 @@ app.use('/cancellation', require('./routes/cancellation').router)
 // 契約者情報の修正
 app.use('/change', require('./routes/change').router)
 
+// uploadFormatList
+app.use('/uploadFormatList', require('./routes/uploadFormatList').router)
+
 // notice
 const noticeHelper = require('./routes/helpers/notice')
 
