@@ -20,7 +20,7 @@ block content
       
     .columns.is-centered
       .column.is-11
-        a.button.is-primary(href="/csvBasicFormat") 新規登録する
+        a.button.is-link.mb-4(href="/csvBasicFormat") 新規登録する
         .box.csvuploadResultBox
           if uploadFormatListArr.length === 0
             p 現在、請求書データのアップロードフォーマットはありません。
@@ -44,9 +44,9 @@ block content
                     td.text-center= item.uploadType
                     td.text-center= item.updatedAt                 
                     td.text-center
-                      a(href="") 確認・変更する
+                      a.button.is-success(href="") 確認・変更する
                     td.text-center
-                      a(href="") 削除 
+                      a.button.is-danger(href="") 削除 
         .mt-1.has-text-left
           a.button.is-link.is-light(href="/portal") ← 戻る
 

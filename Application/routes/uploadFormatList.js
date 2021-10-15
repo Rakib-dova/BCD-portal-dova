@@ -60,7 +60,7 @@ const cbGetIndex = async (req, res, next) => {
   // アップロードフォーマット取得
   const uploadFormatListArr = await uploadFormatListController.getFormatList(req.user.tenantId)
 
-  if (uploadFormatListArr instanceof Error || uploadFormatListArr === null) return next(errorHelper.create(500))
+  if (uploadFormatListArr instanceof Error) return next(errorHelper.create(500))
 
   // ユーザ権限も画面に送る
   res.render('uploadFormatList', {
