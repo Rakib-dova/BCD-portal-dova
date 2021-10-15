@@ -1,4 +1,5 @@
 'use strict'
+
 jest.mock('../../Application/models')
 jest.mock('../../Application/lib/logger')
 
@@ -77,7 +78,23 @@ describe('uploadFormatListControllerのテスト', () => {
     }
   ]
 
-  // 1件の場合return値
+  // DB検索結果が100件の場合
+  const findOneHundredResult = []
+
+  for (let idx = 1; idx < 101; idx++) {
+    findOneHundredResult.push({
+      uploadFormatId: `abc54321-fe0c-98qw-076c-7b88d12cfc0${idx}`,
+      contractId: contractId,
+      setName: `UT${idx}`,
+      itemRowNo: 1,
+      dataStartRowNo: 2,
+      uploadType: '請求書データ',
+      createdAt: new Date('2021-10-15T08:47:49.803Z'),
+      updatedAt: new Date('2021-10-15T08:47:49.803Z')
+    })
+  }
+
+  // 1件の場合、return値
   const findReturnOne = [
     {
       No: 1,
@@ -88,7 +105,7 @@ describe('uploadFormatListControllerのテスト', () => {
     }
   ]
 
-  // 4件の場合return値
+  // 4件の場合、return値
   const findReturnFour = [
     {
       No: 1,
@@ -119,6 +136,19 @@ describe('uploadFormatListControllerのテスト', () => {
       uuid: 'abc54321-fe0c-98qw-076c-7b88d12cfc04'
     }
   ]
+
+  // 100件の場合、return値
+  const uploadFormatListArrOneHundred = []
+
+  for (let idx = 1; idx < 101; idx++) {
+    uploadFormatListArrOneHundred.push({
+      No: idx,
+      setName: `UT${idx}`,
+      updatedAt: '2021/10/15',
+      uploadType: '請求書データ',
+      uuid: `abc54321-fe0c-98qw-076c-7b88d12cfc0${idx}`
+    })
+  }
 
   describe('getFormatList', () => {
     test('正常:1件', async () => {
@@ -155,6 +185,18 @@ describe('uploadFormatListControllerのテスト', () => {
       // 期待結果
       // 想定したデータがReturnされていること
       expect(result).toEqual([])
+    })
+
+    test('正常:100件', async () => {
+      // 準備
+      getUploadFormatListSpy.mockReturnValue(findOneHundredResult)
+
+      // 試験実施
+      const result = await uploadFormatListController.getFormatList(tenantId)
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(uploadFormatListArrOneHundred)
     })
 
     test('異常：uploadFormatListController.getFormatList（DB）エラー', async () => {

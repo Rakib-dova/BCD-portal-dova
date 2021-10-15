@@ -49,6 +49,7 @@ describe('uploadFormatListのテスト', () => {
   const tenantId = '15e2d952-8ba0-42a4-8582-b234cb4a2089'
   const contractId = '87654321-cb0b-48ad-857d-4b42a44ede13'
 
+  // userDB値：正常（テナント管理者）
   const userInfoData = {
     dataValues: {
       userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
@@ -64,11 +65,12 @@ describe('uploadFormatListのテスト', () => {
     }
   }
 
+  // userDB値：正常（一般ユーザ）
   const userInfoDataUserRoleNotTenantAdmin = {
     dataValues: {
       userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
       tenantId: tenantId,
-      userRole: 'test',
+      userRole: 'fe888fbb-172f-467c-b9ad-efe0720fecf9',
       appVersion: '0.0.1',
       refreshToken: 'dummyRefreshToken',
       subRefreshToken: null,
@@ -79,6 +81,7 @@ describe('uploadFormatListのテスト', () => {
     }
   }
 
+  // userDB値：userStatusが0以外
   const userInfoDataStatusIsNot0 = {
     dataValues: {
       userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
@@ -94,6 +97,7 @@ describe('uploadFormatListのテスト', () => {
     }
   }
 
+  // 契約DB値：契約中
   const contractInfoData = {
     dataValues: {
       contractId: contractId,
@@ -106,6 +110,7 @@ describe('uploadFormatListのテスト', () => {
     }
   }
 
+  // 契約DB値：登録申込中
   const contractInfoDatatoBeReceiptContract = {
     dataValues: {
       contractId: contractId,
@@ -118,6 +123,7 @@ describe('uploadFormatListのテスト', () => {
     }
   }
 
+  // 契約DB値：登録受取中
   const contractInfoDatatoBeReceiptingContract = {
     dataValues: {
       contractId: contractId,
@@ -130,6 +136,7 @@ describe('uploadFormatListのテスト', () => {
     }
   }
 
+  // 契約DB値：解約申込中
   const contractInfoDatatoBeReceiptCancel = {
     dataValues: {
       contractId: contractId,
@@ -142,6 +149,7 @@ describe('uploadFormatListのテスト', () => {
     }
   }
 
+  // 契約DB値：解約受取中
   const contractInfoDatatoBeReceiptingCancel = {
     dataValues: {
       contractId: contractId,
@@ -154,10 +162,12 @@ describe('uploadFormatListのテスト', () => {
     }
   }
 
+  // 契約DB値：データがない場合
   const contractInfoNoData = {
     dataValues: {}
   }
 
+  // 契約DB値：変更申込中
   const contractInfoDatatoBeReceiptChange = {
     dataValues: {
       contractId: contractId,
@@ -170,6 +180,7 @@ describe('uploadFormatListのテスト', () => {
     }
   }
 
+  // 契約DB値：変更申込中
   const contractInfoDatatoBeReceiptingChange = {
     dataValues: {
       contractId: contractId,
@@ -182,7 +193,7 @@ describe('uploadFormatListのテスト', () => {
     }
   }
 
-  // 1件の場合return値
+  // 検索結果が1件の場合
   const uploadFormatListArrOne = [
     {
       No: 1,
@@ -193,6 +204,7 @@ describe('uploadFormatListのテスト', () => {
     }
   ]
 
+  // 検索結果が4件の場合
   const uploadFormatListArrFour = [
     {
       No: 1,
@@ -223,6 +235,19 @@ describe('uploadFormatListのテスト', () => {
       uuid: 'abc54321-fe0c-98qw-076c-7b88d12cfc04'
     }
   ]
+
+  // 検索結果が100件の場合
+  const uploadFormatListArrOneHundred = []
+
+  for (let idx = 1; idx < 101; idx++) {
+    uploadFormatListArrOneHundred.push({
+      No: idx,
+      setName: `UT${idx}`,
+      updatedAt: '2021/01/25',
+      uploadType: '請求書データ',
+      uuid: `abc54321-fe0c-98qw-076c-7b88d12cfc0${idx}`
+    })
+  }
 
   describe('ルーティング', () => {
     test('uploadFormatListのルーティングを確認', async () => {
@@ -312,6 +337,34 @@ describe('uploadFormatListのテスト', () => {
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
         uploadFormatListArr: []
+      })
+    })
+
+    test('正常:検索結果が100件の場合', async () => {
+      // 準備
+      // session.userContextに正常値(LoggedIn)を想定する
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(userInfoData)
+      findOneSpyContracts.mockReturnValue(contractInfoData)
+      getFormatListSpy.mockReturnValue(uploadFormatListArrOneHundred)
+
+      // 試験実施
+      await uploadFormatList.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // response.renderでuploadFormatListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
+        uploadFormatListArr: uploadFormatListArrOneHundred
       })
     })
 
