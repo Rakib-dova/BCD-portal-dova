@@ -104,7 +104,7 @@ describe('portalのテスト', () => {
       let newsDataArrSize
 
       await parser
-        .parseURL('https://support.ntt.com/informationRss/goods/rss/mail')
+        .parseURL('https://support.ntt.com/informationRss/goods/rss/bconnection')
         .then((feed) => {
           newsDataArrSize = feed.items.length
           if (newsDataArrSize === 0) {
@@ -140,7 +140,7 @@ describe('portalのテスト', () => {
       let constructDataArr = []
 
       await parser
-        .parseURL('https://support.ntt.com/maintenance/service/rss/050plus')
+        .parseURL('https://support.ntt.com/bconnection/maintenance/list/rss')
         .then((feed) => {
           if (feed.items.length === 0) {
             constructDataArr.push({
