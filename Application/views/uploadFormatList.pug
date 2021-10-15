@@ -23,7 +23,8 @@ block content
         a.button.is-primary(href="/csvBasicFormat") 新規登録する
         .box.csvuploadResultBox
           if uploadFormatListArr.length === 0
-            p 現在、請求書データのアップロードフォーマットはありません。新規登録するボタンから登録を行って下さい。
+            p 現在、請求書データのアップロードフォーマットはありません。
+            p 新規登録するボタンから登録を行って下さい。
           else
             table.table.is-fullwidth.is-hoverable.table-fixed
               thead
