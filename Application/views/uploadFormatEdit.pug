@@ -342,14 +342,15 @@ block content
                             if ~~selectedFormatData[18] === index
                               option(value= index selected)= index+1
                             else
-                              option(value= index)= index+1    
+                              option(value= index)= index+1
                           else
-                            option(value= index)= index+1    
+                            option(value= index)= index+1
                   
         footer.modal-card-foot
           div.button-area
             a.button#returnBtn(href="#") 基本情報設定へ遷移
-            a.button#returnBtn(href="#") 確認画面へ遷移
+            a.button#returnBtn(href="/uploadFormatList") 戻る
+            button.button.is-success.success-button.mr-6#confirmBtn(type="button" data-target="confirmModify-modal") 確認画面へ遷移
 
         .modal.modal-fx-fadeInscale#confirmModify-modal
           .modal-background.cancel-button(data-target="confirmModify-modal")
@@ -413,5 +414,5 @@ block content
       include footer
 
 block append scripts
-//-   script(src="/js/uploadFormat-page.js")
+  script(src="/js/uploadFormatEdit-page.js")
 
