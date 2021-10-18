@@ -92,7 +92,7 @@ module.exports = {
       const uploadForamtDetail = db.UploadFormatDetail
       const uploadFormatDetailId = db.UploadFormatIdentifier
       const uploadFormatDetails = await uploadForamtDetail.getUploadFormatDetail(uploadFormat.uploadFormatId)
-      const uploadFormatDetailIds = await uploadFormatDetailId.getUploadFromatIdId(uploadFormat.uploadFormatId)
+      const uploadFormatDetailIds = await uploadFormatDetailId.getUploadFormatId(uploadFormat.uploadFormatId)
       const columnArr = constantsDefine.csvFormatDefine.columnArr
       const uploadGeneral = {
         uploadFormatItemName: uploadFormat.setName,

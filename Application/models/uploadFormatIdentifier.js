@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       })
     }
 
-    static async getUploadFromatIdId(uploadFormatId) {
+    static async getUploadFormatId(uploadFormatId) {
       try {
         const uploadFormatIds = await sequelize.models.UploadFormatIdentifier.findAll({
           where: {

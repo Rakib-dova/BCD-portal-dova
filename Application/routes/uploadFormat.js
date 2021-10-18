@@ -55,7 +55,7 @@ const cbPostIndex = async (req, res, next) => {
   fs.renameSync(originName, newName)
 
   // アプロードしたファイルを読み込む
-  const csvfilename = newName.replace(path.resolve(filePath), '')
+  const csvFileName = newName.replace(path.resolve(filePath), '')
   let uploadFormatNumber = 0
   // ヘッダなしの場合
   if (req.body.checkItemNameLine === 'on') {
@@ -67,7 +67,7 @@ const cbPostIndex = async (req, res, next) => {
   // データ開始行番号、項目名の行番号チェック
   if ((req.body.checkItemNameLine === 'on' && ~~req.body.uploadFormatNumber <= 0) || ~~req.body.defaultNumber <= 0) {
     // csv削除
-    if (cbRemoveCsv(filePath, csvfilename) === false) {
+    if (cbRemoveCsv(filePath, csvFileName) === false) {
       return next(errorHelper.create(500))
     }
     // 前の画面に遷移
@@ -76,7 +76,7 @@ const cbPostIndex = async (req, res, next) => {
   }
   // ファイル読み込む
   let csv
-  const extractFullpathFile = path.join(filePath, '/') + csvfilename
+  const extractFullpathFile = path.join(filePath, '/') + csvFileName
 
   try {
     csv = fs.readFileSync(extractFullpathFile, 'utf8')
@@ -134,7 +134,7 @@ const cbPostIndex = async (req, res, next) => {
   })
 
   // csv削除
-  if (cbRemoveCsv(filePath, csvfilename) === false) {
+  if (cbRemoveCsv(filePath, csvFileName) === false) {
     return next(errorHelper.create(500))
   }
 
@@ -385,7 +385,7 @@ const cbPostIndex = async (req, res, next) => {
     uploadGeneral: uploadGeneral,
     taxIds: taxIds,
     unitIds: unitIds,
-    csvfilename: csvfilename,
+    csvfilename: csvFileName,
     selectedFormatData: emptyselectedFormatData,
     itemRowNo: req.body.uploadFormatNumber,
     dataStartRowNo: req.body.defaultNumber,
