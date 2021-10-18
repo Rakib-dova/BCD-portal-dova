@@ -19,6 +19,10 @@ const filePath = process.env.INVOICE_UPLOAD_PATH
 const multer = require('multer')
 const upload = multer({ dest: process.env.INVOICE_UPLOAD_PATH })
 
+const cbGetIndex = async (req, res, next) => {
+  res.send('Dummy Page')
+}
+
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
 
@@ -567,11 +571,13 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
+router.get('/:uploadFormatId', helper.isAuthenticated, cbGetIndex)
 router.post('/', upload.single('dataFile'), cbPostIndex)
 router.post('/cbPostConfirmIndex', cbPostConfirmIndex)
 
 module.exports = {
   router: router,
+  cbGetIndex: cbGetIndex,
   cbPostIndex: cbPostIndex,
   cbPostConfirmIndex: cbPostConfirmIndex,
   cbRemoveCsv: cbRemoveCsv
