@@ -47,7 +47,14 @@ const cbGetIndex = async (req, res, next) => {
   // サービスコントローラでエラー発生したとき、500エラー処理
   if (getDataForUploadFormat instanceof Error) return next(errorHelper.create(500))
 
-  res.render('uploadFormatEdit', getDataForUploadFormat)
+  const csvTax = constantsDefine.csvFormatDefine.csvTax
+  const csvUnit = constantsDefine.csvFormatDefine.csvUnit
+
+  res.render('uploadFormatEdit', {
+    ...getDataForUploadFormat,
+    csvTax: csvTax,
+    csvUnit: csvUnit
+  })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
