@@ -18,6 +18,7 @@ const path = require('path')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const multer = require('multer')
 const upload = multer({ dest: process.env.INVOICE_UPLOAD_PATH })
+let uploadData
 
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
@@ -54,7 +55,7 @@ const cbPostIndex = async (req, res, next) => {
   fs.renameSync(originName, newName)
 
   // アプロードしたファイルを読み込む
-  const csvfilename = newName.replace(filePath, '')
+  const csvfilename = newName.replace(path.resolve(filePath), '')
   let uploadFormatNumber = 0
   // ヘッダなしの場合
   if (req.body.checkItemNameLine === 'on') {
@@ -102,12 +103,25 @@ const cbPostIndex = async (req, res, next) => {
   let headerArr = []
   if (req.body.checkItemNameLine === 'on') {
     headerArr = tmpRows[uploadFormatNumber].trim().split(',')
+    uploadData = `${tmpRows[uploadFormatNumber]}\n`
   } else {
+    let headlessItems = ''
+    let idx = 0
+    while (idx < 19) {
+      if (idx !== 18) {
+        headlessItems += `項目${idx + 1},`
+      } else {
+        headlessItems += `項目${idx + 1}`
+      }
+      idx++
+    }
     mesaiArr.map((meisai) => {
       headerArr.push('')
       return ''
     })
+    uploadData = `${headlessItems}\n`
   }
+  uploadData += `${tmpRows[defaultNumber]}`
 
   let duplicateFlag = false
   // 配列に読み込んだcsvデータを入れる。
@@ -422,7 +436,8 @@ const cbPostConfirmIndex = async (req, res, next) => {
       setName: req.body.uploadFormatItemName,
       uploadType: req.body.uploadType,
       itemRowNo: req.body.itemRowNo,
-      dataStartRowNo: req.body.dataStartRowNo
+      dataStartRowNo: req.body.dataStartRowNo,
+      uploadData: uploadData
     })
   } else {
     resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
@@ -431,7 +446,8 @@ const cbPostConfirmIndex = async (req, res, next) => {
       setName: req.body.uploadFormatItemName,
       uploadType: req.body.uploadType,
       itemRowNo: 0,
-      dataStartRowNo: req.body.dataStartRowNo
+      dataStartRowNo: req.body.dataStartRowNo,
+      uploadData: uploadData
     })
   }
 
