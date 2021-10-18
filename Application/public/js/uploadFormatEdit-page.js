@@ -18,7 +18,7 @@ const $ = function (tagObjName) {
   })
 }
 
-// 確認ボタンクリックイベント処理
+// 「確認画面へ遷移」ボタンクリックイベント処理
 $('#editConfirmBtn').addEventListener('click', function (e) {
   e.preventDefault()
   const modal = document.getElementById('confirmModify-modal')
@@ -70,4 +70,16 @@ $('#editConfirmBtn').addEventListener('click', function (e) {
     })
     modal.classList.add('is-active')
   }
+})
+
+// 「基本情報設定画面へ遷移」ボタンクリックイベント処理
+$('#editCsvBasicFormatBtn').addEventListener('click', function (e) {
+  e.preventDefault()
+  const modal = document.getElementById('csvBasicFormat-modal')
+
+  modal.classList.add('is-active').focus()
+})
+
+$('#nextBtn').addEventListener('click', function (e) {
+
 })
