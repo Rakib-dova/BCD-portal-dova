@@ -205,6 +205,9 @@ app.use('/uploadFormat', require('./routes/uploadFormat').router)
 // アップロードフォーマット一覧
 app.use('/uploadFormatList', require('./routes/uploadFormatList').router)
 
+// アップロードフォーマット確認・変更
+app.use('/uploadFormatEdit', require('./routes/uploadFormatEdit').router)
+
 //設定
 // cancellation
 app.use('/cancellation', require('./routes/cancellation').router)
