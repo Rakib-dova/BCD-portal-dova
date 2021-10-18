@@ -15,15 +15,61 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const uploadFormatController = require('../../Application/controllers/uploadFormatController')
+const uploadFormatDetailController = require('../../Application/controllers/uploadFormatDetailController')
+const uploadFormatIdentifierController = require('../../Application/controllers/uploadFormatIdentifierController')
+const constantsDefine = require('../../Application/constants')
 const logger = require('../../Application/lib/logger.js')
 const path = require('path')
+
+// DBのuploadData、バイナリ表示のため、EsLintチェック除外
+// eslint-disable-next-line no-loss-of-precision
+const tmpUploadData = 0x756e646566696e6564e9a085e79bae312ce9a085e79bae322ce9a085e79bae332ce9a085e79bae342ce9a085e79bae352ce9a085e79bae362ce9a085e79bae372ce9a085e79bae382ce9a085e79bae392ce9a085e79bae31302ce9a085e79bae31312ce9a085e79bae31322ce9a085e79bae31332ce9a085e79bae31342ce9a085e79bae31352ce9a085e79bae31362ce9a085e79bae31372ce9a085e79bae31382ce9a085e79bae31390a323032312d30392d31332c5042313336363030313032312c37653532353566652d303565362d346663392d616366302d3037363537346263333566372c323032312d30382d32332c323032312d30382d32332c504249313234325fe6898be58b95e8a9a6e9a8932ce6898be58b95e98a80e8a18c2ce6898be58b95e694afe5ba972ce699aee9809a2c313233343536372ce6898be58b952ce8ab8be6b182e69bb8e4b880e68bace4bd9ce688905f312e6373762c312ce6988ee7b4b0efbc912c332ce4babae69c882c3130303030302ce6b688e8b2bbe7a88e2ce6898be58b95e8a9a6e9a893e38387e383bce382bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+const UploadFormatDB = [
+  {
+    uploadFormatId: 'ad1f0fd3-9def-440b-a0db-bcbf60c92491',
+    setName: '',
+    itemRowNo: 1,
+    dataStartRowNo: 2,
+    updateType: '請求書データ',
+    deleteFlag: 0,
+    uploadData: tmpUploadData,
+    createdAt: new Date(2021, 11, 18),
+    updatedAt: new Date(2021, 11, 18)
+  },
+  {
+    uploadFormatId: 'dad7ebc2-a99d-4d12-896b-a6f3550f3b73',
+    setName: '',
+    itemRowNo: 1,
+    dataStartRowNo: 2,
+    updateType: '請求書データ',
+    deleteFlag: 0,
+    uploadData: tmpUploadData,
+    createdAt: new Date(2021, 11, 18),
+    updatedAt: new Date(2021, 11, 18)
+  },
+  {
+    uploadFormatId: 'e8c4e929-a119-4ee7-b4be-a06c53130c3d',
+    setName: '',
+    itemRowNo: 1,
+    dataStartRowNo: 2,
+    updateType: '請求書データ',
+    deleteFlag: 0,
+    uploadData: tmpUploadData,
+    createdAt: new Date(2021, 11, 18),
+    updatedAt: new Date(2021, 11, 18)
+  }
+]
+
+const UploadFormatDetailDB = []
+const UploadFormatIdentifierDB = []
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.envUploadFormat' })
 }
 let request, response
-let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy, uploadFormatControllerSpy
+let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy
 describe('uploadFormatのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -33,7 +79,10 @@ describe('uploadFormatのテスト', () => {
     findOneSypTenant = jest.spyOn(tenantController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     pathSpy = jest.spyOn(path, 'join')
-    uploadFormatControllerSpy = jest.spyOn(uploadFormatController, 'insert')
+    uploadFormatController.insert = jest.fn(uploadFormatControllerInsert)
+    uploadFormatController.findUploadFormat = jest.fn(uploadFormatControllerFindUploadFormat)
+    uploadFormatDetailController.insert = jest.fn(uploadFormatDetailControllerInsert)
+    uploadFormatIdentifierController.insert = jest.fn(uploadFormatIdentifierControllerInsert)
   })
   afterEach(() => {
     request.resetMocked()
@@ -44,7 +93,6 @@ describe('uploadFormatのテスト', () => {
     findOneSypTenant.mockRestore()
     findOneSpyContracts.mockRestore()
     pathSpy.mockRestore()
-    uploadFormatControllerSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -110,6 +158,18 @@ describe('uploadFormatのテスト', () => {
     }
   }
 
+  const contractdataValues2 = {
+    dataValues: {
+      contractId: '0bcedab8-de85-4b82-bf61-34fbb59ca883',
+      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+      numberN: '0000011111',
+      contractStatus: '00',
+      deleteFlag: false,
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
   const contractdataValues4 = {
     dataValues: {
       contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
@@ -128,6 +188,18 @@ describe('uploadFormatのテスト', () => {
       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
       numberN: '0000011111',
       contractStatus: '30',
+      deleteFlag: false,
+      createdAt: '2021-01-25T08:45:49.803Z',
+      updatedAt: '2021-01-25T08:45:49.803Z'
+    }
+  }
+
+  const contractdataValuesDataControllFail = {
+    dataValues: {
+      contractId: '1111111111-2222-3333-4444-4b42a44ede13',
+      tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+      numberN: '0000011111',
+      contractStatus: '00',
       deleteFlag: false,
       createdAt: '2021-01-25T08:45:49.803Z',
       updatedAt: '2021-01-25T08:45:49.803Z'
@@ -414,6 +486,47 @@ describe('uploadFormatのテスト', () => {
       key: 'keyTonnage',
       value: '44'
     }
+  }
+
+  const reqBodyUnitIds = {
+    keyManMonth: '8',
+    keyBottle: '9',
+    keyCost: '10',
+    keyContainer: '11',
+    keyCentilitre: '12',
+    keySquareCentimeter: '13',
+    keyCubicCentimeter: '14',
+    keyCentimeter: '15',
+    keyCase: '16',
+    keyCarton: '17',
+    keyDay: '18',
+    keyDeciliter: '19',
+    keyDecimeter: '20',
+    keyGrossKilogram: '21',
+    keyPieces: '22',
+    keyFeet: '23',
+    keyGallon: '24',
+    keyGram: '25',
+    keyGrossTonnage: '26',
+    keyHour: '27',
+    keyKilogram: '28',
+    keyKilometers: '29',
+    keyKilowattHour: '30',
+    keyPound: '31',
+    keyLiter: '32',
+    keyMilligram: '33',
+    keyMilliliter: '34',
+    keyMillimeter: '35',
+    keyMonth: '36',
+    keySquareMeter: '37',
+    keyCubicMeter: '38',
+    keyMeter: '39',
+    keyNetTonnage: '40',
+    keyPackage: '41',
+    keyRoll: '42',
+    keyFormula: '43',
+    keyTonnage: '44',
+    keyOthers: '45'
   }
 
   const reqBodyForCbPostIndexOn = {
@@ -1645,7 +1758,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: '/' + user.userId + '_UTtest.csv',
+        csvfilename: `${user.userId}_UTtest.csv`,
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -1701,7 +1814,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: '/' + user.userId + '_UTtest.csv',
+        csvfilename: `${user.userId}_UTtest.csv`,
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -2590,7 +2703,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: '/' + user.userId + '_UTtest.csv',
+        csvfilename: `${user.userId}_UTtest.csv`,
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -2744,7 +2857,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: '/' + user.userId + '_UTtest.csv',
+        csvfilename: `${user.userId}_UTtest.csv`,
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -3029,6 +3142,51 @@ describe('uploadFormatのテスト', () => {
       expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
     })
 
+    test('正常:DBにuploadData保存', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // ファイルデータを設定
+      request.body = {
+        ...reqBodyForCbPostIndexOn,
+        itemRowNo: 1,
+        dataStartRowNo: 2
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues2)
+
+      // 試験実施
+      await uploadFormat.cbPostConfirmIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでcsvConfirmFormatが呼ばれ「る」
+      // 0bcedab8-de85-4b82-bf61-34fbb59ca883
+      let checkUploadFormatData
+      UploadFormatDB.forEach((item) => {
+        if (item.contractId === contractdataValues2.dataValues.contractId) {
+          checkUploadFormatData = item
+        }
+      })
+      expect(checkUploadFormatData.uploadData).toBe(
+        '発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考\n' +
+          '2021-06-14,UT_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1111111,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト'
+      )
+    })
+
     test('準正常：解約中', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -3151,6 +3309,67 @@ describe('uploadFormatのテスト', () => {
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
     })
+
+    test('準正常：UploadFormatDBに入力エラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      request.body = {
+        checkItemNameLine: 'off',
+        uploadFormatItemName: 'csvFormatUpload.csv',
+        uploadType: '請求書データ',
+        itemRowNo: 0,
+        dataStartRowNo: 2,
+        formatData: [
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+          '17',
+          '18',
+          '19'
+        ],
+        headerItems: headerItems,
+        keyConsumptionTax: '',
+        keyReducedTax: '',
+        keyFreeTax: '',
+        keyDutyFree: '',
+        keyExemptTax: '',
+        ...reqBodyUnitIds
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの不正な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValuesDataControllFail)
+
+      helper.checkContractStatus = '00'
+
+      // 試験実施
+      await uploadFormat.cbPostConfirmIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).not.toHaveBeenCalledWith(error500)
+    })
   })
 
   // -----------------------------------------------------------------------------------------
@@ -3196,3 +3415,158 @@ describe('uploadFormatのテスト', () => {
     })
   })
 })
+
+const uploadFormatControllerInsert = async (_tenantId, values) => {
+  const functionName = 'uploadFormatController.insert'
+  let contractRow
+  let contractId
+  let resultToInsertUpload
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+
+  const uploadContractId = values?.contractId
+  if (!uploadContractId) {
+    logger.error(`${constantsDefine.logMessage.CMMERR000}${functionName}`)
+    return
+  }
+
+  try {
+    contractRow = {
+      dataValues: {
+        contractId: uploadContractId
+      }
+    }
+    contractId = contractRow?.dataValues?.contractId
+    if (contractId === '1111111111-2222-3333-4444-4b42a44ede13') {
+      throw new Error('DB input Error')
+    }
+  } catch (error) {
+    logger.error({ contractId: uploadContractId, stack: error.stack, status: 0 })
+    return
+  }
+
+  if (!contractId || contractId !== uploadContractId) {
+    logger.info(`${constantsDefine.logMessage.DBINF000}${functionName}`)
+    return
+  }
+
+  try {
+    const now = new Date()
+    resultToInsertUpload = {
+      dataValues: {
+        ...values,
+        contractId: contractId,
+        createdAt: now,
+        updatedAt: now
+      }
+    }
+    UploadFormatDB.push(resultToInsertUpload.dataValues)
+  } catch (error) {
+    logger.error({ contractId: uploadContractId, stack: error.stack, status: 0 })
+    return
+  }
+
+  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+  return resultToInsertUpload
+}
+
+const uploadFormatControllerFindUploadFormat = async (uploadFormatId) => {
+  const functionName = 'uploadFormatController.findUploadFormat'
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+  let uploadFormat
+  try {
+    UploadFormatDB.forEach((item) => {
+      if (item.uploadFormatId === uploadFormatId) {
+        uploadFormat = {
+          dataValues: item
+        }
+      }
+    })
+  } catch (error) {
+    logger.error({ uploadFormatId: uploadFormatId, stack: error.stack, status: 0 })
+  }
+  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+  return uploadFormat
+}
+
+const uploadFormatDetailControllerInsert = async (values) => {
+  const functionName = 'uploadFormatDetailController.insert'
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+  const uploadFormatId = values?.uploadFormatId
+  if (!uploadFormatId) {
+    logger.error(`${constantsDefine.logMessage.CMMERR000}${functionName}`)
+    return
+  }
+  const uploadFormatRow = await uploadFormatController.findUploadFormat(uploadFormatId)
+
+  if (!uploadFormatRow?.dataValues.uploadFormatId) {
+    logger.info(`${constantsDefine.logMessage.DBINF000}${functionName}`)
+    return
+  }
+
+  let resultToInsertUploadFormatDetail
+
+  try {
+    resultToInsertUploadFormatDetail = {
+      ...values,
+      uploadFormatId: uploadFormatRow?.dataValues.uploadFormatId
+    }
+    UploadFormatDetailDB.push(resultToInsertUploadFormatDetail)
+  } catch (error) {
+    logger.error(
+      {
+        values: {
+          ...values,
+          uploadFormatId: uploadFormatRow?.dataValues.uploadFormatId
+        },
+        stack: error.stack,
+        status: 0
+      },
+      error.name
+    )
+  }
+
+  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+  return resultToInsertUploadFormatDetail
+}
+
+const uploadFormatIdentifierControllerInsert = async (values) => {
+  const functionName = 'uploadFormatDetailController.insert'
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+  const uploadFormatId = values?.uploadFormatId
+
+  if (!uploadFormatId) {
+    logger.error(`${constantsDefine.logMessage.CMMERR000}${functionName}`)
+    return
+  }
+  const uploadFormatRow = await uploadFormatController.findUploadFormat(uploadFormatId)
+
+  if (!uploadFormatRow?.dataValues.uploadFormatId) {
+    logger.info(`${constantsDefine.logMessage.DBINF000}${functionName}`)
+    return
+  }
+
+  let resultToInsertUploadFormatDetail
+
+  try {
+    resultToInsertUploadFormatDetail = {
+      ...values,
+      uploadFormatId: uploadFormatRow?.dataValues.uploadFormatId
+    }
+    UploadFormatIdentifierDB.push(resultToInsertUploadFormatDetail)
+  } catch (error) {
+    logger.error(
+      {
+        values: {
+          ...values,
+          uploadFormatId: uploadFormatRow?.dataValues.uploadFormatId
+        },
+        stack: error.stack,
+        status: 0
+      },
+      error.name
+    )
+  }
+
+  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+  return resultToInsertUploadFormatDetail
+}
