@@ -55,7 +55,7 @@ const cbPostIndex = async (req, res, next) => {
   fs.renameSync(originName, newName)
 
   // アプロードしたファイルを読み込む
-  const csvFileName = newName.replace(path.resolve(filePath), '')
+  const csvFileName = newName.substr(newName.lastIndexOf(path.sep) + 1, newName.length)
   let uploadFormatNumber = 0
   // ヘッダなしの場合
   if (req.body.checkItemNameLine === 'on') {
