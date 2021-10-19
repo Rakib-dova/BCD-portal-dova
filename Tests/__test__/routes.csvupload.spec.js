@@ -57,7 +57,8 @@ let request,
   findOneSpyContracts,
   invoiceListSpy,
   findAllByContractIdSpy,
-  findByUploadFormatIdSpy
+  findByUploadFormatIdSpy,
+  findUploadFormatIdSpy
 
 let createSpyInvoices, createSpyinvoicesDetail, findOneSpyInvoice, findOneSypTenant, findByUploadFormatIdIdentifierSpy
 describe('csvuploadのテスト', () => {
@@ -68,6 +69,7 @@ describe('csvuploadのテスト', () => {
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     findAllByContractIdSpy = jest.spyOn(uploadFormatController, 'findByContractId')
+    findUploadFormatIdSpy = jest.spyOn(uploadFormatController, 'findUploadFormat')
     findByUploadFormatIdSpy = jest.spyOn(uploadFormatDetailController, 'findByUploadFormatId')
     findByUploadFormatIdIdentifierSpy = jest.spyOn(uploadFormatIdentifierController, 'findByUploadFormatId')
     invoiceListSpy = jest.spyOn(csvupload, 'cbExtractInvoice')
@@ -127,6 +129,7 @@ describe('csvuploadのテスト', () => {
     findByUploadFormatIdSpy.mockRestore()
     pathSpy.mockRestore()
     findByUploadFormatIdIdentifierSpy.mockRestore()
+    findUploadFormatIdSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -1326,6 +1329,8 @@ describe('csvuploadのテスト', () => {
       contractId: contractId,
       setName: '請求書フォーマット1',
       uploadType: '請求書データ',
+      itemRowNo: '1',
+      dataStartRowNo: '2',
       createdAt: '2021-07-09T04:30:00.000Z',
       updatedAt: '2021-07-09T04:30:00.000Z'
     },
@@ -1334,11 +1339,38 @@ describe('csvuploadのテスト', () => {
       contractId: contractId,
       setName: '請求書フォーマット2',
       uploadType: '請求書データ',
+      itemRowNo: '1',
+      dataStartRowNo: '2',
       createdAt: '2021-07-09T04:30:00.000Z',
       updatedAt: '2021-07-09T04:30:00.000Z'
     }
   ]
 
+  const uploadFormatResult = {
+    dataValues: [
+      {
+        uploadFormatId: uploadFormatId,
+        contractId: contractId,
+        setName: '請求書フォーマット1',
+        uploadType: '請求書データ',
+        itemRowNo: '1',
+        dataStartRowNo: '2',
+        createdAt: '2021-07-09T04:30:00.000Z',
+        updatedAt: '2021-07-09T04:30:00.000Z'
+      },
+      {
+        uploadFormatId: uploadFormatId2,
+        contractId: contractId,
+        setName: '請求書フォーマット2',
+        uploadType: '請求書データ',
+        itemRowNo: '1',
+        dataStartRowNo: '2',
+        createdAt: '2021-07-09T04:30:00.000Z',
+        updatedAt: '2021-07-09T04:30:00.000Z'
+      }
+    ]
+  }
+  
   const uploadFormatDetailResult = [
     {
       uploadFormatId: uploadFormatId,
@@ -7264,6 +7296,7 @@ describe('csvuploadのテスト', () => {
 
       findByUploadFormatIdSpy.mockReturnValue(uploadFormatDetailResult)
       findByUploadFormatIdIdentifierSpy.mockReturnValue(uploadFormatIdentifierTaxResult)
+      findUploadFormatIdSpy.mockReturnValue(uploadFormatResult)
 
       const userToken = {
         accessToken: 'dummyAccessToken',
@@ -7352,6 +7385,7 @@ describe('csvuploadのテスト', () => {
       // DB設定
       findByUploadFormatIdSpy.mockReturnValue(uploadFormatDetailResult)
       findByUploadFormatIdIdentifierSpy.mockReturnValue(uploadFormatIdentifierUnit10Result)
+      findUploadFormatIdSpy.mockReturnValue(uploadFormatResult)
 
       // 試験実施
       const resultUpl = await csvupload.cbUploadCsv(filePath, filename, fileData)

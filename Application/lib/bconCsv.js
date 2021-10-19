@@ -218,7 +218,7 @@ class bconCsv {
         if (tmpRows[idx].trim()) {
           let docIndex
           if (_formatFlag) {
-            docIndex = _uploadFormatDetail[idx].uploadFormatNumber
+            docIndex = _uploadFormatDetail[1].uploadFormatNumber
           } else {
             docIndex = 1
           }
