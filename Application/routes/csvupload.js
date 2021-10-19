@@ -26,6 +26,7 @@ router.use(
   })
 )
 const BconCsv = require('../lib/bconCsv')
+const BconCsvNoHeader = require('../lib/bconCsvNoHeader')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -66,6 +67,12 @@ const cbGetIndex = async (req, res, next) => {
   }
 
   BconCsv.prototype.companyNetworkConnectionList = await getNetwork({
+    accessToken: req.user.accessToken,
+    refreshToken: req.user.refreshToken
+  })
+
+  // ヘッダがない場合
+  BconCsvNoHeader.prototype.companyNetworkConnectionList = await getNetwork({
     accessToken: req.user.accessToken,
     refreshToken: req.user.refreshToken
   })
@@ -242,6 +249,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
   const uploadFormatId = _req.body.uploadFormatId
   let formatFlag = false
+  let itemRowNumber = 1
+  let dataRowNumber = 2
   let uploadFormatDetail = []
   let uploadFormatIdentifier = []
 
@@ -272,8 +281,27 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     if (uploadFormatIdentifier.length === 0) {
       uploadFormatIdentifier = []
     }
+
+    const uploadFormat = await uploadFormatController.findUploadFormat(uploadFormatId)
+
+    // DBエラー（uploadFormat）の場合
+    if (uploadFormat instanceof Error || uploadFormat === null) {
+      setErrorLog(_req, 500)
+      return _res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    }
+    // ここにヘッダー行目のチェック追加
+    itemRowNumber = uploadFormat.dataValues.itemRowNo
+    dataRowNumber = uploadFormat.dataValues.dataStartRowNo
   }
-  const csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier)
+
+  let csvObj = null
+
+  // ヘッダがない場合
+  if (itemRowNumber === 0) {
+    csvObj = new BconCsvNoHeader(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier, itemRowNumber)
+  } else {
+    csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier)
+  }
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
   const setHeaders = {}
@@ -449,11 +477,22 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       const errorData = invoiceList[idx].error
       const lines = invoiceList[idx].lines
       let messageIdx = 0
-      if (invoiceList[idx].lines !== 0) {
-        messageIdx = invoiceList[idx].lines - 1
+
+      // ヘッダ行目チェック
+      if (itemRowNumber === 1) {
+        if (invoiceList[idx].lines !== 0) {
+          messageIdx = invoiceList[idx].lines - 1
+        } else {
+          messageIdx = invoiceList[idx].lines
+          headerErrorFlag = 1
+        }
       } else {
-        messageIdx = invoiceList[idx].lines
-        headerErrorFlag = 1
+        if (errorData[0].errorData === constantsDefine.invoiceErrMsg.HEADERERR000) {
+          messageIdx = 0
+          headerErrorFlag = 1
+        } else {
+          messageIdx = 0
+        }
       }
 
       if (meisaiFlag === 2) {
@@ -484,11 +523,19 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
         })
       } else {
         invoiceLines.map((ele, idx) => {
+          let errorLines = 0
+          if (headerErrorFlag !== 1) {
+            if (formatFlag && dataRowNumber !== 2) {
+              errorLines = dataRowNumber + idx
+            } else {
+              errorLines = lines + idx
+            }
+          }
           invoiceDetailController.insert({
             invoiceDetailId: uuidv4(),
             invoicesId: _invoices.invoicesId,
             invoiceId: invoiceId,
-            lines: lines + idx,
+            lines: errorLines,
             status: status,
             errorData: errorData[messageIdx + idx].errorData
           })
