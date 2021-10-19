@@ -7,6 +7,8 @@ const constants = require('../constants')
 const { exit } = require('process')
 const bconCsvTaxDefault = require('./bconCsvTax')
 const bconCsvUnitDefault = require('./bconCsvUnitcode')
+const tmpHeader = '請求書番号,発行日,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考'
+const dataNumber = 'データ番号'
 
 class Invoice {
   #DocumentId = null
@@ -191,7 +193,7 @@ class Invoice {
   }
 }
 
-class bconCsv {
+class bconCsvNoHeader {
   #csvFile = {
     fileStatusEnum: {
       SUCCESS: 0,
@@ -212,22 +214,21 @@ class bconCsv {
     getData() {
       return this.data
     },
-    setRows(_data, _formatFlag, _uploadFormatDetail) {
+    setRows(_data, _formatFlag, _uploadFormatDetail, itemRowNumber) {
+      let tmpRowsCover = []
       const tmpRows = _data.split(/\r?\n|\r/)
-      for (let idx = 0; idx < tmpRows.length; idx++) {
-        if (tmpRows[idx].trim()) {
+      tmpRowsCover.push(tmpHeader, ...tmpRows)
+
+      for (let idx = 0; idx < tmpRowsCover.length; idx++) {
+        if (tmpRowsCover[idx].trim()) {
           let docIndex
-          if (_formatFlag) {
-            docIndex = _uploadFormatDetail[idx].uploadFormatNumber
-          } else {
-            docIndex = 1
-          }
-          this.rows.push({
-            idx: idx,
-            invoiceGroup: null,
-            docNo: tmpRows[idx].split(',')[docIndex],
-            rows: tmpRows[idx]
-          })
+          docIndex = _uploadFormatDetail[idx].uploadFormatNumber
+            this.rows.push({
+              idx: itemRowNumber + idx,
+              invoiceGroup: null,
+              docNo: tmpRowsCover[idx].split(',')[docIndex],
+              rows: tmpRowsCover[idx]
+            })
         }
       }
       this.invoiceCnt = this.rows.length
@@ -250,9 +251,10 @@ class bconCsv {
       })
     },
 
-    setFile(_filePath, formatFlag, uploadFormatDetail) {
+    setFile(_filePath, formatFlag, uploadFormatDetail, itemRowNumber) {
       this.setStatus(this.fileStatusEnum.LOADING)
       this.setFormatFlag(formatFlag)
+      this.setItemRowNumber(itemRowNumber)
       this.fd = fs.openSync(_filePath, 'r')
       this.setData(fs.readFileSync(_filePath, 'utf8'))
       this.setStatus(this.fileStatusEnum.SUCCESS)
@@ -260,7 +262,15 @@ class bconCsv {
         if (err) {
         }
       })
-      this.setRows(this.getData(), formatFlag, uploadFormatDetail)
+      this.setRows(this.getData(), formatFlag, uploadFormatDetail,itemRowNumber)
+    },
+
+    setItemRowNumber(itemRowNumber) {
+      this.itemRowNumber = itemRowNumber
+    },
+
+    getsetItemRowNumber() {
+      return this.itemRowNumber
     },
 
     setFormatFlag(formatFlag) {
@@ -293,12 +303,12 @@ class bconCsv {
 
   #invoiceDocumentList = []
 
-  constructor(fullFilePath, formatFlag, uploadFormatDetail, uploadFormatIdentifier) {
-    this.#csvFile.setFile(fullFilePath, formatFlag, uploadFormatDetail)
-    this.convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier)
+  constructor(fullFilePath, formatFlag, uploadFormatDetail, uploadFormatIdentifier, itemRowNumber) {
+    this.#csvFile.setFile(fullFilePath, formatFlag, uploadFormatDetail, itemRowNumber)
+    this.convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier, itemRowNumber)
   }
 
-  convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier) {
+  convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier, itemRowNumber) {
     // CSVカーラム
     const resultConvert = {
       invoiceDetailId: null, // invoiceDetailテーブルのinvoiceDetailIdカーラム
@@ -327,17 +337,13 @@ class bconCsv {
 
     invoiceData.some((element) => {
       let csvColumn = element.rows.split(',')
-
-      if (formatFlag) {
-        csvColumn = this.convertUserCsvFormat(uploadFormatDetail, csvColumn)
-        userHeaderColumns = uploadFormatDetail.length
-        // taxsetting
-        if (uploadFormatIdentifier.length !== 0) {
-          bconCsvTaxUser = this.convertUserTaxidentifier(uploadFormatIdentifier)
-          bconCsvUnitUser = this.convertUserUnitidentifier(uploadFormatIdentifier)
-        }
+      csvColumn = this.convertUserCsvFormat(uploadFormatDetail, csvColumn)
+      userHeaderColumns = uploadFormatDetail.length
+      // taxsetting
+      if (uploadFormatIdentifier.length !== 0) {
+        bconCsvTaxUser = this.convertUserTaxidentifier(uploadFormatIdentifier)
+        bconCsvUnitUser = this.convertUserUnitidentifier(uploadFormatIdentifier)
       }
-
       resultConvert.invoiceDetailId = uuidv4()
       resultConvert.invoiceId = csvColumn[1]
       resultConvert.lines = element.idx
@@ -350,11 +356,11 @@ class bconCsv {
         parentInvoiceStatus = 0
 
         // ユーザが設定したアップロードフォーマットと項目数が間違い場合
-        if (formatFlag && headerchk) {
+        if (formatFlag) {
           let result = csvColumn.filter((col) => {
             if (col) return col
           })
-          if (result.length < userHeaderColumns) {
+          if (result.length < userHeaderColumns && headerchk) {
             errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
             resultConvert.status = -1
             headerchk = false
@@ -375,7 +381,6 @@ class bconCsv {
           }
         }
 
-        // デフォルトフォーマットヘッダチェック
         if (csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE && headerchk && !formatFlag) {
           errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
           resultConvert.status = -1
@@ -426,6 +431,60 @@ class bconCsv {
             return
           }
         }
+
+        let dateBan = 0
+        let invoiceBan = 1
+        let tenantIdBan = 2
+        let paymentDateBan = 3
+        let deliveryDateBan = 4
+        let etcBan = 5
+        let bankNameBan = 6
+        let bankLocalNameBan = 7
+        let subjectBan = 8
+        let accountNumberBan = 9
+        let accountNameBan = 10
+        let etcWriteBan = 11
+
+        uploadFormatDetail.forEach(detail => {
+          if(detail.defaultNumber === 0) {
+            dateBan = detail.uploadFormatNumber+1
+          }
+          if(detail.defaultNumber === 1) {
+            invoiceBan = detail.uploadFormatNumber+1
+          }
+          if(detail.defaultNumber === 2) {
+            tenantIdBan = detail.uploadFormatNumber+1
+          }
+          if(detail.defaultNumber === 3) {
+            paymentDateBan = detail.uploadFormatNumber+1
+          }
+          if(detail.defaultNumber === 4) {
+            deliveryDateBan = detail.uploadFormatNumber+1
+          }
+          if(detail.defaultNumber === 5) {
+            etcBan = detail.uploadFormatNumber+1
+          }
+          if(detail.defaultNumber === 6) {
+            bankNameBan = detail.uploadFormatNumber+1
+          }
+          if(detail.defaultNumber === 7) {
+            bankLocalNameBan = detail.uploadFormatNumber+1
+          }
+          if(detail.defaultNumber === 8) {
+            subjectBan = detail.uploadFormatNumber+1
+          }
+          if(detail.defaultNumber === 9) {
+            accountNumberBan = detail.uploadFormatNumber+1
+          }
+          if(detail.defaultNumber === 10) {
+            accountNameBan = detail.uploadFormatNumber+1
+          }
+          if(detail.defaultNumber === 11) {
+            etcWriteBan = detail.uploadFormatNumber+1
+          }
+
+        })
+        // 発行日
         if (csvColumn[0] !== '') {
           csvColumn[0] = csvColumn[0].replace(/\//g, '-')
           let issueDateArray = csvColumn[0].split('-')
@@ -434,17 +493,19 @@ class bconCsv {
             .slice(-2)}`
 
           switch (validate.isDate(csvColumn[0])) {
+            // 形式の間違い
             case 1:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg['ISSUEDATEERR001']}`
-                : `${constants.invoiceErrMsg['ISSUEDATEERR001']}`
+                ? `,${dataNumber}${dateBan}${constants.invoiceErrMsgForUploadFormat['ISSUEDATEERR001']}`
+                : `${dataNumber}${dateBan}${constants.invoiceErrMsgForUploadFormat['ISSUEDATEERR001']}`
 
               resultConvert.status = -1
               break
+            // 無効な日付
             case 2:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg['ISSUEDATEERR000']}`
-                : `${constants.invoiceErrMsg['ISSUEDATEERR000']}`
+                ? `,${dataNumber}${dateBan}${constants.invoiceErrMsgForUploadFormat['ISSUEDATEERR000']}`
+                : `${dataNumber}${dateBan}${constants.invoiceErrMsgForUploadFormat['ISSUEDATEERR000']}`
 
               resultConvert.status = -1
               break
@@ -452,22 +513,25 @@ class bconCsv {
               break
           }
         } else {
+          // 未入力
           errorData += errorData
-            ? `,${constants.invoiceErrMsg['ISSUEDATEERR002']}`
-            : `${constants.invoiceErrMsg['ISSUEDATEERR002']}`
+            ? `,${dataNumber}${dateBan}${constants.invoiceErrMsgForUploadFormat['ISSUEDATEERR002']}`
+            : `${dataNumber}${dateBan}${constants.invoiceErrMsgForUploadFormat['ISSUEDATEERR002']}`
 
           resultConvert.status = -1
         }
 
         parentInvoice.setIssueDate(csvColumn[0])
 
+
+        // 請求書番号
         switch (validate.isInvoiceId(csvColumn[1])) {
           case '':
             break
           default:
             errorData += errorData
-              ? `,${constants.invoiceErrMsg[validate.isInvoiceId(csvColumn[1])]}`
-              : `${constants.invoiceErrMsg[validate.isInvoiceId(csvColumn[1])]}`
+              ? `,${dataNumber}${invoiceBan}${constants.invoiceErrMsgForUploadFormat[validate.isInvoiceId(csvColumn[1])]}`
+              : `${dataNumber}${invoiceBan}${constants.invoiceErrMsgForUploadFormat[validate.isInvoiceId(csvColumn[1])]}`
 
             resultConvert.status = -1
             break
@@ -476,17 +540,18 @@ class bconCsv {
 
         parentInvoice.setInvoiceNumber(csvColumn[1])
 
+        // テナントID
         if (csvColumn[2] !== '') {
           if (!validate.isUUID(csvColumn[2])) {
             errorData += errorData
-              ? `,${constants.invoiceErrMsg['TENANTERR000']}`
-              : `${constants.invoiceErrMsg['TENANTERR000']}`
+              ? `,${dataNumber}${tenantIdBan}${constants.invoiceErrMsgForUploadFormat['TENANTERR000']}`
+              : `${dataNumber}${tenantIdBan}${constants.invoiceErrMsgForUploadFormat['TENANTERR000']}`
 
             resultConvert.status = -1
           }
 
           const resultcheckNetworkConnection = validate.checkNetworkConnection(
-            bconCsv.prototype.companyNetworkConnectionList,
+            bconCsvNoHeader.prototype.companyNetworkConnectionList,
             csvColumn[2]
           )
 
@@ -498,21 +563,23 @@ class bconCsv {
               break
             default:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
-                : `${constants.invoiceErrMsg[resultcheckNetworkConnection]}`
+                ? `,${constants.invoiceErrMsgForUploadFormat[resultcheckNetworkConnection]}`
+                : `${constants.invoiceErrMsgForUploadFormat[resultcheckNetworkConnection]}`
 
               resultConvert.status = -1
               break
           }
         } else {
+          // テナントID未入力
           errorData += errorData
-            ? `,${constants.invoiceErrMsg['TENANTERR001']}`
-            : `${constants.invoiceErrMsg['TENANTERR001']}`
+            ? `,${dataNumber}${tenantIdBan}${constants.invoiceErrMsgForUploadFormat['TENANTERR001']}`
+            : `${dataNumber}${tenantIdBan}${constants.invoiceErrMsgForUploadFormat['TENANTERR001']}`
 
           resultConvert.status = -1
         }
         parentInvoice.setCustomerTennant(csvColumn[2])
 
+        // 納品日
         if (csvColumn[4] !== '') {
           csvColumn[4] = csvColumn[4].replace(/\//g, '-')
           let deliveryDateArray = csvColumn[4].split('-')
@@ -522,15 +589,15 @@ class bconCsv {
           switch (validate.isDate(csvColumn[4])) {
             case 1:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg['DELIVERYDATEERR001']}`
-                : `${constants.invoiceErrMsg['DELIVERYDATEERR001']}`
+                ? `,${dataNumber}${deliveryDateBan}${constants.invoiceErrMsgForUploadFormat['DELIVERYDATEERR001']}`
+                : `${dataNumber}${deliveryDateBan}${constants.invoiceErrMsgForUploadFormat['DELIVERYDATEERR001']}`
 
               resultConvert.status = -1
               break
             case 2:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg['DELIVERYDATEERR000']}`
-                : `${constants.invoiceErrMsg['DELIVERYDATEERR000']}`
+                ? `,${dataNumber}${deliveryDateBan}${constants.invoiceErrMsgForUploadFormat['DELIVERYDATEERR000']}`
+                : `${dataNumber}${deliveryDateBan}${constants.invoiceErrMsgForUploadFormat['DELIVERYDATEERR000']}`
 
               resultConvert.status = -1
               break
@@ -540,14 +607,15 @@ class bconCsv {
         }
         parentInvoice.setDelivery(csvColumn[4])
 
+        // 備考
         if (csvColumn[5] !== '') {
           switch (validate.isFinancialInstitution(csvColumn[5])) {
             case '':
               break
             default:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg[validate.isFinancialInstitution(csvColumn[5])]}`
-                : `${constants.invoiceErrMsg[validate.isFinancialInstitution(csvColumn[5])]}`
+                ? `,${dataNumber}${etcBan}${constants.invoiceErrMsgForUploadFormat[validate.isFinancialInstitution(csvColumn[5])]}`
+                : `${dataNumber}${etcBan}${constants.invoiceErrMsgForUploadFormat[validate.isFinancialInstitution(csvColumn[5])]}`
 
               resultConvert.status = -1
               break
@@ -564,6 +632,7 @@ class bconCsv {
           csvColumn[9] !== '' ||
           csvColumn[10] !== ''
         ) {
+          // 支払期日
           if (csvColumn[3] !== '') {
             csvColumn[3] = csvColumn[3].replace(/\//g, '-')
             let paymentDateArray = csvColumn[3].split('-')
@@ -573,15 +642,15 @@ class bconCsv {
             switch (validate.isDate(csvColumn[3])) {
               case 1:
                 errorData += errorData
-                  ? `,${constants.invoiceErrMsg['PAYMENTDATEERR001']}`
-                  : `${constants.invoiceErrMsg['PAYMENTDATEERR001']}`
+                  ? `,${dataNumber}${paymentDateBan}${constants.invoiceErrMsgForUploadFormat['PAYMENTDATEERR001']}`
+                  : `${dataNumber}${paymentDateBan}${constants.invoiceErrMsgForUploadFormat['PAYMENTDATEERR001']}`
 
                 resultConvert.status = -1
                 break
               case 2:
                 errorData += errorData
-                  ? `,${constants.invoiceErrMsg['PAYMENTDATEERR000']}`
-                  : `${constants.invoiceErrMsg['PAYMENTDATEERR000']}`
+                  ? `,${dataNumber}${paymentDateBan}${constants.invoiceErrMsgForUploadFormat['PAYMENTDATEERR000']}`
+                  : `${dataNumber}${paymentDateBan}${constants.invoiceErrMsgForUploadFormat['PAYMENTDATEERR000']}`
 
                 resultConvert.status = -1
                 break
@@ -590,48 +659,51 @@ class bconCsv {
             }
           } else {
             errorData += errorData
-              ? `,${constants.invoiceErrMsg['PAYMENTDATEERR002']}`
-              : `${constants.invoiceErrMsg['PAYMENTDATEERR002']}`
+              ? `,${dataNumber}${paymentDateBan}${constants.invoiceErrMsgForUploadFormat['PAYMENTDATEERR002']}`
+              : `${dataNumber}${paymentDateBan}${constants.invoiceErrMsgForUploadFormat['PAYMENTDATEERR002']}`
 
             resultConvert.status = -1
           }
 
+          // 銀行名
           switch (validate.isBankName(csvColumn[6])) {
             case '':
               break
             default:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg[validate.isBankName(csvColumn[6])]}`
-                : `${constants.invoiceErrMsg[validate.isBankName(csvColumn[6])]}`
+                ? `,${dataNumber}${bankNameBan}${constants.invoiceErrMsgForUploadFormat[validate.isBankName(csvColumn[6])]}`
+                : `${dataNumber}${bankNameBan}${constants.invoiceErrMsgForUploadFormat[validate.isBankName(csvColumn[6])]}`
 
               resultConvert.status = -1
               break
           }
 
+          // 支店名
           switch (validate.isFinancialName(csvColumn[7])) {
             case '':
               break
             default:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg[validate.isFinancialName(csvColumn[7])]}`
-                : `${constants.invoiceErrMsg[validate.isFinancialName(csvColumn[7])]}`
+                ? `,${dataNumber}${bankLocalNameBan}${constants.invoiceErrMsgForUploadFormat[validate.isFinancialName(csvColumn[7])]}`
+                : `${dataNumber}${bankLocalNameBan}${constants.invoiceErrMsgForUploadFormat[validate.isFinancialName(csvColumn[7])]}`
 
               resultConvert.status = -1
               break
           }
 
+          // 科目
           switch (validate.isAccountType(csvColumn[8])) {
             case 1:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg['ACCOUNTTYPEERR000']}`
-                : `${constants.invoiceErrMsg['ACCOUNTTYPEERR000']}`
+                ? `,${dataNumber}${subjectBan}${constants.invoiceErrMsgForUploadFormat['ACCOUNTTYPEERR000']}`
+                : `${dataNumber}${subjectBan}${constants.invoiceErrMsgForUploadFormat['ACCOUNTTYPEERR000']}`
 
               resultConvert.status = -1
               break
             case 2:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg['ACCOUNTTYPEERR001']}`
-                : `${constants.invoiceErrMsg['ACCOUNTTYPEERR001']}`
+                ? `,${dataNumber}${subjectBan}${constants.invoiceErrMsgForUploadFormat['ACCOUNTTYPEERR001']}`
+                : `${dataNumber}${subjectBan}${constants.invoiceErrMsgForUploadFormat['ACCOUNTTYPEERR001']}`
 
               resultConvert.status = -1
               break
@@ -640,25 +712,27 @@ class bconCsv {
               break
           }
 
+          // 口座番号
           switch (validate.isAccountId(csvColumn[9])) {
             case '':
               break
             default:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg[validate.isAccountId(csvColumn[9])]}`
-                : `${constants.invoiceErrMsg[validate.isAccountId(csvColumn[9])]}`
+                ? `,${dataNumber}${accountNumberBan}${constants.invoiceErrMsgForUploadFormat[validate.isAccountId(csvColumn[9])]}`
+                : `${dataNumber}${accountNumberBan}${constants.invoiceErrMsgForUploadFormat[validate.isAccountId(csvColumn[9])]}`
 
               resultConvert.status = -1
               break
           }
 
+          // 口座名義
           switch (validate.isAccountName(csvColumn[10])) {
             case '':
               break
             default:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg[validate.isAccountName(csvColumn[10])]}`
-                : `${constants.invoiceErrMsg[validate.isAccountName(csvColumn[10])]}`
+                ? `,${dataNumber}${accountNameBan}${constants.invoiceErrMsgForUploadFormat[validate.isAccountName(csvColumn[10])]}`
+                : `${dataNumber}${accountNameBan}${constants.invoiceErrMsgForUploadFormat[validate.isAccountName(csvColumn[10])]}`
 
               resultConvert.status = -1
               break
@@ -674,14 +748,15 @@ class bconCsv {
           csvColumn[10]
         )
 
+        // その他特記事項
         if (csvColumn[11] !== '') {
           switch (validate.isNote(csvColumn[11])) {
             case '':
               break
             default:
               errorData += errorData
-                ? `,${constants.invoiceErrMsg[validate.isNote(csvColumn[11])]}`
-                : `${constants.invoiceErrMsg[validate.isNote(csvColumn[11])]}`
+                ? `,${dataNumber}${etcWriteBan}${constants.invoiceErrMsgForUploadFormat[validate.isNote(csvColumn[11])]}`
+                : `${dataNumber}${etcWriteBan}${constants.invoiceErrMsgForUploadFormat[validate.isNote(csvColumn[11])]}`
 
               resultConvert.status = -1
               break
@@ -707,56 +782,91 @@ class bconCsv {
 
       setInvoiceLineCnt++
 
+      let meiItemBan = 12
+      let meiContentBan = 13
+      let meiQuantityBan = 14
+      let meiUnitBan = 15
+      let meiUnitPriceBan = 16
+      let meiTaxBan = 17
+      let meiEtcBan = 18
+
+      uploadFormatDetail.forEach(detail => {
+        if(detail.defaultNumber === 12) {
+          meiItemBan = detail.uploadFormatNumber+1
+        }
+        if(detail.defaultNumber === 13) {
+          meiContentBan = detail.uploadFormatNumber+1
+        }
+        if(detail.defaultNumber === 14) {
+          meiQuantityBan = detail.uploadFormatNumber+1
+        }
+        if(detail.defaultNumber === 15) {
+          meiUnitBan = detail.uploadFormatNumber+1
+        }
+        if(detail.defaultNumber === 16) {
+          meiUnitPriceBan = detail.uploadFormatNumber+1
+        }
+        if(detail.defaultNumber === 17) {
+          meiTaxBan = detail.uploadFormatNumber+1
+        }
+        if(detail.defaultNumber === 18) {
+          meiEtcBan = detail.uploadFormatNumber+1
+        }        
+      })
+
+      // 明細-項目ID
       switch (validate.isSellersItemNum(csvColumn[12])) {
         case '':
           break
         default:
           errorData += errorData
-            ? `,${constants.invoiceErrMsg[validate.isSellersItemNum(csvColumn[12])]}`
-            : `${constants.invoiceErrMsg[validate.isSellersItemNum(csvColumn[12])]}`
+            ? `,${dataNumber}${meiItemBan}${constants.invoiceErrMsgForUploadFormat[validate.isSellersItemNum(csvColumn[12])]}`
+            : `${dataNumber}${meiItemBan}${constants.invoiceErrMsgForUploadFormat[validate.isSellersItemNum(csvColumn[12])]}`
 
           resultConvert.status = -1
           break
       }
 
+      // 明細-内容   
       switch (validate.isItemName(csvColumn[13])) {
         case '':
           break
         default:
           errorData += errorData
-            ? `,${constants.invoiceErrMsg[validate.isItemName(csvColumn[13])]}`
-            : `${constants.invoiceErrMsg[validate.isItemName(csvColumn[13])]}`
+            ? `,${dataNumber}${meiContentBan}${constants.invoiceErrMsgForUploadFormat[validate.isItemName(csvColumn[13])]}`
+            : `${dataNumber}${meiContentBan}${constants.invoiceErrMsgForUploadFormat[validate.isItemName(csvColumn[13])]}`
 
           resultConvert.status = -1
           break
       }
 
+      // 明細-数量 
       switch (validate.isQuantityValue(csvColumn[14])) {
         case '':
           break
         default:
           errorData += errorData
-            ? `,${constants.invoiceErrMsg[validate.isQuantityValue(csvColumn[14])]}`
-            : `${constants.invoiceErrMsg[validate.isQuantityValue(csvColumn[14])]}`
+            ? `,${dataNumber}${meiQuantityBan}${constants.invoiceErrMsgForUploadFormat[validate.isQuantityValue(csvColumn[14])]}`
+            : `${dataNumber}${meiQuantityBan}${constants.invoiceErrMsgForUploadFormat[validate.isQuantityValue(csvColumn[14])]}`
 
           resultConvert.status = -1
           break
       }
 
-      // unitValidation
+      // 明細-単位
       if (!bconCsvUnitUser) {
         switch (validate.isUnitcode(csvColumn[15])) {
           case 'UNITERR000':
             errorData += errorData
-              ? `,${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
-              : `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
+              ? `,${dataNumber}${meiUnitBan}${constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[15])]}`
+              : `${dataNumber}${meiUnitBan}${constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[15])]}`
 
             resultConvert.status = -1
             break
           case 'UNITERR001':
             errorData += errorData
-              ? `,${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
-              : `${constants.invoiceErrMsg[validate.isUnitcode(csvColumn[15])]}`
+              ? `,${dataNumber}${meiUnitBan}${constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[15])]}`
+              : `${dataNumber}${meiUnitBan}${constants.invoiceErrMsgForUploadFormat[validate.isUnitcode(csvColumn[15])]}`
 
             resultConvert.status = -1
             break
@@ -768,15 +878,15 @@ class bconCsv {
         switch (validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)) {
           case 'UNITERR000':
             errorData += errorData
-              ? `,${constants.invoiceErrMsg[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]}`
-              : `${constants.invoiceErrMsg[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]}`
+              ? `,${dataNumber}${meiUnitBan}${constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]}`
+              : `${dataNumber}${meiUnitBan}${constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]}`
 
             resultConvert.status = -1
             break
           case 'UNITERR002':
             errorData += errorData
-              ? `,${constants.invoiceErrMsg[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]}`
-              : `${constants.invoiceErrMsg[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]}`
+              ? `,${dataNumber}${meiUnitBan}${constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]}`
+              : `${dataNumber}${meiUnitBan}${constants.invoiceErrMsgForUploadFormat[validate.isUserUnitcode(csvColumn[15], bconCsvUnitUser)]}`
 
             resultConvert.status = -1
             break
@@ -786,32 +896,33 @@ class bconCsv {
         }
       }
 
+      // 明細-単価
       switch (validate.isPriceValue(csvColumn[16])) {
         case '':
           break
         default:
           errorData += errorData
-            ? `,${constants.invoiceErrMsg[validate.isPriceValue(csvColumn[16])]}`
-            : `${constants.invoiceErrMsg[validate.isPriceValue(csvColumn[16])]}`
+            ? `,${dataNumber}${meiUnitPriceBan}${constants.invoiceErrMsgForUploadFormat[validate.isPriceValue(csvColumn[16])]}`
+            : `${dataNumber}${meiUnitPriceBan}${constants.invoiceErrMsgForUploadFormat[validate.isPriceValue(csvColumn[16])]}`
 
           resultConvert.status = -1
           break
       }
 
-      // taxValidation
+      // 明細-税（消費税／軽減税率／不課税／免税／非課税）
       if (!bconCsvTaxUser) {
         switch (validate.isTaxCategori(csvColumn[17])) {
           case 'TAXERR000':
             errorData += errorData
-              ? `,${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
-              : `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
+              ? `,${dataNumber}${meiTaxBan}${constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[17])]}`
+              : `${dataNumber}${meiTaxBan}${constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[17])]}`
 
             resultConvert.status = -1
             break
           case 'TAXERR001':
             errorData += errorData
-              ? `,${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
-              : `${constants.invoiceErrMsg[validate.isTaxCategori(csvColumn[17])]}`
+              ? `,${dataNumber}${meiTaxBan}${constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[17])]}`
+              : `${dataNumber}${meiTaxBan}${constants.invoiceErrMsgForUploadFormat[validate.isTaxCategori(csvColumn[17])]}`
 
             resultConvert.status = -1
             break
@@ -823,15 +934,15 @@ class bconCsv {
         switch (validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)) {
           case 'TAXERR000':
             errorData += errorData
-              ? `,${constants.invoiceErrMsg[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]}`
-              : `${constants.invoiceErrMsg[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]}`
+              ? `,${dataNumber}${meiTaxBan}${constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]}`
+              : `${dataNumber}${meiTaxBan}${constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]}`
 
             resultConvert.status = -1
             break
           case 'TAXERR002':
             errorData += errorData
-              ? `,${constants.invoiceErrMsg[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]}`
-              : `${constants.invoiceErrMsg[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]}`
+              ? `,${dataNumber}${meiTaxBan}${constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]}`
+              : `${dataNumber}${meiTaxBan}${constants.invoiceErrMsgForUploadFormat[validate.isUserTaxCategori(csvColumn[17], bconCsvTaxUser)]}`
 
             resultConvert.status = -1
             break
@@ -841,14 +952,15 @@ class bconCsv {
         }
       }
 
+      // 明細-備考
       if (csvColumn[18] !== '') {
         switch (validate.isDescription(csvColumn[18])) {
           case '':
             break
           default:
             errorData += errorData
-              ? `,${constants.invoiceErrMsg[validate.isDescription(csvColumn[18])]}`
-              : `${constants.invoiceErrMsg[validate.isDescription(csvColumn[18])]}`
+              ? `,${dataNumber}${meiEtcBan}${constants.invoiceErrMsgForUploadFormat[validate.isDescription(csvColumn[18])]}`
+              : `${dataNumber}${meiEtcBan}${constants.invoiceErrMsgForUploadFormat[validate.isDescription(csvColumn[18])]}`
 
             resultConvert.status = -1
             break
@@ -919,7 +1031,6 @@ class bconCsv {
 
   // デフォルトフォーマットをユーザーが登録したアップロードフォーマットに合わせる
   convertUserCsvFormat(uploadFormatDetail, csvColumn) {
-    // let result = Array(19)
     let result = ['','','','','','','','','','','','','','','','','','','']
     uploadFormatDetail.forEach((detail) => {
       if(csvColumn[detail.uploadFormatNumber]) {
@@ -965,4 +1076,4 @@ class bconCsv {
     return bconCsvUnitUser
   }
 }
-module.exports = bconCsv
+module.exports = bconCsvNoHeader
