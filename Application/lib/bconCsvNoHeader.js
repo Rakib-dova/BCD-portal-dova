@@ -218,17 +218,15 @@ class bconCsvNoHeader {
       let tmpRowsCover = []
       const tmpRows = _data.split(/\r?\n|\r/)
       tmpRowsCover.push(tmpHeader, ...tmpRows)
-
       for (let idx = 0; idx < tmpRowsCover.length; idx++) {
-        if (tmpRowsCover[idx].trim()) {
-          let docIndex
-          docIndex = _uploadFormatDetail[idx].uploadFormatNumber
-            this.rows.push({
-              idx: itemRowNumber + idx,
-              invoiceGroup: null,
-              docNo: tmpRowsCover[idx].split(',')[docIndex],
-              rows: tmpRowsCover[idx]
-            })
+        if (tmpRowsCover[idx].trim()) {          
+          let docIndex = _uploadFormatDetail[1].uploadFormatNumber
+          this.rows.push({
+            idx: itemRowNumber + idx,
+            invoiceGroup: null,
+            docNo: tmpRowsCover[idx].split(',')[docIndex],
+            rows: tmpRowsCover[idx]
+          })
         }
       }
       this.invoiceCnt = this.rows.length
