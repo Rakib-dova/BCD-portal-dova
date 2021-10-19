@@ -80,6 +80,4 @@ $('#editCsvBasicFormatBtn').addEventListener('click', function (e) {
   modal.classList.add('is-active').focus()
 })
 
-$('#nextBtn').addEventListener('click', function (e) {
-
-})
+$('#nextBtn').addEventListener('click', function (e) {})

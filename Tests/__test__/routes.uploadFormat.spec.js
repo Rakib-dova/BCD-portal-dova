@@ -1392,7 +1392,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormat.cbPostIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -1432,7 +1432,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormat.cbPostIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -3024,7 +3024,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormat.cbPostIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -3065,7 +3065,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormat.cbPostIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -3278,7 +3278,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormat.cbPostConfirmIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -3304,7 +3304,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormat.cbPostConfirmIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -3367,8 +3367,10 @@ describe('uploadFormatのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
       expect(next).not.toHaveBeenCalledWith(error500)
+
+      // 想定したログが表示される
+      expect(infoSpy).toHaveBeenCalledWith(`${constantsDefine.logMessage.DBINF001} + 'cbPostConfirmIndex'`)
     })
   })
 
@@ -3416,6 +3418,7 @@ describe('uploadFormatのテスト', () => {
   })
 })
 
+// uploadFormatControllerのinsertSpy
 const uploadFormatControllerInsert = async (_tenantId, values) => {
   const functionName = 'uploadFormatController.insert'
   let contractRow
@@ -3469,6 +3472,7 @@ const uploadFormatControllerInsert = async (_tenantId, values) => {
   return resultToInsertUpload
 }
 
+// uploadFormatControllerのfindUploadFormatSpy
 const uploadFormatControllerFindUploadFormat = async (uploadFormatId) => {
   const functionName = 'uploadFormatController.findUploadFormat'
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -3488,6 +3492,7 @@ const uploadFormatControllerFindUploadFormat = async (uploadFormatId) => {
   return uploadFormat
 }
 
+// uploadFormatDetailControllerのinsertSpy
 const uploadFormatDetailControllerInsert = async (values) => {
   const functionName = 'uploadFormatDetailController.insert'
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -3529,6 +3534,7 @@ const uploadFormatDetailControllerInsert = async (values) => {
   return resultToInsertUploadFormatDetail
 }
 
+// uploadFormatIdentifierControllerのinsertSpy
 const uploadFormatIdentifierControllerInsert = async (values) => {
   const functionName = 'uploadFormatDetailController.insert'
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)

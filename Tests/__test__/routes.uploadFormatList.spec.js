@@ -474,7 +474,6 @@ describe('uploadFormatListのテスト', () => {
       // 400,500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 契約情報変更手続き中画面が表示「される」
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
         uploadFormatListArr: uploadFormatListArrOne

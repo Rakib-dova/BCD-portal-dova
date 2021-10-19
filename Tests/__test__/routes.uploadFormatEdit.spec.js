@@ -93,7 +93,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -115,7 +115,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -141,9 +141,9 @@ describe('uploadFormatのテスト', () => {
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
+      // 500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error500)
     })
 
@@ -168,7 +168,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -207,7 +207,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -247,7 +247,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -287,9 +287,9 @@ describe('uploadFormatのテスト', () => {
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
+      // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
 
@@ -326,9 +326,9 @@ describe('uploadFormatのテスト', () => {
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
+      // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
 
@@ -366,7 +366,7 @@ describe('uploadFormatのテスト', () => {
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(error500)
@@ -532,7 +532,6 @@ describe('uploadFormatのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // 500エラーがエラーハンドリング「される」
       expect(next).not.toHaveBeenCalledWith(error500)
 
       expect(response.render).toHaveBeenCalledWith('uploadFormatEdit', {
