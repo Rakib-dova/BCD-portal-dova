@@ -1,0 +1,509 @@
+extends layout
+
+block content
+  form#form
+    .max-width  
+      section.hero.is-small.is-com
+        .hero-body-noImage
+          .title.is-family-noto-sans 請求書アップロードフォーマット設定
+          .subtitle.is-family-noto-sans 対応する取込データを設定してください
+      .container
+        .columns
+          .column
+            .title.is-family-noto-sans 取込データ
+            .box              
+              table.table.is-fullwidth.is-hoverable
+                thead
+                  tr
+                    th.text-center データ連番
+                    th.text-center 項目名  
+                    th.text-center データ内容
+                    input.input(type="hidden" id="checkItemNameLine" name="checkItemNameLine" value= checkItemNameLine)
+                    input.input(type="hidden" id="itemRowNo" name="itemRowNo" value= itemRowNo)
+                    input.input(type="hidden" id="dataStartRowNo" name="dataStartRowNo" value= dataStartRowNo)
+                each content, idx in headerItems
+                  tr
+                    th.text-center.dataIndex(name="dataContent")= idx+1
+                    th.text-center.dataItem(name="dataContent")= content.item
+                    input.input(type="hidden" id="headerItems" name="headerItems" value= content.item)
+                    th.text-center.dataValue(name="dataContent")= content.value
+          .column
+            .title.is-family-noto-sans 請求書データ用フォーマット
+            .box
+              table.table.is-fullwidth.is-hoverable
+                thead
+                  tr
+                    th.text-center 項目名
+                    th.text-center 対応するデータ番号
+                tbody
+                  tr
+                    th 
+                      label.input-label 発行日
+                      p.input-label-required.input-label （必須）
+                      p.errormessage.input-label-required 　
+                    td.text-center
+                      select.is-11.requiredItem#issueDate(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[0].length !== 0
+                            if ~~selectedFormatData[0] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1                           
+                  tr
+                    th
+                      label.input-label 請求書番号
+                      p.input-label-required.input-label （必須）
+                      p.errormessage.input-label-required
+                    td.text-center
+                      select.is-11.requiredItem#invoiceNumber(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[1].length !== 0
+                            if ~~selectedFormatData[1] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+                  tr
+                    th
+                      label.input-label テナントID
+                      p.input-label-required.input-label （必須）
+                      p.errormessage.input-label-required                  
+                    td.text-center
+                      select.is-11.requiredItem#tenantId(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[2].length !== 0
+                            if ~~selectedFormatData[2] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+                  tr
+                    th
+                      label.input-label 支払期日
+                      p.errormessage.input-label-required 
+                    td.text-center
+                      select.is-11#paymentDate(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[3].length !== 0
+                            if ~~selectedFormatData[3] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+                  tr
+                    th 
+                      label.input-label 納品日
+                      p.errormessage.input-label-required 
+                    td.text-center
+                      select.is-11#deliveryDate(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[4].length !== 0
+                            if ~~selectedFormatData[4] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th 
+                      label.input-label 備考
+                      p.errormessage.input-label-required 
+                    td.text-center
+                      select.is-11#documentDescription(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[5].length !== 0
+                            if ~~selectedFormatData[5] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th
+                      label.input-label 銀行名
+                      p.errormessage.input-label-required
+                    td.text-center
+                      select.is-11#bankName(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[6].length !== 0
+                            if ~~selectedFormatData[6] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1   
+
+                  tr
+                    th
+                      label.input-label 支店名
+                      p.errormessage.input-label-required
+                    td.text-center
+                      select.is-11#financialName(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[7].length !== 0
+                            if ~~selectedFormatData[7] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th
+                      label.input-label 科目
+                      p.errormessage.input-label-required
+                    td.text-center
+                      select.is-11#accountType(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[8].length !== 0
+                            if ~~selectedFormatData[8] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th 
+                      label.input-label 口座番号
+                      p.errormessage.input-label-required
+                    td.text-center
+                      select.is-11#accountId(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[9].length !== 0
+                            if ~~selectedFormatData[9] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th 
+                      label.input-label 口座名義
+                      p.errormessage.input-label-required
+                    td.text-center
+                      select.is-11#accountName(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[10].length !== 0
+                            if ~~selectedFormatData[10] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th
+                      label.input-label その他特記事項
+                      p.errormessage.input-label-required
+                    td.text-center
+                      select.is-11#note(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[11].length !== 0
+                            if ~~selectedFormatData[11] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th
+                      label.input-label 明細-項目ID
+                      p.input-label-required.input-label （必須）
+                      p.errormessage.input-label-required
+                    td.text-center
+                      select.is-11.requiredItem#sellersItemNum(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[12].length !== 0
+                            if ~~selectedFormatData[12] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th
+                      label.input-label 明細-内容
+                      p.input-label-required.input-label （必須）
+                      p.errormessage.input-label-required
+                    td.text-center
+                      select.is-11.requiredItem#itemName(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[13].length !== 0
+                            if ~~selectedFormatData[13] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th 
+                      label.input-label 明細-数量
+                      p.input-label-required.input-label （必須）
+                      p.errormessage.input-label-required
+                    td.text-center
+                      select.is-11.requiredItem#quantityValue(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[14].length !== 0
+                            if ~~selectedFormatData[14] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th
+                      label.input-label 明細-単位
+                      p.input-label-required.input-label （必須）
+                      p.errormessage.input-label-required                  
+                    td.text-center
+                      select.is-11.requiredItem#quantityUnitCode(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[15].length !== 0
+                            if ~~selectedFormatData[15] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th
+                      label.input-label 明細-単価
+                      p.input-label-required.input-label （必須）
+                      p.errormessage.input-label-required 
+                    td.text-center
+                      select.is-11.requiredItem#priceValue(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[16].length !== 0
+                            if ~~selectedFormatData[16] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th 
+                      label.input-label 明細-税
+                      p.input-label-required.input-label （必須）
+                      p.errormessage.input-label-required 　
+                      p （消費税／軽減税率／不課税／免税／非課税）
+                    td.text-center
+                      select.is-11.requiredItem#taxRate(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[17].length !== 0
+                            if ~~selectedFormatData[17] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                            
+                          else
+                            option(value= index)= index+1    
+
+                  tr
+                    th 
+                      label.input-label 明細-備考
+                      p.errormessage.input-label-required
+                    td.text-center
+                      select.is-11#description(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems
+                          if selectedFormatData[18].length !== 0
+                            if ~~selectedFormatData[18] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1
+                          else
+                            option(value= index)= index+1
+                  
+        footer.modal-card-foot
+          div.button-area
+            button.button.is-success.success-button.mr-6#editCsvBasicFormatBtn(type="button" data-target="csvBasicFormat-modal") 基本情報設定画面へ遷移
+            a.button.mr-6#returnBtn(href="/uploadFormatList") 戻る
+            button.button.is-success.success-button.mr-6#editConfirmBtn(type="button" data-target="confirmModify-modal") 確認画面へ遷移
+
+        .modal.modal-fx-fadeInscale#confirmModify-modal
+          .modal-card#csvFormatConfirm-modal-card
+            header.modal-card-head
+              p.modal-card-title 請求書アップロードフォーマット設定 確認
+            section.modal-card-body
+             .columns.is-mobile.is-centered: .column.is-full
+              .field.card
+               .card-content
+                .title.is-5 基本情報
+                .field
+                 label(for="uploadFormatItemName") 設定名称
+                 input.width-50.float-right#uploadFormatItemName(type="text" name='uploadFormatItemName' value=uploadGeneral.uploadFormatItemName readonly)
+                .field
+                 label(for="uploadType") アップロード種別
+                 input.width-50.float-right#uploadType(type="text" name='uploadType' value=uploadGeneral.uploadType readonly)
+
+              .field.card
+               .card-content
+                details(open)
+                 summary.title.is-5 明細-税 識別子
+                 each tax in taxIds
+                  .field
+                   label.margin-top-10p(for= key)= tax.itemName
+                     input.width-50.float-right.tax(id=tax.id type="text" name= tax.key value= tax.value readonly)
+
+              .field.card
+               .card-content
+                details(open)
+                 summary.title.is-5 明細-単位 識別子
+                 each unit in unitIds
+                  .field
+                   label.margin-top-10p(for= key)= unit.itemName
+                     input.width-50.float-right.unit(id=unit.id type="text" name= unit.key value= unit.value readonly)
+
+              .field.card
+               .card-content
+                 .title.text-center.is-5 請求書データ用フォーマット  →  取込データ
+                 .box
+                  table.table.is-fullwidth.is-hoverable
+                   thead
+                     tr
+                       th 標準項目名
+                       th
+                       th.text-center ユーザフォーマット項目名
+                       th.text-center データ内容
+                   tbody
+                    each column, idx in columnArr
+                      tr
+                        th= column.columnName
+                        th.checkArrow
+                        th.text-center.checkDataItem
+                        th.text-center.checkDataValue
+
+            footer.modal-card-foot
+              div.button-area
+                a.button.cancel-button.mr-6(data-target='confirmModify-modal') キャンセル
+                button.button.is-success.success-button#submit(type="submit" formaction="/uploadFormatEdit/cbPostConfirmIndex" formmethod="POST") 登録
+
+        .modal.modal-fx-fadeInscale#csvBasicFormat-modal
+          .modal-card#csvBasicFormat-modal-card
+            header.modal-card-head
+              p.modal-card-title 基本情報設定 確認
+            section.modal-card-body
+             .columns.is-mobile.is-centered: .column.is-full
+              .field.card
+                .card-content
+                  - var uploadGeneral = uploadGeneral
+                  .field
+                    label(for="uploadFormatItemName").input-label 設定名称
+                    p#uploadFormatItemNameeRequired.input-label-required.input-label （必須）
+                    .control
+                      input.input#uploadFormatItemName(type="text" name="uploadFormatItemName" value=uploadGeneral.uploadFormatItemName maxlength=100 placeholder='文字・数字100桁まで' required)
+                  .field
+                    label(for="uploadType").input-label アップロード種別
+                    .control
+                      input.input#uploadType(type="text" name="uploadType" value=uploadGeneral.uploadType readonly)
+                  .field
+                    label(for="dataFile").input-label データファイル
+                    p#dataFileRequired.input-label-required.input-label （必須）
+                    .control
+                      .columns.ml-0.pl-0
+                        .column.pl-0
+                          input.input#dataFileName.td-overflow(type="text" name="dataFileName" placeholder='5MBまで' readonly)
+                        .column
+                          label.button.is-link(for="dataFile") ファイル選択
+                          input.is-invisible#dataFile(readonly disabled)
+                  .field.mt-6
+                  - var itemRownNo = itemRownNo
+                  - var dataStartRowNo = dataStartRowNo
+                    label.input-label 項目名の行有無
+                    p#dataFileRequired.input-label-required.input-label （必須）
+                    .control
+                      .column
+                        if itemRownNo === 0
+                          input#checkItemNameLineOn(type='radio' name='checkItemNameLine' value='on' required disabled readonly)
+                          label.mr-6(for="checkItemNameLineOn") あり
+                          input#checkItemNameLineOff(type='radio' name='checkItemNameLine' value='off' required checked)
+                          label(for="checkItemNameLineOff") なし
+                        else
+                          input#checkItemNameLineOn(type='radio' name='checkItemNameLine' value='on' required checked readonly)
+                          label.mr-6(for="checkItemNameLineOn") あり
+                          input#checkItemNameLineOff(type='radio' name='checkItemNameLine' value='off' required disabled readonly)
+                          label(for="checkItemNameLineOff") なし
+                  .field
+                    label(for="uploadFormatNumber").input-label 項目名の行番号
+                    p#uploadFormatNumberRequired.input-label-required.input-label （必須）
+                    .control
+                      .columns.ml-0.pl-0.alignCenterChild
+                        .column.is-one-fifth.pl-0
+                          input.input#uploadFormatNumber(type="text" name="uploadFormatNumber" value=itemRownNo maxlength=7 placeholder='1 ~ 9999999' pattern=inputPattarnHankakuSeisu required readonly) 
+                        .column  
+                          p 行目
+                  .field
+                    label(for="defaultNumber").input-label データ開始行番号
+                    p#defaultNumberRequired.input-label-required.input-label （必須）
+                    .control
+                      .columns.ml-0.pl-0.alignCenterChild
+                        .column.is-one-fifth.pl-0
+                          input.input#defaultNumber(type="text" name="defaultNumber" value=dataStartRowNo maxlength=7 placeholder='1 ~ 9999999' pattern=inputPattarnHankakuSeisu required readonly) 
+                        .column  
+                          p 行目
+            
+              .field.card
+                .card-content
+                  .title.is-5 明細-税 識別子
+                  - var taxItem = taxIds 
+                  each tax, index in csvTax
+                    .field
+                      label(for=tax.id).input-label= tax.name
+                      .control
+                        input.input.input-tax(id=tax.id type="text" name=tax.id value=taxItem[`${tax.id}`].value placeholder='文字・数字100桁まで' maxlength=100)
+
+              .field.card
+                .card-content
+                  .title.is-5 明細-単位 識別子
+                  - var unitItem = unitIds 
+                  each unit, index in csvUnit
+                    .field
+                      label(for=unit.id).input-label= unit.name
+                      .control
+                        input.input.input-unit(id=unit.id type="text" name=unit.id value=unitItem[`${unit.id}`].value placeholder='文字・数字100桁まで' maxlength=100)
+
+             .columns.is-centered.changeConfirm
+              .field.is-grouped.is-grouped-centered
+                .control
+                  .column
+                    div.button-area
+                      button.button.is-link.mr-6#nextBtn 次へ
+                      button.button.cancel-button 戻る
+
+      include footer
+
+block append scripts
+  script(src="/js/uploadFormatEdit-page.js")
+

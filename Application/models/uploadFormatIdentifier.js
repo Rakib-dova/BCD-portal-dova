@@ -17,6 +17,19 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: 'cascade'
       })
     }
+
+    static async getUploadFormatId(uploadFormatId) {
+      try {
+        const uploadFormatIds = await sequelize.models.UploadFormatIdentifier.findAll({
+          where: {
+            uploadFormatId: uploadFormatId
+          }
+        })
+        return uploadFormatIds
+      } catch (error) {
+        return error
+      }
+    }
   }
   UploadFormatIdentifier.init(
     {
