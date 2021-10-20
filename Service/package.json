@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node app",
+    "start": "node server",
     "css-build": "node-sass scss/style.scss public/css/bulma.css",
-    "start:local": "cross-env LOCALLY_HOSTED=true nodemon app"
+    "start:local": "cross-env LOCALLY_HOSTED=true PORT=3005 nodemon server"
   },
   "description": "bcd-portal",
   "dependencies": {

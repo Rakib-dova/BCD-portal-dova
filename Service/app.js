@@ -40,12 +40,6 @@ app.use(
 
 app.use("/service/bconnection", require("./routes/info").router);
 
-//Listen
-console.log("test");
-app.listen(3000, function () {
-  console.log("Start Express on port 3000.");
-});
-
-app.set("port", process.env.PORT || 3000);
+app.set("port", process.env.PORT || 3005);
 
 module.exports = app;

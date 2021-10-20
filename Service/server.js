@@ -15,10 +15,8 @@ if (process.env.LOCALLY_HOSTED === "true") {
   https.globalAgent.options.rejectUnauthorized = false;
 
   const options = {
-    key: fs.readFileSync("./certs/server.key"),
-    cert: fs.readFileSync("./certs/server.crt"),
-    //key: "aaa\n",
-    //cert: "bbb\n",
+    key: fs.readFileSync("../Application/certs/server.key"),
+    cert: fs.readFileSync("../Application/certs/server.crt"),
   };
   const listen = () => {
     server = https.createServer(options, app).listen(app.get("port"), () => {
