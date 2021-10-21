@@ -408,7 +408,7 @@ block content
             footer.modal-card-foot
               div.button-area
                 a.button.cancel-button.mr-6(data-target='confirmModify-modal') キャンセル
-                button.button.is-success.success-button#submit(type="submit" formaction="/uploadFormatEdit" formmethod="POST") 登録
+                button.button.is-success.success-button#submit(type="submit" formaction=`/uploadFormatEdit/${uploadFormatId}` formmethod="POST") 登録
 
         .modal.modal-fx-fadeInscale#csvBasicFormat-modal
           .modal-card#csvBasicFormat-modal-card
@@ -423,7 +423,7 @@ block content
                     label(for="uploadFormatItemName").input-label 設定名称
                     p#uploadFormatItemNameeRequired.input-label-required.input-label （必須）
                     .control
-                      input.input#basicUploadFormatItemName(type="text" name="basicUploadFormatItemName"  value=uploadGeneral.uploadFormatItemName maxlength=100 placeholder='文字・数字100桁まで' required)
+                      input.input#basicUploadFormatItemName(type="text" value=uploadGeneral.uploadFormatItemName maxlength=100 placeholder='文字・数字100桁まで' required)
                   .field
                     label(for="uploadType").input-label アップロード種別
                     .control
@@ -434,7 +434,7 @@ block content
                     .control
                       .columns.ml-0.pl-0
                         .column.pl-0
-                          input.input#dataFileName.td-overflow(type="text" name="dataFileName" placeholder='5MBまで' readonly)
+                          input.input#dataFileName.td-overflow(type="text" placeholder='5MBまで' readonly)
                         .column
                           label.button.is-link(for="dataFile") ファイル選択
                           input.is-invisible#dataFile(readonly disabled)
@@ -446,14 +446,14 @@ block content
                     .control
                       .column
                         if itemRownNo === 0
-                          input#checkItemNameLineOn(type='radio' name='checkItemNameLine' value='on' required disabled readonly)
+                          input#checkItemNameLineOn(type='radio' value='on' required disabled readonly)
                           label.mr-6(for="checkItemNameLineOn") あり
-                          input#checkItemNameLineOff(type='radio' name='checkItemNameLine' value='off' required checked)
+                          input#checkItemNameLineOff(type='radio' value='off' required checked)
                           label(for="checkItemNameLineOff") なし
                         else
-                          input#checkItemNameLineOn(type='radio' name='checkItemNameLine' value='on' required checked readonly)
+                          input#checkItemNameLineOn(type='radio'  value='on' required checked readonly)
                           label.mr-6(for="checkItemNameLineOn") あり
-                          input#checkItemNameLineOff(type='radio' name='checkItemNameLine' value='off' required disabled readonly)
+                          input#checkItemNameLineOff(type='radio' value='off' required disabled readonly)
                           label(for="checkItemNameLineOff") なし
                   .field
                     label(for="uploadFormatNumber").input-label 項目名の行番号
@@ -461,7 +461,7 @@ block content
                     .control
                       .columns.ml-0.pl-0.alignCenterChild
                         .column.is-one-fifth.pl-0
-                          input.input#uploadFormatNumber(type="text" name="uploadFormatNumber" value=itemRownNo maxlength=7 placeholder='1 ~ 9999999' pattern=inputPattarnHankakuSeisu required readonly) 
+                          input.input#uploadFormatNumber(type="text" value=itemRownNo maxlength=7 placeholder='1 ~ 9999999' pattern=inputPattarnHankakuSeisu required readonly) 
                         .column  
                           p 行目
                   .field
@@ -470,7 +470,7 @@ block content
                     .control
                       .columns.ml-0.pl-0.alignCenterChild
                         .column.is-one-fifth.pl-0
-                          input.input#defaultNumber(type="text" name="defaultNumber" value=dataStartRowNo maxlength=7 placeholder='1 ~ 9999999' pattern=inputPattarnHankakuSeisu required readonly) 
+                          input.input#defaultNumber(type="text" value=dataStartRowNo maxlength=7 placeholder='1 ~ 9999999' pattern=inputPattarnHankakuSeisu required readonly) 
                         .column  
                           p 行目
             
@@ -482,7 +482,7 @@ block content
                     .field
                       label(for=tax.id).input-label= tax.name
                       .control
-                        input.input.input-tax(id=tax.id type="text" name=tax.id value=taxItem[`${tax.id}`].value placeholder='文字・数字100桁まで' pattern=inputPatternEngNum maxlength=100)
+                        input.input.input-tax(id=tax.id type="text" value=taxItem[`${tax.id}`].value placeholder='文字・数字100桁まで' pattern=inputPatternEngNum maxlength=100)
 
               .field.card
                 .card-content
@@ -492,7 +492,7 @@ block content
                     .field
                       label(for=unit.id).input-label= unit.name
                       .control
-                        input.input.input-unit(id=unit.id type="text" name=unit.id value=unitItem[`${unit.id}`].value placeholder='文字・数字100桁まで' pattern=inputPatternEngNum maxlength=100)
+                        input.input.input-unit(id=unit.id type="text" value=unitItem[`${unit.id}`].value placeholder='文字・数字100桁まで' pattern=inputPatternEngNum maxlength=100)
 
              .columns.is-centered.changeConfirm
               .field.is-grouped.is-grouped-centered
