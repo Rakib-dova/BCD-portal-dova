@@ -143,26 +143,31 @@ class Invoice {
     }
   }
   setPaymentMeans(_paymentDate, _financialInstitution, _financialName, _accountType, _accountId, _accountName) {
+    if (_paymentDate !== '') {
+      this.#PaymentMeans.PaymentDueDate.value = _paymentDate
+    } else {
+      delete this.#PaymentMeans.PaymentDueDate
+    }
+
     if (
-      _paymentDate !== '' &&
       _financialInstitution !== '' &&
       _financialName !== '' &&
       _accountType !== '' &&
       _accountId !== '' &&
       _accountName !== ''
     ) {
-      this.#PaymentMeans.PaymentDueDate.value = _paymentDate
-
       this.#PaymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.FinancialInstitution.Name.value =
         _financialInstitution
       this.#PaymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.Name.value = _financialName
       this.#PaymentMeans.PayeeFinancialAccount.AccountTypeCode.value = _accountType
       this.#PaymentMeans.PayeeFinancialAccount.ID.value = _accountId
       this.#PaymentMeans.PayeeFinancialAccount.Name.value = _accountName
-      this.#Document.PaymentMeans.push(JSON.parse(JSON.stringify(this.#PaymentMeans)))
     } else {
-      delete this.#Document.PaymentMeans
+      this.#PaymentMeans.PaymentMeansCode.value = 1
+      delete this.#PaymentMeans.PayeeFinancialAccount
     }
+
+    this.#Document.PaymentMeans.push(JSON.parse(JSON.stringify(this.#PaymentMeans)))
   }
 
   #Delivery = { ActualDeliveryDate: { value: null } }
@@ -513,6 +518,32 @@ class bconCsv {
         }
         parentInvoice.setCustomerTennant(csvColumn[2])
 
+        if (csvColumn[3] !== '') {
+          csvColumn[3] = csvColumn[3].replace(/\//g, '-')
+          let paymentDateArray = csvColumn[3].split('-')
+          csvColumn[3] = `${paymentDateArray[0]}-${'0'.concat(paymentDateArray[1]).slice(-2)}-${'0'
+            .concat(paymentDateArray[2])
+            .slice(-2)}`
+          switch (validate.isDate(csvColumn[3])) {
+            case 1:
+              errorData += errorData
+                ? `,${constants.invoiceErrMsg['PAYMENTDATEERR001']}`
+                : `${constants.invoiceErrMsg['PAYMENTDATEERR001']}`
+
+              resultConvert.status = -1
+              break
+            case 2:
+              errorData += errorData
+                ? `,${constants.invoiceErrMsg['PAYMENTDATEERR000']}`
+                : `${constants.invoiceErrMsg['PAYMENTDATEERR000']}`
+
+              resultConvert.status = -1
+              break
+            default:
+              break
+          }
+        }
+
         if (csvColumn[4] !== '') {
           csvColumn[4] = csvColumn[4].replace(/\//g, '-')
           let deliveryDateArray = csvColumn[4].split('-')
@@ -555,47 +586,14 @@ class bconCsv {
         }
         parentInvoice.setAdditionalDocumentReference(csvColumn[5])
 
-        // PaymentMeansチェック
+        // PayeeFinancialAccountチェック
         if (
-          csvColumn[3] !== '' ||
           csvColumn[6] !== '' ||
           csvColumn[7] !== '' ||
           csvColumn[8] !== '' ||
           csvColumn[9] !== '' ||
           csvColumn[10] !== ''
         ) {
-          if (csvColumn[3] !== '') {
-            csvColumn[3] = csvColumn[3].replace(/\//g, '-')
-            let paymentDateArray = csvColumn[3].split('-')
-            csvColumn[3] = `${paymentDateArray[0]}-${'0'.concat(paymentDateArray[1]).slice(-2)}-${'0'
-              .concat(paymentDateArray[2])
-              .slice(-2)}`
-            switch (validate.isDate(csvColumn[3])) {
-              case 1:
-                errorData += errorData
-                  ? `,${constants.invoiceErrMsg['PAYMENTDATEERR001']}`
-                  : `${constants.invoiceErrMsg['PAYMENTDATEERR001']}`
-
-                resultConvert.status = -1
-                break
-              case 2:
-                errorData += errorData
-                  ? `,${constants.invoiceErrMsg['PAYMENTDATEERR000']}`
-                  : `${constants.invoiceErrMsg['PAYMENTDATEERR000']}`
-
-                resultConvert.status = -1
-                break
-              default:
-                break
-            }
-          } else {
-            errorData += errorData
-              ? `,${constants.invoiceErrMsg['PAYMENTDATEERR002']}`
-              : `${constants.invoiceErrMsg['PAYMENTDATEERR002']}`
-
-            resultConvert.status = -1
-          }
-
           switch (validate.isBankName(csvColumn[6])) {
             case '':
               break
@@ -920,9 +918,9 @@ class bconCsv {
   // デフォルトフォーマットをユーザーが登録したアップロードフォーマットに合わせる
   convertUserCsvFormat(uploadFormatDetail, csvColumn) {
     // let result = Array(19)
-    let result = ['','','','','','','','','','','','','','','','','','','']
+    let result = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
     uploadFormatDetail.forEach((detail) => {
-      if(csvColumn[detail.uploadFormatNumber]) {
+      if (csvColumn[detail.uploadFormatNumber]) {
         result[detail.defaultNumber] = csvColumn[detail.uploadFormatNumber].trim()
       } else {
         result[detail.defaultNumber] = ''

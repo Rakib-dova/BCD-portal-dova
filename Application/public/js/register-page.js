@@ -154,7 +154,7 @@ document.getElementById('next-btn').addEventListener('click', function (e) {
       }
       idx++
     } while (invalidCheckTarget[idx])
-    if (focusIdx) {
+    if (focusIdx >= 0) {
       invalidCheckTarget[focusIdx].focus()
       return false
     }
