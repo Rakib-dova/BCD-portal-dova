@@ -380,6 +380,9 @@ describe('uploadFormatのテスト', () => {
         userRole: 'dummy'
       }
       request.user = user
+      request.params = {
+        uploadFormatId: 'd1791550-7c28-4ad5-8c52-c57253b84843'
+      }
       const constantsDefine = require('../../Application/constants')
       const csvTax = constantsDefine.csvFormatDefine.csvTax
       const csvUnit = constantsDefine.csvFormatDefine.csvUnit
@@ -537,7 +540,8 @@ describe('uploadFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('uploadFormatEdit', {
         ...result,
         csvTax: csvTax,
-        csvUnit: csvUnit
+        csvUnit: csvUnit,
+        uploadFormatId: request.params.uploadFormatId
       })
     })
   })
