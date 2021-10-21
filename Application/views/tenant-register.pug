@@ -28,7 +28,7 @@ block content
                         label(for="contractorKanaName").input-label 契約者カナ名（企業名）
                         p#contractorKanaNameRequired.input-label-required.input-label （必須）
                         .control
-                          input.input#contractorKanaName(type="text" name="contractorKanaName" value="" pattern=inputPattarnZenkakuKatakana required maxlength=80 placeholder='全角80文字まで')
+                          input.input#contractorKanaName(type="text" name="contractorKanaName" value="" pattern=inputPattarnZenkakuKatakana required maxlength=80 placeholder='カタカナ80文字まで')
                   
                   .field.card
                     .card-content
@@ -77,7 +77,7 @@ block content
                         p#contactMailRequired.input-label-required.input-label （必須）
                         p.input-label ※メールアドレス　
                         .control
-                          input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress required maxlength=82 placeholder='例：bcd@gma.com')
+                          input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress required maxlength=256 placeholder='例：bcd@gma.com')
 
                   .field.card
                     .card-content
@@ -96,15 +96,15 @@ block content
                       .field
                         label(for="password").input-label パスワード
                         p#passwordRequired.input-label-required.input-label （必須）
-                        p.input-label ※半角英数8桁以上（大・小文字数字必須）
+                        p.input-label ※半角英数8~20桁（大・小文字数字必須）
                         .control
-                          input.input#password.form-control(type="password" name="password" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
+                          input.input#password.form-control(type="password" name="password" value="" pattern=inputPatternKaituPW required maxlength=20 placeholder='例：Abcd1234')
                       .field
                         label(for="passwordConfirm").input-label パスワード確認
                         p#passwordConfirmRequired.input-label-required.input-label （必須）
-                        p.input-label ※半角英数8桁以上（大・小文字数字必須）
+                        p.input-label ※半角英数8~20桁（大・小文字数字必須）
                         .control 
-                          input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
+                          input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" pattern=inputPatternKaituPW required maxlength=20 placeholder='例：Abcd1234')
 
               .columns.is-centered: .column.is-four-fifths
                 .field.is-grouped.is-grouped-left
