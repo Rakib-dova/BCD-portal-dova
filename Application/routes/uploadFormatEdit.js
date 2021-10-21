@@ -84,14 +84,33 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = helper.checkContractStatus
+  const checkContractStatus = helper.checkContractStatus(req, res, next)
 
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
   // 確認画面から渡された内容確認(DBに格納処理)
-  console.log(req.body)
+  const uploadFormatId = req.params.uploadFormatId
+
+  const resultChangeDataForUploadFormat = await uploadFormatController.changeDataForUploadFormat(
+    uploadFormatId,
+    req.body
+  )
+  // サービスコントローラでエラー発生したとき、500エラー処理
+  if (resultChangeDataForUploadFormat instanceof Error) return next(errorHelper.create(500))
+
+  switch (resultChangeDataForUploadFormat) {
+    case 0:
+      res.redirect('/uploadFormatList')
+      break
+    default:
+      {
+        const backURL = req.header('Referer') || '/'
+        res.redirect(backURL)
+      }
+      break
+  }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
