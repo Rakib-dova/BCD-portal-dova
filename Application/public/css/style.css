@@ -521,7 +521,18 @@ img.logo-ncom {
 }
 
 .border {
-  width: 588px;
+  display: inline-block;
   text-align: left;
-  margin-left: 440px;
+  max-width: 100%;
+  position: relative;
+  box-sizing: inherit;
+  width: 600px;
+  padding-left: 10px;
+}
+
+.column-csvupload {
+  display: block;
+  flex-basis: 0;
+  flex-grow: 1;
+  flex-shrink: 1;
 }
