@@ -19,7 +19,6 @@ constantsDefine({
   // 支払期日エラーメッセージ
   PAYMENTDATEERR000: `${invoiceValidDefine.PAYMENTDATE_KEY}は有効な日付を入力してください。`,
   PAYMENTDATEERR001: `${invoiceValidDefine.PAYMENTDATE_KEY}はyyyy/mm/dd/形式で入力してください。`,
-  PAYMENTDATEERR002: `${invoiceValidDefine.PAYMENTDATE_KEY}が未入力です。`,
 
   // 納品日エラーメッセージ
   DELIVERYDATEERR000: `${invoiceValidDefine.DELIVERYDATE_KEY}は有効な日付を入力してください。`,

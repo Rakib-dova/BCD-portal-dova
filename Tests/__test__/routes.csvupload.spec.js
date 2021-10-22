@@ -3608,8 +3608,6 @@ describe('csvuploadのテスト', () => {
 
       const uploadCsvData = Buffer.from(decodeURIComponent(fileData100), 'base64').toString('utf8')
 
-      // accessTradeshiftSpy.mockReturnValue('')
-
       // 試験実施
       const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
       expect(resultUpl).toBeTruthy()
@@ -6084,8 +6082,8 @@ describe('csvuploadのテスト', () => {
 
       expect(invoiceDetailDB[1].invoicesId).toBe(invoicesDB[0].invoicesId)
       expect(invoiceDetailDB[1].invoiceId).toBe('paymentMeansTest2')
-      expect(invoiceDetailDB[1].status).toBe(-1)
-      expect(invoiceDetailDB[1].errorData).toBe('支払期日が未入力です。')
+      expect(invoiceDetailDB[1].status).toBe(0)
+      expect(invoiceDetailDB[1].errorData).toBe('正常に取込ました。')
 
       expect(invoiceDetailDB[2].invoicesId).toBe(invoicesDB[0].invoicesId)
       expect(invoiceDetailDB[2].invoiceId).toBe('paymentMeansTest3')

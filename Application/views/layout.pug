@@ -26,12 +26,12 @@ html
     
     block vars
       - var inputPattarnZenkakuHiragana = '^[^ -~｡-ﾟ\t]+$'　// 全角ひらがな
-      - var inputPattarnZenkaku = '[^\x01-\x7E\uFF61-\uFF9F]+$' // 全角文字
+      - var inputPattarnZenkaku = '^[^\x01-\x7E\uFF61-\uFF9F]+$' // 全角文字
       - var inputPattarnZenkakuKatakana = '^[ァ-ヶー　]+$'　// 全角カタカナ
       - var inputPattarnHankakuNumber = '[0-9]{7}' //半角数値　7文字固定
       - var inputPattarnTellNumber = '^([0-9]{1,4})-([0-9]{1,4})-([0-9]{1,4})'// 電話番号（-あり）
-      - var inputPattarnMailAddress = '^[a-zA-Z0-9-.]+@[a-zA-Z0-9-.]+$' // メールアドレス（緩めの条件）      
-      - var inputPatternKaituPW = '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$' // 開通パスワード 大文字小文字数字必須 8文字以上      
+      - var inputPattarnMailAddress = '^[a-zA-Z0-9-._+]+@[a-zA-Z0-9-._+]+$' // メールアドレス（緩めの条件）
+      - var inputPatternKaituPW = '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$' // 開通パスワード 大文字小文字数字必須 8~20文字
       - var inputPatternCampaignCode = '^([a-zA-Z0-9]{1,10})$' // キャンペーンコード 半角英数
     
     block content
