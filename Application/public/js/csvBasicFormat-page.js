@@ -7,6 +7,7 @@ document.getElementById('checkItemNameLineOn').onclick = function () {
   target.readOnly = false
   target.required = true
   document.getElementById('uploadFormatNumberRequired').classList.remove('is-invisible')
+  document.getElementById('uploadFormatNumberInfo').classList.remove('is-invisible')
 }
 
 // 項目名の行有無が無：必須を外す
@@ -16,6 +17,7 @@ document.getElementById('checkItemNameLineOff').onclick = function () {
   target.required = false
   target.value = ''
   document.getElementById('uploadFormatNumberRequired').classList.add('is-invisible')
+  document.getElementById('uploadFormatNumberInfo').classList.add('is-invisible')
 
   // バリデーションメッセージを削除
   if (

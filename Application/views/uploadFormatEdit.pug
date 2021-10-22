@@ -458,6 +458,8 @@ block content
                   .field
                     label(for="uploadFormatNumber").input-label 項目名の行番号
                     p#uploadFormatNumberRequired.input-label-required.input-label （必須）
+                    div#uploadFormatNumberInfo.tooltip.tip-img
+                      span.tooltiptext 取込データに項目名の行がある場合、その行番号を入力して下さい。
                     .control
                       .columns.ml-0.pl-0.alignCenterChild
                         .column.is-one-fifth.pl-0
@@ -467,6 +469,9 @@ block content
                   .field
                     label(for="defaultNumber").input-label データ開始行番号
                     p#defaultNumberRequired.input-label-required.input-label （必須）
+                    div.tooltip.tip-img
+                      span.tooltiptext 取込データで、データ内容が始まる行番号を入力します。
+                                       |例）1行目が項目名の行で2行目からデータ内容が始まる場合、「2」を入力して下さい。
                     .control
                       .columns.ml-0.pl-0.alignCenterChild
                         .column.is-one-fifth.pl-0
@@ -476,7 +481,10 @@ block content
             
               .field.card
                 .card-content
-                  .title.is-5 明細-税 識別子
+                  .title.is-5.title-label 明細-税 識別子
+                  div.tooltip.tip-img.tip-title.title-label
+                      span.tooltiptext 「明細-税」を識別する文字を入力して下さい。空欄の場合はその項目を利用しない設定になります。
+                .line-content
                   - var taxItem = taxIds 
                   each tax, index in csvTax
                     .field
@@ -486,7 +494,10 @@ block content
 
               .field.card
                 .card-content
-                  .title.is-5 明細-単位 識別子
+                  .title.is-5.title-label 明細-単位 識別子
+                  div.tooltip.tip-img.tip-title.title-label
+                      span.tooltiptext 「明細-単位」を識別する文字を入力して下さい。空欄の場合はその項目を利用しない設定になります。
+                .line-content
                   - var unitItem = unitIds 
                   each unit, index in csvUnit
                     .field
