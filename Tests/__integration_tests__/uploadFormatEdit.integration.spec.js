@@ -259,6 +259,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
 
       await page.waitForTimeout(1000)
 
+      // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
       browser.close()
@@ -288,12 +289,14 @@ describe('請求書アップロードフォーマット設定画面（確認・�
 
       await page.waitForTimeout(1000)
 
+      // アップロードフォーマット設定画面に遷移する。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
       await page.click('#returnBtn')
 
       await page.waitForTimeout(1000)
 
+      // アップロードフォーマット一覧画面にredirectする。
       expect(await page.url()).toBe('https://localhost:3000/uploadFormatList')
 
       browser.close()
@@ -322,6 +325,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
 
       await page.waitForTimeout(1000)
 
+      // 請求書アップロードフォーマット設定画面に遷移する。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
       await page.click('#editCsvBasicFormatBtn')
@@ -332,6 +336,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         return document.getElementById('csvBasicFormat-modal').classList.value
       })
 
+      // 基本情報設定 確認modalが出る。
       expect(isModalIsActive).toMatch(/is-active/i)
 
       await page.click(
@@ -342,6 +347,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         return document.getElementById('csvBasicFormat-modal').classList.value
       })
 
+      // 基本情報設定 確認modalが消える。
       expect(isModalIsActive).not.toMatch(/is-active/i)
 
       await browser.close()
@@ -370,7 +376,8 @@ describe('請求書アップロードフォーマット設定画面（確認・�
       )
 
       await page.waitForTimeout(1000)
-
+      
+      // アップロードフォーマット設定画面に遷移する。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
       await page.click('#editCsvBasicFormatBtn')
@@ -500,6 +507,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         })
       })
 
+      // 変更した税の値が表示されているか確認
       checkTax.forEach((item, idx) => {
         expect(item).toMatch(testTaxValue[idx])
       })
@@ -510,6 +518,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         })
       })
 
+      // 変更した単位の値が表示されているか確認
       checkUnit.forEach((item, idx) => {
         expect(item).toMatch(testUnitValue[idx])
       })
@@ -670,6 +679,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         })
       })
 
+      // 確認画面に税の変更が適用されているのか確認
       checkTax.forEach((item, idx) => {
         expect(item).toMatch(testTaxValue[idx])
       })
@@ -680,6 +690,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         })
       })
 
+      // 確認画面に単位の変更が適用されているのか確認
       checkUnit.forEach((item, idx) => {
         expect(item).toMatch(testUnitValue[idx])
       })
@@ -700,6 +711,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         })
       })
 
+      // 確認画面にアップロードフォーマットデータ番号の変更が適用されているのか確認
       resultItemValue.forEach((item, idx) => {
         expect(item).toBe(testItemValue[idx])
       })
@@ -932,6 +944,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         ).innerText
       })
 
+      // 変更した設定名称が表示されること
       expect(uploadFormatName).toMatch(replaceName)
       browser.close()
     })

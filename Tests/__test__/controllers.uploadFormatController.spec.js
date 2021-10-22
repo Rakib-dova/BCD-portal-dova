@@ -312,7 +312,7 @@ describe('uploadFormatControllerのテスト', () => {
     }
   ]
 
-  const uploadformatResult = {
+  const uploadFormatResult = {
     uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
     contractId: '0255ba15-565d-4597-b074-11908b39a1ad',
     setName: '請求書フォーマット2',
@@ -332,7 +332,8 @@ describe('uploadFormatControllerのテスト', () => {
       uploadData: uploadData,
       createdAt: '2021-10-21T09:00:20.743Z',
       updatedAt: '2021-10-21T09:00:20.743Z'
-    }
+    },
+    save: () => {}
   }
 
   const uploadFormatIdentifierResult =
@@ -346,8 +347,7 @@ describe('uploadFormatControllerのテスト', () => {
         createdAt: '2021-10-22T00:04:22.464Z',
         updatedAt: '2021-10-22T00:04:22.464Z',
         save: () => {},
-        destroy: () => {},
-
+        destroy: () => {}
       },
       {
 
@@ -927,36 +927,33 @@ describe('uploadFormatControllerのテスト', () => {
   describe('updateDataForUploadFormat', () => {
     test('正常', async () => {
       // 準備
-      // findContractSpy.mockReturnValue(findOneReturn)
-      findOneSpy.mockReturnValue(uploadformatResult)
-      uploadFormatDetailFindAllSpy.mockReturnValue(uploadformatResult)
+      findOneSpy.mockReturnValue(uploadFormatResult)
+      uploadFormatDetailFindAllSpy.mockReturnValue(uploadFormatResult)
       uploadFormatDetailIdsFindAll.mockReturnValue(uploadFormatIdentifierResult)
 
       // 試験実施
       const result = await uploadFormatController.changeDataForUploadFormat(tenantId, uploadFormatChangeData)
 
       // 期待結果
-      // 想定したデータがReturnされていること
+      // 想定したデータ'0'がReturnされていること
       expect(result).toEqual(0)
     })
 
-    test('準正常：-1', async () => {
+    test('準正常：必須項目入力チェックにエラーが発生した場合', async () => {
       // 準備
-      // findContractSpy.mockReturnValue(findOneReturn)
-      findOneSpy.mockReturnValue(uploadformatResult)
-      uploadFormatDetailFindAllSpy.mockReturnValue(uploadformatResult)
+      findOneSpy.mockReturnValue(uploadFormatResult)
+      uploadFormatDetailFindAllSpy.mockReturnValue(uploadFormatResult)
       uploadFormatDetailIdsFindAll.mockReturnValue(uploadFormatIdentifierResult)
 
       // 試験実施
       const result = await uploadFormatController.changeDataForUploadFormat(tenantId, uploadFormatChangeDataError)
 
       // 期待結果
-      // 想定したデータがReturnされていること
+      // 想定したデータ'-1'がReturnされていること
       expect(result).toEqual(-1)
     })
 
-
-    test('異常：DBエラー', async () => {
+    test('異常：DBコネクションエラー', async () => {
       // 準備
       const uploadFormatDB = new Error('DB Connection Error')
       UploadFormat.findOne = jest.fn((value) => {
@@ -969,7 +966,7 @@ describe('uploadFormatControllerのテスト', () => {
       // 試験実施
       const result = await uploadFormatController.changeDataForUploadFormat(userUploadFormatId, uploadFormatChangeData)
       // 期待結果
-      // 想定したデータがReturnされていること
+      // 想定したデータ(DB Connection Error)がReturnされていること
       expect(result).toEqual(uploadFormatDB)
     })
   })
