@@ -249,7 +249,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       await page.waitForTimeout(1000)
 
       // アップロードフォーマット設定 確認画面に移動すること確認
-      expect(await page.url()).toMatch('https://localhost:3000/csvConfirmFormat')
+      expect(await page.url()).toMatch('https://localhost:3000/uploadFormat')
 
       await page.click('#submit')
 
@@ -373,6 +373,25 @@ describe('ルーティングのインテグレーションテスト', () => {
       // 'インテ'があること
       expect(formatResult).toBe('インテ')
 
+      await browser.close()
+    })
+
+    test('アップロードフォーマット設定一覧画面へ遷移', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: false,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/csvupload')
+
+      await page.click(
+        'body > div.max-width > div > div.column.is-11 > div.box > div:nth-child(4) > div.columns.mt-0.pt-0 > div > a'
+      )
+
+      expect(await page.url()).toMatch('https://localhost:3000/uploadFormatList')
       await browser.close()
     })
   })
