@@ -130,7 +130,9 @@ let errorSpy,
   findAllSpy,
   uploadFormatDetailGetUploadFormatDetailSpy,
   uploadFormatDetailIdsGetUploadFormatId,
-  successResult
+  successResult,
+  uploadFormatDetailFindAllSpy,
+  uploadFormatDetailIdsFindAll
 
 describe('uploadFormatControllerのテスト', () => {
   beforeEach(() => {
@@ -141,7 +143,11 @@ describe('uploadFormatControllerのテスト', () => {
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
     uploadFormatDetailGetUploadFormatDetailSpy = jest.spyOn(UploadFormatDetail, 'getUploadFormatDetail')
+    uploadFormatDetailFindAllSpy = jest.spyOn(UploadFormatDetail, 'findAll')
     uploadFormatDetailIdsGetUploadFormatId = jest.spyOn(UploadFormatDetailId, 'getUploadFormatId')
+    uploadFormatDetailIdsFindAll = jest.spyOn(UploadFormatDetailId, 'findAll')
+    UploadFormatDetail.build = jest.fn((item) => { return { ...item, save: () => {}, destroy: () => {} } })
+    UploadFormatDetailId.build = jest.fn((item) => { return { ...item, save: () => {}, destroy: () => {} } })
     successResult = { ...baseResult }
   })
   afterEach(() => {
@@ -152,6 +158,8 @@ describe('uploadFormatControllerのテスト', () => {
     errorSpy.mockRestore()
     infoSpy.mockRestore()
     uploadFormatDetailGetUploadFormatDetailSpy.mockRestore()
+    uploadFormatDetailFindAllSpy.mockRestore()
+    uploadFormatDetailIdsFindAll.mockRestore()
   })
   tenantId = '12345678-bdac-4195-80b9-1ea64b8cb70c'
   contractId = '87654321-fbe6-4864-a866-7a3ce9aa517e'
@@ -185,6 +193,94 @@ describe('uploadFormatControllerのテスト', () => {
     uploadType: ''
   }
 
+  const uploadFormatChangeData = {
+    checkItemNameLine: 'on',
+    itemRowNo: '',
+    dataStartRowNo: '2',
+    headerItems: [
+      '発行日',
+      '請求書番号',
+      'テナントID',
+      '支払期日',
+      '納品日',
+      '備考',
+      '銀行名',
+      '支店名',
+      '科目',
+      '口座番号',
+      '口座名義',
+      'その他特記事項',
+      '明細-項目ID',
+      '明細-内容',
+      '明細-数量',
+      '明細-単位',
+      '明細-単価',
+      '明細-税（消費税／軽減税率／不課税／免税／非課税）',
+      '明細-備考'
+    ],
+    formatData: [
+      '0', '1', '2', '3', '',
+      '', '', '', '', '',
+      '', '', '12', '13', '14',
+      '15', '16', '17', ''
+    ],
+    uploadFormatItemName: '請求書フォーマット2',
+    uploadType: ['請求書データ', '請求書データ'],
+    keyConsumptionTax: 'a11122222',
+    keyReducedTax: 'b111',
+    keyFreeTax: 'f111',
+    keyDutyFree: '',
+    keyExemptTax: '',
+    keyManMonth: 'c122',
+    keyBottle: 'd122',
+    keyCost: '',
+    keyContainer: '',
+    keyCentilitre: '',
+    keySquareCentimeter: '',
+    keyCubicCentimeter: '',
+    keyCentimeter: '',
+    keyCase: '',
+    keyCarton: '',
+    keyDay: '',
+    keyDeciliter: '',
+    keyDecimeter: '',
+    keyGrossKilogram: '',
+    keyPieces: '',
+    keyFeet: '',
+    keyGallon: '',
+    keyGram: '',
+    keyGrossTonnage: '',
+    keyHour: '',
+    keyKilogram: '',
+    keyKilometers: '',
+    keyKilowattHour: '',
+    keyPound: '',
+    keyLiter: '',
+    keyMilligram: '',
+    keyMilliliter: '',
+    keyMillimeter: '',
+    keyMonth: '',
+    keySquareMeter: '',
+    keyCubicMeter: '',
+    keyMeter: '',
+    keyNetTonnage: '',
+    keyPackage: '',
+    keyRoll: '',
+    keyFormula: '',
+    keyTonnage: '',
+    keyOthers: ''
+  }
+
+  const uploadFormatChangeDataError = {
+    ...uploadFormatChangeData,
+    formatData: [
+      '0', '1', '2', '3', '',
+      '', '', '', '', '',
+      '', '', '12', '13', '14',
+      '30', '16', '17', ''
+    ]
+  }
+
   const uploadFormatDataNotContractId = {
     contractId: null,
     setName: 'uploadFormatName',
@@ -215,6 +311,91 @@ describe('uploadFormatControllerのテスト', () => {
       updatedAt: '2021-07-09T04:30:00.000Z'
     }
   ]
+
+  const uploadformatResult = {
+    uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+    contractId: '0255ba15-565d-4597-b074-11908b39a1ad',
+    setName: '請求書フォーマット2',
+    itemRowNo: 1,
+    dataStartRowNo: 2,
+    uploadType: '請求書データ',
+    uploadData: uploadData,
+    createdAt: '2021-10-21T09:00:20.743Z',
+    updatedAt: '2021-10-21T09:00:20.743Z',
+    dataValues: {
+      uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+      contractId: '0255ba15-565d-4597-b074-11908b39a1ad',
+      setName: '請求書フォーマット2',
+      itemRowNo: 1,
+      dataStartRowNo: 2,
+      uploadType: '請求書データ',
+      uploadData: uploadData,
+      createdAt: '2021-10-21T09:00:20.743Z',
+      updatedAt: '2021-10-21T09:00:20.743Z'
+    }
+  }
+
+  const uploadFormatIdentifierResult =
+    [
+      {
+        uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+        serialNumber: 1,
+        extensionType: '0',
+        uploadFormatExtension: 'a11122222',
+        defaultExtension: '消費税',
+        createdAt: '2021-10-22T00:04:22.464Z',
+        updatedAt: '2021-10-22T00:04:22.464Z',
+        save: () => {},
+        destroy: () => {},
+
+      },
+      {
+
+        uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+        serialNumber: 2,
+        extensionType: '0',
+        uploadFormatExtension: 'b111',
+        defaultExtension: '軽減税率',
+        createdAt: '2021-10-22T00:04:22.465Z',
+        updatedAt: '2021-10-22T00:04:22.465Z',
+        save: () => {},
+        destroy: () => {}
+      },
+      {
+        uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+        serialNumber: 3,
+        extensionType: '0',
+        uploadFormatExtension: 'f111',
+        defaultExtension: '不課税',
+        createdAt: '2021-10-22T00:04:22.465Z',
+        updatedAt: '2021-10-22T00:04:22.465Z',
+        save: () => {},
+        destroy: () => {}
+      },
+      {
+
+        uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+        serialNumber: 4,
+        extensionType: '1',
+        uploadFormatExtension: 'c122',
+        defaultExtension: '人月',
+        createdAt: '2021-10-22T00:04:22.465Z',
+        updatedAt: '2021-10-22T00:04:22.465Z',
+        save: () => {},
+        destroy: () => {}
+      },
+      {
+        uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+        serialNumber: 5,
+        extensionType: '1',
+        uploadFormatExtension: 'd122',
+        defaultExtension: 'ボトル',
+        createdAt: '2021-10-22T00:04:22.465Z',
+        updatedAt: '2021-10-22T00:04:22.465Z',
+        save: () => {},
+        destroy: () => {}
+      }
+    ]
 
   describe('insert', () => {
     test('正常', async () => {
@@ -737,6 +918,56 @@ describe('uploadFormatControllerのテスト', () => {
 
       // 試験実施
       const result = await uploadFormatController.getDataForUploadFormat(userUploadFormatId)
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(uploadFormatDB)
+    })
+  })
+
+  describe('updateDataForUploadFormat', () => {
+    test('正常', async () => {
+      // 準備
+      // findContractSpy.mockReturnValue(findOneReturn)
+      findOneSpy.mockReturnValue(uploadformatResult)
+      uploadFormatDetailFindAllSpy.mockReturnValue(uploadformatResult)
+      uploadFormatDetailIdsFindAll.mockReturnValue(uploadFormatIdentifierResult)
+
+      // 試験実施
+      const result = await uploadFormatController.changeDataForUploadFormat(tenantId, uploadFormatChangeData)
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(0)
+    })
+
+    test('準正常：-1', async () => {
+      // 準備
+      // findContractSpy.mockReturnValue(findOneReturn)
+      findOneSpy.mockReturnValue(uploadformatResult)
+      uploadFormatDetailFindAllSpy.mockReturnValue(uploadformatResult)
+      uploadFormatDetailIdsFindAll.mockReturnValue(uploadFormatIdentifierResult)
+
+      // 試験実施
+      const result = await uploadFormatController.changeDataForUploadFormat(tenantId, uploadFormatChangeDataError)
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(-1)
+    })
+
+
+    test('異常：DBエラー', async () => {
+      // 準備
+      const uploadFormatDB = new Error('DB Connection Error')
+      UploadFormat.findOne = jest.fn((value) => {
+        throw uploadFormatDB
+      })
+      uploadFormatDetailGetUploadFormatDetailSpy.mockReturnValue([])
+      uploadFormatDetailIdsGetUploadFormatId.mockReturnValue([])
+      const userUploadFormatId = 'c1e543ad-c23e-455b-b33a-2b84651ffe05'
+
+      // 試験実施
+      const result = await uploadFormatController.changeDataForUploadFormat(userUploadFormatId, uploadFormatChangeData)
       // 期待結果
       // 想定したデータがReturnされていること
       expect(result).toEqual(uploadFormatDB)
