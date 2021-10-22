@@ -502,3 +502,26 @@ img.logo-ncom {
   background-color: transparent;
   padding: 1.5rem;
 }
+
+.mr320 {
+  margin-right: 320px;
+}
+
+.mr482 {
+  margin-right: 482px;
+  text-decoration: underline;
+}
+
+.mt500 {
+  margin-top: 80px; 
+}
+
+.mb600 {
+  margin-bottom: 16px; 
+}
+
+.border {
+  width: 588px;
+  text-align: left;
+  margin-left: 440px;
+}
