@@ -173,12 +173,17 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         ignoreHTTPSErrors: true
       })
 
+      // 新しいページ起動
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
+
+      // アップロードフォーマット一覧画面へ移動
       await page.goto('https://localhost:3000/uploadFormatList')
 
+      // ポータル画面へ移動
       await page.click('body > div.max-width > div:nth-child(3) > div > div.mt-1.has-text-left > a')
 
+      // ポータル画面へ移動結果確認
       expect(await page.url()).toMatch('https://localhost:3000/portal')
       await browser.close()
     })
@@ -190,12 +195,17 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         ignoreHTTPSErrors: true
       })
 
+      // 新しいページ起動
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
+
+      // アップロードフォーマット一覧画面へ移動
       await page.goto('https://localhost:3000/uploadFormatList')
 
+      // 請求書一覧画面へ移動
       await page.click('body > div.max-width > div:nth-child(3) > div > a.button.is-link.is-light.float-right')
 
+      // 請求書一覧画面移動結果確認
       expect(await page.url()).toMatch('https://localhost:3000/csvupload')
       await browser.close()
     })

@@ -383,14 +383,19 @@ describe('ルーティングのインテグレーションテスト', () => {
         ignoreHTTPSErrors: true
       })
 
+      // 新しいページ起動
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
+
+      // 請求書一覧作成移動
       await page.goto('https://localhost:3000/csvupload')
 
+      // アップロードフォーマット一覧画面へ遷移
       await page.click(
         'body > div.max-width > div > div.column.is-11 > div.box > div:nth-child(4) > div.columns.mt-0.pt-0 > div > a'
       )
 
+      // アップロードフォーマット一覧画面へ移動結果確認
       expect(await page.url()).toMatch('https://localhost:3000/uploadFormatList')
       await browser.close()
     })
