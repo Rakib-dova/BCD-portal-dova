@@ -247,8 +247,7 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
-      // helper.checkContractStatus = 999
-      helpercheckContractStatusSpy.mockReturnValue(999)
+      helper.checkContractStatus = 999
 
       // 試験実施
       await uploadFormatEdit.cbGetIndex(request, response, next)
@@ -288,8 +287,8 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
-      // helper.checkContractStatus = 0
-      helpercheckContractStatusSpy.mockReturnValue(0)
+      helper.checkContractStatus = 0
+
       // 試験実施
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
@@ -739,8 +738,8 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
-      // helper.checkContractStatus = 999
       helpercheckContractStatusSpy.mockReturnValue(999)
+
       // 試験実施
       await uploadFormatEdit.cbPostIndex(request, response, next)
 
@@ -779,7 +778,6 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
-      // helper.checkContractStatus = 0
       helpercheckContractStatusSpy.mockReturnValue(0)
 
       // 試験実施
