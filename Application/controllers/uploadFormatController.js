@@ -222,7 +222,8 @@ module.exports = {
         }
       })
 
-      //
+      uploadFormat.setName = changeData.uploadFormatItemName
+      await uploadFormat.save()
 
       // ユーザヘッダ取り出し
       const uploadFormatHeader = uploadFormat.uploadData
@@ -232,7 +233,7 @@ module.exports = {
         .split(',')
 
       // 必須項目入力チェック
-      let failFormDataF = false
+      let failFormDataFlag = false
       changeData.formatData.forEach((item, idx) => {
         if (
           idx === 0 ||
@@ -246,15 +247,13 @@ module.exports = {
           idx === 17 ||
           idx === 18
         ) {
-          if (item !== '' && ~~item < 0 && ~~item > uploadFormatHeader.length) {
-            console.log(uploadFormatHeader.length)
-            console.log(~~item)
-            failFormDataF = true
+          if (item !== '' && (~~item < 0 || ~~item > uploadFormatHeader.length)) {
+            failFormDataFlag = true
           }
         }
       })
 
-      if (failFormDataF) return -1
+      if (failFormDataFlag) return -1
 
       const uploadFormatDetail = await UploadFormatDetail.findAll({
         where: {

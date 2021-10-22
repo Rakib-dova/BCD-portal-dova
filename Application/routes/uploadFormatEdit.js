@@ -84,7 +84,7 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = helper.checkContractStatus(req, res, next)
+  const checkContractStatus = await helper.checkContractStatus(req, res, next)
 
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
@@ -120,5 +120,6 @@ router.post('/:uploadFormatId', helper.isAuthenticated, cbPostIndex)
 
 module.exports = {
   router: router,
-  cbGetIndex: cbGetIndex
+  cbGetIndex: cbGetIndex,
+  cbPostIndex: cbPostIndex
 }
