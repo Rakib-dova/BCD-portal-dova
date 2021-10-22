@@ -26,6 +26,8 @@ const BconCsv = require('../lib/bconCsv')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
+
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
@@ -69,12 +71,16 @@ const cbGetIndex = async (req, res, next) => {
 
   // ユーザ権限も画面に送る
   res.render('csvupload')
+
+  logger.trace(constantsDefine.logMessage.TRC002, res)
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
 const cbPostUpload = async (req, res, next) => {
   const functionName = 'cbPostUpload'
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+  logger.trace(constantsDefine.logMessage.TRC001, req)
+
   const invoiceController = require('../controllers/invoiceController')
   if (!req.session || !req.user?.userId) {
     setErrorLog(req, 500)
@@ -170,6 +176,7 @@ const cbPostUpload = async (req, res, next) => {
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
 
+  logger.trace(constantsDefine.logMessage.TRC002, res)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
 
   if (errorText === null) return res.status(200).send(constantsDefine.statusConstants.SUCCESS)
@@ -180,6 +187,8 @@ const cbPostUpload = async (req, res, next) => {
 // csvアップロード
 const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostUploadCsv')
+  logger.trace(constantsDefine.logMessage.TRC001, _filePath, _filename, _uploadCsvData)
+
   const uploadPath = path.join(_filePath, '/')
   const filename = _filename
   const uploadData = _uploadCsvData
@@ -191,16 +200,19 @@ const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
     if (fs.existsSync(uploadPath)) {
       // ユーザディレクトリが存在している場合、CSVファイルを保存する
       writeFile()
+      logger.trace(constantsDefine.logMessage.TRC004, 'true')
       logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadCsv')
       return true
     } else {
       // ユーザディレクトリが存在しない場合、ユーザディレクトリ作成
       fs.mkdirSync(uploadPath)
       writeFile()
+      logger.trace(constantsDefine.logMessage.TRC004, 'true')
       logger.info(constantsDefine.logMessage.INF001 + 'cbPostUploadCsv')
       return true
     }
   } catch (error) {
+    // エラーの場合のログは、戻り先で出力する
     return false
   }
 }
@@ -208,11 +220,13 @@ const cbUploadCsv = (_filePath, _filename, _uploadCsvData) => {
 // CSVファイル削除機能
 const cbRemoveCsv = (_deleteDataPath, _filename) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveCsv')
+  logger.trace(constantsDefine.logMessage.TRC001, _deleteDataPath, _filename)
   const deleteFile = path.join(_deleteDataPath, '/' + _filename)
 
   if (fs.existsSync(deleteFile)) {
     try {
       fs.unlinkSync(deleteFile)
+      logger.trace(constantsDefine.logMessage.TRC004, 'true')
       logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveCsv')
       return true
     } catch (error) {
@@ -228,6 +242,8 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
 
 const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbExtractInvoice')
+  logger.trace(constantsDefine.logMessage.TRC003, _extractDir, _filename, _user, _invoices, _req)
+
   const invoiceController = require('../controllers/invoiceController')
   const invoiceDetailController = require('../controllers/invoiceDetailController')
   const extractFullpathFile = path.join(_extractDir, '/') + _filename
@@ -476,6 +492,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req) 
     })
   }
 
+  logger.trace(constantsDefine.logMessage.TRC004, resultFlag)
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
 
   switch (resultFlag) {
@@ -503,6 +520,7 @@ const getTimeStamp = () => {
     (now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()) +
     (now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()) +
     (now.getMilliseconds() < 10 ? '0' + now.getMilliseconds() : now.getMilliseconds())
+  logger.trace(constantsDefine.logMessage.TRC004, stamp)
   logger.info(constantsDefine.logMessage.INF001 + 'getTimeStamp')
   return stamp
 }

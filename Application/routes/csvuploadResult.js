@@ -22,6 +22,8 @@ router.use(
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
+
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
@@ -101,11 +103,14 @@ const cbGetIndex = async (req, res, next) => {
   res.render('csvuploadResult', {
     csvuploadResultArr: csvuploadResultArr
   })
+  logger.trace(constantsDefine.logMessage.TRC002, res)
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
 const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
+
   let resultStatusCode
   let invoicesId
   if (!req.session || !req.user?.userId) {
@@ -184,6 +189,9 @@ const cbPostIndex = async (req, res, next) => {
     logger.error({ page: 'csvuploadResult', msg: '請求書を取得失敗しました。' })
     logger.error(error)
   }
+
+  logger.trace(constantsDefine.logMessage.TRC002, res)
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 
   // データ送信
   return res.status(resultStatusCode).send(csvuploadResultDetailsArr)

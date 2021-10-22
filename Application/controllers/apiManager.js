@@ -1,7 +1,13 @@
 const axios = require('axios')
 const qs = require('qs')
 const logger = require('../lib/logger')
+
+const constantsDefine = require('../constants')
+
 exports.accessTradeshift = async (accessToken, refreshToken, method, query, body = {}, config = {}) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'accessTradeshift')
+  logger.trace(constantsDefine.logMessage.TRC001, accessToken, refreshToken, method, query, body, config)
+
   // アクセスは2回試す
   // 1回目は受け取ったアクセストークンで試行
   // 2回目は1回目でアクセストークンの期限が切れていた場合、リフレッシュして再試行
@@ -11,13 +17,17 @@ exports.accessTradeshift = async (accessToken, refreshToken, method, query, body
       headers: {
         Accept: 'application/json',
         Authorization: `Bearer ${accessToken}`
-      },
+      }
     }
   }
   const access = async (_accessToken, _method, _query, _body = {}, _config) => {
+    logger.debug(constantsDefine.logMessage.DBG001, _accessToken, _method, _query, _body, _config)
+
     try {
       if (_method === 'get') {
         const res = await axios.get(`https://${process.env.TS_API_HOST}/tradeshift/rest/external${_query}`, _config)
+
+        logger.debug(constantsDefine.logMessage.DBG002, res)
         return res.data
       } else {
         // TODO: get以外は動くか試していない
@@ -27,6 +37,7 @@ exports.accessTradeshift = async (accessToken, refreshToken, method, query, body
           _body,
           _config
         )
+        logger.debug(constantsDefine.logMessage.DBG002, res)
         return res.data
       }
     } catch (error) {
@@ -35,7 +46,7 @@ exports.accessTradeshift = async (accessToken, refreshToken, method, query, body
         // リフレッシュを試行するフロー
         const appToken = Buffer.from(`${process.env.TS_CLIENT_ID}:${process.env.TS_CLIENT_SECRET}`).toString('base64')
 
-        // console.log('Tradeshift API Access: try token refresh...')
+        logger.debug(constantsDefine.logMessage.DBG003)
         try {
           const refreshed = await axios.post(
             `https://${process.env.TS_API_HOST}/tradeshift/auth/token`,

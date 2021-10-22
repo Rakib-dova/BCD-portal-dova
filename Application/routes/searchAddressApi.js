@@ -19,6 +19,8 @@ const cbSearchAddress = async (req, res) => {
   let resultAddress = { addressList: [] }
   let resultStatusCode
   logger.info(constantsDefine.logMessage.INF000 + 'cbSearchAddress')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
+
   let result
   if (!req.session || !req.user?.userId) {
     resultStatusCode = 403
@@ -54,6 +56,7 @@ const cbSearchAddress = async (req, res) => {
       break
   }
 
+  logger.trace(constantsDefine.logMessage.TRC002, res)
   logger.info(constantsDefine.logMessage.INF001 + 'cbSearchAddress')
   // レスポンスを返す
   return res.status(resultStatusCode).send(resultAddress)

@@ -16,6 +16,7 @@ const contractInformationcancelOrder = require('../orderTemplate/contractInforma
 
 const cbGetCancellation = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCancellation')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
@@ -124,6 +125,7 @@ const cbPostCancellation = async (req, res, next) => {
 
   if (cancellation instanceof Error || cancellation === null) return next(errorHelper.create(500))
 
+  logger.trace(constantsDefine.logMessage.TRC002, res)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostCancellation')
   return next(noticeHelper.create('cancellation'))
 }

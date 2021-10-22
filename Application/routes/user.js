@@ -7,6 +7,7 @@ const helper = require('./helpers/middleware')
 const userController = require('../controllers/userController.js')
 const validate = require('../lib/validate')
 const logger = require('../lib/logger')
+const constantsDefine = require('../constants')
 
 const errorHelper = require('./helpers/error')
 const tenantController = require('../controllers/tenantController')
@@ -16,14 +17,23 @@ const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
 const cbGetRegister = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegister')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
+
   if (req.session?.userContext !== 'NotUserRegistered') {
     return next(errorHelper.create(400))
   }
 
   res.render('user-register', { title: '利用登録', csrfToken: req.csrfToken() })
+
+  logger.trace(constantsDefine.logMessage.TRC002, res)
+  logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegister')
 }
 
 const cbPostRegister = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegister')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
+
   if (req.session?.userContext !== 'NotUserRegistered') {
     return next(errorHelper.create(400))
   }
@@ -59,6 +69,9 @@ const cbPostRegister = async (req, res, next) => {
     if (user[0].dataValues?.userId !== req.user.userId) return next(errorHelper.create(500))
     // ユーザ登録成功
     logger.info({ tenant: req.user.tenantId, user: req.user.userId }, 'User Registration Succeeded')
+    logger.trace(constantsDefine.logMessage.TRC002, res)
+    logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegister')
+
     req.session.userContext = 'UserRegistrationCompleted'
     req.flash('info', '利用登録が完了いたしました。')
 
@@ -70,6 +83,9 @@ const cbPostRegister = async (req, res, next) => {
   }
 }
 const cbGetDelete = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegister')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
+
   // ユーザを削除するための動作確認用。開発環境のみ動作。
   if (process.env.NODE_ENV !== 'development') {
     return next(errorHelper.create(500))
@@ -81,9 +97,13 @@ const cbGetDelete = async (req, res, next) => {
 
     if (Number(deleted) === 1) {
       logger.info({ tenant: req.user.tenantId, user: req.user.userId }, 'User deleted successfully')
+      logger.trace(constantsDefine.logMessage.TRC002, res)
+      logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegister')
       return res.send('User deleted successfully')
     } else {
       logger.warn({ tenant: req.user.tenantId, user: req.user.userId }, 'Failed to delete user')
+      logger.trace(constantsDefine.logMessage.TRC002, res)
+      logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegister')
       return res.send('Failed to delete user')
     }
   }

@@ -2,6 +2,7 @@
 const express = require('express')
 const router = express.Router()
 const helper = require('./helpers/middleware')
+const logger = require('../lib/logger')
 
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
@@ -19,6 +20,9 @@ const parser = new Parser({
 })
 
 const cbGetIndex = async (req, res, next) => {
+  logger.info(constants.logMessage.INF000 + 'cbGetIndex')
+  logger.trace(constants.logMessage.TRC001, req)
+
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
@@ -129,6 +133,9 @@ const cbGetIndex = async (req, res, next) => {
     constructDataArr: constructDataArr,
     constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0
   })
+
+  logger.trace(constants.logMessage.TRC002, res)
+  logger.info(constants.logMessage.INF001 + 'cbGetIndex')
 }
 
 router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetIndex)

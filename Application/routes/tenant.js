@@ -19,6 +19,9 @@ const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
 const cbGetRegister = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegister')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
+
   if (req.session?.userContext !== 'NotTenantRegistered') {
     return next(errorHelper.create(400))
   }
@@ -91,9 +94,15 @@ const cbGetRegister = async (req, res, next) => {
     customerId: 'none',
     csrfToken: req.csrfToken()
   })
+
+  logger.trace(constantsDefine.logMessage.TRC002, res)
+  logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegister')
 }
 
 const cbPostRegister = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostRegister')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
+
   if (req.session?.userContext !== 'NotTenantRegistered') {
     return next(errorHelper.create(400))
   }
@@ -167,7 +176,10 @@ const cbPostRegister = async (req, res, next) => {
   if (user[0]?.dataValues?.userId !== req.user.userId) return next(errorHelper.create(500))
 
   // テナント＆ユーザ登録成功したら
+  logger.trace(constantsDefine.logMessage.TRC002, res)
   logger.info({ tenant: req.user?.tenantId, user: req.user?.userId }, 'Tenant Registration Succeeded')
+  logger.info(constantsDefine.logMessage.INF0001 + 'cbPostRegister')
+
   req.session.userContext = 'TenantRegistrationCompleted'
   req.flash('info', '利用登録が完了いたしました。')
 

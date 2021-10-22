@@ -18,6 +18,7 @@ const constantsDefine = require('../constants')
 
 const cbGetChangeIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetChangeIndex')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
@@ -75,11 +76,14 @@ const cbGetChangeIndex = async (req, res, next) => {
     numberN: contract.dataValues?.numberN,
     TS_HOST: process.env.TS_HOST
   })
+
+  logger.trace(constantsDefine.logMessage.TRC002, res)
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetChangeIndex')
 }
 
 const cbPostChangeIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostChangeIndex')
+  logger.trace(constantsDefine.logMessage.TRC001, req)
 
   const userTenantId = req.user.tenantId
   const userId = req.user.userId
@@ -102,7 +106,7 @@ const cbPostChangeIndex = async (req, res, next) => {
   if (checkContractStatus === null || checkContractStatus === 999) {
     return next(errorHelper.create(500))
   }
-  
+
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
   }
@@ -259,8 +263,9 @@ const cbPostChangeIndex = async (req, res, next) => {
   } else {
     return next(errorHelper.create(400))
   }
-
+  logger.trace(constantsDefine.logMessage.TRC002, res)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostChangeIndex')
+
   req.flash('info', '契約者情報変更を受け付けました。')
   return res.redirect('/portal')
 }
