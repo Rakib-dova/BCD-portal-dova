@@ -198,5 +198,198 @@ module.exports = {
     } catch (error) {
       return error
     }
+  },
+  changeDataForUploadFormat: async (uploadFormatId, changeData) => {
+    logger.info(constantsDefine.logMessage.INF000 + 'changeDataForUploadFormat')
+    try {
+      // DBの「UploadFormatDetail」と「UploadFormatIdentifier」のObjectを用意
+      delete changeData.checkItemNameLine
+      delete changeData.itemRowNo
+      delete changeData.dataStartRowNo
+      delete changeData.headerItems
+      delete changeData.uploadType
+
+      const UploadFormatDetail = db.UploadFormatDetail
+      const UploadFormatIdentifier = db.UploadFormatIdentifier
+      const standardHeader = constantsDefine.csvFormatDefine.columnArr
+      const createUploadFormatDetail = []
+      const uploadFormatIds = []
+
+      // DBの３つテーブルから「uploadFormatId」のデータ取得
+      const uploadFormat = await Upload.findOne({
+        where: {
+          uploadFormatId: uploadFormatId
+        }
+      })
+
+      uploadFormat.setName = changeData.uploadFormatItemName
+      await uploadFormat.save()
+
+      // ユーザヘッダ取り出し
+      const uploadFormatHeader = uploadFormat.uploadData
+        .toString('utf-8')
+        .replace('\x00', '')
+        .split(/\r?\n|\r/)[0]
+        .split(',')
+
+      // 必須項目入力チェック
+      let failFormDataFlag = false
+      changeData.formatData.forEach((item, idx) => {
+        if (
+          idx === 0 ||
+          idx === 1 ||
+          idx === 2 ||
+          idx === 12 ||
+          idx === 13 ||
+          idx === 14 ||
+          idx === 15 ||
+          idx === 16 ||
+          idx === 17 ||
+          idx === 18
+        ) {
+          if (item !== '' && (~~item < 0 || ~~item > uploadFormatHeader.length)) {
+            failFormDataFlag = true
+          }
+        }
+      })
+
+      if (failFormDataFlag) return -1
+
+      const uploadFormatDetail = await UploadFormatDetail.findAll({
+        where: {
+          uploadFormatId: uploadFormatId
+        },
+        order: [['uploadFormatNumber', 'ASC']]
+      })
+
+      const uploadFormatIdentifier = await UploadFormatIdentifier.findAll({
+        where: {
+          uploadFormatId: uploadFormatId
+        },
+        order: [['serialNumber', 'ASC']]
+      })
+
+      uploadFormat.uploadFormatItemName = changeData.uploadFormatItemName
+      delete changeData.uploadFormatItemName
+
+      const convertUploadFormatDetail = uploadFormatHeader.map((item, idx) => {
+        return {
+          uploadForamtItemName: item
+        }
+      })
+
+      changeData.formatData.forEach((item, idx) => {
+        if (item !== '') {
+          createUploadFormatDetail.push(
+            UploadFormatDetail.build({
+              uploadFormatId: uploadFormatId,
+              serialNumber: idx + 1,
+              uploadFormatItemName: convertUploadFormatDetail[~~item].uploadForamtItemName,
+              uploadFormatNumber: ~~item,
+              defaultItemName: standardHeader[idx].columnName,
+              defaultNumber: idx
+            })
+          )
+        }
+      })
+      delete changeData.formatData
+
+      const keys = Object.keys(changeData)
+
+      uploadFormatDetail.forEach(async (item) => {
+        await item.destroy()
+      })
+
+      createUploadFormatDetail.forEach(async (item) => {
+        await item.save()
+      })
+
+      uploadFormatIdentifier.forEach(async (item) => {
+        await item.destroy()
+      })
+
+      const defaultExtensionItems = {
+        keyConsumptionTax: '消費税',
+        keyReducedTax: '軽減税率',
+        keyFreeTax: '不課税',
+        keyDutyFree: '免税',
+        keyExemptTax: '非課税',
+        keyManMonth: '人月',
+        keyBottle: 'ボトル',
+        keyCost: 'コスト',
+        keyContainer: 'コンテナ',
+        keyCentilitre: 'センチリットル',
+        keySquareCentimeter: '平方センチメートル',
+        keyCubicCentimeter: '立方センチメートル',
+        keyCentimeter: 'センチメートル',
+        keyCase: 'ケース',
+        keyCarton: 'カートン',
+        keyDay: '日',
+        keyDeciliter: 'デシリットル',
+        keyDecimeter: 'デシメートル',
+        keyGrossKilogram: 'グロス・キログラム',
+        keyPieces: '個',
+        keyFeet: 'フィート',
+        keyGallon: 'ガロン',
+        keyGram: 'グラム',
+        keyGrossTonnage: '総トン',
+        keyHour: '時間',
+        keyKilogram: 'キログラム',
+        keyKilometers: 'キロメートル',
+        keyKilowattHour: 'キロワット時',
+        keyPound: 'ポンド',
+        keyLiter: 'リットル',
+        keyMilligram: 'ミリグラム',
+        keyMilliliter: 'ミリリットル',
+        keyMillimeter: 'ミリメートル',
+        keyMonth: '月',
+        keySquareMeter: '平方メートル',
+        keyCubicMeter: '立方メートル',
+        keyMeter: 'メーター',
+        keyNetTonnage: '純トン',
+        keyPackage: '包',
+        keyRoll: '巻',
+        keyFormula: '式',
+        keyTonnage: 'トン',
+        keyOthers: 'その他'
+      }
+
+      keys.forEach((key) => {
+        const obj = {
+          uploadFormatId: uploadFormatId,
+          extensionType: '',
+          uploadFormatExtension: '',
+          defaultExtension: ''
+        }
+
+        if (key.match(/tax/i) || key.match(/dutyfree/i)) {
+          obj.extensionType = 0
+        } else {
+          obj.extensionType = 1
+        }
+
+        obj.uploadFormatExtension = changeData[key]
+        obj.defaultExtension = defaultExtensionItems[key]
+
+        if (changeData[key] !== '') {
+          uploadFormatIds.push(
+            UploadFormatIdentifier.build({
+              ...obj
+            })
+          )
+        }
+      })
+
+      uploadFormatIds.forEach(async (item, idx) => {
+        item.serialNumber = idx + 1
+        await item.save()
+      })
+
+      logger.info(constantsDefine.logMessage.INF001 + 'changeDataForUploadFormat')
+      return 0
+    } catch (error) {
+      console.log(error)
+      return error
+    }
   }
 }
