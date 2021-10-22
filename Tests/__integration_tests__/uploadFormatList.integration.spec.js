@@ -137,7 +137,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
   })
-  
+
   describe('3.契約ステータス：登録受付', () => {
     test('請求書アップロードフォーマット一覧画面へアクセス', async () => {
       const contract = await db.Contract.findOne({
@@ -164,6 +164,40 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         .expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+    })
+
+    test('請求書アップロードフォーマット一覧画面からポータル画面へ遷移', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/uploadFormatList')
+
+      await page.click('body > div.max-width > div:nth-child(3) > div > div.mt-1.has-text-left > a')
+
+      expect(await page.url()).toMatch('https://localhost:3000/portal')
+      await browser.close()
+    })
+
+    test('請求書アップロードフォーマット一覧画面から請求書一覧画面へ遷移', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/uploadFormatList')
+
+      await page.click('body > div.max-width > div:nth-child(3) > div > a.button.is-link.is-light.float-right')
+
+      expect(await page.url()).toMatch('https://localhost:3000/csvupload')
+      await browser.close()
     })
   })
 
