@@ -20,64 +20,88 @@ const $ = function (tagObjName) {
 
 // 「確認画面へ遷移」ボタンクリックイベント処理
 $('#editConfirmBtn').addEventListener('click', function (e) {
-  e.preventDefault()
-  const modal = document.getElementById('confirmModify-modal')
+  // 確認画面に表示するリスト初期化
+  $('.checkDataItem').forEach((item) => {
+    item.innerText = ''
+  })
+  $('.checkDataValue').forEach((item) => {
+    item.innerText = ''
+  })
 
-  // 必須項目の有無確認（エラーメッセージ削除）
-  const notValue = Array.prototype.map.call($('.requiredItem'), (item) => {
-    const selectNumber = item.selectedIndex
-    const itemValue = item.options[selectNumber].value
-    if (itemValue === '') {
-      return item.parentNode.parentNode.children[0].children[1]
-    } else {
-      item.parentNode.parentNode.children[0].children[1].classList.remove('not-input-required')
+  // ユーザデータを整列
+  const dataItem = Array.prototype.map.call($('.dataItem'), (item, idx) => {
+    return {
+      no: idx + 1,
+      itemName: item.innerText,
+      data: $('.dataValue')[idx].innerText
     }
   })
 
-  // モーダル制御Flag
-  let stopFlag = true
-
-  // 必須項目の有無確認（エラーメッセージ追加、Flag変更）
-  notValue.forEach((item) => {
-    if (item !== undefined) {
-      item.parentNode.parentNode.children[0].children[1].classList.add('not-input-required')
-      stopFlag = false
+  // 標準項目に基準として整列
+  const convertStandardItem = Array.prototype.map.call($('.standardHeader'), (item, idx) => {
+    return {
+      no: idx + 1,
+      checkDataValue: document.getElementsByName('formatData')[idx].selectedIndex
     }
   })
 
-  // モーダル制御
-  if (!stopFlag) {
-    modal.classList.remove('is-active')
-  } else {
-    // モーダルデータ入力
-    const targetDataNumSelect = Object.assign(document.querySelectorAll('select'), Array.prototype)
-    const dataItem = document.getElementsByClassName('dataItem')
-    const dataValue = document.getElementsByClassName('dataValue')
-    const checkDataItem = document.getElementsByClassName('checkDataItem')
-    const checkDataValue = document.getElementsByClassName('checkDataValue')
-    const checkArrow = document.getElementsByClassName('checkArrow')
+  // 選択した項目確認画面表示
+  convertStandardItem.forEach((item, idx) => {
+    if (item.checkDataValue !== 0) {
+      document.querySelector(
+        `#csvFormatConfirm-modal-card > section > div > div > div:nth-child(4) > div > div.box > table > tbody > tr:nth-child(${
+          idx + 1
+        }) > th.text-center.checkDataItem`
+      ).innerText = dataItem[item.checkDataValue - 1].itemName
 
-    targetDataNumSelect.forEach((item, idx) => {
-      if (item.selectedIndex !== 0) {
-        checkDataItem[idx].innerText = dataItem[item.selectedIndex - 1].innerText
-        checkArrow[idx].innerText = '→'
-        checkDataValue[idx].innerText = dataValue[item.selectedIndex - 1].innerText
-      } else {
-        checkDataItem[idx].innerText = ''
-        checkArrow[idx].innerText = ''
-        checkDataValue[idx].innerText = ''
-      }
-    })
-    modal.classList.add('is-active')
+      document.querySelector(
+        `#csvFormatConfirm-modal-card > section > div > div > div:nth-child(4) > div > div.box > table > tbody > tr:nth-child(${
+          idx + 1
+        }) > th.text-center.checkDataValue`
+      ).innerText = dataItem[item.checkDataValue - 1].data
+    }
+  })
+})
+
+// 「基本情報設定画面」の修正ボタンをクリックイベント処理
+$('#csvBasicEditBtn').addEventListener('click', function (e) {
+  // 変更可能な対象項目を取得
+  const basicUploadFormatItemName = $('#basicUploadFormatItemName')
+  const inputTax = $('.input-tax')
+  const inputUnit = $('.input-unit')
+
+  // バリデーションチェック
+  const checkTarget = []
+  inputTax.forEach((item) => {
+    checkTarget.push(item)
+  })
+  inputUnit.forEach((item) => {
+    checkTarget.push(item)
+  })
+  const checkAriaInvalid = []
+  checkTarget.forEach((item) => {
+    if (!item.reportValidity() || item.value.length > 100) {
+      checkAriaInvalid.push(item)
+    }
+  })
+
+  // バリデーションチェックのfalseがある場合、エラー項目にフォーカス移動
+  if (checkAriaInvalid.length !== 0) {
+    checkAriaInvalid[0].focus()
+    return
   }
+
+  // 変更内容確認フォームへ保存
+  $('#uploadFormatItemName').value = basicUploadFormatItemName.value
+
+  inputTax.forEach((item, idx) => {
+    $('.tax')[idx].value = item.value
+  })
+
+  inputUnit.forEach((item, idx) => {
+    $('.unit')[idx].value = item.value
+  })
+
+  // 正常の場合もダル閉じる
+  $('#csvBasicFormat-modal').classList.remove('is-active')
 })
-
-// 「基本情報設定画面へ遷移」ボタンクリックイベント処理
-$('#editCsvBasicFormatBtn').addEventListener('click', function (e) {
-  e.preventDefault()
-  const modal = document.getElementById('csvBasicFormat-modal')
-
-  modal.classList.add('is-active').focus()
-})
-
-$('#nextBtn').addEventListener('click', function (e) {})
