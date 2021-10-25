@@ -479,6 +479,7 @@ img.logo-ncom {
   z-index: 1;
   top: -55px;
   left: 150%;
+  white-space: pre-line;
 }
 
 .tip-title.tooltip .tooltiptext {
