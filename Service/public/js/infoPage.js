@@ -7,3 +7,7 @@ document.getElementById("cmdInfoUrl").onclick = function () {
 document.getElementById("signupUrl").onclick = function () {
   window.open("https://sandbox.tradeshift.com/register");
 };
+
+document.getElementById("loginUrl").onclick = function () {
+  window.open("https://sandbox.tradeshift.com/");
+};
