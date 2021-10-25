@@ -38,7 +38,7 @@ app.use(
   })
 );
 
-app.use("/service/bconnection", require("./routes/info").router);
+app.use("/service/home", require("./routes/info").router);
 
 app.set("port", process.env.PORT || 3005);
 

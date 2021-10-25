@@ -13,8 +13,10 @@ html(lang="ja")
   </head>
    <body>
    <h1>bconnectionデジタルトレードダミー紹介画面</h1>
-   <button type=“button” onclick="location.href='https://sandbox.tradeshift.com/register/index?currentScreen=0'">サインアップ</button>
+   <button type=“button” id="cmdInfoUrl">商品紹介ページ</button>
    <button type=“button” onclick="location.href='https://sandbox.tradeshift.com/?currentScreen=0'">ログイン</button>
    </body>
 
+block append scripts
+  script(src="/js/infoPage.js")
     
