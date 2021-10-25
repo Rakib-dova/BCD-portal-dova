@@ -3,3 +3,7 @@ document.getElementById("cmdInfoUrl").onclick = function () {
     "https://www.ntt.com/business/services/application/crm-dm/bconnection.html"
   );
 };
+
+document.getElementById("signupUrl").onclick = function () {
+  window.open("https://sandbox.tradeshift.com/register");
+};
