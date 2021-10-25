@@ -253,6 +253,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   let dataRowNumber = 2
   let uploadFormatDetail = []
   let uploadFormatIdentifier = []
+  let uploadData = null
 
   // ユーザーがアップロードしたフォーマットでCSVをアップロードする時
   if (uploadFormatId !== null && uploadFormatId.length !== 0) {
@@ -283,6 +284,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     }
 
     const uploadFormat = await uploadFormatController.findUploadFormat(uploadFormatId)
+    uploadData = await uploadFormat.uploadData
 
     // DBエラー（uploadFormat）の場合
     if (uploadFormat instanceof Error || uploadFormat === null) {
@@ -293,14 +295,21 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     itemRowNumber = uploadFormat.dataValues.itemRowNo
     dataRowNumber = uploadFormat.dataValues.dataStartRowNo
   }
-
   let csvObj = null
 
   // ヘッダがない場合
   if (itemRowNumber === 0) {
-    csvObj = new BconCsvNoHeader(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier, itemRowNumber)
+    csvObj = new BconCsvNoHeader(
+      extractFullpathFile,
+      formatFlag,
+      uploadFormatDetail,
+      uploadFormatIdentifier,
+      itemRowNumber
+    )
   } else {
-    csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier)
+    const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット.csv')
+    uploadData = uploadData ?? fs.readFileSync(defaultCsvPath)
+    csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier, uploadData)
   }
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
@@ -354,6 +363,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   let skipCount = 0
   let uploadInvoiceCnt = 0
   let headerErrorFlag = 0
+
   while (invoiceList[idx]) {
     // 明細check
     const meisaiLength = invoiceList[idx].INVOICE.getDocument().InvoiceLine.length
