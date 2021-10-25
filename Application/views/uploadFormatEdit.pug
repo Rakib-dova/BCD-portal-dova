@@ -29,7 +29,7 @@ block content
                     th.text-center.dataValue(name="dataContent")= content.value
           .column
             .title.is-family-noto-sans 請求書データ用フォーマット
-            a.mb600.button.is-link#editCsvBasicFormatBtn(type="button" data-target="csvBasicFormat-modal") 基本情報を確認・変更する 
+            a.mb600.button.is-link.show-modal#editCsvBasicFormatBtn(type="button" data-target="csvBasicFormat-modal") 基本情報を確認・変更する 
             .box
               table.table.is-fullwidth.is-hoverable
                 thead
@@ -350,7 +350,7 @@ block content
         footer.modal-card-foot
               div.is-centered.button-area
                 a.button.mr-6#returnBtn(href="/uploadFormatList") 戻る
-                button.button.is-success.success-button.mr-6#editConfirmBtn(type="button" data-target="confirmModify-modal") 確認
+                button.button.is-success.success-button.mr-6.show-modal#editConfirmBtn(type="button" data-target="confirmModify-modal") 確認
 
         .modal.modal-fx-fadeInscale#confirmModify-modal
           .modal-card#csvFormatConfirm-modal-card
