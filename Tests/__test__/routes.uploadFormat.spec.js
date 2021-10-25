@@ -3106,7 +3106,7 @@ describe('uploadFormatのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvConfirmFormatが呼ばれ「る」
-      expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
+      expect(response.redirect).toHaveBeenCalledWith(303, '/uploadFormatList')
     })
 
     test('正常:ヘッダなし', async () => {
@@ -3139,7 +3139,7 @@ describe('uploadFormatのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvConfirmFormatが呼ばれ「る」
-      expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
+      expect(response.redirect).toHaveBeenCalledWith(303, '/uploadFormatList')
     })
 
     test('正常:DBにuploadData保存', async () => {

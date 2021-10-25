@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="100%"
+   height="100%"
+   viewBox="0 0 176 176"
+   version="1.1"
+   xml:space="preserve"
+   style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"
+   id="svg14"
+   sodipodi:docname="tip-icon.svg"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs18"><rect
+     x="133.35385"
+     y="57.2"
+     width="87.323077"
+     height="91.723077"
+     id="rect2552" /><rect
+     x="133.35385"
+     y="57.200001"
+     width="87.323074"
+     height="91.723076"
+     id="rect2552-0" /></defs><sodipodi:namedview
+   id="namedview16"
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1.0"
+   inkscape:pageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   showgrid="false"
+   inkscape:zoom="2.09"
+   inkscape:cx="170.09569"
+   inkscape:cy="129.42584"
+   inkscape:window-width="1366"
+   inkscape:window-height="705"
+   inkscape:window-x="-8"
+   inkscape:window-y="-8"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="svg14" />
+    
+    <g
+   transform="matrix(2.02507,0,0,2.02507,-42.7098,-40.5069)"
+   id="g6">
+        <circle
+   cx="64.518"
+   cy="63.486"
+   r="35.716"
+   style="fill:white;"
+   id="circle4" />
+    </g>
+    
+<ellipse
+   style="fill:#000000;fill-opacity:1;stroke-width:1"
+   id="path9047"
+   cx="88"
+   cy="88"
+   rx="83.849678"
+   ry="83.934364" /><ellipse
+   style="fill:#ffffff;fill-opacity:1;stroke-width:1"
+   id="ellipse9295"
+   cx="88"
+   cy="88"
+   rx="73.048965"
+   ry="73.122742" /><text
+   xml:space="preserve"
+   id="text2550"
+   style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect2552-0);clip-rule:evenodd;fill:#0e4387;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.285663;stroke-linejoin:round;stroke-miterlimit:2"
+   transform="matrix(3.6720136,0,0,3.3372589,-473.7103,-187.09273)"><tspan
+     x="133.35352"
+     y="96.574219"
+     id="tspan70880">？</tspan></text></svg>

@@ -41,7 +41,15 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.envUploadFormat' })
 }
 let request, response
-let infoSpy, userFindOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy, controllerSpyUploadFormat, findContractSpyContracts, controllerSpyChangeUploadFormat, helpercheckContractStatusSpy
+let infoSpy,
+  userFindOneSpy,
+  findOneSypTenant,
+  findOneSpyContracts,
+  pathSpy,
+  controllerSpyUploadFormat,
+  findContractSpyContracts,
+  controllerSpyChangeUploadFormat,
+  helpercheckContractStatusSpy
 let user
 describe('uploadFormatのテスト', () => {
   beforeEach(() => {
@@ -551,7 +559,6 @@ describe('uploadFormatのテスト', () => {
       })
     })
   })
-
 
   // -----------------------------------------------------------------------------------------
   // cbPostIndex

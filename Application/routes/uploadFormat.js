@@ -562,7 +562,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
   }
 
   // 画面移動
-  res.redirect(303, '/portal')
+  res.redirect(303, '/uploadFormatList')
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostConfirmIndex')
 }
 

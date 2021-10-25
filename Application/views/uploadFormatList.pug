@@ -21,6 +21,7 @@ block content
     .columns.is-centered
       .column.is-11
         a.button.is-link.mb-4(href="/csvBasicFormat") 新規登録する
+        a.button.is-link.is-light.float-right(href="/csvupload") 請求書一括作成→
         .box
           if uploadFormatListArr.length === 0
             p 現在、請求書データのアップロードフォーマットはありません。
@@ -48,7 +49,7 @@ block content
                     td.text-center
                       a.button.is-danger(href="") 削除 
         .mt-1.has-text-left
-          a.button.is-link.is-light(href="/portal") ← 戻る
+          a.button.is-link.is-light(href="/portal") ←Homeへ戻る
 
     include footer
 

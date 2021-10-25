@@ -29,6 +29,15 @@ block content
                     option(value= format.uploadFormatId)= format.setName
           .mt-5.has-text-centered
             .button.is-medium.is-link.is-outlined.is-family-noto-sans.box-large(disabled='disabled', id='start-upload-btn') アップロード開始
+
+          .mt-5.has-text-centered
+            label.mr320.is-family-noto-sans-bold ■独自のCSVで請求書一括作成する場合
+            .columns.is-mobile.is-centered.mt-0.mb-0
+              .column-csvupload
+                p.border 社内システムから出力したCSV等、独自のCSVを利用して請求書を作成できます。ご利用には、アップロードフォーマット設定を登録の上、フォーマット種別を指定ください。
+            .columns.mt-0.pt-0
+              .column.mt-0.pt-0
+                a.mr482(href='uploadFormatList') 設定はこちら
         .mt-1.has-text-right
           a.button.is-link.is-light(href="csvuploadResult") 取込結果一覧 →
 
