@@ -284,13 +284,16 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     }
 
     const uploadFormat = await uploadFormatController.findUploadFormat(uploadFormatId)
-    uploadData = uploadFormat.uploadData
 
     // DBエラー（uploadFormat）の場合
     if (uploadFormat instanceof Error || uploadFormat === null) {
       setErrorLog(_req, 500)
       return _res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
     }
+
+    // ヘッダ確認用データ
+    uploadData = uploadFormat.uploadData
+
     // ここにヘッダー行目のチェック追加
     itemRowNumber = uploadFormat.dataValues.itemRowNo
     dataRowNumber = uploadFormat.dataValues.dataStartRowNo
