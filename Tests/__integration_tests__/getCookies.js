@@ -5,7 +5,18 @@ module.exports = async (app, request, tenants, username, password) => {
 
   await page.goto(res.headers.location) // Tradeshift Oauth2認証ログインページをヘッドレスブラウザで開く
 
-  expect(await page.title()).toBe('ログイン | Tradeshift')
+  const lang = await page.evaluate(() => {
+    return navigator.language
+  })
+  switch (lang) {
+    case 'ja-JP':
+    case 'ja':
+      expect(await page.title()).toBe('ログイン | Tradeshift')
+      break
+    default:
+      expect(await page.title()).toBe('Log in | Tradeshift')
+      break
+  }
   console.log('次のページに遷移しました：' + (await page.title())) // 「ログイン | Tradeshift」のはず
 
   await page.type('input[name="j_username"]', username)
