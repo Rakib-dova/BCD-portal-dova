@@ -65,19 +65,6 @@ const getCookies = async (username, password) => {
 
 describe('ルーティングのインテグレーションテスト', () => {
   let acCookies, userCookies
-  const contractData = {
-    campaignCode: '0123456789',
-    password: '1q2w3e4r5t',
-    contractorName: 'インテグレーションテスター',
-    contractorKanaName: 'インテグレーションテスター',
-    postalNumber: '1001234',
-    contractAddressVal: '東京都中央区日比谷公園',
-    banch1: '１',
-    tatemono1: '建物',
-    contactPersonName: '担当者',
-    contactPhoneNumber: '080-1234-5678',
-    contactMail: 'test@test'
-  }
 
   const csvData = {
     filename: 'integration_test_csv_file',
@@ -149,7 +136,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
     })
 
-    let userCsrf, tenantCsrf
+    let userCsrf
     // userContextが'NotUserRegistered'(tenant側の登録が先に必要)のため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -500,7 +487,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
-    let userCsrf, tenantCsrf
+    let userCsrf
     // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -587,7 +574,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトル
     })
 
-    let userCsrf, tenantCsrf
+    let userCsrf
     // ユーザの利用登録画面が表示されない
     test('/user/registerにアクセス：400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -949,7 +936,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       }
     })
 
-    let userCsrf, tenantCsrf
+    let userCsrf
     // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -3023,7 +3010,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
-    let userCsrf, tenantCsrf
+    let userCsrf
     // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -3112,7 +3099,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
-    let userCsrf, tenantCsrf
+    let userCsrf
     // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
