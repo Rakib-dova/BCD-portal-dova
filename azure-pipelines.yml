@@ -31,6 +31,13 @@ parameters:
     values:
       - yes
       - no
+  
+  - name: UnitTest
+    type: string
+    default: yes
+    values:
+      - yes
+      - no
 
 variables:
   - group: ${{ parameters.Environment }}
@@ -55,6 +62,7 @@ stages:
               arguments: "--force"
 
           - task: Npm@0
+            condition: eq('${{parameters.UnitTest}}', 'yes')
             displayName: "Install test dependencies"
             inputs:
               cwd: Tests
@@ -77,14 +85,17 @@ stages:
               cd ./Tests
               npm run test:ci
             displayName: "Run unit tests"
+            condition: eq('${{parameters.UnitTest}}', 'yes')
             
           - task: PublishCodeCoverageResults@1
+            condition: eq('${{parameters.UnitTest}}', 'yes')
             displayName: 'Publish code coverage'
             inputs:
               codeCoverageTool: Cobertura
               summaryFileLocation: $(System.DefaultWorkingDirectory)/Tests/coverage/cobertura-coverage.xml
           
           - task: PublishTestResults@2
+            condition: eq('${{parameters.UnitTest}}', 'yes')
             displayName: 'Publish test results'
             inputs:
               testRunTitle: '${{ parameters.Environment }}'
