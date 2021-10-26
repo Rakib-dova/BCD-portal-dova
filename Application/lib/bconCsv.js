@@ -342,9 +342,10 @@ class bconCsv {
 
     invoiceData.some((element) => {
       let csvColumn = element.rows.split(',')
-      if (formatFlag) {
-        userHeaderColumns = uploadFormatDetail.length
-        // tax,Unitsetting
+
+      if (formatFlag && !isCheckedHeader) {
+        csvColumn = this.convertUserCsvFormat(uploadFormatDetail, csvColumn)
+        // Tax,Unit setting
         if (uploadFormatIdentifier.length !== 0) {
           bconCsvTaxUser = this.convertUserTaxidentifier(uploadFormatIdentifier)
           bconCsvUnitUser = this.convertUserUnitidentifier(uploadFormatIdentifier)
@@ -369,6 +370,9 @@ class bconCsv {
           isCheckedHeader = false
           switch (formatFlag) {
             case true: {
+              // ファイルのカラム数格納
+              userHeaderColumns = this.userCostomerHeader.length
+
               // カラム数確認
               let result = csvColumn.filter((col) => {
                 if (col) return col
@@ -397,7 +401,7 @@ class bconCsv {
 
                   // 間違えているカラム名があった場合、終了
                   if (errorData) {
-                    return this.headerErrorPush(errorData, resultConvert, parentInvoice, indexObj)
+                    return this.setHeaderErrorMsg(errorData, resultConvert, parentInvoice, indexObj)
                   } else {
                     return
                   }
@@ -405,7 +409,7 @@ class bconCsv {
                 default: {
                   errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
                   resultConvert.status = -1
-                  return this.headerErrorPush(errorData, resultConvert, parentInvoice, indexObj)
+                  return this.setHeaderErrorMsg(errorData, resultConvert, parentInvoice, indexObj)
                 }
               }
             }
@@ -415,7 +419,7 @@ class bconCsv {
                   errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
                   resultConvert.status = -1
 
-                  return this.headerErrorPush(errorData, resultConvert, parentInvoice, indexObj)
+                  return this.setHeaderErrorMsg(errorData, resultConvert, parentInvoice, indexObj)
                 case false:
                   {
                     // ファイルのカラム名とディフォルトカラム名を比較
@@ -440,7 +444,7 @@ class bconCsv {
 
                   // 間違えているカラム名があった場合、終了
                   if (errorData) {
-                    return this.headerErrorPush(errorData, resultConvert, parentInvoice, indexObj)
+                    return this.setHeaderErrorMsg(errorData, resultConvert, parentInvoice, indexObj)
                   } else {
                     return
                   }
@@ -957,6 +961,19 @@ class bconCsv {
     return this.#invoiceDocumentList
   }
 
+  // デフォルトフォーマットをユーザーが登録したアップロードフォーマットに合わせる
+  convertUserCsvFormat(uploadFormatDetail, csvColumn) {
+    let result = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+    uploadFormatDetail.forEach((detail) => {
+      if (csvColumn[detail.uploadFormatNumber]) {
+        result[detail.defaultNumber] = csvColumn[detail.uploadFormatNumber].trim()
+      } else {
+        result[detail.defaultNumber] = ''
+      }
+    })
+    return result
+  }
+
   // ユーザーが指定した税の識別子に合わせる
   convertUserTaxidentifier(uploadFormatIdentifier) {
     let bconCsvTaxUser = { ...bconCsvTaxDefault }
@@ -992,7 +1009,7 @@ class bconCsv {
   }
 
   // ヘッダエラーチェック結果をプッシュする
-  headerErrorPush(errorData, resultConvert, parentInvoice, indexObj) {
+  setHeaderErrorMsg(errorData, resultConvert, parentInvoice, indexObj) {
     resultConvert.error.push({
       errorData: errorData
     })

@@ -284,7 +284,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     }
 
     const uploadFormat = await uploadFormatController.findUploadFormat(uploadFormatId)
-    uploadData = await uploadFormat.uploadData
+    uploadData = uploadFormat.uploadData
 
     // DBエラー（uploadFormat）の場合
     if (uploadFormat instanceof Error || uploadFormat === null) {
