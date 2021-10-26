@@ -149,16 +149,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
     })
 
-    // テナント未登録のため、テナントの利用登録画面にリダイレクトする
-    test('/portalにアクセス：303ステータスと/tenant/registerにリダイレクト', async () => {
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(303)
-
-      expect(res.header.location).toBe('/tenant/register') // リダイレクト先は/tenant/register
-    })
-
     let userCsrf, tenantCsrf
     // userContextが'NotUserRegistered'(tenant側の登録が先に必要)のため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
@@ -180,32 +170,6 @@ describe('ルーティングのインテグレーションテスト', () => {
         .post('/user/register')
         .type('form')
         .send({ _csrf: userCsrf, termsCheck: 'on' })
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 管理者権限がないため、アクセスできない
-    test('/tenant/registerにアクセス：管理者権限不足による利用不可画面表示', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/テナント管理者権限のあるユーザで再度操作をお試しください。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
 
@@ -319,33 +283,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
     })
 
-    // 利用登録
-    let tenantCsrf
-    test('利用登録画面へ遷移', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/利用登録 - BConnectionデジタルトレード/i) // タイトル
-    })
-
-    // 利用登録後
-    test('利用登録実施', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(303)
-
-      expect(res.header.location).toBe('/portal') // リダイレクト先は/portal
-    })
-
     // 利用登録後、ユーザコンテキスト変更
     test('ユーザコンテキスト変更', async () => {
       const res = await request(app)
@@ -453,27 +390,6 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('契約ステータス変更：「新規申込」→ 「新規受付」', async () => {
       await db.Contract.update({ contractStatus: 11 }, { where: { tenantId: testTenantId } })
       await db.Contract.findOne({ where: { tenantId: testTenantId } })
-    })
-
-    // テナントステータスが「新規受付」、利用登録ページ利用できない
-    test('/tenant/registerにアクセス：ステータス「新規受付」、400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    test('/tenant/registerにPOST：ステータス「新規受付」、新規登録、400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ ...contractData, _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
     // テナントステータスが「新規受付」、請求書一括アップロードページ利用できる
@@ -611,32 +527,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
     // テナントステータスが「登録受付」、取り込み結果ページ利用できる
     test('/csvuploadResultにGET：利用できる', async () => {
       await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
@@ -718,32 +608,6 @@ describe('ルーティングのインテグレーションテスト', () => {
         .post('/user/register')
         .type('form')
         .send({ _csrf: userCsrf, termsCheck: 'on' })
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
 
@@ -1106,32 +970,6 @@ describe('ルーティングのインテグレーションテスト', () => {
         .post('/user/register')
         .type('form')
         .send({ _csrf: userCsrf, termsCheck: 'on' })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -3212,32 +3050,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
     // テナントステータスが「新規申込」、取り込み結果ページ利用できる
     test('/csvuploadResultにGET：利用できる', async () => {
       const res = await request(app)
@@ -3326,32 +3138,6 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
-
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
   })
 
   describe('8.DBに一般ユーザのみ登録・アカウント管理者登録なし/アカウント管理者としてリクエスト', () => {
@@ -3385,35 +3171,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること // リダイレクト先は/tenant/register
-    })
-
-    let tenantCsrf
-
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
   })
 
