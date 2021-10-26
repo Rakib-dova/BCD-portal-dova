@@ -296,10 +296,20 @@ class bconCsv {
     return this.#csvFile
   }
 
+  // Insert instance variable the UserCostomHeaderData from DB uploadData
+  setUserCustomerHeader(userCostomerHeader) {
+    this.userCostomerHeader =
+      userCostomerHeader
+        .toString('utf-8')
+        .split(/\r?\n|\r/)[0]
+        .split(',') || []
+  }
+
   #invoiceDocumentList = []
 
-  constructor(fullFilePath, formatFlag, uploadFormatDetail, uploadFormatIdentifier) {
+  constructor(fullFilePath, formatFlag, uploadFormatDetail, uploadFormatIdentifier, uploadData) {
     this.#csvFile.setFile(fullFilePath, formatFlag, uploadFormatDetail)
+    this.setUserCustomerHeader(uploadData)
     this.convertTradeshiftInvoice(uploadFormatDetail, uploadFormatIdentifier)
   }
 
@@ -322,7 +332,7 @@ class bconCsv {
     let parentInvoice = null
     let parentInvoiceStatus = 0
     let indexObj = null
-    let headerchk = true
+    let isCheckedHeader = true
     let headerFlag = true
     let userHeaderColumns = 0
     let setInvoiceLineCnt = 0
@@ -333,10 +343,9 @@ class bconCsv {
     invoiceData.some((element) => {
       let csvColumn = element.rows.split(',')
 
-      if (formatFlag) {
+      if (formatFlag && !isCheckedHeader) {
         csvColumn = this.convertUserCsvFormat(uploadFormatDetail, csvColumn)
-        userHeaderColumns = uploadFormatDetail.length
-        // taxsetting
+        // Tax,Unit setting
         if (uploadFormatIdentifier.length !== 0) {
           bconCsvTaxUser = this.convertUserTaxidentifier(uploadFormatIdentifier)
           bconCsvUnitUser = this.convertUserUnitidentifier(uploadFormatIdentifier)
@@ -354,57 +363,94 @@ class bconCsv {
         parentInvoice = new Invoice()
         parentInvoiceStatus = 0
 
+        // formatFlag-ユーザが設定したフォーマットを使う
+        // isCheckedHeader-カラムを１回チェックする
         // ユーザが設定したアップロードフォーマットと項目数が間違い場合
-        if (formatFlag && headerchk) {
-          let result = csvColumn.filter((col) => {
-            if (col) return col
-          })
-          if (result.length < userHeaderColumns) {
-            errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
-            resultConvert.status = -1
-            headerchk = false
+        if (isCheckedHeader) {
+          isCheckedHeader = false
+          switch (formatFlag) {
+            case true: {
+              // ファイルのカラム数格納
+              userHeaderColumns = this.userCostomerHeader.length
 
-            resultConvert.error.push({
-              errorData: errorData
-            })
+              // カラム数確認
+              let result = csvColumn.filter((col) => {
+                if (col) return col
+              })
+              switch (result.length) {
+                case userHeaderColumns: {
+                  const fileHeader = csvColumn
+                  const userCostomerHeader = this.userCostomerHeader
 
-            parentInvoice.setInvoiceLine('', '', '', '', '', '')
+                  const resultToCheckHeader = userCostomerHeader.filter((header, idx) => {
+                    if (header !== fileHeader[idx]) {
+                      return header
+                    }
+                  })
 
-            indexObj = {
-              ...resultConvert,
-              INVOICE: parentInvoice
+                  // 間違えているカラム名があった場合、エラーメッセージ格納
+                  resultToCheckHeader.forEach((item) => {
+                    if (item) {
+                      errorData += errorData
+                        ? `,${item}の${constants.invoiceErrMsg['HEADERERR000']}`
+                        : `${item}の${constants.invoiceErrMsg['HEADERERR000']}`
+
+                      resultConvert.status = -1
+                    }
+                  })
+
+                  // 間違えているカラム名があった場合、終了
+                  if (errorData) {
+                    return this.setHeaderErrorMsg(errorData, resultConvert, parentInvoice, indexObj)
+                  } else {
+                    return
+                  }
+                }
+                default: {
+                  errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
+                  resultConvert.status = -1
+                  return this.setHeaderErrorMsg(errorData, resultConvert, parentInvoice, indexObj)
+                }
+              }
             }
+            case false: {
+              switch (csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE) {
+                case true:
+                  errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
+                  resultConvert.status = -1
 
-            this.#invoiceDocumentList.push(indexObj)
-            return true
+                  return this.setHeaderErrorMsg(errorData, resultConvert, parentInvoice, indexObj)
+                case false:
+                  {
+                    // ファイルのカラム名とディフォルトカラム名を比較
+                    const fileHeader = csvColumn
+                    const resultToCheckHeader = this.userCostomerHeader.filter((header, idx) => {
+                      if (header !== fileHeader[idx]) {
+                        return header
+                      }
+                    })
+
+                    // 間違えているカラム名があった場合、エラーメッセージ格納
+                    resultToCheckHeader.forEach((item) => {
+                      if (item) {
+                        errorData += errorData
+                          ? `,${item}の${constants.invoiceErrMsg['HEADERERR000']}`
+                          : `${item}の${constants.invoiceErrMsg['HEADERERR000']}`
+
+                        resultConvert.status = -1
+                      }
+                    })
+                  }
+
+                  // 間違えているカラム名があった場合、終了
+                  if (errorData) {
+                    return this.setHeaderErrorMsg(errorData, resultConvert, parentInvoice, indexObj)
+                  } else {
+                    return
+                  }
+              }
+            }
           }
-        }
-
-        // デフォルトフォーマットヘッダチェック
-        if (csvColumn.length !== constants.invoiceValidDefine.COLUMN_VALUE && headerchk && !formatFlag) {
-          errorData += `${constants.invoiceErrMsg['HEADERERR000']}`
-          resultConvert.status = -1
-          headerchk = false
-
-          resultConvert.error.push({
-            errorData: errorData
-          })
-
-          parentInvoice.setInvoiceLine('', '', '', '', '', '')
-
-          indexObj = {
-            ...resultConvert,
-            INVOICE: parentInvoice
-          }
-
-          this.#invoiceDocumentList.push(indexObj)
-          return true
-        } else if (csvColumn.length === constants.invoiceValidDefine.COLUMN_VALUE && headerchk) {
-          headerchk = false
-          return
-        } else if (formatFlag && headerchk) {
-          headerchk = false
-          return
         }
 
         if (!formatFlag) {
@@ -917,7 +963,6 @@ class bconCsv {
 
   // デフォルトフォーマットをユーザーが登録したアップロードフォーマットに合わせる
   convertUserCsvFormat(uploadFormatDetail, csvColumn) {
-    // let result = Array(19)
     let result = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
     uploadFormatDetail.forEach((detail) => {
       if (csvColumn[detail.uploadFormatNumber]) {
@@ -961,6 +1006,23 @@ class bconCsv {
       }
     })
     return bconCsvUnitUser
+  }
+
+  // ヘッダエラーチェック結果をプッシュする
+  setHeaderErrorMsg(errorData, resultConvert, parentInvoice, indexObj) {
+    resultConvert.error.push({
+      errorData: errorData
+    })
+
+    parentInvoice.setInvoiceLine('', '', '', '', '', '')
+
+    indexObj = {
+      ...resultConvert,
+      INVOICE: parentInvoice
+    }
+
+    this.#invoiceDocumentList.push(indexObj)
+    return true
   }
 }
 module.exports = bconCsv
