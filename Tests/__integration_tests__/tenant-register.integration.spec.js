@@ -13,7 +13,7 @@ describe('ルーティングのインテグレーションテスト', () => {
   let acCookies
   let userCookies
   let testTenantId
-  
+
   describe('0.前準備', () => {
     test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
       // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
