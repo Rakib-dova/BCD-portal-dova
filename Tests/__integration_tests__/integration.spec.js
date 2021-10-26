@@ -186,24 +186,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/時間を空けてもう一度アップロードしてください。/i)
     })
 
-    test('/csvuploadResultにGET：制御による500ステータスとエラーメッセージ:管理者', async () => {
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
-    })
-
-    test('/csvuploadResultにGET：制御による500ステータスとエラーメッセージ:一般ユーザー', async () => {
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
-    })
-
     // 利用登録をしていないため、変更ページ利用できない
     test('/changeにGET：制御による500ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -310,26 +292,6 @@ describe('ルーティングのインテグレーションテスト', () => {
           expect(res.text).toMatch('重複の請求書番号があります。')
           break
       }
-    })
-
-    // テナントステータスが「新規申込」、取り込み結果ページ利用できる
-    test('/csvuploadResultにGET：利用できる', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // TITLE
-      expect(res.text).toMatch(/取込結果一覧/i) // SUBTITLE
-      expect(res.text).toMatch(/No/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/アップロード日時/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/ファイル名/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込結果/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込件数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     // テナントステータスが「新規申込」、変更ページ利用できない
@@ -513,27 +475,6 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
-
-    // テナントステータスが「登録受付」、取り込み結果ページ利用できる
-    test('/csvuploadResultにGET：利用できる', async () => {
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // TITLE
-      expect(res.text).toMatch(/取込結果一覧/i) // SUBTITLE
-      expect(res.text).toMatch(/No/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/アップロード日時/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/ファイル名/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込結果/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込件数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
-    })
   })
 
   describe('4.DBにアカウント管理者のみ登録・一般ユーザ登録なし/一般ユーザとしてリクエスト', () => {
@@ -599,27 +540,6 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(400)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // テナントステータスが「登録受付」、取り込み結果ページ利用できる
-    test('/csvuploadResultにGET：利用できる', async () => {
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // TITLE
-      expect(res.text).toMatch(/取込結果一覧/i) // SUBTITLE
-      expect(res.text).toMatch(/No/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/アップロード日時/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/ファイル名/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込結果/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込件数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
   })
 
@@ -2044,25 +1964,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/csv upload/i)
     })
 
-    test('管理者、契約ステータス：40, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // TITLE
-      expect(res.text).toMatch(/取込結果一覧/i) // SUBTITLE
-      expect(res.text).toMatch(/No/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/アップロード日時/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/ファイル名/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込結果/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込件数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
-    })
-
     test('一般ユーザ、契約ステータス：40, /csvupload', async () => {
       await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -2072,25 +1973,6 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/請求書一括作成/i)
       expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：40, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // TITLE
-      expect(res.text).toMatch(/取込結果一覧/i) // SUBTITLE
-      expect(res.text).toMatch(/No/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/アップロード日時/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/ファイル名/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込結果/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込件数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('管理者、契約ステータス：41, /csvupload', async () => {
@@ -2105,25 +1987,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/csv upload/i)
     })
 
-    test('管理者、契約ステータス：41, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // TITLE
-      expect(res.text).toMatch(/取込結果一覧/i) // SUBTITLE
-      expect(res.text).toMatch(/No/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/アップロード日時/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/ファイル名/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込結果/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込件数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
-    })
-
     test('一般ユーザ、契約ステータス：41, /csvupload', async () => {
       await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -2133,25 +1996,6 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/請求書一括作成/i)
       expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：41, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // TITLE
-      expect(res.text).toMatch(/取込結果一覧/i) // SUBTITLE
-      expect(res.text).toMatch(/No/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/アップロード日時/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/ファイル名/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込結果/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込件数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
 
     test('管理者、契約ステータス：00, /csvupload', async () => {
@@ -2166,25 +2010,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/csv upload/i)
     })
 
-    test('管理者、契約ステータス：00, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // TITLE
-      expect(res.text).toMatch(/取込結果一覧/i) // SUBTITLE
-      expect(res.text).toMatch(/No/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/アップロード日時/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/ファイル名/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込結果/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込件数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
-    })
-
     test('一般ユーザ、契約ステータス：00, /csvupload', async () => {
       // 契約ステータス変更(利用登録済み)
       const res = await request(app)
@@ -2196,38 +2021,10 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/csv upload/i)
     })
 
-    test('一般ユーザ、契約ステータス：00, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // TITLE
-      expect(res.text).toMatch(/取込結果一覧/i) // SUBTITLE
-      expect(res.text).toMatch(/No/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/アップロード日時/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/ファイル名/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込結果/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込件数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
-    })
-
     test('管理者、契約ステータス：30, /csvupload', async () => {
       await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：30, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
@@ -2244,15 +2041,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
     })
 
-    test('一般ユーザ、契約ステータス：30, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
     test('管理者、契約ステータス：31, /csvupload', async () => {
       await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
@@ -2263,27 +2051,9 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
     })
 
-    test('管理者、契約ステータス：31, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
     test('一般ユーザ、契約ステータス：31, /csvupload', async () => {
       const res = await request(app)
         .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：31, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
@@ -2301,29 +2071,11 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
-    test('管理者、契約ステータス：99, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
-    })
-
     test('一般ユーザ、契約ステータス：99, /csvupload', async () => {
       // 契約ステータス変更(利用登録済み)
       await db.Contract.update({ contractStatus: '99' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
-    })
-
-    test('一般ユーザ、契約ステータス：99, /csvuploadResult', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(500)
 
@@ -2451,182 +2203,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/サポート/i)
       expect(res.text).toMatch(/請求書一括作成/i)
       expect(res.text).toMatch(/設定/i)
-    })
-
-    test('管理者、契約ステータス：00、/csvuploadResultの詳細ポップアップのタブ選択', async () => {
-      const now = new Date()
-      const testData = {
-        invoicesId: '00715217-a241-4f84-a6cf-f8d786e43cf5',
-        tenantId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-        csvFileName: 'インテグレーションテスト.csv',
-        successCount: '-',
-        failCount: '-',
-        skipCount: '-',
-        invoiceCount: '0',
-        createdAt: `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}T00:00:00.000Z`,
-        updatedAt: `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}T00:00:00.000Z`
-      }
-
-      const resultInvoice = await db.Invoice.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-
-      // 請求書テーブルにデータがない場合テストデータを追加する
-      if (!resultInvoice) {
-        await db.Invoice.create({
-          testData,
-          tenantId: testTenantId
-        })
-      }
-
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      let clickResult
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/csvuploadResult')
-      if (page.url() === 'https://localhost:3000/csvuploadResult') {
-        const selector = await page.$(
-          'body > div.max-width > div.columns.is-centered > div > div.box.csvuploadResultBox > table > tbody > tr:nth-child(1) > td:nth-child(4) > button'
-        )
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.querySelector('#csvuploadDetails-modal').attributes[0].value.match(/is-active/) !== null) {
-            return document.querySelector('#csvuploadDetails-modal').attributes[0].value.match(/is-active/)[0]
-          }
-          return null
-        })
-      }
-      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
-      expect(clickResult).toBe('is-active')
-
-      await page.waitForTimeout(3000)
-
-      await page.click('#btnTabSuccess')
-
-      const tabClickResult = await page.evaluate(() => {
-        const checkedResult = []
-        const failedResult = []
-        const skipResult = []
-        const failedRowTag = document.querySelectorAll('.tr-fail')
-        const skipRowTag = document.querySelectorAll('.tr-skip')
-
-        if (failedRowTag.length !== 0) {
-          Array.prototype.forEach.call(failedRowTag, (ele) => {
-            failedResult.push(ele.classList.value)
-          })
-        }
-        checkedResult.push(failedResult)
-
-        if (skipRowTag.length !== 0) {
-          Array.prototype.forEach.call(skipRowTag, (ele) => skipResult.push(ele.classList.value))
-        }
-        checkedResult.push(skipResult)
-
-        return checkedResult
-      })
-
-      tabClickResult.forEach((failedAndSkip) => {
-        failedAndSkip.forEach((listOfClass) => {
-          expect(listOfClass).toMatch(/is-invisible/i)
-        })
-      })
-
-      await browser.close()
-    })
-
-    test('一般ユーザ、契約ステータス：00、/csvuploadResultの詳細ポップアップのタブ選択', async () => {
-      const now = new Date()
-      const testData = {
-        invoicesId: '00715217-a241-4f84-a6cf-f8d786e43cf5',
-        tenantId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-        csvFileName: 'インテグレーションテスト.csv',
-        successCount: '-',
-        failCount: '-',
-        skipCount: '-',
-        invoiceCount: '0',
-        createdAt: `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}T00:00:00.000Z`,
-        updatedAt: `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}T00:00:00.000Z`
-      }
-
-      const resultInvoice = await db.Invoice.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-
-      // 請求書テーブルにデータがない場合テストデータを追加する
-      if (!resultInvoice) {
-        await db.Invoice.create({
-          testData,
-          tenantId: testTenantId
-        })
-      }
-
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      let clickResult
-      const page = await browser.newPage()
-      await page.setCookie(userCookies[0])
-      await page.goto('https://localhost:3000/csvuploadResult')
-      if (page.url() === 'https://localhost:3000/csvuploadResult') {
-        const selector = await page.$(
-          'body > div.max-width > div.columns.is-centered > div > div.box.csvuploadResultBox > table > tbody > tr:nth-child(1) > td:nth-child(4) > button'
-        )
-        await selector.click({ clickCount: 1 })
-        clickResult = await page.evaluate(() => {
-          if (document.querySelector('#csvuploadDetails-modal').attributes[0].value.match(/is-active/) !== null) {
-            return document.querySelector('#csvuploadDetails-modal').attributes[0].value.match(/is-active/)[0]
-          }
-          return null
-        })
-      }
-      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
-      expect(clickResult).toBe('is-active')
-
-      await page.waitForTimeout(3000)
-
-      await page.click('#btnTabSuccess')
-
-      const tabClickResult = await page.evaluate(() => {
-        const checkedResult = []
-        const failedResult = []
-        const skipResult = []
-        const failedRowTag = document.querySelectorAll('.tr-fail')
-        const skipRowTag = document.querySelectorAll('.tr-skip')
-
-        if (failedRowTag.length !== 0) {
-          Array.prototype.forEach.call(failedRowTag, (ele) => {
-            failedResult.push(ele.classList.value)
-          })
-        }
-        checkedResult.push(failedResult)
-
-        if (skipRowTag.length !== 0) {
-          Array.prototype.forEach.call(skipRowTag, (ele) => skipResult.push(ele.classList.value))
-        }
-        checkedResult.push(skipResult)
-
-        return checkedResult
-      })
-
-      tabClickResult.forEach((failedAndSkip) => {
-        failedAndSkip.forEach((listOfClass) => {
-          expect(listOfClass).toMatch(/is-invisible/i)
-        })
-      })
-
-      await browser.close()
     })
 
     test('管理者、契約ステータス：00、請求書一括作成のポップアップ及びcsvフォーマットダウンロード', async () => {
@@ -3035,26 +2611,6 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(400)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // テナントステータスが「新規申込」、取り込み結果ページ利用できる
-    test('/csvuploadResultにGET：利用できる', async () => {
-      const res = await request(app)
-        .get('/csvuploadResult')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // TITLE
-      expect(res.text).toMatch(/取込結果一覧/i) // SUBTITLE
-      expect(res.text).toMatch(/No/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/アップロード日時/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/ファイル名/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込結果/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/取込件数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/請求書作成数/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/作成完了/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/スキップ/i) // 取り込み結果のカーラム
-      expect(res.text).toMatch(/← 請求書一括作成/i) // 請求書一括作成に戻るリンク
     })
   })
 
