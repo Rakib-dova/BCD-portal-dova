@@ -584,7 +584,7 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
 }
 
 const cbDeleteFormat = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbPostDeleteFormat')
+  logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteFormat')
 
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
@@ -624,7 +624,7 @@ const cbDeleteFormat = async (req, res, next) => {
   res.send({
     result: resultOfDeletedUploadFormat
   })
-  logger.info(constantsDefine.logMessage.INF001 + 'cbPostDeleteFormat')
+  logger.info(constantsDefine.logMessage.INF001 + 'cbDeleteFormat')
 }
 
 const cbGetCheckFormat = async (req, res, next) => {
