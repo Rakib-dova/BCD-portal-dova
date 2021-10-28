@@ -102,6 +102,7 @@ const cbPostIndex = async (req, res, next) => {
 
   switch (resultChangeDataForUploadFormat) {
     case 0:
+      req.flash('info', 'フォーマットの変更が完了しました')
       res.redirect('/uploadFormatList')
       break
     default:
