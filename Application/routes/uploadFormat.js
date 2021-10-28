@@ -565,6 +565,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
   }
 
   // 画面移動
+  req.flash('info', 'フォーマットの登録が完了しました。')
   res.redirect(303, '/uploadFormatList')
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostConfirmIndex')
 }
