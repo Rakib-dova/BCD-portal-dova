@@ -499,13 +499,18 @@ block content
                       .control
                         input.input.input-unit(id=unit.id type="text" value=unitItem[`${unit.id}`].value placeholder='文字・数字100桁まで' pattern=inputPatternEngNum maxlength=100)
 
-             .columns.is-centered.changeConfirm
-              .field.is-grouped.is-grouped-centered
-                .control
-                  .column
-                    div.button-area
-                      a.button.is-link.mr-6#csvBasicEditBtn(data-target='csvBasicFormat-modal') 変更
-                      a.button.cancel-button(data-target='csvBasicFormat-modal') キャンセル
+              .columns.is-centered.changeConfirm
+                .field.is-grouped.is-grouped-centered
+                  .control
+                    .mt-5.has-text-centered
+                      div
+                        p.border-edit ※下記の変更ボタンでは、基本情報の修正内容が反映されません。 
+                      div
+                        p.border-edit 　変更ボタンをクリック後、確認→登録を行ってください。
+                      .column
+                        div.button-area
+                          a.button.cancel-button(data-target='csvBasicFormat-modal') キャンセル
+                          a.button.is-link.ml-6#csvBasicEditBtn(data-target='csvBasicFormat-modal') 変更
 
       include footer
 
