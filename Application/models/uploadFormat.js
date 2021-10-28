@@ -79,6 +79,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         type: DataTypes.STRING(4000).BINARY
       },
+      uploadFileName: {
+        allowNull: true,
+        type: DataTypes.STRING
+      },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
