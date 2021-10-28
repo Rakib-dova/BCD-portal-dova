@@ -672,7 +672,7 @@ const cbGetCheckFormat = async (req, res, next) => {
 
 router.post('/', upload.single('dataFile'), cbPostIndex)
 router.post('/cbPostConfirmIndex', cbPostConfirmIndex)
-router.delete('/:uploadFormatId', cbPostDeleteFormat)
+router.delete('/:uploadFormatId', cbDeleteFormat)
 router.get('/:uploadFormatId', cbGetCheckFormat)
 module.exports = {
   router: router,
