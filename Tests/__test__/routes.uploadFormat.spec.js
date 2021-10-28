@@ -3522,11 +3522,12 @@ describe('uploadFormatのテスト', () => {
       helper.checkContractStatus = (req, res, next) => {
         return '00'
       }
-      // データがある場合
+      // 実施
       checkDataForUploadFormatUploadFormatControllerSpy.mockReturnValue(1)
 
       await uploadFormat.cbGetCheckFormat(request, response, next)
 
+      // データがある場合「1」を返す
       expect(response.body.result).toBe(1)
     })
 
@@ -3544,11 +3545,12 @@ describe('uploadFormatのテスト', () => {
       helper.checkContractStatus = (req, res, next) => {
         return '00'
       }
-      // データがない場合
+      // 実施
       checkDataForUploadFormatUploadFormatControllerSpy.mockReturnValue(-1)
 
       await uploadFormat.cbGetCheckFormat(request, response, next)
 
+      // 既に削除の場合「-1」を返す
       expect(response.body.result).toBe(-1)
     })
 
@@ -3566,11 +3568,12 @@ describe('uploadFormatのテスト', () => {
       helper.checkContractStatus = (req, res, next) => {
         return '00'
       }
-      // DBエラーが発生した場合
+      // 実施
       checkDataForUploadFormatUploadFormatControllerSpy.mockReturnValue(0)
 
       await uploadFormat.cbGetCheckFormat(request, response, next)
 
+      // DBエラーの場合「0」を返す
       expect(response.body.result).toBe(0)
     })
   })
