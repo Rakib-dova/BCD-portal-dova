@@ -70,6 +70,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
 }
 let request, response
 let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy, deleteDataForUploadUploadFormatController
+let checkDataForUploadFormatUploadFormatControllerSpy
 describe('uploadFormatのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -84,6 +85,7 @@ describe('uploadFormatのテスト', () => {
     uploadFormatDetailController.insert = jest.fn(uploadFormatDetailControllerInsert)
     uploadFormatIdentifierController.insert = jest.fn(uploadFormatIdentifierControllerInsert)
     deleteDataForUploadUploadFormatController = jest.spyOn(uploadFormatController, 'deleteDataForUploadFormat')
+    checkDataForUploadFormatUploadFormatControllerSpy = jest.spyOn(uploadFormatController, 'checkDataForUploadFormat')
   })
   afterEach(() => {
     request.resetMocked()
@@ -95,6 +97,7 @@ describe('uploadFormatのテスト', () => {
     findOneSpyContracts.mockRestore()
     pathSpy.mockRestore()
     deleteDataForUploadUploadFormatController.mockRestore()
+    checkDataForUploadFormatUploadFormatControllerSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -209,7 +212,7 @@ describe('uploadFormatのテスト', () => {
   }
 
   // ファイル名設定
-  const filePath = process.env.INVOICE_UPLOAD_PATH
+  const filePath = './' ?? process.env.INVOICE_UPLOAD_PATH
   const fileName = 'uploadFormatTest.csv'
   const fileNameErr = 'uploadFormatTest2.csv'
 
@@ -3501,6 +3504,74 @@ describe('uploadFormatのテスト', () => {
       await uploadFormat.cbPostDeleteFormat(request, response, next)
 
       // 準正常の場合（DBエラー発生）、レスポンスボディのresultで1を返す
+      expect(response.body.result).toBe(0)
+    })
+  })
+
+  describe('cbGetCheckFormat', () => {
+    test('正常：該当アップロードフォーマットがある場合', async () => {
+      request.session = {
+        usercontext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      findOneSpy.mockReturnValue(dataValues)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      helper.checkContractStatus = (req, res, next) => {
+        return '00'
+      }
+      // データがある場合
+      checkDataForUploadFormatUploadFormatControllerSpy.mockReturnValue(1)
+
+      await uploadFormat.cbGetCheckFormat(request, response, next)
+
+      expect(response.body.result).toBe(1)
+    })
+
+    test('準正常：該当アップロードフォーマットが既に削除された場合', async () => {
+      request.session = {
+        usercontext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      findOneSpy.mockReturnValue(dataValues)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      helper.checkContractStatus = (req, res, next) => {
+        return '00'
+      }
+      // データがない場合
+      checkDataForUploadFormatUploadFormatControllerSpy.mockReturnValue(-1)
+
+      await uploadFormat.cbGetCheckFormat(request, response, next)
+
+      expect(response.body.result).toBe(-1)
+    })
+
+    test('準正常：DBエラーの場合', async () => {
+      request.session = {
+        usercontext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      findOneSpy.mockReturnValue(dataValues)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      helper.checkContractStatus = (req, res, next) => {
+        return '00'
+      }
+      // DBエラーが発生した場合
+      checkDataForUploadFormatUploadFormatControllerSpy.mockReturnValue(0)
+
+      await uploadFormat.cbGetCheckFormat(request, response, next)
+
       expect(response.body.result).toBe(0)
     })
   })

@@ -1015,6 +1015,7 @@ describe('uploadFormatControllerのテスト', () => {
           destroy: async () => {}
         })
       }
+
       uploadFormatDetailFindAllSpy.mockReturnValue(uploadFormatDetail)
 
       const uploadFormatIdentifier = []
@@ -1201,10 +1202,10 @@ describe('uploadFormatControllerのテスト', () => {
           defaultExtension: taxUnitSetting[idx].name,
           createdAt: savedDate,
           updatedAt: savedDate,
-          destory: async () => {}
+          destroy: async () => {}
         })
       }
-      uploadFormatDetailIdsFindAll.mockReturnValue([])
+      uploadFormatDetailIdsFindAll.mockReturnValue(uploadFormatIdentifier)
 
       const result = await uploadFormatController.deleteDataForUploadFormat(uploadFormatId)
 
@@ -1297,7 +1298,7 @@ describe('uploadFormatControllerのテスト', () => {
 
       const dbError = new Error('DB Error')
       UploadFormat.findOne = async (value) => {
-        return dbError
+        throw dbError
       }
       uploadFormatDetailFindAllSpy.mockReturnValue(null)
 
@@ -1306,6 +1307,39 @@ describe('uploadFormatControllerのテスト', () => {
       const result = await uploadFormatController.deleteDataForUploadFormat(uploadFormatId)
 
       // 準正常削除の場合、「-1」を返す
+      expect(result).toBe(0)
+    })
+  })
+
+  describe('checkDataForUploadFormat', () => {
+    test('正常：データがある場合', async () => {
+      UploadFormat.findOne = async (value) => {
+        return {}
+      }
+
+      const result = await uploadFormatController.checkDataForUploadFormat('12345-67890-aaaa-bbbb-12345678')
+
+      expect(result).toBe(1)
+    })
+
+    test('準正常：データがすでに削除の場合', async () => {
+      UploadFormat.findOne = async (value) => {
+        return null
+      }
+
+      const result = await uploadFormatController.checkDataForUploadFormat('12345-67890-aaaa-bbbb-12345678')
+
+      expect(result).toBe(-1)
+    })
+
+    test('準正常：システムエラーの場合', async () => {
+      const deError = new Error('DB error')
+      UploadFormat.findOne = async (value) => {
+        throw deError
+      }
+
+      const result = await uploadFormatController.checkDataForUploadFormat('12345-67890-aaaa-bbbb-12345678')
+
       expect(result).toBe(0)
     })
   })
