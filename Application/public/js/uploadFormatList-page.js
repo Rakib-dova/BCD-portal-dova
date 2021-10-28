@@ -22,13 +22,14 @@ const $ = function (tagObjName) {
 document.getElementsByName('deleteButton').forEach((item) => {
   item.addEventListener('click', function (e) {
     const decision = confirm('削除しますか？')
+
     if (!decision) {
       return 0
     } else {
       const uuid = item.getAttribute('uuid')
-      const url = `/uploadFormat/delete/${uuid}`
+      const url = `/uploadFormat/${uuid}`
       fetch(url, {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
         }
@@ -45,7 +46,7 @@ document.getElementsByName('deleteButton').forEach((item) => {
               location.reload()
               break
             case -1:
-              alert('すでに削除されています')
+              alert('すでに削除されています。')
               break
           }
         })

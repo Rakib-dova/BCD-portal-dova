@@ -618,7 +618,7 @@ const cbPostDeleteFormat = async (req, res, next) => {
 
   // ユーザが設定したフォーマットの確認(既に削除されたのか)と削除処理追加
   // result 1は成功、0は削除失敗, -1は既に削除されたもの
-  const result = 1
+  const result = 0
   res.send({
     result: result
   })
@@ -626,8 +626,7 @@ const cbPostDeleteFormat = async (req, res, next) => {
 
 router.post('/', upload.single('dataFile'), cbPostIndex)
 router.post('/cbPostConfirmIndex', cbPostConfirmIndex)
-router.post('/delete/:uploadFormatId', cbPostDeleteFormat)
-
+router.delete('/:uploadFormatId', cbPostDeleteFormat)
 module.exports = {
   router: router,
   cbPostIndex: cbPostIndex,
