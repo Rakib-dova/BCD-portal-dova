@@ -1306,7 +1306,7 @@ describe('uploadFormatControllerのテスト', () => {
 
       const result = await uploadFormatController.deleteDataForUploadFormat(uploadFormatId)
 
-      // 準正常削除の場合、「-1」を返す
+      // 準正常削除の場合、「0」を返す
       expect(result).toBe(0)
     })
   })
@@ -1319,6 +1319,7 @@ describe('uploadFormatControllerのテスト', () => {
 
       const result = await uploadFormatController.checkDataForUploadFormat('12345-67890-aaaa-bbbb-12345678')
 
+      // データがある場合「1」を返す
       expect(result).toBe(1)
     })
 
@@ -1329,6 +1330,7 @@ describe('uploadFormatControllerのテスト', () => {
 
       const result = await uploadFormatController.checkDataForUploadFormat('12345-67890-aaaa-bbbb-12345678')
 
+      // 検索対象が既に削除されたら「-1」を返す
       expect(result).toBe(-1)
     })
 
@@ -1340,6 +1342,7 @@ describe('uploadFormatControllerのテスト', () => {
 
       const result = await uploadFormatController.checkDataForUploadFormat('12345-67890-aaaa-bbbb-12345678')
 
+      // DBエラーが発生された場合「0」を返す
       expect(result).toBe(0)
     })
   })

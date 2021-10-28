@@ -63,7 +63,6 @@ const UploadFormatDB = [
 
 const UploadFormatDetailDB = []
 const UploadFormatIdentifierDB = []
-
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.envUploadFormat' })
@@ -3422,7 +3421,7 @@ describe('uploadFormatのテスト', () => {
     })
   })
 
-  describe('cbPostDeleteFormat', () => {
+  describe('cbDeleteFormat', () => {
     test('正常:削除完了しました。', async () => {
       request.session = {
         usercontext: 'LoggedIn',
@@ -3445,7 +3444,7 @@ describe('uploadFormatのテスト', () => {
       deleteDataForUploadUploadFormatController.mockReturnValue(1)
 
       // アップロードフォーマット削除サービス実施
-      await uploadFormat.cbPostDeleteFormat(request, response, next)
+      await uploadFormat.cbDeleteFormat(request, response, next)
 
       // 正常の場合、レスポンスボディのresultで1を返す
       expect(response.body.result).toBe(1)
@@ -3473,9 +3472,9 @@ describe('uploadFormatのテスト', () => {
       deleteDataForUploadUploadFormatController.mockReturnValue(-1)
 
       // アップロードフォーマット削除サービス実施
-      await uploadFormat.cbPostDeleteFormat(request, response, next)
+      await uploadFormat.cbDeleteFormat(request, response, next)
 
-      // 準正常の場合（既に削除された場合）、レスポンスボディのresultで1を返す
+      // 準正常の場合（既に削除された場合）、レスポンスボディのresultで-1を返す
       expect(response.body.result).toBe(-1)
     })
 
@@ -3501,9 +3500,9 @@ describe('uploadFormatのテスト', () => {
       deleteDataForUploadUploadFormatController.mockReturnValue(0)
 
       // アップロードフォーマット削除サービス実施
-      await uploadFormat.cbPostDeleteFormat(request, response, next)
+      await uploadFormat.cbDeleteFormat(request, response, next)
 
-      // 準正常の場合（DBエラー発生）、レスポンスボディのresultで1を返す
+      // 準正常の場合（DBエラー発生）、レスポンスボディのresultで0を返す
       expect(response.body.result).toBe(0)
     })
   })
