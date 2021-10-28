@@ -191,7 +191,7 @@ module.exports = {
         uploadGeneral: uploadGeneral,
         taxIds: taxIds,
         unitIds: unitIds,
-        csvfilename: '',
+        csvFileName: uploadFormat.uploadFileName,
         selectedFormatData: selectedFormatData,
         itemRownNo: uploadFormat.itemRowNo,
         dataStartRowNo: uploadFormat.dataStartRowNo,
