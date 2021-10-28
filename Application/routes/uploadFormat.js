@@ -660,11 +660,10 @@ const cbGetCheckFormat = async (req, res, next) => {
   // 確認画面から渡されたuploadFormatId取得
   const uploadFormatId = req.params.uploadFormatId
 
-  // アップロードフォーマットを削除して結果を返す
+  // アップロードフォーマットが削除されているのか確認
   const resultOfCheckedUploadFormat = await uploadFormatController.checkDataForUploadFormat(uploadFormatId)
 
-  // ユーザが設定したフォーマットの確認(既に削除されたのか)と削除処理追加
-  // result 1は成功、0は削除失敗, -1は既に削除されたもの
+  // result 1は存在すること、0はシステムエラー, -1は既に削除されたもの
   res.send({
     result: resultOfCheckedUploadFormat
   })

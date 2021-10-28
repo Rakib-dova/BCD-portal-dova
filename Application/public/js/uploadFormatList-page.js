@@ -18,7 +18,7 @@ const $ = function (tagObjName) {
   })
 }
 
-// 確認ボタン押下時の処理
+// 「確認・変更」ボタン押下時の処理
 document.getElementsByName('confirmButton').forEach((item) => {
   item.addEventListener('click', function (e) {
     const uuid = item.getAttribute('uuid')
