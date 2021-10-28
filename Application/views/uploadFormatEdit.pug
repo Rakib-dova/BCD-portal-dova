@@ -432,12 +432,7 @@ block content
                     label(for="dataFile").input-label データファイル
                     p#dataFileRequired.input-label-required.input-label （必須）
                     .control
-                      .columns.ml-0.pl-0
-                        .column.pl-0
-                          input.input#dataFileName.td-overflow(type="text" placeholder='5MBまで' readonly)
-                        .column
-                          label.button.is-link(for="dataFile") ファイル選択
-                          input.is-invisible#dataFile(readonly disabled)
+                      input.input#dataFile(type="text" name="dataFile" value=csvFileName readonly)
                   .field.mt-6
                   - var itemRownNo = itemRownNo
                   - var dataStartRowNo = dataStartRowNo
