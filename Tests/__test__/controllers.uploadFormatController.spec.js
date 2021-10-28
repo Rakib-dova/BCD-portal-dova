@@ -16,6 +16,7 @@ const path = require('path')
 const uploadData = fs.readFileSync(path.resolve('.', 'testData', 'csvFormatUpload2.csv'), {
   encoding: 'utf-8'
 })
+const uploadFileName = 'UTコードテストファイル.csv'
 
 const baseResult = {
   headerItems: [
@@ -111,7 +112,7 @@ const baseResult = {
     keyTonnage: { key: 'keyTonnage', value: '', itemName: 'トン' },
     keyOthers: { key: 'keyOthers', value: '', itemName: 'その他' }
   },
-  csvfilename: '',
+  csvFileName: uploadFileName,
   selectedFormatData: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
   itemRownNo: 1,
   dataStartRowNo: 2,
@@ -146,8 +147,12 @@ describe('uploadFormatControllerのテスト', () => {
     uploadFormatDetailFindAllSpy = jest.spyOn(UploadFormatDetail, 'findAll')
     uploadFormatDetailIdsGetUploadFormatId = jest.spyOn(UploadFormatDetailId, 'getUploadFormatId')
     uploadFormatDetailIdsFindAll = jest.spyOn(UploadFormatDetailId, 'findAll')
-    UploadFormatDetail.build = jest.fn((item) => { return { ...item, save: () => {}, destroy: () => {} } })
-    UploadFormatDetailId.build = jest.fn((item) => { return { ...item, save: () => {}, destroy: () => {} } })
+    UploadFormatDetail.build = jest.fn((item) => {
+      return { ...item, save: () => {}, destroy: () => {} }
+    })
+    UploadFormatDetailId.build = jest.fn((item) => {
+      return { ...item, save: () => {}, destroy: () => {} }
+    })
     successResult = { ...baseResult }
   })
   afterEach(() => {
@@ -190,7 +195,9 @@ describe('uploadFormatControllerのテスト', () => {
   const uploadFormatData = {
     contractId: contractId,
     setName: 'uploadFormatName',
-    uploadType: ''
+    uploadType: '',
+    uploadData: uploadData,
+    uploadFileName: uploadFileName
   }
 
   const uploadFormatChangeData = {
@@ -218,12 +225,7 @@ describe('uploadFormatControllerのテスト', () => {
       '明細-税（消費税／軽減税率／不課税／免税／非課税）',
       '明細-備考'
     ],
-    formatData: [
-      '0', '1', '2', '3', '',
-      '', '', '', '', '',
-      '', '', '12', '13', '14',
-      '15', '16', '17', ''
-    ],
+    formatData: ['0', '1', '2', '3', '', '', '', '', '', '', '', '', '12', '13', '14', '15', '16', '17', ''],
     uploadFormatItemName: '請求書フォーマット2',
     uploadType: ['請求書データ', '請求書データ'],
     keyConsumptionTax: 'a11122222',
@@ -273,24 +275,23 @@ describe('uploadFormatControllerのテスト', () => {
 
   const uploadFormatChangeDataError = {
     ...uploadFormatChangeData,
-    formatData: [
-      '0', '1', '2', '3', '',
-      '', '', '', '', '',
-      '', '', '12', '13', '14',
-      '30', '16', '17', ''
-    ]
+    formatData: ['0', '1', '2', '3', '', '', '', '', '', '', '', '', '12', '13', '14', '30', '16', '17', '']
   }
 
   const uploadFormatDataNotContractId = {
     contractId: null,
     setName: 'uploadFormatName',
-    uploadType: ''
+    uploadType: '',
+    uploadData: uploadData,
+    uploadFileName: uploadFileName
   }
 
   const uploadFormatDataDifferentContractId = {
     contractId: 'null',
     setName: 'uploadFormatName',
-    uploadType: ''
+    uploadType: '',
+    uploadData: uploadData,
+    uploadFileName: uploadFileName
   }
 
   const findAllResult = [
@@ -320,6 +321,7 @@ describe('uploadFormatControllerのテスト', () => {
     dataStartRowNo: 2,
     uploadType: '請求書データ',
     uploadData: uploadData,
+    uploadFileName: uploadFileName,
     createdAt: '2021-10-21T09:00:20.743Z',
     updatedAt: '2021-10-21T09:00:20.743Z',
     dataValues: {
@@ -330,72 +332,70 @@ describe('uploadFormatControllerのテスト', () => {
       dataStartRowNo: 2,
       uploadType: '請求書データ',
       uploadData: uploadData,
+      uploadFileName: uploadFileName,
       createdAt: '2021-10-21T09:00:20.743Z',
       updatedAt: '2021-10-21T09:00:20.743Z'
     },
     save: () => {}
   }
 
-  const uploadFormatIdentifierResult =
-    [
-      {
-        uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
-        serialNumber: 1,
-        extensionType: '0',
-        uploadFormatExtension: 'a11122222',
-        defaultExtension: '消費税',
-        createdAt: '2021-10-22T00:04:22.464Z',
-        updatedAt: '2021-10-22T00:04:22.464Z',
-        save: () => {},
-        destroy: () => {}
-      },
-      {
-
-        uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
-        serialNumber: 2,
-        extensionType: '0',
-        uploadFormatExtension: 'b111',
-        defaultExtension: '軽減税率',
-        createdAt: '2021-10-22T00:04:22.465Z',
-        updatedAt: '2021-10-22T00:04:22.465Z',
-        save: () => {},
-        destroy: () => {}
-      },
-      {
-        uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
-        serialNumber: 3,
-        extensionType: '0',
-        uploadFormatExtension: 'f111',
-        defaultExtension: '不課税',
-        createdAt: '2021-10-22T00:04:22.465Z',
-        updatedAt: '2021-10-22T00:04:22.465Z',
-        save: () => {},
-        destroy: () => {}
-      },
-      {
-
-        uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
-        serialNumber: 4,
-        extensionType: '1',
-        uploadFormatExtension: 'c122',
-        defaultExtension: '人月',
-        createdAt: '2021-10-22T00:04:22.465Z',
-        updatedAt: '2021-10-22T00:04:22.465Z',
-        save: () => {},
-        destroy: () => {}
-      },
-      {
-        uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
-        serialNumber: 5,
-        extensionType: '1',
-        uploadFormatExtension: 'd122',
-        defaultExtension: 'ボトル',
-        createdAt: '2021-10-22T00:04:22.465Z',
-        updatedAt: '2021-10-22T00:04:22.465Z',
-        save: () => {},
-        destroy: () => {}
-      }
-    ]
+  const uploadFormatIdentifierResult = [
+    {
+      uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+      serialNumber: 1,
+      extensionType: '0',
+      uploadFormatExtension: 'a11122222',
+      defaultExtension: '消費税',
+      createdAt: '2021-10-22T00:04:22.464Z',
+      updatedAt: '2021-10-22T00:04:22.464Z',
+      save: () => {},
+      destroy: () => {}
+    },
+    {
+      uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+      serialNumber: 2,
+      extensionType: '0',
+      uploadFormatExtension: 'b111',
+      defaultExtension: '軽減税率',
+      createdAt: '2021-10-22T00:04:22.465Z',
+      updatedAt: '2021-10-22T00:04:22.465Z',
+      save: () => {},
+      destroy: () => {}
+    },
+    {
+      uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+      serialNumber: 3,
+      extensionType: '0',
+      uploadFormatExtension: 'f111',
+      defaultExtension: '不課税',
+      createdAt: '2021-10-22T00:04:22.465Z',
+      updatedAt: '2021-10-22T00:04:22.465Z',
+      save: () => {},
+      destroy: () => {}
+    },
+    {
+      uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+      serialNumber: 4,
+      extensionType: '1',
+      uploadFormatExtension: 'c122',
+      defaultExtension: '人月',
+      createdAt: '2021-10-22T00:04:22.465Z',
+      updatedAt: '2021-10-22T00:04:22.465Z',
+      save: () => {},
+      destroy: () => {}
+    },
+    {
+      uploadFormatId: '794d3ea4-a69d-4c55-b366-17c0d323d212',
+      serialNumber: 5,
+      extensionType: '1',
+      uploadFormatExtension: 'd122',
+      defaultExtension: 'ボトル',
+      createdAt: '2021-10-22T00:04:22.465Z',
+      updatedAt: '2021-10-22T00:04:22.465Z',
+      save: () => {},
+      destroy: () => {}
+    }
+  ]
 
   describe('insert', () => {
     test('正常', async () => {
@@ -545,6 +545,7 @@ describe('uploadFormatControllerのテスト', () => {
         itemRowNo: 0,
         dataStartRowNo: 2,
         uploadType: '請求書データ',
+        uploadFileName: uploadFileName,
         deleteFlag: 0,
         uploadData: uploadData,
         createdAt: now,
@@ -767,6 +768,7 @@ describe('uploadFormatControllerのテスト', () => {
         uploadType: '請求書データ',
         deleteFlag: 0,
         uploadData: uploadData,
+        uploadFileName: uploadFileName,
         createdAt: now,
         updatedAt: now
       }
@@ -801,6 +803,7 @@ describe('uploadFormatControllerのテスト', () => {
         uploadType: '請求書データ',
         deleteFlag: 0,
         uploadData: uploadData2,
+        uploadFileName: uploadFileName,
         createdAt: now,
         updatedAt: now
       }
@@ -834,6 +837,7 @@ describe('uploadFormatControllerのテスト', () => {
         uploadType: '請求書データ',
         deleteFlag: 0,
         uploadData: null,
+        uploadFileName: uploadFileName,
         createdAt: now,
         updatedAt: now
       }
@@ -865,6 +869,7 @@ describe('uploadFormatControllerのテスト', () => {
         uploadType: '請求書データ',
         deleteFlag: 0,
         uploadData: null,
+        uploadFileName: uploadFileName,
         createdAt: now,
         updatedAt: now
       }

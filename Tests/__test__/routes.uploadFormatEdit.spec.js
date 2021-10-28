@@ -887,9 +887,7 @@ describe('uploadFormatのテスト', () => {
       request.params = {
         uploadFormatId: 'd1791550-7c28-4ad5-8c52-c57253b84843'
       }
-      const constantsDefine = require('../../Application/constants')
-      const csvTax = constantsDefine.csvFormatDefine.csvTax
-      const csvUnit = constantsDefine.csvFormatDefine.csvUnit
+
       const result = {
         headerItems: [
           { item: '備考', value: '2021/10/11' },
@@ -1043,6 +1041,10 @@ describe('uploadFormatのテスト', () => {
       controllerSpyUploadFormat.mockReturnValue(result)
 
       controllerSpyChangeUploadFormat.mockReturnValue(0)
+
+      // request.flashは関数なのでモックする。
+      request.flash = jest.fn()
+
       // 試験実施
       await uploadFormatEdit.cbPostIndex(request, response, next)
 
@@ -1050,6 +1052,9 @@ describe('uploadFormatのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(error500)
+
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('info', 'フォーマットの変更が完了しました。')
 
       expect(response.redirect).toHaveBeenCalledWith('/uploadFormatList')
     })
@@ -1065,9 +1070,7 @@ describe('uploadFormatのテスト', () => {
       request.params = {
         uploadFormatId: 'd1791550-7c28-4ad5-8c52-c57253b84843'
       }
-      const constantsDefine = require('../../Application/constants')
-      const csvTax = constantsDefine.csvFormatDefine.csvTax
-      const csvUnit = constantsDefine.csvFormatDefine.csvUnit
+
       const result = {
         headerItems: [
           { item: '備考', value: '2021/10/11' },
@@ -1240,9 +1243,7 @@ describe('uploadFormatのテスト', () => {
       request.params = {
         uploadFormatId: 'd1791550-7c28-4ad5-8c52-c57253b84843'
       }
-      const constantsDefine = require('../../Application/constants')
-      const csvTax = constantsDefine.csvFormatDefine.csvTax
-      const csvUnit = constantsDefine.csvFormatDefine.csvUnit
+
       const result = {
         headerItems: [
           { item: '備考', value: '2021/10/11' },
