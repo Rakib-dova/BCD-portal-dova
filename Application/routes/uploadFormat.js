@@ -583,7 +583,7 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
-const cbPostDeleteFormat = async (req, res, next) => {
+const cbDeleteFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostDeleteFormat')
 
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
@@ -679,6 +679,6 @@ module.exports = {
   cbPostIndex: cbPostIndex,
   cbPostConfirmIndex: cbPostConfirmIndex,
   cbRemoveCsv: cbRemoveCsv,
-  cbPostDeleteFormat: cbPostDeleteFormat,
+  cbDeleteFormat: cbDeleteFormat,
   cbGetCheckFormat: cbGetCheckFormat
 }
