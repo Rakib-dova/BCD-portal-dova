@@ -444,5 +444,24 @@ module.exports = {
       logger.error(error)
       return 0
     }
+  },
+  checkDataForUploadFormat: async (uploadFormatId) => {
+    try {
+      // アップロードフォーマットを検索
+      const deleteTargetUploadFormat = await Upload.findOne({
+        where: {
+          uploadFormatId: uploadFormatId
+        }
+      })
+
+      // nullの場合、既に削除されたと想定する。
+      if (deleteTargetUploadFormat === null) return -1
+
+      // null以外の場合、正常想定
+      return 1
+    } catch (error) {
+      logger.error(error)
+      return 0
+    }
   }
 }

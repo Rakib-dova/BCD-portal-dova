@@ -18,6 +18,37 @@ const $ = function (tagObjName) {
   })
 }
 
+// 確認ボタン押下時の処理
+document.getElementsByName('confirmButton').forEach((item) => {
+  item.addEventListener('click', function (e) {
+    const uuid = item.getAttribute('uuid')
+    const url = `/uploadFormat/${uuid}`
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        // 削除失敗
+        switch (response.result) {
+          case 0:
+            alert('システムエラー')
+            break
+          case 1:
+            // 確認ページに遷移
+            location.href = '/uploadFormatEdit' + '/' + uuid
+            break
+          case -1:
+            alert('すでに削除されています。\n「OK」ボタンを押下し、画面内容を最新します。')
+            location.reload()
+            break
+        }
+      })
+  })
+})
+
 // 削除ボタン押下時の処理
 document.getElementsByName('deleteButton').forEach((item) => {
   item.addEventListener('click', function (e) {
@@ -42,11 +73,13 @@ document.getElementsByName('deleteButton').forEach((item) => {
               alert('削除失敗-システムエラー')
               break
             case 1:
-              // ページ更新(location.reload)
+              // ページ更新
+              alert('削除しました。\n「OK」ボタンを押下し、画面内容を最新します。')
               location.reload()
               break
             case -1:
-              alert('すでに削除されています。')
+              alert('すでに削除されています。\n「OK」ボタンを押下し、画面内容を最新します。')
+              location.reload()
               break
           }
         })
