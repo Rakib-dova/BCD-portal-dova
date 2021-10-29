@@ -621,6 +621,10 @@ const cbDeleteFormat = async (req, res, next) => {
 
   // ユーザが設定したフォーマットの確認(既に削除されたのか)と削除処理追加
   // result 1は成功、0は削除失敗, -1は既に削除されたもの
+  if (resultOfDeletedUploadFormat === 1) {
+    req.flash('info', 'フォーマットを削除しました。')
+  }
+
   res.send({
     result: resultOfDeletedUploadFormat
   })

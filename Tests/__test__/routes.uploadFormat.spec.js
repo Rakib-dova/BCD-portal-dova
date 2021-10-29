@@ -3440,11 +3440,16 @@ describe('uploadFormatのテスト', () => {
         return '00'
       }
 
+      request.flash = jest.fn()
+
       // サービス実施結果を用意する。
       deleteDataForUploadUploadFormatController.mockReturnValue(1)
 
       // アップロードフォーマット削除サービス実施
       await uploadFormat.cbDeleteFormat(request, response, next)
+
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('info', 'フォーマットを削除しました。')
 
       // 正常の場合、レスポンスボディのresultで1を返す
       expect(response.body.result).toBe(1)
