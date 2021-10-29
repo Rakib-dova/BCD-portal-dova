@@ -63,14 +63,14 @@ document.getElementsByName('confirmButton').forEach((item) => {
         // 削除失敗
         switch (response.result) {
           case 0:
-            alert('システムエラー')
+            alert('削除失敗しました。（システムエラー）')
             break
           case 1:
             // 確認ページに遷移
             location.href = '/uploadFormatEdit' + '/' + uuid
             break
           case -1:
-            alert('すでに削除されています。\n「OK」ボタンを押下し、画面内容を最新します。')
+            alert('すでに削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
             location.reload()
             break
         }
