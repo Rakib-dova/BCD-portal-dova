@@ -45,12 +45,13 @@ block content
                     td.text-center= item.uploadType
                     td.text-center= item.updatedAt                 
                     td.text-center
-                      a.button.is-success(href="/uploadFormatEdit" + "/" + item.uuid) 確認・変更する
+                      a.button.is-success(name='confirmButton' uuid= item.uuid) 確認・変更する
                     td.text-center
-                      a.button.is-danger(href="") 削除 
+                      a.button.is-danger#deleteButton(name='deleteButton' uuid= item.uuid) 削除 
         .mt-1.has-text-left
           a.button.is-link.is-light(href="/portal") ←Homeへ戻る
 
     include footer
 
 block append scripts
+  script(src="/js/uploadFormatList-page.js")

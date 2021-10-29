@@ -583,12 +583,102 @@ const cbRemoveCsv = (_deleteDataPath, _filename) => {
   }
 }
 
+const cbDeleteFormat = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteFormat')
+
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req, res, next)
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+
+  // 確認画面から渡されたuploadFormatId取得
+  const uploadFormatId = req.params.uploadFormatId
+
+  // アップロードフォーマットを削除して結果を返す
+  const resultOfDeletedUploadFormat = await uploadFormatController.deleteDataForUploadFormat(uploadFormatId)
+
+  // ユーザが設定したフォーマットの確認(既に削除されたのか)と削除処理追加
+  // result 1は成功、0は削除失敗, -1は既に削除されたもの
+  res.send({
+    result: resultOfDeletedUploadFormat
+  })
+  logger.info(constantsDefine.logMessage.INF001 + 'cbDeleteFormat')
+}
+
+const cbGetCheckFormat = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetCheckFormat')
+
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req, res, next)
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+
+  // 確認画面から渡されたuploadFormatId取得
+  const uploadFormatId = req.params.uploadFormatId
+
+  // アップロードフォーマットが削除されているのか確認
+  const resultOfCheckedUploadFormat = await uploadFormatController.checkDataForUploadFormat(uploadFormatId)
+
+  // result 1は存在すること、0はシステムエラー, -1は既に削除されたもの
+  res.send({
+    result: resultOfCheckedUploadFormat
+  })
+  logger.info(constantsDefine.logMessage.INF001 + 'cbGetCheckFormat')
+}
+
 router.post('/', upload.single('dataFile'), cbPostIndex)
 router.post('/cbPostConfirmIndex', cbPostConfirmIndex)
-
+router.delete('/:uploadFormatId', cbDeleteFormat)
+router.get('/:uploadFormatId', cbGetCheckFormat)
 module.exports = {
   router: router,
   cbPostIndex: cbPostIndex,
   cbPostConfirmIndex: cbPostConfirmIndex,
-  cbRemoveCsv: cbRemoveCsv
+  cbRemoveCsv: cbRemoveCsv,
+  cbDeleteFormat: cbDeleteFormat,
+  cbGetCheckFormat: cbGetCheckFormat
 }
