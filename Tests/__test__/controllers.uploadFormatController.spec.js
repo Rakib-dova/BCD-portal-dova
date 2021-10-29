@@ -16,6 +16,7 @@ const path = require('path')
 const uploadData = fs.readFileSync(path.resolve('.', 'testData', 'csvFormatUpload2.csv'), {
   encoding: 'utf-8'
 })
+const uploadFileName = 'UTコードテストファイル.csv'
 
 const baseResult = {
   headerItems: [
@@ -111,7 +112,7 @@ const baseResult = {
     keyTonnage: { key: 'keyTonnage', value: '', itemName: 'トン' },
     keyOthers: { key: 'keyOthers', value: '', itemName: 'その他' }
   },
-  csvfilename: '',
+  csvFileName: uploadFileName,
   selectedFormatData: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
   itemRownNo: 1,
   dataStartRowNo: 2,
@@ -194,7 +195,9 @@ describe('uploadFormatControllerのテスト', () => {
   const uploadFormatData = {
     contractId: contractId,
     setName: 'uploadFormatName',
-    uploadType: ''
+    uploadType: '',
+    uploadData: uploadData,
+    uploadFileName: uploadFileName
   }
 
   const uploadFormatChangeData = {
@@ -278,13 +281,17 @@ describe('uploadFormatControllerのテスト', () => {
   const uploadFormatDataNotContractId = {
     contractId: null,
     setName: 'uploadFormatName',
-    uploadType: ''
+    uploadType: '',
+    uploadData: uploadData,
+    uploadFileName: uploadFileName
   }
 
   const uploadFormatDataDifferentContractId = {
     contractId: 'null',
     setName: 'uploadFormatName',
-    uploadType: ''
+    uploadType: '',
+    uploadData: uploadData,
+    uploadFileName: uploadFileName
   }
 
   const findAllResult = [
@@ -314,6 +321,7 @@ describe('uploadFormatControllerのテスト', () => {
     dataStartRowNo: 2,
     uploadType: '請求書データ',
     uploadData: uploadData,
+    uploadFileName: uploadFileName,
     createdAt: '2021-10-21T09:00:20.743Z',
     updatedAt: '2021-10-21T09:00:20.743Z',
     dataValues: {
@@ -324,6 +332,7 @@ describe('uploadFormatControllerのテスト', () => {
       dataStartRowNo: 2,
       uploadType: '請求書データ',
       uploadData: uploadData,
+      uploadFileName: uploadFileName,
       createdAt: '2021-10-21T09:00:20.743Z',
       updatedAt: '2021-10-21T09:00:20.743Z'
     },
@@ -536,6 +545,7 @@ describe('uploadFormatControllerのテスト', () => {
         itemRowNo: 0,
         dataStartRowNo: 2,
         uploadType: '請求書データ',
+        uploadFileName: uploadFileName,
         deleteFlag: 0,
         uploadData: uploadData,
         createdAt: now,
@@ -758,6 +768,7 @@ describe('uploadFormatControllerのテスト', () => {
         uploadType: '請求書データ',
         deleteFlag: 0,
         uploadData: uploadData,
+        uploadFileName: uploadFileName,
         createdAt: now,
         updatedAt: now
       }
@@ -792,6 +803,7 @@ describe('uploadFormatControllerのテスト', () => {
         uploadType: '請求書データ',
         deleteFlag: 0,
         uploadData: uploadData2,
+        uploadFileName: uploadFileName,
         createdAt: now,
         updatedAt: now
       }
@@ -825,6 +837,7 @@ describe('uploadFormatControllerのテスト', () => {
         uploadType: '請求書データ',
         deleteFlag: 0,
         uploadData: null,
+        uploadFileName: uploadFileName,
         createdAt: now,
         updatedAt: now
       }
@@ -856,6 +869,7 @@ describe('uploadFormatControllerのテスト', () => {
         uploadType: '請求書データ',
         deleteFlag: 0,
         uploadData: null,
+        uploadFileName: uploadFileName,
         createdAt: now,
         updatedAt: now
       }

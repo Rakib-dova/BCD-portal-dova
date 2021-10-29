@@ -11,13 +11,14 @@ block content
         .columns
           .column
             .title.is-family-noto-sans 取込データ
-            .box              
+            .box
               table.table.is-fullwidth.is-hoverable
                 thead
                   tr
                     th.text-center データ番号
                     th.text-center 項目名  
                     th.text-center データ内容
+                    input.input(type="hidden" id="uploadFileName" name="uploadFileName" value= uploadFileName)
                     input.input(type="hidden" id="checkItemNameLine" name="checkItemNameLine" value= checkItemNameLine)
                     input.input(type="hidden" id="itemRowNo" name="itemRowNo" value= itemRowNo)
                     input.input(type="hidden" id="dataStartRowNo" name="dataStartRowNo" value= dataStartRowNo)

@@ -14,7 +14,9 @@ module.exports = {
   //   itemRowNo - 項目名の行番号,
   //   dataStartRowNo - データ開始行番号,
   //   createdAt - 作成日付,
-  //   updatedAt - 更新日付
+  //   updatedAt - 更新日付,
+  //   uploadData - アップロードファイルデータ
+  //   uploadFileName - アップロードファイル名
   // }
   insert: async (_tenantId, values) => {
     const functionName = 'uploadFormatController.insert'
@@ -189,7 +191,7 @@ module.exports = {
         uploadGeneral: uploadGeneral,
         taxIds: taxIds,
         unitIds: unitIds,
-        csvfilename: '',
+        csvFileName: uploadFormat.uploadFileName,
         selectedFormatData: selectedFormatData,
         itemRownNo: uploadFormat.itemRowNo,
         dataStartRowNo: uploadFormat.dataStartRowNo,
@@ -208,6 +210,7 @@ module.exports = {
       delete changeData.dataStartRowNo
       delete changeData.headerItems
       delete changeData.uploadType
+      delete changeData.dataFile
 
       const UploadFormatDetail = db.UploadFormatDetail
       const UploadFormatIdentifier = db.UploadFormatIdentifier

@@ -1762,7 +1762,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: `${user.userId}_UTtest.csv`,
+        uploadFileName: fileName,
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -1818,7 +1818,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: `${user.userId}_UTtest.csv`,
+        uploadFileName: fileName,
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -2707,7 +2707,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: `${user.userId}_UTtest.csv`,
+        uploadFileName: fileName,
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -2861,7 +2861,7 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvBasicFormatが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormat', {
-        csvfilename: `${user.userId}_UTtest.csv`,
+        uploadFileName: fileName,
         headerItems: headerItems,
         columnArr: columnArr,
         selectedFormatData: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''],
@@ -3098,6 +3098,9 @@ describe('uploadFormatのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
+      // request.flashは関数なのでモックする。
+      request.flash = jest.fn()
+
       // 試験実施
       await uploadFormat.cbPostConfirmIndex(request, response, next)
 
@@ -3109,6 +3112,8 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('info', 'フォーマットの登録が完了しました。')
       // response.renderでcsvConfirmFormatが呼ばれ「る」
       expect(response.redirect).toHaveBeenCalledWith(303, '/uploadFormatList')
     })
@@ -3131,6 +3136,9 @@ describe('uploadFormatのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
 
+      // request.flashは関数なのでモックする。
+      request.flash = jest.fn()
+
       // 試験実施
       await uploadFormat.cbPostConfirmIndex(request, response, next)
 
@@ -3142,6 +3150,8 @@ describe('uploadFormatのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('info', 'フォーマットの登録が完了しました。')
       // response.renderでcsvConfirmFormatが呼ばれ「る」
       expect(response.redirect).toHaveBeenCalledWith(303, '/uploadFormatList')
     })
@@ -3165,6 +3175,9 @@ describe('uploadFormatのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues2)
+
+      // request.flashは関数なのでモックする。
+      request.flash = jest.fn()
 
       // 試験実施
       await uploadFormat.cbPostConfirmIndex(request, response, next)
@@ -3362,6 +3375,9 @@ describe('uploadFormatのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの不正な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValuesDataControllFail)
+
+      // request.flashは関数なのでモックする。
+      request.flash = jest.fn()
 
       helper.checkContractStatus = '00'
 

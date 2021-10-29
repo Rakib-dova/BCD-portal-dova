@@ -50,6 +50,7 @@ const cbPostIndex = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
+  const uploadFileName = req.body.dataFileName
   const originName = path.resolve(filePath, req.file.filename)
   const newName = path.resolve(filePath, `${user.dataValues.userId}_${req.file.originalname}`)
   fs.renameSync(originName, newName)
@@ -385,7 +386,7 @@ const cbPostIndex = async (req, res, next) => {
     uploadGeneral: uploadGeneral,
     taxIds: taxIds,
     unitIds: unitIds,
-    csvfilename: csvFileName,
+    uploadFileName: uploadFileName,
     selectedFormatData: emptyselectedFormatData,
     itemRowNo: req.body.uploadFormatNumber,
     dataStartRowNo: req.body.defaultNumber,
@@ -437,7 +438,8 @@ const cbPostConfirmIndex = async (req, res, next) => {
       uploadType: req.body.uploadType,
       itemRowNo: req.body.itemRowNo,
       dataStartRowNo: req.body.dataStartRowNo,
-      uploadData: uploadData
+      uploadData: uploadData,
+      uploadFileName: req.body.uploadFileName
     })
   } else {
     resultUploadFormat = await uploadFormatController.insert(req.user.tenantId, {
@@ -447,7 +449,8 @@ const cbPostConfirmIndex = async (req, res, next) => {
       uploadType: req.body.uploadType,
       itemRowNo: 0,
       dataStartRowNo: req.body.dataStartRowNo,
-      uploadData: uploadData
+      uploadData: uploadData,
+      uploadFileName: req.body.uploadFileName
     })
   }
 
@@ -562,6 +565,7 @@ const cbPostConfirmIndex = async (req, res, next) => {
   }
 
   // 画面移動
+  req.flash('info', 'フォーマットの登録が完了しました。')
   res.redirect(303, '/uploadFormatList')
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostConfirmIndex')
 }
