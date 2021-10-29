@@ -210,6 +210,7 @@ module.exports = {
       delete changeData.dataStartRowNo
       delete changeData.headerItems
       delete changeData.uploadType
+      delete changeData.dataFile
 
       const UploadFormatDetail = db.UploadFormatDetail
       const UploadFormatIdentifier = db.UploadFormatIdentifier
@@ -392,6 +393,78 @@ module.exports = {
     } catch (error) {
       console.log(error)
       return error
+    }
+  },
+  deleteDataForUploadFormat: async (uploadFormatId) => {
+    try {
+      // アップロードフォーマットを検索
+      const deleteTargetUploadFormat = await Upload.findOne({
+        where: {
+          uploadFormatId: uploadFormatId
+        }
+      })
+
+      // nullの場合、既に削除されたと想定する。
+      if (deleteTargetUploadFormat === null) return -1
+
+      // ヘッダ内容を検索する。
+      const deleteTargetUploadFormatDetail = await db.UploadFormatDetail.findAll({
+        where: {
+          uploadFormatId: deleteTargetUploadFormat.uploadFormatId
+        }
+      })
+
+      // 税と単位を検索する。
+      const deleteTargetUploadFormatIdentifier = await db.UploadFormatIdentifier.findAll({
+        whiere: {
+          uploadFormatId: deleteTargetUploadFormat.uploadFormatId
+        }
+      })
+
+      // ユーザカスタマイズされた税と単位がある場合削除する。
+      if (deleteTargetUploadFormatIdentifier) {
+        logger.info(`${deleteTargetUploadFormat.uploadFormatId}のIdentifierデータを削除開始します。`)
+        deleteTargetUploadFormatIdentifier.forEach((item) => {
+          item.destroy()
+        })
+        logger.info(`${deleteTargetUploadFormat.uploadFormatId}のIdentifierデータを削除終了します。`)
+      }
+
+      // ユーザカスタマイズヘッダ削除
+      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のDetailデータを削除開始します。`)
+      deleteTargetUploadFormatDetail.forEach((item) => {
+        item.destroy()
+      })
+      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のDetailデータを削除終了します。`)
+
+      // アップロードフォーマット削除
+      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のデータを削除終了します。`)
+      deleteTargetUploadFormat.destroy()
+      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のデータを削除終了します。`)
+
+      return 1
+    } catch (error) {
+      logger.error(error)
+      return 0
+    }
+  },
+  checkDataForUploadFormat: async (uploadFormatId) => {
+    try {
+      // アップロードフォーマットを検索
+      const deleteTargetUploadFormat = await Upload.findOne({
+        where: {
+          uploadFormatId: uploadFormatId
+        }
+      })
+
+      // nullの場合、既に削除されたと想定する。
+      if (deleteTargetUploadFormat === null) return -1
+
+      // null以外の場合、正常想定
+      return 1
+    } catch (error) {
+      logger.error(error)
+      return 0
     }
   }
 }

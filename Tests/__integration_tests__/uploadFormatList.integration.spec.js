@@ -201,6 +201,71 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
+
+    test('削除ボタン押下し、ポップアップが表示', async () => {
+      // アップロードフォーマット登録
+      const path = require('path')
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/uploadFormatList')
+
+      await page.waitForTimeout(1000)
+
+      await page.click('body > div.max-width > div:nth-child(3) > div > a')
+      await page.type('#uploadFormatItemName', 'インテグレーションテスト設定')
+      const uploadFileElementHand = await page.$('#dataFile')
+      await uploadFileElementHand.uploadFile(path.resolve('./testData/csvFormatUpload.csv'))
+      await page.type('#uploadFormatNumber', '1')
+      await page.type('#defaultNumber', '2')
+      await page.click('#submit')
+
+      await page.waitForTimeout(1000)
+
+      await page.select('#issueDate', '0')
+      await page.select('#invoiceNumber', '1')
+      await page.select('#tenantId', '2')
+      await page.select('#paymentDate', '3')
+      await page.select('#deliveryDate', '4')
+      await page.select('#sellersItemNum', '5')
+      await page.select('#itemName', '6')
+      await page.select('#quantityValue', '7')
+      await page.select('#quantityUnitCode', '8')
+      await page.select('#priceValue', '9')
+      await page.select('#taxRate', '10')
+
+      await page.click('#confirmBtn')
+
+      await page.waitForTimeout(500)
+
+      await page.click('#submit')
+
+      await page.waitForTimeout(1000)
+
+      // アップロードフォーマット登録後、画面遷移確認
+      expect(await page.url()).toMatch('https://localhost:3000/uploadFormatList')
+
+      await page.click(
+        'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(6) > a'
+      )
+
+      // ダイアログ確認
+      const clickResult = await page.evaluate(() => {
+        if (document.querySelector('#confirmmodify-modal').attributes[0].value.match(/is-active/) !== null) {
+          return document.querySelector('#confirmmodify-modal').attributes[0].value.match(/is-active/)[0]
+        }
+        return null
+      })
+
+      // 削除確認ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
+
+      await browser.close()
+    })
   })
 
   describe('5.契約ステータス：変更申込', () => {

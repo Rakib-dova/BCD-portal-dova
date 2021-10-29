@@ -975,4 +975,389 @@ describe('uploadFormatControllerのテスト', () => {
       expect(result).toEqual(uploadFormatDB)
     })
   })
+
+  describe('deleteDataForUploadFormat', () => {
+    test('正常：アップロードフォーマット削除（３つのテーブルのデータ削除）', async () => {
+      // サービスの内あるDB検索関数の呼び出す結果の用意
+      const uploadFormatId = '12345-67890-aaaa-bbbb-12345678'
+      UploadFormat.findOne = jest.fn((value) => {
+        return {
+          uploadForamtId: value,
+          dataValues: {
+            uploadForamtId: value
+          },
+          destroy: async () => {}
+        }
+      })
+      const headerItems = [
+        '発行日',
+        '請求書番号',
+        'テナントID',
+        '支払期日',
+        '納品日',
+        '備考',
+        '銀行名',
+        '支店名',
+        '科目',
+        '口座番号',
+        '口座名義',
+        'その他特記事項',
+        '明細-項目ID',
+        '明細-内容',
+        '明細-数量',
+        '明細-単位',
+        '明細-単価',
+        '明細-税（消費税／軽減税率／不課税／免税／非課税）',
+        '明細-備考'
+      ]
+
+      const savedDate = new Date().toISOString()
+      const uploadFormatDetail = []
+      for (let idx = 0; idx < 19; idx++) {
+        uploadFormatDetail.push({
+          uploadForamtId: uploadFormatId,
+          serialNumber: idx + 1,
+          uploadFormatItemName: `項目${idx}`,
+          uploadFormatNumber: idx,
+          defaultItemName: headerItems[idx],
+          defaultNumber: idx,
+          createdAt: savedDate,
+          updatedAt: savedDate,
+          dataValues: {
+            uploadFormatId: uploadFormatId
+          },
+          destroy: async () => {}
+        })
+      }
+
+      uploadFormatDetailFindAllSpy.mockReturnValue(uploadFormatDetail)
+
+      const uploadFormatIdentifier = []
+      const taxUnitSetting = [
+        {
+          name: '消費税',
+          code: 'a'
+        },
+        {
+          name: '軽減税率',
+          code: 'b'
+        },
+        {
+          name: '不課税',
+          code: 'c'
+        },
+        {
+          name: '免税',
+          code: 'd'
+        },
+        {
+          name: '非課税',
+          code: 'e'
+        },
+        {
+          name: '人月',
+          code: '1'
+        },
+        {
+          name: 'ボトル',
+          code: '2'
+        },
+        {
+          name: 'コスト',
+          code: '3'
+        },
+        {
+          name: 'コンテナ',
+          code: '4'
+        },
+        {
+          name: 'センチリットル',
+          code: '5'
+        },
+        {
+          name: '平方センチメートル',
+          code: '6'
+        },
+        {
+          name: '立方センチメートル',
+          code: '7'
+        },
+        {
+          name: 'センチメートル',
+          code: '8'
+        },
+        {
+          name: 'ケース',
+          code: '9'
+        },
+        {
+          name: 'カートン',
+          code: '10'
+        },
+        {
+          name: '日',
+          code: '11'
+        },
+        {
+          name: 'デシリットル',
+          code: '12'
+        },
+        {
+          name: 'デシメートル',
+          code: '13'
+        },
+        {
+          name: 'グロス・キログラム',
+          code: '14'
+        },
+        {
+          name: '個',
+          code: '15'
+        },
+        {
+          name: 'フィート',
+          code: '16'
+        },
+        {
+          name: 'ガロン',
+          code: '17'
+        },
+        {
+          name: 'グラム',
+          code: '18'
+        },
+        {
+          name: '総トン',
+          code: '19'
+        },
+        {
+          name: '時間',
+          code: '20'
+        },
+        {
+          name: 'キログラム',
+          code: '21'
+        },
+        {
+          name: 'キロメートル',
+          code: '22'
+        },
+        {
+          name: 'キロワット時',
+          code: '23'
+        },
+        {
+          name: 'ポンド',
+          code: '24'
+        },
+        {
+          name: 'リットル',
+          code: '25'
+        },
+        {
+          name: 'ミリグラム',
+          code: '26'
+        },
+        {
+          name: 'ミリリットル',
+          code: '27'
+        },
+        {
+          name: 'ミリメートル',
+          code: '28'
+        },
+        {
+          name: '月',
+          code: '29'
+        },
+        {
+          name: '平方メートル',
+          code: '30'
+        },
+        {
+          name: '立方メートル',
+          code: '31'
+        },
+        {
+          name: 'メーター',
+          code: '32'
+        },
+        {
+          name: '純トン',
+          code: '33'
+        },
+        {
+          name: '包',
+          code: '34'
+        },
+        {
+          name: '巻',
+          code: '35'
+        },
+        {
+          name: '式',
+          code: '36'
+        },
+        {
+          name: 'トン',
+          code: '37'
+        },
+        {
+          name: 'その他',
+          code: '38'
+        }
+      ]
+      for (let idx = 0; idx < 43; idx++) {
+        uploadFormatIdentifier.push({
+          uploadFormatId: uploadFormatId,
+          serialNumber: idx + 1,
+          extensionType: idx < 5 ? 0 : 1,
+          uploadFormatExtension: taxUnitSetting[idx].code,
+          defaultExtension: taxUnitSetting[idx].name,
+          createdAt: savedDate,
+          updatedAt: savedDate,
+          destroy: async () => {}
+        })
+      }
+      uploadFormatDetailIdsFindAll.mockReturnValue(uploadFormatIdentifier)
+
+      const result = await uploadFormatController.deleteDataForUploadFormat(uploadFormatId)
+
+      // 正常削除の場合、「1」を返す
+      expect(result).toBe(1)
+    })
+
+    test('準正常：アップロードフォーマット削除（UploadFormatIdentifier以外のテーブルのデータ削除）', async () => {
+      // サービスの内あるDB検索関数の呼び出す結果の用意
+      const uploadFormatId = '12345-67890-aaaa-bbbb-12345678'
+      UploadFormat.findOne = jest.fn((value) => {
+        return {
+          uploadForamtId: value,
+          dataValues: {
+            uploadForamtId: value
+          },
+          destroy: async () => {}
+        }
+      })
+      const headerItems = [
+        '発行日',
+        '請求書番号',
+        'テナントID',
+        '支払期日',
+        '納品日',
+        '備考',
+        '銀行名',
+        '支店名',
+        '科目',
+        '口座番号',
+        '口座名義',
+        'その他特記事項',
+        '明細-項目ID',
+        '明細-内容',
+        '明細-数量',
+        '明細-単位',
+        '明細-単価',
+        '明細-税（消費税／軽減税率／不課税／免税／非課税）',
+        '明細-備考'
+      ]
+
+      const savedDate = new Date().toISOString()
+      const uploadFormatDetail = []
+      for (let idx = 0; idx < 19; idx++) {
+        uploadFormatDetail.push({
+          uploadForamtId: uploadFormatId,
+          serialNumber: idx + 1,
+          uploadFormatItemName: `項目${idx}`,
+          uploadFormatNumber: idx,
+          defaultItemName: headerItems[idx],
+          defaultNumber: idx,
+          createdAt: savedDate,
+          updatedAt: savedDate,
+          dataValues: {
+            uploadFormatId: uploadFormatId
+          },
+          destroy: async () => {}
+        })
+      }
+      uploadFormatDetailFindAllSpy.mockReturnValue(uploadFormatDetail)
+
+      uploadFormatDetailIdsFindAll.mockReturnValue([])
+
+      const result = await uploadFormatController.deleteDataForUploadFormat(uploadFormatId)
+
+      // 正常削除の場合、「1」を返す
+      expect(result).toBe(1)
+    })
+
+    test('準正常：アップロードフォーマット削除（既に削除されました）', async () => {
+      // サービスの内あるDB検索関数の呼び出す結果の用意
+      const uploadFormatId = '12345-67890-aaaa-bbbb-12345678'
+
+      UploadFormat.findOne = async () => {
+        return null
+      }
+      uploadFormatDetailFindAllSpy.mockReturnValue(null)
+
+      uploadFormatDetailIdsFindAll.mockReturnValue([])
+
+      const result = await uploadFormatController.deleteDataForUploadFormat(uploadFormatId)
+
+      // 準正常削除の場合、「-1」を返す
+      expect(result).toBe(-1)
+    })
+
+    test('準正常：アップロードフォーマット削除（DBエラー）', async () => {
+      // サービスの内あるDB検索関数の呼び出す結果の用意
+      const uploadFormatId = '12345-67890-aaaa-bbbb-12345678'
+
+      const dbError = new Error('DB Error')
+      UploadFormat.findOne = async (value) => {
+        throw dbError
+      }
+      uploadFormatDetailFindAllSpy.mockReturnValue(null)
+
+      uploadFormatDetailIdsFindAll.mockReturnValue([])
+
+      const result = await uploadFormatController.deleteDataForUploadFormat(uploadFormatId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
+    })
+  })
+
+  describe('checkDataForUploadFormat', () => {
+    test('正常：データがある場合', async () => {
+      UploadFormat.findOne = async (value) => {
+        return {}
+      }
+
+      const result = await uploadFormatController.checkDataForUploadFormat('12345-67890-aaaa-bbbb-12345678')
+
+      // データがある場合「1」を返す
+      expect(result).toBe(1)
+    })
+
+    test('準正常：データがすでに削除の場合', async () => {
+      UploadFormat.findOne = async (value) => {
+        return null
+      }
+
+      const result = await uploadFormatController.checkDataForUploadFormat('12345-67890-aaaa-bbbb-12345678')
+
+      // 検索対象が既に削除されたら「-1」を返す
+      expect(result).toBe(-1)
+    })
+
+    test('準正常：システムエラーの場合', async () => {
+      const deError = new Error('DB error')
+      UploadFormat.findOne = async (value) => {
+        throw deError
+      }
+
+      const result = await uploadFormatController.checkDataForUploadFormat('12345-67890-aaaa-bbbb-12345678')
+
+      // DBエラーが発生された場合「0」を返す
+      expect(result).toBe(0)
+    })
+  })
 })
