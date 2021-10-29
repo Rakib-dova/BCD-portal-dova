@@ -203,9 +203,6 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
     })
 
     test('削除ボタン押下し、ポップアップが表示', async () => {
-      // ダイアログ確認用変数
-      let dialogMessage = ''
-
       // アップロードフォーマット登録
       const path = require('path')
       const puppeteer = require('puppeteer')
@@ -216,7 +213,9 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/uploadFormatList')
-      await page.waitForTimeout(500)
+
+      await page.waitForTimeout(1000)
+
       await page.click('body > div.max-width > div:nth-child(3) > div > a')
       await page.type('#uploadFormatItemName', 'インテグレーションテスト設定')
       const uploadFileElementHand = await page.$('#dataFile')
@@ -225,7 +224,8 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       await page.type('#defaultNumber', '2')
       await page.click('#submit')
 
-      await page.waitForTimeout(500)
+      await page.waitForTimeout(1000)
+
       await page.select('#issueDate', '0')
       await page.select('#invoiceNumber', '1')
       await page.select('#tenantId', '2')
@@ -244,20 +244,26 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
 
       await page.click('#submit')
 
-      await page.waitForTimeout(500)
+      await page.waitForTimeout(1000)
 
       // アップロードフォーマット登録後、画面遷移確認
       expect(await page.url()).toMatch('https://localhost:3000/uploadFormatList')
 
+      await page.click(
+        'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(6) > a'
+      )
+
       // ダイアログ確認
-      page.on('dialog', async (dialog) => {
-        dialogMessage = dialog.message()
-        await dialog.dismiss()
+      const clickResult = await page.evaluate(() => {
+        if (document.querySelector('#confirmmodify-modal').attributes[0].value.match(/is-active/) !== null) {
+          return document.querySelector('#confirmmodify-modal').attributes[0].value.match(/is-active/)[0]
+        }
+        return null
       })
 
-      await page.click('#deleteButton')
+      // 削除確認ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
 
-      expect(dialogMessage).toBe('削除しますか？')
       await browser.close()
     })
   })

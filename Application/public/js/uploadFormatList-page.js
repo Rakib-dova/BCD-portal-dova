@@ -18,6 +18,35 @@ const $ = function (tagObjName) {
   })
 }
 
+// UserAgentで判定し
+// IE以外は動的にスクリプトをロード
+const ua = window.navigator.userAgent
+if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
+  const tag = document.createElement('script')
+  tag.type = 'module'
+  tag.src = '/js/loaded-portal-page.js'
+  document.getElementsByTagName('body')[0].appendChild(tag)
+} else {
+  // IEはクリップボードコピーが機能しないのでコピーボタンを削除
+  const elm = document.getElementById('copy-btn')
+  if (elm) elm.parentNode.removeChild(elm)
+}
+
+window.onload = () => {
+  document.querySelectorAll('.tabs').forEach((tab) => {
+    tab.querySelectorAll('li').forEach((li) => {
+      li.onclick = () => {
+        tab.querySelector('li.is-active').classList.remove('is-active')
+        li.classList.add('is-active')
+        tab.nextElementSibling.querySelector('.tab-pane.is-active').classList.remove('is-active')
+        tab.nextElementSibling
+          .querySelector('.tab-pane#' + li.firstElementChild.getAttribute('id'))
+          .classList.add('is-active')
+      }
+    })
+  })
+}
+
 // 「確認・変更」ボタン押下時の処理
 document.getElementsByName('confirmButton').forEach((item) => {
   item.addEventListener('click', function (e) {
@@ -49,40 +78,41 @@ document.getElementsByName('confirmButton').forEach((item) => {
   })
 })
 
-// 削除ボタン押下時の処理
+// モーダルに削除するuuidを格納
 document.getElementsByName('deleteButton').forEach((item) => {
   item.addEventListener('click', function (e) {
-    const decision = confirm('削除しますか？')
+    const uuid = item.getAttribute('uuid')
+    $('#modalDelBtn').setAttribute('uuid', uuid)
+  })
+})
 
-    if (!decision) {
-      return 0
-    } else {
-      const uuid = item.getAttribute('uuid')
-      const url = `/uploadFormat/${uuid}`
-      fetch(url, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
+// 削除ボタン押下時の処理
+document.getElementsByName('modalDelBtn').forEach((item) => {
+  item.addEventListener('click', function (e) {
+    const uuid = item.getAttribute('uuid')
+    const url = `/uploadFormat/${uuid}`
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        // 削除失敗
+        switch (response.result) {
+          case 0:
+            alert('削除失敗しました。（システムエラー）')
+            break
+          case 1:
+            // ページ更新
+            location.reload()
+            break
+          case -1:
+            alert('すでに削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
+            location.reload()
+            break
         }
       })
-        .then((response) => response.json())
-        .then((response) => {
-          // 削除失敗
-          switch (response.result) {
-            case 0:
-              alert('削除失敗-システムエラー')
-              break
-            case 1:
-              // ページ更新
-              alert('削除しました。\n「OK」ボタンを押下し、画面内容を最新します。')
-              location.reload()
-              break
-            case -1:
-              alert('すでに削除されています。\n「OK」ボタンを押下し、画面内容を最新します。')
-              location.reload()
-              break
-          }
-        })
-    }
   })
 })
