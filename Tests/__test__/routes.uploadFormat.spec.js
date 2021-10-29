@@ -211,7 +211,7 @@ describe('uploadFormatのテスト', () => {
   }
 
   // ファイル名設定
-  const filePath = './' ?? process.env.INVOICE_UPLOAD_PATH
+  const filePath = process.env.INVOICE_UPLOAD_PATH
   const fileName = 'uploadFormatTest.csv'
   const fileNameErr = 'uploadFormatTest2.csv'
 
@@ -3450,6 +3450,42 @@ describe('uploadFormatのテスト', () => {
       expect(response.body.result).toBe(1)
     })
 
+    test('準正常：解約中', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        usercontext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      const testUploadFormatId = '1'
+      request.params.uploadForamtId = testUploadFormatId
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
+      helper.checkContractStatus = (req, res, nex) => {
+        return '00'
+      }
+
+      // サービス実施結果を用意する。
+      deleteDataForUploadUploadFormatController.mockReturnValue(1)
+
+      // アップロードフォーマット削除サービス実施
+      await uploadFormat.cbDeleteFormat(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
     test('準正常:既に削除しました。', async () => {
       request.session = {
         usercontext: 'LoggedIn',
@@ -3505,6 +3541,108 @@ describe('uploadFormatのテスト', () => {
       // 準正常の場合（DBエラー発生）、レスポンスボディのresultで0を返す
       expect(response.body.result).toBe(0)
     })
+
+    test('異常：500エラー（DBからユーザ取得エラー）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからのユーザデータの取得ができなかった(null)場合を想定する
+      findOneSpy.mockReturnValue(null)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      helper.checkContractStatus = (req, res, next) => {
+        return '00'
+      }
+
+      // アップロードフォーマット削除サービス実施
+      await uploadFormat.cbDeleteFormat(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
+    })
+
+    test('異常：404エラーDBから取得したユーザのuserStatusが0以外の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBから取得したユーザデータのuserStatusが0以外の場合を想定する
+      findOneSpy.mockReturnValue(dataValuesStatuserr)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      helper.checkContractStatus = (req, res, next) => {
+        return '00'
+      }
+
+      // アップロードフォーマット削除サービス実施
+      await uploadFormat.cbDeleteFormat(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error404)
+    })
+
+    test('異常：500エラー（ContractStatusが取得されない場合）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの契約情報を取得出来なかったことを想定する
+      findOneSpyContracts.mockReturnValue(null)
+      helper.checkContractStatus = (req, res, next) => {
+        return '00'
+      }
+
+      // アップロードフォーマット削除サービス実施
+      await uploadFormat.cbDeleteFormat(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
+    })
+
+    test('異常：500エラー（不正なContractStatus）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの不正な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues4)
+      helper.checkContractStatus = (req, res, next) => {
+        return 999
+      }
+
+      // アップロードフォーマット削除サービス実施
+      await uploadFormat.cbDeleteFormat(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
+    })
   })
 
   describe('cbGetCheckFormat', () => {
@@ -3522,13 +3660,45 @@ describe('uploadFormatのテスト', () => {
       helper.checkContractStatus = (req, res, next) => {
         return '00'
       }
-      // 実施
+
       checkDataForUploadFormatUploadFormatControllerSpy.mockReturnValue(1)
 
+      // 実施
       await uploadFormat.cbGetCheckFormat(request, response, next)
 
       // データがある場合「1」を返す
       expect(response.body.result).toBe(1)
+    })
+
+    test('準正常：解約中', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        usercontext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
+      helper.checkContractStatus = (req, res, nex) => {
+        return '00'
+      }
+
+      // 実施
+      await uploadFormat.cbGetCheckFormat(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
 
     test('準正常：該当アップロードフォーマットが既に削除された場合', async () => {
@@ -3545,9 +3715,10 @@ describe('uploadFormatのテスト', () => {
       helper.checkContractStatus = (req, res, next) => {
         return '00'
       }
-      // 実施
+
       checkDataForUploadFormatUploadFormatControllerSpy.mockReturnValue(-1)
 
+      // 実施
       await uploadFormat.cbGetCheckFormat(request, response, next)
 
       // 既に削除の場合「-1」を返す
@@ -3568,13 +3739,116 @@ describe('uploadFormatのテスト', () => {
       helper.checkContractStatus = (req, res, next) => {
         return '00'
       }
-      // 実施
+
       checkDataForUploadFormatUploadFormatControllerSpy.mockReturnValue(0)
 
+      // 実施
       await uploadFormat.cbGetCheckFormat(request, response, next)
 
       // DBエラーの場合「0」を返す
       expect(response.body.result).toBe(0)
+    })
+
+    test('異常：500エラー（DBからユーザ取得エラー）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからのユーザデータの取得ができなかった(null)場合を想定する
+      findOneSpy.mockReturnValue(null)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      helper.checkContractStatus = (req, res, next) => {
+        return '00'
+      }
+
+      // 実施
+      await uploadFormat.cbGetCheckFormat(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
+    })
+
+    test('異常：404エラーDBから取得したユーザのuserStatusが0以外の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBから取得したユーザデータのuserStatusが0以外の場合を想定する
+      findOneSpy.mockReturnValue(dataValuesStatuserr)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      helper.checkContractStatus = (req, res, next) => {
+        return '00'
+      }
+
+      // 実施
+      await uploadFormat.cbGetCheckFormat(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error404)
+    })
+
+    test('異常：500エラー（ContractStatusが取得されない場合）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの契約情報を取得出来なかったことを想定する
+      findOneSpyContracts.mockReturnValue(null)
+      helper.checkContractStatus = (req, res, next) => {
+        return '00'
+      }
+
+      // 実施
+      await uploadFormat.cbGetCheckFormat(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
+    })
+
+    test('異常：500エラー（不正なContractStatus）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの不正な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues4)
+      helper.checkContractStatus = (req, res, next) => {
+        return 999
+      }
+
+      // 実施
+      await uploadFormat.cbGetCheckFormat(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(error500)
     })
   })
 })
