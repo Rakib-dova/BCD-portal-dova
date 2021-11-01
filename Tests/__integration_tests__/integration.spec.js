@@ -66,15 +66,6 @@ const getCookies = async (username, password) => {
 describe('ルーティングのインテグレーションテスト', () => {
   let acCookies, userCookies
 
-  const csvData = {
-    filename: 'integration_test_csv_file',
-    fileData: Buffer.from(
-      `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
-    2021-06-14,INTE_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1230012,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
-    ).toString('base64'),
-    uploadFormatId: ''
-  }
-
   const changeData = {
     chkContractorName: 'on',
     contractorName: '変更ページテスト',
@@ -163,29 +154,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
-    // 利用登録をしていないため、請求書一括アップロードページ利用できない
-    test('/csvuploadにGET：制御による500ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
-    })
-
-    // 利用登録をしていないため、請求書一括アップロード機能利用できない
-    test('/csvuploadにPOST：制御による500ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/csvupload')
-        .set('Content-Type', 'application/json')
-        .send({ ...csvData })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/システムエラーが発生しました。/i)
-      expect(res.text).toMatch(/時間を空けてもう一度アップロードしてください。/i)
-    })
-
     // 利用登録をしていないため、変更ページ利用できない
     test('/changeにGET：制御による500ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -262,38 +230,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
-    // テナントステータスが「新規申込」、請求書一括アップロードページ利用できる
-    test('/csvuploadにGET：利用できる', async () => {
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
-      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
-      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
-    })
-
-    // テナントステータスが「新規申込」、請求書一括アップロードページ利用できる
-    test('/csvuploadにPOST：利用できる', async () => {
-      const res = await request(app)
-        .post('/csvupload')
-        .set('Content-Type', 'application/json')
-        .send({ ...csvData })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      switch (res.text) {
-        case 'OK':
-          expect(res.text).toMatch('OK')
-          break
-        case '重複の請求書番号があります。':
-          expect(res.text).toMatch('重複の請求書番号があります。')
-          break
-      }
-    })
-
     // テナントステータスが「新規申込」、変更ページ利用できない
     test('/changeにGET：制御による新規申込中エラー', async () => {
       const res = await request(app)
@@ -339,38 +275,6 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('契約ステータス変更：「新規申込」→ 「新規受付」', async () => {
       await db.Contract.update({ contractStatus: 11 }, { where: { tenantId: testTenantId } })
       await db.Contract.findOne({ where: { tenantId: testTenantId } })
-    })
-
-    // テナントステータスが「新規受付」、請求書一括アップロードページ利用できる
-    test('/csvuploadにGET：利用できる', async () => {
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
-      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
-      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
-    })
-
-    // テナントステータスが「新規受付」、請求書一括アップロードページ利用できる
-    test('/csvuploadにPOST：利用できる', async () => {
-      const res = await request(app)
-        .post('/csvupload')
-        .set('Content-Type', 'application/json')
-        .send({ ...csvData })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      switch (res.text) {
-        case 'OK':
-          expect(res.text).toMatch('OK')
-          break
-        case '重複の請求書番号があります。':
-          expect(res.text).toMatch('重複の請求書番号があります。')
-          break
-      }
     })
 
     // テナントステータスが「新規受付」、変更ページ利用できない
@@ -881,16 +785,6 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(400)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正常にportal画面が表示された後csvuploadページに遷移する。
-    test('/csvuploadにGET：正常にportal画面が表示された後csvuploadページに遷移する', async () => {
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
     // 契約者情報変更
@@ -1902,180 +1796,6 @@ describe('ルーティングのインテグレーションテスト', () => {
       await db.Contract.update({ contractStatus: '99' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
-    })
-
-    test('管理者、契約ステータス：10, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '10', deleteFlag: 'false' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('管理者、契約ステータス：11, /csvupload', async () => {
-      // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：10, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '10' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：11, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('管理者、契約ステータス：40, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：40, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('管理者、契約ステータス：41, /csvupload', async () => {
-      // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：41, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('管理者、契約ステータス：00, /csvupload', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('一般ユーザ、契約ステータス：00, /csvupload', async () => {
-      // 契約ステータス変更(利用登録済み)
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/請求書一括作成/i)
-      expect(res.text).toMatch(/csv upload/i)
-    })
-
-    test('管理者、契約ステータス：30, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：30, /csvupload', async () => {
-      // 契約ステータス変更(利用登録済み)
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：31, /csvupload', async () => {
-      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：31, /csvupload', async () => {
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：99, /csvupload', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '99', deleteFlag: 'true' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
-    })
-
-    test('一般ユーザ、契約ステータス：99, /csvupload', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '99' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/csvupload')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(500)
 
