@@ -14,6 +14,15 @@ describe('ルーティングのインテグレーションテスト', () => {
   let userCookies
   let testTenantId
 
+  const csvData = {
+    filename: 'integration_test_csv_file',
+    fileData: Buffer.from(
+      `発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考
+    2021-06-14,INTE_TEST_INVOICE_1_1,3cfebb4f-2338-4dc7-9523-5423a027a880,2021-03-31,2021-03-17,test111,testsiten,testbank,普通,1230012,kang_test,特記事項テストです。,001,PC,100,個,100000,消費税,アップロードテスト`
+    ).toString('base64'),
+    uploadFormatId: ''
+  }
+
   describe('0.前準備', () => {
     test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
       // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
@@ -37,6 +46,52 @@ describe('ルーティングのインテグレーションテスト', () => {
 
   test('テナントID設定', async () => {
     testTenantId = getTenantId.id
+  })
+
+  describe('1.契約ステータス：未登録', () => {
+    // 利用登録をしていないため、請求書一括アップロードページ利用できない
+    test('管理者、契約ステータス：未登録、GET利用不可', async () => {
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
+    })
+
+    test('一般ユーザ、契約ステータス：未登録、GET利用不可', async () => {
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
+    })
+
+    // 利用登録をしていないため、請求書一括アップロード機能利用できない
+    test('管理者、契約ステータス：未登録、POST利用不可', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/システムエラーが発生しました。/i)
+      expect(res.text).toMatch(/時間を空けてもう一度アップロードしてください。/i)
+    })
+
+    test('一般ユーザ、契約ステータス：未登録、POST利用不可', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/システムエラーが発生しました。/i)
+      expect(res.text).toMatch(/時間を空けてもう一度アップロードしてください。/i)
+    })
   })
 
   describe('1.契約ステータス：新規登録', () => {
@@ -89,7 +144,68 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   describe('2.契約ステータス：登録申込', () => {
-    test('前準備:アップロードフォーマット設定 登録', async () => {
+    test('管理者、契約ステータス：登録申込、GET利用可能', async () => {
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
+    })
+
+    test('一般ユーザ、契約ステータス：登録申込、GET利用可能', async () => {
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
+    })
+
+    // テナントステータスが「新規申込」、請求書一括アップロードページ利用できる
+    test('管理者、契約ステータス：登録申込、POST利用可能', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      switch (res.text) {
+        case 'OK':
+          expect(res.text).toMatch('OK')
+          break
+        case '重複の請求書番号があります。':
+          expect(res.text).toMatch('重複の請求書番号があります。')
+          break
+      }
+    })
+
+    test('一般ユーザ、契約ステータス：登録申込、POST利用可能', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      switch (res.text) {
+        case 'OK':
+          expect(res.text).toMatch('OK')
+          break
+        case '重複の請求書番号があります。':
+          expect(res.text).toMatch('重複の請求書番号があります。')
+          break
+      }
+    })
+
+    test('事前準備:アップロードフォーマット設定 登録', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -269,7 +385,8 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   describe('3.契約ステータス：登録受付', () => {
-    test('管理者、請求書一括作成アクセス：フォーマット種別確認', async () => {
+    test('管理者、契約ステータス：登録受付、GET利用可能', async () => {
+      // 契約ステータス：登録受付に変更
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -288,6 +405,85 @@ describe('ルーティングのインテグレーションテスト', () => {
         )
       }
 
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
+    })
+
+    test('一般ユーザ、契約ステータス：登録受付、GET利用可能', async () => {
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
+    })
+
+    test('管理者、契約ステータス：登録受付、POST利用可能', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      switch (res.text) {
+        case 'OK':
+          expect(res.text).toMatch('OK')
+          break
+        case '重複の請求書番号があります。':
+          expect(res.text).toMatch('重複の請求書番号があります。')
+          break
+      }
+    })
+
+    test('一般ユーザ、契約ステータス：登録受付、POST利用可能', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      switch (res.text) {
+        case 'OK':
+          expect(res.text).toMatch('OK')
+          break
+        case '重複の請求書番号があります。':
+          expect(res.text).toMatch('重複の請求書番号があります。')
+          break
+      }
+    })
+
+    // テナントステータスが「新規受付」、請求書一括アップロードページ利用できる
+    test('/csvuploadにPOST：利用できる', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      switch (res.text) {
+        case 'OK':
+          expect(res.text).toMatch('OK')
+          break
+        case '重複の請求書番号があります。':
+          expect(res.text).toMatch('重複の請求書番号があります。')
+          break
+      }
+    })
+
+    test('管理者、請求書一括作成アクセス：フォーマット種別確認', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -340,13 +536,15 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('アップロードフォーマット設定一覧画面へ遷移', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true
       })
 
       // 新しいページ起動
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
+
+      await page.waitForTimeout(500)
 
       // 請求書一覧作成移動
       await page.goto('https://localhost:3000/csvupload')
@@ -363,7 +561,8 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   describe('4.契約ステータス：契約中', () => {
-    test('管理者、請求書一括作成アクセス：フォーマット種別確認', async () => {
+    test('管理者、契約ステータス：契約中、GET利用可能', async () => {
+      // 契約ステータス：契約中に変更
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -384,6 +583,66 @@ describe('ルーティングのインテグレーションテスト', () => {
         )
       }
 
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
+    })
+
+    test('一般ユーザ、契約ステータス：契約中、GET利用可能', async () => {
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
+    })
+
+    test('管理者、契約ステータス：契約中、POST利用可能', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      switch (res.text) {
+        case 'OK':
+          expect(res.text).toMatch('OK')
+          break
+        case '重複の請求書番号があります。':
+          expect(res.text).toMatch('重複の請求書番号があります。')
+          break
+      }
+    })
+
+    test('一般ユーザ、契約ステータス：契約中、POST利用可能', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      switch (res.text) {
+        case 'OK':
+          expect(res.text).toMatch('OK')
+          break
+        case '重複の請求書番号があります。':
+          expect(res.text).toMatch('重複の請求書番号があります。')
+          break
+      }
+    })
+
+    test('管理者、請求書一括作成アクセス：フォーマット種別確認', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -435,7 +694,8 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   describe('5.契約ステータス：変更申込', () => {
-    test('アップロードフォーマット設定 確認画面アクセス：正常', async () => {
+    test('管理者、契約ステータス：変更申込、GET利用可能', async () => {
+      // 契約ステータス：変更申込に変更
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -463,6 +723,66 @@ describe('ルーティングのインテグレーションテスト', () => {
         )
       }
 
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
+    })
+
+    test('一般ユーザ、契約ステータス：変更申込、GET利用可能', async () => {
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
+    })
+
+    test('管理者、契約ステータス：変更申込、POST利用可能', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      switch (res.text) {
+        case 'OK':
+          expect(res.text).toMatch('OK')
+          break
+        case '重複の請求書番号があります。':
+          expect(res.text).toMatch('重複の請求書番号があります。')
+          break
+      }
+    })
+
+    test('一般ユーザ、契約ステータス：変更申込、POST利用可能', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      switch (res.text) {
+        case 'OK':
+          expect(res.text).toMatch('OK')
+          break
+        case '重複の請求書番号があります。':
+          expect(res.text).toMatch('重複の請求書番号があります。')
+          break
+      }
+    })
+
+    test('アップロードフォーマット設定 確認画面アクセス：正常', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -510,6 +830,200 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(formatResult).toBe('インテ')
 
       await browser.close()
+    })
+  })
+
+  describe('5.契約ステータス：変更受付', () => {
+    test('管理者、契約ステータス：変更受付、GET利用不可', async () => {
+      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
+    })
+
+    test('一般ユーザ、契約ステータス：変更受付、GET利用不可', async () => {
+      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/請求書一括作成/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
+    })
+  })
+
+  test('管理者、契約ステータス：変更受付、POST利用可能', async () => {
+    const res = await request(app)
+      .post('/csvupload')
+      .set('Content-Type', 'application/json')
+      .send({ ...csvData })
+      .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+      .expect(200)
+
+    switch (res.text) {
+      case 'OK':
+        expect(res.text).toMatch('OK')
+        break
+      case '重複の請求書番号があります。':
+        expect(res.text).toMatch('重複の請求書番号があります。')
+        break
+    }
+  })
+
+  test('一般ユーザ、契約ステータス：変更受付、POST利用可能', async () => {
+    const res = await request(app)
+      .post('/csvupload')
+      .set('Content-Type', 'application/json')
+      .send({ ...csvData })
+      .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+      .expect(200)
+
+    switch (res.text) {
+      case 'OK':
+        expect(res.text).toMatch('OK')
+        break
+      case '重複の請求書番号があります。':
+        expect(res.text).toMatch('重複の請求書番号があります。')
+        break
+    }
+  })
+
+  describe('5.契約ステータス：解約申込', () => {
+    test('管理者、契約ステータス：解約申込、GET利用不可', async () => {
+      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：解約申込、GET利用不可', async () => {
+      // 契約ステータス変更(利用登録済み)
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：解約申込、POST利用不可', async () => {
+      await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(400)
+    })
+
+    test('一般ユーザ、契約ステータス：解約申込、POST利用不可', async () => {
+      await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(400)
+    })
+  })
+
+  describe('5.契約ステータス：解約受付', () => {
+    test('管理者、契約ステータス：解約受付、GET利用不可', async () => {
+      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：解約受付、GET利用不可', async () => {
+      // 契約ステータス変更(利用登録済み)
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：解約受付、POST利用不可', async () => {
+      await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(400)
+    })
+
+    test('一般ユーザ、契約ステータス：解約受付、POST利用不可', async () => {
+      await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(400)
+    })
+  })
+
+  describe('5.契約ステータス：解約', () => {
+    test('管理者、契約ステータス：解約、GET利用不可', async () => {
+      await db.Contract.update(
+        { contractStatus: '99', deleteFlag: 'true', numberN: '' },
+        { where: { tenantId: testTenantId } }
+      )
+      await db.Tenant.update({ deleteFlag: 1 }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：解約、GET利用不可', async () => {
+      // 契約ステータス変更(利用登録済み)
+      const res = await request(app)
+        .get('/csvupload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：解約、POST利用不可', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/システムエラーが発生しました。/i)
+      expect(res.text).toMatch(/時間を空けてもう一度アップロードしてください。/i)
+    })
+
+    test('一般ユーザ、契約ステータス：解約、POST利用不可', async () => {
+      const res = await request(app)
+        .post('/csvupload')
+        .set('Content-Type', 'application/json')
+        .send({ ...csvData })
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/システムエラーが発生しました。/i)
+      expect(res.text).toMatch(/時間を空けてもう一度アップロードしてください。/i)
     })
   })
 
