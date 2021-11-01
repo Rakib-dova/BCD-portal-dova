@@ -14,7 +14,6 @@ trigger:
     exclude:
       - /Documents
       - /Tests
-      - /*.yml
 
 parameters:
   - name: Environment
@@ -28,13 +27,6 @@ parameters:
   - name: IntegrationTest
     type: string
     default: no
-    values:
-      - yes
-      - no
-  
-  - name: UnitTest
-    type: string
-    default: yes
     values:
       - yes
       - no
@@ -62,14 +54,10 @@ stages:
               arguments: "--force"
 
           - task: Npm@0
-            condition: eq('${{parameters.UnitTest}}', 'yes')
             displayName: "Install test dependencies"
             inputs:
               cwd: Tests
               arguments: "--force"
-
-          - bash: sudo mkdir /home/upload
-            displayName: Make directory for upload files
 
           - task: gulp@0
             displayName: "Run unit tests"
@@ -80,27 +68,12 @@ stages:
               publishJUnitResults: true
             enabled: false
 
-          - bash: | 
-              npm install jest-junit --save-dev
-              cd ./Tests
-              npm run test:ci
+          - task: Npm@1
             displayName: "Run unit tests"
-            condition: eq('${{parameters.UnitTest}}', 'yes')
-            
-          - task: PublishCodeCoverageResults@1
-            condition: eq('${{parameters.UnitTest}}', 'yes')
-            displayName: 'Publish code coverage'
             inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: $(System.DefaultWorkingDirectory)/Tests/coverage/cobertura-coverage.xml
-          
-          - task: PublishTestResults@2
-            condition: eq('${{parameters.UnitTest}}', 'yes')
-            displayName: 'Publish test results'
-            inputs:
-              testRunTitle: '${{ parameters.Environment }}'
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '$(System.DefaultWorkingDirectory)/Tests/coverage/junit.xml'
+              command: "custom"
+              workingDir: "Tests"
+              customCommand: "run test:ci"
 
           - task: Docker@1
             displayName: "Build an image"
@@ -134,34 +107,11 @@ stages:
             deploy:
               steps:
                 - task: AzureWebAppContainer@1
-                  condition: eq('${{parameters.Environment}}', 'dev')
                   displayName: "Azure Web App on Container Deploy: $(portalAppName)"
                   inputs:
                     azureSubscription: "$(azureSubscriptionEndpoint)"
                     appName: "$(portalAppName)"
                     containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
-                  enabled: true
-
-                - task: AzureWebAppContainer@1
-                  displayName: 'Deploy web app container to staging slot'
-                  condition: eq('${{parameters.Environment}}', 'stg')
-                  inputs:
-                    azureSubscription: '$(azureSubscriptionEndpoint)'
-                    appName: '$(portalAppName)'
-                    deployToSlotOrASE: true
-                    resourceGroupName: '$(bcd_portal_rg_name)'
-                    slotName: 'staging'
-                    containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
-                
-                - task: AzureAppServiceManage@0
-                  displayName: 'Swap slots'
-                  condition: eq('${{parameters.Environment}}', 'stg')
-                  inputs:
-                    azureSubscription: '$(azureSubscriptionEndpoint)'
-                    Action: 'Swap Slots'
-                    WebAppName: '$(portalAppName)'
-                    ResourceGroupName: '$(bcd_portal_rg_name)'
-                    SourceSlot: 'staging'
 
       - job: Confirmation
         condition: eq('${{parameters.IntegrationTest}}', 'yes')
@@ -235,13 +185,7 @@ stages:
               command: "custom"
               workingDir: "Tests"
               customCommand: "run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)"
-            enabled: false
-
-          - bash: | 
-              npm install jest-junit --save-dev
-              cd ./Tests
-              npm run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)
-            displayName: "Run unit tests"
+            enabled: true
 
           - task: AzureCLI@2
             displayName: "Delete front-door waf-policy rule"
