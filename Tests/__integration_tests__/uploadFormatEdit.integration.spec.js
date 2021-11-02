@@ -337,7 +337,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
       )
 
       await page.waitForTimeout(1000)
-      
+
       // アップロードフォーマット設定画面に遷移する。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
