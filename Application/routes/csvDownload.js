@@ -9,6 +9,7 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const validate = require('../lib/validate')
+const apiManager = require('../controllers/apiManager')
 const functionName = 'cbPostIndex'
 
 const cbGetIndex = async (req, res, next) => {
@@ -107,10 +108,38 @@ const cbPostIndex = async (req, res, next) => {
 
   logger.info(`画面から受けたデータ：${JSON.stringify(req.body)}`)
 
-  // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
-  const resultOfSearch = 0
+  // 請求書を検索する
+  const documentsResult = await apiManager.accessTradeshift(
+    req.user.accessToken,
+    req.user.refreshToken,
+    'get',
+    '/documents'
+  )
+  const documents = documentsResult.Document
+  const invoiceNumber = req.body.invoiceNumber
+  let documentID = ''
+
+  // 検索結果から請求書番号でdocumentIDを取得
+  documents.map((doc) => {
+    if (doc.ID === invoiceNumber) {
+      documentID = doc.DocumentId
+    }
+    return 0
+  })
+
+  // 取得したdocumentIDで請求書を取得
+  // 取得した請求書をCSVファイルに作成する処理必要
+  const result = await apiManager.accessTradeshift(
+    req.user.accessToken,
+    req.user.refreshToken,
+    'get',
+    `/documents/${documentID}`
+  )
 
   const downloadFile = ''
+
+  // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
+  const resultOfSearch = 0
   switch (resultOfSearch) {
     case 0: {
       // 条件に合わせるデータがない場合、お知らせを表示する。
@@ -132,7 +161,7 @@ const cbPostIndex = async (req, res, next) => {
 }
 
 router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/', helper.isAuthenticated, cbPostIndex)
+router.post('/downloadInvoice', helper.isAuthenticated, cbPostIndex)
 
 module.exports = {
   router: router,

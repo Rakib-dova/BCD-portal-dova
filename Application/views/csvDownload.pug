@@ -10,7 +10,7 @@ block content
     .columns.is-centered
       .column.is-11
         .box
-          form(method='POST')
+          form#form(action="#")
             .field.is-horizontal
               .field-label.is-normal
                 label.bulmalabel 請求書番号
@@ -18,8 +18,6 @@ block content
                 .field
                   .control.has-icons-right            
                     input.input#invoiceNumber.itemForSearch(type="text" name="invoiceNumber" required)
-                    span.icon.is-small.is-right
-                      i.fas.fa-check
             .field.is-horizontal
               .field-label.is-normal
                 label.bulmalabel ステータス
@@ -93,7 +91,7 @@ block content
                     input.input#paymentDateEnd.itemForSearch(type="date" name="paymentDateEnd" value= today)
             .field.is-grouped.is-grouped-centered
               .control
-                button.button.is-info CSVダウンロード
+                button.button.is-info#submit(type="submit" formaction="/csvDownload/downloadInvoice" formmethod="POST")  CSVダウンロード
 
     include footer
 
