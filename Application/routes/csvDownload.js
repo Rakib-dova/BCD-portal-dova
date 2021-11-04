@@ -107,14 +107,27 @@ const cbPostIndex = async (req, res, next) => {
 
   logger.info(`画面から受けたデータ：${JSON.stringify(req.body)}`)
 
-  const downloadFile = ''
-  // ファイル名：今日の日付_ユーザID.csv
-  const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
-  const filename = encodeURIComponent(`${today}_${req.user.userId}.csv`)
+  // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
+  const resultOfSearch = 0
 
-  res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-  res.status(200).send(downloadFile)
-  logger.info('download')
+  const downloadFile = ''
+  switch (resultOfSearch) {
+    case 0: {
+      // 条件に合わせるデータがない場合、お知らせを表示する。
+      req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
+      res.redirect(303, '/csvDownload')
+      break
+    }
+    default: {
+      // ファイル名：今日の日付_ユーザID.csv
+      const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
+      const filename = encodeURIComponent(`${today}_${req.user.userId}.csv`)
+
+      res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+      res.status(200).send(downloadFile)
+      break
+    }
+  }
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 

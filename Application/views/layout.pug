@@ -39,6 +39,10 @@ html
 
     if messages.info
       #message-info(title= messages.info[0])
+
+    if messages.noti
+      .notification-header
+        .notification.notification-body.is-info#message-info= messages.noti[0]
     
     block scripts
       script(src="/js/common-page.js")
