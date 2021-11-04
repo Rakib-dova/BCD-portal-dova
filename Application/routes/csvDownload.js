@@ -11,7 +11,7 @@ const constantsDefine = require('../constants')
 const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const functionName = 'cbPostIndex'
-
+const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -128,7 +128,6 @@ const cbPostIndex = async (req, res, next) => {
   })
 
   // 取得したdocumentIDで請求書を取得
-  // 取得した請求書をCSVファイルに作成する処理必要
   const result = await apiManager.accessTradeshift(
     req.user.accessToken,
     req.user.refreshToken,
@@ -136,15 +135,124 @@ const cbPostIndex = async (req, res, next) => {
     `/documents/${documentID}`
   )
 
-  const downloadFile = ''
+  // 取得した請求書をJSONに作成する
+  const jsondata = dataTojson(result)
+
+  // JSONファイルをCSVに変更
+  const downloadFile = jsonToCsv(jsondata)
+
   // ファイル名：今日の日付_ユーザID.csv
   const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
   const filename = encodeURIComponent(`${today}_${req.user.userId}.csv`)
-
   res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-  res.status(200).send(downloadFile)
+  res.status(200).send(`${String.fromCharCode(0xfeff)}` + downloadFile)
   logger.info('download')
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+}
+
+const dataTojson = (data) => {
+  const jsonData = []
+  const InvoiceObject = {
+    発行日: '',
+    請求書番号: '',
+    テナントID: '',
+    支払期日: '',
+    納品日: '',
+    備考: '',
+    銀行名: '',
+    支店名: '',
+    科目: '',
+    口座番号: '',
+    口座名義: '',
+    その他特記事項: '',
+    '明細-項目ID': '',
+    '明細-内容': '',
+    '明細-数量': '',
+    '明細-単位': '',
+    '明細-単価': '',
+    '明細-税（消費税／軽減税率／不課税／免税／非課税）': '',
+    '明細-備考': ''
+  }
+  const unitCodeKeys = Object.keys(bconCsvUnitDefault)
+
+  for (let i = 0; i < data.InvoiceLine.length; ++i) {
+    const invoice = { ...InvoiceObject }
+    invoice.発行日 = data.IssueDate.value
+    invoice.請求書番号 = data.ID.value
+    invoice.テナントID = data.AccountingCustomerParty.Party.PartyIdentification[0].ID.value
+    invoice.支払期日 = data.PaymentMeans[0].PaymentDueDate.value
+    invoice.納品日 = data.Delivery[0].ActualDeliveryDate.value
+    invoice.備考 = data.AdditionalDocumentReference[0].ID.value
+    invoice.銀行名 =
+      data.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.FinancialInstitution.Name.value
+    invoice.支店名 = data.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.Name.value
+    const accountType = data.PaymentMeans[0].PayeeFinancialAccount.AccountTypeCode.value
+    switch (accountType) {
+      case 'Current':
+        invoice.科目 = '当座'
+        break
+      case 'General':
+        invoice.科目 = '普通'
+        break
+    }
+    invoice.口座番号 = data.PaymentMeans[0].PayeeFinancialAccount.ID.value
+    invoice.口座名義 = data.PaymentMeans[0].PayeeFinancialAccount.Name.value
+    invoice.その他特記事項 = data.Note[0].value
+    invoice['明細-項目ID'] = data.InvoiceLine[i].ID.value
+    invoice['明細-内容'] = data.InvoiceLine[i].Item.Description[0].value
+    invoice['明細-数量'] = data.InvoiceLine[i].InvoicedQuantity.value
+    const unitcode = data.InvoiceLine[i].InvoicedQuantity.unitCode
+    unitCodeKeys.map((key) => {
+      if (bconCsvUnitDefault[key] === unitcode) {
+        invoice['明細-単位'] = key
+      }
+      return ''
+    })
+    invoice['明細-単価'] = data.InvoiceLine[i].LineExtensionAmount.value
+    const taxValue = data.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.Name.value
+    switch (taxValue) {
+      case 'JP 不課税 0%':
+        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '不課税'
+        break
+      case 'JP 免税 0%':
+        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '免税'
+        break
+      case 'JP 消費税 10%':
+        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '消費税'
+        break
+      case 'JP 消費税(軽減税率) 8%':
+        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '軽減税率'
+        break
+      case 'JP 非課税 0%':
+        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '非課税'
+        break
+    }
+    invoice['明細-備考'] = data.InvoiceLine[i].DocumentReference[0].ID.value
+    jsonData.push(invoice)
+  }
+
+  return jsonData
+}
+
+const jsonToCsv = (jsonData) => {
+  const jsonArray = jsonData
+
+  let csvString = ''
+  const titles = Object.keys(jsonArray[0])
+
+  titles.forEach((title, index) => {
+    csvString += index !== titles.length - 1 ? `${title},` : `${title}\r\n`
+  })
+
+  jsonArray.forEach((content, index) => {
+    let row = ''
+    for (const title in content) {
+      row += row === '' ? `${content[title]}` : `,${content[title]}`
+    }
+    csvString += index !== jsonArray.lent - 1 ? `${row}\r\n` : `${row}`
+  })
+
+  return csvString
 }
 
 router.get('/', helper.isAuthenticated, cbGetIndex)
