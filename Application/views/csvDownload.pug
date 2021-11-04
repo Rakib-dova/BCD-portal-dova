@@ -45,14 +45,14 @@ block content
               .field-body
                 .field
                   .control             
-                    input.input#sender.itemForSearch(type="text" name="sender")
+                    input.input#sender.itemForSearch(type="text" name="sender" pattern="^[a-zA-Z0-9\\u3040-\\u309F\\u30A0-\\u30FF\\uFF61-\\uFF9F]{1,100}$" placeholder="日本語・英語・数字")
             .field.is-horizontal
               .field-label.is-normal
                 label.bulmalabel 受信企業
               .field-body
                 .field
                   .control             
-                    input.input#receiver.itemForSearch(type="text" name="receiver")
+                    input.input#receiver.itemForSearch(type="text" name="receiver" pattern="^[a-zA-Z0-9\\u3040-\\u309F\\u30A0-\\u30FF\\uFF61-\\uFF9F]{1,100}$" placeholder="日本語・英語・数字")
             .field.is-horizontal
               .field-label.is-normal
                 label.bulmalabel 発行日
@@ -71,7 +71,7 @@ block content
               .field-body
                 .field.is-grouped.is-grouped-multiline
                   .control.is-expanded           
-                    input.input#dateOfPreparationStart.itemForSearch(type="date" name="dateOfPreparationStart" value= today)
+                    input.input#dateOfPreparationStart.itemForSearch(type="date" name="dateOfPreparationStart"  value= today)
                   div 　
                   div ～
                   div 　
@@ -88,7 +88,7 @@ block content
                   div ～
                   div 　
                   .control.is-expanded
-                    input.input#paymentDateEnd.itemForSearch(type="date" name="paymentDateEnd" value= today)
+                    input.input#paymentDateEnd.itemForSearch(type="date" name="paymentDateEnd"  value= today)
             .field.is-grouped.is-grouped-centered
               .control
                 button.button.is-info#submit(type="submit" formaction="/csvDownload/downloadInvoice" formmethod="POST")  CSVダウンロード

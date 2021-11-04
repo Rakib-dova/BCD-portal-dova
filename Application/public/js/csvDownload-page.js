@@ -8,6 +8,7 @@ window.onload = () => {
     }, 2600)
   }
 }
+
 document.getElementById('submit').addEventListener('click', function (e) {
   // 各項目チェック
   const elements = document.querySelectorAll('input')
@@ -16,7 +17,6 @@ document.getElementById('submit').addEventListener('click', function (e) {
   const invalidCheckTarget = []
   Array.prototype.forEach.call(elements, (checkTarget) => {
     if (checkTarget.getAttribute('name') === 'invoiceNumber') {
-      console.log(checkTarget.closest('.field').childNodes[1], 'childNode')
       if (
         checkTarget.closest('.field').childNodes[1] !== undefined &&
         checkTarget.closest('.field').childNodes[1].getAttribute('id') === 'caution'
@@ -112,7 +112,6 @@ function shouldBeValidated(field) {
 }
 
 function instantValidation(field) {
-  console.log('instant')
   if (shouldBeValidated(field)) {
     const invalid =
       (field.getAttribute('required') && !field.value) ||
