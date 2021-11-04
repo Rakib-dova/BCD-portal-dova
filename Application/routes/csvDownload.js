@@ -12,6 +12,7 @@ const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const functionName = 'cbPostIndex'
 const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -108,6 +109,9 @@ const cbPostIndex = async (req, res, next) => {
 
   logger.info(`画面から受けたデータ：${JSON.stringify(req.body)}`)
 
+  const invoiceNumber = req.body.invoiceNumber
+  let documentID = ''
+
   // 請求書を検索する
   const documentsResult = await apiManager.accessTradeshift(
     req.user.accessToken,
@@ -115,38 +119,112 @@ const cbPostIndex = async (req, res, next) => {
     'get',
     '/documents'
   )
-  const documents = documentsResult.Document
-  const invoiceNumber = req.body.invoiceNumber
-  let documentID = ''
 
-  // 検索結果から請求書番号でdocumentIDを取得
-  documents.map((doc) => {
-    if (doc.ID === invoiceNumber) {
-      documentID = doc.DocumentId
+  // documentsResultエラー検査
+  if (documentsResult instanceof Error) {
+    if (String(documentsResult.response?.status).slice(0, 1) === '4') {
+      // 400番エラーの場合
+      logger.error(
+        {
+          tenant: req.user.tenantId,
+          user: req.user.userId,
+          invoiceNumber: req.body.invoiceNumber,
+          status: 2
+        },
+        documentsResult.name
+      )
+      req.flash('error', constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR)
+      res.redirect(303, '/csvDownload')
+    } else if (String(documentsResult.response?.status).slice(0, 1) === '5') {
+      // 500番エラーの場合
+      logger.error(
+        {
+          tenant: req.user.tenantId,
+          user: req.user.userId,
+          invoiceNumber: req.body.invoiceNumber,
+          status: 2
+        },
+        documentsResult.toString()
+      )
+      req.flash('error', constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR)
+      res.redirect(303, '/csvDownload')
     }
-    return 0
-  })
+  } else {
+    const documents = documentsResult.Document
+    // 検索結果から請求書番号でdocumentIDを取得
+    documents.map((doc) => {
+      if (doc.ID === invoiceNumber) {
+        documentID = doc.DocumentId
+      }
+      return 0
+    })
+    // 取得したdocumentIDで請求書を取得
+    const result = await apiManager.accessTradeshift(
+      req.user.accessToken,
+      req.user.refreshToken,
+      'get',
+      `/documents/${documentID}`
+    )
+    // resultエラー検査
+    if (result instanceof Error) {
+      if (String(result.response?.status).slice(0, 1) === '4') {
+        // 400番エラーの場合
+        logger.error(
+          {
+            tenant: req.user.tenantId,
+            user: req.user.userId,
+            invoiceNumber: req.body.invoiceNumber,
+            status: 2
+          },
+          result.name
+        )
 
-  // 取得したdocumentIDで請求書を取得
-  const result = await apiManager.accessTradeshift(
-    req.user.accessToken,
-    req.user.refreshToken,
-    'get',
-    `/documents/${documentID}`
-  )
+        req.flash('error', constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR)
+        res.redirect(303, '/csvDownload')
+      } else if (String(result.response?.status).slice(0, 1) === '5') {
+        // 500番エラーの場合
+        logger.error(
+          {
+            tenant: req.user.tenantId,
+            user: req.user.userId,
+            invoiceNumber: req.body.invoiceNumber,
+            status: 2
+          },
+          result.toString()
+        )
+      }
+      req.flash('error', constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR)
+      res.redirect(303, '/csvDownload')
+    } else {
+      // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
+      let resultOfSearch = result.InvoiceLine?.length
+      if (resultOfSearch === undefined) {
+        resultOfSearch = 0
+      }
+      switch (resultOfSearch) {
+        case 0: {
+          // 条件に合わせるデータがない場合、お知らせを表示する。
+          req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
+          res.redirect(303, '/csvDownload')
+          break
+        }
+        default: {
+          // 取得した請求書をJSONに作成する
+          const jsondata = dataTojson(result)
+          // JSONファイルをCSVに変更
+          const downloadFile = jsonToCsv(jsondata)
+          // ファイル名：今日の日付_ユーザID.csv
+          const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
+          const filename = encodeURIComponent(`${today}_${req.user.userId}.csv`)
 
-  // 取得した請求書をJSONに作成する
-  const jsondata = dataTojson(result)
+          res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+          res.status(200).send(`${String.fromCharCode(0xfeff)}` + downloadFile)
+          break
+        }
+      }
+    }
+  }
 
-  // JSONファイルをCSVに変更
-  const downloadFile = jsonToCsv(jsondata)
-
-  // ファイル名：今日の日付_ユーザID.csv
-  const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
-  const filename = encodeURIComponent(`${today}_${req.user.userId}.csv`)
-  res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-  res.status(200).send(`${String.fromCharCode(0xfeff)}` + downloadFile)
-  logger.info('download')
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
@@ -261,5 +339,7 @@ router.post('/downloadInvoice', helper.isAuthenticated, cbPostIndex)
 module.exports = {
   router: router,
   cbGetIndex: cbGetIndex,
-  cbPostIndex: cbPostIndex
+  cbPostIndex: cbPostIndex,
+  dataTojson: dataTojson,
+  jsonToCsv: jsonToCsv
 }
