@@ -71,15 +71,21 @@ const cbGetIndex = async (req, res, next) => {
 
 const cbPostIndex = async (req, res, next) => {
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+
+  // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
 
+  // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
 
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
   if (user instanceof Error || user === null) {
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) {
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
@@ -107,122 +113,69 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
-  logger.info(`画面から受けたデータ：${JSON.stringify(req.body)}`)
-
+  // 請求書ダウンロード画面から請求書番号を取得
   const invoiceNumber = req.body.invoiceNumber
-  let documentID = ''
 
   // 請求書を検索する
   const documentsResult = await apiManager.accessTradeshift(
     req.user.accessToken,
     req.user.refreshToken,
     'get',
-    '/documents'
+    '/documents?businessId=' + invoiceNumber
   )
 
   // documentsResultエラー検査
   if (documentsResult instanceof Error) {
-    if (String(documentsResult.response?.status).slice(0, 1) === '4') {
-      // 400番エラーの場合
-      logger.error(
-        {
-          tenant: req.user.tenantId,
-          user: req.user.userId,
-          invoiceNumber: req.body.invoiceNumber,
-          status: 2
-        },
-        documentsResult.name
-      )
-      req.flash('error', constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR)
-      res.redirect(303, '/csvDownload')
-    } else if (String(documentsResult.response?.status).slice(0, 1) === '5') {
-      // 500番エラーの場合
-      logger.error(
-        {
-          tenant: req.user.tenantId,
-          user: req.user.userId,
-          invoiceNumber: req.body.invoiceNumber,
-          status: 2
-        },
-        documentsResult.toString()
-      )
-      req.flash('error', constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR)
-      res.redirect(303, '/csvDownload')
-    }
+    errorHandle(documentsResult, res, req)
   } else {
-    const documents = documentsResult.Document
-    // 検索結果から請求書番号でdocumentIDを取得
-
-    documents.map((doc) => {
-      if (doc.ID === invoiceNumber) {
-        documentID = doc.DocumentId
-      }
-      return 0
-    })
-    // 取得したdocumentIDで請求書を取得
-    const result = await apiManager.accessTradeshift(
-      req.user.accessToken,
-      req.user.refreshToken,
-      'get',
-      `/documents/${documentID}`
-    )
-    // resultエラー検査
-    if (result instanceof Error) {
-      if (String(result.response?.status).slice(0, 1) === '4') {
-        // 400番エラーの場合
-        logger.error(
-          {
-            tenant: req.user.tenantId,
-            user: req.user.userId,
-            invoiceNumber: req.body.invoiceNumber,
-            status: 2
-          },
-          result.name
-        )
-
-        req.flash('error', constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR)
-        res.redirect(303, '/csvDownload')
-      } else if (String(result.response?.status).slice(0, 1) === '5') {
-        // 500番エラーの場合
-        logger.error(
-          {
-            tenant: req.user.tenantId,
-            user: req.user.userId,
-            invoiceNumber: req.body.invoiceNumber,
-            status: 2
-          },
-          result.toString()
-        )
-      }
-      req.flash('error', constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR)
+    // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
+    if (documentsResult.itemCount === 0) {
+      // 条件に合わせるデータがない場合、お知らせを表示する。
+      req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
       res.redirect(303, '/csvDownload')
     } else {
-      // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
-      let resultOfSearch = result.InvoiceLine?.length
-      if (resultOfSearch === undefined) {
-        resultOfSearch = 0
-      }
+      // documentIdの初期化
+      let documentId = ''
+      // 請求書番号で検索した結果の配列を取得
+      const documents = documentsResult.Document
 
-      switch (resultOfSearch) {
-        case 0: {
-          // 条件に合わせるデータがない場合、お知らせを表示する。
-          req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
-          res.redirect(303, '/csvDownload')
-          break
+      // 取得した配列から請求書番号（UUID）を取得
+      documents.map((doc) => {
+        if (doc.ID === invoiceNumber) {
+          documentId = doc.DocumentId
         }
-        default: {
+        return 0
+      })
+
+      // 請求書番号（UUID）を取得した場合
+      if (documentId !== '') {
+        // 請求書番号（UUID）で請求書情報取得（とれシフAPI呼出）
+        const result = await apiManager.accessTradeshift(
+          req.user.accessToken,
+          req.user.refreshToken,
+          'get',
+          `/documents/${documentId}`
+        )
+
+        // resultエラー検査
+        if (result instanceof Error) {
+          errorHandle(result.response?.status, res, req)
+        } else {
           // 取得した請求書をJSONに作成する
-          const jsondata = dataTojson(result)
+          const jsondata = dataToJson(result)
           // JSONファイルをCSVに変更
           const downloadFile = jsonToCsv(jsondata)
           // ファイル名：今日の日付_ユーザID.csv
           const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
-          const filename = encodeURIComponent(`${today}_${req.user.userId}.csv`)
+          const filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
 
           res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
           res.status(200).send(`${String.fromCharCode(0xfeff)}` + downloadFile)
-          break
         }
+      } else {
+        // 条件に合わせるデータがない場合、お知らせを表示する。
+        req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
+        res.redirect(303, '/csvDownload')
       }
     }
   }
@@ -230,7 +183,37 @@ const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
-const dataTojson = (data) => {
+const errorHandle = (documentsResult, _res, _req) => {
+  if (String(documentsResult.response?.status).slice(0, 1) === '4') {
+    // 400番エラーの場合
+    logger.error(
+      {
+        tenant: _req.user.tenantId,
+        user: _req.user.userId,
+        invoiceNumber: _req.body.invoiceNumber,
+        status: 2
+      },
+      documentsResult.name
+    )
+    _req.flash('noti', constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR)
+    _res.redirect(303, '/csvDownload')
+  } else if (String(documentsResult.response?.status).slice(0, 1) === '5') {
+    // 500番エラーの場合
+    logger.error(
+      {
+        tenant: _req.user.tenantId,
+        user: _req.user.userId,
+        invoiceNumber: _req.body.invoiceNumber,
+        status: 2
+      },
+      documentsResult.toString()
+    )
+    _req.flash('noti', constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR)
+    _res.redirect(303, '/csvDownload')
+  }
+}
+
+const dataToJson = (data) => {
   const jsonData = []
   const InvoiceObject = {
     発行日: '',
@@ -273,28 +256,23 @@ const dataTojson = (data) => {
       return ''
     })
     invoice['明細-単価'] = data.InvoiceLine[i].LineExtensionAmount.value
-    const taxValue = data.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.Name.value
-    switch (taxValue) {
-      case 'JP 不課税 0%':
-        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '不課税'
-        break
-      case 'JP 免税 0%':
-        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '免税'
-        break
-      case 'JP 消費税 10%':
-        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '消費税'
-        break
-      case 'JP 消費税(軽減税率) 8%':
-        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '軽減税率'
-        break
-      case 'JP 非課税 0%':
-        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '非課税'
-        break
+    const taxCategory = data.TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value
+
+    if (taxCategory === 'O') {
+      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '不課税'
+    } else if (taxCategory === 'E') {
+      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '免税'
+    } else if (taxCategory === 'S') {
+      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '消費税'
+    } else if (taxCategory === 'AA') {
+      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '軽減税率'
+    } else {
+      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '非課税'
     }
 
     // 任意項目チェック
     if (data.PaymentMeans) {
-      if (data.PaymentMeans[0].PaymentDueDate.value) {
+      if (data.PaymentMeans[0].PaymentDueDate?.value) {
         invoice.支払期日 = data.PaymentMeans[0].PaymentDueDate.value
       } else {
         invoice.支払期日 = ''
@@ -347,7 +325,7 @@ const dataTojson = (data) => {
 
     if (data.Delivery) {
       if (data.Delivery[0].ActualDeliveryDate.value) {
-        invoice.納品日 = data.Delivery[0].ActualDeliveryDate.value
+        invoice.納品日 = data.Delivery[0].ActualDeliveryDate?.value
       } else {
         invoice.納品日 = ''
       }
@@ -416,6 +394,6 @@ module.exports = {
   router: router,
   cbGetIndex: cbGetIndex,
   cbPostIndex: cbPostIndex,
-  dataTojson: dataTojson,
+  dataToJson: dataToJson,
   jsonToCsv: jsonToCsv
 }
