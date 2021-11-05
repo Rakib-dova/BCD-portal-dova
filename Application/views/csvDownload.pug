@@ -1,0 +1,34 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans 請求明細ダウンロード
+        .subtitle.is-family-noto-sans CSV DOWNLOAD
+
+    .columns.is-centered
+     .column.is-11
+      .box
+       form#form(action="#")
+        article.panel.is-info
+         h2.panel-heading 条件絞り込み
+         .panel-block
+          .container
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel 請求書番号
+             .field-body
+               .field
+                 .control.has-icons-right
+                   input.input#invoiceNumber.itemForSearch(type="text" name="invoiceNumber" required)
+
+           .field.is-grouped.is-grouped-centered
+             .control
+               button.button.is-info#submit(type="submit" formaction="/csvDownload/downloadInvoice" formmethod="POST")  CSVダウンロード
+
+    include footer
+
+block append scripts
+  //- 画面のJSファイル
+  script(src="/js/csvDownload-page.js")

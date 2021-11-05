@@ -547,3 +547,10 @@ img.logo-ncom {
   flex-grow: 1;
   flex-shrink: 1;
 }
+
+.bulmalabel {
+  color: #363636;
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+}

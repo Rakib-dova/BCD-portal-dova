@@ -39,6 +39,19 @@ html
 
     if messages.info
       #message-info(title= messages.info[0])
-    
+
+    if messages.noti
+      .modal.modal-fx-fadeInscale#confirmmodify-modal.is-active
+              .modal-background.cancel-button(data-target="confirmmodify-modal")
+              .modal-card
+                header.modal-card-head
+                  p.modal-card-title 請求書ダウンロード
+                  button.delete(type="button" data-target="confirmmodify-modal")
+                section.modal-card-body
+                  p= messages.noti[0] 
+                footer.modal-card-foot
+                  div.button-area
+                    a.button.cancel-button(data-target='confirmmodify-modal') 確認
+
     block scripts
       script(src="/js/common-page.js")
