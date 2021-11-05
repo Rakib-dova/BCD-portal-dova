@@ -267,7 +267,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
     })
   })
 
@@ -297,7 +297,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
     })
   })
 
