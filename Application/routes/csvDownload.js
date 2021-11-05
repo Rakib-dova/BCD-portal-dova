@@ -256,19 +256,14 @@ const dataToJson = (data) => {
       return ''
     })
     invoice['明細-単価'] = data.InvoiceLine[i].LineExtensionAmount.value
-    const taxCategory = data.InvoiceLine[i].TaxTotal[0].TaxSubtotal[0]?.TaxCategory.ID.value
+    const taxName = (data.InvoiceLine[i].TaxTotal[0].TaxSubtotal[0]?.TaxCategory.TaxScheme.Name.value)
+      .replace('JP ', '')
+      .replace('消費税(軽減税率)', '軽減税率')
+      .replace(' 10%', '')
+      .replace(' 8%', '')
+      .replace(' 0%', '')
 
-    if (taxCategory === 'O') {
-      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '不課税'
-    } else if (taxCategory === 'E') {
-      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '免税'
-    } else if (taxCategory === 'S') {
-      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '消費税'
-    } else if (taxCategory === 'AA') {
-      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '軽減税率'
-    } else {
-      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '非課税'
-    }
+    invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
 
     // 任意項目チェック
     if (data.PaymentMeans) {

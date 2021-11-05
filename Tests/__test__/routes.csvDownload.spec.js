@@ -365,14 +365,14 @@ describe('csvuploadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.InvoiceLine[0].LineExtensionAmount.value}`)
       // 明細-税（消費税／軽減税率／不課税／免税／非課税）
       const taxCategory = {
-        O: '不課税',
-        E: '免税',
-        S: '消費税',
-        AA: '軽減税率',
-        Z: '非課税'
+        'JP 不課税 0%': '不課税',
+        'JP 免税 0%': '免税',
+        'JP 消費税 10%': '消費税',
+        'JP 消費税(軽減税率) 8%': '軽減税率',
+        'JP 非課税 0%': '非課税'
       }
       expect(csvBody).toContain(
-        `${taxCategory[checkingData.InvoiceLine[0].TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value]}`
+        `${taxCategory[checkingData.InvoiceLine[0].TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.Name.value]}`
       )
       // 明細-備考
       expect(csvBody).toContain(
@@ -483,14 +483,14 @@ describe('csvuploadのテスト', () => {
         expect(csvBody).toContain(`${checkingData.InvoiceLine[0].LineExtensionAmount.value}`)
         // 明細-税（消費税／軽減税率／不課税／免税／非課税）
         const taxCategory = {
-          O: '不課税',
-          E: '免税',
-          S: '消費税',
-          AA: '軽減税率',
-          Z: '非課税'
+          'JP 不課税 0%': '不課税',
+          'JP 免税 0%': '免税',
+          'JP 消費税 10%': '消費税',
+          'JP 消費税(軽減税率) 8%': '軽減税率',
+          'JP 非課税 0%': '非課税'
         }
         expect(csvBody).toContain(
-          `${taxCategory[checkingData.InvoiceLine[idx].TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value]}`
+          `${taxCategory[checkingData.InvoiceLine[idx].TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.Name.value]}`
         )
         // 明細-備考
         expect(csvBody).toContain(
@@ -710,14 +710,14 @@ describe('csvuploadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.InvoiceLine[0].LineExtensionAmount.value}`)
       // 明細-税（消費税／軽減税率／不課税／免税／非課税）
       const taxCategory = {
-        O: '不課税',
-        E: '免税',
-        S: '消費税',
-        AA: '軽減税率',
-        Z: '非課税'
+        'JP 不課税 0%': '不課税',
+        'JP 免税 0%': '免税',
+        'JP 消費税 10%': '消費税',
+        'JP 消費税(軽減税率) 8%': '軽減税率',
+        'JP 非課税 0%': '非課税'
       }
       expect(csvBody).toContain(
-        `${taxCategory[checkingData.InvoiceLine[0].TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value]}`
+        `${taxCategory[checkingData.InvoiceLine[0].TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.Name.value]}`
       )
       // 明細-備考
       expect(csvBody).toContain(
