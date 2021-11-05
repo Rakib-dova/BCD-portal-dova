@@ -27,7 +27,7 @@ module.exports = {
     schemeVersionID: '1'
   },
   ID: {
-    value: 'A01006'
+    value: 'a'
   },
   IssueDate: {
     value: '2021-05-18'

@@ -64,14 +64,65 @@ const axios = {
     }
   },
   get: async function (url, config) {
+    const businessId = url.replace(/\/documents\?businessId=/, '')
+    url = url.match(/\/documents\?businessId=/) !== null ? 'bussinessId' : url
     switch (url) {
-      case '/documents': {
-        this.result.response = {
-          status: 200,
-          ...dcouments
+      case 'bussinessId': {
+        switch (businessId) {
+          case 'A01000': {
+            this.result.data = {
+              itemPerPage: 25,
+              itemCount: 0,
+              indexing: false,
+              numPages: 0,
+              pageId: 0,
+              Document: []
+            }
+            break
+          }
+          case 'A01010': {
+            this.result.data = new Error('Request failed with status code 404')
+            this.result.data.response = {
+              status: 400
+            }
+            break
+          }
+          default: {
+            const invoiceId = {
+              A01001: 0,
+              A01002: 1,
+              A01003: 2,
+              A01004: 3,
+              A01005: 4,
+              A01006: 5,
+              A01007: 6,
+              A: 7,
+              A01009: 8,
+              A01010: 9
+            }
+            this.result.data = {
+              itemPerPage: 25,
+              itemCount: 1,
+              indexing: false,
+              numPages: 1,
+              pageId: 0,
+              Document: [dcouments.Document[invoiceId[businessId]]]
+            }
+          }
         }
 
-        return { data: this.result.response }
+        return this.result
+      }
+      case '/documents?businessId=A01001': {
+        this.result.data = {
+          itemPerPage: 25,
+          itemCount: 0,
+          indexing: false,
+          numPages: 0,
+          pageId: 0,
+          Document: []
+        }
+        return this.result
       }
       case '/documents/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1': {
         const invoice = require('../mockInvoice/invoice1')
@@ -96,6 +147,21 @@ const axios = {
       case '/documents/c08d3bb7-9807-4180-9ceb-b842c482300e': {
         const invoice = require('../mockInvoice/invoice6')
         return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4beed0b0': {
+        const invoice = require('../mockInvoice/invoice7')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4b123456': {
+        const invoice = require('../mockInvoice/invoice8')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4b654321': {
+        this.result.data = new Error('Request failed with status code 404')
+        this.result.data.response = {
+          status: 404
+        }
+        return this.result
       }
       default: {
         return { data: null }
@@ -609,6 +675,18 @@ const dcouments = {
       DueDate: '2021-05-20',
       TenantId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
       Properties: []
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4beed0b0',
+      ID: 'A01007'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4b123456',
+      ID: 'a'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4b654321',
+      ID: 'A01009'
     }
   ]
 }

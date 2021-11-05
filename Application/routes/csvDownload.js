@@ -42,7 +42,7 @@ const cbGetIndex = async (req, res, next) => {
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
   // const checkContractStatus = 1
-  const checkContractStatus = helper.checkContractStatus(req, res, next)
+  const checkContractStatus = await helper.checkContractStatus(req, res, next)
 
   if (checkContractStatus === null || checkContractStatus === 999) {
     return next(errorHelper.create(500))
@@ -124,6 +124,8 @@ const cbPostIndex = async (req, res, next) => {
     '/documents?businessId=' + invoiceNumber
   )
 
+  console.log(documentsResult)
+
   // documentsResultエラー検査
   if (documentsResult instanceof Error) {
     errorHandle(documentsResult, res, req)
@@ -157,9 +159,11 @@ const cbPostIndex = async (req, res, next) => {
           `/documents/${documentId}`
         )
 
+        console.log(result)
+
         // resultエラー検査
         if (result instanceof Error) {
-          errorHandle(result.response?.status, res, req)
+          errorHandle(result, res, req)
         } else {
           // 取得した請求書をJSONに作成する
           const jsondata = dataToJson(result)
@@ -256,7 +260,7 @@ const dataToJson = (data) => {
       return ''
     })
     invoice['明細-単価'] = data.InvoiceLine[i].LineExtensionAmount.value
-    const taxCategory = data.TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value
+    const taxCategory = data.TaxTotal[0].TaxSubtotal[i].TaxCategory.ID.value
 
     if (taxCategory === 'O') {
       invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '不課税'
@@ -274,19 +278,13 @@ const dataToJson = (data) => {
     if (data.PaymentMeans) {
       if (data.PaymentMeans[0].PaymentDueDate?.value) {
         invoice.支払期日 = data.PaymentMeans[0].PaymentDueDate.value
-      } else {
-        invoice.支払期日 = ''
       }
       if (data.PaymentMeans[0]?.PayeeFinancialAccount?.FinancialInstitutionBranch) {
         invoice.銀行名 =
           data.PaymentMeans[0]?.PayeeFinancialAccount?.FinancialInstitutionBranch.FinancialInstitution.Name.value
-      } else {
-        invoice.銀行名 = ''
       }
       if (data.PaymentMeans[0]?.PayeeFinancialAccount?.FinancialInstitutionBranch) {
         invoice.支店名 = data.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.Name.value
-      } else {
-        invoice.支店名 = ''
       }
 
       if (data.PaymentMeans[0]?.PayeeFinancialAccount?.AccountTypeCode.value) {
@@ -299,64 +297,37 @@ const dataToJson = (data) => {
             invoice.科目 = '普通'
             break
         }
-      } else {
-        invoice.科目 = ''
       }
 
       if (data.PaymentMeans[0]?.PayeeFinancialAccount?.ID.value) {
         invoice.口座番号 = data.PaymentMeans[0].PayeeFinancialAccount.ID.value
-      } else {
-        invoice.口座番号 = ''
       }
 
       if (data.PaymentMeans[0]?.PayeeFinancialAccount?.Name.value) {
         invoice.口座名義 = data.PaymentMeans[0].PayeeFinancialAccount.Name.value
-      } else {
-        invoice.口座名義 = ''
       }
-    } else {
-      invoice.支払期日 = ''
-      invoice.銀行名 = ''
-      invoice.支店名 = ''
-      invoice.科目 = ''
-      invoice.口座番号 = ''
-      invoice.口座名義 = ''
     }
 
     if (data.Delivery) {
       if (data.Delivery[0].ActualDeliveryDate.value) {
         invoice.納品日 = data.Delivery[0].ActualDeliveryDate?.value
-      } else {
-        invoice.納品日 = ''
       }
-    } else {
-      invoice.納品日 = ''
     }
 
     if (data.AdditionalDocumentReference) {
       if (data.AdditionalDocumentReference[0].DocumentTypeCode.value === 'File ID') {
         invoice.備考 = data.AdditionalDocumentReference[0].ID.value
-      } else {
-        invoice.備考 = ''
       }
-    } else {
-      invoice.備考 = ''
     }
 
     if (data.Note) {
       if (data.Note[0]?.value) {
         invoice.その他特記事項 = data.Note[0].value
-      } else {
-        invoice.その他特記事項 = ''
       }
-    } else {
-      invoice.その他特記事項 = ''
     }
 
     if (data.InvoiceLine[i].DocumentReference) {
       invoice['明細-備考'] = data.InvoiceLine[i].DocumentReference[0].ID.value
-    } else {
-      invoice['明細-備考'] = ''
     }
 
     // 明細をjsonDataに入れる
@@ -381,7 +352,7 @@ const jsonToCsv = (jsonData) => {
     for (const title in content) {
       row += row === '' ? `${content[title]}` : `,${content[title]}`
     }
-    csvString += index !== jsonArray.lent - 1 ? `${row}\r\n` : `${row}`
+    csvString += index !== jsonArray.length - 1 ? `${row}\r\n` : `${row}`
   })
 
   return csvString
@@ -394,6 +365,7 @@ module.exports = {
   router: router,
   cbGetIndex: cbGetIndex,
   cbPostIndex: cbPostIndex,
+  errorHandle: errorHandle,
   dataToJson: dataToJson,
   jsonToCsv: jsonToCsv
 }

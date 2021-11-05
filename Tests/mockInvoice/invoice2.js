@@ -38,6 +38,11 @@ module.exports = {
     listAgencyID: '6',
     listVersionID: 'D08B'
   },
+  Note: [
+    {
+      value: '特記事項テスト1です。'
+    }
+  ],
   DocumentCurrencyCode: {
     value: 'JPY'
   },
@@ -47,7 +52,7 @@ module.exports = {
         value: 'DOWN'
       },
       DocumentTypeCode: {
-        value: 'RoundingRule',
+        value: 'File ID',
         listID: 'urn:tradeshift.com:api:1.0:documenttypecode'
       }
     },
@@ -190,6 +195,27 @@ module.exports = {
       },
       PaymentDueDate: {
         value: ''
+      },
+      PayeeFinancialAccount: {
+        ID: {
+          value: '2222222'
+        },
+        Name: {
+          value: 'kang_test'
+        },
+        AccountTypeCode: {
+          value: 'General'
+        },
+        FinancialInstitutionBranch: {
+          Name: {
+            value: 'testbank'
+          },
+          FinancialInstitution: {
+            Name: {
+              value: 'testsiten'
+            }
+          }
+        }
       }
     }
   ],
@@ -211,7 +237,7 @@ module.exports = {
           },
           TaxCategory: {
             ID: {
-              value: 'O',
+              value: 'AA',
               schemeID: 'UN/ECE 5305',
               schemeAgencyID: '6',
               schemeVersionID: 'D08B'
