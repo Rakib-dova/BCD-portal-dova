@@ -152,6 +152,7 @@ const cbPostIndex = async (req, res, next) => {
   } else {
     const documents = documentsResult.Document
     // 検索結果から請求書番号でdocumentIDを取得
+
     documents.map((doc) => {
       if (doc.ID === invoiceNumber) {
         documentID = doc.DocumentId
@@ -201,12 +202,7 @@ const cbPostIndex = async (req, res, next) => {
       if (resultOfSearch === undefined) {
         resultOfSearch = 0
       }
-      // 請求書検索結果 200件以上の場合
-      if (resultOfSearch > 200) {
-        req.flash('noti', '条件に合致する請求書が200件を超えました。')
-        res.redirect(303, '/csvDownload')
-        return 0
-      }
+
       switch (resultOfSearch) {
         case 0: {
           // 条件に合わせるデータがない場合、お知らせを表示する。
@@ -258,30 +254,14 @@ const dataTojson = (data) => {
     '明細-備考': ''
   }
   const unitCodeKeys = Object.keys(bconCsvUnitDefault)
-
   for (let i = 0; i < data.InvoiceLine.length; ++i) {
     const invoice = { ...InvoiceObject }
+
+    // 必須項目チェック
     invoice.発行日 = data.IssueDate.value
     invoice.請求書番号 = data.ID.value
     invoice.テナントID = data.AccountingCustomerParty.Party.PartyIdentification[0].ID.value
-    invoice.支払期日 = data.PaymentMeans[0].PaymentDueDate.value
-    invoice.納品日 = data.Delivery[0].ActualDeliveryDate.value
-    invoice.備考 = data.AdditionalDocumentReference[0].ID.value
-    invoice.銀行名 =
-      data.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.FinancialInstitution.Name.value
-    invoice.支店名 = data.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.Name.value
-    const accountType = data.PaymentMeans[0].PayeeFinancialAccount.AccountTypeCode.value
-    switch (accountType) {
-      case 'Current':
-        invoice.科目 = '当座'
-        break
-      case 'General':
-        invoice.科目 = '普通'
-        break
-    }
-    invoice.口座番号 = data.PaymentMeans[0].PayeeFinancialAccount.ID.value
-    invoice.口座名義 = data.PaymentMeans[0].PayeeFinancialAccount.Name.value
-    invoice.その他特記事項 = data.Note[0].value
+
     invoice['明細-項目ID'] = data.InvoiceLine[i].ID.value
     invoice['明細-内容'] = data.InvoiceLine[i].Item.Description[0].value
     invoice['明細-数量'] = data.InvoiceLine[i].InvoicedQuantity.value
@@ -311,7 +291,97 @@ const dataTojson = (data) => {
         invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '非課税'
         break
     }
-    invoice['明細-備考'] = data.InvoiceLine[i].DocumentReference[0].ID.value
+
+    // 任意項目チェック
+    if (data.PaymentMeans) {
+      if (data.PaymentMeans[0].PaymentDueDate.value) {
+        invoice.支払期日 = data.PaymentMeans[0].PaymentDueDate.value
+      } else {
+        invoice.支払期日 = ''
+      }
+      if (data.PaymentMeans[0]?.PayeeFinancialAccount?.FinancialInstitutionBranch) {
+        invoice.銀行名 =
+          data.PaymentMeans[0]?.PayeeFinancialAccount?.FinancialInstitutionBranch.FinancialInstitution.Name.value
+      } else {
+        invoice.銀行名 = ''
+      }
+      if (data.PaymentMeans[0]?.PayeeFinancialAccount?.FinancialInstitutionBranch) {
+        invoice.支店名 = data.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.Name.value
+      } else {
+        invoice.支店名 = ''
+      }
+
+      if (data.PaymentMeans[0]?.PayeeFinancialAccount?.AccountTypeCode.value) {
+        const accountType = data.PaymentMeans[0].PayeeFinancialAccount.AccountTypeCode.value
+        switch (accountType) {
+          case 'Current':
+            invoice.科目 = '当座'
+            break
+          case 'General':
+            invoice.科目 = '普通'
+            break
+        }
+      } else {
+        invoice.科目 = ''
+      }
+
+      if (data.PaymentMeans[0]?.PayeeFinancialAccount?.ID.value) {
+        invoice.口座番号 = data.PaymentMeans[0].PayeeFinancialAccount.ID.value
+      } else {
+        invoice.口座番号 = ''
+      }
+
+      if (data.PaymentMeans[0]?.PayeeFinancialAccount?.Name.value) {
+        invoice.口座名義 = data.PaymentMeans[0].PayeeFinancialAccount.Name.value
+      } else {
+        invoice.口座名義 = ''
+      }
+    } else {
+      invoice.支払期日 = ''
+      invoice.銀行名 = ''
+      invoice.支店名 = ''
+      invoice.科目 = ''
+      invoice.口座番号 = ''
+      invoice.口座名義 = ''
+    }
+
+    if (data.Delivery) {
+      if (data.Delivery[0].ActualDeliveryDate.value) {
+        invoice.納品日 = data.Delivery[0].ActualDeliveryDate.value
+      } else {
+        invoice.納品日 = ''
+      }
+    } else {
+      invoice.納品日 = ''
+    }
+
+    if (data.AdditionalDocumentReference) {
+      if (data.AdditionalDocumentReference[0].DocumentTypeCode.value === 'File ID') {
+        invoice.備考 = data.AdditionalDocumentReference[0].ID.value
+      } else {
+        invoice.備考 = ''
+      }
+    } else {
+      invoice.備考 = ''
+    }
+
+    if (data.Note) {
+      if (data.Note[0]?.value) {
+        invoice.その他特記事項 = data.Note[0].value
+      } else {
+        invoice.その他特記事項 = ''
+      }
+    } else {
+      invoice.その他特記事項 = ''
+    }
+
+    if (data.InvoiceLine[i].DocumentReference) {
+      invoice['明細-備考'] = data.InvoiceLine[i].DocumentReference[0].ID.value
+    } else {
+      invoice['明細-備考'] = ''
+    }
+
+    // 明細をjsonDataに入れる
     jsonData.push(invoice)
   }
 
