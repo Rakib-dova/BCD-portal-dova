@@ -371,7 +371,9 @@ describe('csvuploadのテスト', () => {
         AA: '軽減税率',
         Z: '非課税'
       }
-      expect(csvBody).toContain(`${taxCategory[checkingData.TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value]}`)
+      expect(csvBody).toContain(
+        `${taxCategory[checkingData.InvoiceLine[0].TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value]}`
+      )
       // 明細-備考
       expect(csvBody).toContain(
         `${
@@ -487,7 +489,9 @@ describe('csvuploadのテスト', () => {
           AA: '軽減税率',
           Z: '非課税'
         }
-        expect(csvBody).toContain(`${taxCategory[checkingData.TaxTotal[0].TaxSubtotal[idx].TaxCategory.ID.value]}`)
+        expect(csvBody).toContain(
+          `${taxCategory[checkingData.InvoiceLine[idx].TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value]}`
+        )
         // 明細-備考
         expect(csvBody).toContain(
           `${
@@ -712,7 +716,9 @@ describe('csvuploadのテスト', () => {
         AA: '軽減税率',
         Z: '非課税'
       }
-      expect(csvBody).toContain(`${taxCategory[checkingData.TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value]}`)
+      expect(csvBody).toContain(
+        `${taxCategory[checkingData.InvoiceLine[0].TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value]}`
+      )
       // 明細-備考
       expect(csvBody).toContain(
         `${

@@ -124,8 +124,6 @@ const cbPostIndex = async (req, res, next) => {
     '/documents?businessId=' + invoiceNumber
   )
 
-  console.log(documentsResult)
-
   // documentsResultエラー検査
   if (documentsResult instanceof Error) {
     errorHandle(documentsResult, res, req)
@@ -158,8 +156,6 @@ const cbPostIndex = async (req, res, next) => {
           'get',
           `/documents/${documentId}`
         )
-
-        console.log(result)
 
         // resultエラー検査
         if (result instanceof Error) {
@@ -260,7 +256,7 @@ const dataToJson = (data) => {
       return ''
     })
     invoice['明細-単価'] = data.InvoiceLine[i].LineExtensionAmount.value
-    const taxCategory = data.TaxTotal[0].TaxSubtotal[i].TaxCategory.ID.value
+    const taxCategory = data.InvoiceLine[i].TaxTotal[0].TaxSubtotal[0]?.TaxCategory.ID.value
 
     if (taxCategory === 'O') {
       invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '不課税'

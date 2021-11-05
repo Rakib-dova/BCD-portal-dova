@@ -7132,7 +7132,7 @@ module.exports = {
               },
               TaxCategory: {
                 ID: {
-                  value: 'O',
+                  value: 'E',
                   schemeID: 'UN/ECE 5305',
                   schemeAgencyID: '6',
                   schemeVersionID: 'D08B'
@@ -7476,7 +7476,7 @@ module.exports = {
               },
               TaxCategory: {
                 ID: {
-                  value: 'O',
+                  value: 'AA',
                   schemeID: 'UN/ECE 5305',
                   schemeAgencyID: '6',
                   schemeVersionID: 'D08B'
@@ -7562,7 +7562,7 @@ module.exports = {
               },
               TaxCategory: {
                 ID: {
-                  value: 'O',
+                  value: 'Z',
                   schemeID: 'UN/ECE 5305',
                   schemeAgencyID: '6',
                   schemeVersionID: 'D08B'
