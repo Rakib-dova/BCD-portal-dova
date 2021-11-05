@@ -1,0 +1,102 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans 請求書ダウンロード
+        .subtitle.is-family-noto-sans CSV DOWNLOAD
+
+    .columns.is-centered
+      .column.is-11
+        .box
+          form#form(action="#")
+            .field.is-horizontal
+              .field-label.is-normal
+                label.bulmalabel 請求書番号
+              .field-body
+                .field
+                  .control.has-icons-right            
+                    input.input#invoiceNumber.itemForSearch(type="text" name="invoiceNumber" required)
+            .field.is-horizontal
+              .field-label.is-normal
+                label.bulmalabel ステータス
+              .field-body
+                .field
+                  .control             
+                    .select.is-fullwidth
+                      select#status.itemForSearch(name="status")
+                        each item in status
+                          option= item
+            .field.is-horizontal
+              .field-label.is-normal
+                label.bulmalabel 販売/購入
+              .field-body
+                .field
+                  .control
+                    .select.is-fullwidth
+                      select#buyAndSell.itemForSearch(name="buyAndSell")
+                        each item in buyAndSell
+                          option= item
+
+            .field.is-horizontal
+              .field-label.is-normal
+                label.bulmalabel 送信企業
+              .field-body
+                .field
+                  .control             
+                    input.input#sender.itemForSearch(type="text" name="sender" pattern="^[a-zA-Z0-9\\u3040-\\u309F\\u30A0-\\u30FF\\uFF61-\\uFF9F]{1,100}$" placeholder="日本語・英語・数字")
+            .field.is-horizontal
+              .field-label.is-normal
+                label.bulmalabel 受信企業
+              .field-body
+                .field
+                  .control             
+                    input.input#receiver.itemForSearch(type="text" name="receiver" pattern="^[a-zA-Z0-9\\u3040-\\u309F\\u30A0-\\u30FF\\uFF61-\\uFF9F]{1,100}$" placeholder="日本語・英語・数字")
+            .field.is-horizontal
+              .field-label.is-normal
+                label.bulmalabel 発行日
+              .field-body
+                .field.is-grouped.is-grouped-multiline
+                  .control.is-expanded
+                    input.input#issueDateStart.itemForSearch(type="date" name="issueDateStart" value= today)
+                  div 　
+                  div ～
+                  div 　
+                  .control.is-expanded
+                    input.input#issueDateEnd.itemForSearch(type="date" name="issueDateEnd" value= today)
+            .field.is-horizontal
+              .field-label.is-normal
+                label.bulmalabel 作成日
+              .field-body
+                .field.is-grouped.is-grouped-multiline
+                  .control.is-expanded           
+                    input.input#dateOfPreparationStart.itemForSearch(type="date" name="dateOfPreparationStart"  value= today)
+                  div 　
+                  div ～
+                  div 　
+                  .control.is-expanded
+                    input.input#dateOfPreparationEnd.itemForSearch(type="date" name="dateOfPreparationEnd" value= today)
+            .field.is-horizontal
+              .field-label.is-normal
+                label.bulmalabel 支払期日
+              .field-body
+                .field.is-grouped.is-grouped-multiline
+                  .control.is-expanded            
+                    input.input#paymentDateStart.itemForSearch(type="date" name="paymentDateStart" value= today)
+                  div 　
+                  div ～
+                  div 　
+                  .control.is-expanded
+                    input.input#paymentDateEnd.itemForSearch(type="date" name="paymentDateEnd"  value= today)
+            .field.is-grouped.is-grouped-centered
+              .control
+                button.button.is-info#submit(type="submit" formaction="/csvDownload/downloadInvoice" formmethod="POST")  CSVダウンロード
+
+    include footer
+
+block append scripts
+  //- 画面のJSファイル
+  script(src="/js/csvDownload-page.js") 
+
+
