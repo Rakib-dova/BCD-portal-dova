@@ -201,6 +201,12 @@ const cbPostIndex = async (req, res, next) => {
       if (resultOfSearch === undefined) {
         resultOfSearch = 0
       }
+      // 請求書検索結果 200件以上の場合
+      if (resultOfSearch > 200) {
+        req.flash('noti', '条件に合致する請求書が200件を超えました。')
+        res.redirect(303, '/csvDownload')
+        return 0
+      }
       switch (resultOfSearch) {
         case 0: {
           // 条件に合わせるデータがない場合、お知らせを表示する。
