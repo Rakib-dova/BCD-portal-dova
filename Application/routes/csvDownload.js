@@ -54,6 +54,9 @@ const cbGetIndex = async (req, res, next) => {
 
   // 発行日、作成日、支払期日の日付の表示のため、今日の日付を取得
   const today = new Date().toISOString().split('T')[0]
+  // 一か月前の日付取得（発行日）
+  const now = new Date()
+  const oneMonthAgo = new Date(now.setMonth(now.getMonth() - 1)).toISOString().split('T')[0]
   // ステータス項目の選択アイテム
   const status = ['', 'draft', 'accept', 'inbox', 'outbox', 'sales', 'purchases', 'deleted']
   // 販売購入項目の選択アイテム
@@ -63,6 +66,7 @@ const cbGetIndex = async (req, res, next) => {
   res.render('csvDownload', {
     title: '請求書ダウンロード',
     today: today, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
+    oneMonthAgo: oneMonthAgo,
     status: status,
     buyAndSell: buyAndSell
   })
