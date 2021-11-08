@@ -1,7 +1,7 @@
 let fileReader = null
+let fileReader2 = null
 let targetFile = null
 let dataResultBinary = null
-const bomTsukiBinary = 'ï»¿'
 
 // 項目名の行有無が有：必須
 document.getElementById('checkItemNameLineOn').onclick = function () {
@@ -40,9 +40,14 @@ document.getElementById('dataFile').addEventListener('change', function (e) {
         document.getElementById('dataFile').value = null
         alert('ファイルサイズが5MB超えています。\nCSVファイルを確認後もう一度アップロードしてください。')
       } else {
-        dataResultBinary = fileReader.result.split(/\r?\n|\r/)
         document.getElementById('dataFileName').value = document.getElementById('dataFile').files.item(0).name
       }
+    }
+    // CSVファイルのBOM付きの文字処理
+    fileReader2 = new FileReader()
+    fileReader2.readAsText(targetFile)
+    fileReader2.onload = function () {
+      dataResultBinary = fileReader2.result.split(/\r?\n|\r/)
     }
   }
 })
@@ -52,10 +57,7 @@ document.getElementById('submit').addEventListener('click', function (e) {
   let noDatalineFlag = false
   const uploadFormatNumber = document.getElementById('uploadFormatNumber').value
   const defaultNumber = document.getElementById('defaultNumber').value
-  // CSVファイルのBOM付きの文字処理
-  if (dataResultBinary[0] === bomTsukiBinary) {
-    dataResultBinary[0] = ''
-  }
+
   if (dataResultBinary !== null) {
     if (uploadFormatNumber > 0 && uploadFormatNumber < 9999999) {
       if (dataResultBinary[uploadFormatNumber - 1] === '' || dataResultBinary[uploadFormatNumber - 1] === undefined) {
