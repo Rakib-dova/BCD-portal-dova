@@ -82,20 +82,21 @@ const cbGetIndex = async (req, res, next) => {
   // ・回収済み
   const status = [
     'すべて',
-    '送信済み/受信済み',
-    '受理済み/承認済み',
+    '送信済み',
+    '受信済み',
     '無効',
-    '入金額人済み/送金済み',
+    '受理済み/承認済み',
+    '提出済み/承認待ち',
+    '入金確認済み/送金済み',
     '却下済み',
     '内容確認中',
     '期日超過',
-    '提出済み/承認待ち',
     '失敗',
     '送金済み/決済済み',
     '送信中',
     '接続承認待ち',
     'クリアランス中',
-    '切替え済み',
+    '差替え済み',
     '完了',
     '回収済み'
   ]
@@ -166,146 +167,233 @@ const cbPostIndex = async (req, res, next) => {
     findDocumentQuery.businessId = req.body.invoiceNumber
   }
 
+  const stags = ['outbox', 'inbox', 'sales', 'purchases']
+  const states = [
+    'DELIVERED',
+    'REJECTED_BY_SENDER',
+    'ACCEPTED',
+    'SENT',
+    'PAID_CONFIRMED',
+    'REJECTED_BY_RECEIVER',
+    'DISPUTED_BY_RECEIVER',
+    'OVERDUE',
+    'FAILED_DELIVERY',
+    'PAID_UNCONFIRMED',
+    'IN_TRANSIT',
+    'PENDING_NOT_A_CONTACT',
+    'IN_CLEARANCE',
+    'REPLACED',
+    'CLOSED',
+    'COLLECTED'
+  ]
+
+  // 絞り込みの条件に購入/販売追加
+  switch (req.body.buyAndSell) {
+    case 'すべて': {
+      findDocumentQuery.stag = `${stags[1]}&stag=${stags[2]}`
+      break
+    }
+    case '販売': {
+      findDocumentQuery.stag = `${stags[1]}`
+      break
+    }
+    case '購入': {
+      findDocumentQuery.stag = `${stags[2]}`
+      break
+    }
+  }
+
   // 絞り込みの条件にステータス追加
   switch (Array.isArray(req.body.status)) {
     case false: {
       switch (req.body.status) {
         case 'すべて': {
-          findDocumentQuery.stag = 'LOCKED'
-          findDocumentQuery.state = 'DELIVERED&state=ACCEPTED&state=OVERDUE'
+          findDocumentQuery.stag = ''
+          findDocumentQuery.state = ''
+          stags.forEach((item, idx) => {
+            if (idx === 0) {
+              findDocumentQuery.stag += item
+            } else {
+              findDocumentQuery.stag += `&stag=${item}`
+            }
+          })
+          states.forEach((item, idx) => {
+            if (idx === 0) {
+              findDocumentQuery.state += item
+            } else {
+              findDocumentQuery.state += `&state=${item}`
+            }
+          })
           break
         }
-        case '送信済み/受信済み': {
-          findDocumentQuery.stag = 'LOCKED'
-          findDocumentQuery.state = 'DELIVERED'
+        case '送信済み': {
+          findDocumentQuery.stag = `${stags[0]}`
+          findDocumentQuery.state = `${states[0]}`
           break
         }
-        case '受理済み/承認済み': {
-          findDocumentQuery.stag = 'LOCKED'
-          findDocumentQuery.state = 'ACCEPTED'
+        case '受信済み': {
+          findDocumentQuery.stag = `${stags[1]}`
+          findDocumentQuery.state = `${states[0]}`
           break
         }
-        // case '無効': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case '入金額人済み/送金済み': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case '却下済み': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case '内容確認中': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        case '期日超過': {
-          findDocumentQuery.stag = 'LOCKED'
-          findDocumentQuery.state = 'OVERDUE'
+        default: {
+          findDocumentQuery.stag = `${stags[2]}&stag=${stags[3]}`
+          switch (req.body.status) {
+            case '無効': {
+              findDocumentQuery.state = `${states[1]}`
+              break
+            }
+            case '受理済み/承認済み': {
+              findDocumentQuery.state = `${states[2]}`
+              break
+            }
+            case '提出済み/承認待ち': {
+              findDocumentQuery.state = `${states[3]}`
+              break
+            }
+            case '入金確認済み/送金済み': {
+              findDocumentQuery.state = `${states[4]}`
+              break
+            }
+            case '却下済み': {
+              findDocumentQuery.state = `${states[5]}`
+              break
+            }
+            case '内容確認中': {
+              findDocumentQuery.state = `${states[6]}`
+              break
+            }
+            case '期日超過': {
+              findDocumentQuery.state = `${states[7]}`
+              break
+            }
+            case '失敗': {
+              findDocumentQuery.state = `${states[8]}`
+              break
+            }
+            case '送金済み/決済済み': {
+              findDocumentQuery.state = `${states[9]}`
+              break
+            }
+            case '送信中': {
+              findDocumentQuery.state = `${states[10]}`
+              break
+            }
+            case '接続承認待ち': {
+              findDocumentQuery.state = `${states[11]}`
+              break
+            }
+            case 'クリアランス中': {
+              findDocumentQuery.state = `${states[12]}`
+              break
+            }
+            case '差替え済み': {
+              findDocumentQuery.state = `${states[13]}`
+              break
+            }
+            case '完了': {
+              findDocumentQuery.state = `${states[14]}`
+              break
+            }
+            case '回収済み': {
+              findDocumentQuery.state = `${states[15]}`
+              break
+            }
+          }
           break
         }
-        // case '提出済み/承認待ち': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case '失敗': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case '送金済み/決済済み': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case '送信中': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case '接続承認待ち': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case '接続承認待ち': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-
-        // case '接続承認待ち': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case 'クリアランス中': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case '切替え済み': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case '完了': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
-        // case '回収済み': {
-        //   findDocumentQuery.stag = ''
-        //   findDocumentQuery.state = ''
-        //   break
-        // }
       }
       break
     }
     case true: {
-      findDocumentQuery.stag = 'LOCKED'
+      findDocumentQuery.stag = `${stags[2]}&stag=${stags[3]}`
       findDocumentQuery.state = ''
+      let outboxFlag = false
+      let inboxFlag = false
       req.body.status.forEach((item, idx) => {
         if (idx !== 0) {
           findDocumentQuery.state += '&state='
         }
         switch (item) {
-          case '送信済み/受信済み':
-            findDocumentQuery.state += 'DELIVERED'
+          case '送信済み':
+            outboxFlag = true
+            findDocumentQuery.state += `${states[0]}`
             break
-          case '受理済み/承認済み':
-            findDocumentQuery.state += 'ACCEPTED'
+          case '受信済み':
+            inboxFlag = true
+            findDocumentQuery.state += `${states[0]}`
             break
-          case '期日超過':
-            findDocumentQuery.state += 'OVERDUE'
+          case '無効': {
+            findDocumentQuery.state += `${states[1]}`
             break
-          default:
-            findDocumentQuery.state = findDocumentQuery.state.slice(0, -7)
+          }
+          case '受理済み/承認済み': {
+            findDocumentQuery.state += `${states[2]}`
             break
+          }
+          case '提出済み/承認待ち': {
+            findDocumentQuery.state += `${states[3]}`
+            break
+          }
+          case '入金確認済み/送金済み': {
+            findDocumentQuery.state += `${states[4]}`
+            break
+          }
+          case '却下済み': {
+            findDocumentQuery.state += `${states[5]}`
+            break
+          }
+          case '内容確認中': {
+            findDocumentQuery.state += `${states[6]}`
+            break
+          }
+          case '期日超過': {
+            findDocumentQuery.state += `${states[7]}`
+            break
+          }
+          case '失敗': {
+            findDocumentQuery.state += `${states[8]}`
+            break
+          }
+          case '送金済み/決済済み': {
+            findDocumentQuery.state += `${states[9]}`
+            break
+          }
+          case '送信中': {
+            findDocumentQuery.state += `${states[10]}`
+            break
+          }
+          case '接続承認待ち': {
+            findDocumentQuery.state += `${states[11]}`
+            break
+          }
+          case 'クリアランス中': {
+            findDocumentQuery.state += `${states[12]}`
+            break
+          }
+          case '差替え済み': {
+            findDocumentQuery.state += `${states[13]}`
+            break
+          }
+          case '完了': {
+            findDocumentQuery.state += `${states[14]}`
+            break
+          }
+          case '回収済み': {
+            findDocumentQuery.state += `${states[15]}`
+            break
+          }
         }
+        // findDocumentQuery.state = findDocumentQuery.state.slice(0, -7)
       })
-      break
-    }
-  }
 
-  // 絞り込みの条件に購入/販売追加
-  switch (req.body.buyAndSell) {
-    case 'すべて': {
-      break
-    }
-    case '販売': {
-      findDocumentQuery.sales = true
-      break
-    }
-    case '購入': {
-      findDocumentQuery.sales = false
+      if (outboxFlag && inboxFlag) {
+        findDocumentQuery.stag = `${stags[0]}&stag=${stags[1]}`
+      } else if (outboxFlag && !inboxFlag) {
+        findDocumentQuery.stag = `${stags[0]}`
+      } else if (!outboxFlag && inboxFlag) {
+        findDocumentQuery.stag = `${stags[1]}`
+      }
       break
     }
   }
