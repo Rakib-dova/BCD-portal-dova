@@ -1,6 +1,7 @@
 let fileReader = null
 let targetFile = null
 let dataResultBinary = null
+const bomTsukiBinary = 'ï»¿'
 
 // 項目名の行有無が有：必須
 document.getElementById('checkItemNameLineOn').onclick = function () {
@@ -51,6 +52,10 @@ document.getElementById('submit').addEventListener('click', function (e) {
   let noDatalineFlag = false
   const uploadFormatNumber = document.getElementById('uploadFormatNumber').value
   const defaultNumber = document.getElementById('defaultNumber').value
+  // CSVファイルのBOM付きの文字処理
+  if (dataResultBinary[0] === bomTsukiBinary) {
+    dataResultBinary[0] = ''
+  }
   if (dataResultBinary !== null) {
     if (uploadFormatNumber > 0 && uploadFormatNumber < 9999999) {
       if (dataResultBinary[uploadFormatNumber - 1] === '' || dataResultBinary[uploadFormatNumber - 1] === undefined) {
@@ -179,17 +184,6 @@ document.getElementById('submit').addEventListener('click', function (e) {
             .closest('.field')
             .insertBefore(cautionRequired, invalidCheckTarget[idx].closest('.field').childNodes[2])
         }
-
-        // if (cautionRequired.innerText !== '') {
-        //   if (!focusFlag) {
-        //     focusFlag = true
-        //     if (invalidCheckTarget[idx].getAttribute('name') === 'dataFile') {
-        //       focusIdx = idx - 1
-        //     } else {
-        //       focusIdx = idx
-        //     }
-        //   }
-        // }
       }
       const cautionRequiredForuploadFormatNumber = document.createElement('div')
       const cautionRequiredFordefaultNumber = document.createElement('div')
