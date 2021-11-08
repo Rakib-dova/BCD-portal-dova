@@ -1,5 +1,6 @@
 let fileReader = null
 let targetFile = null
+let dataResultBinary = null
 
 // 項目名の行有無が有：必須
 document.getElementById('checkItemNameLineOn').onclick = function () {
@@ -38,6 +39,7 @@ document.getElementById('dataFile').addEventListener('change', function (e) {
         document.getElementById('dataFile').value = null
         alert('ファイルサイズが5MB超えています。\nCSVファイルを確認後もう一度アップロードしてください。')
       } else {
+        dataResultBinary = fileReader.result.split(/\r?\n|\r/)
         document.getElementById('dataFileName').value = document.getElementById('dataFile').files.item(0).name
       }
     }
@@ -45,6 +47,23 @@ document.getElementById('dataFile').addEventListener('change', function (e) {
 })
 
 document.getElementById('submit').addEventListener('click', function (e) {
+  let noHeaderDatalineFlag = false
+  let noDatalineFlag = false
+  const uploadFormatNumber = document.getElementById('uploadFormatNumber').value
+  const defaultNumber = document.getElementById('defaultNumber').value
+  if (dataResultBinary !== null) {
+    if (uploadFormatNumber > 0 && uploadFormatNumber < 9999999) {
+      if (dataResultBinary[uploadFormatNumber - 1] === '' || dataResultBinary[uploadFormatNumber - 1] === undefined) {
+        noHeaderDatalineFlag = true
+      }
+    }
+    if (defaultNumber > 0 && defaultNumber < 9999999) {
+      if (dataResultBinary[defaultNumber - 1] === '' || dataResultBinary[defaultNumber - 1] === undefined) {
+        noDatalineFlag = true
+      }
+    }
+  }
+
   // 各項目チェック
   const elements = document.querySelectorAll('input')
 
@@ -117,11 +136,11 @@ document.getElementById('submit').addEventListener('click', function (e) {
   if (invalidCheckTarget.length > 0) {
     let idx = 0
     do {
+      const cautionRequired = document.createElement('div')
       if (
         invalidCheckTarget[idx].getAttribute('aria-invalid') === 'true' ||
         invalidCheckTarget[idx].value.length === 0
       ) {
-        const cautionRequired = document.createElement('div')
         cautionRequired.classList.add('input-label')
         cautionRequired.classList.add('input-label-required')
         cautionRequired.setAttribute('id', 'caution')
@@ -161,14 +180,60 @@ document.getElementById('submit').addEventListener('click', function (e) {
             .insertBefore(cautionRequired, invalidCheckTarget[idx].closest('.field').childNodes[2])
         }
 
-        if (cautionRequired.innerText !== '') {
-          if (!focusFlag) {
-            focusFlag = true
-            if (invalidCheckTarget[idx].getAttribute('name') === 'dataFile') {
-              focusIdx = idx - 1
-            } else {
-              focusIdx = idx
-            }
+        // if (cautionRequired.innerText !== '') {
+        //   if (!focusFlag) {
+        //     focusFlag = true
+        //     if (invalidCheckTarget[idx].getAttribute('name') === 'dataFile') {
+        //       focusIdx = idx - 1
+        //     } else {
+        //       focusIdx = idx
+        //     }
+        //   }
+        // }
+      }
+      const cautionRequiredForuploadFormatNumber = document.createElement('div')
+      const cautionRequiredFordefaultNumber = document.createElement('div')
+      if (noHeaderDatalineFlag) {
+        if (
+          invalidCheckTarget[idx].getAttribute('name') === 'uploadFormatNumber' &&
+          document.getElementById('uploadFormatNumber').required === true
+        ) {
+          cautionRequiredForuploadFormatNumber.classList.add('input-label')
+          cautionRequiredForuploadFormatNumber.classList.add('input-label-required')
+          cautionRequiredForuploadFormatNumber.setAttribute('id', 'caution')
+          cautionRequiredForuploadFormatNumber.innerText =
+            '値が存在しない行が設定されています。正しい行を入力してください。'
+          invalidCheckTarget[idx].closest('.field').appendChild(cautionRequiredForuploadFormatNumber)
+          invalidCheckTarget[idx]
+            .closest('.field')
+            .insertBefore(cautionRequiredForuploadFormatNumber, invalidCheckTarget[idx].closest('.field').childNodes[2])
+        }
+      }
+
+      if (noDatalineFlag) {
+        if (invalidCheckTarget[idx].getAttribute('name') === 'defaultNumber') {
+          cautionRequiredFordefaultNumber.classList.add('input-label')
+          cautionRequiredFordefaultNumber.classList.add('input-label-required')
+          cautionRequiredFordefaultNumber.setAttribute('id', 'caution')
+          cautionRequiredFordefaultNumber.innerText = '値が存在しない行が設定されています。正しい行を入力してください。'
+          invalidCheckTarget[idx].closest('.field').appendChild(cautionRequiredFordefaultNumber)
+          invalidCheckTarget[idx]
+            .closest('.field')
+            .insertBefore(cautionRequiredFordefaultNumber, invalidCheckTarget[idx].closest('.field').childNodes[2])
+        }
+      }
+
+      if (
+        cautionRequired.innerText !== '' ||
+        cautionRequiredForuploadFormatNumber.innerText !== '' ||
+        cautionRequiredFordefaultNumber.innerText !== ''
+      ) {
+        if (!focusFlag) {
+          focusFlag = true
+          if (invalidCheckTarget[idx].getAttribute('name') === 'dataFile') {
+            focusIdx = idx - 1
+          } else {
+            focusIdx = idx
           }
         }
       }
