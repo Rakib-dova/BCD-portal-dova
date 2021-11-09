@@ -64,7 +64,8 @@ const axios = {
     }
   },
   get: async function (url, config) {
-    const businessId = url.replace(/\/documents\?businessId=/, '')
+    const paramateter = url.split('&')
+    const businessId = paramateter[0].replace(/\/documents\?businessId=/, '')
     url = url.match(/\/documents\?businessId=/) !== null ? 'bussinessId' : url
     switch (url) {
       case 'bussinessId': {
@@ -98,30 +99,19 @@ const axios = {
               A01007: 6,
               A: 7,
               A01009: 8,
-              A01010: 9
+              A01011: 9
             }
             this.result.data = {
               itemPerPage: 25,
               itemCount: 1,
               indexing: false,
-              numPages: 1,
+              numPages: 2,
               pageId: 0,
               Document: [dcouments.Document[invoiceId[businessId]]]
             }
           }
         }
 
-        return this.result
-      }
-      case '/documents?businessId=A01001': {
-        this.result.data = {
-          itemPerPage: 25,
-          itemCount: 0,
-          indexing: false,
-          numPages: 0,
-          pageId: 0,
-          Document: []
-        }
         return this.result
       }
       case '/documents/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1': {
@@ -156,6 +146,10 @@ const axios = {
         const invoice = require('../mockInvoice/invoice8')
         return { data: invoice }
       }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd12': {
+        const invoice = require('../mockInvoice/invoice9')
+        return { data: invoice }
+      }
       case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4b654321': {
         this.result.data = new Error('Request failed with status code 404')
         this.result.data.response = {
@@ -164,7 +158,15 @@ const axios = {
         return this.result
       }
       default: {
-        return { data: null }
+        this.result.data = {
+          itemPerPage: 25,
+          itemCount: 1,
+          indexing: false,
+          numPages: 2,
+          pageId: 0,
+          Document: [dcouments.Document[0], dcouments.Document[1]]
+        }
+        return this.result
       }
     }
   },
@@ -687,6 +689,10 @@ const dcouments = {
     {
       DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4b654321',
       ID: 'A01009'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd12',
+      ID: 'A01011'
     }
   ]
 }
