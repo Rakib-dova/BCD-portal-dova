@@ -53,28 +53,6 @@ block content
                    div ～
                  .control.is-expanded
                    input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" value= maxissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
-           .field.is-horizontal
-             .field-label.is-normal
-               label.bulmalabel 支払期日
-             .field-body
-               .field.is-grouped.is-grouped-multiline
-                 .control.is-expanded
-                   input.input#minDueDateStart.itemForSearch(type="date" name="minDueDate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
-                 .control
-                   div ～
-                 .control.is-expanded
-                   input.input#maxDueDateEnd.itemForSearch(type="date" name="maxDueDate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
-           .field.is-horizontal
-             .field-label.is-normal
-               label.bulmalabel 納品日
-             .field-body
-               .field.is-grouped.is-grouped-multiline
-                 .control.is-expanded
-                   input.input#minDeliveryDate.itemForSearch(type="date" name="minDeliveryDate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
-                 .control
-                   div ～
-                 .control.is-expanded.pb-4
-                   input.input#maxDeliveryDate.itemForSearch(type="date" name="maxDeliveryDate" pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
         .field.is-grouped.is-grouped-centered
           .control.mx-4
             a.button.is-info#submit(type="submit")  CSVダウンロード

@@ -82,8 +82,7 @@ const cbGetIndex = async (req, res, next) => {
   // ・回収済み
   const status = [
     'すべて',
-    '送信済み',
-    '受信済み',
+    '送信済み/受信済み',
     '無効',
     '受理済み/承認済み',
     '提出済み/承認待ち',
@@ -208,15 +207,8 @@ const cbPostIndex = async (req, res, next) => {
     case false: {
       switch (req.body.status) {
         case 'すべて': {
-          findDocumentQuery.stag = ''
+          findDocumentQuery.stag = `${stags[0]}&stag=${stags[1]}`
           findDocumentQuery.state = ''
-          stags.forEach((item, idx) => {
-            if (idx === 0) {
-              findDocumentQuery.stag += item
-            } else {
-              findDocumentQuery.stag += `&stag=${item}`
-            }
-          })
           states.forEach((item, idx) => {
             if (idx === 0) {
               findDocumentQuery.state += item
@@ -226,13 +218,8 @@ const cbPostIndex = async (req, res, next) => {
           })
           break
         }
-        case '送信済み': {
-          findDocumentQuery.stag = `${stags[0]}`
-          findDocumentQuery.state = `${states[0]}`
-          break
-        }
-        case '受信済み': {
-          findDocumentQuery.stag = `${stags[1]}`
+        case '送信済み/受信済み': {
+          findDocumentQuery.stag = `${stags[0]}&stag=${stags[1]}`
           findDocumentQuery.state = `${states[0]}`
           break
         }
@@ -308,19 +295,14 @@ const cbPostIndex = async (req, res, next) => {
     case true: {
       findDocumentQuery.stag = `${stags[2]}&stag=${stags[3]}`
       findDocumentQuery.state = ''
-      let outboxFlag = false
-      let inboxFlag = false
+      let outboxInboxFlag = false
       req.body.status.forEach((item, idx) => {
         if (idx !== 0) {
           findDocumentQuery.state += '&state='
         }
         switch (item) {
-          case '送信済み':
-            outboxFlag = true
-            findDocumentQuery.state += `${states[0]}`
-            break
-          case '受信済み':
-            inboxFlag = true
+          case '送信済み/受信済み':
+            outboxInboxFlag = true
             findDocumentQuery.state += `${states[0]}`
             break
           case '無効': {
@@ -384,15 +366,10 @@ const cbPostIndex = async (req, res, next) => {
             break
           }
         }
-        // findDocumentQuery.state = findDocumentQuery.state.slice(0, -7)
       })
-
-      if (outboxFlag && inboxFlag) {
+      //
+      if (outboxInboxFlag) {
         findDocumentQuery.stag = `${stags[0]}&stag=${stags[1]}`
-      } else if (outboxFlag && !inboxFlag) {
-        findDocumentQuery.stag = `${stags[0]}`
-      } else if (!outboxFlag && inboxFlag) {
-        findDocumentQuery.stag = `${stags[1]}`
       }
       break
     }
@@ -408,25 +385,6 @@ const cbPostIndex = async (req, res, next) => {
     findDocumentQuery.maxissuedate = req.body.maxIssuedate
   }
 
-  // // 絞り込みの条件に支払期日の開始日追加
-  // if (req.body.minDueDate || false) {
-  //   findDocumentQuery.
-  // }
-
-  // // 絞り込みの条件に支払期日の終了日追加
-  // if (req.body.maxDueDate || false) {
-  //   findDocumentQuery.
-  // }
-
-  // // 絞り込みの条件に納品日の開始日追加
-  // if (req.body.minDeliveryDate || false) {
-  //   findDocumentQuery.
-  // }
-
-  // // 絞り込みの条件に納品日の終了日追加
-  // if (req.body.maxDeliveryDate || false) {
-  //   findDocumentQuery.
-  // }
   const invoiceNumber = req.body.invoiceNumber
   const findDocuments = '/documents'
   const sendQuery = qs.stringify(findDocumentQuery).replace(/%26/g, '&').replace(/%3D/g, '=')
@@ -434,7 +392,7 @@ const cbPostIndex = async (req, res, next) => {
   // 請求書を検索する
   let pageId = 0
   let numPages = 1
-  const documentsResult = {}
+  let documentsResult
   do {
     const result = await apiManager.accessTradeshift(
       req.user.accessToken,
@@ -442,10 +400,9 @@ const cbPostIndex = async (req, res, next) => {
       'get',
       `${findDocuments}?${sendQuery}&limit=100&page=${pageId}`
     )
-    numPages = result.numPages
+    numPages = result.numPages ?? 1
     if (pageId === 0) {
-      documentsResult.itemCount = result.itemCount
-      documentsResult.Document = result.Document
+      documentsResult = result
     } else {
       result.Document.forEach((item) => {
         documentsResult.Document.push(item)
