@@ -127,6 +127,10 @@ block content
                 span.panel-icon
                   i.fas.fa-file
                 p 操作マニュアルダウンロード
+              a.panel-block(href='/csvDownload')
+                span.panel-icon
+                  i.fas.fa-file
+                p 請求明細ダウンロード
           footer.modal-card-foot
 
     .modal#support-confirmation-modal
@@ -159,18 +163,15 @@ block content
           button.delete(data-target="config-modal")
         section.modal-card-body
           nav.panel
-            a.panel-block(href='change')
+            a.panel-block(href='/change')
               span.panel-icon
                 i.fas.fa-file
               p 契約情報変更
-            a.panel-block(href='cancellation') 
+            a.panel-block(href='/cancellation') 
               span.panel-icon
                 i.fas.fa-file
               p 解約
-            a.panel-block(href='csvDownload')
-              span.panel-icon
-                i.fas.fa-file
-              p 請求書ダウンロード
+            
         footer.modal-card-foot
   include footer
 
