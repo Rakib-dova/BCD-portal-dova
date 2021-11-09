@@ -189,15 +189,15 @@ const cbPostIndex = async (req, res, next) => {
   // 絞り込みの条件に購入/販売追加
   switch (req.body.buyAndSell) {
     case 'すべて': {
-      findDocumentQuery.stag = `${stags[1]}&stag=${stags[2]}`
+      findDocumentQuery.stag = `${stags[2]}&stag=${stags[3]}`
       break
     }
     case '販売': {
-      findDocumentQuery.stag = `${stags[1]}`
+      findDocumentQuery.stag = `${stags[2]}`
       break
     }
     case '購入': {
-      findDocumentQuery.stag = `${stags[2]}`
+      findDocumentQuery.stag = `${stags[3]}`
       break
     }
   }
@@ -224,7 +224,6 @@ const cbPostIndex = async (req, res, next) => {
           break
         }
         default: {
-          findDocumentQuery.stag = `${stags[2]}&stag=${stags[3]}`
           switch (req.body.status) {
             case '無効': {
               findDocumentQuery.state = `${states[1]}`
