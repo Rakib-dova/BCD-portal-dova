@@ -10,10 +10,10 @@ block content
     .columns.is-centered
      .column.is-11
       .box
-       form#form(action="#")
+       form#form(method="POST")
         article.panel.is-info
          h2.panel-heading 条件絞り込み
-         .panel-block
+         .panel-block.mr-4
           .container
            .field.is-horizontal
              .field-label.is-normal
@@ -21,11 +21,41 @@ block content
              .field-body
                .field
                  .control.has-icons-right
-                   input.input#invoiceNumber.itemForSearch(type="text" name="invoiceNumber" required)
-
-           .field.is-grouped.is-grouped-centered
-             .control
-               button.button.is-info#submit(type="submit" formaction="/csvDownload/downloadInvoice" formmethod="POST")  CSVダウンロード
+                   input.input#invoiceNumber.itemForSearch(type="text" name="invoiceNumber" maxlength="100" pattern="^.{0,100}$")
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel ステータス
+             .field-body
+               .field
+                 .control.has-icons-right
+                   .select.is-fullwidth.is-multiple
+                     select#status(name="status" multiple size=4)
+                       each item in status
+                         option= item
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel 販売/購入
+             .field-body
+               .field
+                 .control.has-icons-right
+                   .select.is-fullwidth
+                     select#buyAndSell(name="buyAndSell")
+                       each item in buyAndSell
+                         option= item
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel 発行日
+             .field-body
+               .field.is-grouped.is-grouped-multiline
+                 .control.is-expanded
+                   input.input#minIssuedate.itemForSearch(type="date" name="minIssuedate" value= minissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+                 .control
+                   div ～
+                 .control.is-expanded
+                   input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" value= maxissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+        .field.is-grouped.is-grouped-centered
+          .control.mx-4
+            a.button.is-info#submit(type="submit")  CSVダウンロード
 
     include footer
 
