@@ -12,6 +12,7 @@ const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
 const functionName = 'cbPostIndex'
 const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
+const csvDownloadController = require('../controllers/csvDownloadController.js')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -52,17 +53,60 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  // 発行日、作成日、支払期日の日付の表示のため、今日の日付を取得
-  const today = new Date().toISOString().split('T')[0]
+  // 発行日開始日と終了日の算定(今日の日付の月 - 1)
+  const today = new Date()
+  const minissuedate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0]
+  const maxissuedate = today.toISOString().split('T')[0]
+
   // ステータス項目の選択アイテム
-  const status = ['', 'draft', 'accept', 'inbox', 'outbox', 'sales', 'purchases', 'deleted']
+  // tradeshiftステータス
+  // ・送信済み/受信済み
+  // ・受理済み/承認済み
+  // ・無効
+  // ・すべて
+  // ・送信済み/受信済み
+  // ・受理済み/承認済み
+  // ・無効
+  // ・入金額人済み/送金済み
+  // ・却下済み
+  // ・内容確認中
+  // ・期日超過
+  // ・提出済み/承認待ち
+  // ・失敗
+  // ・送金済み/決済済み
+  // ・送信中
+  // ・接続承認待ち
+  // ・クリアランス中
+  // ・切替え済み
+  // ・完了
+  // ・回収済み
+  const status = [
+    'すべて',
+    '送信済み/受信済み',
+    '無効',
+    '受理済み/承認済み',
+    '提出済み/承認待ち',
+    '入金確認済み/送金済み',
+    '却下済み',
+    '内容確認中',
+    '期日超過',
+    '失敗',
+    '送金済み/決済済み',
+    '送信中',
+    '接続承認待ち',
+    'クリアランス中',
+    '差替え済み',
+    '完了',
+    '回収済み'
+  ]
   // 販売購入項目の選択アイテム
-  const buyAndSell = ['', '販売', '購入']
+  const buyAndSell = ['すべて', '販売', '購入']
 
   // 請求書ダウンロード画面表示
   res.render('csvDownload', {
-    title: '請求書ダウンロード',
-    today: today, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
+    title: '請求明細ダウンロード',
+    minissuedate: minissuedate,
+    maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
     status: status,
     buyAndSell: buyAndSell
   })
@@ -71,6 +115,7 @@ const cbGetIndex = async (req, res, next) => {
 
 const cbPostIndex = async (req, res, next) => {
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+  const qs = require('qs')
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
@@ -113,17 +158,261 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
-  // 請求書ダウンロード画面から請求書番号を取得
+  // 絞り込みの条件データチェック
+  const findDocumentQuery = {}
+
+  // 絞り込みの条件に請求書番号追加
+  if (req.body.invoiceNumber || false) {
+    findDocumentQuery.businessId = req.body.invoiceNumber
+  }
+
+  const stags = ['outbox', 'inbox', 'sales', 'purchases']
+  const states = [
+    'DELIVERED',
+    'REJECTED_BY_SENDER',
+    'ACCEPTED',
+    'SENT',
+    'PAID_CONFIRMED',
+    'REJECTED_BY_RECEIVER',
+    'DISPUTED_BY_RECEIVER',
+    'OVERDUE',
+    'FAILED_DELIVERY',
+    'PAID_UNCONFIRMED',
+    'IN_TRANSIT',
+    'PENDING_NOT_A_CONTACT',
+    'IN_CLEARANCE',
+    'REPLACED',
+    'CLOSED',
+    'COLLECTED'
+  ]
+
+  // 絞り込みの条件に購入/販売追加
+  switch (req.body.buyAndSell) {
+    case 'すべて': {
+      findDocumentQuery.stag = `${stags[1]}&stag=${stags[2]}`
+      break
+    }
+    case '販売': {
+      findDocumentQuery.stag = `${stags[1]}`
+      break
+    }
+    case '購入': {
+      findDocumentQuery.stag = `${stags[2]}`
+      break
+    }
+  }
+
+  // 絞り込みの条件にステータス追加
+  switch (Array.isArray(req.body.status)) {
+    case false: {
+      switch (req.body.status) {
+        case 'すべて': {
+          findDocumentQuery.stag = `${stags[0]}&stag=${stags[1]}`
+          findDocumentQuery.state = ''
+          states.forEach((item, idx) => {
+            if (idx === 0) {
+              findDocumentQuery.state += item
+            } else {
+              findDocumentQuery.state += `&state=${item}`
+            }
+          })
+          break
+        }
+        case '送信済み/受信済み': {
+          findDocumentQuery.stag = `${stags[0]}&stag=${stags[1]}`
+          findDocumentQuery.state = `${states[0]}`
+          break
+        }
+        default: {
+          findDocumentQuery.stag = `${stags[2]}&stag=${stags[3]}`
+          switch (req.body.status) {
+            case '無効': {
+              findDocumentQuery.state = `${states[1]}`
+              break
+            }
+            case '受理済み/承認済み': {
+              findDocumentQuery.state = `${states[2]}`
+              break
+            }
+            case '提出済み/承認待ち': {
+              findDocumentQuery.state = `${states[3]}`
+              break
+            }
+            case '入金確認済み/送金済み': {
+              findDocumentQuery.state = `${states[4]}`
+              break
+            }
+            case '却下済み': {
+              findDocumentQuery.state = `${states[5]}`
+              break
+            }
+            case '内容確認中': {
+              findDocumentQuery.state = `${states[6]}`
+              break
+            }
+            case '期日超過': {
+              findDocumentQuery.state = `${states[7]}`
+              break
+            }
+            case '失敗': {
+              findDocumentQuery.state = `${states[8]}`
+              break
+            }
+            case '送金済み/決済済み': {
+              findDocumentQuery.state = `${states[9]}`
+              break
+            }
+            case '送信中': {
+              findDocumentQuery.state = `${states[10]}`
+              break
+            }
+            case '接続承認待ち': {
+              findDocumentQuery.state = `${states[11]}`
+              break
+            }
+            case 'クリアランス中': {
+              findDocumentQuery.state = `${states[12]}`
+              break
+            }
+            case '差替え済み': {
+              findDocumentQuery.state = `${states[13]}`
+              break
+            }
+            case '完了': {
+              findDocumentQuery.state = `${states[14]}`
+              break
+            }
+            case '回収済み': {
+              findDocumentQuery.state = `${states[15]}`
+              break
+            }
+          }
+          break
+        }
+      }
+      break
+    }
+    case true: {
+      findDocumentQuery.stag = `${stags[2]}&stag=${stags[3]}`
+      findDocumentQuery.state = ''
+      let outboxInboxFlag = false
+      req.body.status.forEach((item, idx) => {
+        if (idx !== 0) {
+          findDocumentQuery.state += '&state='
+        }
+        switch (item) {
+          case '送信済み/受信済み':
+            outboxInboxFlag = true
+            findDocumentQuery.state += `${states[0]}`
+            break
+          case '無効': {
+            findDocumentQuery.state += `${states[1]}`
+            break
+          }
+          case '受理済み/承認済み': {
+            findDocumentQuery.state += `${states[2]}`
+            break
+          }
+          case '提出済み/承認待ち': {
+            findDocumentQuery.state += `${states[3]}`
+            break
+          }
+          case '入金確認済み/送金済み': {
+            findDocumentQuery.state += `${states[4]}`
+            break
+          }
+          case '却下済み': {
+            findDocumentQuery.state += `${states[5]}`
+            break
+          }
+          case '内容確認中': {
+            findDocumentQuery.state += `${states[6]}`
+            break
+          }
+          case '期日超過': {
+            findDocumentQuery.state += `${states[7]}`
+            break
+          }
+          case '失敗': {
+            findDocumentQuery.state += `${states[8]}`
+            break
+          }
+          case '送金済み/決済済み': {
+            findDocumentQuery.state += `${states[9]}`
+            break
+          }
+          case '送信中': {
+            findDocumentQuery.state += `${states[10]}`
+            break
+          }
+          case '接続承認待ち': {
+            findDocumentQuery.state += `${states[11]}`
+            break
+          }
+          case 'クリアランス中': {
+            findDocumentQuery.state += `${states[12]}`
+            break
+          }
+          case '差替え済み': {
+            findDocumentQuery.state += `${states[13]}`
+            break
+          }
+          case '完了': {
+            findDocumentQuery.state += `${states[14]}`
+            break
+          }
+          case '回収済み': {
+            findDocumentQuery.state += `${states[15]}`
+            break
+          }
+        }
+      })
+      //
+      if (outboxInboxFlag) {
+        findDocumentQuery.stag = `${stags[0]}&stag=${stags[1]}`
+      }
+      break
+    }
+  }
+
+  // 絞り込みの条件に発行日の開始日追加
+  if (req.body.minIssuedate || false) {
+    findDocumentQuery.minissuedate = req.body.minIssuedate
+  }
+
+  // 絞り込みの条件に発行日の終了日追加
+  if (req.body.maxIssuedate || false) {
+    findDocumentQuery.maxissuedate = req.body.maxIssuedate
+  }
+
   const invoiceNumber = req.body.invoiceNumber
+  const findDocuments = '/documents'
+  const sendQuery = qs.stringify(findDocumentQuery).replace(/%26/g, '&').replace(/%3D/g, '=')
 
   // 請求書を検索する
-  const documentsResult = await apiManager.accessTradeshift(
-    req.user.accessToken,
-    req.user.refreshToken,
-    'get',
-    '/documents?businessId=' + invoiceNumber
-  )
+  let pageId = 0
+  let numPages = 1
+  let documentsResult
+  do {
+    const result = await apiManager.accessTradeshift(
+      req.user.accessToken,
+      req.user.refreshToken,
+      'get',
+      `${findDocuments}?${sendQuery}&limit=100&page=${pageId}`
+    )
+    numPages = result.numPages ?? 1
+    if (pageId === 0) {
+      documentsResult = result
+    } else {
+      result.Document.forEach((item) => {
+        documentsResult.Document.push(item)
+      })
+    }
+    pageId++
+  } while (pageId < numPages)
 
+  let filename = ''
+  let downloadFile = ''
   // documentsResultエラー検査
   if (documentsResult instanceof Error) {
     errorHandle(documentsResult, res, req)
@@ -134,48 +423,58 @@ const cbPostIndex = async (req, res, next) => {
       req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
       res.redirect(303, '/csvDownload')
     } else {
-      // documentIdの初期化
-      let documentId = ''
-      // 請求書番号で検索した結果の配列を取得
-      const documents = documentsResult.Document
+      const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
+      if (req.body.invoiceNumber || false) {
+        // documentIdの初期化
+        let documentId = ''
+        // 請求書番号で検索した結果の配列を取得
+        const documents = documentsResult.Document
 
-      // 取得した配列から請求書番号（UUID）を取得
-      documents.map((doc) => {
-        if (doc.ID === invoiceNumber) {
-          documentId = doc.DocumentId
-        }
-        return 0
-      })
+        // 取得した配列から請求書番号（UUID）を取得
+        documents.map((doc) => {
+          if (doc.ID === invoiceNumber) {
+            documentId = doc.DocumentId
+          }
+          return 0
+        })
+        // 請求書番号（UUID）を取得した場合
+        if (documentId !== '') {
+          // 請求書番号（UUID）で請求書情報取得（とれシフAPI呼出）
+          const result = await apiManager.accessTradeshift(
+            req.user.accessToken,
+            req.user.refreshToken,
+            'get',
+            `/documents/${documentId}`
+          )
+          // resultエラー検査
+          if (result instanceof Error) {
+            errorHandle(result, res, req)
+          } else {
+            // 取得した請求書をJSONに作成する
+            const jsondata = dataToJson(result)
+            // JSONファイルをCSVに変更
+            downloadFile = jsonToCsv(jsondata)
+            // ファイル名：今日の日付_ユーザID.csv
 
-      // 請求書番号（UUID）を取得した場合
-      if (documentId !== '') {
-        // 請求書番号（UUID）で請求書情報取得（とれシフAPI呼出）
-        const result = await apiManager.accessTradeshift(
-          req.user.accessToken,
-          req.user.refreshToken,
-          'get',
-          `/documents/${documentId}`
-        )
-
-        // resultエラー検査
-        if (result instanceof Error) {
-          errorHandle(result, res, req)
+            filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
+            res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+            res.status(200).send(`${String.fromCharCode(0xfeff)}${downloadFile}`)
+          }
         } else {
-          // 取得した請求書をJSONに作成する
-          const jsondata = dataToJson(result)
-          // JSONファイルをCSVに変更
-          const downloadFile = jsonToCsv(jsondata)
-          // ファイル名：今日の日付_ユーザID.csv
-          const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
-          const filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
-
-          res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-          res.status(200).send(`${String.fromCharCode(0xfeff)}` + downloadFile)
+          // 条件に合わせるデータがない場合、お知らせを表示する。
+          req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
+          res.redirect(303, '/csvDownload')
         }
       } else {
-        // 条件に合わせるデータがない場合、お知らせを表示する。
-        req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
-        res.redirect(303, '/csvDownload')
+        const invoicesForDownload = await csvDownloadController.createInvoiceDataForDownload(
+          req.user.accessToken,
+          req.user.refreshToken,
+          documentsResult.Document
+        )
+
+        filename = encodeURIComponent(`${today}_請求書.csv`)
+        res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+        res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
       }
     }
   }
@@ -243,7 +542,9 @@ const dataToJson = (data) => {
     // 必須項目チェック
     invoice.発行日 = data.IssueDate.value
     invoice.請求書番号 = data.ID.value
-    invoice.テナントID = data.AccountingCustomerParty.Party.PartyIdentification[0].ID.value
+    if (data.AccountingCustomerParty.Party.PartyIdentification || false) {
+      invoice.テナントID = data.AccountingCustomerParty.Party.PartyIdentification[0].ID.value
+    }
 
     invoice['明細-項目ID'] = data.InvoiceLine[i].ID.value
     invoice['明細-内容'] = data.InvoiceLine[i].Item.Description[0].value
@@ -350,7 +651,7 @@ const jsonToCsv = (jsonData) => {
 }
 
 router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/downloadInvoice', helper.isAuthenticated, cbPostIndex)
+router.post('/', helper.isAuthenticated, cbPostIndex)
 
 module.exports = {
   router: router,

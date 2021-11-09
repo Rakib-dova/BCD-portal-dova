@@ -11,7 +11,7 @@ const getCookies = require('./getCookies')
 
 describe('請求書アップロードフォーマット一覧のインテグレーションテスト', () => {
   let acCookies
-  // let userCookies
+  let userCookies
   let testTenantId
 
   describe('0.前準備', () => {
@@ -20,12 +20,12 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       const options = require('minimist')(process.argv.slice(2))
       const adminId = options.adminid
       const adminSecret = options.adminsecret
-      // const userId = options.userid
-      // const userSecret = options.usersecret
+      const userId = options.userid
+      const userSecret = options.usersecret
       // --------------------アカウント管理者のCookieを取得---------------
       acCookies = await getCookies(app, request, getTenantId, adminId, adminSecret)
       // ---------------------一般ユーザのCookieを取得--------------------
-      // userCookies = await getCookies(userId, userSecret)
+      userCookies = await getCookies(app, request, getTenantId, userId, userSecret)
 
       // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
 
@@ -39,9 +39,9 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
     testTenantId = getTenantId.id
   })
 
-  describe('1.契約ステータス：新規登録', () => {
-    // 利用登録前
-    test('請求書ダウンロード画面へアクセス', async () => {
+  describe('1.契約ステータス：未登録', () => {
+    // 利用登録をしていないため、請求書ダウンロードページ利用できない
+    test('管理者、契約ステータス：未登録、利用不可', async () => {
       const res = await request(app)
         .get('/csvDownload')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -50,6 +50,17 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i) // タイトル
     })
 
+    test('一般ユーザ、契約ステータス：未登録、利用不可', async () => {
+      const res = await request(app)
+        .get('/csvDownload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i) // タイトル
+    })
+  })
+
+  describe('2.契約ステータス：新規登録', () => {
     // 利用登録
     let tenantCsrf
     test('利用登録画面へ遷移', async () => {
@@ -86,21 +97,52 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
 
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
+
+    // 利用登録後、一般ユーザ登録
+    test('一般ユーザ登録', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+    })
   })
 
-  describe('2.契約ステータス：登録申込', () => {
-    test('請求書ダウンロード画面へアクセス', async () => {
+  describe('3.契約ステータス：登録申込', () => {
+    test('管理者、契約ステータス：登録申込、利用可能', async () => {
       const res = await request(app)
         .get('/csvDownload')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
+      expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
+      expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
+      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
+      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+    })
+
+    test('一般ユーザ、契約ステータス：登録申込、利用可能', async () => {
+      const res = await request(app)
+        .get('/csvDownload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
+      expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
+      expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
+      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
+      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
     })
   })
 
-  describe('3.契約ステータス：登録受付', () => {
-    test('請求書ダウンロード画面へアクセス', async () => {
+  describe('4.契約ステータス：登録受付', () => {
+    test('管理者、契約ステータス：登録受付、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -125,11 +167,32 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         .expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
+      expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
+      expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
+      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
+      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+    })
+
+    test('一般ユーザ、契約ステータス：登録受付、利用可能', async () => {
+      const res = await request(app)
+        .get('/csvDownload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
+      expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
+      expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
+      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
+      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
     })
   })
 
-  describe('4.契約ステータス：契約中', () => {
-    test('請求書ダウンロード画面へアクセス', async () => {
+  describe('5.契約ステータス：契約中', () => {
+    test('管理者、契約ステータス：契約中、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -156,11 +219,32 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         .expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
+      expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
+      expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
+      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
+      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+    })
+
+    test('一般ユーザ、契約ステータス：契約中、利用可能', async () => {
+      const res = await request(app)
+        .get('/csvDownload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
+      expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
+      expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
+      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
+      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
     })
   })
 
-  describe('5.契約ステータス：変更申込', () => {
-    test('請求書ダウンロード画面へアクセス', async () => {
+  describe('6.契約ステータス：変更申込', () => {
+    test('管理者、契約ステータス：変更申込、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -194,11 +278,32 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         .expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
+      expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
+      expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
+      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
+      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+    })
+
+    test('一般ユーザ、契約ステータス：変更申込、利用可能', async () => {
+      const res = await request(app)
+        .get('/csvDownload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
+      expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
+      expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
+      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
+      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
     })
   })
 
-  describe('6.契約ステータス：変更受付', () => {
-    test('請求書ダウンロード画面へアクセス', async () => {
+  describe('7.契約ステータス：変更受付', () => {
+    test('管理者、契約ステータス：変更受付、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -223,11 +328,32 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         .expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
+      expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
+      expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
+      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
+      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+    })
+
+    test('一般ユーザ、契約ステータス：変更受付、利用可能', async () => {
+      const res = await request(app)
+        .get('/csvDownload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
+      expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
+      expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
+      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
+      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
     })
   })
 
-  describe('7.契約ステータス：解約申込', () => {
-    test('請求書ダウンロード画面へアクセス', async () => {
+  describe('8.契約ステータス：解約申込', () => {
+    test('管理者、契約ステータス：解約申込、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -267,12 +393,21 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容確認
+    })
+
+    test('一般ユーザ、契約ステータス：解約申込、利用不可', async () => {
+      const res = await request(app)
+        .get('/csvDownload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容確認
     })
   })
 
-  describe('8.契約ステータス：解約受付', () => {
-    test('請求書ダウンロード画面へアクセス', async () => {
+  describe('9.契約ステータス：解約受付', () => {
+    test('管理者、契約ステータス：解約受付、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -297,12 +432,21 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容確認
+    })
+
+    test('一般ユーザ、契約ステータス：解約受付、利用不可', async () => {
+      const res = await request(app)
+        .get('/csvDownload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容確認
     })
   })
 
-  describe('9.契約ステータス：解約', () => {
-    test('請求書ダウンロード画面へアクセス', async () => {
+  describe('10.契約ステータス：解約', () => {
+    test('管理者、契約ステータス：解約、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -339,7 +483,16 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(500)
 
-      expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i) // 画面内容確認
+    })
+
+    test('一般ユーザ、契約ステータス：解約、利用不可', async () => {
+      const res = await request(app)
+        .get('/csvDownload')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i) // 画面内容確認
     })
   })
 
