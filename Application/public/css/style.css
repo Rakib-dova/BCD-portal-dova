@@ -416,7 +416,9 @@ img.logo-ncom {
 .float-right {
   float: right;
 }
-
+.float-left {
+  float: left;
+}
 .margin-right-20 {
   margin-right: 20%;
 }
@@ -462,6 +464,7 @@ img.logo-ncom {
 .tooltip {
   position: relative;
   display: inline-block;
+  margin-left: 5px;
 }
 
 .tooltip .tooltiptext {
