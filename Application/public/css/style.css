@@ -416,7 +416,9 @@ img.logo-ncom {
 .float-right {
   float: right;
 }
-
+.float-left {
+  float: left;
+}
 .margin-right-20 {
   margin-right: 20%;
 }
@@ -462,6 +464,7 @@ img.logo-ncom {
 .tooltip {
   position: relative;
   display: inline-block;
+  margin-left: 5px;
 }
 
 .tooltip .tooltiptext {
@@ -546,4 +549,11 @@ img.logo-ncom {
   flex-basis: 0;
   flex-grow: 1;
   flex-shrink: 1;
+}
+
+.bulmalabel {
+  color: #363636;
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
 }
