@@ -96,17 +96,17 @@ document.getElementById('submit').addEventListener('click', function (e) {
       document.getElementById('uploadFormatNumber').required === true
     ) {
       if (
-        checkTarget.closest('.field').childNodes[2] !== undefined &&
-        checkTarget.closest('.field').childNodes[2].getAttribute('id') === 'caution'
+        checkTarget.closest('.field').childNodes[3] !== undefined &&
+        checkTarget.closest('.field').childNodes[3].getAttribute('id') === 'caution'
       ) {
-        checkTarget.closest('.field').childNodes[2].remove()
+        checkTarget.closest('.field').childNodes[3].remove()
       }
     } else if (checkTarget.getAttribute('name') === 'defaultNumber') {
       if (
-        checkTarget.closest('.field').childNodes[2] !== undefined &&
-        checkTarget.closest('.field').childNodes[2].getAttribute('id') === 'caution'
+        checkTarget.closest('.field').childNodes[3] !== undefined &&
+        checkTarget.closest('.field').childNodes[3].getAttribute('id') === 'caution'
       ) {
-        checkTarget.closest('.field').childNodes[2].remove()
+        checkTarget.closest('.field').childNodes[3].remove()
       }
     } else if (checkTarget.getAttribute('name') === 'uploadFormatItemName') {
       if (
@@ -181,12 +181,12 @@ document.getElementById('submit').addEventListener('click', function (e) {
           invalidCheckTarget[idx].closest('.field').appendChild(cautionRequired)
           invalidCheckTarget[idx]
             .closest('.field')
-            .insertBefore(cautionRequired, invalidCheckTarget[idx].closest('.field').childNodes[2])
+            .insertBefore(cautionRequired, invalidCheckTarget[idx].closest('.field').childNodes[3])
         } else if (invalidCheckTarget[idx].getAttribute('name') === 'defaultNumber') {
           invalidCheckTarget[idx].closest('.field').appendChild(cautionRequired)
           invalidCheckTarget[idx]
             .closest('.field')
-            .insertBefore(cautionRequired, invalidCheckTarget[idx].closest('.field').childNodes[2])
+            .insertBefore(cautionRequired, invalidCheckTarget[idx].closest('.field').childNodes[3])
         } else if (invalidCheckTarget[idx].getAttribute('name') === 'uploadFormatItemName') {
           invalidCheckTarget[idx].closest('.field').appendChild(cautionRequired)
           invalidCheckTarget[idx]
@@ -209,7 +209,7 @@ document.getElementById('submit').addEventListener('click', function (e) {
           invalidCheckTarget[idx].closest('.field').appendChild(cautionRequiredForuploadFormatNumber)
           invalidCheckTarget[idx]
             .closest('.field')
-            .insertBefore(cautionRequiredForuploadFormatNumber, invalidCheckTarget[idx].closest('.field').childNodes[2])
+            .insertBefore(cautionRequiredForuploadFormatNumber, invalidCheckTarget[idx].closest('.field').childNodes[3])
         }
       }
 
@@ -222,7 +222,7 @@ document.getElementById('submit').addEventListener('click', function (e) {
           invalidCheckTarget[idx].closest('.field').appendChild(cautionRequiredFordefaultNumber)
           invalidCheckTarget[idx]
             .closest('.field')
-            .insertBefore(cautionRequiredFordefaultNumber, invalidCheckTarget[idx].closest('.field').childNodes[2])
+            .insertBefore(cautionRequiredFordefaultNumber, invalidCheckTarget[idx].closest('.field').childNodes[3])
         }
       }
 
