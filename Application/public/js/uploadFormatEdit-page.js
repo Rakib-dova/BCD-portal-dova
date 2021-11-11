@@ -99,7 +99,7 @@ $('#csvBasicEditBtn').addEventListener('click', function (e) {
   const taxResult = checkIdentifier(inputTax)
   const unitResult = checkIdentifier(inputUnit)
 
-  // 明細-税,明細-単位 重複がある場合、エラー項目にフォーカス移動
+  // 明細-税,明細-単位重複がある場合、エラー項目にフォーカス移動
   if (taxResult !== -1 || unitResult !== -1) {
     if (taxResult !== -1) {
       inputTax[taxResult].focus()
@@ -155,7 +155,7 @@ $('#csvBasicEditCancelBtn').addEventListener('click', function (e) {
   })
 })
 
-// 税、単位値が重複確認
+// 明細-税,明細-単位値の重複確認
 function checkIdentifier(inputArr) {
   let chkFlag = true
   const chkArr = []
@@ -190,7 +190,7 @@ function checkIdentifier(inputArr) {
   return chkIdx
 }
 
-// エラーメッセージを削除
+// エラーメッセージ削除
 function deleteErrorMessage(elements) {
   Array.prototype.forEach.call(elements, (checkTarget) => {
     if (
