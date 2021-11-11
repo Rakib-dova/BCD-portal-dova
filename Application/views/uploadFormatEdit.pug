@@ -423,7 +423,7 @@ block content
                     label(for="uploadFormatItemName").input-label 設定名称
                     p#uploadFormatItemNameeRequired.input-label-required.input-label （必須）
                     .control
-                      input.input#basicUploadFormatItemName(type="text" value=uploadGeneral.uploadFormatItemName maxlength=100 placeholder='文字・数字100桁まで' required)
+                      input.input#basicUploadFormatItemName(type="text" value=uploadGeneral.uploadFormatItemName maxlength=100 placeholder='文字・数字100桁まで' required data-initvalue=`${uploadGeneral.uploadFormatItemName}`)
                   .field
                     label(for="uploadType").input-label アップロード種別
                     .control
@@ -479,12 +479,12 @@ block content
                   div.tooltip.tip-img.tip-title.title-label
                       span.tooltiptext 「明細-税」を識別する文字を入力して下さい。空欄の場合はその項目を利用しない設定になります。
                 .line-content
-                  - var taxItem = taxIds 
+                  - var taxItem = taxIds
                   each tax, index in csvTax
                     .field
-                      label(for=tax.id).input-label= tax.name
+                      label.input-label= tax.name
                       .control
-                        input.input.input-tax(id=tax.id type="text" value=taxItem[`${tax.id}`].value placeholder='文字・数字100桁まで' pattern=inputPatternEngNum maxlength=100)
+                        input.input.input-tax(type="text" value=taxItem[`${tax.id}`].value placeholder='文字・数字100桁まで' maxlength=100 data-initvalue=`${taxItem[`${tax.id}`].value}`)
 
               .field.card
                 .card-content
@@ -492,12 +492,12 @@ block content
                   div.tooltip.tip-img.tip-title.title-label
                       span.tooltiptext 「明細-単位」を識別する文字を入力して下さい。空欄の場合はその項目を利用しない設定になります。
                 .line-content
-                  - var unitItem = unitIds 
+                  - var unitItem = unitIds
                   each unit, index in csvUnit
                     .field
-                      label(for=unit.id).input-label= unit.name
+                      label.input-label= unit.name
                       .control
-                        input.input.input-unit(id=unit.id type="text" value=unitItem[`${unit.id}`].value placeholder='文字・数字100桁まで' pattern=inputPatternEngNum maxlength=100)
+                        input.input.input-unit(type="text" value=unitItem[`${unit.id}`].value placeholder='文字・数字100桁まで' maxlength=100 data-initvalue=`${unitItem[`${unit.id}`].value}`)
 
               .columns.is-centered.changeConfirm
                 .field.is-grouped.is-grouped-centered
@@ -509,7 +509,7 @@ block content
                         p.border-edit 　変更ボタンをクリック後、確認→登録を行ってください。
                       .column
                         div.button-area
-                          a.button.cancel-button(data-target='csvBasicFormat-modal') キャンセル
+                          a.button.cancel-button#csvBasicEditCancelBtn(data-target='csvBasicFormat-modal') キャンセル
                           a.button.is-link.ml-6#csvBasicEditBtn(data-target='csvBasicFormat-modal') 変更
 
       include footer
