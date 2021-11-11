@@ -63,6 +63,42 @@ $('#editConfirmBtn').addEventListener('click', function (e) {
   })
 })
 
+// 変更ボタンクリックイベント
+$('#submit').addEventListener('click', function (e) {
+  // 必須項目の未入力のチェック
+  const notValue = Array.prototype.map.call($('.requiredItem'), (item) => {
+    const selectNumber = item.selectedIndex
+    const itemValue = item.options[selectNumber].value
+    if (itemValue === '') {
+      return item.parentNode.parentNode.children[0].children[1]
+    } else {
+      item.parentNode.parentNode.children[0].children[1].classList.remove('not-input-required')
+    }
+  })
+
+  // モーダル制御Flag
+  let stopFlag = true
+
+  notValue.forEach((item, idx) => {
+    // 必須未入力エラー表示
+    if (item !== undefined) {
+      document.querySelectorAll('.input-label-required.input-label')[idx].classList.add('not-input-required')
+      stopFlag = false
+    } else {
+      // 必須未入力エラー表示して、入力するとエラー表示削除
+      document.querySelectorAll('.input-label-required.input-label')[idx].classList.remove('not-input-required')
+    }
+  })
+
+  if (stopFlag) {
+    // データをDBに保存
+    $('#form').submit()
+  } else {
+    // モーダル制御
+    $('#confirmModify-modal').classList.remove('is-active')
+  }
+})
+
 // 「基本情報設定画面」の修正ボタンをクリックイベント処理
 $('#csvBasicEditBtn').addEventListener('click', function (e) {
   // 変更可能な対象項目を取得
