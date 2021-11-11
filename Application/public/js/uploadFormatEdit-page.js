@@ -70,6 +70,14 @@ $('#csvBasicEditBtn').addEventListener('click', function (e) {
   const inputTax = $('.input-tax')
   const inputUnit = $('.input-unit')
 
+  // 変更した入力値を保存
+  inputTax.forEach((tax) => {
+    tax.dataset.initvalue = tax.value
+  })
+  inputUnit.forEach((unit) => {
+    unit.dataset.initvalue = unit.value
+  })
+
   // バリデーションチェック
   const checkTarget = []
   inputTax.forEach((item) => {
@@ -106,7 +114,9 @@ $('#csvBasicEditBtn').addEventListener('click', function (e) {
   $('#csvBasicFormat-modal').classList.remove('is-active')
 })
 
+// キャンセルボタンのクリックイベント処理
 $('#csvBasicEditCancelBtn').addEventListener('click', function (e) {
+  // 入力した値を元に戻す
   $('#basicUploadFormatItemName').value = $('#basicUploadFormatItemName').dataset.initvalue
   $('.input-tax').forEach((tax) => {
     tax.value = tax.dataset.initvalue
