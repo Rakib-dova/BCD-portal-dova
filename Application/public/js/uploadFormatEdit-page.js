@@ -105,3 +105,13 @@ $('#csvBasicEditBtn').addEventListener('click', function (e) {
   // 正常の場合もダル閉じる
   $('#csvBasicFormat-modal').classList.remove('is-active')
 })
+
+$('#csvBasicEditCancelBtn').addEventListener('click', function (e) {
+  $('#basicUploadFormatItemName').value = $('#basicUploadFormatItemName').dataset.initvalue
+  $('.input-tax').forEach((tax) => {
+    tax.value = tax.dataset.initvalue
+  })
+  $('.input-unit').forEach((unit) => {
+    unit.value = unit.dataset.initvalue
+  })
+})
