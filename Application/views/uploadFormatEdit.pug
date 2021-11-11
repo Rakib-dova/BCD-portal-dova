@@ -484,7 +484,7 @@ block content
                     .field
                       label(for=tax.id).input-label= tax.name
                       .control
-                        input.input.input-tax(id=tax.id type="text" value=taxItem[`${tax.id}`].value placeholder='文字・数字100桁まで' pattern=inputPatternEngNum maxlength=100 data-initvalue=`${taxItem[`${tax.id}`].value}`)
+                        input.input.input-tax(id=tax.id type="text" value=taxItem[`${tax.id}`].value placeholder='文字・数字100桁まで' maxlength=100 data-initvalue=`${taxItem[`${tax.id}`].value}`)
 
               .field.card
                 .card-content
@@ -497,7 +497,7 @@ block content
                     .field
                       label(for=unit.id).input-label= unit.name
                       .control
-                        input.input.input-unit(id=unit.id type="text" value=unitItem[`${unit.id}`].value placeholder='文字・数字100桁まで' pattern=inputPatternEngNum maxlength=100 data-initvalue=`${unitItem[`${unit.id}`].value}`)
+                        input.input.input-unit(id=unit.id type="text" value=unitItem[`${unit.id}`].value placeholder='文字・数字100桁まで' maxlength=100 data-initvalue=`${unitItem[`${unit.id}`].value}`)
 
               .columns.is-centered.changeConfirm
                 .field.is-grouped.is-grouped-centered
