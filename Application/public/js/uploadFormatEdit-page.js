@@ -92,6 +92,8 @@ $('#csvBasicEditBtn').addEventListener('click', function (e) {
   }
 
   // 変更した入力値を保存
+  basicUploadFormatItemName.dataset.initvalue = basicUploadFormatItemName.value
+
   inputTax.forEach((tax) => {
     tax.dataset.initvalue = tax.value
   })
