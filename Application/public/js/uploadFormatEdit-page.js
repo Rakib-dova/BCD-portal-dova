@@ -70,14 +70,6 @@ $('#csvBasicEditBtn').addEventListener('click', function (e) {
   const inputTax = $('.input-tax')
   const inputUnit = $('.input-unit')
 
-  // 変更した入力値を保存
-  inputTax.forEach((tax) => {
-    tax.dataset.initvalue = tax.value
-  })
-  inputUnit.forEach((unit) => {
-    unit.dataset.initvalue = unit.value
-  })
-
   // バリデーションチェック
   const checkTarget = []
   inputTax.forEach((item) => {
@@ -98,6 +90,14 @@ $('#csvBasicEditBtn').addEventListener('click', function (e) {
     checkAriaInvalid[0].focus()
     return
   }
+
+  // 変更した入力値を保存
+  inputTax.forEach((tax) => {
+    tax.dataset.initvalue = tax.value
+  })
+  inputUnit.forEach((unit) => {
+    unit.dataset.initvalue = unit.value
+  })
 
   // 変更内容確認フォームへ保存
   $('#uploadFormatItemName').value = basicUploadFormatItemName.value
