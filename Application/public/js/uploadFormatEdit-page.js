@@ -20,6 +20,29 @@ const $ = function (tagObjName) {
 
 // 「確認画面へ遷移」ボタンクリックイベント処理
 $('#editConfirmBtn').addEventListener('click', function (e) {
+  // 必須項目の未入力のチェック
+  const notValue = Array.prototype.map.call($('.requiredItem'), (item) => {
+    const selectNumber = item.selectedIndex
+    const itemValue = item.options[selectNumber].value
+    if (itemValue === '') {
+      return item.parentNode.parentNode.children[0].children[1]
+    } else {
+      item.parentNode.parentNode.children[0].children[1].classList.remove('not-input-required')
+    }
+  })
+
+  notValue.forEach((item, idx) => {
+    // 必須未入力エラー表示
+    if (item !== undefined) {
+      document.querySelectorAll('.input-label-required.input-label')[idx].classList.add('not-input-required')
+      // モーダル制御
+      $('#confirmModify-modal').classList.remove('is-active')
+    } else {
+      // 必須未入力エラー表示して、入力するとエラー表示削除
+      document.querySelectorAll('.input-label-required.input-label')[idx].classList.remove('not-input-required')
+    }
+  })
+
   // 確認画面に表示するリスト初期化
   $('.checkDataItem').forEach((item) => {
     item.innerText = ''
@@ -65,38 +88,8 @@ $('#editConfirmBtn').addEventListener('click', function (e) {
 
 // 変更ボタンクリックイベント
 $('#submit').addEventListener('click', function (e) {
-  // 必須項目の未入力のチェック
-  const notValue = Array.prototype.map.call($('.requiredItem'), (item) => {
-    const selectNumber = item.selectedIndex
-    const itemValue = item.options[selectNumber].value
-    if (itemValue === '') {
-      return item.parentNode.parentNode.children[0].children[1]
-    } else {
-      item.parentNode.parentNode.children[0].children[1].classList.remove('not-input-required')
-    }
-  })
-
-  // モーダル制御Flag
-  let stopFlag = true
-
-  notValue.forEach((item, idx) => {
-    // 必須未入力エラー表示
-    if (item !== undefined) {
-      document.querySelectorAll('.input-label-required.input-label')[idx].classList.add('not-input-required')
-      stopFlag = false
-    } else {
-      // 必須未入力エラー表示して、入力するとエラー表示削除
-      document.querySelectorAll('.input-label-required.input-label')[idx].classList.remove('not-input-required')
-    }
-  })
-
-  if (stopFlag) {
-    // データをDBに保存
-    $('#form').submit()
-  } else {
-    // モーダル制御
-    $('#confirmModify-modal').classList.remove('is-active')
-  }
+  // データをDBに保存
+  $('#form').submit()
 })
 
 // 「基本情報設定画面」の修正ボタンをクリックイベント処理
