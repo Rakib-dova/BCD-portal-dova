@@ -107,6 +107,9 @@ block content
         p.control 　
         p.control
           a.button.is-info 全部解除
+        p.control 　
+        p.control
+          a.button △
 
     template#templateSearchResultBox
         .box.searchResultBox
@@ -118,7 +121,18 @@ block content
             label.checkbox
               input.m-3.p-1(type='checkbox' checked=false)
          
-    
+    .modal.modal-fx-fadeInscale#searchCompany-modal
+     .modal-background.cancel-button(data-target="searchCompany-modal")
+     .modal-card
+       header.modal-card-head
+         p.modal-card-title 企業検索
+         button.delete(type="button" data-target="searchCompany-modal")
+       section.modal-card-body
+         p.modal-card-result#modal-card-result
+       footer.modal-card-foot
+         div.button-area
+          a.button.cancel-button(data-target="searchCompany-modal") 確認
+
     include footer
 
 block append scripts

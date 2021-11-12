@@ -187,7 +187,11 @@ app.use('/auth', require('./routes/auth').router)
 
 app.use('/tenant', require('./routes/tenant').router)
 app.use('/user', require('./routes/user').router)
+
+// 住所検索
 app.use('/searchAddress', require('./routes/searchAddressApi').router)
+// 企業検索
+app.use('/searchCompanies', require('./routes/searchCompaniesApi').router)
 
 // 請求書一括アップロード
 // csvupload
