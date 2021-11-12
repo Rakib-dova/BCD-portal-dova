@@ -250,7 +250,7 @@ img.logo-ncom {
 }
 
 .is-invisible {
-  display: none;
+  display: none !important;
 }
 
 .changeConfirm {
@@ -556,4 +556,18 @@ img.logo-ncom {
   display: block;
   font-size: 1rem;
   font-weight: 700;
+}
+
+.searchResultBox {
+  overflow-y: scroll;
+  text-overflow: ellipsis;
+  height: 100%;
+}
+
+#displaySendToSearchResultField {
+  height: 393px !important;
+}
+
+#displaySendBySearchResultField {
+  height: 393px !important;
 }
