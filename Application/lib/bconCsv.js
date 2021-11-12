@@ -982,8 +982,9 @@ class bconCsv {
       if (identifier.extensionType === '0') {
         taxidentifier.map((tax) => {
           if (tax === identifier.defaultExtension) {
-            bconCsvTaxUser[identifier.uploadFormatExtension] = bconCsvTaxUser[tax]
+            const taxValue = bconCsvTaxUser[tax]
             delete bconCsvTaxUser[tax]
+            bconCsvTaxUser[identifier.uploadFormatExtension] = taxValue
           }
         })
       }
@@ -999,8 +1000,9 @@ class bconCsv {
       if (identifier.extensionType === '1') {
         unitidentifier.map((unit) => {
           if (unit === identifier.defaultExtension) {
-            bconCsvUnitUser[identifier.uploadFormatExtension] = bconCsvUnitUser[unit]
+            const unitValue = bconCsvUnitUser[unit]
             delete bconCsvUnitUser[unit]
+            bconCsvUnitUser[identifier.uploadFormatExtension] = unitValue
           }
         })
       }

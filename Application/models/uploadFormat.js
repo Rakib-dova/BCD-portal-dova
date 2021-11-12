@@ -29,7 +29,8 @@ module.exports = (sequelize, DataTypes) => {
         // テナントで契約情報を取得
         const contractId = await sequelize.models.Contract.findOne({
           where: {
-            tenantId: tenantId
+            tenantId: tenantId,
+            deleteFlag: false
           }
         })
         // 契約情報でアップロードフォーマットのデータを取得
