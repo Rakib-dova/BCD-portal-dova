@@ -386,29 +386,76 @@ const cbPostIndex = async (req, res, next) => {
 
   const invoiceNumber = req.body.invoiceNumber
   const findDocuments = '/documents'
-  const sendQuery = qs.stringify(findDocumentQuery).replace(/%26/g, '&').replace(/%3D/g, '=')
 
-  // 請求書を検索する
-  let pageId = 0
-  let numPages = 1
+  // 送信企業の条件のチェック
+  let sentTo
+  if (Array.isArray(req.body.sentTo)) {
+    sentTo = req.body.sentTo
+  } else {
+    if (validate.isString(req.body.sentTo)) {
+      sentTo = [req.body.sentTo]
+    } else {
+      // 企業情報がない場合、検索できるようにする。
+      sentTo = ['nocompany1']
+    }
+  }
+
+  // 受信企業の条件のチェック
+  let sentBy
+  if (Array.isArray(req.body.sentBy)) {
+    sentBy = req.body.sentBy
+  } else {
+    if (validate.isString(req.body.sentBy)) {
+      sentBy = [req.body.sentBy]
+    } else {
+      // 企業情報がない場合、検索できるようにする。
+      sentBy = ['nocompany2']
+    }
+  }
+
+  // 送信企業X受信企業ごとに検索
+  let sentToIdx = 0
   let documentsResult
   do {
-    const result = await apiManager.accessTradeshift(
-      req.user.accessToken,
-      req.user.refreshToken,
-      'get',
-      `${findDocuments}?${sendQuery}&limit=100&page=${pageId}`
-    )
-    numPages = result.numPages ?? 1
-    if (pageId === 0) {
-      documentsResult = result
-    } else {
-      result.Document.forEach((item) => {
-        documentsResult.Document.push(item)
-      })
-    }
-    pageId++
-  } while (pageId < numPages)
+    const company = sentTo[sentToIdx]
+    let sentByIdx = 0
+    if (company !== 'nocompany1') findDocumentQuery.sentTo = company
+    do {
+      const sentByCompany = sentBy[sentByIdx]
+      if (sentByCompany !== 'nocompany2') findDocumentQuery.sentBy = sentByCompany
+      if (company !== sentByCompany) {
+        const sendQuery = qs.stringify(findDocumentQuery).replace(/%26/g, '&').replace(/%3D/g, '=')
+        // 請求書を検索する
+        let pageId = 0
+        let numPages = 1
+        do {
+          const result = await apiManager.accessTradeshift(
+            req.user.accessToken,
+            req.user.refreshToken,
+            'get',
+            `${findDocuments}?${sendQuery}&limit=100&page=${pageId}`
+          )
+          numPages = result.numPages ?? 1
+          // 最初検索の場合結果オブジェクト作成
+          if (pageId === 0 && !(documentsResult?.Document ?? false)) {
+            documentsResult = {
+              ...result
+            }
+          } else {
+            // 検索結果がある場合結果リストに追加
+            result.Document.forEach((item) => {
+              // 結果リストの数をを増加
+              documentsResult.itemCount++
+              documentsResult.Document.push(item)
+            })
+          }
+          pageId++
+        } while (pageId < numPages)
+      }
+      sentByIdx++
+    } while (sentByIdx < sentBy.length)
+    sentToIdx++
+  } while (sentToIdx < sentTo.length)
 
   let filename = ''
   let downloadFile = ''
@@ -600,7 +647,7 @@ const dataToJson = (data) => {
     }
 
     if (data.Delivery) {
-      if (data.Delivery[0].ActualDeliveryDate.value) {
+      if (data.Delivery[0].ActualDeliveryDate?.value ?? false) {
         invoice.納品日 = data.Delivery[0].ActualDeliveryDate?.value
       }
     }
