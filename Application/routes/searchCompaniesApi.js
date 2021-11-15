@@ -100,9 +100,9 @@ const cbSearchCompanies = async (req, res) => {
 }
 
 // エラー処理
-const errorHandle = (documentsResult, _res, _req) => {
+const errorHandle = (companiesResult, _res, _req) => {
   let resultStatusCode
-  if (String(documentsResult.response?.status).slice(0, 1) === '4') {
+  if (String(companiesResult.response?.status).slice(0, 1) === '4') {
     // 400番エラーの場合
     logger.error(
       {
@@ -111,11 +111,11 @@ const errorHandle = (documentsResult, _res, _req) => {
         invoiceNumber: _req.body.invoiceNumber,
         status: 2
       },
-      documentsResult.name
+      companiesResult.name
     )
     resultStatusCode = 400
     return _res.status(resultStatusCode).send(constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR)
-  } else if (String(documentsResult.response?.status).slice(0, 1) === '5') {
+  } else if (String(companiesResult.response?.status).slice(0, 1) === '5') {
     // 500番エラーの場合
     logger.error(
       {
@@ -124,7 +124,7 @@ const errorHandle = (documentsResult, _res, _req) => {
         invoiceNumber: _req.body.invoiceNumber,
         status: 2
       },
-      documentsResult.toString()
+      companiesResult.toString()
     )
     resultStatusCode = 500
     return _res.status(resultStatusCode).send(constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR)
