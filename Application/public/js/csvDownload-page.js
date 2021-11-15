@@ -124,16 +124,20 @@ document.querySelector('#sendToSearchBtn').addEventListener('click', function (e
             modalCardBody.innerHTML = ''
             switch (errStatus) {
               case 403:
+                // 認証情報取得失敗した場合
                 modalCardBody.innerHTML = 'ログインユーザーではありません。'
                 break
               case 400:
+                // APIエラーが発生した場合
                 if (errortext) {
                   modalCardBody.innerHTML = errortext
                 } else {
+                  // 入力した企業名がundefinedの場合
                   modalCardBody.innerHTML = '正しい企業名を入力してください。'
                 }
                 break
               case 500:
+                // APIエラーが発生した場合
                 modalCardBody.innerHTML = errortext
                 break
             }
@@ -225,16 +229,20 @@ document.querySelector('#sendBySearchBtn').addEventListener('click', function (e
             modalCardBody.innerHTML = ''
             switch (errStatus) {
               case 403:
+                // 認証情報取得失敗した場合
                 modalCardBody.innerHTML = 'ログインユーザーではありません。'
                 break
               case 400:
+                // APIエラーが発生した場合
                 if (errortext) {
                   modalCardBody.innerHTML = errortext
                 } else {
+                  // 入力した企業名がundefinedの場合
                   modalCardBody.innerHTML = '正しい企業名を入力してください。'
                 }
                 break
               case 500:
+                // APIエラーが発生した場合
                 modalCardBody.innerHTML = errortext
                 break
             }
@@ -292,7 +300,7 @@ function sendToSelectBtnCreate() {
       if (invisiblechk) {
         this.textContent = '▼'
       } else {
-        this.textContent = '△'
+        this.textContent = '▲'
       }
     })
   }
@@ -346,7 +354,7 @@ function sendBySelectBtnCreate() {
       if (invisiblechk) {
         this.textContent = '▼'
       } else {
-        this.textContent = '△'
+        this.textContent = '▲'
       }
     })
   }

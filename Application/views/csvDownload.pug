@@ -60,7 +60,7 @@ block content
              .field-body
                .field.has-addons
                  p.control.is-expanded
-                   input.input#sendTo(type='text')
+                   input.input#sendTo(type='text' maxlength="100")
                  p.control
                    a.button.is-info#sendToSearchBtn 検索
 
@@ -79,7 +79,7 @@ block content
              .field-body
                .field.has-addons
                  p.control.is-expanded
-                   input.input#sendBy(type='text')
+                   input.input#sendBy(type='text' maxlength="100")
                  p.control
                    a.button.is-info#sendBySearchBtn 検索
 
@@ -109,7 +109,7 @@ block content
           a.button.is-info 全部解除
         p.control 　
         p.control
-          a.button △
+          a.button ▲
 
     template#templateSearchResultBox
         .box.searchResultBox

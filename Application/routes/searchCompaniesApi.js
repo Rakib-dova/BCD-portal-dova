@@ -16,9 +16,12 @@ router.use(
 const cbSearchCompanies = async (req, res) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbSearchCompanies')
 
+  // 検索した結果を格納する変数
   const resultCompanies = []
+  // 返すレスポンスステータスコードを格納する変数
   let resultStatusCode
 
+  // 認証情報取得確認
   if (!req.session || !req.user?.userId) {
     resultStatusCode = 403
     return res.status(resultStatusCode).send()
@@ -30,6 +33,7 @@ const cbSearchCompanies = async (req, res) => {
     return res.status(resultStatusCode).send()
   }
 
+  // 検索する企業名を格納
   const companyName = req.body.companyName
 
   // 自分自身の企業をaccountAPIで取得
@@ -40,7 +44,9 @@ const cbSearchCompanies = async (req, res) => {
     '/account'
   )
 
+  // accountCompanyResultのエラー確認
   if (accountCompanyResult instanceof Error) {
+    // APIエラーが発生した場合
     return errorHandle(accountCompanyResult, res, req)
   } else {
     // 検索した企業名と比較し、部分一致したら格納
@@ -54,37 +60,42 @@ const cbSearchCompanies = async (req, res) => {
     }
   }
 
-  // 企業名を入力できるように変更
-  const encodCcompanyName = encodeURI(companyName)
-  const sendQuery = `query=${encodCcompanyName}`
+  // 企業名を検索できるように変更
+  const encodeCompanyName = encodeURI(companyName)
+  const sendQuery = `query=${encodeCompanyName}}`
 
-  // 請求書を検索する
+  // 企業を検索する
   let pageId = 0
   let numPages = 1
   let apiResult
-  let result
+  let connectionsResult
+  // 検索結果をすべて格納
   do {
-    result = await apiManager.accessTradeshift(
+    connectionsResult = await apiManager.accessTradeshift(
       req.user.accessToken,
       req.user.refreshToken,
       'get',
       `/network/connections?${sendQuery}&limit=100&page=${pageId}`
     )
-    numPages = result.numPages ?? 1
+    // 検索結果の全体ページを格納
+    numPages = connectionsResult.numPages ?? 1
     if (pageId === 0) {
-      apiResult = result
+      apiResult = { ...connectionsResult }
     } else {
-      result.Connection.forEach((item) => {
+      connectionsResult.Connection.forEach((item) => {
         apiResult.Connection.push(item)
       })
     }
     pageId++
   } while (pageId < numPages)
 
-  if (apiResult instanceof Error) {
-    return errorHandle(apiResult, res, req)
+  // connectionsResultのエラー確認
+  if (connectionsResult instanceof Error) {
+    // APIエラーが発生した場合
+    return errorHandle(connectionsResult, res, req)
   } else {
     resultStatusCode = 200
+    // 検索結果の企業名、企業IDを確認し格納
     apiResult.Connection.forEach((item) => {
       if (item.CompanyName && item.CompanyAccountId) {
         resultCompanies.push({

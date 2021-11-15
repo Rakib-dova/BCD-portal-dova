@@ -387,6 +387,9 @@ const cbPostIndex = async (req, res, next) => {
   const invoiceNumber = req.body.invoiceNumber
   const findDocuments = '/documents'
 
+  // 企業情報がない場合、検索できるようにするための変数
+  const noCompany = ['nocompany1', 'nocompany2']
+
   // 送信企業の条件のチェック
   let sentTo
   if (Array.isArray(req.body.sentTo)) {
@@ -396,7 +399,7 @@ const cbPostIndex = async (req, res, next) => {
       sentTo = [req.body.sentTo]
     } else {
       // 企業情報がない場合、検索できるようにする。
-      sentTo = ['nocompany1']
+      sentTo = [noCompany[0]]
     }
   }
 
@@ -409,7 +412,7 @@ const cbPostIndex = async (req, res, next) => {
       sentBy = [req.body.sentBy]
     } else {
       // 企業情報がない場合、検索できるようにする。
-      sentBy = ['nocompany2']
+      sentBy = [noCompany[1]]
     }
   }
 
@@ -420,10 +423,10 @@ const cbPostIndex = async (req, res, next) => {
   do {
     const company = sentTo[sentToIdx]
     let sentByIdx = 0
-    if (company !== 'nocompany1') findDocumentQuery.sentTo = company
+    if (company !== noCompany[0]) findDocumentQuery.sentTo = company
     do {
       const sentByCompany = sentBy[sentByIdx]
-      if (sentByCompany !== 'nocompany2') findDocumentQuery.sentBy = sentByCompany
+      if (sentByCompany !== noCompany[1]) findDocumentQuery.sentBy = sentByCompany
       if (company !== sentByCompany) {
         const sendQuery = qs.stringify(findDocumentQuery).replace(/%26/g, '&').replace(/%3D/g, '=')
         // 請求書を検索する
