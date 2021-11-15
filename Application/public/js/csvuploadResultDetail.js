@@ -79,7 +79,7 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
             $('#tabs').classList.add('is-invisible')
             $('#detailTable').classList.add('is-invisible')
             $('#errormessage').innerHTML =
-              '<h3>請求書が100件超えています。</h3><h3>CSVファイルを確認後もう一度アップロードしてください。</h3><br>'
+              '<h3>請求書が0件か100件を超えています。</h3><h3>CSVファイルを確認後もう一度アップロードしてください。</h3><br>'
           } else {
             resultDetail.forEach((obj) => {
               if (~~obj.lines === 0) {
