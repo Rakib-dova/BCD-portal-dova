@@ -3506,6 +3506,7 @@ describe('csvDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
       // 試験実施
       await csvDownload.cbPostIndex(request, response, next)
 
@@ -3528,6 +3529,51 @@ describe('csvDownloadのテスト', () => {
           0xfeff
         )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
       )
+    })
+
+    test('準正常:請求書複数の場合のAPIエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: '',
+        buyAndSell: buyAndSell[0],
+        minIssuedate: '1990-01-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith(
+        'noti',
+        'APIエラーが発生しました。時間を空けてもう一度試してください。'
+      )
+      // ポータルにリダイレクト「される」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
+      expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
 
     test('準正常:請求書番号APIエラー', async () => {
@@ -3567,7 +3613,7 @@ describe('csvDownloadのテスト', () => {
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
 
-    test('準正常:請求書番（UUID）号APIエラー', async () => {
+    test('準正常:請求書番号（UUID）APIエラー', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
