@@ -1837,6 +1837,73 @@ describe('csvuploadのテスト', () => {
       expect(response.body).toBe(constantsDefine.statusConstants.OVERLAPPED_INVOICE)
     })
 
+    test('準正常：APIエラー（ネットワークテナントID取得）', async () => {
+      // 準備
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+
+      const csvFileName = 'networkCheckData.csv'
+      const csvFilePath = path.resolve(`./testData/${csvFileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(csvFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString()
+
+      const expectError = new Error()
+      expectError.name = 'Bad Request'
+      expectError.response = { status: 400 }
+      expectError.message = 'Bad Request 400'
+
+      apiManager.accessTradeshift = jest.fn((req, refreshToken, method, query, body = {}, config = {}) => {
+        switch (method) {
+          case 'get':
+            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
+              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+                return documentListData2
+              }
+              return documentListData
+            }
+            if (query.match(/^\/network\?limit=100/i)) {
+              if (query.match(/^\/network\?limit=100&page=/i)) {
+                return expectError
+              }
+              return expectError
+            }
+            break
+          case 'put':
+            return 200
+        }
+      })
+
+      const tmpApiManager = apiManager.accessTradeshift
+      // request uplodadFormatId 空
+      // ファイルデータを設定
+      request.body = {
+        fileData: fileData,
+        uploadFormatId: ''
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+
+      apiManager.accessTradeshift = tmpApiManager
+
+      // response.statusが200
+      expect(response.status).toHaveBeenCalledWith(200)
+      // response.bodyに予想したデータが入っている
+      expect(response.body).toBe(constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED)
+    })
+
     test('hotfix1483：請求書【スキップ、成功、スキップ】', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -7277,7 +7344,7 @@ describe('csvuploadのテスト', () => {
       expect(response.body).toBe(constantsDefine.statusConstants.INVOICE_FAILED)
     })
 
-    test('400エラー：APIエラー', async () => {
+    test('準正常：APIエラー（ドキュメント取得）', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
       const tmpdetailInsert = invoiceDetailController.insert
@@ -7301,7 +7368,7 @@ describe('csvuploadのテスト', () => {
 
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const csvFileName = 'networkCheckData.csv'
+      const csvFileName = 'getDocumentData1.csv'
       const csvFilePath = path.resolve(`./testData/${csvFileName}`)
       const fileData = Buffer.from(
         fs.readFileSync(csvFilePath, {
@@ -7314,7 +7381,186 @@ describe('csvuploadのテスト', () => {
       const resultUpl = await csvupload.cbUploadCsv(filePath, filename, fileData)
       expect(resultUpl).toBeTruthy()
 
+      const expectError = new Error()
+      expectError.name = 'Bad Request'
+      expectError.response = { status: 400 }
+      expectError.message = 'Bad Request 400'
+
+      apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
+        switch (method) {
+          case 'get':
+            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
+              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+                return expectError
+              }
+              return expectError
+            }
+            if (query.match(/^\/network\?limit=100/i)) {
+              if (accToken.match('getNetworkErr')) {
+                return new Error('trade shift api error')
+              }
+              if (query.match(/^\/network\?limit=100&page=/i)) {
+                return resultGetNetwork2
+              }
+              return resultGetNetwork
+            }
+            break
+          case 'put':
+            return 200
+        }
+      })
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+
+      const tmpApiManager = apiManager.accessTradeshift
+      // request uplodadFormatId 空
+      request.body = {
+        uploadFormatId: ''
+      }
+      const resultExt = await csvupload.cbExtractInvoice(
+        filePath,
+        filename,
+        userToken,
+        invoiceParameta,
+        request,
+        response
+      )
       // 期待結果
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('準正常：エラー（ドキュメント取得APIの結果が正しくない場合）', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+
+      request.user = user
+
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const csvFileName = 'getDocumentData2.csv'
+      const csvFilePath = path.resolve(`./testData/${csvFileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(csvFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString()
+
+      // 試験実施
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, fileData)
+      expect(resultUpl).toBeTruthy()
+
+      const expectError = new Error()
+      expectError.name = 'Bad Request'
+      expectError.response = { status: 400 }
+      expectError.message = 'Bad Request 400'
+
+      apiManager.accessTradeshift = jest.fn((accToken, refreshToken, method, query, body = {}, config = {}) => {
+        switch (method) {
+          case 'get':
+            if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000/i)) {
+              if (query.match(/^\/documents\?stag=draft&stag=outbox&limit=10000&page=/i)) {
+                return 'test'
+              }
+              return 'test'
+            }
+            if (query.match(/^\/network\?limit=100/i)) {
+              if (accToken.match('getNetworkErr')) {
+                return new Error('trade shift api error')
+              }
+              if (query.match(/^\/network\?limit=100&page=/i)) {
+                return resultGetNetwork2
+              }
+              return resultGetNetwork
+            }
+            break
+          case 'put':
+            return 200
+        }
+      })
+      invoiceController.insert = tmpInsert
+      invoiceDetailController.insert = tmpdetailInsert
+
+      const tmpApiManager = apiManager.accessTradeshift
+      // request uplodadFormatId 空
+      request.body = {
+        uploadFormatId: ''
+      }
+      const resultExt = await csvupload.cbExtractInvoice(
+        filePath,
+        filename,
+        userToken,
+        invoiceParameta,
+        request,
+        response
+      )
+      // 期待結果
+      expect(resultExt).toBe(104)
+
+      const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      apiManager.accessTradeshift = tmpApiManager
+    })
+
+    test('準正常：APIエラー（請求書登録）', async () => {
+      // 準備
+      const tmpInsert = invoiceController.insert
+      const tmpdetailInsert = invoiceDetailController.insert
+
+      request.user = user
+
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+
+      userController.findOne = jest.fn((userId) => {
+        return dataValues
+      })
+      tenantController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+      contractController.findOne = jest.fn((tenantid) => {
+        return contractdataValues
+      })
+
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const csvFileName = 'getDocumentData2.csv'
+      const csvFilePath = path.resolve(`./testData/${csvFileName}`)
+      const fileData = Buffer.from(
+        fs.readFileSync(csvFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+      ).toString()
+
+      // 試験実施
+      const resultUpl = await csvupload.cbUploadCsv(filePath, filename, fileData)
+      expect(resultUpl).toBeTruthy()
+
       const expectError = new Error()
       expectError.name = 'Bad Request'
       expectError.response = { status: 400 }
@@ -7359,6 +7605,7 @@ describe('csvuploadのテスト', () => {
         request,
         response
       )
+      // 期待結果
       expect(resultExt).toBe(104)
 
       const resultRem = await csvupload.cbRemoveCsv(filePath, filename)
@@ -8051,72 +8298,15 @@ describe('csvuploadのテスト', () => {
   })
 
   describe('getNetwork', () => {
-    test('準正常', async () => {
+    test('準正常：エラー（取得したネットワークテナントIDが正しくない場合）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
-      const resultInvoiceDetailController = []
-      request.session = {
-        userContext: 'NotLoggedIn',
-        userRole: 'dummy'
-      }
-      const getNetworkTestUser = {
-        ...user,
-        accessToken: 'getNetworkErr'
-      }
-      request.user = getNetworkTestUser
+      const req = user
 
-      userController.findOne = jest.fn((userId) => {
-        return dataValues
-      })
-      tenantController.findOne = jest.fn((tenantid) => {
-        return contractdataValues
-      })
-      contractController.findOne = jest.fn((tenantid) => {
-        return contractdataValues
-      })
-      invoiceController.insert = jest.fn((values) => {
-        const { v4: uuidv4 } = require('uuid')
-        return {
-          dataValues: {
-            ...values,
-            invoicesId: uuidv4()
-          }
-        }
-      })
-      invoiceController.findInvoice = jest.fn((invoice) => {
-        return { dataValues: invoice }
-      })
-      invoiceDetailController.insert = jest.fn((values) => {
-        if (
-          values.errorData !== '正常に取込ました。' &&
-          values.errorData !== '取込済みのため、処理をスキップしました。'
-        ) {
-          resultInvoiceDetailController.push(values)
-          return values
-        }
-      })
+      const getNetwork = csvupload.getNetwork(req)
 
-      // 試験実施
-      await csvupload.cbGetIndex(request, response, next)
-      // expect(response.render).toHaveBeenCalledWith('csvupload')
-
-      getNetworkTestUser.accessToken = 'dummyAccess'
-      request.user = getNetworkTestUser
-      request.body = {
-        csvFileName: 'getNetwork',
-        fileData: fileData,
-        uploadFormatId: ''
-      }
-
-      // 試験実施
-      await csvupload.cbPostUpload(request, response, next)
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      expect(response.statusCode).toBe(200)
-      expect(response.body).toMatch(/請求書取込が完了しました。/i)
-      expect(response.body).toMatch(/取込結果は一覧画面でご確認下さい。/i)
+      // return結果がundefineである
+      expect(getNetwork).toBeDefined()
     })
   })
 })
