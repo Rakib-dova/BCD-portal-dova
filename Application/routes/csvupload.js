@@ -129,7 +129,10 @@ const cbPostUpload = async (req, res, next) => {
     refreshToken: req.user.refreshToken
   }
 
+  // エラーメッセージを格納
   let errorText = null
+  // ネットワークテナントID取得時エラー確認
+  let getNetworkErrFlag = false
 
   // csvアップロード
   if (cbUploadCsv(filePath, filename, uploadCsvData) === false) {
@@ -155,30 +158,33 @@ const cbPostUpload = async (req, res, next) => {
 
   // ネットワークが紐づいているテナントid確認
   if (validate.isUndefined(BconCsv.prototype.companyNetworkConnectionList)) {
-    return res.status(200).send(constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED)
+    getNetworkErrFlag = false
+    errorText = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
   } else {
+    getNetworkErrFlag = true
     // ヘッダがない場合
     BconCsvNoHeader.prototype.companyNetworkConnectionList = BconCsv.prototype.companyNetworkConnectionList
   }
 
-  // csvからデータ抽出
-  switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req, res)) {
-    case 101:
-      errorText = constantsDefine.statusConstants.INVOICE_FAILED
-      break
-    case 102:
-      errorText = constantsDefine.statusConstants.OVER_SPECIFICATION
-      break
-    case 103:
-      errorText = constantsDefine.statusConstants.OVERLAPPED_INVOICE
-      break
-    case 104:
-      errorText = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
-      break
-    default:
-      break
+  if (getNetworkErrFlag) {
+    // csvからデータ抽出
+    switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req, res)) {
+      case 101:
+        errorText = constantsDefine.statusConstants.INVOICE_FAILED
+        break
+      case 102:
+        errorText = constantsDefine.statusConstants.OVER_SPECIFICATION
+        break
+      case 103:
+        errorText = constantsDefine.statusConstants.OVERLAPPED_INVOICE
+        break
+      case 104:
+        errorText = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
+        break
+      default:
+        break
+    }
   }
-
   // csv削除
   if (cbRemoveCsv(filePath, filename) === false) {
     setErrorLog(req, 500)
