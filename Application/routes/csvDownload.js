@@ -523,6 +523,11 @@ const cbPostIndex = async (req, res, next) => {
           documentsResult.Document
         )
 
+        // エラーを確認する
+        if (invoicesForDownload instanceof Error) {
+          errorHandle(invoicesForDownload, res, req)
+        }
+
         filename = encodeURIComponent(`${today}_請求書.csv`)
         res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
         res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
