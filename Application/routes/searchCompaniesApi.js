@@ -14,22 +14,49 @@ router.use(
 )
 
 const cbSearchCompanies = async (req, res) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbSearchCompanies')
+
   const resultCompanies = []
   let resultStatusCode
-  logger.info(constantsDefine.logMessage.INF000 + 'cbSearchCompanies')
+
   if (!req.session || !req.user?.userId) {
     resultStatusCode = 403
     return res.status(resultStatusCode).send()
   }
 
+  // 検索する企業名の有無確認
   if (req.body.companyName === undefined) {
     resultStatusCode = 400
     return res.status(resultStatusCode).send()
   }
 
-  const companyName = encodeURI(req.body.companyName)
+  const companyName = req.body.companyName
 
-  const sendQuery = `query=${companyName}`
+  // 自分自身の企業をaccountAPIで取得
+  const accountCompanyResult = await apiManager.accessTradeshift(
+    req.user.accessToken,
+    req.user.refreshToken,
+    'get',
+    '/account'
+  )
+
+  if (accountCompanyResult instanceof Error) {
+    return errorHandle(accountCompanyResult, res, req)
+  } else {
+    // 検索した企業名と比較し、部分一致したら格納
+    if (accountCompanyResult.CompanyName && accountCompanyResult.CompanyAccountId) {
+      if (accountCompanyResult.CompanyName.indexOf(companyName) !== -1) {
+        resultCompanies.push({
+          CompanyName: accountCompanyResult.CompanyName,
+          CompanyAccountId: accountCompanyResult.CompanyAccountId
+        })
+      }
+    }
+  }
+
+  // 企業名を入力できるように変更
+  const encodCcompanyName = encodeURI(companyName)
+  const sendQuery = `query=${encodCcompanyName}`
 
   // 請求書を検索する
   let pageId = 0
@@ -55,33 +82,7 @@ const cbSearchCompanies = async (req, res) => {
   } while (pageId < numPages)
 
   if (apiResult instanceof Error) {
-    if (String(apiResult.response?.status).slice(0, 1) === '4') {
-      // 400番エラーの場合
-      logger.error(
-        {
-          tenant: req.user.tenantId,
-          user: req.user.userId,
-          invoiceNumber: req.body.invoiceNumber,
-          status: 2
-        },
-        apiResult.name
-      )
-      resultStatusCode = 400
-      return res.status(resultStatusCode).send(constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR)
-    } else if (String(apiResult.response?.status).slice(0, 1) === '5') {
-      // 500番エラーの場合
-      logger.error(
-        {
-          tenant: req.user.tenantId,
-          user: req.user.userId,
-          invoiceNumber: req.body.invoiceNumber,
-          status: 2
-        },
-        apiResult.toString()
-      )
-      resultStatusCode = 500
-      return res.status(resultStatusCode).send(constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR)
-    }
+    return errorHandle(apiResult, res, req)
   } else {
     resultStatusCode = 200
     apiResult.Connection.forEach((item) => {
@@ -93,15 +94,47 @@ const cbSearchCompanies = async (req, res) => {
       }
     })
   }
-
-  logger.info(constantsDefine.logMessage.INF001 + 'cbSearchCompanies')
   // レスポンスを返す
+  logger.info(constantsDefine.logMessage.INF001 + 'cbSearchCompanies')
   return res.status(resultStatusCode).send(resultCompanies)
+}
+
+// エラー処理
+const errorHandle = (documentsResult, _res, _req) => {
+  let resultStatusCode
+  if (String(documentsResult.response?.status).slice(0, 1) === '4') {
+    // 400番エラーの場合
+    logger.error(
+      {
+        tenant: _req.user.tenantId,
+        user: _req.user.userId,
+        invoiceNumber: _req.body.invoiceNumber,
+        status: 2
+      },
+      documentsResult.name
+    )
+    resultStatusCode = 400
+    return _res.status(resultStatusCode).send(constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR)
+  } else if (String(documentsResult.response?.status).slice(0, 1) === '5') {
+    // 500番エラーの場合
+    logger.error(
+      {
+        tenant: _req.user.tenantId,
+        user: _req.user.userId,
+        invoiceNumber: _req.body.invoiceNumber,
+        status: 2
+      },
+      documentsResult.toString()
+    )
+    resultStatusCode = 500
+    return _res.status(resultStatusCode).send(constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR)
+  }
 }
 
 router.post('/', cbSearchCompanies)
 
 module.exports = {
   router: router,
-  cbSearchCompanies: cbSearchCompanies
+  cbSearchCompanies: cbSearchCompanies,
+  errorHandle: errorHandle
 }
