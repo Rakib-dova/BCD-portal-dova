@@ -7368,7 +7368,7 @@ describe('csvuploadのテスト', () => {
 
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const csvFileName = 'networkCheckData.csv'
+      const csvFileName = 'getDocumentData1.csv'
       const csvFilePath = path.resolve(`./testData/${csvFileName}`)
       const fileData = Buffer.from(
         fs.readFileSync(csvFilePath, {
@@ -7458,7 +7458,7 @@ describe('csvuploadのテスト', () => {
 
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const csvFileName = 'networkCheckData.csv'
+      const csvFileName = 'getDocumentData2.csv'
       const csvFilePath = path.resolve(`./testData/${csvFileName}`)
       const fileData = Buffer.from(
         fs.readFileSync(csvFilePath, {
@@ -7548,7 +7548,7 @@ describe('csvuploadのテスト', () => {
 
       const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
 
-      const csvFileName = 'networkCheckData.csv'
+      const csvFileName = 'getDocumentData2.csv'
       const csvFilePath = path.resolve(`./testData/${csvFileName}`)
       const fileData = Buffer.from(
         fs.readFileSync(csvFilePath, {
