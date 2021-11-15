@@ -72,6 +72,13 @@ $('#confirmBtn').addEventListener('click', function (e) {
   }
 })
 
+$('#submit').addEventListener('click', (e) => {
+  // sessionにoffcheckOnのアイテムが残っていると削除する
+  if (sessionStorage.getItem('offcheckOn')) {
+    sessionStorage.removeItem('offcheckOn')
+  }
+})
+
 // 戻るボタンクリックイベント処理
 $('#returnBtn').addEventListener('click', () => {
   history.back()
