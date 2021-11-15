@@ -416,6 +416,7 @@ const cbPostIndex = async (req, res, next) => {
   // 送信企業X受信企業ごとに検索
   let sentToIdx = 0
   let documentsResult
+  let resultForQuery
   do {
     const company = sentTo[sentToIdx]
     let sentByIdx = 0
@@ -428,22 +429,23 @@ const cbPostIndex = async (req, res, next) => {
         // 請求書を検索する
         let pageId = 0
         let numPages = 1
+
         do {
-          const result = await apiManager.accessTradeshift(
+          resultForQuery = await apiManager.accessTradeshift(
             req.user.accessToken,
             req.user.refreshToken,
             'get',
             `${findDocuments}?${sendQuery}&limit=100&page=${pageId}`
           )
-          numPages = result.numPages ?? 1
+          numPages = resultForQuery.numPages ?? 1
           // 最初検索の場合結果オブジェクト作成
           if (pageId === 0 && !(documentsResult?.Document ?? false)) {
             documentsResult = {
-              ...result
+              ...resultForQuery
             }
           } else {
             // 検索結果がある場合結果リストに追加
-            result.Document.forEach((item) => {
+            resultForQuery.Document.forEach((item) => {
               // 結果リストの数をを増加
               documentsResult.itemCount++
               documentsResult.Document.push(item)
@@ -459,9 +461,9 @@ const cbPostIndex = async (req, res, next) => {
 
   let filename = ''
   let downloadFile = ''
-  // documentsResultエラー検査
-  if (documentsResult instanceof Error) {
-    errorHandle(documentsResult, res, req)
+  // resultForQuery（API呼出）エラー検査
+  if (resultForQuery instanceof Error) {
+    errorHandle(resultForQuery, res, req)
   } else {
     // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
     if (documentsResult.itemCount === 0) {
@@ -486,18 +488,18 @@ const cbPostIndex = async (req, res, next) => {
         // 請求書番号（UUID）を取得した場合
         if (documentId !== '') {
           // 請求書番号（UUID）で請求書情報取得（とれシフAPI呼出）
-          const result = await apiManager.accessTradeshift(
+          const resultForDocumentId = await apiManager.accessTradeshift(
             req.user.accessToken,
             req.user.refreshToken,
             'get',
             `/documents/${documentId}`
           )
           // resultエラー検査
-          if (result instanceof Error) {
-            errorHandle(result, res, req)
+          if (resultForDocumentId instanceof Error) {
+            errorHandle(resultForDocumentId, res, req)
           } else {
             // 取得した請求書をJSONに作成する
-            const jsondata = dataToJson(result)
+            const jsondata = dataToJson(resultForDocumentId)
             // JSONファイルをCSVに変更
             downloadFile = jsonToCsv(jsondata)
             // ファイル名：今日の日付_ユーザID.csv
