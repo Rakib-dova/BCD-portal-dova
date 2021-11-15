@@ -190,13 +190,7 @@ module.exports = {
       }
     }
   },
-  Delivery: [
-    {
-      ActualDeliveryDate: {
-        value: '2021-05-19'
-      }
-    }
-  ],
+  Delivery: [{}],
   PaymentMeans: [
     {
       ID: {
