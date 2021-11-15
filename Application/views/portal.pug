@@ -76,6 +76,17 @@ block content
       .column.hvr-float
         if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
           .box
+            a.show-modal(data-target='registAccountCode-modal')
+              .media.appdesc
+                .media-left
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
+                .media-content
+                  p.title.is-5 仕訳情報設定
+                  p 
+                  p 
+      .column.hvr-float
+        if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+          .box
             a.show-modal(data-target='config-modal')
               .media.appdesc
                 .media-left
@@ -154,7 +165,18 @@ block content
             else
               p お問い合わせは、テナント管理者のみ可能です。
               p テナント管理者にご相談の上、お問い合わせください。
-
+    .modal#registAccountCode-modal
+      .modal-background.cancel-button(data-target='registAccountCode-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title 仕訳情報設定
+          button.delete(data-target="registAccountCode-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/registAccountCode') 
+              span.panel-icon
+                i.fas.fa-file
+              p 勘定科目設定
     .modal#config-modal
       .modal-background.cancel-button(data-target='config-modal')
       .modal-card.is-family-noto-sans

@@ -1,0 +1,45 @@
+extends layoutRegister
+
+block content
+  .hero.is-large
+    .hero-body
+      .container
+
+  .section.is-overlay.mt-6
+    .container.is-max-widescreen.is-family-noto-sans
+      form#form(action="#")
+        article.panel.is-info
+          h2.panel-heading 勘定科目
+          .panel-block
+            .container
+             .columns.is-centered: .column.is-four-fifths
+              .field.card
+                .card-content
+                  .field
+                    label(for="accountCode").input-label 勘定科目コード
+                    p#accountCodeRequired.input-label-required.input-label （必須）            
+                    .control
+                      .columns.ml-0.pl-0.alignCenterChild
+                        .column.pl-0
+                          input.input#codeAccountCode(type="text" name="codeAccountCode" value='' maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
+                  .field
+                    label(for="codeAccountName").input-label 勘定科目名
+                    p#codeAccountNameRequired.input-label-required.input-label （必須）                      
+                    .control
+                      .columns.ml-0.pl-0.alignCenterChild
+                        .column.pl-0
+                          input.input#codeAccountName(type="text" name="codeAccountName" value='' maxlength=40 placeholder='文字列（40桁）' required) 
+         
+
+             .columns.is-centered.changeConfirm
+              .field.is-grouped.is-grouped-centered
+                .control
+                  .column
+                    div.button-area
+                      a.button#return-btn.cancel-button.mr-6(href='/') 戻る
+                      button.button.is-success.success-button#submit(type="submit" formaction="/registAccountCode/createCodeAccount" formmethod="POST") 登録
+       
+      include footer
+
+block append scripts
+  //- script(src="/js/csvBasicFormat-page.js")
