@@ -305,20 +305,27 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   }
   let csvObj = null
 
-  // ヘッダがない場合
-  if (itemRowNumber === 0) {
-    csvObj = new BconCsvNoHeader(
-      extractFullpathFile,
-      formatFlag,
-      uploadFormatDetail,
-      uploadFormatIdentifier,
-      itemRowNumber
-    )
-  } else {
-    const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット.csv')
-    uploadData = uploadData ?? fs.readFileSync(defaultCsvPath)
-    csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier, uploadData)
+  // ファイルから請求書一括作成の時エラー例外
+  try {
+    // ヘッダがない場合
+    if (itemRowNumber === 0) {
+      csvObj = new BconCsvNoHeader(
+        extractFullpathFile,
+        formatFlag,
+        uploadFormatDetail,
+        uploadFormatIdentifier,
+        itemRowNumber
+      )
+    } else {
+      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット.csv')
+      uploadData = uploadData ?? fs.readFileSync(defaultCsvPath)
+      csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier, uploadData)
+    }
+  } catch (error) {
+    logger.error({ stack: error.stack }, error.name)
+    return 101
   }
+
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
   const setHeaders = {}
