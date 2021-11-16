@@ -53,9 +53,85 @@ block content
                    div ～
                  .control.is-expanded
                    input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" value= maxissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel 送信企業
+             .field-body
+               .field.has-addons
+                 p.control.is-expanded
+                   input.input#sendTo(type='text' maxlength="100")
+                 p.control
+                   a.button.is-info#sendToSearchBtn 検索
+
+           .field.is-horizontal
+            .field-label.is-normal
+            .field-body#sendToSelectBtnField
+
+           .field.is-horizontal.is-invisible
+            .field-label.is-normal
+            .field-body.level
+              .container#displaySendToSearchResultField
+
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel 受信企業
+             .field-body
+               .field.has-addons
+                 p.control.is-expanded
+                   input.input#sendBy(type='text' maxlength="100")
+                 p.control
+                   a.button.is-info#sendBySearchBtn 検索
+
+           .field.is-horizontal
+            .field-label.is-normal
+            .field-body#sendBySelectBtnField
+
+           .field.is-horizontal.is-invisible
+            .field-label.is-normal
+            .field-body.level
+              .container#displaySendBySearchResultField
+
+           .field.is-horizontal
+            .field-label.is-normal
+            .field-body
+           
+
+
         .field.is-grouped.is-grouped-centered
           .control.mx-4
             a.button.is-info#submit(type="submit")  CSVダウンロード
+    template#templateAllSelectBtn
+        p.control
+          a.button.is-info 全部選択
+        p.control 　
+        p.control
+          a.button.is-info 全部解除
+        p.control 　
+        p.control
+          a.button ▲
+
+    template#templateSearchResultBox
+        .box.searchResultBox
+
+    template#templateSearchResultItem
+      .field.is-horizontal
+        .field-body
+          p.control
+            label.checkbox
+              input.m-3.p-1(type='checkbox' checked=false)
+         
+    .modal.modal-fx-fadeInscale#searchCompany-modal
+     .modal-background.cancel-button(data-target="searchCompany-modal")
+     .modal-card
+       header.modal-card-head
+         p.modal-card-title 企業検索
+         button.delete(type="button" data-target="searchCompany-modal")
+       section.modal-card-body
+         p.modal-card-result#modal-card-result
+       footer.modal-card-foot
+         div.button-area
+          a.button.cancel-button(data-target="searchCompany-modal") 確認
 
     include footer
 
