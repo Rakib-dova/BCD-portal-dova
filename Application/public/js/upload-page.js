@@ -62,7 +62,6 @@ $('#start-upload-btn').addEventListener('click', () => {
     sender.setRequestHeader('Content-Type', 'application/json')
     sender.onreadystatechange = () => {
       if (sender.readyState === sender.DONE) {
-        console.log(`sender.readyState: ${sender.readyState}, sender.status: ${sender.status}`)
         if (sender.status === 200 || sender.status === 500) {
           modal.classList.remove('is-active')
           $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
