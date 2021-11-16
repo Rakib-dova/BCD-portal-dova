@@ -323,7 +323,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     }
   } catch (error) {
     logger.error({ stack: error.stack }, error.name)
-    return 101
+    return 104
   }
 
   const invoiceList = csvObj.getInvoiceList()
