@@ -107,7 +107,7 @@ document.querySelector('#sendToSearchBtn').addEventListener('click', function (e
                 const cloneSearchResultItemTemplate = document.importNode(searchResultItemTemplate.content, true)
                 cloneSearchResultItemTemplate.querySelector('label').append(item.CompanyName)
                 cloneSearchResultItemTemplate.querySelector('input').id = `sendTo${idx}`
-                cloneSearchResultItemTemplate.querySelector('input').name = 'sendTo'
+                cloneSearchResultItemTemplate.querySelector('input').name = 'sentBy'
                 cloneSearchResultItemTemplate.querySelector('input').classList.add('sendToCompanies')
                 cloneSearchResultItemTemplate.querySelector('input').value = item.CompanyAccountId
                 cloneSearchResultBoxTemplate.querySelector('.box').appendChild(cloneSearchResultItemTemplate)
@@ -212,7 +212,7 @@ document.querySelector('#sendBySearchBtn').addEventListener('click', function (e
                 const cloneSearchResultItemTemplate = document.importNode(searchResultItemTemplate.content, true)
                 cloneSearchResultItemTemplate.querySelector('label').append(item.CompanyName)
                 cloneSearchResultItemTemplate.querySelector('input').id = `sendBy${idx}`
-                cloneSearchResultItemTemplate.querySelector('input').name = 'sendBy'
+                cloneSearchResultItemTemplate.querySelector('input').name = 'sentTo'
                 cloneSearchResultItemTemplate.querySelector('input').classList.add('sendByCompanies')
                 cloneSearchResultItemTemplate.querySelector('input').value = item.CompanyAccountId
                 cloneSearchResultBoxTemplate.querySelector('.box').appendChild(cloneSearchResultItemTemplate)

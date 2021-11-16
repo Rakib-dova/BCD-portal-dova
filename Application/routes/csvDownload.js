@@ -390,7 +390,7 @@ const cbPostIndex = async (req, res, next) => {
   // 企業情報がない場合、検索できるようにするための変数
   const noCompany = ['nocompany1', 'nocompany2']
 
-  // 送信企業の条件のチェック
+  // 受信企業の条件のチェック
   let sentTo
   if (Array.isArray(req.body.sentTo)) {
     sentTo = req.body.sentTo
@@ -403,7 +403,7 @@ const cbPostIndex = async (req, res, next) => {
     }
   }
 
-  // 受信企業の条件のチェック
+  // 送信企業の条件のチェック
   let sentBy
   if (Array.isArray(req.body.sentBy)) {
     sentBy = req.body.sentBy
