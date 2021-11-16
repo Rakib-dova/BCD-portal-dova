@@ -3752,6 +3752,47 @@ describe('csvuploadのテスト', () => {
       expect(resultExt).toBe(102)
     })
 
+    test('準正常：ファイルから請求書一括作成の時エラー例外', async () => {
+      // 準備
+      request.user = user
+      const userToken = {
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      const filename = request.user.tenantId + '_' + request.user.email + '_' + '20210611102239848' + '.csv'
+
+      const uploadCsvData = Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8')
+
+      // 試験実施
+      const resultUpl = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
+      expect(resultUpl).toBeTruthy()
+
+      // request uplodadFormatId 空
+      request.body = {
+        uploadFormatId: ''
+      }
+
+      path.resolve.mockReturnValue(new Error('エラー'))
+
+      const resultExt = await csvupload.cbExtractInvoice(
+        filePath,
+        filename,
+        userToken,
+        invoiceParameta,
+        request,
+        response
+      )
+      expect(resultExt).toBe(104)
+
+      const resultRem = csvupload.cbRemoveCsv(filePath, filename)
+      expect(resultRem).toBeTruthy()
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
     test('準正常：請求書番号バリデーションチェック：未入力', async () => {
       // 準備
       const tmpInsert = invoiceController.insert
