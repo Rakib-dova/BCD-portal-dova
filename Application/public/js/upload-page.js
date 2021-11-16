@@ -62,6 +62,7 @@ $('#start-upload-btn').addEventListener('click', () => {
     sender.setRequestHeader('Content-Type', 'application/json')
     sender.onreadystatechange = () => {
       if (sender.readyState === sender.DONE) {
+        const fiveErrorMsg = '請求書アップロード中に予期しない問題が発生しました。\n取込結果は一覧画面でご確認下さい。'
         if (sender.status === 200 || sender.status === 500) {
           modal.classList.remove('is-active')
           $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
@@ -70,6 +71,26 @@ $('#start-upload-btn').addEventListener('click', () => {
           modal.classList.remove('is-active')
           $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
           location.href = '/portal'
+        } else if (sender.status === 501) {
+          modal.classList.remove('is-active')
+          $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
+          alert(fiveErrorMsg)
+        } else if (sender.status === 502) {
+          modal.classList.remove('is-active')
+          $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
+          alert(fiveErrorMsg)
+        } else if (sender.status === 503) {
+          modal.classList.remove('is-active')
+          $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
+          alert(fiveErrorMsg)
+        } else if (sender.status === 504) {
+          modal.classList.remove('is-active')
+          $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
+          alert(fiveErrorMsg)
+        } else if (sender.status === 505) {
+          modal.classList.remove('is-active')
+          $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
+          alert(fiveErrorMsg)
         } else {
           modal.classList.remove('is-active')
           $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
