@@ -168,7 +168,9 @@ const cbPostUpload = async (req, res, next) => {
 
   if (getNetworkErrFlag) {
     // csvからデータ抽出
-    switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req, res)) {
+    const resultExtra = await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req, res)
+    console.log(`cbExtractInvoice result : ${resultExtra}`)
+    switch (resultExtra) {
       case 101:
         errorText = constantsDefine.statusConstants.INVOICE_FAILED
         break
