@@ -158,13 +158,24 @@ const axios = {
         return this.result
       }
       default: {
-        this.result.data = {
-          itemPerPage: 25,
-          itemCount: 1,
-          indexing: false,
-          numPages: 2,
-          pageId: 0,
-          Document: [dcouments.Document[0], dcouments.Document[1]]
+        if (paramateter[2] === 'minissuedate=1990-01-01') {
+          this.result.data = {
+            itemPerPage: 25,
+            itemCount: 1,
+            indexing: false,
+            numPages: 2,
+            pageId: 0,
+            Document: [dcouments.Document[0], dcouments.Document[8]]
+          }
+        } else {
+          this.result.data = {
+            itemPerPage: 25,
+            itemCount: 1,
+            indexing: false,
+            numPages: 2,
+            pageId: 0,
+            Document: [dcouments.Document[0], dcouments.Document[1]]
+          }
         }
         return this.result
       }
