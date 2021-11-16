@@ -62,17 +62,22 @@ $('#start-upload-btn').addEventListener('click', () => {
     sender.setRequestHeader('Content-Type', 'application/json')
     sender.onreadystatechange = () => {
       if (sender.readyState === sender.DONE) {
+        console.log(`sender.readyState: ${sender.readyState}, sender.status: ${sender.status}`)
         if (sender.status === 200 || sender.status === 500) {
+          console.log(`status 200 or 500`)
           modal.classList.remove('is-active')
           $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
           alert(sender.responseText)
         } else if (sender.status === 400) {
+          console.log('else if status 400')
           modal.classList.remove('is-active')
           $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
           location.href = '/portal'
         } else {
+          console.log('else status etc')
           modal.classList.remove('is-active')
           $('#start-upload-btn').setAttribute('Disabled', 'Disabled')
+          alert(sender.responseText)
         }
       }
     }
