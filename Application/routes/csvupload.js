@@ -260,6 +260,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   let uploadFormatIdentifier = []
   let uploadData = null
 
+  console.log(1)
   // ユーザーがアップロードしたフォーマットでCSVをアップロードする時
   if (uploadFormatId !== null && uploadFormatId.length !== 0) {
     formatFlag = true
@@ -296,6 +297,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       return _res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
     }
 
+    console.log(2)
     // ヘッダ確認用データ
     uploadData = uploadFormat.uploadData
 
@@ -305,6 +307,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   }
   let csvObj = null
 
+  console.log(3)
   // ファイルから請求書一括作成の時エラー例外
   try {
     // ヘッダがない場合
@@ -326,6 +329,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     return 104
   }
 
+  console.log(4)
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
   const setHeaders = {}
@@ -341,6 +345,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     return 101
   }
 
+  console.log(5)
   // トレードシフトからドキュメントを取得
   let documentsList
   const documentIds = []
@@ -378,6 +383,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       return 104
     }
   }
+  console.log(6)
   if (invoiceCnt > 100) {
     logger.error(constantsDefine.logMessage.ERR001 + 'invoiceToomuch Error')
     await invoiceController.updateCount({
@@ -397,6 +403,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   let uploadInvoiceCnt = 0
   let headerErrorFlag = 0
 
+  console.log(7)
   while (invoiceList[idx]) {
     // 明細check
     const meisaiLength = invoiceList[idx].INVOICE.getDocument().InvoiceLine.length
@@ -588,6 +595,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     }
     idx++
   }
+  console.log(8)
   if (headerErrorFlag === 1) {
     await invoiceController.updateCount({
       invoicesId: _invoices.invoicesId,
