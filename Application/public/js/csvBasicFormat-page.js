@@ -1,3 +1,14 @@
+window.onpageshow = function (event) {
+  const perEntries = performance.getEntriesByType('navigation')
+
+  // 戻るボタン押下又はback_forwardした場合
+  if (event.persisted || perEntries[0].type === 'back_forward') {
+    if (sessionStorage.getItem('offcheckOn')) {
+      document.getElementById('checkItemNameLineOff').click()
+    }
+  }
+}
+
 let fileReader = null
 let targetFile = null
 let dataResultBinary = null
@@ -9,6 +20,11 @@ document.getElementById('checkItemNameLineOn').onclick = function () {
   target.required = true
   document.getElementById('uploadFormatNumberRequired').classList.remove('is-invisible')
   document.getElementById('uploadFormatNumberInfo').classList.remove('is-invisible')
+
+  // sessionからoffcheckOnアイテム削除
+  if (sessionStorage.getItem('offcheckOn')) {
+    sessionStorage.removeItem('offcheckOn')
+  }
 }
 
 // 項目名の行有無が無：必須を外す
@@ -27,6 +43,10 @@ document.getElementById('checkItemNameLineOff').onclick = function () {
   ) {
     target.closest('.field').childNodes[2].remove()
   }
+
+  // sessionにoffcheckOn情報を設定する
+  const offcheckOn = true
+  sessionStorage.setItem('offcheckOn', offcheckOn)
 }
 
 document.getElementById('dataFile').addEventListener('change', function (e) {
