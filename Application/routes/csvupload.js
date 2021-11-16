@@ -66,17 +66,6 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  BconCsv.prototype.companyNetworkConnectionList = await getNetwork({
-    accessToken: req.user.accessToken,
-    refreshToken: req.user.refreshToken
-  })
-
-  // ヘッダがない場合
-  BconCsvNoHeader.prototype.companyNetworkConnectionList = await getNetwork({
-    accessToken: req.user.accessToken,
-    refreshToken: req.user.refreshToken
-  })
-
   // フォーマット種別配列
   const formatkindsArr = await uploadFormatController.findByContractId(contract.dataValues.contractId)
 
@@ -139,10 +128,12 @@ const cbPostUpload = async (req, res, next) => {
     accessToken: req.user.accessToken,
     refreshToken: req.user.refreshToken
   }
-  let errorText = null
-  if (validate.isUndefined(BconCsv.prototype.companyNetworkConnectionList)) {
-    BconCsv.prototype.companyNetworkConnectionList = await getNetwork(userToken)
-  }
+
+  // エラーメッセージを格納
+  let errorText = constantsDefine.statusConstants.SUCCESS
+  // ネットワークテナントID取得時エラー確認
+  let getNetworkErrFlag = false
+
   // csvアップロード
   if (cbUploadCsv(filePath, filename, uploadCsvData) === false) {
     setErrorLog(req, 500)
@@ -162,24 +153,38 @@ const cbPostUpload = async (req, res, next) => {
     logger.info(`${constantsDefine.logMessage.DBINF001}${functionName}`)
   }
 
-  // csvからデータ抽出
-  switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req, res)) {
-    case 101:
-      errorText = constantsDefine.statusConstants.INVOICE_FAILED
-      break
-    case 102:
-      errorText = constantsDefine.statusConstants.OVER_SPECIFICATION
-      break
-    case 103:
-      errorText = constantsDefine.statusConstants.OVERLAPPED_INVOICE
-      break
-    case 104:
-      errorText = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
-      break
-    default:
-      break
+  // ネットワークが紐づいているテナントid検索
+  BconCsv.prototype.companyNetworkConnectionList = await getNetwork(req)
+
+  // ネットワークが紐づいているテナントid確認
+  if (validate.isUndefined(BconCsv.prototype.companyNetworkConnectionList)) {
+    getNetworkErrFlag = false
+    errorText = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
+  } else {
+    getNetworkErrFlag = true
+    // ヘッダがない場合
+    BconCsvNoHeader.prototype.companyNetworkConnectionList = BconCsv.prototype.companyNetworkConnectionList
   }
 
+  if (getNetworkErrFlag) {
+    // csvからデータ抽出
+    switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req, res)) {
+      case 101:
+        errorText = constantsDefine.statusConstants.INVOICE_FAILED
+        break
+      case 102:
+        errorText = constantsDefine.statusConstants.OVER_SPECIFICATION
+        break
+      case 103:
+        errorText = constantsDefine.statusConstants.OVERLAPPED_INVOICE
+        break
+      case 104:
+        errorText = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
+        break
+      default:
+        break
+    }
+  }
   // csv削除
   if (cbRemoveCsv(filePath, filename) === false) {
     setErrorLog(req, 500)
@@ -187,8 +192,6 @@ const cbPostUpload = async (req, res, next) => {
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
-
-  if (errorText === null) return res.status(200).send(constantsDefine.statusConstants.SUCCESS)
 
   return res.status(200).send(errorText)
 }
@@ -300,20 +303,27 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   }
   let csvObj = null
 
-  // ヘッダがない場合
-  if (itemRowNumber === 0) {
-    csvObj = new BconCsvNoHeader(
-      extractFullpathFile,
-      formatFlag,
-      uploadFormatDetail,
-      uploadFormatIdentifier,
-      itemRowNumber
-    )
-  } else {
-    const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット.csv')
-    uploadData = uploadData ?? fs.readFileSync(defaultCsvPath)
-    csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier, uploadData)
+  // ファイルから請求書一括作成の時エラー例外
+  try {
+    // ヘッダがない場合
+    if (itemRowNumber === 0) {
+      csvObj = new BconCsvNoHeader(
+        extractFullpathFile,
+        formatFlag,
+        uploadFormatDetail,
+        uploadFormatIdentifier,
+        itemRowNumber
+      )
+    } else {
+      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット.csv')
+      uploadData = uploadData ?? fs.readFileSync(defaultCsvPath)
+      csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier, uploadData)
+    }
+  } catch (error) {
+    logger.error({ stack: error.stack }, error.name)
+    return 104
   }
+
   const invoiceList = csvObj.getInvoiceList()
   const invoiceCnt = invoiceList.length
   const setHeaders = {}
@@ -335,19 +345,37 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   let numPages
   let currPage
   let documentsURL = '/documents?stag=draft&stag=outbox&limit=10000'
-  do {
-    if (Object.prototype.toString.call(currPage) !== '[object Undefined]') {
-      currPage++
-      documentsURL = `/documents?stag=draft&stag=outbox&limit=10000&page=${currPage}`
+  try {
+    do {
+      if (Object.prototype.toString.call(currPage) !== '[object Undefined]') {
+        currPage++
+        documentsURL = `/documents?stag=draft&stag=outbox&limit=10000&page=${currPage}`
+      }
+      documentsList = await apiManager.accessTradeshift(_user.accessToken, _user.refreshToken, 'get', documentsURL)
+      documentsList.Document.forEach((document) => {
+        documentIds.push(document.ID)
+      })
+      numPages = documentsList.numPages
+      currPage = documentsList.pageId
+    } while (currPage < numPages)
+  } catch (err) {
+    if (documentsList instanceof Error) {
+      // apiエラーの場合
+      logger.error(
+        {
+          tenant: _req.user.tenantId,
+          user: _req.user.userId,
+          csvfile: extractFullpathFile,
+          status: 2
+        },
+        documentsList.toString()
+      )
+      return 104
+    } else {
+      logger.error(err)
+      return 104
     }
-    documentsList = await apiManager.accessTradeshift(_user.accessToken, _user.refreshToken, 'get', documentsURL)
-    documentsList.Document.forEach((document) => {
-      documentIds.push(document.ID)
-    })
-    numPages = documentsList.numPages
-    currPage = documentsList.pageId
-  } while (currPage < numPages)
-
+  }
   if (invoiceCnt > 100) {
     logger.error(constantsDefine.logMessage.ERR001 + 'invoiceToomuch Error')
     await invoiceController.updateCount({
@@ -442,7 +470,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
                   invoiceID: invoiceList[idx].invoiceId,
                   status: 2
                 },
-                apiResult.name
+                apiResult.toString()
               )
             } else if (String(apiResult.response?.status).slice(0, 1) === '5') {
               // 500番エラーの場合
@@ -608,7 +636,7 @@ const getTimeStamp = () => {
 }
 
 // 会社のネットワーク情報を取得
-const getNetwork = async (_userToken) => {
+const getNetwork = async (_req) => {
   const connections = []
   let numPages
   let currPage
@@ -620,7 +648,7 @@ const getNetwork = async (_userToken) => {
     }
     let result
     try {
-      result = await apiManager.accessTradeshift(_userToken.accessToken, _userToken.refreshToken, 'get', documentsURL)
+      result = await apiManager.accessTradeshift(_req.user.accessToken, _req.user.refreshToken, 'get', documentsURL)
       result.Connections.Connection.forEach((connection) => {
         if (
           Object.prototype.toString.call(connection.State) !== '[object Undefined]' &&
@@ -630,8 +658,21 @@ const getNetwork = async (_userToken) => {
         }
       })
     } catch (err) {
-      logger.error(err)
-      return
+      if (result instanceof Error) {
+        // apiエラーの場合
+        logger.error(
+          {
+            tenant: _req.user.tenantId,
+            user: _req.user.userId,
+            status: 2
+          },
+          result.toString()
+        )
+        return
+      } else {
+        logger.error(err)
+        return
+      }
     }
 
     numPages = result.numPages
@@ -671,6 +712,5 @@ module.exports = {
   cbRemoveCsv: cbRemoveCsv,
   cbExtractInvoice: cbExtractInvoice,
   getTimeStamp: getTimeStamp,
-  // cbPostUpload, cbUploadCsv, cbRemoveCsv, cbExtractInvoice, getTimeStampはUTテストのため追加
   getNetwork: getNetwork
 }
