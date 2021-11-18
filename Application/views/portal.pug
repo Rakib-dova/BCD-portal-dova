@@ -163,6 +163,7 @@ block content
             else
               p お問い合わせは、テナント管理者のみ可能です。
               p テナント管理者にご相談の上、お問い合わせください。
+
     .modal#csvDownload-modal
      .modal-background.cancel-button(data-target='csvDownload-modal')
      .modal-card.is-family-noto-sans
@@ -174,8 +175,20 @@ block content
            a.panel-block(href='/csvDownload')
              span.panel-icon
                i.fas.fa-file
-             p 請求明細ダウンロード
+             p 請求情報ダウンロード
+           a.panel-block.show-modal(data-target='csvdownload-confirmation-modal')
+             span.panel-icon
+               i.fas.fa-file
+             p 請求情報一括ダウンロード
        footer.modal-card-foot
+       
+     .modal#csvdownload-confirmation-modal
+      .modal-background.cancel-button(data-target='csvdownload-confirmation-modal')
+      .modal-content.is-family-noto-sans
+        .card
+          .card-content.notification.m-0
+            button.delete(data-target="csvdownload-confirmation-modal")
+            p この機能は準備中です。
 
      .modal#config-modal
       .modal-background.cancel-button(data-target='config-modal')
