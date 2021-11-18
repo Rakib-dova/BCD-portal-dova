@@ -299,7 +299,6 @@ describe('契約情報変更のインテグレーションテスト', () => {
     })
 
     test('管理者、契約ステータス：契約中, 契約名変更', async () => {
-      // await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .post('/change')
         .type('form')
@@ -770,6 +769,83 @@ describe('契約情報変更のインテグレーションテスト', () => {
       await browser.close()
     })
 
+    // 建物バリデーションチェック
+    test('管理者、契約ステータス：契約中, 建物バリデーションチェック：全角文字16桁', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/change')
+      if (page.url() === 'https://localhost:3000/change') {
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'インテグレーションテスト')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '１')
+        await page.type('#tatemono1', 'タテモノのふせいなにゅうりょくする。')
+        await page.type('#contactPersonName', '連絡先担当者名')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#tatemono1').value
+        })
+        expect(checkErrorMessage.length).toBe(16)
+        expect(checkErrorMessage).toBe('タテモノのふせいなにゅうりょくす')
+      }
+      await browser.close()
+    })
+
+    test('管理者、契約ステータス：契約中, 建物バリデーションチェック：半角16桁', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/change')
+      if (page.url() === 'https://localhost:3000/change') {
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'インテグレーションテスト')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '１')
+        await page.type('#tatemono1', 'tatemononyuuryokusitekudasai.')
+        await page.type('#contactPersonName', '連絡先担当者名')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#next-btn')
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#tatemono1').value
+        })
+        expect(checkErrorMessage.length).toBe(16)
+        expect(checkErrorMessage).toBe('tatemononyuuryok')
+      }
+      await browser.close()
+    })
+
     // 連絡先担当者名未入力
     test('管理者、契約ステータス：契約中, 連絡先担当者名未入力', async () => {
       const puppeteer = require('puppeteer')
@@ -804,6 +880,79 @@ describe('契約情報変更のインテグレーションテスト', () => {
         expect(checkErrorMessage).toBe('input-label-required')
       }
       await browser.close()
+    })
+
+    // 連絡先担当者名10桁以上
+    test('管理者、契約ステータス：契約中, 連絡先の担当者バリデーションチェック：全角10桁', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: false,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/change')
+      if (page.url() === 'https://localhost:3000/change') {
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'テスト')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '１')
+        await page.type('#contactPersonName', 'レンラクサキのタントウシャのテストです')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
+
+        await page.waitForTimeout(500)
+
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contactPersonName').value
+        })
+        expect(checkErrorMessage.length).toBe(10)
+        expect(checkErrorMessage).toBe('レンラクサキのタント')
+      }
+      // await browser.close()
+    })
+
+    test('管理者、契約ステータス：契約中, 連絡先の担当者バリデーションチェック：半角10桁', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: false,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/change')
+      if (page.url() === 'https://localhost:3000/change') {
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'テスト')
+        await page.type('#postalNumber', '0600000')
+        await page.click('#postalSearchBtn')
+        await page.waitForTimeout(1000)
+        await page.click('#modal-card-result > a:nth-child(1)')
+        await page.type('#banch1', '１')
+        await page.type('#contactPersonName', 'renrakusakinotantoushatesutodesu')
+        await page.type('#contactPhoneNumber', '080-0000-0000')
+        await page.type('#contactMail', 'test@test.co.jp')
+
+        await page.waitForTimeout(500)
+
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#contactPersonName').value
+        })
+        expect(checkErrorMessage.length).toBe(10)
+        expect(checkErrorMessage).toBe('renrakusak')
+      }
+      // await browser.close()
     })
 
     // 連絡先担当者名不正な値
@@ -847,7 +996,7 @@ describe('契約情報変更のインテグレーションテスト', () => {
     test('管理者、契約ステータス：契約中, 連絡先電話番号未入力', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         ignoreHTTPSErrors: true
       })
 
@@ -859,7 +1008,7 @@ describe('契約情報変更のインテグレーションテスト', () => {
         await page.click('#chkContractAddress')
         await page.click('#chkContractContact')
         await page.type('#contractorName', 'テスト')
-        await page.type('#contractorKanaName', 'abc')
+        await page.type('#contractorKanaName', 'テスト')
         await page.type('#postalNumber', '1600000')
         await page.click('#postalSearchBtn')
         await page.waitForTimeout(2000)
@@ -876,7 +1025,7 @@ describe('契約情報変更のインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
-      await browser.close()
+      // await browser.close()
     })
 
     // 連絡先メールアドレス未入力
