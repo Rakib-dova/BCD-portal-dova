@@ -571,3 +571,17 @@ img.logo-ncom {
 #displaySendBySearchResultField {
   height: 393px !important;
 }
+
+.hvr-float {
+  max-height: 206px;
+}
+
+.iconBox {
+  height: 100%;
+}
+
+.textOverflow {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
