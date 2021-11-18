@@ -153,7 +153,7 @@ describe('csvDownloadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでcsvDownloadが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('csvDownload', {
-        title: '請求明細ダウンロード',
+        title: '請求情報ダウンロード',
         minissuedate: minissuedate,
         maxissuedate: maxissuedate,
         status: status,
