@@ -70,16 +70,22 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      'img-src': ["'self'"],
+      'img-src': [
+        "'self' www.googletagmanager.com https://ssl.gstatic.com https://www.gstatic.com https://www.google-analytics.com"
+      ],
       'form-action': ["'self'"], // form-actionは自己ドメインに制限
       // bulma-toast、fontawasom、googlefontsを使うためstyle-srcを一部許可
       // prettier-ignore
       'style-src': [
-        "'self' https://use.fontawesome.com https://fonts.googleapis.com"
+        "'self' https://use.fontawesome.com https://fonts.googleapis.com https://www.googletagmanager.com"
       ],
-      'script-src': ["'self'"],
+      'script-src': [
+        "'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://ssl.google-analytics.com"
+      ],
       'object-src': ["'self'"],
-      'frame-ancestors': [`'self' https://${process.env.TS_HOST}`]
+      'frame-ancestors': [`'self' https://${process.env.TS_HOST}`],
+      // 'font-src': ["'self' 'https://fonts.gstatic.com data:'"],
+      'connect-src': ["'self' https://www.google-analytics.com"]
     }
   })
 )
@@ -208,7 +214,7 @@ app.use('/uploadFormatList', require('./routes/uploadFormatList').router)
 // アップロードフォーマット確認・変更
 app.use('/uploadFormatEdit', require('./routes/uploadFormatEdit').router)
 
-//設定
+// 設定
 // cancellation
 app.use('/cancellation', require('./routes/cancellation').router)
 
