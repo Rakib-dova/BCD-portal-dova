@@ -212,6 +212,10 @@ app.use('/uploadFormatList', require('./routes/uploadFormatList').router)
 // アップロードフォーマット確認・変更
 app.use('/uploadFormatEdit', require('./routes/uploadFormatEdit').router)
 
+// 仕訳情報設定
+// 勘定科目設定
+app.use('/registAccountCode', require('./routes/registAccountCode').router)
+
 // 設定
 // cancellation
 app.use('/cancellation', require('./routes/cancellation').router)
