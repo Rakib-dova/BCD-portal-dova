@@ -886,7 +886,7 @@ describe('契約情報変更のインテグレーションテスト', () => {
     test('管理者、契約ステータス：契約中, 連絡先の担当者バリデーションチェック：全角10桁', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true
       })
 
@@ -916,13 +916,13 @@ describe('契約情報変更のインテグレーションテスト', () => {
         expect(checkErrorMessage.length).toBe(10)
         expect(checkErrorMessage).toBe('レンラクサキのタント')
       }
-      // await browser.close()
+      await browser.close()
     })
 
     test('管理者、契約ステータス：契約中, 連絡先の担当者バリデーションチェック：半角10桁', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true
       })
 
@@ -952,7 +952,7 @@ describe('契約情報変更のインテグレーションテスト', () => {
         expect(checkErrorMessage.length).toBe(10)
         expect(checkErrorMessage).toBe('renrakusak')
       }
-      // await browser.close()
+      await browser.close()
     })
 
     // 連絡先担当者名不正な値
@@ -996,7 +996,7 @@ describe('契約情報変更のインテグレーションテスト', () => {
     test('管理者、契約ステータス：契約中, 連絡先電話番号未入力', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true
       })
 
@@ -1025,7 +1025,7 @@ describe('契約情報変更のインテグレーションテスト', () => {
         })
         expect(checkErrorMessage).toBe('input-label-required')
       }
-      // await browser.close()
+      await browser.close()
     })
 
     // 連絡先メールアドレス未入力
