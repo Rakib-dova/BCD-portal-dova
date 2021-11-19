@@ -8,10 +8,8 @@ const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
-const codeAccountController = require('../controllers/codeAccountController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
-const { v4: uuidv4 } = require('uuid')
 
 const cbGetCodeAccount = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCodeAccount')
@@ -45,8 +43,14 @@ const cbGetCodeAccount = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  res.render('registAccoutCode', {
-    TS_HOST: process.env.TS_HOST
+  res.render('registAccountCode', {
+    subjectName: '勘定科目',
+    codeLabel: '勘定科目コード',
+    nameLabel: '勘定科目名',
+    requiredTagCode: 'codeAccountCodeRequired',
+    requiredTagName: 'codeAccountNameRequired',
+    idForCodeInput: 'codeAccountCode',
+    idForNameInput: 'codeAccountName'
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCodeAccount')
@@ -84,24 +88,12 @@ const cbPostCreateCodeAccount = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
   console.log(req.body)
-  const codeAccountName = req.body.codeAccountName
-  const codeAccountCode = req.body.codeAccountCode
-  console.log(codeAccountName)
-  console.log(codeAccountCode)
-  const codeAccountId = uuidv4()
-  const result = await codeAccountController.insert(req.user.tenantId, {
-    codeAccountId: codeAccountId,
-    contractId: contract.dataValues.contractId,
-    subjectName: codeAccountName,
-    subjectCode: codeAccountCode
-  })
-  console.log(result)
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostCreateCodeAccount')
 }
 
 router.get('/', helper.isAuthenticated, cbGetCodeAccount)
-router.post('/createCodeAccount', helper.isAuthenticated, cbPostCreateCodeAccount)
+router.post('/', helper.isAuthenticated, cbPostCreateCodeAccount)
 
 module.exports = {
   router: router,

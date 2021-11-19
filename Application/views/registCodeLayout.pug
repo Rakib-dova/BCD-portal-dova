@@ -1,0 +1,42 @@
+block content
+  .hero.is-large
+    .hero-body
+      .container
+
+  .section.is-overlay.mt-6
+    .container.is-max-widescreen.is-family-noto-sans
+      form#form(method="POST")
+        article.panel.is-info
+          h2.panel-heading #{subject}
+          .panel-block
+            .container
+             .columns.is-centered: .column.is-four-fifths
+              .field.card
+                .card-content
+                  .field
+                    label(for="accountCode").input-label #{codeLabel}
+                    p(id= requiredTagCode).input-label-required.input-label （必須）
+                    p#RequiredErrorMesageForCode.input-label-required.is-invisible
+                    .control
+                      .columns.ml-0.pl-0.alignCenterChild
+                        .column.pl-0
+                          input.input(type="text" id= idForCodeInput name= idForCodeInput value='' maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
+                  .field
+                    label(for="codeAccountName").input-label #{nameLabel}
+                    p(id= requiredTagName).input-label-required.input-label （必須）
+                    p#RequiredErrorMesageForName.input-label-required.is-invisible
+                    .control
+                      .columns.ml-0.pl-0.alignCenterChild
+                        .column.pl-0
+                          input.input(type="text" id= idForNameInput name= idForNameInput value='' maxlength=40 placeholder='文字列（40桁）' required) 
+         
+
+             .columns.is-centered.changeConfirm
+              .field.is-grouped.is-grouped-centered
+                .control
+                  .column
+                    div.button-area
+                      a.button#return-btn.cancel-button.mr-6(href='/') 戻る
+                      a.button.is-success.success-button#submit 登録
+
+    include footer
