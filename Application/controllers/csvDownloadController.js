@@ -8,10 +8,20 @@ const createInvoiceDataForDownload = async (accessToken, refreshToken, documents
   const invoices = []
 
   // 検索した複数の請求書の文書データを取得
-  documents.forEach(async (item) => {
-    const invoice = apiManager.accessTradeshift(accessToken, refreshToken, 'get', `/documents/${item.DocumentId}`)
-    invoices.push(invoice)
-  })
+  for (let idx = 0; idx < documents.length; idx++) {
+    const invoice = await apiManager.accessTradeshift(
+      accessToken,
+      refreshToken,
+      'get',
+      `/documents/${documents[idx].DocumentId}`
+    )
+    // エラーを確認する
+    if (invoice instanceof Error) {
+      return invoice
+    } else {
+      invoices.push(invoice)
+    }
+  }
 
   // CSVファイルをまとめる変数
   let fileData = ''
@@ -29,9 +39,9 @@ const createInvoiceDataForDownload = async (accessToken, refreshToken, documents
         // ヘッダ除外したもののみ追加
         if (row !== 0) {
           fileData += rows[row]
+          fileData += String.fromCharCode(0x0a) // 改行の追加
         }
       }
-      fileData += String.fromCharCode(0x0a) // 改行の追加
     }
   }
   // 複数の請求書の文書をCSVファイルに作成して、返却

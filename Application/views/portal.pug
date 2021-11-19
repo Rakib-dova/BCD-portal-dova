@@ -54,7 +54,7 @@ block content
 
     .columns.is-desktop.is-family-noto-sans
       .column.hvr-float
-        .box
+        .box.iconBox.textOverflow
           a.show-modal(data-target='support-modal')
             .media.appdesc
               .media-left
@@ -65,7 +65,7 @@ block content
                 p その他FAQを参照できます。
                 //- p.tag.is-link.is-normal 有効化されています
       .column.hvr-float
-        .box
+        .box.iconBox.textOverflow
           a.show-modal(data-target='csvupload-modal')
             .media.appdesc
               .media-left
@@ -74,19 +74,29 @@ block content
                 p.title.is-5 請求書一括作成
                 p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
       .column.hvr-float
+        .box.iconBox.textOverflow
+          a.show-modal(data-target='csvDownload-modal')
+            .media.appdesc
+              .media-left
+                img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
+              .media-content
+                p.title.is-5 請求情報ダウンロード
+                p 送受信した請求情報をCSV形式でダウンロードできます。
+
+    .columns.is-desktop.is-family-noto-sans
+      .column.hvr-float
         if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
-          .box
+          .box.iconBox.textOverflow
             a.show-modal(data-target='registAccountCode-modal')
               .media.appdesc
                 .media-left
                   img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
                 .media-content
                   p.title.is-5 仕訳情報設定
-                  p 
-                  p 
+                  p 勘定科目と補助科目をユーザーカスタマイズができます。
       .column.hvr-float
         if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
-          .box
+          .box.iconBox.textOverflow
             a.show-modal(data-target='config-modal')
               .media.appdesc
                 .media-left
@@ -95,6 +105,7 @@ block content
                   p.title.is-5 設定
                   p 契約情報変更と解約を行うことができます。
                   p 解約の場合は取り消しはできません。
+      .column.hvr-float
 
     .modal#support-modal
       .modal-background.cancel-button(data-target='support-modal')
@@ -138,10 +149,6 @@ block content
                 span.panel-icon
                   i.fas.fa-file
                 p 操作マニュアルダウンロード
-              a.panel-block(href='/csvDownload')
-                span.panel-icon
-                  i.fas.fa-file
-                p 請求明細ダウンロード
           footer.modal-card-foot
 
     .modal#support-confirmation-modal
@@ -177,7 +184,35 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 勘定科目設定
-    .modal#config-modal
+        footer.modal-card-foot
+
+    .modal#csvDownload-modal
+     .modal-background.cancel-button(data-target='csvDownload-modal')
+     .modal-card.is-family-noto-sans
+       header.modal-card-head
+         p.modal-card-title 請求情報ダウンロード
+         button.delete(data-target="csvDownload-modal")
+       section.modal-card-body
+         nav.panel
+           a.panel-block(href='/csvDownload')
+             span.panel-icon
+               i.fas.fa-file
+             p 請求情報ダウンロード
+           a.panel-block.show-modal(data-target='csvdownload-confirmation-modal')
+             span.panel-icon
+               i.fas.fa-file
+             p 請求情報一括ダウンロード
+       footer.modal-card-foot
+       
+     .modal#csvdownload-confirmation-modal
+      .modal-background.cancel-button(data-target='csvdownload-confirmation-modal')
+      .modal-content.is-family-noto-sans
+        .card
+          .card-content.notification.m-0
+            button.delete(data-target="csvdownload-confirmation-modal")
+            p この機能は準備中です。
+
+     .modal#config-modal
       .modal-background.cancel-button(data-target='config-modal')
       .modal-card.is-family-noto-sans
         header.modal-card-head
@@ -193,7 +228,6 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 解約
-            
         footer.modal-card-foot
   include footer
 

@@ -104,7 +104,7 @@ const cbGetIndex = async (req, res, next) => {
 
   // 請求書ダウンロード画面表示
   res.render('csvDownload', {
-    title: '請求明細ダウンロード',
+    title: '請求情報ダウンロード',
     minissuedate: minissuedate,
     maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
     status: status,
@@ -386,35 +386,87 @@ const cbPostIndex = async (req, res, next) => {
 
   const invoiceNumber = req.body.invoiceNumber
   const findDocuments = '/documents'
-  const sendQuery = qs.stringify(findDocumentQuery).replace(/%26/g, '&').replace(/%3D/g, '=')
 
-  // 請求書を検索する
-  let pageId = 0
-  let numPages = 1
-  let documentsResult
-  do {
-    const result = await apiManager.accessTradeshift(
-      req.user.accessToken,
-      req.user.refreshToken,
-      'get',
-      `${findDocuments}?${sendQuery}&limit=100&page=${pageId}`
-    )
-    numPages = result.numPages ?? 1
-    if (pageId === 0) {
-      documentsResult = result
+  // 企業情報がない場合、検索できるようにするための変数
+  const noCompany = ['nocompany1', 'nocompany2']
+
+  // 受信企業の条件のチェック
+  let sentTo
+  if (Array.isArray(req.body.sentTo)) {
+    sentTo = req.body.sentTo
+  } else {
+    if (validate.isString(req.body.sentTo)) {
+      sentTo = [req.body.sentTo]
     } else {
-      result.Document.forEach((item) => {
-        documentsResult.Document.push(item)
-      })
+      // 企業情報がない場合、検索できるようにする。
+      sentTo = [noCompany[0]]
     }
-    pageId++
-  } while (pageId < numPages)
+  }
+
+  // 送信企業の条件のチェック
+  let sentBy
+  if (Array.isArray(req.body.sentBy)) {
+    sentBy = req.body.sentBy
+  } else {
+    if (validate.isString(req.body.sentBy)) {
+      sentBy = [req.body.sentBy]
+    } else {
+      // 企業情報がない場合、検索できるようにする。
+      sentBy = [noCompany[1]]
+    }
+  }
+
+  // 送信企業X受信企業ごとに検索
+  let sentToIdx = 0
+  let documentsResult
+  let resultForQuery
+  do {
+    const company = sentTo[sentToIdx]
+    let sentByIdx = 0
+    if (company !== noCompany[0]) findDocumentQuery.sentTo = company
+    do {
+      const sentByCompany = sentBy[sentByIdx]
+      if (sentByCompany !== noCompany[1]) findDocumentQuery.sentBy = sentByCompany
+      if (company !== sentByCompany) {
+        const sendQuery = qs.stringify(findDocumentQuery).replace(/%26/g, '&').replace(/%3D/g, '=')
+        // 請求書を検索する
+        let pageId = 0
+        let numPages = 1
+
+        do {
+          resultForQuery = await apiManager.accessTradeshift(
+            req.user.accessToken,
+            req.user.refreshToken,
+            'get',
+            `${findDocuments}?${sendQuery}&limit=100&page=${pageId}`
+          )
+          numPages = resultForQuery.numPages ?? 1
+          // 最初検索の場合結果オブジェクト作成
+          if (pageId === 0 && !(documentsResult?.Document ?? false)) {
+            documentsResult = {
+              ...resultForQuery
+            }
+          } else {
+            // 検索結果がある場合結果リストに追加
+            resultForQuery.Document.forEach((item) => {
+              // 結果リストの数をを増加
+              documentsResult.itemCount++
+              documentsResult.Document.push(item)
+            })
+          }
+          pageId++
+        } while (pageId < numPages)
+      }
+      sentByIdx++
+    } while (sentByIdx < sentBy.length)
+    sentToIdx++
+  } while (sentToIdx < sentTo.length)
 
   let filename = ''
   let downloadFile = ''
-  // documentsResultエラー検査
-  if (documentsResult instanceof Error) {
-    errorHandle(documentsResult, res, req)
+  // resultForQuery（API呼出）エラー検査
+  if (resultForQuery instanceof Error) {
+    errorHandle(resultForQuery, res, req)
   } else {
     // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
     if (documentsResult.itemCount === 0) {
@@ -439,18 +491,18 @@ const cbPostIndex = async (req, res, next) => {
         // 請求書番号（UUID）を取得した場合
         if (documentId !== '') {
           // 請求書番号（UUID）で請求書情報取得（とれシフAPI呼出）
-          const result = await apiManager.accessTradeshift(
+          const resultForDocumentId = await apiManager.accessTradeshift(
             req.user.accessToken,
             req.user.refreshToken,
             'get',
             `/documents/${documentId}`
           )
           // resultエラー検査
-          if (result instanceof Error) {
-            errorHandle(result, res, req)
+          if (resultForDocumentId instanceof Error) {
+            errorHandle(resultForDocumentId, res, req)
           } else {
             // 取得した請求書をJSONに作成する
-            const jsondata = dataToJson(result)
+            const jsondata = dataToJson(resultForDocumentId)
             // JSONファイルをCSVに変更
             downloadFile = jsonToCsv(jsondata)
             // ファイル名：今日の日付_ユーザID.csv
@@ -470,6 +522,11 @@ const cbPostIndex = async (req, res, next) => {
           req.user.refreshToken,
           documentsResult.Document
         )
+
+        // エラーを確認する
+        if (invoicesForDownload instanceof Error) {
+          errorHandle(invoicesForDownload, res, req)
+        }
 
         filename = encodeURIComponent(`${today}_請求書.csv`)
         res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
@@ -600,7 +657,7 @@ const dataToJson = (data) => {
     }
 
     if (data.Delivery) {
-      if (data.Delivery[0].ActualDeliveryDate.value) {
+      if (data.Delivery[0].ActualDeliveryDate?.value ?? false) {
         invoice.納品日 = data.Delivery[0].ActualDeliveryDate?.value
       }
     }
