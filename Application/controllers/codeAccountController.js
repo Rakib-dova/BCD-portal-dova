@@ -1,60 +1,62 @@
 const db = require('../models')
 const logger = require('../lib/logger')
-const contractController = require('./contractController')
 const CodeAccount = db.CodeAccount
 const constantsDefine = require('../constants')
-
+const { v4: uuidV4 } = require('uuid')
+const Op = db.Sequelize.Op
 module.exports = {
-  // パラメータ値
-  // values = {
-  //   uploadFormatId(PK) - フォーマットID,
+  // CodeAccountカラム
+  //   codeAccountId(PK) - PK
   //   contractId(FK)=>Contracts(contractIdId) - 契約ID,
-  //   setName - フォーマット名,
-  //   uploadType - フォーマットタイプ,
-  //   itemRowNo - 項目名の行番号,
-  //   dataStartRowNo - データ開始行番号,
+  //   subjectCode - 勘定科目コード,
+  //   subjectName - 勘定科目名,
   //   createdAt - 作成日付,
   //   updatedAt - 更新日付,
-  //   uploadData - アップロードファイルデータ
-  //   uploadFileName - アップロードファイル名
-  // }
-  insert: async (_tenantId, values) => {
+  insert: async (contract, values) => {
     const functionName = 'codeAccountController.insert'
-    let contractRow
-    let contractId
-    let resultToInsertCodeAccount
+    // 関数開始表示
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
-
-    const uploadContractId = values?.contractId
-    if (!uploadContractId) {
-      logger.error(`${constantsDefine.logMessage.CMMERR000}${functionName}`)
-      return
-    }
-
+    const uploadContractId = contract.contractId
     try {
-      contractRow = await contractController.findContract({ tenantId: _tenantId, deleteFlag: false }, 'createdAt DESC')
-      contractId = contractRow?.dataValues?.contractId
-    } catch (error) {
-      logger.error({ contractId: uploadContractId, stack: error.stack, status: 0 })
-      return
-    }
+      let duplicatedFlag = false
 
-    if (!contractId || contractId !== uploadContractId) {
-      logger.info(`${constantsDefine.logMessage.DBINF000}${functionName}`)
-      return
-    }
-
-    try {
-      resultToInsertCodeAccount = await CodeAccount.create({
-        ...values,
-        contractId: contractId
+      // 重複コード検索
+      const resultSearch = await CodeAccount.findAll({
+        where: { subjectCode: { [Op.eq]: values.subjectCode } }
       })
-    } catch (error) {
-      logger.error({ contractId: uploadContractId, stack: error.stack, status: 0 })
-      return
-    }
 
-    logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
-    return resultToInsertCodeAccount
+      // 重複コード検索（sequelize大小文字区別しないため）
+      resultSearch.forEach((item) => {
+        if (item.subjectCode === values.subjectCode) {
+          duplicatedFlag = true
+        }
+      })
+
+      // 重複コードある場合、登録拒否処理
+      if (duplicatedFlag) {
+        return false
+      }
+
+      // 重複コードない場合DBに保存する。
+      const resultToInsertCodeAccount = await CodeAccount.create({
+        ...values,
+        contractId: uploadContractId,
+        codeAccountId: uuidV4()
+      })
+
+      // 関数終了表示
+      logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+
+      // DB保存失敗したらモデルCodeAccountインスタンスではない
+      if (resultToInsertCodeAccount instanceof CodeAccount) {
+        return true
+      } else {
+        return false
+      }
+    } catch (error) {
+      // DBエラー発生したら処理
+      logger.error({ contractId: uploadContractId, stack: error.stack, status: 0 })
+      return error
+    }
   }
 }
