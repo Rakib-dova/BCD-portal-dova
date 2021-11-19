@@ -1,3 +1,9 @@
+window.onload = () => {
+  if (document.querySelector('#confirmmodify-modal > div.modal-card > header > p')) {
+    document.querySelector('#confirmmodify-modal > div.modal-card > header > p').innerText = '勘定科目設定'
+  }
+}
+
 document.getElementById('submit').addEventListener('click', function (e) {
   const regExpEngNumber = '^[a-zA-Z0-9+]*$'
   let errorFlag = false

@@ -10,6 +10,7 @@ const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
+const codeAccountController = require('../controllers/codeAccountController')
 
 const cbGetCodeAccount = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCodeAccount')
@@ -87,7 +88,19 @@ const cbPostCreateCodeAccount = async (req, res, next) => {
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
-  console.log(req.body)
+
+  const subjectCode = req.body.codeAccountCode
+  const subjectName = req.body.codeAccountName
+  const result = await codeAccountController.insert(contract, { subjectCode, subjectName })
+
+  // 結果確認
+  if (result) {
+    res.redirect('/')
+  } else {
+    // 失敗した時
+    req.flash('info', '勘定科目登録に失敗しました。')
+    res.redirect('/registAccountCode')
+  }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostCreateCodeAccount')
 }
