@@ -56,7 +56,7 @@ block content
                       .field
                         label(for="tatemono1").input-label 建物等　
                         .control
-                          input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=80 placeholder='全角80文字まで')
+                          input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16文字まで')
                   
                   .field.card
                     .card-content
@@ -65,7 +65,7 @@ block content
                         label(for="contactPersonName").input-label 連絡先担当者名
                         p#contactPersonNameRequired.input-label-required.input-label （必須）
                         .control
-                          input.input#contactPersonName(type="text" name="contactPersonName" value="" pattern=inputPattarnZenkaku required maxlength=80 placeholder='全角80文字まで')
+                          input.input#contactPersonName(type="text" name="contactPersonName" value="" pattern=inputPattarnZenkaku required maxlength=10 placeholder='全角10文字まで')
                       .field
                         label(for="contactPhoneNumber").input-label 連絡先電話番号
                         p#contactPhoneNumberRequired.input-label-required.input-label （必須）
