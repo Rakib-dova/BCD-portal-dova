@@ -51,7 +51,8 @@ const cbGetCodeAccount = async (req, res, next) => {
     requiredTagCode: 'codeAccountCodeRequired',
     requiredTagName: 'codeAccountNameRequired',
     idForCodeInput: 'codeAccountCode',
-    idForNameInput: 'codeAccountName'
+    idForNameInput: 'codeAccountName',
+    modalTitle: '勘定科目設定確認'
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCodeAccount')
@@ -91,14 +92,21 @@ const cbPostCreateCodeAccount = async (req, res, next) => {
 
   const subjectCode = req.body.codeAccountCode
   const subjectName = req.body.codeAccountName
+
+  // 勘定科目をDBに保存する。
+  // 結果：true 正常登録、false 登録失敗、Error DBエラー発生
   const result = await codeAccountController.insert(contract, { subjectCode, subjectName })
+
+  if (result instanceof Error) return next(errorHelper.create(500))
 
   // 結果確認
   if (result) {
-    res.redirect('/')
+    // 正常に登録ができた場合
+    req.flash('info', '勘定科目を登録しました。')
+    res.redirect('/portal')
   } else {
     // 失敗した時
-    req.flash('info', '勘定科目登録に失敗しました。')
+    req.flash('noti', '勘定科目登録に失敗しました。')
     res.redirect('/registAccountCode')
   }
 

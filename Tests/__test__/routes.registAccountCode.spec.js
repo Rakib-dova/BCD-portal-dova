@@ -11,7 +11,6 @@ const next = require('jest-express').Next
 const helper = require('../../Application/routes/helpers/middleware')
 const errorHelper = require('../../Application/routes/helpers/error')
 const noticeHelper = require('../../Application/routes/helpers/notice')
-const apiManager = require('../../Application/controllers/apiManager.js')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const codeAccountController = require('../../Application/controllers/codeAccountController.js')
@@ -39,11 +38,14 @@ const user = [
     userId: '045fb5fd-7cd1-499e-9e1d-b3635b039d9f'
   }
 ]
+
+// 正常セッションでの場合
 const session = {
   userContext: 'LoggedIn',
   userRole: 'dummy'
 }
 
+// 正常セッションではない場合
 const notLoggedInsession = {
   userContext: 'dummy',
   userRole: 'dummy'
@@ -51,7 +53,6 @@ const notLoggedInsession = {
 
 // モックテーブル定義
 const Users = require('../mockDB/Users_Table')
-const Tenants = require('../mockDB/Tenants_Table')
 const Contracts = require('../mockDB/Contracts_Table')
 
 describe('registAccountCodeのテスト', () => {
@@ -62,6 +63,7 @@ describe('registAccountCodeのテスト', () => {
     userControllerFindOneSpy = jest.spyOn(userController, 'findOne')
     contractControllerFindOneSpy = jest.spyOn(contractController, 'findOne')
     codeAccountControllerInsertSpy = jest.spyOn(codeAccountController, 'insert')
+    request.flash = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -116,7 +118,8 @@ describe('registAccountCodeのテスト', () => {
         requiredTagCode: 'codeAccountCodeRequired',
         requiredTagName: 'codeAccountNameRequired',
         idForCodeInput: 'codeAccountCode',
-        idForNameInput: 'codeAccountName'
+        idForNameInput: 'codeAccountName',
+        modalTitle: '勘定科目設定確認'
       })
     })
 
@@ -144,6 +147,7 @@ describe('registAccountCodeのテスト', () => {
       // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
+
     test('400エラー:LoggedInではないsessionの場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -254,6 +258,7 @@ describe('registAccountCodeのテスト', () => {
       // 期待結果
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
+
     test('500エラー：不正なcheckContractStatus(null)', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -274,7 +279,9 @@ describe('registAccountCodeのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      helper.checkContractStatus = '00'
     })
+
     test('500エラー：不正なcheckContractStatus(999)', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -324,7 +331,7 @@ describe('registAccountCodeのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
 
-      expect(response.getHeader('Location')).toEqual('/')
+      expect(response.getHeader('Location')).toEqual('/portal')
     })
 
     test('異常:勘定科目登録に失敗した場合。', async () => {
@@ -352,7 +359,7 @@ describe('registAccountCodeのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // responseのヘッダ
-      expect(request.flash).toHaveBeenCalledWith('info', '勘定科目登録に失敗しました。')
+      expect(request.flash).toHaveBeenCalledWith('noti', '勘定科目登録に失敗しました。')
       expect(response.getHeader('Location')).toEqual('/registAccountCode')
     })
 
@@ -374,6 +381,7 @@ describe('registAccountCodeのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
     })
+
     test('500エラー:codeAccountController.insertエラー', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -495,6 +503,7 @@ describe('registAccountCodeのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
+
     test('500エラー：不正なContractStatus、 DBエラー', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
