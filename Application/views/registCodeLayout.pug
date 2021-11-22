@@ -37,6 +37,28 @@ block content
                   .column
                     div.button-area
                       a.button#return-btn.cancel-button.mr-6(href='/') 戻る
-                      a.button.is-success.success-button#submit 登録
+                      a.button.is-link.success-button#btnCheck 確認
+
+  .modal#check-modal
+    .modal-background.cancel-button(data-target='check-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head
+        p.modal-card-title.title.mb-0 #{modalTitle}
+        button.delete(data-target='check-modal')
+      section.modal-card-body
+        table.table.is-striped.is-bordered.is-fullwidth
+          tbody
+            tr
+              td 勘定科目コード
+              td
+               p#checkCodeAccountCode 　
+          tr
+            td 勘定科目名
+            td
+              p#checkCodeAccountName 　
+      footer.modal-card-foot
+        div.button-area
+          a.button#cancel-btn.cancel-button(data-target='check-modal') キャンセル
+          a.button.is-success#submit 登録
 
     include footer
