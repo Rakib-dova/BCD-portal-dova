@@ -3,7 +3,6 @@ const logger = require('../lib/logger')
 const CodeAccount = db.CodeAccount
 const constantsDefine = require('../constants')
 const { v4: uuidV4 } = require('uuid')
-const Op = db.Sequelize.Op
 module.exports = {
   // CodeAccountカラム
   //   codeAccountId(PK) - PK
@@ -22,7 +21,10 @@ module.exports = {
 
       // 重複コード検索
       const resultSearch = await CodeAccount.findAll({
-        where: { subjectCode: { [Op.eq]: values.subjectCode } }
+        where: {
+          subjectCode: values.subjectCode,
+          contractId: uploadContractId
+        }
       })
 
       // 重複コード検索（sequelize大小文字区別しないため）
