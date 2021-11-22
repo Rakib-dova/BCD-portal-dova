@@ -87,6 +87,16 @@ block content
       .column.hvr-float
         if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
           .box.iconBox.textOverflow
+            a.show-modal(data-target='registAccountCode-modal')
+              .media.appdesc
+                .media-left
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
+                .media-content
+                  p.title.is-5 仕訳情報設定
+                  p 勘定科目と補助科目をユーザーカスタマイズができます。
+      .column.hvr-float
+        if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+          .box.iconBox.textOverflow
             a.show-modal(data-target='config-modal')
               .media.appdesc
                 .media-left
@@ -95,7 +105,6 @@ block content
                   p.title.is-5 設定
                   p 契約情報変更と解約を行うことができます。
                   p 解約の場合は取り消しはできません。
-      .column.hvr-float
       .column.hvr-float
 
     .modal#support-modal
@@ -163,6 +172,19 @@ block content
             else
               p お問い合わせは、テナント管理者のみ可能です。
               p テナント管理者にご相談の上、お問い合わせください。
+    .modal#registAccountCode-modal
+      .modal-background.cancel-button(data-target='registAccountCode-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title 仕訳情報設定
+          button.delete(data-target="registAccountCode-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/registAccountCode') 
+              span.panel-icon
+                i.fas.fa-file
+              p 勘定科目設定
+        footer.modal-card-foot
 
     .modal#csvDownload-modal
      .modal-background.cancel-button(data-target='csvDownload-modal')
