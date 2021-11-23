@@ -6,15 +6,15 @@
 trigger:
   branches:
     include:
-      - refs/heads/master
       - refs/heads/snake_case
+
   paths:
     include:
-      - /
+      - Application
     exclude:
-      - /Documents
-      - /Tests
-      - /*.yml
+      - Documents
+      - Tests
+      - '*.yml'
 
 parameters:
   - name: Environment
@@ -22,24 +22,27 @@ parameters:
     default: dev
     values:
       - dev
-      - stg
-      - prd
-
-  - name: IntegrationTest
-    type: string
-    default: no
-    values:
-      - yes
-      - no
+      - prodstg
+      - prod
+      - demo
 
 variables:
   - group: ${{ parameters.Environment }}
-
-pool:
-  vmImage: "ubuntu-latest"
+  - name: tag
+    value: $[format('{0:yyyyMMdd}', pipeline.startTime)]
+  - name: devDeploy #開発環境デプロイフラグ
+    value: ${{ eq(parameters.Environment,'dev')}}
+  - name: Deploy #prod, proddtg, demo環境デプロイフラグ
+    value: ${{ or(eq(parameters.Environment,'prodstg'), eq(parameters.Environment,'prod'),eq(parameters.Environment,'demo'))}}
+  - name: japanwest #西日本デプロイフラグ
+    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg')) }}
+  - name: vmPipeline #パイプライン起動停止フラグ
+    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg')) }}
 
 stages:
   - stage: BuildandPush
+    pool:
+      vmImage: ubuntu-latest
     jobs:
       - job:
         steps:
@@ -114,133 +117,359 @@ stages:
               command: push
               imageName: "$(repositoryName):$(Build.BuildId)"
 
-  - stage: Deploy
+  - stage: devDeploy
+    dependsOn: BuildandPush
+    condition: eq(variables.devDeploy ,'true')
+    pool:
+      vmImage: windows-latest
     jobs:
       - deployment: Deploy
-        environment: dev
+        environment: ${{ parameters.Environment }}
         strategy:
           runOnce:
             deploy:
               steps:
                 - task: AzureWebAppContainer@1
                   condition: eq('${{parameters.Environment}}', 'dev')
-                  displayName: "Azure Web App on Container Deploy: $(portalAppName)"
+                  displayName: "Azure Web App on Container Deploy: $(appserviceName)"
                   inputs:
                     azureSubscription: "$(azureSubscriptionEndpoint)"
-                    appName: "$(portalAppName)"
+                    appName: "$(appserviceName)"
                     containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
-                  enabled: true
 
-                - task: AzureWebAppContainer@1
-                  displayName: 'Deploy web app container to staging slot'
-                  condition: eq('${{parameters.Environment}}', 'stg')
+
+  - stage: Deploy
+    pool:
+      name: Default
+      demands: 
+      - Agent.Name -equals $(AgentName) #要Self-hostedAgent
+      workspace:
+        clean: all
+    dependsOn: BuildandPush
+    condition: eq(variables.Deploy ,'true')
+    jobs:
+      - job: vmstart
+        displayName: Start VM for Pipeline
+        pool: 
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: none
+          - task: AzureCLI@2
+            condition: eq(variables.vmPipeline,'True')
+            displayName: Start VM for Pipline
+            inputs:
+              azureSubscription: '$(azureSubscriptionEndpoint)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                vmStatus=`az vm get-instance-view -n $(vmPipelineName) -g $(operationRg)  --query instanceView.statuses[1].displayStatus  -o tsv`
+                if [ "$vmStatus" == "VM deallocated" ]; then
+                  az vm start -g $(operationRg)  -n $(vmPipelineName)
+                fi
+            
+      - deployment: DBSchema
+        dependsOn: vmstart
+        displayName: Change DBSchema
+        environment: production
+        strategy:
+          runOnce:
+            deploy: 
+              steps: 
+              - download: none
+              
+              - checkout: self
+
+              - powershell: |
+                  #DB接続先情報出力
+                  $json='{
+                  "${{ parameters.Environment }}": {
+                    "username": "pentas",
+                    "password": "$(dbadminPassword)",
+                    "database": "$(databaseName)",
+                    "host": "$(sqlserverFailovergroupsName)",
+                    "dialect": "mssql",
+                    "logging": false
+                    }
+                  }'
+                  $json | out-file .\Application\config\config.json  -Encoding UTF8
+                  #dbmigration
+                  cd Application
+                  npm install --save sequelize
+                  $result=npx sequelize  db:migrate --env ${{ parameters.Environment }}
+                  $result
+                  #rollback用にmigration数を出力
+                  $migrationCnt=($result|Select-String "migrated" ).Count
+                  mkdir -f $(Pipeline.Workspace)/variables
+                  echo $migrationCnt > $(Pipeline.Workspace)/variables/migrationCnt
+                displayName: npx sequelize db:migrate
+                name: dbmigrate
+            
+            on:
+              failure:
+                steps: 
+                  - powershell: |
+                      #undo
+                      cd Application
+                      $migrationCnt=cat $(Pipeline.Workspace)/variables/migrationCnt
+                      for ($i=0; $i -le $migrationCnt-1; $i++){
+                        npx sequelize  db:migrate:undo --env ${{ parameters.Environment }}
+                      }
+                    displayName: npx sequelize  db:migrate:undo
+
+      - deployment: japanwest
+        displayName: Deploy to japanwest App Service
+        dependsOn: DBSchema
+        condition: eq(dependencies.DBSchema.result,'Succeeded')
+        environment: production
+        strategy:
+          runOnce:
+            preDeploy:
+              steps:
+              - download: current 
+                displayName: Download artifacts
+              - task: AzureWebAppContainer@1
+                displayName: Deploy to staging slot of japaneast App Service
+                inputs:
+                  azureSubscription: '$(azureSubscriptionEndpoint)'
+                  appName: '$(appServiceName)'
+                  deployToSlotOrASE: true
+                  slotName: 'staging'
+                  resourceGroupName: '$(portalRg)'
+                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
+                  appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
+
+              - task: AzureWebAppContainer@1
+                condition: eq(variables.japanwest,'True')
+                displayName: Deploy to staging slot of japanwest App Service
+                inputs:
+                  azureSubscription: '$(azureSubscriptionEndpoint)'
+                  appName: '$(appServiceSecName)'
+                  deployToSlotOrASE: true
+                  slotName: 'staging'
+                  resourceGroupName: '$(portalSecRg)'
+                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
+                  appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
+
+              - task: AzureCLI@2
+                condition: eq(variables.japanwest,'True')
+                displayName: Priolity down on japanwest App Service
+                inputs:
+                  azureSubscription: '$(azureSubscriptionEndpoint)'
+                  scriptType: 'ps'
+                  scriptLocation: 'inlineScript'
+                  inlineScript: |
+                    az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
+                    az network front-door backend-pool backend update  -g $(portalRg)  `
+                    --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                    --priority 2 --index 2 #西日本Azure Functionの優先度を下げる
+            
+            deploy:
+              steps: 
+                - download: none
+                - task: AzureCLI@2
+                  condition: eq(variables.japanwest,'True')
+                  displayName: Swap slots on japanwest App Service
+                  name: swapSlots1
                   inputs:
                     azureSubscription: '$(azureSubscriptionEndpoint)'
-                    appName: '$(portalAppName)'
-                    deployToSlotOrASE: true
-                    resourceGroupName: '$(bcd_portal_rg_name)'
-                    slotName: 'staging'
-                    containers: '$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az webapp deployment slot swap --slot 'staging' --action 'swap' `
+                      --name $(appServiceSecName) -g $(portalSecRg)
+                      Write-Host "##vso[task.setvariable variable=swapSlots1Status]Success"
+
+            routeTraffic:
+              steps:
+              - task: AzureCLI@2
+                condition: eq(variables.japanwest,'True')
+                displayName: Priolity down on japaneast App Service
+                inputs:
+                  azureSubscription: '$(azureSubscriptionEndpoint)'
+                  scriptType: 'ps'
+                  scriptLocation: 'inlineScript'
+                  inlineScript: |
+                    az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
+                    az network front-door backend-pool backend update  -g $(portalRg)  `
+                    --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                    --priority 3 --index 1 #東日本App Serviceの優先度を下げる
+
+              - task: AzureCLI@2
+                condition: eq(variables.japanwest,'True')
+                displayName: Priolity up on japanwest App Service
+                inputs:
+                  azureSubscription: '$(azureSubscriptionEndpoint)'
+                  scriptType: 'ps'
+                  scriptLocation: 'inlineScript'
+                  inlineScript: |
+                    az network front-door backend-pool backend update  -g $(portalRg)  `
+                    --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                    --priority 1 --index 2 #西日本App Serviceの優先度を上げる
+            on:
+              failure: 
+                steps:
+                - task: AzureCLI@2
+                  condition: and(eq(variables.japanwest,'True'),eq(variables['swapSlots1Status'], 'Success'))
+                  displayName: Swap slots on japanwest App Service
+                  inputs:
+                    azureSubscription: '$(azureSubscriptionEndpoint)'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az webapp deployment slot swap --slot 'staging' --action 'swap' `
+                      --name $(appServiceSecName) -g $(portalSecRg)
+
+                - task: AzureCLI@2
+                  displayName: Priolity up on japaneast App Service
+                  condition: eq(variables.japanwest,'True')
+                  inputs:
+                    azureSubscription: '$(azureSubscriptionEndpoint)'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
+                      az network front-door backend-pool backend update  -g $(portalRg)  `
+                      --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                      --priority 1 --index 1 #東日本App Serviceの優先度を上げる
                 
-                - task: AzureAppServiceManage@0
-                  displayName: 'Swap slots'
-                  condition: eq('${{parameters.Environment}}', 'stg')
+                - task: AzureCLI@2
+                  displayName: Priolity up on japanwest App Service
+                  condition: eq(variables.japanwest,'True')
                   inputs:
                     azureSubscription: '$(azureSubscriptionEndpoint)'
-                    Action: 'Swap Slots'
-                    WebAppName: '$(portalAppName)'
-                    ResourceGroupName: '$(bcd_portal_rg_name)'
-                    SourceSlot: 'staging'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      
+                      az network front-door backend-pool backend update  -g $(portalRg)  `
+                      --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                      --priority 1 --index 2 #西日本Azure Functionの優先度を上げる
+                      #AGENT_JOBSTATUS ='SucceededWithIssues'
+                      $env:AGENT_JOBSTATUS ='SucceededWithIssues'
 
-      - job: Confirmation
-        condition: eq('${{parameters.IntegrationTest}}', 'yes')
-        dependsOn: Deploy
-        pool: server
+                - powershell: |
+                    #undo
+                    cd Application
+                    $migrationCnt=cat $(Pipeline.Workspace)/variables/migrationCnt
+                    for ($i=0; $i -le $migrationCnt-1; $i++){
+                      npx sequelize  db:migrate:undo --env ${{ parameters.Environment }}
+                    }
+                  displayName: npx sequelize  db:migrate:undo
+                  
+
+      - deployment: japaneast
+        displayName: Deploy to japaneast App Service
+        dependsOn: japanwest
+        condition: eq(dependencies.japanwest.result,'Succeeded')
+        environment: production
+        strategy:
+          runOnce:
+            deploy:
+              steps:              
+                - download: none
+                - task: AzureCLI@2
+                  displayName: Swap slots on japaneast App Service
+                  inputs:
+                    azureSubscription: '$(azureSubscriptionEndpoint)'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az webapp deployment slot swap --slot 'staging' --action 'swap' `
+                      --name $(appserviceName) -g $(portalRg)
+                      Write-Host "##vso[task.setvariable variable=swapSlots2Status]Success"
+                      Write-Host 'swapSlots2Status'
+                      Write-Host '$(swapSlots2Status)'
+
+            routeTraffic:
+              steps:
+                - task: AzureCLI@2
+                  condition: eq(variables.japanwest,'True')
+                  displayName: Priolity up on japaneast App Service
+                  inputs:
+                    azureSubscription: '$(azureSubscriptionEndpoint)'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
+                      az network front-door backend-pool backend update  -g $(portalRg)  `
+                      --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                      --priority 1 --index 1 #東日本App Serviceの優先度を上げる
+
+            on:
+              failure: 
+                steps:
+                - task: AzureCLI@2
+                  displayName: Swap slots on japaneast App Service
+                  condition: eq(variables['swapSlots2Status'], 'Success')
+                  inputs:
+                    azureSubscription: '$(azureSubscriptionEndpoint)'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az webapp deployment slot swap --slot 'staging' --action 'swap' `
+                      --name $(appServiceName) -g $(portalRg)
+
+                - task: AzureCLI@2
+                  condition: eq(variables.japanwest,'True')
+                  displayName: Swap slots on japanwest App Service
+                  inputs:
+                    azureSubscription: '$(azureSubscriptionEndpoint)'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az webapp deployment slot swap --slot 'staging' --action 'swap' `
+                      --name $(appServiceSecName) -g $(portalSecRg)
+
+                - task: AzureCLI@2
+                  condition: eq(variables.japanwest,'True')
+                  displayName: Priolity up on japaneast App Service
+                  inputs:
+                    azureSubscription: '$(azureSubscriptionEndpoint)'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
+                      az network front-door backend-pool backend update  -g $(portalRg)  `
+                      --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                      --priority 1 --index 1 #東日本App Serviceの優先度を上げる
+                
+                - task: AzureCLI@2
+                  condition: eq(variables.japanwest,'True')
+                  displayName: Priolity up on japanwest App Service
+                  inputs:
+                    azureSubscription: '$(azureSubscriptionEndpoint)'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az network front-door backend-pool backend update  -g $(portalRg)  `
+                      --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                      --priority 1 --index 2 #西日本Azure Functionの優先度を上げる
+
+                - powershell: |
+                    #undo
+                    cd Application
+                    $migrationCnt=cat $(Pipeline.Workspace)/variables/migrationCnt
+                    for ($i=0; $i -le $migrationCnt-1; $i++){
+                      npx sequelize  db:migrate:undo --env ${{ parameters.Environment }}
+                    }
+                  displayName: npx sequelize  db:migrate:undo
+
+      - job: vmdeallocate
+        displayName: Deallocate VM for Pipeline
+        dependsOn: japaneast      
+        pool: 
+          vmImage: ubuntu-latest
         steps:
-          - task: ManualValidation@0
-            displayName: Confirm before running integration tests
-            inputs:
-              notifyUsers: "$(BUILD.REQUESTEDFOREMAIL)"
-              instructions: |
-                Make sure that test accounts should be agreed with terms of service
-
-                Procedure
-                Please login to Tradeshift
-                https://sandbox.tradeshift.com/?currentScreen=0
-                Username:$(adminid)
-                password:$(adminsecret)
-                and access digital trade page
-                $(digitaltradeURL)
-                and if register page are displayed ,agree with terms of service (In case portal page are displayed, you have no actions)
-            enabled: true
-
-      - job: IntegrationTest
-        pool:
-          vmImage: "windows-latest"
-        condition: eq('${{parameters.IntegrationTest}}', 'yes')
-        dependsOn: Confirmation
-        steps:
+          - checkout: none
           - task: AzureCLI@2
-            displayName: "Create front-door waf-policy rule to allow access from Azure pipeline"
+            condition: eq(variables.vmPipeline,'True')
+            displayName: Deallocate VM for Pipline
             inputs:
-              azureSubscription: "$(azureSubscriptionEndpoint)"
-              scriptType: "ps"
-              scriptLocation: "inlineScript"
+              azureSubscription: '$(azureSubscriptionEndpoint)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
               inlineScript: |
-                #Install Azure CLI extention without prompt
-                az config set extension.use_dynamic_install=yes_without_prompt
-                #Get Outbound IP address of Azure pipelines
-                $ip=Invoke-RestMethod https://ipinfo.io/json | select -exp ip
-                Write-Output -------Create front-door waf-policy rule-------
-                az network front-door waf-policy rule create `
-                --name temporaryAllowFromAzurePipelines `
-                --priority 10 `
-                --rule-type MatchRule `
-                --action Allow `
-                --resource-group '$(bcd_portal_rg_name)' `
-                --policy-name '$(WAFname)' --defer
-                Write-Output -------Add IPAdress to front-door waf-policy rule-------
-                az network front-door waf-policy rule match-condition add `
-                --match-variable RemoteAddr `
-                --operator IPMatch `
-                --values $ip `
-                --name temporaryAllowFromAzurePipelines `
-                --resource-group '$(bcd_portal_rg_name)' `
-                --policy-name '$(WAFname)'
-                Write-Output -------Wait for 3 minutes to apply change-------
-                Start-Sleep -s 180
-
-          - task: Npm@0
-            displayName: "Install test dependencies"
-            inputs:
-              cwd: Tests
-              arguments: "--force"
-            enabled: true
-
-          - task: Npm@1
-            displayName: "Run integration tests"
-            continueOnError: true
-            inputs:
-              command: "custom"
-              workingDir: "Tests"
-              customCommand: "run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)"
-            enabled: false
-
-          - bash: | 
-              npm install jest-junit --save-dev
-              cd ./Tests
-              npm run test:integrationCi -- ./az_integration.spec.js --adminid=$(adminid) --adminsecret=$(adminsecret) --userid=$(userid) --usersecret=$(usersecret)
-            displayName: "Run unit tests"
-
-          - task: AzureCLI@2
-            displayName: "Delete front-door waf-policy rule"
-            inputs:
-              azureSubscription: "$(azureSubscriptionEndpoint)"
-              scriptType: "ps"
-              scriptLocation: "inlineScript"
-              inlineScript: |
-                Write-Output -------Delete front-door waf-policy rule-------
-                az network front-door waf-policy rule delete `
-                --name temporaryAllowFromAzurePipelines `
-                --policy-name '$(WAFname)' `
-                --resource-group '$(bcd_portal_rg_name)'
+                vmStatus=`az vm get-instance-view -n $(vmPipelineName) -g $(operationRg)  --query instanceView.statuses[1].displayStatus  -o tsv`
+                if [ "$vmStatus" == "VM running" ]; then
+                  az vm deallocate -g  $(operationRg)  -n $(vmPipelineName)
+                fi
