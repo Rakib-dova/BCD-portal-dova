@@ -100,7 +100,7 @@ stages:
             inputs:
               containerregistrytype: "Container Registry"
               dockerRegistryEndpoint: "Redhat Container Registry"
-              imageName: "$(repositoryName):$(Build.BuildId)"
+              imageName: "$(repositoryName):$(tag)"
               useDefaultContext: false
               buildContext: "$(System.DefaultWorkingDirectory)/Application"
 
@@ -108,7 +108,7 @@ stages:
             displayName: "Tag an image"
             inputs:
               command: tag
-              arguments: "registry.redhat.io/$(repositoryName):$(Build.BuildId) $(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
+              arguments: "registry.redhat.io/$(repositoryName):$(tag) $(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
 
           - task: Docker@1
             displayName: "Push an image"
@@ -116,7 +116,7 @@ stages:
               azureSubscriptionEndpoint: "$(azureSubscriptionEndpoint)"
               azureContainerRegistry: $(azureContainerResistoryName).azurecr.io
               command: push
-              imageName: "$(repositoryName):$(Build.BuildId)"
+              imageName: "$(repositoryName):$(tag)"
 
   - stage: devDeploy
     dependsOn: BuildandPush
@@ -171,7 +171,7 @@ stages:
       - deployment: DBSchema
         dependsOn: vmstart
         displayName: Change DBSchema
-        environment: production
+        environment: ${{ parameters.Environment }}
         strategy:
           runOnce:
             deploy: 
@@ -221,7 +221,7 @@ stages:
         displayName: Deploy to japanwest App Service
         dependsOn: DBSchema
         condition: eq(dependencies.DBSchema.result,'Succeeded')
-        environment: production
+        environment: ${{ parameters.Environment }}
         strategy:
           runOnce:
             preDeploy:
@@ -362,7 +362,7 @@ stages:
         displayName: Deploy to japaneast App Service
         dependsOn: japanwest
         condition: eq(dependencies.japanwest.result,'Succeeded')
-        environment: production
+        environment: ${{ parameters.Environment }}
         strategy:
           runOnce:
             deploy:
