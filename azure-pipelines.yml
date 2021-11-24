@@ -25,6 +25,7 @@ parameters:
       - prodstg
       - prod
       - demo
+      - test
 
 variables:
   - group: ${{ parameters.Environment }}
@@ -33,11 +34,11 @@ variables:
   - name: devDeploy #開発環境デプロイフラグ
     value: ${{ eq(parameters.Environment,'dev')}}
   - name: Deploy #prod, proddtg, demo環境デプロイフラグ
-    value: ${{ or(eq(parameters.Environment,'prodstg'), eq(parameters.Environment,'prod'),eq(parameters.Environment,'demo'))}}
+    value: ${{ or(eq(parameters.Environment,'prodstg'), eq(parameters.Environment,'prod'),eq(parameters.Environment,'demo'),eq(parameters.Environment,'test'))}}
   - name: japanwest #西日本デプロイフラグ
-    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg')) }}
+    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
   - name: vmPipeline #パイプライン起動停止フラグ
-    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg')) }}
+    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
 
 stages:
   - stage: BuildandPush
