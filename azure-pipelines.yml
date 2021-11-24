@@ -171,7 +171,7 @@ stages:
       - deployment: DBSchema
         dependsOn: vmstart
         displayName: Change DBSchema
-        environment: production
+        environment: ${{ parameters.Environment }}
         strategy:
           runOnce:
             deploy: 
@@ -221,7 +221,7 @@ stages:
         displayName: Deploy to japanwest App Service
         dependsOn: DBSchema
         condition: eq(dependencies.DBSchema.result,'Succeeded')
-        environment: production
+        environment: ${{ parameters.Environment }}
         strategy:
           runOnce:
             preDeploy:
@@ -362,7 +362,7 @@ stages:
         displayName: Deploy to japaneast App Service
         dependsOn: japanwest
         condition: eq(dependencies.japanwest.result,'Succeeded')
-        environment: production
+        environment: ${{ parameters.Environment }}
         strategy:
           runOnce:
             deploy:
