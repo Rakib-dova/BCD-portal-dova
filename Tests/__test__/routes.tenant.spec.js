@@ -32,6 +32,7 @@ const routesTenant = require('../../Application/routes/tenant')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
+const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
 const helper = require('../../Application/routes/helpers/middleware')
 
@@ -40,7 +41,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.env' })
 }
 
-let request, response, accessTradeshiftSpy, infoSpy, createSpy
+let request, response, accessTradeshiftSpy, infoSpy, createSpy, checkContractStatusSpy
 describe('tenantのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -55,6 +56,8 @@ describe('tenantのテスト', () => {
 
     const logger = require('../../Application/lib/logger.js')
     infoSpy = jest.spyOn(logger, 'info')
+
+    checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
   })
   afterEach(() => {
     request.resetMocked()
@@ -63,6 +66,7 @@ describe('tenantのテスト', () => {
     accessTradeshiftSpy.mockRestore()
     infoSpy.mockRestore()
     createSpy.mockRestore()
+    checkContractStatusSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -153,6 +157,8 @@ describe('tenantのテスト', () => {
           Modified: '2021-01-20T05:20:07.137Z',
           AccountType: 'FREE'
         })
+
+      checkContractStatusSpy.mockReturnValue(null)
 
       // CSRF対策
       request.csrfToken = jest.fn()
@@ -247,6 +253,8 @@ describe('tenantのテスト', () => {
           AccountType: 'FREE'
         })
 
+      checkContractStatusSpy.mockReturnValue(null)
+
       // CSRF対策
       request.csrfToken = jest.fn()
       // 試験実施
@@ -285,6 +293,636 @@ describe('tenantのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
       // response.renderが呼ばれ「ない」
       expect(response.render).not.toHaveBeenCalled()
+    })
+
+    test('500エラー：契約中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+
+      checkContractStatusSpy.mockReturnValue('00')
+
+      // CSRF対策
+      request.csrfToken = jest.fn()
+
+      // 試験実施
+      await routesTenant.cbGetRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：登録申込中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+
+      checkContractStatusSpy.mockReturnValue('10')
+
+      // CSRF対策
+      request.csrfToken = jest.fn()
+
+      // 試験実施
+      await routesTenant.cbGetRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：登録受取中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+
+      checkContractStatusSpy.mockReturnValue('11')
+
+      // CSRF対策
+      request.csrfToken = jest.fn()
+
+      // 試験実施
+      await routesTenant.cbGetRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：変更申込中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+
+      checkContractStatusSpy.mockReturnValue('40')
+
+      // CSRF対策
+      request.csrfToken = jest.fn()
+
+      // 試験実施
+      await routesTenant.cbGetRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：変更受取中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+
+      checkContractStatusSpy.mockReturnValue('41')
+
+      // CSRF対策
+      request.csrfToken = jest.fn()
+
+      // 試験実施
+      await routesTenant.cbGetRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：解約申込中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+
+      checkContractStatusSpy.mockReturnValue('30')
+
+      // CSRF対策
+      request.csrfToken = jest.fn()
+
+      // 試験実施
+      await routesTenant.cbGetRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：解約受取中の場合', async () => {
+      // 準備
+      // session.userContextに正常値(NotTenantRegistered)を想定する
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+
+      checkContractStatusSpy.mockReturnValue('31')
+
+      // CSRF対策
+      request.csrfToken = jest.fn()
+
+      // 試験実施
+      await routesTenant.cbGetRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('500エラー：セッション内のuserのToken情報がnullの場合', async () => {
@@ -334,7 +972,7 @@ describe('tenantのテスト', () => {
       expect(response.render).not.toHaveBeenCalled()
     })
 
-    test('403エラー：アカウント管理者権限のないユーザで操作した場合', async () => {
+    test('「テナント管理者権限のあるユーザで再度操作をお試しください。」の画面表示：アカウント管理者権限のないユーザで操作した場合', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
@@ -364,12 +1002,8 @@ describe('tenantのテスト', () => {
       await routesTenant.cbGetRegister(request, response, next)
 
       // 期待結果
-      // 403エラーが返される
-      const expectError = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-      expectError.name = 'Forbidden'
-      expectError.status = 403
-      expectError.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-      expect(next).toHaveBeenCalledWith(expectError)
+      // 一般ユーザで使用できない
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
       // response.renderが呼ばれ「ない」
       expect(response.render).not.toHaveBeenCalled()
     })
@@ -423,7 +1057,19 @@ describe('tenantのテスト', () => {
       }
       // フォームの送信値
       request.body = {
-        termsCheck: 'on'
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -510,6 +1156,8 @@ describe('tenantのテスト', () => {
         true
       ])
 
+      checkContractStatusSpy.mockReturnValue(null)
+
       // 試験実施
       await routesTenant.cbPostRegister(request, response, next)
 
@@ -539,7 +1187,19 @@ describe('tenantのテスト', () => {
       }
       // フォームの送信値
       request.body = {
-        termsCheck: 'on'
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // 試験実施
       await routesTenant.cbPostRegister(request, response, next)
@@ -559,6 +1219,20 @@ describe('tenantのテスト', () => {
       // session.userContextにNotTenantRegisteredを入れる
       request.session = {
         userContext: 'NotTenantRegistered'
+      }
+      request.body = {
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -603,6 +1277,839 @@ describe('tenantのテスト', () => {
       expect(response.getHeader('Location')).not.toEqual('/portal')
     })
 
+    test('500エラー：契約中の場合', async () => {
+      // 準備
+      // session.userContextにNotTenantRegisteredを入れる
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+      // DBからの正常なユーザデータ取得を想定する
+      createSpy.mockReturnValue([
+        {
+          dataValues: {
+            userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+            appVersion: '0.0.1',
+            refreshToken: 'dummyRefreshToken',
+            userStatus: 0
+          }
+        },
+        true
+      ])
+
+      checkContractStatusSpy.mockReturnValue('00')
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：登録申込中の場合', async () => {
+      // 準備
+      // session.userContextにNotTenantRegisteredを入れる
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+      // DBからの正常なユーザデータ取得を想定する
+      createSpy.mockReturnValue([
+        {
+          dataValues: {
+            userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+            appVersion: '0.0.1',
+            refreshToken: 'dummyRefreshToken',
+            userStatus: 0
+          }
+        },
+        true
+      ])
+
+      checkContractStatusSpy.mockReturnValue('10')
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：登録受取中の場合', async () => {
+      // 準備
+      // session.userContextにNotTenantRegisteredを入れる
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+      // DBからの正常なユーザデータ取得を想定する
+      createSpy.mockReturnValue([
+        {
+          dataValues: {
+            userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+            appVersion: '0.0.1',
+            refreshToken: 'dummyRefreshToken',
+            userStatus: 0
+          }
+        },
+        true
+      ])
+
+      checkContractStatusSpy.mockReturnValue('11')
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：変更申込中の場合', async () => {
+      // 準備
+      // session.userContextにNotTenantRegisteredを入れる
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+      // DBからの正常なユーザデータ取得を想定する
+      createSpy.mockReturnValue([
+        {
+          dataValues: {
+            userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+            appVersion: '0.0.1',
+            refreshToken: 'dummyRefreshToken',
+            userStatus: 0
+          }
+        },
+        true
+      ])
+
+      checkContractStatusSpy.mockReturnValue('40')
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：変更受取中の場合', async () => {
+      // 準備
+      // session.userContextにNotTenantRegisteredを入れる
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+      // DBからの正常なユーザデータ取得を想定する
+      createSpy.mockReturnValue([
+        {
+          dataValues: {
+            userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+            appVersion: '0.0.1',
+            refreshToken: 'dummyRefreshToken',
+            userStatus: 0
+          }
+        },
+        true
+      ])
+
+      checkContractStatusSpy.mockReturnValue('41')
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：解約申込中の場合', async () => {
+      // 準備
+      // session.userContextにNotTenantRegisteredを入れる
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+      // DBからの正常なユーザデータ取得を想定する
+      createSpy.mockReturnValue([
+        {
+          dataValues: {
+            userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+            appVersion: '0.0.1',
+            refreshToken: 'dummyRefreshToken',
+            userStatus: 0
+          }
+        },
+        true
+      ])
+
+      checkContractStatusSpy.mockReturnValue('30')
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：解約受取中の場合', async () => {
+      // 準備
+      // session.userContextにNotTenantRegisteredを入れる
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+      // DBからの正常なユーザデータ取得を想定する
+      createSpy.mockReturnValue([
+        {
+          dataValues: {
+            userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+            appVersion: '0.0.1',
+            refreshToken: 'dummyRefreshToken',
+            userStatus: 0
+          }
+        },
+        true
+      ])
+
+      checkContractStatusSpy.mockReturnValue('31')
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
     test('500エラー：セッション内のuserのToken情報がnullの場合', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
@@ -611,7 +2118,19 @@ describe('tenantのテスト', () => {
       }
       // フォームの送信値
       request.body = {
-        termsCheck: 'on'
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // userのTokenにnullを入れる
       request.user = {
@@ -642,7 +2161,19 @@ describe('tenantのテスト', () => {
       }
       // フォームの送信値
       request.body = {
-        termsCheck: 'on'
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -667,7 +2198,7 @@ describe('tenantのテスト', () => {
       expect(response.getHeader('Location')).not.toEqual('/portal')
     })
 
-    test('403エラー：アカウント管理者権限のないユーザで操作した場合', async () => {
+    test('「テナント管理者権限のあるユーザで再度操作をお試しください。」の画面表示：アカウント管理者権限のないユーザで操作した場合', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
       request.session = {
@@ -675,7 +2206,19 @@ describe('tenantのテスト', () => {
       }
       // フォームの送信値
       request.body = {
-        termsCheck: 'on'
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -692,7 +2235,7 @@ describe('tenantのテスト', () => {
           {
             UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
             GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-            Role: 'abcdefcd-00d9-427c-bf03-4ef0112ba16d'
+            Role: 'abcdefcd-00d9-427c-bf03-1234a2a2d55a'
           }
         ]
       })
@@ -701,12 +2244,9 @@ describe('tenantのテスト', () => {
       await routesTenant.cbPostRegister(request, response, next)
 
       // 期待結果
-      // 403エラーが返される
-      const expectError = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-      expectError.name = 'Forbidden'
-      expectError.status = 403
-      expectError.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-      expect(next).toHaveBeenCalledWith(expectError)
+      // 一般ユーザで使用できない
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
+
       // 登録成功時のログが呼ばれ「ない」
       expect(infoSpy).not.toHaveBeenCalled()
       // ポータルにリダイレクト「されない」
@@ -722,7 +2262,19 @@ describe('tenantのテスト', () => {
       }
       // フォームの送信値
       request.body = {
-        termsCheck: 'on'
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -777,7 +2329,19 @@ describe('tenantのテスト', () => {
       }
       // フォームの送信値
       request.body = {
-        termsCheck: 'on'
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -832,7 +2396,19 @@ describe('tenantのテスト', () => {
       }
       // フォームの送信値
       request.body = {
-        termsCheck: 'on'
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {
@@ -886,77 +2462,6 @@ describe('tenantのテスト', () => {
       expect(response.getHeader('Location')).not.toEqual('/portal')
     })
 
-    test('400エラー：作られたUserの配列データ2つ目がfalseの場合', async () => {
-      // 準備
-      // session.userContextに正常値(NotTenantRegistered)を想定する
-      request.session = {
-        userContext: 'NotTenantRegistered'
-      }
-      // フォームの送信値
-      request.body = {
-        termsCheck: 'on'
-      }
-      // request.userに正常値を想定する
-      request.user = {
-        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
-        accessToken: 'dummyAccessToken',
-        refreshToken: 'dummyRefreshToken'
-      }
-      // Tradeshiftから正常なユーザデータ取得を想定する
-      accessTradeshiftSpy.mockReturnValueOnce({
-        Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
-        CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-        CompanyName: 'UnitTestCompany',
-        Username: 'dummy@example.com',
-        Language: 'ja',
-        TimeZone: 'Asia/Tokyo',
-        Memberships: [
-          {
-            UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
-            GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-            Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
-          }
-        ],
-        Created: '2021-01-20T05:11:15.177Z',
-        State: 'ACTIVE',
-        Type: 'PERSON',
-        FirstName: 'Yamada',
-        LastName: 'Taro',
-        Visible: true
-      })
-      // DBからの取得データの配列2つ目がfalseの場合を想定する
-      createSpy.mockReturnValue([
-        {
-          dataValues: {
-            userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
-            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-            userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-            appVersion: '0.0.1',
-            refreshToken: 'dummyRefreshToken',
-            userStatus: 0
-          }
-        },
-        false
-      ])
-
-      // 試験実施
-      await routesTenant.cbPostRegister(request, response, next)
-
-      // 期待結果
-      // 指定の400エラーを返す
-      const expectError = new Error('データが二重送信された可能性があります。')
-      expectError.name = 'Bad Request'
-      expectError.status = 400
-      expectError.desc = '既にご利用のユーザーの登録は完了しています。'
-      expect(next).toHaveBeenCalledWith(expectError)
-      // 登録成功時のログが呼ばれ「ない」
-      expect(infoSpy).not.toHaveBeenCalled()
-      // ポータルにリダイレクト「されない」
-      expect(response.redirect).not.toHaveBeenCalledWith(303, '/portal')
-      expect(response.getHeader('Location')).not.toEqual('/portal')
-    })
-
     test('500エラー：リクエストとcreateされたuserIdが異なる場合', async () => {
       // 準備
       // session.userContextに正常値(NotTenantRegistered)を想定する
@@ -965,7 +2470,19 @@ describe('tenantのテスト', () => {
       }
       // フォームの送信値
       request.body = {
-        termsCheck: 'on'
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
       }
       // request.userに正常値を想定する
       request.user = {

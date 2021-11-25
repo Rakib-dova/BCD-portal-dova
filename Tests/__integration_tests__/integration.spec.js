@@ -2,8 +2,10 @@
 const app = require('../../Application/app')
 const request = require('supertest')
 const { JSDOM } = require('jsdom')
+let testTenantId = null
+const db = require('../../Application/models')
 
-jest.setTimeout(40000) // jestのタイムアウトを40秒とする
+jest.setTimeout(60000) // jestのタイムアウトを60秒とする
 
 const getCookies = async (username, password) => {
   const page = await browser.newPage()
@@ -12,7 +14,17 @@ const getCookies = async (username, password) => {
 
   await page.goto(res.headers.location) // Tradeshift Oauth2認証ログインページをヘッドレスブラウザで開く
 
-  expect(await page.title()).toBe('ログイン | Tradeshift')
+  const lang = await page.evaluate(() => {
+    return navigator.language
+  })
+
+  // ブラウザのロケールライジング
+  if (lang === 'ja') {
+    expect(await page.title()).toBe('ログイン | Tradeshift')
+  } else {
+    expect(await page.title()).toBe('Login | Tradeshift')
+  }
+
   console.log('次のページに遷移しました：' + (await page.title())) // 「ログイン | Tradeshift」のはず
 
   await page.type('input[name="j_username"]', username)
@@ -28,7 +40,17 @@ const getCookies = async (username, password) => {
   // Oauth2認証後、ヘッドレスブラウザ内ではアプリにリダイレクトしている
   await page.waitForTimeout(10000) // 10秒待つことにする
 
-  expect(await page.title()).toMatch(/BConnectionデジタルトレード/i)
+  // テナントId取得
+  if (!testTenantId) {
+    await page.goto('https://sandbox.tradeshift.com')
+    const tradeshiftConfig = await page.evaluate(() => {
+      return window.ts.chrome.config
+    })
+    testTenantId = tradeshiftConfig.companyId
+  }
+
+  await page.goto(res.headers.location)
+  // expect(await page.title()).toMatch('利用登録 - BConnectionデジタルトレード')
   console.log('次のページに遷移しました：' + (await page.title())) // 「XXX - BConnectionデジタルトレード」となるはず
 
   const cookies = await page.cookies() // cookieを奪取
@@ -44,7 +66,7 @@ const getCookies = async (username, password) => {
 describe('ルーティングのインテグレーションテスト', () => {
   let acCookies, userCookies
 
-  describe('前準備', () => {
+  describe('0.前準備', () => {
     test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
       // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
       const options = require('minimist')(process.argv.slice(2))
@@ -59,6 +81,10 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
 
+      // DBクリア
+      await db.Contract.destroy({ where: { tenantId: testTenantId } })
+      await db.Order.destroy({ where: { tenantId: testTenantId } })
+
       // アカウント管理者を削除
       await request(app)
         .get('/user/delete')
@@ -71,7 +97,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
   })
 
-  describe('DBにアカウント管理者・一般ユーザ共に登録なし/一般ユーザとしてリクエスト', () => {
+  describe('1.DBにアカウント管理者・一般ユーザ共に登録なし/一般ユーザとしてリクエスト', () => {
     // DB状態:
     //   テナント：
     //    試験前：未登録
@@ -95,17 +121,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
     })
 
-    // テナント未登録のため、テナントの利用登録画面にリダイレクトする
-    test('/portalにアクセス：303ステータスと/tenant/registerにリダイレクト', async () => {
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(303)
-
-      expect(res.header.location).toBe('/tenant/register') // リダイレクト先は/tenant/register
-    })
-
-    let userCsrf, tenantCsrf
+    let userCsrf
     // userContextが'NotUserRegistered'(tenant側の登録が先に必要)のため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -121,45 +137,39 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('/user/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
         .send({ _csrf: userCsrf, termsCheck: 'on' })
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(403)
+        .expect(400)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
-    // 管理者権限がないため、アクセスできない
-    test('/tenant/registerにアクセス：管理者権限不足による403ステータスとエラーメッセージ', async () => {
+    // 利用登録をしていないため、解約ページ利用できない
+    test('/cancellationにGET：制御による500ステータスとエラーメッセージ', async () => {
       const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(403)
+        .get('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(500)
 
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。/i) // タイトル
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
     })
 
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    // 利用登録をしていないため、解約機能利用できない
+    test('/cancellationにPOST：制御による500ステータスとエラーメッセージ', async () => {
       const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(403)
+        .post('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(500)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
     })
   })
 
-  describe('DBにアカウント管理者・一般ユーザ共に登録なし/アカウント管理者としてリクエスト', () => {
+  describe('2.DBにアカウント管理者・一般ユーザ共に登録なし/アカウント管理者としてリクエスト', () => {
     // DB状態:
     //   テナント：
     //    試験前：未登録
@@ -183,71 +193,64 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
     })
 
-    // テナント未登録のため、テナントの利用登録画面にリダイレクトする
-    test('/portalにアクセス：303ステータスと/tenant/registerにリダイレクト', async () => {
+    // 利用登録後、ユーザコンテキスト変更
+    test('ユーザコンテキスト変更', async () => {
       const res = await request(app)
         .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(303)
-
-      expect(res.header.location).toBe('/tenant/register') // リダイレクト先は/tenant/register
-    })
-
-    let userCsrf, tenantCsrf
-    // userContextが'NotUserRegistered'(tenant側の登録が先に必要)のため、アクセスできない
-    test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/user/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/user/register')
-        .type('form')
-        .send({ _csrf: userCsrf, termsCheck: 'on' })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(403)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // テナントの利用登録録画面が正常に表示される
-    test('/tenant/registerにアクセス：200ステータスとテナントの利用登録画面表示', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/利用登録 - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
-    // 正常にテナントが登録され、ポータルにリダイレクトされる
-    test('/tenant/registerにPOST：303ステータスと/portalにリダイレクト(アカウント管理者とテナント登録成功)', async () => {
+    // テナントステータスが「新規申込」、解約ページ利用できない
+    test('/cancellationにGET：制御による新規申込中エラー', async () => {
       const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
+        .get('/cancellation')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(303) // 303リダイレクトに直す？
+        .expect(200)
 
-      expect(res.header.location).toBe('/portal') // リダイレクト先は/portal
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i)
+    })
+
+    // テナントステータスが「新規申込」、解約機能利用できない
+    test('/cancellationにPOST：制御による新規申込中エラー', async () => {
+      const res = await request(app)
+        .post('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i)
+    })
+
+    // 契約ステータスを「新規申込」から「新規受付」に変更
+    test('契約ステータス変更：「新規申込」→ 「新規受付」', async () => {
+      await db.Contract.update({ contractStatus: 11 }, { where: { tenantId: testTenantId } })
+      await db.Contract.findOne({ where: { tenantId: testTenantId } })
+    })
+
+    // テナントステータスが「新規受付」、解約ページ利用できない
+    test('/cancellationにGET：制御による新規申込中エラー', async () => {
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i)
+    })
+
+    // テナントステータスが「新規受付」、解約機能利用できない
+    test('/cancellationにPOST：制御による新規申込中エラー', async () => {
+      const res = await request(app)
+        .post('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i)
     })
   })
 
-  describe('DBにアカウント管理者のみ登録・一般ユーザ登録なし/アカウント管理者としてリクエスト', () => {
+  describe('3.DBにアカウント管理者のみ登録・一般ユーザ登録なし/アカウント管理者としてリクエスト', () => {
     // DB状態:
     //   テナント：
     //    試験前：登録済
@@ -281,7 +284,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
-    let userCsrf, tenantCsrf
+    let userCsrf
     // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -297,45 +300,19 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('/user/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
         .send({ _csrf: userCsrf, termsCheck: 'on' })
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(403)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(403)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
   })
 
-  describe('DBにアカウント管理者のみ登録・一般ユーザ登録なし/一般ユーザとしてリクエスト', () => {
+  describe('4.DBにアカウント管理者のみ登録・一般ユーザ登録なし/一般ユーザとしてリクエスト', () => {
     // DB状態:
     //   テナント：
     //    試験前：登録済
@@ -359,25 +336,10 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.header.location).toBe('/auth') // リダイレクト先は/auth
     })
 
-    // テナント登録済/ユーザ未登録のため、ユーザの利用登録画面にリダイレクトする
-    test('/portalにアクセス：303ステータスと/user/registerにリダイレクト', async () => {
+    // テナント登録済/ユーザ未登録のため、ユーザ登録する
+    test('/portalにアクセス：ユーザ登録', async () => {
       const res = await request(app)
         .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(303)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.header.location).toBe('/user/register') // リダイレクト先は/user/register
-    })
-
-    let userCsrf, tenantCsrf
-    // ユーザの利用登録画面が正常に表示される
-    test('/user/registerにアクセス：200ステータスとユーザの利用登録画面表示', async () => {
-      const res = await request(app)
-        .get('/user/register')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
@@ -385,49 +347,38 @@ describe('ルーティングのインテグレーションテスト', () => {
       const dom = new JSDOM(res.text)
       userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
 
-      expect(res.text).toMatch(/利用登録 - BConnectionデジタルトレード/i) // タイトル
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトル
     })
 
-    // 正常に一般ユーザが登録され、/portalにリダイレクトする
-    test('/user/registerにPOST：303ステータスと/portalにリダイレクト(一般ユーザ登録成功)', async () => {
+    let userCsrf
+    // ユーザの利用登録画面が表示されない
+    test('/user/registerにアクセス：400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
-        .post('/user/register')
-        .type('form')
-        .send({ _csrf: userCsrf, termsCheck: 'on' })
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(303)
-
-      expect(res.header.location).toBe('/portal') // リダイレクト先は/portal
-    })
-
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
+        .get('/user/register')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
 
       // CSRFのワンタイムトークン取得
       const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
+      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    // 一般ユーザが登録されない、アクセスできない
+    test('/user/registerにPOST：400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
-        .post('/tenant/register')
+        .post('/user/register')
         .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
+        .send({ _csrf: userCsrf, termsCheck: 'on' })
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(403)
+        .expect(400)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
   })
 
-  describe('DBにアカウント管理者・一般ユーザ共に登録済/アカウント管理者としてリクエスト', () => {
+  describe('5.DBにアカウント管理者・一般ユーザ共に登録済/アカウント管理者としてリクエスト', () => {
     // DB状態:
     //   テナント：
     //    試験前：登録済
@@ -461,7 +412,286 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
-    let userCsrf, tenantCsrf
+    // (登録画面に遷移せず)正常にお知らせ画面が表示される
+    test('管理者、/portalにアクセス：お知らせ画面が表示されること', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/お知らせ/i) // タイトルが含まれていること
+    })
+
+    // (登録画面に遷移せず)正常にお知らせ画面が表示される
+    test('一般ユーザ、、/portalにアクセス：お知らせ画面が表示されること', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/お知らせ/i) // タイトルが含まれていること
+    })
+
+    test('管理者、/portalにアクセス：もっと見るボタンのリンク確認', async () => {
+      let hrefResult
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        hrefResult = await page.evaluate(() => {
+          if (document.querySelector('#informationTab > div > a').href !== null) {
+            return document.querySelector('#informationTab > div > a').href
+          }
+          return null
+        })
+      }
+
+      expect(hrefResult).toBe('https://support.ntt.com/bconnection/information/search')
+    })
+
+    test('一般ユーザ、/portalにアクセス：もっと見るボタンのリンク確認', async () => {
+      let hrefResult
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        hrefResult = await page.evaluate(() => {
+          if (document.querySelector('#informationTab > div > a').href !== null) {
+            return document.querySelector('#informationTab > div > a').href
+          }
+          return null
+        })
+      }
+
+      expect(hrefResult).toBe('https://support.ntt.com/bconnection/information/search')
+    })
+
+    test('管理者, お知らせ-工事情報表示及び「もっと見る」ボタンで遷移', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+
+      const httpsUrl = 'https://localhost:3000'
+      const sitePath = `${httpsUrl}${res.req.path}`
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`${sitePath}`, {
+        waitUntil: 'networkidle0'
+      })
+      if (page.url() === `${sitePath}`) {
+        await page.click('#constructTab')
+        await page.waitForTimeout(500)
+
+        const constructInformation = await page.evaluate(() => {
+          return document
+            .querySelector(
+              'body > div.container.is-max-widescreen > columns > div > div > div > div.tabs.is-centered.is-boxed.is-medium > ul > li:nth-child(2)'
+            )
+            .getAttribute('class')
+        })
+        expect(constructInformation).toBe('is-active')
+
+        const consturctRssUrl = 'https://support.ntt.com/bconnection/information/search'
+        const checkedPage = await browser.newPage()
+        await checkedPage.goto(`${consturctRssUrl}`, {
+          waitUntil: 'networkidle0'
+        })
+        const constructUrlRss = await checkedPage.evaluate(() => {
+          const date1 = new Date(document.body.children[0].children[1].children[2].innerText)
+          const date2 = new Date(document.body.children[0].children[2].children[2].innerText)
+          const date3 = new Date(document.body.children[0].children[3].children[2].innerText)
+          const doc = [
+            {
+              title: document.body.children[0].children[1].children[0].innerText,
+              link: document.body.children[0].children[1].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date1.getFullYear()}年${date1.getMonth() + 1}月${date1.getDate()}日`
+            },
+            {
+              title: document.body.children[0].children[2].children[0].innerText,
+              link: document.body.children[0].children[2].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date2.getFullYear()}年${date2.getMonth() + 1}月${date2.getDate()}日`
+            },
+            {
+              title: document.body.children[0].children[3].children[0].innerText,
+              link: document.body.children[0].children[3].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date3.getFullYear()}年${date3.getMonth() + 1}月${date3.getDate()}日`
+            }
+          ]
+          return doc
+        })
+
+        const constructRss = await page.evaluate(() => {
+          return [
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsDate').innerText
+            },
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsDate').innerText
+            },
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsDate').innerText
+            }
+          ]
+        })
+
+        await checkedPage.close()
+
+        let idx = 0
+        constructRss.forEach((item) => {
+          expect(item.title).toBe(constructUrlRss[idx].title)
+          expect(item.link).toBe(constructUrlRss[idx].link)
+          expect(item.date).toBe(constructUrlRss[idx].date)
+          idx++
+        })
+
+        const constructUrl = await page.evaluate(() => {
+          return document.querySelector('#constructTab > div > a').href
+        })
+        page.click('#constructTab > div > a')
+        await page.waitForTimeout(500)
+        const pages = await browser.pages()
+        const newTapPage = pages[pages.length - 1]
+        expect(newTapPage.url()).toBe(constructUrl)
+        await browser.close()
+      }
+    })
+
+    test('一般ユーザ, お知らせ-工事情報表示及び「もっと見る」ボタンで遷移', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+
+      const httpsUrl = 'https://localhost:3000'
+      const sitePath = `${httpsUrl}${res.req.path}`
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto(`${sitePath}`, {
+        waitUntil: 'networkidle0'
+      })
+      if (page.url() === `${sitePath}`) {
+        await page.click('#constructTab')
+        await page.waitForTimeout(500)
+
+        const constructInformation = await page.evaluate(() => {
+          return document
+            .querySelector(
+              'body > div.container.is-max-widescreen > columns > div > div > div > div.tabs.is-centered.is-boxed.is-medium > ul > li:nth-child(2)'
+            )
+            .getAttribute('class')
+        })
+        expect(constructInformation).toBe('is-active')
+
+        const consturctRssUrl = 'https://support.ntt.com/informationRss/goods/rss/mail'
+        const checkedPage = await browser.newPage()
+        await checkedPage.goto(`${consturctRssUrl}`, {
+          waitUntil: 'networkidle0'
+        })
+        const constructUrlRss = await checkedPage.evaluate(() => {
+          const date1 = new Date(document.body.children[0].children[1].children[2].innerText)
+          const date2 = new Date(document.body.children[0].children[2].children[2].innerText)
+          const date3 = new Date(document.body.children[0].children[3].children[2].innerText)
+          const doc = [
+            {
+              title: document.body.children[0].children[1].children[0].innerText,
+              link: document.body.children[0].children[1].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date1.getFullYear()}年${date1.getMonth() + 1}月${date1.getDate()}日`
+            },
+            {
+              title: document.body.children[0].children[2].children[0].innerText,
+              link: document.body.children[0].children[2].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date2.getFullYear()}年${date2.getMonth() + 1}月${date2.getDate()}日`
+            },
+            {
+              title: document.body.children[0].children[3].children[0].innerText,
+              link: document.body.children[0].children[3].innerText
+                .replace(/\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}Z/, '')
+                .trim(),
+              date: `${date3.getFullYear()}年${date3.getMonth() + 1}月${date3.getDate()}日`
+            }
+          ]
+          return doc
+        })
+
+        const constructRss = await page.evaluate(() => {
+          return [
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(1) > td.newsDate').innerText
+            },
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(2) > td.newsDate').innerText
+            },
+            {
+              title: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsTitle > a')
+                .innerText,
+              link: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsTitle > a').href,
+              date: document.querySelector('#constructTab > table > tbody > tr:nth-child(3) > td.newsDate').innerText
+            }
+          ]
+        })
+
+        await checkedPage.close()
+
+        let idx = 0
+        constructRss.forEach((item) => {
+          expect(item.title).toBe(constructUrlRss[idx].title)
+          expect(item.link).toBe(constructUrlRss[idx].link)
+          expect(item.date).toBe(constructUrlRss[idx].date)
+          idx++
+        })
+
+        const constructUrl = await page.evaluate(() => {
+          return document.querySelector('#constructTab > div > a').href
+        })
+        page.click('#constructTab > div > a')
+        await page.waitForTimeout(500)
+        const pages = await browser.pages()
+        const newTapPage = pages[pages.length - 1]
+        expect(newTapPage.url()).toBe(constructUrl)
+        await browser.close()
+      }
+    })
+
+    let userCsrf
     // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -477,45 +707,648 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('/user/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
         .send({ _csrf: userCsrf, termsCheck: 'on' })
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(403)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
 
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('管理者、契約ステータス：10, /cancellation', async () => {
+      await db.Contract.update({ contractStatus: '10', deleteFlag: 'false' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
+        .get('/cancellation')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(403)
+        .expect(200)
 
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：10, /cancellation', async () => {
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/本機能はご利用いただけません。/i)
+    })
+
+    test('管理者、契約ステータス：11, /cancellation', async () => {
+      // 契約ステータス変更(受け取り完了)
+      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：11, /cancellation', async () => {
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/本機能はご利用いただけません。/i)
+    })
+
+    test('管理者、契約ステータス：40, /cancellation', async () => {
+      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：41, /cancellation', async () => {
+      // 契約ステータス変更(受け取り完了)
+      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：40, /cancellation', async () => {
+      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/本機能はご利用いただけません。/i)
+    })
+
+    test('一般ユーザ、契約ステータス：41, /cancellation', async () => {
+      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/本機能はご利用いただけません。/i)
+    })
+
+    test('管理者、契約ステータス：00, /cancellation', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/解約/i)
+      expect(res.text).toMatch(/解約する前に以下の内容をご確認ください。/i)
+    })
+
+    test('一般ユーザ、契約ステータス：00, /cancellation', async () => {
+      // 契約ステータス変更(利用登録済み)
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/本機能はご利用いただけません。/i)
+    })
+
+    test('管理者、契約ステータス：30, /cancellation', async () => {
+      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：30, /cancellation', async () => {
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i)
+    })
+
+    test('管理者、契約ステータス：31, /cancellation', async () => {
+      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：31, /cancellation', async () => {
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i)
+    })
+
+    test('管理者、契約ステータス：99, /cancellation', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '99', deleteFlag: 'true' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
+    })
+
+    test('一般ユーザ、契約ステータス：99, /cancellation', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '99' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/cancellation')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
+    })
+
+    test('管理者、契約ステータス：10, /portal', async () => {
+      await db.Contract.update({ contractStatus: '10', deleteFlag: 'false' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/サポート/i)
+      expect(res.text).toMatch(/請求書一括作成/i)
+      expect(res.text).toMatch(/設定/i)
+    })
+
+    test('管理者、契約ステータス：11, /portal', async () => {
+      // 契約ステータス変更(受け取り完了)
+      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/サポート/i)
+      expect(res.text).toMatch(/請求書一括作成/i)
+      expect(res.text).toMatch(/設定/i)
+    })
+
+    test('一般ユーザ、契約ステータス：10, /portal', async () => {
+      await db.Contract.update({ contractStatus: '10' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/サポート/i)
+      expect(res.text).toMatch(/請求書一括作成/i)
+      expect(res.text).toMatch(/設定/i)
+    })
+
+    test('一般ユーザ、契約ステータス：11, /portal', async () => {
+      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/サポート/i)
+      expect(res.text).toMatch(/請求書一括作成/i)
+      expect(res.text).toMatch(/設定/i)
+    })
+
+    test('管理者、契約ステータス：40, /portal', async () => {
+      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/サポート/i)
+      expect(res.text).toMatch(/請求書一括作成/i)
+      expect(res.text).toMatch(/設定/i)
+    })
+
+    test('管理者、契約ステータス：41, /portal', async () => {
+      // 契約ステータス変更(受け取り完了)
+      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/サポート/i)
+      expect(res.text).toMatch(/請求書一括作成/i)
+      expect(res.text).toMatch(/設定/i)
+    })
+
+    test('一般ユーザ、契約ステータス：40, /portal', async () => {
+      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/サポート/i)
+      expect(res.text).toMatch(/請求書一括作成/i)
+      expect(res.text).toMatch(/設定/i)
+    })
+
+    test('一般ユーザ、契約ステータス：41, /portal', async () => {
+      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/サポート/i)
+      expect(res.text).toMatch(/請求書一括作成/i)
+      expect(res.text).toMatch(/設定/i)
+    })
+
+    test('管理者、契約ステータス：00, /portal', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/サポート/i)
+      expect(res.text).toMatch(/請求書一括作成/i)
+      expect(res.text).toMatch(/設定/i)
+    })
+
+    test('一般ユーザ、契約ステータス：00, /portal', async () => {
+      // 契約ステータス変更(利用登録済み)
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/サポート/i)
+      expect(res.text).toMatch(/請求書一括作成/i)
+      expect(res.text).toMatch(/設定/i)
+    })
+
+    test('管理者、契約ステータス：00、請求書一括作成のポップアップ及びcsvフォーマットダウンロード', async () => {
+      let clickResult
+      const path = require('path')
+      const downloadPath = path.resolve('./kanri_download')
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        // ページのローディングが終わるまで待つ
+        const selector = await page.$(
+          'body > div.container.is-max-widescreen > div.columns.is-desktop.is-family-noto-sans > div:nth-child(2) > div > a'
+        )
+        await selector.click({ clickCount: 1 })
+        await page.waitForTimeout(1000)
+        clickResult = await page.evaluate(() => {
+          if (document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/) !== null) {
+            return document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/)[0]
+          }
+          return null
+        })
+      }
+      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
+
+      await page.waitForTimeout(3000)
+
+      // ダウンロードフォルダ設定
+      await page._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: downloadPath
+      })
+
+      const csvFormatDownloadSelector = await page.$(
+        '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(2)'
+      )
+
+      const fileName = await page.evaluate(() => {
+        const href = decodeURI(
+          document.querySelector(
+            '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(2)'
+          ).href
+        ).toString()
+        const startIdx = href.lastIndexOf('/')
+        const lastIdx = href.length
+        return `${href.substr(startIdx, lastIdx)}`
+      })
+
+      await csvFormatDownloadSelector.click({ clickCount: 1 })
+
+      // ダウンロード終わってからテスト（待機時間：2秒）
+      setTimeout(() => {
+        const fs = require('fs')
+        const downloadFilePath = path.resolve(`${downloadPath}${path.sep}${fileName}`)
+        const downloadFile = fs.readFileSync(downloadFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        const originFilePath = path.resolve('../Application/public/html/請求書一括作成フォーマット.csv')
+        const originFile = fs.readFileSync(originFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        expect(originFile).toBe(downloadFile)
+      }, 2000)
+    })
+
+    test('管理者、契約ステータス：00、請求書一括作成のポップアップ及びマニュアルダウンロード', async () => {
+      let clickResult
+      const path = require('path')
+      const downloadPath = path.resolve('./kanri_download')
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        // ページのローディングが終わるまで待つ
+        const selector = await page.$(
+          'body > div.container.is-max-widescreen > div.columns.is-desktop.is-family-noto-sans > div:nth-child(2) > div > a'
+        )
+        await selector.click({ clickCount: 1 })
+        await page.waitForTimeout(1000)
+        clickResult = await page.evaluate(() => {
+          if (document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/) !== null) {
+            return document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/)[0]
+          }
+          return null
+        })
+      }
+      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
+
+      await page.waitForTimeout(3000)
+
+      // ダウンロードフォルダ設定
+      await page._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: downloadPath
+      })
+
+      const csvFormatDownloadSelector = await page.$(
+        '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(3)'
+      )
+
+      const fileName = await page.evaluate(() => {
+        const href = decodeURI(
+          document.querySelector(
+            '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(3)'
+          ).href
+        ).toString()
+        const startIdx = href.lastIndexOf('/')
+        const lastIdx = href.length
+        return `${href.substr(startIdx, lastIdx)}`
+      })
+
+      await csvFormatDownloadSelector.click({ clickCount: 1 })
+
+      // ダウンロード終わってからテスト（待機時間：2秒）
+      setTimeout(() => {
+        const fs = require('fs')
+        const downloadFilePath = path.resolve(`${downloadPath}${path.sep}${fileName}`)
+        const downloadFile = fs.readFileSync(downloadFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        const originFilePath = path.resolve(
+          '../Application/public/html/【Bconnectionデジタルトレードアプリ】操作マニュアル_請求書一括作成.pdf'
+        )
+        const originFile = fs.readFileSync(originFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        expect(originFile).toBe(downloadFile)
+      }, 2000)
+    })
+
+    test('一般ユーザ、契約ステータス：00、請求書一括作成のポップアップ及びcsvフォーマットダウンロード', async () => {
+      let clickResult
+      const path = require('path')
+      const downloadPath = path.resolve('./ippan_download')
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        // ページのローディングが終わるまで待つ
+        const selector = await page.$(
+          'body > div.container.is-max-widescreen > div.columns.is-desktop.is-family-noto-sans > div:nth-child(2) > div > a'
+        )
+        await selector.click({ clickCount: 1 })
+        await page.waitForTimeout(1000)
+        clickResult = await page.evaluate(() => {
+          if (document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/) !== null) {
+            return document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/)[0]
+          }
+          return null
+        })
+      }
+      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
+
+      await page.waitForTimeout(3000)
+
+      // ダウンロードフォルダ設定
+      await page._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: downloadPath
+      })
+
+      const csvFormatDownloadSelector = await page.$(
+        '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(2)'
+      )
+
+      const fileName = await page.evaluate(() => {
+        const href = decodeURI(
+          document.querySelector(
+            '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(2)'
+          ).href
+        ).toString()
+        const startIdx = href.lastIndexOf('/')
+        const lastIdx = href.length
+        return `${href.substr(startIdx, lastIdx)}`
+      })
+
+      await csvFormatDownloadSelector.click({ clickCount: 1 })
+
+      // ダウンロード終わってからテスト（待機時間：2秒）
+      setTimeout(() => {
+        const fs = require('fs')
+        const downloadFilePath = path.resolve(`${downloadPath}${path.sep}${fileName}`)
+        const downloadFile = fs.readFileSync(downloadFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        const originFilePath = path.resolve('../Application/public/html/請求書一括作成フォーマット.csv')
+        const originFile = fs.readFileSync(originFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        expect(originFile).toBe(downloadFile)
+      }, 2000)
+    })
+
+    test('一般ユーザ、契約ステータス：00、請求書一括作成のポップアップ及びマニュアルダウンロード', async () => {
+      let clickResult
+      const path = require('path')
+      const downloadPath = path.resolve('./ippan_download')
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      page.waitForNavigation()
+      if (page.url() === 'https://localhost:3000/portal') {
+        // ページのローディングが終わるまで待つ
+        const selector = await page.$(
+          'body > div.container.is-max-widescreen > div.columns.is-desktop.is-family-noto-sans > div:nth-child(2) > div > a'
+        )
+        await selector.click({ clickCount: 1 })
+        await page.waitForTimeout(1000)
+        clickResult = await page.evaluate(() => {
+          if (document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/) !== null) {
+            return document.querySelector('#csvupload-modal').attributes[0].value.match(/is-active/)[0]
+          }
+          return null
+        })
+      }
+      // 詳細画面ポップアップ画面のタグのクラスが「is-active」になることを確認
+      expect(clickResult).toBe('is-active')
+
+      await page.waitForTimeout(3000)
+
+      // ダウンロードフォルダ設定
+      await page._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: downloadPath
+      })
+
+      const csvFormatDownloadSelector = await page.$(
+        '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(3)'
+      )
+
+      const fileName = await page.evaluate(() => {
+        const href = decodeURI(
+          document.querySelector(
+            '#csvupload-modal > div.modal-card.is-family-noto-sans > section > nav > a:nth-child(3)'
+          ).href
+        ).toString()
+        const startIdx = href.lastIndexOf('/')
+        const lastIdx = href.length
+        return `${href.substr(startIdx, lastIdx)}`
+      })
+
+      await csvFormatDownloadSelector.click({ clickCount: 1 })
+
+      // ダウンロード終わってからテスト（待機時間：2秒）
+      setTimeout(() => {
+        const fs = require('fs')
+        const downloadFilePath = path.resolve(`${downloadPath}${path.sep}${fileName}`)
+        const downloadFile = fs.readFileSync(downloadFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        const originFilePath = path.resolve(
+          '../Application/public/html/【Bconnectionデジタルトレードアプリ】操作マニュアル_請求書一括作成.pdf'
+        )
+        const originFile = fs.readFileSync(originFilePath, {
+          encoding: 'utf-8',
+          flag: 'r'
+        })
+
+        expect(originFile).toBe(downloadFile)
+      }, 2000)
+    })
+
+    test('管理者、契約ステータス：30, /portal', async () => {
+      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：31, /portal', async () => {
+      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：30, /portal', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('一般ユーザ、契約ステータス：31, /portal', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
+    })
+
+    test('管理者、契約ステータス：99, /portal', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '99', deleteFlag: 'true' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
+    })
+
+    test('一般ユーザ、契約ステータス：99, /portal', async () => {
+      // 契約ステータス変更(利用登録済み)
+      await db.Contract.update({ contractStatus: '99' }, { where: { tenantId: testTenantId } })
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(500)
+
+      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
   })
 
-  describe('DBにアカウント管理者・一般ユーザ共に登録済/一般ユーザとしてリクエスト', () => {
+  describe('6.DBにアカウント管理者・一般ユーザ共に登録済/一般ユーザとしてリクエスト', () => {
     // DB状態:
     //   テナント：
     //    試験前：登録済
@@ -531,6 +1364,8 @@ describe('ルーティングのインテグレーションテスト', () => {
 
     // /authにリダイレクトする
     test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
+      // 契約ステータスを「契約中」に設定
+      await db.Contract.update({ contractStatus: '00', deleteFlag: 'false' }, { where: { tenantId: testTenantId } })
       const res = await request(app)
         .get('/')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
@@ -549,7 +1384,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
-    let userCsrf, tenantCsrf
+    let userCsrf
     // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -565,45 +1400,19 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('/user/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
         .send({ _csrf: userCsrf, termsCheck: 'on' })
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(403)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(403)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
   })
 
-  describe('DBに一般ユーザのみ登録・アカウント管理者登録なし/一般ユーザとしてリクエスト', () => {
+  describe('7.DBに一般ユーザのみ登録・アカウント管理者登録なし/一般ユーザとしてリクエスト', () => {
     // DB状態:
     //   テナント：
     //    試験前：登録済
@@ -644,7 +1453,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
-    let userCsrf, tenantCsrf
+    let userCsrf
     // userContextが'NotUserRegistered'ではない(登録済の)ため、アクセスできない
     test('/user/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
@@ -660,45 +1469,19 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/user/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
+    test('/user/registerにPOST：csurfによる400ステータスとエラーメッセージ', async () => {
       const res = await request(app)
         .post('/user/register')
         .type('form')
         .send({ _csrf: userCsrf, termsCheck: 'on' })
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(403)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(403)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
   })
 
-  describe('DBに一般ユーザのみ登録・アカウント管理者登録なし/アカウント管理者としてリクエスト', () => {
+  describe('8.DBに一般ユーザのみ登録・アカウント管理者登録なし/アカウント管理者としてリクエスト', () => {
     // DB状態:
     //   テナント：
     //    試験前：登録済
@@ -723,79 +1506,32 @@ describe('ルーティングのインテグレーションテスト', () => {
     })
 
     // テナント登録済/ユーザ未登録のため、ユーザの利用登録画面にリダイレクトする
-    test('/portalにアクセス：303ステータスと/user/registerにリダイレクト', async () => {
+    test('/portalにアクセス：200ステータスと/portalにリダイレクト', async () => {
       const res = await request(app)
         .get('/portal')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(303)
-
-      expect(res.header.location).toBe('/user/register') // リダイレクト先は/user/register
-    })
-
-    let userCsrf, tenantCsrf
-    // ユーザの利用登録画面が正常に表示される
-    test('/user/registerにアクセス：200ステータスとユーザの利用登録画面表示', async () => {
-      const res = await request(app)
-        .get('/user/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      userCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/利用登録 - BConnectionデジタルトレード/i) // タイトル
-    })
-
-    // 正常にアカウント管理者が登録され、/portalにリダイレクトする
-    test('/user/registerにPOST：303ステータスと/portalにリダイレクト(アカウント管理者登録成功)', async () => {
-      const res = await request(app)
-        .post('/user/register')
-        .type('form')
-        .send({ _csrf: userCsrf, termsCheck: 'on' })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(303)
-
-      expect(res.header.location).toBe('/portal') // リダイレクト先は/portal
-    })
-
-    // userContextが'NotTenantRegistered'ではない(登録済の)ため、アクセスできない
-    test('/tenant/registerにアクセス：userContext不一致による400ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    // 正しいCSRFトークンを取得していないため、アクセスできない
-    test('/tenant/registerにPOST：csurfによる403ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(403)
-
-      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
   })
-  describe('後処理', () => {
-    test('全てのユーザを削除', async () => {
-      // アカウント管理者を削除
-      await request(app)
-        .get('/user/delete')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
 
+  describe('後処理', () => {
+    test('ContractとOrderデータ削除', async () => {
+      await db.Contract.destroy({ where: { tenantId: testTenantId } })
+      await db.Order.destroy({ where: { tenantId: testTenantId } })
+    })
+
+    test('全てのユーザを削除', async () => {
       // 一般ユーザを削除
       await request(app)
         .get('/user/delete')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+
+      // アカウント管理者を削除
+      await request(app)
+        .get('/user/delete')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
     })
   })
 })

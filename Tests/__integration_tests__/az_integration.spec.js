@@ -1,4 +1,8 @@
 'use strict'
+
+// TODO : 契約ステータス変更操作（DB操作）が必要なテストケースはintegration.spec.jsのみ実施
+// 該当ソースは2021/8/2基準、integration.spec.jsの403行目、481行目～489行目、492行目～530行目、544行目～558行目、578行目～638行目、648行目～828行目、877行目～890行目、911行目～970行目、
+
 // const app = require('../../Application/app')
 const request = require('supertest')
 const { JSDOM } = require('jsdom')
@@ -106,6 +110,55 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(303)
 
       expect(res.header.location).toBe('/tenant/register') // リダイレクト先は/tenant/register
+    })
+
+    // 住所検索成功
+    test('住所検索：1件以上', async () => {
+      const res = await request(app)
+        .post('/searchAddress')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .set('Content-Type', 'application/json')
+        .send({ postalNumber: '0600000' })
+        .expect(200)
+      expect(res.status).toBe(200)
+      expect(res.body.addressList[0].address).toBe('北海道札幌市中央区')
+      expect(res.body.addressList[1].address).toBe('北海道札幌市中央区円山')
+    })
+
+    test('住所検索:結果0件', async () => {
+      const res = await request(app)
+        .post('/searchAddress')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .set('Content-Type', 'application/json')
+        .send({ postalNumber: '1234567' })
+        .expect(200)
+
+      expect(res.status).toBe(200)
+      expect(res.body.addressList.length).toBe(0)
+    })
+
+    // 住所検索失敗
+    test('住所検索失敗-パラメータなし', async () => {
+      const res = await request(app)
+        .post('/searchAddress')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .set('Content-Type', 'application/json')
+        .send({ postalNumberl: '1234567' })
+        .expect(400)
+
+      expect(res.status).toBe(400)
+    })
+
+    // 住所検索失敗
+    test('住所検索失敗-正しくないパラメータ値', async () => {
+      const res = await request(app)
+        .post('/searchAddress')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .set('Content-Type', 'application/json')
+        .send({ postalNumberl: '123456a' })
+        .expect(400)
+
+      expect(res.status).toBe(400)
     })
 
     let userCsrf, tenantCsrf
@@ -446,6 +499,9 @@ describe('ルーティングのインテグレーションテスト', () => {
     //    試験前：登録済
     //    試験後(期待値)：登録済
 
+    // DB操作用
+    // const db = require('../../Application/models')
+
     // /authにリダイレクトする
     test('/indexにアクセス：303ステータスと/authにリダイレクト', async () => {
       const res = await request(app)
@@ -517,6 +573,16 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(200) // az環境は403でなく200が返る
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+
+    // 正常にportal画面から契約者変更へ遷移する
+    test('管理者、契約ステータス：10, /change', async () => {
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
     })
   })
 
@@ -605,6 +671,15 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(200) // az環境は403でなく200が返る
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
+    })
+    // 契約者情報変更
+    test('管理者、契約ステータス：10, /change', async () => {
+      const res = await request(app)
+        .get('/change')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
     })
   })
 

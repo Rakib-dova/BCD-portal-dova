@@ -1,0 +1,44 @@
+{
+  "contractBasicInfo": {
+    "tradeshiftId": "",
+    "orderId": "",
+    "orderType": "",
+    "contractChangeName": "",
+    "contractChangeAddress": "",
+    "contractChangeContact": "",
+    "appDate": "",
+    "OpeningDate": "",
+    "contractNumber": "",
+    "salesChannelCode": "",
+    "campaignCode": "",
+    "kaianPassword": ""
+  },
+
+  "contractAccountInfo": {
+    "contractAccountId": "",
+    "customerType": "",
+    "commonCustomerId": "",
+    "contractorName": "",
+    "contractorKanaName": "",
+    "postalNumber": "",
+    "contractAddress": "",
+    "banch1": "",
+    "tatemono1": ""
+  },
+
+  "contactList": [
+    {
+      "contactType": "",
+      "contactPersonName": "",
+      "contactPhoneNumber": "",
+      "contactMail": ""
+    }
+  ],
+
+  "prdtList": [
+    {
+      "prdtCode": "BF1021000000100",
+      "appType": "010"
+    }
+  ]
+}

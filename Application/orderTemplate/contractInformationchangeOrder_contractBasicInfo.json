@@ -1,0 +1,15 @@
+{
+  "contractBasicInfo": {
+    "tradeshiftId": "",
+    "orderId": "",
+    "orderType": "",
+    "contractChangeName": "",
+    "contractChangeAddress": "",
+    "contractChangeContact": "",
+    "appDate": "",
+    "OpeningDate": "",
+    "contractNumber": "",
+    "salesChannelCode": "",
+    "kaianPassword": ""
+  }
+}

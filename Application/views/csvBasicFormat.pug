@@ -1,0 +1,104 @@
+extends layout
+
+block content
+  .hero.is-large
+    .hero-body
+      .container
+
+  .section.is-overlay.mt-6
+    .container.is-max-widescreen.is-family-noto-sans
+      form#form(action="#" enctype="multipart/form-data")
+        article.panel.is-info
+          h2.panel-heading 基本情報設定
+          .panel-block
+            .container
+             .columns.is-centered: .column.is-four-fifths
+              .field.card
+                .card-content
+                  .field
+                    label(for="uploadFormatItemName").input-label 設定名称
+                    p#uploadFormatItemNameeRequired.input-label-required.input-label （必須）
+                    .control
+                      input.input#uploadFormatItemName(type="text" name="uploadFormatItemName" value='' maxlength=100 placeholder='文字・数字100桁まで' required)
+                  .field
+                    label(for="uploadType").input-label アップロード種別
+                    .control
+                      input.input#uploadType(type="text" name="uploadType" value="請求書データ" readonly)
+                  .field
+                    label(for="dataFile").input-label データファイル
+                    p#dataFileRequired.input-label-required.input-label （必須）
+                    .control
+                      .columns.ml-0.pl-0
+                        .column.pl-0
+                          input.input#dataFileName.td-overflow(type="text" name="dataFileName" placeholder='5MBまで' readonly)
+                        .column
+                          label.button.is-link(for="dataFile") ファイル選択
+                          input.is-invisible#dataFile(type="file" name="dataFile" accept=".csv" required)
+                  .field.mt-6
+                    label.input-label 項目名の行有無
+                    p#dataFileRequired.input-label-required.input-label （必須）
+                    .control
+                      .column
+                        input#checkItemNameLineOn(type='radio' name='checkItemNameLine' value='on' required checked)
+                        label.mr-6(for="checkItemNameLineOn") あり
+                        input#checkItemNameLineOff(type='radio' name='checkItemNameLine' value='off' required)
+                        label(for="checkItemNameLineOff") なし
+                  .field
+                    label(for="uploadFormatNumber").input-label 項目名の行番号
+                    div#uploadFormatNumberInfo.tooltip.tip-img.float-left
+                      span.tooltiptext 取込データに項目名の行がある場合、その行番号を入力して下さい。      
+                    p#uploadFormatNumberRequired.input-label-required.input-label （必須）            
+                    .control
+                      .columns.ml-0.pl-0.alignCenterChild
+                        .column.is-one-fifth.pl-0
+                          input.input#uploadFormatNumber(type="text" name="uploadFormatNumber" value='' maxlength=7 placeholder='1 ~ 9999999' pattern=inputPattarnHankakuSeisu required) 
+                        .column  
+                          p 行目
+                  .field
+                    label(for="defaultNumber").input-label データ開始行番号
+                    div.tooltip.tip-img.float-left
+                      span.tooltiptext 取込データで、データ内容が始まる行番号を入力します。&#10;&#13; 例）1行目が項目名の行で2行目からデータ内容が始まる場合、「2」を入力して下さい。
+                    p#defaultNumberRequired.input-label-required.input-label （必須）                      
+                    .control
+                      .columns.ml-0.pl-0.alignCenterChild
+                        .column.is-one-fifth.pl-0
+                          input.input#defaultNumber(type="text" name="defaultNumber" value='' maxlength=7 placeholder='1 ~ 9999999' pattern=inputPattarnHankakuSeisu required) 
+                        .column  
+                          p 行目
+            
+              .field.card
+                .card-content
+                  .title.is-5.title-label 明細-税 識別子
+                  div.tooltip.tip-img.tip-title.title-label
+                      span.tooltiptext 「明細-税」を識別する文字を入力して下さい。空欄の場合はその項目を利用しない設定になります。
+                .line-content
+                  each tax, index in csvTax
+                    .field
+                      label(for=tax.id).input-label= tax.name
+                      .control
+                        input.input.input-tax(id=tax.id type="text" name=tax.id value='' placeholder='文字・数字100桁まで' maxlength=100)
+
+              .field.card
+                .card-content
+                  .title.is-5.title-label 明細-単位 識別子
+                  div.tooltip.tip-img.tip-title.title-label
+                      span.tooltiptext 「明細-単位」を識別する文字を入力して下さい。空欄の場合はその項目を利用しない設定になります。
+                .line-content
+                  each unit, index in csvUnit
+                    .field
+                      label(for=unit.id).input-label= unit.name
+                      .control
+                        input.input.input-unit(id=unit.id type="text" name=unit.id value='' placeholder='文字・数字100桁まで' maxlength=100)
+
+             .columns.is-centered.changeConfirm
+              .field.is-grouped.is-grouped-centered
+                .control
+                  .column
+                    div.button-area
+                      a.button#return-btn.cancel-button(href='uploadFormatList') 戻る
+                      button.button.is-link.ml-6#submit(type="submit" formaction="/uploadFormat" formmethod="POST") 次へ
+       
+      include footer
+
+block append scripts
+  script(src="/js/csvBasicFormat-page.js")

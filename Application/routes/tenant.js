@@ -5,11 +5,14 @@ const router = express.Router()
 const helper = require('./helpers/middleware')
 // Require our controllers.
 const userController = require('../controllers/userController.js')
-const validate = require('../lib/validate')
 const apiManager = require('../controllers/apiManager')
+const noticeHelper = require('./helpers/notice')
 const logger = require('../lib/logger')
 
 const errorHelper = require('./helpers/error')
+
+const constantsDefine = require('../constants')
+const contractInformationnewOrder = require('../orderTemplate/contractInformationnewOrder.json')
 
 // CSR対策
 const csrf = require('csurf')
@@ -30,17 +33,29 @@ const cbGetRegister = async (req, res, next) => {
     'get',
     '/account/info/user'
   )
-  // Tradeshift APIへのアクセスエラーは、エラーオブジェクトが返る
-  if (userdata instanceof Error) return next(errorHelper.create(500))
 
-  if (userdata.Memberships?.[0].Role?.toLowerCase() !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d') {
-    // TODO: 画面文言は変更の可能性あり。
-    const e = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-    e.name = 'Forbidden'
-    e.status = 403
-    e.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-    return next(e)
+  // Tradeshift APIへのアクセスエラーは、エラーオブジェクトが返る
+  if (userdata instanceof Error) {
+    return next(errorHelper.create(500))
   }
+
+  if (userdata.Memberships?.[0].Role?.toLowerCase() !== constantsDefine.userRoleConstants.tenantManager) {
+    return next(noticeHelper.create('generaluser'))
+  }
+
+  switch (await helper.checkContractStatus(req, res, next)) {
+    case '00':
+    case '10':
+    case '11':
+    case '30':
+    case '31':
+    case '40':
+    case '41':
+      return next(errorHelper.create(500))
+    default:
+      break
+  }
+
   const companyName = userdata.CompanyName
   const userName = userdata.LastName + ' ' + userdata.FirstName
   const email = userdata.Username // TradeshiftのAPIではUsernameにemailが入っている
@@ -96,48 +111,67 @@ const cbPostRegister = async (req, res, next) => {
   // Tradeshift APIへのアクセスエラーは、エラーオブジェクトが返る
   if (userdata instanceof Error) return next(errorHelper.create(500))
 
-  if (userdata.Memberships?.[0].Role?.toLowerCase() !== 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d') {
-    // TODO: 画面文言は変更の可能性あり。
-    const e = new Error('デジタルトレードのご利用にはアカウント管理者による利用登録が必要です。')
-    e.name = 'Forbidden'
-    e.status = 403
-    e.desc = 'アカウント管理者権限のあるユーザで再度操作をお試しください。'
-    return next(e)
+  if (userdata.Memberships?.[0].Role?.toLowerCase() !== constantsDefine.userRoleConstants.tenantManager) {
+    return next(noticeHelper.create('generaluser'))
+  }
+
+  switch (await helper.checkContractStatus(req, res, next)) {
+    case '00':
+    case '10':
+    case '11':
+    case '30':
+    case '31':
+    case '40':
+    case '41':
+      return next(errorHelper.create(500))
+    default:
+      break
   }
 
   if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))
 
+  // contractBasicInfo 設定
+  contractInformationnewOrder.contractBasicInfo.tradeshiftId = req.user.tenantId
+  contractInformationnewOrder.contractBasicInfo.orderType = constantsDefine.statusConstants.orderTypeNewOrder
+  contractInformationnewOrder.contractBasicInfo.campaignCode = req.body.campaignCode
+  contractInformationnewOrder.contractBasicInfo.kaianPassword = req.body.password
+
+  // contractorName
+  contractInformationnewOrder.contractAccountInfo.contractorName = req.body.contractorName
+  // contractorKanaName
+  contractInformationnewOrder.contractAccountInfo.contractorKanaName = req.body.contractorKanaName
+  // postalName
+  contractInformationnewOrder.contractAccountInfo.postalNumber = req.body.postalNumber
+  // contractAddress
+  contractInformationnewOrder.contractAccountInfo.contractAddress = req.body.contractAddressVal
+  // banchi1
+  contractInformationnewOrder.contractAccountInfo.banch1 = req.body.banch1
+  // tatemono1
+  contractInformationnewOrder.contractAccountInfo.tatemono1 = req.body.tatemono1
+
+  // contactPersonName
+  contractInformationnewOrder.contactList[0].contactPersonName = req.body.contactPersonName
+  contractInformationnewOrder.contactList[0].contactPhoneNumber = req.body.contactPhoneNumber
+  contractInformationnewOrder.contactList[0].contactMail = req.body.contactMail
+
   // ユーザ登録と同時にテナント登録も行われる
-  const user = await userController.create(req.user.accessToken, req.user.refreshToken)
+  const user = await userController.create(req.user.accessToken, req.user.refreshToken, contractInformationnewOrder)
 
   // データベースエラーは、エラーオブジェクトが返る
   if (user instanceof Error) return next(errorHelper.create(500))
 
+  if (user === null) return next(errorHelper.create(500))
+
   // ユーザはfindOrCreateで登録されるため戻り値userには配列が入る
-  if (user !== null && validate.isArray(user)) {
-    // userの配列[0]にオブジェクト、配列[1]にcreatedのtrue or false
-    // falseの場合は、フォームの二重送信に該当
+  // 重複加入については登録時、userControllerで'99'以外の契約がある場合重複登録に見て、「null」を返して500エラーにする
+  if (user[0]?.dataValues?.userId !== req.user.userId) return next(errorHelper.create(500))
 
-    if (user[1] === false) {
-      const e = new Error('データが二重送信された可能性があります。')
-      e.name = 'Bad Request'
-      e.status = 400
-      e.desc = '既にご利用のユーザーの登録は完了しています。'
-      return next(e)
-    }
+  // テナント＆ユーザ登録成功したら
+  logger.info({ tenant: req.user?.tenantId, user: req.user?.userId }, 'Tenant Registration Succeeded')
+  req.session.userContext = 'TenantRegistrationCompleted'
+  req.flash('info', '利用登録が完了いたしました。')
 
-    if (user[0].dataValues?.userId !== req.user.userId) return next(errorHelper.create(500))
-
-    // テナント＆ユーザ登録成功したら
-    logger.info({ tenant: req.user?.tenantId, user: req.user?.userId }, 'Tenant Registration Succeeded')
-    req.session.userContext = 'TenantRegistrationCompleted'
-    req.flash('info', '利用登録が完了いたしました。')
-
-    return res.redirect(303, '/portal')
-  } else {
-    // 失敗したら
-    return next(errorHelper.create(500))
-  }
+  return res.redirect(303, '/portal')
 }
 
 router.get('/register', helper.isAuthenticated, csrfProtection, cbGetRegister)

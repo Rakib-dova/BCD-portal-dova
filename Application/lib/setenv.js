@@ -23,4 +23,7 @@ exports.config = (env) => {
   const { TOKEN_ENC_PASS, TOKEN_ENC_SALT } = JSON.parse(env.TOKEN_ENC.replace(/'/g, '"'))
   process.env.TOKEN_ENC_PASS = TOKEN_ENC_PASS
   process.env.TOKEN_ENC_SALT = TOKEN_ENC_SALT
+
+  const { INVOICE_UPLOAD_PATH } = JSON.parse(env.INVOICE_UPLOAD_PATH.replace(/'/g, '"'))
+  process.env.INVOICE_UPLOAD_PATH = INVOICE_UPLOAD_PATH
 }
