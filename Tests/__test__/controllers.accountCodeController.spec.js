@@ -77,11 +77,11 @@ describe('accountCodeControllerのテスト', () => {
       createSpy.mockReturnValue(codeAccountDataResult)
 
       // 勘定科目登録時、画面から渡されるデータ
-      const subjectName = 'パソコン'
-      const subjectCode = 'AAA'
+      const accountCodeName = 'パソコン1'
+      const accountCode = 'AAA2'
 
       // 試験実施
-      const result = await accountCodeController.insert(contractNormal, { subjectCode, subjectName })
+      const result = await accountCodeController.insert(contractNormal, { accountCode, accountCodeName })
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -111,11 +111,11 @@ describe('accountCodeControllerのテスト', () => {
       createSpy.mockReturnValue(null)
 
       // 勘定科目登録時、画面から渡されるデータ
-      const subjectName = '登録エラー'
-      const subjectCode = 'ABC'
+      const accountCodeName = '登録エラー'
+      const accountCode = 'ABC'
 
       // 試験実施
-      const result = await accountCodeController.insert(contractNormal, { subjectCode, subjectName })
+      const result = await accountCodeController.insert(contractNormal, { accountCode, accountCodeName })
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -130,11 +130,11 @@ describe('accountCodeControllerのテスト', () => {
       createSpy.mockReturnValue(null)
 
       // 勘定科目登録時、画面から渡されるデータ
-      const subjectName = 'パソコン'
-      const subjectCode = 'AAA'
+      const accountCodeName = 'パソコン'
+      const accountCode = 'AAA'
 
       // 試験実施
-      await accountCodeController.insert(contractNormal, { subjectCode, subjectName })
+      await accountCodeController.insert(contractNormal, { accountCode, accountCodeName })
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -149,11 +149,11 @@ describe('accountCodeControllerのテスト', () => {
       createSpy.mockReturnValue(dbError)
 
       // 勘定科目登録時、画面から渡されるデータ
-      const subjectName = 'パソコン'
-      const subjectCode = 'AAA'
+      const accountCodeName = 'パソコン'
+      const accountCode = 'AAA'
 
       // 試験実施
-      const result = await accountCodeController.insert(contractNormal, { subjectCode, subjectName })
+      const result = await accountCodeController.insert(contractNormal, { accountCode, accountCodeName })
 
       // 期待結果
       // 想定したデータがReturnされていること

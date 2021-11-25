@@ -16,9 +16,9 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const accountCodeController = require('../../Application/controllers/accountCodeController')
 const accountCodeList = require('../../Application/routes/accountCodeList')
-const userMock = require('../mockDb/Users_Table')
-const tenantsMock = require('../mockDb/Tenants_Table')
-const contractMock = require('../mockDb/Contracts_Table')
+const userMock = require('../mockDB/Users_Table')
+const tenantsMock = require('../mockDB/Tenants_Table')
+const contractMock = require('../mockDB/Contracts_Table')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
@@ -69,30 +69,30 @@ describe('routes.accountListのテスト', () => {
   const accountCodeListArrFour = [
     {
       no: 1,
-      codeAccountId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
-      subjectCode: 'AA001',
-      subjectName: '費用科目',
+      accountCodeId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
+      accountCode: 'AA001',
+      accountCodeName: '費用科目',
       updatedAt: '2021/11/25'
     },
     {
       no: 2,
-      codeAccountId: '0ab2343d-9d98-4614-b68b-78929bd84fee',
-      subjectCode: 'AA002',
-      subjectName: '預金科目',
+      accountCodeId: '0ab2343d-9d98-4614-b68b-78929bd84fee',
+      accountCode: 'AA002',
+      accountCodeName: '預金科目',
       updatedAt: '2021/11/25'
     },
     {
       no: 3,
-      codeAccountId: '241a8890-14f5-455f-8934-ee1e64b53cb5',
-      subjectCode: 'AA003',
-      subjectName: '預かり金',
+      accountCodeId: '241a8890-14f5-455f-8934-ee1e64b53cb5',
+      accountCode: 'AA003',
+      accountCodeName: '預かり金',
       updatedAt: '2021/11/25'
     },
     {
       no: 4,
-      codeAccountId: 'aab5cd98-dbd8-4222-b3b0-f5318de5bdcf',
-      subjectCode: 'AA004',
-      subjectName: '受取手形',
+      accountCodeId: 'aab5cd98-dbd8-4222-b3b0-f5318de5bdcf',
+      accountCode: 'AA004',
+      accountCodeName: '受取手形',
       updatedAt: '2021/11/25'
     }
   ]
