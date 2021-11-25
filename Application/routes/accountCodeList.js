@@ -9,7 +9,7 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
-const getAccountCodeList = require('../controllers/accountCodeController').getAccountCodeList
+const accountCodeController = require('../controllers/accountCodeController')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -50,7 +50,7 @@ const cbGetIndex = async (req, res, next) => {
   }
 
   // 勘定科目
-  const accountCodeListArr = await getAccountCodeList(contract.contractId)
+  const accountCodeListArr = await accountCodeController.getAccountCodeList(contract.contractId)
 
   if (accountCodeListArr instanceof Error) return next(errorHelper.create(500))
 

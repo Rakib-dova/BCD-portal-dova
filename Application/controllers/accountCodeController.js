@@ -65,11 +65,11 @@ module.exports = {
   // 取得したデータを画面に表示するデータに加工
   // 加工物
   // {
-  //    codeAccountId：勘定科目のユニークID
-  //    no：           勘定科目の順番
-  //    subjectCode：  勘定科目コード
-  //    subjectName：  勘定科目名
-  //    updatedAt：    勘定科目の登録時間と更新時間
+  //    no：               勘定科目の順番
+  //    accountCodeId：    勘定科目のユニークID
+  //    accountCode：      勘定科目コード
+  //    accountCodeName：  勘定科目名
+  //    updatedAt：        勘定科目の登録時間と更新時間
   // }
   getAccountCodeList: async (contractId) => {
     try {

@@ -112,6 +112,7 @@ describe('registAccountCodeのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでregistAccountCodeが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('registAccountCode', {
+        backUrl: '/accountCodeList',
         codeName: '勘定科目',
         codeLabel: '勘定科目コード',
         codeNameLabel: '勘定科目名',
@@ -132,7 +133,8 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+      helper.checkContractStatus = '40'
       // 試験実施
       await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
@@ -176,7 +178,7 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[8])
       // 試験実施
       await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
@@ -232,7 +234,7 @@ describe('registAccountCodeのテスト', () => {
       request.user = { ...user[2] }
 
       // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[2])
+      userControllerFindOneSpy.mockReturnValue(Users[8])
 
       // 試験実施
       await registAccountCode.cbGetRegistAccountCode(request, response, next)
@@ -331,7 +333,7 @@ describe('registAccountCodeのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
 
-      expect(response.getHeader('Location')).toEqual('/portal')
+      expect(response.getHeader('Location')).toEqual('/accountCodeList')
     })
 
     test('異常:勘定科目登録に失敗した場合。', async () => {
@@ -537,9 +539,9 @@ describe('registAccountCodeのテスト', () => {
       }
 
       // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
+      userControllerFindOneSpy.mockReturnValue(Users[7])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[6])
       // 試験実施
       await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
