@@ -1,7 +1,7 @@
 'use strict'
 const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class CodeAccount extends Model {
+  class AccountCode extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       // https://qiita.com/NewGyu/items/83390aa17dce1ffb4cd3
-      CodeAccount.belongsTo(models.Contract, {
+      AccountCode.belongsTo(models.Contract, {
         foreignKey: 'contractId', // k1を指定
         targetKey: 'contractId', // k2を指定
         onDelete: 'cascade',
@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       })
     }
 
-    static async getCodeAccountList(tenantId) {
+    static async getAccountCodeList(tenantId) {
       try {
         // テナントで契約情報を取得
         const contractId = await sequelize.models.Contract.findOne({
@@ -29,23 +29,23 @@ module.exports = (sequelize, DataTypes) => {
         })
         // 契約情報で勘定科目のデータを取得
         // 作成日が優先順位にして並べる
-        const codeAccounts = await sequelize.models.CodeAccount.findAll({
+        const accountCodes = await sequelize.models.AccountCode.findAll({
           where: {
             contractId: contractId.contractId
           },
           order: [['createdAt', 'DESC']]
         })
 
-        return codeAccounts
+        return accountCodes
       } catch (error) {
         // エラーが発生した場合、エラーObjectを渡す。
         return error
       }
     }
   }
-  CodeAccount.init(
+  AccountCode.init(
     {
-      codeAccountId: {
+      accountCodeId: {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false
@@ -54,11 +54,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.UUID
       },
-      subjectName: {
+      accountCodeName: {
         allowNull: false,
         type: DataTypes.STRING
       },
-      subjectCode: {
+      accountCode: {
         allowNull: false,
         type: DataTypes.INTEGER
       },
@@ -75,9 +75,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'CodeAccount',
-      tableName: 'CodeAccount'
+      modelName: 'AccountCode',
+      tableName: 'AccountCode'
     }
   )
-  return CodeAccount
+  return AccountCode
 }

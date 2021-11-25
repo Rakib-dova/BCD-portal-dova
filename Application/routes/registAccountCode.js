@@ -10,10 +10,10 @@ const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
-const codeAccountController = require('../controllers/codeAccountController')
+const accountCodeController = require('../controllers/accountCodeController')
 
-const cbGetCodeAccount = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbGetCodeAccount')
+const cbGetRegistAccountCode = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegistAccountCode')
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
@@ -45,21 +45,21 @@ const cbGetCodeAccount = async (req, res, next) => {
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
   res.render('registAccountCode', {
-    subjectName: '勘定科目',
+    codeName: '勘定科目',
     codeLabel: '勘定科目コード',
-    nameLabel: '勘定科目名',
-    requiredTagCode: 'codeAccountCodeRequired',
-    requiredTagName: 'codeAccountNameRequired',
-    idForCodeInput: 'codeAccountCode',
-    idForNameInput: 'codeAccountName',
+    codeNameLabel: '勘定科目名',
+    requiredTagCode: 'accountCodeTagRequired',
+    requiredTagName: 'accountCodeNameRequired',
+    idForCodeInput: 'setAccountCodeInputId',
+    idForNameInput: 'setAccountCodeNameInputId',
     modalTitle: '勘定科目設定確認'
   })
 
-  logger.info(constantsDefine.logMessage.INF001 + 'cbGetCodeAccount')
+  logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegistAccountCode')
 }
 
-const cbPostCreateCodeAccount = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbPostCreateCodeAccount')
+const cbPostRegistAccountCode = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostRegistAccountCode')
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
@@ -90,12 +90,12 @@ const cbPostCreateCodeAccount = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  const subjectCode = req.body.codeAccountCode
-  const subjectName = req.body.codeAccountName
+  const accountCode = req.body.setAccountCodeInputId
+  const accountCodeName = req.body.setAccountCodeNameInputId
 
   // 勘定科目をDBに保存する。
   // 結果：true 正常登録、false 登録失敗、Error DBエラー発生
-  const result = await codeAccountController.insert(contract, { subjectCode, subjectName })
+  const result = await accountCodeController.insert(contract, { accountCode, accountCodeName })
 
   if (result instanceof Error) return next(errorHelper.create(500))
 
@@ -110,14 +110,14 @@ const cbPostCreateCodeAccount = async (req, res, next) => {
     res.redirect('/registAccountCode')
   }
 
-  logger.info(constantsDefine.logMessage.INF001 + 'cbPostCreateCodeAccount')
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostRegistAccountCode')
 }
 
-router.get('/', helper.isAuthenticated, cbGetCodeAccount)
-router.post('/', helper.isAuthenticated, cbPostCreateCodeAccount)
+router.get('/', helper.isAuthenticated, cbGetRegistAccountCode)
+router.post('/', helper.isAuthenticated, cbPostRegistAccountCode)
 
 module.exports = {
   router: router,
-  cbGetCodeAccount: cbGetCodeAccount,
-  cbPostCreateCodeAccount: cbPostCreateCodeAccount
+  cbGetRegistAccountCode: cbGetRegistAccountCode,
+  cbPostRegistAccountCode: cbPostRegistAccountCode
 }

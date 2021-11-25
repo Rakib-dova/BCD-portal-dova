@@ -1,18 +1,18 @@
 const db = require('../models')
 const logger = require('../lib/logger')
-const CodeAccount = db.CodeAccount
+const AccountCode = db.AccountCode
 const constantsDefine = require('../constants')
 const { v4: uuidV4 } = require('uuid')
 module.exports = {
-  // CodeAccountカラム
-  //   codeAccountId(PK) - PK
-  //   contractId(FK)=>Contracts(contractIdId) - 契約ID,
-  //   subjectCode - 勘定科目コード,
-  //   subjectName - 勘定科目名,
+  // accountCodeテーブル
+  //   accountCodeId(PK) - PK
+  //   contractId(FK)=>Contracts(contractId) - 契約ID,
+  //   accountCode - 勘定科目コード,
+  //   accountCodeName - 勘定科目名,
   //   createdAt - 作成日付,
   //   updatedAt - 更新日付,
   insert: async (contract, values) => {
-    const functionName = 'codeAccountController.insert'
+    const functionName = 'accountCodeController.insert'
     // 関数開始表示
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     const uploadContractId = contract.contractId
@@ -20,16 +20,16 @@ module.exports = {
       let duplicatedFlag = false
 
       // 重複コード検索
-      const resultSearch = await CodeAccount.findAll({
+      const resultSearch = await AccountCode.findAll({
         where: {
-          subjectCode: values.subjectCode,
+          accountCode: values.accountCode,
           contractId: uploadContractId
         }
       })
 
       // 重複コード検索（sequelize大小文字区別しないため）
       resultSearch.forEach((item) => {
-        if (item.subjectCode === values.subjectCode) {
+        if (item.accountCode === values.accountCode) {
           duplicatedFlag = true
         }
       })
@@ -40,17 +40,17 @@ module.exports = {
       }
 
       // 重複コードない場合DBに保存する。
-      const resultToInsertCodeAccount = await CodeAccount.create({
+      const resultToInsertAccountCode = await AccountCode.create({
         ...values,
         contractId: uploadContractId,
-        codeAccountId: uuidV4()
+        accountCodeId: uuidV4()
       })
 
       // 関数終了表示
       logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
 
-      // DB保存失敗したらモデルCodeAccountインスタンスではない
-      if (resultToInsertCodeAccount instanceof CodeAccount) {
+      // DB保存失敗したらモデルAccountCodeインスタンスではない
+      if (resultToInsertAccountCode instanceof AccountCode) {
         return true
       } else {
         return false
