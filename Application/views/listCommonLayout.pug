@@ -1,0 +1,40 @@
+﻿block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans #{title}
+        .subtitle.is-family-noto-sans #{engTitle}
+
+    .columns.is-centered
+      .column.is-11
+        a.button.is-link.mb-4(href="/registAccountCode") #{btnNameForRegister}
+        
+        .box
+          if accountCodeListArr.length === 0
+            p #{messageForNotItem}
+          else
+            table.table.is-fullwidth.is-hoverable.table-fixed
+              thead
+                tr
+                  th.width-5.text-center #{nameListNo}
+                  th.width-25.text-center #{nameSubjectCode}
+                  th.width-13.text-center #{nameSubjectName}
+                  th.width-10.text-center #{nameUpdateAt}
+                  th.width-10.text-center 
+                  th.width-10.text-center 
+              tbody
+                - var list = accountCodeListArr
+                each item in list
+                  tr
+                    th.text-center.td-overflow= item.no
+                    td.text-center.td-overflow= item.subjectCode
+                    td.text-center.td-overflow= item.subjectName
+                    td.text-center.td-overflow= item.updatedAt                 
+                    td.text-center
+                      a.button.is-success(class= setClassChangeBtn name='confirmButton' data-codeaccountId= item.codeAccountId) 確認・変更する
+                    td.text-center.show-modal
+                      a.button.is-danger(class= setClassDeleteBtn name = 'deleteButton' data-target = "confirmmodify-modal" uuid= item.codeAccountId) 削除
+        .mt-1.has-text-left
+          a.button.is-link.is-light(href="/portal") ←Homeへ戻る
+
+    include footer
