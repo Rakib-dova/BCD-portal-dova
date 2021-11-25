@@ -7,7 +7,7 @@ block content
     .container.is-max-widescreen.is-family-noto-sans
       form#form(method="POST")
         article.panel.is-info
-          h2.panel-heading #{subjectName}
+          h2.panel-heading #{codeName}
           .panel-block
             .container
              .columns.is-centered: .column.is-four-fifths
@@ -22,7 +22,7 @@ block content
                         .column.pl-0
                           input.input(type="text" id= idForCodeInput name= idForCodeInput value='' maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
                   .field
-                    label(for="codeAccountName").input-label #{nameLabel}
+                    label(for="setAccountCodeNameInputId").input-label #{codeNameLabel}
                     p(id= requiredTagName).input-label-required.input-label （必須）
                     p#RequiredErrorMesageForName.input-label-required.is-invisible
                     .control
@@ -51,11 +51,11 @@ block content
             tr
               td 勘定科目コード
               td
-               p#checkCodeAccountCode 　
+               p#checksetAccountCodeInputId 　
           tr
             td 勘定科目名
             td
-              p#checkCodeAccountName 　
+              p#checksetAccountCodeNameInputId 　
       footer.modal-card-foot
         div.button-area
           a.button#cancel-btn.cancel-button(data-target='check-modal') キャンセル

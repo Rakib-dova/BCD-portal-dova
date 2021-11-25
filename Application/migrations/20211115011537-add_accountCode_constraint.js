@@ -9,10 +9,10 @@ module.exports = {
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
     return [
-      queryInterface.addConstraint('CodeAccount', {
+      queryInterface.addConstraint('AccountCode', {
         fields: ['contractId'],
         type: 'foreign key',
-        name: 'fk_codeAccount_contracts',
+        name: 'fk_accountCode_contracts',
         references: {
           table: 'Contracts',
           field: 'contractId'
@@ -30,6 +30,6 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    return [queryInterface.removeConstraint('CodeAccount', 'fk_codeAccount_contracts')]
+    return [queryInterface.removeConstraint('AccountCode', 'fk_accountCode_contracts')]
   }
 }
