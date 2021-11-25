@@ -8,8 +8,8 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.createTable('CodeAccount', {
-      codeAccountId: {
+    await queryInterface.createTable('AccountCode', {
+      accountCodeId: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID
@@ -18,11 +18,11 @@ module.exports = {
         allowNull: false,
         type: Sequelize.UUID
       },
-      subjectName: {
+      accountCodeName: {
         allowNull: false,
         type: Sequelize.STRING(40)
       },
-      subjectCode: {
+      accountCode: {
         allowNull: false,
         type: Sequelize.STRING(10)
       },
@@ -44,6 +44,6 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    await queryInterface.dropTable('CodeAccount')
+    await queryInterface.dropTable('AccountCode')
   }
 }
