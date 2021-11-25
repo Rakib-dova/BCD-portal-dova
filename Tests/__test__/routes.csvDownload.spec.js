@@ -168,13 +168,13 @@ describe('csvDownloadのテスト', () => {
       request.user = { ...user[1] }
 
       // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[1])
+      userControllerFindOneSpy.mockReturnValue(Users[6])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
 
-      tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[1])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
       // 試験実施
       await csvDownload.cbGetIndex(request, response, next)
 
@@ -197,26 +197,26 @@ describe('csvDownloadのテスト', () => {
       request.user = { ...user[1] }
 
       // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[1])
+      userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[7])
 
       tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[1])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[7])
       // 試験実施
       await csvDownload.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // 解約手続き中画面が表示「される」
-      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
@@ -259,7 +259,7 @@ describe('csvDownloadのテスト', () => {
       request.user = { ...user[2] }
 
       // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[2])
+      userControllerFindOneSpy.mockReturnValue(Users[8])
 
       // 試験実施
       await csvDownload.cbGetIndex(request, response, next)
@@ -3954,13 +3954,13 @@ describe('csvDownloadのテスト', () => {
       request.user = { ...user[1] }
 
       // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[1])
+      userControllerFindOneSpy.mockReturnValue(Users[6])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
 
-      tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[1])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
 
       // 試験実施
       await csvDownload.cbPostIndex(request, response, next)

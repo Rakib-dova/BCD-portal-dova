@@ -213,6 +213,8 @@ app.use('/uploadFormatList', require('./routes/uploadFormatList').router)
 app.use('/uploadFormatEdit', require('./routes/uploadFormatEdit').router)
 
 // 仕訳情報設定
+// 勘定科目一覧
+app.use('/accountCodeList', require('./routes/accountCodeList').router)
 // 勘定科目設定
 app.use('/registAccountCode', require('./routes/registAccountCode').router)
 

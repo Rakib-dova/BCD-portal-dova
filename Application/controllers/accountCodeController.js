@@ -2,6 +2,7 @@ const db = require('../models')
 const logger = require('../lib/logger')
 const AccountCode = db.AccountCode
 const constantsDefine = require('../constants')
+const Sequelize = require('sequelize')
 const { v4: uuidV4 } = require('uuid')
 module.exports = {
   // accountCodeテーブル
@@ -58,6 +59,46 @@ module.exports = {
     } catch (error) {
       // DBエラー発生したら処理
       logger.error({ contractId: uploadContractId, stack: error.stack, status: 0 })
+      return error
+    }
+  },
+  // 取得したデータを画面に表示するデータに加工
+  // 加工物
+  // {
+  //    no：               勘定科目の順番
+  //    accountCodeId：    勘定科目のユニークID
+  //    accountCode：      勘定科目コード
+  //    accountCodeName：  勘定科目名
+  //    updatedAt：        勘定科目の登録時間と更新時間
+  // }
+  getAccountCodeList: async (contractId) => {
+    try {
+      const timestamp = require('../lib/utils').timestampForList
+      // 契約番号により勘定科目データをDBから取得（勘定科目コードを昇順にする）
+      const listAccountCode = await AccountCode.findAll({
+        where: {
+          contractId: contractId
+        },
+        order: [
+          Sequelize.literal(
+            'CASE WHEN (ASCII(SUBSTRING(accountCode, 1, 1)) >= 48 and ASCII(SUBSTRING(accountCode, 1, 1)) <= 57) THEN 2 ELSE 1 END, accountCode ASC'
+          )
+        ]
+      })
+
+      // 出力用データに加工する。
+      const resultAccountCodeList = listAccountCode.map((item, idx) => {
+        return {
+          no: idx + 1,
+          accountCodeId: item.accountCodeId,
+          accountCode: item.accountCode,
+          accountCodeName: item.accountCodeName,
+          updatedAt: timestamp(item.updatedAt)
+        }
+      })
+      return resultAccountCodeList
+    } catch (error) {
+      logger.error({ contractId: contractId, stack: error.stack, status: 0 })
       return error
     }
   }
