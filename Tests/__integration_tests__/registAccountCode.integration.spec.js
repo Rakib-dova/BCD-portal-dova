@@ -243,8 +243,8 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registAccountCode')
       if (page.url() === 'https://localhost:3000/registAccountCode') {
-        await page.type('#codeAccountCode', '')
-        await page.type('#codeAccountName', 'インテグレーションテスト')
+        await page.type('#setAccountCodeInputId', '')
+        await page.type('#setAccountCodeNameInputId', 'インテグレーションテスト')
 
         await page.waitForTimeout(500)
 
@@ -272,20 +272,20 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registAccountCode')
       if (page.url() === 'https://localhost:3000/registAccountCode') {
-        await page.type('#codeAccountCode', 'intgrationTest')
-        await page.type('#codeAccountName', '')
+        await page.type('#setAccountCodeInputId', 'intgrationTest')
+        await page.type('#setAccountCodeNameInputId', '')
 
         await page.waitForTimeout(500)
 
         await page.click('#submit')
 
         // 入力値が変わっていること確認
-        const checkCodeAccountCode = await page.evaluate(() => {
-          return document.querySelector('#codeAccountCode').value
+        const checksetAccountCodeInputId = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeInputId').value
         })
 
-        expect(checkCodeAccountCode.length).toBe(10)
-        expect(checkCodeAccountCode).toBe('intgration')
+        expect(checksetAccountCodeInputId.length).toBe(10)
+        expect(checksetAccountCodeInputId).toBe('intgration')
       }
       await browser.close()
     })
@@ -302,20 +302,20 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registAccountCode')
       if (page.url() === 'https://localhost:3000/registAccountCode') {
-        await page.type('#codeAccountCode', '12345678901234567890')
-        await page.type('#codeAccountName', '')
+        await page.type('#setAccountCodeInputId', '12345678901234567890')
+        await page.type('#setAccountCodeNameInputId', '')
 
         await page.waitForTimeout(500)
 
         await page.click('#submit')
 
         // 入力値が変わっていること確認
-        const checkCodeAccountCode = await page.evaluate(() => {
-          return document.querySelector('#codeAccountCode').value
+        const checksetAccountCodeInputId = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeInputId').value
         })
 
-        expect(checkCodeAccountCode.length).toBe(10)
-        expect(checkCodeAccountCode).toBe('1234567890')
+        expect(checksetAccountCodeInputId.length).toBe(10)
+        expect(checksetAccountCodeInputId).toBe('1234567890')
       }
       await browser.close()
     })
@@ -332,20 +332,20 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registAccountCode')
       if (page.url() === 'https://localhost:3000/registAccountCode') {
-        await page.type('#codeAccountCode', 'test1234567890')
-        await page.type('#codeAccountName', '')
+        await page.type('#setAccountCodeInputId', 'test1234567890')
+        await page.type('#setAccountCodeNameInputId', '')
 
         await page.waitForTimeout(500)
 
         await page.click('#submit')
 
         // 入力値が変わっていること確認
-        const checkCodeAccountCode = await page.evaluate(() => {
-          return document.querySelector('#codeAccountCode').value
+        const checksetAccountCodeInputId = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeInputId').value
         })
 
-        expect(checkCodeAccountCode.length).toBe(10)
-        expect(checkCodeAccountCode).toBe('test123456')
+        expect(checksetAccountCodeInputId.length).toBe(10)
+        expect(checksetAccountCodeInputId).toBe('test123456')
       }
       await browser.close()
     })
@@ -362,8 +362,8 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registAccountCode')
       if (page.url() === 'https://localhost:3000/registAccountCode') {
-        await page.evaluate(() => (document.querySelector('#codeAccountCode').value = 'test1234567890'))
-        await page.type('#codeAccountName', '')
+        await page.evaluate(() => (document.querySelector('#setAccountCodeInputId').value = 'test1234567890'))
+        await page.type('#setAccountCodeNameInputId', '')
 
         await page.waitForTimeout(500)
 
@@ -391,8 +391,8 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registAccountCode')
       if (page.url() === 'https://localhost:3000/registAccountCode') {
-        await page.type('#codeAccountCode', 'テスト')
-        await page.type('#codeAccountName', 'インテグレーションテスト')
+        await page.type('#setAccountCodeInputId', 'テスト')
+        await page.type('#setAccountCodeNameInputId', 'インテグレーションテスト')
 
         await page.waitForTimeout(500)
 
@@ -420,8 +420,8 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registAccountCode')
       if (page.url() === 'https://localhost:3000/registAccountCode') {
-        await page.type('#codeAccountCode', 'test')
-        await page.type('#codeAccountName', '')
+        await page.type('#setAccountCodeInputId', 'test')
+        await page.type('#setAccountCodeNameInputId', '')
 
         await page.waitForTimeout(500)
 
@@ -449,20 +449,20 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registAccountCode')
       if (page.url() === 'https://localhost:3000/registAccountCode') {
-        await page.type('#codeAccountCode', '')
-        await page.type('#codeAccountName', 'あいうえおabcdefg123456789あいうえおabcdefg123456789')
+        await page.type('#setAccountCodeInputId', '')
+        await page.type('#setAccountCodeNameInputId', 'あいうえおabcdefg123456789あいうえおabcdefg123456789')
 
         await page.waitForTimeout(500)
 
         await page.click('#submit')
 
         // 入力値が変わっていること確認
-        const checkCodeAccountName = await page.evaluate(() => {
-          return document.querySelector('#codeAccountName').value
+        const checksetAccountCodeNameInputId = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeNameInputId').value
         })
 
-        expect(checkCodeAccountName.length).toBe(40)
-        expect(checkCodeAccountName).toBe('あいうえおabcdefg123456789あいうえおabcdefg1234567')
+        expect(checksetAccountCodeNameInputId.length).toBe(40)
+        expect(checksetAccountCodeNameInputId).toBe('あいうえおabcdefg123456789あいうえおabcdefg1234567')
       }
       await browser.close()
     })
@@ -479,10 +479,11 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registAccountCode')
       if (page.url() === 'https://localhost:3000/registAccountCode') {
-        await page.type('#codeAccountCode', 'test')
+        await page.type('#setAccountCodeInputId', 'test')
         await page.evaluate(
           () =>
-            (document.querySelector('#codeAccountCode').value = 'あいうえおabcdefg123456789あいうえおabcdefg123456789')
+            (document.querySelector('#setAccountCodeInputId').value =
+              'あいうえおabcdefg123456789あいうえおabcdefg123456789')
         )
 
         await page.waitForTimeout(500)

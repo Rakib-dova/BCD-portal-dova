@@ -13,11 +13,11 @@ const errorHelper = require('../../Application/routes/helpers/error')
 const noticeHelper = require('../../Application/routes/helpers/notice')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
-const codeAccountController = require('../../Application/controllers/codeAccountController.js')
+const accountCodeController = require('../../Application/controllers/accountCodeController.js')
 const logger = require('../../Application/lib/logger.js')
 
 let request, response, infoSpy
-let userControllerFindOneSpy, contractControllerFindOneSpy, codeAccountControllerInsertSpy
+let userControllerFindOneSpy, contractControllerFindOneSpy, accountCodeControllerInsertSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -62,7 +62,7 @@ describe('registAccountCodeのテスト', () => {
     infoSpy = jest.spyOn(logger, 'info')
     userControllerFindOneSpy = jest.spyOn(userController, 'findOne')
     contractControllerFindOneSpy = jest.spyOn(contractController, 'findOne')
-    codeAccountControllerInsertSpy = jest.spyOn(codeAccountController, 'insert')
+    accountCodeControllerInsertSpy = jest.spyOn(accountCodeController, 'insert')
     request.flash = jest.fn()
   })
   afterEach(() => {
@@ -72,7 +72,7 @@ describe('registAccountCodeのテスト', () => {
     infoSpy.mockRestore()
     userControllerFindOneSpy.mockRestore()
     contractControllerFindOneSpy.mockRestore()
-    codeAccountControllerInsertSpy.mockRestore()
+    accountCodeControllerInsertSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -80,17 +80,17 @@ describe('registAccountCodeのテスト', () => {
       expect(registAccountCode.router.get).toBeCalledWith(
         '/',
         helper.isAuthenticated,
-        registAccountCode.cbGetCodeAccount
+        registAccountCode.cbGetRegistAccountCode
       )
       expect(registAccountCode.router.post).toBeCalledWith(
         '/',
         helper.isAuthenticated,
-        registAccountCode.cbPostCreateCodeAccount
+        registAccountCode.cbPostRegistAccountCode
       )
     })
   })
 
-  describe('コールバック:cbGetCodeAccount', () => {
+  describe('コールバック:cbGetRegistAccountCode', () => {
     test('正常', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -103,7 +103,7 @@ describe('registAccountCodeのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
 
       // 試験実施
-      await registAccountCode.cbGetCodeAccount(request, response, next)
+      await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -112,13 +112,13 @@ describe('registAccountCodeのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでregistAccountCodeが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('registAccountCode', {
-        subjectName: '勘定科目',
+        codeName: '勘定科目',
         codeLabel: '勘定科目コード',
-        nameLabel: '勘定科目名',
-        requiredTagCode: 'codeAccountCodeRequired',
-        requiredTagName: 'codeAccountNameRequired',
-        idForCodeInput: 'codeAccountCode',
-        idForNameInput: 'codeAccountName',
+        codeNameLabel: '勘定科目名',
+        requiredTagCode: 'accountCodeTagRequired',
+        requiredTagName: 'accountCodeNameRequired',
+        idForCodeInput: 'setAccountCodeInputId',
+        idForNameInput: 'setAccountCodeNameInputId',
         modalTitle: '勘定科目設定確認'
       })
     })
@@ -134,7 +134,7 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[1])
       // 試験実施
-      await registAccountCode.cbGetCodeAccount(request, response, next)
+      await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -159,7 +159,7 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[1])
       // 試験実施
-      await registAccountCode.cbGetCodeAccount(request, response, next)
+      await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -178,7 +178,7 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[1])
       // 試験実施
-      await registAccountCode.cbGetCodeAccount(request, response, next)
+      await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -194,7 +194,7 @@ describe('registAccountCodeのテスト', () => {
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
       // 試験実施
-      await registAccountCode.cbGetCodeAccount(request, response, next)
+      await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -215,7 +215,7 @@ describe('registAccountCodeのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(userDbError)
 
       // 試験実施
-      await registAccountCode.cbGetCodeAccount(request, response, next)
+      await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -235,7 +235,7 @@ describe('registAccountCodeのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[2])
 
       // 試験実施
-      await registAccountCode.cbGetCodeAccount(request, response, next)
+      await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
       // 期待結果
       expect(next).toHaveBeenCalledWith(errorHelper.create(404))
@@ -253,7 +253,7 @@ describe('registAccountCodeのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(contractDbError)
 
       // 試験実施
-      await registAccountCode.cbGetCodeAccount(request, response, next)
+      await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
       // 期待結果
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
@@ -273,7 +273,7 @@ describe('registAccountCodeのテスト', () => {
       helper.checkContractStatus = null
 
       // 試験実施
-      await registAccountCode.cbGetCodeAccount(request, response, next)
+      await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -296,7 +296,7 @@ describe('registAccountCodeのテスト', () => {
       helper.checkContractStatus = 999
 
       // 試験実施
-      await registAccountCode.cbGetCodeAccount(request, response, next)
+      await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -306,24 +306,24 @@ describe('registAccountCodeのテスト', () => {
     })
   })
 
-  describe('コールバック:cbPostCreateCodeAccount', () => {
+  describe('コールバック:cbPostRegistAccountCode', () => {
     test('正常', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        codeAccountCode: 'A01001',
-        codeAccountName: 'codeAccountName'
+        setAccountCodeInputId: 'A01001',
+        setAccountCodeNameInputId: 'setAccountCodeNameInputId'
       }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      codeAccountControllerInsertSpy.mockReturnValue(true)
+      accountCodeControllerInsertSpy.mockReturnValue(true)
       // 試験実施
-      await registAccountCode.cbPostCreateCodeAccount(request, response, next)
+      await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -341,17 +341,17 @@ describe('registAccountCodeのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        codeAccountCode: 'A01001',
-        codeAccountName: 'codeAccountName'
+        setAccountCodeInputId: 'A01001',
+        setAccountCodeNameInputId: 'setAccountCodeNameInputId'
       }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      codeAccountControllerInsertSpy.mockReturnValue(false)
+      accountCodeControllerInsertSpy.mockReturnValue(false)
       // 試験実施
-      await registAccountCode.cbPostCreateCodeAccount(request, response, next)
+      await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -374,7 +374,7 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[1])
       // 試験実施
-      await registAccountCode.cbPostCreateCodeAccount(request, response, next)
+      await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -382,15 +382,15 @@ describe('registAccountCodeのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
     })
 
-    test('500エラー:codeAccountController.insertエラー', async () => {
+    test('500エラー:accountCodeController.insertエラー', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.flash = jest.fn()
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        codeAccountCode: 'A01001',
-        codeAccountName: 'codeAccountName'
+        setAccountCodeInputId: 'A01001',
+        setAccountCodeNameInputId: 'setAccountCodeNameInputId'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -398,9 +398,9 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
       const dbError = new Error()
-      codeAccountControllerInsertSpy.mockReturnValue(dbError)
+      accountCodeControllerInsertSpy.mockReturnValue(dbError)
       // 試験実施
-      await registAccountCode.cbPostCreateCodeAccount(request, response, next)
+      await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -413,7 +413,7 @@ describe('registAccountCodeのテスト', () => {
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
       // 試験実施
-      await registAccountCode.cbPostCreateCodeAccount(request, response, next)
+      await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -434,7 +434,7 @@ describe('registAccountCodeのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(Contracts[1])
 
       // 試験実施
-      await registAccountCode.cbPostCreateCodeAccount(request, response, next)
+      await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -453,7 +453,7 @@ describe('registAccountCodeのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(Contracts[1])
 
       // 試験実施
-      await registAccountCode.cbPostCreateCodeAccount(request, response, next)
+      await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -474,7 +474,7 @@ describe('registAccountCodeのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(contractDbError)
 
       // 試験実施
-      await registAccountCode.cbPostCreateCodeAccount(request, response, next)
+      await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -496,7 +496,7 @@ describe('registAccountCodeのテスト', () => {
       helper.checkContractStatus = 999
 
       // 試験実施
-      await registAccountCode.cbPostCreateCodeAccount(request, response, next)
+      await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -517,7 +517,7 @@ describe('registAccountCodeのテスト', () => {
       helper.checkContractStatus = 999
 
       // 試験実施
-      await registAccountCode.cbPostCreateCodeAccount(request, response, next)
+      await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -532,8 +532,8 @@ describe('registAccountCodeのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        codeAccountCode: 'A01001',
-        codeAccountName: 'codeAccountName'
+        setAccountCodeInputId: 'A01001',
+        setAccountCodeNameInputId: 'setAccountCodeNameInputId'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -541,7 +541,7 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[1])
       // 試験実施
-      await registAccountCode.cbPostCreateCodeAccount(request, response, next)
+      await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
