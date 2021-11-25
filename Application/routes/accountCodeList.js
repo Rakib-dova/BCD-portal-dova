@@ -9,6 +9,7 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
+const getAccountCodeList = require('../controllers/accountCodeController').getAccountCodeList
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -49,7 +50,7 @@ const cbGetIndex = async (req, res, next) => {
   }
 
   // 勘定科目
-  const accountCodeListArr = await tmpAccountCodeListController(contract.contractId)
+  const accountCodeListArr = await getAccountCodeList(contract.contractId)
 
   if (accountCodeListArr instanceof Error) return next(errorHelper.create(500))
 
@@ -69,117 +70,6 @@ const cbGetIndex = async (req, res, next) => {
     setClassDeleteBtn: 'deleteAccountCodeBtn'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
-}
-
-// ダミーデータ関数
-const tmpAccountCodeListController = async (contractId) => {
-  const { v4: uuid } = require('uuid')
-  const dummyContractId = uuid()
-  const now = new Date().toISOString().replace('T', ' ').replace('Z', '')
-  const dummyData1 = {
-    no: 1,
-    codeAccountId: uuid(),
-    contractId: dummyContractId,
-    subjectName: '現金',
-    subjectCode: 'AB001',
-    createdAt: now,
-    updatedAt: now
-  }
-  const dummyData2 = {
-    no: 2,
-    codeAccountId: uuid(),
-    contractId: dummyContractId,
-    subjectName: '小口現金',
-    subjectCode: 'AB002',
-    createdAt: now,
-    updatedAt: now
-  }
-  const dummyData3 = {
-    no: 3,
-    codeAccountId: uuid(),
-    contractId: dummyContractId,
-    subjectName: '当座預金',
-    subjectCode: 'AB003',
-    createdAt: now,
-    updatedAt: now
-  }
-  const dummyData4 = {
-    no: 4,
-    codeAccountId: uuid(),
-    contractId: dummyContractId,
-    subjectName: '普通預金',
-    subjectCode: 'AB004',
-    createdAt: now,
-    updatedAt: now
-  }
-  const dummyData5 = {
-    no: 5,
-    codeAccountId: uuid(),
-    contractId: dummyContractId,
-    subjectName: '売掛金',
-    subjectCode: 'AB005',
-    createdAt: now,
-    updatedAt: now
-  }
-  const dummyData6 = {
-    no: 6,
-    codeAccountId: uuid(),
-    contractId: dummyContractId,
-    subjectName: '商品',
-    subjectCode: 'AB006',
-    createdAt: now,
-    updatedAt: now
-  }
-  const dummyData7 = {
-    no: 7,
-    codeAccountId: uuid(),
-    contractId: dummyContractId,
-    subjectName: '貯蔵品',
-    subjectCode: 'AB007',
-    createdAt: now,
-    updatedAt: now
-  }
-  const dummyData8 = {
-    no: 8,
-    codeAccountId: uuid(),
-    contractId: dummyContractId,
-    subjectName: '前払費用',
-    subjectCode: 'AB008',
-    createdAt: now,
-    updatedAt: now
-  }
-  const dummyData9 = {
-    no: 9,
-    codeAccountId: uuid(),
-    contractId: dummyContractId,
-    subjectName: '前払金',
-    subjectCode: 'AB009',
-    createdAt: now,
-    updatedAt: now
-  }
-  const dummyData10 = {
-    no: 10,
-    codeAccountId: uuid(),
-    contractId: dummyContractId,
-    subjectName: '短期貸付金',
-    subjectCode: 'AB010',
-    createdAt: now,
-    updatedAt: now
-  }
-
-  const dummyDataList = []
-  dummyDataList.push(dummyData1)
-  dummyDataList.push(dummyData2)
-  dummyDataList.push(dummyData3)
-  dummyDataList.push(dummyData4)
-  dummyDataList.push(dummyData5)
-  dummyDataList.push(dummyData6)
-  dummyDataList.push(dummyData7)
-  dummyDataList.push(dummyData8)
-  dummyDataList.push(dummyData9)
-  dummyDataList.push(dummyData10)
-
-  return dummyDataList
 }
 
 router.get('/', helper.isAuthenticated, cbGetIndex)
