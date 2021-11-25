@@ -59,13 +59,13 @@ const cbGetIndex = async (req, res, next) => {
     title: '勘定科目一覧',
     engTitle: 'ACCOUNT CODE LIST',
     btnNameForRegister: '新規登録する',
-    accountCodeListArr: accountCodeListArr,
+    listArr: accountCodeListArr,
     messageForNotItem: '現在、勘定科目はありません。勘定科目を登録お願いします。',
     // リスト表示カラム
-    nameListNo: 'No',
-    nameSubjectCode: '勘定科目コード',
-    nameSubjectName: '勘定科目名',
-    nameUpdateAt: '最新更新日',
+    listNo: 'No',
+    accountCode: '勘定科目コード',
+    accountCodeName: '勘定科目名',
+    accountCodeUpdatedAt: '最新更新日',
     setClassChangeBtn: 'checkChangeAccountCodeBtn',
     setClassDeleteBtn: 'deleteAccountCodeBtn'
   })

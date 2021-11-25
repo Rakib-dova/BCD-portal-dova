@@ -2,6 +2,7 @@ const db = require('../models')
 const logger = require('../lib/logger')
 const AccountCode = db.AccountCode
 const constantsDefine = require('../constants')
+const Sequelize = require('sequelize')
 const { v4: uuidV4 } = require('uuid')
 module.exports = {
   // accountCodeテーブル
@@ -78,16 +79,20 @@ module.exports = {
         where: {
           contractId: contractId
         },
-        order: [['accountCode', 'ASC']]
+        order: [
+          Sequelize.literal(
+            'CASE WHEN (ASCII(SUBSTRING(accountCode, 1, 1)) >= 48 and ASCII(SUBSTRING(accountCode, 1, 1)) <= 57) THEN 2 ELSE 1 END, accountCode ASC'
+          )
+        ]
       })
 
       // 出力用データに加工する。
       const resultAccountCodeList = listAccountCode.map((item, idx) => {
         return {
           no: idx + 1,
-          codeAccountId: item.accountCodeId,
-          subjectCode: item.accountCode,
-          subjectName: item.accountCodeName,
+          accountCodeId: item.accountCodeId,
+          accountCode: item.accountCode,
+          accountCodeName: item.accountCodeName,
           updatedAt: timestamp(item.updatedAt)
         }
       })
