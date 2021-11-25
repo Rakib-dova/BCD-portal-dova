@@ -52,7 +52,8 @@ const cbGetRegistAccountCode = async (req, res, next) => {
     requiredTagName: 'accountCodeNameRequired',
     idForCodeInput: 'setAccountCodeInputId',
     idForNameInput: 'setAccountCodeNameInputId',
-    modalTitle: '勘定科目設定確認'
+    modalTitle: '勘定科目設定確認',
+    backUrl: '/accountCodeList'
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegistAccountCode')
@@ -103,7 +104,7 @@ const cbPostRegistAccountCode = async (req, res, next) => {
   if (result) {
     // 正常に登録ができた場合
     req.flash('info', '勘定科目を登録しました。')
-    res.redirect('/portal')
+    res.redirect('/accountCodeList')
   } else {
     // 失敗した時
     req.flash('noti', '勘定科目登録に失敗しました。')

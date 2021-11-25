@@ -60,5 +60,41 @@ module.exports = {
       logger.error({ contractId: uploadContractId, stack: error.stack, status: 0 })
       return error
     }
+  },
+  // 取得したデータを画面に表示するデータに加工
+  // 加工物
+  // {
+  //    codeAccountId：勘定科目のユニークID
+  //    no：           勘定科目の順番
+  //    subjectCode：  勘定科目コード
+  //    subjectName：  勘定科目名
+  //    updatedAt：    勘定科目の登録時間と更新時間
+  // }
+  getAccountCodeList: async (contractId) => {
+    try {
+      const timestamp = require('../lib/utils').timestampForList
+      // 契約番号により勘定科目データをDBから取得（勘定科目コードを昇順にする）
+      const listAccountCode = await AccountCode.findAll({
+        where: {
+          contractId: contractId
+        },
+        order: [['accountCode', 'ASC']]
+      })
+
+      // 出力用データに加工する。
+      const resultAccountCodeList = listAccountCode.map((item, idx) => {
+        return {
+          no: idx + 1,
+          codeAccountId: item.accountCodeId,
+          subjectCode: item.accountCode,
+          subjectName: item.accountCodeName,
+          updatedAt: timestamp(item.updatedAt)
+        }
+      })
+      return resultAccountCodeList
+    } catch (error) {
+      logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+      return error
+    }
   }
 }

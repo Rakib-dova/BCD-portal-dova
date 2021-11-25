@@ -2,25 +2,25 @@
 jest.mock('../../Application/models')
 jest.mock('../../Application/lib/logger')
 
-const codeAccountController = require('../../Application/controllers/codeAccountController')
+const accountCodeController = require('../../Application/controllers/accountCodeController')
 const logger = require('../../Application/lib/logger')
-const CodeAccount = require('../../Application/models').CodeAccount
+const AccountCode = require('../../Application/models').AccountCode
 
-const codeAccountId = '5a927284-57c9-4594-9ed8-472d261a6102'
-const codeAccountDataResult = new CodeAccount()
-codeAccountDataResult.codeAccountId = codeAccountId
-codeAccountDataResult.contractId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
-codeAccountDataResult.subjectName = 'パソコン'
-codeAccountDataResult.subjectCode = 'AAA'
-codeAccountDataResult.createdAt = '2021-07-09T04:30:00.000Z'
-codeAccountDataResult.updatedAt = '2021-07-09T04:30:00.000Z'
+const accountCodeId = '5a927284-57c9-4594-9ed8-472d261a6102'
+const accountCodeDataResult = new AccountCode()
+accountCodeDataResult.accountCodeId = accountCodeId
+accountCodeDataResult.contractId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
+accountCodeDataResult.codeName = 'パソコン'
+accountCodeDataResult.subjectCode = 'AAA'
+accountCodeDataResult.createdAt = '2021-07-09T04:30:00.000Z'
+accountCodeDataResult.updatedAt = '2021-07-09T04:30:00.000Z'
 
 let errorSpy, contractId, findAllSpy, infoSpy, createSpy
 
-describe('codeAccountControllerControllerのテスト', () => {
+describe('accountCodeControllerControllerのテスト', () => {
   beforeEach(() => {
-    createSpy = jest.spyOn(CodeAccount, 'create')
-    findAllSpy = jest.spyOn(CodeAccount, 'findAll')
+    createSpy = jest.spyOn(AccountCode, 'create')
+    findAllSpy = jest.spyOn(AccountCode, 'findAll')
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
   })
@@ -57,14 +57,14 @@ describe('codeAccountControllerControllerのテスト', () => {
       // 準備
       // DBから勘定科目登録時、返す勘定科目インスタンス
       findAllSpy.mockReturnValue([])
-      createSpy.mockReturnValue(codeAccountDataResult)
+      createSpy.mockReturnValue(accountCodeDataResult)
 
       // 勘定科目登録時、画面から渡されるデータ
-      const subjectName = 'パソコン'
+      const codeName = 'パソコン'
       const subjectCode = 'AAA'
 
       // 試験実施
-      const result = await codeAccountController.insert(contractNormal, { subjectCode, subjectName })
+      const result = await accountCodeController.insert(contractNormal, { subjectCode, codeName })
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -73,15 +73,15 @@ describe('codeAccountControllerControllerのテスト', () => {
 
     test('異常：重複された勘定科目登録する時', async () => {
       // 準備
-      findAllSpy.mockReturnValue([codeAccountDataResult])
-      createSpy.mockReturnValue(codeAccountDataResult)
+      findAllSpy.mockReturnValue([accountCodeDataResult])
+      createSpy.mockReturnValue(accountCodeDataResult)
 
       // 勘定科目登録時、画面から渡されるデータ
-      const subjectName = 'パソコン'
+      const codeName = 'パソコン'
       const subjectCode = 'AAA'
 
       // 試験実施
-      const result = await codeAccountController.insert(contractNormal, { subjectCode, subjectName })
+      const result = await accountCodeController.insert(contractNormal, { subjectCode, codeName })
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -94,11 +94,11 @@ describe('codeAccountControllerControllerのテスト', () => {
       createSpy.mockReturnValue(null)
 
       // 勘定科目登録時、画面から渡されるデータ
-      const subjectName = '登録エラー'
+      const codeName = '登録エラー'
       const subjectCode = 'ABC'
 
       // 試験実施
-      const result = await codeAccountController.insert(contractNormal, { subjectCode, subjectName })
+      const result = await accountCodeController.insert(contractNormal, { subjectCode, codeName })
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -113,11 +113,11 @@ describe('codeAccountControllerControllerのテスト', () => {
       createSpy.mockReturnValue(null)
 
       // 勘定科目登録時、画面から渡されるデータ
-      const subjectName = 'パソコン'
+      const codeName = 'パソコン'
       const subjectCode = 'AAA'
 
       // 試験実施
-      await codeAccountController.insert(contractNormal, { subjectCode, subjectName })
+      await accountCodeController.insert(contractNormal, { subjectCode, codeName })
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -132,11 +132,11 @@ describe('codeAccountControllerControllerのテスト', () => {
       createSpy.mockReturnValue(dbError)
 
       // 勘定科目登録時、画面から渡されるデータ
-      const subjectName = 'パソコン'
+      const codeName = 'パソコン'
       const subjectCode = 'AAA'
 
       // 試験実施
-      const result = await codeAccountController.insert(contractNormal, { subjectCode, subjectName })
+      const result = await accountCodeController.insert(contractNormal, { subjectCode, codeName })
 
       // 期待結果
       // 想定したデータがReturnされていること
