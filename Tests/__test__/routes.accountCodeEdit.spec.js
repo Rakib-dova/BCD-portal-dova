@@ -181,7 +181,7 @@ describe('accountCodeEditのテスト', () => {
       await accountCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
@@ -236,7 +236,7 @@ describe('accountCodeEditのテスト', () => {
       request.session = { ...session }
       request.user = { ...Users[0] }
 
-      // DBからの正常なユーザデータの取得を想定する
+      // DBからエラーが発生することを想定する
       const userDbError = new Error('User Table Error')
       userControllerFindOneSpy.mockReturnValue(userDbError)
 
@@ -296,7 +296,7 @@ describe('accountCodeEditのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[7])
       // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(null)
+      tenatnsFindOneSpy.mockReturnValue(Tenants[8])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[7])
 
