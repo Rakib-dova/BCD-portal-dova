@@ -20,7 +20,7 @@ block content
                     .control
                       .columns.ml-0.pl-0.alignCenterChild
                         .column.pl-0
-                          input.input(type="text" id= idForCodeInput name= idForCodeInput value='' maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
+                          input.input(type="text" id= idForCodeInput name= idForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
                   .field
                     label(for="setAccountCodeNameInputId").input-label #{codeNameLabel}
                     p(id= requiredTagName).input-label-required.input-label （必須）
@@ -28,7 +28,7 @@ block content
                     .control
                       .columns.ml-0.pl-0.alignCenterChild
                         .column.pl-0
-                          input.input(type="text" id= idForNameInput name= idForNameInput value='' maxlength=40 placeholder='文字列（40桁）' required) 
+                          input.input(type="text" id= idForNameInput name= idForNameInput value= valueForNameInput maxlength=40 placeholder='文字列（40桁）' required) 
          
 
              .columns.is-centered.changeConfirm
@@ -61,4 +61,4 @@ block content
           a.button#cancel-btn.cancel-button(data-target='check-modal') キャンセル
           a.button.is-success#submit 登録
 
-    include footer
+  include footer

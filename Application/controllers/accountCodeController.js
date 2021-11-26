@@ -101,5 +101,21 @@ module.exports = {
       logger.error({ contractId: contractId, stack: error.stack, status: 0 })
       return error
     }
+  },
+  getAccountCode: async (contractId, accountCodeId) => {
+    try {
+      // 契約情報と勘定科目キーでDBのデータを検索する。
+      const result = await AccountCode.findOne({
+        where: {
+          contractId: contractId,
+          accountCodeId: accountCodeId
+        }
+      })
+      // 検索結果オブジェクトに作成して返す
+      return { accountCode: result.accountCode, accountCodeName: result.accountCodeName }
+    } catch (error) {
+      logger.error({ contractId: contractId, accountCodeId: accountCodeId, stack: error.stack, status: 0 })
+      return error
+    }
   }
 }

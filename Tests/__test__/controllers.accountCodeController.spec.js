@@ -6,6 +6,7 @@ const accountCodeController = require('../../Application/controllers/accountCode
 const logger = require('../../Application/lib/logger')
 const AccountCode = require('../../Application/models').AccountCode
 const timestamp = require('../../Application/lib/utils').timestampForList
+const accountCodeMock = require('../mockDB/AccountCode_Table')
 
 const codeAccountId = '5a927284-57c9-4594-9ed8-472d261a6102'
 const codeAccountDataResult = new AccountCode()
@@ -32,18 +33,20 @@ dbAccountCode100Table.forEach((item, idx, arr) => {
 
 dbAccountCodeTable.push(codeAccountDataResult)
 
-let errorSpy, contractId, findAllSpy, infoSpy, createSpy
+let errorSpy, contractId, findAllSpy, infoSpy, createSpy, findOneSpy
 
 describe('accountCodeControllerのテスト', () => {
   beforeEach(() => {
     createSpy = jest.spyOn(AccountCode, 'create')
     findAllSpy = jest.spyOn(AccountCode, 'findAll')
+    findOneSpy = jest.spyOn(AccountCode, 'findOne')
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
   })
   afterEach(() => {
     createSpy.mockRestore()
     findAllSpy.mockRestore()
+    findOneSpy.mockRestore()
     errorSpy.mockRestore()
     infoSpy.mockRestore()
   })
@@ -244,6 +247,48 @@ describe('accountCodeControllerのテスト', () => {
       // 期待結果
       // 想定したデータがReturnされていること
       expect(errorSpy).toHaveBeenCalledWith({ contractId: contractId, stack: expect.anything(), status: 0 })
+    })
+  })
+
+  describe('getAccountCode', () => {
+    test('正常：検索対象がある場合', async () => {
+      // 準備
+      // 勘定科目がある場合
+      findOneSpy.mockReturnValue(accountCodeMock[0])
+
+      // contractId, accountCodeId
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+
+      // 試験実施
+      const result = await accountCodeController.getAccountCode(contractId, accountCodeId)
+
+      expect(result).toEqual({
+        accountCode: accountCodeMock[0].accountCode,
+        accountCodeName: accountCodeMock[0].accountCodeName
+      })
+    })
+    test('異常：findOne DBエラー', async () => {
+      // 準備
+      // DBエラー
+      const errorDbPool = new Error('DB POOL ERROR')
+      findOneSpy.mockImplementation(() => {
+        throw errorDbPool
+      })
+
+      // contractId, accountCodeId
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+
+      // 試験実施
+      await accountCodeController.getAccountCode(contractId, accountCodeId)
+
+      expect(errorSpy).toHaveBeenCalledWith({
+        contractId: contractId,
+        accountCodeId: accountCodeId,
+        stack: expect.anything(),
+        status: 0
+      })
     })
   })
 })
