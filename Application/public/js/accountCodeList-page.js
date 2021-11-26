@@ -32,9 +32,3 @@ Array.prototype.forEach.call(document.querySelectorAll('.deleteAccountCodeBtn'),
     alert('現在機能追加中です。')
   })
 })
-
-Array.prototype.forEach.call(document.querySelectorAll('.checkChangeAccountCodeBtn'), (item) => {
-  item.addEventListener('click', () => {
-    alert('現在機能追加中です。')
-  })
-})
