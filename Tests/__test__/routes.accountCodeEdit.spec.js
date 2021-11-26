@@ -23,7 +23,8 @@ let userControllerFindOneSpy,
   accountCodeControllerGetAccountCodeSpy,
   tenatnsFindOneSpy,
   userControllerFindAndUpdate,
-  contractControllerFindContractSpy
+  contractControllerFindContractSpy,
+  checkContractStatusSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -54,6 +55,7 @@ describe('accountCodeEditのテスト', () => {
     accountCodeControllerGetAccountCodeSpy = jest.spyOn(accountCodeController, 'getAccountCode')
     tenatnsFindOneSpy = jest.spyOn(tenantController, 'findOne')
     request.flash = jest.fn()
+    checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
   })
   afterEach(() => {
     request.resetMocked()
@@ -66,6 +68,7 @@ describe('accountCodeEditのテスト', () => {
     userControllerFindAndUpdate.mockRestore()
     accountCodeControllerGetAccountCodeSpy.mockRestore()
     tenatnsFindOneSpy.mockRestore()
+    checkContractStatusSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -156,8 +159,8 @@ describe('accountCodeEditのテスト', () => {
         idForNameInput: 'setAccountCodeNameInputId',
         modalTitle: '勘定科目設定確認',
         backUrl: '/accountCodeList',
-        valueForCodeInput: AccountCode[0].accountCode,
-        valueForNameInput: AccountCode[0].accountCodeName
+        valueForCodeInput: '',
+        valueForNameInput: ''
       })
     })
 
@@ -206,7 +209,7 @@ describe('accountCodeEditのテスト', () => {
       await accountCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
@@ -221,7 +224,7 @@ describe('accountCodeEditのテスト', () => {
       await accountCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
       // 解約手続き中画面が表示「される」
@@ -242,7 +245,7 @@ describe('accountCodeEditのテスト', () => {
       await accountCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
       // 解約手続き中画面が表示「される」
@@ -294,9 +297,12 @@ describe('accountCodeEditのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[7])
       // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[8])
+      tenatnsFindOneSpy.mockReturnValue(null)
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[7])
+
+      // checkContractStatusからreturnされる値設定
+      checkContractStatusSpy.mockReturnValue(null)
 
       // 試験実施
       await accountCodeEdit.cbGetIndex(request, response, next)
@@ -316,12 +322,14 @@ describe('accountCodeEditのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[9])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[8])
       // DBからの正常なテナント情報取得を想定する
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
-      contractControllerFindContractSpy.mockReturnValue(Contracts[9])
+      contractControllerFindContractSpy.mockReturnValue(Contracts[8])
 
+      // checkContractStatusからreturnされる値設定
+      checkContractStatusSpy.mockReturnValue(999)
       // 試験実施
       await accountCodeEdit.cbGetIndex(request, response, next)
 

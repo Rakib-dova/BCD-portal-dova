@@ -253,7 +253,7 @@ describe('accountCodeControllerのテスト', () => {
   describe('getAccountCode', () => {
     test('正常：検索対象がある場合', async () => {
       // 準備
-      // 勘定科目がない場合
+      // 勘定科目がある場合
       findOneSpy.mockReturnValue(accountCodeMock[0])
 
       // contractId, accountCodeId
@@ -270,7 +270,7 @@ describe('accountCodeControllerのテスト', () => {
     })
     test('異常：findOne DBエラー', async () => {
       // 準備
-      // 勘定科目がない場合
+      // DBエラー
       const errorDbPool = new Error('DB POOL ERROR')
       findOneSpy.mockImplementation(() => {
         throw errorDbPool
