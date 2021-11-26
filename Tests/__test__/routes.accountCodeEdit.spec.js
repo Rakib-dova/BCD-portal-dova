@@ -183,7 +183,6 @@ describe('accountCodeEditのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
