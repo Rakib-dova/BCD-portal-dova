@@ -9,7 +9,6 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
-const accountCodeController = require('../controllers/accountCodeController')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -49,10 +48,10 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  // 勘定科目
-  const accountCodeListArr = await accountCodeController.getAccountCodeList(contract.contractId)
+  // DBからデータ取得（ダミーデータ）
+  const result = await dummyDataController(req.params.accountCodeId)
 
-  if (accountCodeListArr instanceof Error) return next(errorHelper.create(500))
+  if (result instanceof Error) return next(errorHelper.create(500))
 
   // アップロードフォーマットデータを画面に渡す。
   res.render('registAccountCode', {
@@ -64,12 +63,18 @@ const cbGetIndex = async (req, res, next) => {
     idForCodeInput: 'setAccountCodeInputId',
     idForNameInput: 'setAccountCodeNameInputId',
     modalTitle: '勘定科目設定確認',
-    backUrl: '/accountCodeList'
+    backUrl: '/accountCodeList',
+    valueForCodeInput: result.accountCode,
+    valueForNameInput: result.accountCodeName
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
 router.get('/:accountCodeId', helper.isAuthenticated, cbGetIndex)
+
+const dummyDataController = async (accountId) => {
+  return { accountCode: 'AA001', accountCodeName: '費用科目' }
+}
 
 module.exports = {
   router: router,
