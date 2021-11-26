@@ -217,6 +217,8 @@ app.use('/uploadFormatEdit', require('./routes/uploadFormatEdit').router)
 app.use('/accountCodeList', require('./routes/accountCodeList').router)
 // 勘定科目設定
 app.use('/registAccountCode', require('./routes/registAccountCode').router)
+// 勘定科目確認・変更
+app.use('/accountCodeEdit', require('./routes/accountCodeEdit').router)
 
 // 設定
 // cancellation
