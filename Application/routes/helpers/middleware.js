@@ -80,31 +80,16 @@ exports.isUserRegistered = async (req, res, next) => {
   }
 }
 
-exports.checkContractStatus = async (req, res, next) => {
-  if (!req.user?.userId) return res.redirect(303, '/auth')
-
-  if (!validate.isUUID(req.user?.userId)) {
-    return next(errorHelper.create(500))
-  } // userIdのバリデーション
-
-  // テナント情報検索
-  const tenant = await tenantController.findOne(req.user.tenantId)
-
-  // DB検索エラーの場合
-  if (tenant instanceof Error) return next(errorHelper.create(500))
-
-  let tenantId = tenant?.dataValues.tenantId
-
-  if (!tenantId) {
-    tenantId = req.user.tenantId
-  }
-
+exports.checkContractStatus = async (tenantId) => {
   let contracts = await contractController.findContract({ tenantId: tenantId }, 'createdAt DESC')
 
   // DB検索エラーの場合
-  if (contracts instanceof Error) return next(errorHelper.create(500))
+  if (contracts instanceof Error) {
+    return null
+  }
 
-  if (tenant === null && contracts === null) {
+  // contracts nullの場合
+  if (contracts === null) {
     return null
   }
 
