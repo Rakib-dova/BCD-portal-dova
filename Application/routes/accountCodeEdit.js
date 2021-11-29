@@ -114,9 +114,10 @@ const cbPostIndex = async function (req, res, next) {
 
   // 勘定科目コードの変更の時、検索データと変更値をとる
   const contractId = contract.contractId
-  const accountCodeId = req.params.accountCodeId
-  const accountCode = req.body.setAccountCodeInputId
-  const accountCodeName = req.body.setAccountCodeNameInputId
+  const accountCodeId = req.params.accountCodeId ?? 'failedAccountCodeId'
+  const accountCode = req.body.setAccountCodeInputId ?? 'failedAccountCode'
+  const accountCodeName =
+    req.body.setAccountCodeNameInputId ?? 'failedRequestBodySetAccountCodeNameFromAccountCodeEdit.Get'
 
   // 勘定科目コードを変更する。
   const result = await accountCodeController.updatedAccountCode(contractId, accountCodeId, accountCode, accountCodeName)
@@ -125,10 +126,10 @@ const cbPostIndex = async function (req, res, next) {
   if (result instanceof Error) return next(errorHelper.create(500))
 
   // 変更結果を表示する。
-  // 結果：0（正常変更）、1（変更なし）
+  // 結果：0（正常変更）、1（変更なし）、-1（重複コードの場合）、-2（勘定科目検索失敗）
   switch (result) {
     case 0:
-      req.flash('info', '勘定科目コードを変更しました。')
+      req.flash('info', '勘定科目を変更しました。')
       res.redirect('/accountCodeList')
       break
     case 1:
@@ -138,6 +139,10 @@ const cbPostIndex = async function (req, res, next) {
     case -1:
       req.flash('noti', '既に登録されている勘定科目コードがあることを確認しました。')
       res.redirect(`/accountCodeEdit/${accountCodeId}`)
+      break
+    case -2:
+      req.flash('noti', '当該勘定科目をDBから見つかりませんでした。')
+      res.redirect('/accountCodeList')
       break
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')

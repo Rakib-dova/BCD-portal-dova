@@ -407,14 +407,14 @@ describe('accountCodeControllerのテスト', () => {
       // 重複コード検索用データの用意
       findAllSpy.mockReturnValue([])
 
-      await accountCodeController.updatedAccountCode(contractId, accountCodeId, accountCode, accountCodeName)
+      const result = await accountCodeController.updatedAccountCode(
+        contractId,
+        accountCodeId,
+        accountCode,
+        accountCodeName
+      )
 
-      expect(errorSpy).toHaveBeenCalledWith({
-        contractId: contractId,
-        accountCodeId: accountCodeId,
-        stack: expect.anything(),
-        status: 0
-      })
+      expect(result).toBe(-2)
     })
 
     test('異常：DBエラー発生', async () => {
@@ -446,6 +446,33 @@ describe('accountCodeControllerのテスト', () => {
         stack: expect.anything(),
         status: 0
       })
+    })
+
+    test('異常：対象勘定科目を検索失敗', async () => {
+      // 準備
+      // パラメータの用意
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+      const accountCode = 'AB0001'
+      const accountCodeName = '預金科目'
+
+      // transactionモックの用意
+      transactionSpy.mockReturnValue({ ...transaction })
+
+      // DBから変更対象を取得
+      findOneSpy.mockReturnValue(null)
+
+      // 重複コード検索用データの用意
+      findAllSpy.mockReturnValue([])
+
+      const result = await accountCodeController.updatedAccountCode(
+        contractId,
+        accountCodeId,
+        accountCode,
+        accountCodeName
+      )
+
+      expect(result).toBe(-2)
     })
   })
 })
