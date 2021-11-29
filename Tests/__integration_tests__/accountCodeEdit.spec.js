@@ -389,6 +389,405 @@ describe('勘定科目確認・変更のインテグレーションテスト', (
 
       await browser.close()
     })
+
+    // バリデーションチェック
+
+    // 勘定科目コード未入力
+    test('バリデーションチェック、勘定科目コード未入力', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        await page.evaluate(() => (document.querySelector('#setAccountCodeInputId').value = ''))
+        const setAccountCodeNameInputId = await page.$('#setAccountCodeNameInputId')
+        await setAccountCodeNameInputId.click({ clickCount: 3 })
+        await setAccountCodeNameInputId.type('インテグレーションテスト')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        // エラーメッセージが表示されること確認
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
+        })
+
+        expect(checkErrorMessage).toBe('input-label-required')
+      }
+      await browser.close()
+    })
+
+    // 勘定科目コード11桁以上の場合（英語）
+    test('バリデーションチェック、勘定科目コード11桁以上の場合（英語）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        const setAccountCodeInputId = await page.$('#setAccountCodeInputId')
+        await setAccountCodeInputId.click({ clickCount: 3 })
+        await setAccountCodeInputId.type('intgrationTest')
+        await page.evaluate(() => (document.querySelector('#setAccountCodeNameInputId').value = ''))
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        // 入力値が変わっていること確認
+        const checkSetAccountCodeInputId = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeInputId').value
+        })
+
+        expect(checkSetAccountCodeInputId.length).toBe(10)
+        expect(checkSetAccountCodeInputId).toBe('intgration')
+      }
+      await browser.close()
+    })
+
+    // // 勘定科目コード11桁以上の場合（数字）
+    test('バリデーションチェック、勘定科目コード11桁以上の場合（数字）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        const setAccountCodeInputId = await page.$('#setAccountCodeInputId')
+        await setAccountCodeInputId.click({ clickCount: 3 })
+        await setAccountCodeInputId.type('12345678901234567890')
+        await page.evaluate(() => (document.querySelector('#setAccountCodeNameInputId').value = ''))
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        // 入力値が変わっていること確認
+        const checkSetAccountCodeInputId = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeInputId').value
+        })
+
+        expect(checkSetAccountCodeInputId.length).toBe(10)
+        expect(checkSetAccountCodeInputId).toBe('1234567890')
+      }
+      await browser.close()
+    })
+
+    // 勘定科目コード11桁以上の場合（英・数字）
+    test('バリデーションチェック、勘定科目コード11桁以上の場合（英・数字）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        const setAccountCodeInputId = await page.$('#setAccountCodeInputId')
+        await setAccountCodeInputId.click({ clickCount: 3 })
+        await setAccountCodeInputId.type('test1234567890')
+        await page.evaluate(() => (document.querySelector('#setAccountCodeNameInputId').value = ''))
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        // 入力値が変わっていること確認
+        const checkSetAccountCodeInputId = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeInputId').value
+        })
+
+        expect(checkSetAccountCodeInputId.length).toBe(10)
+        expect(checkSetAccountCodeInputId).toBe('test123456')
+      }
+      await browser.close()
+    })
+
+    // 勘定科目コードをコンソールで11桁以上を入力した場合
+    test('バリデーションチェック、勘定科目コードをコンソールで11桁以上を入力した場合', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        await page.evaluate(() => (document.querySelector('#setAccountCodeInputId').value = 'test1234567890'))
+        await page.evaluate(() => (document.querySelector('#setAccountCodeNameInputId').value = ''))
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        // エラーメッセージが表示されること確認
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
+        })
+
+        expect(checkErrorMessage).toBe('input-label-required')
+      }
+      await browser.close()
+    })
+
+    // 勘定科目コード英・数字以外入力
+    test('バリデーションチェック、勘定科目コード英・数字以外入力', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        const setAccountCodeInputId = await page.$('#setAccountCodeInputId')
+        await setAccountCodeInputId.click({ clickCount: 3 })
+        await setAccountCodeInputId.type('テスト')
+        const setAccountCodeNameInputId = await page.$('#setAccountCodeNameInputId')
+        await setAccountCodeNameInputId.click({ clickCount: 3 })
+        await setAccountCodeNameInputId.type('インテグレーションテスト')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        // エラーメッセージが表示されること確認
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
+        })
+
+        expect(checkErrorMessage).toBe('input-label-required')
+      }
+      await browser.close()
+    })
+
+    // 勘定科目名未入力
+    test('バリデーションチェック、勘定科目名未入力', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        const setAccountCodeInputId = await page.$('#setAccountCodeInputId')
+        await setAccountCodeInputId.click({ clickCount: 3 })
+        await setAccountCodeInputId.type('test')
+        await page.evaluate(() => (document.querySelector('#setAccountCodeNameInputId').value = ''))
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        // エラーメッセージが表示されること確認
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#RequiredErrorMesageForName').getAttribute('class')
+        })
+
+        expect(checkErrorMessage).toBe('input-label-required')
+      }
+      await browser.close()
+    })
+
+    // 勘定科目名41桁以上入力
+    test('バリデーションチェック、勘定科目名41桁以上入力', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        await page.evaluate(() => (document.querySelector('#setAccountCodeInputId').value = ''))
+        const setAccountCodeNameInputId = await page.$('#setAccountCodeNameInputId')
+        await setAccountCodeNameInputId.click({ clickCount: 3 })
+        await setAccountCodeNameInputId.type('あいうえおabcdefg123456789あいうえおabcdefg123456789')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        // 入力値が変わっていること確認
+        const checkSetAccountCodeNameInputId = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeNameInputId').value
+        })
+
+        expect(checkSetAccountCodeNameInputId.length).toBe(40)
+        expect(checkSetAccountCodeNameInputId).toBe('あいうえおabcdefg123456789あいうえおabcdefg1234567')
+      }
+      await browser.close()
+    })
+
+    // 勘定科目名をコンソールで41桁以上を入力した場合
+    test('バリデーションチェック、勘定科目名をコンソールで41桁以上を入力した場合', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        const setAccountCodeInputId = await page.$('#setAccountCodeInputId')
+        await setAccountCodeInputId.click({ clickCount: 3 })
+        await setAccountCodeInputId.type('test')
+        await page.evaluate(
+          () =>
+            (document.querySelector('#setAccountCodeNameInputId').value =
+              'あいうえおabcdefg123456789あいうえおabcdefg123456789')
+        )
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        // エラーメッセージが表示されること確認
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#RequiredErrorMesageForName').getAttribute('class')
+        })
+
+        expect(checkErrorMessage).toBe('input-label-required')
+      }
+      await browser.close()
+    })
+
+    // 確認モーダル表示確認
+    test('モーダル表示確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        const setAccountCodeInputId = await page.$('#setAccountCodeInputId')
+        await setAccountCodeInputId.click({ clickCount: 3 })
+        await setAccountCodeInputId.type('test')
+        const setAccountCodeNameInputId = await page.$('#setAccountCodeNameInputId')
+        await setAccountCodeNameInputId.click({ clickCount: 3 })
+        await setAccountCodeNameInputId.type('インテグレーションテスト')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        // エラーメッセージが表示されること確認
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#check-modal').getAttribute('class')
+        })
+
+        expect(checkErrorMessage).toBe('modal is-active')
+      }
+      await browser.close()
+    })
+
+    // 勘定科目変更
+    test('勘定科目変更実施', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        const setAccountCodeInputId = await page.$('#setAccountCodeInputId')
+        await setAccountCodeInputId.click({ clickCount: 3 })
+        await setAccountCodeInputId.type('test')
+        const setAccountCodeNameInputId = await page.$('#setAccountCodeNameInputId')
+        await setAccountCodeNameInputId.click({ clickCount: 3 })
+        await setAccountCodeNameInputId.type('インテグレーションテスト')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#submit')
+
+        await page.waitForTimeout(500)
+
+        // 勘定科目一覧画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/accountCodeList')
+      }
+      await browser.close()
+    })
+
+    test('変更した勘定科目の内容を勘定科目一覧で確認', async () => {
+      const res = await request(app)
+        .get('/accountCodeList')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      // 登録した勘定科目の内容確認
+      expect(res.text).toMatch(/test/i)
+      expect(res.text).toMatch(/インテグレーションテスト/i)
+    })
+
+    // 勘定科目名41桁以上入力
+    test('変更した勘定科目の内容を勘定科目確認・変更画面で確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+      if (page.url() === `https://localhost:3000${redirectUrl}`) {
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        // 入力値が変わっていること確認
+        const checkSetAccountCodeInputId = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeInputId').value
+        })
+
+        // 入力値が変わっていること確認
+        const checkSetAccountCodeNameInputId = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeNameInputId').value
+        })
+
+        expect(checkSetAccountCodeInputId).toBe('test')
+        expect(checkSetAccountCodeNameInputId).toBe('インテグレーションテスト')
+      }
+      await browser.close()
+    })
   })
 
   describe('5.契約ステータス：変更申込', () => {
