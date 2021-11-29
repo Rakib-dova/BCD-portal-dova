@@ -7,7 +7,7 @@ const logger = require('../../Application/lib/logger')
 const AccountCode = require('../../Application/models').AccountCode
 const timestamp = require('../../Application/lib/utils').timestampForList
 const accountCodeMock = require('../mockDB/AccountCode_Table')
-
+const sequelize = require('../../Application/models').sequelize
 const codeAccountId = '5a927284-57c9-4594-9ed8-472d261a6102'
 const codeAccountDataResult = new AccountCode()
 codeAccountDataResult.accountCodeId = codeAccountId
@@ -33,7 +33,13 @@ dbAccountCode100Table.forEach((item, idx, arr) => {
 
 dbAccountCodeTable.push(codeAccountDataResult)
 
-let errorSpy, contractId, findAllSpy, infoSpy, createSpy, findOneSpy
+const transaction = {
+  commit: () => {},
+  rollback: () => {},
+  LOCK: {}
+}
+
+let errorSpy, contractId, findAllSpy, infoSpy, createSpy, findOneSpy, transactionSpy
 
 describe('accountCodeControllerのテスト', () => {
   beforeEach(() => {
@@ -42,6 +48,7 @@ describe('accountCodeControllerのテスト', () => {
     findOneSpy = jest.spyOn(AccountCode, 'findOne')
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
+    transactionSpy = jest.spyOn(sequelize, 'transaction')
   })
   afterEach(() => {
     createSpy.mockRestore()
@@ -49,6 +56,7 @@ describe('accountCodeControllerのテスト', () => {
     findOneSpy.mockRestore()
     errorSpy.mockRestore()
     infoSpy.mockRestore()
+    transactionSpy.mockRestore()
   })
 
   contractId = '87654321-fbe6-4864-a866-7a3ce9aa517e'
@@ -282,6 +290,155 @@ describe('accountCodeControllerのテスト', () => {
 
       // 試験実施
       await accountCodeController.getAccountCode(contractId, accountCodeId)
+
+      expect(errorSpy).toHaveBeenCalledWith({
+        contractId: contractId,
+        accountCodeId: accountCodeId,
+        stack: expect.anything(),
+        status: 0
+      })
+    })
+  })
+
+  describe('updatedAccountCode', () => {
+    test('正常：正常変更の場合', async () => {
+      // 準備
+      // パラメータの用意
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+      const accountCode = 'AB0001'
+      const accountCodeName = '預金科目'
+
+      // transactionモックの用意
+      transactionSpy.mockReturnValue({ ...transaction })
+
+      // DBから変更対象を取得
+      const findOneData = new AccountCode({ ...accountCodeMock[0] })
+      findOneData._changed = new Set()
+      findOneData._changed.add('accountCode')
+      findOneSpy.mockReturnValue(findOneData)
+
+      // 重複コード検索用データの用意
+      findAllSpy.mockReturnValue([])
+
+      const result = await accountCodeController.updatedAccountCode(
+        contractId,
+        accountCodeId,
+        accountCode,
+        accountCodeName
+      )
+
+      expect(result).toBe(0)
+    })
+
+    test('準正常：勘定科目コードと勘定科目名の値を変更なく変更ボタンを押下する', async () => {
+      // 準備
+      // パラメータの用意
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+      const accountCode = 'AB001'
+      const accountCodeName = '預金科目'
+
+      // transactionモックの用意
+      transactionSpy.mockReturnValue({ ...transaction })
+
+      // DBから変更対象を取得
+      const findOneData = new AccountCode({ ...accountCodeMock[0] })
+      findOneData._changed = new Set()
+      findOneSpy.mockReturnValue(findOneData)
+
+      // 重複コード検索用データの用意
+      findAllSpy.mockReturnValue([])
+
+      const result = await accountCodeController.updatedAccountCode(
+        contractId,
+        accountCodeId,
+        accountCode,
+        accountCodeName
+      )
+
+      expect(result).toBe(1)
+    })
+
+    test('準正常：変更コードが既存データと重複の場合', async () => {
+      // 準備
+      // パラメータの用意
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+      const accountCode = 'BC0001'
+      const accountCodeName = '預金科目'
+
+      // transactionモックの用意
+      transactionSpy.mockReturnValue({ ...transaction })
+
+      // DBから変更対象を取得
+      const findOneData = new AccountCode({ ...accountCodeMock[0] })
+      findOneData._changed = new Set()
+      findOneData._changed.add('accountCode')
+      findOneSpy.mockReturnValue(findOneData)
+
+      // 重複コード検索用データの用意
+      findAllSpy.mockReturnValue([accountCodeMock[1]])
+
+      const result = await accountCodeController.updatedAccountCode(
+        contractId,
+        accountCodeId,
+        accountCode,
+        accountCodeName
+      )
+
+      expect(result).toBe(-1)
+    })
+
+    test('異常：検索対象がヌールの場合', async () => {
+      // 準備
+      // パラメータの用意
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+      const accountCode = 'AB0001'
+      const accountCodeName = '預金科目'
+
+      // transactionモックの用意
+      transactionSpy.mockReturnValue({ ...transaction })
+
+      // DBから変更対象を取得
+      findOneSpy.mockReturnValue(null)
+
+      // 重複コード検索用データの用意
+      findAllSpy.mockReturnValue([])
+
+      await accountCodeController.updatedAccountCode(contractId, accountCodeId, accountCode, accountCodeName)
+
+      expect(errorSpy).toHaveBeenCalledWith({
+        contractId: contractId,
+        accountCodeId: accountCodeId,
+        stack: expect.anything(),
+        status: 0
+      })
+    })
+
+    test('異常：DBエラー発生', async () => {
+      // 準備
+      // パラメータの用意
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+      const accountCode = 'AB0001'
+      const accountCodeName = '預金科目'
+
+      // エラーの定義
+      const dbPoolError = new Error('DB POOL Error')
+      // transactionモックの用意
+      transactionSpy.mockReturnValue({ ...transaction })
+
+      // DBから変更対象を取得
+      findOneSpy.mockImplementation(() => {
+        throw dbPoolError
+      })
+
+      // 重複コード検索用データの用意
+      findAllSpy.mockReturnValue([])
+
+      await accountCodeController.updatedAccountCode(contractId, accountCodeId, accountCode, accountCodeName)
 
       expect(errorSpy).toHaveBeenCalledWith({
         contractId: contractId,
