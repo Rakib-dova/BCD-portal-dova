@@ -24,7 +24,8 @@ let userControllerFindOneSpy,
   tenatnsFindOneSpy,
   userControllerFindAndUpdate,
   contractControllerFindContractSpy,
-  checkContractStatusSpy
+  checkContractStatusSpy,
+  updatedAccountCodeSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -46,6 +47,7 @@ const AccountCode = require('../mockDB/AccountCode_Table')
 describe('accountCodeEditのテスト', () => {
   beforeEach(() => {
     request = new Request()
+    request.body = {}
     response = new Response()
     infoSpy = jest.spyOn(logger, 'info')
     userControllerFindOneSpy = jest.spyOn(userController, 'findOne')
@@ -56,6 +58,7 @@ describe('accountCodeEditのテスト', () => {
     tenatnsFindOneSpy = jest.spyOn(tenantController, 'findOne')
     request.flash = jest.fn()
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
+    updatedAccountCodeSpy = jest.spyOn(accountCodeController, 'updatedAccountCode')
   })
   afterEach(() => {
     request.resetMocked()
@@ -69,6 +72,7 @@ describe('accountCodeEditのテスト', () => {
     accountCodeControllerGetAccountCodeSpy.mockRestore()
     tenatnsFindOneSpy.mockRestore()
     checkContractStatusSpy.mockRestore()
+    updatedAccountCodeSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -77,6 +81,11 @@ describe('accountCodeEditのテスト', () => {
         '/:accountCodeId',
         helper.isAuthenticated,
         accountCodeEdit.cbGetIndex
+      )
+      expect(accountCodeEdit.router.post).toBeCalledWith(
+        '/:accountCodeId',
+        helper.isAuthenticated,
+        accountCodeEdit.cbPostIndex
       )
     })
   })
@@ -336,6 +345,367 @@ describe('accountCodeEditのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('異常：異常経路接続', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, userContext: 'NotLoggedIn' }
+      request.user = { ...Users[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await accountCodeEdit.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('NotLoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('dummy')
+      // response.renderでregistAccountCodeが呼ばれ「る」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+    })
+  })
+
+  describe('コールバック:cbPostIndex', () => {
+    test('正常：勘定科目コードと勘定科目名変更', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.accountCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setAccountCodeInputId = 'AA001'
+      request.body.setAccountCodeNameInputId = '費用科目'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // accountCodeController.updatedAccountCodeのモックバリュー
+      updatedAccountCodeSpy.mockReturnValue(0)
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでregistAccountCodeが呼ばれ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/accountCodeList')
+    })
+
+    test('準正常：勘定科目コードと勘定科目名の値は変更なくて変更ボタン押下する。', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.accountCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setAccountCodeInputId = 'AA001'
+      request.body.setAccountCodeNameInputId = '費用科目'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // accountCodeController.updatedAccountCodeのモックバリュー
+      updatedAccountCodeSpy.mockReturnValue(1)
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでregistAccountCodeが呼ばれ「る」
+      expect(response.redirect).toHaveBeenCalledWith(`/accountCodeEdit/${request.params.accountCodeId}`)
+    })
+
+    test('準正常：既存勘定科目コードがある場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.accountCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setAccountCodeInputId = 'AA001'
+      request.body.setAccountCodeNameInputId = '費用科目'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // accountCodeController.updatedAccountCodeのモックバリュー
+      updatedAccountCodeSpy.mockReturnValue(-1)
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでregistAccountCodeが呼ばれ「る」
+      expect(response.redirect).toHaveBeenCalledWith(`/accountCodeEdit/${request.params.accountCodeId}`)
+    })
+
+    test('準正常：解約申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[6] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[6])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+      // DBからの正常な勘定科目情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[5])
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('500エラー:不正なContractデータの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[9] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[9])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[7])
+      // DBからの正常な勘定科目情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[8])
+      // 契約不正の場合
+      contractControllerFindContractSpy.mockReturnValue(Contracts[7])
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：requestのsession,userIdがnullの場合', async () => {
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+
+      // DBからエラーが発生することを想定する
+      const userDbError = new Error('User Table Error')
+      userControllerFindOneSpy.mockReturnValue(userDbError)
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user.statusが0ではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[8] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[8])
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(404))
+    })
+
+    test('500エラー：contracts検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      const contractDbError = new Error('Contracts Table Error')
+      contractControllerFindOneSpy.mockReturnValue(contractDbError)
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：不正なcheckContractStatus(null)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[9] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[9])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[7])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[8])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[7])
+
+      // checkContractStatusからreturnされる値設定
+      checkContractStatusSpy.mockReturnValue(null)
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：不正なcheckContractStatus(999)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[8])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[8])
+
+      // checkContractStatusからreturnされる値設定
+      checkContractStatusSpy.mockReturnValue(999)
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('異常：勘定科目コントローラのエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.accountCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setAccountCodeInputId = 'AA001'
+      request.body.setAccountCodeNameInputId = '費用科目'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // accountCodeController.updatedAccountCodeのモックバリュー
+      const dbError = new Error('DB Pool Error')
+      updatedAccountCodeSpy.mockReturnValue(dbError)
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでregistAccountCodeが呼ばれ「る」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('異常：異常経路接続', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, userContext: 'NotLoggedIn' }
+      request.user = { ...Users[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('NotLoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('dummy')
+      // response.renderでregistAccountCodeが呼ばれ「る」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
     })
   })
 })
