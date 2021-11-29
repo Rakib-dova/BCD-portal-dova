@@ -135,6 +135,10 @@ const cbPostIndex = async function (req, res, next) {
       req.flash('noti', '変更値がありません。')
       res.redirect(`/accountCodeEdit/${accountCodeId}`)
       break
+    case -1:
+      req.flash('noti', '既に登録されている勘定科目コードがあることを確認しました。')
+      res.redirect(`/accountCodeEdit/${accountCodeId}`)
+      break
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }

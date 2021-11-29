@@ -126,6 +126,7 @@ module.exports = {
   // 戻り値：0（正常変更）、1（変更なし）、Error（DBエラー、システムエラーなど）
   updatedAccountCode: async function (contractId, accountCodeId, accountCode, accountCodeName) {
     const t = await db.sequelize.transaction()
+    let duplicatedFlag = false
     try {
       // 変更対象の勘定科目コードを検索
       const accountCodeRecord = await AccountCode.findOne(
@@ -142,6 +143,27 @@ module.exports = {
           lock: t.LOCK
         }
       )
+
+      const duplicatedAccountCodeRecord = await AccountCode.findAll(
+        {
+          where: {
+            contractId,
+            accountCode
+          }
+        },
+        {
+          transaction: t
+        }
+      )
+      duplicatedAccountCodeRecord.forEach((item) => {
+        if (item.accountCode === accountCode) {
+          duplicatedFlag = true
+        }
+      })
+
+      if (duplicatedFlag) {
+        return -1
+      }
 
       // 変更の値を入れる
       accountCodeRecord.accountCode = accountCode
