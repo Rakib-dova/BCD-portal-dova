@@ -736,7 +736,7 @@ describe('accountCodeEditのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでregistAccountCodeが呼ばれ「る」
+      // 勘定科目一覧画面へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/accountCodeList')
     })
 
@@ -768,7 +768,7 @@ describe('accountCodeEditのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでregistAccountCodeが呼ばれ「る」
+      // 勘定科目一覧画面へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/accountCodeList')
     })
 
@@ -800,7 +800,7 @@ describe('accountCodeEditのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでregistAccountCodeが呼ばれ「る」
+      // 勘定科目一覧画面へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/accountCodeList')
     })
   })
