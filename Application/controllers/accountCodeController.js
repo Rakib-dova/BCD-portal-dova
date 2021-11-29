@@ -117,5 +117,71 @@ module.exports = {
       logger.error({ contractId: contractId, accountCodeId: accountCodeId, stack: error.stack, status: 0 })
       return error
     }
+  },
+  // 勘定科目コードを変更する
+  // contractId: 契約番号
+  // accountCodeId: 勘定科目コードキー
+  // accountCode：勘定科目のコード
+  // accountCodeName: 勘定科目の名
+  // 戻り値：0（正常変更）、1（変更なし）、Error（DBエラー、システムエラーなど）
+  updatedAccountCode: async function (contractId, accountCodeId, accountCode, accountCodeName) {
+    const t = await db.sequelize.transaction()
+    let duplicatedFlag = false
+    try {
+      // 変更対象の勘定科目コードを検索
+      const accountCodeRecord = await AccountCode.findOne(
+        {
+          where: {
+            contractId,
+            accountCodeId
+          }
+        },
+        {
+          transaction: t
+        },
+        {
+          lock: t.LOCK
+        }
+      )
+
+      const duplicatedAccountCodeRecord = await AccountCode.findAll(
+        {
+          where: {
+            contractId,
+            accountCode
+          }
+        },
+        {
+          transaction: t
+        }
+      )
+      duplicatedAccountCodeRecord.forEach((item) => {
+        if (item.accountCode === accountCode) {
+          duplicatedFlag = true
+        }
+      })
+
+      if (duplicatedFlag) {
+        return -1
+      }
+
+      // 変更の値を入れる
+      accountCodeRecord.accountCode = accountCode
+      accountCodeRecord.accountCodeName = accountCodeName
+
+      // データ変更がある場合、DB保存する
+      if (accountCodeRecord._changed.size > 0) {
+        await accountCodeRecord.save({ transaction: t })
+        await t.commit()
+        return 0
+        // データ変更がない場合、1を返して
+      } else {
+        return 1
+      }
+    } catch (error) {
+      logger.error({ contractId: contractId, accountCodeId: accountCodeId, stack: error.stack, status: 0 })
+      await t.rollback()
+      return error
+    }
   }
 }
