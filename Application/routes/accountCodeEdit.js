@@ -119,6 +119,25 @@ const cbPostIndex = async function (req, res, next) {
   const accountCodeName =
     req.body.setAccountCodeNameInputId ?? 'failedRequestBodySetAccountCodeNameFromAccountCodeEdit.Get'
 
+  if (accountCodeId.length === 0 || accountCodeId === 'failedAccountCodeId') {
+    req.flash('noti', '勘定科目変更する値に誤りがあります。')
+    res.redirect('/accountCodeList')
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+    return
+  }
+
+  if (
+    accountCode.length === 0 ||
+    accountCodeName.length === 0 ||
+    accountCode === 'failedAccountCode' ||
+    accountCodeName === 'failedRequestBodySetAccountCodeNameFromAccountCodeEdit.Get'
+  ) {
+    req.flash('noti', '勘定科目変更する値に誤りがあります。')
+    res.redirect(`/accountCodeEdit/${accountCodeId}`)
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+    return
+  }
+
   // 勘定科目コードを変更する。
   const result = await accountCodeController.updatedAccountCode(contractId, accountCodeId, accountCode, accountCodeName)
 
@@ -133,7 +152,7 @@ const cbPostIndex = async function (req, res, next) {
       res.redirect('/accountCodeList')
       break
     case 1:
-      req.flash('noti', '変更値がありません。')
+      req.flash('noti', 'すでに登録されている値です。')
       res.redirect(`/accountCodeEdit/${accountCodeId}`)
       break
     case -1:
