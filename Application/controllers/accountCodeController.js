@@ -4,6 +4,7 @@ const AccountCode = db.AccountCode
 const constantsDefine = require('../constants')
 const Sequelize = require('sequelize')
 const { v4: uuidV4 } = require('uuid')
+const Op = db.Sequelize.Op
 module.exports = {
   // accountCodeテーブル
   //   accountCodeId(PK) - PK
@@ -147,8 +148,17 @@ module.exports = {
       const duplicatedAccountCodeRecord = await AccountCode.findAll(
         {
           where: {
-            contractId,
-            accountCode
+            [Op.and]: [
+              {
+                contractId: contractId
+              },
+              { accountCode: accountCode },
+              {
+                accountCodeId: {
+                  [Op.ne]: accountCodeId
+                }
+              }
+            ]
           }
         },
         {
