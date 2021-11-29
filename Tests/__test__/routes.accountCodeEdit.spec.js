@@ -370,7 +370,7 @@ describe('accountCodeEditのテスト', () => {
       expect(request.session?.userContext).toBe('NotLoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('dummy')
-      // response.renderでregistAccountCodeが呼ばれ「る」
+      // 400エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
     })
   })
@@ -404,7 +404,7 @@ describe('accountCodeEditのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでregistAccountCodeが呼ばれ「る」
+      // 勘定科目一覧へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/accountCodeList')
     })
 
@@ -436,7 +436,7 @@ describe('accountCodeEditのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでregistAccountCodeが呼ばれ「る」
+      // 勘定科目変更画面へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith(`/accountCodeEdit/${request.params.accountCodeId}`)
     })
 
@@ -468,7 +468,7 @@ describe('accountCodeEditのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでregistAccountCodeが呼ばれ「る」
+      // 勘定科目変更画面へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith(`/accountCodeEdit/${request.params.accountCodeId}`)
     })
 
@@ -524,7 +524,7 @@ describe('accountCodeEditのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -536,7 +536,7 @@ describe('accountCodeEditのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング「される」」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -557,7 +557,7 @@ describe('accountCodeEditのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -677,7 +677,7 @@ describe('accountCodeEditのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでregistAccountCodeが呼ばれ「る」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -704,8 +704,104 @@ describe('accountCodeEditのテスト', () => {
       expect(request.session?.userContext).toBe('NotLoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('dummy')
-      // response.renderでregistAccountCodeが呼ばれ「る」
+      // 400エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+    })
+
+    test('異常：パラメータがヌールの場合：accountCodeId', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.accountCodeId = null
+      request.body.setAccountCodeInputId = 'AA001'
+      request.body.setAccountCodeNameInputId = '費用科目'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // accountCodeController.updatedAccountCodeのモックバリュー
+      updatedAccountCodeSpy.mockReturnValue(-2)
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでregistAccountCodeが呼ばれ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/accountCodeList')
+    })
+
+    test('異常：パラメータがヌールの場合：accountCode', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.accountCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setAccountCodeInputId = null
+      request.body.setAccountCodeNameInputId = '費用科目'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // accountCodeController.updatedAccountCodeのモックバリュー
+      updatedAccountCodeSpy.mockReturnValue(-2)
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでregistAccountCodeが呼ばれ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/accountCodeList')
+    })
+
+    test('異常：パラメータがヌールの場合：accountCode', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.accountCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setAccountCodeInputId = 'AB001'
+      request.body.setAccountCodeNameInputId = null
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // accountCodeController.updatedAccountCodeのモックバリュー
+      updatedAccountCodeSpy.mockReturnValue(-2)
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでregistAccountCodeが呼ばれ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/accountCodeList')
     })
   })
 })

@@ -123,7 +123,7 @@ module.exports = {
   // accountCodeId: 勘定科目コードキー
   // accountCode：勘定科目のコード
   // accountCodeName: 勘定科目の名
-  // 戻り値：0（正常変更）、1（変更なし）、Error（DBエラー、システムエラーなど）
+  // 戻り値：0（正常変更）、1（変更なし）、-1（重複勘定科目コードの場合）、Error（DBエラー、システムエラーなど）、-2（勘定科目検索失敗）
   updatedAccountCode: async function (contractId, accountCodeId, accountCode, accountCodeName) {
     const t = await db.sequelize.transaction()
     let duplicatedFlag = false
@@ -143,7 +143,7 @@ module.exports = {
           lock: t.LOCK
         }
       )
-
+      // 重複コード検索
       const duplicatedAccountCodeRecord = await AccountCode.findAll(
         {
           where: {
@@ -155,6 +155,7 @@ module.exports = {
           transaction: t
         }
       )
+      // 取得したデータから大小文字区別して重複チェック
       duplicatedAccountCodeRecord.forEach((item) => {
         if (item.accountCode === accountCode) {
           duplicatedFlag = true
@@ -163,6 +164,10 @@ module.exports = {
 
       if (duplicatedFlag) {
         return -1
+      }
+
+      if (accountCodeRecord === null) {
+        return -2
       }
 
       // 変更の値を入れる
