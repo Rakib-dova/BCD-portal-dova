@@ -757,8 +757,6 @@ describe('accountCodeEditのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountCodeController.updatedAccountCodeのモックバリュー
-      updatedAccountCodeSpy.mockReturnValue(-2)
 
       // 試験実施
       await accountCodeEdit.cbPostIndex(request, response, next)
@@ -769,7 +767,7 @@ describe('accountCodeEditのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // 勘定科目一覧画面へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/accountCodeList')
+      expect(response.redirect).toHaveBeenCalledWith('/accountCodeEdit/74a9717e-4ed8-4430-9109-9ab7e850bdc7')
     })
 
     test('異常：パラメータがヌールの場合：accountCode', async () => {
@@ -780,6 +778,36 @@ describe('accountCodeEditのテスト', () => {
       request.params.accountCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
       request.body.setAccountCodeInputId = 'AB001'
       request.body.setAccountCodeNameInputId = null
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await accountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 勘定科目一覧画面へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/accountCodeEdit/74a9717e-4ed8-4430-9109-9ab7e850bdc7')
+    })
+
+    test('異常：変更の瞬間対象データが無：accountCode', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.accountCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setAccountCodeInputId = 'AB001'
+      request.body.setAccountCodeNameInputId = 'abcd'
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
