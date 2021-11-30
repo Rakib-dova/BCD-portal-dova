@@ -2,8 +2,8 @@ const db = require('../models')
 const logger = require('../lib/logger')
 const AccountCode = db.AccountCode
 const constantsDefine = require('../constants')
-const Sequelize = require('sequelize')
 const { v4: uuidV4 } = require('uuid')
+const Op = db.Sequelize.Op
 module.exports = {
   // accountCodeテーブル
   //   accountCodeId(PK) - PK
@@ -79,11 +79,7 @@ module.exports = {
         where: {
           contractId: contractId
         },
-        order: [
-          Sequelize.literal(
-            'CASE WHEN (ASCII(SUBSTRING(accountCode, 1, 1)) >= 48 and ASCII(SUBSTRING(accountCode, 1, 1)) <= 57) THEN 2 ELSE 1 END, accountCode ASC'
-          )
-        ]
+        order: [['accountCode', 'ASC']]
       })
 
       // 出力用データに加工する。
@@ -115,6 +111,86 @@ module.exports = {
       return { accountCode: result.accountCode, accountCodeName: result.accountCodeName }
     } catch (error) {
       logger.error({ contractId: contractId, accountCodeId: accountCodeId, stack: error.stack, status: 0 })
+      return error
+    }
+  },
+  // 勘定科目コードを変更する
+  // contractId: 契約番号
+  // accountCodeId: 勘定科目コードキー
+  // accountCode：勘定科目のコード
+  // accountCodeName: 勘定科目の名
+  // 戻り値：0（正常変更）、1（変更なし）、-1（重複勘定科目コードの場合）、Error（DBエラー、システムエラーなど）、-2（勘定科目検索失敗）
+  updatedAccountCode: async function (contractId, accountCodeId, accountCode, accountCodeName) {
+    const t = await db.sequelize.transaction()
+    let duplicatedFlag = false
+    try {
+      // 変更対象の勘定科目コードを検索
+      const accountCodeRecord = await AccountCode.findOne(
+        {
+          where: {
+            contractId,
+            accountCodeId
+          }
+        },
+        {
+          transaction: t
+        },
+        {
+          lock: t.LOCK
+        }
+      )
+      // 重複コード検索
+      const duplicatedAccountCodeRecord = await AccountCode.findAll(
+        {
+          where: {
+            [Op.and]: [
+              {
+                contractId: contractId
+              },
+              { accountCode: accountCode },
+              {
+                accountCodeId: {
+                  [Op.ne]: accountCodeId
+                }
+              }
+            ]
+          }
+        },
+        {
+          transaction: t
+        }
+      )
+      // 取得したデータから大小文字区別して重複チェック
+      duplicatedAccountCodeRecord.forEach((item) => {
+        if (item.accountCode === accountCode) {
+          duplicatedFlag = true
+        }
+      })
+
+      if (duplicatedFlag) {
+        return -1
+      }
+
+      if (accountCodeRecord === null) {
+        return -2
+      }
+
+      // 変更の値を入れる
+      accountCodeRecord.accountCode = accountCode
+      accountCodeRecord.accountCodeName = accountCodeName
+
+      // データ変更がある場合、DB保存する
+      if (accountCodeRecord._changed.size > 0) {
+        await accountCodeRecord.save({ transaction: t })
+        await t.commit()
+        return 0
+        // データ変更がない場合、1を返して
+      } else {
+        return 1
+      }
+    } catch (error) {
+      logger.error({ contractId: contractId, accountCodeId: accountCodeId, stack: error.stack, status: 0 })
+      await t.rollback()
       return error
     }
   }
