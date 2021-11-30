@@ -81,7 +81,7 @@ exports.isUserRegistered = async (req, res, next) => {
 }
 
 exports.checkContractStatus = async (tenantId) => {
-  let contracts = await contractController.findContract({ tenantId: tenantId }, 'createdAt DESC')
+  const contracts = await contractController.findContract({ tenantId: tenantId, deleteFlag: false }, 'createdAt DESC')
 
   // DB検索エラーの場合
   if (contracts instanceof Error) {
@@ -91,14 +91,6 @@ exports.checkContractStatus = async (tenantId) => {
   // contracts nullの場合
   if (contracts === null) {
     return null
-  }
-
-  if (Object.prototype.toString.call(contracts) === '[object Array]') {
-    contracts.forEach((contract) => {
-      if (contract.dataValues.deleteFlag === false) {
-        contracts = contract
-      }
-    })
   }
 
   // 契約状態返却、999は異常系の状態
