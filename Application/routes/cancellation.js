@@ -124,7 +124,7 @@ const cbPostCancellation = async (req, res, next) => {
   // 解約申込登録を行う
   const cancellation = await cancellationsController.create(req.user.tenantId, '{}', contractInformationcancelOrder)
 
-  if (cancellation instanceof Error || cancellation === null) return next(errorHelper.create(500))
+  if (cancellation instanceof Error) return next(errorHelper.create(500))
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostCancellation')
   return next(noticeHelper.create('cancellation'))

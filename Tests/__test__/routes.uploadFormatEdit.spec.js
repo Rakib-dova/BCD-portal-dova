@@ -825,6 +825,7 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
+      helpercheckContractStatusSpy.mockReturnValue('30')
 
       // 試験実施
       await uploadFormatEdit.cbPostIndex(request, response, next)

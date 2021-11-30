@@ -23,7 +23,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.env' })
 }
 let request, response
-let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy
+let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy, checkContractStatusSpy
 describe('csvBasicFormatのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -32,6 +32,7 @@ describe('csvBasicFormatのテスト', () => {
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSypTenant = jest.spyOn(tenantController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
+    checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     pathSpy = jest.spyOn(path, 'resolve')
   })
   afterEach(() => {
@@ -42,6 +43,7 @@ describe('csvBasicFormatのテスト', () => {
     findOneSpy.mockRestore()
     findOneSypTenant.mockRestore()
     findOneSpyContracts.mockRestore()
+    checkContractStatusSpy.mockReturnValue()
     pathSpy.mockRestore()
   })
 
@@ -273,6 +275,7 @@ describe('csvBasicFormatのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvBasicFormat.cbGetCsvBasicFormat(request, response, next)
@@ -308,6 +311,7 @@ describe('csvBasicFormatのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvBasicFormat.cbGetCsvBasicFormat(request, response, next)
@@ -470,7 +474,7 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).not.toHaveBeenCalled()
     })
 
-    test('異常：500エラー（不正なContractStatus）', async () => {
+    test('異常：500エラー（不正なContractStatus①）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {
@@ -494,7 +498,7 @@ describe('csvBasicFormatのテスト', () => {
       expect(next).toHaveBeenCalledWith(error500)
     })
 
-    test('異常：500エラー（不正なContractStatus）', async () => {
+    test('異常：500エラー（不正なContractStatus②）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = {
@@ -507,8 +511,7 @@ describe('csvBasicFormatのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの不正な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
-
-      helper.checkContractStatus = 999
+      checkContractStatusSpy.mockReturnValue(999)
 
       // 試験実施
       await csvBasicFormat.cbGetCsvBasicFormat(request, response, next)
