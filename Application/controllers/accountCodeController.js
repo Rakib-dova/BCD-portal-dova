@@ -2,7 +2,6 @@ const db = require('../models')
 const logger = require('../lib/logger')
 const AccountCode = db.AccountCode
 const constantsDefine = require('../constants')
-const Sequelize = require('sequelize')
 const { v4: uuidV4 } = require('uuid')
 const Op = db.Sequelize.Op
 module.exports = {
@@ -80,11 +79,7 @@ module.exports = {
         where: {
           contractId: contractId
         },
-        order: [
-          Sequelize.literal(
-            'CASE WHEN (ASCII(SUBSTRING(accountCode, 1, 1)) >= 48 and ASCII(SUBSTRING(accountCode, 1, 1)) <= 57) THEN 2 ELSE 1 END, accountCode ASC'
-          )
-        ]
+        order: [['accountCode', 'ASC']]
       })
 
       // 出力用データに加工する。
