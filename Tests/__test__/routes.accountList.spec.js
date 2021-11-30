@@ -134,7 +134,7 @@ describe('routes.accountListのテスト', () => {
         engTitle: 'ACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
-        messageForNotItem: '現在、勘定科目はありません。勘定科目を登録お願いします。',
+        messageForNotItem: '現在、勘定科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
         listNo: 'No',
         accountCode: '勘定科目コード',
@@ -176,7 +176,7 @@ describe('routes.accountListのテスト', () => {
         engTitle: 'ACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
         listArr: accountCodeListArrFour,
-        messageForNotItem: '現在、勘定科目はありません。勘定科目を登録お願いします。',
+        messageForNotItem: '現在、勘定科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
         listNo: 'No',
         accountCode: '勘定科目コード',
@@ -217,7 +217,7 @@ describe('routes.accountListのテスト', () => {
         engTitle: 'ACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
-        messageForNotItem: '現在、勘定科目はありません。勘定科目を登録お願いします。',
+        messageForNotItem: '現在、勘定科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
         listNo: 'No',
         accountCode: '勘定科目コード',
@@ -258,7 +258,7 @@ describe('routes.accountListのテスト', () => {
         engTitle: 'ACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
-        messageForNotItem: '現在、勘定科目はありません。勘定科目を登録お願いします。',
+        messageForNotItem: '現在、勘定科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
         listNo: 'No',
         accountCode: '勘定科目コード',
@@ -299,7 +299,7 @@ describe('routes.accountListのテスト', () => {
         engTitle: 'ACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
-        messageForNotItem: '現在、勘定科目はありません。勘定科目を登録お願いします。',
+        messageForNotItem: '現在、勘定科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
         listNo: 'No',
         accountCode: '勘定科目コード',
@@ -340,7 +340,7 @@ describe('routes.accountListのテスト', () => {
         engTitle: 'ACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
-        messageForNotItem: '現在、勘定科目はありません。勘定科目を登録お願いします。',
+        messageForNotItem: '現在、勘定科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
         listNo: 'No',
         accountCode: '勘定科目コード',
@@ -381,7 +381,7 @@ describe('routes.accountListのテスト', () => {
         engTitle: 'ACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
-        messageForNotItem: '現在、勘定科目はありません。勘定科目を登録お願いします。',
+        messageForNotItem: '現在、勘定科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
         listNo: 'No',
         accountCode: '勘定科目コード',
@@ -629,6 +629,33 @@ describe('routes.accountListのテスト', () => {
       const sqlError = new Error('DB SQL Error')
       userControllerFindOneSpy.mockReturnValue(userMock[0])
       findOneSpyContracts.mockReturnValue(sqlError)
+
+      // 試験実施
+      await accountCodeList.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      // response.renderが呼ばれ「ない」
+      expect(response.render).not.toHaveBeenCalled()
+    })
+    test('500エラー：勘定科目DBエラーの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      userControllerFindOneSpy.mockReturnValue(userMock[0])
+      findOneSpyContracts.mockReturnValue(contractMock[0])
+      tenantControllerFindOneSpy.mockReturnValue(tenantsMock[0])
+      contractControllerFindContractSpy.mockReturnValue(contractMock[0])
+      const dbError = new Error('accountCode Table Error')
+      getAccountCodeListSpy.mockReturnValue(dbError)
 
       // 試験実施
       await accountCodeList.cbGetIndex(request, response, next)

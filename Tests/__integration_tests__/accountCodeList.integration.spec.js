@@ -238,7 +238,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/勘定科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/現在、勘定科目はありません。勘定科目を登録お願いします。/i)
+      expect(res.text).toMatch(/現在、勘定科目はありません。新規登録するボタンから登録を行ってください。/i)
       expect(res.text).toMatch(/←Homeへ戻る/i)
     })
 

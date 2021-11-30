@@ -146,7 +146,7 @@ describe('accountCodeEditのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // DBからの正常な勘定科目情報取得を想定する
+      // DBからのnullの勘定科目情報取得を想定する
       accountCodeControllerGetAccountCodeSpy.mockReturnValue(null)
 
       // 試験実施
@@ -185,6 +185,8 @@ describe('accountCodeEditのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(Contracts[5])
       // DBからの正常な勘定科目情報取得を想定する
       tenatnsFindOneSpy.mockReturnValue(Tenants[5])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue('30')
 
       // 試験実施
       await accountCodeEdit.cbGetIndex(request, response, next)
@@ -294,6 +296,31 @@ describe('accountCodeEditのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
+    test('500エラー：不正な勘定科目データの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常な勘定科目情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue('00')
+      const accountCodeDbError = new Error('AccountCodeCode Table Error')
+      // DBからのnullの勘定科目情報取得を想定する
+      accountCodeControllerGetAccountCodeSpy.mockReturnValue(accountCodeDbError)
+      // checkContractStatusからreturnされる値設定
+
+      // 試験実施
+      await accountCodeEdit.cbGetIndex(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
     test('500エラー：不正なcheckContractStatus(null)', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -482,8 +509,7 @@ describe('accountCodeEditのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[6])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[5])
-      // DBからの正常な勘定科目情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[5])
+      checkContractStatusSpy.mockReturnValue('30')
 
       // 試験実施
       await accountCodeEdit.cbPostIndex(request, response, next)

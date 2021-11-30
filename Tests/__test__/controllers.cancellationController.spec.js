@@ -58,18 +58,20 @@ describe('cancellationsControllerのテスト', () => {
     test('正常：データ０件', async () => {
       // 準備
       // DBから取得したデータが「０件」を想定する
-      findContractSpy.mockReturnValueOnce(undefined)
+      findContractSpy.mockReturnValueOnce(null)
       const tenantIdNotExist = 'asdf'
       // 試験実施
       const result = await cancellationsController.create(tenantIdNotExist, cancelData)
+
       // 期待結果
       // 想定した契約情報がReturnされていること
       expect(errorSpy).toHaveBeenCalledWith(
         { user: tenantIdNotExist, stack: expect.anything(), status: 0 },
         expect.anything()
       )
-      expect(result).toEqual({ statuscode: '051', value: new Error('ERR051 Not Founded ContractId') })
-      // expect(result.length).toEqual(undefined)
+      expect(() => {
+        throw result
+      }).toThrowError('ERR051 Not Founded ContractId')
     })
 
     test('status 0のErrorログ: DBエラー時', async () => {
@@ -87,7 +89,9 @@ describe('cancellationsControllerのテスト', () => {
       // status: 0のErrorログ出力が呼ばれること
       expect(errorSpy).toHaveBeenCalledWith({ user: tenantId, stack: expect.anything(), status: 0 }, expect.anything())
       // DBErrorが返されること
-      expect(result).toEqual({ statuscode: '051', value: new Error('ERR051 Not Founded ContractId') })
+      expect(() => {
+        throw result
+      }).toThrowError('ERR051 Not Founded ContractId')
     })
 
     test('updateのErrorログ: DBエラー時', async () => {
@@ -104,7 +108,9 @@ describe('cancellationsControllerのテスト', () => {
       // status: 0のErrorログ出力が呼ばれること
       expect(errorSpy).toHaveBeenCalledWith({ user: tenantId, stack: expect.anything(), status: 0 }, expect.anything())
       // DBErrorが返されること
-      expect(result).toEqual({ statuscode: '052', value: new Error('ERR052 Not updated ContratStatus') })
+      expect(() => {
+        throw result
+      }).toThrowError(new Error('ERR052 Not updated ContratStatus'))
     })
   })
 })

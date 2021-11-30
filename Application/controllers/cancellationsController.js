@@ -57,7 +57,7 @@ module.exports = {
       } else if (errorStatus === '052') {
         logger.error({ user: _tenantId, stack: error.stack, status: 0 }, error.name)
       }
-      return { statuscode: errorStatus, value: error }
+      return error
     }
   }
 }
