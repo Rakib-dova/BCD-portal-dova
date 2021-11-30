@@ -633,7 +633,7 @@ const cbDeleteFormat = async (req, res, next) => {
       result: 0
     })
   }
-  // if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return res.send({
       result: 0

@@ -17,7 +17,7 @@ const accountCodeController = require('../../Application/controllers/accountCode
 const logger = require('../../Application/lib/logger.js')
 
 let request, response, infoSpy
-let userControllerFindOneSpy, contractControllerFindOneSpy, accountCodeControllerInsertSpy
+let userControllerFindOneSpy, contractControllerFindOneSpy, accountCodeControllerInsertSpy, checkContractStatusSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -64,6 +64,7 @@ describe('registAccountCodeのテスト', () => {
     contractControllerFindOneSpy = jest.spyOn(contractController, 'findOne')
     accountCodeControllerInsertSpy = jest.spyOn(accountCodeController, 'insert')
     request.flash = jest.fn()
+    checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
   })
   afterEach(() => {
     request.resetMocked()
@@ -73,6 +74,7 @@ describe('registAccountCodeのテスト', () => {
     userControllerFindOneSpy.mockRestore()
     contractControllerFindOneSpy.mockRestore()
     accountCodeControllerInsertSpy.mockRestore()
+    checkContractStatusSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -101,6 +103,9 @@ describe('registAccountCodeのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
 
       // 試験実施
       await registAccountCode.cbGetRegistAccountCode(request, response, next)
@@ -134,14 +139,15 @@ describe('registAccountCodeのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[1])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[5])
-      helper.checkContractStatus = '40'
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[5].dataValues.contractStatus)
       // 試験実施
       await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
@@ -177,8 +183,8 @@ describe('registAccountCodeのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[8])
+      // DBからの不正な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(null)
       // 試験実施
       await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
@@ -188,10 +194,8 @@ describe('registAccountCodeのテスト', () => {
       // expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // 解約手続き中画面が表示「される」
-      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
@@ -271,9 +275,8 @@ describe('registAccountCodeのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[1])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[1])
-
-      helper.checkContractStatus = null
-
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(null)
       // 試験実施
       await registAccountCode.cbGetRegistAccountCode(request, response, next)
 
@@ -281,7 +284,6 @@ describe('registAccountCodeのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-      helper.checkContractStatus = '00'
     })
 
     test('500エラー：不正なcheckContractStatus(999)', async () => {
@@ -295,7 +297,8 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[1])
 
-      helper.checkContractStatus = 999
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(999)
 
       // 試験実施
       await registAccountCode.cbGetRegistAccountCode(request, response, next)
@@ -304,7 +307,6 @@ describe('registAccountCodeのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-      helper.checkContractStatus = '00'
     })
   })
 
@@ -324,6 +326,10 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
       accountCodeControllerInsertSpy.mockReturnValue(true)
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
       // 試験実施
       await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
@@ -352,6 +358,8 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
       accountCodeControllerInsertSpy.mockReturnValue(false)
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
       // 試験実施
       await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
@@ -401,6 +409,8 @@ describe('registAccountCodeのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
       const dbError = new Error()
       accountCodeControllerInsertSpy.mockReturnValue(dbError)
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
       // 試験実施
       await registAccountCode.cbPostRegistAccountCode(request, response, next)
 
@@ -484,7 +494,7 @@ describe('registAccountCodeのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('500エラー：不正なContractStatus、 DBエラー', async () => {
+    test('500エラー：不正なContractStatus(null)、 DBエラー', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -495,7 +505,8 @@ describe('registAccountCodeのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[1])
 
-      helper.checkContractStatus = 999
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(null)
 
       // 試験実施
       await registAccountCode.cbPostRegistAccountCode(request, response, next)
@@ -516,7 +527,8 @@ describe('registAccountCodeのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[1])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[1])
-      helper.checkContractStatus = 999
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(999)
 
       // 試験実施
       await registAccountCode.cbPostRegistAccountCode(request, response, next)
@@ -525,7 +537,6 @@ describe('registAccountCodeのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-      helper.checkContractStatus = '00'
     })
 
     test('解約', async () => {
@@ -542,6 +553,8 @@ describe('registAccountCodeのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[7])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[6])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[6].dataValues.contractStatus)
       // 試験実施
       await registAccountCode.cbPostRegistAccountCode(request, response, next)
 

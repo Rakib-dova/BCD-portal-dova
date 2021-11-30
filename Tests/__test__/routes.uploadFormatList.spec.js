@@ -21,7 +21,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.env' })
 }
 
-let request, response, infoSpy, findOneSpy, findOneSpyContracts, getFormatListSpy
+let request, response, infoSpy, findOneSpy, findOneSpyContracts, getFormatListSpy, helpercheckContractStatusSpy
 describe('uploadFormatListのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -30,6 +30,7 @@ describe('uploadFormatListのテスト', () => {
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     infoSpy = jest.spyOn(logger, 'info')
     getFormatListSpy = jest.spyOn(uploadFormatListController, 'getFormatList')
+    helpercheckContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
   })
   afterEach(() => {
     request.resetMocked()
@@ -39,6 +40,7 @@ describe('uploadFormatListのテスト', () => {
     findOneSpy.mockRestore()
     findOneSpyContracts.mockRestore()
     getFormatListSpy.mockRestore()
+    helpercheckContractStatusSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -270,6 +272,8 @@ describe('uploadFormatListのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoData)
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
@@ -299,6 +303,9 @@ describe('uploadFormatListのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractInfoData)
       getFormatListSpy.mockReturnValue(uploadFormatListArrFour)
 
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue('00')
+
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -326,6 +333,9 @@ describe('uploadFormatListのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoData)
       getFormatListSpy.mockReturnValue([])
+
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
@@ -355,6 +365,9 @@ describe('uploadFormatListのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractInfoData)
       getFormatListSpy.mockReturnValue(uploadFormatListArrOneHundred)
 
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue('00')
+
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -383,6 +396,8 @@ describe('uploadFormatListのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptContract)
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
 
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptContract.dataValues.contractStatus)
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -411,6 +426,8 @@ describe('uploadFormatListのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingContract)
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
 
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptingContract.dataValues.contractStatus)
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -438,7 +455,8 @@ describe('uploadFormatListのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptChange)
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
-
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptContract.dataValues.contractStatus)
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -466,7 +484,8 @@ describe('uploadFormatListのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingChange)
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
-
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptingChange.dataValues.contractStatus)
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -494,7 +513,8 @@ describe('uploadFormatListのテスト', () => {
       findOneSpy.mockReturnValue(userInfoDataUserRoleNotTenantAdmin)
       findOneSpyContracts.mockReturnValue(contractInfoData)
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
-
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractInfoData.dataValues.contractStatus)
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -522,7 +542,8 @@ describe('uploadFormatListのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
-
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptCancel.dataValues.contractStatus)
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -548,7 +569,8 @@ describe('uploadFormatListのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingCancel)
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
-
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptingCancel.dataValues.contractStatus)
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -599,7 +621,8 @@ describe('uploadFormatListのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoNoData)
-      helper.checkContractStatus = 999
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(999)
 
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
@@ -691,6 +714,7 @@ describe('uploadFormatListのテスト', () => {
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
+
       // DBからのユーザデータの取得でエラーが発生した場合を想定する
       findOneSpy.mockReturnValue(new Error('DB error mock'))
       findOneSpyContracts.mockReturnValue(contractInfoData)
@@ -743,7 +767,8 @@ describe('uploadFormatListのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoData)
       getFormatListSpy.mockReturnValue(new Error('DB error mock'))
-
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractInfoData.dataValues.contractStatus)
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 

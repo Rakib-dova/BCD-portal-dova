@@ -255,7 +255,9 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
-      helper.checkContractStatus = 999
+
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(999)
 
       // 試験実施
       await uploadFormatEdit.cbGetIndex(request, response, next)
@@ -295,7 +297,9 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
-      helper.checkContractStatus = 0
+
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(30)
 
       // 試験実施
       await uploadFormatEdit.cbGetIndex(request, response, next)
@@ -335,7 +339,8 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
-
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(31)
       // 試験実施
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
@@ -374,6 +379,9 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue('00')
+
       controllerSpyUploadFormat.mockReturnValue(new Error('uploadFormatController Error'))
 
       // 試験実施
@@ -542,6 +550,8 @@ describe('uploadFormatのテスト', () => {
         }
       })
       controllerSpyUploadFormat.mockReturnValue(result)
+
+      // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(0)
       // 試験実施
       await uploadFormatEdit.cbGetIndex(request, response, next)
@@ -745,6 +755,8 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
+
+      // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(999)
 
       // 試験実施
@@ -785,7 +797,9 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
-      helpercheckContractStatusSpy.mockReturnValue(0)
+
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(30)
 
       // 試験実施
       await uploadFormatEdit.cbPostIndex(request, response, next)
@@ -825,7 +839,9 @@ describe('uploadFormatのテスト', () => {
           tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
         }
       })
-      helpercheckContractStatusSpy.mockReturnValue('30')
+
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(31)
 
       // 試験実施
       await uploadFormatEdit.cbPostIndex(request, response, next)
