@@ -509,8 +509,7 @@ describe('accountCodeEditのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[6])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[5])
-      // DBからの正常な勘定科目情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[5])
+      checkContractStatusSpy.mockReturnValue('30')
 
       // 試験実施
       await accountCodeEdit.cbPostIndex(request, response, next)

@@ -72,7 +72,6 @@ describe('cancellationsControllerのテスト', () => {
       expect(() => {
         throw result
       }).toThrowError('ERR051 Not Founded ContractId')
-      // expect(result.length).toEqual(undefined)
     })
 
     test('status 0のErrorログ: DBエラー時', async () => {

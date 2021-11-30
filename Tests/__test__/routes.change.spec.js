@@ -311,7 +311,7 @@ describe('changeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingContract)
-      checkcontractStatusSpy.mockReturnValue('42')
+      checkcontractStatusSpy.mockReturnValue('11')
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)

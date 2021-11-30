@@ -552,7 +552,7 @@ describe('uploadFormatのテスト', () => {
       controllerSpyUploadFormat.mockReturnValue(result)
 
       // ユーザ権限チェック結果設定
-      helpercheckContractStatusSpy.mockReturnValue(0)
+      helpercheckContractStatusSpy.mockReturnValue('00')
       // 試験実施
       await uploadFormatEdit.cbGetIndex(request, response, next)
 

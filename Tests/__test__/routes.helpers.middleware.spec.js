@@ -996,7 +996,7 @@ describe('helpers/middlewareのテスト', () => {
       const result = await middleware.checkContractStatus(request.user.tenantId)
 
       // 期待結果
-      // return値がnullであること
+      // return値が999であること
       expect(result).toBe(999)
     })
   })
