@@ -148,7 +148,7 @@ stages:
                   inputs:
                     azureSubscription: "$(azureSubscriptionEndpoint)"
                     appName: "$(appserviceName)"
-                    containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
+                    containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
 
 
   - stage: Deploy
