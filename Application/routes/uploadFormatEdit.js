@@ -35,7 +35,7 @@ const cbGetIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = helper.checkContractStatus
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
@@ -84,7 +84,7 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = await helper.checkContractStatus(req, res, next)
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 

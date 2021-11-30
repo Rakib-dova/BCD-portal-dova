@@ -39,7 +39,7 @@ const cbGetIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = await helper.checkContractStatus(req, res, next)
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
   if (checkContractStatus === null || checkContractStatus === 999) {
     return next(errorHelper.create(500))
@@ -60,7 +60,7 @@ const cbGetIndex = async (req, res, next) => {
     engTitle: 'ACCOUNT CODE LIST',
     btnNameForRegister: '新規登録する',
     listArr: accountCodeListArr,
-    messageForNotItem: '現在、勘定科目はありません。勘定科目を登録お願いします。',
+    messageForNotItem: '現在、勘定科目はありません。新規登録するボタンから登録を行ってください。',
     // リスト表示カラム
     listNo: 'No',
     accountCode: '勘定科目コード',
