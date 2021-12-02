@@ -617,8 +617,12 @@ const dataToJson = (data) => {
     invoice.発行日 = data.IssueDate.value
 
     // 宛先情報
-    invoice['宛先-テナントID'] = data.AccountingCustomerParty.Party.PartyIdentification[0]?.ID.value ?? ''
-    invoice['宛先-会社名'] = data.AccountingCustomerParty.Party.PartyName[0]?.Name.value ?? ''
+    if (data.AccountingCustomerParty.Party.PartyIdentification || false) {
+      invoice['宛先-テナントID'] = data.AccountingCustomerParty.Party.PartyIdentification[0].ID.value
+    }
+    if (data.AccountingCustomerParty.Party.Name || false) {
+      invoice['宛先-会社名'] = data.AccountingCustomerParty.Party.PartyName[0].Name.value
+    }
     // 宛先住所情報
     if (data.AccountingCustomerParty.Party.PostalAddress || false) {
       invoice['宛先-国/地域'] = data.AccountingCustomerParty.Party.PostalAddress.Country?.IdentificationCode.value ?? ''
@@ -632,8 +636,12 @@ const dataToJson = (data) => {
     // invoice['宛先-GLN（企業・事業所識別コード）'] = data.AccountingCustomerParty.Party.PartyIdentification[0].ID.value
 
     // 差出人情報
-    invoice['差出人-テナントID'] = data.AccountingSupplierParty.Party.PartyIdentification[0]?.ID.value ?? ''
-    invoice['差出人-会社名'] = data.AccountingSupplierParty.Party.PartyName[0]?.Name.value ?? ''
+    if (data.AccountingSupplierParty.Party.PartyIdentification || false) {
+      invoice['差出人-テナントID'] = data.AccountingSupplierParty.Party.PartyIdentification[0].ID.value
+    }
+    if (data.AccountingSupplierParty.Party.PartyName || false) {
+      invoice['差出人-会社名'] = data.AccountingSupplierParty.Party.PartyName[0].Name.value
+    }
     // 差出人住所情報
     if (data.AccountingSupplierParty.Party.PostalAddress || false) {
       invoice['差出人-国/地域'] =
