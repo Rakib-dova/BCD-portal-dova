@@ -675,10 +675,32 @@ const dataToJson = (data) => {
     // 必須項目チェック
     invoice.発行日 = data.IssueDate.value
 
-    // 宛先情報
+    /// 宛先テナントID及びGLN等の情報
     if (data.AccountingCustomerParty.Party.PartyIdentification || false) {
-      invoice['宛先-テナントID'] = data.AccountingCustomerParty.Party.PartyIdentification[0].ID.value
+      const partyIdentificationData = []
+      data.AccountingCustomerParty.Party.PartyIdentification.forEach((item) => {
+        switch (item.ID.schemeID) {
+          case 'TS:ID':
+            invoice['宛先-テナントID'] = item.ID.value
+            break
+          case 'TS:REGNO':
+            partyIdentificationData.push(`${item.ID.schemeName}:${item.ID.value}`)
+            break
+          case 'GLN':
+            partyIdentificationData.push(`${item.ID.schemeID}:${item.ID.value}`)
+            break
+          case 'JP:CT':
+            partyIdentificationData.push(`法人番号:${item.ID.value}`)
+            break
+        }
+      })
+      if (partyIdentificationData.length > 1) {
+        invoice['宛先-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString().replace(/,/gi, '、')}}`
+      } else {
+        invoice['宛先-GLN（企業・事業所識別コード）'] = partyIdentificationData.toString()
+      }
     }
+    // 宛先会社名情報
     if (data.AccountingCustomerParty.Party.PartyName || false) {
       invoice['宛先-会社名'] = data.AccountingCustomerParty.Party.PartyName[0].Name.value
     }
@@ -692,12 +714,33 @@ const dataToJson = (data) => {
       invoice['宛先-ビル、マンション名'] =
         data.AccountingCustomerParty.Party.PostalAddress.AdditionalStreetName?.value ?? ''
     }
-    // invoice['宛先-GLN（企業・事業所識別コード）'] = data.AccountingCustomerParty.Party.PartyIdentification[0].ID.value
 
-    // 差出人情報
+    // 差出人テナントID及びGLN等の情報
     if (data.AccountingSupplierParty.Party.PartyIdentification || false) {
-      invoice['差出人-テナントID'] = data.AccountingSupplierParty.Party.PartyIdentification[0].ID.value
+      const partyIdentificationData = []
+      data.AccountingSupplierParty.Party.PartyIdentification.forEach((item) => {
+        switch (item.ID.schemeID) {
+          case 'TS:ID':
+            invoice['差出人-テナントID'] = item.ID.value
+            break
+          case 'TS:REGNO':
+            partyIdentificationData.push(`${item.ID.schemeName}:${item.ID.value}`)
+            break
+          case 'GLN':
+            partyIdentificationData.push(`${item.ID.schemeID}:${item.ID.value}`)
+            break
+          case 'JP:CT':
+            partyIdentificationData.push(`法人番号:${item.ID.value}`)
+            break
+        }
+      })
+      if (partyIdentificationData.length > 1) {
+        invoice['差出人-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString().replace(/,/gi, '、')}}`
+      } else {
+        invoice['差出人-GLN（企業・事業所識別コード）'] = partyIdentificationData.toString()
+      }
     }
+    // 差出人会社名情報
     if (data.AccountingSupplierParty.Party.PartyName || false) {
       invoice['差出人-会社名'] = data.AccountingSupplierParty.Party.PartyName[0].Name.value
     }
