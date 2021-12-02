@@ -1,5 +1,6 @@
 'use strict'
 const express = require('express')
+const DOMParser = require('dom-parser')
 const router = express.Router()
 const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
@@ -594,7 +595,30 @@ const dataToJson = (data) => {
     テナントID: '',
     支払期日: '',
     納品日: '',
+    納品開始日: '',
+    納品終了日: '',
     備考: '',
+    注文書番号: '',
+    注文書発行日: '',
+    参考情報: '',
+    契約書番号: '',
+    部門: '',
+    '取引先担当者（アドレス）': '',
+    輸送情報: '',
+    Tradeshiftクリアランス: '',
+    通関識別情報: '',
+    ID: '',
+    課税日: '',
+    販売者の手数料番号: '',
+    DUNSナンバー: '',
+    貿易取引条件: '',
+    暫定時間: '',
+    予約番号: '',
+    為替レート: '',
+    '為替レート-通貨': '',
+    '為替レート-日付': '',
+    為替レート換算後の税金総額: '',
+    '為替レート-Convertd Document Total(incl taxes)': '',
     支払方法: '',
     '支払い条件-割引率': '',
     '支払い条件-割増率': '',
@@ -654,6 +678,7 @@ const dataToJson = (data) => {
     '明細-税（消費税／軽減税率／不課税／免税／非課税）': '',
     '明細-備考': ''
   }
+
   const unitCodeKeys = Object.keys(bconCsvUnitDefault)
   // 現金払い, 小切手払い, BankCardどちか一つ
   let paymentMeanIndex = false
@@ -949,25 +974,156 @@ const dataToJson = (data) => {
     }
 
     if (data.Delivery) {
+      // 納品日
       if (data.Delivery[0].ActualDeliveryDate?.value ?? false) {
-        invoice.納品日 = data.Delivery[0].ActualDeliveryDate.value ?? ''
+        invoice.納品日 = data.Delivery[0].ActualDeliveryDate?.value
+      }
+
+      // PromisedDeliveryPeriod（納品開始日、納品終了日）
+      // 納品開始日
+      if (data.Delivery[0].PromisedDeliveryPeriod?.StartDate?.value ?? false) {
+        invoice.納品開始日 = data.Delivery[0].PromisedDeliveryPeriod?.StartDate?.value
+      }
+
+      // 納品終了日
+      if (data.Delivery[0].PromisedDeliveryPeriod?.EndDate?.value ?? false) {
+        invoice.納品終了日 = data.Delivery[0].PromisedDeliveryPeriod?.EndDate?.value
+      }
+
+      // 販売者の手数料番号
+      if (data.Delivery[0].Despatch?.ID?.value ?? false) {
+        invoice.販売者の手数料番号 = data.Delivery[0].Despatch?.ID?.value
+      }
+    }
+
+    // 注文書
+    if (data.OrderReference) {
+      // 注文書番号
+      if (data.OrderReference?.ID?.value ?? false) {
+        invoice.注文書番号 = data.OrderReference?.ID?.value
+      }
+
+      // 注文書発行日
+      if (data.OrderReference?.IssueDate?.value ?? false) {
+        invoice.注文書発行日 = data.OrderReference?.IssueDate?.value
+      }
+    }
+
+    // 参考情報
+    if (data.BillingReference) {
+      if (data.BillingReference[0]?.InvoiceDocumentReference?.ID?.value ?? false) {
+        invoice.参考情報 = data.BillingReference[0]?.InvoiceDocumentReference?.ID?.value
+      }
+    }
+
+    // 契約書番号
+    if (data.ContractDocumentReference) {
+      if (data.ContractDocumentReference[0]?.ID?.value ?? false) {
+        invoice.契約書番号 = data.ContractDocumentReference[0]?.ID?.value
+      }
+    }
+
+    // 部門
+    if (data.AccountingCost) {
+      if (data.AccountingCost?.value ?? false) {
+        invoice.部門 = data.AccountingCost?.value
+      }
+    }
+
+    if (data.AccountingCustomerParty) {
+      // 取引先担当者（アドレス）
+      if (data.AccountingCustomerParty.Party?.Contact?.ID?.value ?? false) {
+        invoice['取引先担当者（アドレス）'] = data.AccountingCustomerParty.Party.Contact?.ID?.value
+      }
+
+      // ID
+      if (data.AccountingCustomerParty.CustomerAssignedAccountID?.value ?? false) {
+        invoice.ID = data.AccountingCustomerParty.CustomerAssignedAccountID?.value
       }
     }
 
     if (data.AdditionalDocumentReference) {
-      if (data.AdditionalDocumentReference[0].DocumentTypeCode.value === 'File ID') {
-        invoice.備考 = data.AdditionalDocumentReference[0].ID.value ?? ''
+      for (i = 0; i < data.AdditionalDocumentReference.length; i++) {
+        if (data.AdditionalDocumentReference[i]?.DocumentTypeCode?.value === 'File ID') {
+          // 備考
+          invoice.備考 = data.AdditionalDocumentReference[i].ID.value
+        } else if (data.AdditionalDocumentReference[i].DocumentTypeCode.value === 'BOL ID') {
+          // 輸送情報
+          invoice.輸送情報 = data.AdditionalDocumentReference[i].ID.value
+        } else if (data.AdditionalDocumentReference[i].DocumentTypeCode.value === 'Interim Hours') {
+          // 暫定時間
+          invoice.暫定時間 = data.AdditionalDocumentReference[i].ID.value
+        } else if (data.AdditionalDocumentReference[i].DocumentTypeCode.value === 'Clearance Clave') {
+          // 通関識別情報
+          invoice.通関識別情報 = data.AdditionalDocumentReference[i].ID.value
+        } else if (data.AdditionalDocumentReference[i].DocumentTypeCode.value === 'TS Clearance') {
+          // Tradeshiftクリアランス
+          invoice.Tradeshiftクリアランス = data.AdditionalDocumentReference[i].ID.value
+        } else if (data.AdditionalDocumentReference[i].DocumentTypeCode.value === 'BookingNumber') {
+          // 予約番号
+          invoice.予約番号 = data.AdditionalDocumentReference[i].ID.value
+        }
+      }
+    }
+
+    // 課税日
+    if (data.TaxPointDate) {
+      invoice.課税日 = data.TaxPointDate?.value
+    }
+
+    if (data.AccountingSupplierParty) {
+      // DUNSナンバー
+      if (data.AccountingSupplierParty.Party?.PhysicalLocation?.ID?.value ?? false) {
+        invoice.DUNSナンバー = data.AccountingSupplierParty.Party?.PhysicalLocation?.ID?.value
+      }
+    }
+
+    // 為替レート
+    if (data.TaxExchangeRate) {
+      // 為替レート
+      if (data.TaxExchangeRate?.CalculationRate?.value ?? false) {
+        invoice.為替レート = data.TaxExchangeRate?.CalculationRate?.value
+      }
+
+      // 為替レート-通貨
+      if (data.TaxExchangeRate?.TargetCurrencyCode?.value ?? false) {
+        invoice['為替レート-通貨'] = data.TaxExchangeRate?.TargetCurrencyCode?.value
+      }
+
+      // 為替レート-日付
+      if (data.TaxExchangeRate?.Date?.value ?? false) {
+        invoice['為替レート-日付'] = data.TaxExchangeRate?.Date?.value
+      }
+    }
+
+    // 為替レート換算後の税金総額
+    if (data.TaxTotal) {
+      if (data.TaxTotal[0]?.TaxSubtotal[0]?.TransactionCurrencyTaxAmount?.value ?? false) {
+        invoice.為替レート換算後の税金総額 = data.TaxTotal[0]?.TaxSubtotal[0]?.TransactionCurrencyTaxAmount?.value
+      }
+    }
+
+    // 為替レート-Convertd Document Total(incl taxes)
+    if (data.UBLExtensions) {
+      if (data.UBLExtensions?.UBLExtension[0]?.ExtensionContent?.value ?? false) {
+        const dom = new DOMParser().parseFromString(
+          data.UBLExtensions?.UBLExtension[0]?.ExtensionContent?.value,
+          'text/xml'
+        )
+        const xmlValue = dom.getElementsByTagName('ts')[0].childNodes[0].text
+
+        invoice['為替レート-Convertd Document Total(incl taxes)'] = xmlValue
       }
     }
 
     if (data.Note) {
       if (data.Note[0]?.value) {
-        invoice.その他特記事項 = data.Note[0].value ?? ''
+        invoice.その他特記事項 = data.Note[0].value
       }
     }
 
-    if (data.InvoiceLine[i].DocumentReference) {
-      invoice['明細-備考'] = data.InvoiceLine[i].DocumentReference[0].ID.value ?? ''
+    if (data.InvoiceLine[i]?.DocumentReference) {
+      invoice['明細-備考'] = data.InvoiceLine[i].DocumentReference[0].ID.value
     }
 
     // 明細をjsonDataに入れる
@@ -979,12 +1135,14 @@ const dataToJson = (data) => {
 
 const jsonToCsv = (jsonData) => {
   const jsonArray = jsonData
+
   let csvString = ''
   const replacer = (key, value) => (value === null ? '' : value)
   const titles = Object.keys(jsonArray[0])
   csvString = jsonArray.map((row) => titles.map((fieldName) => JSON.stringify(row[fieldName], replacer)).join(','))
   csvString.unshift(titles.join(','))
   csvString = csvString.join('\r\n')
+
   return csvString
 }
 
