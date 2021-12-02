@@ -620,7 +620,7 @@ const dataToJson = (data) => {
     if (data.AccountingCustomerParty.Party.PartyIdentification || false) {
       invoice['宛先-テナントID'] = data.AccountingCustomerParty.Party.PartyIdentification[0].ID.value
     }
-    if (data.AccountingCustomerParty.Party.Name || false) {
+    if (data.AccountingCustomerParty.Party.PartyName || false) {
       invoice['宛先-会社名'] = data.AccountingCustomerParty.Party.PartyName[0].Name.value
     }
     // 宛先住所情報
