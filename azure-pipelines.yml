@@ -22,6 +22,7 @@ parameters:
     default: dev
     values:
       - dev
+      - dev2
       - prodstg
       - prod
       - demo
@@ -33,7 +34,7 @@ variables:
   - name: tag
     value: $[format('{0:yyyyMMdd}', pipeline.startTime)]
   - name: devDeploy #開発環境デプロイフラグ
-    value: ${{ eq(parameters.Environment,'dev')}}
+    value: ${{ or(eq(parameters.Environment,'dev'), eq(parameters.Environment,'dev2'))}}
   - name: Deploy #prod, proddtg, demo環境デプロイフラグ
     value: ${{ or(eq(parameters.Environment,'prodstg'), eq(parameters.Environment,'prod'),eq(parameters.Environment,'demo'),eq(parameters.Environment,'test'))}}
   - name: japanwest #西日本デプロイフラグ
