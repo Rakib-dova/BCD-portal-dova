@@ -720,7 +720,7 @@ const dataToJson = (data) => {
         }
       })
       if (partyIdentificationData.length > 1) {
-        invoice['宛先-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString().replace(/,/gi, '、')}}`
+        invoice['宛先-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString()}`
       } else {
         invoice['宛先-GLN（企業・事業所識別コード）'] = partyIdentificationData.toString()
       }
@@ -760,7 +760,7 @@ const dataToJson = (data) => {
         }
       })
       if (partyIdentificationData.length > 1) {
-        invoice['差出人-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString().replace(/,/gi, '、')}}`
+        invoice['差出人-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString()}`
       } else {
         invoice['差出人-GLN（企業・事業所識別コード）'] = partyIdentificationData.toString()
       }
