@@ -99,7 +99,10 @@ const axios = {
               A01007: 6,
               A: 7,
               A01009: 8,
-              A01011: 9
+              A01011: 9,
+              A01012: 10,
+              A01013: 11,
+              A01014: 12
             }
             this.result.data = {
               itemPerPage: 25,
@@ -156,6 +159,18 @@ const axios = {
           status: 404
         }
         return this.result
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd13': {
+        const invoice = require('../mockInvoice/invoice10')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd14': {
+        const invoice = require('../mockInvoice/invoice11')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd15': {
+        const invoice = require('../mockInvoice/invoice12')
+        return { data: invoice }
       }
       default: {
         if (paramateter[2] === 'minissuedate=1990-01-01') {
@@ -704,6 +719,18 @@ const dcouments = {
     {
       DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd12',
       ID: 'A01011'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd13',
+      ID: 'A01012'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd14',
+      ID: 'A01013'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd15',
+      ID: 'A01014'
     }
   ]
 }
