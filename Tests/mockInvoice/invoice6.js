@@ -197,7 +197,7 @@ module.exports = {
         value: '1f79a689-25ff-4ea4-8b45-38e48ac5cb68'
       },
       PaymentMeansCode: {
-        value: '1',
+        value: '42',
         listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
       },
       PaymentDueDate: {
