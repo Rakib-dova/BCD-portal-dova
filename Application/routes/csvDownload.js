@@ -480,6 +480,7 @@ const cbPostIndex = async (req, res, next) => {
         let documentId = ''
         // 請求書番号で検索した結果の配列を取得
         const documents = documentsResult.Document
+
         // 取得した配列から請求書番号（UUID）を取得
         documents.map((doc) => {
           if (doc.ID === invoiceNumber) {
@@ -676,7 +677,103 @@ const dataToJson = (data) => {
     '明細-単位': '',
     '明細-単価': '',
     '明細-税（消費税／軽減税率／不課税／免税／非課税）': '',
-    '明細-備考': ''
+    '明細-小計 (税抜)': '',
+    '明細-割引1-内容': '',
+    '明細-割引1-値': '',
+    '明細-割引1-単位': '',
+    '明細-割引1-単価': '',
+    '明細-割引2-内容': '',
+    '明細-割引2-値': '',
+    '明細-割引2-単位': '',
+    '明細-割引2-単価': '',
+    '明細-割引3-内容': '',
+    '明細-割引3-値': '',
+    '明細-割引3-単位': '',
+    '明細-割引3-単価': '',
+    '明細-割引4以降': '',
+    '明細-追加料金1-内容': '',
+    '明細-追加料金1-値': '',
+    '明細-追加料金1-単位': '',
+    '明細-追加料金1-単価': '',
+    '明細-追加料金2-内容': '',
+    '明細-追加料金2-値': '',
+    '明細-追加料金2-単位': '',
+    '明細-追加料金2-単価': '',
+    '明細-追加料金3-内容': '',
+    '明細-追加料金3-値': '',
+    '明細-追加料金3-単位': '',
+    '明細-追加料金3-単価': '',
+    '明細-追加料金4以降': '',
+    '明細-輸送情報': '',
+    '明細-備考': '',
+    '明細-貿易取引条件': '',
+    '明細-シリアルナンバー': '',
+    '明細-商品分類コード: ECCN': '',
+    '明細-発注者品番': '',
+    '明細-注文明細番号': '',
+    '明細-EAN/GTIN': '',
+    '明細-ロケーションID': '',
+    '明細-貨物注文番号': '',
+    '明細-納品日': '',
+    '明細-HSN/SAC区分': '',
+    '明細-HSN/SACの値': '',
+    '明細-非課税/免税の理由': '',
+    '明細-注文書番号': '',
+    '明細-詳細': '',
+    '明細-メーカー名': '',
+    '明細-原産国': '',
+    '明細-納期': '',
+    '明細-配送先-私書箱': '',
+    '明細-配送先-市区町村番地': '',
+    '明細-配送先-マンション名': '',
+    '明細-配送先-都道府県': '',
+    '明細-配送先-郵便番号': '',
+    '明細-配送先-国': '',
+    '割引1-項目ID': '',
+    '割引1-内容': '',
+    '割引1-数量': '',
+    '割引1-単位': '',
+    '割引1-税': '',
+    '割引1-小計 (税抜)': '',
+    '割引2-項目ID': '',
+    '割引2-内容': '',
+    '割引2-数量': '',
+    '割引2-単位': '',
+    '割引2-税': '',
+    '割引2-小計 (税抜)': '',
+    '割引3-項目ID': '',
+    '割引3-内容': '',
+    '割引3-数量': '',
+    '割引3-単位': '',
+    '割引3-税': '',
+    '割引3-小計 (税抜)': '',
+    割引4以降: '',
+    '追加料金1-項目ID': '',
+    '追加料金1-内容': '',
+    '追加料金1-数量': '',
+    '追加料金1-単位': '',
+    '追加料金1-税': '',
+    '追加料金1-小計（税抜）': '',
+    '追加料金2-項目ID': '',
+    '追加料金2-内容': '',
+    '追加料金2-数量': '',
+    '追加料金2-単位': '',
+    '追加料金2-税': '',
+    '追加料金2-小計（税抜）': '',
+    '追加料金3-項目ID': '',
+    '追加料金3-内容': '',
+    '追加料金3-数量': '',
+    '追加料金3-単位': '',
+    '追加料金3-税': '',
+    '追加料金3-小計（税抜）': '',
+    追加料金4以降: '',
+    '固定税1-項目ID': '',
+    '固定税1-税': '',
+    '固定税2-項目ID': '',
+    '固定税2-税': '',
+    '固定税3-項目ID': '',
+    '固定税3-税': '',
+    固定税4以降: ''
   }
 
   const unitCodeKeys = Object.keys(bconCsvUnitDefault)
@@ -706,7 +803,7 @@ const dataToJson = (data) => {
         }
       })
       if (partyIdentificationData.length > 1) {
-        invoice['宛先-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString()}`
+        invoice['宛先-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString()}}`
       } else {
         invoice['宛先-GLN（企業・事業所識別コード）'] = partyIdentificationData.toString()
       }
@@ -746,7 +843,7 @@ const dataToJson = (data) => {
         }
       })
       if (partyIdentificationData.length > 1) {
-        invoice['差出人-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString()}`
+        invoice['差出人-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString()}}`
       } else {
         invoice['差出人-GLN（企業・事業所識別コード）'] = partyIdentificationData.toString()
       }
@@ -769,26 +866,6 @@ const dataToJson = (data) => {
     // invoice['宛先-GLN（企業・事業所識別コード）'] = data.AccountingSupplierParty.Party.PartyIdentification[0].ID.value
 
     invoice.請求書番号 = data.ID.value
-
-    invoice['明細-項目ID'] = data.InvoiceLine[i].ID.value
-    invoice['明細-内容'] = data.InvoiceLine[i].Item.Description[0].value
-    invoice['明細-数量'] = data.InvoiceLine[i].InvoicedQuantity.value
-    const unitcode = data.InvoiceLine[i].InvoicedQuantity.unitCode
-    unitCodeKeys.map((key) => {
-      if (bconCsvUnitDefault[key] === unitcode) {
-        invoice['明細-単位'] = key
-      }
-      return ''
-    })
-    invoice['明細-単価'] = data.InvoiceLine[i].LineExtensionAmount.value
-    const taxName = (data.InvoiceLine[i].TaxTotal[0].TaxSubtotal[0]?.TaxCategory.TaxScheme.Name.value)
-      .replace('JP ', '')
-      .replace('消費税(軽減税率)', '軽減税率')
-      .replace(' 10%', '')
-      .replace(' 8%', '')
-      .replace(' 0%', '')
-
-    invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
 
     // 任意項目チェック
     // 支払条件チェック
@@ -1345,25 +1422,25 @@ const dataToJson = (data) => {
     }
 
     if (data.AdditionalDocumentReference) {
-      for (let i = 0; i < data.AdditionalDocumentReference.length; i++) {
-        if (data.AdditionalDocumentReference[i]?.DocumentTypeCode?.value === 'File ID') {
+      for (let j = 0; j < data.AdditionalDocumentReference.length; j++) {
+        if (data.AdditionalDocumentReference[j]?.DocumentTypeCode?.value === 'File ID') {
           // 備考
-          invoice.備考 = data.AdditionalDocumentReference[i].ID.value
-        } else if (data.AdditionalDocumentReference[i].DocumentTypeCode.value === 'BOL ID') {
+          invoice.備考 = data.AdditionalDocumentReference[j].ID.value
+        } else if (data.AdditionalDocumentReference[j].DocumentTypeCode.value === 'BOL ID') {
           // 輸送情報
-          invoice.輸送情報 = data.AdditionalDocumentReference[i].ID.value
-        } else if (data.AdditionalDocumentReference[i].DocumentTypeCode.value === 'Interim Hours') {
+          invoice.輸送情報 = data.AdditionalDocumentReference[j].ID.value
+        } else if (data.AdditionalDocumentReference[j].DocumentTypeCode.value === 'Interim Hours') {
           // 暫定時間
-          invoice.暫定時間 = data.AdditionalDocumentReference[i].ID.value
-        } else if (data.AdditionalDocumentReference[i].DocumentTypeCode.value === 'Clearance Clave') {
+          invoice.暫定時間 = data.AdditionalDocumentReference[j].ID.value
+        } else if (data.AdditionalDocumentReference[j].DocumentTypeCode.value === 'Clearance Clave') {
           // 通関識別情報
-          invoice.通関識別情報 = data.AdditionalDocumentReference[i].ID.value
-        } else if (data.AdditionalDocumentReference[i].DocumentTypeCode.value === 'TS Clearance') {
+          invoice.通関識別情報 = data.AdditionalDocumentReference[j].ID.value
+        } else if (data.AdditionalDocumentReference[j].DocumentTypeCode.value === 'TS Clearance') {
           // Tradeshiftクリアランス
-          invoice.Tradeshiftクリアランス = data.AdditionalDocumentReference[i].ID.value
-        } else if (data.AdditionalDocumentReference[i].DocumentTypeCode.value === 'BookingNumber') {
+          invoice.Tradeshiftクリアランス = data.AdditionalDocumentReference[j].ID.value
+        } else if (data.AdditionalDocumentReference[j].DocumentTypeCode.value === 'BookingNumber') {
           // 予約番号
-          invoice.予約番号 = data.AdditionalDocumentReference[i].ID.value
+          invoice.予約番号 = data.AdditionalDocumentReference[j].ID.value
         }
       }
     }
@@ -1424,8 +1501,325 @@ const dataToJson = (data) => {
       }
     }
 
+    // InvoiceLine
+
+    invoice['明細-項目ID'] = data.InvoiceLine[i].ID.value
+
+    invoice['明細-数量'] = data.InvoiceLine[i].InvoicedQuantity.value
+    const unitcode = data.InvoiceLine[i].InvoicedQuantity.unitCode
+    unitCodeKeys.map((key) => {
+      if (bconCsvUnitDefault[key] === unitcode) {
+        invoice['明細-単位'] = key
+      }
+      return ''
+    })
+    invoice['明細-小計 (税抜)'] = data.InvoiceLine[i].LineExtensionAmount?.value
+
+    if (data.InvoiceLine[i].OrderLineReference) {
+      // 明細-注文書番号
+      invoice['明細-注文書番号'] = data.InvoiceLine[i].OrderLineReference[0]?.OrderReference?.ID?.value
+      // 明細-注文明細番号
+      invoice['明細-注文明細番号'] = data.InvoiceLine[i].OrderLineReference[0]?.LineID?.value
+    }
+
+    if (data.InvoiceLine[i]?.TaxTotal) {
+      const taxName = (data.InvoiceLine[i].TaxTotal[0]?.TaxSubtotal[0]?.TaxCategory?.TaxScheme?.Name?.value)
+        .replace('JP ', '')
+        .replace('消費税(軽減税率)', '軽減税率')
+        .replace(' 10%', '')
+        .replace(' 8%', '')
+        .replace(' 0%', '')
+
+      // 明細-税（消費税／軽減税率／不課税／免税／非課税）
+      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+
+      // 明細-非課税/免税の理由
+      invoice['明細-非課税/免税の理由'] =
+        data.InvoiceLine[i].TaxTotal[0]?.TaxSubtotal[0]?.TaxCategory?.TaxExemptionReason?.value
+    }
+
+    // 割引の個数（１～３）
+    let discountNumbering = 1
+    // 追加料金の個数（１～３）
+    let addAmountNumbering = 1
+
+    if (data.InvoiceLine[i]?.AllowanceCharge) {
+      for (let m = 0; m < data.InvoiceLine[i]?.AllowanceCharge?.length; m++) {
+        if (data.InvoiceLine[i]?.AllowanceCharge[m]?.ChargeIndicator?.value === false) {
+          // 割引
+          if (discountNumbering === 1) {
+            // 明細-割引1-内容
+            invoice['明細-割引1-内容'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.AllowanceChargeReason?.value
+
+            // 明細-割引1-単位
+            if (data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['明細-割引1-単位'] = 'JPY'
+            } else {
+              invoice['明細-割引1-単位'] = '%'
+
+              // 明細-割引1-値
+              invoice['明細-割引1-値'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            // 明細-割引1-単価
+            invoice['明細-割引1-単価'] = '-' + data.InvoiceLine[i]?.AllowanceCharge[m]?.Amount?.value
+          } else if (discountNumbering === 2) {
+            // 明細-割引2-内容
+            invoice['明細-割引2-内容'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.AllowanceChargeReason?.value
+
+            // 明細-割引2-単位
+            if (data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['明細-割引2-単位'] = 'JPY'
+            } else {
+              invoice['明細-割引2-単位'] = '%'
+
+              // 明細-割引2-値
+              invoice['明細-割引2-値'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            // 明細-割引2-単価
+            invoice['明細-割引2-単価'] = '-' + data.InvoiceLine[i]?.AllowanceCharge[m]?.Amount?.value
+          } else if (discountNumbering === 3) {
+            // 明細-割引3-内容
+            invoice['明細-割引3-内容'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.AllowanceChargeReason?.value
+
+            // 明細-割引3-単位
+            if (data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['明細-割引3-単位'] = 'JPY'
+            } else {
+              invoice['明細-割引3-単位'] = '%'
+
+              // 明細-割引3-値
+              invoice['明細-割引3-値'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            // 明細-割引3-単価
+            invoice['明細-割引3-単価'] = '-' + data.InvoiceLine[i]?.AllowanceCharge[m]?.Amount?.value
+          } else {
+            // 内容
+            const allowanceChargeReason = data.InvoiceLine[i]?.AllowanceCharge[m]?.AllowanceChargeReason?.value
+            // 単価
+            let unit
+            let value = ''
+
+            if (data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value === 1) {
+              unit = 'JPY'
+            } else {
+              unit = '%'
+              value = data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            const amount = '-' + data.InvoiceLine[i]?.AllowanceCharge[m]?.Amount?.value
+
+            invoice['明細-割引4以降'] += invoice['明細-割引4以降']
+              ? `, {'明細-割引${discountNumbering}-内容':'${allowanceChargeReason}', '明細-割引${discountNumbering}-値':'${value}', '明細-割引${discountNumbering}-単位':'${unit}', '明細-割引${discountNumbering}-単価':'${amount}'}`
+              : `{{'明細-割引${discountNumbering}-内容':'${allowanceChargeReason}', '明細-割引${discountNumbering}-値':'${value}', '明細-割引${discountNumbering}-単位':'${unit}', '明細-割引${discountNumbering}-単価':'${amount}'}`
+          }
+
+          discountNumbering++
+        } else {
+          // 追加料金
+          if (addAmountNumbering === 1) {
+            // 明細-追加料金1-内容
+            invoice['明細-追加料金1-内容'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.AllowanceChargeReason?.value
+
+            // 明細-追加料金1-単位
+            if (data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['明細-追加料金1-単位'] = 'JPY'
+            } else {
+              invoice['明細-追加料金1-単位'] = '%'
+
+              // 明細-追加料金1-値
+              invoice['明細-追加料金1-値'] =
+                data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            // 明細-追加料金1-単価
+            invoice['明細-追加料金1-単価'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.Amount?.value
+          } else if (addAmountNumbering === 2) {
+            // 明細-追加料金2-内容
+            invoice['明細-追加料金2-内容'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.AllowanceChargeReason?.value
+
+            // 明細-追加料金2-単位
+            if (data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['明細-追加料金2-単位'] = 'JPY'
+            } else {
+              invoice['明細-追加料金2-単位'] = '%'
+
+              // 明細-追加料金2-値
+              invoice['明細-追加料金2-値'] =
+                data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            // 明細-追加料金2-単価
+            invoice['明細-追加料金2-単価'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.Amount?.value
+          } else if (addAmountNumbering === 3) {
+            // 明細-追加料金3-内容
+            invoice['明細-追加料金3-内容'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.AllowanceChargeReason?.value
+
+            // 明細-追加料金3-単位
+            if (data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['明細-追加料金3-単位'] = 'JPY'
+            } else {
+              invoice['明細-追加料金3-単位'] = '%'
+
+              // 明細-追加料金3-値
+              invoice['明細-追加料金3-値'] =
+                data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            // 明細-追加料金3-単価
+            invoice['明細-追加料金3-単価'] = data.InvoiceLine[i]?.AllowanceCharge[m]?.Amount?.value
+          } else {
+            // 内容
+            const allowanceChargeReason = data.InvoiceLine[i]?.AllowanceCharge[m]?.AllowanceChargeReason?.value
+            // 単価
+            let unit
+            let value = ''
+
+            if (data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value === 1) {
+              unit = 'JPY'
+            } else {
+              unit = '%'
+              value = data.InvoiceLine[i]?.AllowanceCharge[m]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            const amount = data.InvoiceLine[i]?.AllowanceCharge[m]?.Amount?.value
+
+            invoice['明細-追加料金4以降'] += invoice['明細-追加料金4以降']
+              ? `, {'明細-追加料金${addAmountNumbering}-内容':'${allowanceChargeReason}', '明細-追加料金${addAmountNumbering}-値':'${value}', '明細-追加料金${addAmountNumbering}-単位':'${unit}', '明細-追加料金${addAmountNumbering}-単価':'${amount}'}`
+              : `{{'明細-追加料金${addAmountNumbering}-内容':'${allowanceChargeReason}', '明細-追加料金${addAmountNumbering}-値':'${value}', '明細-追加料金${addAmountNumbering}-単位':'${unit}', '明細-追加料金${addAmountNumbering}-単価':'${amount}'}`
+          }
+
+          addAmountNumbering++
+        }
+      }
+      invoice['明細-割引4以降'] += invoice['明細-割引4以降'] ? '}' : ''
+      invoice['明細-追加料金4以降'] += invoice['明細-追加料金4以降'] ? '}' : ''
+    }
+
     if (data.InvoiceLine[i]?.DocumentReference) {
-      invoice['明細-備考'] = data.InvoiceLine[i].DocumentReference[0].ID.value
+      for (let k = 0; k < data.InvoiceLine[i]?.DocumentReference?.length; k++) {
+        if (data.InvoiceLine[i]?.DocumentReference[k]?.DocumentTypeCode?.value === 'File ID') {
+          // 明細-備考
+          invoice['明細-備考'] = data.InvoiceLine[i].DocumentReference[k].ID.value
+        } else if (data.InvoiceLine[i]?.DocumentReference[k]?.DocumentTypeCode?.value === 'BOL ID') {
+          // 明細-輸送情報
+          invoice['明細-輸送情報'] = data.InvoiceLine[i].DocumentReference[k].ID.value
+        } else if (data.InvoiceLine[i]?.DocumentReference[k]?.DocumentTypeCode?.value === 'LinePrice') {
+          // 明細-単価
+          invoice['明細-単価'] = data.InvoiceLine[i].DocumentReference[k].ID.value
+          console.log(data.InvoiceLine[i].DocumentReference[k].ID.value)
+        }
+      }
+    }
+
+    // 明細-単価（割引や追加料金などがない場合）
+    if (invoice['明細-単価'] === '') {
+      console.log('asdfasdfasdfasdfasdf')
+      if (data.InvoiceLine[i]?.Price) {
+        console.log('123456489')
+        console.log(data.InvoiceLine[i].Price.PriceAmount?.value)
+        invoice['明細-単価'] = data.InvoiceLine[i].Price.PriceAmount?.value
+      }
+    }
+
+    if (data.InvoiceLine[i]?.Item) {
+      if (data.InvoiceLine[i]?.Item?.Description) {
+        // 明細-内容
+        invoice['明細-内容'] = data.InvoiceLine[i].Item.Description[0].value
+      }
+
+      if (data.InvoiceLine[i]?.Item?.ModelName) {
+        // 明細-詳細
+        invoice['明細-詳細'] = data.InvoiceLine[i].Item.ModelName[0].value
+      }
+
+      if (data.InvoiceLine[i]?.Item?.BuyersItemIdentification) {
+        // 明細-発注者品番
+        invoice['明細-発注者品番'] = data.InvoiceLine[i].Item.BuyersItemIdentification?.ID?.value
+      }
+
+      if (data.InvoiceLine[i]?.Item?.StandardItemIdentification) {
+        // 明細-EAN/GTIN
+        invoice['明細-EAN/GTIN'] = data.InvoiceLine[i].Item.StandardItemIdentification?.ID?.value
+      }
+
+      // HSN/SAC
+      if (data.InvoiceLine[i]?.Item?.AdditionalItemIdentification) {
+        // 明細-HSN/SAC区分
+        invoice['明細-HSN/SAC区分'] = data.InvoiceLine[i].Item.AdditionalItemIdentification[0]?.ID?.schemeID
+        // 明細-HSN/SACの値
+        invoice['明細-HSN/SACの値'] = data.InvoiceLine[i].Item.AdditionalItemIdentification[0]?.ID?.value
+      }
+
+      if (data.InvoiceLine[i]?.Item?.OriginCountry) {
+        // 明細-原産国
+        invoice['明細-原産国'] = data.InvoiceLine[i].Item.OriginCountry?.Name?.value
+      }
+
+      if (data.InvoiceLine[i]?.Item?.CommodityClassification) {
+        // 明細-商品分類コード: ECCN
+        invoice['明細-商品分類コード: ECCN'] =
+          data.InvoiceLine[i].Item.CommodityClassification[0]?.ItemClassificationCode?.value
+      }
+
+      if (data.InvoiceLine[i]?.Item?.ManufacturerParty) {
+        // 明細-メーカー名
+        invoice['明細-メーカー名'] = data.InvoiceLine[i].Item.ManufacturerParty[0]?.PartyName[0]?.Name?.value
+      }
+
+      if (data.InvoiceLine[i]?.Item?.ItemInstance) {
+        // 明細-シリアルナンバー
+        invoice['明細-シリアルナンバー'] = data.InvoiceLine[i].Item.ItemInstance[0]?.SerialID?.value
+      }
+    }
+
+    if (data.InvoiceLine[i]?.DeliveryTerms) {
+      // 明細-納期
+      invoice['明細-納期'] = data.InvoiceLine[i].DeliveryTerms.ID?.value
+    }
+
+    if (data.InvoiceLine[i]?.Delivery) {
+      if (data.InvoiceLine[i]?.Delivery[0].DeliveryLocation) {
+        if (data.InvoiceLine[i]?.Delivery[0].DeliveryLocation.ID) {
+          // 明細-ロケーションID
+          invoice['明細-ロケーションID'] = data.InvoiceLine[i]?.Delivery[0].DeliveryLocation.ID.value
+        }
+
+        if (data.InvoiceLine[i]?.Delivery[0].DeliveryLocation.Address) {
+          // 明細-配送先-私書箱
+          invoice['明細-配送先-私書箱'] = data.InvoiceLine[i]?.Delivery[0].DeliveryLocation.Address.Postbox?.value
+
+          // 明細-配送先-市区町村番地
+          invoice['明細-配送先-市区町村番地'] =
+            data.InvoiceLine[i]?.Delivery[0].DeliveryLocation.Address.StreetName?.value
+
+          // 明細-配送先-マンション名
+          invoice['明細-配送先-マンション名'] =
+            data.InvoiceLine[i]?.Delivery[0].DeliveryLocation.Address.AdditionalStreetName?.value
+
+          // 明細-配送先-都道府県
+          invoice['明細-配送先-都道府県'] = data.InvoiceLine[i]?.Delivery[0].DeliveryLocation.Address.CityName?.value
+
+          // 明細-配送先-郵便番号
+          invoice['明細-配送先-郵便番号'] = data.InvoiceLine[i]?.Delivery[0].DeliveryLocation.Address.PostalZone?.value
+
+          // 明細-配送先-国
+          invoice['明細-配送先-国'] =
+            data.InvoiceLine[i]?.Delivery[0].DeliveryLocation.Address.Country?.IdentificationCode?.value
+        }
+      }
+
+      if (data.InvoiceLine[i]?.Delivery[0].TrackingID) {
+        // 明細-貨物注文番号
+        invoice['明細-貨物注文番号'] = data.InvoiceLine[i]?.Delivery[0].TrackingID.value
+      }
+
+      if (data.InvoiceLine[i]?.Delivery[0].ActualDeliveryDate) {
+        // 明細-納品日
+        invoice['明細-納品日'] = data.InvoiceLine[i]?.Delivery[0].ActualDeliveryDate.value
+      }
     }
 
     // 明細をjsonDataに入れる
@@ -1444,6 +1838,7 @@ const jsonToCsv = (jsonData) => {
   csvString = jsonArray.map((row) => titles.map((fieldName) => JSON.stringify(row[fieldName], replacer)).join(','))
   csvString.unshift(titles.join(','))
   csvString = csvString.join('\r\n')
+
   return csvString
 }
 
