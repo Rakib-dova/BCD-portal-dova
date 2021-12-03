@@ -102,7 +102,8 @@ const axios = {
               A01011: 9,
               A01012: 10,
               A01013: 11,
-              A01014: 12
+              A01014: 12,
+              A01015: 13
             }
             this.result.data = {
               itemPerPage: 25,
@@ -170,6 +171,10 @@ const axios = {
       }
       case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd15': {
         const invoice = require('../mockInvoice/invoice12')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd16': {
+        const invoice = require('../mockInvoice/invoice13')
         return { data: invoice }
       }
       default: {
@@ -731,6 +736,10 @@ const dcouments = {
     {
       DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd15',
       ID: 'A01014'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd16',
+      ID: 'A01015'
     }
   ]
 }

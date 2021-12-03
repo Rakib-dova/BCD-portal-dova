@@ -16,6 +16,7 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
+const DOMParser = require('dom-parser')
 
 let request, response, infoSpy
 let userControllerFindOneSpy,
@@ -67,7 +68,7 @@ const status = [
 ]
 
 const headers =
-  '発行日,宛先-テナントID,宛先-会社名,宛先-国/地域,宛先-私書箱,宛先-郵便番号,宛先-都道府県,宛先-市区町村・番地,宛先-ビル、マンション名,宛先-GLN（企業・事業所識別コード）,差出人-テナントID,差出人-会社名,差出人-国/地域,差出人-私書箱,差出人-郵便番号,差出人-都道府県,差出人-市区町村・番地,差出人-ビル、マンション名,差出人-GLN（企業・事業所識別コード）,請求書番号,テナントID,支払期日,納品日,納品開始日,納品終了日,備考,注文書番号,注文書発行日,参考情報,契約書番号,部門,取引先担当者（アドレス）,輸送情報,Tradeshiftクリアランス,通関識別情報,ID,課税日,販売者の手数料番号,DUNSナンバー,貿易取引条件,暫定時間,予約番号,為替レート,為替レート-通貨,為替レート-日付,為替レート換算後の税金総額,為替レート-Convertd Document Total(incl taxes),支払方法,支払い条件-割引率,支払い条件-割増率,支払い条件-決済開始日,支払い条件-決済終了日,支払い条件-ペナルティ開始日,支払い条件-ペナルティ終了日,支払い条件-説明,銀行口座-銀行名,銀行口座-支店名,銀行口座-口座番号,銀行口座-科目,銀行口座-口座名義,銀行口座-番地,銀行口座-ビル名 / フロア等,銀行口座-家屋番号,銀行口座-市区町村,銀行口座-都道府県,銀行口座-郵便番号,銀行口座-所在地,銀行口座-国,DirectDebit-銀行名,DirectDebit-支店名,DirectDebit-口座番号,DirectDebit-科目,DirectDebit-口座名義,DirectDebit-番地,DirectDebit-ビル名 / フロア等,DirectDebit-家屋番号,DirectDebit-市区町村,DirectDebit-都道府県,DirectDebit-郵便番号,DirectDebit-所在地,DirectDebit-国,IBAN払い-銀行識別コード / SWIFTコード,IBAN払い-IBAN,IBAN払い-説明,国際電信送金-ABAナンバー,国際電信送金-SWIFTコード,国際電信送金-IBAN,国際電信送金-口座名義,国際電信送金-番地,国際電信送金-ビル名 / フロア等,国際電信送金-家屋番号,国際電信送金-市区町村,国際電信送金-都道府県,国際電信送金-郵便番号,国際電信送金 - 所在地,国際電信送金-国,国際電信送金-説明,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考'
+  '発行日,宛先-テナントID,宛先-会社名,宛先-国/地域,宛先-私書箱,宛先-郵便番号,宛先-都道府県,宛先-市区町村・番地,宛先-ビル、マンション名,宛先-GLN（企業・事業所識別コード）,差出人-テナントID,差出人-会社名,差出人-国/地域,差出人-私書箱,差出人-郵便番号,差出人-都道府県,差出人-市区町村・番地,差出人-ビル、マンション名,差出人-GLN（企業・事業所識別コード）,請求書番号,テナントID,支払期日,納品日,納品開始日,納品終了日,備考,注文書番号,注文書発行日,参考情報,契約書番号,部門,取引先担当者（アドレス）,輸送情報,Tradeshiftクリアランス,通関識別情報,ID,課税日,販売者の手数料番号,DUNSナンバー,貿易取引条件,暫定時間,予約番号,為替レート,為替レート-通貨,為替レート-日付,為替レート換算後の税金総額,為替レート-Convertd Document Total(incl taxes),支払方法,支払い条件-割引率,支払い条件-割増率,支払い条件-決済開始日,支払い条件-決済終了日,支払い条件-ペナルティ開始日,支払い条件-ペナルティ終了日,支払い条件-説明,銀行口座-銀行名,銀行口座-支店名,銀行口座-口座番号,銀行口座-科目,銀行口座-口座名義,銀行口座-番地,銀行口座-ビル名 / フロア等,銀行口座-家屋番号,銀行口座-市区町村,銀行口座-都道府県,銀行口座-郵便番号,銀行口座-所在地,銀行口座-国,DirectDebit-銀行名,DirectDebit-支店名,DirectDebit-口座番号,DirectDebit-科目,DirectDebit-口座名義,DirectDebit-番地,DirectDebit-ビル名 / フロア等,DirectDebit-家屋番号,DirectDebit-市区町村,DirectDebit-都道府県,DirectDebit-郵便番号,DirectDebit-所在地,DirectDebit-国,IBAN払い-銀行識別コード / SWIFTコード,IBAN払い-IBAN,IBAN払い-説明,国際電信送金-ABAナンバー,国際電信送金-SWIFTコード,国際電信送金-IBAN,国際電信送金-口座名義,国際電信送金-番地,国際電信送金-ビル名 / フロア等,国際電信送金-家屋番号,国際電信送金-市区町村,国際電信送金-都道府県,国際電信送金-郵便番号,国際電信送金 - 所在地,国際電信送金-国,国際電信送金-説明,支払方法-予備,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考'
 
 const buyAndSell = ['すべて', '販売', '購入']
 
@@ -4358,6 +4359,115 @@ describe('csvDownloadのテスト', () => {
       for (let idx = 12; idx < 18; idx++) {
         expect(checkData[idx]).toBe('""')
       }
+    })
+
+    test('正常:オプション項目を追加した請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01015',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01015')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice13')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 指定したオプション項目がある
+      // 支払期日
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[0].PaymentDueDate.value}`)
+      // 納品日
+      expect(csvBody).toContain(`${checkingData.Delivery[0].ActualDeliveryDate?.value}`)
+      // 納品開始日
+      expect(csvBody).toContain(`${checkingData.Delivery[0].PromisedDeliveryPeriod?.StartDate?.value}`)
+      // 納品終了日
+      expect(csvBody).toContain(`${checkingData.Delivery[0].PromisedDeliveryPeriod?.EndDate?.value}`)
+      // 販売者の手数料番号
+      expect(csvBody).toContain(`${checkingData.Delivery[0].Despatch?.ID?.value}`)
+      // 注文書番号
+      expect(csvBody).toContain(`${checkingData.OrderReference?.ID?.value}`)
+      // 注文書発行日
+      expect(csvBody).toContain(`${checkingData.OrderReference?.IssueDate?.value}`)
+      // 参考情報
+      expect(csvBody).toContain(`${checkingData.BillingReference[0]?.InvoiceDocumentReference?.ID?.value}`)
+      // 契約書番号
+      expect(csvBody).toContain(`${checkingData.ContractDocumentReference[0]?.ID?.value}`)
+      // 部門
+      expect(csvBody).toContain(`${checkingData.AccountingCost?.value}`)
+      // 取引先担当者（アドレス）
+      expect(csvBody).toContain(`${checkingData.AccountingCustomerParty.Party.Contact?.ID?.value}`)
+      // ID
+      expect(csvBody).toContain(`${checkingData.AccountingCustomerParty.CustomerAssignedAccountID?.value}`)
+
+      for (let i = 0; i < checkingData.AdditionalDocumentReference.length; i++) {
+        if (checkingData.AdditionalDocumentReference[i]?.DocumentTypeCode?.value === 'File ID') {
+          // 備考
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'BOL ID') {
+          // 輸送情報
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'Interim Hours') {
+          // 暫定時間
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'Clearance Clave') {
+          // 通関識別情報
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'TS Clearance') {
+          // Tradeshiftクリアランス
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'BookingNumber') {
+          // 予約番号
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        }
+      }
+
+      // 課税日
+      expect(csvBody).toContain(`${checkingData.TaxPointDate?.value}`)
+      // DUNSナンバー
+      expect(csvBody).toContain(`${checkingData.AccountingSupplierParty.Party?.PhysicalLocation?.ID?.value}`)
+      // 為替レート
+      expect(csvBody).toContain(`${checkingData.TaxExchangeRate?.CalculationRate?.value}`)
+      // 為替レート-通貨
+      expect(csvBody).toContain(`${checkingData.TaxExchangeRate?.TargetCurrencyCode?.value}`)
+      // 為替レート-日付
+      expect(csvBody).toContain(`${checkingData.TaxExchangeRate?.Date?.value}`)
+      // 為替レート換算後の税金総額
+      expect(csvBody).toContain(`${checkingData.TaxTotal[0]?.TaxSubtotal[0]?.TransactionCurrencyTaxAmount?.value}`)
+      // 為替レート-Convertd Document Total(incl taxes)
+      const dom = new DOMParser().parseFromString(
+        checkingData.UBLExtensions?.UBLExtension[0]?.ExtensionContent?.value,
+        'text/xml'
+      )
+      const xmlValue = dom.getElementsByTagName('ts')[0]?.childNodes[0]?.text
+      expect(csvBody).toContain(`${xmlValue}`)
     })
 
     test('正常:請求書複数の場合', async () => {
