@@ -480,7 +480,6 @@ const cbPostIndex = async (req, res, next) => {
         let documentId = ''
         // 請求書番号で検索した結果の配列を取得
         const documents = documentsResult.Document
-
         // 取得した配列から請求書番号（UUID）を取得
         documents.map((doc) => {
           if (doc.ID === invoiceNumber) {
@@ -794,13 +793,51 @@ const dataToJson = (data) => {
     // 任意項目チェック
     // 支払条件チェック
     if (data.PaymentTerms) {
-      invoice['支払い条件-割引率'] = data.PaymentTerms[0].SettlementDiscountPercent.value ?? ''
-      invoice['支払い条件-割増率'] = data.PaymentTerms[0].PenaltySurchargePercent.value ?? ''
-      invoice['支払い条件-決済開始日'] = data.PaymentTerms[0].SettlementPeriod.StartDate.value ?? ''
-      invoice['支払い条件-決済終了日'] = data.PaymentTerms[0].SettlementPeriod.EndDate.value ?? ''
-      invoice['支払い条件-ペナルティ開始日'] = data.PaymentTerms[0].PenaltyPeriod.StartDate.value ?? ''
-      invoice['支払い条件-ペナルティ終了日'] = data.PaymentTerms[0].PenaltyPeriod.EndDate.value ?? ''
-      invoice['支払い条件-説明'] = data.PaymentTerms[0].Note[0].value ?? ''
+      let paymentTermsMultiIndex = false
+      let paymentTermsIndex = 2
+      const paymentTerms = data.PaymentTerms
+      paymentTerms.forEach((terms) => {
+        const settlementDiscountPercent = terms.SettlementDiscountPercent?.value ?? ''
+        const penaltySurchargePercent = terms.PenaltySurchargePercent?.value ?? ''
+        const settleStartDate = terms.SettlementPeriod?.StartDate?.value ?? ''
+        const settleEndDate = terms.SettlementPeriod?.EndDate?.value ?? ''
+        const penaltyStartDate = terms.PenaltyPeriod?.StartDate?.value ?? ''
+        const penaltyEndDate = terms.PenaltyPeriod?.EndDate?.value ?? ''
+        const note = terms.Note[0]?.value ?? ''
+        if (!paymentTermsMultiIndex) {
+          invoice['支払い条件-割引率'] = settlementDiscountPercent
+          invoice['支払い条件-割増率'] = penaltySurchargePercent
+          invoice['支払い条件-決済開始日'] = settleStartDate
+          invoice['支払い条件-決済終了日'] = settleEndDate
+          invoice['支払い条件-ペナルティ開始日'] = penaltyStartDate
+          invoice['支払い条件-ペナルティ終了日'] = penaltyEndDate
+          invoice['支払い条件-説明'] = note
+          paymentTermsMultiIndex = true
+        } else {
+          invoice['支払方法-予備'] += invoice['支払方法-予備']
+            ? `,支払い条件-割引率${paymentTermsIndex}:${settlementDiscountPercent}`
+            : `支払い条件-割引率${paymentTermsIndex}:${settlementDiscountPercent}`
+          invoice['支払方法-予備'] += invoice['支払方法-予備']
+            ? `,支払い条件-割増率${paymentTermsIndex}:${penaltySurchargePercent}`
+            : `支払い条件-割増率${paymentTermsIndex}:${penaltySurchargePercent}`
+          invoice['支払方法-予備'] += invoice['支払方法-予備']
+            ? `,支払い条件-決済開始日${paymentTermsIndex}:${settleStartDate}`
+            : `支払い条件-決済開始日${paymentTermsIndex}:${settleStartDate}`
+          invoice['支払方法-予備'] += invoice['支払方法-予備']
+            ? `,支払い条件-決済終了日${paymentTermsIndex}:${settleEndDate}`
+            : `支払い条件-決済終了日${paymentTermsIndex}:${settleEndDate}`
+          invoice['支払方法-予備'] += invoice['支払方法-予備']
+            ? `,支払い条件-ペナルティ開始日${paymentTermsIndex}:${penaltyStartDate}`
+            : `支払い条件-ペナルティ開始日${paymentTermsIndex}:${penaltyStartDate}`
+          invoice['支払方法-予備'] += invoice['支払方法-予備']
+            ? `,支払い条件-ペナルティ終了日${paymentTermsIndex}:${penaltyEndDate}`
+            : `支払い条件-ペナルティ終了日${paymentTermsIndex}:${penaltyEndDate}`
+          invoice['支払方法-予備'] += invoice['支払方法-予備']
+            ? `,支払い条件-説明${paymentTermsIndex}:${note}`
+            : `支払い条件-説明${paymentTermsIndex}:${note}`
+          paymentTermsIndex += 1
+        }
+      })
     }
 
     // 支払方法
@@ -1375,7 +1412,7 @@ const dataToJson = (data) => {
           data.UBLExtensions?.UBLExtension[0]?.ExtensionContent?.value,
           'text/xml'
         )
-        const xmlValue = dom.getElementsByTagName('ts')[0].childNodes[0].text
+        const xmlValue = dom.getElementsByTagName('ts')[0]?.childNodes[0]?.text
 
         invoice['為替レート-Convertd Document Total(incl taxes)'] = xmlValue
       }
