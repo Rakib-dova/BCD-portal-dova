@@ -1308,7 +1308,7 @@ const dataToJson = (data) => {
     }
 
     if (data.AdditionalDocumentReference) {
-      for (i = 0; i < data.AdditionalDocumentReference.length; i++) {
+      for (let i = 0; i < data.AdditionalDocumentReference.length; i++) {
         if (data.AdditionalDocumentReference[i]?.DocumentTypeCode?.value === 'File ID') {
           // 備考
           invoice.備考 = data.AdditionalDocumentReference[i].ID.value
