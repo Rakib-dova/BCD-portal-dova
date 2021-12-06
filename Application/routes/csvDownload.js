@@ -733,47 +733,42 @@ const dataToJson = (data) => {
     '割引1-内容': '',
     '割引1-数量': '',
     '割引1-単位': '',
-    '割引1-税': '',
-    '割引1-小計 (税抜)': '',
+    '割引1-税（消費税／軽減税率／不課税／免税／非課税）': '',
+    '割引1-小計（税抜）': '',
     '割引2-項目ID': '',
     '割引2-内容': '',
     '割引2-数量': '',
     '割引2-単位': '',
-    '割引2-税': '',
-    '割引2-小計 (税抜)': '',
+    '割引2-税（消費税／軽減税率／不課税／免税／非課税）': '',
+    '割引2-小計（税抜）': '',
     '割引3-項目ID': '',
     '割引3-内容': '',
     '割引3-数量': '',
     '割引3-単位': '',
-    '割引3-税': '',
-    '割引3-小計 (税抜)': '',
+    '割引3-税（消費税／軽減税率／不課税／免税／非課税）': '',
+    '割引3-小計（税抜）': '',
     割引4以降: '',
     '追加料金1-項目ID': '',
     '追加料金1-内容': '',
     '追加料金1-数量': '',
     '追加料金1-単位': '',
-    '追加料金1-税': '',
+    '追加料金1-税（消費税／軽減税率／不課税／免税／非課税）': '',
     '追加料金1-小計（税抜）': '',
     '追加料金2-項目ID': '',
     '追加料金2-内容': '',
     '追加料金2-数量': '',
     '追加料金2-単位': '',
-    '追加料金2-税': '',
+    '追加料金2-税（消費税／軽減税率／不課税／免税／非課税）': '',
     '追加料金2-小計（税抜）': '',
     '追加料金3-項目ID': '',
     '追加料金3-内容': '',
     '追加料金3-数量': '',
     '追加料金3-単位': '',
-    '追加料金3-税': '',
+    '追加料金3-税（消費税／軽減税率／不課税／免税／非課税）': '',
     '追加料金3-小計（税抜）': '',
     追加料金4以降: '',
-    '固定税1-項目ID': '',
-    '固定税1-税': '',
-    '固定税2-項目ID': '',
-    '固定税2-税': '',
-    '固定税3-項目ID': '',
-    '固定税3-税': '',
-    固定税4以降: ''
+    '固定税-項目ID': '',
+    '固定税-税': ''
   }
 
   const unitCodeKeys = Object.keys(bconCsvUnitDefault)
@@ -1501,8 +1496,292 @@ const dataToJson = (data) => {
       }
     }
 
-    // InvoiceLine
+    // 割引の個数（１～３）
+    let discountNumberingForTotal = 1
+    // 追加料金の個数（１～３）
+    let addAmountNumberingForTotal = 1
 
+    if (data.AllowanceCharge) {
+      for (let a = 0; a < data.AllowanceCharge?.length; a++) {
+        if (data.AllowanceCharge[a]?.ChargeIndicator?.value === false) {
+          // 割引
+          if (discountNumberingForTotal === 1) {
+            // 割引1-項目ID
+            invoice['割引1-項目ID'] = '割引'
+
+            // 割引1-内容
+            invoice['割引1-内容'] = data.AllowanceCharge[a]?.AllowanceChargeReason?.value
+
+            // 割引1-単位
+            if (data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['割引1-単位'] = 'JPY'
+            } else {
+              invoice['割引1-単位'] = '%'
+
+              // 割引1-数量
+              invoice['割引1-数量'] = data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            if (data.AllowanceCharge[a]?.TaxCategory) {
+              const taxName = (data.AllowanceCharge[a]?.TaxCategory[0]?.TaxScheme?.Name?.value)
+                .replace('JP ', '')
+                .replace('消費税(軽減税率)', '軽減税率')
+                .replace(' 10%', '')
+                .replace(' 8%', '')
+                .replace(' 0%', '')
+
+              // 割引1-税（消費税／軽減税率／不課税／免税／非課税）
+              invoice['割引1-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+            }
+
+            // 割引1-小計（税抜）
+            invoice['割引1-小計（税抜）'] = '-' + data.AllowanceCharge[a]?.Amount?.value
+          } else if (discountNumberingForTotal === 2) {
+            // 割引2-項目ID
+            invoice['割引2-項目ID'] = '割引'
+
+            // 割引2-内容
+            invoice['割引2-内容'] = data.AllowanceCharge[a]?.AllowanceChargeReason?.value
+
+            // 割引2-単位
+            if (data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['割引2-単位'] = 'JPY'
+            } else {
+              invoice['割引2-単位'] = '%'
+
+              // 割引2-数量
+              invoice['割引2-数量'] = data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            if (data.AllowanceCharge[a]?.TaxCategory) {
+              const taxName = (data.AllowanceCharge[a]?.TaxCategory[0]?.TaxScheme?.Name?.value)
+                .replace('JP ', '')
+                .replace('消費税(軽減税率)', '軽減税率')
+                .replace(' 10%', '')
+                .replace(' 8%', '')
+                .replace(' 0%', '')
+
+              // 割引2-税（消費税／軽減税率／不課税／免税／非課税）
+              invoice['割引2-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+            }
+
+            // 割引2-小計（税抜）
+            invoice['割引2-小計（税抜）'] = '-' + data.AllowanceCharge[a]?.Amount?.value
+          } else if (discountNumberingForTotal === 3) {
+            // 割引3-項目ID
+            invoice['割引3-項目ID'] = '割引'
+
+            // 割引3-内容
+            invoice['割引3-内容'] = data.AllowanceCharge[a]?.AllowanceChargeReason?.value
+
+            // 割引3-単位
+            if (data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['割引3-単位'] = 'JPY'
+            } else {
+              invoice['割引3-単位'] = '%'
+
+              // 割引3-数量
+              invoice['割引3-数量'] = data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            if (data.AllowanceCharge[a]?.TaxCategory) {
+              const taxName = (data.AllowanceCharge[a]?.TaxCategory[0]?.TaxScheme?.Name?.value)
+                .replace('JP ', '')
+                .replace('消費税(軽減税率)', '軽減税率')
+                .replace(' 10%', '')
+                .replace(' 8%', '')
+                .replace(' 0%', '')
+
+              // 割引3-税（消費税／軽減税率／不課税／免税／非課税）
+              invoice['割引3-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+            }
+
+            // 割引3-小計（税抜）
+            invoice['割引3-小計（税抜）'] = '-' + data.AllowanceCharge[a]?.Amount?.value
+          } else {
+            // 項目ID
+            const title = '割引'
+            // 内容
+            const allowanceChargeReason = data.AllowanceCharge[a]?.AllowanceChargeReason?.value
+            // 数量
+            let unitMeasure
+            // 単位
+            let unit
+            // 税（消費税／軽減税率／不課税／免税／非課税）
+            let taxValue
+            // 小計（税抜）
+            const amount = '-' + data.AllowanceCharge[a]?.Amount?.value
+
+            // 単位
+            if (data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value === 1) {
+              unit = 'JPY'
+              unitMeasure = ''
+            } else {
+              unit = '%'
+              unitMeasure = data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            if (data.AllowanceCharge[a]?.TaxCategory) {
+              const taxName = (data.AllowanceCharge[a]?.TaxCategory[0]?.TaxScheme?.Name?.value)
+                .replace('JP ', '')
+                .replace('消費税(軽減税率)', '軽減税率')
+                .replace(' 10%', '')
+                .replace(' 8%', '')
+                .replace(' 0%', '')
+
+              // 税
+              taxValue = taxName
+            }
+
+            invoice['割引4以降'] += invoice['割引4以降']
+              ? `, {'割引${discountNumberingForTotal}-項目ID:'${title}', '割引${discountNumberingForTotal}-内容':'${allowanceChargeReason}', '割引${discountNumberingForTotal}-数量':'${unitMeasure}', '割引${discountNumberingForTotal}-単位':'${unit}', '割引${discountNumberingForTotal}-税（消費税／軽減税率／不課税／免税／非課税）':'${taxValue}', '割引${discountNumberingForTotal}-小計（税抜）':'${amount}'}`
+              : `{{'割引${discountNumberingForTotal}-項目ID:'${title}', '割引${discountNumberingForTotal}-内容':'${allowanceChargeReason}', '割引${discountNumberingForTotal}-数量':'${unitMeasure}', '割引${discountNumberingForTotal}-単位:'${unit}', '割引${discountNumberingForTotal}-税（消費税／軽減税率／不課税／免税／非課税）':'${taxValue}', '割引${discountNumberingForTotal}-小計（税抜）':'${amount}'}`
+          }
+
+          discountNumberingForTotal++
+        } else {
+          // 追加料金
+          if (addAmountNumberingForTotal === 1) {
+            // 追加料金1-項目ID
+            invoice['追加料金1-項目ID'] = '追加料金'
+
+            // 追加料金1-内容
+            invoice['追加料金1-内容'] = data.AllowanceCharge[a]?.AllowanceChargeReason?.value
+
+            // 追加料金1-単位
+            if (data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['追加料金1-単位'] = 'JPY'
+            } else {
+              invoice['追加料金1-単位'] = '%'
+
+              // 追加料金1-数量
+              invoice['追加料金1-数量'] = data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            if (data.AllowanceCharge[a]?.TaxCategory) {
+              const taxName = (data.AllowanceCharge[a]?.TaxCategory[0]?.TaxScheme?.Name?.value)
+                .replace('JP ', '')
+                .replace('消費税(軽減税率)', '軽減税率')
+                .replace(' 10%', '')
+                .replace(' 8%', '')
+                .replace(' 0%', '')
+
+              // 追加料金1-税（消費税／軽減税率／不課税／免税／非課税）
+              invoice['追加料金1-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+            }
+
+            // 追加料金1-小計（税抜）
+            invoice['追加料金1-小計（税抜）'] = data.AllowanceCharge[a]?.Amount?.value
+          } else if (addAmountNumberingForTotal === 2) {
+            // 追加料金2-項目ID
+            invoice['追加料金2-項目ID'] = '追加料金'
+
+            // 追加料金2-内容
+            invoice['追加料金2-内容'] = data.AllowanceCharge[a]?.AllowanceChargeReason?.value
+
+            // 追加料金2-単位
+            if (data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['追加料金2-単位'] = 'JPY'
+            } else {
+              invoice['追加料金2-単位'] = '%'
+
+              // 追加料金2-数量
+              invoice['追加料金2-数量'] = data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            if (data.AllowanceCharge[a]?.TaxCategory) {
+              const taxName = (data.AllowanceCharge[a]?.TaxCategory[0]?.TaxScheme?.Name?.value)
+                .replace('JP ', '')
+                .replace('消費税(軽減税率)', '軽減税率')
+                .replace(' 10%', '')
+                .replace(' 8%', '')
+                .replace(' 0%', '')
+
+              // 追加料金2-税（消費税／軽減税率／不課税／免税／非課税）
+              invoice['追加料金2-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+            }
+
+            // 追加料金2-小計（税抜）
+            invoice['追加料金2-小計（税抜）'] = data.AllowanceCharge[a]?.Amount?.value
+          } else if (addAmountNumberingForTotal === 3) {
+            // 追加料金3-項目ID
+            invoice['追加料金3-項目ID'] = '追加料金'
+
+            // 追加料金3-内容
+            invoice['追加料金3-内容'] = data.AllowanceCharge[a]?.AllowanceChargeReason?.value
+
+            // 追加料金3-単位
+            if (data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value === 1) {
+              invoice['追加料金3-単位'] = 'JPY'
+            } else {
+              invoice['追加料金3-単位'] = '%'
+
+              // 追加料金3-数量
+              invoice['追加料金3-数量'] = data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            if (data.AllowanceCharge[a]?.TaxCategory) {
+              const taxName = (data.AllowanceCharge[a]?.TaxCategory[0]?.TaxScheme?.Name?.value)
+                .replace('JP ', '')
+                .replace('消費税(軽減税率)', '軽減税率')
+                .replace(' 10%', '')
+                .replace(' 8%', '')
+                .replace(' 0%', '')
+
+              // 追加料金3-税（消費税／軽減税率／不課税／免税／非課税）
+              invoice['追加料金3-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+            }
+
+            // 追加料金3-小計（税抜）
+            invoice['追加料金3-小計（税抜）'] = data.AllowanceCharge[a]?.Amount?.value
+          } else {
+            // 項目ID
+            const title = '追加料金'
+            // 内容
+            const allowanceChargeReason = data.AllowanceCharge[a]?.AllowanceChargeReason?.value
+            // 数量
+            let unitMeasure
+            // 単位
+            let unit
+            // 税（消費税／軽減税率／不課税／免税／非課税）
+            let taxValue
+            // 小計（税抜）
+            const amount = '-' + data.AllowanceCharge[a]?.Amount?.value
+
+            // 単位
+            if (data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value === 1) {
+              unit = 'JPY'
+              unitMeasure = ''
+            } else {
+              unit = '%'
+              unitMeasure = data.AllowanceCharge[a]?.MultiplierFactorNumeric?.value * 100
+            }
+
+            if (data.AllowanceCharge[a]?.TaxCategory) {
+              const taxName = (data.AllowanceCharge[a]?.TaxCategory[0]?.TaxScheme?.Name?.value)
+                .replace('JP ', '')
+                .replace('消費税(軽減税率)', '軽減税率')
+                .replace(' 10%', '')
+                .replace(' 8%', '')
+                .replace(' 0%', '')
+
+              // 税
+              taxValue = taxName
+            }
+
+            invoice['追加料金4以降'] += invoice['追加料金4以降']
+              ? `, {'追加料金${addAmountNumberingForTotal}-項目ID:'${title}', '追加料金${addAmountNumberingForTotal}-内容':'${allowanceChargeReason}', '追加料金${addAmountNumberingForTotal}-数量':'${unitMeasure}', '追加料金${addAmountNumberingForTotal}-単位':'${unit}', '追加料金${addAmountNumberingForTotal}-税（消費税／軽減税率／不課税／免税／非課税）':'${taxValue}', '追加料金${addAmountNumberingForTotal}-小計（税抜）':'${amount}'}`
+              : `{{'追加料金${addAmountNumberingForTotal}-項目ID:'${title}', '追加料金${addAmountNumberingForTotal}-内容':'${allowanceChargeReason}', '追加料金${addAmountNumberingForTotal}-数量':'${unitMeasure}', '追加料金${addAmountNumberingForTotal}-単位:'${unit}', '追加料金${addAmountNumberingForTotal}-税（消費税／軽減税率／不課税／免税／非課税）':'${taxValue}', '追加料金${addAmountNumberingForTotal}-小計（税抜）':'${amount}'}`
+          }
+
+          addAmountNumberingForTotal++
+        }
+      }
+      invoice['割引4以降'] += invoice['割引4以降'] ? '}' : ''
+      invoice['追加料金4以降'] += invoice['追加料金4以降'] ? '}' : ''
+    }
+
+    // InvoiceLine
     invoice['明細-項目ID'] = data.InvoiceLine[i].ID.value
 
     invoice['明細-数量'] = data.InvoiceLine[i].InvoicedQuantity.value
@@ -1529,6 +1808,14 @@ const dataToJson = (data) => {
         .replace(' 10%', '')
         .replace(' 8%', '')
         .replace(' 0%', '')
+
+      // 固定税
+      if (taxName === '固定税') {
+        if (data.taxTotal) {
+          invoice['固定税-項目ID'] = '税額(文書合計)'
+          invoice['固定税-税'] = data.taxTotal.TaxAmount?.value
+        }
+      }
 
       // 明細-税（消費税／軽減税率／不課税／免税／非課税）
       invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
