@@ -4620,7 +4620,6 @@ describe('csvDownloadのテスト', () => {
       const checkData = csvBody.split(',')
       expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 支払い条件が空欄になっている。
-      console.log(checkData)
       for (let idx = 48; idx < 55; idx++) {
         expect(checkData[idx]).toBe('""')
       }
@@ -4887,10 +4886,6 @@ describe('csvDownloadのテスト', () => {
       const csvBody = response.setHeader().body.split('\r\n')[1]
 
       expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-
-      // const checkData = csvBody.split(',')
-      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-      // const checkingData = require('../mockInvoice/invoice16')
       // 支払い条件が複数になっている。
       expect(csvBody).toContain('支払方法2:小切手払い')
     })
@@ -4933,12 +4928,7 @@ describe('csvDownloadのテスト', () => {
       // responseのcsvファイル
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
-
       expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-
-      // const checkData = csvBody.split(',')
-      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-      // const checkingData = require('../mockInvoice/invoice16')
       // 国際電信送金3がある
       expect(csvBody).toContain('国際電信送金3')
     })
@@ -4981,12 +4971,7 @@ describe('csvDownloadのテスト', () => {
       // responseのcsvファイル
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
-
       expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-
-      // const checkData = csvBody.split(',')
-      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-      // const checkingData = require('../mockInvoice/invoice16')
       // DirectDebit3がある
       expect(csvBody).toContain('DirectDebit3')
     })
@@ -5029,12 +5014,7 @@ describe('csvDownloadのテスト', () => {
       // responseのcsvファイル
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
-
       expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-
-      // const checkData = csvBody.split(',')
-      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-      // const checkingData = require('../mockInvoice/invoice16')
       // 口座名義3がある
       expect(csvBody).toContain('口座名義3')
     })
@@ -5077,12 +5057,7 @@ describe('csvDownloadのテスト', () => {
       // responseのcsvファイル
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
-
       expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-
-      // const checkData = csvBody.split(',')
-      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-      // const checkingData = require('../mockInvoice/invoice16')
       // IBANノート3がある
       expect(csvBody).toContain('IBANノート3')
     })
@@ -5125,12 +5100,7 @@ describe('csvDownloadのテスト', () => {
       // responseのcsvファイル
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
-
       expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-
-      // const checkData = csvBody.split(',')
-      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-      // const checkingData = require('../mockInvoice/invoice16')
       // 現金払いがある
       expect(csvBody).toContain('支払方法2:現金払い')
     })
@@ -5219,6 +5189,320 @@ describe('csvDownloadのテスト', () => {
       expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // BankCardがある
       expect(csvBody).toContain('支払方法2:BankCard')
+    })
+
+    test('正常:明細部分のオプションが登録された（割引・追加料金各5個）場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01027',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01027')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が5個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      expect(csvBody).toContain('追加料金４')
+      expect(csvBody).toContain('追加料金５')
+      // 明細-割引が5個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
+      expect(csvBody).toContain('割引４')
+      expect(csvBody).toContain('割引５')
+    })
+
+    test('正常:明細部分のオプションが登録された（JPY、割引・追加料金各5個）場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01028',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01028')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が5個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      expect(csvBody).toContain('追加料金４')
+      expect(csvBody).toContain('追加料金５')
+      // 明細-割引が5個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
+      expect(csvBody).toContain('割引４')
+      expect(csvBody).toContain('割引５')
+      // JPYがある
+      expect(csvBody).toContain('JPY')
+    })
+
+    test('正常:明細部分のオプションが登録された（割引・追加料金各3個）場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01032',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01032')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が5個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      // 明細-割引が5個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
+    })
+
+    test('正常:割引・追加料金を登録した場合（各５個）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01029',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01029')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が3個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      expect(csvBody).toContain('追加料金４')
+      expect(csvBody).toContain('追加料金５')
+      // 明細-割引が3個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
+      expect(csvBody).toContain('割引４')
+      expect(csvBody).toContain('割引５')
+    })
+
+    test('正常:割引・追加料金を登録した場合（JPY、各５個）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01030',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01030')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が5個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      expect(csvBody).toContain('追加料金４')
+      expect(csvBody).toContain('追加料金５')
+      // 明細-割引が5個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
+      expect(csvBody).toContain('割引４')
+      expect(csvBody).toContain('割引５')
+      // JPYがある
+      expect(csvBody).toContain('JPY')
+    })
+
+    test('正常:割引・追加料金を登録した場合（各３個）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01031',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01031')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が3個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      // 明細-割引が3個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
     })
 
     test('正常:請求書複数の場合', async () => {
