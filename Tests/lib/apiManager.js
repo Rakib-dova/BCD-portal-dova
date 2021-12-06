@@ -103,7 +103,18 @@ const axios = {
               A01012: 10,
               A01013: 11,
               A01014: 12,
-              A01015: 13
+              A01015: 13,
+              A01016: 14,
+              A01017: 15,
+              A01018: 16,
+              A01019: 17,
+              A01020: 18,
+              A01021: 19,
+              A01022: 20,
+              A01023: 21,
+              A01024: 22,
+              A01025: 23,
+              A01026: 24
             }
             this.result.data = {
               itemPerPage: 25,
@@ -175,6 +186,50 @@ const axios = {
       }
       case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd16': {
         const invoice = require('../mockInvoice/invoice13')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd17': {
+        const invoice = require('../mockInvoice/invoice14')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd18': {
+        const invoice = require('../mockInvoice/invoice15')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd19': {
+        const invoice = require('../mockInvoice/invoice16')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd20': {
+        const invoice = require('../mockInvoice/invoice17')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd21': {
+        const invoice = require('../mockInvoice/invoice18')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd22': {
+        const invoice = require('../mockInvoice/invoice19')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd23': {
+        const invoice = require('../mockInvoice/invoice20')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd24': {
+        const invoice = require('../mockInvoice/invoice21')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd25': {
+        const invoice = require('../mockInvoice/invoice22')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd26': {
+        const invoice = require('../mockInvoice/invoice23')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd27': {
+        const invoice = require('../mockInvoice/invoice24')
         return { data: invoice }
       }
       default: {
@@ -740,6 +795,50 @@ const dcouments = {
     {
       DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd16',
       ID: 'A01015'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd17',
+      ID: 'A01016'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd18',
+      ID: 'A01017'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd19',
+      ID: 'A01018'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd20',
+      ID: 'A01019'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd21',
+      ID: 'A01020'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd22',
+      ID: 'A01021'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd23',
+      ID: 'A01022'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd24',
+      ID: 'A01023'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd25',
+      ID: 'A01024'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd26',
+      ID: 'A01025'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd27',
+      ID: 'A01026'
     }
   ]
 }

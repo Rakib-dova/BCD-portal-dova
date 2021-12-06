@@ -889,24 +889,12 @@ const dataToJson = (data) => {
           invoice['支払方法-予備'] += invoice['支払方法-予備']
             ? `,支払い条件-割引率${paymentTermsIndex}:${settlementDiscountPercent}`
             : `支払い条件-割引率${paymentTermsIndex}:${settlementDiscountPercent}`
-          invoice['支払方法-予備'] += invoice['支払方法-予備']
-            ? `,支払い条件-割増率${paymentTermsIndex}:${penaltySurchargePercent}`
-            : `支払い条件-割増率${paymentTermsIndex}:${penaltySurchargePercent}`
-          invoice['支払方法-予備'] += invoice['支払方法-予備']
-            ? `,支払い条件-決済開始日${paymentTermsIndex}:${settleStartDate}`
-            : `支払い条件-決済開始日${paymentTermsIndex}:${settleStartDate}`
-          invoice['支払方法-予備'] += invoice['支払方法-予備']
-            ? `,支払い条件-決済終了日${paymentTermsIndex}:${settleEndDate}`
-            : `支払い条件-決済終了日${paymentTermsIndex}:${settleEndDate}`
-          invoice['支払方法-予備'] += invoice['支払方法-予備']
-            ? `,支払い条件-ペナルティ開始日${paymentTermsIndex}:${penaltyStartDate}`
-            : `支払い条件-ペナルティ開始日${paymentTermsIndex}:${penaltyStartDate}`
-          invoice['支払方法-予備'] += invoice['支払方法-予備']
-            ? `,支払い条件-ペナルティ終了日${paymentTermsIndex}:${penaltyEndDate}`
-            : `支払い条件-ペナルティ終了日${paymentTermsIndex}:${penaltyEndDate}`
-          invoice['支払方法-予備'] += invoice['支払方法-予備']
-            ? `,支払い条件-説明${paymentTermsIndex}:${note}`
-            : `支払い条件-説明${paymentTermsIndex}:${note}`
+          invoice['支払方法-予備'] += `,支払い条件-割増率${paymentTermsIndex}:${penaltySurchargePercent}`
+          invoice['支払方法-予備'] += `,支払い条件-決済開始日${paymentTermsIndex}:${settleStartDate}`
+          invoice['支払方法-予備'] += `,支払い条件-決済終了日${paymentTermsIndex}:${settleEndDate}`
+          invoice['支払方法-予備'] += `,支払い条件-ペナルティ開始日${paymentTermsIndex}:${penaltyStartDate}`
+          invoice['支払方法-予備'] += `,支払い条件-ペナルティ終了日${paymentTermsIndex}:${penaltyEndDate}`
+          invoice['支払方法-予備'] += `,支払い条件-説明${paymentTermsIndex}:${note}`
           paymentTermsIndex += 1
         }
       })
@@ -1049,55 +1037,31 @@ const dataToJson = (data) => {
             invoice['支払方法-予備'] += invoice['支払方法-予備']
               ? `,DirectDebit-銀行名${directDebitPaymentMeanIndex}:${bankName}`
               : `DirectDebit-銀行名${directDebitPaymentMeanIndex}:${bankName}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,DirectDebit-口座番号${directDebitPaymentMeanIndex}:${accountNumber}`
-              : `DirectDebit-口座番号${directDebitPaymentMeanIndex}:${accountNumber}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,DirectDebit-国${directDebitPaymentMeanIndex}:${country}`
-              : `DirectDebit-国${directDebitPaymentMeanIndex}:${country}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,DirectDebit-家屋番号${directDebitPaymentMeanIndex}:${buildingNumber}`
-              : `DirectDebit-家屋番号${directDebitPaymentMeanIndex}:${buildingNumber}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,DirectDebit-ビル名 / フロア等${directDebitPaymentMeanIndex}:${additionalStreetName}`
-              : `DirectDebit-ビル名 / フロア等${directDebitPaymentMeanIndex}:${additionalStreetName}`
+            invoice['支払方法-予備'] += `,DirectDebit-口座番号${directDebitPaymentMeanIndex}:${accountNumber}`
+            invoice['支払方法-予備'] += `,DirectDebit-国${directDebitPaymentMeanIndex}:${country}`
+            invoice['支払方法-予備'] += `,DirectDebit-家屋番号${directDebitPaymentMeanIndex}:${buildingNumber}`
+            invoice[
+              '支払方法-予備'
+            ] += `,DirectDebit-ビル名 / フロア等${directDebitPaymentMeanIndex}:${additionalStreetName}`
 
             switch (accountType) {
               case 'Current':
-                invoice['支払方法-予備'] += invoice['支払方法-予備']
-                  ? `,DirectDebit-科目${directDebitPaymentMeanIndex}:当座`
-                  : `DirectDebit-科目${directDebitPaymentMeanIndex}:当座`
+                invoice['支払方法-予備'] += `,DirectDebit-科目${directDebitPaymentMeanIndex}:当座`
                 break
               case 'General':
-                invoice['支払方法-予備'] += invoice['支払方法-予備']
-                  ? `,DirectDebit-科目${directDebitPaymentMeanIndex}:普通`
-                  : `DirectDebit-科目${directDebitPaymentMeanIndex}:普通`
+                invoice['支払方法-予備'] += `,DirectDebit-科目${directDebitPaymentMeanIndex}:普通`
                 break
               default:
                 break
             }
 
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,DirectDebit-郵便番号${directDebitPaymentMeanIndex}:${postalZone}`
-              : `DirectDebit-郵便番号${directDebitPaymentMeanIndex}:${postalZone}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,DirectDebit-市区町村${directDebitPaymentMeanIndex}:${cityName}`
-              : `DirectDebit-市区町村${directDebitPaymentMeanIndex}:${cityName}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,DirectDebit-所在地${directDebitPaymentMeanIndex}:${addressLine}`
-              : `DirectDebit-所在地${directDebitPaymentMeanIndex}:${addressLine}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,DirectDebit-支店名${directDebitPaymentMeanIndex}:${institutionBranchName}`
-              : `DirectDebit-支店名${directDebitPaymentMeanIndex}:${institutionBranchName}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `DirectDebit-番地${directDebitPaymentMeanIndex}:${streetName}`
-              : `,DirectDebit-番地${directDebitPaymentMeanIndex}:${streetName}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,DirectDebit-口座名義${directDebitPaymentMeanIndex}:${accountName}`
-              : `DirectDebit-口座名義${directDebitPaymentMeanIndex}:${accountName}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,DirectDebit-都道府県${directDebitPaymentMeanIndex}:${countrySubentity}`
-              : `DirectDebit-都道府県${directDebitPaymentMeanIndex}:${countrySubentity}`
+            invoice['支払方法-予備'] += `,DirectDebit-郵便番号${directDebitPaymentMeanIndex}:${postalZone}`
+            invoice['支払方法-予備'] += `,DirectDebit-市区町村${directDebitPaymentMeanIndex}:${cityName}`
+            invoice['支払方法-予備'] += `,DirectDebit-所在地${directDebitPaymentMeanIndex}:${addressLine}`
+            invoice['支払方法-予備'] += `,DirectDebit-支店名${directDebitPaymentMeanIndex}:${institutionBranchName}`
+            invoice['支払方法-予備'] += `,DirectDebit-番地${directDebitPaymentMeanIndex}:${streetName}`
+            invoice['支払方法-予備'] += `,DirectDebit-口座名義${directDebitPaymentMeanIndex}:${accountName}`
+            invoice['支払方法-予備'] += `,DirectDebit-都道府県${directDebitPaymentMeanIndex}:${countrySubentity}`
 
             directDebitPaymentMeanIndex += 1
           }
@@ -1169,55 +1133,30 @@ const dataToJson = (data) => {
             invoice['支払方法-予備'] += invoice['支払方法-予備']
               ? `,銀行口座-銀行名${bankAccountPaymentMeanIndex}:${accountBankName}`
               : `銀行口座-銀行名${bankAccountPaymentMeanIndex}:${accountBankName}`
-
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,銀行口座-支店名${bankAccountPaymentMeanIndex}:${branchName}`
-              : `銀行口座-支店名${bankAccountPaymentMeanIndex}:${branchName}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,銀行口座-口座番号${bankAccountPaymentMeanIndex}:${bankAccountNumber}`
-              : `銀行口座-口座番号${bankAccountPaymentMeanIndex}:${bankAccountNumber}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,銀行口座-口座名義${bankAccountPaymentMeanIndex}:${bankAccountName}`
-              : `銀行口座-口座名義${bankAccountPaymentMeanIndex}:${bankAccountName}`
+            invoice['支払方法-予備'] += `,銀行口座-支店名${bankAccountPaymentMeanIndex}:${branchName}`
+            invoice['支払方法-予備'] += `,銀行口座-口座番号${bankAccountPaymentMeanIndex}:${bankAccountNumber}`
+            invoice['支払方法-予備'] += `,銀行口座-口座名義${bankAccountPaymentMeanIndex}:${bankAccountName}`
 
             switch (accountType) {
               case 'Current':
-                invoice['支払方法-予備'] += invoice['支払方法-予備']
-                  ? `,銀行口座-科目${bankAccountPaymentMeanIndex}:当座`
-                  : `銀行口座-科目${bankAccountPaymentMeanIndex}:当座`
+                invoice['支払方法-予備'] += `,銀行口座-科目${bankAccountPaymentMeanIndex}:当座`
                 break
               case 'General':
-                invoice['支払方法-予備'] += invoice['支払方法-予備']
-                  ? `,銀行口座-科目${bankAccountPaymentMeanIndex}:普通`
-                  : `銀行口座-科目${bankAccountPaymentMeanIndex}:普通`
+                invoice['支払方法-予備'] += `,銀行口座-科目${bankAccountPaymentMeanIndex}:普通`
                 break
               default:
                 break
             }
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,銀行口座-家屋番号${bankAccountPaymentMeanIndex}:${bankBuildingNumber}`
-              : `銀行口座-家屋番号${bankAccountPaymentMeanIndex}:${bankBuildingNumber}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,銀行口座-市区町村${bankAccountPaymentMeanIndex}:${bankCityName}`
-              : `銀行口座-市区町村${bankAccountPaymentMeanIndex}:${bankCityName}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,銀行口座-都道府県${bankAccountPaymentMeanIndex}:${bankCountrySubentity}`
-              : `銀行口座-都道府県${bankAccountPaymentMeanIndex}:${bankCountrySubentity}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,銀行口座-郵便番号${bankAccountPaymentMeanIndex}:${bankPostalZone}`
-              : `銀行口座-郵便番号${bankAccountPaymentMeanIndex}:${bankPostalZone}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,銀行口座-所在地${bankAccountPaymentMeanIndex}:${bankCountry}`
-              : `銀行口座-所在地${bankAccountPaymentMeanIndex}:${bankCountry}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,銀行口座-国${bankAccountPaymentMeanIndex}:${bankAddressLine}`
-              : `銀行口座-国${bankAccountPaymentMeanIndex}:${bankAddressLine}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,銀行口座-番地${bankAccountPaymentMeanIndex}:${bankStreetName}`
-              : `銀行口座-番地${bankAccountPaymentMeanIndex}:${bankStreetName}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,銀行口座-ビル名 / フロア等${bankAccountPaymentMeanIndex}:${bankAdditionalStreetName}`
-              : `銀行口座-ビル名 / フロア等${bankAccountPaymentMeanIndex}:${bankAdditionalStreetName}`
+            invoice['支払方法-予備'] += `,銀行口座-家屋番号${bankAccountPaymentMeanIndex}:${bankBuildingNumber}`
+            invoice['支払方法-予備'] += `,銀行口座-市区町村${bankAccountPaymentMeanIndex}:${bankCityName}`
+            invoice['支払方法-予備'] += `,銀行口座-都道府県${bankAccountPaymentMeanIndex}:${bankCountrySubentity}`
+            invoice['支払方法-予備'] += `,銀行口座-郵便番号${bankAccountPaymentMeanIndex}:${bankPostalZone}`
+            invoice['支払方法-予備'] += `,銀行口座-所在地${bankAccountPaymentMeanIndex}:${bankCountry}`
+            invoice['支払方法-予備'] += `,銀行口座-国${bankAccountPaymentMeanIndex}:${bankAddressLine}`
+            invoice['支払方法-予備'] += `,銀行口座-番地${bankAccountPaymentMeanIndex}:${bankStreetName}`
+            invoice[
+              '支払方法-予備'
+            ] += `,銀行口座-ビル名 / フロア等${bankAccountPaymentMeanIndex}:${bankAdditionalStreetName}`
 
             bankAccountPaymentMeanIndex += 1
           }
@@ -1240,12 +1179,10 @@ const dataToJson = (data) => {
             invoice['支払方法-予備'] += invoice['支払方法-予備']
               ? `,IBAN払い-IBAN${ibanPaymentMeanIndex}:${iban}`
               : `IBAN払い-IBAN${ibanPaymentMeanIndex}:${iban}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,IBAN払い-説明${ibanPaymentMeanIndex}:${ibanPaymentNote}`
-              : `IBAN払い-説明${ibanPaymentMeanIndex}:${ibanPaymentNote}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,IBAN払い-銀行識別コード / SWIFTコード${ibanPaymentMeanIndex}:${ibanFinancialInstitutionId}`
-              : `IBAN払い-銀行識別コード / SWIFTコード${ibanPaymentMeanIndex}:${ibanFinancialInstitutionId}`
+            invoice['支払方法-予備'] += `,IBAN払い-説明${ibanPaymentMeanIndex}:${ibanPaymentNote}`
+            invoice[
+              '支払方法-予備'
+            ] += `,IBAN払い-銀行識別コード / SWIFTコード${ibanPaymentMeanIndex}:${ibanFinancialInstitutionId}`
             ibanPaymentMeanIndex += 1
           }
         }
@@ -1305,42 +1242,32 @@ const dataToJson = (data) => {
             invoice['支払方法-予備'] += invoice['支払方法-予備']
               ? `,国際電信送金-ABAナンバー${internationalPaymentMeanIndex}:${abaNumber}`
               : `国際電信送金-ABAナンバー${internationalPaymentMeanIndex}:${abaNumber}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,国際電信送金-SWIFTコード${internationalPaymentMeanIndex}:${swiftCode}`
-              : `国際電信送金-SWIFTコード${internationalPaymentMeanIndex}:${swiftCode}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,国際電信送金-IBAN${internationalPaymentMeanIndex}:${internationalIban}`
-              : `国際電信送金-IBAN${internationalPaymentMeanIndex}:${internationalIban}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,国際電信送金-口座名義${internationalPaymentMeanIndex}:${internationalBankAccountName}`
-              : `国際電信送金-口座名義${internationalPaymentMeanIndex}:${internationalBankAccountName}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,国際電信送金-番地${internationalPaymentMeanIndex}:${internationalStreetName}`
-              : `国際電信送金-番地${internationalPaymentMeanIndex}:${internationalStreetName}`
-            invoice['国際電信送金-ビル名 / フロア等'] += invoice['支払方法-予備']
-              ? `,国際電信送金-ビル名 / フロア等${internationalPaymentMeanIndex}:${internationalAdditionalStreetName}`
-              : `国際電信送金-ビル名 / フロア等${internationalPaymentMeanIndex}:${internationalAdditionalStreetName}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,国際電信送金-家屋番号${internationalPaymentMeanIndex}:${internationalBuildingNumber}`
-              : `国際電信送金-家屋番号${internationalPaymentMeanIndex}:${internationalBuildingNumber}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,国際電信送金-市区町村${internationalPaymentMeanIndex}:${internationalCityName}`
-              : `国際電信送金-市区町村${internationalPaymentMeanIndex}:${internationalCityName}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,国際電信送金-都道府県${internationalPaymentMeanIndex}:${internationalCountrySubentity}`
-              : `国際電信送金-都道府県${internationalPaymentMeanIndex}:${internationalCountrySubentity}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,国際電信送金-郵便番号${internationalPaymentMeanIndex}:${internationalPostalZone}`
-              : `国際電信送金-郵便番号${internationalPaymentMeanIndex}:${internationalPostalZone}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,国際電信送金-所在地${internationalPaymentMeanIndex}:${internationalAddressLine}`
-              : `国際電信送金-所在地${internationalPaymentMeanIndex}:${internationalAddressLine}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,国際電信送金-国${internationalPaymentMeanIndex}:${internationalCountry}`
-              : `国際電信送金-国${internationalPaymentMeanIndex}:${internationalCountry}`
-            invoice['支払方法-予備'] += invoice['支払方法-予備']
-              ? `,国際電信送金-説明${internationalPaymentMeanIndex}:${internationalPaymentNote}`
-              : `国際電信送金-説明${internationalPaymentMeanIndex}:${internationalPaymentNote}`
+            invoice['支払方法-予備'] += `,国際電信送金-SWIFTコード${internationalPaymentMeanIndex}:${swiftCode}`
+            invoice['支払方法-予備'] += `,国際電信送金-IBAN${internationalPaymentMeanIndex}:${internationalIban}`
+            invoice[
+              '支払方法-予備'
+            ] += `,国際電信送金-口座名義${internationalPaymentMeanIndex}:${internationalBankAccountName}`
+            invoice['支払方法-予備'] += `,国際電信送金-番地${internationalPaymentMeanIndex}:${internationalStreetName}`
+            invoice[
+              '国際電信送金-ビル名 / フロア等'
+            ] += `,国際電信送金-ビル名 / フロア等${internationalPaymentMeanIndex}:${internationalAdditionalStreetName}`
+            invoice[
+              '支払方法-予備'
+            ] += `,国際電信送金-家屋番号${internationalPaymentMeanIndex}:${internationalBuildingNumber}`
+            invoice[
+              '支払方法-予備'
+            ] += `,国際電信送金-市区町村${internationalPaymentMeanIndex}:${internationalCityName}`
+            invoice[
+              '支払方法-予備'
+            ] += `,国際電信送金-都道府県${internationalPaymentMeanIndex}:${internationalCountrySubentity}`
+            invoice[
+              '支払方法-予備'
+            ] += `,国際電信送金-郵便番号${internationalPaymentMeanIndex}:${internationalPostalZone}`
+            invoice[
+              '支払方法-予備'
+            ] += `,国際電信送金-所在地${internationalPaymentMeanIndex}:${internationalAddressLine}`
+            invoice['支払方法-予備'] += `,国際電信送金-国${internationalPaymentMeanIndex}:${internationalCountry}`
+            invoice['支払方法-予備'] += `,国際電信送金-説明${internationalPaymentMeanIndex}:${internationalPaymentNote}`
             internationalPaymentMeanIndex += 1
           }
         }
@@ -1996,17 +1923,13 @@ const dataToJson = (data) => {
         } else if (data.InvoiceLine[i]?.DocumentReference[k]?.DocumentTypeCode?.value === 'LinePrice') {
           // 明細-単価
           invoice['明細-単価'] = data.InvoiceLine[i].DocumentReference[k].ID.value
-          console.log(data.InvoiceLine[i].DocumentReference[k].ID.value)
         }
       }
     }
 
     // 明細-単価（割引や追加料金などがない場合）
     if (invoice['明細-単価'] === '') {
-      console.log('asdfasdfasdfasdfasdf')
       if (data.InvoiceLine[i]?.Price) {
-        console.log('123456489')
-        console.log(data.InvoiceLine[i].Price.PriceAmount?.value)
         invoice['明細-単価'] = data.InvoiceLine[i].Price.PriceAmount?.value
       }
     }
