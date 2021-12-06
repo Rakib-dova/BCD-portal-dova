@@ -1738,9 +1738,9 @@ const dataToJson = (data) => {
 
       // 固定税
       if (taxName === '固定税') {
-        if (data.taxTotal) {
+        if (data.TaxTotal) {
           invoice['固定税-項目ID'] = '税額(文書合計)'
-          invoice['固定税-税'] = data.taxTotal.TaxAmount?.value
+          invoice['固定税-税'] = data.TaxTotal.TaxAmount?.value
         }
       }
 

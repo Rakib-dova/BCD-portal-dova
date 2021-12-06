@@ -114,7 +114,13 @@ const axios = {
               A01023: 21,
               A01024: 22,
               A01025: 23,
-              A01026: 24
+              A01026: 24,
+              A01027: 25,
+              A01028: 26,
+              A01029: 27,
+              A01030: 28,
+              A01031: 29,
+              A01032: 30
             }
             this.result.data = {
               itemPerPage: 25,
@@ -230,6 +236,30 @@ const axios = {
       }
       case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd27': {
         const invoice = require('../mockInvoice/invoice24')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd28': {
+        const invoice = require('../mockInvoice/invoice25')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd29': {
+        const invoice = require('../mockInvoice/invoice26')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd30': {
+        const invoice = require('../mockInvoice/invoice27')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd31': {
+        const invoice = require('../mockInvoice/invoice28')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd32': {
+        const invoice = require('../mockInvoice/invoice29')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd33': {
+        const invoice = require('../mockInvoice/invoice30')
         return { data: invoice }
       }
       default: {
@@ -839,6 +869,30 @@ const dcouments = {
     {
       DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd27',
       ID: 'A01026'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd28',
+      ID: 'A01027'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd29',
+      ID: 'A01028'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd30',
+      ID: 'A01029'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd31',
+      ID: 'A01030'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd32',
+      ID: 'A01031'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd33',
+      ID: 'A01032'
     }
   ]
 }
