@@ -147,26 +147,6 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
     })
-
-    // 利用登録をしていないため、解約ページ利用できない
-    test('/cancellationにGET：制御による500ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
-    })
-
-    // 利用登録をしていないため、解約機能利用できない
-    test('/cancellationにPOST：制御による500ステータスとエラーメッセージ', async () => {
-      const res = await request(app)
-        .post('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i) // タイトル
-    })
   })
 
   describe('2.DBにアカウント管理者・一般ユーザ共に登録なし/アカウント管理者としてリクエスト', () => {
@@ -203,50 +183,10 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
-    // テナントステータスが「新規申込」、解約ページ利用できない
-    test('/cancellationにGET：制御による新規申込中エラー', async () => {
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在利用登録手続き中です。/i)
-    })
-
-    // テナントステータスが「新規申込」、解約機能利用できない
-    test('/cancellationにPOST：制御による新規申込中エラー', async () => {
-      const res = await request(app)
-        .post('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在利用登録手続き中です。/i)
-    })
-
     // 契約ステータスを「新規申込」から「新規受付」に変更
     test('契約ステータス変更：「新規申込」→ 「新規受付」', async () => {
       await db.Contract.update({ contractStatus: 11 }, { where: { tenantId: testTenantId } })
       await db.Contract.findOne({ where: { tenantId: testTenantId } })
-    })
-
-    // テナントステータスが「新規受付」、解約ページ利用できない
-    test('/cancellationにGET：制御による新規申込中エラー', async () => {
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在利用登録手続き中です。/i)
-    })
-
-    // テナントステータスが「新規受付」、解約機能利用できない
-    test('/cancellationにPOST：制御による新規申込中エラー', async () => {
-      const res = await request(app)
-        .post('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在利用登録手続き中です。/i)
     })
   })
 
@@ -716,168 +656,6 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(400)
 
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i) // タイトル
-    })
-
-    test('管理者、契約ステータス：10, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '10', deleteFlag: 'false' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：10, /cancellation', async () => {
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/本機能はご利用いただけません。/i)
-    })
-
-    test('管理者、契約ステータス：11, /cancellation', async () => {
-      // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '11' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在利用登録手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：11, /cancellation', async () => {
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/本機能はご利用いただけません。/i)
-    })
-
-    test('管理者、契約ステータス：40, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
-    })
-
-    test('管理者、契約ステータス：41, /cancellation', async () => {
-      // 契約ステータス変更(受け取り完了)
-      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：40, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '40' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/本機能はご利用いただけません。/i)
-    })
-
-    test('一般ユーザ、契約ステータス：41, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '41' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/本機能はご利用いただけません。/i)
-    })
-
-    test('管理者、契約ステータス：00, /cancellation', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/解約/i)
-      expect(res.text).toMatch(/解約する前に以下の内容をご確認ください。/i)
-    })
-
-    test('一般ユーザ、契約ステータス：00, /cancellation', async () => {
-      // 契約ステータス変更(利用登録済み)
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/本機能はご利用いただけません。/i)
-    })
-
-    test('管理者、契約ステータス：30, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '30' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：30, /cancellation', async () => {
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i)
-    })
-
-    test('管理者、契約ステータス：31, /cancellation', async () => {
-      await db.Contract.update({ contractStatus: '31' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容
-    })
-
-    test('一般ユーザ、契約ステータス：31, /cancellation', async () => {
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/現在解約手続き中です。/i)
-    })
-
-    test('管理者、契約ステータス：99, /cancellation', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '99', deleteFlag: 'true' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
-    })
-
-    test('一般ユーザ、契約ステータス：99, /cancellation', async () => {
-      // 契約ステータス変更(利用登録済み)
-      await db.Contract.update({ contractStatus: '99' }, { where: { tenantId: testTenantId } })
-      const res = await request(app)
-        .get('/cancellation')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(500)
-
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
     test('管理者、契約ステータス：10, /portal', async () => {
