@@ -592,7 +592,6 @@ const dataToJson = (data) => {
     '差出人-ビル、マンション名': '',
     '差出人-GLN（企業・事業所識別コード）': '',
     請求書番号: '',
-    テナントID: '',
     支払期日: '',
     納品日: '',
     納品開始日: '',
@@ -858,7 +857,6 @@ const dataToJson = (data) => {
       invoice['差出人-ビル、マンション名'] =
         data.AccountingSupplierParty.Party.PostalAddress.AdditionalStreetName?.value ?? ''
     }
-    // invoice['宛先-GLN（企業・事業所識別コード）'] = data.AccountingSupplierParty.Party.PartyIdentification[0].ID.value
 
     invoice.請求書番号 = data.ID.value
 
