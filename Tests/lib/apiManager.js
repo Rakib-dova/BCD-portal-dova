@@ -99,7 +99,28 @@ const axios = {
               A01007: 6,
               A: 7,
               A01009: 8,
-              A01011: 9
+              A01011: 9,
+              A01012: 10,
+              A01013: 11,
+              A01014: 12,
+              A01015: 13,
+              A01016: 14,
+              A01017: 15,
+              A01018: 16,
+              A01019: 17,
+              A01020: 18,
+              A01021: 19,
+              A01022: 20,
+              A01023: 21,
+              A01024: 22,
+              A01025: 23,
+              A01026: 24,
+              A01027: 25,
+              A01028: 26,
+              A01029: 27,
+              A01030: 28,
+              A01031: 29,
+              A01032: 30
             }
             this.result.data = {
               itemPerPage: 25,
@@ -156,6 +177,90 @@ const axios = {
           status: 404
         }
         return this.result
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd13': {
+        const invoice = require('../mockInvoice/invoice10')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd14': {
+        const invoice = require('../mockInvoice/invoice11')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd15': {
+        const invoice = require('../mockInvoice/invoice12')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd16': {
+        const invoice = require('../mockInvoice/invoice13')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd17': {
+        const invoice = require('../mockInvoice/invoice14')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd18': {
+        const invoice = require('../mockInvoice/invoice15')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd19': {
+        const invoice = require('../mockInvoice/invoice16')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd20': {
+        const invoice = require('../mockInvoice/invoice17')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd21': {
+        const invoice = require('../mockInvoice/invoice18')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd22': {
+        const invoice = require('../mockInvoice/invoice19')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd23': {
+        const invoice = require('../mockInvoice/invoice20')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd24': {
+        const invoice = require('../mockInvoice/invoice21')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd25': {
+        const invoice = require('../mockInvoice/invoice22')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd26': {
+        const invoice = require('../mockInvoice/invoice23')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd27': {
+        const invoice = require('../mockInvoice/invoice24')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd28': {
+        const invoice = require('../mockInvoice/invoice25')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd29': {
+        const invoice = require('../mockInvoice/invoice26')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd30': {
+        const invoice = require('../mockInvoice/invoice27')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd31': {
+        const invoice = require('../mockInvoice/invoice28')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd32': {
+        const invoice = require('../mockInvoice/invoice29')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd33': {
+        const invoice = require('../mockInvoice/invoice30')
+        return { data: invoice }
       }
       default: {
         if (paramateter[2] === 'minissuedate=1990-01-01') {
@@ -704,6 +809,90 @@ const dcouments = {
     {
       DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd12',
       ID: 'A01011'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd13',
+      ID: 'A01012'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd14',
+      ID: 'A01013'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd15',
+      ID: 'A01014'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd16',
+      ID: 'A01015'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd17',
+      ID: 'A01016'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd18',
+      ID: 'A01017'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd19',
+      ID: 'A01018'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd20',
+      ID: 'A01019'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd21',
+      ID: 'A01020'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd22',
+      ID: 'A01021'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd23',
+      ID: 'A01022'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd24',
+      ID: 'A01023'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd25',
+      ID: 'A01024'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd26',
+      ID: 'A01025'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd27',
+      ID: 'A01026'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd28',
+      ID: 'A01027'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd29',
+      ID: 'A01028'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd30',
+      ID: 'A01029'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd31',
+      ID: 'A01030'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd32',
+      ID: 'A01031'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd33',
+      ID: 'A01032'
     }
   ]
 }

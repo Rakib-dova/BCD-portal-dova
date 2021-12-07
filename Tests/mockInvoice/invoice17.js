@@ -27,7 +27,7 @@ module.exports = {
     schemeVersionID: '1'
   },
   ID: {
-    value: 'A01001'
+    value: 'A01019'
   },
   IssueDate: {
     value: '2021-08-23'
@@ -40,7 +40,7 @@ module.exports = {
   },
   Note: [
     {
-      value: '特記事項テスト1です。'
+      value: '特記事項テスト13です。'
     }
   ],
   DocumentCurrencyCode: {
@@ -195,32 +195,155 @@ module.exports = {
   PaymentMeans: [
     {
       ID: {
-        value: 'fca33ef8-6cf9-48e5-ad6c-51c10210e61f'
+        value: 'fc6d1b03-fe23-4898-aa49-4f29021b684b'
       },
       PaymentMeansCode: {
-        value: '42',
+        value: '31',
         listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
       },
       PaymentDueDate: {
-        value: '2021-08-23'
+        value: '2021-12-31'
+      },
+      PaymentChannelCode: {
+        value: 'SWIFTUS',
+        listID: 'urn:tradeshift.com:api:1.0:paymentchannelcode'
+      },
+      PayeeFinancialAccount: {
+        ID: {},
+        Name: {},
+        PaymentNote: [{}],
+        FinancialInstitutionBranch: {
+          ID: {},
+          FinancialInstitution: {
+            ID: {}
+          },
+          Address: {
+            AddressFormatCode: {},
+            StreetName: {},
+            AdditionalStreetName: {},
+            BuildingNumber: {},
+            CityName: {},
+            PostalZone: {},
+            CountrySubentity: {},
+            AddressLine: [{}],
+            Country: {
+              IdentificationCode: {}
+            }
+          }
+        }
+      }
+    },
+    {
+      ID: {
+        value: 'fc6d1b03-fe23-4898-aa49-4f29021b684b'
+      },
+      PaymentMeansCode: {
+        value: '31',
+        listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
+      },
+      PaymentDueDate: {
+        value: '2021-12-31'
+      },
+      PaymentChannelCode: {
+        value: 'SWIFTUS',
+        listID: 'urn:tradeshift.com:api:1.0:paymentchannelcode'
+      },
+      PayeeFinancialAccount: {
+        ID: {},
+        Name: {},
+        PaymentNote: [{}],
+        FinancialInstitutionBranch: {
+          ID: {},
+          FinancialInstitution: {
+            ID: {}
+          },
+          Address: {
+            AddressFormatCode: {},
+            StreetName: {},
+            AdditionalStreetName: {},
+            BuildingNumber: {},
+            CityName: {},
+            PostalZone: {},
+            CountrySubentity: {},
+            AddressLine: [{}],
+            Country: {
+              IdentificationCode: {}
+            }
+          }
+        }
+      }
+    },
+    {
+      ID: {
+        value: 'b824cc6e-15b3-4d5d-940b-24567ae71d55'
+      },
+      PaymentMeansCode: {
+        value: '31',
+        listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
+      },
+      PaymentDueDate: {
+        value: '2021-12-31'
+      },
+      PaymentChannelCode: {
+        value: 'SWIFTUS',
+        listID: 'urn:tradeshift.com:api:1.0:paymentchannelcode'
       },
       PayeeFinancialAccount: {
         ID: {
-          value: '2222222'
+          value: '1130007'
         },
         Name: {
-          value: 'kang_test'
+          value: '口座名義（任意）'
         },
-        AccountTypeCode: {
-          value: 'General'
-        },
+        PaymentNote: [
+          {
+            value: '国際電信送金3'
+          }
+        ],
         FinancialInstitutionBranch: {
-          Name: {
-            value: 'testbank'
+          ID: {
+            value: '123456780'
           },
           FinancialInstitution: {
-            Name: {
-              value: 'testsiten'
+            ID: {
+              value: 'BOTKJPJT'
+            }
+          },
+          Address: {
+            AddressFormatCode: {
+              value: '5',
+              listID: 'UN/ECE 3477',
+              listAgencyID: '6'
+            },
+            StreetName: {
+              value: '所在地１（任意）'
+            },
+            AdditionalStreetName: {
+              value: '所在地２（任意）'
+            },
+            BuildingNumber: {
+              value: 'ビル名（任意）'
+            },
+            CityName: {
+              value: '市区町村（任意）'
+            },
+            PostalZone: {
+              value: '郵便番号（任意）'
+            },
+            CountrySubentity: {
+              value: '都道府県（任意）'
+            },
+            AddressLine: [
+              {
+                Line: {
+                  value: '所在地（任意）'
+                }
+              }
+            ],
+            Country: {
+              IdentificationCode: {
+                value: '国名（任意）'
+              }
             }
           }
         }

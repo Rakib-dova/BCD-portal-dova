@@ -27,7 +27,7 @@ module.exports = {
     schemeVersionID: '1'
   },
   ID: {
-    value: 'A01001'
+    value: 'A01020'
   },
   IssueDate: {
     value: '2021-08-23'
@@ -40,7 +40,7 @@ module.exports = {
   },
   Note: [
     {
-      value: '特記事項テスト1です。'
+      value: '特記事項テスト13です。'
     }
   ],
   DocumentCurrencyCode: {
@@ -198,7 +198,87 @@ module.exports = {
         value: 'fca33ef8-6cf9-48e5-ad6c-51c10210e61f'
       },
       PaymentMeansCode: {
-        value: '42',
+        value: '49',
+        listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
+      },
+      PaymentDueDate: {
+        value: '2021-08-23'
+      },
+      PayeeFinancialAccount: {
+        ID: {},
+        Name: {},
+        AccountTypeCode: {},
+        FinancialInstitutionBranch: {
+          Name: {},
+          FinancialInstitution: {
+            Name: {}
+          },
+          Address: {
+            BuildingNumber: {},
+            CityName: {},
+            CountrySubentity: {},
+            PostalZone: {},
+            AddressLine: [
+              {
+                Line: {}
+              }
+            ],
+            Country: {
+              IdentificationCode: {}
+            },
+            StreetName: {},
+            AdditionalStreetName: {}
+          }
+        }
+      }
+    },
+    {
+      ID: {
+        value: 'fca33ef8-6cf9-48e5-ad6c-51c10210e61f'
+      },
+      PaymentMeansCode: {
+        value: '49',
+        listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
+      },
+      PaymentDueDate: {
+        value: '2021-08-23'
+      },
+      PayeeFinancialAccount: {
+        ID: {},
+        Name: {},
+        AccountTypeCode: {
+          value: 'General'
+        },
+        FinancialInstitutionBranch: {
+          Name: {},
+          FinancialInstitution: {
+            Name: {}
+          },
+          Address: {
+            BuildingNumber: {},
+            CityName: {},
+            CountrySubentity: {},
+            PostalZone: {},
+            AddressLine: [
+              {
+                Line: {}
+              }
+            ],
+            Country: {
+              IdentificationCode: {}
+            },
+            StreetName: {},
+            AdditionalStreetName: {}
+          }
+        }
+      }
+    },
+    {
+      ID: {
+        value: 'fca33ef8-6cf9-48e5-ad6c-51c10210e61f'
+      },
+      PaymentMeansCode: {
+        value: '49',
         listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
       },
       PaymentDueDate: {
@@ -206,21 +286,53 @@ module.exports = {
       },
       PayeeFinancialAccount: {
         ID: {
-          value: '2222222'
+          value: 'DirectDebit3'
         },
         Name: {
-          value: 'kang_test'
+          value: '口座名義'
         },
         AccountTypeCode: {
-          value: 'General'
+          value: 'Current'
         },
         FinancialInstitutionBranch: {
           Name: {
-            value: 'testbank'
+            value: '王子店'
           },
           FinancialInstitution: {
             Name: {
-              value: 'testsiten'
+              value: '三菱'
+            }
+          },
+          Address: {
+            BuildingNumber: {
+              value: '家屋番号'
+            },
+            CityName: {
+              value: '市区町村'
+            },
+            CountrySubentity: {
+              value: '都道府県'
+            },
+            PostalZone: {
+              value: '1140003'
+            },
+            AddressLine: [
+              {
+                Line: {
+                  value: '所在地'
+                }
+              }
+            ],
+            Country: {
+              IdentificationCode: {
+                value: '国'
+              }
+            },
+            StreetName: {
+              value: '番地'
+            },
+            AdditionalStreetName: {
+              value: 'ビル名 / フロア等'
             }
           }
         }

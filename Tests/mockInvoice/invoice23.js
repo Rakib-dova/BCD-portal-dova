@@ -27,7 +27,7 @@ module.exports = {
     schemeVersionID: '1'
   },
   ID: {
-    value: 'A01001'
+    value: 'A01025'
   },
   IssueDate: {
     value: '2021-08-23'
@@ -40,7 +40,7 @@ module.exports = {
   },
   Note: [
     {
-      value: '特記事項テスト1です。'
+      value: '特記事項テスト13です。'
     }
   ],
   DocumentCurrencyCode: {
@@ -194,79 +194,19 @@ module.exports = {
   ],
   PaymentMeans: [
     {
-      ID: {
-        value: 'fca33ef8-6cf9-48e5-ad6c-51c10210e61f'
-      },
       PaymentMeansCode: {
-        value: '42',
-        listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
-      },
-      PaymentDueDate: {
-        value: '2021-08-23'
-      },
-      PayeeFinancialAccount: {
-        ID: {
-          value: '2222222'
-        },
-        Name: {
-          value: 'kang_test'
-        },
-        AccountTypeCode: {
-          value: 'General'
-        },
-        FinancialInstitutionBranch: {
-          Name: {
-            value: 'testbank'
-          },
-          FinancialInstitution: {
-            Name: {
-              value: 'testsiten'
-            }
-          }
-        }
+        value: '48'
       }
-    }
-  ],
-  TaxTotal: [
+    },
     {
-      TaxAmount: {
-        value: 0,
-        currencyID: 'JPY'
-      },
-      TaxSubtotal: [
-        {
-          TaxableAmount: {
-            value: 100,
-            currencyID: 'JPY'
-          },
-          TaxAmount: {
-            value: 0,
-            currencyID: 'JPY'
-          },
-          TaxCategory: {
-            ID: {
-              value: 'E',
-              schemeID: 'UN/ECE 5305',
-              schemeAgencyID: '6',
-              schemeVersionID: 'D08B'
-            },
-            Percent: {
-              value: 0
-            },
-            TaxScheme: {
-              ID: {
-                value: 'VAT',
-                schemeID: 'UN/ECE 5153 Subset',
-                schemeAgencyID: '6',
-                schemeVersionID: 'D08B'
-              },
-              Name: {
-                value: 'JP 不課税 0%'
-              }
-            }
-          }
-        }
-      ]
+      PaymentMeansCode: {
+        value: '48'
+      }
+    },
+    {
+      PaymentMeansCode: {
+        value: '48'
+      }
     }
   ],
   LegalMonetaryTotal: {

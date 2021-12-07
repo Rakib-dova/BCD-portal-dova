@@ -16,6 +16,7 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
+const DOMParser = require('dom-parser')
 
 let request, response, infoSpy
 let userControllerFindOneSpy,
@@ -65,6 +66,9 @@ const status = [
   '完了',
   '回収済み'
 ]
+
+const headers =
+  '発行日,宛先-テナントID,宛先-会社名,宛先-国/地域,宛先-私書箱,宛先-郵便番号,宛先-都道府県,宛先-市区町村・番地,宛先-ビル、マンション名,宛先-GLN（企業・事業所識別コード）,差出人-テナントID,差出人-会社名,差出人-国/地域,差出人-私書箱,差出人-郵便番号,差出人-都道府県,差出人-市区町村・番地,差出人-ビル、マンション名,差出人-GLN（企業・事業所識別コード）,請求書番号,支払期日,納品日,納品開始日,納品終了日,備考,注文書番号,注文書発行日,参考情報,契約書番号,部門,取引先担当者（アドレス）,輸送情報,Tradeshiftクリアランス,通関識別情報,ID,課税日,販売者の手数料番号,DUNSナンバー,暫定時間,予約番号,為替レート,為替レート-通貨,為替レート-日付,為替レート換算後の税金総額,為替レート-Convertd Document Total(incl taxes),支払方法,支払い条件-割引率,支払い条件-割増率,支払い条件-決済開始日,支払い条件-決済終了日,支払い条件-ペナルティ開始日,支払い条件-ペナルティ終了日,支払い条件-説明,銀行口座-銀行名,銀行口座-支店名,銀行口座-口座番号,銀行口座-科目,銀行口座-口座名義,銀行口座-番地,銀行口座-ビル名 / フロア等,銀行口座-家屋番号,銀行口座-市区町村,銀行口座-都道府県,銀行口座-郵便番号,銀行口座-所在地,銀行口座-国,DirectDebit-銀行名,DirectDebit-支店名,DirectDebit-口座番号,DirectDebit-科目,DirectDebit-口座名義,DirectDebit-番地,DirectDebit-ビル名 / フロア等,DirectDebit-家屋番号,DirectDebit-市区町村,DirectDebit-都道府県,DirectDebit-郵便番号,DirectDebit-所在地,DirectDebit-国,IBAN払い-銀行識別コード / SWIFTコード,IBAN払い-IBAN,IBAN払い-説明,国際電信送金-ABAナンバー,国際電信送金-SWIFTコード,国際電信送金-IBAN,国際電信送金-口座名義,国際電信送金-番地,国際電信送金-ビル名 / フロア等,国際電信送金-家屋番号,国際電信送金-市区町村,国際電信送金-都道府県,国際電信送金-郵便番号,国際電信送金 - 所在地,国際電信送金-国,国際電信送金-説明,支払方法-予備,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-小計 (税抜),明細-割引1-内容,明細-割引1-値,明細-割引1-単位,明細-割引1-単価,明細-割引2-内容,明細-割引2-値,明細-割引2-単位,明細-割引2-単価,明細-割引3-内容,明細-割引3-値,明細-割引3-単位,明細-割引3-単価,明細-割引4以降,明細-追加料金1-内容,明細-追加料金1-値,明細-追加料金1-単位,明細-追加料金1-単価,明細-追加料金2-内容,明細-追加料金2-値,明細-追加料金2-単位,明細-追加料金2-単価,明細-追加料金3-内容,明細-追加料金3-値,明細-追加料金3-単位,明細-追加料金3-単価,明細-追加料金4以降,明細-輸送情報,明細-備考,明細-シリアルナンバー,明細-商品分類コード: ECCN,明細-発注者品番,明細-注文明細番号,明細-EAN/GTIN,明細-ロケーションID,明細-貨物注文番号,明細-納品日,明細-HSN/SAC区分,明細-HSN/SACの値,明細-非課税/免税の理由,明細-注文書番号,明細-詳細,明細-メーカー名,明細-原産国,明細-納期,明細-配送先-私書箱,明細-配送先-市区町村番地,明細-配送先-マンション名,明細-配送先-都道府県,明細-配送先-郵便番号,明細-配送先-国,割引1-項目ID,割引1-内容,割引1-数量,割引1-単位,割引1-税（消費税／軽減税率／不課税／免税／非課税）,割引1-小計（税抜）,割引2-項目ID,割引2-内容,割引2-数量,割引2-単位,割引2-税（消費税／軽減税率／不課税／免税／非課税）,割引2-小計（税抜）,割引3-項目ID,割引3-内容,割引3-数量,割引3-単位,割引3-税（消費税／軽減税率／不課税／免税／非課税）,割引3-小計（税抜）,割引4以降,追加料金1-項目ID,追加料金1-内容,追加料金1-数量,追加料金1-単位,追加料金1-税（消費税／軽減税率／不課税／免税／非課税）,追加料金1-小計（税抜）,追加料金2-項目ID,追加料金2-内容,追加料金2-数量,追加料金2-単位,追加料金2-税（消費税／軽減税率／不課税／免税／非課税）,追加料金2-小計（税抜）,追加料金3-項目ID,追加料金3-内容,追加料金3-数量,追加料金3-単位,追加料金3-税（消費税／軽減税率／不課税／免税／非課税）,追加料金3-小計（税抜）,追加料金4以降,固定税-項目ID,固定税-税'
 
 const buyAndSell = ['すべて', '販売', '購入']
 
@@ -352,11 +356,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -475,11 +475,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -598,11 +594,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -721,11 +713,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -843,11 +831,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -965,11 +949,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -1087,11 +1067,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -1209,11 +1185,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -1331,11 +1303,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -1453,11 +1421,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -1575,11 +1539,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -1697,11 +1657,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -1819,11 +1775,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -1941,11 +1893,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -2063,11 +2011,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -2185,11 +2129,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -2307,11 +2247,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -2429,11 +2365,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -2551,11 +2483,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -2673,11 +2601,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -2795,11 +2719,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -2918,11 +2838,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -3040,11 +2956,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -3162,11 +3074,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice1')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -3276,11 +3184,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
 
       const checkingData = require('../mockInvoice/invoice6')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       for (let idx = 0; idx < 201; idx++) {
         const csvBody = response.setHeader().body.split('\r\n')[idx + 1]
         // 発行日
@@ -3362,7 +3266,7 @@ describe('csvDownloadのテスト', () => {
       }
     })
 
-    test('正常:テナントIDがない請求書の場合', async () => {
+    test('正常:宛先-テナントIDがない請求書の場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -3405,11 +3309,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
       const csvBody = response.setHeader().body.split('\r\n')[1]
       const checkingData = require('../mockInvoice/invoice9')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
       // 発行日
       expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
       // 請求書番号
@@ -3482,6 +3382,2129 @@ describe('csvDownloadのテスト', () => {
       )
     })
 
+    test('正常:宛先-GNLが設定されている請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01014',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01014')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice12')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      checkingData.AccountingCustomerParty.Party.PartyIdentification.forEach((item) => {
+        switch (item.ID.schemeID) {
+          case 'TS:REGNO':
+            expect(csvBody).toContain(`${item.ID.schemeName}:${item.ID.value}`)
+            break
+          case 'GLN':
+            expect(csvBody).toContain(`${item.ID.schemeID}:${item.ID.value}`)
+            break
+          case 'JP:CT':
+            expect(csvBody).toContain(`法人番号:${item.ID.value}`)
+            break
+        }
+      })
+    })
+
+    test('正常:宛先-テナントID以外が設定（複数）されている請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01013',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01013')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice11')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      checkingData.AccountingCustomerParty.Party.PartyIdentification.forEach((item) => {
+        switch (item.ID.schemeID) {
+          case 'TS:REGNO':
+            expect(csvBody).toContain(`${item.ID.schemeName}:${item.ID.value}`)
+            break
+          case 'GLN':
+            expect(csvBody).toContain(`${item.ID.schemeID}:${item.ID.value}`)
+            break
+          case 'JP:CT':
+            expect(csvBody).toContain(`法人番号:${item.ID.value}`)
+            break
+        }
+      })
+    })
+
+    test('正常:宛先-会社名がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 宛先-会社名が空欄になっている。
+      expect(checkData[2]).toBe('""')
+    })
+
+    test('正常:宛先-国/地域がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 宛先-国/地域が空欄になっている。
+      expect(checkData[3]).toBe('""')
+    })
+
+    test('正常:宛先-私書箱がある請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice9')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 宛先-私書箱がある
+      expect(csvBody).toContain(checkingData.AccountingCustomerParty.Party.PostalAddress.Postbox.value)
+    })
+
+    test('正常:宛先-郵便番号がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 宛先-郵便番号が空欄になっている。
+      expect(checkData[5]).toBe('""')
+    })
+
+    test('正常:宛先-都道府県がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 宛先-都道府県が空欄になっている。
+      expect(checkData[6]).toBe('""')
+    })
+
+    test('正常:宛先-市区町村・番地がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 宛先-市区町村・番地が空欄になっている。
+      expect(checkData[7]).toBe('""')
+    })
+
+    test('正常:宛先-ビル、マンション名がある請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice9')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 宛先-ビル、マンション名がある
+      expect(csvBody).toContain(checkingData.AccountingCustomerParty.Party.PostalAddress.AdditionalStreetName.value)
+    })
+
+    test('正常:宛先の住所情報がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01012',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01012')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 差出人-テナントIDが空欄になっている。
+
+      for (let idx = 3; idx < 9; idx++) {
+        expect(checkData[idx]).toBe('""')
+      }
+    })
+
+    test('正常:差出人-テナントIDがない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 差出人-テナントIDが空欄になっている。
+      expect(checkData[10]).toBe('""')
+    })
+
+    test('正常:差出人-GNLが設定されている請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01014',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01014')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice12')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      checkingData.AccountingSupplierParty.Party.PartyIdentification.forEach((item) => {
+        switch (item.ID.schemeID) {
+          case 'TS:REGNO':
+            expect(csvBody).toContain(`${item.ID.schemeName}:${item.ID.value}`)
+            break
+          case 'GLN':
+            expect(csvBody).toContain(`${item.ID.schemeID}:${item.ID.value}`)
+            break
+          case 'JP:CT':
+            expect(csvBody).toContain(`法人番号:${item.ID.value}`)
+            break
+        }
+      })
+    })
+
+    test('正常:差出人-テナントID以外が設定（複数）されている請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01013',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01013')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice11')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      checkingData.AccountingSupplierParty.Party.PartyIdentification.forEach((item) => {
+        switch (item.ID.schemeID) {
+          case 'TS:REGNO':
+            expect(csvBody).toContain(`${item.ID.schemeName}:${item.ID.value}`)
+            break
+          case 'GLN':
+            expect(csvBody).toContain(`${item.ID.schemeID}:${item.ID.value}`)
+            break
+          case 'JP:CT':
+            expect(csvBody).toContain(`法人番号:${item.ID.value}`)
+            break
+        }
+      })
+    })
+
+    test('正常:差出人-会社名がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 差出人-会社名が空欄になっている。
+      expect(checkData[11]).toBe('""')
+    })
+
+    test('正常:差出人-国/地域がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 差出人-国/地域が空欄になっている。
+      expect(checkData[12]).toBe('""')
+    })
+
+    test('正常:差出人-私書箱がある請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice9')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 差出人-私書箱がある
+      expect(csvBody).toContain(checkingData.AccountingSupplierParty.Party.PostalAddress.Postbox?.value ?? '')
+    })
+
+    test('正常:差出人-郵便番号がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 差出人-郵便番号が空欄になっている。
+      expect(checkData[14]).toBe('""')
+    })
+
+    test('正常:差出人-都道府県がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 差出人-都道府県が空欄になっている。
+      expect(checkData[15]).toBe('""')
+    })
+
+    test('正常:差出人-市区町村・番地がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 差出人-市区町村・番地が空欄になっている。
+      expect(checkData[16]).toBe('""')
+    })
+
+    test('正常:差出人-ビル、マンション名がある請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01011',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01011')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice9')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 差出人-ビル、マンション名がある
+      expect(csvBody).toContain(
+        checkingData.AccountingSupplierParty.Party.PostalAddress.AdditionalStreetName?.value ?? ''
+      )
+    })
+
+    test('正常:差出人の住所情報がない請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01012',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01012')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 差出人の住所情報が空欄になっている。
+      for (let idx = 12; idx < 18; idx++) {
+        expect(checkData[idx]).toBe('""')
+      }
+    })
+
+    test('正常:オプション項目を追加した請求書の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01015',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01015')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice13')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 指定したオプション項目がある
+      // 支払期日
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[0].PaymentDueDate.value}`)
+      // 納品日
+      expect(csvBody).toContain(`${checkingData.Delivery[0].ActualDeliveryDate?.value}`)
+      // 納品開始日
+      expect(csvBody).toContain(`${checkingData.Delivery[0].PromisedDeliveryPeriod?.StartDate?.value}`)
+      // 納品終了日
+      expect(csvBody).toContain(`${checkingData.Delivery[0].PromisedDeliveryPeriod?.EndDate?.value}`)
+      // 販売者の手数料番号
+      expect(csvBody).toContain(`${checkingData.Delivery[0].Despatch?.ID?.value}`)
+      // 注文書番号
+      expect(csvBody).toContain(`${checkingData.OrderReference?.ID?.value}`)
+      // 注文書発行日
+      expect(csvBody).toContain(`${checkingData.OrderReference?.IssueDate?.value}`)
+      // 参考情報
+      expect(csvBody).toContain(`${checkingData.BillingReference[0]?.InvoiceDocumentReference?.ID?.value}`)
+      // 契約書番号
+      expect(csvBody).toContain(`${checkingData.ContractDocumentReference[0]?.ID?.value}`)
+      // 部門
+      expect(csvBody).toContain(`${checkingData.AccountingCost?.value}`)
+      // 取引先担当者（アドレス）
+      expect(csvBody).toContain(`${checkingData.AccountingCustomerParty.Party.Contact?.ID?.value}`)
+      // ID
+      expect(csvBody).toContain(`${checkingData.AccountingCustomerParty.CustomerAssignedAccountID?.value}`)
+
+      for (let i = 0; i < checkingData.AdditionalDocumentReference.length; i++) {
+        if (checkingData.AdditionalDocumentReference[i]?.DocumentTypeCode?.value === 'File ID') {
+          // 備考
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'BOL ID') {
+          // 輸送情報
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'Interim Hours') {
+          // 暫定時間
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'Clearance Clave') {
+          // 通関識別情報
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'TS Clearance') {
+          // Tradeshiftクリアランス
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'BookingNumber') {
+          // 予約番号
+          expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        }
+      }
+
+      // 課税日
+      expect(csvBody).toContain(`${checkingData.TaxPointDate?.value}`)
+      // DUNSナンバー
+      expect(csvBody).toContain(`${checkingData.AccountingSupplierParty.Party?.PhysicalLocation?.ID?.value}`)
+      // 為替レート
+      expect(csvBody).toContain(`${checkingData.TaxExchangeRate?.CalculationRate?.value}`)
+      // 為替レート-通貨
+      expect(csvBody).toContain(`${checkingData.TaxExchangeRate?.TargetCurrencyCode?.value}`)
+      // 為替レート-日付
+      expect(csvBody).toContain(`${checkingData.TaxExchangeRate?.Date?.value}`)
+      // 為替レート換算後の税金総額
+      expect(csvBody).toContain(`${checkingData.TaxTotal[0]?.TaxSubtotal[0]?.TransactionCurrencyTaxAmount?.value}`)
+      // 為替レート-Convertd Document Total(incl taxes)
+      const dom = new DOMParser().parseFromString(
+        checkingData.UBLExtensions?.UBLExtension[0]?.ExtensionContent?.value,
+        'text/xml'
+      )
+      const xmlValue = dom.getElementsByTagName('ts')[0]?.childNodes[0]?.text
+      expect(csvBody).toContain(`${xmlValue}`)
+    })
+
+    test('正常:オプション項目を追加した請求書（値がない場合）の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01026',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01026')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice13')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 指定したオプション項目がある
+      // 支払期日
+      expect(csvBody).not.toContain(`${checkingData.PaymentMeans[0].PaymentDueDate.value}`)
+      // 納品日
+      expect(csvBody).not.toContain(`${checkingData.Delivery[0].ActualDeliveryDate?.value}`)
+      // 納品開始日
+      expect(csvBody).not.toContain(`${checkingData.Delivery[0].PromisedDeliveryPeriod?.StartDate?.value}`)
+      // 納品終了日
+      expect(csvBody).not.toContain(`${checkingData.Delivery[0].PromisedDeliveryPeriod?.EndDate?.value}`)
+      // 販売者の手数料番号
+      expect(csvBody).not.toContain(`${checkingData.Delivery[0].Despatch?.ID?.value}`)
+      // 注文書番号
+      expect(csvBody).not.toContain(`${checkingData.OrderReference?.ID?.value}`)
+      // 注文書発行日
+      expect(csvBody).not.toContain(`${checkingData.OrderReference?.IssueDate?.value}`)
+      // 参考情報
+      expect(csvBody).not.toContain(`${checkingData.BillingReference[0]?.InvoiceDocumentReference?.ID?.value}`)
+      // 契約書番号
+      expect(csvBody).not.toContain(`${checkingData.ContractDocumentReference[0]?.ID?.value}`)
+      // 部門
+      expect(csvBody).not.toContain(`${checkingData.AccountingCost?.value}`)
+      // 取引先担当者（アドレス）
+      expect(csvBody).not.toContain(`${checkingData.AccountingCustomerParty.Party.Contact?.ID?.value}`)
+      // ID
+      expect(csvBody).not.toContain(`${checkingData.AccountingCustomerParty.CustomerAssignedAccountID?.value}`)
+
+      for (let i = 0; i < checkingData.AdditionalDocumentReference.length; i++) {
+        if (checkingData.AdditionalDocumentReference[i]?.DocumentTypeCode?.value === 'File ID') {
+          // 備考
+          expect(csvBody).not.toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'BOL ID') {
+          // 輸送情報
+          expect(csvBody).not.toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'Interim Hours') {
+          // 暫定時間
+          expect(csvBody).not.toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'Clearance Clave') {
+          // 通関識別情報
+          expect(csvBody).not.toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'TS Clearance') {
+          // Tradeshiftクリアランス
+          expect(csvBody).not.toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        } else if (checkingData.AdditionalDocumentReference[i].DocumentTypeCode.value === 'BookingNumber') {
+          // 予約番号
+          expect(csvBody).not.toContain(`${checkingData.AdditionalDocumentReference[i].ID.value}`)
+        }
+      }
+
+      // 課税日
+      expect(csvBody).not.toContain(`${checkingData.TaxPointDate?.value}`)
+      // DUNSナンバー
+      expect(csvBody).not.toContain(`${checkingData.AccountingSupplierParty.Party?.PhysicalLocation?.ID?.value}`)
+      // 為替レート
+      expect(csvBody).not.toContain(`${checkingData.TaxExchangeRate?.CalculationRate?.value}`)
+      // 為替レート-通貨
+      expect(csvBody).not.toContain(`${checkingData.TaxExchangeRate?.TargetCurrencyCode?.value}`)
+      // 為替レート-日付
+      expect(csvBody).not.toContain(`${checkingData.TaxExchangeRate?.Date?.value}`)
+      // 為替レート換算後の税金総額
+      expect(csvBody).not.toContain(`${checkingData.TaxTotal[0]?.TaxSubtotal[0]?.TransactionCurrencyTaxAmount?.value}`)
+      // 為替レート-Convertd Document Total(incl taxes)
+      const dom = new DOMParser().parseFromString(
+        checkingData.UBLExtensions?.UBLExtension[0]?.ExtensionContent?.value,
+        'text/xml'
+      )
+      const xmlValue = dom.getElementsByTagName('ts')[0]?.childNodes[0]?.text
+      expect(csvBody).not.toContain(`${xmlValue}`)
+    })
+
+    test('正常:支払条件がない場合。', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01016',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01016')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkData = csvBody.split(',')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 支払い条件が空欄になっている。
+      for (let idx = 48; idx < 55; idx++) {
+        expect(checkData[idx]).toBe('""')
+      }
+    })
+
+    test('正常:支払い方法が全部取得出来る', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01017',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01017')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice15')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 支払い方法が全部取得出来る
+      // 支払い条件-割引率
+      expect(csvBody).toContain(`${checkingData.PaymentTerms[0].SettlementDiscountPercent.value}`)
+      // 支払い条件-割増率
+      expect(csvBody).toContain(`${checkingData.PaymentTerms[0].PenaltySurchargePercent.value}`)
+      // 支払い条件-決済開始日
+      expect(csvBody).toContain(`${checkingData.PaymentTerms[0].SettlementPeriod.StartDate.value}`)
+      // 支払い条件-決済終了日
+      expect(csvBody).toContain(`${checkingData.PaymentTerms[0].SettlementPeriod.EndDate.value}`)
+      // 支払い条件-ペナルティ開始日
+      expect(csvBody).toContain(`${checkingData.PaymentTerms[0].PenaltyPeriod.StartDate.value}`)
+      // 支払い条件-ペナルティ終了日
+      expect(csvBody).toContain(`${checkingData.PaymentTerms[0].PenaltyPeriod.EndDate.value}`)
+      // 支払い条件-説明
+      expect(csvBody).toContain(`${checkingData.PaymentTerms[0].Note[0].value}`)
+      // 銀行口座-銀行名
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[2].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name?.value}`
+      )
+      // 銀行口座-支店名
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[2].PayeeFinancialAccount.FinancialInstitutionBranch.Name.value}`
+      )
+      // 銀行口座-口座番号
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[2].PayeeFinancialAccount.ID.value}`)
+      // 銀行口座-科目
+      switch (checkingData.PaymentMeans[2].PayeeFinancialAccount.AccountTypeCode.value) {
+        case 'General':
+          expect(csvBody).toContain('普通')
+          break
+        case 'Current':
+          expect(csvBody).toContain('当座')
+          break
+      }
+      // 銀行口座-口座名義
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[2].PayeeFinancialAccount.Name.value}`)
+      // 銀行口座-番地
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[2].PayeeFinancialAccount.FinancialInstitutionBranch.Address.StreetName.value}`
+      )
+      // 銀行口座-ビル名 / フロア等
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[2].PayeeFinancialAccount.FinancialInstitutionBranch.Address.AdditionalStreetName.value}`
+      )
+      // 銀行口座-家屋番号
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[2].PayeeFinancialAccount.FinancialInstitutionBranch.Address.BuildingNumber.value}`
+      )
+      // 銀行口座-市区町村
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[2].PayeeFinancialAccount.FinancialInstitutionBranch.Address.CountrySubentity.value}`
+      )
+      // 銀行口座-都道府県
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[2].PayeeFinancialAccount.FinancialInstitutionBranch.FinancialInstitution.Name.value}`
+      )
+      // 銀行口座-郵便番号
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[2].PayeeFinancialAccount.FinancialInstitutionBranch.Address.PostalZone.value}`
+      )
+      // 銀行口座-所在地
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[2].PayeeFinancialAccount.FinancialInstitutionBranch.Address.AddressLine[0].Line.value}`
+      )
+      // 銀行口座-国
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[2].PayeeFinancialAccount.FinancialInstitutionBranch.Address.Country.IdentificationCode.value}`
+      )
+
+      // DirectDebit-銀行名
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[1].PayeeFinancialAccount.FinancialInstitutionBranch.FinancialInstitution.Name.value}`
+      )
+      // DirectDebit-支店名
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[1].PayeeFinancialAccount.FinancialInstitutionBranch.Name.value}`
+      )
+      // DirectDebit-口座番号
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[1].PayeeFinancialAccount.ID.value}`)
+      // DirectDebit-科目
+      switch (checkingData.PaymentMeans[1].PayeeFinancialAccount.AccountTypeCode.value) {
+        case 'General':
+          expect(csvBody).toContain('普通')
+          break
+        case 'Current':
+          expect(csvBody).toContain('当座')
+          break
+      }
+      // DirectDebit-口座名義
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[1].PayeeFinancialAccount?.Name?.value}`)
+      // DirectDebit-番地
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[1].PayeeFinancialAccount.FinancialInstitutionBranch.Address.StreetName.value}`
+      )
+      // DirectDebit-ビル名 / フロア等
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[1].PayeeFinancialAccount.FinancialInstitutionBranch.Address.AdditionalStreetName.value}`
+      )
+      // DirectDebit-家屋番号
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[1].PayeeFinancialAccount.FinancialInstitutionBranch.Address?.BuildingNumber.value}`
+      )
+      // DirectDebit-市区町村
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[1].PayeeFinancialAccount.FinancialInstitutionBranch.Address.CityName.value}`
+      )
+      // DirectDebit-都道府県
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[1].PayeeFinancialAccount.FinancialInstitutionBranch.Address.CountrySubentity.value}`
+      )
+      // DirectDebit-郵便番号
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[1].PayeeFinancialAccount.FinancialInstitutionBranch.Address.PostalZone.value}`
+      )
+      // DirectDebit-所在地
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[1].PayeeFinancialAccount.FinancialInstitutionBranch.Address.AddressLine[0].Line.value}`
+      )
+      // DirectDebit-国
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[1].PayeeFinancialAccount.FinancialInstitutionBranch.Address.Country.IdentificationCode.value}`
+      )
+
+      // IBAN払い-IBAN
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[3].PayeeFinancialAccount?.ID?.value}`)
+      // IBAN払い-説明
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[3].PayeeFinancialAccount.PaymentNote[0].value}`)
+      // IBAN払い-銀行識別コード / SWIFTコード
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[3].PayeeFinancialAccount.FinancialInstitutionBranch.FinancialInstitution.ID.value}`
+      )
+
+      // 国際電信送金-ABAナンバー
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[4].PayeeFinancialAccount.FinancialInstitutionBranch.ID.value}`
+      )
+      // 国際電信送金-SWIFTコード
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[4].PayeeFinancialAccount.FinancialInstitutionBranch.FinancialInstitution.ID.value}`
+      )
+      // 国際電信送金-IBAN
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[4].PayeeFinancialAccount.ID.value}`)
+
+      // DirectDebit-口座名義
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[4].PayeeFinancialAccount.Name.value}`)
+      // 国際電信送金-番地
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[4].PayeeFinancialAccount.FinancialInstitutionBranch.Address.StreetName.value}`
+      )
+      // 国際電信送金-ビル名 / フロア等
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[4].PayeeFinancialAccount.FinancialInstitutionBranch.Address.AdditionalStreetName.value}`
+      )
+      // 国際電信送金-家屋番号
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[4].PayeeFinancialAccount.FinancialInstitutionBranch.Address.BuildingNumber.value}`
+      )
+      // 国際電信送金-市区町村
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[4].PayeeFinancialAccount.FinancialInstitutionBranch.Address.CityName.value}`
+      )
+      // 国際電信送金-都道府県
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[4].PayeeFinancialAccount.FinancialInstitutionBranch.Address.CountrySubentity.value}`
+      )
+      // 国際電信送金-郵便番号
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[4].PayeeFinancialAccount.FinancialInstitutionBranch.Address.PostalZone.value}`
+      )
+      // 国際電信送金-所在地
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[4].PayeeFinancialAccount.FinancialInstitutionBranch.Address.AddressLine[0].Line.value}`
+      )
+      // 国際電信送金-国
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[4].PayeeFinancialAccount.FinancialInstitutionBranch.Address.Country.IdentificationCode.value}`
+      )
+      // 国際電信送金-説明
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[4].PayeeFinancialAccount.PaymentNote[0].value}`)
+    })
+
+    test('正常:科目が複数の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01018',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01018')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 支払い条件が複数になっている。
+      expect(csvBody).toContain('支払方法2:小切手払い')
+    })
+
+    test('正常:国際電信送金が複数の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01019',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01019')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 国際電信送金3がある
+      expect(csvBody).toContain('国際電信送金3')
+    })
+
+    test('正常:DirectDebitが複数の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01020',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01020')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // DirectDebit3がある
+      expect(csvBody).toContain('DirectDebit3')
+    })
+
+    test('正常:銀行口座が複数の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01021',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01021')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 口座名義3がある
+      expect(csvBody).toContain('口座名義3')
+    })
+
+    test('正常:IBANが複数の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01022',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01022')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // IBANノート3がある
+      expect(csvBody).toContain('IBANノート3')
+    })
+
+    test('正常:現金払いが複数の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01023',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01023')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 現金払いがある
+      expect(csvBody).toContain('支払方法2:現金払い')
+    })
+
+    test('正常:小切手払いが複数の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01024',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01024')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 小切手払いがある
+      expect(csvBody).toContain('支払方法2:小切手払い')
+    })
+
+    test('正常:BankCardが複数の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01025',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01025')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // BankCardがある
+      expect(csvBody).toContain('支払方法2:BankCard')
+    })
+
+    test('正常:明細部分のオプションが登録された（割引・追加料金各5個）場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01027',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01027')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が5個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      expect(csvBody).toContain('追加料金４')
+      expect(csvBody).toContain('追加料金５')
+      // 明細-割引が5個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
+      expect(csvBody).toContain('割引４')
+      expect(csvBody).toContain('割引５')
+    })
+
+    test('正常:明細部分のオプションが登録された（JPY、割引・追加料金各5個）場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01028',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01028')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が5個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      expect(csvBody).toContain('追加料金４')
+      expect(csvBody).toContain('追加料金５')
+      // 明細-割引が5個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
+      expect(csvBody).toContain('割引４')
+      expect(csvBody).toContain('割引５')
+      // JPYがある
+      expect(csvBody).toContain('JPY')
+    })
+
+    test('正常:明細部分のオプションが登録された（割引・追加料金各3個）場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01032',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01032')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が5個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      // 明細-割引が5個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
+    })
+
+    test('正常:割引・追加料金を登録した場合（各５個）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01029',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01029')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が3個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      expect(csvBody).toContain('追加料金４')
+      expect(csvBody).toContain('追加料金５')
+      // 明細-割引が3個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
+      expect(csvBody).toContain('割引４')
+      expect(csvBody).toContain('割引５')
+    })
+
+    test('正常:割引・追加料金を登録した場合（JPY、各５個）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01030',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01030')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が5個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      expect(csvBody).toContain('追加料金４')
+      expect(csvBody).toContain('追加料金５')
+      // 明細-割引が5個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
+      expect(csvBody).toContain('割引４')
+      expect(csvBody).toContain('割引５')
+      // JPYがある
+      expect(csvBody).toContain('JPY')
+    })
+
+    test('正常:割引・追加料金を登録した場合（各３個）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01031',
+        status: 'すべて',
+        buyAndSell: '購入',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        minDueDate: '',
+        maxDueDate: '',
+        minDeliveryDate: '',
+        maxDeliveryDate: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01031')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 明細-追加料金が3個ある
+      expect(csvBody).toContain('追加料金１')
+      expect(csvBody).toContain('追加料金２')
+      expect(csvBody).toContain('追加料金３')
+      // 明細-割引が3個ある
+      expect(csvBody).toContain('割引１')
+      expect(csvBody).toContain('割引２')
+      expect(csvBody).toContain('割引３')
+    })
+
     test('正常:請求書複数の場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -3524,11 +5547,7 @@ describe('csvDownloadのテスト', () => {
       // responseのcsvファイル
       const csvHeader = response.setHeader().body.split('\r\n')[0]
 
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
     })
 
     test('準正常:請求書複数の場合のAPIエラー', async () => {
@@ -3719,11 +5738,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
 
       const checkingData = require('../mockInvoice/invoice2')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
 
       const csvBody = response.setHeader().body.split('\r\n')[1]
       // 発行日
@@ -3835,11 +5850,7 @@ describe('csvDownloadのテスト', () => {
       const csvHeader = response.setHeader().body.split('\r\n')[0]
 
       const checkingData = require('../mockInvoice/invoice3')
-      expect(csvHeader).toBe(
-        `${String.fromCharCode(
-          0xfeff
-        )}発行日,請求書番号,テナントID,支払期日,納品日,備考,銀行名,支店名,科目,口座番号,口座名義,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-備考`
-      )
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
 
       const csvBody = response.setHeader().body.split('\r\n')[1]
       // 発行日

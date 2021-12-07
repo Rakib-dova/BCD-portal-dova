@@ -27,7 +27,7 @@ module.exports = {
     schemeVersionID: '1'
   },
   ID: {
-    value: 'A01001'
+    value: 'A01018'
   },
   IssueDate: {
     value: '2021-08-23'
@@ -40,7 +40,7 @@ module.exports = {
   },
   Note: [
     {
-      value: '特記事項テスト1です。'
+      value: '特記事項テスト13です。'
     }
   ],
   DocumentCurrencyCode: {
@@ -192,7 +192,224 @@ module.exports = {
       }
     }
   ],
+  PaymentTerms: [
+    {
+      SettlementDiscountPercent: {
+        value: '10'
+      },
+      PenaltySurchargePercent: {
+        value: '20'
+      },
+      SettlementPeriod: {
+        StartDate: {
+          value: '2021-12-03'
+        },
+        EndDate: {
+          value: '2021-12-31'
+        }
+      },
+      PenaltyPeriod: {
+        StartDate: {
+          value: '2022-01-03'
+        },
+        EndDate: {
+          value: '2022-01-31'
+        }
+      },
+      Note: [
+        {
+          value: '支払い条件Note'
+        }
+      ]
+    },
+    {
+      SettlementDiscountPercent: {
+        value: '10'
+      },
+      PenaltySurchargePercent: {
+        value: '20'
+      },
+      SettlementPeriod: {
+        StartDate: {
+          value: '2021-12-03'
+        },
+        EndDate: {
+          value: '2021-12-31'
+        }
+      },
+      PenaltyPeriod: {
+        StartDate: {
+          value: '2022-01-03'
+        },
+        EndDate: {
+          value: '2022-01-31'
+        }
+      },
+      Note: [
+        {
+          value: '支払い条件Note'
+        }
+      ]
+    },
+    {
+      SettlementDiscountPercent: {},
+      PenaltySurchargePercent: {},
+      SettlementPeriod: {
+        StartDate: {},
+        EndDate: {}
+      },
+      PenaltyPeriod: {
+        StartDate: {},
+        EndDate: {}
+      },
+      Note: [{}]
+    }
+  ],
   PaymentMeans: [
+    {
+      PaymentMeansCode: {
+        value: '10'
+      }
+    },
+    {
+      PaymentMeansCode: {
+        value: '20'
+      }
+    },
+
+    {
+      PaymentMeansCode: {
+        value: '48'
+      }
+    },
+    {
+      ID: {
+        value: 'fca33ef8-6cf9-48e5-ad6c-51c10210e61f'
+      },
+      PaymentMeansCode: {
+        value: '49',
+        listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
+      },
+      PaymentDueDate: {
+        value: '2021-08-23'
+      },
+      PayeeFinancialAccount: {
+        ID: {
+          value: '2222222'
+        },
+        Name: {
+          value: '口座名義'
+        },
+        AccountTypeCode: {
+          value: 'General'
+        },
+        FinancialInstitutionBranch: {
+          Name: {
+            value: '王子店'
+          },
+          FinancialInstitution: {
+            Name: {
+              value: '三菱'
+            }
+          },
+          Address: {
+            BuildingNumber: {
+              value: '家屋番号'
+            },
+            CityName: {
+              value: '市区町村'
+            },
+            CountrySubentity: {
+              value: '都道府県'
+            },
+            PostalZone: {
+              value: '1140003'
+            },
+            AddressLine: [
+              {
+                Line: {
+                  value: '所在地'
+                }
+              }
+            ],
+            Country: {
+              IdentificationCode: {
+                value: '国'
+              }
+            },
+            StreetName: {
+              value: '番地'
+            },
+            AdditionalStreetName: {
+              value: 'ビル名 / フロア等'
+            }
+          }
+        }
+      }
+    },
+    {
+      ID: {
+        value: 'fca33ef8-6cf9-48e5-ad6c-51c10210e61f'
+      },
+      PaymentMeansCode: {
+        value: '49',
+        listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
+      },
+      PaymentDueDate: {
+        value: '2021-08-23'
+      },
+      PayeeFinancialAccount: {
+        ID: {
+          value: '2222222'
+        },
+        Name: {
+          value: '口座名義'
+        },
+        AccountTypeCode: {},
+        FinancialInstitutionBranch: {
+          Name: {
+            value: '王子店'
+          },
+          FinancialInstitution: {
+            Name: {
+              value: '三菱'
+            }
+          },
+          Address: {
+            BuildingNumber: {
+              value: '家屋番号'
+            },
+            CityName: {
+              value: '市区町村'
+            },
+            CountrySubentity: {
+              value: '都道府県'
+            },
+            PostalZone: {
+              value: '1140003'
+            },
+            AddressLine: [
+              {
+                Line: {
+                  value: '所在地'
+                }
+              }
+            ],
+            Country: {
+              IdentificationCode: {
+                value: '国'
+              }
+            },
+            StreetName: {
+              value: '番地'
+            },
+            AdditionalStreetName: {
+              value: 'ビル名 / フロア等'
+            }
+          }
+        }
+      }
+    },
     {
       ID: {
         value: 'fca33ef8-6cf9-48e5-ad6c-51c10210e61f'
@@ -209,19 +426,226 @@ module.exports = {
           value: '2222222'
         },
         Name: {
-          value: 'kang_test'
+          value: '口座名義'
         },
         AccountTypeCode: {
           value: 'General'
         },
         FinancialInstitutionBranch: {
           Name: {
-            value: 'testbank'
+            value: '渋谷店'
           },
           FinancialInstitution: {
             Name: {
-              value: 'testsiten'
+              value: 'みずほ'
             }
+          },
+          Address: {
+            BuildingNumber: {
+              value: '家屋番号'
+            },
+            CityName: {
+              value: '市区町村'
+            },
+            CountrySubentity: {
+              value: '都道府県'
+            },
+            PostalZone: {
+              value: '1140003'
+            },
+            AddressLine: [
+              {
+                Line: {
+                  value: '所在地'
+                }
+              }
+            ],
+            Country: {
+              IdentificationCode: {
+                value: '国'
+              }
+            },
+            StreetName: {
+              value: '口座番地'
+            },
+            AdditionalStreetName: {
+              value: 'ビル名 / フロア等'
+            }
+          }
+        }
+      }
+    },
+    {
+      ID: {
+        value: 'fca33ef8-6cf9-48e5-ad6c-51c10210e61f'
+      },
+      PaymentMeansCode: {
+        value: '42',
+        listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
+      },
+      PaymentDueDate: {},
+      PayeeFinancialAccount: {
+        ID: {},
+        Name: {},
+        AccountTypeCode: {},
+        FinancialInstitutionBranch: {
+          Name: {},
+          FinancialInstitution: {
+            Name: {}
+          },
+          Address: {
+            BuildingNumber: {},
+            CityName: {},
+            CountrySubentity: {},
+            PostalZone: {},
+            AddressLine: [
+              {
+                Line: {}
+              }
+            ],
+            Country: {
+              IdentificationCode: {}
+            },
+            StreetName: {},
+            AdditionalStreetName: {}
+          }
+        }
+      }
+    },
+    {
+      PaymentChannelCode: {
+        value: 'IBAN'
+      },
+      PayeeFinancialAccount: {
+        ID: {
+          value: 'IBANコード'
+        },
+
+        PaymentNote: [
+          {
+            value: 'IBANノート'
+          }
+        ],
+        FinancialInstitutionBranch: {
+          FinancialInstitution: {
+            ID: {
+              value: '銀行識別コード / SWIFTコード'
+            }
+          }
+        }
+      }
+    },
+    {
+      PaymentChannelCode: {
+        value: 'IBAN'
+      },
+      PayeeFinancialAccount: {
+        ID: {
+          value: 'IBANコード'
+        },
+
+        PaymentNote: [
+          {
+            value: 'IBANノート2'
+          }
+        ],
+        FinancialInstitutionBranch: {
+          FinancialInstitution: {
+            ID: {
+              value: '銀行識別コード / SWIFTコード'
+            }
+          }
+        }
+      }
+    },
+    {
+      PaymentChannelCode: {
+        value: 'SWIFTUS'
+      },
+      PayeeFinancialAccount: {
+        ID: {
+          value: 'コード'
+        },
+        Name: {
+          value: '口座名義'
+        },
+        PaymentNote: [
+          {
+            value: '国際ノート'
+          }
+        ],
+        FinancialInstitutionBranch: {
+          ID: {
+            value: 'ABAナンバー'
+          },
+          FinancialInstitution: {
+            ID: {
+              value: 'SWIFTコード'
+            }
+          },
+          Address: {
+            BuildingNumber: {
+              value: '家屋番号'
+            },
+            CityName: {
+              value: '市区町村'
+            },
+            CountrySubentity: {
+              value: '都道府県'
+            },
+            PostalZone: {
+              value: '1140003'
+            },
+            AddressLine: [
+              {
+                Line: {
+                  value: '所在地'
+                }
+              }
+            ],
+            Country: {
+              IdentificationCode: {
+                value: '国'
+              }
+            },
+            StreetName: {
+              value: '番地'
+            },
+            AdditionalStreetName: {
+              value: 'ビル名 / フロア等'
+            }
+          }
+        }
+      }
+    },
+    {
+      PaymentChannelCode: {
+        value: 'SWIFTUS'
+      },
+      PayeeFinancialAccount: {
+        ID: {},
+        Name: {},
+        PaymentNote: [],
+        FinancialInstitutionBranch: {
+          ID: {},
+          FinancialInstitution: {
+            ID: {}
+          },
+          Address: {
+            BuildingNumber: {},
+            CityName: {},
+            CountrySubentity: {},
+            PostalZone: {},
+            AddressLine: [
+              {
+                Line: {}
+              }
+            ],
+            Country: {
+              IdentificationCode: {}
+            },
+            StreetName: {},
+            AdditionalStreetName: {}
           }
         }
       }

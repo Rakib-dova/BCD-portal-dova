@@ -27,7 +27,7 @@ module.exports = {
     schemeVersionID: '1'
   },
   ID: {
-    value: 'A01001'
+    value: 'A01022'
   },
   IssueDate: {
     value: '2021-08-23'
@@ -40,7 +40,7 @@ module.exports = {
   },
   Note: [
     {
-      value: '特記事項テスト1です。'
+      value: '特記事項テスト13です。'
     }
   ],
   DocumentCurrencyCode: {
@@ -194,79 +194,57 @@ module.exports = {
   ],
   PaymentMeans: [
     {
-      ID: {
-        value: 'fca33ef8-6cf9-48e5-ad6c-51c10210e61f'
+      PaymentChannelCode: {
+        value: 'IBAN'
       },
-      PaymentMeansCode: {
-        value: '42',
-        listID: 'urn:tradeshift.com:api:1.0:paymentmeanscode'
+      PayeeFinancialAccount: {
+        ID: {},
+
+        PaymentNote: [{}],
+        FinancialInstitutionBranch: {
+          FinancialInstitution: {
+            ID: {}
+          }
+        }
+      }
+    },
+    {
+      PaymentChannelCode: {
+        value: 'IBAN'
       },
-      PaymentDueDate: {
-        value: '2021-08-23'
+      PayeeFinancialAccount: {
+        ID: {},
+
+        PaymentNote: [{}],
+        FinancialInstitutionBranch: {
+          FinancialInstitution: {
+            ID: {}
+          }
+        }
+      }
+    },
+    {
+      PaymentChannelCode: {
+        value: 'IBAN'
       },
       PayeeFinancialAccount: {
         ID: {
-          value: '2222222'
+          value: 'IBANコード'
         },
-        Name: {
-          value: 'kang_test'
-        },
-        AccountTypeCode: {
-          value: 'General'
-        },
+
+        PaymentNote: [
+          {
+            value: 'IBANノート3'
+          }
+        ],
         FinancialInstitutionBranch: {
-          Name: {
-            value: 'testbank'
-          },
           FinancialInstitution: {
-            Name: {
-              value: 'testsiten'
+            ID: {
+              value: '銀行識別コード / SWIFTコード'
             }
           }
         }
       }
-    }
-  ],
-  TaxTotal: [
-    {
-      TaxAmount: {
-        value: 0,
-        currencyID: 'JPY'
-      },
-      TaxSubtotal: [
-        {
-          TaxableAmount: {
-            value: 100,
-            currencyID: 'JPY'
-          },
-          TaxAmount: {
-            value: 0,
-            currencyID: 'JPY'
-          },
-          TaxCategory: {
-            ID: {
-              value: 'E',
-              schemeID: 'UN/ECE 5305',
-              schemeAgencyID: '6',
-              schemeVersionID: 'D08B'
-            },
-            Percent: {
-              value: 0
-            },
-            TaxScheme: {
-              ID: {
-                value: 'VAT',
-                schemeID: 'UN/ECE 5153 Subset',
-                schemeAgencyID: '6',
-                schemeVersionID: 'D08B'
-              },
-              Name: {
-                value: 'JP 不課税 0%'
-              }
-            }
-          }
-        }
-      ]
     }
   ],
   LegalMonetaryTotal: {
