@@ -1188,7 +1188,7 @@ describe('契約情報変更のインテグレーションテスト', () => {
       expect(res.text).toMatch(/現在契約情報変更手続き中です。/i) // 画面内容確認
     })
 
-    test('管理者、契約ステータス：変更申込、利用不可（POST）', async () => {
+    test('管理者、契約ステータス：変更受付、利用不可（POST）', async () => {
       const res = await request(app)
         .post('/change')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
