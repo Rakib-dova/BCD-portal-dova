@@ -9,9 +9,23 @@ const cbGetIndex = (req, res, next) => {
   res.redirect(303, '/auth')
 }
 
+const cbGetRegister = (req, res, next) => {
+  // アカウント作成 遷移
+  res.redirect(303, 'https://sandbox.tradeshift.com/register')
+}
+
+const cbGetLogin = (req, res, next) => {
+  // ログイン 遷移
+  res.redirect(303, 'https://sandbox.tradeshift.com/?currentScreen=0')
+}
+
 router.get('/', cbGetIndex)
+router.get('/gtm_sinup', cbGetRegister)
+router.get('/gtm_login', cbGetLogin)
 
 module.exports = {
   router: router,
-  cbGetIndex: cbGetIndex
+  cbGetIndex: cbGetIndex,
+  cbGetRegister: cbGetRegister,
+  cbGetLogin: cbGetLogin
 }
