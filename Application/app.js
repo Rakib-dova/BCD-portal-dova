@@ -1,4 +1,4 @@
-﻿'use strict'
+'use strict'
 if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.env' })
 }
