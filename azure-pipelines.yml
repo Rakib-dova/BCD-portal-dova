@@ -23,6 +23,7 @@ parameters:
     values:
       - dev
       - dev2
+      - docomoIDF
       - prodstg
       - prod
       - demo
