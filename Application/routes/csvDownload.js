@@ -881,16 +881,16 @@ const dataToJson = (data) => {
           paymentTermsMultiIndex = true
         } else {
           const paymentConditionArray = []
-          paymentConditionArray.push(` '支払い条件-割引率${paymentTermsIndex}':'${settlementDiscountPercent}'`)
+          paymentConditionArray.push(`'支払い条件-割引率${paymentTermsIndex}':'${settlementDiscountPercent}'`)
           paymentConditionArray.push(` '支払い条件-割増率${paymentTermsIndex}':'${penaltySurchargePercent}'`)
           paymentConditionArray.push(` '支払い条件-決済開始日${paymentTermsIndex}':'${settleStartDate}'`)
           paymentConditionArray.push(` '支払い条件-決済終了日${paymentTermsIndex}':'${settleEndDate}'`)
           paymentConditionArray.push(` '支払い条件-ペナルティ開始日${paymentTermsIndex}':'${penaltyStartDate}'`)
           paymentConditionArray.push(` '支払い条件-ペナルティ終了日${paymentTermsIndex}':'${penaltyEndDate}'`)
-          paymentConditionArray.push(` '支払い条件-説明${paymentTermsIndex}':'${note}' `)
+          paymentConditionArray.push(` '支払い条件-説明${paymentTermsIndex}':'${note}'`)
 
           // 支払方法-予備に支払方法を入れる
-          paymentExtra.push(`{${paymentConditionArray}}`)
+          paymentExtraPush(paymentExtra, paymentConditionArray)
 
           paymentTermsIndex += 1
         }
@@ -951,24 +951,24 @@ const dataToJson = (data) => {
         } else {
           // 複数の現金払いの場合
           if (mean.PaymentMeansCode?.value === '10') {
-            paymentMeansArray.push(` '支払方法${paymentWayIndex}':'現金払い' `)
+            paymentMeansArray.push(`'支払方法${paymentWayIndex}':'現金払い'`)
             paymentWayIndex += 1
           }
           // 小切手払い
           if (mean.PaymentMeansCode?.value === '20') {
-            paymentMeansArray.push(` '支払方法${paymentWayIndex}':'小切手払い' `)
+            paymentMeansArray.push(`'支払方法${paymentWayIndex}':'小切手払い'`)
             paymentWayIndex += 1
           }
           // BankCard
           if (mean.PaymentMeansCode?.value === '48') {
-            paymentMeansArray.push(` '支払方法${paymentWayIndex}':'BankCard' `)
+            paymentMeansArray.push(`'支払方法${paymentWayIndex}':'BankCard'`)
             paymentWayIndex += 1
           }
         }
 
         // 支払方法-予備に支払方法を入れる
         if (paymentMeansArray.length !== 0) {
-          paymentExtra.push(`{${paymentMeansArray}}`)
+          paymentExtraPush(paymentExtra, paymentMeansArray)
         }
 
         // DirectDebit
@@ -1034,7 +1034,7 @@ const dataToJson = (data) => {
               mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.CountrySubentity?.value ?? ''
 
             // 配列に入れる
-            directDebitInfoArray.push(` 'DirectDebit-銀行名${directDebitPaymentMeanIndex}':'${bankName}'`)
+            directDebitInfoArray.push(`'DirectDebit-銀行名${directDebitPaymentMeanIndex}':'${bankName}'`)
             directDebitInfoArray.push(` 'DirectDebit-口座番号${directDebitPaymentMeanIndex}':'${accountNumber}'`)
             directDebitInfoArray.push(` 'DirectDebit-国${directDebitPaymentMeanIndex}':'${country}'`)
             directDebitInfoArray.push(` 'DirectDebit-家屋番号${directDebitPaymentMeanIndex}':'${buildingNumber}'`)
@@ -1058,10 +1058,11 @@ const dataToJson = (data) => {
             directDebitInfoArray.push(` 'DirectDebit-番地${directDebitPaymentMeanIndex}':'${streetName}'`)
             directDebitInfoArray.push(` 'DirectDebit-口座番号${directDebitPaymentMeanIndex}':'${accountNumber}'`)
             directDebitInfoArray.push(` 'DirectDebit-口座名義${directDebitPaymentMeanIndex}':'${accountName}'`)
-            directDebitInfoArray.push(` 'DirectDebit-都道府県${directDebitPaymentMeanIndex}':'${countrySubentity}' `)
+            directDebitInfoArray.push(` 'DirectDebit-都道府県${directDebitPaymentMeanIndex}':'${countrySubentity}'`)
 
             // 支払方法-予備に支払方法を入れる
-            paymentExtra.push(`{${directDebitInfoArray}}`)
+            paymentExtraPush(paymentExtra, directDebitInfoArray)
+
             directDebitPaymentMeanIndex += 1
           }
         }
@@ -1131,7 +1132,7 @@ const dataToJson = (data) => {
             const bankAdditionalStreetName =
               mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.AdditionalStreetName?.value ?? ''
 
-            bankAccountInfoArray.push(` '銀行口座-銀行名${bankAccountPaymentMeanIndex}':'${accountBankName}'`)
+            bankAccountInfoArray.push(`'銀行口座-銀行名${bankAccountPaymentMeanIndex}':'${accountBankName}'`)
             bankAccountInfoArray.push(` '銀行口座-支店名${bankAccountPaymentMeanIndex}':'${branchName}'`)
             bankAccountInfoArray.push(` '銀行口座-口座番号${bankAccountPaymentMeanIndex}':'${bankAccountNumber}'`)
             bankAccountInfoArray.push(` '銀行口座-口座名義${bankAccountPaymentMeanIndex}':'${bankAccountName}'`)
@@ -1153,14 +1154,12 @@ const dataToJson = (data) => {
             bankAccountInfoArray.push(` '銀行口座-国${bankAccountPaymentMeanIndex}':'${bankAddressLine}'`)
             bankAccountInfoArray.push(` '銀行口座-番地${bankAccountPaymentMeanIndex}':'${bankStreetName}'`)
             bankAccountInfoArray.push(
-              ` '銀行口座-ビル名 / フロア等${bankAccountPaymentMeanIndex}':'${bankAdditionalStreetName}' `
+              ` '銀行口座-ビル名 / フロア等${bankAccountPaymentMeanIndex}':'${bankAdditionalStreetName}'`
             )
+
             // 支払方法-予備に支払方法を入れる
-            if (paymentExtra.length !== 0) {
-              paymentExtra.push(`, {${bankAccountInfoArray}}`)
-            } else {
-              paymentExtra.push(`{${bankAccountInfoArray}}`)
-            }
+            paymentExtraPush(paymentExtra, bankAccountInfoArray)
+
             bankAccountPaymentMeanIndex += 1
           }
         }
@@ -1181,13 +1180,14 @@ const dataToJson = (data) => {
             const ibanFinancialInstitutionId =
               mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.ID?.value ?? ''
 
-            ibanInfoArray.push(` 'IBAN払い-IBAN${ibanPaymentMeanIndex}':'${iban}'`)
+            ibanInfoArray.push(`'IBAN払い-IBAN${ibanPaymentMeanIndex}':'${iban}'`)
             ibanInfoArray.push(` 'IBAN払い-説明${ibanPaymentMeanIndex}':'${ibanPaymentNote}'`)
             ibanInfoArray.push(
-              ` 'IBAN払い-銀行識別コード / SWIFTコード${ibanPaymentMeanIndex}':'${ibanFinancialInstitutionId}' `
+              ` 'IBAN払い-銀行識別コード / SWIFTコード${ibanPaymentMeanIndex}':'${ibanFinancialInstitutionId}'`
             )
             // 支払方法-予備に支払方法を入れる
-            paymentExtra.push(`{${ibanInfoArray}}`)
+            paymentExtraPush(paymentExtra, ibanInfoArray)
+
             ibanPaymentMeanIndex += 1
           }
         }
@@ -1245,7 +1245,7 @@ const dataToJson = (data) => {
               mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.Country?.IdentificationCode?.value ?? ''
             const internationalPaymentNote = mean.PayeeFinancialAccount?.PaymentNote[0]?.value ?? ''
 
-            internationalInfoArray.push(` '国際電信送金-ABAナンバー${internationalPaymentMeanIndex}':'${abaNumber}'`)
+            internationalInfoArray.push(`'国際電信送金-ABAナンバー${internationalPaymentMeanIndex}':'${abaNumber}'`)
             internationalInfoArray.push(` '国際電信送金-SWIFTコード${internationalPaymentMeanIndex}':'${swiftCode}'`)
             internationalInfoArray.push(` '国際電信送金-IBAN${internationalPaymentMeanIndex}':'${internationalIban}'`)
             internationalInfoArray.push(
@@ -1274,10 +1274,12 @@ const dataToJson = (data) => {
             )
             internationalInfoArray.push(` '国際電信送金-国${internationalPaymentMeanIndex}':'${internationalCountry}'`)
             internationalInfoArray.push(
-              ` '国際電信送金-説明${internationalPaymentMeanIndex}':'${internationalPaymentNote}' `
+              ` '国際電信送金-説明${internationalPaymentMeanIndex}':'${internationalPaymentNote}'`
             )
+
             // 支払方法-予備に支払方法を入れる
-            paymentExtra.push(`{${internationalInfoArray}}`)
+            paymentExtraPush(paymentExtra, internationalInfoArray)
+
             internationalPaymentMeanIndex += 1
           }
         }
@@ -2114,6 +2116,16 @@ const jsonToCsv = (jsonData) => {
   csvString = csvString.join('\r\n')
 
   return csvString
+}
+
+const paymentExtraPush = async (paymentExtra, data) => {
+  if (paymentExtra.length !== 0) {
+    paymentExtra.push(` {${data}}`)
+  } else {
+    paymentExtra.push(`{${data}}`)
+  }
+
+  return paymentExtra
 }
 
 router.get('/', helper.isAuthenticated, cbGetIndex)
