@@ -42,7 +42,8 @@ block content
                             .column.is-one-third.pl-0
                               input.input#postalNumber(type="text" name="postalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7 placeholder='例：1234567')
                             .column 
-                              .button.is-link#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
+                              .button.is-link.mr-3#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
+                              .button.is-danger#postalClearBtn(type="button" disabled) クリア
                       .field
                         label(for="contractAddressVal").input-label 住所
                         p#contractAddressValRequired.input-label-required.input-label （必須）
