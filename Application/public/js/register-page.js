@@ -346,6 +346,10 @@ $('#postalNumber').addEventListener('input', function () {
 })
 
 $('#postalSearchBtn').addEventListener('click', function () {
+  // 住所検索ボタンが非活性化の時は動作しない
+  if ($('#postalSearchBtn').getAttribute('disabled') !== null) {
+    return
+  }
   const postalNumber = $('#postalNumber').value
   const sendData = { postalNumber: null }
   const modalCardBody = $('#modal-card-result')
@@ -368,13 +372,15 @@ $('#postalSearchBtn').addEventListener('click', function () {
         const resultAddress = JSON.parse(requestAddressApi.responseText)
         if (resultAddress.addressList.length === 0) {
           $(dataTarget).classList.add('is-active')
-          modalCardBody.innerHTML = '該当する住所が見つかりませんでした。'
+          modalCardBody.innerHTML =
+            '該当する住所が見つかりませんでした。<br>住所検索が可能な郵便番号を入力してください。'
         } else {
           const resultLength = resultAddress.addressList.length
           if (resultLength === 1) {
             $('#contractAddressVal').value = resultAddress.addressList[0].address
             $('#banch1').value = ''
             $('#tatemono1').value = ''
+            freezePostalSearchBtn()
           } else {
             $(dataTarget).classList.add('is-active')
             resultAddress.addressList.forEach((obj) => {
@@ -387,6 +393,7 @@ $('#postalSearchBtn').addEventListener('click', function () {
                 $('#contractAddressVal').value = ele.innerHTML.replace('<br>', '')
                 $('#banch1').value = ''
                 $('#tatemono1').value = ''
+                freezePostalSearchBtn()
               }
             })
           }
@@ -410,3 +417,27 @@ $('#postalSearchBtn').addEventListener('click', function () {
   }
   requestAddressApi.send(JSON.stringify(sendData))
 })
+
+// クリアボタン機能
+$('#postalClearBtn').addEventListener('click', function () {
+  // クリアボタンが非活性化の時は動作しない
+  if ($('#postalClearBtn').getAttribute('disabled') !== null) {
+    return
+  }
+  // 住所情報クリア
+  $('#postalNumber').value = ''
+  $('#contractAddressVal').value = ''
+  $('#banch1').value = ''
+  $('#tatemono1').value = ''
+  // 郵便番号を入力可能に変更
+  $('#postalNumber').readOnly = false
+  // クリアボタン非活性化
+  $('#postalClearBtn').setAttribute('disabled', 'disabled')
+})
+
+// 郵便番号入力不可に変更 、住所検索ボタン非活性化、クリアボタン活性化
+function freezePostalSearchBtn() {
+  $('#postalNumber').readOnly = true
+  $('#postalSearchBtn').setAttribute('disabled', 'disabled')
+  $('#postalClearBtn').removeAttribute('disabled')
+}
