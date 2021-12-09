@@ -660,6 +660,89 @@ describe('契約情報変更のインテグレーションテスト', () => {
       await browser.close()
     })
 
+    // 住所がない郵便番号検索
+    test('管理者、契約ステータス：契約中, 住所がない郵便番号検索', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/change')
+      if (page.url() === 'https://localhost:3000/change') {
+        await page.click('#chkContractorName')
+        await page.click('#chkContractAddress')
+        await page.click('#chkContractContact')
+        await page.type('#contractorName', 'テスト')
+        await page.type('#contractorKanaName', 'abc')
+        await page.type('#postalNumber', '1234567')
+        await page.click('#postalSearchBtn')
+
+        await page.waitForTimeout(500)
+
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#modal-card-result').innerText
+        })
+
+        expect(checkErrorMessage).toEqual(
+          '該当する住所が見つかりませんでした。\n住所検索が可能な郵便番号を入力してください。'
+        )
+      }
+
+      await browser.close()
+    })
+
+    // 検索ボタン押下し、クリアボタン活性化
+    test('管理者、契約ステータス：契約中, 検索ボタン押下し、クリアボタン活性化', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/change')
+      if (page.url() === 'https://localhost:3000/change') {
+        await page.click('#chkContractAddress')
+        await page.type('#postalNumber', '0600012')
+        await page.click('#postalSearchBtn')
+
+        await page.waitForTimeout(1000)
+
+        await page.click('#modal-card-result > a:nth-child(1)')
+
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#postalClearBtn').getAttribute('disabled')
+        })
+        expect(checkErrorMessage).toBe(null)
+
+        await page.type('#postalNumber', '0600013')
+        const resultChangeInput = await page.evaluate(() => {
+          return document.querySelector('#postalNumber').value
+        })
+
+        expect(resultChangeInput).toEqual('0600012')
+
+        await page.click('#postalClearBtn')
+
+        const resultAddressInput = await page.evaluate(() => {
+          return [
+            document.querySelector('#postalNumber').value,
+            document.querySelector('#contractAddressVal').value,
+            document.querySelector('#banch1').value,
+            document.querySelector('#tatemono1').value
+          ]
+        })
+
+        expect(resultAddressInput).toEqual(expect.arrayContaining(['', '', '', '']))
+      }
+
+      await browser.close()
+    })
+
     // 住所未入力
     test('管理者、契約ステータス：契約中, 住所未入力', async () => {
       const puppeteer = require('puppeteer')
@@ -1009,7 +1092,7 @@ describe('契約情報変更のインテグレーションテスト', () => {
         await page.click('#chkContractContact')
         await page.type('#contractorName', 'テスト')
         await page.type('#contractorKanaName', 'テスト')
-        await page.type('#postalNumber', '1600000')
+        await page.type('#postalNumber', '0600012')
         await page.click('#postalSearchBtn')
         await page.waitForTimeout(2000)
         await page.click('#modal-card-result > a:nth-child(1)')
@@ -1045,7 +1128,7 @@ describe('契約情報変更のインテグレーションテスト', () => {
         await page.click('#chkContractContact')
         await page.type('#contractorName', 'テスト')
         await page.type('#contractorKanaName', 'abc')
-        await page.type('#postalNumber', '1600000')
+        await page.type('#postalNumber', '0600012')
         await page.click('#postalSearchBtn')
         await page.waitForTimeout(2000)
         await page.click('#modal-card-result > a:nth-child(1)')
@@ -1081,7 +1164,7 @@ describe('契約情報変更のインテグレーションテスト', () => {
         await page.click('#chkContractContact')
         await page.type('#contractorName', 'テスト')
         await page.type('#contractorKanaName', 'abc')
-        await page.type('#postalNumber', '1600000')
+        await page.type('#postalNumber', '0600012')
         await page.click('#postalSearchBtn')
         await page.waitForTimeout(2000)
         await page.click('#modal-card-result > a:nth-child(1)')
