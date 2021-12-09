@@ -277,7 +277,9 @@ $('#postalNumber').addEventListener('input', function () {
   $('#postalSearchBtn').removeAttribute('disabled')
 })
 
+// 住所検索ボタン
 $('#postalSearchBtn').addEventListener('click', function () {
+  if (this.getAttribute('disabled') !== null) return
   const postalNumber = $('#postalNumber').value
   const sendData = { postalNumber: null }
   const modalCardBody = $('#modal-card-result')
@@ -300,13 +302,16 @@ $('#postalSearchBtn').addEventListener('click', function () {
         const resultAddress = JSON.parse(requestAddressApi.responseText)
         if (resultAddress.addressList.length === 0) {
           $(dataTarget).classList.add('is-active')
-          modalCardBody.innerHTML = '該当する住所が見つかりませんでした。'
+          modalCardBody.innerHTML =
+            '該当する住所が見つかりませんでした。<br>住所検索が可能な郵便番号を入力してください。'
         } else {
           const resultLength = resultAddress.addressList.length
+
           if (resultLength === 1) {
             $('#contractAddressVal').value = resultAddress.addressList[0].address
             $('#banch1').value = ''
             $('#tatemono1').value = ''
+            freezePostalSearchBtn()
           } else {
             $(dataTarget).classList.add('is-active')
             resultAddress.addressList.forEach((obj) => {
@@ -320,6 +325,7 @@ $('#postalSearchBtn').addEventListener('click', function () {
                 $('#banch1').value = ''
                 $('#tatemono1').value = ''
                 $('#contractAddressValErrormessage').classList.add('is-invisible')
+                freezePostalSearchBtn()
               }
             })
           }
@@ -383,4 +389,22 @@ function instantValidation(field) {
       field.setAttribute('aria-invalid', 'true')
     }
   }
+}
+
+// 郵便番号と住所クリアボタン
+$('#postalClearBtn').addEventListener('click', function () {
+  if (this.getAttribute('disabled') !== null) return
+  this.setAttribute('disabled', 'disabled')
+  $('#postalNumber').value = ''
+  $('#contractAddressVal').value = ''
+  $('#banch1').value = ''
+  $('#tatemono1').value = ''
+  $('#postalNumber').readOnly = false
+})
+
+// 郵便番号検索後、郵便番号入力欄リードオンリー、検索ボタン非活性して、クリアボタン活性化
+function freezePostalSearchBtn() {
+  $('#postalNumber').readOnly = true
+  $('#postalSearchBtn').setAttribute('disabled', 'disabled')
+  $('#postalClearBtn').removeAttribute('disabled')
 }
