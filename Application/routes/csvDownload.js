@@ -572,6 +572,7 @@ const errorHandle = (documentsResult, _res, _req) => {
 const dataToJson = (data) => {
   const jsonData = []
   const InvoiceObject = {
+    請求書番号: '',
     発行日: '',
     '宛先-テナントID': '',
     '宛先-会社名': '',
@@ -581,7 +582,9 @@ const dataToJson = (data) => {
     '宛先-都道府県': '',
     '宛先-市区町村・番地': '',
     '宛先-ビル、マンション名': '',
-    '宛先-GLN（企業・事業所識別コード）': '',
+    '宛先-登録番号': '',
+    '宛先-GLN': '',
+    '宛先-法人番号': '',
     '差出人-テナントID': '',
     '差出人-会社名': '',
     '差出人-国/地域': '',
@@ -590,8 +593,9 @@ const dataToJson = (data) => {
     '差出人-都道府県': '',
     '差出人-市区町村・番地': '',
     '差出人-ビル、マンション名': '',
-    '差出人-GLN（企業・事業所識別コード）': '',
-    請求書番号: '',
+    '差出人-登録番号': '',
+    '差出人-GLN': '',
+    '差出人-法人番号': '',
     支払期日: '',
     納品日: '',
     納品開始日: '',
@@ -777,28 +781,25 @@ const dataToJson = (data) => {
 
     /// 宛先テナントID及びGLN等の情報
     if (data.AccountingCustomerParty.Party.PartyIdentification || false) {
-      const partyIdentificationData = []
       data.AccountingCustomerParty.Party.PartyIdentification.forEach((item) => {
         switch (item.ID.schemeID) {
           case 'TS:ID':
             invoice['宛先-テナントID'] = item.ID.value
             break
           case 'TS:REGNO':
-            partyIdentificationData.push(`${item.ID.schemeName}:${item.ID.value}`)
+            // 登録番号
+            invoice['宛先-登録番号'] = item.ID.value
             break
           case 'GLN':
-            partyIdentificationData.push(`${item.ID.schemeID}:${item.ID.value}`)
+            // GLN
+            invoice['宛先-GLN'] = item.ID.value
             break
           case 'JP:CT':
-            partyIdentificationData.push(`法人番号:${item.ID.value}`)
+            // 法人番号
+            invoice['宛先-法人番号'] = item.ID.value
             break
         }
       })
-      if (partyIdentificationData.length > 1) {
-        invoice['宛先-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString()}}`
-      } else {
-        invoice['宛先-GLN（企業・事業所識別コード）'] = partyIdentificationData.toString()
-      }
     }
     // 宛先会社名情報
     if (data.AccountingCustomerParty.Party.PartyName || false) {
@@ -817,28 +818,22 @@ const dataToJson = (data) => {
 
     // 差出人テナントID及びGLN等の情報
     if (data.AccountingSupplierParty.Party.PartyIdentification || false) {
-      const partyIdentificationData = []
       data.AccountingSupplierParty.Party.PartyIdentification.forEach((item) => {
         switch (item.ID.schemeID) {
           case 'TS:ID':
             invoice['差出人-テナントID'] = item.ID.value
             break
           case 'TS:REGNO':
-            partyIdentificationData.push(`${item.ID.schemeName}:${item.ID.value}`)
+            invoice['差出人-登録番号'] = item.ID.value
             break
           case 'GLN':
-            partyIdentificationData.push(`${item.ID.schemeID}:${item.ID.value}`)
+            invoice['差出人-GLN'] = item.ID.value
             break
           case 'JP:CT':
-            partyIdentificationData.push(`法人番号:${item.ID.value}`)
+            invoice['差出人-法人番号'] = item.ID.value
             break
         }
       })
-      if (partyIdentificationData.length > 1) {
-        invoice['差出人-GLN（企業・事業所識別コード）'] = `{${partyIdentificationData.toString()}}`
-      } else {
-        invoice['差出人-GLN（企業・事業所識別コード）'] = partyIdentificationData.toString()
-      }
     }
     // 差出人会社名情報
     if (data.AccountingSupplierParty.Party.PartyName || false) {
