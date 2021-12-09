@@ -75,7 +75,7 @@ block content
                 p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
       .column.hvr-float
         .box.iconBox.textOverflow
-          a.show-modal(data-target='csvDownload-modal')
+          a.show-modal(href='/csvDownload')
             .media.appdesc
               .media-left
                 img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
@@ -186,33 +186,7 @@ block content
               p 勘定科目設定
         footer.modal-card-foot
 
-    .modal#csvDownload-modal
-     .modal-background.cancel-button(data-target='csvDownload-modal')
-     .modal-card.is-family-noto-sans
-       header.modal-card-head
-         p.modal-card-title 請求情報ダウンロード
-         button.delete(data-target="csvDownload-modal")
-       section.modal-card-body
-         nav.panel
-           a.panel-block(href='/csvDownload')
-             span.panel-icon
-               i.fas.fa-file
-             p 請求情報ダウンロード
-           a.panel-block.show-modal(data-target='csvdownload-confirmation-modal')
-             span.panel-icon
-               i.fas.fa-file
-             p 請求情報一括ダウンロード
-       footer.modal-card-foot
-       
-     .modal#csvdownload-confirmation-modal
-      .modal-background.cancel-button(data-target='csvdownload-confirmation-modal')
-      .modal-content.is-family-noto-sans
-        .card
-          .card-content.notification.m-0
-            button.delete(data-target="csvdownload-confirmation-modal")
-            p この機能は準備中です。
-
-     .modal#config-modal
+    .modal#config-modal
       .modal-background.cancel-button(data-target='config-modal')
       .modal-card.is-family-noto-sans
         header.modal-card-head
