@@ -157,6 +157,28 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
+
+    test('ポータル画面で請求情報ダウンロード画面遷移', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: false,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      if (page.url() === 'https://localhost:3000/portal') {
+        await page.click('body > div.container.is-max-widescreen > div:nth-child(2) > div:nth-child(3) > div > a')
+        await page.waitForTimeout(1000)
+        const checkLocation = await page.evaluate(() => {
+          return location.href
+        })
+        expect(checkLocation).toEqual('https://localhost:3000/csvDownload')
+      }
+
+      // await browser.close()
+    })
   })
 
   describe('5.契約ステータス：変更申込', () => {
