@@ -1395,6 +1395,14 @@ const dataToJson = (data) => {
       }
     }
 
+    // 登録した税の設定取り出し
+    const csvTax = constantsDefine.csvFormatDefine.csvTax
+    const taxNameLists = []
+
+    csvTax.forEach((item) => {
+      taxNameLists.push(item.name)
+    })
+
     // 割引の個数（１～３）
     let discountNumberingForTotal = 1
     // 追加料金の個数（１～３）
@@ -1429,8 +1437,13 @@ const dataToJson = (data) => {
                 .replace(' 8%', '')
                 .replace(' 0%', '')
 
-              // 割引1-税（消費税／軽減税率／不課税／免税／非課税）
-              invoice['割引1-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              if (taxNameLists.includes(taxName) === false) {
+                // 割引1-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['割引1-税（消費税／軽減税率／不課税／免税／非課税）'] = '固定税'
+              } else {
+                // 割引1-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['割引1-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              }
             }
 
             // 割引1-小計（税抜）
@@ -1460,8 +1473,13 @@ const dataToJson = (data) => {
                 .replace(' 8%', '')
                 .replace(' 0%', '')
 
-              // 割引2-税（消費税／軽減税率／不課税／免税／非課税）
-              invoice['割引2-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              if (taxNameLists.includes(taxName) === false) {
+                // 割引2-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['割引2-税（消費税／軽減税率／不課税／免税／非課税）'] = '固定税'
+              } else {
+                // 割引2-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['割引2-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              }
             }
 
             // 割引2-小計（税抜）
@@ -1491,8 +1509,13 @@ const dataToJson = (data) => {
                 .replace(' 8%', '')
                 .replace(' 0%', '')
 
-              // 割引3-税（消費税／軽減税率／不課税／免税／非課税）
-              invoice['割引3-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              if (taxNameLists.includes(taxName) === false) {
+                // 割引3-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['割引3-税（消費税／軽減税率／不課税／免税／非課税）'] = '固定税'
+              } else {
+                // 割引3-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['割引3-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              }
             }
 
             // 割引3-小計（税抜）
@@ -1529,7 +1552,11 @@ const dataToJson = (data) => {
                 .replace(' 0%', '')
 
               // 税
-              taxValue = taxName
+              if (taxNameLists.includes(taxName) === false) {
+                taxValue = '固定税'
+              } else {
+                taxValue = taxName
+              }
             }
 
             invoice['割引4以降'] += invoice['割引4以降']
@@ -1565,8 +1592,13 @@ const dataToJson = (data) => {
                 .replace(' 8%', '')
                 .replace(' 0%', '')
 
-              // 追加料金1-税（消費税／軽減税率／不課税／免税／非課税）
-              invoice['追加料金1-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              if (taxNameLists.includes(taxName) === false) {
+                // 追加料金1-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['追加料金1-税（消費税／軽減税率／不課税／免税／非課税）'] = '固定税'
+              } else {
+                // 追加料金1-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['追加料金1-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              }
             }
 
             // 追加料金1-小計（税抜）
@@ -1596,8 +1628,13 @@ const dataToJson = (data) => {
                 .replace(' 8%', '')
                 .replace(' 0%', '')
 
-              // 追加料金2-税（消費税／軽減税率／不課税／免税／非課税）
-              invoice['追加料金2-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              if (taxNameLists.includes(taxName) === false) {
+                // 追加料金2-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['追加料金2-税（消費税／軽減税率／不課税／免税／非課税）'] = '固定税'
+              } else {
+                // 追加料金2-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['追加料金2-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              }
             }
 
             // 追加料金2-小計（税抜）
@@ -1627,8 +1664,13 @@ const dataToJson = (data) => {
                 .replace(' 8%', '')
                 .replace(' 0%', '')
 
-              // 追加料金3-税（消費税／軽減税率／不課税／免税／非課税）
-              invoice['追加料金3-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              if (taxNameLists.includes(taxName) === false) {
+                // 追加料金3-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['追加料金3-税（消費税／軽減税率／不課税／免税／非課税）'] = '固定税'
+              } else {
+                // 追加料金3-税（消費税／軽減税率／不課税／免税／非課税）
+                invoice['追加料金3-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+              }
             }
 
             // 追加料金3-小計（税抜）
@@ -1665,7 +1707,11 @@ const dataToJson = (data) => {
                 .replace(' 0%', '')
 
               // 税
-              taxValue = taxName
+              if (taxNameLists.includes(taxName) === false) {
+                taxValue = '固定税'
+              } else {
+                taxValue = taxName
+              }
             }
 
             invoice['追加料金4以降'] += invoice['追加料金4以降']
@@ -1709,15 +1755,18 @@ const dataToJson = (data) => {
         .replace(' 0%', '')
 
       // 固定税
-      if (taxName === '固定税') {
-        if (data.TaxTotal) {
-          invoice['固定税-項目ID'] = '税額(文書合計)'
-          invoice['固定税-税'] = data.TaxTotal.TaxAmount?.value
-        }
-      }
+      if (taxNameLists.includes(taxName) === false) {
+        // 明細-税（消費税／軽減税率／不課税／免税／非課税）
+        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = '固定税'
 
-      // 明細-税（消費税／軽減税率／不課税／免税／非課税）
-      invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+        if (data.TaxTotal) {
+          invoice['固定税-項目ID'] = taxName
+          invoice['固定税-税'] = data.TaxTotal[0].TaxAmount?.value
+        }
+      } else {
+        // 明細-税（消費税／軽減税率／不課税／免税／非課税）
+        invoice['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = taxName
+      }
 
       // 明細-非課税/免税の理由
       invoice['明細-非課税/免税の理由'] =
