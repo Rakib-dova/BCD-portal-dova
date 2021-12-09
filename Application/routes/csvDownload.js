@@ -880,13 +880,17 @@ const dataToJson = (data) => {
           invoice['支払い条件-説明'] = note
           paymentTermsMultiIndex = true
         } else {
-          paymentExtra.push(`支払い条件-割引率${paymentTermsIndex}:${settlementDiscountPercent}`)
-          paymentExtra.push(`支払い条件-割増率${paymentTermsIndex}:${penaltySurchargePercent}`)
-          paymentExtra.push(`支払い条件-決済開始日${paymentTermsIndex}:${settleStartDate}`)
-          paymentExtra.push(`支払い条件-決済終了日${paymentTermsIndex}:${settleEndDate}`)
-          paymentExtra.push(`支払い条件-ペナルティ開始日${paymentTermsIndex}:${penaltyStartDate}`)
-          paymentExtra.push(`支払い条件-ペナルティ終了日${paymentTermsIndex}:${penaltyEndDate}`)
-          paymentExtra.push(`支払い条件-説明${paymentTermsIndex}:${note}`)
+          const paymentConditionArray = []
+          paymentConditionArray.push(` '支払い条件-割引率${paymentTermsIndex}':'${settlementDiscountPercent}'`)
+          paymentConditionArray.push(` '支払い条件-割増率${paymentTermsIndex}':'${penaltySurchargePercent}'`)
+          paymentConditionArray.push(` '支払い条件-決済開始日${paymentTermsIndex}':'${settleStartDate}'`)
+          paymentConditionArray.push(` '支払い条件-決済終了日${paymentTermsIndex}':'${settleEndDate}'`)
+          paymentConditionArray.push(` '支払い条件-ペナルティ開始日${paymentTermsIndex}':'${penaltyStartDate}'`)
+          paymentConditionArray.push(` '支払い条件-ペナルティ終了日${paymentTermsIndex}':'${penaltyEndDate}'`)
+          paymentConditionArray.push(` '支払い条件-説明${paymentTermsIndex}':'${note}' `)
+
+          // 支払方法-予備に支払方法を入れる
+          paymentExtra.push(`{${paymentConditionArray}}`)
 
           paymentTermsIndex += 1
         }
@@ -924,6 +928,7 @@ const dataToJson = (data) => {
 
       // 支払い方法と条件をcsvに記入
       paymentMeans.forEach((mean) => {
+        const paymentMeansArray = []
         if (!paymentMeanIndex) {
           // 現金払いの場合
           if (mean.PaymentMeansCode?.value === '10') {
@@ -946,22 +951,28 @@ const dataToJson = (data) => {
         } else {
           // 複数の現金払いの場合
           if (mean.PaymentMeansCode?.value === '10') {
-            paymentExtra.push(`支払方法${paymentWayIndex}:現金払い`)
+            paymentMeansArray.push(` '支払方法${paymentWayIndex}':'現金払い' `)
             paymentWayIndex += 1
           }
           // 小切手払い
           if (mean.PaymentMeansCode?.value === '20') {
-            paymentExtra.push(`支払方法${paymentWayIndex}:小切手払い`)
+            paymentMeansArray.push(` '支払方法${paymentWayIndex}':'小切手払い' `)
             paymentWayIndex += 1
           }
           // BankCard
           if (mean.PaymentMeansCode?.value === '48') {
-            paymentExtra.push(`支払方法${paymentWayIndex}:BankCard`)
+            paymentMeansArray.push(` '支払方法${paymentWayIndex}':'BankCard' `)
             paymentWayIndex += 1
           }
         }
 
+        // 支払方法-予備に支払方法を入れる
+        if (paymentMeansArray.length !== 0) {
+          paymentExtra.push(`{${paymentMeansArray}}`)
+        }
+
         // DirectDebit
+        const directDebitInfoArray = []
         if (mean.PaymentMeansCode?.value === '49') {
           if (!paymentMeanIndexDirectDebit) {
             invoice['DirectDebit-銀行名'] =
@@ -1023,34 +1034,40 @@ const dataToJson = (data) => {
               mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.CountrySubentity?.value ?? ''
 
             // 配列に入れる
-            paymentExtra.push(`DirectDebit-銀行名${directDebitPaymentMeanIndex}:${bankName}`)
-            paymentExtra.push(`DirectDebit-口座番号${directDebitPaymentMeanIndex}:${accountNumber}`)
-            paymentExtra.push(`DirectDebit-国${directDebitPaymentMeanIndex}:${country}`)
-            paymentExtra.push(`DirectDebit-家屋番号${directDebitPaymentMeanIndex}:${buildingNumber}`)
-            paymentExtra.push(`DirectDebit-ビル名 / フロア等${directDebitPaymentMeanIndex}:${additionalStreetName}`)
+            directDebitInfoArray.push(` 'DirectDebit-銀行名${directDebitPaymentMeanIndex}':'${bankName}'`)
+            directDebitInfoArray.push(` 'DirectDebit-口座番号${directDebitPaymentMeanIndex}':'${accountNumber}'`)
+            directDebitInfoArray.push(` 'DirectDebit-国${directDebitPaymentMeanIndex}':'${country}'`)
+            directDebitInfoArray.push(` 'DirectDebit-家屋番号${directDebitPaymentMeanIndex}':'${buildingNumber}'`)
+            directDebitInfoArray.push(
+              ` 'DirectDebit-ビル名 / フロア等${directDebitPaymentMeanIndex}':'${additionalStreetName}'`
+            )
             switch (accountType) {
               case 'Current':
-                paymentExtra.push(`DirectDebit-科目${directDebitPaymentMeanIndex}:当座`)
+                directDebitInfoArray.push(` 'DirectDebit-科目${directDebitPaymentMeanIndex}':'当座'`)
                 break
               case 'General':
-                paymentExtra.push(`DirectDebit-科目${directDebitPaymentMeanIndex}:普通`)
+                directDebitInfoArray.push(` 'DirectDebit-科目${directDebitPaymentMeanIndex}':'普通'`)
                 break
               default:
                 break
             }
-            paymentExtra.push(`DirectDebit-郵便番号${directDebitPaymentMeanIndex}:${postalZone}`)
-            paymentExtra.push(`DirectDebit-市区町村${directDebitPaymentMeanIndex}:${cityName}`)
-            paymentExtra.push(`DirectDebit-所在地${directDebitPaymentMeanIndex}:${addressLine}`)
-            paymentExtra.push(`DirectDebit-支店名${directDebitPaymentMeanIndex}:${institutionBranchName}`)
-            paymentExtra.push(`DirectDebit-番地${directDebitPaymentMeanIndex}:${streetName}`)
-            paymentExtra.push(`DirectDebit-口座番号${directDebitPaymentMeanIndex}:${accountNumber}`)
-            paymentExtra.push(`DirectDebit-口座名義${directDebitPaymentMeanIndex}:${accountName}`)
-            paymentExtra.push(`DirectDebit-都道府県${directDebitPaymentMeanIndex}:${countrySubentity}`)
+            directDebitInfoArray.push(` 'DirectDebit-郵便番号${directDebitPaymentMeanIndex}':'${postalZone}'`)
+            directDebitInfoArray.push(` 'DirectDebit-市区町村${directDebitPaymentMeanIndex}':'${cityName}'`)
+            directDebitInfoArray.push(` 'DirectDebit-所在地${directDebitPaymentMeanIndex}':'${addressLine}'`)
+            directDebitInfoArray.push(` 'DirectDebit-支店名${directDebitPaymentMeanIndex}':'${institutionBranchName}'`)
+            directDebitInfoArray.push(` 'DirectDebit-番地${directDebitPaymentMeanIndex}':'${streetName}'`)
+            directDebitInfoArray.push(` 'DirectDebit-口座番号${directDebitPaymentMeanIndex}':'${accountNumber}'`)
+            directDebitInfoArray.push(` 'DirectDebit-口座名義${directDebitPaymentMeanIndex}':'${accountName}'`)
+            directDebitInfoArray.push(` 'DirectDebit-都道府県${directDebitPaymentMeanIndex}':'${countrySubentity}' `)
+
+            // 支払方法-予備に支払方法を入れる
+            paymentExtra.push(`{${directDebitInfoArray}}`)
             directDebitPaymentMeanIndex += 1
           }
         }
 
         // 銀行口座
+        const bankAccountInfoArray = []
         if (mean.PaymentMeansCode?.value === '42') {
           if (!paymentMeanIndexBank) {
             invoice['銀行口座-銀行名'] =
@@ -1114,34 +1131,42 @@ const dataToJson = (data) => {
             const bankAdditionalStreetName =
               mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.AdditionalStreetName?.value ?? ''
 
-            paymentExtra.push(`銀行口座-銀行名${bankAccountPaymentMeanIndex}:${accountBankName}`)
-            paymentExtra.push(`銀行口座-支店名${bankAccountPaymentMeanIndex}:${branchName}`)
-            paymentExtra.push(`銀行口座-口座番号${bankAccountPaymentMeanIndex}:${bankAccountNumber}`)
-            paymentExtra.push(`銀行口座-口座名義${bankAccountPaymentMeanIndex}:${bankAccountName}`)
+            bankAccountInfoArray.push(` '銀行口座-銀行名${bankAccountPaymentMeanIndex}':'${accountBankName}'`)
+            bankAccountInfoArray.push(` '銀行口座-支店名${bankAccountPaymentMeanIndex}':'${branchName}'`)
+            bankAccountInfoArray.push(` '銀行口座-口座番号${bankAccountPaymentMeanIndex}':'${bankAccountNumber}'`)
+            bankAccountInfoArray.push(` '銀行口座-口座名義${bankAccountPaymentMeanIndex}':'${bankAccountName}'`)
             switch (accountType) {
               case 'Current':
-                paymentExtra.push(`銀行口座-科目${bankAccountPaymentMeanIndex}:当座`)
+                bankAccountInfoArray.push(` '銀行口座-科目${bankAccountPaymentMeanIndex}':'当座'`)
                 break
               case 'General':
-                paymentExtra.push(`銀行口座-科目${bankAccountPaymentMeanIndex}:普通`)
+                bankAccountInfoArray.push(` '銀行口座-科目${bankAccountPaymentMeanIndex}':'普通'`)
                 break
               default:
                 break
             }
-            paymentExtra.push(`銀行口座-家屋番号${bankAccountPaymentMeanIndex}:${bankBuildingNumber}`)
-            paymentExtra.push(`銀行口座-市区町村${bankAccountPaymentMeanIndex}:${bankCityName}`)
-            paymentExtra.push(`銀行口座-都道府県${bankAccountPaymentMeanIndex}:${bankCountrySubentity}`)
-            paymentExtra.push(`銀行口座-郵便番号${bankAccountPaymentMeanIndex}:${bankPostalZone}`)
-            paymentExtra.push(`銀行口座-所在地${bankAccountPaymentMeanIndex}:${bankCountry}`)
-            paymentExtra.push(`銀行口座-国${bankAccountPaymentMeanIndex}:${bankAddressLine}`)
-            paymentExtra.push(`銀行口座-番地${bankAccountPaymentMeanIndex}:${bankStreetName}`)
-            paymentExtra.push(`銀行口座-ビル名 / フロア等${bankAccountPaymentMeanIndex}:${bankAdditionalStreetName}`)
-
+            bankAccountInfoArray.push(` '銀行口座-家屋番号${bankAccountPaymentMeanIndex}':'${bankBuildingNumber}'`)
+            bankAccountInfoArray.push(` '銀行口座-市区町村${bankAccountPaymentMeanIndex}':'${bankCityName}'`)
+            bankAccountInfoArray.push(` '銀行口座-都道府県${bankAccountPaymentMeanIndex}':'${bankCountrySubentity}'`)
+            bankAccountInfoArray.push(` '銀行口座-郵便番号${bankAccountPaymentMeanIndex}':'${bankPostalZone}'`)
+            bankAccountInfoArray.push(` '銀行口座-所在地${bankAccountPaymentMeanIndex}':'${bankCountry}'`)
+            bankAccountInfoArray.push(` '銀行口座-国${bankAccountPaymentMeanIndex}':'${bankAddressLine}'`)
+            bankAccountInfoArray.push(` '銀行口座-番地${bankAccountPaymentMeanIndex}':'${bankStreetName}'`)
+            bankAccountInfoArray.push(
+              ` '銀行口座-ビル名 / フロア等${bankAccountPaymentMeanIndex}':'${bankAdditionalStreetName}' `
+            )
+            // 支払方法-予備に支払方法を入れる
+            if (paymentExtra.length !== 0) {
+              paymentExtra.push(`, {${bankAccountInfoArray}}`)
+            } else {
+              paymentExtra.push(`{${bankAccountInfoArray}}`)
+            }
             bankAccountPaymentMeanIndex += 1
           }
         }
 
         // IBAN
+        const ibanInfoArray = []
         if (mean.PaymentChannelCode?.value === 'IBAN') {
           if (!paymentMeanIndexIBAN) {
             invoice['IBAN払い-IBAN'] = mean.PayeeFinancialAccount?.ID?.value ?? ''
@@ -1156,16 +1181,19 @@ const dataToJson = (data) => {
             const ibanFinancialInstitutionId =
               mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.ID?.value ?? ''
 
-            paymentExtra.push(`IBAN払い-IBAN${ibanPaymentMeanIndex}:${iban}`)
-            paymentExtra.push(`IBAN払い-説明${ibanPaymentMeanIndex}:${ibanPaymentNote}`)
-            paymentExtra.push(
-              `IBAN払い-銀行識別コード / SWIFTコード${ibanPaymentMeanIndex}:${ibanFinancialInstitutionId}`
+            ibanInfoArray.push(` 'IBAN払い-IBAN${ibanPaymentMeanIndex}':'${iban}'`)
+            ibanInfoArray.push(` 'IBAN払い-説明${ibanPaymentMeanIndex}':'${ibanPaymentNote}'`)
+            ibanInfoArray.push(
+              ` 'IBAN払い-銀行識別コード / SWIFTコード${ibanPaymentMeanIndex}':'${ibanFinancialInstitutionId}' `
             )
+            // 支払方法-予備に支払方法を入れる
+            paymentExtra.push(`{${ibanInfoArray}}`)
             ibanPaymentMeanIndex += 1
           }
         }
 
         // 国際
+        const internationalInfoArray = []
         if (mean.PaymentChannelCode?.value === 'SWIFTUS') {
           if (!paymentMeanIndexSWIFTUS) {
             invoice['国際電信送金-ABAナンバー'] =
@@ -1217,21 +1245,39 @@ const dataToJson = (data) => {
               mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.Country?.IdentificationCode?.value ?? ''
             const internationalPaymentNote = mean.PayeeFinancialAccount?.PaymentNote[0]?.value ?? ''
 
-            paymentExtra.push(`国際電信送金-ABAナンバー${internationalPaymentMeanIndex}:${abaNumber}`)
-            paymentExtra.push(`国際電信送金-SWIFTコード${internationalPaymentMeanIndex}:${swiftCode}`)
-            paymentExtra.push(`国際電信送金-IBAN${internationalPaymentMeanIndex}:${internationalIban}`)
-            paymentExtra.push(`国際電信送金-口座名義${internationalPaymentMeanIndex}:${internationalBankAccountName}`)
-            paymentExtra.push(`国際電信送金-番地${internationalPaymentMeanIndex}:${internationalStreetName}`)
-            paymentExtra.push(
-              `国際電信送金-ビル名 / フロア等${internationalPaymentMeanIndex}:${internationalAdditionalStreetName}`
+            internationalInfoArray.push(` '国際電信送金-ABAナンバー${internationalPaymentMeanIndex}':'${abaNumber}'`)
+            internationalInfoArray.push(` '国際電信送金-SWIFTコード${internationalPaymentMeanIndex}':'${swiftCode}'`)
+            internationalInfoArray.push(` '国際電信送金-IBAN${internationalPaymentMeanIndex}':'${internationalIban}'`)
+            internationalInfoArray.push(
+              ` '国際電信送金-口座名義${internationalPaymentMeanIndex}':'${internationalBankAccountName}'`
             )
-            paymentExtra.push(`国際電信送金-家屋番号${internationalPaymentMeanIndex}:${internationalBuildingNumber}`)
-            paymentExtra.push(`国際電信送金-市区町村${internationalPaymentMeanIndex}:${internationalCityName}`)
-            paymentExtra.push(`国際電信送金-都道府県${internationalPaymentMeanIndex}:${internationalCountrySubentity}`)
-            paymentExtra.push(`国際電信送金-郵便番号${internationalPaymentMeanIndex}:${internationalPostalZone}`)
-            paymentExtra.push(`国際電信送金-所在地${internationalPaymentMeanIndex}:${internationalAddressLine}`)
-            paymentExtra.push(`国際電信送金-国${internationalPaymentMeanIndex}:${internationalCountry}`)
-            paymentExtra.push(`国際電信送金-説明${internationalPaymentMeanIndex}:${internationalPaymentNote}`)
+            internationalInfoArray.push(
+              ` '国際電信送金-番地${internationalPaymentMeanIndex}':'${internationalStreetName}'`
+            )
+            internationalInfoArray.push(
+              ` '国際電信送金-ビル名 / フロア等${internationalPaymentMeanIndex}':'${internationalAdditionalStreetName}'`
+            )
+            internationalInfoArray.push(
+              ` '国際電信送金-家屋番号${internationalPaymentMeanIndex}':'${internationalBuildingNumber}'`
+            )
+            internationalInfoArray.push(
+              ` '国際電信送金-市区町村${internationalPaymentMeanIndex}':'${internationalCityName}'`
+            )
+            internationalInfoArray.push(
+              ` '国際電信送金-都道府県${internationalPaymentMeanIndex}':'${internationalCountrySubentity}'`
+            )
+            internationalInfoArray.push(
+              ` '国際電信送金-郵便番号${internationalPaymentMeanIndex}':'${internationalPostalZone}'`
+            )
+            internationalInfoArray.push(
+              ` '国際電信送金-所在地${internationalPaymentMeanIndex}':'${internationalAddressLine}'`
+            )
+            internationalInfoArray.push(` '国際電信送金-国${internationalPaymentMeanIndex}':'${internationalCountry}'`)
+            internationalInfoArray.push(
+              ` '国際電信送金-説明${internationalPaymentMeanIndex}':'${internationalPaymentNote}' `
+            )
+            // 支払方法-予備に支払方法を入れる
+            paymentExtra.push(`{${internationalInfoArray}}`)
             internationalPaymentMeanIndex += 1
           }
         }
@@ -1239,7 +1285,9 @@ const dataToJson = (data) => {
     }
 
     // '支払方法-予備'項目に配列を入れる
-    invoice['支払方法-予備'] = `{${paymentExtra.toString()}}`
+    if (paymentExtra.length !== 0) {
+      invoice['支払方法-予備'] = `{${paymentExtra.toString()}}`
+    }
 
     if (data.Delivery) {
       // 納品日
