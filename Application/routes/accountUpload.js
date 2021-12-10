@@ -118,6 +118,15 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // 以後はCSVファイルからデータ読み込み処理
+
+  // csvファイル削除
+  if (cbRemoveAccountCsv(filePath, filename) === false) {
+    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  }
+
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+
+  return res.status(200).send('勘定科目取込が完了しました。')
 }
 
 // csvアップロード
@@ -148,6 +157,27 @@ const cbUploadAccountCsv = (_filePath, _filename, _uploadCsvData) => {
   }
 }
 
+// CSVファイル削除機能
+const cbRemoveAccountCsv = (_deleteDataPath, _filename) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbRemoveAccountCsv')
+  const deleteFile = path.join(_deleteDataPath, '/' + _filename)
+
+  if (fs.existsSync(deleteFile)) {
+    try {
+      fs.unlinkSync(deleteFile)
+      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveAccountCsv')
+      return true
+    } catch (error) {
+      logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveAccountCsv')
+      return false
+    }
+  } else {
+    // 削除対象がない場合、サーバーエラー画面表示
+    logger.info(constantsDefine.logMessage.INF001 + 'cbRemoveAccountCsv')
+    return false
+  }
+}
+
 router.get('/', helper.isAuthenticated, cbGetIndex)
 router.post('/', helper.isAuthenticated, cbPostIndex)
 
@@ -155,5 +185,6 @@ module.exports = {
   router: router,
   cbGetIndex: cbGetIndex,
   cbPostIndex: cbPostIndex,
-  cbUploadAccountCsv: cbUploadAccountCsv
+  cbUploadAccountCsv: cbUploadAccountCsv,
+  cbRemoveAccountCsv: cbRemoveAccountCsv
 }
