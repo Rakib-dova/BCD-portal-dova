@@ -105,6 +105,174 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/利用登録 - BConnectionデジタルトレード/i) // タイトル
     })
 
+    //  検索した郵便番号の結果がないときのメッセージ確認
+    test('検索した郵便番号の結果がないときのメッセージ確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/tenant/register')
+      if (page.url() === 'https://localhost:3000/tenant/register') {
+        await page.type('#postalNumber', '1234567')
+        await page.click('#postalSearchBtn')
+
+        await page.waitForTimeout(500)
+
+        // 検索した郵便番号の結果がないときの表示されたメッセージ確認
+        const checkErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#modal-card-result').innerText
+        })
+
+        expect(checkErrorMessage).toBe(
+          '該当する住所が見つかりませんでした。\n住所検索が可能な郵便番号を入力してください。'
+        )
+      }
+      await browser.close()
+    })
+
+    //  クリアボタン機能確認
+    test('検索した郵便番号の結果が1件の場合：クリアボタン機能確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/tenant/register')
+      if (page.url() === 'https://localhost:3000/tenant/register') {
+        await page.type('#postalNumber', '1000000')
+        await page.click('#postalSearchBtn')
+
+        await page.waitForTimeout(500)
+
+        // 住所入力後、状態確認
+        // 郵便番号入力が不可になること確認
+        const postalNumberReadonlyOn = await page.evaluate(() => {
+          return document.querySelector('#postalNumber').getAttribute('readonly')
+        })
+        expect(postalNumberReadonlyOn).toBe('')
+
+        // 住所検索ボタン非活性化確認
+        const postalSearchBtnInactive = await page.evaluate(() => {
+          return document.querySelector('#postalSearchBtn').getAttribute('disabled')
+        })
+        expect(postalSearchBtnInactive).toBe('disabled')
+
+        // クリアボタン活性化確認
+        const postalClearBtnActive = await page.evaluate(() => {
+          return document.querySelector('#postalClearBtn').getAttribute('disabled')
+        })
+        expect(postalClearBtnActive).not.toBe('disabled')
+
+        //　クリアボタン押下
+        await page.click('#postalClearBtn')
+
+        // クリアボタン押下後、状態確認
+        // 郵便番号が初期化されていること確認
+        const postalNumberInput = await page.evaluate(() => {
+          return document.querySelector('#postalNumber').value
+        })
+        expect(postalNumberInput).toBe('')
+
+        // 郵便番号入力が可能になること確認
+        const postalNumberReadonlyOff = await page.evaluate(() => {
+          return document.querySelector('#postalNumber').getAttribute('readonly')
+        })
+        expect(postalNumberReadonlyOff).toBe(null)
+
+        // 住所検索ボタン非活性化確認
+        const postalSearchBtnActive = await page.evaluate(() => {
+          return document.querySelector('#postalSearchBtn').getAttribute('disabled')
+        })
+        expect(postalSearchBtnActive).toBe('disabled')
+
+        // クリアボタン非活性化確認
+        const postalClearBtnInactive = await page.evaluate(() => {
+          return document.querySelector('#postalClearBtn').getAttribute('disabled')
+        })
+        expect(postalClearBtnInactive).toBe('disabled')
+      }
+
+      await browser.close()
+    })
+
+    test('検索した郵便番号の結果が複数の場合：クリアボタン機能確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/tenant/register')
+      if (page.url() === 'https://localhost:3000/tenant/register') {
+        await page.type('#postalNumber', '1000004')
+        await page.click('#postalSearchBtn')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#modal-card-result > a:nth-child(1)')
+
+        await page.waitForTimeout(300)
+
+        // 住所入力後、状態確認
+        // 郵便番号入力が不可になること確認
+        const postalNumberReadonlyOn = await page.evaluate(() => {
+          return document.querySelector('#postalNumber').getAttribute('readonly')
+        })
+        expect(postalNumberReadonlyOn).toBe('')
+
+        // 住所検索ボタン非活性化確認
+        const postalSearchBtnInactive = await page.evaluate(() => {
+          return document.querySelector('#postalSearchBtn').getAttribute('disabled')
+        })
+        expect(postalSearchBtnInactive).toBe('disabled')
+
+        // クリアボタン活性化確認
+        const postalClearBtnActive = await page.evaluate(() => {
+          return document.querySelector('#postalClearBtn').getAttribute('disabled')
+        })
+        expect(postalClearBtnActive).not.toBe('disabled')
+
+        //　クリアボタン押下
+        await page.click('#postalClearBtn')
+
+        // クリアボタン押下後、状態確認
+        // 郵便番号が初期化されていること確認
+        const postalNumberInput = await page.evaluate(() => {
+          return document.querySelector('#postalNumber').value
+        })
+        expect(postalNumberInput).toBe('')
+
+        // 郵便番号入力が可能になること確認
+        const postalNumberReadonlyOff = await page.evaluate(() => {
+          return document.querySelector('#postalNumber').getAttribute('readonly')
+        })
+        expect(postalNumberReadonlyOff).toBe(null)
+
+        // 住所検索ボタン非活性化確認
+        const postalSearchBtnActive = await page.evaluate(() => {
+          return document.querySelector('#postalSearchBtn').getAttribute('disabled')
+        })
+        expect(postalSearchBtnActive).toBe('disabled')
+
+        // クリアボタン非活性化確認
+        const postalClearBtnInactive = await page.evaluate(() => {
+          return document.querySelector('#postalClearBtn').getAttribute('disabled')
+        })
+        expect(postalClearBtnInactive).toBe('disabled')
+      }
+
+      await browser.close()
+    })
+
     // 利用登録後
     test('利用登録実施', async () => {
       const res = await request(app)
