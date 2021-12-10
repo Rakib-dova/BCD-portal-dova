@@ -55,21 +55,13 @@ const cbGetIndex = async (req, res, next) => {
   if (accountCodeListArr instanceof Error) return next(errorHelper.create(500))
 
   // アップロードフォーマットデータを画面に渡す。
-  res.render('accountCodeList', {
-    title: '勘定科目一覧',
-    engTitle: 'ACCOUNT CODE LIST',
-    btnNameForRegister: '新規登録する',
-    listArr: accountCodeListArr,
-    messageForNotItem: '現在、勘定科目はありません。新規登録するボタンから登録を行ってください。',
-    // リスト表示カラム
-    listNo: 'No',
-    accountCode: '勘定科目コード',
-    accountCodeName: '勘定科目名',
-    accountCodeUpdatedAt: '最新更新日',
-    setClassChangeBtn: 'checkChangeAccountCodeBtn',
-    setClassDeleteBtn: 'deleteAccountCodeBtn',
-    prevLocation: '/uploadAccount',
-    prevLocationName: '←勘定科目一括作成'
+  res.render('accountUpload', {
+    uploadCommonLayoutTitle: '勘定科目一括作成',
+    uploadCommonLayoutEngTitle: 'BULK UPLOAD ACCOUNT CODE',
+    fileInputName: 'bulkAccountCode',
+    cautionForSelectedFile: 'ファイル選択してください。',
+    listLocation: '/accountCodeList',
+    listLoacationName: '勘定科目一覧→'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
