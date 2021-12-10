@@ -8,7 +8,10 @@ const cbGetIndex = (req, res, next) => {
 
   if (test === 'sinup_dxstore') {
     // dxストアから遷移した場合、Cookieをセット
-    res.setHeader('Set-Cookie', 'referer=dxstore;')
+    res.cookie('CustomReferer', 'dxstore', {
+      httpOnly: false,
+      maxAge: 60000
+    })
     // アカウント登録ページに遷移
     res.redirect(303, 'https://sandbox.tradeshift.com/register')
   } else if (test === 'sinup') {
