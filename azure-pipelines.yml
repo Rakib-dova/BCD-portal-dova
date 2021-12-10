@@ -33,7 +33,7 @@ parameters:
 variables:
   - group: ${{ parameters.Environment }}
   - name: tag
-    value: $[format('{0:yyyyMMdd}', pipeline.startTime)]
+    value: $[format('{0:yyyyMMddHHmmss}', pipeline.startTime)]
   - name: devDeploy #開発環境デプロイフラグ
     value: ${{ or(eq(parameters.Environment,'dev'), eq(parameters.Environment,'dev2'), eq(parameters.Environment,'docomoIDF'))}}
   - name: Deploy #prod, proddtg, demo環境デプロイフラグ
