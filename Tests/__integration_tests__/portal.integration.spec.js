@@ -161,7 +161,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('ポータル画面で請求情報ダウンロード画面遷移', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true
       })
       const page = await browser.newPage()
@@ -177,7 +177,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         expect(checkLocation).toEqual('https://localhost:3000/csvDownload')
       }
 
-      // await browser.close()
+      await browser.close()
     })
   })
 
