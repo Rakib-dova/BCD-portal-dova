@@ -171,6 +171,10 @@ const cbPostRegister = async (req, res, next) => {
   req.session.userContext = 'TenantRegistrationCompleted'
   req.flash('info', '利用登録が完了いたしました。')
 
+  if (req.cookies.CustomReferer === 'dxstore') {
+    req.flash('info', 'DXストアから来たユーザーが登録しました。')
+  }
+
   return res.redirect(303, '/portal')
 }
 
