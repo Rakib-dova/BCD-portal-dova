@@ -74,6 +74,16 @@ block content
                 p.title.is-5 請求書一括作成
                 p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
       .column.hvr-float
+        .box.iconBox.textOverflow
+          a(href='/csvDownload')
+            .media.appdesc
+              .media-left
+                img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
+              .media-content
+                p.title.is-5 請求情報ダウンロード
+                p 送受信した請求情報をCSV形式でダウンロードできます。
+
+      .column.hvr-float
         if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
           .box
             a.show-modal(data-target='config-modal')

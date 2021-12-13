@@ -80,40 +80,17 @@ exports.isUserRegistered = async (req, res, next) => {
   }
 }
 
-exports.checkContractStatus = async (req, res, next) => {
-  if (!req.user?.userId) return res.redirect(303, '/auth')
-
-  if (!validate.isUUID(req.user?.userId)) {
-    return next(errorHelper.create(500))
-  } // userIdのバリデーション
-
-  // テナント情報検索
-  const tenant = await tenantController.findOne(req.user.tenantId)
+exports.checkContractStatus = async (tenantId) => {
+  const contracts = await contractController.findContract({ tenantId: tenantId, deleteFlag: false }, 'createdAt DESC')
 
   // DB検索エラーの場合
-  if (tenant instanceof Error) return next(errorHelper.create(500))
-
-  let tenantId = tenant?.dataValues.tenantId
-
-  if (!tenantId) {
-    tenantId = req.user.tenantId
-  }
-
-  let contracts = await contractController.findContract({ tenantId: tenantId }, 'createdAt DESC')
-
-  // DB検索エラーの場合
-  if (contracts instanceof Error) return next(errorHelper.create(500))
-
-  if (tenant === null && contracts === null) {
+  if (contracts instanceof Error) {
     return null
   }
 
-  if (Object.prototype.toString.call(contracts) === '[object Array]') {
-    contracts.forEach((contract) => {
-      if (contract.dataValues.deleteFlag === false) {
-        contracts = contract
-      }
-    })
+  // contracts nullの場合
+  if (contracts === null) {
+    return null
   }
 
   // 契約状態返却、999は異常系の状態

@@ -250,7 +250,7 @@ img.logo-ncom {
 }
 
 .is-invisible {
-  display: none;
+  display: none !important;
 }
 
 .changeConfirm {
