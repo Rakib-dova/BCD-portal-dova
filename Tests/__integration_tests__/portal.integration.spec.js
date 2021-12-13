@@ -169,6 +169,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       await page.goto('https://localhost:3000/portal', { waitUntil: 'networkidle0' })
       const pageUrl = await page.url()
       if (pageUrl === 'https://localhost:3000/portal') {
+        // ページ表示完了まで待ち
         await page.waitForTimeout(1000)
         const pageIcons = await page.evaluate(() => {
           const iconTiles = []
@@ -189,7 +190,7 @@ describe('ルーティングのインテグレーションテスト', () => {
             }
           }
 
-          // 外部連携するアイコンとコンテンツを読み込み
+          // 外部サービスアイコンとコンテンツを読み込み
           for (let row = 1; row < 3; row++) {
             const iconObj = document.querySelector(
               `body > div.container.is-max-widescreen > div:nth-child(3) > div > div:nth-child(${row}) > div > a > div > div.media-content > p.title.is-5`
@@ -218,7 +219,7 @@ describe('ルーティングのインテグレーションテスト', () => {
           '銀行振込消込'
         ]
 
-        // アイコンのアイコンの説明
+        // アイコンの説明
         const iconContent = [
           '指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。',
           '送受信した請求情報をCSV形式でダウンロードできます。',
