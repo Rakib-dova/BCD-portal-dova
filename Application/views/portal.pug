@@ -1,7 +1,7 @@
 ﻿extends layout
 
 block content
-  .hero.is-large
+  .hero.is-small
     .hero-body
       .container
 
@@ -51,61 +51,82 @@ block content
                 .mt-1.has-text-right
                   a.button.is-link.is-light(href='https://support.ntt.com/bconnection/maintenance/search' target='_blank') もっと見る 
 
-
-    .columns.is-desktop.is-family-noto-sans
-      .column.hvr-float
-        .box.iconBox.textOverflow
-          a.show-modal(data-target='support-modal')
-            .media.appdesc
-              .media-left
-                img.app-icon(src='../image/ts-app-digitaltrade-func-icon-support.svg')
-              .media-content
-                p.title.is-5 サポート
-                p 設定方法、利用方法に関するお問い合わせが無料で利用できます。
-                p その他FAQを参照できます。
-                //- p.tag.is-link.is-normal 有効化されています
-      .column.hvr-float
-        .box.iconBox.textOverflow
-          a.show-modal(data-target='csvupload-modal')
-            .media.appdesc
-              .media-left
-                img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_upload-type2c.svg')
-              .media-content
-                p.title.is-5 請求書一括作成
-                p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
-      .column.hvr-float
-        .box.iconBox.textOverflow
-          a.show-modal(data-target='csvDownload-modal')
-            .media.appdesc
-              .media-left
-                img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
-              .media-content
-                p.title.is-5 請求情報ダウンロード
-                p 送受信した請求情報をCSV形式でダウンロードできます。
-
-    .columns.is-desktop.is-family-noto-sans
-      .column.hvr-float
-        .box.iconBox.textOverflow
-          a.show-modal(data-target='registAccountCode-modal')
-            .media.appdesc
-              .media-left
-                img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
-              .media-content
-                p.title.is-5 仕訳情報設定
-                p 勘定科目と補助科目をユーザーカスタマイズができます。
-
-      .column.hvr-float
-        if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+    .box
+      .columns.is-desktop.is-family-noto-sans
+        .column.hvr-float
           .box.iconBox.textOverflow
-            a.show-modal(data-target='config-modal')
+            a.show-modal(data-target='csvupload-modal')
               .media.appdesc
                 .media-left
-                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_upload-type2c.svg')
                 .media-content
-                  p.title.is-5 設定
-                  p 契約情報変更と解約を行うことができます。
-                  p 解約の場合は取り消しはできません。
-      .column.hvr-float
+                  p.title.is-5 請求書一括作成
+                  p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
+        .column.hvr-float
+          .box.iconBox.textOverflow
+            a.show-modal(data-target='csvDownload-modal')
+              .media.appdesc
+                .media-left
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
+                .media-content
+                  p.title.is-5 請求情報ダウンロード
+                  p 送受信した請求情報をCSV形式でダウンロードできます。
+        .column.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='registAccountCode-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
+                  .media-content
+                    p.title.is-5 仕訳情報設定
+                    p 勘定科目と補助科目をユーザーカスタマイズができます。
+
+      .columns.is-desktop.is-family-noto-sans
+        .column.hvr-float
+          .box.iconBox.textOverflow
+            a.show-modal(data-target='support-modal')
+              .media.appdesc
+                .media-left
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-support.svg')
+                .media-content
+                  p.title.is-5 サポート
+                  p 設定方法、利用方法に関するお問い合わせが無料で利用できます。
+                  p その他FAQを参照できます。
+                  //- p.tag.is-link.is-normal 有効化されています
+        .column.hvr-float
+          if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='config-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                  .media-content
+                    p.title.is-5 設定
+                    p 契約情報変更と解約を行うことができます。
+                    p 解約の場合は取り消しはできません。
+        .column.hvr-float
+
+    .box
+      .columns.is-desktop.is-family-noto-sans
+        .column.hvr-float
+          .box.iconBox.textOverflow
+            a.show-modal(data-target='factoring-modal')
+              .media.appdesc
+                .media-left
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-olta-type1.svg')
+                .media-content
+                  p.title.is-5 ファクタリング
+                  p 請求書（売掛金）を買い取らせていただくことで素早く簡単に現金化ができるサービスです。
+        .column.hvr-float
+          .box.iconBox.textOverflow
+            a.show-modal(data-target='settlement-modal')
+              .media.appdesc
+                .media-left
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-olta-type1.svg')
+                .media-content
+                  p.title.is-5 銀行振込消込
+                  p 専用の振込口座をご利用いただくことで振込名義人によらず請求先を特定できるサービスです。
+        .column.hvr-float
 
     .modal#support-modal
       .modal-background.cancel-button(data-target='support-modal')
@@ -232,6 +253,28 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 解約
+        footer.modal-card-foot
+    
+     .modal#factoring-modal
+      .modal-background.cancel-button(data-target='factoring-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title ファクタリング
+          button.delete(data-target='factoring-modal')
+        section.modal-card-body
+          nav.panel
+          | 説明文
+        footer.modal-card-foot
+
+     .modal#settlement-modal
+      .modal-background.cancel-button(data-target='settlement-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title 決済
+          button.delete(data-target='settlement-modal')
+        section.modal-card-body
+          nav.panel
+          | 説明文
         footer.modal-card-foot
   include footer
 
