@@ -637,3 +637,11 @@ img.logo-ncom {
   border-radius: 0px 0px 7px 7px;
   margin-top: -3px;
 }
+
+#olta-modal-card {
+  width: 1000px !important;
+}
+
+.olta-link-underline {
+  text-decoration: underline;
+}

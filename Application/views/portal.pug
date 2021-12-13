@@ -257,24 +257,45 @@ block content
     
      .modal#factoring-modal
       .modal-background.cancel-button(data-target='factoring-modal')
-      .modal-card.is-family-noto-sans
+      .modal-card#olta-modal-card
         header.modal-card-head
           p.modal-card-title ファクタリング
           button.delete(data-target='factoring-modal')
         section.modal-card-body
-          nav.panel
-          | 説明文
+          p 【本サービスはOLTA株式会社が提供する提携サービスとなります】
+          br
+          p  最短即日で資金調達できるオンライン完結のファクタリングサービス
+          p  ファクタリングとは、「入金待ちの請求書」（売掛金）を売却して、早期に運転資金を調達する「借りない資金調達」です。
+          p  借入ではないため、審査に信用情報は参照せず、信用情報への記録もなし。担保や保証人を必要としません。
+          br
+          p  OLTAのクラウドファクタリングなら法人・個人事業主いずれもご利用いただけて、買取金額に上限も下限も設定していません。
+          br
+          p  さらに、お客様の取引先に知られることなくすべての手続きが完了する2者間ファクタリングです。
+          br
+          p  お問合せ・お申込みは下記リンクから。※リンク先は外部サイトとなります。
+          a.olta-link-underline(href='https://www.olta.co.jp/lp/bconnection/' target='_blank') https://www.olta.co.jp/lp/bconnection/
         footer.modal-card-foot
 
      .modal#settlement-modal
       .modal-background.cancel-button(data-target='settlement-modal')
-      .modal-card.is-family-noto-sans
+      .modal-card#olta-modal-card
         header.modal-card-head
           p.modal-card-title 決済
           button.delete(data-target='settlement-modal')
         section.modal-card-body
-          nav.panel
-          | 説明文
+          p 【本サービスはNTTスマートトレード株式会社が提供する提携サービスとなります】
+          br
+          p  銀行振込消込サービスではお取引先様向けの専用振込口座番号をご用意いたします。
+          p  Bconnectionデジタルトレードで発行する請求書にこの口座番号を記載いただくと本口座に入金のあった振込は振込名義人がどのように記載されるかに関わらずご請求先様からの振込と認識できるようになります。
+          p  借入ではないため、審査に信用情報は参照せず、信用情報への記録もなし。担保や保証人を必要としません。
+          br
+          p  メリット
+          p  ・名義人の確認が不要に。煩わしいカナ名の確認が不要になります
+          p  ・入金の通知を電文・メールで受け取ることができます
+          p  ・ほぼリアルタイムで入金確認（最大タイムラグ15分）ができます
+          br
+          p  お問合せ・お申込みは下記リンクから。※リンク先は外部サイトとなります。
+          a.olta-link-underline(href='https://www.nttsmarttrade.co.jp/bconnection_lp/' target='_blank') https://www.nttsmarttrade.co.jp/bconnection_lp/
         footer.modal-card-foot
   include footer
 
