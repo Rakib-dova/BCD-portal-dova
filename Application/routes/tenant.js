@@ -169,10 +169,11 @@ const cbPostRegister = async (req, res, next) => {
   // テナント＆ユーザ登録成功したら
   logger.info({ tenant: req.user?.tenantId, user: req.user?.userId }, 'Tenant Registration Succeeded')
   req.session.userContext = 'TenantRegistrationCompleted'
-  req.flash('info', '利用登録が完了いたしました。')
 
-  if (req.cookies.CustomReferer === 'dxstore') {
-    req.flash('info', 'DXストアから来たユーザーが登録しました。')
+  if (req.cookies?.CustomReferer === 'dxstore') {
+    req.flash('info', 'DXストアから来たユーザーの利用登録が完了いたしました。')
+  } else {
+    req.flash('info', '利用登録が完了いたしました。')
   }
 
   return res.redirect(303, '/portal')

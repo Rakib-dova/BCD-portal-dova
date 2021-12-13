@@ -8,6 +8,7 @@ require('./lib/setenv').config(process.env)
 const express = require('express')
 const path = require('path')
 const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
 
 // logger(bunyan)の前にapplication insightsを読み込む必要がある。un-used-valueだが必須。
 const appInsights = require('applicationinsights')
@@ -148,6 +149,9 @@ app.set('view engine', 'pug')
 
 // body-parser
 app.use(bodyParser.urlencoded({ extended: false }))
+
+// cookie-parser
+app.use(cookieParser())
 
 // uncomment after placing your favicon in /public
 // app.use(favicon(__dirname + '/public/favicon.ico'));
