@@ -5586,10 +5586,10 @@ describe('csvDownloadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith(
-        'noti',
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
-      )
+      ])
       // ポータルにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
@@ -5623,10 +5623,10 @@ describe('csvDownloadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith(
-        'noti',
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
-      )
+      ])
       // ポータルにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
@@ -5660,10 +5660,10 @@ describe('csvDownloadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith(
-        'noti',
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
-      )
+      ])
       // ポータルにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
@@ -5697,7 +5697,10 @@ describe('csvDownloadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', '条件に合致する請求書が見つかりませんでした。')
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '請求書ダウンロード',
+        '条件に合致する請求書が見つかりませんでした。'
+      ])
       // ポータルにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
@@ -5952,7 +5955,10 @@ describe('csvDownloadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', '条件に合致する請求書が見つかりませんでした。')
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '請求書ダウンロード',
+        '条件に合致する請求書が見つかりませんでした。'
+      ])
       // ポータルにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')

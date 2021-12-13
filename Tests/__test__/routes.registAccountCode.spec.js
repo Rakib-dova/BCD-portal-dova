@@ -369,7 +369,7 @@ describe('registAccountCodeのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // responseのヘッダ
-      expect(request.flash).toHaveBeenCalledWith('noti', '勘定科目登録に失敗しました。')
+      expect(request.flash).toHaveBeenCalledWith('noti', ['勘定科目登録', '勘定科目登録に失敗しました。'])
       expect(response.getHeader('Location')).toEqual('/registAccountCode')
     })
 

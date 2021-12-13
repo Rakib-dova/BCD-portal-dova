@@ -4,6 +4,7 @@ const basicHeader = 'コード,勘定科目名'
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const filePath = process.env.INVOICE_UPLOAD_PATH
+const accountCodeInser = require('./accountCodeController')
 const upload = async function (_file, contract) {
   logger.info(constantsDefine.logMessage.INF000 + 'accountUploadController.upload')
 
@@ -18,8 +19,11 @@ const upload = async function (_file, contract) {
 
   try {
     // 勘定科目CSVファイル読み込み
+
     const data = fs.readFileSync(newFilePath, { encoding: 'utf-8' })
+
     const rows = data.split(/\r?\n|\r/)
+
     // 勘定科目のヘッダ取出
     const header = rows[0]
 
@@ -92,46 +96,47 @@ const upload = async function (_file, contract) {
       return prevCode - nextCode
     })
 
-    // 重複が確認された場合
-    if (result === -5) {
-      return result
-    }
-
     // 既に保存されているデータと重複チェックしながらほぞんする。
-    const accountCodeInser = require('./accountCodeController').insert
     const inputPatternEngNum = '^[a-zA-Z0-9+]*$'
+
     for (let idx = 0; idx < uploadAccountCode.length; idx++) {
       if (uploadAccountCode[idx].duplicationFlag) continue
       if (uploadAccountCode[idx].code.length > 10 || !uploadAccountCode[idx].code.match(inputPatternEngNum)) {
         result = -6
-        return result
       }
       if (uploadAccountCode[idx].name.length > 40) {
         result = -7
-        return result
       }
+    }
+
+    if (result === -6 || result === -7) {
+      return result
+    }
+
+    for (let idx = 0; idx < uploadAccountCode.length; idx++) {
       const values = {
         accountCode: uploadAccountCode[idx].code,
         accountCodeName: uploadAccountCode[idx].name
       }
-      const insertResult = await accountCodeInser(contract, values)
+
+      const insertResult = await accountCodeInser.insert(contract, values)
+
       if (!insertResult) {
         result = -5
         return result
       }
     }
+
     // 削除機能追加
-    if ((await removeFile(newFilePath)) === true) {
-      console.log('削除OK')
+
+    if ((await removeFile(newFilePath)) === true && result === null) {
       result = 0
     }
     logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
-
     return result
   } catch (error) {
     logger.error({ contractId: contract.contractId, stack: error.stack, status: 0 })
     logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
-
     return error
   }
 }

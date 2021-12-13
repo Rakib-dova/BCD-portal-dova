@@ -9,7 +9,7 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
-const upload = require('multer')({ dest: '/home/upload' })
+const upload = require('multer')({ dest: process.env.INVOICE_UPLOAD_PATH })
 const accountUploadController = require('../controllers/accountUploadController')
 
 const cbGetIndex = async (req, res, next) => {
@@ -102,6 +102,7 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // req.file.userId設定
+
   req.file.userId = req.user.userId
   const status = await accountUploadController.upload(req.file, contract)
 
