@@ -10,7 +10,6 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const upload = require('multer')({ dest: '/home/upload' })
-// const upload = require('multer')({ dest: process.env.INVOICE_UPLOAD_PATH })
 const accountUploadController = require('../controllers/accountUploadController')
 
 const cbGetIndex = async (req, res, next) => {
@@ -58,13 +57,14 @@ const cbGetIndex = async (req, res, next) => {
     fileInputName: 'bulkAccountCode',
     cautionForSelectedFile: 'ファイル選択してください。',
     listLocation: '/accountCodeList',
-    listLoacationName: '勘定科目一覧→'
+    listLoacationName: '勘定科目一覧→',
+    accountCodeUpload: '/uploadAccount'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
 const cbPostIndex = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
@@ -101,10 +101,12 @@ const cbPostIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  // req.file.userId設定
+  req.file.userId = req.user.userId
   const status = await accountUploadController.upload(req.file, contract)
 
   if (status instanceof Error) {
-    req.flash('noti', '勘定科目一括作成間エラーが発生しました。')
+    req.flash('noti', ['勘定科目一括作成', '勘定科目一括作成間エラーが発生しました。'])
     res.redirect('/uploadAccount')
   }
 
@@ -112,32 +114,46 @@ const cbPostIndex = async (req, res, next) => {
     // 正常
     case 0:
       req.flash('info', '勘定科目取込が完了しました。')
-      break
+      return res.redirect('/accountCodeList')
     // ヘッダー不一致
     case -1:
-      req.flash('noti', '勘定科目取込が完了しました。（ヘッダーに誤りがあります。）')
+      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（ヘッダーに誤りがあります。）'])
       break
     // 勘定科目データが0件の場合
     case -2:
-      req.flash('noti', '勘定科目取込が完了しました。（取込データが存在していません。）')
+      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（取込データが存在していません。）'])
       break
     // 勘定科目データが200件の超過の場合
     case -3:
-      req.flash('noti', '勘定科目取込が完了しました。（一度に取り込める勘定科目は200件までとなります。）')
+      req.flash('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（一度に取り込める勘定科目は200件までとなります。）'
+      ])
       break
     // 勘定科目データが様式を従っていない
     case -4:
-      req.flash('noti', '勘定科目取込が完了しました。（一部行目に誤りがあります。）')
+      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（一部行目に誤りがあります。）'])
       break
     // 既に登録済み勘定科目がある場合
     case -5:
-      req.flash('noti', '勘定科目取込が完了しました。（勘定科目コードが重複する勘定科目はスキップしました。）')
+      req.flash('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（勘定科目コードが重複する勘定科目はスキップしました。）'
+      ])
       break
+    // 勘定科目コードのバリデーションチェックが間違い場合
     case -6:
-      req.flash('noti', '勘定科目取込が完了しました。（勘定科目コードは半角英数字10文字以内で入力してください。）')
+      req.flash('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（勘定科目コードは半角英数字10文字以内で入力してください。）'
+      ])
       break
+    // 勘定科目名のバリデーションチェックが間違い場合
     case -7:
-      req.flash('noti', '勘定科目取込が完了しました。（勘定科目名は全角・半角40文字以内で入力してください。）')
+      req.flash('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（勘定科目名は全角・半角40文字以内で入力してください。）'
+      ])
       break
   }
   res.redirect('/uploadAccount')
@@ -148,5 +164,6 @@ router.post('/', helper.isAuthenticated, upload.single('bulkAccountCode'), cbPos
 
 module.exports = {
   router: router,
-  cbGetIndex: cbGetIndex
+  cbGetIndex: cbGetIndex,
+  cbPostIndex: cbPostIndex
 }

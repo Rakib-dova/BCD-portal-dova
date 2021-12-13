@@ -3,27 +3,34 @@ const path = require('path')
 const basicHeader = 'コード,勘定科目名'
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
-
+const filePath = process.env.INVOICE_UPLOAD_PATH
 const upload = async function (_file, contract) {
   logger.info(constantsDefine.logMessage.INF000 + 'accountUploadController.upload')
 
   let result = null
-  //   const filename = _file.filename アップロードファイル削除機能用
-  const filepath = path.resolve(_file.path)
+
+  // filename設定
+  const today = new Date().getTime()
+  const filename = '勘定科目' + '_' + today + '_' + _file.userId + '_' + _file.originalname + '.csv'
+  const originName = path.resolve(filePath, _file.filename)
+  const newFilePath = path.resolve(filePath, filename)
+  fs.renameSync(originName, newFilePath)
 
   try {
     // 勘定科目CSVファイル読み込み
-    const data = fs.readFileSync(filepath, { encoding: 'utf-8' })
+    const data = fs.readFileSync(newFilePath, { encoding: 'utf-8' })
     const rows = data.split(/\r?\n|\r/)
     // 勘定科目のヘッダ取出
     const header = rows[0]
 
     // ヘッダ除去
     rows.shift()
-    if (rows[rows.length - 1] === '') rows.pop()
 
+    // ヘッダの最終番目が空の場合は削除
+    if (rows[rows.length - 1] === '') rows.pop()
     // ヘッダチェック
-    if (basicHeader.match(header) === null) {
+
+    if (header.match(basicHeader) === null) {
       result = -1
       logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
       return result
@@ -85,6 +92,11 @@ const upload = async function (_file, contract) {
       return prevCode - nextCode
     })
 
+    // 重複が確認された場合
+    if (result === -5) {
+      return result
+    }
+
     // 既に保存されているデータと重複チェックしながらほぞんする。
     const accountCodeInser = require('./accountCodeController').insert
     const inputPatternEngNum = '^[a-zA-Z0-9+]*$'
@@ -92,22 +104,29 @@ const upload = async function (_file, contract) {
       if (uploadAccountCode[idx].duplicationFlag) continue
       if (uploadAccountCode[idx].code.length > 10 || !uploadAccountCode[idx].code.match(inputPatternEngNum)) {
         result = -6
-        break
+        return result
       }
       if (uploadAccountCode[idx].name.length > 40) {
         result = -7
-        break
+        return result
       }
       const values = {
         accountCode: uploadAccountCode[idx].code,
         accountCodeName: uploadAccountCode[idx].name
       }
       const insertResult = await accountCodeInser(contract, values)
-      if (!insertResult) result = -5
+      if (!insertResult) {
+        result = -5
+        return result
+      }
     }
-
     // 削除機能追加
+    if ((await removeFile(newFilePath)) === true) {
+      console.log('削除OK')
+      result = 0
+    }
     logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
+
     return result
   } catch (error) {
     logger.error({ contractId: contract.contractId, stack: error.stack, status: 0 })
@@ -117,7 +136,27 @@ const upload = async function (_file, contract) {
   }
 }
 
-const removeFile = async (path, filename) => {}
+// CSVファイル削除機能
+const removeFile = async (deleteFilePath) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'accountUploadController.remove')
+  const deleteFile = path.join(deleteFilePath)
+
+  if (fs.existsSync(deleteFile)) {
+    try {
+      fs.unlinkSync(deleteFile)
+      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.remove')
+      return true
+    } catch (error) {
+      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.remove')
+      throw error
+    }
+  } else {
+    // 削除対象がない場合、サーバーエラー画面表示
+    logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.remove')
+    const deleteError = new Error('CSVファイル削除エラー')
+    throw deleteError
+  }
+}
 
 module.exports = {
   upload: upload,

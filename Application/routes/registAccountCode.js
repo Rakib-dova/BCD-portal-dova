@@ -107,7 +107,7 @@ const cbPostRegistAccountCode = async (req, res, next) => {
     res.redirect('/accountCodeList')
   } else {
     // 失敗した時
-    req.flash('noti', '勘定科目登録に失敗しました。')
+    req.flash('noti', ['勘定科目登録', '勘定科目登録に失敗しました。'])
     res.redirect('/registAccountCode')
   }
 

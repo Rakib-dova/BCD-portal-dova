@@ -120,7 +120,7 @@ const cbPostIndex = async function (req, res, next) {
     req.body.setAccountCodeNameInputId ?? 'failedRequestBodySetAccountCodeNameFromAccountCodeEdit.Get'
 
   if (accountCodeId.length === 0 || accountCodeId === 'failedAccountCodeId') {
-    req.flash('noti', '勘定科目変更する値に誤りがあります。')
+    req.flash('noti', ['勘定科目変更', '勘定科目変更する値に誤りがあります。'])
     res.redirect('/accountCodeList')
     logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
     return
@@ -132,7 +132,7 @@ const cbPostIndex = async function (req, res, next) {
     accountCode === 'failedAccountCode' ||
     accountCodeName === 'failedRequestBodySetAccountCodeNameFromAccountCodeEdit.Get'
   ) {
-    req.flash('noti', '勘定科目変更する値に誤りがあります。')
+    req.flash('noti', ['勘定科目変更', '勘定科目変更する値に誤りがあります。'])
     res.redirect(`/accountCodeEdit/${accountCodeId}`)
     logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
     return
@@ -152,15 +152,15 @@ const cbPostIndex = async function (req, res, next) {
       res.redirect('/accountCodeList')
       break
     case 1:
-      req.flash('noti', 'すでに登録されている値です。')
+      req.flash('noti', ['勘定科目変更', 'すでに登録されている値です。'])
       res.redirect(`/accountCodeEdit/${accountCodeId}`)
       break
     case -1:
-      req.flash('noti', '既に登録されている勘定科目コードがあることを確認しました。')
+      req.flash('noti', ['勘定科目変更', '既に登録されている勘定科目コードがあることを確認しました。'])
       res.redirect(`/accountCodeEdit/${accountCodeId}`)
       break
     case -2:
-      req.flash('noti', '当該勘定科目をDBから見つかりませんでした。')
+      req.flash('noti', ['勘定科目変更', '当該勘定科目をDBから見つかりませんでした。'])
       res.redirect('/accountCodeList')
       break
   }
