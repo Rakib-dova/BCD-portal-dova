@@ -1,7 +1,7 @@
 ﻿extends layout
 
 block content
-  .hero.is-large
+  .hero.is-small
     .hero-body
       .container
 
@@ -51,61 +51,80 @@ block content
                 .mt-1.has-text-right
                   a.button.is-link.is-light(href='https://support.ntt.com/bconnection/maintenance/search' target='_blank') もっと見る 
 
-
-    .columns.is-desktop.is-family-noto-sans
-      .column.hvr-float
-        .box.iconBox.textOverflow
-          a.show-modal(data-target='support-modal')
-            .media.appdesc
-              .media-left
-                img.app-icon(src='../image/ts-app-digitaltrade-func-icon-support.svg')
-              .media-content
-                p.title.is-5 サポート
-                p 設定方法、利用方法に関するお問い合わせが無料で利用できます。
-                p その他FAQを参照できます。
-                //- p.tag.is-link.is-normal 有効化されています
-      .column.hvr-float
-        .box.iconBox.textOverflow
-          a.show-modal(data-target='csvupload-modal')
-            .media.appdesc
-              .media-left
-                img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_upload-type2c.svg')
-              .media-content
-                p.title.is-5 請求書一括作成
-                p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
-      .column.hvr-float
-        .box.iconBox.textOverflow
-          a(href='/csvDownload')
-            .media.appdesc
-              .media-left
-                img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
-              .media-content
-                p.title.is-5 請求情報ダウンロード
-                p 送受信した請求情報をCSV形式でダウンロードできます。
-
-    .columns.is-desktop.is-family-noto-sans
-      .column.hvr-float
-        .box.iconBox.textOverflow
-          a.show-modal(data-target='registAccountCode-modal')
-            .media.appdesc
-              .media-left
-                img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
-              .media-content
-                p.title.is-5 仕訳情報設定
-                p 勘定科目と補助科目をユーザーカスタマイズができます。
-
-      .column.hvr-float
-        if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+    .box
+      .columns.is-desktop.is-family-noto-sans
+        .column.hvr-float
           .box.iconBox.textOverflow
-            a.show-modal(data-target='config-modal')
+            a.show-modal(data-target='csvupload-modal')
               .media.appdesc
                 .media-left
-                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_upload-type2c.svg')
                 .media-content
-                  p.title.is-5 設定
-                  p 契約情報変更と解約を行うことができます。
-                  p 解約の場合は取り消しはできません。
-      .column.hvr-float
+                  p.title.is-5 請求書一括作成
+                  p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
+        .column.hvr-float
+          .box.iconBox.textOverflow
+            a(href='/csvDownload')
+              .media.appdesc
+                .media-left
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
+                .media-content
+                  p.title.is-5 請求情報ダウンロード
+                  p 送受信した請求情報をCSV形式でダウンロードできます。
+        .column.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='registAccountCode-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
+                  .media-content
+                    p.title.is-5 仕訳情報設定
+                    p 勘定科目と補助科目をユーザーカスタマイズができます。
+
+      .columns.is-desktop.is-family-noto-sans
+        .column.hvr-float
+          .box.iconBox.textOverflow
+            a.show-modal(data-target='support-modal')
+              .media.appdesc
+                .media-left
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-support.svg')
+                .media-content
+                  p.title.is-5 サポート
+                  p 設定方法、利用方法に関するお問い合わせが無料で利用できます。その他FAQを参照できます。
+        .column.hvr-float
+          if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='config-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                  .media-content
+                    p.title.is-5 設定
+                    p 契約情報変更と解約を行うことができます。
+                    p 解約の場合は取り消しはできません。
+        .column.hvr-float
+
+    .box
+      .columns.is-desktop.is-family-noto-sans
+        .column.hvr-float
+          .box.iconBox.textOverflow
+            a.show-modal(data-target='factoring-modal')
+              .media.appdesc
+                .media-left
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-olta-type1.svg')
+                .media-content
+                  p.title.is-5 ファクタリング
+                  p 請求書（売掛金）を買い取らせていただくことで素早く簡単に現金化ができるサービスです。
+        .column.hvr-float
+          .box.iconBox.textOverflow
+            a.show-modal(data-target='settlement-modal')
+              .media.appdesc
+                .media-left
+                  img.app-icon(src='../image/ts-app-digitaltrade-func-icon-olta-type1.svg')
+                .media-content
+                  p.title.is-5 銀行振込消込
+                  p 専用の振込口座をご利用いただくことで振込名義人によらず請求先を特定できるサービスです。
+        .column.hvr-float
 
     .modal#support-modal
       .modal-background.cancel-button(data-target='support-modal')
@@ -172,6 +191,7 @@ block content
             else
               p お問い合わせは、テナント管理者のみ可能です。
               p テナント管理者にご相談の上、お問い合わせください。
+
     .modal#registAccountCode-modal
       .modal-background.cancel-button(data-target='registAccountCode-modal')
       .modal-card.is-family-noto-sans
@@ -186,7 +206,25 @@ block content
               p 勘定科目設定
         footer.modal-card-foot
 
-    .modal#config-modal
+    .modal#csvDownload-modal
+     .modal-background.cancel-button(data-target='csvDownload-modal')
+     .modal-card.is-family-noto-sans
+       header.modal-card-head
+         p.modal-card-title 請求情報ダウンロード
+         button.delete(data-target="csvDownload-modal")
+       section.modal-card-body
+         nav.panel
+           a.panel-block(href='/csvDownload')
+             span.panel-icon
+               i.fas.fa-file
+             p 請求情報ダウンロード
+           a.panel-block.show-modal(data-target='csvdownload-confirmation-modal')
+             span.panel-icon
+               i.fas.fa-file
+             p 請求情報一括ダウンロード
+       footer.modal-card-foot
+
+     .modal#config-modal
       .modal-background.cancel-button(data-target='config-modal')
       .modal-card.is-family-noto-sans
         header.modal-card-head
@@ -202,6 +240,49 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 解約
+        footer.modal-card-foot
+    
+     .modal#factoring-modal
+      .modal-background.cancel-button(data-target='factoring-modal')
+      .modal-card#olta-modal-card
+        header.modal-card-head
+          p.modal-card-title ファクタリング
+          button.delete(data-target='factoring-modal')
+        section.modal-card-body
+          p 【本サービスはOLTA株式会社が提供する提携サービスとなります】
+          br
+          p  最短即日で資金調達できるオンライン完結のファクタリングサービス
+          p  ファクタリングとは、「入金待ちの請求書」（売掛金）を売却して、早期に運転資金を調達する「借りない資金調達」です。
+          p  借入ではないため、審査に信用情報は参照せず、信用情報への記録もなし。担保や保証人を必要としません。
+          br
+          p  OLTAのクラウドファクタリングなら法人・個人事業主いずれもご利用いただけて、買取金額に上限も下限も設定していません。
+          br
+          p  さらに、お客様の取引先に知られることなくすべての手続きが完了する2者間ファクタリングです。
+          br
+          p  お問合せ・お申込みは下記リンクから。※リンク先は外部サイトとなります。
+          a.olta-link-underline(href='https://www.olta.co.jp/lp/bconnection/' target='_blank') https://www.olta.co.jp/lp/bconnection/
+        footer.modal-card-foot
+
+     .modal#settlement-modal
+      .modal-background.cancel-button(data-target='settlement-modal')
+      .modal-card#olta-modal-card
+        header.modal-card-head
+          p.modal-card-title 銀行振込消込
+          button.delete(data-target='settlement-modal')
+        section.modal-card-body
+          p 【本サービスはNTTスマートトレード株式会社が提供する提携サービスとなります】
+          br
+          p  銀行振込消込サービスではお取引先様向けの専用振込口座番号をご用意いたします。
+          p  Bconnectionデジタルトレードで発行する請求書にこの口座番号を記載いただくと本口座に入金のあった振込は振込名義人がどのように記載されるかに関わらずご請求先様からの振込と認識できるようになります。
+          p  借入ではないため、審査に信用情報は参照せず、信用情報への記録もなし。担保や保証人を必要としません。
+          br
+          p  メリット
+          p  ・名義人の確認が不要に。煩わしいカナ名の確認が不要になります
+          p  ・入金の通知を電文・メールで受け取ることができます
+          p  ・ほぼリアルタイムで入金確認（最大タイムラグ15分）ができます
+          br
+          p  お問合せ・お申込みは下記リンクから。※リンク先は外部サイトとなります。
+          a.olta-link-underline(href='https://www.nttsmarttrade.co.jp/bconnection_lp/' target='_blank') https://www.nttsmarttrade.co.jp/bconnection_lp/
         footer.modal-card-foot
   include footer
 
