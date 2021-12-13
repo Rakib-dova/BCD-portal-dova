@@ -64,7 +64,7 @@ block content
                   p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
         .column.hvr-float
           .box.iconBox.textOverflow
-            a.show-modal(data-target='csvDownload-modal')
+            a(href='/csvDownload')
               .media.appdesc
                 .media-left
                   img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
@@ -278,7 +278,7 @@ block content
       .modal-background.cancel-button(data-target='settlement-modal')
       .modal-card#olta-modal-card
         header.modal-card-head
-          p.modal-card-title 決済
+          p.modal-card-title 銀行振込消込
           button.delete(data-target='settlement-modal')
         section.modal-card-body
           p 【本サービスはNTTスマートトレード株式会社が提供する提携サービスとなります】

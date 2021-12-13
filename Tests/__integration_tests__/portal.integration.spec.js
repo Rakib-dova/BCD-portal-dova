@@ -158,6 +158,29 @@ describe('ルーティングのインテグレーションテスト', () => {
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
 
+    test('ポータル画面で請求情報ダウンロード画面遷移', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      if (page.url() === 'https://localhost:3000/portal') {
+        await page.click(
+          'body > div.container.is-max-widescreen > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div > a'
+        )
+        await page.waitForTimeout(1000)
+        const checkLocation = await page.evaluate(() => {
+          return location.href
+        })
+        expect(checkLocation).toEqual('https://localhost:3000/csvDownload')
+      }
+
+      await browser.close()
+    })
+
     test('ポータル画面アイコン確認', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
@@ -223,7 +246,7 @@ describe('ルーティングのインテグレーションテスト', () => {
           '指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。',
           '送受信した請求情報をCSV形式でダウンロードできます。',
           '勘定科目と補助科目をユーザーカスタマイズができます。',
-          '設定方法、利用方法に関するお問い合わせが無料で利用できます。',
+          '設定方法、利用方法に関するお問い合わせが無料で利用できます。その他FAQを参照できます。',
           '契約情報変更と解約を行うことができます。',
           '請求書（売掛金）を買い取らせていただくことで素早く簡単に現金化ができるサービスです。',
           '専用の振込口座をご利用いただくことで振込名義人によらず請求先を特定できるサービスです。'
