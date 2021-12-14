@@ -1,11 +1,13 @@
 extends layout
 
 block content
-  .hero.is-large
-    .hero-body
-      .container
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans 基本情報設定
+        .subtitle.is-family-noto-sans CSV BASIC FORMAT
 
-  .section.is-overlay.mt-6
+  .section.pt-5
     .container.is-max-widescreen.is-family-noto-sans
       form#form(action="#" enctype="multipart/form-data")
         article.panel.is-info
