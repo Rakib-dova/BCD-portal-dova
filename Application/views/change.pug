@@ -1,32 +1,35 @@
 ﻿extends layout
 block content
-  .hero.is-large
-    .hero-body
-      .container
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans 契約情報変更
+        .subtitle.is-family-noto-sans CONTRACT CHANGE
 
-  .section.is-overlay.mt-6
-    .container.is-max-widescreen.is-family-noto-sans
-      form#form(action="#")
-        article.panel.is-info
-          h2.panel-heading 契約情報変更
-          .panel-block
-            .container  
-              .field.card
-                .card-content
-                  h5.title.is-5 変更パターンを選択してください。
-                  .columns.is-centered
-                    .column 
-                      h5.subtitle.is-5 変更パターン
-                    .column.is-three-quarters
-                      label.checkbox
-                        input#chkContractorName(type='checkbox' name='chkContractorName' checked=false required)
-                        label(for='chkContractorName') 契約者名変更
-                      label.checkbox.ml-5 
-                        input#chkContractAddress(type='checkbox' name='chkContractAddress' checked=false required)
-                        label(for='chkContractAddress') 契約者住所変更
-                      label.checkbox.ml-5 
-                        input#chkContractContact(type='checkbox' name='chkContractContact' checked=false required)
-                        label(for='chkContractContact') 契約者連絡先変更
+    .columns.is-centered
+      .column.is-11
+        .container.is-max-widescreen.is-family-noto-sans
+            form#form(action="#")
+              article.panel.is-info
+                h2.panel-heading 契約情報変更
+                .panel-block
+                  .container  
+                    .field.card
+                      .card-content
+                        h5.title.is-5 変更パターンを選択してください。
+                        .columns.is-centered
+                          .column 
+                            h5.subtitle.is-5 変更パターン
+                          .column.is-three-quarters
+                            label.checkbox
+                              input#chkContractorName(type='checkbox' name='chkContractorName' checked=false required)
+                              label(for='chkContractorName') 契約者名変更
+                            label.checkbox.ml-5 
+                              input#chkContractAddress(type='checkbox' name='chkContractAddress' checked=false required)
+                              label.textOverflow(for='chkContractAddress') 契約者住所変更
+                            label.checkbox.ml-5 
+                              input#chkContractContact(type='checkbox' name='chkContractContact' checked=false required)
+                              label.textOverflow(for='chkContractContact') 契約者連絡先変更
 
               .field.card.is-invisible#cardContractorName
                 .card-content

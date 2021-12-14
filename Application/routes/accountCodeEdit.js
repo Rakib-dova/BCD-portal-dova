@@ -69,7 +69,9 @@ const cbGetIndex = async (req, res, next) => {
     modalTitle: '勘定科目設定確認',
     backUrl: '/accountCodeList',
     valueForCodeInput: result?.accountCode ?? '',
-    valueForNameInput: result?.accountCodeName ?? ''
+    valueForNameInput: result?.accountCodeName ?? '',
+    logTitle: '勘定科目確認・変更',
+    logTitleEng: 'EDIT ACCOUNT CODE'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
