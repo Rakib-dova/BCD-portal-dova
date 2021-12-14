@@ -645,3 +645,19 @@ img.logo-ncom {
 .olta-link-underline {
   text-decoration: underline;
 }
+
+/* 
+  ・他ページのヘッダー部と幅合わせる。
+  ロゴとお知らせの高さの間隔が24pxに固定する
+*/
+.is-logo {
+  padding-bottom: 0px !important;
+  padding-top: 0px !important;
+  height: 113px;
+  background-size: 70% 70% !important;
+  margin-bottom: cal(100% - 12px);
+}
+
+body > div.hero.is-small {
+  height: 125px;
+}
