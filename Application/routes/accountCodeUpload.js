@@ -9,7 +9,8 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
-const accountCodeController = require('../controllers/accountCodeController')
+const upload = require('multer')({ dest: process.env.INVOICE_UPLOAD_PATH })
+const accountUploadController = require('../controllers/accountUploadController')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -26,14 +27,14 @@ const cbGetIndex = async (req, res, next) => {
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
-  // 異常経路接続接続防止（ログイン→ポータル→サービス）
-  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
 
   // DBから契約情報取得
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  req.session.userContext = 'LoggedIn'
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
@@ -49,34 +50,20 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  // 検索キー取得（契約情報ID、勘定科目ID）
-  const contractId = contract.contractId
-  const accountCodeId = req.params.accountCodeId
-  // DBからデータ取得
-  const result = await accountCodeController.getAccountCode(contractId, accountCodeId)
-
-  if (result instanceof Error) return next(errorHelper.create(500))
-
   // アップロードフォーマットデータを画面に渡す。
-  res.render('registAccountCode', {
-    codeName: '勘定科目確認・変更',
-    codeLabel: '勘定科目コード',
-    codeNameLabel: '勘定科目名',
-    requiredTagCode: 'accountCodeTagRequired',
-    requiredTagName: 'accountCodeNameRequired',
-    idForCodeInput: 'setAccountCodeInputId',
-    idForNameInput: 'setAccountCodeNameInputId',
-    modalTitle: '勘定科目設定確認',
-    backUrl: '/accountCodeList',
-    valueForCodeInput: result?.accountCode ?? '',
-    valueForNameInput: result?.accountCodeName ?? '',
-    logTitle: '勘定科目確認・変更',
-    logTitleEng: 'EDIT ACCOUNT CODE'
+  res.render('accountUpload', {
+    uploadCommonLayoutTitle: '勘定科目一括作成',
+    uploadCommonLayoutEngTitle: 'BULK UPLOAD ACCOUNT CODE',
+    fileInputName: 'bulkAccountCode',
+    cautionForSelectedFile: 'ファイル選択してください。',
+    listLocation: '/accountCodeList',
+    listLoacationName: '勘定科目一覧→',
+    accountCodeUpload: '/uploadAccount'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
-const cbPostIndex = async function (req, res, next) {
+const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
@@ -97,8 +84,8 @@ const cbPostIndex = async function (req, res, next) {
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
-  // 異常経路接続接続防止（ログイン→ポータル→サービス）
-  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
+
+  req.session.userContext = 'LoggedIn'
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
@@ -114,63 +101,67 @@ const cbPostIndex = async function (req, res, next) {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  // 勘定科目コードの変更の時、検索データと変更値をとる
-  const contractId = contract.contractId
-  const accountCodeId = req.params.accountCodeId ?? 'failedAccountCodeId'
-  const accountCode = req.body.setAccountCodeInputId ?? 'failedAccountCode'
-  const accountCodeName =
-    req.body.setAccountCodeNameInputId ?? 'failedRequestBodySetAccountCodeNameFromAccountCodeEdit.Get'
+  // req.file.userId設定
 
-  if (accountCodeId.length === 0 || accountCodeId === 'failedAccountCodeId') {
-    req.flash('noti', ['勘定科目変更', '勘定科目変更する値に誤りがあります。'])
-    res.redirect('/accountCodeList')
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
-    return
+  req.file.userId = req.user.userId
+  const status = await accountUploadController.upload(req.file, contract)
+
+  if (status instanceof Error) {
+    req.flash('noti', ['勘定科目一括作成', '勘定科目一括作成間エラーが発生しました。'])
+    res.redirect('/uploadAccount')
   }
 
-  if (
-    accountCode.length === 0 ||
-    accountCodeName.length === 0 ||
-    accountCode === 'failedAccountCode' ||
-    accountCodeName === 'failedRequestBodySetAccountCodeNameFromAccountCodeEdit.Get'
-  ) {
-    req.flash('noti', ['勘定科目変更', '勘定科目変更する値に誤りがあります。'])
-    res.redirect(`/accountCodeEdit/${accountCodeId}`)
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
-    return
-  }
-
-  // 勘定科目コードを変更する。
-  const result = await accountCodeController.updatedAccountCode(contractId, accountCodeId, accountCode, accountCodeName)
-
-  // DB変更の時エラーが発生したら500ページへ遷移する。
-  if (result instanceof Error) return next(errorHelper.create(500))
-
-  // 変更結果を表示する。
-  // 結果：0（正常変更）、1（変更なし）、-1（重複コードの場合）、-2（勘定科目検索失敗）
-  switch (result) {
+  switch (status) {
+    // 正常
     case 0:
-      req.flash('info', '勘定科目を変更しました。')
-      res.redirect('/accountCodeList')
-      break
-    case 1:
-      req.flash('noti', ['勘定科目変更', 'すでに登録されている値です。'])
-      res.redirect(`/accountCodeEdit/${accountCodeId}`)
-      break
+      req.flash('info', '勘定科目取込が完了しました。')
+      return res.redirect('/accountCodeList')
+    // ヘッダー不一致
     case -1:
-      req.flash('noti', ['勘定科目変更', '既に登録されている勘定科目コードがあることを確認しました。'])
-      res.redirect(`/accountCodeEdit/${accountCodeId}`)
+      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（ヘッダーに誤りがあります。）'])
       break
+    // 勘定科目データが0件の場合
     case -2:
-      req.flash('noti', ['勘定科目変更', '当該勘定科目をDBから見つかりませんでした。'])
-      res.redirect('/accountCodeList')
+      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（取込データが存在していません。）'])
+      break
+    // 勘定科目データが200件の超過の場合
+    case -3:
+      req.flash('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（一度に取り込める勘定科目は200件までとなります。）'
+      ])
+      break
+    // 勘定科目データが様式を従っていない
+    case -4:
+      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（一部行目に誤りがあります。）'])
+      break
+    // 既に登録済み勘定科目がある場合
+    case -5:
+      req.flash('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（勘定科目コードが重複する勘定科目はスキップしました。）'
+      ])
+      break
+    // 勘定科目コードのバリデーションチェックが間違い場合
+    case -6:
+      req.flash('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（勘定科目コードは半角英数字10文字以内で入力してください。）'
+      ])
+      break
+    // 勘定科目名のバリデーションチェックが間違い場合
+    case -7:
+      req.flash('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（勘定科目名は全角・半角40文字以内で入力してください。）'
+      ])
       break
   }
-  logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+  res.redirect('/uploadAccount')
 }
 
-router.get('/:accountCodeId', helper.isAuthenticated, cbGetIndex)
-router.post('/:accountCodeId', helper.isAuthenticated, cbPostIndex)
+router.get('/', helper.isAuthenticated, cbGetIndex)
+router.post('/', helper.isAuthenticated, upload.single('bulkAccountCode'), cbPostIndex)
 
 module.exports = {
   router: router,

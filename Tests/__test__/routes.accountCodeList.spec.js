@@ -141,7 +141,9 @@ describe('routes.accountListのテスト', () => {
         accountCodeName: '勘定科目名',
         accountCodeUpdatedAt: '最新更新日',
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
-        setClassDeleteBtn: 'deleteAccountCodeBtn'
+        setClassDeleteBtn: 'deleteAccountCodeBtn',
+        prevLocation: '/uploadAccount',
+        prevLocationName: '←勘定科目一括作成'
       })
     })
 
@@ -183,7 +185,9 @@ describe('routes.accountListのテスト', () => {
         accountCodeName: '勘定科目名',
         accountCodeUpdatedAt: '最新更新日',
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
-        setClassDeleteBtn: 'deleteAccountCodeBtn'
+        setClassDeleteBtn: 'deleteAccountCodeBtn',
+        prevLocation: '/uploadAccount',
+        prevLocationName: '←勘定科目一括作成'
       })
     })
 
@@ -224,7 +228,9 @@ describe('routes.accountListのテスト', () => {
         accountCodeName: '勘定科目名',
         accountCodeUpdatedAt: '最新更新日',
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
-        setClassDeleteBtn: 'deleteAccountCodeBtn'
+        setClassDeleteBtn: 'deleteAccountCodeBtn',
+        prevLocation: '/uploadAccount',
+        prevLocationName: '←勘定科目一括作成'
       })
     })
 
@@ -265,7 +271,9 @@ describe('routes.accountListのテスト', () => {
         accountCodeName: '勘定科目名',
         accountCodeUpdatedAt: '最新更新日',
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
-        setClassDeleteBtn: 'deleteAccountCodeBtn'
+        setClassDeleteBtn: 'deleteAccountCodeBtn',
+        prevLocation: '/uploadAccount',
+        prevLocationName: '←勘定科目一括作成'
       })
     })
 
@@ -306,7 +314,9 @@ describe('routes.accountListのテスト', () => {
         accountCodeName: '勘定科目名',
         accountCodeUpdatedAt: '最新更新日',
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
-        setClassDeleteBtn: 'deleteAccountCodeBtn'
+        setClassDeleteBtn: 'deleteAccountCodeBtn',
+        prevLocation: '/uploadAccount',
+        prevLocationName: '←勘定科目一括作成'
       })
     })
 
@@ -347,7 +357,9 @@ describe('routes.accountListのテスト', () => {
         accountCodeName: '勘定科目名',
         accountCodeUpdatedAt: '最新更新日',
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
-        setClassDeleteBtn: 'deleteAccountCodeBtn'
+        setClassDeleteBtn: 'deleteAccountCodeBtn',
+        prevLocation: '/uploadAccount',
+        prevLocationName: '←勘定科目一括作成'
       })
     })
 
@@ -388,7 +400,9 @@ describe('routes.accountListのテスト', () => {
         accountCodeName: '勘定科目名',
         accountCodeUpdatedAt: '最新更新日',
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
-        setClassDeleteBtn: 'deleteAccountCodeBtn'
+        setClassDeleteBtn: 'deleteAccountCodeBtn',
+        prevLocation: '/uploadAccount',
+        prevLocationName: '←勘定科目一括作成'
       })
     })
 

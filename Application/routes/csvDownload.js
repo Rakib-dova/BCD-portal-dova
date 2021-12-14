@@ -471,7 +471,7 @@ const cbPostIndex = async (req, res, next) => {
     // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
     if (documentsResult.itemCount === 0) {
       // 条件に合わせるデータがない場合、お知らせを表示する。
-      req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
+      req.flash('noti', ['請求書ダウンロード', '条件に合致する請求書が見つかりませんでした。'])
       res.redirect(303, '/csvDownload')
     } else {
       const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
@@ -514,7 +514,7 @@ const cbPostIndex = async (req, res, next) => {
           }
         } else {
           // 条件に合わせるデータがない場合、お知らせを表示する。
-          req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
+          req.flash('noti', ['請求書ダウンロード', '条件に合致する請求書が見つかりませんでした。'])
           res.redirect(303, '/csvDownload')
         }
       } else {
@@ -551,7 +551,7 @@ const errorHandle = (documentsResult, _res, _req) => {
       },
       documentsResult.name
     )
-    _req.flash('noti', constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR)
+    _req.flash('noti', ['請求書ダウンロード', constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
     _res.redirect(303, '/csvDownload')
   } else if (String(documentsResult.response?.status).slice(0, 1) === '5') {
     // 500番エラーの場合
@@ -564,7 +564,7 @@ const errorHandle = (documentsResult, _res, _req) => {
       },
       documentsResult.toString()
     )
-    _req.flash('noti', constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR)
+    _req.flash('noti', ['請求書ダウンロード', constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
     _res.redirect(303, '/csvDownload')
   }
 }

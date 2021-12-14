@@ -46,10 +46,10 @@ html
               .modal-background.cancel-button(data-target="confirmmodify-modal")
               .modal-card
                 header.modal-card-head
-                  p.modal-card-title 請求書ダウンロード
+                  p.modal-card-title= messages.noti[0]
                   button.delete(type="button" data-target="confirmmodify-modal")
                 section.modal-card-body
-                  p= messages.noti[0] 
+                  p= messages.noti[1] 
                 footer.modal-card-foot
                   div.button-area
                     a.button.cancel-button(data-target='confirmmodify-modal') 確認
