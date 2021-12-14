@@ -33,7 +33,7 @@ parameters:
 variables:
   - group: ${{ parameters.Environment }}
   - name: tag
-    value: $[format('{0:yyyyMMdd}', pipeline.startTime)]
+    value: $[format('{0:yyyyMMddHHmmss}', pipeline.startTime)]
   - name: devDeploy #開発環境デプロイフラグ
     value: ${{ or(eq(parameters.Environment,'dev'), eq(parameters.Environment,'dev2'), eq(parameters.Environment,'docomoIDF'))}}
   - name: Deploy #prod, proddtg, demo環境デプロイフラグ
@@ -110,7 +110,7 @@ stages:
             inputs:
               containerregistrytype: "Container Registry"
               dockerRegistryEndpoint: "Redhat Container Registry"
-              imageName: "$(repositoryName):$(tag)"
+              imageName: "$(repositoryName):$(Build.BuildId)"
               useDefaultContext: false
               buildContext: "$(System.DefaultWorkingDirectory)/Application"
 
@@ -120,7 +120,7 @@ stages:
             name: "Tag"
             inputs:
               command: tag
-              arguments: "registry.redhat.io/$(repositoryName):$(tag) $(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
+              arguments: "registry.redhat.io/$(repositoryName):$(Build.BuildId) $(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
 
           - task: Docker@1
             condition: succeeded()
@@ -130,7 +130,7 @@ stages:
               azureSubscriptionEndpoint: "$(azureSubscriptionEndpoint)"
               azureContainerRegistry: $(azureContainerResistoryName).azurecr.io
               command: push
-              imageName: "$(repositoryName):$(tag)"
+              imageName: "$(repositoryName):$(Build.BuildId)"
 
   - stage: devDeploy
     dependsOn: BuildandPush
@@ -149,7 +149,7 @@ stages:
                   inputs:
                     azureSubscription: "$(azureSubscriptionEndpoint)"
                     appName: "$(appserviceName)"
-                    containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
+                    containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
 
 
   - stage: Deploy
@@ -249,7 +249,7 @@ stages:
                   deployToSlotOrASE: true
                   slotName: 'staging'
                   resourceGroupName: '$(portalRg)'
-                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
+                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
                   appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
 
               - task: AzureWebAppContainer@1
@@ -261,7 +261,7 @@ stages:
                   deployToSlotOrASE: true
                   slotName: 'staging'
                   resourceGroupName: '$(portalSecRg)'
-                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
+                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
                   appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
 
               - task: AzureCLI@2
