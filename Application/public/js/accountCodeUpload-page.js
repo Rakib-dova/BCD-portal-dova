@@ -1,5 +1,3 @@
-const modal = document.getElementById('upload-progress-modal')
-const uploader = document.getElementById('accountCodeUpload')
 let fileReader = null
 let targetFile = null
 
@@ -24,8 +22,10 @@ document.getElementsByName('bulkAccountCode')[0].addEventListener('change', func
     fileReader.onload = function () {
       if (fileReader.result.length > 5120000) {
         alert('ファイルサイズが5MB超えています。\nCSVファイルを確認後もう一度アップロードしてください。')
+        $('#filename').innerText = ''
         $('#upload').setAttribute('disabled', 'disabled')
       } else {
+        $('#filename').innerText = targetFile.name
         $('#upload').removeAttribute('disabled')
       }
     }

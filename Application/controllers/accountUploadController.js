@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const basicHeader = 'コード,勘定科目名'
+const basicHeader = /勘定科目コード,勘定科目名$/
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const filePath = process.env.INVOICE_UPLOAD_PATH
@@ -32,9 +32,10 @@ const upload = async function (_file, contract) {
 
     // ヘッダの最終番目が空の場合は削除
     if (rows[rows.length - 1] === '') rows.pop()
-    // ヘッダチェック
 
-    if (header.match(basicHeader) === null) {
+    // ヘッダチェック
+    const headerChk = header.split(',')
+    if (headerChk.length !== 2 || header.match(basicHeader) === null) {
       result = -1
       logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
       return result
