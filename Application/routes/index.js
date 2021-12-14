@@ -4,20 +4,23 @@ const express = require('express')
 const router = express.Router()
 
 const cbGetIndex = (req, res, next) => {
-  const test = req.query.test
+  const transition = req.query.transition
+  const dxstoreFlg = req.query.dxstoreFlg
 
-  if (test === 'sinup_dxstore') {
+  if (dxstoreFlg === 'true') {
     // dxストアから遷移した場合、Cookieをセット
-     res.cookie('CustomReferer', 'dxstore', {
-       httpOnly: false,
-　　   maxAge: 60000
-     })
+    res.cookie('customReferrer', 'dxstore', {
+      secure: true,
+      httpOnly: false,
+      sameSite: 'none',
+      maxAge: 60000
+    })
+  }
+
+  if (transition === 'sinup') {
     // アカウント登録ページに遷移
     res.redirect(303, 'https://sandbox.tradeshift.com/register')
-  } else if (test === 'sinup') {
-    // アカウント登録ページに遷移
-    res.redirect(303, 'https://sandbox.tradeshift.com/register')
-  } else if (test === 'login') {
+  } else if (transition === 'login') {
     // ログインページに遷移
     res.redirect(303, 'https://sandbox.tradeshift.com/?currentScreen=0')
   } else {
