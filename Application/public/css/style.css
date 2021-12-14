@@ -659,5 +659,11 @@ img.logo-ncom {
 }
 
 body > div.hero.is-small {
-  height: 125px;
+  height: 149px;
+}
+
+.olta-title-font-size {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-left: 1.5rem;
 }
