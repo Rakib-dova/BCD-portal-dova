@@ -125,6 +125,8 @@ describe('registAccountCodeのテスト', () => {
         requiredTagName: 'accountCodeNameRequired',
         idForCodeInput: 'setAccountCodeInputId',
         idForNameInput: 'setAccountCodeNameInputId',
+        logTitle: '勘定科目登録',
+        logTitleEng: 'REGIST ACCOUNT CODE',
         modalTitle: '勘定科目設定確認'
       })
     })
