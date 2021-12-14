@@ -6,8 +6,6 @@ const accountUploadController = require('../../Application/controllers/accountUp
 const accountCodeController = require('../../Application/controllers/accountCodeController')
 const logger = require('../../Application/lib/logger')
 const AccountCode = require('../../Application/models').AccountCode
-const timestamp = require('../../Application/lib/utils').timestampForList
-const accountCodeMock = require('../mockDB/AccountCode_Table')
 const sequelize = require('../../Application/models').sequelize
 const codeAccountId = '5a927284-57c9-4594-9ed8-472d261a6102'
 const codeAccountDataResult = new AccountCode()
@@ -24,8 +22,6 @@ const dbAccountCodeTable = []
 const dbAccountCode100Table = []
 dbAccountCode100Table.length = 100
 
-const filePath = process.env.INVOICE_UPLOAD_PATH
-
 dbAccountCode100Table.forEach((item, idx, arr) => {
   const { v4: uuidV4 } = require('uuid')
   arr[idx] = new AccountCode()
@@ -37,12 +33,6 @@ dbAccountCode100Table.forEach((item, idx, arr) => {
 })
 
 dbAccountCodeTable.push(codeAccountDataResult)
-
-const transaction = {
-  commit: () => {},
-  rollback: () => {},
-  LOCK: {}
-}
 
 let errorSpy, contractId, findAllSpy, infoSpy, createSpy, findOneSpy, transactionSpy
 let pathSpy, accountCodeControllerInsertSpy
@@ -183,10 +173,9 @@ describe('accountUploadControllerのテスト', () => {
 
       pathSpy.mockReturnValue(newFilePath)
 
-      // const file = fileDataSetting
       accountCodeControllerInsertSpy.mockReturnValue(true)
 
-      // // 試験実施
+      // 試験実施
       const result = await accountUploadController.upload(file, contractNormal)
 
       // 期待結果
@@ -419,7 +408,6 @@ describe('accountUploadControllerのテスト', () => {
   describe('removeFile', () => {
     test('正常:データ削除', async () => {
       // 準備
-      // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
       // 勘定科目一括作成
@@ -458,7 +446,7 @@ describe('accountUploadControllerのテスト', () => {
         result = err
       }
       // 期待結果
-      // DBErrorが返されること
+      // 削除エラーが返されること
       expect(() => {
         throw result
       }).toThrowError('CSVファイル削除エラー')
@@ -476,7 +464,7 @@ describe('accountUploadControllerのテスト', () => {
         result = err
       }
       // 期待結果
-      // DBErrorが返されること
+      // 削除エラー（権限エラー）が返されること
       expect(() => {
         throw result
       }).toThrowError('permission denied')
