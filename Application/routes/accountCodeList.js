@@ -67,9 +67,7 @@ const cbGetIndex = async (req, res, next) => {
     accountCodeName: '勘定科目名',
     accountCodeUpdatedAt: '最新更新日',
     setClassChangeBtn: 'checkChangeAccountCodeBtn',
-    setClassDeleteBtn: 'deleteAccountCodeBtn',
-    prevLocation: '/uploadAccount',
-    prevLocationName: '←勘定科目一括作成'
+    setClassDeleteBtn: 'deleteAccountCodeBtn'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }

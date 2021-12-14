@@ -120,7 +120,8 @@ const axios = {
               A01029: 27,
               A01030: 28,
               A01031: 29,
-              A01032: 30
+              A01032: 30,
+              A01033: 31
             }
             this.result.data = {
               itemPerPage: 25,
@@ -260,6 +261,10 @@ const axios = {
       }
       case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd33': {
         const invoice = require('../mockInvoice/invoice30')
+        return { data: invoice }
+      }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd34': {
+        const invoice = require('../mockInvoice/invoice31')
         return { data: invoice }
       }
       default: {
@@ -893,6 +898,10 @@ const dcouments = {
     {
       DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd33',
       ID: 'A01032'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd34',
+      ID: 'A01033'
     }
   ]
 }
