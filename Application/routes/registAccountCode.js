@@ -53,7 +53,9 @@ const cbGetRegistAccountCode = async (req, res, next) => {
     idForCodeInput: 'setAccountCodeInputId',
     idForNameInput: 'setAccountCodeNameInputId',
     modalTitle: '勘定科目設定確認',
-    backUrl: '/accountCodeList'
+    backUrl: '/accountCodeList',
+    logTitle: '勘定科目登録',
+    logTitleEng: 'REGIST ACCOUNT CODE'
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegistAccountCode')
