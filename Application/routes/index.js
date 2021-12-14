@@ -9,6 +9,8 @@ const cbGetIndex = (req, res, next) => {
   if (test === 'sinup_dxstore') {
     // dxストアから遷移した場合、Cookieをセット
     res.cookie('CustomReferer', 'dxstore', {
+      secure: true,
+      sameSite: 'none',
       httpOnly: false,
       maxAge: 86400000
     })
