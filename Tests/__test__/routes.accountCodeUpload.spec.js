@@ -191,7 +191,7 @@ describe('accountCodeUploadのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -212,7 +212,7 @@ describe('accountCodeUploadのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -300,31 +300,6 @@ describe('accountCodeUploadのテスト', () => {
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-    })
-
-    test('異常：異常経路接続', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session, userContext: 'NotLoggedIn' }
-      request.user = { ...Users[0] }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
-
-      // 試験実施
-      await accountCodeUpload.cbGetIndex(request, response, next)
-
-      // 期待結果
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })
@@ -444,7 +419,7 @@ describe('accountCodeUploadのテスト', () => {
       expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
     })
 
-    test('準正常：勘定科目取込が完了（取込データが存在なし）', async () => {
+    test('準正常：勘定科目取込が完了（取込データが存在しない）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
