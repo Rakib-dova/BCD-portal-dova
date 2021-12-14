@@ -123,12 +123,10 @@ const upload = async function (_file, contract) {
 
       if (!insertResult) {
         result = -5
-        return result
       }
     }
 
     // 削除機能追加
-
     if ((await removeFile(newFilePath)) === true && result === null) {
       result = 0
     }
