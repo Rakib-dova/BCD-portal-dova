@@ -11,8 +11,8 @@ const cbGetIndex = (req, res, next) => {
     // dxストアから遷移した場合、Cookieをセット
     res.cookie('customReferrer', 'dxstore', {
       secure: true,
-      httpOnly: false,
       sameSite: 'none',
+      httpOnly: true,
       maxAge: 86400000
     })
   }
