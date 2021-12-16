@@ -103,7 +103,28 @@ $('#csvBasicEditBtn').addEventListener('click', function (e) {
   deleteErrorMessage(inputTax)
   deleteErrorMessage(inputUnit)
 
-  // バリデーションチェック
+  // 設定名称エラーメッセージ初期化
+  deleteErrorMessageForItemName(basicUploadFormatItemName)
+
+  // 設定名称バリデーションチェック
+  let ItemNameNoInputFlag = false
+  // 設定名称ブランクチェック
+  const itemNameTrim = basicUploadFormatItemName.value.trim()
+
+  if (!basicUploadFormatItemName.reportValidity() || itemNameTrim === '') {
+    const cautionNotInput = document.createElement('div')
+    cautionNotInput.classList.add('input-label')
+    cautionNotInput.classList.add('input-label-required')
+    cautionNotInput.setAttribute('id', 'caution')
+    cautionNotInput.innerText = '　未入力です。'
+    basicUploadFormatItemName.closest('.field').appendChild(cautionNotInput)
+    basicUploadFormatItemName
+      .closest('.field')
+      .insertBefore(cautionNotInput, basicUploadFormatItemName.closest('.field').childNodes[2])
+    ItemNameNoInputFlag = true
+  }
+
+  // 明細-税,明細-単位バリデーションチェック
   const checkTarget = []
   inputTax.forEach((item) => {
     checkTarget.push(item)
@@ -128,8 +149,12 @@ $('#csvBasicEditBtn').addEventListener('click', function (e) {
   const taxResult = checkIdentifier(inputTax)
   const unitResult = checkIdentifier(inputUnit)
 
-  // 明細-税,明細-単位重複がある場合、エラー項目にフォーカス移動
-  if (taxResult !== -1 || unitResult !== -1) {
+  // 設定名称が未入力場合
+  if (ItemNameNoInputFlag) {
+    basicUploadFormatItemName.focus()
+    return
+  } else if (taxResult !== -1 || unitResult !== -1) {
+    // 明細-税,明細-単位重複がある場合、エラー項目にフォーカス移動
     if (taxResult !== -1) {
       inputTax[taxResult].focus()
     } else if (unitResult !== -1) {
@@ -173,7 +198,7 @@ $('#csvBasicEditCancelBtn').addEventListener('click', function (e) {
   // 明細-税,明細-単位エラーメッセージ初期化
   deleteErrorMessage(inputTax)
   deleteErrorMessage(inputUnit)
-
+  deleteErrorMessageForItemName(basicUploadFormatItemName)
   // 入力した値を元に戻す
   basicUploadFormatItemName.value = basicUploadFormatItemName.dataset.initvalue
   inputTax.forEach((tax) => {
@@ -229,4 +254,14 @@ function deleteErrorMessage(elements) {
       checkTarget.closest('.field').childNodes[1].remove()
     }
   })
+}
+
+// エラーメッセージ削除(設定名称)
+function deleteErrorMessageForItemName(elements) {
+  if (
+    elements.closest('.field').childNodes[2] !== undefined &&
+    elements.closest('.field').childNodes[2].getAttribute('id') === 'caution'
+  ) {
+    elements.closest('.field').childNodes[2].remove()
+  }
 }
