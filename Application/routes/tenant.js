@@ -19,7 +19,7 @@ const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
 // ユーザーカウントアップ
-const countupUser = require('../lib/countupUser')
+const { countupUser } = require('../lib/countupUser')
 
 const cbGetRegister = async (req, res, next) => {
   if (req.session?.userContext !== 'NotTenantRegistered') {

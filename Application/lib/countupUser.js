@@ -11,13 +11,25 @@ const blockBlobClient = containerClient.getBlockBlobClient(blobName)
 
 const countupUser = async (tenant) => {
   try {
-    // ダウンロード
-    await blockBlobClient.downloadToFile(blobName, 0, undefined)
+    // ファイルが存在するか確認する
+    const isExist = await blockBlobClient.exists()
 
-    // エクセルファイルを開く
     const workbook = new ExcelJS.Workbook()
-    await workbook.xlsx.readFile(blobName)
-    const worksheet = workbook.getWorksheet('user_count')
+    let worksheet
+
+    if (isExist) {
+      // ダウンロード
+      await blockBlobClient.downloadToFile(blobName, 0, undefined)
+      await workbook.xlsx.readFile(blobName)
+      worksheet = workbook.getWorksheet('user_count')
+    } else {
+      // ファイル新規作成
+      worksheet = workbook.addWorksheet('user_count')
+      const dateCell = worksheet.getCell('A1')
+      dateCell.value = 'date'
+      const dxstoreCell = worksheet.getCell('B1')
+      dxstoreCell.value = 'dxstore'
+    }
 
     // カラムにキーを設定
     const dateCol = worksheet.getColumn('A')
@@ -67,7 +79,12 @@ const getCurrentRow = (worksheet) => {
   const nowDate = new Date()
   const lastDate = getLastDate(worksheet)
 
-  if (lastDate && nowDate.getFullYear() === lastDate.getFullYear() && nowDate.getDate() === lastDate.getDate()) {
+  if (
+    lastDate &&
+    typeof lastDate !== 'string' &&
+    nowDate.getFullYear() === lastDate.getFullYear() &&
+    nowDate.getDate() === lastDate.getDate()
+  ) {
     return worksheet.getRow(worksheet.rowCount)
   } else {
     const year = nowDate.getFullYear()
@@ -85,4 +102,9 @@ const getLastDate = (worksheet) => {
   return lastDateCell.value
 }
 
-module.exports = countupUser
+module.exports = {
+  countupUser,
+  getTenantColumn,
+  getCurrentRow,
+  getLastDate
+}
