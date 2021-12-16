@@ -361,56 +361,56 @@ describe('請求書アップロードフォーマット設定画面（確認・�
       await browser.close()
     })
 
-    // test('請求書アップロードフォーマット設定画面（確認・変更）の基本情報画面の名称チェック：空白のみの場合', async () => {
-    //   const puppeteer = require('puppeteer')
-    //   const browser = await puppeteer.launch({
-    //     headless: true,
-    //     ignoreHTTPSErrors: true
-    //   })
-    //   const page = await browser.newPage()
-    //   await page.setCookie(acCookies[0])
-    //   await page.goto('https://localhost:3000/uploadFormatList')
+    test('請求書アップロードフォーマット設定画面（確認・変更）の基本情報画面の名称チェック：空白のみの場合', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/uploadFormatList')
 
-    //   // 基本情報設定変更画面開く
-    //   await page.click(
-    //     'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(5) > a'
-    //   )
+      // 基本情報設定変更画面開く
+      await page.click(
+        'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(5) > a'
+      )
 
-    //   await page.waitForTimeout(1000)
+      await page.waitForTimeout(1000)
 
-    //   await page.click('#editCsvBasicFormatBtn')
+      await page.click('#editCsvBasicFormatBtn')
 
-    //   // 基本情報設定変更画面開きをチェック
-    //   const checkOpenedModal = await page.evaluate(() => {
-    //     return Array.prototype.find.call(document.querySelector('#csvBasicFormat-modal').classList, (item) => {
-    //       if (item === 'is-active') return true
-    //       return false
-    //     })
-    //   })
+      // 基本情報設定変更画面開きをチェック
+      const checkOpenedModal = await page.evaluate(() => {
+        return Array.prototype.find.call(document.querySelector('#csvBasicFormat-modal').classList, (item) => {
+          if (item === 'is-active') return true
+          return false
+        })
+      })
 
-    //   expect(checkOpenedModal).toBe('is-active')
+      expect(checkOpenedModal).toBe('is-active')
 
-    //   // 請求書アップロードフォーマット設定画面に遷移する。
-    //   await page.focus('#basicUploadFormatItemName')
-    //   await page.keyboard.press('End')
-    //   for (let idx = 0; idx < 100; idx++) {
-    //     await page.keyboard.press('Backspace')
-    //   }
+      // 請求書アップロードフォーマット設定画面に遷移する。
+      await page.focus('#basicUploadFormatItemName')
+      await page.keyboard.press('End')
+      for (let idx = 0; idx < 100; idx++) {
+        await page.keyboard.press('Backspace')
+      }
 
-    //   await page.keyboard.type(String.fromCharCode(32))
+      await page.keyboard.type(String.fromCharCode(32))
 
-    //   await page.click('#csvBasicEditBtn')
+      await page.click('#csvBasicEditBtn')
 
-    //   const noInputMessage = await page.evaluate(() => {
-    //     return document.querySelector(
-    //       '#csvBasicFormat-modal-card > section > div > div > div:nth-child(1) > div > div:nth-child(1) > div'
-    //     ).innerText
-    //   })
+      const noInputMessage = await page.evaluate(() => {
+        return document.querySelector(
+          '#csvBasicFormat-modal-card > section > div > div > div:nth-child(1) > div > div:nth-child(1) > div'
+        ).innerText
+      })
 
-    //   expect(noInputMessage).toMatch(/未入力です。/)
+      expect(noInputMessage).toMatch(/未入力です。/)
 
-    //   await browser.close()
-    // })
+      await browser.close()
+    })
 
     test('請求書アップロードフォーマット設定画面（確認・変更）の基本情報画面で税、単位修正、確認画面に反映', async () => {
       const puppeteer = require('puppeteer')
