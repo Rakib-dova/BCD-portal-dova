@@ -18,6 +18,9 @@ const contractInformationnewOrder = require('../orderTemplate/contractInformatio
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+// ユーザーカウントアップ
+const { countupUser } = require('../lib/countupUser')
+
 const cbGetRegister = async (req, res, next) => {
   if (req.session?.userContext !== 'NotTenantRegistered') {
     return next(errorHelper.create(400))
@@ -169,6 +172,13 @@ const cbPostRegister = async (req, res, next) => {
   // テナント＆ユーザ登録成功したら
   logger.info({ tenant: req.user?.tenantId, user: req.user?.userId }, 'Tenant Registration Succeeded')
   req.session.userContext = 'TenantRegistrationCompleted'
+
+  // クッキーにカスタムリファラが設定されていたらユーザーをカウントする
+  if (req.cookies?.customReferrer === 'dxstore') {
+    await countupUser('dxstore')
+    res.clearCookie('customReferrer')
+  }
+
   req.flash('info', '利用登録が完了いたしました。')
 
   return res.redirect(303, '/portal')
