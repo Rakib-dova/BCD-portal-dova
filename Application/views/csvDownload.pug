@@ -27,11 +27,17 @@ block content
                label.bulmalabel ステータス
              .field-body
                .field
+                .box
+                 .field-body
+                  p.control
+                    a.button.is-info#statusAllCheck 全選択
                  .control.has-icons-right
-                   .select.is-fullwidth.is-multiple
-                     select#status(name="status" multiple size=4)
-                       each item in status
-                         option= item
+                   .is-fullwidth.is-multiple
+                    each item in status
+                      input.m-3.p-1(type="checkbox" name="status" checked=false value=item)
+                      label.checkbox=item
+                      br
+
            .field.is-horizontal
              .field-label.is-normal
                label.bulmalabel 販売/購入
@@ -103,10 +109,10 @@ block content
             a.button.is-info#submit(type="submit")  CSVダウンロード
     template#templateAllSelectBtn
         p.control
-          a.button.is-info 全部選択
+          a.button.is-info 全選択
         p.control 　
         p.control
-          a.button.is-info 全部解除
+          a.button.is-info 全解除
         p.control 　
         p.control
           a.button ▲
@@ -132,6 +138,18 @@ block content
        footer.modal-card-foot
          div.button-area
           a.button.cancel-button(data-target="searchCompany-modal") 確認
+
+    .modal.modal-fx-fadeInscale#checkStatus-modal
+     .modal-background.cancel-button(data-target="checkStatus-modal")
+     .modal-card
+       header.modal-card-head
+         p.modal-card-title ステータス
+         button.delete(type="button" data-target="checkStatus-modal")
+       section.modal-card-body
+         p.modal-card-result#modal-card-checkStatus
+       footer.modal-card-foot
+         div.button-area
+          a.button.cancel-button(data-target="checkStatus-modal") 確認
 
     include footer
 
