@@ -141,7 +141,6 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
 
   // 絞り込みの条件データチェック
-  // withouttag=archived&withouttag=AP_DOCUMENT_DRAFT&withouttag=PARTNER_DOCUMENT_DRAFT&withouttag=tsgo-document&_onlyIndex=true&ascending=false&onlydeleted=false&onlydrafts=false&stag=sales&stag=purchases&stag=draft
   const findDocumentQuery = {
     withouttag: ['archived', 'AP_DOCUMENT_DRAFT', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document'],
     _onlyIndex: true,
@@ -193,7 +192,6 @@ const cbPostIndex = async (req, res, next) => {
               findDocumentQuery.state = `${states[1]}`
               break
             }
-
             case '入金確認済み/送金済み': {
               findDocumentQuery.state = `${states[2]}`
               break
@@ -208,7 +206,6 @@ const cbPostIndex = async (req, res, next) => {
       req.body.status.forEach((item, idx) => {
         switch (item) {
           case '送信済み/受信済み':
-            // outboxInboxFlag = true
             findDocumentQuery.state.push(`${states[0]}`)
             break
 
@@ -225,6 +222,12 @@ const cbPostIndex = async (req, res, next) => {
       })
       break
     }
+  }
+
+  if (findDocumentQuery.state.length === 0) {
+    req.flash('noti', ['請求書ダウンロード', 'ステータスをいずれかのの１つ選択してください。'])
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+    return res.redirect(303, '/csvDownload')
   }
 
   // 絞り込みの条件に発行日の開始日追加
@@ -294,7 +297,6 @@ const cbPostIndex = async (req, res, next) => {
         let numPages = 1
 
         do {
-          console.log(sendQuery)
           resultForQuery = await apiManager.accessTradeshift(
             req.user.accessToken,
             req.user.refreshToken,
@@ -396,7 +398,6 @@ const cbPostIndex = async (req, res, next) => {
       }
     }
   }
-
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
