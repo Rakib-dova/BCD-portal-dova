@@ -64,9 +64,38 @@ const axios = {
     }
   },
   get: async function (url, config) {
-    const paramateter = url.split('&')
-    const businessId = paramateter[0].replace(/\/documents\?businessId=/, '')
-    url = url.match(/\/documents\?businessId=/) !== null ? 'bussinessId' : url
+    url = url
+      .replace('/documents?', '')
+      .replace('withouttag=archived', '')
+      .replace('&withouttag=AP_DOCUMENT_DRAFT', '')
+      .replace('&withouttag=PARTNER_DOCUMENT_DRAFT', '')
+      .replace('&withouttag=tsgo-document', '')
+      .replace('&_onlyIndex=true', '')
+      .replace('&ascending=false', '')
+      .replace('&onlydeleted=false', '')
+      .replace('&onlydrafts=false', '')
+      .replace('&stag=sales', '')
+      .replace('&stag=purchases', '')
+      .replace('&stag=draft', '')
+      .replace('&type=invoice', '')
+      .replace('&', '')
+
+    const paramateter = {}
+    url.split('&').forEach((item) => {
+      const keyValue = item.split('=')
+      if (keyValue[0] === 'state' && paramateter[`${keyValue[0]}`] === undefined) {
+        paramateter[`${keyValue[0]}`] = []
+        paramateter[`${keyValue[0]}`].push(keyValue[1])
+      } else if (keyValue[0] === 'state' && paramateter[`${keyValue[0]}`] !== undefined) {
+        paramateter[`${keyValue[0]}`].push(keyValue[1])
+      } else {
+        paramateter[`${keyValue[0]}`] = keyValue[1]
+      }
+    })
+
+    const businessId = paramateter.businessId || null
+    url = businessId !== null ? 'bussinessId' : url
+    console.log(url)
     switch (url) {
       case 'bussinessId': {
         switch (businessId) {
@@ -121,7 +150,8 @@ const axios = {
               A01030: 28,
               A01031: 29,
               A01032: 30,
-              A01033: 31
+              A01033: 31,
+              A01034: 32
             }
             this.result.data = {
               itemPerPage: 25,
@@ -133,7 +163,6 @@ const axios = {
             }
           }
         }
-
         return this.result
       }
       case '/documents/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1': {
@@ -267,8 +296,18 @@ const axios = {
         const invoice = require('../mockInvoice/invoice31')
         return { data: invoice }
       }
+      case '/documents/c1aa94c2-f6c9-465a-911f-a2cd4babcd35': {
+        const error = new Error('csv download error')
+        error.response = {
+          status: 401
+        }
+        return {
+          data: error
+        }
+      }
       default: {
-        if (paramateter[2] === 'minissuedate=1990-01-01') {
+        if (paramateter.minIssuedate === '1990-01-01') {
+          console.log('default 1')
           this.result.data = {
             itemPerPage: 25,
             itemCount: 1,
@@ -276,6 +315,19 @@ const axios = {
             numPages: 2,
             pageId: 0,
             Document: [dcouments.Document[0], dcouments.Document[8]]
+          }
+        } else if (
+          paramateter.state.join('') === 'DELIVEREDACCEPTEDPAID_CONFIRMED' &&
+          paramateter.minissuedate === '9999-99-99' &&
+          paramateter.maxissuedate === '9999-99-99'
+        ) {
+          this.result.data = {
+            itemPerPage: 25,
+            itemCount: 1,
+            indexing: false,
+            numPages: 1,
+            pageId: 0,
+            Document: [dcouments.Document[32]]
           }
         } else {
           this.result.data = {
@@ -902,6 +954,10 @@ const dcouments = {
     {
       DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd34',
       ID: 'A01033'
+    },
+    {
+      DocumentId: 'c1aa94c2-f6c9-465a-911f-a2cd4babcd35',
+      ID: 'A01034'
     }
   ]
 }
