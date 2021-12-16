@@ -28,16 +28,15 @@ block content
              .field-body
                .field
                 .box
-                 .field-body
-                  p.control
-                    a.button.is-info#statusAllCheck 全選択
                  .control.has-icons-right
                    .is-fullwidth.is-multiple
                     each item in status
                       input.m-3.p-1(type="checkbox" name="status" checked=false value=item)
                       label.checkbox=item
                       br
-
+                 .field-body
+                  p.control
+                    a.button.is-info#statusAllCheck 全選択
            .field.is-horizontal
              .field-label.is-normal
                label.bulmalabel 販売/購入
