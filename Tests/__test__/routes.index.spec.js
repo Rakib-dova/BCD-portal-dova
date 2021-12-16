@@ -50,7 +50,7 @@ describe('indexのテスト', () => {
         secure: true,
         httpOnly: false,
         sameSite: 'none',
-        maxAge: 60000
+        maxAge: 86400000
       })
     })
 
@@ -76,7 +76,7 @@ describe('indexのテスト', () => {
         secure: true,
         httpOnly: false,
         sameSite: 'none',
-        maxAge: 60000
+        maxAge: 86400000
       })
     })
 
