@@ -7,15 +7,22 @@ const cbGetIndex = (req, res, next) => {
   const transition = req.query.transition
   const dxstoreFlg = req.query.dxstoreFlg
 
-  if (dxstoreFlg === 'true') {
-    // dxストアから遷移した場合、Cookieをセット
-    res.cookie('customReferrer', 'dxstore', {
-      secure: true,
-      sameSite: 'none',
-      httpOnly: true,
-      maxAge: 86400000
-    })
-  }
+  // if (dxstoreFlg === 'true') {
+  //   // dxストアから遷移した場合、Cookieをセット
+  //   res.cookie('customReferrer', 'dxstore', {
+  //     secure: true,
+  //     sameSite: 'none',
+  //     httpOnly: true,
+  //     maxAge: 86400000
+  //   })
+  // }
+
+  res.cookie('customReferrer', 'dxstore', {
+    secure: true,
+    sameSite: 'none',
+    httpOnly: false,
+    maxAge: 86400000
+  })
 
   if (transition === 'sinup') {
     // アカウント登録ページに遷移
