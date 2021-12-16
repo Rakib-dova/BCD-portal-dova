@@ -119,10 +119,13 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/送信済み\/受信済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/受理済み\/承認済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/入金確認済み\/送金済み/i) //ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
-      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
-      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+      expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/受信企業/i) // 受信企業ラベルがあること
     })
 
     test('一般ユーザ、契約ステータス：登録申込、利用可能', async () => {
@@ -134,10 +137,13 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/送信済み\/受信済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/受理済み\/承認済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/入金確認済み\/送金済み/i) //ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
-      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
-      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+      expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/受信企業/i) // 受信企業ラベルがあること
     })
   })
 
@@ -169,10 +175,13 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/送信済み\/受信済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/受理済み\/承認済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/入金確認済み\/送金済み/i) //ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
-      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
-      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+      expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/受信企業/i) // 受信企業ラベルがあること
     })
 
     test('一般ユーザ、契約ステータス：登録受付、利用可能', async () => {
@@ -184,10 +193,13 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/送信済み\/受信済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/受理済み\/承認済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/入金確認済み\/送金済み/i) //ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
-      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
-      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+      expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/受信企業/i) // 受信企業ラベルがあること
     })
   })
 
@@ -221,10 +233,13 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/送信済み\/受信済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/受理済み\/承認済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/入金確認済み\/送金済み/i) //ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
-      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
-      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+      expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/受信企業/i) // 受信企業ラベルがあること
     })
 
     test('一般ユーザ、契約ステータス：契約中、利用可能', async () => {
@@ -236,10 +251,79 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/送信済み\/受信済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/受理済み\/承認済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/入金確認済み\/送金済み/i) //ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
-      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
-      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+      expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/受信企業/i) // 受信企業ラベルがあること
+    })
+
+    // 送信企業ボタン確認
+    test('送信企業ボタン確認（全選択、全解除）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/csvDownload')
+      if (page.url() === 'https://localhost:3000/csvDownload') {
+        await page.click('#sendToSearchBtn')
+
+        await page.waitForTimeout(2000)
+
+        // 全選択ボタン確認
+        const checkAllSelectSentToBtn = await page.evaluate(() => {
+          return document.querySelector('#allSelectSentToBtn').innerText
+        })
+        expect(checkAllSelectSentToBtn).toBe('全選択')
+
+        // 全解除ボタン確認
+        const checkAllClearSentToBtn = await page.evaluate(() => {
+          return document.querySelector('#allClearSentToBtn').innerText
+        })
+        expect(checkAllClearSentToBtn).toBe('全解除')
+      }
+
+      await browser.close()
+    })
+
+    // 受信企業ボタン確認
+    test('受信企業ボタン確認（全選択、全解除）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/csvDownload')
+      if (page.url() === 'https://localhost:3000/csvDownload') {
+        await page.click('#sendBySearchBtn')
+
+        await page.waitForTimeout(2000)
+
+        // 全選択ボタン確認
+        const checkAllSelectSentByBtn = await page.evaluate(() => {
+          return document.querySelector('#allSelectSentByBtn').innerText
+        })
+        expect(checkAllSelectSentByBtn).toBe('全選択')
+
+        // 全解除ボタン確認
+        const checkAllClearSentByBtn = await page.evaluate(() => {
+          return document.querySelector('#allClearSentByBtn').innerText
+        })
+        expect(checkAllClearSentByBtn).toBe('全解除')
+      }
+
+      await browser.close()
     })
   })
 
@@ -280,10 +364,13 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/送信済み\/受信済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/受理済み\/承認済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/入金確認済み\/送金済み/i) //ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
-      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
-      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+      expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/受信企業/i) // 受信企業ラベルがあること
     })
 
     test('一般ユーザ、契約ステータス：変更申込、利用可能', async () => {
@@ -295,10 +382,13 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/送信済み\/受信済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/受理済み\/承認済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/入金確認済み\/送金済み/i) //ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
-      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
-      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+      expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/受信企業/i) // 受信企業ラベルがあること
     })
   })
 
@@ -330,10 +420,13 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/送信済み\/受信済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/受理済み\/承認済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/入金確認済み\/送金済み/i) //ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
-      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
-      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+      expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/受信企業/i) // 受信企業ラベルがあること
     })
 
     test('一般ユーザ、契約ステータス：変更受付、利用可能', async () => {
@@ -345,10 +438,13 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
+      expect(res.text).toMatch(/送信済み\/受信済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/受理済み\/承認済み/i) //ステータスリスト確認
+      expect(res.text).toMatch(/入金確認済み\/送金済み/i) //ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
-      expect(res.text).toMatch(/支払期日/i) // 支払期日ラベルがあること
-      expect(res.text).toMatch(/納品日/i) // 納品日ラベルがあること
+      expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/受信企業/i) // 受信企業ラベルがあること
     })
   })
 
