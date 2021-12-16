@@ -46,7 +46,7 @@ describe('indexのテスト', () => {
       expect(response.redirect).toHaveBeenCalledWith(303, 'https://sandbox.tradeshift.com/register')
       expect(response.getHeader('Location')).toEqual('https://sandbox.tradeshift.com/register')
 
-      expect(response.cookie).toHaveBeenCalledWith('CustomReferrer', 'dxstore', {
+      expect(response.cookie).toHaveBeenCalledWith('customReferrer', 'dxstore', {
         secure: true,
         httpOnly: false,
         sameSite: 'none',
@@ -72,7 +72,7 @@ describe('indexのテスト', () => {
       expect(response.redirect).toHaveBeenCalledWith(303, 'https://sandbox.tradeshift.com/?currentScreen=0')
       expect(response.getHeader('Location')).toEqual('https://sandbox.tradeshift.com/?currentScreen=0')
 
-      expect(response.cookie).toHaveBeenCalledWith('CustomReferrer', 'dxstore', {
+      expect(response.cookie).toHaveBeenCalledWith('customReferrer', 'dxstore', {
         secure: true,
         httpOnly: false,
         sameSite: 'none',
