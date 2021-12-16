@@ -211,7 +211,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
           .querySelector(
             'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(5) > a'
           )
-          .getAttribute('href')
+          .getAttribute('uuid')
       })
 
       await page.click(
@@ -221,9 +221,9 @@ describe('請求書アップロードフォーマット設定画面（確認・�
       await page.waitForTimeout(1000)
 
       // アップロードフォーマット変更画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
+      expect(await page.url()).toBe(`https://localhost:3000/uploadFormatEdit/${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('請求書アップロードフォーマット設定画面（確認・変更）の「戻る」ボタン', async () => {
@@ -241,7 +241,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
           .querySelector(
             'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(5) > a'
           )
-          .getAttribute('href')
+          .getAttribute('uuid')
       })
 
       await page.click(
@@ -251,7 +251,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
       await page.waitForTimeout(1000)
 
       // アップロードフォーマット設定画面に遷移する。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
+      expect(await page.url()).toBe(`https://localhost:3000/uploadFormatEdit/${redirectUrl}`)
 
       await page.click('#returnBtn')
 
@@ -278,7 +278,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
           .querySelector(
             'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(5) > a'
           )
-          .getAttribute('href')
+          .getAttribute('uuid')
       })
       await page.click(
         'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(5) > a'
@@ -287,7 +287,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
       await page.waitForTimeout(1000)
 
       // 請求書アップロードフォーマット設定画面に遷移する。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
+      expect(await page.url()).toBe(`https://localhost:3000/uploadFormatEdit/${redirectUrl}`)
 
       await page.click('#editCsvBasicFormatBtn')
 
@@ -300,9 +300,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
       // 基本情報設定 確認modalが出る。
       expect(isModalIsActive).toMatch(/is-active/i)
 
-      await page.click(
-        '#csvBasicFormat-modal-card > section > div.columns.is-centered.changeConfirm > div > div > div > div > a.button.cancel-button'
-      )
+      await page.click('#csvBasicEditCancelBtn')
 
       isModalIsActive = await page.evaluate(() => {
         return document.getElementById('csvBasicFormat-modal').classList.value
@@ -313,6 +311,106 @@ describe('請求書アップロードフォーマット設定画面（確認・�
 
       await browser.close()
     })
+
+    test('請求書アップロードフォーマット設定画面（確認・変更）の基本情報画面の名称チェック：未入力の場合', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/uploadFormatList')
+
+      // 基本情報設定変更画面開く
+      await page.click(
+        'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(5) > a'
+      )
+
+      await page.waitForTimeout(1000)
+
+      await page.click('#editCsvBasicFormatBtn')
+
+      // 基本情報設定変更画面開きをチェック
+      const checkOpenedModal = await page.evaluate(() => {
+        return Array.prototype.find.call(document.querySelector('#csvBasicFormat-modal').classList, (item) => {
+          if (item === 'is-active') return true
+          return false
+        })
+      })
+
+      expect(checkOpenedModal).toBe('is-active')
+
+      // 請求書アップロードフォーマット設定画面に遷移する。
+      await page.focus('#basicUploadFormatItemName')
+      await page.keyboard.press('End')
+      for (let idx = 0; idx < 100; idx++) {
+        await page.keyboard.press('Backspace')
+      }
+
+      await page.click('#csvBasicEditBtn')
+
+      const noInputMessage = await page.evaluate(() => {
+        return document.querySelector(
+          '#csvBasicFormat-modal-card > section > div > div > div:nth-child(1) > div > div:nth-child(1) > div'
+        ).innerText
+      })
+
+      expect(noInputMessage).toMatch(/未入力です。/)
+
+      await browser.close()
+    })
+
+    // test('請求書アップロードフォーマット設定画面（確認・変更）の基本情報画面の名称チェック：空白のみの場合', async () => {
+    //   const puppeteer = require('puppeteer')
+    //   const browser = await puppeteer.launch({
+    //     headless: true,
+    //     ignoreHTTPSErrors: true
+    //   })
+    //   const page = await browser.newPage()
+    //   await page.setCookie(acCookies[0])
+    //   await page.goto('https://localhost:3000/uploadFormatList')
+
+    //   // 基本情報設定変更画面開く
+    //   await page.click(
+    //     'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(5) > a'
+    //   )
+
+    //   await page.waitForTimeout(1000)
+
+    //   await page.click('#editCsvBasicFormatBtn')
+
+    //   // 基本情報設定変更画面開きをチェック
+    //   const checkOpenedModal = await page.evaluate(() => {
+    //     return Array.prototype.find.call(document.querySelector('#csvBasicFormat-modal').classList, (item) => {
+    //       if (item === 'is-active') return true
+    //       return false
+    //     })
+    //   })
+
+    //   expect(checkOpenedModal).toBe('is-active')
+
+    //   // 請求書アップロードフォーマット設定画面に遷移する。
+    //   await page.focus('#basicUploadFormatItemName')
+    //   await page.keyboard.press('End')
+    //   for (let idx = 0; idx < 100; idx++) {
+    //     await page.keyboard.press('Backspace')
+    //   }
+
+    //   await page.keyboard.type(String.fromCharCode(32))
+
+    //   await page.click('#csvBasicEditBtn')
+
+    //   const noInputMessage = await page.evaluate(() => {
+    //     return document.querySelector(
+    //       '#csvBasicFormat-modal-card > section > div > div > div:nth-child(1) > div > div:nth-child(1) > div'
+    //     ).innerText
+    //   })
+
+    //   expect(noInputMessage).toMatch(/未入力です。/)
+
+    //   await browser.close()
+    // })
 
     test('請求書アップロードフォーマット設定画面（確認・変更）の基本情報画面で税、単位修正、確認画面に反映', async () => {
       const puppeteer = require('puppeteer')
@@ -329,7 +427,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
           .querySelector(
             'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(5) > a'
           )
-          .getAttribute('href')
+          .getAttribute('uuid')
       })
 
       await page.click(
@@ -339,7 +437,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
       await page.waitForTimeout(1000)
 
       // アップロードフォーマット設定画面に遷移する。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
+      expect(await page.url()).toBe(`https://localhost:3000/uploadFormatEdit/${redirectUrl}`)
 
       await page.click('#editCsvBasicFormatBtn')
 
@@ -374,11 +472,26 @@ describe('請求書アップロードフォーマット設定画面（確認・�
 
       // 税変更
       const testTaxValue = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE']
-      await page.type('#keyConsumptionTax', testTaxValue[0])
-      await page.type('#keyReducedTax', testTaxValue[1])
-      await page.type('#keyFreeTax', testTaxValue[2])
-      await page.type('#keyDutyFree', testTaxValue[3])
-      await page.type('#keyExemptTax', testTaxValue[4])
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(1) > div > input',
+        testTaxValue[0]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(2) > div > input',
+        testTaxValue[1]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(3) > div > input',
+        testTaxValue[2]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(4) > div > input',
+        testTaxValue[3]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(5 ) > div > input',
+        testTaxValue[4]
+      )
 
       // 単位変更
       const testUnitValue = [
@@ -421,44 +534,14 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         'K2',
         'L2'
       ]
-      await page.type('#keyManMonth', testUnitValue[0])
-      await page.type('#keyBottle', testUnitValue[1])
-      await page.type('#keyCost', testUnitValue[2])
-      await page.type('#keyContainer', testUnitValue[3])
-      await page.type('#keyCentilitre', testUnitValue[4])
-      await page.type('#keySquareCentimeter', testUnitValue[5])
-      await page.type('#keyCubicCentimeter', testUnitValue[6])
-      await page.type('#keyCentimeter', testUnitValue[7])
-      await page.type('#keyCase', testUnitValue[8])
-      await page.type('#keyCarton', testUnitValue[9])
-      await page.type('#keyDay', testUnitValue[10])
-      await page.type('#keyDeciliter', testUnitValue[11])
-      await page.type('#keyDecimeter', testUnitValue[12])
-      await page.type('#keyGrossKilogram', testUnitValue[13])
-      await page.type('#keyPieces', testUnitValue[14])
-      await page.type('#keyFeet', testUnitValue[15])
-      await page.type('#keyGallon', testUnitValue[16])
-      await page.type('#keyGram', testUnitValue[17])
-      await page.type('#keyGrossTonnage', testUnitValue[18])
-      await page.type('#keyHour', testUnitValue[19])
-      await page.type('#keyKilogram', testUnitValue[20])
-      await page.type('#keyKilometers', testUnitValue[21])
-      await page.type('#keyKilowattHour', testUnitValue[22])
-      await page.type('#keyPound', testUnitValue[23])
-      await page.type('#keyLiter', testUnitValue[24])
-      await page.type('#keyMilligram', testUnitValue[25])
-      await page.type('#keyMilliliter', testUnitValue[26])
-      await page.type('#keyMillimeter', testUnitValue[27])
-      await page.type('#keyMonth', testUnitValue[28])
-      await page.type('#keySquareMeter', testUnitValue[29])
-      await page.type('#keyCubicMeter', testUnitValue[30])
-      await page.type('#keyMeter', testUnitValue[31])
-      await page.type('#keyNetTonnage', testUnitValue[32])
-      await page.type('#keyPackage', testUnitValue[33])
-      await page.type('#keyRoll', testUnitValue[34])
-      await page.type('#keyFormula', testUnitValue[35])
-      await page.type('#keyTonnage', testUnitValue[36])
-      await page.type('#keyOthers', testUnitValue[37])
+      for (let idx = 0; idx < testUnitValue.length; idx++) {
+        await page.type(
+          `#csvBasicFormat-modal-card > section > div > div > div:nth-child(3) > div.line-content > div:nth-child(${
+            idx + 1
+          }) > div > input`,
+          testUnitValue[idx]
+        )
+      }
 
       await page.click('#csvBasicEditBtn')
 
@@ -484,7 +567,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         expect(item).toMatch(testUnitValue[idx])
       })
 
-      browser.close()
+      await browser.close()
     })
 
     test('請求書アップロードフォーマット設定画面（確認・変更）の基本情報画面で税、単位修正、アップロードフォーマットデータ番号、確認画面に反映', async () => {
@@ -502,7 +585,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
           .querySelector(
             'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(5) > a'
           )
-          .getAttribute('href')
+          .getAttribute('uuid')
       })
 
       await page.click(
@@ -511,7 +594,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
 
       await page.waitForTimeout(1000)
 
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
+      expect(await page.url()).toBe(`https://localhost:3000/uploadFormatEdit/${redirectUrl}`)
 
       await page.click('#editCsvBasicFormatBtn')
 
@@ -546,11 +629,26 @@ describe('請求書アップロードフォーマット設定画面（確認・�
 
       // 税変更
       const testTaxValue = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE']
-      await page.type('#keyConsumptionTax', testTaxValue[0])
-      await page.type('#keyReducedTax', testTaxValue[1])
-      await page.type('#keyFreeTax', testTaxValue[2])
-      await page.type('#keyDutyFree', testTaxValue[3])
-      await page.type('#keyExemptTax', testTaxValue[4])
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(1) > div > input',
+        testTaxValue[0]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(2) > div > input',
+        testTaxValue[1]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(3) > div > input',
+        testTaxValue[2]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(4) > div > input',
+        testTaxValue[3]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(5 ) > div > input',
+        testTaxValue[4]
+      )
 
       // 単位変更
       const testUnitValue = [
@@ -593,44 +691,14 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         'K2',
         'L2'
       ]
-      await page.type('#keyManMonth', testUnitValue[0])
-      await page.type('#keyBottle', testUnitValue[1])
-      await page.type('#keyCost', testUnitValue[2])
-      await page.type('#keyContainer', testUnitValue[3])
-      await page.type('#keyCentilitre', testUnitValue[4])
-      await page.type('#keySquareCentimeter', testUnitValue[5])
-      await page.type('#keyCubicCentimeter', testUnitValue[6])
-      await page.type('#keyCentimeter', testUnitValue[7])
-      await page.type('#keyCase', testUnitValue[8])
-      await page.type('#keyCarton', testUnitValue[9])
-      await page.type('#keyDay', testUnitValue[10])
-      await page.type('#keyDeciliter', testUnitValue[11])
-      await page.type('#keyDecimeter', testUnitValue[12])
-      await page.type('#keyGrossKilogram', testUnitValue[13])
-      await page.type('#keyPieces', testUnitValue[14])
-      await page.type('#keyFeet', testUnitValue[15])
-      await page.type('#keyGallon', testUnitValue[16])
-      await page.type('#keyGram', testUnitValue[17])
-      await page.type('#keyGrossTonnage', testUnitValue[18])
-      await page.type('#keyHour', testUnitValue[19])
-      await page.type('#keyKilogram', testUnitValue[20])
-      await page.type('#keyKilometers', testUnitValue[21])
-      await page.type('#keyKilowattHour', testUnitValue[22])
-      await page.type('#keyPound', testUnitValue[23])
-      await page.type('#keyLiter', testUnitValue[24])
-      await page.type('#keyMilligram', testUnitValue[25])
-      await page.type('#keyMilliliter', testUnitValue[26])
-      await page.type('#keyMillimeter', testUnitValue[27])
-      await page.type('#keyMonth', testUnitValue[28])
-      await page.type('#keySquareMeter', testUnitValue[29])
-      await page.type('#keyCubicMeter', testUnitValue[30])
-      await page.type('#keyMeter', testUnitValue[31])
-      await page.type('#keyNetTonnage', testUnitValue[32])
-      await page.type('#keyPackage', testUnitValue[33])
-      await page.type('#keyRoll', testUnitValue[34])
-      await page.type('#keyFormula', testUnitValue[35])
-      await page.type('#keyTonnage', testUnitValue[36])
-      await page.type('#keyOthers', testUnitValue[37])
+      for (let idx = 0; idx < testUnitValue.length; idx++) {
+        await page.type(
+          `#csvBasicFormat-modal-card > section > div > div > div:nth-child(3) > div.line-content > div:nth-child(${
+            idx + 1
+          }) > div > input`,
+          testUnitValue[idx]
+        )
+      }
 
       await page.click('#csvBasicEditBtn')
 
@@ -677,7 +745,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         expect(item).toBe(testItemValue[idx])
       })
 
-      browser.close()
+      await browser.close()
     })
 
     test('請求書アップロードフォーマット設定画面（確認・変更）の基本情報画面で税、単位修正、アップロードフォーマットデータ番号、DB登録', async () => {
@@ -695,7 +763,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
           .querySelector(
             'body > div.max-width > div:nth-child(3) > div > div.box > table > tbody > tr > td:nth-child(5) > a'
           )
-          .getAttribute('href')
+          .getAttribute('uuid')
       })
 
       await page.click(
@@ -704,7 +772,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
 
       await page.waitForTimeout(1000)
 
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
+      expect(await page.url()).toBe(`https://localhost:3000/uploadFormatEdit/${redirectUrl}`)
 
       await page.click('#editCsvBasicFormatBtn')
 
@@ -740,11 +808,26 @@ describe('請求書アップロードフォーマット設定画面（確認・�
 
       // 税変更
       const testTaxValue = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE']
-      await page.type('#keyConsumptionTax', testTaxValue[0])
-      await page.type('#keyReducedTax', testTaxValue[1])
-      await page.type('#keyFreeTax', testTaxValue[2])
-      await page.type('#keyDutyFree', testTaxValue[3])
-      await page.type('#keyExemptTax', testTaxValue[4])
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(1) > div > input',
+        testTaxValue[0]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(2) > div > input',
+        testTaxValue[1]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(3) > div > input',
+        testTaxValue[2]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(4) > div > input',
+        testTaxValue[3]
+      )
+      await page.type(
+        '#csvBasicFormat-modal-card > section > div > div > div:nth-child(2) > div.line-content > div:nth-child(5 ) > div > input',
+        testTaxValue[4]
+      )
 
       // 単位変更
       const testUnitValue = [
@@ -787,44 +870,14 @@ describe('請求書アップロードフォーマット設定画面（確認・�
         'K2',
         'L2'
       ]
-      await page.type('#keyManMonth', testUnitValue[0])
-      await page.type('#keyBottle', testUnitValue[1])
-      await page.type('#keyCost', testUnitValue[2])
-      await page.type('#keyContainer', testUnitValue[3])
-      await page.type('#keyCentilitre', testUnitValue[4])
-      await page.type('#keySquareCentimeter', testUnitValue[5])
-      await page.type('#keyCubicCentimeter', testUnitValue[6])
-      await page.type('#keyCentimeter', testUnitValue[7])
-      await page.type('#keyCase', testUnitValue[8])
-      await page.type('#keyCarton', testUnitValue[9])
-      await page.type('#keyDay', testUnitValue[10])
-      await page.type('#keyDeciliter', testUnitValue[11])
-      await page.type('#keyDecimeter', testUnitValue[12])
-      await page.type('#keyGrossKilogram', testUnitValue[13])
-      await page.type('#keyPieces', testUnitValue[14])
-      await page.type('#keyFeet', testUnitValue[15])
-      await page.type('#keyGallon', testUnitValue[16])
-      await page.type('#keyGram', testUnitValue[17])
-      await page.type('#keyGrossTonnage', testUnitValue[18])
-      await page.type('#keyHour', testUnitValue[19])
-      await page.type('#keyKilogram', testUnitValue[20])
-      await page.type('#keyKilometers', testUnitValue[21])
-      await page.type('#keyKilowattHour', testUnitValue[22])
-      await page.type('#keyPound', testUnitValue[23])
-      await page.type('#keyLiter', testUnitValue[24])
-      await page.type('#keyMilligram', testUnitValue[25])
-      await page.type('#keyMilliliter', testUnitValue[26])
-      await page.type('#keyMillimeter', testUnitValue[27])
-      await page.type('#keyMonth', testUnitValue[28])
-      await page.type('#keySquareMeter', testUnitValue[29])
-      await page.type('#keyCubicMeter', testUnitValue[30])
-      await page.type('#keyMeter', testUnitValue[31])
-      await page.type('#keyNetTonnage', testUnitValue[32])
-      await page.type('#keyPackage', testUnitValue[33])
-      await page.type('#keyRoll', testUnitValue[34])
-      await page.type('#keyFormula', testUnitValue[35])
-      await page.type('#keyTonnage', testUnitValue[36])
-      await page.type('#keyOthers', testUnitValue[37])
+      for (let idx = 0; idx < testUnitValue.length; idx++) {
+        await page.type(
+          `#csvBasicFormat-modal-card > section > div > div > div:nth-child(3) > div.line-content > div:nth-child(${
+            idx + 1
+          }) > div > input`,
+          testUnitValue[idx]
+        )
+      }
 
       await page.click('#csvBasicEditBtn')
 
@@ -907,7 +960,7 @@ describe('請求書アップロードフォーマット設定画面（確認・�
 
       // 変更した設定名称が表示されること
       expect(uploadFormatName).toMatch(replaceName)
-      browser.close()
+      await browser.close()
     })
   })
 
