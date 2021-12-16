@@ -108,7 +108,10 @@ $('#csvBasicEditBtn').addEventListener('click', function (e) {
 
   // 設定名称バリデーションチェック
   let ItemNameNoInputFlag = false
-  if (!basicUploadFormatItemName.reportValidity()) {
+  // 設定名称ブランクチェック
+  const itemNameTrim = basicUploadFormatItemName.value.trim()
+
+  if (!basicUploadFormatItemName.reportValidity() || itemNameTrim === '') {
     const cautionNotInput = document.createElement('div')
     cautionNotInput.classList.add('input-label')
     cautionNotInput.classList.add('input-label-required')
@@ -253,7 +256,7 @@ function deleteErrorMessage(elements) {
   })
 }
 
-// エラーメッセージ削除
+// エラーメッセージ削除(設定名称)
 function deleteErrorMessageForItemName(elements) {
   if (
     elements.closest('.field').childNodes[2] !== undefined &&
