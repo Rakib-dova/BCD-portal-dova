@@ -28,6 +28,9 @@ jest.mock('../../Application/node_modules/csurf', () => {
     }
   })
 })
+jest.mock('../../Application/lib/countupUser.js', () => ({
+  countupUser: jest.fn((tenant) => tenant)
+}))
 
 const middleware = require('../../Application/routes/helpers/middleware')
 const Request = require('jest-express').Request

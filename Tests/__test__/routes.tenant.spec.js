@@ -22,6 +22,10 @@ jest.mock('../../Application/node_modules/csurf', () => {
   })
 })
 
+jest.mock('../../Application/lib/countupUser.js', () => ({
+  countupUser: jest.fn((tenant) => tenant)
+}))
+
 // CSR対策
 /*
 const csrf = require('../../Application/node_modules/csurf')
@@ -41,7 +45,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.env' })
 }
 
-let request, response, accessTradeshiftSpy, infoSpy, createSpy, checkContractStatusSpy
+let request, response, accessTradeshiftSpy, infoSpy, createSpy, checkContractStatusSpy, countupSpy
 describe('tenantのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -57,6 +61,9 @@ describe('tenantのテスト', () => {
     const logger = require('../../Application/lib/logger.js')
     infoSpy = jest.spyOn(logger, 'info')
 
+    const countupModule = require('../../Application/lib/countupUser.js')
+    countupSpy = jest.spyOn(countupModule, 'countupUser')
+
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
   })
   afterEach(() => {
@@ -67,6 +74,7 @@ describe('tenantのテスト', () => {
     infoSpy.mockRestore()
     createSpy.mockRestore()
     checkContractStatusSpy.mockRestore()
+    countupSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -1170,6 +1178,141 @@ describe('tenantのテスト', () => {
         { tenant: request.user?.tenantId, user: request.user?.userId },
         'Tenant Registration Succeeded'
       )
+      // request.session.userContextが'TenantRegistrationCompleted'になる
+      expect(request.session.userContext).toBe('TenantRegistrationCompleted')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('info', '利用登録が完了いたしました。')
+      // ポータルにリダイレクト「される」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
+      expect(response.getHeader('Location')).toEqual('/portal')
+    })
+
+    test('正常 (カスタムリファラが付与されている場合)', async () => {
+      // 準備
+      // session.userContextにNotTenantRegisteredを入れる
+      request.session = {
+        userContext: 'NotTenantRegistered'
+      }
+      // フォームの送信値
+      request.body = {
+        termsCheck: 'on',
+        // 入力フォームデータ
+        password: '1q2w3e4r5t',
+        contractorName: '市江素',
+        contractorKanaName: 'シエス',
+        postalNumber: '1234567',
+        contractAddress: '東京都渋谷区１丁目',
+        banch1: '１番地',
+        tatemono1: '銀王ビル',
+        contactPersonName: 'トレド',
+        contactPhoneNumber: '080-1234-5678',
+        contactMail: 'example@example.com',
+        campaignCode: 'A1b2C3d4E5'
+      }
+      // request.userに正常値を想定する
+      request.user = {
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+        userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+        accessToken: 'dummyAccessToken',
+        refreshToken: 'dummyRefreshToken'
+      }
+      request.cookies = {
+        customReferrer: 'dxstore'
+      }
+      // request.flashは関数なのでモックする。返り値は必要ないので処理は空
+      request.flash = jest.fn()
+      // Tradeshift(1回目)から正常なユーザデータ取得を想定する
+      accessTradeshiftSpy
+        .mockReturnValueOnce({
+          Id: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          CompanyName: 'UnitTestCompany',
+          Username: 'dummy@example.com',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              GroupId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-01-20T05:11:15.177Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'Yamada',
+          LastName: 'Taro',
+          Visible: true
+        })
+        // Tradeshift(2回目)から正常なテナントデータ取得を想定する
+        .mockReturnValue({
+          CompanyName: 'UnitTestCompany',
+          Country: 'JP',
+          CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          State: 'ACTIVE',
+          Identifiers: [
+            {
+              scheme: 'TS:ID',
+              value: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+            }
+          ],
+          AddressLines: [
+            {
+              scheme: 'city',
+              value: '東京都'
+            },
+            {
+              scheme: 'street',
+              value: '港区'
+            },
+            {
+              scheme: 'zip',
+              value: '105-0000'
+            }
+          ],
+          RegistrationAddressLines: [],
+          AcceptingDocumentProfiles: [],
+          LookingFor: [],
+          Offering: [],
+          PublicProfile: false,
+          NonuserInvoicing: false,
+          AutoAcceptConnections: false,
+          Restricted: true,
+          Created: '2021-01-20T05:11:15.177Z',
+          Modified: '2021-01-20T05:20:07.137Z',
+          AccountType: 'FREE'
+        })
+      // DBからの正常なユーザデータ取得を想定する
+      createSpy.mockReturnValue([
+        {
+          dataValues: {
+            userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+            appVersion: '0.0.1',
+            refreshToken: 'dummyRefreshToken',
+            userStatus: 0
+          }
+        },
+        true
+      ])
+
+      checkContractStatusSpy.mockReturnValue(null)
+
+      // 試験実施
+      await routesTenant.cbPostRegister(request, response, next)
+
+      // 期待結果
+      // 400,500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // 登録成功時のログが呼ばれ「る」
+      expect(infoSpy).toHaveBeenCalledWith(
+        { tenant: request.user?.tenantId, user: request.user?.userId },
+        'Tenant Registration Succeeded'
+      )
+      // カスタムリファラが付与されている場合、カウントアップが実行される
+      expect(countupSpy).toHaveBeenCalledWith('dxstore')
       // request.session.userContextが'TenantRegistrationCompleted'になる
       expect(request.session.userContext).toBe('TenantRegistrationCompleted')
       // request.flashが呼ばれ「る」
