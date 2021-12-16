@@ -368,11 +368,3 @@ function sendBySelectBtnCreate() {
     })
   }
 }
-
-// ステータスの全選択ボタンクリック
-document.querySelector('#statusAllCheck').addEventListener('click', function (e) {
-  const statusCheckBoxes = document.querySelectorAll("input[name='status']")
-  statusCheckBoxes.forEach((element) => {
-    element.checked = true
-  })
-})
