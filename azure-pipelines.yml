@@ -227,6 +227,7 @@ stages:
                   appName: $(appServiceName)
                   resourceGroupName: $(portalRg)
                   runtimeStack: NODE|14-lts
+                  slotName: staging
                   package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
                   startUpCommand: npm run start
               
@@ -239,6 +240,7 @@ stages:
                   appName: $(appServiceSecName)
                   resourceGroupName: $(portalSecRg)
                   runtimeStack: NODE|14-lts
+                  slotName: staging
                   package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
                   startUpCommand: npm run start
 
