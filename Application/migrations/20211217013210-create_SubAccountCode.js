@@ -18,10 +18,6 @@ module.exports = {
         allowNull: false,
         type: Sequelize.UUID
       },
-      accountCode: {
-        allowNull: false,
-        type: Sequelize.STRING(10)
-      },
       subjectName: {
         allowNull: false,
         type: Sequelize.STRING(40)
