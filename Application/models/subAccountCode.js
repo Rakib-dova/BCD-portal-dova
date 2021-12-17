@@ -16,12 +16,6 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'cascade',
         onUpdate: 'cascade'
       })
-      SubAccountCode.belongsTo(models.AccountCode, {
-        foreignKey: 'accountCode', // k1を指定
-        targetKey: 'accountCode', // k2を指定
-        onDelete: 'cascade',
-        onUpdate: 'cascade'
-      })
     }
   }
   SubAccountCode.init(
