@@ -218,28 +218,29 @@ stages:
               steps:
               - download: current 
                 displayName: Download artifacts
-              - task: AzureWebAppContainer@1
-                displayName: Deploy to staging slot of japaneast App Service
+              
+              - task: AzureWebApp@1
+                displayName: 'Deploy to staging slot of japaneast App Service'
                 inputs:
-                  azureSubscription: '$(azureSubscriptionEndpoint)'
-                  appName: '$(appServiceName)'
-                  deployToSlotOrASE: true
-                  slotName: 'staging'
-                  resourceGroupName: '$(portalRg)'
-                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
-                  appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
-
-              - task: AzureWebAppContainer@1
+                  azureSubscription: $(azureSubscriptionEndpoint)
+                  appType: webAppLinux
+                  appName: $(appServiceName)
+                  resourceGroupName: $(portalRg)
+                  runtimeStack: NODE|14-lts
+                  package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+                  startUpCommand: npm run start
+              
+              - task: AzureWebApp@1
+                displayName: 'Deploy to staging slot of japanwest App Service'
                 condition: eq(variables.japanwest,'True')
-                displayName: Deploy to staging slot of japanwest App Service
                 inputs:
-                  azureSubscription: '$(azureSubscriptionEndpoint)'
-                  appName: '$(appServiceSecName)'
-                  deployToSlotOrASE: true
-                  slotName: 'staging'
-                  resourceGroupName: '$(portalSecRg)'
-                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
-                  appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
+                  azureSubscription: $(azureSubscriptionEndpoint)
+                  appType: webAppLinux
+                  appName: $(appServiceSecName)
+                  resourceGroupName: $(portalSecRg)
+                  runtimeStack: NODE|14-lts
+                  package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+                  startUpCommand: npm run start
 
               - task: AzureCLI@2
                 condition: eq(variables.japanwest,'True')
