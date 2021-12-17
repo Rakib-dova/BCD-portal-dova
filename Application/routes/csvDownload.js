@@ -61,9 +61,9 @@ const cbGetIndex = async (req, res, next) => {
   // ステータス項目の選択アイテム
   // tradeshiftステータス
   // ・送信済み/受信済み
-  // ・受理済み/承認済み
-  // ・入金確認済み/送金済み
-  const status = ['送信済み/受信済み', '受理済み/承認済み', '入金確認済み/送金済み']
+  // ・受理済み
+  // ・入金確認済み
+  const status = ['送信済み/受信済み', '受理済み', '入金確認済み']
   // 販売購入項目の選択アイテム
   const buyAndSell = ['すべて', '販売', '購入']
 
@@ -142,8 +142,8 @@ const cbPostIndex = async (req, res, next) => {
 
   const states = [
     'DELIVERED', // 送信済み・受信済み
-    'ACCEPTED', // 受理済み/承認済み
-    'PAID_CONFIRMED' // 入金確認済み/送金済み
+    'ACCEPTED', // 受理済み
+    'PAID_CONFIRMED' // 入金確認済み
   ]
 
   // 絞り込みの条件に購入/販売追加
@@ -171,11 +171,11 @@ const cbPostIndex = async (req, res, next) => {
         }
         default: {
           switch (req.body.status) {
-            case '受理済み/承認済み': {
+            case '受理済み': {
               findDocumentQuery.state = `${states[1]}`
               break
             }
-            case '入金確認済み/送金済み': {
+            case '入金確認済み': {
               findDocumentQuery.state = `${states[2]}`
               break
             }
@@ -192,12 +192,12 @@ const cbPostIndex = async (req, res, next) => {
             findDocumentQuery.state.push(`${states[0]}`)
             break
 
-          case '受理済み/承認済み': {
+          case '受理済み': {
             findDocumentQuery.state.push(`${states[1]}`)
             break
           }
 
-          case '入金確認済み/送金済み': {
+          case '入金確認済み': {
             findDocumentQuery.state.push(`${states[2]}`)
             break
           }
