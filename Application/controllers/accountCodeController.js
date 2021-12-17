@@ -193,5 +193,71 @@ module.exports = {
       await t.rollback()
       return error
     }
+  },
+  searchAccountCode: async (contractId, accountCode, accountCodeName) => {
+    try {
+      let userWhere
+      if (accountCode.length !== 0 && accountCodeName.length !== 0) {
+        userWhere = {
+          contractId: contractId,
+          [Op.or]: [
+            {
+              accountCode: {
+                [Op.like]: `%${accountCode}%`
+              }
+            },
+            {
+              accountCodeName: {
+                [Op.like]: `%${accountCodeName}%`
+              }
+            }
+          ]
+        }
+      } else if (accountCode.length !== 0 && accountCodeName.length === 0) {
+        userWhere = {
+          contractId: contractId,
+          [Op.or]: [
+            {
+              accountCode: {
+                [Op.like]: `%${accountCode}%`
+              }
+            }
+          ]
+        }
+      } else if (accountCode.length === 0 && accountCodeName.length !== 0) {
+        userWhere = {
+          contractId: contractId,
+          [Op.or]: [
+            {
+              accountCodeName: {
+                [Op.like]: `%${accountCodeName}%`
+              }
+            }
+          ]
+        }
+      }
+      const result = await AccountCode.findAll({
+        where: userWhere
+      })
+      result.sort((next, prev) => {
+        return next.accountCode - prev.accountCode
+      })
+      return result.map((item) => {
+        return {
+          accountCodeId: item.accountCodeId,
+          accountCode: item.accountCode,
+          accountCodeName: item.accountCodeName
+        }
+      })
+    } catch (error) {
+      logger.error({
+        contractId: contractId,
+        accountCode: accountCode,
+        accountCodeName: accountCodeName,
+        stack: error.stack,
+        status: 0
+      })
+      return error
+    }
   }
 }
