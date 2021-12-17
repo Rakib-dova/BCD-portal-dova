@@ -16,23 +16,11 @@ module.exports = {
       },
       accountCodeId: {
         allowNull: false,
-        type: Sequelize.UUID,
-        reference: {
-          model: {
-            tableName: 'AccountCode'
-          },
-          key: 'accountCodeId'
-        }
+        type: Sequelize.UUID
       },
       accountCode: {
         allowNull: false,
-        type: Sequelize.STRING(10),
-        reference: {
-          model: {
-            tableName: 'AccountCode'
-          },
-          key: 'accountCode'
-        }
+        type: Sequelize.STRING(10)
       },
       subjectName: {
         allowNull: false,
