@@ -1,4 +1,4 @@
-﻿'use strict'
+'use strict'
 const express = require('express')
 const router = express.Router()
 const helper = require('./helpers/middleware')
@@ -44,7 +44,8 @@ const cbGetCancellation = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = helper.checkContractStatus
+
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
   if (checkContractStatus === null || checkContractStatus === 999) {
     return next(errorHelper.create(500))
@@ -93,7 +94,8 @@ const cbPostCancellation = async (req, res, next) => {
 
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = helper.checkContractStatus
+
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
   if (checkContractStatus === null || checkContractStatus === 999) {
     return next(errorHelper.create(500))
@@ -122,7 +124,7 @@ const cbPostCancellation = async (req, res, next) => {
   // 解約申込登録を行う
   const cancellation = await cancellationsController.create(req.user.tenantId, '{}', contractInformationcancelOrder)
 
-  if (cancellation instanceof Error || cancellation === null) return next(errorHelper.create(500))
+  if (cancellation instanceof Error) return next(errorHelper.create(500))
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostCancellation')
   return next(noticeHelper.create('cancellation'))

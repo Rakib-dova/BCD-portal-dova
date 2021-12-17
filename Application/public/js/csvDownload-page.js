@@ -1,6 +1,15 @@
 window.onload = function () {
   document.getElementById('submit').addEventListener('click', (e) => {
-    document.querySelector('#form').submit()
+    let statusCheckBoxes = document.querySelectorAll("input[name='status']")
+    statusCheckBoxes = Array.prototype.slice.call(statusCheckBoxes)
+    if (statusCheckBoxes.filter((element) => element.checked === true).length === 0) {
+      const dataTarget = document.querySelector('#checkStatus-modal')
+      const modalCardBody = document.querySelector('#modal-card-checkStatus')
+      modalCardBody.innerHTML = 'ステータスを選択してください。'
+      dataTarget.classList.add('is-active')
+    } else {
+      document.querySelector('#form').submit()
+    }
   })
 }
 

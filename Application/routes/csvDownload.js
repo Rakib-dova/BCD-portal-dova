@@ -80,25 +80,7 @@ const cbGetIndex = async (req, res, next) => {
   // ・切替え済み
   // ・完了
   // ・回収済み
-  const status = [
-    'すべて',
-    '送信済み/受信済み',
-    '無効',
-    '受理済み/承認済み',
-    '提出済み/承認待ち',
-    '入金確認済み/送金済み',
-    '却下済み',
-    '内容確認中',
-    '期日超過',
-    '失敗',
-    '送金済み/決済済み',
-    '送信中',
-    '接続承認待ち',
-    'クリアランス中',
-    '差替え済み',
-    '完了',
-    '回収済み'
-  ]
+  const status = ['送信済み/受信済み', '受理済み/承認済み', '入金確認済み/送金済み']
   // 販売購入項目の選択アイテム
   const buyAndSell = ['すべて', '販売', '購入']
 
@@ -159,45 +141,39 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
 
   // 絞り込みの条件データチェック
-  const findDocumentQuery = {}
+  const findDocumentQuery = {
+    withouttag: ['archived', 'AP_DOCUMENT_DRAFT', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document'],
+    _onlyIndex: true,
+    ascending: false,
+    onlydeleted: false,
+    onlydrafts: false,
+    stag: ['sales', 'purchases', 'draft'],
+    state: [],
+    type: 'invoice'
+  }
 
   // 絞り込みの条件に請求書番号追加
   if (req.body.invoiceNumber || false) {
     findDocumentQuery.businessId = req.body.invoiceNumber
   }
 
-  const stags = ['outbox', 'inbox', 'sales', 'purchases']
   const states = [
-    'DELIVERED',
-    'REJECTED_BY_SENDER',
-    'ACCEPTED',
-    'SENT',
-    'PAID_CONFIRMED',
-    'REJECTED_BY_RECEIVER',
-    'DISPUTED_BY_RECEIVER',
-    'OVERDUE',
-    'FAILED_DELIVERY',
-    'PAID_UNCONFIRMED',
-    'IN_TRANSIT',
-    'PENDING_NOT_A_CONTACT',
-    'IN_CLEARANCE',
-    'REPLACED',
-    'CLOSED',
-    'COLLECTED'
+    'DELIVERED', // 送信済み・受信済み
+    'ACCEPTED', // 受理済み/承認済み
+    'PAID_CONFIRMED' // 入金確認済み/送金済み
   ]
 
   // 絞り込みの条件に購入/販売追加
   switch (req.body.buyAndSell) {
     case 'すべて': {
-      findDocumentQuery.stag = `${stags[2]}&stag=${stags[3]}`
       break
     }
     case '販売': {
-      findDocumentQuery.stag = `${stags[2]}`
+      findDocumentQuery.sales = true
       break
     }
     case '購入': {
-      findDocumentQuery.stag = `${stags[3]}`
+      findDocumentQuery.sales = false
       break
     }
   }
@@ -206,83 +182,18 @@ const cbPostIndex = async (req, res, next) => {
   switch (Array.isArray(req.body.status)) {
     case false: {
       switch (req.body.status) {
-        case 'すべて': {
-          findDocumentQuery.stag = `${stags[0]}&stag=${stags[1]}`
-          findDocumentQuery.state = ''
-          states.forEach((item, idx) => {
-            if (idx === 0) {
-              findDocumentQuery.state += item
-            } else {
-              findDocumentQuery.state += `&state=${item}`
-            }
-          })
-          break
-        }
         case '送信済み/受信済み': {
-          findDocumentQuery.stag = `${stags[0]}&stag=${stags[1]}`
           findDocumentQuery.state = `${states[0]}`
           break
         }
         default: {
           switch (req.body.status) {
-            case '無効': {
+            case '受理済み/承認済み': {
               findDocumentQuery.state = `${states[1]}`
               break
             }
-            case '受理済み/承認済み': {
-              findDocumentQuery.state = `${states[2]}`
-              break
-            }
-            case '提出済み/承認待ち': {
-              findDocumentQuery.state = `${states[3]}`
-              break
-            }
             case '入金確認済み/送金済み': {
-              findDocumentQuery.state = `${states[4]}`
-              break
-            }
-            case '却下済み': {
-              findDocumentQuery.state = `${states[5]}`
-              break
-            }
-            case '内容確認中': {
-              findDocumentQuery.state = `${states[6]}`
-              break
-            }
-            case '期日超過': {
-              findDocumentQuery.state = `${states[7]}`
-              break
-            }
-            case '失敗': {
-              findDocumentQuery.state = `${states[8]}`
-              break
-            }
-            case '送金済み/決済済み': {
-              findDocumentQuery.state = `${states[9]}`
-              break
-            }
-            case '送信中': {
-              findDocumentQuery.state = `${states[10]}`
-              break
-            }
-            case '接続承認待ち': {
-              findDocumentQuery.state = `${states[11]}`
-              break
-            }
-            case 'クリアランス中': {
-              findDocumentQuery.state = `${states[12]}`
-              break
-            }
-            case '差替え済み': {
-              findDocumentQuery.state = `${states[13]}`
-              break
-            }
-            case '完了': {
-              findDocumentQuery.state = `${states[14]}`
-              break
-            }
-            case '回収済み': {
-              findDocumentQuery.state = `${states[15]}`
+              findDocumentQuery.state = `${states[2]}`
               break
             }
           }
@@ -292,86 +203,31 @@ const cbPostIndex = async (req, res, next) => {
       break
     }
     case true: {
-      findDocumentQuery.stag = `${stags[2]}&stag=${stags[3]}`
-      findDocumentQuery.state = ''
-      let outboxInboxFlag = false
       req.body.status.forEach((item, idx) => {
-        if (idx !== 0) {
-          findDocumentQuery.state += '&state='
-        }
         switch (item) {
           case '送信済み/受信済み':
-            outboxInboxFlag = true
-            findDocumentQuery.state += `${states[0]}`
+            findDocumentQuery.state.push(`${states[0]}`)
             break
-          case '無効': {
-            findDocumentQuery.state += `${states[1]}`
-            break
-          }
+
           case '受理済み/承認済み': {
-            findDocumentQuery.state += `${states[2]}`
+            findDocumentQuery.state.push(`${states[1]}`)
             break
           }
-          case '提出済み/承認待ち': {
-            findDocumentQuery.state += `${states[3]}`
-            break
-          }
+
           case '入金確認済み/送金済み': {
-            findDocumentQuery.state += `${states[4]}`
-            break
-          }
-          case '却下済み': {
-            findDocumentQuery.state += `${states[5]}`
-            break
-          }
-          case '内容確認中': {
-            findDocumentQuery.state += `${states[6]}`
-            break
-          }
-          case '期日超過': {
-            findDocumentQuery.state += `${states[7]}`
-            break
-          }
-          case '失敗': {
-            findDocumentQuery.state += `${states[8]}`
-            break
-          }
-          case '送金済み/決済済み': {
-            findDocumentQuery.state += `${states[9]}`
-            break
-          }
-          case '送信中': {
-            findDocumentQuery.state += `${states[10]}`
-            break
-          }
-          case '接続承認待ち': {
-            findDocumentQuery.state += `${states[11]}`
-            break
-          }
-          case 'クリアランス中': {
-            findDocumentQuery.state += `${states[12]}`
-            break
-          }
-          case '差替え済み': {
-            findDocumentQuery.state += `${states[13]}`
-            break
-          }
-          case '完了': {
-            findDocumentQuery.state += `${states[14]}`
-            break
-          }
-          case '回収済み': {
-            findDocumentQuery.state += `${states[15]}`
+            findDocumentQuery.state.push(`${states[2]}`)
             break
           }
         }
       })
-      //
-      if (outboxInboxFlag) {
-        findDocumentQuery.stag = `${stags[0]}&stag=${stags[1]}`
-      }
       break
     }
+  }
+
+  if (findDocumentQuery.state.length === 0) {
+    req.flash('noti', ['請求書ダウンロード', 'ステータスをいずれかのの１つ選択してください。'])
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+    return res.redirect(303, '/csvDownload')
   }
 
   // 絞り込みの条件に発行日の開始日追加
@@ -428,7 +284,14 @@ const cbPostIndex = async (req, res, next) => {
       const sentByCompany = sentBy[sentByIdx]
       if (sentByCompany !== noCompany[1]) findDocumentQuery.sentBy = sentByCompany
       if (company !== sentByCompany) {
-        const sendQuery = qs.stringify(findDocumentQuery).replace(/%26/g, '&').replace(/%3D/g, '=')
+        const sendQuery = qs
+          .stringify(findDocumentQuery)
+          .replace(/%26/g, '&')
+          .replace(/%3D/g, '=')
+          .replace(/%5B0%5D/g, '')
+          .replace(/%5B1%5D/g, '')
+          .replace(/%5B2%5D/g, '')
+          .replace(/%5B3%5D/g, '')
         // 請求書を検索する
         let pageId = 0
         let numPages = 1
@@ -471,7 +334,7 @@ const cbPostIndex = async (req, res, next) => {
     // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
     if (documentsResult.itemCount === 0) {
       // 条件に合わせるデータがない場合、お知らせを表示する。
-      req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
+      req.flash('noti', ['請求書ダウンロード', '条件に合致する請求書が見つかりませんでした。'])
       res.redirect(303, '/csvDownload')
     } else {
       const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
@@ -514,7 +377,7 @@ const cbPostIndex = async (req, res, next) => {
           }
         } else {
           // 条件に合わせるデータがない場合、お知らせを表示する。
-          req.flash('noti', '条件に合致する請求書が見つかりませんでした。')
+          req.flash('noti', ['請求書ダウンロード', '条件に合致する請求書が見つかりませんでした。'])
           res.redirect(303, '/csvDownload')
         }
       } else {
@@ -535,7 +398,6 @@ const cbPostIndex = async (req, res, next) => {
       }
     }
   }
-
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
@@ -551,7 +413,7 @@ const errorHandle = (documentsResult, _res, _req) => {
       },
       documentsResult.name
     )
-    _req.flash('noti', constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR)
+    _req.flash('noti', ['請求書ダウンロード', constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
     _res.redirect(303, '/csvDownload')
   } else if (String(documentsResult.response?.status).slice(0, 1) === '5') {
     // 500番エラーの場合
@@ -564,7 +426,7 @@ const errorHandle = (documentsResult, _res, _req) => {
       },
       documentsResult.toString()
     )
-    _req.flash('noti', constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR)
+    _req.flash('noti', ['請求書ダウンロード', constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
     _res.redirect(303, '/csvDownload')
   }
 }

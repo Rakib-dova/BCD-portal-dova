@@ -1,4 +1,4 @@
-﻿'use strict'
+'use strict'
 const express = require('express')
 const router = express.Router()
 
@@ -43,7 +43,7 @@ const cbGetRegister = async (req, res, next) => {
     return next(noticeHelper.create('generaluser'))
   }
 
-  switch (await helper.checkContractStatus(req, res, next)) {
+  switch (await helper.checkContractStatus(req.user.tenantId)) {
     case '00':
     case '10':
     case '11':
@@ -115,7 +115,7 @@ const cbPostRegister = async (req, res, next) => {
     return next(noticeHelper.create('generaluser'))
   }
 
-  switch (await helper.checkContractStatus(req, res, next)) {
+  switch (await helper.checkContractStatus(req.user.tenantId)) {
     case '00':
     case '10':
     case '11':

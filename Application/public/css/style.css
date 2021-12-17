@@ -557,3 +557,113 @@ img.logo-ncom {
   font-size: 1rem;
   font-weight: 700;
 }
+
+.searchResultBox {
+  overflow-y: scroll;
+  text-overflow: ellipsis;
+  height: 100%;
+}
+
+#displaySendToSearchResultField {
+  height: 393px !important;
+}
+
+#displaySendBySearchResultField {
+  height: 393px !important;
+}
+
+.hvr-float {
+  max-height: 206px;
+}
+
+.iconBox {
+  height: 100%;
+}
+
+.textOverflow {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#accountCodeUpload > div > label > span.file-cta > span.file-label {
+  overflow: hidden;
+  width: 100%;
+}
+
+#accountCodeUpload > div > label > span.file-name {
+  max-width: 100% !important;
+  border: unset;
+}
+
+#upload {
+  width: 100%;
+  overflow: hidden;
+}
+
+.is-purple {
+  background-color: #454cad;
+}
+
+#accountCodeUpload > div > label > input {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#accountCodeUpload > div > label > span.file-cta {
+  border: #eee solid 3px !important;
+  border-radius: 7px 7px 0px 0px !important;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: content-box;
+}
+
+#accountCodeUpload > div > label > span.file-cta > span:nth-child(3) > a {
+  line-height: 36px;
+  background-color: #454cad;
+  border: #454cad;
+  border-radius: 0.2rem;
+  font-size: 14px;
+  color: #fff;
+  margin-top: 8px;
+}
+
+#accountCodeUpload > div > label {
+  min-width: 100%;
+}
+
+#accountCodeUpload > div > label > span.file-name {
+  border: #eee solid 3px !important;
+  border-radius: 0px 0px 7px 7px;
+  margin-top: -3px;
+}
+
+#olta-modal-card {
+  width: 1000px !important;
+}
+
+.olta-link-underline {
+  text-decoration: underline;
+}
+
+/* 
+  ・他ページのヘッダー部と幅合わせる。
+  ロゴとお知らせの高さの間隔が24pxに固定する
+*/
+.is-logo {
+  padding-bottom: 0px !important;
+  padding-top: 0px !important;
+  height: 113px;
+  background-size: 70% 70% !important;
+  margin-bottom: cal(100% - 12px);
+}
+
+body > div.hero.is-small {
+  height: 149px;
+}
+
+.olta-title-font-size {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-left: 1.5rem;
+}
