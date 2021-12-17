@@ -169,7 +169,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       await page.goto('https://localhost:3000/portal')
       if (page.url() === 'https://localhost:3000/portal') {
         await page.click(
-          'body > div.container.is-max-widescreen > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div > a'
+          'body > div.container.is-max-widescreen > columns > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div > a'
         )
         await page.waitForTimeout(1000)
         const checkLocation = await page.evaluate(() => {
@@ -200,10 +200,10 @@ describe('ルーティングのインテグレーションテスト', () => {
           for (let row = 1; row < 3; row++) {
             for (let col = 1; col < 4; col++) {
               const iconObj = document.querySelector(
-                `body > div.container.is-max-widescreen > div:nth-child(2) > div:nth-child(${row}) > div:nth-child(${col}) > div > a > div > div.media-content > p.title.is-5`
+                `body > div.container.is-max-widescreen > columns > div:nth-child(2) > div:nth-child(${row}) > div:nth-child(${col}) > div > a > div > div.media-content > p.title.is-5`
               )
               const contentObj = document.querySelector(
-                `body > div.container.is-max-widescreen > div:nth-child(2) > div:nth-child(${row}) > div:nth-child(${col}) > div > a > div > div.media-content > p:nth-child(2)`
+                `body > div.container.is-max-widescreen > columns > div:nth-child(2) > div:nth-child(${row}) > div:nth-child(${col}) > div > a > div > div.media-content > p:nth-child(2)`
               )
               if (iconObj === null || iconObj === undefined) continue
               iconTiles.push({
@@ -216,10 +216,10 @@ describe('ルーティングのインテグレーションテスト', () => {
           // 外部サービスアイコンとコンテンツを読み込み
           for (let row = 1; row < 3; row++) {
             const iconObj = document.querySelector(
-              `body > div.container.is-max-widescreen > div:nth-child(3) > div > div:nth-child(${row}) > div > a > div > div.media-content > p.title.is-5`
+              `body > div.container.is-max-widescreen > columns > div:nth-child(3) > div > div:nth-child(${row}) > div > a > div > div.media-content > p.title.is-5`
             )
             const contentObj = document.querySelector(
-              `body > div.container.is-max-widescreen > div:nth-child(3) > div > div:nth-child(${row}) > div > a > div > div.media-content > p:nth-child(2)`
+              `body > div.container.is-max-widescreen > columns > div:nth-child(3) > div > div:nth-child(${row}) > div > a > div > div.media-content > p:nth-child(2)`
             )
             if (iconObj === null || iconObj === undefined) continue
             iconTiles.push({
@@ -450,7 +450,6 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   afterAll(async () => {
-    console.log('後処理処理')
     await db.User.destroy({ where: { tenantId: testTenantId } })
     await db.Tenant.destroy({ where: { tenantId: testTenantId } })
   })
