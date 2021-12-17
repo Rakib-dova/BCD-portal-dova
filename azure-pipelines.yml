@@ -228,6 +228,18 @@ stages:
                   resourceGroupName: '$(portalRg)'
                   containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
                   appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
+                enabled: false
+              
+              - task: AzureWebApp@1
+                displayName: 'Deploy to staging slot of japaneast App Service'
+                inputs:
+                  azureSubscription: $(azureSubscriptionEndpoint)
+                  appType: webAppLinux
+                  appName: $(appServiceName)
+                  resourceGroupName: $(portalRg)
+                  runtimeStack: NODE|14-lts
+                  package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+                  startUpCommand: npm run start
 
               - task: AzureWebAppContainer@1
                 condition: eq(variables.japanwest,'True')
@@ -240,6 +252,19 @@ stages:
                   resourceGroupName: '$(portalSecRg)'
                   containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
                   appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
+                enabled: false
+              
+              - task: AzureWebApp@1
+                displayName: 'Deploy to staging slot of japanwest App Service'
+                condition: eq(variables.japanwest,'True')
+                inputs:
+                  azureSubscription: $(azureSubscriptionEndpoint)
+                  appType: webAppLinux
+                  appName: $(appServiceSecName)
+                  resourceGroupName: $(portalSecRg)
+                  runtimeStack: NODE|14-lts
+                  package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+                  startUpCommand: npm run start
 
               - task: AzureCLI@2
                 condition: eq(variables.japanwest,'True')
