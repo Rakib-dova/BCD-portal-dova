@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       accountCode: {
         allowNull: false,
-        type: DataTypes.INTEGER
+        type: DataTypes.STRING
       },
       createdAt: {
         type: DataTypes.DATE,
