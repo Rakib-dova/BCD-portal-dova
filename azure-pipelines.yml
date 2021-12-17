@@ -218,17 +218,6 @@ stages:
               steps:
               - download: current 
                 displayName: Download artifacts
-              - task: AzureWebAppContainer@1
-                displayName: Deploy to staging slot of japaneast App Service
-                inputs:
-                  azureSubscription: '$(azureSubscriptionEndpoint)'
-                  appName: '$(appServiceName)'
-                  deployToSlotOrASE: true
-                  slotName: 'staging'
-                  resourceGroupName: '$(portalRg)'
-                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
-                  appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
-                enabled: false
               
               - task: AzureWebApp@1
                 displayName: 'Deploy to staging slot of japaneast App Service'
@@ -240,19 +229,6 @@ stages:
                   runtimeStack: NODE|14-lts
                   package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
                   startUpCommand: npm run start
-
-              - task: AzureWebAppContainer@1
-                condition: eq(variables.japanwest,'True')
-                displayName: Deploy to staging slot of japanwest App Service
-                inputs:
-                  azureSubscription: '$(azureSubscriptionEndpoint)'
-                  appName: '$(appServiceSecName)'
-                  deployToSlotOrASE: true
-                  slotName: 'staging'
-                  resourceGroupName: '$(portalSecRg)'
-                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
-                  appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
-                enabled: false
               
               - task: AzureWebApp@1
                 displayName: 'Deploy to staging slot of japanwest App Service'
