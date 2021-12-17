@@ -17,8 +17,27 @@ block content
                     .column.is-fullwidth
                       .field.card
                         .card-content
+                          if isRegistSubAccountCode
+                            label.input-label 
+                            | #{parentCodeLabel}  
+                            .control
+                              input.input(type="text" id= parentIdForCodeInput name= parentIdForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum) 
+                            label.input-label
+                            | #{parentCodeNameLabel}  
+                            .control
+                              input.input(type="text" id= parentIdForNameInput name= parentIdForNameInput value= valueForNameInput maxlength=40 placeholder='文字列（40桁）') 
+                            .field.is-grouped.is-grouped-centered.mt-3
+                              .control
+                                div.button-area
+                                  a.button.is-danger.mr-6#btnClear クリア
+                                  a.button.is-link#btnSearchAccountCode 検索
+                            .field.is-horizontal.is-invisible
+                              .field-label.is-normal
+                              .field-body.level
+                                .container#displaySearchAccountCode
+
                           .field
-                            label(for="accountCode").input-label #{codeLabel}
+                            label(for= idForCodeInput).input-label #{codeLabel}
                             p(id= requiredTagCode).input-label-required.input-label （必須）
                             p#RequiredErrorMesageForCode.input-label-required.is-invisible
                             .control
@@ -26,7 +45,7 @@ block content
                                 .column.pl-0
                                   input.input(type="text" id= idForCodeInput name= idForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
                           .field
-                            label(for="setAccountCodeNameInputId").input-label #{codeNameLabel}
+                            label(for= idForNameInput).input-label #{codeNameLabel}
                             p(id= requiredTagName).input-label-required.input-label （必須）
                             p#RequiredErrorMesageForName.input-label-required.is-invisible
                             .control
