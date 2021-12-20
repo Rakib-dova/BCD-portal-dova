@@ -85,5 +85,33 @@ module.exports = {
       logger.error({ accountCodeId: values.accountCodeId, stack: error.stack, status: 0 })
       return error
     }
+  },
+  // 取得したデータを画面に表示するデータに加工
+  // 加工物
+  // {
+  //    no：               補助科目の順番
+  //    subAccountCodeId： 補助科目のユニークID
+  //    subjectCode：      補助科目コード
+  //    subjectName：      補助科目名
+  //    accountCodeName：  紐づいている勘定科目の名
+  // }
+  getSubAccountCodeList: async () => {
+    try {
+      const accountCodeNameArr = await SubAccountCode.getsubAccountCodeList()
+
+      // 出力用データに加工する。
+      const resultSubAccountCodeList = accountCodeNameArr.map((item, idx) => {
+        return {
+          no: idx + 1,
+          subjectCode: item.subjectCode,
+          subjectName: item.subjectName,
+          accountCodeName: item.accountCodeName
+        }
+      })
+      return resultSubAccountCodeList
+    } catch (error) {
+      logger.error({ stack: error.stack, status: 0 })
+      return error
+    }
   }
 }
