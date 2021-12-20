@@ -121,7 +121,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('一般ユーザ、契約ステータス：登録申込、利用可能', async () => {
@@ -133,7 +133,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
   })
 
@@ -166,7 +166,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('一般ユーザ、契約ステータス：登録受付、利用可能', async () => {
@@ -178,7 +178,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
   })
 
@@ -213,7 +213,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('一般ユーザ、契約ステータス：契約中、利用可能', async () => {
@@ -225,7 +225,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     // 機能・遷移確認
@@ -239,7 +239,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
       expect(res.text).toMatch(/現在、補助科目はありません。新規登録するボタンから登録を行ってください。/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('「←Homeへ戻る」リンク遷移確認（補助科目一括作成画面に遷移）', async () => {
@@ -317,7 +317,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
     test('補助科目登録後、補助科目一覧に遷移確認（補助科目一覧画面に遷移）', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         ignoreHTTPSErrors: true
       })
 
@@ -335,7 +335,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
 
         await page.waitForTimeout(500)
 
-        await page.click('#displayFieldBody > div > div > p > label > input')
+        await page.click('#displayFieldBody > tr > td:nth-child(1) > div > div > p > label > input')
 
         await page.waitForTimeout(500)
 
@@ -350,7 +350,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
         // 補助科目一覧画面に遷移確認
         expect(await page.url()).toBe('https://localhost:3000/subAccountCodeList')
       }
-      await browser.close()
+      // await browser.close()
     })
 
     test('登録した補助科目がある場合、画面確認', async () => {
@@ -371,7 +371,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       expect(res.text).toMatch(/test/i)
       expect(res.text).toMatch(/確認・変更する/i)
       expect(res.text).toMatch(/削除/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('補助科目登録画面「戻る」ボタン遷移確認（補助科目一覧画面に遷移）', async () => {
@@ -424,7 +424,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('一般ユーザ、契約ステータス：変更申込、利用可能', async () => {
@@ -435,7 +435,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
   })
 
@@ -467,7 +467,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('一般ユーザ、契約ステータス：変更受付、利用可能', async () => {
@@ -478,7 +478,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
   })
 

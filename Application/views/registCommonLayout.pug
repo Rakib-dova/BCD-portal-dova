@@ -65,10 +65,14 @@ block content
                                         
                           .columns.is-fullwidth
                             .column.is-fullwidth
-                              label(for= idForNameInput).input-label #{codeNameLabel}
-                              p(id= requiredTagName).input-label-required.input-label （必須）
                               .field.is-horizontal.is-invisible#displayInvisible
-                                .box#displayFieldBody
+                                .box
+                                  table.table
+                                    thead
+                                      td チェック
+                                      td 勘定科目コード
+                                      td 勘定科目名
+                                    tbody#displayFieldBody
 
 
   .modal#check-modal
@@ -99,7 +103,7 @@ block content
                 td
                   p#checksetAccountCodeInputId
               tr
-                td 補助科目名
+                td 勘定科目名
                 td
                   p#checksetAccountCodeNameInputId
       footer.modal-card-foot
@@ -120,10 +124,16 @@ block content
           a.button.is-danger.cancel-button(data-target='caution-modal') 確認
   if isRegistSubAccountCode
     template#searchResultAccountCode
-      .field.is-horizontal
-        .field-body
-          p.control
-            label.checkbox
-              input.inputCheckbox(type='checkbox' name='setAccountCodeId')
+      tr
+        td
+          .field.is-horizontal
+            .field-body
+              p.control
+                label.checkbox
+                  input.inputCheckbox(type='checkbox' name='setAccountCodeId')
+        td.columnAccountcode
+        |
+        td.columnAccountCodeName
+        |
 
   include footer

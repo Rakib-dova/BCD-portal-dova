@@ -37,7 +37,10 @@ document.getElementById('btnCheck').addEventListener('click', function (e) {
   }
 
   // 勘定科目名が未入力の場合
-  if (document.querySelector('#setSubAccountCodeNameInputId').value.length === 0) {
+  if (
+    document.querySelector('#setSubAccountCodeNameInputId').value.length === 0 ||
+    document.querySelector('#setSubAccountCodeNameInputId').value.trim().length === 0
+  ) {
     document.querySelector('#RequiredErrorMesageForName').innerHTML = '勘定科目名が未入力です。'
     document.querySelector('#RequiredErrorMesageForName').classList.remove('is-invisible')
     errorFlag = true
@@ -62,7 +65,10 @@ document.getElementById('btnCheck').addEventListener('click', function (e) {
         targetCheckbox = item
       }
     })
-    document.querySelector('#checksetAccountCodeInputId').innerText = targetCheckbox.parentElement.innerText
+    document.querySelector('#checksetAccountCodeInputId').innerText =
+      targetCheckbox.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(
+        '.columnAccountcode'
+      ).innerText
     document.querySelector('#checksetSubAccountCodeInputId').innerText =
       document.querySelector('#setSubAccountCodeInputId').value
     document.querySelector('#checksetSubAccountNameInputId').innerText = document.querySelector(
@@ -98,9 +104,8 @@ const displayAccountCode = function (accountCodeArr) {
   const searchResultAccountCode = document.querySelector('#searchResultAccountCode')
   accountCodeArr.forEach((item) => {
     const cloneSearchResultAccountCodeTemplate = document.importNode(searchResultAccountCode.content, true)
-    cloneSearchResultAccountCodeTemplate
-      .querySelector('.checkbox')
-      .append(`${item.accountCode} ${item.accountCodeName}`)
+    cloneSearchResultAccountCodeTemplate.querySelector('.columnAccountcode').innerText = item.accountCode
+    cloneSearchResultAccountCodeTemplate.querySelector('.columnAccountCodeName').innerText = item.accountCodeName
     cloneSearchResultAccountCodeTemplate.querySelector('.inputCheckbox').value = item.accountCodeId
     displayFieldBody.appendChild(cloneSearchResultAccountCodeTemplate)
   })
@@ -112,6 +117,13 @@ const displayAccountCode = function (accountCodeArr) {
 const inputEvent = () => {
   Array.prototype.forEach.call(document.querySelectorAll('.inputCheckbox'), (item) => {
     item.addEventListener('click', function () {
+      // POとの相談内容（削除はPO確認後）
+      // item選択時にもチェックができるようにするか。
+      // -------------------------------------------------------------------------------------------------------
+      // this.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.classList.toggle(
+      //   'is-selected'
+      // )
+      // -------------------------------------------------------------------------------------------------------
       const checkBox = document.querySelectorAll('.inputCheckbox')
       for (let idx = 0; idx < checkBox.length; idx++) {
         if (this !== checkBox[idx]) {
@@ -120,8 +132,36 @@ const inputEvent = () => {
       }
     })
   })
+  // POとの相談内容（削除はPO確認後）
+  // item選択時にもチェックができるようにするか。
+  // -------------------------------------------------------------------------------------------------------
+  // Array.prototype.forEach.call(document.querySelectorAll('#displayFieldBody > tr'), (item) => {
+  //   item.addEventListener('click', function () {
+  //     const $this = this
+  //     const $thisRowCheckbox = $this.querySelector('input')
+  //     if ($thisRowCheckbox.checked) {
+  //       $this.querySelector('input').checked = false
+  //     } else {
+  //       $this.querySelector('input').checked = true
+  //     }
+  //     const checkBox = document.querySelectorAll('.inputCheckbox')
+  //     for (let idx = 0; idx < checkBox.length; idx++) {
+  //       if ($thisRowCheckbox !== checkBox[idx]) {
+  //         checkBox[idx].checked = false
+  //       }
+  //     }
+  //     for (let idx = 0; idx < document.querySelectorAll('#displayFieldBody > tr').length; idx++) {
+  //       if ($this !== document.querySelectorAll('#displayFieldBody > tr')[idx]) {
+  //         document.querySelectorAll('#displayFieldBody > tr')[idx].classList.remove('is-selected')
+  //       }
+  //     }
+  //     $this.classList.toggle('is-selected')
+  //   })
+  // })
+  // -------------------------------------------------------------------------------------------------------
 }
 
+// 勘定科目コード検索が０けんの場合
 const displayNoAccountCode = function () {
   const displayFieldBody = document.querySelector('#displayFieldBody')
   const searchResultAccountCode = document.querySelector('#searchResultAccountCode')

@@ -158,6 +158,33 @@ describe('subAccountCodeControllerのテスト', () => {
       expect(result).toEqual(0)
     })
 
+    test('準正常：登録時、勘定科目が削除されたこと', async () => {
+      // 準備
+      // 勘定科目検索結果
+      accountCodefindOneSpy.mockReturnValue(null)
+
+      // DBから補助科目登録時、返す補助科目インスタンス
+      subAccountCodefindAllSpy.mockReturnValue([subAccountCodeDataResult])
+      subAccountCodeCreateSpy.mockReturnValue(subAccountCodeDataResult)
+
+      // transactionモックの用意
+      transactionSpy.mockReturnValue({ ...transaction })
+
+      // パラメータの用意
+      const values = {
+        accountCodeId: 'AB001',
+        subjectCode: 'AAA',
+        subjectName: '開発'
+      }
+
+      // 試験実施
+      const result = await subAccountCodeController.insert(contractNormal, values)
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(-1)
+    })
+
     test('異常：重複された補助科目登録する時', async () => {
       // 準備
       // 勘定科目検索結果

@@ -67,7 +67,7 @@ const cbGetIndex = async (req, res, next) => {
     idForCodeInput: 'setSubAccountCodeInputId',
     idForNameInput: 'setSubAccountCodeNameInputId',
     modalTitle: '補助科目設定確認',
-    backUrl: '/portal',
+    backUrl: '/subAccountCodeList',
     logTitle: '補助科目登録',
     logTitleEng: 'REGIST SUB ACCOUNT CODE',
     isRegistSubAccountCode: true,

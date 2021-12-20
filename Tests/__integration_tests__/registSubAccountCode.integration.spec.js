@@ -196,6 +196,14 @@ describe('補助科目作成のインテグレーションテスト', () => {
         }
       })
       await db.Order.destroy({ where: { tenantId: testTenantId } })
+      const v4 = require('uuid').v4
+      const testAccountCode = new db.AccountCode({
+        accountCodeId: v4(),
+        contractId: contract.contractId,
+        accountCodeName: 'インテグレーションテスト',
+        accountCode: 'INTE0001'
+      })
+      await testAccountCode.save()
       if (contract.dataValues.contractStatus !== '00') {
         await db.Contract.update(
           {
@@ -235,8 +243,6 @@ describe('補助科目作成のインテグレーションテスト', () => {
       expect(res.text).toMatch(/補助科目名/i)
     })
 
-    // バリデーションチェック
-
     // 補助科目コード未入力
     test('バリデーションチェック、補助科目コード未入力', async () => {
       const puppeteer = require('puppeteer')
@@ -249,8 +255,11 @@ describe('補助科目作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registSubAccountCode')
       if (page.url() === 'https://localhost:3000/registSubAccountCode') {
-        await page.type('#setSubAccountCodeInputId', '')
+        await page.type('#setSubAccountCodeInputId', ' ')
         await page.type('#setSubAccountCodeNameInputId', 'インテグレーションテスト')
+        await page.click('#btnSearchAccountCode')
+        await page.waitForTimeout(1000)
+        await page.click('#displayFieldBody > tr:nth-child(1) > td:nth-child(1) > div > div > p > label > input')
 
         await page.waitForTimeout(500)
 
@@ -370,6 +379,9 @@ describe('補助科目作成のインテグレーションテスト', () => {
       if (page.url() === 'https://localhost:3000/registSubAccountCode') {
         await page.evaluate(() => (document.querySelector('#setSubAccountCodeInputId').value = 'test1234567890'))
         await page.type('#setSubAccountCodeNameInputId', 'test')
+        await page.click('#btnSearchAccountCode')
+        await page.waitForTimeout(1000)
+        await page.click('#displayFieldBody > tr:nth-child(1) > td:nth-child(1) > div > div > p > label > input')
 
         await page.waitForTimeout(500)
 
@@ -399,7 +411,9 @@ describe('補助科目作成のインテグレーションテスト', () => {
       if (page.url() === 'https://localhost:3000/registSubAccountCode') {
         await page.type('#setSubAccountCodeInputId', 'テスト')
         await page.type('#setSubAccountCodeNameInputId', 'インテグレーションテスト')
-
+        await page.click('#btnSearchAccountCode')
+        await page.waitForTimeout(1000)
+        await page.click('#displayFieldBody > tr:nth-child(1) > td:nth-child(1) > div > div > p > label > input')
         await page.waitForTimeout(500)
 
         await page.click('#btnCheck')
@@ -427,8 +441,10 @@ describe('補助科目作成のインテグレーションテスト', () => {
       await page.goto('https://localhost:3000/registSubAccountCode')
       if (page.url() === 'https://localhost:3000/registSubAccountCode') {
         await page.type('#setSubAccountCodeInputId', 'test')
-        await page.type('#setSubAccountCodeNameInputId', '')
-
+        await page.type('#setSubAccountCodeNameInputId', ' ')
+        await page.click('#btnSearchAccountCode')
+        await page.waitForTimeout(1000)
+        await page.click('#displayFieldBody > tr:nth-child(1) > td:nth-child(1) > div > div > p > label > input')
         await page.waitForTimeout(500)
 
         await page.click('#btnCheck')
@@ -491,7 +507,9 @@ describe('補助科目作成のインテグレーションテスト', () => {
             (document.querySelector('#setSubAccountCodeNameInputId').value =
               'あいうえおabcdefg123456789あいうえおabcdefg123456789')
         )
-
+        await page.click('#btnSearchAccountCode')
+        await page.waitForTimeout(1000)
+        await page.click('#displayFieldBody > tr:nth-child(1) > td:nth-child(1) > div > div > p > label > input')
         await page.waitForTimeout(500)
 
         await page.click('#btnCheck')

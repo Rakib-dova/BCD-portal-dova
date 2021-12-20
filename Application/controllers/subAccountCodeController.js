@@ -20,7 +20,7 @@ module.exports = {
     // 関数開始表示
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     try {
-      const t = await db.sequelize.transaction()
+      const insertSubAcoountCodeTransaction = await db.sequelize.transaction()
       let duplicatedFlag = false
       // accountCodeId取得
       const accountCodeSearchResult = await AccountCode.findOne(
@@ -31,9 +31,12 @@ module.exports = {
           }
         },
         {
-          transaction: t
+          transaction: insertSubAcoountCodeTransaction
         }
       )
+      if (accountCodeSearchResult === null) {
+        return -1
+      }
       const accountCodeId = accountCodeSearchResult.accountCodeId
       // 重複コード検索
       const resultSearch = await SubAccountCode.findAll(
@@ -44,7 +47,7 @@ module.exports = {
           }
         },
         {
-          transaction: t
+          transaction: insertSubAcoountCodeTransaction
         }
       )
 
@@ -67,7 +70,7 @@ module.exports = {
           subAccountCodeId: uuidV4()
         },
         {
-          transaction: t
+          transaction: insertSubAcoountCodeTransaction
         }
       )
 
@@ -75,10 +78,10 @@ module.exports = {
       logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
       // DB保存失敗したらモデルAccountCodeインスタンスではない
       if (resultToInsertSubAccountCode instanceof SubAccountCode) {
-        t.commit()
+        insertSubAcoountCodeTransaction.commit()
         return 0
       } else {
-        t.rollback()
+        insertSubAcoountCodeTransaction.rollback()
         return -1
       }
     } catch (error) {
