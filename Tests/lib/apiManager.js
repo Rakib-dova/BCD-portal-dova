@@ -95,7 +95,7 @@ const axios = {
 
     const businessId = paramateter.businessId || null
     url = businessId !== null ? 'bussinessId' : url
-    console.log(url)
+    // console.log(url)
     switch (url) {
       case 'bussinessId': {
         switch (businessId) {
@@ -317,7 +317,7 @@ const axios = {
             Document: [dcouments.Document[0], dcouments.Document[8]]
           }
         } else if (
-          paramateter.state.join('') === 'DELIVEREDACCEPTEDPAID_CONFIRMED' &&
+          paramateter.state.join('') === 'DELIVEREDACCEPTEDPAID_UNCONFIRMEDPAID_CONFIRMED' &&
           paramateter.minissuedate === '9999-99-99' &&
           paramateter.maxissuedate === '9999-99-99'
         ) {
