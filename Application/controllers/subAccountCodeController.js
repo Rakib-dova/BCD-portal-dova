@@ -19,22 +19,33 @@ module.exports = {
     // 関数開始表示
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     try {
+      const t = await db.sequelize.transaction()
       let duplicatedFlag = false
       // accountCodeId取得
-      const accountCodeSearchResult = await AccountCode.findOne({
-        where: {
-          contractId: uploadContractId,
-          accountCode: values.accountCode
+      const accountCodeSearchResult = await AccountCode.findOne(
+        {
+          where: {
+            contractId: uploadContractId,
+            accountCodeId: values.accountCodeId
+          }
+        },
+        {
+          transaction: t
         }
-      })
+      )
       const accountCodeId = accountCodeSearchResult.accountCodeId
       // 重複コード検索
-      const resultSearch = await SubAccountCode.findAll({
-        where: {
-          subjectCode: values.subjectCode,
-          accountCodeId: accountCodeId
+      const resultSearch = await SubAccountCode.findAll(
+        {
+          where: {
+            subjectCode: values.subjectCode,
+            accountCodeId: accountCodeId
+          }
+        },
+        {
+          transaction: t
         }
-      })
+      )
 
       // 重複コード検索（sequelize大小文字区別しないため）
       resultSearch.forEach((item) => {
@@ -47,19 +58,26 @@ module.exports = {
         return 1
       }
       // 重複コードない場合DBに保存する。
-      const resultToInsertSubAccountCode = await SubAccountCode.create({
-        accountCodeId: accountCodeId,
-        subjectName: values.subjectName,
-        subjectCode: values.subjectCode,
-        subAccountCodeId: uuidV4()
-      })
+      const resultToInsertSubAccountCode = await SubAccountCode.create(
+        {
+          accountCodeId: accountCodeId,
+          subjectName: values.subjectName,
+          subjectCode: values.subjectCode,
+          subAccountCodeId: uuidV4()
+        },
+        {
+          transaction: t
+        }
+      )
 
       // 関数終了表示
       logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
       // DB保存失敗したらモデルAccountCodeインスタンスではない
       if (resultToInsertSubAccountCode instanceof SubAccountCode) {
+        t.commit()
         return 0
       } else {
+        t.rollback()
         return -1
       }
     } catch (error) {

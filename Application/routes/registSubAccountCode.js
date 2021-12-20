@@ -52,6 +52,12 @@ const cbGetIndex = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
+  const registedAccountCodeList = await accountCodeController.getAccountCodeList(contract.contractId)
+
+  if (registedAccountCodeList.length === 0) {
+    req.flash('noti', ['補助科目登録', '事前に勘定科目登録する必要があります。'])
+  }
+
   res.render('registSubAccountCode', {
     codeName: '補助科目',
     codeLabel: '補助科目コード',
@@ -115,10 +121,7 @@ const cbPostGetAccountCode = async (req, res, next) => {
   const targetAccountCode = req.body.accountCode ?? ''
   const targetAccountCodeName = req.body.accountCodeName ?? ''
 
-  if (targetAccountCode.length === 0 && targetAccountCodeName.length === 0) {
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetAccountCode')
-    return res.status(400).send('400 Bad Request')
-  } else if (targetAccountCode.length > 10 || targetAccountCodeName.length > 40) {
+  if (targetAccountCode.length > 10 || targetAccountCodeName.length > 40) {
     logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetAccountCode')
     return res.status(400).send('400 Bad Request')
   }
@@ -166,13 +169,13 @@ const cbPostIndex = async (req, res, next) => {
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
   // 勘定科目accountCodeId
-  const accountCode = req.body.setAccountCodeInputId
-  // 補助科目
+  const accountCodeId = req.body.setAccountCodeId
+  // 補助科目コード
   const subAccountCodeId = req.body.setSubAccountCodeInputId
   // 補助科目名
   const subAccountCodeName = req.body.setSubAccountCodeNameInputId
   const values = {
-    accountCode: accountCode,
+    accountCodeId: accountCodeId,
     subjectCode: subAccountCodeId,
     subjectName: subAccountCodeName
   }
