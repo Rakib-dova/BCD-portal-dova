@@ -193,5 +193,79 @@ module.exports = {
       await t.rollback()
       return error
     }
+  },
+  // 勘定科目検索
+  // 使用者から受けた、勘定科目コードや勘定科目名で勘定科目を検索する。
+  searchAccountCode: async (contractId, accountCode, accountCodeName) => {
+    try {
+      let userCustomizeWhere
+      // 検索キーがない場合、全部検索
+      if (accountCode.length !== 0 && accountCodeName.length !== 0) {
+        userCustomizeWhere = {
+          contractId: contractId,
+          [Op.or]: [
+            {
+              accountCode: {
+                [Op.like]: `%${accountCode}%`
+              }
+            },
+            {
+              accountCodeName: {
+                [Op.like]: `%${accountCodeName}%`
+              }
+            }
+          ]
+        }
+        // 検索キーが勘定科目コードのみの場合
+      } else if (accountCode.length !== 0 && accountCodeName.length === 0) {
+        userCustomizeWhere = {
+          contractId: contractId,
+          [Op.or]: [
+            {
+              accountCode: {
+                [Op.like]: `%${accountCode}%`
+              }
+            }
+          ]
+        }
+        // 検索キーが勘定科目名のみの場合
+      } else if (accountCode.length === 0 && accountCodeName.length !== 0) {
+        userCustomizeWhere = {
+          contractId: contractId,
+          [Op.or]: [
+            {
+              accountCodeName: {
+                [Op.like]: `%${accountCodeName}%`
+              }
+            }
+          ]
+        }
+      }
+      // 検索
+      const result = await AccountCode.findAll({
+        where: userCustomizeWhere
+      })
+      // 勘定科目コードで昇順整列する。
+      result.sort((next, prev) => {
+        return next.accountCode - prev.accountCode
+      })
+      // 検索結果を画面表示するため、加工
+      return result.map((item) => {
+        return {
+          accountCodeId: item.accountCodeId,
+          accountCode: item.accountCode,
+          accountCodeName: item.accountCodeName
+        }
+      })
+    } catch (error) {
+      logger.error({
+        contractId: contractId,
+        accountCode: accountCode,
+        accountCodeName: accountCodeName,
+        stack: error.stack,
+        status: 0
+      })
+      return error
+    }
   }
 }

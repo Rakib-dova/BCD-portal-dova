@@ -17,25 +17,6 @@ block content
                     .column.is-fullwidth
                       .field.card
                         .card-content
-                          if isRegistSubAccountCode
-                            label.input-label 
-                            | #{parentCodeLabel}  
-                            .control
-                              input.input(type="text" id= parentIdForCodeInput name= parentIdForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum) 
-                            label.input-label
-                            | #{parentCodeNameLabel}  
-                            .control
-                              input.input(type="text" id= parentIdForNameInput name= parentIdForNameInput value= valueForNameInput maxlength=40 placeholder='文字列（40桁）') 
-                            .field.is-grouped.is-grouped-centered.mt-3
-                              .control
-                                div.button-area
-                                  a.button.is-danger.mr-6#btnClear クリア
-                                  a.button.is-link#btnSearchAccountCode 検索
-                            .field.is-horizontal.is-invisible
-                              .field-label.is-normal
-                              .field-body.level
-                                .container#displaySearchAccountCode
-
                           .field
                             label(for= idForCodeInput).input-label #{codeLabel}
                             p(id= requiredTagCode).input-label-required.input-label （必須）
@@ -58,7 +39,41 @@ block content
                               .column
                                 div.button-area
                                   a.button#return-btn.cancel-button.mr-6(href= backUrl) 戻る
-                                  a.button.is-link.success-button#btnCheck 確認
+                                  if isRegistSubAccountCode
+                                    a.button.is-link.success-button#btnCheck(disabled) 確認
+                                  else
+                                    a.button.is-link.success-button#btnCheck 確認
+                        if isRegistSubAccountCode
+                          .columns
+                            .column.is-5
+                                label.input-label 
+                                | #{parentCodeLabel}  
+                                .control
+                                  input.input(type="text" id= parentIdForCodeInput name= parentIdForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum) 
+                                label.input-label
+                                | #{parentCodeNameLabel}  
+                                .control
+                                  input.input(type="text" id= parentIdForNameInput name= parentIdForNameInput value= valueForNameInput maxlength=40 placeholder='文字列（40桁）') 
+                            .column.is-4
+                                .field.is-grouped.is-grouped-centered
+                                  .control
+                                    div.button-area
+                                      .column
+                                      .column.mt-4
+                                        a.button.is-link.mr-6#btnSearchAccountCode 検索
+                                        a.button.is-danger#btnClear クリア
+                                        
+                          .columns.is-fullwidth
+                            .column.is-fullwidth
+                              .field.is-horizontal.is-invisible#displayInvisible
+                                .box
+                                  table.table
+                                    thead
+                                      td チェック
+                                      td 勘定科目コード
+                                      td 勘定科目名
+                                    tbody#displayFieldBody
+
 
   .modal#check-modal
     .modal-background.cancel-button(data-target='check-modal')
@@ -69,17 +84,56 @@ block content
       section.modal-card-body
         table.table.is-striped.is-bordered.is-fullwidth
           tbody
-            tr
-              td 勘定科目コード
-              td
-               p#checksetAccountCodeInputId 　
-          tr
-            td 勘定科目名
-            td
-              p#checksetAccountCodeNameInputId 　
+            if (isRegistSubAccountCode)
+              tr
+                td #{checkModalLabel1}
+                td
+                  p(id= pTagForcheckInput1)
+              tr
+                td #{checkModalLabel2}
+                td
+                  p(id= pTagForcheckInput2)
+              tr
+                td #{checkModalLabel3}
+                td
+                  p(id= pTagForcheckInput3)
+            else 
+              tr
+                td 勘定科目コード
+                td
+                  p#checksetAccountCodeInputId
+              tr
+                td 勘定科目名
+                td
+                  p#checksetAccountCodeNameInputId
       footer.modal-card-foot
         div.button-area
           a.button#cancel-btn.cancel-button(data-target='check-modal') キャンセル
           a.button.is-success#submit 登録
+  
+  .modal#caution-modal
+    .modal-background.cancel-button(data-target='caution-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head
+        p.modal-card-title.title.mb-0 
+        button.delete(data-target='caution-modal')
+      section.modal-card-body
+        p#caution-message
+      footer.modal-card-foot
+        div.button-area
+          a.button.is-danger.cancel-button(data-target='caution-modal') 確認
+  if isRegistSubAccountCode
+    template#searchResultAccountCode
+      tr
+        td
+          .field.is-horizontal
+            .field-body
+              p.control
+                label.checkbox
+                  input.inputCheckbox(type='checkbox' name='setAccountCodeId')
+        td.columnAccountcode
+        |
+        td.columnAccountCodeName
+        |
 
   include footer
