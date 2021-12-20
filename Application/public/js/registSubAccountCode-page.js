@@ -98,9 +98,8 @@ const displayAccountCode = function (accountCodeArr) {
   const searchResultAccountCode = document.querySelector('#searchResultAccountCode')
   accountCodeArr.forEach((item) => {
     const cloneSearchResultAccountCodeTemplate = document.importNode(searchResultAccountCode.content, true)
-    cloneSearchResultAccountCodeTemplate
-      .querySelector('.checkbox')
-      .append(`${item.accountCode} ${item.accountCodeName}`)
+    cloneSearchResultAccountCodeTemplate.querySelector('.columnAccountcode').innerText = item.accountCode
+    cloneSearchResultAccountCodeTemplate.querySelector('.columnAccountCodeName').innerText = item.accountCodeName
     cloneSearchResultAccountCodeTemplate.querySelector('.inputCheckbox').value = item.accountCodeId
     displayFieldBody.appendChild(cloneSearchResultAccountCodeTemplate)
   })
@@ -112,12 +111,38 @@ const displayAccountCode = function (accountCodeArr) {
 const inputEvent = () => {
   Array.prototype.forEach.call(document.querySelectorAll('.inputCheckbox'), (item) => {
     item.addEventListener('click', function () {
+      this.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.classList.toggle(
+        'is-selected'
+      )
       const checkBox = document.querySelectorAll('.inputCheckbox')
       for (let idx = 0; idx < checkBox.length; idx++) {
         if (this !== checkBox[idx]) {
           checkBox[idx].checked = false
         }
       }
+    })
+  })
+  Array.prototype.forEach.call(document.querySelectorAll('#displayFieldBody > tr'), (item) => {
+    item.addEventListener('click', function () {
+      const $this = this
+      const $thisRowCheckbox = $this.querySelector('input')
+      if ($thisRowCheckbox.checked) {
+        $this.querySelector('input').checked = false
+      } else {
+        $this.querySelector('input').checked = true
+      }
+      const checkBox = document.querySelectorAll('.inputCheckbox')
+      for (let idx = 0; idx < checkBox.length; idx++) {
+        if ($thisRowCheckbox !== checkBox[idx]) {
+          checkBox[idx].checked = false
+        }
+      }
+      for (let idx = 0; idx < document.querySelectorAll('#displayFieldBody > tr').length; idx++) {
+        if ($this !== document.querySelectorAll('#displayFieldBody > tr')[idx]) {
+          document.querySelectorAll('#displayFieldBody > tr')[idx].classList.remove('is-selected')
+        }
+      }
+      $this.classList.toggle('is-selected')
     })
   })
 }
