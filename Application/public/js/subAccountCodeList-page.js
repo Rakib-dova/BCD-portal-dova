@@ -27,7 +27,13 @@ window.onload = () => {
   })
 }
 
-Array.prototype.forEach.call(document.querySelectorAll('.deleteAccountCodeBtn'), (item) => {
+Array.prototype.forEach.call(document.querySelectorAll('.deleteSubAccountCodeBtn'), (item) => {
+  item.addEventListener('click', () => {
+    alert('現在機能追加中です。')
+  })
+})
+
+Array.prototype.forEach.call(document.querySelectorAll('.checkChangeSubAccountCodeBtn'), (item) => {
   item.addEventListener('click', () => {
     alert('現在機能追加中です。')
   })
