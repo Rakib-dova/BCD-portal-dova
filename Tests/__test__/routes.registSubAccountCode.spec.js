@@ -148,7 +148,7 @@ describe('registSubAccountCodeのテスト', () => {
         idForCodeInput: 'setSubAccountCodeInputId',
         idForNameInput: 'setSubAccountCodeNameInputId',
         modalTitle: '補助科目設定確認',
-        backUrl: '/portal',
+        backUrl: '/subAccountCodeList',
         logTitle: '補助科目登録',
         logTitleEng: 'REGIST SUB ACCOUNT CODE',
         isRegistSubAccountCode: true,
@@ -676,7 +676,7 @@ describe('registSubAccountCodeのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでportalが呼ばれ「る」
-      expect(response.getHeader('Location')).toEqual('/portal')
+      expect(response.getHeader('Location')).toEqual('/subAccountCodeList')
       expect(request.flash).toHaveBeenCalledWith('info', '補助科目を登録しました。')
     })
 

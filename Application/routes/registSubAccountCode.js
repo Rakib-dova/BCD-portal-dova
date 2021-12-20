@@ -67,7 +67,7 @@ const cbGetIndex = async (req, res, next) => {
     idForCodeInput: 'setSubAccountCodeInputId',
     idForNameInput: 'setSubAccountCodeNameInputId',
     modalTitle: '補助科目設定確認',
-    backUrl: '/portal',
+    backUrl: '/subAccountCodeList',
     logTitle: '補助科目登録',
     logTitleEng: 'REGIST SUB ACCOUNT CODE',
     isRegistSubAccountCode: true,
@@ -189,7 +189,7 @@ const cbPostIndex = async (req, res, next) => {
     case 0:
       // 正常に登録ができた場合
       req.flash('info', '補助科目を登録しました。')
-      res.redirect('/portal')
+      res.redirect('/subAccountCodeList')
       break
     case 1:
       req.flash('noti', ['補助科目登録', 'すでに登録されている値です。'])

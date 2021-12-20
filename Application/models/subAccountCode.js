@@ -1,5 +1,5 @@
 'use strict'
-const { Model } = require('sequelize')
+const { Model, QueryTypes } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class SubAccountCode extends Model {
     /**
@@ -16,6 +16,24 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'cascade',
         onUpdate: 'cascade'
       })
+    }
+
+    static async getsubAccountCodeList(contract) {
+      try {
+        const result = await sequelize.query(
+          'SELECT subjectName, subjectCode, accountCodeName FROM dbo.SubAccountCode INNER JOIN dbo.AccountCode ON dbo.SubAccountCode.accountCodeId = dbo.AccountCode.accountCodeId  WHERE dbo.AccountCode.contractId = ?  ORDER BY subjectCode',
+          { replacements: [contract.dataValues.contractId], type: QueryTypes.SELECT }
+        )
+
+        return result
+      } catch (error) {
+        // エラーが発生した場合、エラーObjectを渡す。
+        return error
+      }
+    }
+
+    static async test(contract) {
+      return []
     }
   }
   SubAccountCode.init(

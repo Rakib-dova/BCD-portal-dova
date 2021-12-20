@@ -121,7 +121,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/勘定科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：登録申込、利用可能', async () => {
@@ -133,7 +133,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/勘定科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
   })
 
@@ -166,7 +166,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/勘定科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：登録受付、利用可能', async () => {
@@ -178,7 +178,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/勘定科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
   })
 
@@ -213,7 +213,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/勘定科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：契約中、利用可能', async () => {
@@ -225,7 +225,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/勘定科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
 
     // 機能・遷移確認
@@ -239,10 +239,10 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       expect(res.text).toMatch(/勘定科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
       expect(res.text).toMatch(/現在、勘定科目はありません。新規登録するボタンから登録を行ってください。/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
 
-    test('「←Homeへ戻る」リンク遷移確認（ポータル画面に遷移）', async () => {
+    test('「←勘定科目一括作成」リンク遷移確認（勘定科目一括作成画面に遷移）', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -257,8 +257,8 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
         await page.waitForTimeout(500)
 
-        // ポータル画面に遷移確認
-        expect(await page.url()).toBe('https://localhost:3000/portal')
+        // 勘定科目一括作成画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/uploadAccount')
       }
       await browser.close()
     })
@@ -331,7 +331,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       expect(res.text).toMatch(/最新更新日/i)
       expect(res.text).toMatch(/確認・変更する/i)
       expect(res.text).toMatch(/削除/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
 
     test('勘定科目登録画面「戻る」ボタン遷移確認（勘定科目一覧画面に遷移）', async () => {
@@ -384,7 +384,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/勘定科目一覧/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：変更申込、利用可能', async () => {
@@ -395,7 +395,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/勘定科目一覧/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
   })
 
@@ -427,7 +427,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/勘定科目一覧/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：変更受付、利用可能', async () => {
@@ -438,7 +438,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/勘定科目一覧/i)
-      expect(res.text).toMatch(/←Homeへ戻る/i)
+      expect(res.text).toMatch(/←勘定科目一括作成/i)
     })
   })
 

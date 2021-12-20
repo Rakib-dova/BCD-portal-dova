@@ -240,6 +240,10 @@ module.exports = {
             }
           ]
         }
+      } else {
+        userCustomizeWhere = {
+          contractId: contractId
+        }
       }
       // 検索
       const result = await AccountCode.findAll({

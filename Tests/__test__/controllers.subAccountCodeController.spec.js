@@ -7,6 +7,7 @@ const logger = require('../../Application/lib/logger')
 const AccountCode = require('../../Application/models').AccountCode
 const SubAccountCode = require('../../Application/models').SubAccountCode
 const accountCodeMock = require('../mockDB/AccountCode_Table')
+
 const sequelize = require('../../Application/models').sequelize
 const codeAccountId = '5a927284-57c9-4594-9ed8-472d261a6102'
 const subAccountCodeId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
@@ -40,24 +41,33 @@ const transaction = {
   LOCK: {}
 }
 
-let errorSpy, contractId, findAllSpy, infoSpy, createSpy, accountCodefindOneSpy, transactionSpy
+let errorSpy,
+  contractId,
+  subAccountCodefindAllSpy,
+  infoSpy,
+  subAccountCodeCreateSpy,
+  accountCodefindOneSpy,
+  transactionSpy,
+  SubAccountCodeGetsubAccountCodeListSpy
 
 describe('subAccountCodeControllerのテスト', () => {
   beforeEach(() => {
-    createSpy = jest.spyOn(SubAccountCode, 'create')
-    findAllSpy = jest.spyOn(SubAccountCode, 'findAll')
+    subAccountCodeCreateSpy = jest.spyOn(SubAccountCode, 'create')
+    subAccountCodefindAllSpy = jest.spyOn(SubAccountCode, 'findAll')
     accountCodefindOneSpy = jest.spyOn(AccountCode, 'findOne')
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
     transactionSpy = jest.spyOn(sequelize, 'transaction')
+    SubAccountCodeGetsubAccountCodeListSpy = jest.spyOn(SubAccountCode, 'getsubAccountCodeList')
   })
   afterEach(() => {
-    createSpy.mockRestore()
-    findAllSpy.mockRestore()
+    subAccountCodeCreateSpy.mockRestore()
+    subAccountCodefindAllSpy.mockRestore()
     accountCodefindOneSpy.mockRestore()
     errorSpy.mockRestore()
     infoSpy.mockRestore()
     transactionSpy.mockRestore()
+    SubAccountCodeGetsubAccountCodeListSpy.mockRestore()
   })
 
   contractId = '87654321-fbe6-4864-a866-7a3ce9aa517e'
@@ -81,6 +91,45 @@ describe('subAccountCodeControllerのテスト', () => {
     }
   }
 
+  const subAccountCodeListResult = [
+    {
+      subjectCode: 'TEST1',
+      subjectName: '補助科目1',
+      accountCodeName: '勘定科目1'
+    },
+    {
+      subjectCode: 'TEST2',
+      subjectName: '補助科目2',
+      accountCodeName: '勘定科目2'
+    },
+    {
+      subjectCode: 'TEST3',
+      subjectName: '補助科目3',
+      accountCodeName: '勘定科目3'
+    }
+  ]
+
+  const subAccountControllerResult = [
+    {
+      no: 1,
+      subjectCode: 'TEST1',
+      subjectName: '補助科目1',
+      accountCodeName: '勘定科目1'
+    },
+    {
+      no: 2,
+      subjectCode: 'TEST2',
+      subjectName: '補助科目2',
+      accountCodeName: '勘定科目2'
+    },
+    {
+      no: 3,
+      subjectCode: 'TEST3',
+      subjectName: '補助科目3',
+      accountCodeName: '勘定科目3'
+    }
+  ]
+
   describe('insert', () => {
     test('正常', async () => {
       // 準備
@@ -88,8 +137,8 @@ describe('subAccountCodeControllerのテスト', () => {
       accountCodefindOneSpy.mockReturnValue(accountCodeMock[0])
 
       // DBから補助科目登録時、返す補助科目インスタンス
-      findAllSpy.mockReturnValue(dbSubAccountCodeTable)
-      createSpy.mockReturnValue(subAccountCodeDataResult)
+      subAccountCodefindAllSpy.mockReturnValue(dbSubAccountCodeTable)
+      subAccountCodeCreateSpy.mockReturnValue(subAccountCodeDataResult)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })
@@ -109,14 +158,41 @@ describe('subAccountCodeControllerのテスト', () => {
       expect(result).toEqual(0)
     })
 
+    test('準正常：登録時、勘定科目が削除されたこと', async () => {
+      // 準備
+      // 勘定科目検索結果
+      accountCodefindOneSpy.mockReturnValue(null)
+
+      // DBから補助科目登録時、返す補助科目インスタンス
+      subAccountCodefindAllSpy.mockReturnValue([subAccountCodeDataResult])
+      subAccountCodeCreateSpy.mockReturnValue(subAccountCodeDataResult)
+
+      // transactionモックの用意
+      transactionSpy.mockReturnValue({ ...transaction })
+
+      // パラメータの用意
+      const values = {
+        accountCodeId: 'AB001',
+        subjectCode: 'AAA',
+        subjectName: '開発'
+      }
+
+      // 試験実施
+      const result = await subAccountCodeController.insert(contractNormal, values)
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(-1)
+    })
+
     test('異常：重複された補助科目登録する時', async () => {
       // 準備
       // 勘定科目検索結果
       accountCodefindOneSpy.mockReturnValue(accountCodeMock[0])
 
       // DBから補助科目登録時、返す補助科目インスタンス
-      findAllSpy.mockReturnValue([subAccountCodeDataResult])
-      createSpy.mockReturnValue(subAccountCodeDataResult)
+      subAccountCodefindAllSpy.mockReturnValue([subAccountCodeDataResult])
+      subAccountCodeCreateSpy.mockReturnValue(subAccountCodeDataResult)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })
@@ -141,9 +217,9 @@ describe('subAccountCodeControllerのテスト', () => {
       // 勘定科目検索結果
       accountCodefindOneSpy.mockReturnValue(accountCodeMock[0])
 
-      // DBから補助科目登録時、返す補助科目インスタンス
-      findAllSpy.mockReturnValue([])
-      createSpy.mockReturnValue(null)
+      // DBから補助科目登録時、返す補助科目インスタンスがnull
+      subAccountCodefindAllSpy.mockReturnValue([])
+      subAccountCodeCreateSpy.mockReturnValue(null)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })
@@ -171,8 +247,8 @@ describe('subAccountCodeControllerのテスト', () => {
         throw dbError
       })
       // DBから補助科目登録時、返す補助科目インスタンス
-      findAllSpy.mockReturnValue([])
-      createSpy.mockReturnValue(null)
+      subAccountCodefindAllSpy.mockReturnValue([])
+      subAccountCodeCreateSpy.mockReturnValue(null)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })
@@ -202,8 +278,8 @@ describe('subAccountCodeControllerのテスト', () => {
       accountCodefindOneSpy.mockReturnValue(accountCodeMock[0])
       // 重複コード検索時、エラーが発生する場合
       const dbError = new Error()
-      findAllSpy.mockReturnValue(dbError)
-      createSpy.mockReturnValue(null)
+      subAccountCodefindAllSpy.mockReturnValue(dbError)
+      subAccountCodeCreateSpy.mockReturnValue(null)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })
@@ -233,8 +309,8 @@ describe('subAccountCodeControllerのテスト', () => {
       accountCodefindOneSpy.mockReturnValue(accountCodeMock[0])
       // DB登録時、エラーが発生する場合
       const dbError = new Error()
-      findAllSpy.mockReturnValue([])
-      createSpy.mockReturnValue(dbError)
+      subAccountCodefindAllSpy.mockReturnValue([])
+      subAccountCodeCreateSpy.mockReturnValue(dbError)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })
@@ -252,6 +328,40 @@ describe('subAccountCodeControllerのテスト', () => {
       // 期待結果
       // 想定したデータがReturnされていること
       expect(result).toEqual(-1)
+    })
+  })
+
+  describe('getSubAccountCodeList', () => {
+    test('正常', async () => {
+      // 準備
+      // 勘定科目検索結果
+      SubAccountCodeGetsubAccountCodeListSpy.mockReturnValue(subAccountCodeListResult)
+
+      // 試験実施
+      const result = await subAccountCodeController.getSubAccountCodeList()
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(subAccountControllerResult)
+    })
+
+    test('異常：DBエラー', async () => {
+      // 準備
+      // 勘定科目検索結果
+      const dbError = new Error()
+      SubAccountCodeGetsubAccountCodeListSpy.mockImplementation(() => {
+        throw dbError
+      })
+
+      // 試験実施
+      await subAccountCodeController.getSubAccountCodeList()
+
+      // 期待結果
+
+      expect(errorSpy).toHaveBeenCalledWith({
+        stack: expect.anything(),
+        status: 0
+      })
     })
   })
 })

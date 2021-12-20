@@ -9,7 +9,7 @@ jest.setTimeout(60000) // jestのタイムアウトを60秒とする
 
 const getCookies = require('./getCookies')
 
-describe('補助科目作成のインテグレーションテスト', () => {
+describe('補助科目一覧のインテグレーションテスト', () => {
   let acCookies
   let userCookies
   let testTenantId
@@ -39,10 +39,10 @@ describe('補助科目作成のインテグレーションテスト', () => {
   })
 
   describe('1.契約ステータス：未登録', () => {
-    // 利用登録をしていないため、補助科目作成ページ利用できない
+    // 利用登録をしていないため、補助科目一覧ページ利用できない
     test('管理者、契約ステータス：未登録、利用不可', async () => {
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(500)
 
@@ -50,10 +50,9 @@ describe('補助科目作成のインテグレーションテスト', () => {
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
-    // 利用登録をしていないため、補助科目作成ページ利用できない
     test('一般ユーザ、契約ステータス：未登録、利用不可', async () => {
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(500)
 
@@ -112,36 +111,34 @@ describe('補助科目作成のインテグレーションテスト', () => {
   })
 
   describe('3.契約ステータス：登録申込', () => {
-    // テナントステータスが「新規申込」、補助科目作成ページ利用可能
+    // テナントステータスが「新規申込」、補助科目一覧ページ利用可能
     test('管理者、契約ステータス：登録申込、利用可能', async () => {
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/補助科目/i)
-      expect(res.text).toMatch(/検索/i)
-      expect(res.text).toMatch(/補助科目コード/i)
-      expect(res.text).toMatch(/補助科目名/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('一般ユーザ、契約ステータス：登録申込、利用可能', async () => {
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/補助科目/i)
-      expect(res.text).toMatch(/検索/i)
-      expect(res.text).toMatch(/補助科目コード/i)
-      expect(res.text).toMatch(/補助科目名/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
   })
 
   describe('4.契約ステータス：登録受付', () => {
-    // テナントステータスが「新規受付」、補助科目作成ページ利用可能
+    // テナントステータスが「新規受付」、補助科目一覧ページ利用可能
     test('管理者、契約ステータス：登録受付、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -162,33 +159,31 @@ describe('補助科目作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/補助科目/i)
-      expect(res.text).toMatch(/検索/i)
-      expect(res.text).toMatch(/補助科目コード/i)
-      expect(res.text).toMatch(/補助科目名/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('一般ユーザ、契約ステータス：登録受付、利用可能', async () => {
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/補助科目/i)
-      expect(res.text).toMatch(/検索/i)
-      expect(res.text).toMatch(/補助科目コード/i)
-      expect(res.text).toMatch(/補助科目名/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
   })
 
   describe('5.契約ステータス：契約中', () => {
-    // テナントステータスが「契約中」、補助科目作成ページ利用可能
+    // テナントステータスが「契約中」、補助科目一覧ページ利用可能
     test('管理者、契約ステータス：契約中、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -196,14 +191,6 @@ describe('補助科目作成のインテグレーションテスト', () => {
         }
       })
       await db.Order.destroy({ where: { tenantId: testTenantId } })
-      const v4 = require('uuid').v4
-      const testAccountCode = new db.AccountCode({
-        accountCodeId: v4(),
-        contractId: contract.contractId,
-        accountCodeName: 'インテグレーションテスト',
-        accountCode: 'INTE0001'
-      })
-      await testAccountCode.save()
       if (contract.dataValues.contractStatus !== '00') {
         await db.Contract.update(
           {
@@ -219,32 +206,175 @@ describe('補助科目作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/補助科目/i)
-      expect(res.text).toMatch(/検索/i)
-      expect(res.text).toMatch(/補助科目コード/i)
-      expect(res.text).toMatch(/補助科目名/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('一般ユーザ、契約ステータス：契約中、利用可能', async () => {
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/補助科目/i)
-      expect(res.text).toMatch(/検索/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
+    })
+
+    // 機能・遷移確認
+    test('登録した補助科目が１件もない場合、画面確認', async () => {
+      const res = await request(app)
+        .get('/subAccountCodeList')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/現在、補助科目はありません。新規登録するボタンから登録を行ってください。/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
+    })
+
+    test('「←Homeへ戻る」リンク遷移確認（補助科目一括作成画面に遷移）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/subAccountCodeList')
+      if (page.url() === 'https://localhost:3000/subAccountCodeList') {
+        await page.click('body > div.max-width > div > div > div.mt-1.has-text-left > a')
+
+        await page.waitForTimeout(500)
+
+        // ポータル画面に遷移確認（補助科目一括作成画面が追加されたら変更必要）
+        expect(await page.url()).toBe('https://localhost:3000/portal')
+      }
+      await browser.close()
+    })
+
+    test('「新規登録する」ボタン遷移確認（補助科目登録画面に遷移）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/subAccountCodeList')
+      if (page.url() === 'https://localhost:3000/subAccountCodeList') {
+        await page.click('body > div.max-width > div > div > a')
+
+        await page.waitForTimeout(500)
+
+        // 補助科目登録画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/registSubAccountCode')
+      }
+      await browser.close()
+    })
+
+    test('事前準備：勘定科目登録', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/registAccountCode')
+      if (page.url() === 'https://localhost:3000/registAccountCode') {
+        await page.type('#setAccountCodeInputId', 'intgration')
+        await page.type('#setAccountCodeNameInputId', 'test')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#submit')
+
+        await page.waitForTimeout(500)
+
+        // 補助科目一覧画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/accountCodeList')
+      }
+      await browser.close()
+    })
+
+    test('補助科目登録後、補助科目一覧に遷移確認（補助科目一覧画面に遷移）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: false,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/registSubAccountCode')
+      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
+        await page.type('#setSubAccountCodeInputId', 'subAccount')
+        await page.type('#setSubAccountCodeNameInputId', 'subTest')
+        await page.type('#setAccountCodeInputId', 'intgration')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnSearchAccountCode')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#displayFieldBody > tr > td:nth-child(1) > div > div > p > label > input')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#submit')
+
+        await page.waitForTimeout(500)
+
+        // 補助科目一覧画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/subAccountCodeList')
+      }
+      // await browser.close()
+    })
+
+    test('登録した補助科目がある場合、画面確認', async () => {
+      const res = await request(app)
+        .get('/subAccountCodeList')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/subAccount/i)
       expect(res.text).toMatch(/補助科目名/i)
+      expect(res.text).toMatch(/subTest/i)
+      expect(res.text).toMatch(/勘定科目名/i)
+      expect(res.text).toMatch(/test/i)
+      expect(res.text).toMatch(/確認・変更する/i)
+      expect(res.text).toMatch(/削除/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
-    // 補助科目コード未入力
-    test('バリデーションチェック、補助科目コード未入力', async () => {
+    test('補助科目登録画面「戻る」ボタン遷移確認（補助科目一覧画面に遷移）', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -255,278 +385,19 @@ describe('補助科目作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registSubAccountCode')
       if (page.url() === 'https://localhost:3000/registSubAccountCode') {
-        await page.type('#setSubAccountCodeInputId', ' ')
-        await page.type('#setSubAccountCodeNameInputId', 'インテグレーションテスト')
-        await page.click('#btnSearchAccountCode')
-        await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td:nth-child(1) > div > div > p > label > input')
+        await page.click('#return-btn')
 
         await page.waitForTimeout(500)
 
-        await page.click('#btnCheck')
-
-        // エラーメッセージが表示されること確認
-        const checkErrorMessage = await page.evaluate(() => {
-          return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
-        })
-
-        expect(checkErrorMessage).toBe('input-label-required')
-      }
-      await browser.close()
-    })
-
-    // 補助科目コード11桁以上の場合（英語）
-    test('バリデーションチェック、補助科目コード11桁以上の場合（英語）', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registSubAccountCode')
-      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
-        await page.type('#setSubAccountCodeInputId', 'intgrationTest')
-        await page.type('#setSubAccountCodeNameInputId', '')
-
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // 入力値が変わっていること確認
-        const checkSetSubAccountCodeInputId = await page.evaluate(() => {
-          return document.querySelector('#setSubAccountCodeInputId').value
-        })
-
-        expect(checkSetSubAccountCodeInputId.length).toBe(10)
-        expect(checkSetSubAccountCodeInputId).toBe('intgration')
-      }
-      await browser.close()
-    })
-
-    // 補助科目コード11桁以上の場合（数字）
-    test('バリデーションチェック、補助科目コード11桁以上の場合（数字）', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registSubAccountCode')
-      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
-        await page.type('#setSubAccountCodeInputId', '12345678901234567890')
-        await page.type('#setSubAccountCodeNameInputId', '')
-
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // 入力値が変わっていること確認
-        const checkSetSubAccountCodeInputId = await page.evaluate(() => {
-          return document.querySelector('#setSubAccountCodeInputId').value
-        })
-
-        expect(checkSetSubAccountCodeInputId.length).toBe(10)
-        expect(checkSetSubAccountCodeInputId).toBe('1234567890')
-      }
-      await browser.close()
-    })
-
-    // 補助科目コード11桁以上の場合（英・数字）
-    test('バリデーションチェック、補助科目コード11桁以上の場合（英・数字）', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registSubAccountCode')
-      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
-        await page.type('#setSubAccountCodeInputId', 'test1234567890')
-        await page.type('#setSubAccountCodeNameInputId', '')
-
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // 入力値が変わっていること確認
-        const checkSetSubAccountCodeInputId = await page.evaluate(() => {
-          return document.querySelector('#setSubAccountCodeInputId').value
-        })
-
-        expect(checkSetSubAccountCodeInputId.length).toBe(10)
-        expect(checkSetSubAccountCodeInputId).toBe('test123456')
-      }
-      await browser.close()
-    })
-
-    // 補助科目コードをコンソールで11桁以上を入力した場合
-    test('バリデーションチェック、補助科目コードをコンソールで11桁以上を入力した場合', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registSubAccountCode')
-      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
-        await page.evaluate(() => (document.querySelector('#setSubAccountCodeInputId').value = 'test1234567890'))
-        await page.type('#setSubAccountCodeNameInputId', 'test')
-        await page.click('#btnSearchAccountCode')
-        await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td:nth-child(1) > div > div > p > label > input')
-
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // エラーメッセージが表示されること確認
-        const checkErrorMessage = await page.evaluate(() => {
-          return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
-        })
-
-        expect(checkErrorMessage).toBe('input-label-required')
-      }
-      await browser.close()
-    })
-
-    // 補助科目コード英・数字以外入力
-    test('バリデーションチェック、補助科目コード英・数字以外入力', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registSubAccountCode')
-      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
-        await page.type('#setSubAccountCodeInputId', 'テスト')
-        await page.type('#setSubAccountCodeNameInputId', 'インテグレーションテスト')
-        await page.click('#btnSearchAccountCode')
-        await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td:nth-child(1) > div > div > p > label > input')
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // エラーメッセージが表示されること確認
-        const checkErrorMessage = await page.evaluate(() => {
-          return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
-        })
-
-        expect(checkErrorMessage).toBe('input-label-required')
-      }
-      await browser.close()
-    })
-
-    // 補助科目名未入力
-    test('バリデーションチェック、補助科目名未入力', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registSubAccountCode')
-      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
-        await page.type('#setSubAccountCodeInputId', 'test')
-        await page.type('#setSubAccountCodeNameInputId', ' ')
-        await page.click('#btnSearchAccountCode')
-        await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td:nth-child(1) > div > div > p > label > input')
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // エラーメッセージが表示されること確認
-        const checkErrorMessage = await page.evaluate(() => {
-          return document.querySelector('#RequiredErrorMesageForName').getAttribute('class')
-        })
-
-        expect(checkErrorMessage).toBe('input-label-required')
-      }
-      await browser.close()
-    })
-
-    // 補助科目名41桁以上入力
-    test('バリデーションチェック、補助科目名41桁以上入力', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registSubAccountCode')
-      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
-        await page.type('#setSubAccountCodeInputId', '')
-        await page.type('#setSubAccountCodeNameInputId', 'あいうえおabcdefg123456789あいうえおabcdefg123456789')
-
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // 入力値が変わっていること確認
-        const checkSetSubAccountCodeNameInputId = await page.evaluate(() => {
-          return document.querySelector('#setSubAccountCodeNameInputId').value
-        })
-
-        expect(checkSetSubAccountCodeNameInputId.length).toBe(40)
-        expect(checkSetSubAccountCodeNameInputId).toBe('あいうえおabcdefg123456789あいうえおabcdefg1234567')
-      }
-      await browser.close()
-    })
-
-    // 補助科目名をコンソールで41桁以上を入力した場合
-    test('バリデーションチェック、補助科目名をコンソールで41桁以上を入力した場合', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registSubAccountCode')
-      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
-        await page.type('#setSubAccountCodeInputId', 'test')
-        await page.evaluate(
-          () =>
-            (document.querySelector('#setSubAccountCodeNameInputId').value =
-              'あいうえおabcdefg123456789あいうえおabcdefg123456789')
-        )
-        await page.click('#btnSearchAccountCode')
-        await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td:nth-child(1) > div > div > p > label > input')
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // エラーメッセージが表示されること確認
-        const checkErrorMessage = await page.evaluate(() => {
-          return document.querySelector('#RequiredErrorMesageForName').getAttribute('class')
-        })
-
-        expect(checkErrorMessage).toBe('input-label-required')
+        // 補助科目一覧画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/subAccountCodeList')
       }
       await browser.close()
     })
   })
 
   describe('6.契約ステータス：変更申込', () => {
-    // テナントステータスが「変更申込」、補助科目作成ページ利用可能
+    // テナントステータスが「変更申込」、補助科目一覧ページ利用可能
     test('管理者、契約ステータス：変更申込、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -547,33 +418,29 @@ describe('補助科目作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/補助科目/i)
-      expect(res.text).toMatch(/検索/i)
-      expect(res.text).toMatch(/補助科目コード/i)
-      expect(res.text).toMatch(/補助科目名/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('一般ユーザ、契約ステータス：変更申込、利用可能', async () => {
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/補助科目/i)
-      expect(res.text).toMatch(/検索/i)
-      expect(res.text).toMatch(/補助科目コード/i)
-      expect(res.text).toMatch(/補助科目名/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
   })
 
   describe('7.契約ステータス：変更受付', () => {
-    // テナントステータスが「変更受付」、補助科目作成ページ利用可能
+    // テナントステータスが「変更受付」、補助科目一覧ページ利用可能
     test('管理者、契約ステータス：変更受付、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -594,33 +461,29 @@ describe('補助科目作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/補助科目/i)
-      expect(res.text).toMatch(/検索/i)
-      expect(res.text).toMatch(/補助科目コード/i)
-      expect(res.text).toMatch(/補助科目名/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
 
     test('一般ユーザ、契約ステータス：変更受付、利用可能', async () => {
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/補助科目/i)
-      expect(res.text).toMatch(/検索/i)
-      expect(res.text).toMatch(/補助科目コード/i)
-      expect(res.text).toMatch(/補助科目名/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/←ポータル画面/i)
     })
   })
 
   describe('8.契約ステータス：解約申込', () => {
-    // テナントステータスが「解約申込」、補助科目作成ページ利用不可
+    // テナントステータスが「解約申込」、補助科目一覧ページ利用不可
     test('管理者、契約ステータス：解約申込、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -657,7 +520,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
@@ -667,7 +530,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
 
     test('一般ユーザ、契約ステータス：解約申込、利用不可', async () => {
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
@@ -677,7 +540,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
   })
 
   describe('9.契約ステータス：解約受付', () => {
-    // テナントステータスが「解約受付」、補助科目作成ページ利用不可
+    // テナントステータスが「解約受付」、補助科目一覧ページ利用不可
     test('管理者、契約ステータス：解約受付、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -699,7 +562,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
@@ -709,7 +572,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
 
     test('一般ユーザ、契約ステータス：解約受付、利用不可', async () => {
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
@@ -719,7 +582,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
   })
 
   describe('10.契約ステータス：解約', () => {
-    // テナントステータスが「解約」、補助科目作成ページ利用不可
+    // テナントステータスが「解約」、補助科目一覧ページ利用不可
     test('管理者、契約ステータス：解約、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -753,7 +616,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(500)
 
@@ -763,7 +626,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
 
     test('一般ユーザ、契約ステータス：解約、利用不可', async () => {
       const res = await request(app)
-        .get('/registSubAccountCode')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(500)
 

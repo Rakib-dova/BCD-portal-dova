@@ -39,12 +39,12 @@ const transaction = {
   LOCK: {}
 }
 
-let errorSpy, contractId, findAllSpy, infoSpy, createSpy, findOneSpy, transactionSpy
+let errorSpy, contractId, accountCodefindAllSpy, infoSpy, createSpy, findOneSpy, transactionSpy
 
 describe('accountCodeControllerのテスト', () => {
   beforeEach(() => {
     createSpy = jest.spyOn(AccountCode, 'create')
-    findAllSpy = jest.spyOn(AccountCode, 'findAll')
+    accountCodefindAllSpy = jest.spyOn(AccountCode, 'findAll')
     findOneSpy = jest.spyOn(AccountCode, 'findOne')
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
@@ -52,7 +52,7 @@ describe('accountCodeControllerのテスト', () => {
   })
   afterEach(() => {
     createSpy.mockRestore()
-    findAllSpy.mockRestore()
+    accountCodefindAllSpy.mockRestore()
     findOneSpy.mockRestore()
     errorSpy.mockRestore()
     infoSpy.mockRestore()
@@ -84,7 +84,7 @@ describe('accountCodeControllerのテスト', () => {
     test('正常', async () => {
       // 準備
       // DBから勘定科目登録時、返す勘定科目インスタンス
-      findAllSpy.mockReturnValue(dbAccountCodeTable)
+      accountCodefindAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
 
       // 勘定科目登録時、画面から渡されるデータ
@@ -101,7 +101,7 @@ describe('accountCodeControllerのテスト', () => {
 
     test('異常：重複された勘定科目登録する時', async () => {
       // 準備
-      findAllSpy.mockReturnValue([codeAccountDataResult])
+      accountCodefindAllSpy.mockReturnValue([codeAccountDataResult])
       createSpy.mockReturnValue(codeAccountDataResult)
 
       // 勘定科目登録時、画面から渡されるデータ
@@ -118,7 +118,7 @@ describe('accountCodeControllerのテスト', () => {
 
     test('異常：登録エラー', async () => {
       // 準備
-      findAllSpy.mockReturnValue([])
+      accountCodefindAllSpy.mockReturnValue([])
       createSpy.mockReturnValue(null)
 
       // 勘定科目登録時、画面から渡されるデータ
@@ -137,7 +137,7 @@ describe('accountCodeControllerのテスト', () => {
       // 準備
       // 重複コード検索時、エラーが発生する場合
       const dbError = new Error()
-      findAllSpy.mockReturnValue(dbError)
+      accountCodefindAllSpy.mockReturnValue(dbError)
       createSpy.mockReturnValue(null)
 
       // 勘定科目登録時、画面から渡されるデータ
@@ -156,7 +156,7 @@ describe('accountCodeControllerのテスト', () => {
       // 準備
       // DB登録時、エラーが発生する場合
       const dbError = new Error()
-      findAllSpy.mockReturnValue([])
+      accountCodefindAllSpy.mockReturnValue([])
       createSpy.mockReturnValue(dbError)
 
       // 勘定科目登録時、画面から渡されるデータ
@@ -176,7 +176,7 @@ describe('accountCodeControllerのテスト', () => {
     test('正常:データがない場合', async () => {
       // 準備
       // 勘定科目DB
-      findAllSpy.mockReturnValue([])
+      accountCodefindAllSpy.mockReturnValue([])
 
       // コントラクターID
       const contractId = '6e396429-169b-4a3a-9a66-07d4f3ffd23e'
@@ -191,7 +191,7 @@ describe('accountCodeControllerのテスト', () => {
     test('正常:データ1件ある場合', async () => {
       // 準備
       // 勘定科目DB
-      findAllSpy.mockReturnValue(dbAccountCode100Table)
+      accountCodefindAllSpy.mockReturnValue(dbAccountCode100Table)
 
       // コントラクターID
       const contractId = '6e396429-169b-4a3a-9a66-07d4f3ffd23e'
@@ -217,7 +217,7 @@ describe('accountCodeControllerのテスト', () => {
     test('正常:データ100件ある場合', async () => {
       // 準備
       // 勘定科目DB
-      findAllSpy.mockReturnValue([dbAccountCodeTable[0]])
+      accountCodefindAllSpy.mockReturnValue([dbAccountCodeTable[0]])
 
       // コントラクターID
       const contractId = '6e396429-169b-4a3a-9a66-07d4f3ffd23e'
@@ -244,7 +244,7 @@ describe('accountCodeControllerのテスト', () => {
       // 準備
       // コード検索時、エラーが発生する場合
       const dbPoolError = new Error('DB POOL Error')
-      findAllSpy.mockReturnValue(dbPoolError)
+      accountCodefindAllSpy.mockReturnValue(dbPoolError)
 
       // コントラクターID
       const contractId = '6e396429-169b-4a3a-9a66-07d4f3ffd23e'
@@ -319,7 +319,7 @@ describe('accountCodeControllerのテスト', () => {
       findOneSpy.mockReturnValue(findOneData)
 
       // 重複コード検索用データの用意
-      findAllSpy.mockReturnValue([])
+      accountCodefindAllSpy.mockReturnValue([])
 
       const result = await accountCodeController.updatedAccountCode(
         contractId,
@@ -348,7 +348,7 @@ describe('accountCodeControllerのテスト', () => {
       findOneSpy.mockReturnValue(findOneData)
 
       // 重複コード検索用データの用意
-      findAllSpy.mockReturnValue([])
+      accountCodefindAllSpy.mockReturnValue([])
 
       const result = await accountCodeController.updatedAccountCode(
         contractId,
@@ -378,7 +378,7 @@ describe('accountCodeControllerのテスト', () => {
       findOneSpy.mockReturnValue(findOneData)
 
       // 重複コード検索用データの用意
-      findAllSpy.mockReturnValue([accountCodeMock[1]])
+      accountCodefindAllSpy.mockReturnValue([accountCodeMock[1]])
 
       const result = await accountCodeController.updatedAccountCode(
         contractId,
@@ -405,7 +405,7 @@ describe('accountCodeControllerのテスト', () => {
       findOneSpy.mockReturnValue(null)
 
       // 重複コード検索用データの用意
-      findAllSpy.mockReturnValue([])
+      accountCodefindAllSpy.mockReturnValue([])
 
       const result = await accountCodeController.updatedAccountCode(
         contractId,
@@ -436,7 +436,7 @@ describe('accountCodeControllerのテスト', () => {
       })
 
       // 重複コード検索用データの用意
-      findAllSpy.mockReturnValue([])
+      accountCodefindAllSpy.mockReturnValue([])
 
       await accountCodeController.updatedAccountCode(contractId, accountCodeId, accountCode, accountCodeName)
 
@@ -463,7 +463,7 @@ describe('accountCodeControllerのテスト', () => {
       findOneSpy.mockReturnValue(null)
 
       // 重複コード検索用データの用意
-      findAllSpy.mockReturnValue([])
+      accountCodefindAllSpy.mockReturnValue([])
 
       const result = await accountCodeController.updatedAccountCode(
         contractId,
@@ -480,7 +480,7 @@ describe('accountCodeControllerのテスト', () => {
     test('正常：検索対象がある場合（条件未入力検索）', async () => {
       // 準備
       // 勘定科目がある場合
-      findAllSpy.mockReturnValue([accountCodeMock[0], accountCodeMock[1]])
+      accountCodefindAllSpy.mockReturnValue([accountCodeMock[0], accountCodeMock[1]])
 
       // contractId, accountCode, accountCodeName
       const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
@@ -504,10 +504,10 @@ describe('accountCodeControllerのテスト', () => {
       ])
     })
 
-    test('正常：検索対象がある場合（勘定科目コード、勘定科目名で検索）', async () => {
+    test('正常：検索対象がある場合（勘定科目コード又は、勘定科目名で検索）', async () => {
       // 準備
       // 勘定科目がある場合
-      findAllSpy.mockReturnValue([accountCodeMock[0]])
+      accountCodefindAllSpy.mockReturnValue([accountCodeMock[0]])
 
       // contractId, accountCode, accountCodeName
       const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
@@ -526,10 +526,10 @@ describe('accountCodeControllerのテスト', () => {
       ])
     })
 
-    test('正常：検索対象がある場合（勘定科目コードで検索）', async () => {
+    test('正常：検索対象がある場合（勘定科目コード又は勘定科目名で部分一致検索）', async () => {
       // 準備
       // 勘定科目がある場合
-      findAllSpy.mockReturnValue([accountCodeMock[0]])
+      accountCodefindAllSpy.mockReturnValue([accountCodeMock[0]])
 
       // contractId, accountCode, accountCodeName
       const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
@@ -551,7 +551,7 @@ describe('accountCodeControllerのテスト', () => {
     test('正常：検索対象がある場合（勘定科目名で検索）', async () => {
       // 準備
       // 勘定科目がある場合
-      findAllSpy.mockReturnValue([accountCodeMock[0], accountCodeMock[1]])
+      accountCodefindAllSpy.mockReturnValue([accountCodeMock[0], accountCodeMock[1]])
 
       // contractId, accountCode, accountCodeName
       const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
@@ -579,7 +579,7 @@ describe('accountCodeControllerのテスト', () => {
       // 準備
       // DBエラー
       const errorDbPool = new Error('DB POOL ERROR')
-      findAllSpy.mockImplementation(() => {
+      accountCodefindAllSpy.mockImplementation(() => {
         throw errorDbPool
       })
 

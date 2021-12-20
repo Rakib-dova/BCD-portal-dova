@@ -37,7 +37,10 @@ document.getElementById('btnCheck').addEventListener('click', function (e) {
   }
 
   // 勘定科目名が未入力の場合
-  if (document.querySelector('#setSubAccountCodeNameInputId').value.length === 0) {
+  if (
+    document.querySelector('#setSubAccountCodeNameInputId').value.length === 0 ||
+    document.querySelector('#setSubAccountCodeNameInputId').value.trim().length === 0
+  ) {
     document.querySelector('#RequiredErrorMesageForName').innerHTML = '勘定科目名が未入力です。'
     document.querySelector('#RequiredErrorMesageForName').classList.remove('is-invisible')
     errorFlag = true
