@@ -111,9 +111,13 @@ const displayAccountCode = function (accountCodeArr) {
 const inputEvent = () => {
   Array.prototype.forEach.call(document.querySelectorAll('.inputCheckbox'), (item) => {
     item.addEventListener('click', function () {
-      this.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.classList.toggle(
-        'is-selected'
-      )
+      // POとの相談内容（削除はPO確認後）
+      // item選択時にもチェックができるようにするか。
+      // -------------------------------------------------------------------------------------------------------
+      // this.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.classList.toggle(
+      //   'is-selected'
+      // )
+      // -------------------------------------------------------------------------------------------------------
       const checkBox = document.querySelectorAll('.inputCheckbox')
       for (let idx = 0; idx < checkBox.length; idx++) {
         if (this !== checkBox[idx]) {
@@ -122,29 +126,33 @@ const inputEvent = () => {
       }
     })
   })
-  Array.prototype.forEach.call(document.querySelectorAll('#displayFieldBody > tr'), (item) => {
-    item.addEventListener('click', function () {
-      const $this = this
-      const $thisRowCheckbox = $this.querySelector('input')
-      if ($thisRowCheckbox.checked) {
-        $this.querySelector('input').checked = false
-      } else {
-        $this.querySelector('input').checked = true
-      }
-      const checkBox = document.querySelectorAll('.inputCheckbox')
-      for (let idx = 0; idx < checkBox.length; idx++) {
-        if ($thisRowCheckbox !== checkBox[idx]) {
-          checkBox[idx].checked = false
-        }
-      }
-      for (let idx = 0; idx < document.querySelectorAll('#displayFieldBody > tr').length; idx++) {
-        if ($this !== document.querySelectorAll('#displayFieldBody > tr')[idx]) {
-          document.querySelectorAll('#displayFieldBody > tr')[idx].classList.remove('is-selected')
-        }
-      }
-      $this.classList.toggle('is-selected')
-    })
-  })
+  // POとの相談内容（削除はPO確認後）
+  // item選択時にもチェックができるようにするか。
+  // -------------------------------------------------------------------------------------------------------
+  // Array.prototype.forEach.call(document.querySelectorAll('#displayFieldBody > tr'), (item) => {
+  //   item.addEventListener('click', function () {
+  //     const $this = this
+  //     const $thisRowCheckbox = $this.querySelector('input')
+  //     if ($thisRowCheckbox.checked) {
+  //       $this.querySelector('input').checked = false
+  //     } else {
+  //       $this.querySelector('input').checked = true
+  //     }
+  //     const checkBox = document.querySelectorAll('.inputCheckbox')
+  //     for (let idx = 0; idx < checkBox.length; idx++) {
+  //       if ($thisRowCheckbox !== checkBox[idx]) {
+  //         checkBox[idx].checked = false
+  //       }
+  //     }
+  //     for (let idx = 0; idx < document.querySelectorAll('#displayFieldBody > tr').length; idx++) {
+  //       if ($this !== document.querySelectorAll('#displayFieldBody > tr')[idx]) {
+  //         document.querySelectorAll('#displayFieldBody > tr')[idx].classList.remove('is-selected')
+  //       }
+  //     }
+  //     $this.classList.toggle('is-selected')
+  //   })
+  // })
+  // -------------------------------------------------------------------------------------------------------
 }
 
 // 勘定科目コード検索が０けんの場合
