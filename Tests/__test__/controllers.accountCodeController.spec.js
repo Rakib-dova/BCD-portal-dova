@@ -475,4 +475,129 @@ describe('accountCodeControllerのテスト', () => {
       expect(result).toBe(-2)
     })
   })
+
+  describe('searchAccountCode', () => {
+    test('正常：検索対象がある場合（条件未入力検索）', async () => {
+      // 準備
+      // 勘定科目がある場合
+      findAllSpy.mockReturnValue([accountCodeMock[0], accountCodeMock[1]])
+
+      // contractId, accountCode, accountCodeName
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCode = ''
+      const accountCodeName = ''
+
+      // 試験実施
+      const result = await accountCodeController.searchAccountCode(contractId, accountCode, accountCodeName)
+
+      expect(result).toEqual([
+        {
+          accountCodeId: accountCodeMock[0].accountCodeId,
+          accountCode: accountCodeMock[0].accountCode,
+          accountCodeName: accountCodeMock[0].accountCodeName
+        },
+        {
+          accountCodeId: accountCodeMock[1].accountCodeId,
+          accountCode: accountCodeMock[1].accountCode,
+          accountCodeName: accountCodeMock[1].accountCodeName
+        }
+      ])
+    })
+
+    test('正常：検索対象がある場合（勘定科目コード、勘定科目名で検索）', async () => {
+      // 準備
+      // 勘定科目がある場合
+      findAllSpy.mockReturnValue([accountCodeMock[0]])
+
+      // contractId, accountCode, accountCodeName
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCode = 'AB001'
+      const accountCodeName = '預金科目'
+
+      // 試験実施
+      const result = await accountCodeController.searchAccountCode(contractId, accountCode, accountCodeName)
+
+      expect(result).toEqual([
+        {
+          accountCodeId: accountCodeMock[0].accountCodeId,
+          accountCode: accountCodeMock[0].accountCode,
+          accountCodeName: accountCodeMock[0].accountCodeName
+        }
+      ])
+    })
+
+    test('正常：検索対象がある場合（勘定科目コードで検索）', async () => {
+      // 準備
+      // 勘定科目がある場合
+      findAllSpy.mockReturnValue([accountCodeMock[0]])
+
+      // contractId, accountCode, accountCodeName
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCode = 'AB001'
+      const accountCodeName = ''
+
+      // 試験実施
+      const result = await accountCodeController.searchAccountCode(contractId, accountCode, accountCodeName)
+
+      expect(result).toEqual([
+        {
+          accountCodeId: accountCodeMock[0].accountCodeId,
+          accountCode: accountCodeMock[0].accountCode,
+          accountCodeName: accountCodeMock[0].accountCodeName
+        }
+      ])
+    })
+
+    test('正常：検索対象がある場合（勘定科目名で検索）', async () => {
+      // 準備
+      // 勘定科目がある場合
+      findAllSpy.mockReturnValue([accountCodeMock[0], accountCodeMock[1]])
+
+      // contractId, accountCode, accountCodeName
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCode = ''
+      const accountCodeName = '預金科目'
+
+      // 試験実施
+      const result = await accountCodeController.searchAccountCode(contractId, accountCode, accountCodeName)
+
+      expect(result).toEqual([
+        {
+          accountCodeId: accountCodeMock[0].accountCodeId,
+          accountCode: accountCodeMock[0].accountCode,
+          accountCodeName: accountCodeMock[0].accountCodeName
+        },
+        {
+          accountCodeId: accountCodeMock[1].accountCodeId,
+          accountCode: accountCodeMock[1].accountCode,
+          accountCodeName: accountCodeMock[1].accountCodeName
+        }
+      ])
+    })
+
+    test('異常：DBエラー', async () => {
+      // 準備
+      // DBエラー
+      const errorDbPool = new Error('DB POOL ERROR')
+      findAllSpy.mockImplementation(() => {
+        throw errorDbPool
+      })
+
+      // contractId, accountCode, accountCodeName
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+      const accountCode = 'AB001'
+      const accountCodeName = '預金科目'
+
+      // 試験実施
+      await accountCodeController.searchAccountCode(contractId, accountCode, accountCodeName)
+
+      expect(errorSpy).toHaveBeenCalledWith({
+        contractId: contractId,
+        accountCode: accountCode,
+        accountCodeName: accountCodeName,
+        stack: expect.anything(),
+        status: 0
+      })
+    })
+  })
 })
