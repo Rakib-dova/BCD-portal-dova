@@ -52,14 +52,14 @@ const cbGetIndex = async (req, res, next) => {
   const subAccountCodeListArr = [
     {
       no: 1,
-      subAccountCode: 'TEST1',
-      subAccountCodeName: '補助科目1',
+      subjectCode: 'TEST1',
+      subjectName: '補助科目1',
       accountCodeName: '勘定科目1'
     },
     {
       no: 2,
-      subAccountCode: 'TEST2',
-      subAccountCodeName: '補助科目2',
+      subjectCode: 'TEST2',
+      subjectName: '補助科目2',
       accountCodeName: '勘定科目2'
     }
   ]
@@ -75,8 +75,8 @@ const cbGetIndex = async (req, res, next) => {
     messageForNotItem: '現在、補助科目はありません。新規登録するボタンから登録を行ってください。',
     // リスト表示カラム
     listNo: 'No',
-    subAccountCode: '補助科目コード',
-    subAccountCodeName: '補助科目名',
+    subjectCode: '補助科目コード',
+    subjectName: '補助科目名',
     accountCodeName: '勘定科目名',
     setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
     setClassDeleteBtn: 'deleteSubAccountCodeBtn',
