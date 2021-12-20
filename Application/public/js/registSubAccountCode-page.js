@@ -62,7 +62,10 @@ document.getElementById('btnCheck').addEventListener('click', function (e) {
         targetCheckbox = item
       }
     })
-    document.querySelector('#checksetAccountCodeInputId').innerText = targetCheckbox.parentElement.innerText
+    document.querySelector('#checksetAccountCodeInputId').innerText =
+      targetCheckbox.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(
+        '.columnAccountcode'
+      ).innerText
     document.querySelector('#checksetSubAccountCodeInputId').innerText =
       document.querySelector('#setSubAccountCodeInputId').value
     document.querySelector('#checksetSubAccountNameInputId').innerText = document.querySelector(
