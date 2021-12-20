@@ -139,7 +139,7 @@ describe('subAccountCodeControllerのテスト', () => {
     test('異常：登録エラー', async () => {
       // 準備
       // 勘定科目検索結果
-      accountCodefindOneSpy.mockReturnValue(accountCodeMock[0])
+      accountCodefindOneSpy.mockReturnValue(null)
 
       // DBから補助科目登録時、返す補助科目インスタンス
       findAllSpy.mockReturnValue([])
