@@ -26,7 +26,6 @@ let request,
   infoSpy,
   findOneSpy,
   findOneSpyContracts,
-  getFormatListSpy,
   helpercheckContractStatusSpy,
   subAccountCodeControllerGetSubAccountCodeListSpy
 describe('subAccountCodeListのテスト', () => {
@@ -211,58 +210,6 @@ describe('subAccountCodeListのテスト', () => {
       accountCodeName: '勘定科目1'
     }
   ]
-  const uploadFormatListArrThree = [
-    {
-      no: 1,
-      subjectCode: 'TEST1',
-      subjectName: '補助科目1',
-      accountCodeName: '勘定科目1'
-    },
-    {
-      no: 2,
-      subjectCode: 'TEST2',
-      subjectName: '補助科目2',
-      accountCodeName: '勘定科目2'
-    },
-    {
-      no: 3,
-      subjectCode: 'TEST3',
-      subjectName: '補助科目3',
-      accountCodeName: '勘定科目3'
-    }
-  ]
-
-  // 検索結果が4件の場合
-  const uploadFormatListArrFour = [
-    {
-      No: 1,
-      setName: 'UT1',
-      updatedAt: '2021/01/25',
-      uploadType: '請求書データ',
-      uuid: 'abc54321-fe0c-98qw-076c-7b88d12cfc01'
-    },
-    {
-      No: 2,
-      setName: 'UT2',
-      updatedAt: '2021/01/25',
-      uploadType: '請求書データ',
-      uuid: 'abc54321-fe0c-98qw-076c-7b88d12cfc02'
-    },
-    {
-      No: 3,
-      setName: 'UT3',
-      updatedAt: '2021/01/25',
-      uploadType: '請求書データ',
-      uuid: 'abc54321-fe0c-98qw-076c-7b88d12cfc03'
-    },
-    {
-      No: 4,
-      setName: 'UT4',
-      updatedAt: '2021/01/25',
-      uploadType: '請求書データ',
-      uuid: 'abc54321-fe0c-98qw-076c-7b88d12cfc04'
-    }
-  ]
 
   // 検索結果が100件の場合
   const uploadFormatListArrOneHundred = []
@@ -322,8 +269,8 @@ describe('subAccountCodeListのテスト', () => {
         accountCodeName: '勘定科目名',
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
-        prevLocation: '/registSubAccountCode',
-        prevLocationName: '←補助科目一括作成'
+        prevLocation: '/portal',
+        prevLocationName: '←ポータル画面'
       })
     })
 
@@ -366,8 +313,8 @@ describe('subAccountCodeListのテスト', () => {
         accountCodeName: '勘定科目名',
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
-        prevLocation: '/registSubAccountCode',
-        prevLocationName: '←補助科目一括作成'
+        prevLocation: '/portal',
+        prevLocationName: '←ポータル画面'
       })
     })
 
@@ -409,8 +356,8 @@ describe('subAccountCodeListのテスト', () => {
         accountCodeName: '勘定科目名',
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
-        prevLocation: '/registSubAccountCode',
-        prevLocationName: '←補助科目一括作成'
+        prevLocation: '/portal',
+        prevLocationName: '←ポータル画面'
       })
     })
 
@@ -452,8 +399,8 @@ describe('subAccountCodeListのテスト', () => {
         accountCodeName: '勘定科目名',
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
-        prevLocation: '/registSubAccountCode',
-        prevLocationName: '←補助科目一括作成'
+        prevLocation: '/portal',
+        prevLocationName: '←ポータル画面'
       })
     })
 
@@ -495,8 +442,8 @@ describe('subAccountCodeListのテスト', () => {
         accountCodeName: '勘定科目名',
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
-        prevLocation: '/registSubAccountCode',
-        prevLocationName: '←補助科目一括作成'
+        prevLocation: '/portal',
+        prevLocationName: '←ポータル画面'
       })
     })
 
@@ -538,8 +485,8 @@ describe('subAccountCodeListのテスト', () => {
         accountCodeName: '勘定科目名',
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
-        prevLocation: '/registSubAccountCode',
-        prevLocationName: '←補助科目一括作成'
+        prevLocation: '/portal',
+        prevLocationName: '←ポータル画面'
       })
     })
 
@@ -583,8 +530,8 @@ describe('subAccountCodeListのテスト', () => {
         accountCodeName: '勘定科目名',
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
-        prevLocation: '/registSubAccountCode',
-        prevLocationName: '←補助科目一括作成'
+        prevLocation: '/portal',
+        prevLocationName: '←ポータル画面'
       })
     })
 

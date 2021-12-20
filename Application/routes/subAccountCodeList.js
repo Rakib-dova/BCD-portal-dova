@@ -50,7 +50,7 @@ const cbGetIndex = async (req, res, next) => {
   }
 
   // 補助科目
-  const subAccountCodeListArr = await subAccountCodeController.getSubAccountCodeList()
+  const subAccountCodeListArr = await subAccountCodeController.getSubAccountCodeList(contract)
 
   if (subAccountCodeListArr instanceof Error) return next(errorHelper.create(500))
 
@@ -68,8 +68,8 @@ const cbGetIndex = async (req, res, next) => {
     accountCodeName: '勘定科目名',
     setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
     setClassDeleteBtn: 'deleteSubAccountCodeBtn',
-    prevLocation: '/registSubAccountCode',
-    prevLocationName: '←補助科目一括作成'
+    prevLocation: '/portal',
+    prevLocationName: '←ポータル画面'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }

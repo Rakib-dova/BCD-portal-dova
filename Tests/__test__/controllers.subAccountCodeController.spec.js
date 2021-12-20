@@ -43,17 +43,17 @@ const transaction = {
 
 let errorSpy,
   contractId,
-  findAllSpy,
+  subAccountCodefindAllSpy,
   infoSpy,
-  createSpy,
+  subAccountCodeCreateSpy,
   accountCodefindOneSpy,
   transactionSpy,
   SubAccountCodeGetsubAccountCodeListSpy
 
 describe('subAccountCodeControllerのテスト', () => {
   beforeEach(() => {
-    createSpy = jest.spyOn(SubAccountCode, 'create')
-    findAllSpy = jest.spyOn(SubAccountCode, 'findAll')
+    subAccountCodeCreateSpy = jest.spyOn(SubAccountCode, 'create')
+    subAccountCodefindAllSpy = jest.spyOn(SubAccountCode, 'findAll')
     accountCodefindOneSpy = jest.spyOn(AccountCode, 'findOne')
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
@@ -61,8 +61,8 @@ describe('subAccountCodeControllerのテスト', () => {
     SubAccountCodeGetsubAccountCodeListSpy = jest.spyOn(SubAccountCode, 'getsubAccountCodeList')
   })
   afterEach(() => {
-    createSpy.mockRestore()
-    findAllSpy.mockRestore()
+    subAccountCodeCreateSpy.mockRestore()
+    subAccountCodefindAllSpy.mockRestore()
     accountCodefindOneSpy.mockRestore()
     errorSpy.mockRestore()
     infoSpy.mockRestore()
@@ -137,8 +137,8 @@ describe('subAccountCodeControllerのテスト', () => {
       accountCodefindOneSpy.mockReturnValue(accountCodeMock[0])
 
       // DBから補助科目登録時、返す補助科目インスタンス
-      findAllSpy.mockReturnValue(dbSubAccountCodeTable)
-      createSpy.mockReturnValue(subAccountCodeDataResult)
+      subAccountCodefindAllSpy.mockReturnValue(dbSubAccountCodeTable)
+      subAccountCodeCreateSpy.mockReturnValue(subAccountCodeDataResult)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })
@@ -164,8 +164,8 @@ describe('subAccountCodeControllerのテスト', () => {
       accountCodefindOneSpy.mockReturnValue(accountCodeMock[0])
 
       // DBから補助科目登録時、返す補助科目インスタンス
-      findAllSpy.mockReturnValue([subAccountCodeDataResult])
-      createSpy.mockReturnValue(subAccountCodeDataResult)
+      subAccountCodefindAllSpy.mockReturnValue([subAccountCodeDataResult])
+      subAccountCodeCreateSpy.mockReturnValue(subAccountCodeDataResult)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })
@@ -190,9 +190,9 @@ describe('subAccountCodeControllerのテスト', () => {
       // 勘定科目検索結果
       accountCodefindOneSpy.mockReturnValue(accountCodeMock[0])
 
-      // DBから補助科目登録時、返す補助科目インスタンス
-      findAllSpy.mockReturnValue([])
-      createSpy.mockReturnValue(null)
+      // DBから補助科目登録時、返す補助科目インスタンスがnull
+      subAccountCodefindAllSpy.mockReturnValue([])
+      subAccountCodeCreateSpy.mockReturnValue(null)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })
@@ -220,8 +220,8 @@ describe('subAccountCodeControllerのテスト', () => {
         throw dbError
       })
       // DBから補助科目登録時、返す補助科目インスタンス
-      findAllSpy.mockReturnValue([])
-      createSpy.mockReturnValue(null)
+      subAccountCodefindAllSpy.mockReturnValue([])
+      subAccountCodeCreateSpy.mockReturnValue(null)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })
@@ -251,8 +251,8 @@ describe('subAccountCodeControllerのテスト', () => {
       accountCodefindOneSpy.mockReturnValue(accountCodeMock[0])
       // 重複コード検索時、エラーが発生する場合
       const dbError = new Error()
-      findAllSpy.mockReturnValue(dbError)
-      createSpy.mockReturnValue(null)
+      subAccountCodefindAllSpy.mockReturnValue(dbError)
+      subAccountCodeCreateSpy.mockReturnValue(null)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })
@@ -282,8 +282,8 @@ describe('subAccountCodeControllerのテスト', () => {
       accountCodefindOneSpy.mockReturnValue(accountCodeMock[0])
       // DB登録時、エラーが発生する場合
       const dbError = new Error()
-      findAllSpy.mockReturnValue([])
-      createSpy.mockReturnValue(dbError)
+      subAccountCodefindAllSpy.mockReturnValue([])
+      subAccountCodeCreateSpy.mockReturnValue(dbError)
 
       // transactionモックの用意
       transactionSpy.mockReturnValue({ ...transaction })

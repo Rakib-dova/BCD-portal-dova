@@ -2,6 +2,7 @@ const db = require('../models')
 const logger = require('../lib/logger')
 const AccountCode = db.AccountCode
 const SubAccountCode = db.SubAccountCode
+const subAccountCodeModel = require('../models').SubAccountCode
 const constantsDefine = require('../constants')
 const { v4: uuidV4 } = require('uuid')
 
@@ -14,7 +15,7 @@ module.exports = {
   //   createdAt - 作成日付,
   //   updatedAt - 更新日付
   insert: async (contract, values) => {
-    const functionName = 'sugAccountCodeController.insert'
+    const functionName = 'SubAccountCodeController.insert'
     const uploadContractId = contract.contractId
     // 関数開始表示
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -95,12 +96,12 @@ module.exports = {
   //    subjectName：      補助科目名
   //    accountCodeName：  紐づいている勘定科目の名
   // }
-  getSubAccountCodeList: async () => {
+  getSubAccountCodeList: async (contract) => {
     try {
-      const accountCodeNameArr = await SubAccountCode.getsubAccountCodeList()
+      const accountCodeNameArr = await subAccountCodeModel.getsubAccountCodeList(contract)
 
       // 出力用データに加工する。
-      const resultSubAccountCodeList = accountCodeNameArr.map((item, idx) => {
+      return accountCodeNameArr.map((item, idx) => {
         return {
           no: idx + 1,
           subjectCode: item.subjectCode,
@@ -108,7 +109,6 @@ module.exports = {
           accountCodeName: item.accountCodeName
         }
       })
-      return resultSubAccountCodeList
     } catch (error) {
       logger.error({ stack: error.stack, status: 0 })
       return error
