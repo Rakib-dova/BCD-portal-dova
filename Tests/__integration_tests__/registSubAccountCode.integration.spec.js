@@ -270,7 +270,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
           return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
         })
 
-        expect(checkErrorMessage).toBe('input-label-required')
+        expect(checkErrorMessage).toBe('input-label-required is-invisible')
       }
       await browser.close()
     })
@@ -392,7 +392,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
           return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
         })
 
-        expect(checkErrorMessage).toBe('input-label-required')
+        expect(checkErrorMessage).toBe('input-label-required is-invisible')
       }
       await browser.close()
     })
@@ -423,7 +423,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
           return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
         })
 
-        expect(checkErrorMessage).toBe('input-label-required')
+        expect(checkErrorMessage).toBe('input-label-required is-invisible')
       }
       await browser.close()
     })
@@ -454,7 +454,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
           return document.querySelector('#RequiredErrorMesageForName').getAttribute('class')
         })
 
-        expect(checkErrorMessage).toBe('input-label-required')
+        expect(checkErrorMessage).toBe('input-label-required is-invisible')
       }
       await browser.close()
     })
@@ -519,7 +519,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
           return document.querySelector('#RequiredErrorMesageForName').getAttribute('class')
         })
 
-        expect(checkErrorMessage).toBe('input-label-required')
+        expect(checkErrorMessage).toBe('input-label-required is-invisible')
       }
       await browser.close()
     })
