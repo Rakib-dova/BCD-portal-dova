@@ -17,8 +17,8 @@
               thead
                 tr
                   th.width-5.text-center #{listNo}
-                  th.width-25.text-center #{subAccountCode}
-                  th.width-13.text-center #{subAccountCodeName}
+                  th.width-25.text-center #{subjectCode}
+                  th.width-13.text-center #{subjectName}
                   th.width-10.text-center #{accountCodeName}
                   th.width-10.text-center 
                   th.width-10.text-center 
@@ -27,8 +27,8 @@
                 each item in list
                   tr
                     th.text-center.td-overflow= item.no
-                    td.text-center.td-overflow= item.subAccountCode
-                    td.text-center.td-overflow= item.subAccountCodeName
+                    td.text-center.td-overflow= item.subjectCode
+                    td.text-center.td-overflow= item.subjectName
                     td.text-center.td-overflow= item.accountCodeName                 
                     td.text-center
                       a.button.is-success(class= setClassChangeBtn name='confirmButton' href= '') 確認・変更する
