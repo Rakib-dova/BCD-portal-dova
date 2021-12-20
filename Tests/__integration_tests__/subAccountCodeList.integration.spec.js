@@ -9,7 +9,7 @@ jest.setTimeout(60000) // jestのタイムアウトを60秒とする
 
 const getCookies = require('./getCookies')
 
-describe('勘定科目一覧のインテグレーションテスト', () => {
+describe('補助科目一覧のインテグレーションテスト', () => {
   let acCookies
   let userCookies
   let testTenantId
@@ -39,10 +39,10 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
   })
 
   describe('1.契約ステータス：未登録', () => {
-    // 利用登録をしていないため、勘定科目一覧ページ利用できない
+    // 利用登録をしていないため、補助科目一覧ページ利用できない
     test('管理者、契約ステータス：未登録、利用不可', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(500)
 
@@ -52,7 +52,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
     test('一般ユーザ、契約ステータス：未登録、利用不可', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(500)
 
@@ -111,34 +111,34 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
   })
 
   describe('3.契約ステータス：登録申込', () => {
-    // テナントステータスが「新規申込」、勘定科目一覧ページ利用可能
+    // テナントステータスが「新規申込」、補助科目一覧ページ利用可能
     test('管理者、契約ステータス：登録申込、利用可能', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
     })
 
     test('一般ユーザ、契約ステータス：登録申込、利用可能', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
     })
   })
 
   describe('4.契約ステータス：登録受付', () => {
-    // テナントステータスが「新規受付」、勘定科目一覧ページ利用可能
+    // テナントステータスが「新規受付」、補助科目一覧ページ利用可能
     test('管理者、契約ステータス：登録受付、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -159,31 +159,31 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
     })
 
     test('一般ユーザ、契約ステータス：登録受付、利用可能', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
     })
   })
 
   describe('5.契約ステータス：契約中', () => {
-    // テナントステータスが「契約中」、勘定科目一覧ページ利用可能
+    // テナントステータスが「契約中」、補助科目一覧ページ利用可能
     test('管理者、契約ステータス：契約中、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -206,43 +206,43 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
     })
 
     test('一般ユーザ、契約ステータス：契約中、利用可能', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
     })
 
     // 機能・遷移確認
-    test('登録した勘定科目が１件もない場合、画面確認', async () => {
+    test('登録した補助科目が１件もない場合、画面確認', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/現在、勘定科目はありません。新規登録するボタンから登録を行ってください。/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
+      expect(res.text).toMatch(/現在、補助科目はありません。新規登録するボタンから登録を行ってください。/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
     })
 
-    test('「←勘定科目一括作成」リンク遷移確認（勘定科目一括作成画面に遷移）', async () => {
+    test('「←Homeへ戻る」リンク遷移確認（補助科目一括作成画面に遷移）', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -251,19 +251,19 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/accountCodeList')
-      if (page.url() === 'https://localhost:3000/accountCodeList') {
+      await page.goto('https://localhost:3000/subAccountCodeList')
+      if (page.url() === 'https://localhost:3000/subAccountCodeList') {
         await page.click('body > div.max-width > div > div > div.mt-1.has-text-left > a')
 
         await page.waitForTimeout(500)
 
-        // 勘定科目一括作成画面に遷移確認
-        expect(await page.url()).toBe('https://localhost:3000/uploadAccount')
+        // ポータル画面に遷移確認（補助科目一括作成画面が追加されたら変更必要）
+        expect(await page.url()).toBe('https://localhost:3000/portal')
       }
       await browser.close()
     })
 
-    test('「新規登録する」ボタン遷移確認（勘定科目登録画面に遷移）', async () => {
+    test('「新規登録する」ボタン遷移確認（補助科目登録画面に遷移）', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -272,19 +272,19 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/accountCodeList')
-      if (page.url() === 'https://localhost:3000/accountCodeList') {
+      await page.goto('https://localhost:3000/subAccountCodeList')
+      if (page.url() === 'https://localhost:3000/subAccountCodeList') {
         await page.click('body > div.max-width > div > div > a')
 
         await page.waitForTimeout(500)
 
-        // 勘定科目登録画面に遷移確認
-        expect(await page.url()).toBe('https://localhost:3000/registAccountCode')
+        // 補助科目登録画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/registSubAccountCode')
       }
       await browser.close()
     })
 
-    test('勘定科目登録後、勘定科目一覧に遷移確認（勘定科目一覧画面に遷移）', async () => {
+    test('事前準備：勘定科目登録', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -308,33 +308,13 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
         await page.waitForTimeout(500)
 
-        // 勘定科目一覧画面に遷移確認
+        // 補助科目一覧画面に遷移確認
         expect(await page.url()).toBe('https://localhost:3000/accountCodeList')
       }
       await browser.close()
     })
 
-    test('登録した勘定科目がある場合、画面確認', async () => {
-      const res = await request(app)
-        .get('/accountCodeList')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
-      expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/No/i)
-      expect(res.text).toMatch(/勘定科目コード/i)
-      expect(res.text).toMatch(/intgration/i)
-      expect(res.text).toMatch(/勘定科目名/i)
-      expect(res.text).toMatch(/test/i)
-      expect(res.text).toMatch(/最新更新日/i)
-      expect(res.text).toMatch(/確認・変更する/i)
-      expect(res.text).toMatch(/削除/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
-    })
-
-    test('勘定科目登録画面「戻る」ボタン遷移確認（勘定科目一覧画面に遷移）', async () => {
+    test('補助科目登録後、補助科目一覧に遷移確認（補助科目一覧画面に遷移）', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -343,21 +323,81 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registAccountCode')
-      if (page.url() === 'https://localhost:3000/registAccountCode') {
+      await page.goto('https://localhost:3000/registSubAccountCode')
+      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
+        await page.type('#setSubAccountCodeInputId', 'subAccount')
+        await page.type('#setSubAccountCodeNameInputId', 'subTest')
+        await page.type('#setAccountCodeInputId', 'intgration')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnSearchAccountCode')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#displayFieldBody > div > div > p > label > input')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#submit')
+
+        await page.waitForTimeout(500)
+
+        // 補助科目一覧画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/subAccountCodeList')
+      }
+      await browser.close()
+    })
+
+    test('登録した補助科目がある場合、画面確認', async () => {
+      const res = await request(app)
+        .get('/subAccountCodeList')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/No/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/subAccount/i)
+      expect(res.text).toMatch(/補助科目名/i)
+      expect(res.text).toMatch(/subTest/i)
+      expect(res.text).toMatch(/勘定科目名/i)
+      expect(res.text).toMatch(/test/i)
+      expect(res.text).toMatch(/確認・変更する/i)
+      expect(res.text).toMatch(/削除/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
+    })
+
+    test('補助科目登録画面「戻る」ボタン遷移確認（補助科目一覧画面に遷移）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/registSubAccountCode')
+      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
         await page.click('#return-btn')
 
         await page.waitForTimeout(500)
 
-        // 勘定科目一覧画面に遷移確認
-        expect(await page.url()).toBe('https://localhost:3000/accountCodeList')
+        // 補助科目一覧画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/subAccountCodeList')
       }
       await browser.close()
     })
   })
 
   describe('6.契約ステータス：変更申込', () => {
-    // テナントステータスが「変更申込」、勘定科目一覧ページ利用可能
+    // テナントステータスが「変更申込」、補助科目一覧ページ利用可能
     test('管理者、契約ステータス：変更申込、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -378,29 +418,29 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
     })
 
     test('一般ユーザ、契約ステータス：変更申込、利用可能', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
     })
   })
 
   describe('7.契約ステータス：変更受付', () => {
-    // テナントステータスが「変更受付」、勘定科目一覧ページ利用可能
+    // テナントステータスが「変更受付」、補助科目一覧ページ利用可能
     test('管理者、契約ステータス：変更受付、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -421,29 +461,29 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
     })
 
     test('一般ユーザ、契約ステータス：変更受付、利用可能', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/勘定科目一覧/i)
-      expect(res.text).toMatch(/←勘定科目一括作成/i)
+      expect(res.text).toMatch(/補助科目一覧/i)
+      expect(res.text).toMatch(/←Homeへ戻る/i)
     })
   })
 
   describe('8.契約ステータス：解約申込', () => {
-    // テナントステータスが「解約申込」、勘定科目一覧ページ利用不可
+    // テナントステータスが「解約申込」、補助科目一覧ページ利用不可
     test('管理者、契約ステータス：解約申込、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -480,7 +520,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
@@ -490,7 +530,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
     test('一般ユーザ、契約ステータス：解約申込、利用不可', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
@@ -500,7 +540,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
   })
 
   describe('9.契約ステータス：解約受付', () => {
-    // テナントステータスが「解約受付」、勘定科目一覧ページ利用不可
+    // テナントステータスが「解約受付」、補助科目一覧ページ利用不可
     test('管理者、契約ステータス：解約受付、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -522,7 +562,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
@@ -532,7 +572,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
     test('一般ユーザ、契約ステータス：解約受付、利用不可', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
@@ -542,7 +582,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
   })
 
   describe('10.契約ステータス：解約', () => {
-    // テナントステータスが「解約」、勘定科目一覧ページ利用不可
+    // テナントステータスが「解約」、補助科目一覧ページ利用不可
     test('管理者、契約ステータス：解約、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -576,7 +616,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(500)
 
@@ -586,7 +626,7 @@ describe('勘定科目一覧のインテグレーションテスト', () => {
 
     test('一般ユーザ、契約ステータス：解約、利用不可', async () => {
       const res = await request(app)
-        .get('/accountCodeList')
+        .get('/subAccountCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(500)
 
