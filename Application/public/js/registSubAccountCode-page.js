@@ -193,6 +193,10 @@ const displayNoAccountCode = function () {
 
 // 勘定科目コード検索
 document.querySelector('#btnSearchAccountCode').addEventListener('click', function () {
+  // 検索ボタンが非活性化の時は動作しない
+  if ($('#btnSearchAccountCode').getAttribute('disabled') !== null) {
+    return
+  }
   const accountCode = document.querySelector('#setAccountCodeInputId').value
   const accountCodeName = document.querySelector('#setAccountCodeNameInputId').value
 
