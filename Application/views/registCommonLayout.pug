@@ -106,12 +106,24 @@ block content
         div.button-area
           a.button#cancel-btn.cancel-button(data-target='check-modal') キャンセル
           a.button.is-success#submit 登録
-
-  template#searchResultAccountCode
-    .field.is-horizontal
-      .field-body
-        p.control
-          label.checkbox
-            input.inputCheckbox(type='checkbox' name='accountCode')
+  
+  .modal#caution-modal
+    .modal-background.cancel-button(data-target='caution-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head
+        p.modal-card-title.title.mb-0 
+        button.delete(data-target='caution-modal')
+      section.modal-card-body
+        p#caution-message
+      footer.modal-card-foot
+        div.button-area
+          a.button.is-danger.cancel-button(data-target='caution-modal') 確認
+  if isRegistSubAccountCode
+    template#searchResultAccountCode
+      .field.is-horizontal
+        .field-body
+          p.control
+            label.checkbox
+              input.inputCheckbox(type='checkbox' name='setAccountCodeId')
 
   include footer

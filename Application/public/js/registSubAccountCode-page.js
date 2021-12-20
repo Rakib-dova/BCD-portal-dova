@@ -122,8 +122,21 @@ const inputEvent = () => {
   })
 }
 
+const displayNoAccountCode = function () {
+  const displayFieldBody = document.querySelector('#displayFieldBody')
+  const searchResultAccountCode = document.querySelector('#searchResultAccountCode')
+  const cloneSearchResultAccountCodeTemplate = document.importNode(searchResultAccountCode.content, true)
+  cloneSearchResultAccountCodeTemplate.querySelector('p').innerText = '検索した勘定科目を見つかれませんでした。'
+  displayFieldBody.appendChild(cloneSearchResultAccountCodeTemplate)
+  document.querySelector('#displayInvisible').classList.remove('is-invisible')
+}
+
 // 勘定科目コード検索
-document.querySelector('#btnSearchAccountCode').addEventListener('click', () => {
+document.querySelector('#btnSearchAccountCode').addEventListener('click', function () {
+  const accountCode = document.querySelector('#setAccountCodeInputId').value
+  const accountCodeName = document.querySelector('#setAccountCodeNameInputId').value
+
+  const $this = this
   deleteDisplayAccountCode()
   const getAccountCode = new XMLHttpRequest()
   getAccountCode.open('POST', '/registSubAccountCode/getAccountCode')
@@ -137,7 +150,7 @@ document.querySelector('#btnSearchAccountCode').addEventListener('click', () => 
             displayAccountCode(result)
             inputEvent()
           } else {
-            deleteDisplayAccountCode()
+            displayNoAccountCode()
           }
           break
         }
@@ -147,14 +160,10 @@ document.querySelector('#btnSearchAccountCode').addEventListener('click', () => 
         }
       }
     }
+    $this.classList.remove('is-loading')
   }
-  const accountCode = document.querySelector('#setAccountCodeInputId').value
-  const accountCodeName = document.querySelector('#setAccountCodeNameInputId').value
-  if (accountCode.length !== 0 || accountCodeName.length !== 0) {
-    getAccountCode.send(JSON.stringify({ accountCode: accountCode, accountCodeName: accountCodeName }))
-  } else {
-    deleteDisplayAccountCode()
-  }
+  $this.classList.add('is-loading')
+  getAccountCode.send(JSON.stringify({ accountCode: accountCode, accountCodeName: accountCodeName }))
 })
 
 // クリアボタン
@@ -162,6 +171,7 @@ document.querySelector('#btnClear').addEventListener('click', () => {
   document.querySelector('#setAccountCodeInputId').value = ''
   document.querySelector('#setAccountCodeNameInputId').value = ''
   deleteDisplayAccountCode()
+  document.querySelector('#btnCheck').setAttribute('disabled', '')
 })
 
 // event発生時、入力データをチェックして、「確認」ボタン活性化する。
