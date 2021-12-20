@@ -122,6 +122,7 @@ const inputEvent = () => {
   })
 }
 
+// 勘定科目コード検索が０けんの場合
 const displayNoAccountCode = function () {
   const displayFieldBody = document.querySelector('#displayFieldBody')
   const searchResultAccountCode = document.querySelector('#searchResultAccountCode')
