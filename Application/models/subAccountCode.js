@@ -1,7 +1,7 @@
 'use strict'
-const { Model } = require('sequelize')
+const { Model, QueryTypes } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class AccountCode extends Model {
+  class SubAccountCode extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -10,58 +10,44 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       // https://qiita.com/NewGyu/items/83390aa17dce1ffb4cd3
-      AccountCode.belongsTo(models.Contract, {
-        foreignKey: 'contractId', // k1を指定
-        targetKey: 'contractId', // k2を指定
+      SubAccountCode.belongsTo(models.AccountCode, {
+        foreignKey: 'accountCodeId', // k1を指定
+        targetKey: 'accountCodeId', // k2を指定
         onDelete: 'cascade',
         onUpdate: 'cascade'
       })
-      AccountCode.hasMany(models.SubAccountCode, {
-        foreignKey: 'accountCodeId' // k1
-      })
     }
 
-    static async getAccountCodeList(tenantId) {
+    static async getsubAccountCodeList() {
       try {
-        // テナントで契約情報を取得
-        const contractId = await sequelize.models.Contract.findOne({
-          where: {
-            tenantId: tenantId,
-            deleteFlag: false
-          }
-        })
-        // 契約情報で勘定科目のデータを取得
-        // 作成日が優先順位にして並べる
-        const accountCodes = await sequelize.models.AccountCode.findAll({
-          where: {
-            contractId: contractId.contractId
-          },
-          order: [['createdAt', 'DESC']]
-        })
+        const result = await sequelize.query(
+          'SELECT subjectName, subjectCode, accountCodeName FROM dbo.SubAccountCode INNER JOIN dbo.AccountCode ON dbo.SubAccountCode.accountCodeId = dbo.AccountCode.accountCodeId ORDER BY subjectCode',
+          { type: QueryTypes.SELECT }
+        )
 
-        return accountCodes
+        return result
       } catch (error) {
         // エラーが発生した場合、エラーObjectを渡す。
         return error
       }
     }
   }
-  AccountCode.init(
+  SubAccountCode.init(
     {
-      accountCodeId: {
+      subAccountCodeId: {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false
       },
-      contractId: {
+      accountCodeId: {
         allowNull: false,
         type: DataTypes.UUID
       },
-      accountCodeName: {
+      subjectName: {
         allowNull: false,
         type: DataTypes.STRING
       },
-      accountCode: {
+      subjectCode: {
         allowNull: false,
         type: DataTypes.STRING
       },
@@ -78,9 +64,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'AccountCode',
-      tableName: 'AccountCode'
+      modelName: 'SubAccountCode',
+      tableName: 'SubAccountCode'
     }
   )
-  return AccountCode
+  return SubAccountCode
 }

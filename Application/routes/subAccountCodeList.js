@@ -6,6 +6,7 @@ const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
+const subAccountCodeController = require('../controllers/subAccountCodeController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
@@ -49,22 +50,9 @@ const cbGetIndex = async (req, res, next) => {
   }
 
   // 補助科目
-  const subAccountCodeListArr = [
-    {
-      no: 1,
-      subjectCode: 'TEST1',
-      subjectName: '補助科目1',
-      accountCodeName: '勘定科目1'
-    },
-    {
-      no: 2,
-      subjectCode: 'TEST2',
-      subjectName: '補助科目2',
-      accountCodeName: '勘定科目2'
-    }
-  ]
+  const subAccountCodeListArr = await subAccountCodeController.getSubAccountCodeList()
 
-  // if (accountCodeListArr instanceof Error) return next(errorHelper.create(500))
+  if (subAccountCodeListArr instanceof Error) return next(errorHelper.create(500))
 
   // アップロードフォーマットデータを画面に渡す。
   res.render('subAccountCodeList', {
