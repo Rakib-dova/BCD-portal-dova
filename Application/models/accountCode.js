@@ -16,6 +16,9 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'cascade',
         onUpdate: 'cascade'
       })
+      AccountCode.hasMany(models.SubAccountCode, {
+        foreignKey: 'accountCodeId' // k1
+      })
     }
 
     static async getAccountCodeList(tenantId) {
@@ -60,7 +63,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       accountCode: {
         allowNull: false,
-        type: DataTypes.INTEGER
+        type: DataTypes.STRING
       },
       createdAt: {
         type: DataTypes.DATE,

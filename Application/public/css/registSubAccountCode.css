@@ -1,0 +1,17 @@
+#check-modal > div.modal-card.is-family-noto-sans > section > table > tbody > tr > td:nth-child(1) {
+  width: 150px !important;
+}
+#displayInvisible {
+  width: 100%;
+}
+
+#displayFieldBody {
+  width: 100%;
+  max-height: 200px;
+  overflow: auto;
+  margin-bottom: 20px;
+}
+
+#form > article > div > div > div > div > div > div.columns.is-fullwidth > div > label {
+  margin-bottom: 10px;
+}
