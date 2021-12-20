@@ -222,6 +222,7 @@ app.use('/accountCodeEdit', require('./routes/accountCodeEdit').router)
 // 勘定科目一括作成
 app.use('/uploadAccount', require('./routes/accountCodeUpload').router)
 // 補助科目設定
+app.use('/subAccountCodeList', require('./routes/subAccountCodeList').router)
 app.use('/registSubAccountCode', require('./routes/registSubAccountCode').router)
 
 // 設定
