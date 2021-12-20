@@ -95,7 +95,6 @@ const axios = {
 
     const businessId = paramateter.businessId || null
     url = businessId !== null ? 'bussinessId' : url
-    // console.log(url)
     switch (url) {
       case 'bussinessId': {
         switch (businessId) {
