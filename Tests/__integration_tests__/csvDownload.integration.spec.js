@@ -121,6 +121,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
       expect(res.text).toMatch(/送信済み\/受信済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/受理済み/i) // ステータスリスト確認
+      expect(res.text).toMatch(/送金済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/入金確認済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
@@ -139,6 +140,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
       expect(res.text).toMatch(/送信済み\/受信済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/受理済み/i) // ステータスリスト確認
+      expect(res.text).toMatch(/送金済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/入金確認済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
@@ -177,6 +179,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
       expect(res.text).toMatch(/送信済み\/受信済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/受理済み/i) // ステータスリスト確認
+      expect(res.text).toMatch(/送金済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/入金確認済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
@@ -195,6 +198,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
       expect(res.text).toMatch(/送信済み\/受信済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/受理済み/i) // ステータスリスト確認
+      expect(res.text).toMatch(/送金済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/入金確認済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
@@ -235,6 +239,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
       expect(res.text).toMatch(/送信済み\/受信済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/受理済み/i) // ステータスリスト確認
+      expect(res.text).toMatch(/送金済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/入金確認済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
@@ -253,6 +258,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
       expect(res.text).toMatch(/送信済み\/受信済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/受理済み/i) // ステータスリスト確認
+      expect(res.text).toMatch(/送金済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/入金確認済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
@@ -366,6 +372,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
       expect(res.text).toMatch(/送信済み\/受信済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/受理済み/i) // ステータスリスト確認
+      expect(res.text).toMatch(/送金済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/入金確認済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
@@ -384,6 +391,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
       expect(res.text).toMatch(/送信済み\/受信済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/受理済み/i) // ステータスリスト確認
+      expect(res.text).toMatch(/送金済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/入金確認済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
@@ -422,6 +430,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
       expect(res.text).toMatch(/送信済み\/受信済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/受理済み/i) // ステータスリスト確認
+      expect(res.text).toMatch(/送金済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/入金確認済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
@@ -440,6 +449,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       expect(res.text).toMatch(/ステータス/i) // ステータスラベルがあること
       expect(res.text).toMatch(/送信済み\/受信済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/受理済み/i) // ステータスリスト確認
+      expect(res.text).toMatch(/送金済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/入金確認済み/i) // ステータスリスト確認
       expect(res.text).toMatch(/販売\/購入/i) // 販売/購入ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
