@@ -31,14 +31,14 @@ document.getElementById('btnCheck').addEventListener('click', function (e) {
   document.querySelector('#RequiredErrorMesageForCode').classList.add('is-invisible')
   document.querySelector('#RequiredErrorMesageForName').classList.add('is-invisible')
 
-  // 勘定科目コードが未入力の場合
+  // 補助科目コードが未入力の場合
   if (document.querySelector('#setSubAccountCodeInputId').value.length === 0) {
-    document.querySelector('#RequiredErrorMesageForCode').innerHTML = '勘定科目コードが未入力です。'
+    document.querySelector('#RequiredErrorMesageForCode').innerHTML = '補助科目コードが未入力です。'
     document.querySelector('#RequiredErrorMesageForCode').classList.remove('is-invisible')
     errorFlag = true
   }
 
-  // 勘定科目コードの英数文字ではない場合
+  // 補助科目コードの英数文字ではない場合
   if (
     !document.querySelector('#setSubAccountCodeInputId').value.match(regExpEngNumber) &&
     document.querySelector('#setSubAccountCodeInputId').value.length > 0 &&
@@ -49,26 +49,26 @@ document.getElementById('btnCheck').addEventListener('click', function (e) {
     errorFlag = true
   }
 
-  // 勘定科目コードが10桁以上の場合
+  // 補助科目コードが10桁以上の場合
   if (document.querySelector('#setSubAccountCodeInputId').value.length > 10) {
-    document.querySelector('#RequiredErrorMesageForCode').innerHTML = '勘定科目コードは10桁まで入力してください。'
+    document.querySelector('#RequiredErrorMesageForCode').innerHTML = '補助科目コードは10桁まで入力してください。'
     document.querySelector('#RequiredErrorMesageForCode').classList.remove('is-invisible')
     errorFlag = true
   }
 
-  // 勘定科目名が未入力の場合
+  // 補助科目名が未入力の場合
   if (
     document.querySelector('#setSubAccountCodeNameInputId').value.length === 0 ||
     document.querySelector('#setSubAccountCodeNameInputId').value.trim().length === 0
   ) {
-    document.querySelector('#RequiredErrorMesageForName').innerHTML = '勘定科目名が未入力です。'
+    document.querySelector('#RequiredErrorMesageForName').innerHTML = '補助科目名が未入力です。'
     document.querySelector('#RequiredErrorMesageForName').classList.remove('is-invisible')
     errorFlag = true
   }
 
-  // 勘定科目名が40桁以上の場合
+  // 補助科目名が40桁以上の場合
   if (document.querySelector('#setSubAccountCodeNameInputId').value.length > 40) {
-    document.querySelector('#RequiredErrorMesageForName').innerHTML = '勘定科目名は40桁まで入力してください。'
+    document.querySelector('#RequiredErrorMesageForName').innerHTML = '補助科目名は40桁まで入力してください。'
     document.querySelector('#RequiredErrorMesageForName').classList.remove('is-invisible')
     errorFlag = true
   }
