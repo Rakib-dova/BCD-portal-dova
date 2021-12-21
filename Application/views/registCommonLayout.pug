@@ -142,7 +142,10 @@ block content
       footer.modal-card-foot
         div.button-area
           a.button#cancel-btn.cancel-button(data-target='check-modal') キャンセル
-          a.button.is-success#submit 登録
+          if valueForAccountCodeInput
+            a.button.is-success#submit(disabled) 登録
+          else 
+            a.button.is-success#submit 登録
   
   .modal#caution-modal
     .modal-background.cancel-button(data-target='caution-modal')
