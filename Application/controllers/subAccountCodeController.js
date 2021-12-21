@@ -109,11 +109,48 @@ module.exports = {
           no: idx + 1,
           subjectCode: item.subjectCode,
           subjectName: item.subjectName,
-          accountCodeName: item.accountCodeName
+          accountCodeName: item.accountCodeName,
+          subAccountCodeId: item.subAccountCodeId
         }
       })
     } catch (error) {
       logger.error({ stack: error.stack, status: 0 })
+      return error
+    }
+  },
+  getSubAccountCode: async (contractId, subAccountCodeId) => {
+    try {
+      // 契約番号と補助科目IDでデータを取得（OUTER JOIN）
+      const targetAccountCodeSubAccountCodeJoin = await AccountCode.findAll({
+        raw: true,
+        include: [
+          {
+            model: SubAccountCode,
+            attributes: ['subAccountCodeId', 'subjectCode', 'subjectName'],
+            where: {
+              subAccountCodeId: subAccountCodeId
+            }
+          }
+        ],
+        where: {
+          contractId: contractId
+        }
+      })
+      // 検索検索がない場合nullを返却
+      if (targetAccountCodeSubAccountCodeJoin.length === 0) {
+        return null
+      }
+      // 検索結果出力
+      return {
+        subAccountCodeId: targetAccountCodeSubAccountCodeJoin[0]['SubAccountCodes.subAccountCodeId'],
+        accountCodeId: targetAccountCodeSubAccountCodeJoin[0].accountCodeId,
+        accountCode: targetAccountCodeSubAccountCodeJoin[0].accountCode,
+        accountCodeName: targetAccountCodeSubAccountCodeJoin[0].accountCodeName,
+        subjectName: targetAccountCodeSubAccountCodeJoin[0]['SubAccountCodes.subjectName'],
+        subjectCode: targetAccountCodeSubAccountCodeJoin[0]['SubAccountCodes.subjectCode']
+      }
+    } catch (error) {
+      logger.error({ contractId: contractId, stack: error.stack, status: 0 })
       return error
     }
   }
