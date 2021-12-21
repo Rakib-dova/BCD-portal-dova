@@ -188,8 +188,9 @@ describe('registSubAccountCodeのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-
+      // メッセージの表示を確認
       expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目一覧', '該当する勘定科目が存在しませんでした。'])
+      // 補助科目リスト画面へリダイレクトすることを確認
       expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
     })
 
@@ -234,8 +235,9 @@ describe('registSubAccountCodeのテスト', () => {
       await subAccountCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
+      // 400エラーがエラーハンドリング
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
     })
 
@@ -253,9 +255,8 @@ describe('registSubAccountCodeのテスト', () => {
       await subAccountCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
       // 解約手続き中画面が表示「される」
@@ -267,10 +268,9 @@ describe('registSubAccountCodeのテスト', () => {
       await subAccountCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -288,10 +288,9 @@ describe('registSubAccountCodeのテスト', () => {
       await subAccountCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -308,6 +307,7 @@ describe('registSubAccountCodeのテスト', () => {
       await subAccountCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
+      // 404エラーがエラーハンドリング
       expect(next).toHaveBeenCalledWith(errorHelper.create(404))
     })
 
@@ -326,6 +326,7 @@ describe('registSubAccountCodeのテスト', () => {
       await subAccountCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
+      // 500エラーがエラーハンドリング
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -347,6 +348,7 @@ describe('registSubAccountCodeのテスト', () => {
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -370,6 +372,7 @@ describe('registSubAccountCodeのテスト', () => {
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
+      // 500エラーがエラーハンドリング
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -412,7 +415,7 @@ describe('registSubAccountCodeのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-
+      // 500エラーがエラーハンドリング
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })
