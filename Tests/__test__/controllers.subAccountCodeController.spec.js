@@ -364,4 +364,88 @@ describe('subAccountCodeControllerのテスト', () => {
       })
     })
   })
+
+  describe('getSubAccountCode', () => {
+    test('正常', async () => {
+      // 準備
+      // 勘定科目・補助科目テーブルOUTER JOIN結果
+      const accountCodeAndSubAccount = {
+        accountCodeId: 'f194969f-9307-4e18-a097-843aa6ce7b73',
+        contractId: '6e2b28a9-84bb-41a4-b5af-6d6e421ea70a',
+        accountCodeName: '普通預金',
+        accountCode: '131',
+        createdAt: '2021-12-20T02:12:40.549Z',
+        updatedAt: '2021-12-20T02:12:40.549Z',
+        'SubAccountCodes.subAccountCodeId': '308e7acf-072d-4533-94f5-dcdf5972007e',
+        'SubAccountCodes.subjectCode': '188121',
+        'SubAccountCodes.subjectName': 'テスト2'
+      }
+      subAccountCodefindAllSpy.mockReturnValue([accountCodeAndSubAccount])
+
+      // 契約番号
+      const contractId = '6e2b28a9-84bb-41a4-b5af-6d6e421ea70a'
+      const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
+
+      // 試験実施
+      const result = await subAccountCodeController.getSubAccountCode(contractId, subAccountCodeId)
+
+      // 期待結果
+      expect(result).toMatchObject({
+        subAccountCodeId: accountCodeAndSubAccount['SubAccountCodes.subAccountCodeId'],
+        accountCodeId: accountCodeAndSubAccount.accountCodeId,
+        accountCode: accountCodeAndSubAccount.accountCode,
+        accountCodeName: accountCodeAndSubAccount.accountCodeName,
+        subjectName: accountCodeAndSubAccount['SubAccountCodes.subjectName'],
+        subjectCode: accountCodeAndSubAccount['SubAccountCodes.subjectCode']
+      })
+    })
+
+    test('準正常：該当データがない場合', async () => {
+      // 準備
+      // データない場合
+      subAccountCodefindAllSpy.mockReturnValue([])
+
+      // 契約番号
+      const contractId = '6e2b28a9-84bb-41a4-b5af-6d6e421ea70a'
+      const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
+
+      // 試験実施
+      const result = await subAccountCodeController.getSubAccountCode(contractId, subAccountCodeId)
+
+      // 期待結果
+      expect(result).toBeNull()
+    })
+
+    test('異常：DBエラー発生', async () => {
+      // 準備
+      // データない場合
+      const dbError = new Error("DatabaseError [SequelizeDatabaseError]: Invalid column name 'subAccountCodeId'.")
+      dbError.code = 'EREQUEST'
+      dbError.number = 207
+      dbError.state = 1
+      dbError.class = 16
+      dbError.serverName = 'sqlserver'
+      dbError.procName = ''
+      dbError.lineNumber = 1
+      dbError.sql = 'SELECT'
+      subAccountCodefindAllSpy.mockImplementation(() => {
+        throw dbError
+      })
+
+      // 契約番号
+      const contractId = '6e2b28a9-84bb-41a4-b5af-6d6e421ea70a'
+      const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
+
+      // 試験実施
+      const result = await subAccountCodeController.getSubAccountCode(contractId, subAccountCodeId)
+
+      // 期待結果
+      expect(errorSpy).toHaveBeenCalledWith({
+        contractId: contractId,
+        stack: expect.anything(),
+        status: 0
+      })
+      expect(result).toMatchObject(dbError)
+    })
+  })
 })
