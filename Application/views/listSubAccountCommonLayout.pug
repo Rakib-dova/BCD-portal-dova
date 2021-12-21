@@ -31,7 +31,7 @@
                     td.text-center.td-overflow= item.subjectName
                     td.text-center.td-overflow= item.accountCodeName                 
                     td.text-center
-                      a.button.is-success(class= setClassChangeBtn name='confirmButton') 確認・変更する
+                      a.button.is-success(class= setClassChangeBtn name='confirmButton' href=`/subAccountCodeEdit/${item.subAccountCodeId}`) 確認・変更する
                     td.text-center.show-modal
                       a.button.is-danger(class= setClassDeleteBtn name='deleteButton') 削除
         .mt-1.has-text-left

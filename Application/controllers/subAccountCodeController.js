@@ -109,7 +109,8 @@ module.exports = {
           no: idx + 1,
           subjectCode: item.subjectCode,
           subjectName: item.subjectName,
-          accountCodeName: item.accountCodeName
+          accountCodeName: item.accountCodeName,
+          subAccountCodeId: item.subAccountCodeId
         }
       })
     } catch (error) {
