@@ -192,9 +192,6 @@ const cbPostIndex = async (req, res, next) => {
       res.redirect('/subAccountCodeList')
       break
     case 1:
-      req.flash('noti', ['補助科目登録', 'すでに登録されている値です。'])
-      res.redirect('/registSubAccountCode')
-      break
     case -1:
       req.flash('noti', ['補助科目登録', '補助科目登録に失敗しました。'])
       res.redirect('/registSubAccountCode')

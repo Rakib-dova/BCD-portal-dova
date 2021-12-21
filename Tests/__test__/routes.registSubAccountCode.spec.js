@@ -738,7 +738,7 @@ describe('registSubAccountCodeのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでregistSubAccountCodeが呼ばれ「る」
       expect(response.getHeader('Location')).toEqual('/registSubAccountCode')
-      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目登録', 'すでに登録されている値です。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目登録', '補助科目登録に失敗しました。'])
     })
 
     test('異常：補助科目登録失敗の場合', async () => {
