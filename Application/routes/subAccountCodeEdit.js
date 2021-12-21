@@ -9,7 +9,7 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
-const accountCodeController = require('../controllers/accountCodeController')
+const subAccountCodeController = require('../controllers/subAccountCodeController')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -54,11 +54,11 @@ const cbGetIndex = async (req, res, next) => {
   const contractId = contract.contractId
 
   // DBからデータ取得
-  const result = await dummySubAccountCodeControllerGetSubAccountCode(contractId, subAccountCodeId)
+  const result = await subAccountCodeController.getSubAccountCode(contractId, subAccountCodeId)
 
   // 変更の同時削除された場合
   if (result === null) {
-    req.flash('noti', ['補助科目一覧', ''])
+    req.flash('noti', ['補助科目一覧', '該当する勘定科目が存在しませんでした。'])
     res.redirect('/subAccountCodeList')
   }
 
@@ -95,17 +95,6 @@ const cbGetIndex = async (req, res, next) => {
     valueForAccountCodeName: result.accountCodeName
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
-}
-
-const dummySubAccountCodeControllerGetSubAccountCode = async (contract, subAccountCodeId) => {
-  return {
-    subAccountCodeId: '308e7acf-072d-4533-94f5-dcdf5972007e',
-    accountCodeId: 'f194969f-9307-4e18-a097-843aa6ce7b73',
-    accountCode: '131',
-    accountCodeName: '普通預金',
-    subjectName: 'ダミーデータ',
-    subjectCode: 'DUMMY2021'
-  }
 }
 
 router.get('/:subAccountCodeId', helper.isAuthenticated, cbGetIndex)
