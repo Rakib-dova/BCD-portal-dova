@@ -69,7 +69,7 @@ const cbGetIndex = async (req, res, next) => {
     setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
     setClassDeleteBtn: 'deleteSubAccountCodeBtn',
     prevLocation: '/portal',
-    prevLocationName: '←ポータル画面'
+    prevLocationName: '←Homeに戻る'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
