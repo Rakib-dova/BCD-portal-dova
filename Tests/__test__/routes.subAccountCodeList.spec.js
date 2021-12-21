@@ -270,7 +270,7 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/portal',
-        prevLocationName: '←ポータル画面'
+        prevLocationName: '←Homeに戻る'
       })
     })
 
@@ -314,7 +314,7 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/portal',
-        prevLocationName: '←ポータル画面'
+        prevLocationName: '←Homeに戻る'
       })
     })
 
@@ -357,7 +357,7 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/portal',
-        prevLocationName: '←ポータル画面'
+        prevLocationName: '←Homeに戻る'
       })
     })
 
@@ -400,7 +400,7 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/portal',
-        prevLocationName: '←ポータル画面'
+        prevLocationName: '←Homeに戻る'
       })
     })
 
@@ -443,7 +443,7 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/portal',
-        prevLocationName: '←ポータル画面'
+        prevLocationName: '←Homeに戻る'
       })
     })
 
@@ -486,7 +486,7 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/portal',
-        prevLocationName: '←ポータル画面'
+        prevLocationName: '←Homeに戻る'
       })
     })
 
@@ -531,7 +531,7 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/portal',
-        prevLocationName: '←ポータル画面'
+        prevLocationName: '←Homeに戻る'
       })
     })
 
