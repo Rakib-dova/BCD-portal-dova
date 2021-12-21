@@ -58,8 +58,9 @@ const cbGetIndex = async (req, res, next) => {
 
   // 変更の同時削除された場合
   if (result === null) {
+    logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
     req.flash('noti', ['補助科目一覧', '該当する勘定科目が存在しませんでした。'])
-    res.redirect('/subAccountCodeList')
+    return res.redirect('/subAccountCodeList')
   }
 
   if (result instanceof Error) return next(errorHelper.create(500))
