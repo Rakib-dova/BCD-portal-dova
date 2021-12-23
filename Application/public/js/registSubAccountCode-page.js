@@ -112,6 +112,9 @@ const deleteDisplayAccountCode = function () {
     })
   }
 
+  document.querySelector('#setAccountCodeInputId').value = ''
+  document.querySelector('#setAccountCodeNameInputId').value = ''
+
   document.querySelector('#displayInvisible').classList.add('is-invisible')
 }
 
@@ -136,7 +139,8 @@ const displayAccountCode = function (accountCodeArr) {
       $('#setAccountCodeInputIdResult').setAttribute('readonly', true)
       $('#setAccountCodeId').value = ele.parentElement.parentElement.lastChild.innerText
       $('#setAccountCodeInputIdResult').classList.remove('is-invisible')
-      $('#btnClear').click()
+      $('#setAccountCodeInputIdResultColumn').classList.remove('is-invisible')
+      $('#btnAccountCodeClear').classList.remove('is-invisible')
       deleteDisplayAccountCode()
       $('#btnOpenAccountCodeModal').setAttribute('disabled', 'disabled')
       $('#btnAccountCodeClear').removeAttribute('disabled')
@@ -230,7 +234,6 @@ document.querySelector('#btnSearchAccountCode').addEventListener('click', functi
           if (result.length !== 0) {
             displayAccountCode(result)
             inputEvent()
-            freezePostalSearchBtn()
           } else {
             displayNoAccountCode()
           }
@@ -247,30 +250,6 @@ document.querySelector('#btnSearchAccountCode').addEventListener('click', functi
   $this.classList.add('is-loading')
   getAccountCode.send(JSON.stringify({ accountCode: accountCode, accountCodeName: accountCodeName }))
 })
-
-// クリアボタン
-document.querySelector('#btnClear').addEventListener('click', () => {
-  // クリアボタンが非活性化の時は動作しない
-  if ($('#btnClear').getAttribute('disabled') !== null) {
-    return
-  }
-  $('#setAccountCodeInputId').readOnly = false
-  $('#setAccountCodeNameInputId').readOnly = false
-  $('#setAccountCodeInputId').value = ''
-  $('#setAccountCodeNameInputId').value = ''
-  deleteDisplayAccountCode()
-  document.querySelector('#btnCheck').setAttribute('disabled', '')
-  $('#btnSearchAccountCode').removeAttribute('disabled')
-  $('#btnClear').setAttribute('disabled', 'disabled')
-})
-
-// 勘定科目（コード、名）が入力不可に変更 、検索ボタン非活性化、クリアボタン活性化
-function freezePostalSearchBtn() {
-  $('#setAccountCodeInputId').readOnly = true
-  $('#setAccountCodeNameInputId').readOnly = true
-  $('#btnSearchAccountCode').setAttribute('disabled', 'disabled')
-  $('#btnClear').removeAttribute('disabled')
-}
 
 // event発生時、入力データをチェックして、「確認」ボタン活性化する。
 document.querySelector('body').addEventListener('change', function (event) {
@@ -307,6 +286,8 @@ document.querySelector('#btnAccountCodeClear').addEventListener('click', () => {
   $('#btnOpenAccountCodeModal').removeAttribute('disabled')
   $('#btnAccountCodeClear').setAttribute('disabled', true)
   $('#btnCheck').setAttribute('disabled', true)
+  $('#setAccountCodeInputIdResultColumn').classList.add('is-invisible')
+  $('#btnAccountCodeClear').classList.add('is-invisible')
 })
 
 // 補助科目コードと補助科目名を設定した上で勘定科目のみ変更した時、確認ボタン活性化処理

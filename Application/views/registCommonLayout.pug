@@ -21,14 +21,19 @@ block content
                           .field
                             .columns
                               .column
+                                label(for= parentIdForCodeInputResult).input-label #{parentCodeLabel}
+                                p(id= requiredTagParentCodeLabel).input-label-required.input-label （必須）
                                 .control
-                                  label(for= parentIdForCodeInputResult).input-label #{parentCodeLabel}
-                                  p(id= requiredTagParentCodeLabel).input-label-required.input-label （必須）
-                                  input.input.is-invisible(type="text" id= parentIdForCodeInputResult name= parentIdForCodeInputResult value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum readonly) 
-                                  input.input.is-invisible(type="text" id= 'setAccountCodeId' name= 'setAccountCodeId' value pattern=inputPatternEngNum hidden)
-                                .control
-                                  .button.is-link.mr-6#btnOpenAccountCodeModal(type="button" data-toggle="modal" data-target="#searchAccountCode-modal" ) 設定
-                                  .button.is-danger#btnAccountCodeClear(type="button" disabled) クリア                                      
+                                  .columns.ml-0.pl-0
+                                    .column#setAccountCodeInputIdResultColumn.ml-0.pl-0.is-invisible
+                                      input.input.is-invisible(type="text" id= parentIdForCodeInputResult name= parentIdForCodeInputResult value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum readonly) 
+                                    .column.ml-0.pl-0 
+                                      .button.is-link.mr-2#btnOpenAccountCodeModal(type="button" data-toggle="modal" data-target="#searchAccountCode-modal" ) 設定
+                                      .button.is-danger.is-invisible#btnAccountCodeClear(type="button" disabled) クリア   
+                                      input.input.is-invisible(type="text" id= 'setAccountCodeId' name= 'setAccountCodeId' value pattern=inputPatternEngNum hidden)                              
+                           
+                                     
+                                        
                           .field
                             .columns
                               .column
@@ -36,7 +41,7 @@ block content
                                 p(id= requiredTagCode).input-label-required.input-label （必須）
                                 p#RequiredErrorMesageForCode.input-label-required.is-invisible
                                 .control
-                                  .columns.ml-0.pl-0.alignCenterChild
+                                  .columns.ml-0.pl-0.mb-1.alignCenterChild
                                     .column.pl-0
                                       input.input(type="text" id= idForCodeInput name= idForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
                                 label(for= idForNameInput).input-label #{codeNameLabel}
@@ -162,25 +167,30 @@ block content
       section.modal-card-body
         p.modal-card-result
         if isRegistSubAccountCode
-          .columns
+          .columns.is-centered
             .column
-                label.input-label 
-                | #{parentCodeLabel}  
-                .control
+              label.input-label 
+              | #{parentCodeLabel}  
+              .control
+                .column.pl-0
                   input.input(type="text" id= parentIdForCodeInput name= parentIdForCodeInput value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum) 
-                label.input-label
-                | #{parentCodeNameLabel}  
-                .control
+              label.input-label
+              | #{parentCodeNameLabel}  
+              .control
+                .column.pl-0              
                   input.input(type="text" id= parentIdForNameInput name= parentIdForNameInput value maxlength=40 placeholder='文字列（40桁）') 
-                .column
-                  .control
-                    .button.is-link.mr-6#btnSearchAccountCode(type="button") 検索
-                    .button.is-danger#btnClear(type="button" disabled) クリア
+              .control
+                .field.is-grouped.is-grouped-centered 
+                  .columns
+                    .column
+                      div.button-area
+                        .button.is-link#btnSearchAccountCode(type="button") 検索
+
           .columns.is-fullwidth
             .column.is-fullwidth              
-              .subtitle 検索結果
               .field.is-horizontal.is-invisible#displayInvisible
                 .box
+                  .subtitle 検索結果  
                   table.table
                     thead
                       td 勘定科目コード
