@@ -119,6 +119,7 @@ module.exports = {
     }
   },
   getSubAccountCode: async (contractId, subAccountCodeId) => {
+    logger.info(constantsDefine.logMessage.INF000 + 'subAccountCodeController.getSubAccountCode')
     try {
       // 契約番号と補助科目IDでデータを取得（OUTER JOIN）
       const targetAccountCodeSubAccountCodeJoin = await AccountCode.findAll({
@@ -138,6 +139,7 @@ module.exports = {
       })
       // 検索検索がない場合nullを返却
       if (targetAccountCodeSubAccountCodeJoin.length === 0) {
+        logger.info(constantsDefine.logMessage.INF001 + 'subAccountCodeController.getSubAccountCode')
         return null
       }
       // 検索結果出力
@@ -151,6 +153,136 @@ module.exports = {
       }
     } catch (error) {
       logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+      logger.info(constantsDefine.logMessage.INF001 + 'subAccountCodeController.getSubAccountCode')
+      return error
+    }
+  },
+  updateSubAccountCode: async function (contractId, accountCodeId, subAccountCodeId, subjectCode, subAccountCodeName) {
+    logger.info(constantsDefine.logMessage.INF000 + 'subAccountCodeController.updateSubAccountCode')
+    try {
+      logger.info()
+      const updateTarget = await this.checkAndLockSubAccountCode(
+        contractId,
+        accountCodeId,
+        subAccountCodeId,
+        subjectCode,
+        subAccountCodeName
+      )
+      logger.info(constantsDefine.logMessage.INF001 + 'subAccountCodeController.updateSubAccountCode')
+      switch (updateTarget) {
+        case 0:
+          return 0
+        case 1:
+          return 1
+        case -1:
+          return -1
+        case -2:
+          return -2
+        default:
+          return updateTarget
+      }
+    } catch (error) {
+      logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+      logger.info(constantsDefine.logMessage.INF001 + 'subAccountCodeController.updateSubAccountCode')
+      return error
+    }
+  },
+  checkAndLockSubAccountCode: async function (
+    contractId,
+    accountCodeId,
+    subAccountCodeId,
+    subjectCode,
+    subjectCodeName
+  ) {
+    logger.info(constantsDefine.logMessage.INF000 + 'subAccountCodeController.checkAndLockSubAccountCode')
+    const lockTransaction = await db.sequelize.transaction()
+    try {
+      const motoSubAccountCode = await this.getSubAccountCode(contractId, subAccountCodeId)
+      // 補助科目の親の勘定科目の有無のチェック
+      switch (motoSubAccountCode !== null && !(motoSubAccountCode instanceof Error)) {
+        case true:
+          break
+        default:
+          return -3
+      }
+      const getUpdateTarget = await SubAccountCode.findOne(
+        {
+          where: {
+            subAccountCodeId: subAccountCodeId
+          }
+        },
+        {
+          transaction: lockTransaction
+        }
+      )
+
+      // 補助科目の有無のチェック
+      switch (getUpdateTarget instanceof SubAccountCode) {
+        case true:
+          break
+        default:
+          return -2
+      }
+
+      // 重複チェック
+      let duplicatedFlag = false
+      const Op = db.Sequelize.Op
+      const getSubAccountCodeList = await await AccountCode.findAll(
+        {
+          raw: true,
+          include: [
+            {
+              model: SubAccountCode,
+              attributes: ['subAccountCodeId', 'subjectCode', 'subjectName'],
+              where: {
+                subAccountCodeId: {
+                  [Op.ne]: [subAccountCodeId]
+                }
+              }
+            }
+          ],
+          where: {
+            contractId: contractId
+          }
+        },
+        {
+          transaction: lockTransaction
+        }
+      )
+      let idx = 0
+      while (getSubAccountCodeList[idx]) {
+        if (
+          getSubAccountCodeList[idx]['SubAccountCodes.subjectCode'] === subjectCode &&
+          getSubAccountCodeList[idx].accountCodeId === accountCodeId
+        ) {
+          duplicatedFlag = true
+        }
+        idx++
+      }
+      if (duplicatedFlag) {
+        return -1
+      }
+
+      // 変更する補助科目のデータ変更
+      getUpdateTarget.subjectCode = subjectCode
+      getUpdateTarget.subjectName = subjectCodeName
+      getUpdateTarget.accountCodeId = accountCodeId
+
+      // 変更内容がない場合終了
+      if (getUpdateTarget._changed.size === 0) {
+        return 1
+      }
+
+      // 変更がある場合、保存後、コミット実施
+      getUpdateTarget.save()
+      lockTransaction.commit()
+      logger.info(constantsDefine.logMessage.INF001 + 'subAccountCodeController.checkAndLockSubAccountCode')
+      return 0
+    } catch (error) {
+      logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+      logger.info(constantsDefine.logMessage.INF001 + 'subAccountCodeController.checkAndLockSubAccountCode')
+      // 途中エラーが発生したら、ロールバック
+      lockTransaction.rollback()
       return error
     }
   }
