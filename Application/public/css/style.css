@@ -667,3 +667,10 @@ body > div.hero.is-small {
   font-weight: bold;
   margin-left: 1.5rem;
 }
+
+/* 
+  ・勘定科目検索時のテーブル高さ
+*/
+#displayInvisible {
+  max-height: 290px;
+}

@@ -17,22 +17,35 @@ block content
                     .column.is-fullwidth
                       .field.card
                         .card-content
+                        if isRegistSubAccountCode
                           .field
-                            label(for= idForCodeInput).input-label #{codeLabel}
-                            p(id= requiredTagCode).input-label-required.input-label （必須）
-                            p#RequiredErrorMesageForCode.input-label-required.is-invisible
-                            .control
-                              .columns.ml-0.pl-0.alignCenterChild
-                                .column.pl-0
-                                  input.input(type="text" id= idForCodeInput name= idForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
+                            .columns
+                              .column
+                                .control
+                                  label(for= parentIdForCodeInputResult).input-label #{parentCodeLabel}
+                                  p(id= requiredTagParentCodeLabel).input-label-required.input-label （必須）
+                                  input.input.is-invisible(type="text" id= parentIdForCodeInputResult name= parentIdForCodeInputResult value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum readonly) 
+                                  input.input.is-invisible(type="text" id= 'setAccountCodeId' name= 'setAccountCodeId' value pattern=inputPatternEngNum hidden)
+                                .control
+                                  .button.is-link.mr-6#btnOpenAccountCodeModal(type="button" data-toggle="modal" data-target="#searchAccountCode-modal" ) 設定
+                                  .button.is-danger#btnAccountCodeClear(type="button" disabled) クリア                                      
                           .field
-                            label(for= idForNameInput).input-label #{codeNameLabel}
-                            p(id= requiredTagName).input-label-required.input-label （必須）
-                            p#RequiredErrorMesageForName.input-label-required.is-invisible
-                            .control
-                              .columns.ml-0.pl-0.alignCenterChild
-                                .column.pl-0
-                                  input.input(type="text" id= idForNameInput name= idForNameInput value= valueForNameInput maxlength=40 placeholder='文字列（40桁）' required) 
+                            .columns
+                              .column
+                                label(for= idForCodeInput).input-label #{codeLabel}
+                                p(id= requiredTagCode).input-label-required.input-label （必須）
+                                p#RequiredErrorMesageForCode.input-label-required.is-invisible
+                                .control
+                                  .columns.ml-0.pl-0.alignCenterChild
+                                    .column.pl-0
+                                      input.input(type="text" id= idForCodeInput name= idForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
+                                label(for= idForNameInput).input-label #{codeNameLabel}
+                                p(id= requiredTagName).input-label-required.input-label （必須）
+                                p#RequiredErrorMesageForName.input-label-required.is-invisible
+                                .control
+                                  .columns.ml-0.pl-0.alignCenterChild
+                                    .column.pl-0
+                                      input.input(type="text" id= idForNameInput name= idForNameInput value= valueForNameInput maxlength=40 placeholder='文字列（40桁）' required) 
 
                           .field.is-grouped.is-grouped-centered
                             .control
@@ -45,67 +58,36 @@ block content
                                     a.button.is-link.success-button#btnCheck(disabled) 確認
                                   else
                                     a.button.is-link.success-button#btnCheck 確認
-                        if isRegistSubAccountCode
-                          .columns
-                            .column.is-5
-                                label.input-label 
-                                | #{parentCodeLabel}  
-                                .control
-                                  if valueForAccountCodeInput
-                                    input.input(type="text" id= parentIdForCodeInput name= parentIdForCodeInput value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum readonly) 
-                                  else
-                                    input.input(type="text" id= parentIdForCodeInput name= parentIdForCodeInput value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum) 
-                                label.input-label
-                                | #{parentCodeNameLabel}  
-                                .control
-                                  if valueForAccountCodeInput
-                                    input.input(type="text" id= parentIdForNameInput name= parentIdForNameInput value maxlength=40 placeholder='文字列（40桁）' readonly) 
-                                  else
-                                    input.input(type="text" id= parentIdForNameInput name= parentIdForNameInput value maxlength=40 placeholder='文字列（40桁）') 
-                            .column.is-4
-                                .field.is-grouped.is-grouped-centered
-                                  .control
-                                    div.button-area
-                                      .column
-                                      .column.mt-4
-                                        if valueForAccountCodeInput
-                                          .button.is-link.mr-6#btnSearchAccountCode(type="button" disabled) 検索
-                                          .button.is-danger#btnClear(type="button") クリア
-                                        else
-                                          .button.is-link.mr-6#btnSearchAccountCode(type="button") 検索
-                                          .button.is-danger#btnClear(type="button" disabled) クリア
-                                        
-                          .columns.is-fullwidth
-                            .column.is-fullwidth
-                              if valueForAccountCodeInput
-                                .field.is-horizontal#displayInvisible
-                                  .box
-                                    table.table
-                                      thead
-                                        td チェック
-                                        td 勘定科目コード
-                                        td 勘定科目名
-                                      tbody#displayFieldBody
-                                        tr
-                                          td
-                                            .field.is-horizontal
-                                              .field-body
-                                                p.control
-                                                  label.checkbox
-                                                    input.inputCheckbox(type='checkbox' name='setAccountCodeId' value= valueForAccountCodeInput checked)
-                                          td.columnAccountcode
-                                            | #{valueForAccountCode}
-                                          td.columnAccountCodeName
-                                            | #{valueForAccountCodeName}
-                              else 
-                                .field.is-horizontal.is-invisible#displayInvisible
-                                  .box
-                                    table.table
-                                      thead
-                                        td チェック
-                                        td 勘定科目コード
-                                        td 勘定科目名
-                                      tbody#displayFieldBody
+                        else 
+                          .card-content
+                            .field
+                              label(for= idForCodeInput).input-label #{codeLabel}
+                              p(id= requiredTagCode).input-label-required.input-label （必須）
+                              p#RequiredErrorMesageForCode.input-label-required.is-invisible
+                              .control
+                                .columns.ml-0.pl-0.alignCenterChild
+                                  .column.pl-0
+                                    input.input(type="text" id= idForCodeInput name= idForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
+                            .field
+                              label(for= idForNameInput).input-label #{codeNameLabel}
+                              p(id= requiredTagName).input-label-required.input-label （必須）
+                              p#RequiredErrorMesageForName.input-label-required.is-invisible
+                              .control
+                                .columns.ml-0.pl-0.alignCenterChild
+                                  .column.pl-0
+                                    input.input(type="text" id= idForNameInput name= idForNameInput value= valueForNameInput maxlength=40 placeholder='文字列（40桁）' required) 
+
+                            .field.is-grouped.is-grouped-centered
+                              .control
+                                .column
+                                  div.button-area
+                                    a.button#return-btn.cancel-button.mr-6(href= backUrl) 戻る
+                                    if valueForAccountCodeInput
+                                      a.button.is-link.success-button#btnCheck 確認
+                                    else if isRegistSubAccountCode
+                                      a.button.is-link.success-button#btnCheck(disabled) 確認
+                                    else
+                                      a.button.is-link.success-button#btnCheck 確認
 
 
   .modal#check-modal
@@ -158,18 +140,54 @@ block content
       footer.modal-card-foot
         div.button-area
           a.button.is-danger.cancel-button(data-target='caution-modal') 確認
+
   if isRegistSubAccountCode
     template#searchResultAccountCode
       tr
-        td
+        td.columnNoAccountCodeMessage
           .field.is-horizontal
             .field-body
-              p.control
-                label.checkbox
-                  input.inputCheckbox(type='checkbox' name='setAccountCodeId')
-        td.columnAccountcode
-        |
+              p.control.noAccountCodeMessage              
+        td.columnAccountCode
         td.columnAccountCodeName
-        |
+        td.control.columnAccountCodeId(hidden)
+
+
+  .modal.modal-fx-fadeInscale#searchAccountCode-modal
+    .modal-background.cancel-button(data-target="searchAccountCode-modal")
+    .modal-card
+      header.modal-card-head
+        p.modal-card-title 勘定科目検索
+        button.delete(type="button" data-target="searchAccountCode-modal")
+      section.modal-card-body
+        p.modal-card-result
+        if isRegistSubAccountCode
+          .columns
+            .column
+                label.input-label 
+                | #{parentCodeLabel}  
+                .control
+                  input.input(type="text" id= parentIdForCodeInput name= parentIdForCodeInput value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum) 
+                label.input-label
+                | #{parentCodeNameLabel}  
+                .control
+                  input.input(type="text" id= parentIdForNameInput name= parentIdForNameInput value maxlength=40 placeholder='文字列（40桁）') 
+                .column
+                  .control
+                    .button.is-link.mr-6#btnSearchAccountCode(type="button") 検索
+                    .button.is-danger#btnClear(type="button" disabled) クリア
+          .columns.is-fullwidth
+            .column.is-fullwidth              
+              .subtitle 検索結果
+              .field.is-horizontal.is-invisible#displayInvisible
+                .box
+                  table.table
+                    thead
+                      td 勘定科目コード
+                      td 勘定科目名
+                    tbody#displayFieldBody
+      footer.modal-card-foot.modal-address-foot
+
+
 
   include footer
