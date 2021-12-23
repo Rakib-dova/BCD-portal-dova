@@ -320,7 +320,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
         // 補助科目一覧画面に遷移確認
         expect(await page.url()).toBe('https://localhost:3000/subAccountCodeList')
       }
-      // await browser.close()
+      await browser.close()
     })
 
     test('登録した補助科目がある場合、画面確認', async () => {

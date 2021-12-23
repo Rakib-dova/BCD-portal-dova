@@ -258,7 +258,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
         await page.type('#setSubAccountCodeInputId', '')
         await page.type('#setSubAccountCodeNameInputId', 'インテグレーションテスト')
         await page.click('#btnOpenAccountCodeModal')
-        await page.waitForTimeout(300)
+        await page.waitForTimeout(500)
         await page.click('#btnSearchAccountCode')
         await page.waitForTimeout(1000)
 
@@ -268,6 +268,55 @@ describe('補助科目作成のインテグレーションテスト', () => {
         })
 
         expect(checkAccountCodeName).toBe('インテグレーションテスト')
+      }
+      await browser.close()
+    })
+
+    // クリアボタン活性化及び機能確認
+    test('クリアボタン活性化及び機能確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/registSubAccountCode')
+      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
+        await page.type('#setSubAccountCodeInputId', '')
+        await page.type('#setSubAccountCodeNameInputId', 'インテグレーションテスト')
+        await page.click('#btnOpenAccountCodeModal')
+        await page.waitForTimeout(500)
+        await page.click('#btnSearchAccountCode')
+        await page.waitForTimeout(1000)
+        await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')
+        await page.waitForTimeout(500)
+        // クリアボタンの活性化確認
+        const checkAccountCodeClear = await page.evaluate(() => {
+          return document.querySelector('#btnAccountCodeClear').getAttribute('class')
+        })
+        expect(checkAccountCodeClear).toBe('button is-danger')
+
+        // 入力欄の活性化確認
+        const checkAccountCodeInputIdResult = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeInputIdResult').getAttribute('class')
+        })
+        expect(checkAccountCodeInputIdResult).toBe('input')
+
+        await page.click('#btnAccountCodeClear')
+
+        // クリアボタンの非活性化確認
+        const checkAccountCodeClearInvisible = await page.evaluate(() => {
+          return document.querySelector('#btnAccountCodeClear').getAttribute('class')
+        })
+        expect(checkAccountCodeClearInvisible).toBe('button is-danger is-invisible')
+
+        // 入力欄の非活性化確認
+        const checkAccountCodeInputIdResultInvisible = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeInputIdResult').getAttribute('class')
+        })
+        expect(checkAccountCodeInputIdResultInvisible).toBe('input is-invisible')
       }
       await browser.close()
     })
@@ -287,7 +336,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
         await page.type('#setSubAccountCodeInputId', '')
         await page.type('#setSubAccountCodeNameInputId', 'インテグレーションテスト')
         await page.click('#btnOpenAccountCodeModal')
-        await page.waitForTimeout(300)
+        await page.waitForTimeout(500)
         await page.click('#btnSearchAccountCode')
         await page.waitForTimeout(1000)
 
@@ -316,7 +365,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
         await page.type('#setSubAccountCodeInputId', '')
         await page.type('#setSubAccountCodeNameInputId', 'インテグレーションテスト')
         await page.click('#btnOpenAccountCodeModal')
-        await page.waitForTimeout(300)
+        await page.waitForTimeout(500)
         await page.click('#btnSearchAccountCode')
         await page.waitForTimeout(1000)
         await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')

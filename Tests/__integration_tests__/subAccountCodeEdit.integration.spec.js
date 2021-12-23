@@ -182,7 +182,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('一般ユーザ、登録した補助科目の確認・変更画面へアクセス、利用可能', async () => {
@@ -204,7 +204,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
   })
 
@@ -267,7 +267,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('一般ユーザ、登録した補助科目の確認・変更画面へアクセス、利用可能', async () => {
@@ -289,7 +289,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
   })
 
@@ -354,7 +354,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('一般ユーザ、登録した補助科目の確認・変更画面へアクセス、利用可能', async () => {
@@ -376,7 +376,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('「戻る」ボタン遷移確認（ポータル画面に遷移）', async () => {
@@ -465,7 +465,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('一般ユーザ、登録した補助科目の確認・変更画面へアクセス、利用可能', async () => {
@@ -487,7 +487,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
   })
 
@@ -550,7 +550,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('一般ユーザ、登録した補助科目の確認・変更画面へアクセス、利用可能', async () => {
@@ -572,7 +572,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
   })
 
