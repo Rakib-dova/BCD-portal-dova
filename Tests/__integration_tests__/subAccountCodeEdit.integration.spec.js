@@ -138,9 +138,11 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       if (page.url() === 'https://localhost:3000/registSubAccountCode') {
         await page.type('#setSubAccountCodeInputId', 'subAccount')
         await page.type('#setSubAccountCodeNameInputId', 'subTest')
+        await page.click('#btnOpenAccountCodeModal')
+        await page.waitForTimeout(300)
         await page.click('#btnSearchAccountCode')
-        await page.waitForTimeout(500)
-        await page.click('#displayFieldBody > tr > td:nth-child(1) > div > div > p > label > input')
+        await page.waitForTimeout(1000)
+        await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')
         await page.waitForTimeout(500)
         await page.click('#btnCheck')
         await page.waitForTimeout(200)
