@@ -78,17 +78,9 @@ document.getElementById('btnCheck').addEventListener('click', function (e) {
     return false
   } else {
     // バリデーションが合うとき
-    const checkBoxInputs = document.querySelectorAll('.inputCheckbox')
-    let targetCheckbox = null
-    Array.prototype.forEach.call(checkBoxInputs, (item) => {
-      if (item.checked) {
-        targetCheckbox = item
-      }
-    })
+
     document.querySelector('#checksetAccountCodeInputId').innerText =
-      targetCheckbox.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(
-        '.columnAccountcode'
-      ).innerText
+      document.querySelector('#setAccountCodeInputIdResult').value
     document.querySelector('#checksetSubAccountCodeInputId').innerText =
       document.querySelector('#setSubAccountCodeInputId').value
     document.querySelector('#checksetSubAccountNameInputId').innerText = document.querySelector(
@@ -119,6 +111,10 @@ const deleteDisplayAccountCode = function () {
       displayFieldBody.removeChild(item)
     })
   }
+
+  document.querySelector('#setAccountCodeInputId').value = ''
+  document.querySelector('#setAccountCodeNameInputId').value = ''
+
   document.querySelector('#displayInvisible').classList.add('is-invisible')
 }
 
@@ -128,10 +124,28 @@ const displayAccountCode = function (accountCodeArr) {
   const searchResultAccountCode = document.querySelector('#searchResultAccountCode')
   accountCodeArr.forEach((item) => {
     const cloneSearchResultAccountCodeTemplate = document.importNode(searchResultAccountCode.content, true)
-    cloneSearchResultAccountCodeTemplate.querySelector('.columnAccountcode').innerText = item.accountCode
+    cloneSearchResultAccountCodeTemplate.querySelector('.columnAccountCodeId').innerText = item.accountCodeId
+    cloneSearchResultAccountCodeTemplate.querySelector('.columnNoAccountCodeMessage').classList.add('is-invisible')
+    cloneSearchResultAccountCodeTemplate.querySelector('.columnAccountCode').innerHTML =
+      '<a class="resultAccountCode" data-target="#searchAccountCode-modal">' + item.accountCode + '<br>'
     cloneSearchResultAccountCodeTemplate.querySelector('.columnAccountCodeName').innerText = item.accountCodeName
-    cloneSearchResultAccountCodeTemplate.querySelector('.inputCheckbox').value = item.accountCodeId
+
     displayFieldBody.appendChild(cloneSearchResultAccountCodeTemplate)
+  })
+  $('.resultAccountCode').forEach((ele) => {
+    ele.onclick = () => {
+      $(ele.getAttribute('data-target')).classList.remove('is-active')
+      $('#setAccountCodeInputIdResult').value = ele.innerHTML.replace('<br>', '')
+      $('#setAccountCodeInputIdResult').setAttribute('readonly', true)
+      $('#setAccountCodeId').value = ele.parentElement.parentElement.lastChild.innerText
+      $('#setAccountCodeInputIdResult').classList.remove('is-invisible')
+      $('#setAccountCodeInputIdResultColumn').classList.remove('is-invisible')
+      $('#btnAccountCodeClear').classList.remove('is-invisible')
+      deleteDisplayAccountCode()
+      $('#btnOpenAccountCodeModal').setAttribute('disabled', 'disabled')
+      $('#btnAccountCodeClear').removeAttribute('disabled')
+      checkbtnCheck()
+    }
   })
 
   document.querySelector('#displayInvisible').classList.remove('is-invisible')
@@ -190,7 +204,10 @@ const displayNoAccountCode = function () {
   const displayFieldBody = document.querySelector('#displayFieldBody')
   const searchResultAccountCode = document.querySelector('#searchResultAccountCode')
   const cloneSearchResultAccountCodeTemplate = document.importNode(searchResultAccountCode.content, true)
-  cloneSearchResultAccountCodeTemplate.querySelector('p').innerText = '該当する勘定科目が存在しませんでした。'
+  cloneSearchResultAccountCodeTemplate.querySelector('.columnNoAccountCodeMessage').classList.remove('is-invisible')
+  cloneSearchResultAccountCodeTemplate.querySelector('.noAccountCodeMessage').innerText =
+    '該当する勘定科目が存在しませんでした。'
+  cloneSearchResultAccountCodeTemplate.querySelector('.columnAccountCodeId').classList.add('is-invisible')
   displayFieldBody.appendChild(cloneSearchResultAccountCodeTemplate)
   document.querySelector('#displayInvisible').classList.remove('is-invisible')
 }
@@ -217,7 +234,6 @@ document.querySelector('#btnSearchAccountCode').addEventListener('click', functi
           if (result.length !== 0) {
             displayAccountCode(result)
             inputEvent()
-            freezePostalSearchBtn()
           } else {
             displayNoAccountCode()
           }
@@ -235,45 +251,58 @@ document.querySelector('#btnSearchAccountCode').addEventListener('click', functi
   getAccountCode.send(JSON.stringify({ accountCode: accountCode, accountCodeName: accountCodeName }))
 })
 
-// クリアボタン
-document.querySelector('#btnClear').addEventListener('click', () => {
-  // クリアボタンが非活性化の時は動作しない
-  if ($('#btnClear').getAttribute('disabled') !== null) {
-    return
-  }
-  $('#setAccountCodeInputId').readOnly = false
-  $('#setAccountCodeNameInputId').readOnly = false
-  $('#setAccountCodeInputId').value = ''
-  $('#setAccountCodeNameInputId').value = ''
-  deleteDisplayAccountCode()
-  document.querySelector('#btnCheck').setAttribute('disabled', '')
-  $('#btnSearchAccountCode').removeAttribute('disabled')
-  $('#btnClear').setAttribute('disabled', 'disabled')
-})
-
-// 勘定科目（コード、名）が入力不可に変更 、検索ボタン非活性化、クリアボタン活性化
-function freezePostalSearchBtn() {
-  $('#setAccountCodeInputId').readOnly = true
-  $('#setAccountCodeNameInputId').readOnly = true
-  $('#btnSearchAccountCode').setAttribute('disabled', 'disabled')
-  $('#btnClear').removeAttribute('disabled')
-}
-
 // event発生時、入力データをチェックして、「確認」ボタン活性化する。
 document.querySelector('body').addEventListener('change', function (event) {
   const sbuAccountCodeInput = document.querySelector('#setSubAccountCodeInputId')
   const sbuAccountCodeNameInput = document.querySelector('#setSubAccountCodeNameInputId')
-  const checkBoxInputs = document.querySelectorAll('.inputCheckbox')
-  let targetCheckbox = null
-  Array.prototype.forEach.call(checkBoxInputs, (item) => {
-    if (item.checked) {
-      targetCheckbox = item
-    }
-  })
-
+  const setAccountCodeInputIdResult = document.querySelector('#setAccountCodeInputIdResult')
+  const setAccountCodeId = document.querySelector('#setAccountCodeId')
   document.querySelector('#btnCheck').setAttribute('disabled', '')
-
-  if (sbuAccountCodeInput.value.length !== 0 && sbuAccountCodeNameInput.value.length !== 0 && targetCheckbox) {
+  if (
+    sbuAccountCodeInput.value.length !== 0 &&
+    sbuAccountCodeNameInput.value.length !== 0 &&
+    setAccountCodeInputIdResult.value.length !== 0 &&
+    setAccountCodeId.value.length !== 0
+  ) {
     document.querySelector('#btnCheck').removeAttribute('disabled')
   }
 })
+
+// 設定ボタンクリック時
+document.querySelector('#btnOpenAccountCodeModal').addEventListener('click', () => {
+  // 検索ボタンが非活性化の時は動作しない
+  if ($('#btnOpenAccountCodeModal').getAttribute('disabled') !== null) {
+    return
+  }
+  const dataTarget = $('#btnOpenAccountCodeModal').getAttribute('data-target')
+  $(dataTarget).classList.add('is-active')
+})
+
+// btnAccountCodeClearボタンクリック時
+document.querySelector('#btnAccountCodeClear').addEventListener('click', () => {
+  $('#setAccountCodeInputIdResult').value = ''
+  $('#setAccountCodeId').value = ''
+  $('#setAccountCodeInputIdResult').classList.add('is-invisible')
+  $('#btnOpenAccountCodeModal').removeAttribute('disabled')
+  $('#btnAccountCodeClear').setAttribute('disabled', true)
+  $('#btnCheck').setAttribute('disabled', true)
+  $('#setAccountCodeInputIdResultColumn').classList.add('is-invisible')
+  $('#btnAccountCodeClear').classList.add('is-invisible')
+})
+
+// 補助科目コードと補助科目名を設定した上で勘定科目のみ変更した時、確認ボタン活性化処理
+function checkbtnCheck() {
+  const sbuAccountCodeInput = document.querySelector('#setSubAccountCodeInputId')
+  const sbuAccountCodeNameInput = document.querySelector('#setSubAccountCodeNameInputId')
+  const setAccountCodeInputIdResult = document.querySelector('#setAccountCodeInputIdResult')
+  const setAccountCodeId = document.querySelector('#setAccountCodeId')
+  document.querySelector('#btnCheck').setAttribute('disabled', '')
+  if (
+    sbuAccountCodeInput.value.length !== 0 &&
+    sbuAccountCodeNameInput.value.length !== 0 &&
+    setAccountCodeInputIdResult.value.length !== 0 &&
+    setAccountCodeId.value.length !== 0
+  ) {
+    document.querySelector('#btnCheck').removeAttribute('disabled')
+  }
+}
