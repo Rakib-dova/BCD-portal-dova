@@ -74,6 +74,7 @@ const cbGetIndex = async (req, res, next) => {
     parentCodeLabel: '勘定科目コード',
     parentCodeNameLabel: '勘定科目名',
     parentIdForCodeInput: 'setAccountCodeInputId',
+    parentIdForCodeInputResult: 'setAccountCodeInputIdResult',
     parentIdForNameInput: 'setAccountCodeNameInputId',
     pTagForcheckInput1: 'checksetAccountCodeInputId',
     pTagForcheckInput2: 'checksetSubAccountCodeInputId',
