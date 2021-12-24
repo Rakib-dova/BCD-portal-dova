@@ -154,7 +154,8 @@ describe('registSubAccountCodeのテスト', () => {
         valueForNameInput: accountCodeAndSubAccountCode.subjectName,
         valueForAccountCodeInput: accountCodeAndSubAccountCode.accountCodeId,
         valueForAccountCode: accountCodeAndSubAccountCode.accountCode,
-        valueForAccountCodeName: accountCodeAndSubAccountCode.accountCodeName
+        valueForAccountCodeName: accountCodeAndSubAccountCode.accountCodeName,
+        parentIdForCodeInputResult: 'setAccountCodeInputIdResult'
       })
     })
 
