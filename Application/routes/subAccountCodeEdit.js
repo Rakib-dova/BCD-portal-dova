@@ -93,7 +93,8 @@ const cbGetIndex = async (req, res, next) => {
     valueForNameInput: result.subjectName,
     valueForAccountCodeInput: result.accountCodeId,
     valueForAccountCode: result.accountCode,
-    valueForAccountCodeName: result.accountCodeName
+    valueForAccountCodeName: result.accountCodeName,
+    parentIdForCodeInputResult: 'setAccountCodeInputIdResult'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
