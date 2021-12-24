@@ -142,7 +142,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
         await page.waitForTimeout(300)
         await page.click('#btnSearchAccountCode')
         await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')
+        await page.click('#displayFieldBody > tr')
         await page.waitForTimeout(500)
         await page.click('#btnCheck')
         await page.waitForTimeout(200)
@@ -194,6 +194,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
+
+      await page.waitForTimeout(500)
 
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'
@@ -258,6 +260,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
 
+      await page.waitForTimeout(500)
+
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'
       )
@@ -279,6 +283,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
+
+      await page.waitForTimeout(500)
 
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'
@@ -345,6 +351,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
 
+      await page.waitForTimeout(500)
+
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'
       )
@@ -367,6 +375,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
 
+      await page.waitForTimeout(500)
+
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'
       )
@@ -388,6 +398,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
+
+      await page.waitForTimeout(500)
 
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'

@@ -290,7 +290,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
         await page.waitForTimeout(500)
         await page.click('#btnSearchAccountCode')
         await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')
+        await page.click('#displayFieldBody > tr')
         await page.waitForTimeout(500)
         // クリアボタンの活性化確認
         const checkAccountCodeClear = await page.evaluate(() => {
@@ -310,13 +310,13 @@ describe('補助科目作成のインテグレーションテスト', () => {
         const checkAccountCodeClearInvisible = await page.evaluate(() => {
           return document.querySelector('#btnAccountCodeClear').getAttribute('class')
         })
-        expect(checkAccountCodeClearInvisible).toBe('button is-danger is-invisible')
+        expect(checkAccountCodeClearInvisible).toMatch('button is-danger is-invisible')
 
         // 入力欄の非活性化確認
         const checkAccountCodeInputIdResultInvisible = await page.evaluate(() => {
           return document.querySelector('#setAccountCodeInputIdResult').getAttribute('class')
         })
-        expect(checkAccountCodeInputIdResultInvisible).toBe('input is-invisible')
+        expect(checkAccountCodeInputIdResultInvisible).toMatch('input')
       }
       await browser.close()
     })
@@ -368,7 +368,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
         await page.waitForTimeout(500)
         await page.click('#btnSearchAccountCode')
         await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')
+        await page.click('#displayFieldBody > tr')
 
         // 確認ボタンの非活性化確認
         const checkBtnCheck = await page.evaluate(() => {
@@ -476,7 +476,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
         await page.waitForTimeout(500)
         await page.click('#btnSearchAccountCode')
         await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')
+        await page.click('#displayFieldBody > tr')
         await page.waitForTimeout(500)
         await page.click('#btnCheck')
 
@@ -508,7 +508,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
         await page.waitForTimeout(500)
         await page.click('#btnSearchAccountCode')
         await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')
+        await page.click('#displayFieldBody > tr')
         await page.waitForTimeout(500)
         await page.click('#btnCheck')
 
@@ -540,7 +540,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
         await page.waitForTimeout(500)
         await page.click('#btnSearchAccountCode')
         await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')
+        await page.click('#displayFieldBody > tr')
 
         // 確認ボタンの非活性化確認
         const checkBtnCheck = await page.evaluate(() => {
@@ -600,7 +600,7 @@ describe('補助科目作成のインテグレーションテスト', () => {
         await page.waitForTimeout(500)
         await page.click('#btnSearchAccountCode')
         await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')
+        await page.click('#displayFieldBody > tr')
         await page.waitForTimeout(500)
         await page.click('#btnCheck')
 

@@ -175,6 +175,8 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
 
   const $this = this
   deleteDisplayAccountCode()
+  $('#setAccountCodeInputId').value = accountCode
+  $('#setAccountCodeNameInputId').value = accountCodeName
   const getAccountCode = new XMLHttpRequest()
   getAccountCode.open('POST', '/registSubAccountCode/getAccountCode')
   getAccountCode.setRequestHeader('Content-Type', 'application/json')

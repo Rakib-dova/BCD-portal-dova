@@ -310,7 +310,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
         await page.waitForTimeout(300)
         await page.click('#btnSearchAccountCode')
         await page.waitForTimeout(1000)
-        await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')
+        await page.click('#displayFieldBody > tr')
         await page.waitForTimeout(500)
         await page.click('#btnCheck')
         await page.waitForTimeout(200)
