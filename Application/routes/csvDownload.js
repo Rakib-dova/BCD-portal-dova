@@ -326,7 +326,7 @@ const cbPostIndex = async (req, res, next) => {
     errorHandle(resultForQuery, res, req)
   } else {
     // documentsResultのデータ有無確認
-    if (!documentsResult ?? false) {
+    if (!documentsResult) {
       req.flash('noti', [
         '請求書ダウンロード',
         '請求書ダウンロードに失敗しました。<br>（送信企業と受信企業で同じ企業を選択している場合はどちらか一方をチェックしてください。）'
