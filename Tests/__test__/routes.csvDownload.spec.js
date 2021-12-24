@@ -5654,6 +5654,43 @@ describe('csvDownloadのテスト', () => {
       )
     })
 
+    test('準正常:受信企業/送信企業が同じ企業の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01001',
+        buyAndSell: buyAndSell[0],
+        status: '送信済み/受信済み',
+        sentTo: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
+        sentBy: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // 試験実施
+      await csvDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '請求書ダウンロード',
+        '請求書ダウンロードに失敗しました。<br>（送信企業と受信企業で同じ企業を選択している場合はどちらか一方をチェックしてください。）'
+      ])
+    })
+
     test('準正常:csvDownloadController.createInvoiceDataForDLエラー', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
