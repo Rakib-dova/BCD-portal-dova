@@ -544,6 +544,16 @@ img.logo-ncom {
   padding-left: 10px;
 }
 
+.border-csvdownload {
+  display: inline-block;
+  text-align: left;
+  max-width: 100%;
+  position: relative;
+  box-sizing: inherit;
+  width: 565px;
+  padding-left: 10px;
+}
+
 .column-csvupload {
   display: block;
   flex-basis: 0;
