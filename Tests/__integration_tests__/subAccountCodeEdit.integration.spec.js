@@ -138,9 +138,11 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       if (page.url() === 'https://localhost:3000/registSubAccountCode') {
         await page.type('#setSubAccountCodeInputId', 'subAccount')
         await page.type('#setSubAccountCodeNameInputId', 'subTest')
+        await page.click('#btnOpenAccountCodeModal')
+        await page.waitForTimeout(300)
         await page.click('#btnSearchAccountCode')
-        await page.waitForTimeout(500)
-        await page.click('#displayFieldBody > tr > td:nth-child(1) > div > div > p > label > input')
+        await page.waitForTimeout(1000)
+        await page.click('#displayFieldBody > tr:nth-child(1) > td.columnAccountCode > a')
         await page.waitForTimeout(500)
         await page.click('#btnCheck')
         await page.waitForTimeout(200)
@@ -180,7 +182,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('一般ユーザ、登録した補助科目の確認・変更画面へアクセス、利用可能', async () => {
@@ -193,6 +195,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
 
+      await page.waitForTimeout(500)
+
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'
       )
@@ -202,7 +206,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
   })
 
@@ -256,6 +260,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
 
+      await page.waitForTimeout(500)
+
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'
       )
@@ -265,7 +271,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('一般ユーザ、登録した補助科目の確認・変更画面へアクセス、利用可能', async () => {
@@ -278,6 +284,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
 
+      await page.waitForTimeout(500)
+
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'
       )
@@ -287,7 +295,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
   })
 
@@ -343,6 +351,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
 
+      await page.waitForTimeout(500)
+
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'
       )
@@ -352,7 +362,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('一般ユーザ、登録した補助科目の確認・変更画面へアクセス、利用可能', async () => {
@@ -365,6 +375,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
 
+      await page.waitForTimeout(500)
+
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'
       )
@@ -374,7 +386,83 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
+    })
+    // 勘定科目コード検索機能確認
+    test('勘定科目コード検索機能確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/registSubAccountCode')
+      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
+        await page.type('#setSubAccountCodeInputId', '')
+        await page.type('#setSubAccountCodeNameInputId', 'インテグレーションテスト')
+        await page.click('#btnOpenAccountCodeModal')
+        await page.waitForTimeout(500)
+        await page.click('#btnSearchAccountCode')
+        await page.waitForTimeout(1000)
+
+        // 確認ボタンの非活性化確認
+        const checkAccountCodeName = await page.evaluate(() => {
+          return document.querySelector('#displayFieldBody > tr:nth-child(1) > td.columnAccountCodeName').innerText
+        })
+
+        expect(checkAccountCodeName).toBe('インテグレーションテスト')
+      }
+      await browser.close()
+    })
+    // クリアボタン活性化及び機能確認
+    test('クリアボタン活性化及び機能確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/registSubAccountCode')
+      if (page.url() === 'https://localhost:3000/registSubAccountCode') {
+        await page.type('#setSubAccountCodeInputId', '')
+        await page.type('#setSubAccountCodeNameInputId', 'インテグレーションテスト')
+        await page.click('#btnOpenAccountCodeModal')
+        await page.waitForTimeout(500)
+        await page.click('#btnSearchAccountCode')
+        await page.waitForTimeout(1000)
+        await page.click('#displayFieldBody > tr')
+        await page.waitForTimeout(500)
+        // クリアボタンの活性化確認
+        const checkAccountCodeClear = await page.evaluate(() => {
+          return document.querySelector('#btnAccountCodeClear').getAttribute('class')
+        })
+        expect(checkAccountCodeClear).toBe('button is-danger')
+
+        // 入力欄の活性化確認
+        const checkAccountCodeInputIdResult = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeInputIdResult').getAttribute('class')
+        })
+        expect(checkAccountCodeInputIdResult).toBe('input')
+
+        await page.click('#btnAccountCodeClear')
+
+        // クリアボタンの非活性化確認
+        const checkAccountCodeClearInvisible = await page.evaluate(() => {
+          return document.querySelector('#btnAccountCodeClear').getAttribute('class')
+        })
+        expect(checkAccountCodeClearInvisible).toMatch('button is-danger is-invisible')
+
+        // 入力欄の非活性化確認
+        const checkAccountCodeInputIdResultInvisible = await page.evaluate(() => {
+          return document.querySelector('#setAccountCodeInputIdResult').getAttribute('class')
+        })
+        expect(checkAccountCodeInputIdResultInvisible).toMatch('input')
+      }
+      await browser.close()
     })
 
     test('「戻る」ボタン遷移確認（ポータル画面に遷移）', async () => {
@@ -386,6 +474,8 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/subAccountCodeList')
+
+      await page.waitForTimeout(500)
 
       await page.click(
         'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td:nth-child(5) > a'
@@ -463,7 +553,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('一般ユーザ、登録した補助科目の確認・変更画面へアクセス、利用可能', async () => {
@@ -485,7 +575,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
   })
 
@@ -548,7 +638,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
 
     test('一般ユーザ、登録した補助科目の確認・変更画面へアクセス、利用可能', async () => {
@@ -570,7 +660,7 @@ describe('補助科目確認・変更のインテグレーションテスト', (
       // アップロードフォーマット変更画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
-      browser.close()
+      await browser.close()
     })
   })
 
