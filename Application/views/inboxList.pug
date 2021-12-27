@@ -1,0 +1,68 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans 受領した請求書一覧
+        .subtitle.is-family-noto-sans RECEIVE INVOICES LIST
+
+    .columns.is-centered
+      .column.is-11
+        .box
+          if listArr.length !== 0
+            table.table.is-fullwidth.is-hoverable.table-fixed
+              thead
+                tr
+                  th.width-5.text-center No
+                  th.width-10.text-center 請求書番号
+                  th.width-10.text-center ステータス
+                  th.width-10.text-center 通貨
+                  th.width-10.text-center 金額
+                  th.width-10.text-center 送信企業
+                  th.width-10.text-center 受信企業
+                  th.width-10.text-center 更新日
+                  th.width-10.text-center 期限日
+                  th.width-10.text-center 
+              tbody.display-row
+                each item in listArr
+                  tr
+                    th.text-center.td-overflow= item.no
+                    td.text-center.td-overflow= item.invoiceNo
+                    td.text-center.td-overflow
+                      if item.status === 0
+                        a.a-status-PAID_CONFIRMED 送金済み
+                      else if item.status === 1
+                        a.a-status-PAID_UNCONFIRMED 入金確認済み
+                      else if item.status === 2
+                        a.a-status-ACCEPTED 受理済み
+                      else if item.status === 3
+                        a.a-status-DELIVERED 受信済み
+                    td.text-center.td-overflow= item.currency
+                    td.text-center.td-overflow= item.ammount
+                    td.text-center.td-overflow= item.sentTo
+                    td.text-center.td-overflow= item.sentBy
+                    td.text-center.td-overflow= item.updated
+                    td.text-center.td-overflow= item.expire
+                    td.text-center.display-row-td
+                      a.button.is-success.td-overflow.display-row-td-button(href=`#` data-target= item.documentId) 確認・変更する
+            nav.pagination(role='navigation' aria-label='pagination')
+              if (previousPage === 0) 
+                a.pagination-previous 前のページ
+              else
+                a.pagination-previous(href= `/inboxList/${previousPage}`) 前のページ
+              a.pagination-next(href= `/inboxList/${nextPage}`) 次のページ
+              ul.pagination-list
+                li
+                  a.pagination-link.is-current(aria-label='1ページへ移動') 1
+          else 
+            p 現在、受領した請求書一覧はありません。
+
+        .mt-1.has-text-left
+          a.button.is-link.is-light(href='/portal') ←Homeへ戻る
+
+  include footer
+
+block append scripts
+  script(src="/js/inboxList-page.js")
+  link(rel='stylesheet', type='text/css', href='/css/inboxList.css')
