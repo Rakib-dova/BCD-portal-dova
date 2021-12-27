@@ -59,8 +59,8 @@ const cbGetIndex = async (req, res, next) => {
   // 受領した請求書一覧レンダリング
   res.render('inboxList', {
     listArr: result.list,
-    previousPage: result.previous,
-    nextPage: result.next
+    numPages: result.numPages,
+    currPage: result.currPage
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')

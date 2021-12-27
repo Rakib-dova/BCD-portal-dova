@@ -95,3 +95,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.a-previous-none {
+  color: #fff;
+  border-color: #fff !important;
+  padding-left: 0.75em;
+  padding-right: 0.75em;
+  white-space: nowrap;
+}
+.a-next-none {
+  color: #fff;
+  border-color: #fff !important;
+  padding-left: 0.75em;
+  padding-right: 0.75em;
+  white-space: nowrap;
+  order: 3;
+}
