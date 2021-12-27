@@ -172,15 +172,15 @@ const cbPostIndex = async (req, res, next) => {
   // 補助科目変更結果
   switch (result) {
     case 0:
-      req.flash('info', '補助科目を変更しました。')
+      req.flash('info', '補助科目の変更が完了しました。')
       res.redirect('/subAccountCodeList')
       break
     case 1:
-      req.flash('noti', ['補助科目変更', 'すでに登録されている値です。'])
+      req.flash('noti', ['補助科目変更', '入力した補助科目は既に登録されています。'])
       res.redirect(`/subAccountCodeEdit/${subAccountCodeId}`)
       break
     case -1:
-      req.flash('noti', ['補助科目変更', '既に登録されている補助科目コードがあることを確認しました。'])
+      req.flash('noti', ['補助科目変更', '入力した補助科目は重複されています。'])
       res.redirect(`/subAccountCodeEdit/${subAccountCodeId}`)
       break
     case -2:
