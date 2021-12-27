@@ -20,36 +20,25 @@ module.exports = {
     // 関数開始表示
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     try {
-      const insertSubAcoountCodeTransaction = await db.sequelize.transaction()
       let duplicatedFlag = false
       // accountCodeId取得
-      const accountCodeSearchResult = await AccountCode.findOne(
-        {
-          where: {
-            contractId: uploadContractId,
-            accountCodeId: values.accountCodeId
-          }
-        },
-        {
-          transaction: insertSubAcoountCodeTransaction
+      const accountCodeSearchResult = await AccountCode.findOne({
+        where: {
+          contractId: uploadContractId,
+          accountCodeId: values.accountCodeId
         }
-      )
+      })
       if (accountCodeSearchResult === null) {
         return -1
       }
       const accountCodeId = accountCodeSearchResult.accountCodeId
       // 重複コード検索
-      const resultSearch = await SubAccountCode.findAll(
-        {
-          where: {
-            subjectCode: values.subjectCode,
-            accountCodeId: accountCodeId
-          }
-        },
-        {
-          transaction: insertSubAcoountCodeTransaction
+      const resultSearch = await SubAccountCode.findAll({
+        where: {
+          subjectCode: values.subjectCode,
+          accountCodeId: accountCodeId
         }
-      )
+      })
 
       // 重複コード検索（sequelize大小文字区別しないため）
       resultSearch.forEach((item) => {
@@ -62,26 +51,19 @@ module.exports = {
         return 1
       }
       // 重複コードない場合DBに保存する。
-      const resultToInsertSubAccountCode = await SubAccountCode.create(
-        {
-          accountCodeId: accountCodeId,
-          subjectName: values.subjectName,
-          subjectCode: values.subjectCode,
-          subAccountCodeId: uuidV4()
-        },
-        {
-          transaction: insertSubAcoountCodeTransaction
-        }
-      )
+      const resultToInsertSubAccountCode = await SubAccountCode.create({
+        accountCodeId: accountCodeId,
+        subjectName: values.subjectName,
+        subjectCode: values.subjectCode,
+        subAccountCodeId: uuidV4()
+      })
 
       // 関数終了表示
       logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
       // DB保存失敗したらモデルAccountCodeインスタンスではない
       if (resultToInsertSubAccountCode instanceof SubAccountCode) {
-        insertSubAcoountCodeTransaction.commit()
         return 0
       } else {
-        insertSubAcoountCodeTransaction.rollback()
         return -1
       }
     } catch (error) {
@@ -203,7 +185,6 @@ module.exports = {
     subjectCodeName
   ) {
     logger.info(constantsDefine.logMessage.INF000 + 'subAccountCodeController.checkAndLockSubAccountCode')
-    const lockTransaction = await db.sequelize.transaction()
     try {
       const motoSubAccountCode = await this.getSubAccountCode(contractId, subAccountCodeId)
       // 補助科目の親の勘定科目の有無のチェック
@@ -213,16 +194,11 @@ module.exports = {
         default:
           return -3
       }
-      const getUpdateTarget = await SubAccountCode.findOne(
-        {
-          where: {
-            subAccountCodeId: subAccountCodeId
-          }
-        },
-        {
-          transaction: lockTransaction
+      const getUpdateTarget = await SubAccountCode.findOne({
+        where: {
+          subAccountCodeId: subAccountCodeId
         }
-      )
+      })
 
       // 補助科目の有無のチェック
       switch (getUpdateTarget instanceof SubAccountCode) {
@@ -235,28 +211,23 @@ module.exports = {
       // 重複チェック
       let duplicatedFlag = false
       const Op = db.Sequelize.Op
-      const getSubAccountCodeList = await await AccountCode.findAll(
-        {
-          raw: true,
-          include: [
-            {
-              model: SubAccountCode,
-              attributes: ['subAccountCodeId', 'subjectCode', 'subjectName'],
-              where: {
-                subAccountCodeId: {
-                  [Op.ne]: [subAccountCodeId]
-                }
+      const getSubAccountCodeList = await await AccountCode.findAll({
+        raw: true,
+        include: [
+          {
+            model: SubAccountCode,
+            attributes: ['subAccountCodeId', 'subjectCode', 'subjectName'],
+            where: {
+              subAccountCodeId: {
+                [Op.ne]: [subAccountCodeId]
               }
             }
-          ],
-          where: {
-            contractId: contractId
           }
-        },
-        {
-          transaction: lockTransaction
+        ],
+        where: {
+          contractId: contractId
         }
-      )
+      })
       let idx = 0
       while (getSubAccountCodeList[idx]) {
         if (
@@ -283,14 +254,12 @@ module.exports = {
 
       // 変更がある場合、保存後、コミット実施
       getUpdateTarget.save()
-      lockTransaction.commit()
       logger.info(constantsDefine.logMessage.INF001 + 'subAccountCodeController.checkAndLockSubAccountCode')
       return 0
     } catch (error) {
       logger.error({ contractId: contractId, stack: error.stack, status: 0 })
       logger.info(constantsDefine.logMessage.INF001 + 'subAccountCodeController.checkAndLockSubAccountCode')
       // 途中エラーが発生したら、ロールバック
-      lockTransaction.rollback()
       return error
     }
   }
