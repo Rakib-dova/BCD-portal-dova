@@ -1,0 +1,97 @@
+.display-row-td {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50px);
+}
+.loading > li {
+  content: '';
+  width: 30px;
+  height: 100px;
+  background-color: rgb(10, 10, 10);
+  z-index: 99999;
+  position: absolute;
+  top: calc(var(--idx) * -10px);
+  left: 0px;
+}
+
+.a-status-PAID_CONFIRMED {
+  background-color: #d15b00;
+  border-color: transparent;
+  color: #fff;
+  border-width: 1px;
+  justify-content: center;
+  padding-bottom: calc(0.5em - 1px);
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-top: calc(0.5em - 1px);
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 4px;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 128px;
+  height: 35px;
+}
+
+.a-status-PAID_UNCONFIRMED {
+  background-color: #287f06;
+  border-color: transparent;
+  color: #fff;
+  border-width: 1px;
+  justify-content: center;
+  padding-bottom: calc(0.5em - 1px);
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: calc(0.5em - 1px);
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 4px;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 128px;
+  height: 35px;
+}
+.a-status-ACCEPTED {
+  background-color: #0065a3;
+  border-color: transparent;
+  color: #fff;
+  border-width: 1px;
+  justify-content: center;
+  padding-bottom: calc(0.5em - 1px);
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-top: calc(0.5em - 1px);
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 4px;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 128px;
+  height: 35px;
+}
+.a-status-DELIVERED {
+  background-color: #85c06d;
+  border-color: transparent;
+  color: #fff;
+  border-width: 1px;
+  justify-content: center;
+  padding-bottom: 7px;
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-top: calc(0.5em - 1px);
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 4px;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
