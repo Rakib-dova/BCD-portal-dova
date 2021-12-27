@@ -1,8 +1,8 @@
 module.exports = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
   const processStatus = {
-    PAID_CONFIRMED: 0, // 送金済み
-    PAID_UNCONFIRMED: 1, // 入金確認済み
+    PAID_CONFIRMED: 0, // 入金確認済み
+    PAID_UNCONFIRMED: 1, // 送金済み
     ACCEPTED: 2, // 受理済み
     DELIVERED: 3 // 受信済み
   }
@@ -65,7 +65,7 @@ module.exports = async function (accessToken, refreshToken, pageId, tenantId) {
       ammount: ammount(),
       sentTo: item.SenderCompanyName ?? '-',
       sentBy: item.ReceiverCompanyName ?? '-',
-      updated: item.ApplicationResponse !== undefined ? item.ApplicationResponse.ResponseDate ?? '-' : '-',
+      updated: item.LastEdit !== undefined ? item.LastEdit.substring(0, 10) ?? '-' : '-',
       expire: item.DueDate ?? '-',
       documentId: item.DocumentId
     }
@@ -86,7 +86,7 @@ module.exports = async function (accessToken, refreshToken, pageId, tenantId) {
     return nextDate > prevDate ? 1 : nextDate < prevDate ? -1 : 0
   })
 
-  // 結果h返却
+  // 結果返却
   return {
     previous: previousPage,
     next: nextPage,
