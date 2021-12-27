@@ -461,7 +461,7 @@ describe('registSubAccountCodeのテスト', () => {
 
       // 期待結果
       // メッセージ表示
-      expect(request.flash).toHaveBeenCalledWith('info', '補助科目を変更しました。')
+      expect(request.flash).toHaveBeenCalledWith('info', '補助科目の変更が完了しました。')
       // 補助科目一覧に遷移
       expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
     })
@@ -497,7 +497,7 @@ describe('registSubAccountCodeのテスト', () => {
 
       // 期待結果
       // メッセージ表示
-      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', 'すでに登録されている値です。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '入力した補助科目は既に登録されています。'])
       // 補助科目変更に戻る
       expect(response.redirect).toHaveBeenCalledWith(`/subAccountCodeEdit/${request.params.subAccountCodeId}`)
     })
@@ -533,10 +533,7 @@ describe('registSubAccountCodeのテスト', () => {
 
       // 期待結果
       // メッセージ表示
-      expect(request.flash).toHaveBeenCalledWith('noti', [
-        '補助科目変更',
-        '既に登録されている補助科目コードがあることを確認しました。'
-      ])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '入力した補助科目は重複されています。'])
       // 補助科目変更に戻る
       expect(response.redirect).toHaveBeenCalledWith(`/subAccountCodeEdit/${request.params.subAccountCodeId}`)
     })
@@ -724,7 +721,7 @@ describe('registSubAccountCodeのテスト', () => {
       expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
     })
 
-    test('準正常:補助科目コード名0桁', async () => {
+    test('準正常:補助科目名0桁', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -732,8 +729,8 @@ describe('registSubAccountCodeのテスト', () => {
       // パラメータ
       request.body = {
         setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
-        setSubAccountCodeInputId: 'テスト001',
-        setSubAccountCodeNameInputId: ' '
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: ''
       }
       request.params = {
         subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
@@ -760,7 +757,7 @@ describe('registSubAccountCodeのテスト', () => {
       expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
     })
 
-    test('準正常:補助科目コード名40桁超過', async () => {
+    test('準正常:補助科目名40桁超過', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -768,8 +765,8 @@ describe('registSubAccountCodeのテスト', () => {
       // パラメータ
       request.body = {
         setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
-        setSubAccountCodeInputId: 'テスト001',
-        setSubAccountCodeNameInputId: 'UTテスト'
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト123456789UTテスト123456789UTテスト123456789'
       }
       request.params = {
         subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
@@ -1050,7 +1047,7 @@ describe('registSubAccountCodeのテスト', () => {
       await subAccountCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
-      // 500ハンドリング
+      // 404ハンドリング
       expect(next).toHaveBeenCalledWith(errorHelper.create(404))
     })
 

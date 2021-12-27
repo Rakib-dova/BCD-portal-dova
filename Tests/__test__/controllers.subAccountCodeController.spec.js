@@ -571,7 +571,7 @@ describe('subAccountCodeControllerのテスト', () => {
       )
 
       // 期待結果
-      // 正常の場合、「0」を返却
+      // 重複の場合、「-1」を返却
       expect(result).toBe(-1)
     })
 
@@ -631,7 +631,7 @@ describe('subAccountCodeControllerのテスト', () => {
       )
 
       // 期待結果
-      // 正常の場合、「0」を返却
+      // 登録されている場合、「1」を返却
       expect(result).toBe(1)
     })
 
@@ -685,7 +685,7 @@ describe('subAccountCodeControllerのテスト', () => {
       )
 
       // 期待結果
-      // 正常の場合、「0」を返却
+      // DBエラーの場合、エラー内容を返却
       expect(logger.error).toHaveBeenCalledWith({
         contractId: contractId,
         stack: dbError.stack,
@@ -864,7 +864,7 @@ describe('subAccountCodeControllerのテスト', () => {
       )
 
       // 期待結果
-      // 正常の場合、「0」を返却
+      // エラーの場合、エラー内容を返却
       expect(logger.error).toHaveBeenCalledWith({
         contractId: contractId,
         stack: dbError.stack,
