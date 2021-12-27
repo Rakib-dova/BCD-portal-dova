@@ -160,7 +160,6 @@ module.exports = {
   updateSubAccountCode: async function (contractId, accountCodeId, subAccountCodeId, subjectCode, subAccountCodeName) {
     logger.info(constantsDefine.logMessage.INF000 + 'subAccountCodeController.updateSubAccountCode')
     try {
-      logger.info()
       const updateTarget = await this.checkAndLockSubAccountCode(
         contractId,
         accountCodeId,
@@ -169,6 +168,7 @@ module.exports = {
         subAccountCodeName
       )
       logger.info(constantsDefine.logMessage.INF001 + 'subAccountCodeController.updateSubAccountCode')
+      // 戻り値：0（正常変更）、1（変更なし）、-1（重複補助科目コードの場合）、Error（DBエラー、システムエラーなど）、-2（補助科目検索失敗）、その他（他のデータエラー）
       switch (updateTarget) {
         case 0:
           return 0
@@ -187,6 +187,14 @@ module.exports = {
       return error
     }
   },
+  // 補助科目コードをチェック・変更する。
+  // {
+  //    contractId: 契約番号
+  //    accountCodeId: 勘定科目コードキー
+  //    subAccountCodeId： 補助科目のユニークID
+  //    subjectCode：      補助科目コード
+  //    subjectName：      補助科目名
+  // }
   checkAndLockSubAccountCode: async function (
     contractId,
     accountCodeId,
