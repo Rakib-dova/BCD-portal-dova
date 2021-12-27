@@ -42,7 +42,6 @@ module.exports = async function (accessToken, refreshToken, pageId, tenantId) {
 
   const documents = await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${findDocuments}?${query}`)
 
-  console.log(documents)
   // アクセストークンの有効期限が終わるの場合
   if (documents.Document === undefined) {
     return {

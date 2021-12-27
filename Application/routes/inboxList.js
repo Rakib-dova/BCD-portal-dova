@@ -58,7 +58,6 @@ const cbGetIndex = async (req, res, next) => {
   // 受領した請求書リスト取得
   const result = await inboxController(accessToken, refreshToken, pageId, tenantId)
 
-  console.log(result)
   // 受領した請求書一覧レンダリング
   res.render('inboxList', {
     listArr: result.list,
