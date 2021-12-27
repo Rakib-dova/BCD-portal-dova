@@ -1,4 +1,4 @@
-module.exports = async function (accessToken, refreshToken, pageId, tenantId) {
+const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
   const processStatus = {
     PAID_CONFIRMED: 0, // 入金確認済み
@@ -92,4 +92,7 @@ module.exports = async function (accessToken, refreshToken, pageId, tenantId) {
     numPages: numPage,
     currPage: currPage + 1
   }
+}
+module.exports = {
+  getInbox: getInbox
 }

@@ -54,9 +54,7 @@ const cbGetIndex = async (req, res, next) => {
   const refreshToken = req.user.refreshToken
   const pageId = ~~req.params.page
   const tenantId = user.tenantId
-
-  // 受領した請求書リスト取得
-  const result = await inboxController(accessToken, refreshToken, pageId, tenantId)
+  const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
 
   // 受領した請求書一覧レンダリング
   res.render('inboxList', {
