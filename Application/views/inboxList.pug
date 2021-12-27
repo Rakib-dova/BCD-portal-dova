@@ -31,9 +31,9 @@ block content
                     td.text-center.td-overflow= item.invoiceNo
                     td.text-center.td-overflow
                       if item.status === 0
-                        a.a-status-PAID_CONFIRMED 送金済み
-                      else if item.status === 1
                         a.a-status-PAID_UNCONFIRMED 入金確認済み
+                      else if item.status === 1
+                        a.a-status-PAID_CONFIRMED 送金済み
                       else if item.status === 2
                         a.a-status-ACCEPTED 受理済み
                       else if item.status === 3
