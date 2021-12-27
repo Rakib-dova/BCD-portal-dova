@@ -17,8 +17,8 @@ module.exports = async function (accessToken, refreshToken, pageId, tenantId) {
   const onlydrafts = false
   const sentTo = tenantId
   const stag = ['sales', 'purchases', 'draft']
-  const onePagePerItemCount = 20
-  const page = pageId - 1
+  const onePagePerItemCount = 20 // １ページあたり表示する項目の数
+  const page = pageId - 1 // 現在ページ
   const query = qs
     .stringify({
       withouttag: withouttag,
@@ -42,8 +42,9 @@ module.exports = async function (accessToken, refreshToken, pageId, tenantId) {
 
   const documents = await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${findDocuments}?${query}`)
 
+  console.log(documents)
   // アクセストークンの有効期限が終わるの場合
-  if (documents.Document.map === undefined) {
+  if (documents.Document === undefined) {
     return {
       previous: 0,
       next: 1,
@@ -58,7 +59,7 @@ module.exports = async function (accessToken, refreshToken, pageId, tenantId) {
       return Math.floor(item.ItemInfos[1].value).toLocaleString('ja-JP')
     }
     return {
-      no: idx + 1,
+      no: idx + 1 + page * onePagePerItemCount,
       invoiceNo: item.ID,
       status: processStatus[`${item.UnifiedState}`] ?? '-',
       currency: item.ItemInfos[0].value ?? '-',
@@ -71,8 +72,8 @@ module.exports = async function (accessToken, refreshToken, pageId, tenantId) {
     }
   })
 
-  const previousPage = documents.pageId - 1 > 0 ? documents.pageId - 1 : 0
-  const nextPage = documents.pageId + 1
+  const numPage = documents.numPages
+  const currPage = documents.pageId
 
   // 更新日で整列(更新日がない場合、期限日で整列)
   const updated = documentList.sort((next, prev) => {
@@ -88,8 +89,8 @@ module.exports = async function (accessToken, refreshToken, pageId, tenantId) {
 
   // 結果h返却
   return {
-    previous: previousPage,
-    next: nextPage,
-    list: updated
+    list: updated,
+    numPages: numPage,
+    currPage: currPage + 1
   }
 }
