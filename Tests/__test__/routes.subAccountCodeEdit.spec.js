@@ -21,6 +21,7 @@ let userControllerFindOneSpy
 let contractControllerFindOneSpy
 let checkContractStatusSpy
 let subAccountCodeControllerGetSubAccountCode
+let subAccountCodeControllerUpdateSubAccountCode
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -74,6 +75,7 @@ describe('registSubAccountCodeのテスト', () => {
     subAccountCodeControllerGetSubAccountCode = jest.spyOn(subAccountCodeController, 'getSubAccountCode')
     request.flash = jest.fn()
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
+    subAccountCodeControllerUpdateSubAccountCode = jest.spyOn(subAccountCodeController, 'updateSubAccountCode')
   })
   afterEach(() => {
     request.resetMocked()
@@ -84,6 +86,7 @@ describe('registSubAccountCodeのテスト', () => {
     contractControllerFindOneSpy.mockRestore()
     subAccountCodeControllerGetSubAccountCode.mockRestore()
     checkContractStatusSpy.mockRestore()
+    subAccountCodeControllerUpdateSubAccountCode.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -92,6 +95,11 @@ describe('registSubAccountCodeのテスト', () => {
         '/:subAccountCodeId',
         helper.isAuthenticated,
         subAccountCodeEdit.cbGetIndex
+      )
+      expect(subAccountCodeEdit.router.post).toBeCalledWith(
+        '/:subAccountCodeId',
+        helper.isAuthenticated,
+        subAccountCodeEdit.cbPostIndex
       )
     })
   })
@@ -190,7 +198,7 @@ describe('registSubAccountCodeのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // メッセージの表示を確認
-      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目一覧', '該当する勘定科目が存在しませんでした。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目一覧', '該当する補助科目が存在しませんでした。'])
       // 補助科目リスト画面へリダイレクトすることを確認
       expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
     })
@@ -417,6 +425,727 @@ describe('registSubAccountCodeのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // 500エラーがエラーハンドリング
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+  })
+
+  describe('コールバック:cbPostIndex', () => {
+    test('正常:変更成功', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(0)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // メッセージ表示
+      expect(request.flash).toHaveBeenCalledWith('info', '補助科目の変更が完了しました。')
+      // 補助科目一覧に遷移
+      expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
+    })
+
+    test('準正常:値の変更なし', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(1)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // メッセージ表示
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '入力した補助科目は既に登録されています。'])
+      // 補助科目変更に戻る
+      expect(response.redirect).toHaveBeenCalledWith(`/subAccountCodeEdit/${request.params.subAccountCodeId}`)
+    })
+
+    test('準正常:コードの重複', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(-1)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // メッセージ表示
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '入力した補助科目は重複されています。'])
+      // 補助科目変更に戻る
+      expect(response.redirect).toHaveBeenCalledWith(`/subAccountCodeEdit/${request.params.subAccountCodeId}`)
+    })
+
+    test('準正常:変更の時データが削除などで取得失敗', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(-2)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // メッセージ表示
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '当該補助科目をDBから見つかりませんでした。'])
+      // 補助科目一覧にリダイレクト
+      expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
+    })
+
+    test('準正常:元のデータ取得失敗', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(-3)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // メッセージ表示
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '補助科目変更',
+        '当該補助科目をDB変更中エラーが発生しました。'
+      ])
+      // 補助科目一覧にリダイレクト
+      expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
+    })
+
+    test('準正常:勘定科目コードIDの正常値ではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: 'test',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(-3)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // メッセージ表示
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '変更中エラーが発生しました。'])
+      // 補助科目一覧にリダイレクト
+      expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
+    })
+
+    test('準正常:補助科目コードIDの正常値ではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: 'test'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(-3)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // メッセージ表示
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '変更中エラーが発生しました。'])
+      // 補助科目一覧にリダイレクト
+      expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
+    })
+
+    test('準正常:補助科目コードの英数字ではない', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'テスト001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(-3)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // メッセージ表示
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '変更中エラーが発生しました。'])
+      // 補助科目一覧にリダイレクト
+      expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
+    })
+
+    test('準正常:補助科目名0桁', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: ''
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(-3)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // メッセージ表示
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '変更中エラーが発生しました。'])
+      // 補助科目一覧にリダイレクト
+      expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
+    })
+
+    test('準正常:補助科目名40桁超過', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト123456789UTテスト123456789UTテスト123456789'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(-3)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // メッセージ表示
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '変更中エラーが発生しました。'])
+      // 補助科目一覧にリダイレクト
+      expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
+    })
+
+    test('500エラー：変更中コントローラエラー発生', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'UTEST',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // DBエラー
+      const dbError = new Error('DatabaseError [SequelizeDatabaseError]')
+      dbError.code = 'EREQUEST'
+      dbError.number = 207
+      dbError.state = 1
+      dbError.class = 16
+      dbError.serverName = 'sqlserver'
+      dbError.procName = ''
+      dbError.lineNumber = 1
+      dbError.sql = 'SELECT'
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(dbError)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 500エラーハンドリング
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：不正なcheckContractStatus(null)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(null)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(-3)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 500エラーハンドリング確認
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：不正なcheckContractStatus(999)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(999)
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue(-3)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 500エラーハンドリング確認
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：解約申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[6])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue('00')
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue()
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 解約画面表示
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('500エラー：DBユーザの情報なし', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(null)
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue()
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue()
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue()
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 500ハンドリング
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：ユーザの取得時、DBエラー発生', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+      // DBエラー
+      const dbError = new Error('DatabaseError [SequelizeDatabaseError]')
+      dbError.code = 'EREQUEST'
+      dbError.number = 207
+      dbError.state = 1
+      dbError.class = 16
+      dbError.serverName = 'sqlserver'
+      dbError.procName = ''
+      dbError.lineNumber = 1
+      dbError.sql = 'SELECT'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(dbError)
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue()
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue()
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue()
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 500ハンドリング
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('404エラー：ユーザのステータスが0ではない', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[8] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[8])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue()
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue()
+      // subAccountCodeControllerの返却値の設定
+      subAccountCodeControllerUpdateSubAccountCode.mockReturnValue()
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404ハンドリング
+      expect(next).toHaveBeenCalledWith(errorHelper.create(404))
+    })
+
+    test('400エラー：userContextがnotLoogedIn', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...notLoggedInsession }
+      request.user = { ...Users[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 400ハンドリング
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+    })
+
+    test('500エラー：contract取得なし', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(null)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 500ハンドリング
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：contract取得時、エラー発生', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      // パラメータ
+      request.body = {
+        setAccountCodeId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+        setSubAccountCodeInputId: 'A1001',
+        setSubAccountCodeNameInputId: 'UTテスト'
+      }
+      request.params = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      }
+      // メッセージ関数準備
+      request.flash = jest.fn()
+      // DBエラー
+      const dbError = new Error('DatabaseError [SequelizeDatabaseError]')
+      dbError.code = 'EREQUEST'
+      dbError.number = 207
+      dbError.state = 1
+      dbError.class = 16
+      dbError.serverName = 'sqlserver'
+      dbError.procName = ''
+      dbError.lineNumber = 1
+      dbError.sql = 'SELECT'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(dbError)
+
+      // 実施
+      await subAccountCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 500ハンドリング
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })

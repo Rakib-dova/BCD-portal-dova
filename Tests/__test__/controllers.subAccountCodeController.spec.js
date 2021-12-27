@@ -48,13 +48,17 @@ let errorSpy,
   subAccountCodeCreateSpy,
   accountCodefindOneSpy,
   transactionSpy,
-  SubAccountCodeGetsubAccountCodeListSpy
+  SubAccountCodeGetsubAccountCodeListSpy,
+  accountCodeFindAllSpy,
+  subAccountcodeFindOneSpy
 
 describe('subAccountCodeControllerのテスト', () => {
   beforeEach(() => {
     subAccountCodeCreateSpy = jest.spyOn(SubAccountCode, 'create')
     subAccountCodefindAllSpy = jest.spyOn(SubAccountCode, 'findAll')
+    subAccountcodeFindOneSpy = jest.spyOn(SubAccountCode, 'findOne')
     accountCodefindOneSpy = jest.spyOn(AccountCode, 'findOne')
+    accountCodeFindAllSpy = jest.spyOn(AccountCode, 'findAll')
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
     transactionSpy = jest.spyOn(sequelize, 'transaction')
@@ -68,6 +72,8 @@ describe('subAccountCodeControllerのテスト', () => {
     infoSpy.mockRestore()
     transactionSpy.mockRestore()
     SubAccountCodeGetsubAccountCodeListSpy.mockRestore()
+    accountCodeFindAllSpy.mockRestore()
+    subAccountcodeFindOneSpy.mockRestore()
   })
 
   contractId = '87654321-fbe6-4864-a866-7a3ce9aa517e'
@@ -443,6 +449,425 @@ describe('subAccountCodeControllerのテスト', () => {
       expect(errorSpy).toHaveBeenCalledWith({
         contractId: contractId,
         stack: expect.anything(),
+        status: 0
+      })
+      expect(result).toMatchObject(dbError)
+    })
+  })
+
+  describe('updateSubAccountCode', () => {
+    test('正常', async () => {
+      // 準備
+      const contractId = '1af5541e-6d8c-4335-a570-b471ff8d58e7'
+      const accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      const subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      const subjectCode = 'UTTEST01'
+      const subAccountCodeName = 'テスト'
+
+      transactionSpy.mockReturnValue(transaction)
+
+      accountCodeFindAllSpy.mockReturnValue([
+        {
+          subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+          accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eaee',
+          accountCode: '112',
+          accountCodeName: '小口現金',
+          subjectName: 'テスト',
+          subjectCode: '1'
+        }
+      ])
+
+      const getUpdateTarget = new SubAccountCode()
+      getUpdateTarget.subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      getUpdateTarget.accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      getUpdateTarget.subjectName = 'テスト'
+      getUpdateTarget.subjectCode = '1'
+      getUpdateTarget.createdAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget.updatedAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget._changed = new Set(['subjectCode'])
+
+      subAccountcodeFindOneSpy.mockReturnValueOnce(getUpdateTarget)
+
+      accountCodeFindAllSpy.mockReturnValueOnce([
+        {
+          accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eae1',
+          contractId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+          accountCodeName: '勘定テスト',
+          accountCode: '0000',
+          createdAt: new Date('2021-12-23T02:10:35.708Z'),
+          updatedAt: new Date('2021-12-23T02:10:35.708Z'),
+          'SubAccountCodes.subAccountCodeId': '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+          'SubAccountCodes.subjectCode': '123',
+          'SubAccountCodes.subjectName': 'テスト'
+        }
+      ])
+
+      // 実施
+      const result = await subAccountCodeController.updateSubAccountCode(
+        contractId,
+        accountCodeId,
+        subAccountCodeId,
+        subjectCode,
+        subAccountCodeName
+      )
+
+      // 期待結果
+      // 正常の場合、「0」を返却
+      expect(result).toBe(0)
+    })
+
+    test('準正常：subjectCode重複', async () => {
+      // 準備
+      const contractId = '1af5541e-6d8c-4335-a570-b471ff8d58e7'
+      const accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eae1'
+      const subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      const subjectCode = 'UTTEST01'
+      const subAccountCodeName = 'テスト'
+
+      transactionSpy.mockReturnValue(transaction)
+
+      const motoSubAccountCode = {
+        subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+        accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eaee',
+        accountCode: '112',
+        accountCodeName: '小口現金',
+        subjectName: 'テスト',
+        subjectCode: '1'
+      }
+      accountCodeFindAllSpy.mockReturnValueOnce([motoSubAccountCode])
+
+      const getUpdateTarget = new SubAccountCode()
+      getUpdateTarget.subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      getUpdateTarget.accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      getUpdateTarget.subjectName = 'テスト'
+      getUpdateTarget.subjectCode = '1'
+      getUpdateTarget.createdAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget.updatedAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget._changed = new Set(['subjectCode'])
+
+      subAccountcodeFindOneSpy.mockReturnValue(getUpdateTarget)
+
+      accountCodeFindAllSpy.mockReturnValueOnce([
+        {
+          accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eae1',
+          contractId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+          accountCodeName: '勘定テスト',
+          accountCode: '0000',
+          createdAt: new Date('2021-12-23T02:10:35.708Z'),
+          updatedAt: new Date('2021-12-23T02:10:35.708Z'),
+          'SubAccountCodes.subAccountCodeId': '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+          'SubAccountCodes.subjectCode': 'UTTEST01',
+          'SubAccountCodes.subjectName': '重複テスト'
+        }
+      ])
+
+      // 実施
+      const result = await subAccountCodeController.updateSubAccountCode(
+        contractId,
+        accountCodeId,
+        subAccountCodeId,
+        subjectCode,
+        subAccountCodeName
+      )
+
+      // 期待結果
+      // 重複の場合、「-1」を返却
+      expect(result).toBe(-1)
+    })
+
+    test('準正常：変更内容なし', async () => {
+      // 準備
+      const contractId = '1af5541e-6d8c-4335-a570-b471ff8d58e7'
+      const accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      const subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      const subjectCode = '1'
+      const subAccountCodeName = 'テスト'
+
+      transactionSpy.mockReturnValue(transaction)
+
+      accountCodeFindAllSpy.mockReturnValue([
+        {
+          subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+          accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eaee',
+          accountCode: '112',
+          accountCodeName: '小口現金',
+          subjectName: 'テスト',
+          subjectCode: '1'
+        }
+      ])
+
+      const getUpdateTarget = new SubAccountCode()
+      getUpdateTarget.subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      getUpdateTarget.accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      getUpdateTarget.subjectName = 'テスト'
+      getUpdateTarget.subjectCode = '1'
+      getUpdateTarget.createdAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget.updatedAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget._changed = new Set()
+
+      subAccountcodeFindOneSpy.mockReturnValueOnce(getUpdateTarget)
+
+      accountCodeFindAllSpy.mockReturnValueOnce([
+        {
+          accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eae1',
+          contractId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+          accountCodeName: '勘定テスト',
+          accountCode: '0000',
+          createdAt: new Date('2021-12-23T02:10:35.708Z'),
+          updatedAt: new Date('2021-12-23T02:10:35.708Z'),
+          'SubAccountCodes.subAccountCodeId': '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+          'SubAccountCodes.subjectCode': '1233',
+          'SubAccountCodes.subjectName': 'テスト'
+        }
+      ])
+
+      // 実施
+      const result = await subAccountCodeController.updateSubAccountCode(
+        contractId,
+        accountCodeId,
+        subAccountCodeId,
+        subjectCode,
+        subAccountCodeName
+      )
+
+      // 期待結果
+      // 登録されている場合、「1」を返却
+      expect(result).toBe(1)
+    })
+
+    test('準正常：DBエラー発生', async () => {
+      // 準備
+      const contractId = '1af5541e-6d8c-4335-a570-b471ff8d58e7'
+      const accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      const subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      const subjectCode = '1'
+      const subAccountCodeName = 'テスト'
+
+      transactionSpy.mockReturnValue(transaction)
+
+      const dbError = new Error('DB ERROR')
+      accountCodeFindAllSpy.mockImplementation(() => {
+        throw dbError
+      })
+
+      const getUpdateTarget = new SubAccountCode()
+      getUpdateTarget.subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      getUpdateTarget.accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      getUpdateTarget.subjectName = 'テスト'
+      getUpdateTarget.subjectCode = '1'
+      getUpdateTarget.createdAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget.updatedAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget._changed = new Set()
+
+      subAccountcodeFindOneSpy.mockReturnValueOnce(getUpdateTarget)
+
+      accountCodeFindAllSpy.mockReturnValueOnce([
+        {
+          accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eae1',
+          contractId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+          accountCodeName: '勘定テスト',
+          accountCode: '0000',
+          createdAt: new Date('2021-12-23T02:10:35.708Z'),
+          updatedAt: new Date('2021-12-23T02:10:35.708Z'),
+          'SubAccountCodes.subAccountCodeId': '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+          'SubAccountCodes.subjectCode': '1233',
+          'SubAccountCodes.subjectName': 'テスト'
+        }
+      ])
+
+      // 実施
+      const result = await subAccountCodeController.updateSubAccountCode(
+        contractId,
+        accountCodeId,
+        subAccountCodeId,
+        subjectCode,
+        subAccountCodeName
+      )
+
+      // 期待結果
+      // DBエラーの場合、エラー内容を返却
+      expect(logger.error).toHaveBeenCalledWith({
+        contractId: contractId,
+        stack: dbError.stack,
+        status: 0
+      })
+      expect(result).toMatchObject(dbError)
+    })
+
+    test('準正常：補助科目オブジェクト取得失敗', async () => {
+      // 準備
+      const contractId = '1af5541e-6d8c-4335-a570-b471ff8d58e7'
+      const accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      const subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      const subjectCode = '1'
+      const subAccountCodeName = 'テスト'
+
+      transactionSpy.mockReturnValue(transaction)
+
+      accountCodeFindAllSpy.mockReturnValue([
+        {
+          subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+          accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eaee',
+          accountCode: '112',
+          accountCodeName: '小口現金',
+          subjectName: 'テスト',
+          subjectCode: '1'
+        }
+      ])
+
+      const getUpdateTarget = new SubAccountCode()
+      getUpdateTarget.subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      getUpdateTarget.accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      getUpdateTarget.subjectName = 'テスト'
+      getUpdateTarget.subjectCode = '1'
+      getUpdateTarget.createdAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget.updatedAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget._changed = new Set()
+
+      subAccountcodeFindOneSpy.mockReturnValueOnce(null)
+
+      accountCodeFindAllSpy.mockReturnValueOnce([
+        {
+          accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eae1',
+          contractId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+          accountCodeName: '勘定テスト',
+          accountCode: '0000',
+          createdAt: new Date('2021-12-23T02:10:35.708Z'),
+          updatedAt: new Date('2021-12-23T02:10:35.708Z'),
+          'SubAccountCodes.subAccountCodeId': '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+          'SubAccountCodes.subjectCode': '1233',
+          'SubAccountCodes.subjectName': 'テスト'
+        }
+      ])
+
+      // 実施
+      const result = await subAccountCodeController.updateSubAccountCode(
+        contractId,
+        accountCodeId,
+        subAccountCodeId,
+        subjectCode,
+        subAccountCodeName
+      )
+
+      // 期待結果
+      // 補助科目がない場合「-2」を返却する
+      expect(result).toBe(-2)
+    })
+
+    test('準正常：勘定科目と補助科目JOINデータなし', async () => {
+      // 準備
+      const contractId = '1af5541e-6d8c-4335-a570-b471ff8d58e7'
+      const accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      const subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      const subjectCode = '1'
+      const subAccountCodeName = 'テスト'
+
+      transactionSpy.mockReturnValue(transaction)
+
+      accountCodeFindAllSpy.mockReturnValueOnce(null)
+
+      const getUpdateTarget = new SubAccountCode()
+      getUpdateTarget.subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      getUpdateTarget.accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      getUpdateTarget.subjectName = 'テスト'
+      getUpdateTarget.subjectCode = '1'
+      getUpdateTarget.createdAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget.updatedAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget._changed = new Set()
+
+      subAccountcodeFindOneSpy.mockReturnValueOnce(null)
+
+      accountCodeFindAllSpy.mockReturnValueOnce([
+        {
+          accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eae1',
+          contractId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+          accountCodeName: '勘定テスト',
+          accountCode: '0000',
+          createdAt: new Date('2021-12-23T02:10:35.708Z'),
+          updatedAt: new Date('2021-12-23T02:10:35.708Z'),
+          'SubAccountCodes.subAccountCodeId': '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+          'SubAccountCodes.subjectCode': '1233',
+          'SubAccountCodes.subjectName': 'テスト'
+        }
+      ])
+
+      // 実施
+      const result = await subAccountCodeController.updateSubAccountCode(
+        contractId,
+        accountCodeId,
+        subAccountCodeId,
+        subjectCode,
+        subAccountCodeName
+      )
+
+      // 期待結果
+      // JOIN失敗の場合「-3」を返却
+      expect(result).toBe(-3)
+    })
+
+    test('準正常：transactionエラー', async () => {
+      // 準備
+      const contractId = '1af5541e-6d8c-4335-a570-b471ff8d58e7'
+      const accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      const subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      const subjectCode = 'UTTEST01'
+      const subAccountCodeName = 'テスト'
+
+      const dbError = new Error('transaction error')
+      transactionSpy.mockImplementation(() => {
+        throw dbError
+      })
+
+      accountCodeFindAllSpy.mockReturnValue([
+        {
+          subAccountCodeId: '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+          accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eaee',
+          accountCode: '112',
+          accountCodeName: '小口現金',
+          subjectName: 'テスト',
+          subjectCode: '1'
+        }
+      ])
+
+      const getUpdateTarget = new SubAccountCode()
+      getUpdateTarget.subAccountCodeId = '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1'
+      getUpdateTarget.accountCodeId = '28559125-f0b9-4145-a3e0-7c31ad04eaee'
+      getUpdateTarget.subjectName = 'テスト'
+      getUpdateTarget.subjectCode = '1'
+      getUpdateTarget.createdAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget.updatedAt = new Date('2021-12-23T02:10:35.708Z')
+      getUpdateTarget._changed = new Set(['subjectCode'])
+
+      subAccountcodeFindOneSpy.mockReturnValue(getUpdateTarget)
+
+      accountCodeFindAllSpy([
+        {
+          accountCodeId: '28559125-f0b9-4145-a3e0-7c31ad04eae1',
+          contractId: '1af5541e-6d8c-4335-a570-b471ff8d58e7',
+          accountCodeName: '勘定テスト',
+          accountCode: '0000',
+          createdAt: new Date('2021-12-23T02:10:35.708Z'),
+          updatedAt: new Date('2021-12-23T02:10:35.708Z'),
+          'SubAccountCodes.subAccountCodeId': '0a6eb23d-f91b-4266-ac72-eb59cb9f5ad1',
+          'SubAccountCodes.subjectCode': '123',
+          'SubAccountCodes.subjectName': 'テスト'
+        }
+      ])
+
+      // 実施
+      const result = await subAccountCodeController.updateSubAccountCode(
+        contractId,
+        accountCodeId,
+        subAccountCodeId,
+        subjectCode,
+        subAccountCodeName
+      )
+
+      // 期待結果
+      // エラーの場合、エラー内容を返却
+      expect(logger.error).toHaveBeenCalledWith({
+        contractId: contractId,
+        stack: dbError.stack,
         status: 0
       })
       expect(result).toMatchObject(dbError)

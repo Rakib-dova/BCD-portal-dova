@@ -150,15 +150,15 @@ const cbPostIndex = async function (req, res, next) {
   // 結果：0（正常変更）、1（変更なし）、-1（重複コードの場合）、-2（勘定科目検索失敗）
   switch (result) {
     case 0:
-      req.flash('info', '勘定科目を変更しました。')
+      req.flash('info', '勘定科目の変更が完了しました。')
       res.redirect('/accountCodeList')
       break
     case 1:
-      req.flash('noti', ['勘定科目変更', 'すでに登録されている値です。'])
+      req.flash('noti', ['勘定科目変更', '入力した勘定科目は既に登録されています。'])
       res.redirect(`/accountCodeEdit/${accountCodeId}`)
       break
     case -1:
-      req.flash('noti', ['勘定科目変更', '既に登録されている勘定科目コードがあることを確認しました。'])
+      req.flash('noti', ['勘定科目変更', '入力した勘定科目は重複されています。'])
       res.redirect(`/accountCodeEdit/${accountCodeId}`)
       break
     case -2:
