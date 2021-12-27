@@ -57,6 +57,7 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
       if (item.ItemInfos[1] === undefined) return '-'
       return Math.floor(item.ItemInfos[1].value).toLocaleString('ja-JP')
     }
+
     return {
       no: idx + 1 + page * onePagePerItemCount,
       invoiceNo: item.ID,
@@ -65,7 +66,7 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
       ammount: ammount(),
       sentTo: item.SenderCompanyName ?? '-',
       sentBy: item.ReceiverCompanyName ?? '-',
-      updated: item.LastEdit !== undefined ? item.LastEdit.substring(0, 10) ?? '-' : '-',
+      updated: item.LastEdit !== undefined ? item.LastEdit.substring(0, 10) : '-',
       expire: item.DueDate ?? '-',
       documentId: item.DocumentId
     }
