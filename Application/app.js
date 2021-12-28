@@ -234,6 +234,9 @@ app.use('/registSubAccountCode', require('./routes/registSubAccountCode').router
 // 補助科目確認・変更
 app.use('/subAccountCodeEdit', require('./routes/subAccountCodeEdit').router)
 
+// 受領した請求書一覧
+app.use('/inboxList', require('./routes/inboxList').router)
+
 // 設定
 // cancellation
 app.use('/cancellation', require('./routes/cancellation').router)
