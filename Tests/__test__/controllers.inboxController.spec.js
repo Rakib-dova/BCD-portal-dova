@@ -614,18 +614,7 @@ describe('inboxControllerのテスト', () => {
       expect(result).toEqual(result1)
     })
 
-    test('異常: アクセストークンの有効期限が終わるの場合の場合', async () => {
-      // 準備
-      // APIからの正常情報の取得を想定する
-      accessTradeshiftSpy.mockReturnValue(searchResult2)
-
-      // 試験実施
-      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
-      // 期待結果
-      expect(result).toEqual(result0)
-    })
-
-    test('異常：文書をリスト化する時値がない場合', async () => {
+    test('正常：文書をリスト化する時値がない場合', async () => {
       // 準備
       // APIからの正常情報の取得を想定する
       accessTradeshiftSpy.mockReturnValue(searchResult3)
@@ -636,7 +625,7 @@ describe('inboxControllerのテスト', () => {
       expect(result).toEqual(result3)
     })
 
-    test('異常：文書をリスト化する時値がない場合(Line87)', async () => {
+    test('正常：更新日がない場合、期限日で整列', async () => {
       // 準備
       // APIからの正常情報の取得を想定する
       accessTradeshiftSpy.mockReturnValue(searchResult4)
@@ -645,6 +634,17 @@ describe('inboxControllerのテスト', () => {
       const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
       // 期待結果
       expect(result).toEqual(result4)
+    })
+
+    test('異常: アクセストークンの有効期限が終わるの場合の場合', async () => {
+      // 準備
+      // APIからの正常情報の取得を想定する
+      accessTradeshiftSpy.mockReturnValue(searchResult2)
+
+      // 試験実施
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+      // 期待結果
+      expect(result).toEqual(result0)
     })
   })
 })

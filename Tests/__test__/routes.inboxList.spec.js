@@ -170,7 +170,7 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでcsvDownloadが呼ばれ「る」
+      // response.renderでinboxListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList', {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
@@ -201,7 +201,7 @@ describe('inboxListのテスト', () => {
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
@@ -233,7 +233,6 @@ describe('inboxListのテスト', () => {
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
@@ -247,10 +246,10 @@ describe('inboxListのテスト', () => {
       await inboxList.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -268,10 +267,10 @@ describe('inboxListのテスト', () => {
       await inboxList.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -288,6 +287,7 @@ describe('inboxListのテスト', () => {
       await inboxList.cbGetIndex(request, response, next)
 
       // 期待結果
+      // 404エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(404))
     })
 
@@ -307,6 +307,7 @@ describe('inboxListのテスト', () => {
       await inboxList.cbGetIndex(request, response, next)
 
       // 期待結果
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -326,6 +327,7 @@ describe('inboxListのテスト', () => {
       await inboxList.cbGetIndex(request, response, next)
 
       // 期待結果
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })
