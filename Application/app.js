@@ -212,7 +212,6 @@ app.use('/uploadFormatList', require('./routes/uploadFormatList').router)
 // アップロードフォーマット確認・変更
 app.use('/uploadFormatEdit', require('./routes/uploadFormatEdit').router)
 
-//設定
 // 設定
 // cancellation
 app.use('/cancellation', require('./routes/cancellation').router)
@@ -222,6 +221,9 @@ app.use('/change', require('./routes/change').router)
 
 // 請求書ダウンロード
 app.use('/csvDownload', require('./routes/csvDownload').router)
+
+// ネットワーク接続状況ダウンロード
+app.use('/networkDownload', require('./routes/networkDownload').router)
 
 // notice
 const noticeHelper = require('./routes/helpers/notice')

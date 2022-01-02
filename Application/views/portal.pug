@@ -79,7 +79,6 @@ block content
                     p.title.is-5 サポート
                     p 設定方法、利用方法に関するお問い合わせが無料で利用できます。その他FAQを参照できます。
 
-
         .columns.is-desktop.is-family-noto-sans
           .column.hvr-float
             if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
@@ -93,6 +92,14 @@ block content
                       p 契約情報変更と解約を行うことができます。
                       p 解約の場合は取り消しはできません。
           .column.hvr-float
+             .box.iconBox.textOverflow
+              a(href='/networkDownload')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
+                  .media-content
+                    p.title.is-5 ネットワーク接続状況ダウンロード
+                    p つながり申請状況をCSV形式でダウンロードできます。
           .column.hvr-float
       .column.is-12.menu
        p.olta-title-font-size 提携サービス
