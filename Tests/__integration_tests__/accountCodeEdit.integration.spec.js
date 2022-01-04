@@ -757,7 +757,7 @@ describe('勘定科目確認・変更のインテグレーションテスト', (
       expect(res.text).toMatch(/インテグレーションテスト/i)
     })
 
-    // 勘定科目名41桁以上入力
+    // 変更した勘定科目の内容を勘定科目確認・変更画面で確認
     test('変更した勘定科目の内容を勘定科目確認・変更画面で確認', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
@@ -769,10 +769,6 @@ describe('勘定科目確認・変更のインテグレーションテスト', (
       await page.setCookie(acCookies[0])
       await page.goto(`https://localhost:3000${redirectUrl}`)
       if (page.url() === `https://localhost:3000${redirectUrl}`) {
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
         // 入力値が変わっていること確認
         const checkSetAccountCodeInputId = await page.evaluate(() => {
           return document.querySelector('#setAccountCodeInputId').value

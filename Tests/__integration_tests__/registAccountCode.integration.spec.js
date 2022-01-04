@@ -248,7 +248,7 @@ describe('勘定科目作成のインテグレーションテスト', () => {
 
         await page.waitForTimeout(500)
 
-        await page.click('#submit')
+        await page.click('#btnCheck')
 
         // エラーメッセージが表示されること確認
         const checkErrorMessage = await page.evaluate(() => {
@@ -274,10 +274,6 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       if (page.url() === 'https://localhost:3000/registAccountCode') {
         await page.type('#setAccountCodeInputId', 'intgrationTest')
         await page.type('#setAccountCodeNameInputId', '')
-
-        await page.waitForTimeout(500)
-
-        await page.click('#submit')
 
         // 入力値が変わっていること確認
         const checksetAccountCodeInputId = await page.evaluate(() => {
@@ -305,10 +301,6 @@ describe('勘定科目作成のインテグレーションテスト', () => {
         await page.type('#setAccountCodeInputId', '12345678901234567890')
         await page.type('#setAccountCodeNameInputId', '')
 
-        await page.waitForTimeout(500)
-
-        await page.click('#submit')
-
         // 入力値が変わっていること確認
         const checksetAccountCodeInputId = await page.evaluate(() => {
           return document.querySelector('#setAccountCodeInputId').value
@@ -334,10 +326,6 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       if (page.url() === 'https://localhost:3000/registAccountCode') {
         await page.type('#setAccountCodeInputId', 'test1234567890')
         await page.type('#setAccountCodeNameInputId', '')
-
-        await page.waitForTimeout(500)
-
-        await page.click('#submit')
 
         // 入力値が変わっていること確認
         const checksetAccountCodeInputId = await page.evaluate(() => {
@@ -367,7 +355,7 @@ describe('勘定科目作成のインテグレーションテスト', () => {
 
         await page.waitForTimeout(500)
 
-        await page.click('#submit')
+        await page.click('#btnCheck')
 
         // エラーメッセージが表示されること確認
         const checkErrorMessage = await page.evaluate(() => {
@@ -396,7 +384,7 @@ describe('勘定科目作成のインテグレーションテスト', () => {
 
         await page.waitForTimeout(500)
 
-        await page.click('#submit')
+        await page.click('#btnCheck')
 
         // エラーメッセージが表示されること確認
         const checkErrorMessage = await page.evaluate(() => {
@@ -425,7 +413,7 @@ describe('勘定科目作成のインテグレーションテスト', () => {
 
         await page.waitForTimeout(500)
 
-        await page.click('#submit')
+        await page.click('#btnCheck')
 
         // エラーメッセージが表示されること確認
         const checkErrorMessage = await page.evaluate(() => {
@@ -451,10 +439,6 @@ describe('勘定科目作成のインテグレーションテスト', () => {
       if (page.url() === 'https://localhost:3000/registAccountCode') {
         await page.type('#setAccountCodeInputId', '')
         await page.type('#setAccountCodeNameInputId', 'あいうえおabcdefg123456789あいうえおabcdefg123456789')
-
-        await page.waitForTimeout(500)
-
-        await page.click('#submit')
 
         // 入力値が変わっていること確認
         const checksetAccountCodeNameInputId = await page.evaluate(() => {
@@ -488,7 +472,7 @@ describe('勘定科目作成のインテグレーションテスト', () => {
 
         await page.waitForTimeout(500)
 
-        await page.click('#submit')
+        await page.click('#btnCheck')
 
         // エラーメッセージが表示されること確認
         const checkErrorMessage = await page.evaluate(() => {

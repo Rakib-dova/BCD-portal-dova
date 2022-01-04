@@ -167,6 +167,7 @@ module.exports = {
 
       // データ変更がある場合、DB保存する
       if (accountCodeRecord._changed.size > 0) {
+        await accountCodeRecord.save()
         return 0
         // データ変更がない場合、1を返して
       } else {
