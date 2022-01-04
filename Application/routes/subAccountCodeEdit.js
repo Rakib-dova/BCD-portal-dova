@@ -180,7 +180,7 @@ const cbPostIndex = async (req, res, next) => {
       res.redirect(`/subAccountCodeEdit/${subAccountCodeId}`)
       break
     case -1:
-      req.flash('noti', ['補助科目変更', '入力した補助科目は重複されています。'])
+      req.flash('noti', ['補助科目変更', '入力した補助科目コードは重複されています。'])
       res.redirect(`/subAccountCodeEdit/${subAccountCodeId}`)
       break
     case -2:
