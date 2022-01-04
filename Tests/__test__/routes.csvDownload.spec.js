@@ -17,6 +17,8 @@ const contractController = require('../../Application/controllers/contractContro
 const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
 const DOMParser = require('dom-parser')
+const notiTitle = '請求書ダウンロード'
+const csvDownloadSysError = 'システムエラーが発生しました。\n時間を空けてもう一度アップロードしてください。'
 
 let request, response, infoSpy
 let userControllerFindOneSpy,
@@ -5487,8 +5489,10 @@ describe('csvDownloadのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // statusCodeが400である
-      expect(response.statusCode).toBe(400)
+      // エラーが発生するとダウンロードページにリダイレクト及びエラーメッセージ表示
+      expect(response.statusCode).toBe(303)
+      expect(response.headers.Location).toMatch('/csvDownload')
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, csvDownloadSysError])
     })
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
@@ -5499,8 +5503,10 @@ describe('csvDownloadのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // statusCodeが500である
-      expect(response.statusCode).toBe(500)
+      // エラーが発生するとダウンロードページにリダイレクト及びエラーメッセージ表示
+      expect(response.statusCode).toBe(303)
+      expect(response.headers.Location).toMatch('/csvDownload')
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, csvDownloadSysError])
     })
 
     test('準正常:ステータス未選択', async () => {
@@ -5754,8 +5760,10 @@ describe('csvDownloadのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // statusCodeが500である
-      expect(response.statusCode).toBe(500)
+      // エラーが発生するとダウンロードページにリダイレクト及びエラーメッセージ表示
+      expect(response.statusCode).toBe(303)
+      expect(response.headers.Location).toMatch('/csvDownload')
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, csvDownloadSysError])
     })
 
     test('500エラー：user.statusが0ではない場合', async () => {
@@ -5779,8 +5787,10 @@ describe('csvDownloadのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // statusCodeが500である
-      expect(response.statusCode).toBe(500)
+      // エラーが発生するとダウンロードページにリダイレクト及びエラーメッセージ表示
+      expect(response.statusCode).toBe(303)
+      expect(response.headers.Location).toMatch('/csvDownload')
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, csvDownloadSysError])
     })
 
     test('500エラー：contracts検索の時、DBエラー', async () => {
@@ -5806,8 +5816,10 @@ describe('csvDownloadのテスト', () => {
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // statusCodeが500である
-      expect(response.statusCode).toBe(500)
+      // エラーが発生するとダウンロードページにリダイレクト及びエラーメッセージ表示
+      expect(response.statusCode).toBe(303)
+      expect(response.headers.Location).toMatch('/csvDownload')
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, csvDownloadSysError])
     })
 
     test('500エラー：不正なContractStatus、 DBエラー', async () => {
@@ -5836,8 +5848,10 @@ describe('csvDownloadのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // statusCodeが500である
-      expect(response.statusCode).toBe(500)
+      // エラーが発生するとダウンロードページにリダイレクト及びエラーメッセージ表示
+      expect(response.statusCode).toBe(303)
+      expect(response.headers.Location).toMatch('/csvDownload')
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, csvDownloadSysError])
     })
 
     test('異常:APIエラー', async () => {
