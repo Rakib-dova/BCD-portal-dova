@@ -170,7 +170,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(postalClearBtnActive).not.toBe('disabled')
 
-        //　クリアボタン押下
+        // クリアボタン押下
         await page.click('#postalClearBtn')
 
         // クリアボタン押下後、状態確認
@@ -241,7 +241,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         })
         expect(postalClearBtnActive).not.toBe('disabled')
 
-        //　クリアボタン押下
+        // クリアボタン押下
         await page.click('#postalClearBtn')
 
         // クリアボタン押下後、状態確認
