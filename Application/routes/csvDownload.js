@@ -87,8 +87,7 @@ const cbPostIndex = async (req, res, next) => {
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
-    req.flash('noti', [notiTitle, constantsDefine.statusConstants.SYSTEMERRORMESSAGE])
-    return res.redirect(303, '/csvDownload')
+    return next(errorHelper.create(400))
   }
 
   // DBからuserデータ取得
@@ -97,13 +96,12 @@ const cbPostIndex = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
   if (user instanceof Error || user === null) {
-    req.flash('noti', [notiTitle, constantsDefine.statusConstants.SYSTEMERRORMESSAGE])
+    req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
     return res.redirect(303, '/csvDownload')
   }
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) {
-    req.flash('noti', [notiTitle, constantsDefine.statusConstants.SYSTEMERRORMESSAGE])
-    return res.redirect(303, '/csvDownload')
+    return next(errorHelper.create(404))
   }
 
   // DBから契約情報取得
@@ -111,7 +109,7 @@ const cbPostIndex = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) {
-    req.flash('noti', [notiTitle, constantsDefine.statusConstants.SYSTEMERRORMESSAGE])
+    req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
     return res.redirect(303, '/csvDownload')
   }
 
@@ -120,13 +118,11 @@ const cbPostIndex = async (req, res, next) => {
 
   const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
   if (checkContractStatus === null || checkContractStatus === 999) {
-    req.flash('noti', [notiTitle, constantsDefine.statusConstants.SYSTEMERRORMESSAGE])
-    return res.redirect(303, '/csvDownload')
+    return next(errorHelper.create(400))
   }
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    req.flash('noti', [notiTitle, constantsDefine.statusConstants.SYSTEMERRORMESSAGE])
-    return res.redirect(303, '/csvDownload')
+    return next(noticeHelper.create('cancelprocedure'))
   }
 
   req.session.userContext = 'LoggedIn'
