@@ -31,9 +31,9 @@ block content
               thead
                 tr
                   th.width-5.text-center No
-                  th.width-25.text-center 設定名称
+                  th.width-13.text-center 設定名称
                   th.width-13.text-center アップロード種別
-                  th.width-10.text-center 最新更新日
+                  th.width-13.text-center 最新更新日
                   th.width-10.text-center 
                   th.width-10.text-center 
               tbody
@@ -46,7 +46,7 @@ block content
                     td.text-center= item.updatedAt                 
                     td.text-center
                       a.button.is-success(name='confirmButton' uuid= item.uuid) 確認・変更する
-                    td.text-center
+                    td
                       a.button.is-danger.show-modal(type = "button" name = 'deleteButton' data-target = "confirmmodify-modal" uuid= item.uuid) 削除
         .mt-1.has-text-left
           a.button.is-link.is-light(href="/portal") ←Homeへ戻る

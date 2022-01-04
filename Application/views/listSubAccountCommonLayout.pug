@@ -18,8 +18,8 @@
                 tr
                   th.width-5.text-center #{listNo}
                   th.width-10.text-center #{subjectCode}
-                  th.width-25.text-center #{subjectName}
-                  th.width-25.text-center #{accountCodeName}
+                  th.width-13.text-center #{subjectName}
+                  th.width-13.text-center #{accountCodeName}
                   th.width-10.text-center 
                   th.width-10.text-center 
               tbody
@@ -32,7 +32,7 @@
                     td.text-center.td-overflow= item.accountCodeName                 
                     td.text-center
                       a.button.is-success(class= setClassChangeBtn name='confirmButton' href=`/subAccountCodeEdit/${item.subAccountCodeId}`) 確認・変更する
-                    td.text-center.show-modal
+                    td.show-modal
                       a.button.is-danger(class= setClassDeleteBtn name='deleteButton') 削除
         .mt-1.has-text-left
           a.button.is-link.is-light(href= prevLocation) #{prevLocationName}
