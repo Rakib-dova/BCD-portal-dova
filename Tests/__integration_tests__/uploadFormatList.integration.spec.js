@@ -204,7 +204,6 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
 
     test('削除ボタン押下し、ポップアップが表示', async () => {
       // アップロードフォーマット登録
-      const path = require('path')
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -212,14 +211,19 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       })
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/uploadFormatList')
+      await page.goto('https://localhost:3000/csvBasicFormat')
+      await page.type('#uploadFormatItemName', 'インテグレーションテスト設定')
+      const [fileChooser] = await Promise.all([
+        page.waitForFileChooser(),
+        page.click(
+          '#form > article > div > div > div:nth-child(1) > div > div:nth-child(1) > div > div:nth-child(3) > div > div > div:nth-child(2) > label'
+        )
+      ])
+
+      await fileChooser.accept(['./testData/csvFormatUpload.csv'])
 
       await page.waitForTimeout(1000)
 
-      await page.click('body > div.max-width > div:nth-child(3) > div > a')
-      await page.type('#uploadFormatItemName', 'インテグレーションテスト設定')
-      const uploadFileElementHand = await page.$('#dataFile')
-      await uploadFileElementHand.uploadFile(path.resolve('./testData/csvFormatUpload.csv'))
       await page.type('#uploadFormatNumber', '1')
       await page.type('#defaultNumber', '2')
       await page.click('#submit')
@@ -229,14 +233,12 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
       await page.select('#issueDate', '0')
       await page.select('#invoiceNumber', '1')
       await page.select('#tenantId', '2')
-      await page.select('#paymentDate', '3')
-      await page.select('#deliveryDate', '4')
-      await page.select('#sellersItemNum', '5')
-      await page.select('#itemName', '6')
-      await page.select('#quantityValue', '7')
-      await page.select('#quantityUnitCode', '8')
-      await page.select('#priceValue', '9')
-      await page.select('#taxRate', '10')
+      await page.select('#sellersItemNum', '12')
+      await page.select('#itemName', '13')
+      await page.select('#quantityValue', '14')
+      await page.select('#quantityUnitCode', '15')
+      await page.select('#priceValue', '16')
+      await page.select('#taxRate', '17')
 
       await page.click('#confirmBtn')
 
@@ -244,7 +246,7 @@ describe('請求書アップロードフォーマット一覧のインテグレ�
 
       await page.click('#submit')
 
-      await page.waitForTimeout(1000)
+      await page.waitForTimeout(2000)
 
       // アップロードフォーマット登録後、画面遷移確認
       expect(await page.url()).toMatch('https://localhost:3000/uploadFormatList')

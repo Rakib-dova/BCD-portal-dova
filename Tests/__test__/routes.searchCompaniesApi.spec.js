@@ -43,7 +43,8 @@ const companyResult = {
   pageId: 0,
   Connection: [
     { CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2002', CompanyName: '株式会社テスト2' },
-    { CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2003', CompanyName: '株式会社テスト3' }
+    { CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2003', CompanyName: '株式会社テスト3' },
+    { CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2004', CompanyName: '株式会社テスト2' }
   ]
 }
 

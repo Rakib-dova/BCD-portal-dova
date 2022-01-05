@@ -233,7 +233,7 @@ describe('ルーティングのインテグレーションテスト', () => {
     test('取り込み結果一覧の詳細画面確認', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true
       })
 

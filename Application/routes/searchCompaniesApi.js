@@ -62,7 +62,7 @@ const cbSearchCompanies = async (req, res) => {
 
   // 企業名を検索できるように変更
   const encodeCompanyName = encodeURI(companyName)
-  const sendQuery = `query=${encodeCompanyName}}`
+  const sendQuery = `query=${encodeCompanyName}`
 
   // 企業を検索する
   let pageId = 0
@@ -105,6 +105,15 @@ const cbSearchCompanies = async (req, res) => {
       }
     })
   }
+
+  // 会社名で昇順ソート
+  resultCompanies.sort((prev, next) => {
+    const prevCompany = prev.CompanyName
+    const nextCompany = next.CompanyName
+
+    return prevCompany < nextCompany ? -1 : prevCompany > nextCompany ? 1 : 0
+  })
+
   // レスポンスを返す
   logger.info(constantsDefine.logMessage.INF001 + 'cbSearchCompanies')
   return res.status(resultStatusCode).send(resultCompanies)

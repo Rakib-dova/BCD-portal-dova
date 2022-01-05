@@ -1,17 +1,7 @@
+import { $ } from '../module/selector.js'
+
 let fileReader = null
 let targetFile = null
-
-const $ = (_selector) => {
-  const selectorDelimeter = _selector.substr(0, 1)
-  const selector = _selector.substr(1, _selector.length)
-
-  switch (selectorDelimeter) {
-    case '#':
-      return document.getElementById(selector)
-    case '.':
-      return document.getElementsByClassName(selector)
-  }
-}
 
 // 「アップロード開始」ボタンの活性化のスイッチ
 document.getElementsByName('bulkAccountCode')[0].addEventListener('change', function (e) {

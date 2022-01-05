@@ -533,7 +533,7 @@ describe('registSubAccountCodeのテスト', () => {
 
       // 期待結果
       // メッセージ表示
-      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '入力した補助科目は重複されています。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目変更', '入力した補助科目コードは重複されています。'])
       // 補助科目変更に戻る
       expect(response.redirect).toHaveBeenCalledWith(`/subAccountCodeEdit/${request.params.subAccountCodeId}`)
     })
