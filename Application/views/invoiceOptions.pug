@@ -1,1 +1,81 @@
-﻿
+﻿block content
+  .columns.is-centered
+      .column.is-11
+          .box
+            .box
+              table.max-width
+                thead.max-width
+                  tr
+                    - var list = optionLine1
+                    each item in list
+                      th.width-10= item.columnName
+                tbody
+                  tr
+                    - var list = optionLine1
+                    each item in list                  
+                      td.pb-2.td-overflow= item.columnData
+            
+                thead
+                  tr
+                    - var list = optionLine2
+                    each item in list
+                      th.width-10= item.columnName
+                tbody
+                  tr
+                    - var list = optionLine2
+                    each item in list                  
+                      td.pb-2.td-overflow= item.columnData
+                thead
+                  tr
+                    - var list = optionLine3
+                    each item in list
+                      th.width-10= item.columnName
+                tbody
+                  tr
+                    - var list = optionLine3
+                    each item in list                  
+                      td.pb-2.td-overflow= item.columnData
+                thead
+                  tr
+                    - var list = optionLine4
+                    each item in list
+                      th.width-10= item.columnName
+                tbody
+                  tr
+                    - var list = optionLine4
+                    each item in list                  
+                      td.pb-2.td-overflow= item.columnData               
+                thead
+                  tr
+                    - var list = optionLine5
+                    each item in list
+                      th.width-10= item.columnName
+                tbody
+                  tr
+                    - var list = optionLine5
+                    each item in list                  
+                      td.pb-2.td-overflow= item.columnData
+                thead
+                  tr
+                    - var list = optionLine6
+                    each item in list
+                      th.width-10= item.columnName
+                tbody
+                  tr
+                    - var list = optionLine6
+                    each item in list                  
+                      td.pb-2.td-overflow= item.columnData                        
+                thead
+                  tr
+                    th.width-10= optionLine7.columnName
+                tbody
+                  tr
+                    td.pb-2.td-overflow= optionLine7.columnData
+              hr
+              table
+                thead
+                  tr
+                    th.width-10= optionLine8.columnName
+                tbody
+                  tr
+                    td.pb-2.td-overflow= optionLine8.columnData             
