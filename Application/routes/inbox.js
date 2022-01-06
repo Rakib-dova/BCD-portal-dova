@@ -52,9 +52,8 @@ const cbGetIndex = async (req, res, next) => {
   // ページ取得
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
-  const pageId = ~~req.params.page
-  const tenantId = user.tenantId
-  // const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+  const invoiceId = req.params.invoiceId
+  const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, invoiceId)
 
   // 受領した請求書一覧レンダリング
   // オプション欄
@@ -95,6 +94,7 @@ const cbGetIndex = async (req, res, next) => {
   const optionLine7 = { columnName: '備考', columnData: '備考' }
   const optionLine8 = { columnName: 'その他特記事項', columnData: 'その他特記事項' }
   res.render('inbox', {
+    ...result,
     optionLine1: optionLine1,
     optionLine2: optionLine2,
     optionLine3: optionLine3,

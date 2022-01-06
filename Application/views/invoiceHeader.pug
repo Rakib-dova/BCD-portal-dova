@@ -1,1 +1,94 @@
-﻿
+﻿.box
+  .columns.m-0
+    .column.is-2.text-inbox.text-inbox-subtitle.text-inbox-common
+      | 請求書番号 
+    .column.text-inbox-common
+      | #{invoiceId}
+
+.box
+  .columns.m-0
+    .column
+      p.text-inbox.text-inbox-subtitle.text-inbox-common 宛先
+      if AccountingCustomerParty
+        if AccountingCustomerParty.Party.PartyName[0].Name.value.length !== 0
+          .columns.m-0.p-0
+            .column.p-0
+              | #{AccountingCustomerParty.Party.PartyName[0].Name.value}
+        if AccountingCustomerParty.Party.PostalAddress
+          if AccountingCustomerParty.Party.PostalAddress.PostalZone && AccountingCustomerParty.Party.PostalAddress.PostalZone.value.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{AccountingCustomerParty.Party.PostalAddress.PostalZone.value}
+          if AccountingCustomerParty.Party.PostalAddress.CityName && AccountingCustomerParty.Party.PostalAddress.CityName.value.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{AccountingCustomerParty.Party.PostalAddress.CityName.value}
+          if AccountingCustomerParty.Party.PostalAddress.StreetName && AccountingCustomerParty.Party.PostalAddress.StreetName.value.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{AccountingCustomerParty.Party.PostalAddress.StreetName.value}
+          if AccountingCustomerParty.Party.PostalAddress.Country && AccountingCustomerParty.Party.PostalAddress.Country.IdentificationCode.value.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{AccountingCustomerParty.Party.PostalAddress.Country.IdentificationCode.value === 'JP' ? '日本' : ''}
+        .columns.m-0.p-0
+          .column.p-0
+            |　
+        each id in AccountingCustomerParty.Party.PartyIdentification
+          if id.ID.schemeID === 'TS:REGNO'
+            .columns.m-0.p-0
+              .column.p-0
+                | 登録番号：#{id.ID.value}
+          if id.ID.schemeID === 'GLN'
+            .columns.m-0.p-0
+              .column.p-0
+                | GLN：#{id.ID.value}
+          if id.ID.schemeID === 'JP:CT'
+            .columns.m-0.p-0
+              .column.p-0
+                | 法人番号：#{id.ID.value}
+
+    .column
+      p.text-inbox.text-inbox-subtitle.text-inbox-common 差出人
+      if AccountingSupplierParty
+        if AccountingSupplierParty.Party.PartyName[0].Name.value.length !== 0
+          .columns.m-0.p-0
+            .column.p-0
+              | #{AccountingSupplierParty.Party.PartyName[0].Name.value}
+        if AccountingSupplierParty.Party.PostalAddress
+          if AccountingSupplierParty.Party.PostalAddress.PostalZone && AccountingSupplierParty.Party.PostalAddress.PostalZone.value.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{AccountingSupplierParty.Party.PostalAddress.PostalZone.value}
+          if AccountingCustomerParty.Party.PostalAddress.CityName && AccountingCustomerParty.Party.PostalAddress.CityName.value.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{AccountingSupplierParty.Party.PostalAddress.CityName.value}
+          if AccountingSupplierParty.Party.PostalAddress.StreetName && AccountingSupplierParty.Party.PostalAddress.StreetName.value.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{AccountingSupplierParty.Party.PostalAddress.StreetName.value}
+          if AccountingSupplierParty.Party.PostalAddress.Country && AccountingSupplierParty.Party.PostalAddress.Country.IdentificationCode.value.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{AccountingSupplierParty.Party.PostalAddress.Country.IdentificationCode.value === 'JP' ? '日本' : ''}
+          if AccountingSupplierParty.Party.Contact.ElectronicMail && AccountingSupplierParty.Party.Contact.ElectronicMail.value.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{AccountingSupplierParty.Party.Contact.ElectronicMail.value}
+        .columns.m-0.p-0
+          .column.p-0
+            |　
+        each id in AccountingSupplierParty.Party.PartyIdentification
+          if id.ID.schemeID === 'TS:REGNO'
+            .columns.m-0.p-0
+              .column.p-0
+                | 登録番号：#{id.ID.value}
+          if id.ID.schemeID === 'GLN'
+            .columns.m-0.p-0
+              .column.p-0
+                | GLN：#{id.ID.value}
+          if id.ID.schemeID === 'JP:CT'
+            .columns.m-0.p-0
+              .column.p-0
+                | 法人番号：#{id.ID.value}

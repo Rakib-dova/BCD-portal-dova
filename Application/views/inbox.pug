@@ -1,11 +1,15 @@
 ﻿extends layout
 
 block content
-  include invoiceHeader
-  include invoiceOptions
-  include invoicePaymentMethod
-  include invoiceLines
-  include invoiceFooter
+  .container
+    div.title-box-journallzing
+      h4.title-text-journallzing.text-inbox 仕分け情報設定
+    .box
+      include invoiceHeader
+      include invoiceOptions
+      include invoicePaymentMethod
+      include invoiceLines
+      include invoiceFooter
 
   include footer
 
