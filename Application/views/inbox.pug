@@ -1,0 +1,14 @@
+﻿extends layout
+
+block content
+  include invoiceHeader
+  include invoiceOptions
+  include invoicePaymentMethod
+  include invoiceLines
+  include invoiceFooter
+
+  include footer
+
+block append scripts
+  script(src="/js/inbox-page.js")
+  link(rel='stylesheet', type='text/css', href='/css/inbox.css')

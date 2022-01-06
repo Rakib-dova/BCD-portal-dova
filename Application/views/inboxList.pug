@@ -45,7 +45,7 @@ block content
                     td.text-center.td-overflow= item.updated
                     td.text-center.td-overflow= item.expire
                     td.text-center.display-row-td
-                      a.button.is-success.td-overflow.display-row-td-button(href=`#` data-target= item.documentId) 仕訳情報設定
+                      a.button.is-success.td-overflow.display-row-td-button(href=`/inbox/${item.documentId}`) 仕訳情報設定
             nav.pagination.is-centered(role='navigation' aria-label='pagination')
               - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
               - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
