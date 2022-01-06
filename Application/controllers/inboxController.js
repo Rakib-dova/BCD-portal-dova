@@ -94,6 +94,201 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
     currPage: currPage + 1
   }
 }
+
+const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId) {
+  return dummyData
+}
 module.exports = {
-  getInbox: getInbox
+  getInbox: getInbox,
+  getInvoiceDetail: getInvoiceDetail
+}
+
+const dummyData = {
+  invoiceId: 'TEST202111212',
+  AccountingSupplierParty: {
+    Party: {
+      PartyIdentification: [
+        {
+          ID: {
+            value: '99999999-9999-9999-9999-9999999999999',
+            schemeID: 'TS:ID',
+            schemeName: 'Tradeshift identifier'
+          }
+        },
+        {
+          ID: {
+            value: '12345678',
+            schemeID: 'TS:REGNO',
+            schemeName: 'ACN'
+          }
+        }
+      ],
+      PartyName: [
+        {
+          Name: {
+            value: '(株)ABCDEFGHIJKLMNOPQRSTUあいうえお'
+          }
+        }
+      ],
+      PostalAddress: {
+        AddressFormatCode: {
+          value: '5',
+          listID: 'UN/ECE 3477',
+          listAgencyID: '6',
+          listVersionID: 'D08B'
+        },
+        StreetName: {
+          value: '太田'
+        },
+        AdditionalStreetName: {
+          value: '太田'
+        },
+        BuildingNumber: {
+          value: ''
+        },
+        CityName: {
+          value: '東京度'
+        },
+        PostalZone: {
+          value: '123-4567'
+        },
+        Country: {
+          IdentificationCode: {
+            value: 'JP'
+          }
+        }
+      },
+      PartyLeagalEntyty: [
+        {
+          RegistrationAddress: {
+            AddressFormatCode: {
+              value: '5',
+              listID: 'UN/ECE 3477',
+              listAgencyID: '6'
+            },
+            Postbox: {
+              value: 100
+            },
+            StreetName: {
+              value: '春日部市、A１－２－３'
+            },
+            AdditionalStreetName: {
+              value: 'テストヴィレッジ/９９９号'
+            },
+            CityName: {
+              value: 'テスト県'
+            },
+            PostalZone: {
+              value: '114-0014'
+            },
+            CorporateRegistrationScheme: {
+              ID: {
+                value: 'SOLE'
+              }
+            }
+          }
+        }
+      ],
+      Contact: {
+        ID: {
+          value: 'db9be280-c77b-4e9e-b138-ef96bdba5288',
+          schemeURI: 'http://tradeshift.com/api/1.0/userId'
+        },
+        Name: {
+          value: 'ExampleInc'
+        },
+        Telephone: {
+          value: '000-0000-0000'
+        },
+        ElectronicMail: {
+          value: 'ceomail@testdata'
+        }
+      },
+      Person: {
+        FirtName: {
+          value: '名'
+        },
+        FamilyName: {
+          value: '苗字'
+        }
+      }
+    }
+  },
+  AccountingCustomerParty: {
+    Party: {
+      PartyIdentification: [
+        {
+          ID: {
+            value: 'aa99999-aa99-aa99-aa99-9999999999999',
+            schemeID: 'TS:REGNO',
+            schemeName: 'company id'
+          }
+        },
+        {
+          ID: {
+            value: 'GLNコード',
+            schemeID: 'GLN'
+          }
+        },
+        {
+          ID: {
+            value: '法人番号12345678',
+            schemeID: 'JP:CT'
+          }
+        }
+      ],
+      PartyName: [
+        {
+          Name: {
+            value: '(株)宛先会社'
+          }
+        }
+      ],
+      PostalAddress: {
+        AddressFormatCode: {
+          value: '5',
+          listID: 'UN/ECE 3477',
+          listAgencyID: '6',
+          listVersionID: 'D08B'
+        },
+        PostBox: {
+          value: '私書箱番号'
+        },
+        StreetName: {
+          value: '丁目番地'
+        },
+        AddtionalStreetName: {
+          value: 'ビル名'
+        },
+        BuildingNumber: {
+          value: ''
+        },
+        CityName: {
+          value: '東京都'
+        },
+        PostalZone: {
+          value: '郵便番号123-4567'
+        },
+        Country: {
+          IdentificationCode: {
+            value: 'JP'
+          }
+        }
+      },
+      PartyLegalEntity: [
+        {
+          RegistrationName: {
+            value: '(株)宛先会社'
+          }
+        },
+        {
+          CompanyId: {
+            value: 'aa99999-aa99-aa99-aa99-9999999999999',
+            schemeID: 'TS:REGNO'
+          }
+        }
+      ],
+      Contact: {}
+    }
+  }
 }
