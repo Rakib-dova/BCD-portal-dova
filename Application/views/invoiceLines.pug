@@ -1,1 +1,66 @@
-﻿
+﻿if invoiceLine.length !== 0
+  each item in invoiceLine
+    if '明細-項目ID' in item
+      .box
+        .columns
+          - for (var [key,value] of Object.entries(item))
+            if key === '明細-項目ID' && value.length !== 0
+              .column
+                p.text-center.font-bold 項目ID
+                p.text-center.mb-1= value
+            if key === '明細-内容' && value.length !== 0
+              .column.is-5
+                p.font-bold  内容
+                each subItem in value
+                  if subItem.item === '内容'
+                    p.mb-1= subItem.value
+                  else
+                    p.mb-1= `${subItem.item}： ${subItem.value}`
+            if key === '明細-数量' && value.length !== 0
+              .column
+                p.text-right.font-bold  数量
+                each subValue in value
+                  p.text-right.mb-1= subValue
+            if key === '明細-単位' && value.length !== 0
+              .column
+                p.text-left.font-bold 単位
+                each subValue in value
+                  p.text-left.mb-1= subValue
+            if key === '明細-単価' && value.length !== 0
+              .column
+                p.text-center.font-bold  単価
+                each subValue in value
+                  p.text-center.mb-1= subValue
+            if key === '明細-税（消費税／軽減税率／不課税／免税／非課税）' && value.length !== 0
+              .column
+                p.text-center.font-bold  税
+                p.text-center.mb-1= value     
+            if key === '明細-小計 (税抜)' && value.length !== 0
+              .column
+                p.text-center.font-bold  小計 (税抜) 
+                p.text-center.mb-1= value                                            
+    else
+      .box
+        - for (var [key,value] of Object.entries(item))
+          each subitem in value
+            .columns
+              - for (var [subKey,subValue] of Object.entries(subitem))
+                  if (subKey === '割引-項目ID'||subKey === '追加料金-項目ID') && subValue.length !== 0
+                    .column
+                      p.text-center= subValue
+                  if (subKey === '割引-内容'||subKey === '追加料金-内容') && subValue.length !== 0
+                    .column.is-5
+                      p= subValue
+                  if (subKey === '割引-数量'||subKey === '追加料金-数量') && subValue.length !== 0
+                    .column
+                      p.text-right= subValue
+                  if (subKey === '割引-単位'||subKey === '追加料金-単位') && subValue.length !== 0
+                    .column
+                      p.text-left= subValue
+                    .column
+                  if (subKey === '割引-税（消費税／軽減税率／不課税／免税／非課税）'||subKey === '追加料金-税（消費税／軽減税率／不課税／免税／非課税）') && subValue.length !== 0
+                    .column
+                      p.text-center= subValue
+                  if (subKey === '割引-小計（税抜）'||subKey === '追加料金-小計（税抜）') && subValue.length !== 0
+                    .column
+                      p.text-center= subValue   
