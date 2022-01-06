@@ -1,0 +1,27 @@
+#displayPaymentMethodField {
+  border-top: 1px dotted;
+  border-color: #dbdbdb;
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+.paymentmean {
+  border-bottom: 1px dotted;
+  border-color: #dbdbdb;
+  padding: 0;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.table.paymentTable td,
+.table.paymentTable th {
+  border-width: 0 0 0 0;
+}
+
+.paymentTitle {
+  padding-top: 6px;
+  font-size: 1.5rem;
+}
+
+.paymentMethod {
+  font-size: 18px;
+}

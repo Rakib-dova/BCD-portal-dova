@@ -93,6 +93,29 @@ const cbGetIndex = async (req, res, next) => {
   ]
   const optionLine7 = { columnName: '備考', columnData: '備考' }
   const optionLine8 = { columnName: 'その他特記事項', columnData: 'その他特記事項' }
+
+  // 支払い条件と手段ダミーデータ
+  const payments = {
+    paymentmean1: {
+      支払い条件: [
+        { item: '税コード', value: 'bd067e19-e7c4-4562-b511-56dbaa17aa37' },
+        { item: '説明', value: '説明' },
+        { item: '割引率', value: '10' },
+        { item: '決済開始日', value: '21/12/10' },
+        { item: '決済終了日', value: '21/12/16' },
+        { item: '割増率', value: '12' },
+        { item: 'ペナルティ開始日', value: '21/12/10' },
+        { item: 'ペナルティ終了日', value: '21/12/17' }
+      ]
+    },
+    paymentmean2: {
+      現金払い: {}
+    },
+    paymentmean3: {
+      小切手払い: {}
+    }
+  }
+
   res.render('inbox', {
     ...result,
     optionLine1: optionLine1,
@@ -102,7 +125,8 @@ const cbGetIndex = async (req, res, next) => {
     optionLine5: optionLine5,
     optionLine6: optionLine6,
     optionLine7: optionLine7,
-    optionLine8: optionLine8
+    optionLine8: optionLine8,
+    payments: payments
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
