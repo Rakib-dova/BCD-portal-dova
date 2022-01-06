@@ -33,3 +33,11 @@
 .text-inbox-subtitle {
   font-weight: bold;
 }
+
+.width-10 {
+  width: 10%;
+}
+
+.height-30 {
+  height: 30px;
+}
