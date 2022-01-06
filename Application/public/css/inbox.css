@@ -41,3 +41,15 @@
 .height-30 {
   height: 30px;
 }
+
+.font-bold {
+  font-weight: bold;
+}
+
+.text-left {
+  text-align: left !important;
+}
+
+.text-right {
+  text-align: right !important;
+}
