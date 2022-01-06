@@ -53,3 +53,10 @@
 .text-right {
   text-align: right !important;
 }
+
+.grouped-button {
+  position: relative;
+  left: 50%;
+  justify-content: center;
+  transform: translateX(-66px);
+}
