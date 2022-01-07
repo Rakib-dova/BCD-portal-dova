@@ -1,13 +1,13 @@
 ﻿.box
   .columns.m-0
-    .column.is-2.text-inbox.text-inbox-subtitle.text-inbox-common
+    .column-header.is-2-header.text-inbox.text-inbox-subtitle.text-inbox-common
       | 請求書番号 
-    .column.text-inbox-common
+    .column-header.text-inbox-common
       | #{invoiceId}
 
 .box
   .columns.m-0
-    .column
+    .column-header
       p.text-inbox.text-inbox-subtitle.text-inbox-common 宛先
         if customer
           if customer.name !== 0
@@ -52,15 +52,15 @@
               .column.p-0
                 | 法人番号：#{id.value}
 
-    .column
+    .column-header
       p.text-inbox.text-inbox-subtitle.text-inbox-common 差出人
       if supplier
         if customer !== 0
           .columns.m-0.p-0
             .column.p-0
               | #{supplier.name}
-        if supplier.address.postalNumber
-          if supplier.postalNumber && supplier.postalNumber.length !== 0
+        if supplier.address
+          if supplier.address.postalNumber && supplier.address.postalNumber.length !== 0
             .columns.m-0.p-0
               .column.p-0
                 | #{supplier.address.postalNumber}
