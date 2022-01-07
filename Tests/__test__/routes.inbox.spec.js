@@ -225,7 +225,6 @@ describe('inboxのテスト', () => {
         optionLine6: createOptions(6, dummyData.options),
         optionLine7: createOptions(7, dummyData.options),
         optionLine8: createOptions(8, dummyData.options),
-        payments: payments,
         invoiceLine: invoiceLine
       })
     })
@@ -427,7 +426,6 @@ describe('inboxのテスト', () => {
         optionLine6: [],
         optionLine7: {},
         optionLine8: {},
-        payments: payments,
         invoiceLine: invoiceLine
       })
     })
