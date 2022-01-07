@@ -32,6 +32,12 @@ class InvoiceDetail {
       this.setExtenstionContent(invoice.UBLExtensions.UBLExtension[0].ExtensionContent)
     }
 
+    // 支払情報設定
+    this.payments = []
+    if (!isUndefined(invoice.PaymentTerms) || !isUndefined(invoice.PaymentMeans)) {
+      this.setPaymentMeans(invoice.PaymentTerms, invoice.PaymentMeans)
+    }
+
     this.setOptions(invoice)
   }
 
@@ -300,6 +306,322 @@ class InvoiceDetail {
           this.options.contactEmail = invoice.AccountingCustomerParty.Party.Contact.ID.value
         }
       }
+    }
+  }
+
+  setPaymentMeans(paymentTerms, paymentMeans) {
+    this.payments = []
+
+    // 支払い条件
+    if (paymentTerms) {
+      paymentTerms.forEach((terms) => {
+        // 支払い条件の税コード
+        const ID = terms.ID?.value ?? ''
+        // 支払い条件の説明
+        const note = terms.Note[0]?.value ?? ''
+        // 支払い条件の割引率
+        const settlementDiscountPercent = terms.SettlementDiscountPercent?.value ?? ''
+        // 支払い条件の決済開始日
+        const settleStartDate = terms.SettlementPeriod?.StartDate?.value ?? ''
+        // 支払い条件の決済終了日
+        const settleEndDate = terms.SettlementPeriod?.EndDate?.value ?? ''
+        // 支払い条件の割増率
+        const penaltySurchargePercent = terms.PenaltySurchargePercent?.value ?? ''
+        // 支払い条件の'ペナルティ開始日
+        const penaltyStartDate = terms.PenaltyPeriod?.StartDate?.value ?? ''
+        // 支払い条件のペナルティ終了日
+        const penaltyEndDate = terms.PenaltyPeriod?.EndDate?.value ?? ''
+
+        const paymentTerms = {
+          支払い条件: [
+            { item: '税コード', value: ID },
+            { item: '説明', value: note },
+            { item: '割引率', value: settlementDiscountPercent },
+            { item: '決済開始日', value: settleStartDate },
+            { item: '決済終了日', value: settleEndDate },
+            { item: '割増率', value: penaltySurchargePercent },
+            { item: 'ペナルティ開始日', value: penaltyStartDate },
+            { item: 'ペナルティ終了日', value: penaltyEndDate }
+          ]
+        }
+
+        // 空欄項目削除
+        for (let i = 0; i < paymentTerms.支払い条件.length; i++) {
+          if (paymentTerms.支払い条件[i].value === '') {
+            paymentTerms.支払い条件.splice(i, 1)
+            i--
+          }
+        }
+
+        this.payments.push(paymentTerms)
+      })
+    }
+
+    // 支払い手段
+    if (paymentMeans) {
+      // 支払い方法と条件をcsvに記入
+      paymentMeans.forEach((mean) => {
+        // 現金払いの場合
+        if (mean.PaymentMeansCode?.value === '10') {
+          this.payments.push({
+            現金払い: {}
+          })
+        }
+        // 小切手払い
+        if (mean.PaymentMeansCode?.value === '20') {
+          this.payments.push({
+            小切手払い: {}
+          })
+        }
+        // BankCard
+        if (mean.PaymentMeansCode?.value === '48') {
+          this.payments.push({
+            'Payment by bank card': {}
+          })
+        }
+
+        // DirectDebit
+        if (mean.PaymentMeansCode?.value === '49') {
+          // DirectDebitの銀行名
+          const bankName =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name.value ?? ''
+          // DirectDebitの支店名
+          const institutionBranchName = mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Name?.value ?? ''
+          // DirectDebitの科目
+          let accountType
+          if (mean.PayeeFinancialAccount?.AccountTypeCode?.value === 'Current') {
+            accountType = '当座'
+          } else if (mean.PayeeFinancialAccount?.AccountTypeCode?.value === 'General') {
+            accountType = '普通'
+          } else {
+            accountType = ''
+          }
+          // DirectDebitの口座番号
+          const accountNumber = mean.PayeeFinancialAccount?.ID?.value ?? ''
+          // DirectDebitの口座名義
+          const accountName = mean.PayeeFinancialAccount?.Name?.value ?? ''
+          // DirectDebitの番地
+          const streetName = mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.StreetName?.value ?? ''
+          // DirectDebitのビル名 / フロア等
+          const additionalStreetName =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.AdditionalStreetName?.value ?? ''
+          // DirectDebitの家屋番号
+          const buildingNumber =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.BuildingNumber?.value ?? ''
+          // DirectDebitの市区町村
+          const cityName = mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.CityName?.value ?? ''
+          // DirectDebitの都道府県
+          const countrySubentity =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.CountrySubentity?.value ?? ''
+          // DirectDebitの郵便番号
+          const postalZone = mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.PostalZone?.value ?? ''
+          // DirectDebitの所在地
+          const addressLine =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.AddressLine[0]?.Line?.value ?? ''
+          // DirectDebitの国
+          const country =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.Country?.IdentificationCode?.value ?? ''
+
+          const directDebitInfo = {
+            'Payment by direct debit': [
+              { item: '銀行名', value: bankName },
+              { item: '支店名', value: institutionBranchName },
+              { item: '科目', value: accountType },
+              { item: '口座番号', value: accountNumber },
+              { item: '口座名義', value: accountName },
+              { item: '番地', value: streetName },
+              { item: 'ビル名/フロア等', value: additionalStreetName },
+              { item: '家屋番号', value: buildingNumber },
+              { item: '都道府県', value: cityName },
+              { item: '都道府県', value: countrySubentity },
+              { item: '郵便番号', value: postalZone },
+              { item: '所在地', value: addressLine },
+              { item: '国', value: country }
+            ]
+          }
+
+          // 空欄項目削除
+          for (let i = 0; i < directDebitInfo['Payment by direct debit'].length; i++) {
+            if (directDebitInfo['Payment by direct debit'][i].value === '') {
+              directDebitInfo['Payment by direct debit'].splice(i, 1)
+              i--
+            }
+          }
+
+          this.payments.push(directDebitInfo)
+        }
+
+        // 銀行口座
+        if (mean.PaymentMeansCode?.value === '42') {
+          // 銀行口座の銀行名
+          const accountBankName =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name?.value ?? ''
+          // 銀行口座の支店名
+          const branchName = mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Name?.value ?? ''
+          // 銀行口座の科目
+          let accountType
+          if (mean.PayeeFinancialAccount?.AccountTypeCode?.value === 'Current') {
+            accountType = '当座'
+          } else if (mean.PayeeFinancialAccount?.AccountTypeCode?.value === 'General') {
+            accountType = '普通'
+          } else {
+            accountType = ''
+          }
+          // 銀行口座の口座番号
+          const bankAccountNumber = mean.PayeeFinancialAccount?.ID?.value ?? ''
+          // 銀行口座の口座名義
+          const bankAccountName = mean.PayeeFinancialAccount?.Name?.value ?? ''
+          // 銀行口座の番地
+          const bankStreetName =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.StreetName?.value ?? ''
+          // 銀行口座のビル名/フロア等
+          const bankAdditionalStreetName =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.AdditionalStreetName?.value ?? ''
+          // 銀行口座の家屋番号
+          const bankBuildingNumber =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch.Address?.BuildingNumber.value ?? ''
+          // 銀行口座の市区町村
+          const bankCityName = mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.CityName?.value ?? ''
+          // 銀行口座の都道府県
+          const bankCountrySubentity =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.CountrySubentity?.value ?? ''
+          // 銀行口座の郵便番号
+          const bankPostalZone = mean.PayeeFinancialAccount?.FinancialInstitutionBranch.Address?.PostalZone?.value ?? ''
+          // 銀行口座の所在地
+          const bankAddressLine =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.AddressLine[0]?.Line?.value ?? ''
+          // 銀行口座の国
+          const bankCountry =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.Country?.IdentificationCode?.value ?? ''
+
+          const bankAccountInfo = {
+            '銀行口座情報(国内)': [
+              { item: '銀行名', value: accountBankName },
+              { item: '支店名', value: branchName },
+              { item: '科目', value: accountType },
+              { item: '口座番号', value: bankAccountNumber },
+              { item: '口座名義', value: bankAccountName },
+              { item: '番地', value: bankStreetName },
+              { item: 'ビル名/フロア等', value: bankAdditionalStreetName },
+              { item: '家屋番号', value: bankBuildingNumber },
+              { item: '都道府県', value: bankCityName },
+              { item: '都道府県', value: bankCountrySubentity },
+              { item: '郵便番号', value: bankPostalZone },
+              { item: '所在地', value: bankAddressLine },
+              { item: '国', value: bankCountry }
+            ]
+          }
+
+          // 空欄項目削除
+          for (let i = 0; i < bankAccountInfo['銀行口座情報(国内)'].length; i++) {
+            if (bankAccountInfo['銀行口座情報(国内)'][i].value === '') {
+              bankAccountInfo['銀行口座情報(国内)'].splice(i, 1)
+              i--
+            }
+          }
+
+          this.payments.push(bankAccountInfo)
+        }
+
+        // IBAN
+        if (mean.PaymentChannelCode?.value === 'IBAN') {
+          // IBNの銀行識別コード/SWIFTコード
+          const ibanFinancialInstitutionId =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.ID?.value ?? ''
+          // IBNのIBN
+          const iban = mean.PayeeFinancialAccount?.ID?.value ?? ''
+          // IBNの説明
+          const ibanPaymentNote = mean.PayeeFinancialAccount?.PaymentNote[0]?.value ?? ''
+
+          const ibanInfo = {
+            IBANで支払う: [
+              { item: '銀行識別コード<br>/SWIFTコード', value: ibanFinancialInstitutionId },
+              { item: 'IBAN', value: iban },
+              { item: '説明', value: ibanPaymentNote }
+            ]
+          }
+
+          // 空欄項目削除
+          for (let i = 0; i < ibanInfo.IBANで支払う.length; i++) {
+            if (ibanInfo.IBANで支払う[i].value === '') {
+              ibanInfo.IBANで支払う.splice(i, 1)
+              i--
+            }
+          }
+
+          this.payments.push(ibanInfo)
+        }
+
+        // 国際電信送金
+        if (mean.PaymentChannelCode?.value === 'SWIFTUS') {
+          // 国際電信送金のABAナンバー
+          const abaNumber = mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.ID?.value ?? ''
+          // 国際電信送金のSWIFTコード
+          const swiftCode = mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.ID.value ?? ''
+          // 国際電信送金のIBAN
+          const internationalIban = mean.PayeeFinancialAccount?.ID?.value ?? ''
+          // 国際電信送金の口座名義
+          const internationalBankAccountName = mean.PayeeFinancialAccount?.Name?.value ?? ''
+          // 国際電信送金の番地
+          const internationalStreetName =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.StreetName?.value ?? ''
+          // 国際電信送金のビル名/フロア等
+          const internationalAdditionalStreetName =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.AdditionalStreetName?.value ?? ''
+          // 国際電信送金の家屋番号
+          const internationalBuildingNumber =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.BuildingNumber?.value ?? ''
+          // 国際電信送金の市区町村
+          const internationalCityName =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.CityName?.value ?? ''
+          // 国際電信送金の都道府県
+          const internationalCountrySubentity =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.CountrySubentity?.value ?? ''
+          // 国際電信送金の郵便番号
+          const internationalPostalZone =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.PostalZone?.value ?? ''
+          // 国際電信送金の所在地
+          const internationalAddressLine =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.AddressLine[0]?.Line?.value ?? ''
+          // 国際電信送金の国
+          const internationalCountry =
+            mean.PayeeFinancialAccount?.FinancialInstitutionBranch?.Address?.Country?.IdentificationCode?.value ?? ''
+          // 国際電信送金の説明
+          const internationalPaymentNote = mean.PayeeFinancialAccount?.PaymentNote[0]?.value ?? ''
+
+          const internationalInfo = {
+            国際電信送金で支払う: [
+              { item: 'ABAナンバー', value: abaNumber },
+              { item: 'SWIFTコード', value: swiftCode },
+              { item: 'IBAN', value: internationalIban },
+              { item: '銀行名', value: '' },
+              { item: '口座名義', value: internationalBankAccountName },
+              { item: '番地', value: internationalStreetName },
+              { item: 'ビル名/フロア等', value: internationalAdditionalStreetName },
+              { item: '家屋番号', value: internationalBuildingNumber },
+              { item: '都道府県', value: internationalCityName },
+              { item: '都道府県', value: internationalCountrySubentity },
+              { item: '郵便番号', value: internationalPostalZone },
+              { item: '所在地', value: internationalAddressLine },
+              { item: '国', value: internationalCountry },
+              { item: '説明', value: internationalPaymentNote }
+            ]
+          }
+
+          // 空欄項目削除（銀行名以外）
+          for (let i = 0; i < internationalInfo.国際電信送金で支払う.length; i++) {
+            if (
+              internationalInfo.国際電信送金で支払う[i].item !== '銀行名' &&
+              internationalInfo.国際電信送金で支払う[i].value === ''
+            ) {
+              internationalInfo.国際電信送金で支払う.splice(i, 1)
+              i--
+            }
+          }
+
+          this.payments.push(internationalInfo)
+        }
+      })
     }
   }
 }
