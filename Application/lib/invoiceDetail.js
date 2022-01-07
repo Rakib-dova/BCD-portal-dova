@@ -1,4 +1,5 @@
 const validate = require('./validate')
+const bconCsvUnitcode = require('../lib/bconCsvUnitcode')
 const isUndefined = validate.isUndefined
 class InvoiceDetail {
   constructor(invoice) {
@@ -38,6 +39,14 @@ class InvoiceDetail {
       this.setPaymentMeans(invoice.PaymentTerms, invoice.PaymentMeans)
     }
 
+    // 明細部分
+    if (!isUndefined(invoice.InvoiceLine) && invoice.InvoiceLine.length !== 0) {
+      if (!isUndefined(invoice.AllowanceCharge) && invoice.AllowanceCharge.length !== 0) {
+        this.setInvoiceLine(invoice.InvoiceLine, invoice.AllowanceCharge)
+      } else {
+        this.setInvoiceLine(invoice.InvoiceLine, [])
+      }
+    }
     this.setOptions(invoice)
   }
 
@@ -623,6 +632,405 @@ class InvoiceDetail {
         }
       })
     }
+  }
+
+  setInvoiceLine(invoiceLineContent, allowanceChargeContent) {
+    this.invoiceLine = []
+
+    // 明細部分
+    invoiceLineContent.map((item) => {
+      const meisai = {}
+      const meisaiDetail = []
+      // '明細-項目ID'
+      if (!validate.isUndefined(item.ID.value)) {
+        meisai['明細-項目ID'] = item.ID.value
+      }
+
+      // 明細-内容の内容
+      if (!validate.isUndefined(item.Item.Name.value)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '内容'
+        meisaiDetailObject.value = item.Item.Name.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 割引と追加料金
+      if (!validate.isUndefined(item.AllowanceCharge)) {
+        item.AllowanceCharge.map((ac) => {
+          // '明細-内容'のobject
+          const meisaiDetailObject = {
+            item: '',
+            value: ''
+          }
+          // true:追加料金,false:割引
+          if (ac.ChargeIndicator.value) {
+            meisaiDetailObject.item = '追加料金'
+          } else {
+            meisaiDetailObject.item = '割引'
+          }
+          meisaiDetailObject.value = ac.AllowanceChargeReason.value
+          meisaiDetail.push(meisaiDetailObject)
+        })
+      }
+
+      // 部門
+      if (!validate.isUndefined(item.AccountingCost)) {
+        // '明細-内容'
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '部門'
+        meisaiDetailObject.value = item.AccountingCost.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 注文書番号
+      if (!validate.isUndefined(item.OrderLineReference)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '注文書番号'
+        meisaiDetailObject.value = item.OrderLineReference[0].OrderReference.ID.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 注文明細番号
+      if (!validate.isUndefined(item.OrderLineReference)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '注文明細番号'
+        meisaiDetailObject.value = item.OrderLineReference[0].LineID.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 輸送情報,備考
+      if (!validate.isUndefined(item.DocumentReference) && item.DocumentReference.length !== 0) {
+        item.DocumentReference.map((dr) => {
+          // '明細-内容'のobject
+          const meisaiDetailObject = {
+            item: '',
+            value: ''
+          }
+          switch (dr.DocumentTypeCode.value) {
+            case 'BOL ID':
+              meisaiDetailObject.item = '輸送情報'
+              meisaiDetailObject.value = dr.ID.value
+              break
+            case 'File ID':
+              meisaiDetailObject.item = '備考'
+              meisaiDetailObject.value = dr.ID.value
+              break
+            default:
+              break
+          }
+          if (meisaiDetailObject.item !== '') {
+            meisaiDetail.push(meisaiDetailObject)
+          }
+        })
+      }
+
+      // 詳細
+      if (!validate.isUndefined(item.Item.ModelName)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+
+        meisaiDetailObject.item = '詳細'
+        meisaiDetailObject.value = item.Item.ModelName[0].value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // メーカー名
+
+      // シリアルナンバー
+      if (!validate.isUndefined(item.Item.ItemInstance)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = 'シリアルナンバー'
+        meisaiDetailObject.value = item.Item.ItemInstance[0].SerialID.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // HSN/SAC
+      if (!validate.isUndefined(item.Item.AdditionalItemIdentification)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = item.Item.AdditionalItemIdentification[0].ID.schemeID
+        meisaiDetailObject.value = item.Item.AdditionalItemIdentification[0].ID.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 発注者品番
+      if (!validate.isUndefined(item.Item.BuyersItemIdentification)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '発注者品番'
+        meisaiDetailObject.value = item.Item.BuyersItemIdentification.ID.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 原産国
+      if (!validate.isUndefined(item.Item.OriginCountry)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '原産国'
+        meisaiDetailObject.value = item.Item.OriginCountry.Name.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // EAN/GTIN
+      if (!validate.isUndefined(item.Item.StandardItemIdentification)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = 'EAN/GTIN'
+        meisaiDetailObject.value = item.Item.StandardItemIdentification.ID.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 納期
+      if (!validate.isUndefined(item.DeliveryTerms)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '納期'
+        meisaiDetailObject.value = item.DeliveryTerms.ID.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 商品分類コード: ECCN: ECCN 商品分類コード: ECCN
+      if (!validate.isUndefined(item.Item.CommodityClassification)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '商品分類コード: ECCN'
+        meisaiDetailObject.value = item.Item.CommodityClassification[0].ItemClassificationCode.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 非課税/免税の理由
+      if (!validate.isUndefined(item.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxExemptionReason)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '非課税/免税の理由'
+        meisaiDetailObject.value = item.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxExemptionReason.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 貨物注文番号
+      if (!validate.isUndefined(item.Delivery)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '貨物注文番号'
+        meisaiDetailObject.value = item.Delivery[0].TrackingID.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 納品日
+      if (!validate.isUndefined(item.Delivery)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '納品日'
+        let date = item.Delivery[0].ActualDeliveryDate.value
+        date = date.replace(/-/g, '/').substring(2)
+        meisaiDetailObject.value = date
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // 配送先
+      if (!validate.isUndefined(item.Delivery)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = '配送先'
+        meisaiDetailObject.value =
+          item.Delivery[0].DeliveryLocation.Address.StreetName.value +
+          '、' +
+          item.Delivery[0].DeliveryLocation.Address.AdditionalStreetName.value +
+          '、' +
+          item.Delivery[0].DeliveryLocation.Address.CityName.value +
+          '、' +
+          item.Delivery[0].DeliveryLocation.Address.PostalZone.value +
+          '、' +
+          item.Delivery[0].DeliveryLocation.Address.Country.IdentificationCode.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      // ロケーションID
+      if (!validate.isUndefined(item.Delivery)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = 'ロケーションID'
+        meisaiDetailObject.value = item.Delivery[0].DeliveryLocation.ID.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
+
+      meisai['明細-内容'] = meisaiDetail
+
+      // 明細-数量
+      const quantityArr = []
+
+      if (!validate.isUndefined(item.InvoicedQuantity)) {
+        quantityArr.push(item.InvoicedQuantity.value.toLocaleString('ja-JP'))
+      }
+
+      // 割引と追加料金の数量
+      if (!validate.isUndefined(item.AllowanceCharge)) {
+        item.AllowanceCharge.map((ac) => {
+          if (ac.MultiplierFactorNumeric.value !== 1) {
+            quantityArr.push(ac.MultiplierFactorNumeric.value * 100)
+          } else {
+            quantityArr.push(1)
+          }
+        })
+      }
+      meisai['明細-数量'] = quantityArr
+
+      // 明細-単位
+      const unitCodeArr = []
+      const unitcodes = Object.entries(bconCsvUnitcode)
+
+      if (!validate.isUndefined(item.InvoicedQuantity)) {
+        unitcodes.map(([key, value]) => {
+          if (item.InvoicedQuantity.unitCode === value) {
+            unitCodeArr.push(key)
+          }
+        })
+      }
+
+      // 割引と追加料金の単位
+      if (!validate.isUndefined(item.AllowanceCharge)) {
+        item.AllowanceCharge.map((ac) => {
+          if (ac.MultiplierFactorNumeric.value !== 1) {
+            unitCodeArr.push('%')
+          } else {
+            unitCodeArr.push(1)
+          }
+        })
+      }
+      meisai['明細-単位'] = unitCodeArr
+
+      // 明細-単価
+      const costArr = []
+
+      if (!validate.isUndefined(item.DocumentReference) && item.DocumentReference.length !== 0) {
+        item.DocumentReference.map((dr) => {
+          if (dr.DocumentTypeCode.value === 'LinePrice') {
+            const cost = Math.floor(dr.ID.value)
+            costArr.push(cost.toLocaleString('ja-JP'))
+          }
+        })
+      } else {
+        costArr.push(item.Price.PriceAmount.value.toLocaleString('ja-JP'))
+      }
+
+      if (!validate.isUndefined(item.AllowanceCharge)) {
+        item.AllowanceCharge.map((ac) => {
+          if (ac.ChargeIndicator.value) {
+            costArr.push(ac.Amount.value.toLocaleString('ja-JP'))
+          } else {
+            costArr.push('-' + ac.Amount.value.toLocaleString('ja-JP'))
+          }
+        })
+      }
+
+      meisai['明細-単価'] = costArr // 51000
+      meisai['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = [
+        `${item.TaxTotal[0].TaxSubtotal[0].TaxCategory.Percent.value}%`
+      ]
+      meisai['明細-小計 (税抜)'] = item.LineExtensionAmount.value.toLocaleString('ja-JP') // ','処理必要
+      this.invoiceLine.push(meisai)
+    })
+
+    // 共通割引と追加料金
+    const discountAndChargeAll = {}
+    const discountArr = []
+    const chargeArr = []
+    if (allowanceChargeContent.length === 0) {
+      return
+    }
+
+    allowanceChargeContent.map((item) => {
+      // 割引の場合
+      if (!item.ChargeIndicator.value) {
+        const discountObject = {}
+        discountObject['割引-項目ID'] = '割引'
+        discountObject['割引-内容'] = item.AllowanceChargeReason.value
+        if (item.MultiplierFactorNumeric.value !== 1) {
+          discountObject['割引-数量'] = item.MultiplierFactorNumeric.value * 100
+          discountObject['割引-単位'] = '%'
+        } else {
+          discountObject['割引-数量'] = 1
+          discountObject['割引-単位'] = 1
+        }
+        discountObject['割引-税（消費税／軽減税率／不課税／免税／非課税）'] = `${item.TaxCategory[0].Percent.value}%`
+        discountObject['割引-小計（税抜）'] = '-' + item.Amount.value.toLocaleString('ja-JP')
+        discountArr.push(discountObject)
+      } else {
+        // 追加料金の場合
+        const chargeObject = {}
+        chargeObject['割引-項目ID'] = '追加料金'
+        chargeObject['割引-内容'] = item.AllowanceChargeReason.value
+        if (item.MultiplierFactorNumeric.value !== 1) {
+          chargeObject['割引-数量'] = item.MultiplierFactorNumeric.value * 100
+          chargeObject['割引-単位'] = '%'
+        } else {
+          chargeObject['割引-数量'] = 1
+          chargeObject['割引-単位'] = 1
+        }
+        chargeObject['割引-税（消費税／軽減税率／不課税／免税／非課税）'] = `${item.TaxCategory[0].Percent.value}%`
+        chargeObject['割引-小計（税抜）'] = item.Amount.value.toLocaleString('ja-JP')
+        chargeArr.push(chargeObject)
+      }
+    })
+
+    discountAndChargeAll['割引'] = discountArr
+    discountAndChargeAll['追加料金'] = chargeArr
+    this.invoiceLine.push(discountAndChargeAll)
   }
 }
 module.exports = InvoiceDetail
