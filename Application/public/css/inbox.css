@@ -60,3 +60,32 @@
   justify-content: center;
   transform: translateX(-66px);
 }
+
+.column-header {
+  display: block;
+  flex-basis: 0;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.is-2-header {
+  flex: none;
+  width: 13%;
+}
+
+.is-5-header {
+  flex: none;
+  width: 40%;
+}
+
+.text-left-lines {
+  text-align: left !important;
+}
+
+.text-right-lines {
+  text-align: right !important;
+}
+
+.text-center-lines {
+  text-align: center !important;
+}
