@@ -20,12 +20,20 @@
               .column-header.mr-1
                 p.text-right-lines.font-bold  数量
                 each subValue in value
-                  p.text-right-lines.mb-1= subValue
+                  if subValue !== 1
+                    p.text-right-lines.mb-1= subValue
+                  else
+                    p.text-right-lines.mb-1= '　'
+
+        
             if key === '明細-単位' && value.length !== 0
               .column-header.ml-1
                 p.text-left-lines.font-bold 単位
                 each subValue in value
-                  p.text-left-lines.mb-1= subValue
+                  if subValue !== 1
+                    p.text-left-lines.mb-1= subValue
+                  else
+                    p.text-left-lines.mb-1= '　'
             if key === '明細-単価' && value.length !== 0
               .column-header
                 p.text-right-lines.font-bold  単価
