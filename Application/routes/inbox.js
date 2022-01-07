@@ -10,6 +10,7 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
+const notiTitle = '仕分け情報設定'
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -53,46 +54,112 @@ const cbGetIndex = async (req, res, next) => {
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
   const invoiceId = req.params.invoiceId
-  const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, invoiceId)
+  let result
+  try {
+    result = await inboxController.getInvoiceDetail(accessToken, refreshToken, invoiceId)
+  } catch (error) {
+    logger.error({ stack: error.stack, status: 1 })
+    req.flash('noti', [notiTitle, 'システムエラーが発生しました。'])
+    return res.redirect('/inboxList/1')
+  }
 
   // 受領した請求書一覧レンダリング
   // オプション欄
-  const optionLine1 = [
-    { columnName: '請求日', columnData: '22/01/04' },
-    { columnName: '課税日', columnData: '22/01/05' },
-    { columnName: '予約番号', columnData: 'ABC1204531' },
-    { columnName: '通貨', columnData: '円' }
-  ]
-  const optionLine2 = [
-    { columnName: '支払期日', columnData: '22/01/9' },
-    { columnName: '注文書番号', columnData: '注文書番号' },
-    { columnName: '注文書発行日', columnData: '22/01/05' },
-    { columnName: '参考情報', columnData: '参考情報' }
-  ]
-  const optionLine3 = [
-    { columnName: '契約書番号', columnData: 'PB147500102' },
-    { columnName: '部門', columnData: '部門' },
-    { columnName: '納品日', columnData: '22/01/05' },
-    { columnName: '納品開始日', columnData: '22/01/05' }
-  ]
-  const optionLine4 = [
-    { columnName: '納品終了日', columnData: '22/01/9' },
-    { columnName: 'ID', columnData: 'ID' },
-    { columnName: '納期', columnData: '納期' },
-    { columnName: '輸送情報', columnData: '輸送情報' }
-  ]
-  const optionLine5 = [
-    { columnName: '販売者の手数料番号', columnData: '販売者の手数料番号' },
-    { columnName: 'DUNSナンバー', columnData: 'DUNSナンバー' },
-    { columnName: '取引先担当者(アドレス)', columnData: '取引先担当者(アドレス)' }
-  ]
-  const optionLine6 = [
-    { columnName: '暫定時間', columnData: '22/01/04' },
-    { columnName: '通関識別情報', columnData: '通関識別情報' },
-    { columnName: 'Tradeshiftクリアランス', columnData: 'Tradeshiftクリアランス' }
-  ]
-  const optionLine7 = { columnName: '備考', columnData: '備考' }
-  const optionLine8 = { columnName: 'その他特記事項', columnData: 'その他特記事項' }
+  const optionLine1 = []
+  if (result.options.issueDate) {
+    optionLine1.push({ columnName: '請求日', columnData: result.options.issueDate })
+  }
+  if (result.options.taxPointDate) {
+    optionLine1.push({ columnName: '課税日', columnData: result.options.taxPointDate })
+  }
+  if (result.options.bookingNumber) {
+    optionLine1.push({ columnName: '予約番号', columnData: result.options.bookingNumber })
+  }
+  if (result.options.documentCurrencyCode) {
+    optionLine1.push({ columnName: '通貨', columnData: result.options.documentCurrencyCode })
+  }
+
+  const optionLine2 = []
+  if (result.options.paymentDueDate) {
+    optionLine2.push({ columnName: '支払期日', columnData: result.options.paymentDueDate })
+  }
+  if (result.options.orderRef) {
+    if (result.options.orderRef.no) {
+      optionLine2.push({ columnName: '注文書番号', columnData: result.options.orderRef.no })
+    }
+    if (result.options.orderRef.issueDate) {
+      optionLine2.push({ columnName: '注文書発行日', columnData: result.options.orderRef.issueDate })
+    }
+  }
+  if (result.options.invoiceDocRef) {
+    optionLine2.push({ columnName: '参考情報', columnData: result.options.invoiceDocRef })
+  }
+
+  const optionLine3 = []
+  if (result.options.actualDeliveryDate) {
+    optionLine3.push({ columnName: '納品日', columnData: result.options.actualDeliveryDate })
+  }
+  if (result.options.promisedDeliveryPeriod && result.options.promisedDeliveryPeriod.startDate) {
+    optionLine3.push({ columnName: '納品開始日', columnData: result.options.promisedDeliveryPeriod.startDate })
+  }
+
+  if (result.options.contractDocumentRef) {
+    optionLine3.push({ columnName: '契約書番号', columnData: result.options.contractDocumentRef })
+  }
+
+  if (result.options.accountingCost) {
+    optionLine3.push({ columnName: '部門', columnData: result.options.accountingCost })
+  }
+
+  const optionLine4 = []
+  if (result.options.promisedDeliveryPeriod && result.options.promisedDeliveryPeriod.endDate) {
+    optionLine4.push({ columnName: '納品終了日', columnData: result.options.promisedDeliveryPeriod.endDate })
+  }
+  if (result.options.deliveryTerms) {
+    optionLine4.push({ columnName: '納期', columnData: result.options.deliveryTerms })
+  }
+  if (result.options.customerAssAccId) {
+    optionLine4.push({ columnName: 'ID', columnData: result.options.customerAssAccId })
+  }
+  if (result.options.boldId) {
+    optionLine4.push({ columnName: '輸送情報', columnData: result.options.boldId })
+  }
+
+  const optionLine5 = []
+  if (result.options.despatch) {
+    optionLine5.push({ columnName: '販売者の手数料番号', columnData: result.options.despatch })
+  }
+  if (result.options.physicalLocation) {
+    optionLine5.push({ columnName: 'DUNSナンバー', columnData: result.options.physicalLocation })
+  }
+  if (result.options.contactEmail) {
+    optionLine5.push({ columnName: '取引先担当者(アドレス)', columnData: result.options.contactEmail })
+  }
+
+  const optionLine6 = []
+  if (result.options.interimHours) {
+    optionLine6.push({ columnName: '暫定時間', columnData: result.options.interimHours })
+  }
+
+  if (result.options.clearanceClave) {
+    optionLine6.push({ columnName: '通関識別情報', columnData: result.options.clearanceClave })
+  }
+
+  if (result.options.tsClearance) {
+    optionLine6.push({ columnName: 'Tradeshiftクリアランス', columnData: result.options.tsClearance })
+  }
+
+  const optionLine7 = {}
+  if (result.options.fileId) {
+    optionLine7.columnName = '備考'
+    optionLine7.columnData = result.options.fileId
+  }
+
+  const optionLine8 = {}
+  if (result.options.note) {
+    optionLine8.columnName = 'その他特記事項'
+    optionLine8.columnData = result.options.note
+  }
 
   // 支払い条件と手段ダミーデータ
   const payments = {
