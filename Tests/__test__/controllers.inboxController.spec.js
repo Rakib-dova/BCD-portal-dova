@@ -5,7 +5,7 @@ jest.mock('../../Application/lib/logger')
 const inboxController = require('../../Application/controllers/inboxController')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const logger = require('../../Application/lib/logger')
-
+const InvoiceDetailObj = require('../../Application/lib/invoiceDetail')
 let accessTradeshiftSpy, errorSpy
 
 const searchResult1 = {
@@ -645,6 +645,17 @@ describe('inboxControllerのテスト', () => {
       const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
       // 期待結果
       expect(result).toEqual(result0)
+    })
+  })
+
+  describe('getInvoiceDetail', () => {
+    test('正常', async () => {
+      const dummyData = require('../mockInvoice/invoice32')
+      accessTradeshiftSpy.mockReturnValue(dummyData)
+      const resultDummyData = new InvoiceDetailObj(dummyData)
+      const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
+
+      expect(result).toEqual(resultDummyData)
     })
   })
 })
