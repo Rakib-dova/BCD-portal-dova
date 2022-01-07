@@ -31,6 +31,8 @@ class InvoiceDetail {
     if (!isUndefined(invoice.UBLExtensions.UBLExtension[0])) {
       this.setExtenstionContent(invoice.UBLExtensions.UBLExtension[0].ExtensionContent)
     }
+
+    this.setOptions(invoice)
   }
 
   setSupplier(accountingSupplierParty) {
@@ -163,6 +165,142 @@ class InvoiceDetail {
         content.search('<ts:PayableAlternativeAmount>') -
         '<ts:PayableAlternativeAmount>'.length
     )
+  }
+
+  setOptions(invoice) {
+    this.options = {}
+    if (!isUndefined(invoice.Note) && invoice.Note.length !== 0) {
+      this.options.note = invoice.Note[0].value
+    }
+
+    if (!isUndefined(invoice.AdditionalDocumentReference) && invoice.AdditionalDocumentReference.length !== 0) {
+      const addtionalDocRef = invoice.AdditionalDocumentReference
+
+      addtionalDocRef.forEach((item) => {
+        switch (item.DocumentTypeCode.value) {
+          case 'BOL ID':
+            this.options.boldId = item.ID.value
+            break
+          case 'Interim Hours':
+            this.options.interimHours = item.ID.value
+            break
+          case 'Clearance Clave':
+            this.options.clearanceClave = item.ID.value
+            break
+          case 'TS Clearance':
+            this.options.tsClearance = item.ID.value
+            break
+          case 'File ID':
+            this.options.fileId = item.ID.value
+            break
+          case 'BookingNumber':
+            this.options.bookingNumber = item.ID.value
+            break
+          case 'DOWN':
+            this.options.roundingRule = item.ID.value
+            break
+          case 'humanreadableversion':
+            this.options.humanReadableVersion = item.ID.value
+            break
+        }
+      })
+
+      if (!isUndefined(invoice.DeliveryTerms)) {
+        this.options.deliveryTerms = invoice.DeliveryTerms.ID.value
+      }
+
+      if (!isUndefined(invoice.IssueDate)) {
+        this.options.issueDate = invoice.IssueDate.value
+      }
+
+      if (!isUndefined(invoice.PaymentMeans) && invoice.PaymentMeans.length !== 0) {
+        const paymentMeans = invoice.PaymentMeans
+        paymentMeans.forEach((item) => {
+          if (!isUndefined(item.PaymentDueDate)) {
+            this.options.paymentDueDate = item.PaymentDueDate.value
+          }
+        })
+      }
+
+      if (!isUndefined(invoice.OrderReference)) {
+        this.options.orderRef = {}
+        if (!isUndefined(invoice.OrderReference.ID)) {
+          this.options.orderRef.no = invoice.OrderReference.ID.value
+        }
+        if (!isUndefined(invoice.OrderReference.IssueDate)) {
+          this.options.orderRef.issueDate = invoice.OrderReference.IssueDate.value
+        }
+      }
+
+      if (!isUndefined(invoice.DocumentCurrencyCode)) {
+        switch (invoice.DocumentCurrencyCode.value) {
+          case 'JPY':
+            this.options.documentCurrencyCode = '円'
+            break
+        }
+      }
+
+      if (!isUndefined(invoice.AccountingCost)) {
+        this.options.accountingCost = invoice.AccountingCost.value
+      }
+
+      if (!isUndefined(invoice.ContractDocumentReference) && invoice.ContractDocumentReference.length !== 0) {
+        this.options.contractDocumentRef = invoice.ContractDocumentReference[0].ID.value
+      }
+
+      if (!isUndefined(invoice.Delivery) && invoice.Delivery.length !== 0) {
+        const delivery = invoice.Delivery
+        delivery.forEach((item) => {
+          const keys = Object.keys(item)
+          keys.forEach((key) => {
+            switch (key) {
+              case 'ActualDeliveryDate':
+                this.options.actualDeliveryDate = item.ActualDeliveryDate.value
+                break
+              case 'PromisedDeliveryPeriod':
+                this.options.promisedDeliveryPeriod = {}
+                this.options.promisedDeliveryPeriod.startDate = item.PromisedDeliveryPeriod.StartDate.value
+                this.options.promisedDeliveryPeriod.endDate = item.PromisedDeliveryPeriod.EndDate.value
+                break
+              case 'Despatch':
+                this.options.despatch = item.Despatch.ID.value
+            }
+          })
+        })
+      }
+
+      if (!isUndefined(invoice.AccountingCustomerParty.CustomerAssignedAccountID)) {
+        this.options.customerAssAccId = invoice.AccountingCustomerParty.CustomerAssignedAccountID.value
+      }
+
+      if (!isUndefined(invoice.TaxPointDate)) {
+        this.options.taxPointDate = invoice.TaxPointDate.value
+      }
+
+      if (!isUndefined(invoice.BillingReference) && invoice.BillingReference.length !== 0) {
+        const billRef = invoice.BillingReference
+        billRef.forEach((item) => {
+          const keys = Object.keys(item)
+          keys.forEach((key) => {
+            switch (key) {
+              case 'InvoiceDocumentReference':
+                this.options.invoiceDocRef = item.InvoiceDocumentReference.ID.value
+                break
+            }
+          })
+        })
+      }
+
+      if (!isUndefined(invoice.AccountingSupplierParty.Party.PhysicalLocation)) {
+        this.options.physicalLocation = invoice.AccountingSupplierParty.Party.PhysicalLocation.ID.value
+      }
+
+      if (!isUndefined(invoice.AccountingCustomerParty.Party.Contact)) {
+        if (!isUndefined(invoice.AccountingCustomerParty.Party.Contact.ID)) {
+          this.options.contactEmail = invoice.AccountingCustomerParty.Party.Contact.ID.value
+        }
+      }
+    }
   }
 }
 module.exports = InvoiceDetail
