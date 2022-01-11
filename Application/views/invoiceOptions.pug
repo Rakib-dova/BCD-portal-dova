@@ -60,18 +60,22 @@
       tr
         - var list = optionLine6
         each item in list                  
-          td.pb-2.td-overflow= item.columnData                        
-    thead
-      tr
-        th.width-10= optionLine7.columnName
-    tbody
-      tr
-        td.pb-2.td-overflow= optionLine7.columnData
+          td.pb-2.td-overflow= item.columnData
+
+  if optionLine7.columnName
+    .columns.p-0.m-0
+      .column.width-10.p-0.m-0
+        p.width-10.text-inbox.text-inbox-subtitle.text-inbox-common
+          | #{optionLine7.columnName}
+    .columns.p-0.m-0
+      .column.pb-2.item-text-overflow.p-0
+        p.item-text-overflow
+          | #{optionLine7.columnData}
   hr
-  table
-    thead
-      tr
-        th.width-10= optionLine8.columnName
-    tbody
-      tr
-        td.pb-2.td-overflow= optionLine8.columnData             
+  .columns.p-0.m-0
+    .column.width-10.p-0
+      p.text-inbox.text-inbox-subtitle.text-inbox-common #{optionLine8.columnName}
+  .columns.wraper-columns.p-0.m-0
+    .column.p-0.item-text-overflow
+      p.pb-2.item-text-overflow
+        | #{optionLine8.columnData}
