@@ -6,14 +6,14 @@
       | #{invoiceId}
 
 .box
-  .columns.m-0
+  .columns.m-0.wraper-columns
     .column-header
       p.text-inbox.text-inbox-subtitle.text-inbox-common 宛先
         if customer
           if customer.name !== 0
           .columns.m-0.p-0
             .column.p-0
-              | #{customer.name}
+              p.text-overflow #{customer.name}
         if customer.address
           if customer.address.postalNumber && customer.address.postalNumber.length !== 0
             .columns.m-0.p-0
@@ -56,9 +56,9 @@
       p.text-inbox.text-inbox-subtitle.text-inbox-common 差出人
       if supplier
         if customer !== 0
-          .columns.m-0.p-0
+          .columns.m-0.p-0.wraper-columns
             .column.p-0
-              | #{supplier.name}
+              p.text-overflow #{supplier.name}
         if supplier.address
           if supplier.address.postalNumber && supplier.address.postalNumber.length !== 0
             .columns.m-0.p-0
