@@ -59,6 +59,77 @@ const Users = require('../mockDB/Users_Table')
 const Tenants = require('../mockDB/Tenants_Table')
 const Contracts = require('../mockDB/Contracts_Table')
 
+// 実装ダミーデータ
+const invoiceLine = [
+  {
+    '明細-項目ID': 1,
+    '明細-内容': [
+      { item: '内容', value: '画面作成明細１' },
+      { item: '割引', value: '明細割引１' }, // 明細-割引1-内容
+      { item: '追加料金1', value: '追加料金１' }, // 明細-追加料金1-内容
+      { item: '注文書番号', value: '注文書番号' },
+      { item: '注文明細番号', value: '注文明細番号' },
+      { item: '輸送情報', value: '輸送情報' },
+      { item: '商品分類コード: ECCN', value: '商品分類コード: ECCN' },
+      { item: '納品日', value: '22/02/10' },
+      { item: '配送先', value: '市区町村・番地、ビル、マンション名、都道府県、100-0000、JP' }
+    ],
+    '明細-数量': [20, 5, 5],
+    '明細-単位': ['個', '%', '%'],
+    '明細-単価': ['100,000', '-100,000', '100,000'],
+    '明細-税（消費税／軽減税率／不課税／免税／非課税）': '10%',
+    '明細-小計 (税抜)': '2,000,000'
+  },
+  {
+    '明細-項目ID': 2,
+    '明細-内容': [{ item: '内容', value: '画面作成明細2' }],
+    '明細-数量': [40],
+    '明細-単位': ['個'],
+    '明細-単価': ['200,000'],
+    '明細-税（消費税／軽減税率／不課税／免税／非課税）': '10%',
+    '明細-小計 (税抜)': '8,000,000'
+  },
+
+  {
+    割引: [
+      {
+        '割引-項目ID': '割引',
+        '割引-内容': '割引１',
+        '割引-数量': 2,
+        '割引-単位': '%',
+        '割引-税（消費税／軽減税率／不課税／免税／非課税）': '10%',
+        '割引-小計（税抜）': '-188,109'
+      },
+      {
+        '割引-項目ID': '割引',
+        '割引-内容': '割引2',
+        '割引-数量': 4,
+        '割引-単位': '%',
+        '割引-税（消費税／軽減税率／不課税／免税／非課税）': '10%',
+        '割引-小計（税抜）': '-376,218'
+      }
+    ],
+    追加料金: [
+      {
+        '追加料金-項目ID': '追加料金',
+        '追加料金-内容': '追加料金１',
+        '追加料金-数量': 3,
+        '追加料金-単位': '%',
+        '追加料金-税（消費税／軽減税率／不課税／免税／非課税）': '10%',
+        '追加料金-小計（税抜）': '300,235'
+      },
+      {
+        '追加料金-項目ID': '追加料金',
+        '追加料金-内容': '追加料金2',
+        '追加料金-数量': 6,
+        '追加料金-単位': '%',
+        '追加料金-税（消費税／軽減税率／不課税／免税／非課税）': '10%',
+        '追加料金-小計（税抜）': '563,693'
+      }
+    ]
+  }
+]
+
 describe('inboxのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -132,7 +203,8 @@ describe('inboxのテスト', () => {
         optionLine5: createOptions(5, dummyData.options),
         optionLine6: createOptions(6, dummyData.options),
         optionLine7: createOptions(7, dummyData.options),
-        optionLine8: createOptions(8, dummyData.options)
+        optionLine8: createOptions(8, dummyData.options),
+        invoiceLine: invoiceLine
       })
     })
 
@@ -332,7 +404,8 @@ describe('inboxのテスト', () => {
         optionLine5: [],
         optionLine6: [],
         optionLine7: {},
-        optionLine8: {}
+        optionLine8: {},
+        invoiceLine: invoiceLine
       })
     })
 
