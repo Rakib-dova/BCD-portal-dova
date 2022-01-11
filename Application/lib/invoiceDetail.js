@@ -126,6 +126,7 @@ class InvoiceDetail {
     taxTotal[0].TaxSubtotal.forEach((subItem) => {
       this.taxSubtotal.push({
         taxableAmount: subItem.TaxableAmount.value,
+        taxCategoryId: subItem.TaxCategory.ID.value,
         categoryName: subItem.TaxCategory.TaxScheme.Name.value,
         taxAmount: !isUndefined(subItem.TaxAmount) ? subItem.TaxAmount.value : null,
         transactionCurrTaxAmount: !isUndefined(subItem.TransactionCurrencyTaxAmount)
@@ -643,10 +644,14 @@ class InvoiceDetail {
   setInvoiceLine(invoiceLineContent, allowanceChargeContent) {
     this.invoiceLine = []
 
+    // 明細-数量
+    const quantityArr = []
+
     // 明細部分
     invoiceLineContent.forEach((item) => {
       const meisai = {}
       const meisaiDetail = []
+      const unitCodeArr = []
       // '明細-項目ID'
       meisai['明細-項目ID'] = item.ID.value
 
@@ -678,6 +683,20 @@ class InvoiceDetail {
           }
           meisaiDetailObject.value = ac.AllowanceChargeReason.value
           meisaiDetail.push(meisaiDetailObject)
+
+          // 割引と追加料金の数量
+          if (ac.MultiplierFactorNumeric.value !== 1) {
+            quantityArr.push(ac.MultiplierFactorNumeric.value * 100)
+          } else {
+            quantityArr.push(1)
+          }
+
+          // 割引と追加料金の単位
+          if (ac.MultiplierFactorNumeric.value !== 1) {
+            unitCodeArr.push('%')
+          } else {
+            unitCodeArr.push(1)
+          }
         })
       }
 
@@ -944,27 +963,13 @@ class InvoiceDetail {
 
       meisai['明細-内容'] = meisaiDetail
 
-      // 明細-数量
-      const quantityArr = []
-
       if (!validate.isUndefined(item.InvoicedQuantity)) {
         quantityArr.push(item.InvoicedQuantity.value.toLocaleString('ja-JP'))
       }
 
-      // 割引と追加料金の数量
-      if (!validate.isUndefined(item.AllowanceCharge)) {
-        item.AllowanceCharge.forEach((ac) => {
-          if (ac.MultiplierFactorNumeric.value !== 1) {
-            quantityArr.push(ac.MultiplierFactorNumeric.value * 100)
-          } else {
-            quantityArr.push(1)
-          }
-        })
-      }
       meisai['明細-数量'] = quantityArr
 
       // 明細-単位
-      const unitCodeArr = []
       const unitcodes = Object.entries(bconCsvUnitcode)
 
       if (!validate.isUndefined(item.InvoicedQuantity)) {
@@ -975,16 +980,6 @@ class InvoiceDetail {
         })
       }
 
-      // 割引と追加料金の単位
-      if (!validate.isUndefined(item.AllowanceCharge)) {
-        item.AllowanceCharge.forEach((ac) => {
-          if (ac.MultiplierFactorNumeric.value !== 1) {
-            unitCodeArr.push('%')
-          } else {
-            unitCodeArr.push(1)
-          }
-        })
-      }
       meisai['明細-単位'] = unitCodeArr
 
       // 明細-単価
@@ -1001,6 +996,8 @@ class InvoiceDetail {
         costArr.push(item.Price.PriceAmount.value.toLocaleString('ja-JP'))
       }
 
+      meisai.allowanceCharge = []
+      const taxTotal = {}
       if (!validate.isUndefined(item.AllowanceCharge)) {
         item.AllowanceCharge.forEach((ac) => {
           if (ac.ChargeIndicator.value) {
@@ -1008,8 +1005,30 @@ class InvoiceDetail {
           } else {
             costArr.push('-' + ac.Amount.value.toLocaleString('ja-JP'))
           }
+          meisai.allowanceCharge.push({
+            allowanceChargeReason: ac.AllowanceChargeReason.value,
+            multiplierFactorNumeric: `${ac.MultiplierFactorNumeric.value * 100}%`,
+            sequenceNumeric: ac.SequenceNumeric,
+            amount: (~~`${ac.ChargeIndicator.value ? 1 : -1}` * ac.Amount.value).toLocaleString('ja-JP'),
+            taxCategory: ac.TaxCategory[0].TaxScheme.Name.value,
+            taxCategoryId: ac.TaxCategory[0].ID.value,
+            taxPercet: ac.TaxCategory[0].Percent.value,
+            taxTotalAmount: this.amount * ac.TaxCategory[0].Percent.value
+          })
         })
       }
+
+      taxTotal.taxAmount = item.TaxTotal[0].TaxAmount.value
+      taxTotal.taxCurrencyID = item.TaxTotal[0].TaxAmount.value
+      taxTotal.taxSubtotal = {
+        category: item.TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value,
+        name: item.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.Name.value,
+        reason:
+          item.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxExemptionReason !== undefined
+            ? item.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxExemptionReason.value
+            : ''
+      }
+      meisai.taxTotal = taxTotal
 
       meisai['明細-単価'] = costArr // 51000
       meisai['明細-税（消費税／軽減税率／不課税／免税／非課税）'] = [
@@ -1019,10 +1038,11 @@ class InvoiceDetail {
       this.invoiceLine.push(meisai)
     })
 
-    // 共通割引と追加料金
+    // 請求書の割引と追加料金
     const discountAndChargeAll = {}
     const discountArr = []
     const chargeArr = []
+    this.allowanceCharge = []
     if (allowanceChargeContent.length === 0) {
       return
     }
@@ -1058,6 +1078,37 @@ class InvoiceDetail {
         chargeObject['割引-税（消費税／軽減税率／不課税／免税／非課税）'] = `${item.TaxCategory[0].Percent.value}%`
         chargeObject['割引-小計（税抜）'] = item.Amount.value.toLocaleString('ja-JP')
         chargeArr.push(chargeObject)
+      }
+
+      if (!validate.isUndefined(item.TaxCategory) && item.TaxCategory.length !== 0) {
+        switch (item.TaxCategory[0].ID.value) {
+          case 'G':
+          case 'Z':
+            this.allowanceCharge.push({
+              allowanceChargeIndicator: item.ChargeIndicator.value,
+              allowanceChargeReason: item.AllowanceChargeReason.value,
+              multiplierFactorNumeric: `${item.MultiplierFactorNumeric.value * 100}%`,
+              percent: `${item.TaxCategory[0].Percent.value}%`,
+              amount: (~~`${item.ChargeIndicator.value ? 1 : -1}` * item.Amount.value).toLocaleString('ja-JP'),
+              taxCategory: item.TaxCategory[0].TaxScheme.Name.value,
+              taxCategoryId: item.TaxCategory[0].ID.value,
+              taxPercet: item.TaxCategory[0].Percent.value,
+              taxTotalAmount: item.TaxTotal.TaxAmount.value
+            })
+            break
+          default:
+            this.allowanceCharge.push({
+              allowanceChargeIndicator: item.ChargeIndicator.value,
+              allowanceChargeReason: item.AllowanceChargeReason.value,
+              multiplierFactorNumeric: `${item.MultiplierFactorNumeric.value * 100}%`,
+              percent: `${item.TaxCategory[0].Percent.value}%`,
+              amount: (~~`${item.ChargeIndicator.value ? 1 : -1}` * item.Amount.value).toLocaleString('ja-JP'),
+              taxCategory: item.TaxCategory[0].TaxScheme.Name.value,
+              taxCategoryId: item.TaxCategory[0].ID.value,
+              taxPercet: item.TaxCategory[0].Percent.value,
+              taxTotalAmount: item.TaxTotal.TaxAmount.value
+            })
+        }
       }
     })
 

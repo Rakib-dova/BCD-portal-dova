@@ -25,7 +25,6 @@
                   else
                     p.text-right-lines.mb-1= '　'
 
-        
             if key === '明細-単位' && value.length !== 0
               .column-header.ml-1
                 p.text-left-lines.font-bold 単位
@@ -46,10 +45,15 @@
             if key === '明細-小計 (税抜)' && value.length !== 0
               .column-header
                 p.text-right-lines.font-bold  小計 (税抜) 
-                p.text-right-lines.mb-1= value                                            
+                p.text-right-lines.mb-1= value
+        .columns
+          if item.taxTotal.taxSubtotal.category === 'G' || item.taxTotal.taxSubtotal.category === 'Z'
+            .column-header
+              p.text-left-lines #{item.taxTotal.taxSubtotal.name}
     else
       .box
         - for (var [key,value] of Object.entries(item))
+          - var idx = 0
           each subitem in value
             div.paymentmean
               .columns.m-0
@@ -73,4 +77,10 @@
                         p.text-right-lines= subValue
                     if (subKey === '割引-小計（税抜）'||subKey === '追加料金-小計（税抜）') && subValue.length !== 0
                       .column-header
-                        p.text-right-lines= subValue   
+                        p.text-right-lines= subValue
+              .columns.m-0
+                if allowanceCharge[idx]
+                  if allowanceCharge[idx].taxCategoryId === 'G' || allowanceCharge[idx].taxCategoryId === 'Z'
+                    .column-header
+                      | #{allowanceCharge[idx].taxCategory}
+              - idx++
