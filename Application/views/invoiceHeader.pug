@@ -18,7 +18,7 @@
           if customer.address.postalNumber && customer.address.postalNumber.length !== 0
             .columns.m-0.p-0
               .column.p-0
-                | #{customer.address.postalNumber}
+                | #{customer.address.postbox} #{customer.address.postalNumber}
           if customer.address.cityName && customer.address.cityName.length !== 0
             .columns.m-0.p-0
               .column.p-0
@@ -63,7 +63,7 @@
           if supplier.address.postalNumber && supplier.address.postalNumber.length !== 0
             .columns.m-0.p-0
               .column.p-0
-                | #{supplier.address.postalNumber}
+                | #{supplier.address.postbox} #{supplier.address.postalNumber}
           if supplier.address.cityName && supplier.address.length !== 0
             .columns.m-0.p-0
               .column.p-0
