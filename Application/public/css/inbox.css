@@ -89,3 +89,23 @@
 .text-center-lines {
   text-align: center !important;
 }
+
+.text-overflow {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 632px;
+}
+
+.item-text-overflow {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.wraper-columns {
+  flex-wrap: wrap;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
