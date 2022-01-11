@@ -638,13 +638,11 @@ class InvoiceDetail {
     this.invoiceLine = []
 
     // 明細部分
-    invoiceLineContent.map((item) => {
+    invoiceLineContent.forEach((item) => {
       const meisai = {}
       const meisaiDetail = []
       // '明細-項目ID'
-      if (!validate.isUndefined(item.ID.value)) {
-        meisai['明細-項目ID'] = item.ID.value
-      }
+      meisai['明細-項目ID'] = item.ID.value
 
       // 明細-内容の内容
       if (!validate.isUndefined(item.Item.Name.value)) {
@@ -660,7 +658,7 @@ class InvoiceDetail {
 
       // 割引と追加料金
       if (!validate.isUndefined(item.AllowanceCharge)) {
-        item.AllowanceCharge.map((ac) => {
+        item.AllowanceCharge.forEach((ac) => {
           // '明細-内容'のobject
           const meisaiDetailObject = {
             item: '',
@@ -715,7 +713,7 @@ class InvoiceDetail {
 
       // 輸送情報,備考
       if (!validate.isUndefined(item.DocumentReference) && item.DocumentReference.length !== 0) {
-        item.DocumentReference.map((dr) => {
+        item.DocumentReference.forEach((dr) => {
           // '明細-内容'のobject
           const meisaiDetailObject = {
             item: '',
@@ -877,7 +875,11 @@ class InvoiceDetail {
       }
 
       // 配送先
-      if (!validate.isUndefined(item.Delivery)) {
+      if (
+        !validate.isUndefined(item.Delivery) &&
+        !validate.isUndefined(item.Delivery.DeliveryLocation) &&
+        !validate.isUndefined(item.Delivery.DeliveryLocation.Address)
+      ) {
         // '明細-内容'のobject
         const meisaiDetailObject = {
           item: '',
@@ -885,15 +887,27 @@ class InvoiceDetail {
         }
         meisaiDetailObject.item = '配送先'
         meisaiDetailObject.value =
-          item.Delivery[0].DeliveryLocation.Address.StreetName.value +
-          '、' +
-          item.Delivery[0].DeliveryLocation.Address.AdditionalStreetName.value +
-          '、' +
-          item.Delivery[0].DeliveryLocation.Address.CityName.value +
-          '、' +
-          item.Delivery[0].DeliveryLocation.Address.PostalZone.value +
-          '、' +
-          item.Delivery[0].DeliveryLocation.Address.Country.IdentificationCode.value
+          (item.Delivery[0].DeliveryLocation.Address.Postbox !== undefined
+            ? `${item.Delivery[0].DeliveryLocation.Address.Postbox.value}、`
+            : '') +
+          (item.Delivery[0].DeliveryLocation.Address.StreetName !== undefined
+            ? `${item.Delivery[0].DeliveryLocation.Address.StreetName.value}、`
+            : '') +
+          (item.Delivery[0].DeliveryLocation.Address.AdditionalStreetName !== undefined
+            ? `${item.Delivery[0].DeliveryLocation.Address.AdditionalStreetName.value}、`
+            : '') +
+          (item.Delivery[0].DeliveryLocation.Address.BuildingNumber !== undefined
+            ? `${item.Delivery[0].DeliveryLocation.Address.BuildingNumber.value}、`
+            : '') +
+          (item.Delivery[0].DeliveryLocation.Address.CityName !== undefined
+            ? `${item.Delivery[0].DeliveryLocation.Address.CityName.value}、`
+            : '') +
+          (item.Delivery[0].DeliveryLocation.Address.PostalZone !== undefined
+            ? `${item.Delivery[0].DeliveryLocation.Address.PostalZone.value}、`
+            : '') +
+          (item.Delivery[0].DeliveryLocation.Address.Country !== undefined
+            ? `${item.Delivery[0].DeliveryLocation.Address.Country.IdentificationCode.value}、`
+            : '')
         meisaiDetail.push(meisaiDetailObject)
       }
 
@@ -920,7 +934,7 @@ class InvoiceDetail {
 
       // 割引と追加料金の数量
       if (!validate.isUndefined(item.AllowanceCharge)) {
-        item.AllowanceCharge.map((ac) => {
+        item.AllowanceCharge.forEach((ac) => {
           if (ac.MultiplierFactorNumeric.value !== 1) {
             quantityArr.push(ac.MultiplierFactorNumeric.value * 100)
           } else {
@@ -935,7 +949,7 @@ class InvoiceDetail {
       const unitcodes = Object.entries(bconCsvUnitcode)
 
       if (!validate.isUndefined(item.InvoicedQuantity)) {
-        unitcodes.map(([key, value]) => {
+        unitcodes.forEach(([key, value]) => {
           if (item.InvoicedQuantity.unitCode === value) {
             unitCodeArr.push(key)
           }
@@ -944,7 +958,7 @@ class InvoiceDetail {
 
       // 割引と追加料金の単位
       if (!validate.isUndefined(item.AllowanceCharge)) {
-        item.AllowanceCharge.map((ac) => {
+        item.AllowanceCharge.forEach((ac) => {
           if (ac.MultiplierFactorNumeric.value !== 1) {
             unitCodeArr.push('%')
           } else {
@@ -958,7 +972,7 @@ class InvoiceDetail {
       const costArr = []
 
       if (!validate.isUndefined(item.DocumentReference) && item.DocumentReference.length !== 0) {
-        item.DocumentReference.map((dr) => {
+        item.DocumentReference.forEach((dr) => {
           if (dr.DocumentTypeCode.value === 'LinePrice') {
             const cost = Math.floor(dr.ID.value)
             costArr.push(cost.toLocaleString('ja-JP'))
@@ -969,7 +983,7 @@ class InvoiceDetail {
       }
 
       if (!validate.isUndefined(item.AllowanceCharge)) {
-        item.AllowanceCharge.map((ac) => {
+        item.AllowanceCharge.forEach((ac) => {
           if (ac.ChargeIndicator.value) {
             costArr.push(ac.Amount.value.toLocaleString('ja-JP'))
           } else {
@@ -994,7 +1008,7 @@ class InvoiceDetail {
       return
     }
 
-    allowanceChargeContent.map((item) => {
+    allowanceChargeContent.forEach((item) => {
       // 割引の場合
       if (!item.ChargeIndicator.value) {
         const discountObject = {}
