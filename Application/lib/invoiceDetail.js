@@ -644,14 +644,10 @@ class InvoiceDetail {
   setInvoiceLine(invoiceLineContent, allowanceChargeContent) {
     this.invoiceLine = []
 
-    // 明細-数量
-    const quantityArr = []
-
     // 明細部分
     invoiceLineContent.forEach((item) => {
       const meisai = {}
       const meisaiDetail = []
-      const unitCodeArr = []
       // '明細-項目ID'
       meisai['明細-項目ID'] = item.ID.value
 
@@ -683,20 +679,6 @@ class InvoiceDetail {
           }
           meisaiDetailObject.value = ac.AllowanceChargeReason.value
           meisaiDetail.push(meisaiDetailObject)
-
-          // 割引と追加料金の数量
-          if (ac.MultiplierFactorNumeric.value !== 1) {
-            quantityArr.push(ac.MultiplierFactorNumeric.value * 100)
-          } else {
-            quantityArr.push(1)
-          }
-
-          // 割引と追加料金の単位
-          if (ac.MultiplierFactorNumeric.value !== 1) {
-            unitCodeArr.push('%')
-          } else {
-            unitCodeArr.push(1)
-          }
         })
       }
 
@@ -963,11 +945,27 @@ class InvoiceDetail {
 
       meisai['明細-内容'] = meisaiDetail
 
+      // 明細-数量
+      const quantityArr = []
+
       if (!validate.isUndefined(item.InvoicedQuantity)) {
         quantityArr.push(item.InvoicedQuantity.value.toLocaleString('ja-JP'))
       }
 
+      // 割引と追加料金の数量
+      if (!validate.isUndefined(item.AllowanceCharge)) {
+        item.AllowanceCharge.forEach((ac) => {
+          if (ac.MultiplierFactorNumeric.value !== 1) {
+            quantityArr.push(ac.MultiplierFactorNumeric.value * 100)
+          } else {
+            quantityArr.push(1)
+          }
+        })
+      }
+
       meisai['明細-数量'] = quantityArr
+
+      const unitCodeArr = []
 
       // 明細-単位
       const unitcodes = Object.entries(bconCsvUnitcode)
@@ -976,6 +974,17 @@ class InvoiceDetail {
         unitcodes.forEach(([key, value]) => {
           if (item.InvoicedQuantity.unitCode === value) {
             unitCodeArr.push(key)
+          }
+        })
+      }
+
+      // 割引と追加料金の単位
+      if (!validate.isUndefined(item.AllowanceCharge)) {
+        item.AllowanceCharge.forEach((ac) => {
+          if (ac.MultiplierFactorNumeric.value !== 1) {
+            unitCodeArr.push('%')
+          } else {
+            unitCodeArr.push(1)
           }
         })
       }
