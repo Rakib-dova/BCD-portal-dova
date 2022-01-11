@@ -236,6 +236,8 @@ app.use('/subAccountCodeEdit', require('./routes/subAccountCodeEdit').router)
 
 // 受領した請求書一覧
 app.use('/inboxList', require('./routes/inboxList').router)
+// 受領した請求書
+app.use('/inbox', require('./routes/inbox').router)
 
 // 設定
 // cancellation
