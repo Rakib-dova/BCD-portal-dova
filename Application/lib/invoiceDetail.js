@@ -61,6 +61,7 @@ class InvoiceDetail {
         ? address.AdditionalStreetName.value
         : ''
       this.supplier.address.cityName = !isUndefined(address.CityName) ? address.CityName.value : ''
+      this.supplier.address.postbox = !isUndefined(address.Postbox) ? address.Postbox.value : ''
       this.supplier.address.postalNumber = !isUndefined(address.PostalZone) ? address.PostalZone.value : ''
       this.supplier.address.country = !isUndefined(address.Country)
         ? `${address.Country.IdentificationCode.value === 'JP' ? '日本' : ''}`
@@ -94,6 +95,7 @@ class InvoiceDetail {
         ? address.AdditionalStreetName.value
         : ''
       this.customer.address.cityName = !isUndefined(address.CityName) ? address.CityName.value : ''
+      this.customer.address.postbox = !isUndefined(address.Postbox) ? address.Postbox.value : ''
       this.customer.address.postalNumber = !isUndefined(address.PostalZone) ? address.PostalZone.value : ''
       this.customer.address.country = !isUndefined(address.Country)
         ? `${address.Country.IdentificationCode.value === 'JP' ? '日本' : ''}`
@@ -164,7 +166,7 @@ class InvoiceDetail {
     this.taxExRate = {}
     this.taxExRate.sourceCurrCode = taxExchangeRate.SourceCurrencyCode.value
     this.taxExRate.targetCurrCode = taxExchangeRate.TargetCurrencyCode.value
-    this.taxExRate.calculationRate = taxExchangeRate.CalculationRate.value
+    this.taxExRate.calculationRate = Number(taxExchangeRate.CalculationRate.value).toLocaleString()
     this.taxExRate.mathchOpCode = taxExchangeRate.MathematicOperatorCode.value
     if (taxExchangeRate.Date) {
       const date = new Date(taxExchangeRate.Date.value)
@@ -180,6 +182,10 @@ class InvoiceDetail {
         content.search('<ts:PayableAlternativeAmount>') -
         '<ts:PayableAlternativeAmount>'.length
     )
+
+    if (this.extenstionContent.length !== 0) {
+      this.extenstionContent = Number(this.extenstionContent).toLocaleString()
+    }
   }
 
   setOptions(invoice) {
@@ -751,6 +757,16 @@ class InvoiceDetail {
       }
 
       // メーカー名
+      if (!validate.isUndefined(item.Item.ManufacturerParty)) {
+        // '明細-内容'のobject
+        const meisaiDetailObject = {
+          item: '',
+          value: ''
+        }
+        meisaiDetailObject.item = 'メーカー名'
+        meisaiDetailObject.value = item.Item.ManufacturerParty[0].PartyName[0].Name.value
+        meisaiDetail.push(meisaiDetailObject)
+      }
 
       // シリアルナンバー
       if (!validate.isUndefined(item.Item.ItemInstance)) {
@@ -832,7 +848,10 @@ class InvoiceDetail {
           value: ''
         }
         meisaiDetailObject.item = '商品分類コード: ECCN'
-        meisaiDetailObject.value = item.Item.CommodityClassification[0].ItemClassificationCode.value
+        meisaiDetailObject.value =
+          item.Item.CommodityClassification[0].ItemClassificationCode.listID +
+          ' ' +
+          item.Item.CommodityClassification[0].ItemClassificationCode.value
         meisaiDetail.push(meisaiDetailObject)
       }
 
@@ -877,8 +896,8 @@ class InvoiceDetail {
       // 配送先
       if (
         !validate.isUndefined(item.Delivery) &&
-        !validate.isUndefined(item.Delivery.DeliveryLocation) &&
-        !validate.isUndefined(item.Delivery.DeliveryLocation.Address)
+        !validate.isUndefined(item.Delivery[0].DeliveryLocation) &&
+        !validate.isUndefined(item.Delivery[0].DeliveryLocation.Address)
       ) {
         // '明細-内容'のobject
         const meisaiDetailObject = {
@@ -887,9 +906,6 @@ class InvoiceDetail {
         }
         meisaiDetailObject.item = '配送先'
         meisaiDetailObject.value =
-          (item.Delivery[0].DeliveryLocation.Address.Postbox !== undefined
-            ? `${item.Delivery[0].DeliveryLocation.Address.Postbox.value}、`
-            : '') +
           (item.Delivery[0].DeliveryLocation.Address.StreetName !== undefined
             ? `${item.Delivery[0].DeliveryLocation.Address.StreetName.value}、`
             : '') +
@@ -902,11 +918,14 @@ class InvoiceDetail {
           (item.Delivery[0].DeliveryLocation.Address.CityName !== undefined
             ? `${item.Delivery[0].DeliveryLocation.Address.CityName.value}、`
             : '') +
+          (item.Delivery[0].DeliveryLocation.Address.Postbox !== undefined
+            ? `${item.Delivery[0].DeliveryLocation.Address.Postbox.value}、`
+            : '') +
           (item.Delivery[0].DeliveryLocation.Address.PostalZone !== undefined
             ? `${item.Delivery[0].DeliveryLocation.Address.PostalZone.value}、`
             : '') +
           (item.Delivery[0].DeliveryLocation.Address.Country !== undefined
-            ? `${item.Delivery[0].DeliveryLocation.Address.Country.IdentificationCode.value}、`
+            ? `${item.Delivery[0].DeliveryLocation.Address.Country.IdentificationCode.value}`
             : '')
         meisaiDetail.push(meisaiDetailObject)
       }
