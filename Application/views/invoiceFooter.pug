@@ -21,11 +21,18 @@
           .column.m-0.p-0.text-right
             | #{chargeTotalAmount.toLocaleString()}
       each subtotal in taxSubtotal
-        .columns.m-0.p-0
-          .column.m-0.p-0
-            | #{subtotal.taxableAmount.toLocaleString()}の#{subtotal.categoryName}
-          .column.m-0.p-0.text-right
-            | #{subtotal.taxAmount.toLocaleString()}
+        if subtotal.taxCategoryId === 'G' || subtotal.taxCategoryId === 'Z'
+          .columns.m-0.p-0
+            .column.m-0.p-0
+              | #{subtotal.categoryName}
+            .column.m-0.p-0.text-right
+              | #{subtotal.taxAmount.toLocaleString()}
+        else
+          .columns.m-0.p-0
+            .column.m-0.p-0
+              | #{subtotal.taxableAmount.toLocaleString()}の#{subtotal.categoryName}
+            .column.m-0.p-0.text-right
+              | #{subtotal.taxAmount.toLocaleString()}
       if payableAmount
         .columns.m-0.p-0
           .column.m-0.p-0.text-inbox.text-inbox-common.text-inbox-subtitle
