@@ -19,7 +19,7 @@ trigger:
 parameters:
   - name: Environment
     type: string
-    default: dev
+    default: obc
     values:
       - obc
       - BuildandPush
