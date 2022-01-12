@@ -21,13 +21,7 @@ parameters:
     type: string
     default: dev
     values:
-      - dev
-      - dev2
-      - docomoIDF
-      - prodstg
-      - prod
-      - demo
-      - test
+      - obc
       - BuildandPush
 
 variables:
