@@ -49,7 +49,10 @@ html
                   p.modal-card-title= messages.noti[0]
                   button.delete(type="button" data-target="confirmmodify-modal")
                 section.modal-card-body
-                  p !{messages.noti[1]}
+                  if messages.noti[2] === 'SYSERR'
+                    p.color-err-message !{messages.noti[1]}
+                  else
+                    p !{messages.noti[1]}
                 footer.modal-card-foot
                   div.button-area
                     a.button.cancel-button(data-target='confirmmodify-modal') 確認
