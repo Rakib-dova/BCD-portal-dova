@@ -125,48 +125,38 @@ const cbPostIndex = async (req, res, next) => {
     return res.redirect('/uploadAccount')
   }
 
-  switch (status) {
-    // 正常
-    case 0:
-      req.flash('info', '勘定科目取込が完了しました。')
-      return res.redirect('/accountCodeList')
-    // ヘッダー不一致
-    case -1:
-      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（ヘッダーに誤りがあります。）'])
-      break
-    // 勘定科目データが0件の場合
-    case -2:
-      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（取込データが存在していません。）'])
-      break
-    // 勘定科目データが200件の超過の場合
-    case -3:
-      req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTCOUNTERR000, 'SYSERR'])
-      break
-    // 勘定科目データが様式を従っていない
-    case -4:
-      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（一部行目に誤りがあります。）'])
-      break
-    // 既に登録済み勘定科目がある場合
-    case -5:
-      req.flash('noti', [
-        '勘定科目一括作成',
-        '勘定科目取込が完了しました。（勘定科目コードが重複する勘定科目はスキップしました。）'
-      ])
-      break
-    // 勘定科目コードのバリデーションチェックが間違い場合
-    case -6:
-      req.flash('noti', [
-        '勘定科目一括作成',
-        '勘定科目取込が完了しました。（勘定科目コードは半角英数字10文字以内で入力してください。）'
-      ])
-      break
-    // 勘定科目名のバリデーションチェックが間違い場合
-    case -7:
-      req.flash('noti', [
-        '勘定科目一括作成',
-        '勘定科目取込が完了しました。（勘定科目名は全角・半角40文字以内で入力してください。）'
-      ])
-      break
+  // エラーメッセージが有無確認
+  if (validate.isArray(status)) {
+    req.flash('errnoti', [
+      '取込に失敗しました。',
+      '下記表に記載されている内容を修正して、再アップロードして下さい。',
+      'SYSERR',
+      status
+    ])
+  } else {
+    switch (status) {
+      // 正常
+      case 0:
+        req.flash('info', '勘定科目取込が完了しました。')
+        return res.redirect('/accountCodeList')
+      // ヘッダー不一致
+      case -1:
+        req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（ヘッダーに誤りがあります。）'])
+        break
+      // 勘定科目データが0件の場合
+      case -2:
+        req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（取込データが存在していません。）'])
+        break
+      // 勘定科目データが200件の超過の場合
+      case -3:
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTCOUNTERR000, 'SYSERR'])
+        break
+      // 勘定科目データが様式を従っていない
+      case -4:
+        req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（一部行目に誤りがあります。）'])
+        break
+      // 既に登録済み勘定科目がある場合
+    }
   }
   logger.info(constantsDefine.logMessage.INF001 + 'accountCodeUpload.cbPostIndex')
   res.redirect('/uploadAccount')
