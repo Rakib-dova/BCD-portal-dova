@@ -1,7 +1,6 @@
 'use stric'
 module.exports = {
   // 共通
-
   // コード
   CODE_LENGTH: 10,
 

@@ -414,6 +414,32 @@ const checkNetworkConnection = function (companyNetworkConnectionList, targetCon
   return ''
 }
 
+// 仕訳のバリデーションチェック
+// コード
+const isCode = function (code, type) {
+  const inputPatternEngNum = '^[a-zA-Z0-9+]*$'
+  const regex = new RegExp(inputPatternEngNum)
+  if (code.length < 1) {
+    return `${type}CODEERR000`
+  } else if (code.length > constantsDefine.codeValidDefine.CODE_LENGTH) {
+    return `${type}CODEERR001`
+  } else if (!regex.test(code)) {
+    return `${type}CODEERR002`
+  } else {
+    return ''
+  }
+}
+
+const isName = function (name, type) {
+  if (name.length < 1) {
+    return `${type}NAMEERR000`
+  } else if (name.length > constantsDefine.codeValidDefine.NAME_LENGTH) {
+    return `${type}NAMEERR001`
+  } else {
+    return ''
+  }
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -448,5 +474,7 @@ module.exports = {
   isDescription: isDescription,
   checkNetworkConnection: checkNetworkConnection,
   isUndefined: isUndefined,
-  isNumberRegular: isNumberRegular
+  isNumberRegular: isNumberRegular,
+  isCode: isCode,
+  isName: isName
 }
