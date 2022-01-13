@@ -123,18 +123,7 @@ describe('accountCodeUploadのテスト', () => {
         cautionForSelectedFile: 'ファイル選択してください。',
         listLocation: '/accountCodeList',
         listLoacationName: '勘定科目一覧→',
-        accountCodeUpload: '/uploadAccount',
-        procedureContents: {
-          downloadComment: 'アップロード用CSVファイルダウンロード',
-          procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
-          procedureComment2: '2. CSVファイルに勘定科目を記入',
-          'procedureComment2-1': 'A列：勘定科目コード　英・数字のみ（10桁）',
-          'procedureComment2-2': 'B列：勘定科目名　　　文字列（40桁）',
-          'procedureComment2-3': '※1ファイルで作成できる勘定科目の数は200まで',
-          procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
-          procedureComment4: '4.「アップロード開始」ボタンをクリック',
-          procedureTitle: '(手順)'
-        }
+        accountCodeUpload: '/uploadAccount'
       })
     })
 
@@ -384,9 +373,8 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', [
-        '取込に失敗しました。',
-        'システムエラーです。<BR>（後程、接続してください。）',
-        'SYSERR'
+        '勘定科目一括作成',
+        '勘定科目一括作成間エラーが発生しました。'
       ])
       // 勘定科目一覧へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
@@ -423,7 +411,10 @@ describe('accountCodeUploadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', 'ヘッダーが指定のものと異なります。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（ヘッダーに誤りがあります。）'
+      ])
       // 勘定科目一覧へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
     })
@@ -459,7 +450,10 @@ describe('accountCodeUploadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（取込データが存在していません。）'
+      ])
       // 勘定科目一覧へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
     })
@@ -496,9 +490,8 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', [
-        '取込に失敗しました。',
-        '勘定科目が200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>  （一度に取り込める勘定科目は200件までとなります。）',
-        'SYSERR'
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（一度に取り込める勘定科目は200件までとなります。）'
       ])
       // 勘定科目一覧へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
@@ -535,7 +528,10 @@ describe('accountCodeUploadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（一部行目に誤りがあります。）'
+      ])
       // 勘定科目一覧へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
     })
@@ -560,7 +556,7 @@ describe('accountCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // accountUploadController.uploadのモックバリュー
-      accountUploadControllerUploadSpy.mockReturnValue([])
+      accountUploadControllerUploadSpy.mockReturnValue(-5)
 
       // 試験実施
       await accountCodeUpload.cbPostIndex(request, response, next)
@@ -571,11 +567,87 @@ describe('accountCodeUploadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('errnoti', [
-        '取込に失敗しました。',
-        '下記表に記載されている内容を修正して、再アップロードして下さい。',
-        'SYSERR',
-        []
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（勘定科目コードが重複する勘定科目はスキップしました。）'
+      ])
+      // 勘定科目一覧へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
+    })
+
+    test('準正常：勘定科目取込が完了（勘定科目コードが半角英数字10文字超えた場合）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.file = {
+        originalname: 'test1.csv',
+        userId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
+        fileName: 'filename'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // accountUploadController.uploadのモックバリュー
+      accountUploadControllerUploadSpy.mockReturnValue(-6)
+
+      // 試験実施
+      await accountCodeUpload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（勘定科目コードは半角英数字10文字以内で入力してください。）'
+      ])
+      // 勘定科目一覧へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
+    })
+
+    test('準正常：勘定科目取込が完了（勘定科目名が全角・半角40文字超えた場合）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.file = {
+        originalname: 'test1.csv',
+        userId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
+        fileName: 'filename'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // accountUploadController.uploadのモックバリュー
+      accountUploadControllerUploadSpy.mockReturnValue(-7)
+
+      // 試験実施
+      await accountCodeUpload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '勘定科目一括作成',
+        '勘定科目取込が完了しました。（勘定科目名は全角・半角40文字以内で入力してください。）'
       ])
       // 勘定科目一覧へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
