@@ -667,3 +667,7 @@ body > div.hero.is-small {
   font-weight: bold;
   margin-left: 1.5rem;
 }
+
+.color-err-message {
+  color: #f00;
+}

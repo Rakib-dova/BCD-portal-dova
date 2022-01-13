@@ -64,7 +64,7 @@ const cbGetIndex = async (req, res, next) => {
 }
 
 const cbPostIndex = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
+  logger.info(constantsDefine.logMessage.INF000 + 'accountCodeUpload.cbPostIndex')
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
@@ -107,8 +107,9 @@ const cbPostIndex = async (req, res, next) => {
   const status = await accountUploadController.upload(req.file, contract)
 
   if (status instanceof Error) {
-    req.flash('noti', ['勘定科目一括作成', '勘定科目一括作成間エラーが発生しました。'])
-    res.redirect('/uploadAccount')
+    req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.SYSERR000, 'SYSERR'])
+    logger.info(constantsDefine.logMessage.INF001 + 'accountCodeUpload.cbPostIndex')
+    return res.redirect('/uploadAccount')
   }
 
   switch (status) {
@@ -126,10 +127,7 @@ const cbPostIndex = async (req, res, next) => {
       break
     // 勘定科目データが200件の超過の場合
     case -3:
-      req.flash('noti', [
-        '勘定科目一括作成',
-        '勘定科目取込が完了しました。（一度に取り込める勘定科目は200件までとなります。）'
-      ])
+      req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTCOUNTERR000, 'SYSERR'])
       break
     // 勘定科目データが様式を従っていない
     case -4:
@@ -157,6 +155,7 @@ const cbPostIndex = async (req, res, next) => {
       ])
       break
   }
+  logger.info(constantsDefine.logMessage.INF001 + 'accountCodeUpload.cbPostIndex')
   res.redirect('/uploadAccount')
 }
 
