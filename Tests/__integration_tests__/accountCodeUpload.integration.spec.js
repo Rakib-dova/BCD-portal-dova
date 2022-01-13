@@ -208,6 +208,15 @@ describe('勘定科目一括作成のインテグレーションテスト', () =
           }
         )
       }
+      // テスト用勘定科目登録
+      const v4 = require('uuid').v4
+      const testAccountCode = new db.AccountCode({
+        accountCodeId: v4(),
+        contractId: contract.contractId,
+        accountCodeName: 'インテグレーションテスト',
+        accountCode: 'INTE0001'
+      })
+      await testAccountCode.save()
 
       const res = await request(app)
         .get('/uploadAccount')
@@ -252,6 +261,159 @@ describe('勘定科目一括作成のインテグレーションテスト', () =
 
       // 勘定科目一覧画面にに移動すること確認
       expect(await page.url()).toMatch('https://localhost:3000/accountCodeList')
+
+      await browser.close()
+    })
+
+    test('勘定科目一括作成：バリデーションチェック機能（勘定科目コード、勘定科目名）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/uploadAccount')
+
+      await page.waitForTimeout(500)
+
+      const [fileChooser] = await Promise.all([
+        page.waitForFileChooser(),
+        page.click('#accountCodeUpload > div > label > span.file-cta > span:nth-child(3) > a')
+      ])
+
+      await fileChooser.accept(['./testData/accountCodeUpload_inegration1.csv'])
+
+      await page.waitForTimeout(1000)
+
+      page.click('#upload')
+
+      await page.waitForTimeout(500)
+
+      const errorMsg = await page.evaluate(() => {
+        return document.querySelector(
+          '#errorConfirmmodify-modal > div.modal-card.errnoti-model-size > section:nth-child(3) > div > table'
+        ).innerText
+      })
+
+      // エラーメッセージ確認
+      expect(errorMsg).toMatch('勘定科目コードが未入力です。')
+      expect(errorMsg).toMatch('勘定科目コードは10文字以内で入力してください。')
+      expect(errorMsg).toMatch('入力した勘定科目コードは既に登録されています。')
+      expect(errorMsg).toMatch('勘定科目コードは英数字で入力してください。')
+      expect(errorMsg).toMatch('勘定科目名が未入力です。')
+      expect(errorMsg).toMatch('勘定科目名は40文字以内で入力してください。')
+      expect(errorMsg).toMatch('勘定科目コードが未入力です。,勘定科目名が未入力です。')
+      expect(errorMsg).toMatch(
+        '勘定科目コードは10文字以内で入力してください。,勘定科目名は40文字以内で入力してください。'
+      )
+
+      await browser.close()
+    })
+
+    test('勘定科目一括作成：ヘッダチェック', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/uploadAccount')
+
+      await page.waitForTimeout(500)
+
+      const [fileChooser] = await Promise.all([
+        page.waitForFileChooser(),
+        page.click('#accountCodeUpload > div > label > span.file-cta > span:nth-child(3) > a')
+      ])
+
+      await fileChooser.accept(['./testData/accountCodeUpload_inegration2.csv'])
+
+      await page.waitForTimeout(1000)
+
+      page.click('#upload')
+
+      await page.waitForTimeout(500)
+
+      const errorMsg = await page.evaluate(() => {
+        return document.querySelector('#confirmmodify-modal > div.modal-card > section').innerText
+      })
+
+      // エラーメッセージ確認
+      expect(errorMsg).toMatch('ヘッダーが指定のものと異なります。')
+
+      await browser.close()
+    })
+
+    test('勘定科目一括作成：の項目数チェック', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/uploadAccount')
+
+      await page.waitForTimeout(500)
+
+      const [fileChooser] = await Promise.all([
+        page.waitForFileChooser(),
+        page.click('#accountCodeUpload > div > label > span.file-cta > span:nth-child(3) > a')
+      ])
+
+      await fileChooser.accept(['./testData/accountCodeUpload_inegration3.csv'])
+
+      await page.waitForTimeout(1000)
+
+      page.click('#upload')
+
+      await page.waitForTimeout(500)
+
+      const errorMsg = await page.evaluate(() => {
+        return document.querySelector('#confirmmodify-modal > div.modal-card > section').innerText
+      })
+
+      // エラーメッセージ確認
+      expect(errorMsg).toMatch('項目数が異なります。')
+
+      await browser.close()
+    })
+
+    test('勘定科目一括作成：200件件数超過', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/uploadAccount')
+
+      await page.waitForTimeout(500)
+
+      const [fileChooser] = await Promise.all([
+        page.waitForFileChooser(),
+        page.click('#accountCodeUpload > div > label > span.file-cta > span:nth-child(3) > a')
+      ])
+
+      await fileChooser.accept(['./testData/accountCodeUpload_test4.csv'])
+
+      await page.waitForTimeout(1000)
+
+      page.click('#upload')
+
+      await page.waitForTimeout(500)
+
+      const errorMsg = await page.evaluate(() => {
+        return document.querySelector('#confirmmodify-modal > div.modal-card > section').innerText
+      })
+
+      // エラーメッセージ確認
+      expect(errorMsg).toMatch('勘定科目が200件を超えています。')
+      expect(errorMsg).toMatch('CSVファイルを確認後もう一度アップロードしてください。')
+      expect(errorMsg).toMatch('（一度に取り込める勘定科目は200件までとなります。）')
 
       await browser.close()
     })
