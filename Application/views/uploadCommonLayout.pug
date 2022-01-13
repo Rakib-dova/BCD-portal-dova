@@ -8,8 +8,8 @@
     .columns.is-centered
       .column.is-11
         .box
-          .columns.is-centered
-            .column.is-fullwidth
+          .columns.uploader
+            .column
               form#accountCodeUpload(action= accountCodeUpload method='POST' enctype='multipart/form-data')
                 .file.is-centered.is-medium.is-boxed.has-name.is-border.is-white
                   label.file-label.has-text-centered
@@ -22,10 +22,26 @@
                       span
                         a.button.btn-primary.is-small.is-family-noto-sans.pt-0.pb-0 ファイル選択
                     span.file-name
-                      p.td-overflow.is-family-noto-sans#filename
-          .columns
-            .column.is-fullwidth
-              a.button.box-large.is-outlined.is-medium.is-family-noto-sans.is-link#upload(disabled) アップロード開始
+                      p.td-overflow.is-family-noto-sans#filename             
+
+              .mt-5.has-text-centered
+                a.button.box-large.is-outlined.is-medium.is-family-noto-sans.is-link#upload(disabled) アップロード開始
+
+
+              if procedureContents
+                .mt-5
+                  label.is-family-noto-sans-bold.tip-title #{procedureContents.procedureTitle}
+                  .columns.is-mobile.is-centered.mt-0.mb-0
+                    .column-csvupload
+                      p.border #{procedureContents.procedureComment1}
+                      a.border(download href="../html/勘定科目一括作成フォーマット.csv") 　#{procedureContents.downloadComment}
+                      p.border #{procedureContents.procedureComment2}
+                      p.border 　#{procedureContents['procedureComment2-1']}
+                      p.border 　#{procedureContents['procedureComment2-2']}
+                      p.border 　#{procedureContents['procedureComment2-3']}
+                      p.border #{procedureContents.procedureComment3}
+                      p.border #{procedureContents.procedureComment4}               
+
     .columns.is-centered
       .column.is-11.has-text-right
         a.button.is-link.is-light(href= listLocation) #{listLoacationName}

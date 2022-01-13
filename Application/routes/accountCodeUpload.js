@@ -50,6 +50,18 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  const procedureContents = {
+    procedureTitle: '(手順)',
+    procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
+    downloadComment: 'アップロード用CSVファイルダウンロード',
+    procedureComment2: '2. CSVファイルに勘定科目を記入',
+    'procedureComment2-1': 'A列：勘定科目コード　英・数字のみ（10桁）',
+    'procedureComment2-2': 'B列：勘定科目名　　　文字列（40桁）',
+    'procedureComment2-3': '※1ファイルで作成できる勘定科目の数は200まで',
+    procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
+    procedureComment4: '4.「アップロード開始」ボタンをクリック'
+  }
+
   // アップロードフォーマットデータを画面に渡す。
   res.render('accountUpload', {
     uploadCommonLayoutTitle: '勘定科目一括作成',
@@ -58,7 +70,8 @@ const cbGetIndex = async (req, res, next) => {
     cautionForSelectedFile: 'ファイル選択してください。',
     listLocation: '/accountCodeList',
     listLoacationName: '勘定科目一覧→',
-    accountCodeUpload: '/uploadAccount'
+    accountCodeUpload: '/uploadAccount',
+    procedureContents: procedureContents
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
