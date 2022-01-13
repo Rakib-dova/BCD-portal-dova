@@ -33,6 +33,13 @@ const upload = async function (_file, contract) {
     // ヘッダの最終番目が空の場合は削除
     if (rows[rows.length - 1] === '') rows.pop()
 
+    // 勘定科目数量チェック（200件以上の場合エラーにする）
+    if (rows.length > 200) {
+      result = -3
+      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
+      return result
+    }
+
     // ヘッダチェック
     const headerChk = header.split(',')
     if (headerChk.length !== 2 || header.match(basicHeader) === null) {
@@ -44,13 +51,6 @@ const upload = async function (_file, contract) {
     // 勘定科目データがない場合
     if (rows.length < 1) {
       result = -2
-      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
-      return result
-    }
-
-    // 勘定科目数量チェック（200件以上の場合エラーにする）
-    if (rows.length > 200) {
-      result = -3
       logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
       return result
     }
@@ -121,6 +121,11 @@ const upload = async function (_file, contract) {
       }
 
       const insertResult = await accountCodeInser.insert(contract, values)
+
+      // DBエラー発生の場合、エラー処理
+      if (insertResult instanceof Error) {
+        throw insertResult
+      }
 
       if (!insertResult) {
         result = -5

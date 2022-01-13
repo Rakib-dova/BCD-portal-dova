@@ -9,5 +9,12 @@ constantsDefine({
 
   // 勘定科目名エラーメッセージ
   ACCOUNTNAMEERR000: `${codeValidDefine.ACCOUNTNAME_KEY}が未入力です。`,
-  ACCOUNTNAMEERR001: `${codeValidDefine.ACCOUNTNAME_KEY}は${codeValidDefine.NAME_LENGTH}文字以内で入力してください。`
+  ACCOUNTNAMEERR001: `${codeValidDefine.ACCOUNTNAME_KEY}は${codeValidDefine.NAME_LENGTH}文字以内で入力してください。`,
+
+  // CSVファイル件数
+  ACCOUNTCOUNTERR000:
+    '勘定科目が200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>  （一度に取り込める勘定科目は200件までとなります。）',
+
+  // システムエラー
+  SYSERR000: 'システムエラーです。<BR>（後程、接続してください。）'
 })
