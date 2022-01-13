@@ -141,11 +141,11 @@ const cbPostIndex = async (req, res, next) => {
         return res.redirect('/accountCodeList')
       // ヘッダー不一致
       case -1:
-        req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（ヘッダーに誤りがあります。）'])
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTHEADERERR000])
         break
       // 勘定科目データが0件の場合
       case -2:
-        req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（取込データが存在していません。）'])
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTDATAERR000])
         break
       // 勘定科目データが200件の超過の場合
       case -3:
@@ -153,7 +153,7 @@ const cbPostIndex = async (req, res, next) => {
         break
       // 勘定科目データが様式を従っていない
       case -4:
-        req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（一部行目に誤りがあります。）'])
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTDATAERR000])
         break
       // 既に登録済み勘定科目がある場合
     }
