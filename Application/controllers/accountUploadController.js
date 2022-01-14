@@ -4,7 +4,7 @@ const basicHeader = /勘定科目コード,勘定科目名$/
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const filePath = process.env.INVOICE_UPLOAD_PATH
-const accountCodeInser = require('./accountCodeController')
+const accountCodeController = require('./accountCodeController')
 const constants = require('../constants')
 const validate = require('../lib/validate')
 
@@ -130,7 +130,7 @@ const upload = async function (_file, contract) {
           accountCodeName: uploadAccountCode[idx].name
         }
 
-        const insertResult = await accountCodeInser.insert(contract, values)
+        const insertResult = await accountCodeController.insert(contract, values)
 
         // DBエラー発生の場合、エラー処理
         if (insertResult instanceof Error) {
