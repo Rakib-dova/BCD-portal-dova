@@ -66,7 +66,7 @@ const cbGetIndex = async (req, res, next) => {
     uploadCommonLayoutTitle: '勘定科目一括作成',
     uploadCommonLayoutEngTitle: 'BULK UPLOAD ACCOUNT CODE',
     fileInputName: 'bulkAccountCode',
-    cautionForSelectedFile: 'ファイル選択してください。',
+    cautionForSelectedFile: 'ファイルを選択してください。',
     listLocation: '/accountCodeList',
     listLoacationName: '勘定科目一覧→',
     accountCodeUpload: '/uploadAccount',
