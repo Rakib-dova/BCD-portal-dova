@@ -55,9 +55,9 @@ const cbGetIndex = async (req, res, next) => {
     procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
     downloadComment: 'アップロード用CSVファイルダウンロード',
     procedureComment2: '2. CSVファイルに勘定科目を記入',
-    'procedureComment2-1': 'A列：勘定科目コード　英・数字のみ（10桁）',
-    'procedureComment2-2': 'B列：勘定科目名　　　文字列（40桁）',
-    'procedureComment2-3': '※1ファイルで作成できる勘定科目の数は200まで',
+    procedureComment2A: 'A列：勘定科目コード　英・数字のみ（10桁）',
+    procedureComment2B: 'B列：勘定科目名　　　文字列（40桁）',
+    procedureComment2C: '※1ファイルで作成できる勘定科目の数は200まで',
     procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
     procedureComment4: '4.「アップロード開始」ボタンをクリック'
   }
@@ -141,11 +141,11 @@ const cbPostIndex = async (req, res, next) => {
         return res.redirect('/accountCodeList')
       // ヘッダー不一致
       case -1:
-        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTHEADERERR000])
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTHEADERERR000, 'SYSERR'])
         break
       // 勘定科目データが0件の場合
       case -2:
-        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTDATAERR000])
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTDATAERR000, 'SYSERR'])
         break
       // 勘定科目データが200件の超過の場合
       case -3:
@@ -153,7 +153,7 @@ const cbPostIndex = async (req, res, next) => {
         break
       // 勘定科目データが様式を従っていない
       case -4:
-        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTDATAERR000])
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTDATAERR000, 'SYSERR'])
         break
       // 既に登録済み勘定科目がある場合
     }

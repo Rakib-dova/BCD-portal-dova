@@ -90,7 +90,7 @@ const upload = async function (_file, contract) {
     })
 
     // 仕訳種類指定
-    const type = 'ACCOUNT'
+    const prefix = 'ACCOUNT'
     // 勘定科目バリデーションチェック
     const errorMsg = []
 
@@ -100,19 +100,19 @@ const upload = async function (_file, contract) {
       let errorCheck = false
 
       // 勘定科目コードバリデーションチェック
-      const checkCode = validate.isCode(uploadAccountCode[idx].code, type)
+      const checkCode = validate.isCode(uploadAccountCode[idx].code, prefix)
       switch (checkCode) {
         case '':
           break
         default:
           errorCheck = true
-          errorData += errorData ? `,${constants.codeErrMsg[checkCode]}` : `${constants.codeErrMsg[checkCode]}`
+          errorData += `${constants.codeErrMsg[checkCode]}`
 
           break
       }
 
       // 勘定科目名バリデーションチェック
-      const checkName = validate.isName(uploadAccountCode[idx].name, type)
+      const checkName = validate.isName(uploadAccountCode[idx].name, prefix)
       switch (checkName) {
         case '':
           break
@@ -132,11 +132,14 @@ const upload = async function (_file, contract) {
 
         const insertResult = await accountCodeInser.insert(contract, values)
 
+        // DBエラー発生の場合、エラー処理
+        if (insertResult instanceof Error) {
+          throw insertResult
+        }
+
         // 重複の場合
         if (!insertResult) {
-          errorData += errorData
-            ? `,${constants.codeErrMsg.ACCOUNTCODEERR003}`
-            : `${constants.codeErrMsg.ACCOUNTCODEERR003}`
+          errorData += `${constants.codeErrMsg.ACCOUNTCODEERR003}`
         }
       }
 
