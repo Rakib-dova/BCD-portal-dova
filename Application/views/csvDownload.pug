@@ -102,14 +102,20 @@ block content
 
         .field.is-grouped.is-grouped-centered
           .control.mx-4
-            a.button.is-info#submit(type="submit")  CSVダウンロード
+            .mt-5.has-text-centered
+              div
+                p.border-csvdownload ※ダウンロードされる請求書数は100件以内となるように設定してください。
+              .column
+                div.button-area
+                  a.button.is-info#submit(type="submit")  CSVダウンロード
+            
     template#templateAllSelectBtn
         p.control
           a.button.is-info 全選択
-        p.control 　
+        p.control
         p.control
           a.button.is-info 全解除
-        p.control 　
+        p.control
         p.control
           a.button ▲
 

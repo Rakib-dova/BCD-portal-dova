@@ -61,9 +61,10 @@ const cbGetIndex = async (req, res, next) => {
   // ステータス項目の選択アイテム
   // tradeshiftステータス
   // ・送信済み/受信済み
-  // ・受理済み/承認済み
-  // ・入金確認済み/送金済み
-  const status = ['送信済み/受信済み', '受理済み/承認済み', '入金確認済み/送金済み']
+  // ・受理済み
+  // ・送金済み
+  // ・入金確認済み
+  const status = ['送信済み/受信済み', '受理済み', '送金済み', '入金確認済み']
   // 販売購入項目の選択アイテム
   const buyAndSell = ['すべて', '販売', '購入']
 
@@ -142,8 +143,9 @@ const cbPostIndex = async (req, res, next) => {
 
   const states = [
     'DELIVERED', // 送信済み・受信済み
-    'ACCEPTED', // 受理済み/承認済み
-    'PAID_CONFIRMED' // 入金確認済み/送金済み
+    'ACCEPTED', // 受理済み
+    'PAID_UNCONFIRMED', // 送金済み
+    'PAID_CONFIRMED' // 入金確認済み
   ]
 
   // 絞り込みの条件に購入/販売追加
@@ -171,12 +173,16 @@ const cbPostIndex = async (req, res, next) => {
         }
         default: {
           switch (req.body.status) {
-            case '受理済み/承認済み': {
+            case '受理済み': {
               findDocumentQuery.state = `${states[1]}`
               break
             }
-            case '入金確認済み/送金済み': {
+            case '送金済み': {
               findDocumentQuery.state = `${states[2]}`
+              break
+            }
+            case '入金確認済み': {
+              findDocumentQuery.state = `${states[3]}`
               break
             }
           }
@@ -192,13 +198,18 @@ const cbPostIndex = async (req, res, next) => {
             findDocumentQuery.state.push(`${states[0]}`)
             break
 
-          case '受理済み/承認済み': {
+          case '受理済み': {
             findDocumentQuery.state.push(`${states[1]}`)
             break
           }
 
-          case '入金確認済み/送金済み': {
+          case '送金済み': {
             findDocumentQuery.state.push(`${states[2]}`)
+            break
+          }
+
+          case '入金確認済み': {
+            findDocumentQuery.state.push(`${states[3]}`)
             break
           }
         }
@@ -314,8 +325,15 @@ const cbPostIndex = async (req, res, next) => {
   if (resultForQuery instanceof Error) {
     errorHandle(resultForQuery, res, req)
   } else {
-    // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
-    if (documentsResult.itemCount === 0) {
+    // documentsResultのデータ有無確認
+    if (!documentsResult) {
+      req.flash('noti', [
+        '請求書ダウンロード',
+        '請求書ダウンロードに失敗しました。<br>（送信企業と受信企業で同じ企業を選択している場合はどちらか一方をチェックしてください。）'
+      ])
+      res.redirect(303, '/csvDownload')
+    } else if (documentsResult.itemCount === 0) {
+      // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
       // 条件に合わせるデータがない場合、お知らせを表示する。
       req.flash('noti', ['請求書ダウンロード', '条件に合致する請求書が見つかりませんでした。'])
       res.redirect(303, '/csvDownload')
