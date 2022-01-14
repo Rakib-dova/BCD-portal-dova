@@ -5,6 +5,9 @@ const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const accountCodeInser = require('./accountCodeController')
+const constants = require('../constants')
+const validate = require('../lib/validate')
+
 const upload = async function (_file, contract) {
   logger.info(constantsDefine.logMessage.INF000 + 'accountUploadController.upload')
 
@@ -33,6 +36,13 @@ const upload = async function (_file, contract) {
     // ヘッダの最終番目が空の場合は削除
     if (rows[rows.length - 1] === '') rows.pop()
 
+    // 勘定科目数量チェック（200件以上の場合エラーにする）
+    if (rows.length > 200) {
+      result = -3
+      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
+      return result
+    }
+
     // ヘッダチェック
     const headerChk = header.split(',')
     if (headerChk.length !== 2 || header.match(basicHeader) === null) {
@@ -44,13 +54,6 @@ const upload = async function (_file, contract) {
     // 勘定科目データがない場合
     if (rows.length < 1) {
       result = -2
-      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
-      return result
-    }
-
-    // 勘定科目数量チェック（200件以上の場合エラーにする）
-    if (rows.length > 200) {
-      result = -3
       logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
       return result
     }
@@ -86,44 +89,68 @@ const upload = async function (_file, contract) {
       }
     })
 
-    // 昇順ソートしながら、重複チェックする。
-    uploadAccountCode.sort((prev, next) => {
-      const prevCode = prev.code
-      const nextCode = next.code
-      if (prevCode - nextCode === 0) {
-        prev.duplicationFlag = true
-        result = -5
-      }
-      return prevCode - nextCode
-    })
-
-    // 既に保存されているデータと重複チェックしながらほぞんする。
-    const inputPatternEngNum = '^[a-zA-Z0-9+]*$'
+    // 仕訳種類指定
+    const prefix = 'ACCOUNT'
+    // 勘定科目バリデーションチェック
+    const errorMsg = []
 
     for (let idx = 0; idx < uploadAccountCode.length; idx++) {
-      if (uploadAccountCode[idx].duplicationFlag) continue
-      if (uploadAccountCode[idx].code.length > 10 || !uploadAccountCode[idx].code.match(inputPatternEngNum)) {
-        result = -6
-      }
-      if (uploadAccountCode[idx].name.length > 40) {
-        result = -7
-      }
-    }
+      let errorIdx
+      let errorData = ''
+      let errorCheck = false
 
-    if (result === -6 || result === -7) {
-      return result
-    }
+      // 勘定科目コードバリデーションチェック
+      const checkCode = validate.isCode(uploadAccountCode[idx].code, prefix)
+      switch (checkCode) {
+        case '':
+          break
+        default:
+          errorCheck = true
+          errorData += `${constants.codeErrMsg[checkCode]}`
 
-    for (let idx = 0; idx < uploadAccountCode.length; idx++) {
-      const values = {
-        accountCode: uploadAccountCode[idx].code,
-        accountCodeName: uploadAccountCode[idx].name
+          break
       }
 
-      const insertResult = await accountCodeInser.insert(contract, values)
+      // 勘定科目名バリデーションチェック
+      const checkName = validate.isName(uploadAccountCode[idx].name, prefix)
+      switch (checkName) {
+        case '':
+          break
+        default:
+          errorCheck = true
+          errorData += errorData ? `,${constants.codeErrMsg[checkName]}` : `${constants.codeErrMsg[checkName]}`
 
-      if (!insertResult) {
-        result = -5
+          break
+      }
+
+      // バリデーションチェック結果問題ない場合DBに保存
+      if (!errorCheck) {
+        const values = {
+          accountCode: uploadAccountCode[idx].code,
+          accountCodeName: uploadAccountCode[idx].name
+        }
+
+        const insertResult = await accountCodeInser.insert(contract, values)
+
+        // DBエラー発生の場合、エラー処理
+        if (insertResult instanceof Error) {
+          throw insertResult
+        }
+
+        // 重複の場合
+        if (!insertResult) {
+          errorData += `${constants.codeErrMsg.ACCOUNTCODEERR003}`
+        }
+      }
+
+      if (errorData.length !== 0) {
+        errorIdx = idx + 1
+        errorMsg.push({
+          idx: errorIdx,
+          code: uploadAccountCode[idx].code,
+          name: uploadAccountCode[idx].name,
+          errorData: errorData
+        })
       }
     }
 
@@ -132,6 +159,10 @@ const upload = async function (_file, contract) {
       result = 0
     }
     logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
+    if (errorMsg.length !== 0) {
+      errorMsg.unshift({ header: ['行数', '勘定科目コード', '勘定科目名', '詳細'] })
+      return errorMsg
+    }
     return result
   } catch (error) {
     logger.error({ contractId: contract.contractId, stack: error.stack, status: 0 })

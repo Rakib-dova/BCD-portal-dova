@@ -153,6 +153,14 @@ describe('accountUploadControllerのテスト', () => {
     })
   ).toString('base64')
 
+  // 異常系9
+  const accountCodeFileData10 = Buffer.from(
+    fs.readFileSync('./testData/accountCodeUpload_test10.csv', {
+      encoding: 'utf-8',
+      flag: 'r'
+    })
+  ).toString('base64')
+
   describe('upload', () => {
     test('正常', async () => {
       // 準備
@@ -206,6 +214,7 @@ describe('accountUploadControllerのテスト', () => {
       // 想定したデータがReturnされていること
       expect(result).toEqual(-1)
     })
+
     test('異常：データなし', async () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
@@ -229,6 +238,7 @@ describe('accountUploadControllerのテスト', () => {
       // 想定したデータがReturnされていること
       expect(result).toEqual(-2)
     })
+
     test('異常：200データ以上', async () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
@@ -252,6 +262,7 @@ describe('accountUploadControllerのテスト', () => {
       // 想定したデータがReturnされていること
       expect(result).toEqual(-3)
     })
+
     test('異常：勘定科目行ごとバリデーションチェック', async () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
@@ -275,7 +286,8 @@ describe('accountUploadControllerのテスト', () => {
       // 想定したデータがReturnされていること
       expect(result).toEqual(-4)
     })
-    test('異常：重複チェック', async () => {
+
+    test('異常：勘定科目行ごとバリデーションチェック(勘定科目コードと名)', async () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
@@ -296,7 +308,15 @@ describe('accountUploadControllerのテスト', () => {
 
       // 期待結果
       // 想定したデータがReturnされていること
-      expect(result).toEqual(-5)
+      expect(result).toEqual([
+        { header: ['行数', '勘定科目コード', '勘定科目名', '詳細'] },
+        {
+          code: 'TEST333322222222222222',
+          errorData: '勘定科目コードは10文字以内で入力してください。,勘定科目名は40文字以内で入力してください。',
+          idx: 1,
+          name: '結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12結合テスト12'
+        }
+      ])
     })
 
     test('異常：10桁数チェック', async () => {
@@ -320,7 +340,10 @@ describe('accountUploadControllerのテスト', () => {
 
       // 期待結果
       // 想定したデータがReturnされていること
-      expect(result).toEqual(-6)
+      expect(result).toEqual([
+        { header: ['行数', '勘定科目コード', '勘定科目名', '詳細'] },
+        { code: '11111111111', errorData: '勘定科目コードは10文字以内で入力してください。', idx: 1, name: '現金' }
+      ])
     })
 
     test('異常：40桁数チェック', async () => {
@@ -344,10 +367,56 @@ describe('accountUploadControllerのテスト', () => {
 
       // 期待結果
       // 想定したデータがReturnされていること
-      expect(result).toEqual(-7)
+      expect(result).toEqual([
+        { header: ['行数', '勘定科目コード', '勘定科目名', '詳細'] },
+        {
+          code: 'A2021',
+          errorData: '勘定科目名は40文字以内で入力してください。',
+          idx: 1,
+          name: '現金現金現金現金現金現金現金現金現金現金現金現金現金現金現金現金現金現金現金現金金'
+        }
+      ])
     })
 
-    test('異常：重複チェック(insertError)', async () => {
+    test('異常：重複チェック', async () => {
+      // 準備
+      // DBから勘定科目登録時、返す勘定科目インスタンス
+      findAllSpy.mockReturnValue(dbAccountCodeTable)
+      createSpy.mockReturnValue(codeAccountDataResult)
+      const file = {
+        originalname: 'test11.csv',
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        userId: 'userId'
+      }
+
+      // 勘定科目一括作成
+      const fs = require('fs')
+      const uploadFilePath = path.resolve('/home/upload/test11.csv')
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(accountCodeFileData10), 'base64').toString('utf8')
+      )
+      pathSpy.mockReturnValue('/home/upload/test11.csv')
+      accountCodeControllerInsertSpy.mockClear()
+      accountCodeControllerInsertSpy.mockReturnValueOnce(false)
+
+      // // 試験実施
+      const result = await accountUploadController.upload(file, contractNormal)
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual([
+        { header: ['行数', '勘定科目コード', '勘定科目名', '詳細'] },
+        {
+          code: 'TEST302',
+          errorData: '入力した勘定科目コードは既に登録されています。',
+          idx: 1,
+          name: '結合テスト12'
+        }
+      ])
+    })
+
+    test('異常：DBエラー(insertError)', async () => {
       // 準備
       // DBから勘定科目登録時、返す勘定科目インスタンス
       findAllSpy.mockReturnValue(dbAccountCodeTable)
@@ -363,15 +432,15 @@ describe('accountUploadControllerのテスト', () => {
       const uploadFilePath = path.resolve('/home/upload/test1.csv')
       fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData1), 'base64').toString('utf8'))
       pathSpy.mockReturnValue('/home/upload/test1.csv')
-      accountCodeControllerInsertSpy.mockClear()
-      accountCodeControllerInsertSpy.mockReturnValueOnce(false)
+      const insertError = new Error('insert Error')
+      accountCodeControllerInsertSpy.mockReturnValue(insertError)
 
       // // 試験実施
       const result = await accountUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
-      expect(result).toEqual(-5)
+      expect(result).toEqual(insertError)
     })
 
     test('異常：エラー処理', async () => {

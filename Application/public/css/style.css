@@ -667,3 +667,31 @@ body > div.hero.is-small {
   font-weight: bold;
   margin-left: 1.5rem;
 }
+
+.color-err-message {
+  color: #f00;
+}
+
+.errnoti-model-size {
+  width: 70% !important;
+}
+
+.errnoti-table-size {
+  width: 100%;
+}
+
+.errnoti-table-number {
+  width: 70px;
+}
+
+.errnoti-table-td {
+  min-width: 150px;
+  max-width: 300px;
+}
+
+.uploader-columns {
+  clear: both;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 600px;
+}

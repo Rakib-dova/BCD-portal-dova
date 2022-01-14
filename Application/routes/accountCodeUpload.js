@@ -50,6 +50,18 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  const procedureContents = {
+    procedureTitle: '(手順)',
+    procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
+    downloadComment: 'アップロード用CSVファイルダウンロード',
+    procedureComment2: '2. CSVファイルに勘定科目を記入',
+    procedureComment2A: 'A列：勘定科目コード　英・数字のみ（10桁）',
+    procedureComment2B: 'B列：勘定科目名　　　文字列（40桁）',
+    procedureComment2C: '※1ファイルで作成できる勘定科目の数は200まで',
+    procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
+    procedureComment4: '4.「アップロード開始」ボタンをクリック'
+  }
+
   // アップロードフォーマットデータを画面に渡す。
   res.render('accountUpload', {
     uploadCommonLayoutTitle: '勘定科目一括作成',
@@ -58,13 +70,14 @@ const cbGetIndex = async (req, res, next) => {
     cautionForSelectedFile: 'ファイル選択してください。',
     listLocation: '/accountCodeList',
     listLoacationName: '勘定科目一覧→',
-    accountCodeUpload: '/uploadAccount'
+    accountCodeUpload: '/uploadAccount',
+    procedureContents: procedureContents
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
 const cbPostIndex = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
+  logger.info(constantsDefine.logMessage.INF000 + 'accountCodeUpload.cbPostIndex')
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
@@ -107,56 +120,45 @@ const cbPostIndex = async (req, res, next) => {
   const status = await accountUploadController.upload(req.file, contract)
 
   if (status instanceof Error) {
-    req.flash('noti', ['勘定科目一括作成', '勘定科目一括作成間エラーが発生しました。'])
-    res.redirect('/uploadAccount')
+    req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.SYSERR000, 'SYSERR'])
+    logger.info(constantsDefine.logMessage.INF001 + 'accountCodeUpload.cbPostIndex')
+    return res.redirect('/uploadAccount')
   }
 
-  switch (status) {
-    // 正常
-    case 0:
-      req.flash('info', '勘定科目取込が完了しました。')
-      return res.redirect('/accountCodeList')
-    // ヘッダー不一致
-    case -1:
-      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（ヘッダーに誤りがあります。）'])
-      break
-    // 勘定科目データが0件の場合
-    case -2:
-      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（取込データが存在していません。）'])
-      break
-    // 勘定科目データが200件の超過の場合
-    case -3:
-      req.flash('noti', [
-        '勘定科目一括作成',
-        '勘定科目取込が完了しました。（一度に取り込める勘定科目は200件までとなります。）'
-      ])
-      break
-    // 勘定科目データが様式を従っていない
-    case -4:
-      req.flash('noti', ['勘定科目一括作成', '勘定科目取込が完了しました。（一部行目に誤りがあります。）'])
-      break
-    // 既に登録済み勘定科目がある場合
-    case -5:
-      req.flash('noti', [
-        '勘定科目一括作成',
-        '勘定科目取込が完了しました。（勘定科目コードが重複する勘定科目はスキップしました。）'
-      ])
-      break
-    // 勘定科目コードのバリデーションチェックが間違い場合
-    case -6:
-      req.flash('noti', [
-        '勘定科目一括作成',
-        '勘定科目取込が完了しました。（勘定科目コードは半角英数字10文字以内で入力してください。）'
-      ])
-      break
-    // 勘定科目名のバリデーションチェックが間違い場合
-    case -7:
-      req.flash('noti', [
-        '勘定科目一括作成',
-        '勘定科目取込が完了しました。（勘定科目名は全角・半角40文字以内で入力してください。）'
-      ])
-      break
+  // エラーメッセージが有無確認
+  if (validate.isArray(status)) {
+    req.flash('errnoti', [
+      '取込に失敗しました。',
+      '下記表に記載されている内容を修正して、再アップロードして下さい。',
+      'SYSERR',
+      status
+    ])
+  } else {
+    switch (status) {
+      // 正常
+      case 0:
+        req.flash('info', '勘定科目取込が完了しました。')
+        return res.redirect('/accountCodeList')
+      // ヘッダー不一致
+      case -1:
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTHEADERERR000, 'SYSERR'])
+        break
+      // 勘定科目データが0件の場合
+      case -2:
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTDATAERR000, 'SYSERR'])
+        break
+      // 勘定科目データが200件の超過の場合
+      case -3:
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTCOUNTERR000, 'SYSERR'])
+        break
+      // 勘定科目データが様式を従っていない
+      case -4:
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTDATAERR000, 'SYSERR'])
+        break
+      // 既に登録済み勘定科目がある場合
+    }
   }
+  logger.info(constantsDefine.logMessage.INF001 + 'accountCodeUpload.cbPostIndex')
   res.redirect('/uploadAccount')
 }
 
