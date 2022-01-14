@@ -128,9 +128,9 @@ describe('accountCodeUploadのテスト', () => {
           downloadComment: 'アップロード用CSVファイルダウンロード',
           procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
           procedureComment2: '2. CSVファイルに勘定科目を記入',
-          'procedureComment2-1': 'A列：勘定科目コード　英・数字のみ（10桁）',
-          'procedureComment2-2': 'B列：勘定科目名　　　文字列（40桁）',
-          'procedureComment2-3': '※1ファイルで作成できる勘定科目の数は200まで',
+          procedureComment2A: 'A列：勘定科目コード　英・数字のみ（10桁）',
+          procedureComment2B: 'B列：勘定科目名　　　文字列（40桁）',
+          procedureComment2C: '※1ファイルで作成できる勘定科目の数は200まで',
           procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
           procedureComment4: '4.「アップロード開始」ボタンをクリック',
           procedureTitle: '(手順)'
@@ -423,7 +423,11 @@ describe('accountCodeUploadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', 'ヘッダーが指定のものと異なります。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '取込に失敗しました。',
+        'ヘッダーが指定のものと異なります。',
+        'SYSERR'
+      ])
       // 勘定科目一覧へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
     })
@@ -459,7 +463,7 @@ describe('accountCodeUploadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
       // 勘定科目一覧へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
     })
@@ -535,7 +539,7 @@ describe('accountCodeUploadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
       // 勘定科目一覧へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
     })
