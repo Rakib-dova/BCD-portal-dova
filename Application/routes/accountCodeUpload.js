@@ -53,7 +53,6 @@ const cbGetIndex = async (req, res, next) => {
   const procedureContents = {
     procedureTitle: '(手順)',
     procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
-    downloadComment: 'アップロード用CSVファイルダウンロード',
     procedureComment2: '2. CSVファイルに勘定科目を記入',
     procedureComment2A: 'A列：勘定科目コード　英・数字のみ（10桁）',
     procedureComment2B: 'B列：勘定科目名　　　文字列（40桁）',
@@ -71,7 +70,9 @@ const cbGetIndex = async (req, res, next) => {
     listLocation: '/accountCodeList',
     listLoacationName: '勘定科目一覧→',
     accountCodeUpload: '/uploadAccount',
-    procedureContents: procedureContents
+    procedureContents: procedureContents,
+    formatFileLocation: '../html/勘定科目一括作成フォーマット.csv',
+    formatFileLinkText: 'アップロード用CSVファイルダウンロード'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }

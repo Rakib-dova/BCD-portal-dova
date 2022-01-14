@@ -34,7 +34,7 @@
                   .columns.is-centered.mt-0.mb-0
                     .column-csvupload
                       p.border #{procedureContents.procedureComment1}
-                      a.border(download href="../html/勘定科目一括作成フォーマット.csv") 　#{procedureContents.downloadComment}
+                      a.border(download href= formatFileLocation) 　#{formatFileLinkText}
                       p.border #{procedureContents.procedureComment2}
                       p.border 　#{procedureContents.procedureComment2A}
                       p.border 　#{procedureContents.procedureComment2B}
