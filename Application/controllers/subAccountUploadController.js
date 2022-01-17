@@ -154,6 +154,11 @@ const upload = async function (_file, contract) {
             ''
           )
 
+          // DBエラー発生の場合、エラー処理
+          if (searchAccountCodeResult instanceof Error) {
+            throw searchAccountCodeResult
+          }
+
           // 勘定科目検索結果がない場合
           if (searchAccountCodeResult.length === 0) {
             errorData += `${constants.codeErrMsg.ACCOUNTCODEERR004}`

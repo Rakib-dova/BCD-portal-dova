@@ -397,7 +397,7 @@ describe('accountCodeUploadのテスト', () => {
         'システムエラーです。<BR>（後程、接続してください。）',
         'SYSERR'
       ])
-      // 補助科目一覧へリダイレクトされ「る」
+      // 補助科目一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 
@@ -437,7 +437,7 @@ describe('accountCodeUploadのテスト', () => {
         'ヘッダーが指定のものと異なります。',
         'SYSERR'
       ])
-      // 補助科目一覧へリダイレクトされ「る」
+      // 補助科目一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 
@@ -473,7 +473,7 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
-      // 補助科目一覧へリダイレクトされ「る」
+      // 補助科目一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 
@@ -513,7 +513,7 @@ describe('accountCodeUploadのテスト', () => {
         '補助科目が200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>（一度に取り込める補助科目は200件までとなります。）',
         'SYSERR'
       ])
-      // 補助科目一覧へリダイレクトされ「る」
+      // 補助科目一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 
@@ -549,7 +549,7 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
-      // 補助科目一覧へリダイレクトされ「る」
+      // 補助科目一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 
@@ -590,7 +590,7 @@ describe('accountCodeUploadのテスト', () => {
         'SYSERR',
         []
       ])
-      // 補助科目一覧へリダイレクトされ「る」
+      // 補助科目一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 

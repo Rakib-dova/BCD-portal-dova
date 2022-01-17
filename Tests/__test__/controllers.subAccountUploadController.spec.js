@@ -11,22 +11,21 @@ const SubAccountCode = require('../../Application/models').SubAccountCode
 const sequelize = require('../../Application/models').sequelize
 const codeAccountId = '5a927284-57c9-4594-9ed8-472d261a6102'
 const subAccountCode = '12327284-57c9-4594-9ed8-472d261a6102'
-const codeAccountDataResult = AccountCode.build({
-  accountCodeId: '5a927284-57c9-4594-9ed8-472d261a6102',
-  contractId: 'f10b95a4-74a1-4691-880a-827c9f1a1faf',
-  accountCodeName: 'TEST1',
-  accountCode: 'TEST1',
-  createdAt: new Date('2021-07-09T04:30:00.000Z'),
-  updatedAt: new Date('2021-07-09T04:30:00.000Z')
-})
-const subAccountCodeResult = SubAccountCode.build({
-  subAccountCodeId: subAccountCode,
-  accountCodeId: codeAccountId,
-  subjectName: 'TEST1homei',
-  subjectCode: 'TEST1hoko',
-  createdAt: new Date('2021-07-09T04:30:00.000Z'),
-  updatedAt: new Date('2021-07-09T04:30:00.000Z')
-})
+const codeAccountDataResult = new AccountCode()
+codeAccountDataResult.accountCodeId = codeAccountId
+codeAccountDataResult.contractId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
+codeAccountDataResult.accountCodeName = 'TEST1'
+codeAccountDataResult.accountCode = 'TEST1'
+codeAccountDataResult.createdAt = new Date('2021-07-09T04:30:00.000Z')
+codeAccountDataResult.updatedAt = new Date('2021-07-09T04:30:00.000Z')
+const subAccountCodeResult = new SubAccountCode()
+subAccountCodeResult.subAccountCodeId = subAccountCode
+subAccountCodeResult.accountCodeId = codeAccountId
+subAccountCodeResult.subjectName = 'TEST1homei'
+subAccountCodeResult.subjectCode = 'TEST1hoko'
+subAccountCodeResult.createdAt = new Date('2021-07-09T04:30:00.000Z')
+subAccountCodeResult.updatedAt = new Date('2021-07-09T04:30:00.000Z')
+
 const path = require('path')
 const fs = require('fs')
 
@@ -471,58 +470,109 @@ describe('subAccountUploadControllerのテスト', () => {
       ])
     })
 
-    test('異常：重複チェック（勘定科目コード）', async () => {
+    test('異常：未登録勘定科目コード', async () => {
       // 準備
-      // DBから勘定科目登録時、返す勘定科目インスタンス
-      subAccountCodefindAllSpy.mockReturnValue(dbSubAccountCodeTable)
-      const file = {
-        originalname: 'test11.csv',
-        filename: '8d73eae9e5bcd33f5863b9251a76c551',
-        userId: 'userId'
-      }
-
+      findAllSpy.mockReturnValue(dbAccountCodeTable)
+      createSpy.mockReturnValue(codeAccountDataResult)
+      searchAccountCodeSpy.mockReturnValue([{ accountCodeId: codeAccountId }])
+      findOneSpy.mockReturnValue([{ accountCodeId: codeAccountId }])
       // 補助科目一括作成
-      const today = new Date().getTime()
-      const filename = '補助科目' + '_' + today + '_' + file.userId + '_' + file.originalname + '.csv'
-      const newFilePath = path.resolve('/home/upload', filename)
+      const fs = require('fs')
+      const uploadFilePath = path.resolve('/home/upload/test10.csv')
       fs.writeFileSync(
-        newFilePath,
+        uploadFilePath,
         Buffer.from(decodeURIComponent(subAccountCodeFileData10), 'base64').toString('utf8')
       )
-
-      pathSpy.mockReturnValue(newFilePath)
-
-      subAccountCodeControllerInsertSpy.mockReturnValueOnce(1)
-
-      // 試験実施
-      await subAccountUploadController.upload(file, contractNormal)
-    })
-
-    test('異常：重複チェック（補助科目コード）', async () => {
-      // 準備
-      // DBから勘定科目登録時、返す勘定科目インスタンス
-      subAccountCodefindAllSpy.mockReturnValue(dbSubAccountCodeTable)
+      pathSpy.mockReturnValue('/home/upload/test10.csv')
       const file = {
-        originalname: 'test11.csv',
-        filename: '8d73eae9e5bcd33f5863b9251a76c551',
-        userId: 'userId'
+        userId: 'userId',
+        originalname: 'test8.csv',
+        filename: '8d73eae9e5bcd33f5863b9251a76c551'
       }
-
-      // 補助科目一括作成
-      const today = new Date().getTime()
-      const filename = '補助科目' + '_' + today + '_' + file.userId + '_' + file.originalname + '.csv'
-      const newFilePath = path.resolve('/home/upload', filename)
-      fs.writeFileSync(
-        newFilePath,
-        Buffer.from(decodeURIComponent(subAccountCodeFileData10), 'base64').toString('utf8')
-      )
-
-      pathSpy.mockReturnValue(newFilePath)
 
       subAccountCodeControllerInsertSpy.mockReturnValueOnce(-1)
 
       // 試験実施
-      await subAccountUploadController.upload(file, contractNormal)
+      const result = await subAccountUploadController.upload(file, contractNormal)
+
+      expect(result).toEqual([
+        { header: ['行数', '勘定科目コード', '補助科目コード', '補助科目名', '詳細'] },
+        {
+          accountCode: 'TEST1',
+          errorData: '未登録の勘定科目コードです。事前に「勘定科目登録画面」から勘定科目コードを登録してください。',
+          idx: 1,
+          subjectCode: 'TEST1hoko',
+          subjectName: 'TEST1homei'
+        }
+      ])
+    })
+
+    test('異常：重複チェック（補助科目コード）', async () => {
+      // 準備
+      findAllSpy.mockReturnValue(dbAccountCodeTable)
+      createSpy.mockReturnValue(codeAccountDataResult)
+      searchAccountCodeSpy.mockReturnValue([{ accountCodeId: codeAccountId }])
+      findOneSpy.mockReturnValue([{ accountCodeId: codeAccountId }])
+      // 補助科目一括作成
+      const fs = require('fs')
+      const uploadFilePath = path.resolve('/home/upload/test10.csv')
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData10), 'base64').toString('utf8')
+      )
+      pathSpy.mockReturnValue('/home/upload/test10.csv')
+      const file = {
+        userId: 'userId',
+        originalname: 'test8.csv',
+        filename: '8d73eae9e5bcd33f5863b9251a76c551'
+      }
+
+      subAccountCodeControllerInsertSpy.mockReturnValueOnce(1)
+
+      // 試験実施
+      const result = await subAccountUploadController.upload(file, contractNormal)
+
+      expect(result).toEqual([
+        { header: ['行数', '勘定科目コード', '補助科目コード', '補助科目名', '詳細'] },
+        {
+          accountCode: 'TEST1',
+          errorData: '入力した補助科目コードは既に登録されています。',
+          idx: 1,
+          subjectCode: 'TEST1hoko',
+          subjectName: 'TEST1homei'
+        }
+      ])
+    })
+
+    test('異常：DBエラー(acountTableError)', async () => {
+      // 準備
+      // DBから勘定科目登録時、返す勘定科目インスタンス
+      findAllSpy.mockReturnValue(dbAccountCodeTable)
+      createSpy.mockReturnValue(codeAccountDataResult)
+      findOneSpy.mockReturnValue([{ accountCodeId: codeAccountId }])
+      const file = {
+        originalname: 'test1.csv',
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        userId: 'userId'
+      }
+
+      // 補助科目一括作成
+      const fs = require('fs')
+      const uploadFilePath = path.resolve('/home/upload/test1.csv')
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData1), 'base64').toString('utf8')
+      )
+      pathSpy.mockReturnValue('/home/upload/test1.csv')
+      const searchAccountError = new Error('AcountTable Error')
+      searchAccountCodeSpy.mockReturnValue(searchAccountError)
+
+      // 試験実施
+      const result = await subAccountUploadController.upload(file, contractNormal)
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(searchAccountError)
     })
 
     test('異常：DBエラー(insertError)', async () => {
@@ -555,6 +605,38 @@ describe('subAccountUploadControllerのテスト', () => {
       expect(result).toEqual(insertError)
     })
 
+    test('異常：DBエラー（subAccountCodeテーブルエラー）', async () => {
+      // 準備
+      // DBから勘定科目登録時、返す勘定科目インスタンス
+      findAllSpy.mockReturnValue(dbAccountCodeTable)
+      createSpy.mockReturnValue(codeAccountDataResult)
+      const file = {
+        originalname: 'test1.csv',
+        filename: '8d73eae9e5bcd33f5863b9251a76c551',
+        userId: 'userId'
+      }
+
+      // 補助科目一括作成
+      const fs = require('fs')
+      const uploadFilePath = path.resolve('/home/upload/test1.csv')
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData1), 'base64').toString('utf8')
+      )
+      pathSpy.mockReturnValue('/home/upload/test1.csv')
+      const subAccountCodeError = new Error(
+        "SequelizeDatabaseError: Invalid object name 'SubAccountCode'.\n at Query.formatError"
+      )
+      subAccountCodeControllerInsertSpy.mockReturnValue(subAccountCodeError)
+
+      // 試験実施
+      const result = await subAccountUploadController.upload(file, contractNormal)
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(subAccountCodeError)
+    })
+
     test('異常：エラー処理', async () => {
       // 準備
       // DBから勘定科目登録時、返す勘定科目インスタンス
@@ -578,7 +660,7 @@ describe('subAccountUploadControllerのテスト', () => {
         throw new Error('CSVファイル削除エラー')
       })
 
-      // // 試験実施
+      // 試験実施
       const result = await subAccountUploadController.upload(file, contractNormal)
 
       // 期待結果
