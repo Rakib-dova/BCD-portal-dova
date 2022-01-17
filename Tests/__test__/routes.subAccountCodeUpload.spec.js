@@ -4,7 +4,7 @@ jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
 process.env.INVOICE_UPLOAD_PATH ?? JSON.stringify({ INVOICE_UPLOAD_PATH: './testData' })
-const accountCodeUpload = require('../../Application/routes/accountCodeUpload')
+const subAccountCodeUpload = require('../../Application/routes/subAccountCodeUpload')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
@@ -15,7 +15,7 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const accountCodeController = require('../../Application/controllers/accountCodeController.js')
-const accountUploadController = require('../../Application/controllers/accountUploadController.js')
+const subAccountUploadController = require('../../Application/controllers/subAccountUploadController.js')
 const logger = require('../../Application/lib/logger.js')
 
 let request, response, infoSpy
@@ -27,7 +27,7 @@ let userControllerFindOneSpy,
   contractControllerFindContractSpy,
   checkContractStatusSpy,
   updatedAccountCodeSpy,
-  accountUploadControllerUploadSpy
+  subAccountUploadControllerUploadSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -60,7 +60,7 @@ describe('accountCodeUploadのテスト', () => {
     request.flash = jest.fn()
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     updatedAccountCodeSpy = jest.spyOn(accountCodeController, 'updatedAccountCode')
-    accountUploadControllerUploadSpy = jest.spyOn(accountUploadController, 'upload')
+    subAccountUploadControllerUploadSpy = jest.spyOn(subAccountUploadController, 'upload')
   })
   afterEach(() => {
     request.resetMocked()
@@ -75,18 +75,22 @@ describe('accountCodeUploadのテスト', () => {
     tenatnsFindOneSpy.mockRestore()
     checkContractStatusSpy.mockRestore()
     updatedAccountCodeSpy.mockRestore()
-    accountUploadControllerUploadSpy.mockRestore()
+    subAccountUploadControllerUploadSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
     test('accountCodeのルーティングを確認', async () => {
-      expect(accountCodeUpload.router.get).toBeCalledWith('/', helper.isAuthenticated, accountCodeUpload.cbGetIndex)
+      expect(subAccountCodeUpload.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        subAccountCodeUpload.cbGetIndex
+      )
 
-      expect(accountCodeUpload.router.post).toBeCalledWith(
+      expect(subAccountCodeUpload.router.post).toBeCalledWith(
         '/',
         helper.isAuthenticated,
         expect.any(Function),
-        accountCodeUpload.cbPostIndex
+        subAccountCodeUpload.cbPostIndex
       )
     })
   })
@@ -108,7 +112,7 @@ describe('accountCodeUploadのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
 
       // 試験実施
-      await accountCodeUpload.cbGetIndex(request, response, next)
+      await subAccountCodeUpload.cbGetIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -116,23 +120,25 @@ describe('accountCodeUploadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでaccountUploadが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('accountUpload', {
-        uploadCommonLayoutTitle: '勘定科目一括作成',
-        uploadCommonLayoutEngTitle: 'BULK UPLOAD ACCOUNT CODE',
-        fileInputName: 'bulkAccountCode',
+      expect(response.render).toHaveBeenCalledWith('subAccountUpload', {
+        uploadCommonLayoutTitle: '補助科目一括作成',
+        uploadCommonLayoutEngTitle: 'BULK UPLOAD SUBACCOUNT CODE',
+        fileInputName: 'bulkSubAccountCode',
         cautionForSelectedFile: 'ファイルを選択してください。',
-        listLocation: '/accountCodeList',
-        formatFileLocation: '../html/勘定科目一括作成フォーマット.csv',
+        listLocation: '/subAccountCodeList',
+        formatFileLocation: '../html/補助科目一括作成フォーマット.csv',
         formatFileLinkText: 'アップロード用CSVファイルダウンロード',
-        listLoacationName: '勘定科目一覧→',
-        accountCodeUpload: '/uploadAccount',
+        listLoacationName: '補助科目一覧→',
+        accountCodeUpload: '/uploadSubAccount',
         procedureContents: {
           procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
-          procedureComment2: '2. CSVファイルに勘定科目を記入',
+          procedureComment2: '2. CSVファイルに補助科目を記入',
           procedureComment2Children: [
-            'A列：勘定科目コード　英・数字のみ（10桁）',
-            'B列：勘定科目名　　　文字列（40桁）',
-            '※1ファイルで作成できる勘定科目の数は200まで'
+            'A列：勘定科目コード 英・数字のみ（10桁）',
+            'B列：補助科目コード 英・数字のみ（10桁）',
+            'C列：補助科目名 文字列（40桁）',
+            '※1ファイルで作成できる補助科目の数は200まで',
+            '※登録済みの勘定科目コードを入力してください'
           ],
           procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
           procedureComment4: '4.「アップロード開始」ボタンをクリック',
@@ -151,13 +157,13 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[6])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[5])
-      // DBからの正常な勘定科目情報取得を想定する
+      // DBからの正常な補助科目情報取得を想定する
       tenatnsFindOneSpy.mockReturnValue(Tenants[5])
       // ユーザ権限チェック結果設定
       checkContractStatusSpy.mockReturnValue('30')
 
       // 試験実施
-      await accountCodeUpload.cbGetIndex(request, response, next)
+      await subAccountCodeUpload.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -180,11 +186,11 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[9])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[7])
-      // DBからの正常な勘定科目情報取得を想定する
+      // DBからの正常な補助科目情報取得を想定する
       tenatnsFindOneSpy.mockReturnValue(Tenants[8])
 
       // 試験実施
-      await accountCodeUpload.cbGetIndex(request, response, next)
+      await subAccountCodeUpload.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -199,7 +205,7 @@ describe('accountCodeUploadのテスト', () => {
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
       // 試験実施
-      await accountCodeUpload.cbGetIndex(request, response, next)
+      await subAccountCodeUpload.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -220,7 +226,7 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(userDbError)
 
       // 試験実施
-      await accountCodeUpload.cbGetIndex(request, response, next)
+      await subAccountCodeUpload.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -240,7 +246,7 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[8])
 
       // 試験実施
-      await accountCodeUpload.cbGetIndex(request, response, next)
+      await subAccountCodeUpload.cbGetIndex(request, response, next)
 
       // 期待結果
       expect(next).toHaveBeenCalledWith(errorHelper.create(404))
@@ -258,7 +264,7 @@ describe('accountCodeUploadのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(contractDbError)
 
       // 試験実施
-      await accountCodeUpload.cbGetIndex(request, response, next)
+      await subAccountCodeUpload.cbGetIndex(request, response, next)
 
       // 期待結果
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
@@ -283,7 +289,7 @@ describe('accountCodeUploadのテスト', () => {
       checkContractStatusSpy.mockReturnValue(null)
 
       // 試験実施
-      await accountCodeUpload.cbGetIndex(request, response, next)
+      await subAccountCodeUpload.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -309,7 +315,7 @@ describe('accountCodeUploadのテスト', () => {
       // checkContractStatusからreturnされる値設定
       checkContractStatusSpy.mockReturnValue(999)
       // 試験実施
-      await accountCodeUpload.cbGetIndex(request, response, next)
+      await subAccountCodeUpload.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -319,7 +325,7 @@ describe('accountCodeUploadのテスト', () => {
   })
 
   describe('コールバック:cbPostIndex', () => {
-    test('正常：勘定科目コードと勘定科目名一括作成', async () => {
+    test('正常：補助科目コードと補助科目名一括作成', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -330,6 +336,13 @@ describe('accountCodeUploadのテスト', () => {
         fileName: 'filename'
       }
 
+      // const uploadFilePath = path.resolve('/home/upload/test1.csv')
+      // fs.writeFileSync(
+      //   uploadFilePath,
+      //   Buffer.from(decodeURIComponent(subAccountCodeFileData), 'base64').toString('utf8')
+      // )
+      // pathSpy.mockReturnValue('/home/upload/test1.csv')
+
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
@@ -339,10 +352,10 @@ describe('accountCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // accountUploadController.uploadのモックバリュー
-      accountUploadControllerUploadSpy.mockReturnValue(0)
+      subAccountUploadControllerUploadSpy.mockReturnValue(0)
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -350,12 +363,12 @@ describe('accountCodeUploadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('info', '勘定科目取込が完了しました。')
-      // 勘定科目一覧へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/accountCodeList')
+      expect(request.flash).toHaveBeenCalledWith('info', '補助科目取込が完了しました。')
+      // 補助科目一覧へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/subAccountCodeList')
     })
 
-    test('異常：勘定科目コードと勘定科目名一括作成', async () => {
+    test('異常：補助科目コードと補助科目名一括作成', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -375,10 +388,10 @@ describe('accountCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // accountUploadController.uploadのモックバリュー
-      accountUploadControllerUploadSpy.mockReturnValue(new Error())
+      subAccountUploadControllerUploadSpy.mockReturnValue(new Error())
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -391,11 +404,11 @@ describe('accountCodeUploadのテスト', () => {
         'システムエラーです。<BR>（後程、接続してください。）',
         'SYSERR'
       ])
-      // 勘定科目一覧へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
+      // 補助科目一覧へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 
-    test('準正常：勘定科目取込が完了（ヘッダーに誤り）', async () => {
+    test('準正常：補助科目取込が完了（ヘッダーに誤り）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -415,10 +428,10 @@ describe('accountCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // accountUploadController.uploadのモックバリュー
-      accountUploadControllerUploadSpy.mockReturnValue(-1)
+      subAccountUploadControllerUploadSpy.mockReturnValue(-1)
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -431,11 +444,11 @@ describe('accountCodeUploadのテスト', () => {
         'ヘッダーが指定のものと異なります。',
         'SYSERR'
       ])
-      // 勘定科目一覧へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
+      // 補助科目一覧へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 
-    test('準正常：勘定科目取込が完了（取込データが存在しない）', async () => {
+    test('準正常：補助科目取込が完了（取込データが存在しない）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -455,10 +468,10 @@ describe('accountCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // accountUploadController.uploadのモックバリュー
-      accountUploadControllerUploadSpy.mockReturnValue(-2)
+      subAccountUploadControllerUploadSpy.mockReturnValue(-2)
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -467,11 +480,11 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
-      // 勘定科目一覧へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
+      // 補助科目一覧へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 
-    test('準正常：勘定科目取込が完了（一度に取り込める勘定科目は200件以上）', async () => {
+    test('準正常：補助科目取込が完了（一度に取り込める補助科目は200件以上）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -491,10 +504,10 @@ describe('accountCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // accountUploadController.uploadのモックバリュー
-      accountUploadControllerUploadSpy.mockReturnValue(-3)
+      subAccountUploadControllerUploadSpy.mockReturnValue(-3)
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -504,14 +517,14 @@ describe('accountCodeUploadのテスト', () => {
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', [
         '取込に失敗しました。',
-        '勘定科目が200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>  （一度に取り込める勘定科目は200件までとなります。）',
+        '補助科目が200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>（一度に取り込める補助科目は200件までとなります。）',
         'SYSERR'
       ])
-      // 勘定科目一覧へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
+      // 補助科目一覧へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 
-    test('準正常：勘定科目取込が完了（一部行目に誤り）', async () => {
+    test('準正常：補助科目取込が完了（一部行目に誤り）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -531,10 +544,10 @@ describe('accountCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // accountUploadController.uploadのモックバリュー
-      accountUploadControllerUploadSpy.mockReturnValue(-4)
+      subAccountUploadControllerUploadSpy.mockReturnValue(-4)
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -543,11 +556,11 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
-      // 勘定科目一覧へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
+      // 補助科目一覧へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 
-    test('準正常：勘定科目取込が完了（重複する勘定科目コードスキップ）', async () => {
+    test('準正常：補助科目取込が完了（重複する補助科目コードスキップ）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -567,10 +580,10 @@ describe('accountCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // accountUploadController.uploadのモックバリュー
-      accountUploadControllerUploadSpy.mockReturnValue([])
+      subAccountUploadControllerUploadSpy.mockReturnValue([])
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -584,8 +597,8 @@ describe('accountCodeUploadのテスト', () => {
         'SYSERR',
         []
       ])
-      // 勘定科目一覧へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadAccount')
+      // 補助科目一覧へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/uploadSubAccount')
     })
 
     test('準正常：解約申込中の場合', async () => {
@@ -606,7 +619,7 @@ describe('accountCodeUploadのテスト', () => {
       checkContractStatusSpy.mockReturnValue('30')
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -634,13 +647,13 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[9])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[7])
-      // DBからの正常な勘定科目情報取得を想定する
+      // DBからの正常な補助科目情報取得を想定する
       tenatnsFindOneSpy.mockReturnValue(Tenants[8])
       // 契約不正の場合
       contractControllerFindContractSpy.mockReturnValue(Contracts[7])
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -655,7 +668,7 @@ describe('accountCodeUploadのテスト', () => {
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -676,7 +689,7 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(userDbError)
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -696,7 +709,7 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[8])
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       expect(next).toHaveBeenCalledWith(errorHelper.create(404))
@@ -714,7 +727,7 @@ describe('accountCodeUploadのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(contractDbError)
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
@@ -739,7 +752,7 @@ describe('accountCodeUploadのテスト', () => {
       checkContractStatusSpy.mockReturnValue(null)
 
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -765,7 +778,7 @@ describe('accountCodeUploadのテスト', () => {
       // checkContractStatusからreturnされる値設定
       checkContractStatusSpy.mockReturnValue(999)
       // 試験実施
-      await accountCodeUpload.cbPostIndex(request, response, next)
+      await subAccountCodeUpload.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
