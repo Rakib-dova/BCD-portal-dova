@@ -143,7 +143,7 @@ const cbPostIndex = async (req, res, next) => {
     switch (status) {
       // 正常
       case 0:
-        req.flash('info', '勘定科目取込が完了しました。')
+        req.flash('info', '補助科目取込が完了しました。')
         return res.redirect('/subAccountCodeList')
       // ヘッダー不一致
       case -1:
