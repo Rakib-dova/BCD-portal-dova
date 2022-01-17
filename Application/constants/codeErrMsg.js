@@ -6,10 +6,22 @@ constantsDefine({
   ACCOUNTCODEERR001: `${codeValidDefine.ACCOUNTCODE_KEY}は${codeValidDefine.CODE_LENGTH}文字以内で入力してください。`,
   ACCOUNTCODEERR002: `${codeValidDefine.ACCOUNTCODE_KEY}は英数字で入力してください。`,
   ACCOUNTCODEERR003: `入力した${codeValidDefine.ACCOUNTCODE_KEY}は既に登録されています。`,
+  ACCOUNTCODEERR004: `未登録の${codeValidDefine.ACCOUNTCODE_KEY}です。事前に「勘定科目登録画面」から${codeValidDefine.ACCOUNTCODE_KEY}を登録してください。`,
 
   // 勘定科目名エラーメッセージ
   ACCOUNTNAMEERR000: `${codeValidDefine.ACCOUNTNAME_KEY}が未入力です。`,
   ACCOUNTNAMEERR001: `${codeValidDefine.ACCOUNTNAME_KEY}は${codeValidDefine.NAME_LENGTH}文字以内で入力してください。`,
+
+  // 補助科目コードエラーメッセージ
+
+  SUBACCOUNTCODEERR000: `${codeValidDefine.SUBACCOUNTCODE_KEY}が未入力です。`,
+  SUBACCOUNTCODEERR001: `${codeValidDefine.SUBACCOUNTCODE_KEY}は${codeValidDefine.CODE_LENGTH}文字以内で入力してください。`,
+  SUBACCOUNTCODEERR002: `${codeValidDefine.SUBACCOUNTCODE_KEY}は英数字で入力してください。`,
+  SUBACCOUNTCODEERR003: `入力した${codeValidDefine.SUBACCOUNTCODE_KEY}は既に登録されています。`,
+
+  // 補助科目名エラーメッセージ
+  SUBACCOUNTNAMEERR000: `${codeValidDefine.SUBACCOUNTNAME_KEY}が未入力です。`,
+  SUBACCOUNTNAMEERR001: `${codeValidDefine.SUBACCOUNTNAME_KEY}は${codeValidDefine.NAME_LENGTH}文字以内で入力してください。`,
 
   // CSVファイル件数
   ACCOUNTCOUNTERR000:

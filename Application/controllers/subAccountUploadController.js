@@ -4,8 +4,8 @@ const basicHeader = /勘定科目コード,補助科目コード,補助科目名
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const filePath = process.env.INVOICE_UPLOAD_PATH
-const accountCodeController = require('./accountCodeController')
 const subAccountCodeController = require('./subAccountCodeController')
+const accountCodeController = require('./accountCodeController')
 const constants = require('../constants')
 const validate = require('../lib/validate')
 
@@ -93,7 +93,8 @@ const upload = async function (_file, contract) {
     })
 
     // 仕訳種類指定
-    const prefix = 'ACCOUNT'
+    const accoutPrefix = 'ACCOUNT'
+    const subAccoutPrefix = 'SUBACCOUNT'
     // 補助科目バリデーションチェック
     const errorMsg = []
 
@@ -103,7 +104,7 @@ const upload = async function (_file, contract) {
       let errorCheck = false
 
       // 勘定科目コードバリデーションチェック
-      const checkAccountCode = validate.isCode(subUploadAccountCode[idx].accountCode, prefix)
+      const checkAccountCode = validate.isCode(subUploadAccountCode[idx].accountCode, accoutPrefix)
       switch (checkAccountCode) {
         case '':
           break
@@ -115,19 +116,19 @@ const upload = async function (_file, contract) {
       }
 
       // 補助科目コードバリデーションチェック
-      const checkCode = validate.isCode(subUploadAccountCode[idx].subAccountCode, prefix)
+      const checkCode = validate.isCode(subUploadAccountCode[idx].subAccountCode, subAccoutPrefix)
       switch (checkCode) {
         case '':
           break
         default:
           errorCheck = true
-          errorData += `${constants.codeErrMsg[checkCode]}`
+          errorData += errorData ? `,${constants.codeErrMsg[checkCode]}` : `${constants.codeErrMsg[checkCode]}`
 
           break
       }
 
       // 補助科目名バリデーションチェック
-      const checkName = validate.isName(subUploadAccountCode[idx].subAccountName, prefix)
+      const checkName = validate.isName(subUploadAccountCode[idx].subAccountName, subAccoutPrefix)
       switch (checkName) {
         case '':
           break
@@ -138,17 +139,19 @@ const upload = async function (_file, contract) {
           break
       }
 
-      const searchAccountCodeResult = await accountCodeController.searchAccountCode(
-        contract.contractId,
-        subUploadAccountCode[idx].accountCode,
-        ''
-      )
+      // バリデーションチェック結果問題ない場合DBに保存
+      if (!errorCheck) {
+        // 勘定科目検索
+        const searchAccountCodeResult = await accountCodeController.searchAccountCode(
+          contract.contractId,
+          subUploadAccountCode[idx].accountCode,
+          ''
+        )
 
-      if (searchAccountCodeResult.length === 0) {
-        errorData += '勘定科目なし'
-      } else {
-        // バリデーションチェック結果問題ない場合DBに保存
-        if (!errorCheck) {
+        // 勘定科目検索結果がない場合
+        if (searchAccountCodeResult.length === 0) {
+          errorData += `${constants.codeErrMsg.ACCOUNTCODEERR004}`
+        } else {
           const values = {
             accountCodeId: searchAccountCodeResult[0].accountCodeId,
             subjectCode: subUploadAccountCode[idx].subAccountCode,
@@ -156,21 +159,21 @@ const upload = async function (_file, contract) {
           }
 
           const insertResult = await subAccountCodeController.insert(contract, values)
-          console.log('insertResult~~~', insertResult)
+
           // DBエラー発生の場合、エラー処理
           if (insertResult instanceof Error) {
             throw insertResult
           }
 
-          // 重複の場合
+          // 重複の場合、登録の時勘定科目がなくなった場合
           switch (insertResult) {
             case 0:
               break
             case 1:
-              errorData += '補助科目重複'
+              errorData += `${constants.codeErrMsg.SUBACCOUNTCODEERR003}`
               break
             case -1:
-              errorData += '勘定科目なし'
+              errorData += `${constants.codeErrMsg.ACCOUNTCODEERR004}`
               break
           }
         }

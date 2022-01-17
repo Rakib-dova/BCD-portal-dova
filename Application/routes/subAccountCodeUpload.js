@@ -129,7 +129,7 @@ const cbPostIndex = async (req, res, next) => {
 
   // エラーメッセージが有無確認
   if (validate.isArray(status)) {
-    req.flash('errnotisubaccount', [
+    req.flash('errnoti', [
       '取込に失敗しました。',
       '下記表に記載されている内容を修正して、再アップロードして下さい。',
       'SYSERR',
