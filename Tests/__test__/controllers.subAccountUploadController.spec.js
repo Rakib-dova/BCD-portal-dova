@@ -11,20 +11,22 @@ const SubAccountCode = require('../../Application/models').SubAccountCode
 const sequelize = require('../../Application/models').sequelize
 const codeAccountId = '5a927284-57c9-4594-9ed8-472d261a6102'
 const subAccountCode = '12327284-57c9-4594-9ed8-472d261a6102'
-const codeAccountDataResult = new AccountCode()
-codeAccountDataResult.accountCodeId = '5a927284-57c9-4594-9ed8-472d261a6102'
-codeAccountDataResult.contractId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
-codeAccountDataResult.accountCodeName = 'TEST1'
-codeAccountDataResult.accountCode = 'TEST1'
-codeAccountDataResult.createdAt = new Date('2021-07-09T04:30:00.000Z')
-codeAccountDataResult.updatedAt = new Date('2021-07-09T04:30:00.000Z')
-const subAccountCodeResult = new SubAccountCode()
-subAccountCodeResult.subAccountCodeId = subAccountCode
-subAccountCodeResult.accountCodeId = codeAccountId
-subAccountCodeResult.subjectName = 'TEST1homei'
-subAccountCodeResult.subjectCode = 'TEST1hoko'
-subAccountCodeResult.createdAt = new Date('2021-07-09T04:30:00.000Z')
-subAccountCodeResult.updatedAt = new Date('2021-07-09T04:30:00.000Z')
+const codeAccountDataResult = AccountCode.build({
+  accountCodeId: '5a927284-57c9-4594-9ed8-472d261a6102',
+  contractId: 'f10b95a4-74a1-4691-880a-827c9f1a1faf',
+  accountCodeName: 'TEST1',
+  accountCode: 'TEST1',
+  createdAt: new Date('2021-07-09T04:30:00.000Z'),
+  updatedAt: new Date('2021-07-09T04:30:00.000Z')
+})
+const subAccountCodeResult = SubAccountCode.build({
+  subAccountCodeId: subAccountCode,
+  accountCodeId: codeAccountId,
+  subjectName: 'TEST1homei',
+  subjectCode: 'TEST1hoko',
+  createdAt: new Date('2021-07-09T04:30:00.000Z'),
+  updatedAt: new Date('2021-07-09T04:30:00.000Z')
+})
 const path = require('path')
 const fs = require('fs')
 
@@ -97,9 +99,9 @@ describe('subAccountUploadControllerのテスト', () => {
     }
   }
 
-  // 勘定科目データ1
-  // 請求書が1つの場合
-  const accountCodeFileData1 = Buffer.from(
+  // 補助科目データ
+  // データが1つの場合
+  const subAccountCodeFileData1 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test1.csv', {
       encoding: 'utf-8',
       flag: 'r'
@@ -107,7 +109,7 @@ describe('subAccountUploadControllerのテスト', () => {
   ).toString('base64')
 
   // 異常系1
-  const accountCodeFileData2 = Buffer.from(
+  const subAccountCodeFileData2 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test2.csv', {
       encoding: 'utf-8',
       flag: 'r'
@@ -115,7 +117,7 @@ describe('subAccountUploadControllerのテスト', () => {
   ).toString('base64')
 
   // 異常系2
-  const accountCodeFileData3 = Buffer.from(
+  const subAccountCodeFileData3 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test3.csv', {
       encoding: 'utf-8',
       flag: 'r'
@@ -123,7 +125,7 @@ describe('subAccountUploadControllerのテスト', () => {
   ).toString('base64')
 
   // 異常系3
-  const accountCodeFileData4 = Buffer.from(
+  const subAccountCodeFileData4 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test4.csv', {
       encoding: 'utf-8',
       flag: 'r'
@@ -131,7 +133,7 @@ describe('subAccountUploadControllerのテスト', () => {
   ).toString('base64')
 
   // 異常系4
-  const accountCodeFileData5 = Buffer.from(
+  const subAccountCodeFileData5 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test5.csv', {
       encoding: 'utf-8',
       flag: 'r'
@@ -139,7 +141,7 @@ describe('subAccountUploadControllerのテスト', () => {
   ).toString('base64')
 
   // 異常系5
-  const accountCodeFileData6 = Buffer.from(
+  const subAccountCodeFileData6 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test6.csv', {
       encoding: 'utf-8',
       flag: 'r'
@@ -147,7 +149,7 @@ describe('subAccountUploadControllerのテスト', () => {
   ).toString('base64')
 
   // 異常系6
-  const accountCodeFileData7 = Buffer.from(
+  const subAccountCodeFileData7 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test7.csv', {
       encoding: 'utf-8',
       flag: 'r'
@@ -155,7 +157,7 @@ describe('subAccountUploadControllerのテスト', () => {
   ).toString('base64')
 
   // 異常系7
-  const accountCodeFileData8 = Buffer.from(
+  const subAccountCodeFileData8 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test8.csv', {
       encoding: 'utf-8',
       flag: 'r'
@@ -163,7 +165,7 @@ describe('subAccountUploadControllerのテスト', () => {
   ).toString('base64')
 
   // 異常系8
-  const accountCodeFileData9 = Buffer.from(
+  const subAccountCodeFileData9 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test9.csv', {
       encoding: 'utf-8',
       flag: 'r'
@@ -171,15 +173,15 @@ describe('subAccountUploadControllerのテスト', () => {
   ).toString('base64')
 
   // 異常系9
-  const accountCodeFileData10 = Buffer.from(
+  const subAccountCodeFileData10 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test10.csv', {
       encoding: 'utf-8',
       flag: 'r'
     })
   ).toString('base64')
 
-  // 異常系9
-  const accountCodeFileData11 = Buffer.from(
+  // 異常系10
+  const subAccountCodeFileData11 = Buffer.from(
     fs.readFileSync('./testData/subAccountCodeUpload_test11.csv', {
       encoding: 'utf-8',
       flag: 'r'
@@ -198,11 +200,11 @@ describe('subAccountUploadControllerのテスト', () => {
         userId: 'userId'
       }
 
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const today = new Date().getTime()
       const filename = '補助科目' + '_' + today + '_' + file.userId + '_' + file.originalname + '.csv'
       const newFilePath = path.resolve('/home/upload', filename)
-      fs.writeFileSync(newFilePath, Buffer.from(decodeURIComponent(accountCodeFileData1), 'base64').toString('utf8'))
+      fs.writeFileSync(newFilePath, Buffer.from(decodeURIComponent(subAccountCodeFileData1), 'base64').toString('utf8'))
 
       pathSpy.mockReturnValue(newFilePath)
 
@@ -220,10 +222,13 @@ describe('subAccountUploadControllerのテスト', () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test2.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData2), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData2), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test2.csv')
       const file = {
         userId: 'userId',
@@ -244,10 +249,13 @@ describe('subAccountUploadControllerのテスト', () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test3.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData3), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData3), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test3.csv')
       const file = {
         userId: 'userId',
@@ -268,12 +276,12 @@ describe('subAccountUploadControllerのテスト', () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test12.csv')
       fs.writeFileSync(
         uploadFilePath,
-        Buffer.from(decodeURIComponent(accountCodeFileData11), 'base64').toString('utf8')
+        Buffer.from(decodeURIComponent(subAccountCodeFileData11), 'base64').toString('utf8')
       )
       pathSpy.mockReturnValue('/home/upload/test12.csv')
       const file = {
@@ -305,10 +313,13 @@ describe('subAccountUploadControllerのテスト', () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test4.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData4), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData4), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test4.csv')
       const file = {
         userId: 'userId',
@@ -329,10 +340,13 @@ describe('subAccountUploadControllerのテスト', () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test5.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData5), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData5), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test5.csv')
       const file = {
         userId: 'userId',
@@ -353,10 +367,13 @@ describe('subAccountUploadControllerのテスト', () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test6.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData6), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData6), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test6.csv')
       const file = {
         userId: 'userId',
@@ -387,10 +404,13 @@ describe('subAccountUploadControllerのテスト', () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test7.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData7), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData7), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test7.csv')
       const file = {
         userId: 'userId',
@@ -419,10 +439,13 @@ describe('subAccountUploadControllerのテスト', () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test8.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData8), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData8), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test8.csv')
       const file = {
         userId: 'userId',
@@ -458,11 +481,14 @@ describe('subAccountUploadControllerのテスト', () => {
         userId: 'userId'
       }
 
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const today = new Date().getTime()
       const filename = '補助科目' + '_' + today + '_' + file.userId + '_' + file.originalname + '.csv'
       const newFilePath = path.resolve('/home/upload', filename)
-      fs.writeFileSync(newFilePath, Buffer.from(decodeURIComponent(accountCodeFileData10), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        newFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData10), 'base64').toString('utf8')
+      )
 
       pathSpy.mockReturnValue(newFilePath)
 
@@ -482,11 +508,14 @@ describe('subAccountUploadControllerのテスト', () => {
         userId: 'userId'
       }
 
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const today = new Date().getTime()
       const filename = '補助科目' + '_' + today + '_' + file.userId + '_' + file.originalname + '.csv'
       const newFilePath = path.resolve('/home/upload', filename)
-      fs.writeFileSync(newFilePath, Buffer.from(decodeURIComponent(accountCodeFileData10), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        newFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData10), 'base64').toString('utf8')
+      )
 
       pathSpy.mockReturnValue(newFilePath)
 
@@ -507,15 +536,18 @@ describe('subAccountUploadControllerのテスト', () => {
         userId: 'userId'
       }
 
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test1.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData1), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData1), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test1.csv')
       const insertError = new Error('insert Error')
       subAccountCodeControllerInsertSpy.mockReturnValue(insertError)
 
-      // // 試験実施
+      // 試験実施
       const result = await subAccountUploadController.upload(file, contractNormal)
 
       // 期待結果
@@ -534,10 +566,13 @@ describe('subAccountUploadControllerのテスト', () => {
         userId: 'userId'
       }
 
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test1.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData1), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData1), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test1.csv')
       subAccountCodeControllerInsertSpy.mockImplementation(() => {
         throw new Error('CSVファイル削除エラー')
@@ -559,10 +594,13 @@ describe('subAccountUploadControllerのテスト', () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test9.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData9), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData9), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test9.csv')
 
       subAccountCodeControllerInsertSpy.mockReturnValue(0)
@@ -578,10 +616,13 @@ describe('subAccountUploadControllerのテスト', () => {
       // 準備
       findAllSpy.mockReturnValue(dbAccountCodeTable)
       createSpy.mockReturnValue(codeAccountDataResult)
-      // 勘定科目一括作成
+      // 補助科目一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test9.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(accountCodeFileData9), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData9), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test9.csv')
 
       subAccountCodeControllerInsertSpy.mockReturnValue(0)

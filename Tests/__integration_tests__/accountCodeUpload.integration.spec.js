@@ -346,7 +346,7 @@ describe('勘定科目一括作成のインテグレーションテスト', () =
       await browser.close()
     })
 
-    test('勘定科目一括作成：の項目数チェック', async () => {
+    test('勘定科目一括作成：項目数チェック', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,

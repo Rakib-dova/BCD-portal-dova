@@ -119,7 +119,7 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでaccountUploadが呼ばれ「る」
+      // response.renderでsubAccountUploadが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('subAccountUpload', {
         uploadCommonLayoutTitle: '補助科目一括作成',
         uploadCommonLayoutEngTitle: 'BULK UPLOAD SUBACCOUNT CODE',
@@ -199,7 +199,7 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -336,13 +336,6 @@ describe('accountCodeUploadのテスト', () => {
         fileName: 'filename'
       }
 
-      // const uploadFilePath = path.resolve('/home/upload/test1.csv')
-      // fs.writeFileSync(
-      //   uploadFilePath,
-      //   Buffer.from(decodeURIComponent(subAccountCodeFileData), 'base64').toString('utf8')
-      // )
-      // pathSpy.mockReturnValue('/home/upload/test1.csv')
-
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
@@ -351,7 +344,7 @@ describe('accountCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // subAccountUploadController.uploadのモックバリュー
       subAccountUploadControllerUploadSpy.mockReturnValue(0)
 
       // 試験実施
@@ -387,7 +380,7 @@ describe('accountCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // subAccountUploadController.uploadのモックバリュー
       subAccountUploadControllerUploadSpy.mockReturnValue(new Error())
 
       // 試験実施
@@ -427,7 +420,7 @@ describe('accountCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // subAccountUploadController.uploadのモックバリュー
       subAccountUploadControllerUploadSpy.mockReturnValue(-1)
 
       // 試験実施
@@ -467,7 +460,7 @@ describe('accountCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // subAccountUploadController.uploadのモックバリュー
       subAccountUploadControllerUploadSpy.mockReturnValue(-2)
 
       // 試験実施
@@ -503,7 +496,7 @@ describe('accountCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // subAccountUploadController.uploadのモックバリュー
       subAccountUploadControllerUploadSpy.mockReturnValue(-3)
 
       // 試験実施
@@ -543,7 +536,7 @@ describe('accountCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // subAccountUploadController.uploadのモックバリュー
       subAccountUploadControllerUploadSpy.mockReturnValue(-4)
 
       // 試験実施
@@ -579,7 +572,7 @@ describe('accountCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // subAccountUploadController.uploadのモックバリュー
       subAccountUploadControllerUploadSpy.mockReturnValue([])
 
       // 試験実施
