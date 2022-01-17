@@ -38,24 +38,24 @@ const upload = async function (_file, contract) {
 
     // 勘定科目数量チェック（200件以上の場合エラーにする）
     if (rows.length > 200) {
-      result = -3
-      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
-      return result
+      if (result === null) {
+        result = -3
+      }
     }
 
     // ヘッダチェック
     const headerChk = header.split(',')
     if (headerChk.length !== 2 || header.match(basicHeader) === null) {
-      result = -1
-      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
-      return result
+      if (result === null) {
+        result = -1
+      }
     }
 
     // 勘定科目データがない場合
     if (rows.length < 1) {
-      result = -2
-      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
-      return result
+      if (result === null) {
+        result = -2
+      }
     }
 
     // 勘定科目行ごとチェックする。
@@ -70,10 +70,10 @@ const upload = async function (_file, contract) {
       }
     })
     if (resultVerifiedField.length !== 0) {
-      result = -4
-      result.message = resultVerifiedField
-      logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
-      return result
+      if (result === null) {
+        result = -4
+        result.message = resultVerifiedField
+      }
     }
 
     // 重複チェック前にデータを加工する。
@@ -88,73 +88,74 @@ const upload = async function (_file, contract) {
         duplicationFlag: false
       }
     })
-
     // 仕訳種類指定
     const prefix = 'ACCOUNT'
     // 勘定科目バリデーションチェック
     const errorMsg = []
 
-    for (let idx = 0; idx < uploadAccountCode.length; idx++) {
-      let errorIdx
-      let errorData = ''
-      let errorCheck = false
+    if (result === null) {
+      for (let idx = 0; idx < uploadAccountCode.length; idx++) {
+        let errorIdx
+        let errorData = ''
+        let errorCheck = false
 
-      // 勘定科目コードバリデーションチェック
-      const checkCode = validate.isCode(uploadAccountCode[idx].code, prefix)
-      switch (checkCode) {
-        case '':
-          break
-        default:
-          errorCheck = true
-          errorData += `${constants.codeErrMsg[checkCode]}`
+        // 勘定科目コードバリデーションチェック
+        const checkCode = validate.isCode(uploadAccountCode[idx].code, prefix)
+        switch (checkCode) {
+          case '':
+            break
+          default:
+            errorCheck = true
+            errorData += `${constants.codeErrMsg[checkCode]}`
 
-          break
-      }
-
-      // 勘定科目名バリデーションチェック
-      const checkName = validate.isName(uploadAccountCode[idx].name, prefix)
-      switch (checkName) {
-        case '':
-          break
-        default:
-          errorCheck = true
-          errorData += errorData ? `,${constants.codeErrMsg[checkName]}` : `${constants.codeErrMsg[checkName]}`
-
-          break
-      }
-
-      // バリデーションチェック結果問題ない場合DBに保存
-      if (!errorCheck) {
-        const values = {
-          accountCode: uploadAccountCode[idx].code,
-          accountCodeName: uploadAccountCode[idx].name
+            break
         }
 
-        const insertResult = await accountCodeController.insert(contract, values)
+        // 勘定科目名バリデーションチェック
+        const checkName = validate.isName(uploadAccountCode[idx].name, prefix)
+        switch (checkName) {
+          case '':
+            break
+          default:
+            errorCheck = true
+            errorData += errorData ? `,${constants.codeErrMsg[checkName]}` : `${constants.codeErrMsg[checkName]}`
 
-        // DBエラー発生の場合、エラー処理
-        if (insertResult instanceof Error) {
-          throw insertResult
+            break
         }
 
-        // 重複の場合
-        if (!insertResult) {
-          errorData += `${constants.codeErrMsg.ACCOUNTCODEERR003}`
-        }
-      }
+        // バリデーションチェック結果問題ない場合DBに保存
+        if (!errorCheck) {
+          const values = {
+            accountCode: uploadAccountCode[idx].code,
+            accountCodeName: uploadAccountCode[idx].name
+          }
 
-      if (errorData.length !== 0) {
-        errorIdx = idx + 1
-        errorMsg.push({
-          idx: errorIdx,
-          code: uploadAccountCode[idx].code,
-          name: uploadAccountCode[idx].name,
-          errorData: errorData
-        })
+          const insertResult = await accountCodeController.insert(contract, values)
+
+          // DBエラー発生の場合、エラー処理
+          if (insertResult instanceof Error) {
+            throw insertResult
+          }
+
+          // 重複の場合
+          if (!insertResult) {
+            errorData += `${constants.codeErrMsg.ACCOUNTCODEERR003}`
+          }
+        }
+
+        if (errorData.length !== 0) {
+          errorIdx = idx + 1
+          errorMsg.push({
+            idx: errorIdx,
+            code: uploadAccountCode[idx].code,
+            name: uploadAccountCode[idx].name,
+            errorData: errorData
+          })
+        }
       }
     }
 
-    // 削除機能追加
+    // アップロードファイル削除
     if ((await removeFile(newFilePath)) === true && result === null) {
       result = 0
     }

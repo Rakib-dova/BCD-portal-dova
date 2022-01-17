@@ -13,7 +13,6 @@ constantsDefine({
   ACCOUNTNAMEERR001: `${codeValidDefine.ACCOUNTNAME_KEY}は${codeValidDefine.NAME_LENGTH}文字以内で入力してください。`,
 
   // 補助科目コードエラーメッセージ
-
   SUBACCOUNTCODEERR000: `${codeValidDefine.SUBACCOUNTCODE_KEY}が未入力です。`,
   SUBACCOUNTCODEERR001: `${codeValidDefine.SUBACCOUNTCODE_KEY}は${codeValidDefine.CODE_LENGTH}文字以内で入力してください。`,
   SUBACCOUNTCODEERR002: `${codeValidDefine.SUBACCOUNTCODE_KEY}は英数字で入力してください。`,
@@ -31,12 +30,11 @@ constantsDefine({
   SUBACCOUNTCOUNTERR000:
     '補助科目が200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>（一度に取り込める補助科目は200件までとなります。）',
 
+  // --------------------共通メッセージ--------------------
   // システムエラー
   SYSERR000: 'システムエラーです。<BR>（後程、接続してください。）',
-
-  // CSVファイルヘッダエラー
-  ACCOUNTHEADERERR000: 'ヘッダーが指定のものと異なります。',
-
-  // CSVファイルデータエラー
-  ACCOUNTDATAERR000: '項目数が異なります。'
+  // CSVファイルヘッダエラーメッセージ
+  CODEHEADERERR000: 'ヘッダーが指定のものと異なります。',
+  // CSVファイルデータエラーメッセージ
+  CODEDATAERR000: '項目数が異なります。'
 })

@@ -39,24 +39,24 @@ const upload = async function (_file, contract) {
 
     // 補助科目数量チェック（200件以上の場合エラーにする）
     if (rows.length > 200) {
-      result = -3
-      logger.info(constantsDefine.logMessage.INF001 + 'subAccountUploadController.upload')
-      return result
+      if (result === null) {
+        result = -3
+      }
     }
 
     // ヘッダチェック
     const headerChk = header.split(',')
     if (headerChk.length !== 3 || header.match(basicHeader) === null) {
-      result = -1
-      logger.info(constantsDefine.logMessage.INF001 + 'subAccountUploadController.upload')
-      return result
+      if (result === null) {
+        result = -1
+      }
     }
 
     // 補助科目データがない場合
     if (rows.length < 1) {
-      result = -2
-      logger.info(constantsDefine.logMessage.INF001 + 'subAccountUploadController.upload')
-      return result
+      if (result === null) {
+        result = -2
+      }
     }
 
     // 補助科目行ごとチェックする。
@@ -71,10 +71,10 @@ const upload = async function (_file, contract) {
       }
     })
     if (resultVerifiedField.length !== 0) {
-      result = -4
-      result.message = resultVerifiedField
-      logger.info(constantsDefine.logMessage.INF001 + 'subAccountUploadController.upload')
-      return result
+      if (result === null) {
+        result = -4
+        result.message = resultVerifiedField
+      }
     }
 
     // 重複チェック前にデータを加工する。
@@ -98,100 +98,99 @@ const upload = async function (_file, contract) {
     // 補助科目バリデーションチェック
     const errorMsg = []
 
-    for (let idx = 0; idx < subUploadAccountCode.length; idx++) {
-      let errorIdx
-      let errorData = ''
-      let errorCheck = false
+    if (result === null) {
+      for (let idx = 0; idx < subUploadAccountCode.length; idx++) {
+        let errorIdx
+        let errorData = ''
+        let errorCheck = false
 
-      // 勘定科目コードバリデーションチェック
-      const checkAccountCode = validate.isCode(subUploadAccountCode[idx].accountCode, accoutPrefix)
-      switch (checkAccountCode) {
-        case '':
-          break
-        default:
-          errorCheck = true
-          errorData += `${constants.codeErrMsg[checkAccountCode]}`
+        // 勘定科目コードバリデーションチェック
+        const checkAccountCode = validate.isCode(subUploadAccountCode[idx].accountCode, accoutPrefix)
+        switch (checkAccountCode) {
+          case '':
+            break
+          default:
+            errorCheck = true
+            errorData += `${constants.codeErrMsg[checkAccountCode]}`
+            break
+        }
 
-          break
-      }
+        // 補助科目コードバリデーションチェック
+        const checkCode = validate.isCode(subUploadAccountCode[idx].subAccountCode, subAccoutPrefix)
+        switch (checkCode) {
+          case '':
+            break
+          default:
+            errorCheck = true
+            errorData += errorData ? `,${constants.codeErrMsg[checkCode]}` : `${constants.codeErrMsg[checkCode]}`
+            break
+        }
 
-      // 補助科目コードバリデーションチェック
-      const checkCode = validate.isCode(subUploadAccountCode[idx].subAccountCode, subAccoutPrefix)
-      switch (checkCode) {
-        case '':
-          break
-        default:
-          errorCheck = true
-          errorData += errorData ? `,${constants.codeErrMsg[checkCode]}` : `${constants.codeErrMsg[checkCode]}`
+        // 補助科目名バリデーションチェック
+        const checkName = validate.isName(subUploadAccountCode[idx].subAccountName, subAccoutPrefix)
+        switch (checkName) {
+          case '':
+            break
+          default:
+            errorCheck = true
+            errorData += errorData ? `,${constants.codeErrMsg[checkName]}` : `${constants.codeErrMsg[checkName]}`
+            break
+        }
 
-          break
-      }
+        // バリデーションチェック結果問題ない場合DBに保存
+        if (!errorCheck) {
+          // 勘定科目検索
+          const searchAccountCodeResult = await accountCodeController.searchAccountCode(
+            contract.contractId,
+            subUploadAccountCode[idx].accountCode,
+            ''
+          )
 
-      // 補助科目名バリデーションチェック
-      const checkName = validate.isName(subUploadAccountCode[idx].subAccountName, subAccoutPrefix)
-      switch (checkName) {
-        case '':
-          break
-        default:
-          errorCheck = true
-          errorData += errorData ? `,${constants.codeErrMsg[checkName]}` : `${constants.codeErrMsg[checkName]}`
+          // 勘定科目検索結果がない場合
+          if (searchAccountCodeResult.length === 0) {
+            errorData += `${constants.codeErrMsg.ACCOUNTCODEERR004}`
+          } else {
+            const values = {
+              accountCodeId: searchAccountCodeResult[0].accountCodeId,
+              subjectCode: subUploadAccountCode[idx].subAccountCode,
+              subjectName: subUploadAccountCode[idx].subAccountName
+            }
 
-          break
-      }
+            const insertResult = await subAccountCodeController.insert(contract, values)
 
-      // バリデーションチェック結果問題ない場合DBに保存
-      if (!errorCheck) {
-        // 勘定科目検索
-        const searchAccountCodeResult = await accountCodeController.searchAccountCode(
-          contract.contractId,
-          subUploadAccountCode[idx].accountCode,
-          ''
-        )
+            // DBエラー発生の場合、エラー処理
+            if (insertResult instanceof Error) {
+              throw insertResult
+            }
 
-        // 勘定科目検索結果がない場合
-        if (searchAccountCodeResult.length === 0) {
-          errorData += `${constants.codeErrMsg.ACCOUNTCODEERR004}`
-        } else {
-          const values = {
-            accountCodeId: searchAccountCodeResult[0].accountCodeId,
-            subjectCode: subUploadAccountCode[idx].subAccountCode,
-            subjectName: subUploadAccountCode[idx].subAccountName
-          }
-
-          const insertResult = await subAccountCodeController.insert(contract, values)
-
-          // DBエラー発生の場合、エラー処理
-          if (insertResult instanceof Error) {
-            throw insertResult
-          }
-
-          // 重複の場合、登録の時勘定科目がなくなった場合
-          switch (insertResult) {
-            case 0:
-              break
-            case 1:
-              errorData += `${constants.codeErrMsg.SUBACCOUNTCODEERR003}`
-              break
-            case -1:
-              errorData += `${constants.codeErrMsg.ACCOUNTCODEERR004}`
-              break
+            // 重複の場合、登録の時勘定科目がなくなった場合
+            switch (insertResult) {
+              case 0:
+                break
+              case 1:
+                errorData += `${constants.codeErrMsg.SUBACCOUNTCODEERR003}`
+                break
+              case -1:
+                errorData += `${constants.codeErrMsg.ACCOUNTCODEERR004}`
+                break
+            }
           }
         }
-      }
 
-      if (errorData.length !== 0) {
-        errorIdx = idx + 1
-        errorMsg.push({
-          idx: errorIdx,
-          accountCode: subUploadAccountCode[idx].accountCode,
-          subjectCode: subUploadAccountCode[idx].subAccountCode,
-          subjectName: subUploadAccountCode[idx].subAccountName,
-          errorData: errorData
-        })
+        if (errorData.length !== 0) {
+          errorIdx = idx + 1
+          errorMsg.push({
+            idx: errorIdx,
+            accountCode: subUploadAccountCode[idx].accountCode,
+            subjectCode: subUploadAccountCode[idx].subAccountCode,
+            subjectName: subUploadAccountCode[idx].subAccountName,
+            errorData: errorData
+          })
+        }
       }
     }
 
-    // 削除機能追加
+    // アップロードファイル削除
     if ((await removeFile(newFilePath)) === true && result === null) {
       result = 0
     }
