@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const basicHeader = /勘定科目コード,補助科目コード,補助科目名$/
+const basicHeaderCsvPath = path.resolve('./public/html/補助科目一括作成フォーマット.csv')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const filePath = process.env.INVOICE_UPLOAD_PATH
@@ -45,8 +45,16 @@ const upload = async function (_file, contract) {
     }
 
     // ヘッダチェック
+    // 補助科目フォーマットファイルのヘッダ取得
+    const basicHeader = fs
+      .readFileSync(basicHeaderCsvPath)
+      .toString('utf-8')
+      .split(/\r?\n|\r/)[0]
+      .split(',')
+
+    // ヘッダ比較
     const headerChk = header.split(',')
-    if (headerChk.length !== 3 || header.match(basicHeader) === null) {
+    if (JSON.stringify(headerChk) !== JSON.stringify(basicHeader)) {
       if (result === null) {
         result = -1
       }
