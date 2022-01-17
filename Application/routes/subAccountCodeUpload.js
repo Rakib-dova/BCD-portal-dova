@@ -161,7 +161,6 @@ const cbPostIndex = async (req, res, next) => {
       case -4:
         req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.CODEDATAERR000, 'SYSERR'])
         break
-      // 既に登録済み勘定科目がある場合
     }
   }
   logger.info(constantsDefine.logMessage.INF001 + routerName + '.cbPostIndex')
