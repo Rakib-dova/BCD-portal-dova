@@ -54,10 +54,14 @@ const cbGetIndex = async (req, res, next) => {
   const procedureContents = {
     procedureTitle: '(手順)',
     procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
-    procedureComment2: '2. CSVファイルに勘定科目を記入',
-    procedureComment2A: 'A列：勘定科目コード 英・数字のみ（10桁）',
-    procedureComment2B: 'B列：補助科目コード 英・数字のみ（10桁）、C列：補助科目名 文字列（40桁）',
-    procedureComment2C: '※1ファイルで作成できる勘定科目の数は200まで',
+    procedureComment2: '2. CSVファイルに補助科目を記入',
+    procedureComment2Children: [
+      'A列：勘定科目コード 英・数字のみ（10桁）',
+      'B列：補助科目コード 英・数字のみ（10桁）',
+      'C列：補助科目名 文字列（40桁）',
+      '※1ファイルで作成できる補助科目の数は200まで',
+      '※登録済みの勘定科目コードを入力してください'
+    ],
     procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
     procedureComment4: '4.「アップロード開始」ボタンをクリック'
   }
@@ -151,7 +155,7 @@ const cbPostIndex = async (req, res, next) => {
         break
       // 勘定科目データが200件の超過の場合
       case -3:
-        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTCOUNTERR000, 'SYSERR'])
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.SUBACCOUNTCOUNTERR000, 'SYSERR'])
         break
       // 勘定科目データが様式を従っていない
       case -4:

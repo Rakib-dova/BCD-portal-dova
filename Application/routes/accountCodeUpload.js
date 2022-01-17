@@ -54,9 +54,11 @@ const cbGetIndex = async (req, res, next) => {
     procedureTitle: '(手順)',
     procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
     procedureComment2: '2. CSVファイルに勘定科目を記入',
-    procedureComment2A: 'A列：勘定科目コード　英・数字のみ（10桁）',
-    procedureComment2B: 'B列：勘定科目名　　　文字列（40桁）',
-    procedureComment2C: '※1ファイルで作成できる勘定科目の数は200まで',
+    procedureComment2Children: [
+      'A列：勘定科目コード　英・数字のみ（10桁）',
+      'B列：勘定科目名　　　文字列（40桁）',
+      '※1ファイルで作成できる勘定科目の数は200まで'
+    ],
     procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
     procedureComment4: '4.「アップロード開始」ボタンをクリック'
   }
