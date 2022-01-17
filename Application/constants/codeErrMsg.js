@@ -24,8 +24,12 @@ constantsDefine({
   SUBACCOUNTNAMEERR001: `${codeValidDefine.SUBACCOUNTNAME_KEY}は${codeValidDefine.NAME_LENGTH}文字以内で入力してください。`,
 
   // CSVファイル件数
+  // 勘定科目上限値超過
   ACCOUNTCOUNTERR000:
     '勘定科目が200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>  （一度に取り込める勘定科目は200件までとなります。）',
+  // 補助科目上限値超過
+  SUBACCOUNTCOUNTERR000:
+    '補助科目が200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>（一度に取り込める補助科目は200件までとなります。）',
 
   // システムエラー
   SYSERR000: 'システムエラーです。<BR>（後程、接続してください。）',
