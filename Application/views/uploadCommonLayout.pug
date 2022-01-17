@@ -14,13 +14,13 @@
                 .file.is-centered.is-medium.is-boxed.has-name.is-border.is-white
                   label.file-label.has-text-centered
                     input.file-input(type='file' name= fileInputName accept='.csv').is-purple
-                    span.file-cta
+                    span.file-cta.inbox-size-selected-file
                       span.file-idForCodeInput
-                        i.fas.fa-upload.fa-2x
-                      span.file-label
-                        p.td-overflow.is-family-noto-sans #{cautionForSelectedFile}
+                        i.fas.fa-upload.fa-3x.title-selected-file-icon.up-selected-file-title
+                      span.file-label.up-selected-file-title
+                        p.td-overflow.font-is-macSystem.title-selected-file #{cautionForSelectedFile}
                       span
-                        a.button.btn-primary.is-small.is-family-noto-sans.pt-0.pb-0 ファイル選択
+                        a.button.btn-primary.is-small.is-family-noto-sans.pt-0.pb-0.up-selected-file-title ファイル選択
                     span.file-name
                       p.td-overflow.is-family-noto-sans#filename             
 
@@ -34,11 +34,10 @@
                   .columns.is-centered.mt-0.mb-0
                     .column-csvupload
                       p.border #{procedureContents.procedureComment1}
-                      a.border(download href="../html/勘定科目一括作成フォーマット.csv") 　#{procedureContents.downloadComment}
+                      a.border(download href= formatFileLocation) 　#{formatFileLinkText}
                       p.border #{procedureContents.procedureComment2}
-                      p.border 　#{procedureContents.procedureComment2A}
-                      p.border 　#{procedureContents.procedureComment2B}
-                      p.border 　#{procedureContents.procedureComment2C}
+                      each child in procedureContents.procedureComment2Children
+                        p.border 　#{child}
                       p.border #{procedureContents.procedureComment3}
                       p.border #{procedureContents.procedureComment4}               
 

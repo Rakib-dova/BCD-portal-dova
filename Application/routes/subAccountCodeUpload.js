@@ -10,10 +10,11 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const upload = require('multer')({ dest: process.env.INVOICE_UPLOAD_PATH })
-const accountUploadController = require('../controllers/accountUploadController')
+const routerName = 'subAccountCodeUpload'
+const subAccountUploadController = require('../controllers/subAccountUploadController')
 
 const cbGetIndex = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
+  logger.info(constantsDefine.logMessage.INF000 + routerName + '.cbGetIndex')
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
@@ -53,34 +54,36 @@ const cbGetIndex = async (req, res, next) => {
   const procedureContents = {
     procedureTitle: '(手順)',
     procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
-    procedureComment2: '2. CSVファイルに勘定科目を記入',
+    procedureComment2: '2. CSVファイルに補助科目を記入',
     procedureComment2Children: [
-      'A列：勘定科目コード　英・数字のみ（10桁）',
-      'B列：勘定科目名　　　文字列（40桁）',
-      '※1ファイルで作成できる勘定科目の数は200まで'
+      'A列：勘定科目コード 英・数字のみ（10桁）',
+      'B列：補助科目コード 英・数字のみ（10桁）',
+      'C列：補助科目名 文字列（40桁）',
+      '※1ファイルで作成できる補助科目の数は200まで',
+      '※登録済みの勘定科目コードを入力してください'
     ],
     procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
     procedureComment4: '4.「アップロード開始」ボタンをクリック'
   }
 
   // アップロードフォーマットデータを画面に渡す。
-  res.render('accountUpload', {
-    uploadCommonLayoutTitle: '勘定科目一括作成',
-    uploadCommonLayoutEngTitle: 'BULK UPLOAD ACCOUNT CODE',
-    fileInputName: 'bulkAccountCode',
+  res.render('subAccountUpload', {
+    uploadCommonLayoutTitle: '補助科目一括作成',
+    uploadCommonLayoutEngTitle: 'BULK UPLOAD SUBACCOUNT CODE',
+    fileInputName: 'bulkSubAccountCode',
     cautionForSelectedFile: 'ファイルを選択してください。',
-    listLocation: '/accountCodeList',
-    listLoacationName: '勘定科目一覧→',
-    accountCodeUpload: '/uploadAccount',
+    listLocation: '/subAccountCodeList',
+    listLoacationName: '補助科目一覧→',
+    accountCodeUpload: '/uploadSubAccount',
     procedureContents: procedureContents,
-    formatFileLocation: '../html/勘定科目一括作成フォーマット.csv',
+    formatFileLocation: '../html/補助科目一括作成フォーマット.csv',
     formatFileLinkText: 'アップロード用CSVファイルダウンロード'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
 const cbPostIndex = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'accountCodeUpload.cbPostIndex')
+  logger.info(constantsDefine.logMessage.INF000 + routerName + '.cbPostIndex')
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
@@ -120,12 +123,12 @@ const cbPostIndex = async (req, res, next) => {
   // req.file.userId設定
 
   req.file.userId = req.user.userId
-  const status = await accountUploadController.upload(req.file, contract)
+  const status = await subAccountUploadController.upload(req.file, contract)
 
   if (status instanceof Error) {
     req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.SYSERR000, 'SYSERR'])
-    logger.info(constantsDefine.logMessage.INF001 + 'accountCodeUpload.cbPostIndex')
-    return res.redirect('/uploadAccount')
+    logger.info(constantsDefine.logMessage.INF001 + routerName + '.cbPostIndex')
+    return res.redirect('/uploadSubAccount')
   }
 
   // エラーメッセージが有無確認
@@ -140,8 +143,8 @@ const cbPostIndex = async (req, res, next) => {
     switch (status) {
       // 正常
       case 0:
-        req.flash('info', '勘定科目取込が完了しました。')
-        return res.redirect('/accountCodeList')
+        req.flash('info', '補助科目取込が完了しました。')
+        return res.redirect('/subAccountCodeList')
       // ヘッダー不一致
       case -1:
         req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.CODEHEADERERR000, 'SYSERR'])
@@ -152,7 +155,7 @@ const cbPostIndex = async (req, res, next) => {
         break
       // 勘定科目データが200件の超過の場合
       case -3:
-        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.ACCOUNTCOUNTERR000, 'SYSERR'])
+        req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.SUBACCOUNTCOUNTERR000, 'SYSERR'])
         break
       // 勘定科目データが様式を従っていない
       case -4:
@@ -160,12 +163,12 @@ const cbPostIndex = async (req, res, next) => {
         break
     }
   }
-  logger.info(constantsDefine.logMessage.INF001 + 'accountCodeUpload.cbPostIndex')
-  res.redirect('/uploadAccount')
+  logger.info(constantsDefine.logMessage.INF001 + routerName + '.cbPostIndex')
+  res.redirect('/uploadSubAccount')
 }
 
 router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/', helper.isAuthenticated, upload.single('bulkAccountCode'), cbPostIndex)
+router.post('/', helper.isAuthenticated, upload.single('bulkSubAccountCode'), cbPostIndex)
 
 module.exports = {
   router: router,

@@ -1,33 +1,34 @@
 const fs = require('fs')
 const path = require('path')
-const basicHeaderCsvPath = path.resolve('./public/html/勘定科目一括作成フォーマット.csv')
+const basicHeaderCsvPath = path.resolve('./public/html/補助科目一括作成フォーマット.csv')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const filePath = process.env.INVOICE_UPLOAD_PATH
+const subAccountCodeController = require('./subAccountCodeController')
 const accountCodeController = require('./accountCodeController')
 const constants = require('../constants')
 const validate = require('../lib/validate')
 
 const upload = async function (_file, contract) {
-  logger.info(constantsDefine.logMessage.INF000 + 'accountUploadController.upload')
+  logger.info(constantsDefine.logMessage.INF000 + 'subAccountUploadController.upload')
 
   let result = null
 
   // filename設定
   const today = new Date().getTime()
-  const filename = '勘定科目' + '_' + today + '_' + _file.userId + '_' + _file.originalname + '.csv'
+  const filename = '補助科目' + '_' + today + '_' + _file.userId + '_' + _file.originalname + '.csv'
   const originName = path.resolve(filePath, _file.filename)
   const newFilePath = path.resolve(filePath, filename)
   fs.renameSync(originName, newFilePath)
 
   try {
-    // 勘定科目CSVファイル読み込み
+    // 補助科目CSVファイル読み込み
 
     const data = fs.readFileSync(newFilePath, { encoding: 'utf-8' })
 
     const rows = data.split(/\r?\n|\r/)
 
-    // 勘定科目のヘッダ取出
+    // 補助科目のヘッダ取出
     const header = rows[0]
 
     // ヘッダ除去
@@ -36,7 +37,7 @@ const upload = async function (_file, contract) {
     // ヘッダの最終番目が空の場合は削除
     if (rows[rows.length - 1] === '') rows.pop()
 
-    // 勘定科目数量チェック（200件以上の場合エラーにする）
+    // 補助科目数量チェック（200件以上の場合エラーにする）
     if (rows.length > 200) {
       if (result === null) {
         result = -3
@@ -44,7 +45,7 @@ const upload = async function (_file, contract) {
     }
 
     // ヘッダチェック
-    // 勘定科目フォーマットファイルのヘッダ取得
+    // 補助科目フォーマットファイルのヘッダ取得
     const basicHeader = fs
       .readFileSync(basicHeaderCsvPath)
       .toString('utf-8')
@@ -59,18 +60,18 @@ const upload = async function (_file, contract) {
       }
     }
 
-    // 勘定科目データがない場合
+    // 補助科目データがない場合
     if (rows.length < 1) {
       if (result === null) {
         result = -2
       }
     }
 
-    // 勘定科目行ごとチェックする。
+    // 補助科目行ごとチェックする。
     const resultVerifiedField = []
     rows.forEach((item, idx) => {
       const row = item.split(',')
-      if (row.length !== 2) {
+      if (row.length !== 3) {
         resultVerifiedField.push({
           idx: idx + 2,
           item: item
@@ -85,69 +86,107 @@ const upload = async function (_file, contract) {
     }
 
     // 重複チェック前にデータを加工する。
-    const uploadAccountCode = rows.map((item, idx) => {
+    const subUploadAccountCode = rows.map((item, idx) => {
       const row = item.split(',')
-      const code = row[0]
-      const accountName = row[1]
+      const accountCode = row[0]
+      const subAccountCode = row[1]
+      const subAccountName = row[2]
       return {
         idx: idx,
-        code: code,
-        name: accountName,
+        accountCode: accountCode,
+        subAccountCode: subAccountCode,
+        subAccountName: subAccountName,
         duplicationFlag: false
       }
     })
+
     // 仕訳種類指定
-    const prefix = 'ACCOUNT'
-    // 勘定科目バリデーションチェック
+    const accoutPrefix = 'ACCOUNT'
+    const subAccoutPrefix = 'SUBACCOUNT'
+    // 補助科目バリデーションチェック
     const errorMsg = []
 
     if (result === null) {
-      for (let idx = 0; idx < uploadAccountCode.length; idx++) {
+      for (let idx = 0; idx < subUploadAccountCode.length; idx++) {
         let errorIdx
         let errorData = ''
         let errorCheck = false
 
         // 勘定科目コードバリデーションチェック
-        const checkCode = validate.isCode(uploadAccountCode[idx].code, prefix)
+        const checkAccountCode = validate.isCode(subUploadAccountCode[idx].accountCode, accoutPrefix)
+        switch (checkAccountCode) {
+          case '':
+            break
+          default:
+            errorCheck = true
+            errorData += `${constants.codeErrMsg[checkAccountCode]}`
+            break
+        }
+
+        // 補助科目コードバリデーションチェック
+        const checkCode = validate.isCode(subUploadAccountCode[idx].subAccountCode, subAccoutPrefix)
         switch (checkCode) {
           case '':
             break
           default:
             errorCheck = true
-            errorData += `${constants.codeErrMsg[checkCode]}`
-
+            errorData += errorData ? `,${constants.codeErrMsg[checkCode]}` : `${constants.codeErrMsg[checkCode]}`
             break
         }
 
-        // 勘定科目名バリデーションチェック
-        const checkName = validate.isName(uploadAccountCode[idx].name, prefix)
+        // 補助科目名バリデーションチェック
+        const checkName = validate.isName(subUploadAccountCode[idx].subAccountName, subAccoutPrefix)
         switch (checkName) {
           case '':
             break
           default:
             errorCheck = true
             errorData += errorData ? `,${constants.codeErrMsg[checkName]}` : `${constants.codeErrMsg[checkName]}`
-
             break
         }
 
         // バリデーションチェック結果問題ない場合DBに保存
         if (!errorCheck) {
-          const values = {
-            accountCode: uploadAccountCode[idx].code,
-            accountCodeName: uploadAccountCode[idx].name
-          }
-
-          const insertResult = await accountCodeController.insert(contract, values)
+          // 勘定科目検索
+          const searchAccountCodeResult = await accountCodeController.searchAccountCode(
+            contract.contractId,
+            subUploadAccountCode[idx].accountCode,
+            ''
+          )
 
           // DBエラー発生の場合、エラー処理
-          if (insertResult instanceof Error) {
-            throw insertResult
+          if (searchAccountCodeResult instanceof Error) {
+            throw searchAccountCodeResult
           }
 
-          // 重複の場合
-          if (!insertResult) {
-            errorData += `${constants.codeErrMsg.ACCOUNTCODEERR003}`
+          // 勘定科目検索結果がない場合
+          if (searchAccountCodeResult.length === 0) {
+            errorData += `${constants.codeErrMsg.ACCOUNTCODEERR004}`
+          } else {
+            const values = {
+              accountCodeId: searchAccountCodeResult[0].accountCodeId,
+              subjectCode: subUploadAccountCode[idx].subAccountCode,
+              subjectName: subUploadAccountCode[idx].subAccountName
+            }
+
+            const insertResult = await subAccountCodeController.insert(contract, values)
+
+            // DBエラー発生の場合、エラー処理
+            if (insertResult instanceof Error) {
+              throw insertResult
+            }
+
+            // 重複の場合、登録の時勘定科目がなくなった場合
+            switch (insertResult) {
+              case 0:
+                break
+              case 1:
+                errorData += `${constants.codeErrMsg.SUBACCOUNTCODEERR003}`
+                break
+              case -1:
+                errorData += `${constants.codeErrMsg.ACCOUNTCODEERR004}`
+                break
+            }
           }
         }
 
@@ -155,8 +194,9 @@ const upload = async function (_file, contract) {
           errorIdx = idx + 1
           errorMsg.push({
             idx: errorIdx,
-            code: uploadAccountCode[idx].code,
-            name: uploadAccountCode[idx].name,
+            accountCode: subUploadAccountCode[idx].accountCode,
+            subjectCode: subUploadAccountCode[idx].subAccountCode,
+            subjectName: subUploadAccountCode[idx].subAccountName,
             errorData: errorData
           })
         }
@@ -167,15 +207,15 @@ const upload = async function (_file, contract) {
     if ((await removeFile(newFilePath)) === true && result === null) {
       result = 0
     }
-    logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
+    logger.info(constantsDefine.logMessage.INF001 + 'subAccountUploadController.upload')
     if (errorMsg.length !== 0) {
-      errorMsg.unshift({ header: ['行数', '勘定科目コード', '勘定科目名', '詳細'] })
+      errorMsg.unshift({ header: ['行数', '勘定科目コード', '補助科目コード', '補助科目名', '詳細'] })
       return errorMsg
     }
     return result
   } catch (error) {
     logger.error({ contractId: contract.contractId, stack: error.stack, status: 0 })
-    logger.info(constantsDefine.logMessage.INF001 + 'accountUploadController.upload')
+    logger.info(constantsDefine.logMessage.INF001 + 'subAccountUploadController.upload')
     return error
   }
 }
@@ -204,5 +244,5 @@ const removeFile = async (deleteFilePath) => {
 
 module.exports = {
   upload: upload,
-  remove: removeFile
+  removeFile: removeFile
 }

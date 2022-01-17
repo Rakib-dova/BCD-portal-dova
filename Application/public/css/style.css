@@ -695,3 +695,29 @@ body > div.hero.is-small {
   width: 100%;
   max-width: 600px;
 }
+
+.font-is-macSystem {
+  font-family: BlinkMacSystemFont, -apple-system, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+    'Droid Sans', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+}
+
+.title-selected-file {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: #5f6982;
+}
+
+.title-selected-file-icon::before {
+  color: #5f6982;
+  content: '\f093';
+  font-size: 50px;
+}
+
+.inbox-size-selected-file {
+  padding: 32px 24px !important;
+}
+
+.up-selected-file-title {
+  transform: translateY(-22px);
+}

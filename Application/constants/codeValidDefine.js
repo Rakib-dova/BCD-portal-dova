@@ -8,6 +8,10 @@ module.exports = {
   ACCOUNTCODE_KEY: '勘定科目コード',
   ACCOUNTNAME_KEY: '勘定科目名',
 
+  // 補助科目
+  SUBACCOUNTCODE_KEY: '補助科目コード',
+  SUBACCOUNTNAME_KEY: '補助科目名',
+
   // 名
   NAME_LENGTH: 40
 }
