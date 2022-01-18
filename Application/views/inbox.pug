@@ -1,0 +1,21 @@
+﻿extends layout
+
+block content
+  .container
+    div.title-box-journallzing
+      h4.title-text-journallzing.text-inbox 仕訳情報設定
+    .box
+      include invoiceHeader
+      include invoiceOptions
+      include invoicePaymentMethod
+      include invoiceLines
+      include invoiceFooter
+      .grouped-button
+        a.button.mr-6(href='/inboxList/1')  戻る
+        button.button.is-link 確認
+
+  include footer
+
+block append scripts
+  script(src="/js/inbox-page.js")
+  link(rel='stylesheet', type='text/css', href='/css/inbox.css')

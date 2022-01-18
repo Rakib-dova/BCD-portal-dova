@@ -1,3 +1,5 @@
+const apiManager = require('./apiManager')
+
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
   const processStatus = {
@@ -6,7 +8,6 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
     ACCEPTED: 2, // 受理済み
     DELIVERED: 3 // 受信済み
   }
-  const apiManager = require('./apiManager')
   const findDocuments = '/documents'
   const withouttag = ['archived', 'AP_DOCUMENT_Draft', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document']
   const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
@@ -94,6 +95,14 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
     currPage: currPage + 1
   }
 }
+
+const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId) {
+  const InvoiceDetail = require('../lib/invoiceDetail')
+  const invoice = await apiManager.accessTradeshift(accessTk, refreshTk, 'get', `/documents/${invoiceId}`)
+  const displayInvoice = new InvoiceDetail(invoice)
+  return displayInvoice
+}
 module.exports = {
-  getInbox: getInbox
+  getInbox: getInbox,
+  getInvoiceDetail: getInvoiceDetail
 }

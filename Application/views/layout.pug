@@ -49,10 +49,54 @@ html
                   p.modal-card-title= messages.noti[0]
                   button.delete(type="button" data-target="confirmmodify-modal")
                 section.modal-card-body
-                  p !{messages.noti[1]}
+                  if messages.noti[2] === 'SYSERR'
+                    p.color-err-message !{messages.noti[1]}
+                  else
+                    p !{messages.noti[1]}
                 footer.modal-card-foot
                   div.button-area
                     a.button.cancel-button(data-target='confirmmodify-modal') 確認
+
+    if messages.errnoti
+      .modal.modal-fx-fadeInscale#errorConfirmmodify-modal.is-active
+              .modal-background.cancel-button(data-target="errorConfirmmodify-modal")
+              .modal-card.errnoti-model-size
+                header.modal-card-head
+                  p.modal-card-title= messages.errnoti[0]
+                  button.delete(type="button" data-target="errorConfirmmodify-modal")
+                section.modal-card-body
+                  if messages.errnoti[2] === 'SYSERR'
+                    p.color-err-message !{messages.errnoti[1]}
+                  else
+                    p !{messages.errnoti[1]}
+                if messages.errnoti[3]
+                 section.modal-card-body
+                  div
+                    table.table.errnoti-table-size
+                      thead
+                        tr
+                        each header in messages.errnoti[3][0].header
+                          th.text-center= header
+                      tbody
+                       if messages.errnoti[3][0].header.length === 5
+                        - for (var i =1; i < messages.errnoti[3].length; i++)
+                          tr
+                            td.errnoti-table-number.text-center= messages.errnoti[3][i].idx
+                            td.errnoti-table-td= messages.errnoti[3][i].accountCode
+                            td.errnoti-table-td= messages.errnoti[3][i].subjectCode
+                            td.errnoti-table-td= messages.errnoti[3][i].subjectName
+                            td= messages.errnoti[3][i].errorData
+                       else
+                        - for (var i =1; i < messages.errnoti[3].length; i++)
+                          tr
+                            td.errnoti-table-number.text-center= messages.errnoti[3][i].idx
+                            td.errnoti-table-td= messages.errnoti[3][i].code
+                            td.errnoti-table-td= messages.errnoti[3][i].name
+                            td= messages.errnoti[3][i].errorData
+
+                footer.modal-card-foot
+                  div.button-area
+                    a.button.cancel-button(data-target='errorConfirmmodify-modal') 確認
 
     block scripts
       script(src="/js/common-page.js")

@@ -228,6 +228,9 @@ app.use('/uploadAccount', require('./routes/accountCodeUpload').router)
 // 補助科目
 app.use('/subAccountCodeList', require('./routes/subAccountCodeList').router)
 
+// 補助科目一括作成
+app.use('/uploadSubAccount', require('./routes/subAccountCodeUpload').router)
+
 // 補助科目設定
 app.use('/registSubAccountCode', require('./routes/registSubAccountCode').router)
 
@@ -236,6 +239,8 @@ app.use('/subAccountCodeEdit', require('./routes/subAccountCodeEdit').router)
 
 // 受領した請求書一覧
 app.use('/inboxList', require('./routes/inboxList').router)
+// 受領した請求書
+app.use('/inbox', require('./routes/inbox').router)
 
 // 設定
 // cancellation
