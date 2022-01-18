@@ -3493,6 +3493,9 @@ describe('uploadFormatのテスト', () => {
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
+      request.params = {
+        uploadFormatId: '55555555-cb0b-48ad-857d-4b42a44ede13'
+      }
 
       const testUploadFormatId = '1'
       request.params.uploadForamtId = testUploadFormatId
@@ -3559,6 +3562,9 @@ describe('uploadFormatのテスト', () => {
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.params = {
+        uploadFormatId: '55555555-cb0b-48ad-857d-4b42a44ede13'
       }
 
       const testUploadFormatId = '1'

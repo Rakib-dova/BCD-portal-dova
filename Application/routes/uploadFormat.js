@@ -641,6 +641,11 @@ const cbDeleteFormat = async (req, res, next) => {
   }
   // 確認画面から渡されたuploadFormatId取得
   const uploadFormatId = req.params.uploadFormatId
+  if (!validate.isUUID(uploadFormatId)) {
+    return res.send({
+      result: 0
+    })
+  }
 
   // アップロードフォーマットを削除して結果を返す
   const resultOfDeletedUploadFormat = await uploadFormatController.deleteDataForUploadFormat(uploadFormatId)

@@ -285,7 +285,7 @@ module.exports = {
       logger.info(`${deleteTargetAccountCode.accountCodeId}と紐づいてる補助科目の削除処理を終了します。`)
 
       // 勘定科目削除
-      logger.info(`${deleteTargetAccountCode.accountCodeId}のデータの削除処理を終了します。`)
+      logger.info(`${deleteTargetAccountCode.accountCodeId}のデータの削除処理を開始します。`)
       await deleteTargetAccountCode.destroy()
       logger.info(`${deleteTargetAccountCode.accountCodeId}のデータの削除処理を終了します。`)
 
