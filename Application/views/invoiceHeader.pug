@@ -13,7 +13,10 @@
           if customer.name !== 0
           .columns.m-0.p-0
             .column.p-0
-              p.text-overflow #{customer.name}
+              if customer.name.length < 36
+                p.text-overflow #{customer.name}
+              else
+                p(title= customer.name).text-overflow #{customer.name.substr(0, 35)}...
         if customer.address
           if customer.address.postalNumber && customer.address.postalNumber.length !== 0
             .columns.m-0.p-0
@@ -58,7 +61,10 @@
         if customer !== 0
           .columns.m-0.p-0.wraper-columns
             .column.p-0
-              p.text-overflow #{supplier.name}
+              if supplier.name.length < 36
+                p.text-overflow #{supplier.name}
+              else
+                p(title= supplier.name).text-overflow #{supplier.name.substr(0, 35)}...
         if supplier.address
           if supplier.address.postalNumber && supplier.address.postalNumber.length !== 0
             .columns.m-0.p-0
