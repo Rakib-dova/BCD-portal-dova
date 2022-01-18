@@ -213,11 +213,15 @@ app.use('/uploadFormatList', require('./routes/uploadFormatList').router)
 app.use('/uploadFormatEdit', require('./routes/uploadFormatEdit').router)
 
 // 仕訳情報設定
+// ------------勘定科目
 // 勘定科目一覧
 app.use('/accountCodeList', require('./routes/accountCodeList').router)
 
 // 勘定科目設定
 app.use('/registAccountCode', require('./routes/registAccountCode').router)
+
+// 勘定科目削除
+app.use('/deleteAccountCode', require('./routes/deleteAccountCode').router)
 
 // 勘定科目確認・変更
 app.use('/accountCodeEdit', require('./routes/accountCodeEdit').router)
@@ -225,7 +229,8 @@ app.use('/accountCodeEdit', require('./routes/accountCodeEdit').router)
 // 勘定科目一括作成
 app.use('/uploadAccount', require('./routes/accountCodeUpload').router)
 
-// 補助科目
+// ------------補助科目
+// 補助科目一覧
 app.use('/subAccountCodeList', require('./routes/subAccountCodeList').router)
 
 // 補助科目一括作成
