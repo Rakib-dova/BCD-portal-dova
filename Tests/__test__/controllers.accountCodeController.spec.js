@@ -5,6 +5,7 @@ jest.mock('../../Application/lib/logger')
 const accountCodeController = require('../../Application/controllers/accountCodeController')
 const logger = require('../../Application/lib/logger')
 const AccountCode = require('../../Application/models').AccountCode
+const SubAccountCode = require('../../Application/models').SubAccountCode
 const timestamp = require('../../Application/lib/utils').timestampForList
 const accountCodeMock = require('../mockDB/AccountCode_Table')
 const sequelize = require('../../Application/models').sequelize
@@ -39,7 +40,14 @@ const transaction = {
   LOCK: {}
 }
 
-let errorSpy, contractId, accountCodefindAllSpy, infoSpy, createSpy, findOneSpy, transactionSpy
+let errorSpy,
+  contractId,
+  accountCodefindAllSpy,
+  infoSpy,
+  createSpy,
+  findOneSpy,
+  transactionSpy,
+  subAccountCodeFindAllSpy
 
 describe('accountCodeControllerのテスト', () => {
   beforeEach(() => {
@@ -49,6 +57,10 @@ describe('accountCodeControllerのテスト', () => {
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
     transactionSpy = jest.spyOn(sequelize, 'transaction')
+    subAccountCodeFindAllSpy = jest.spyOn(SubAccountCode, 'findAll')
+    SubAccountCode.build = jest.fn((item) => {
+      return { ...item, save: () => {}, destroy: () => {} }
+    })
   })
   afterEach(() => {
     createSpy.mockRestore()
@@ -57,6 +69,7 @@ describe('accountCodeControllerのテスト', () => {
     errorSpy.mockRestore()
     infoSpy.mockRestore()
     transactionSpy.mockRestore()
+    subAccountCodeFindAllSpy.mockRestore()
   })
 
   contractId = '87654321-fbe6-4864-a866-7a3ce9aa517e'
@@ -598,6 +611,113 @@ describe('accountCodeControllerのテスト', () => {
         stack: expect.anything(),
         status: 0
       })
+    })
+  })
+  describe('deleteDataForUploadFormat', () => {
+    test('正常：勘定科目削除（紐づいてる補助科目あり）', async () => {
+      // accountCodeId
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+
+      // 勘定科目検索（Mockデータ）
+      AccountCode.findOne = jest.fn((value) => {
+        return {
+          accountCodeId: value,
+          dataValues: {
+            accountCodeId: value
+          },
+          destroy: async () => {}
+        }
+      })
+
+      // 補助科目検索（Mockデータ）、削除対象の勘定科目と紐づいてる補助科目
+      const savedDate = new Date().toISOString()
+      const subAccounts = []
+      for (let idx = 0; idx < 5; idx++) {
+        const { v4: uuidV4 } = require('uuid')
+        subAccounts.push({
+          subAccountCodeId: uuidV4(),
+          accountCodeId: accountCodeId,
+          subjectName: `補助科目${idx}`,
+          subjectCode: `TEST${idx}`,
+          createdAt: savedDate,
+          updatedAt: savedDate,
+          dataValues: {
+            accountCodeId: accountCodeId
+          },
+          destroy: async () => {}
+        })
+      }
+      subAccountCodeFindAllSpy.mockReturnValue(subAccounts)
+
+      // 試験実施
+      const result = await accountCodeController.deleteForAccountCode(accountCodeId)
+
+      // 正常削除の「1」を返す
+      expect(result).toEqual(1)
+    })
+
+    test('準正常：勘定科目削除（紐づいてる補助科目なし）', async () => {
+      // accountCodeId
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+
+      // 勘定科目検索（Mockデータ）
+      AccountCode.findOne = jest.fn((value) => {
+        return {
+          accountCodeId: value,
+          dataValues: {
+            accountCodeId: value
+          },
+          destroy: async () => {}
+        }
+      })
+
+      // 補助科目検索（Mockデータ）
+      subAccountCodeFindAllSpy.mockReturnValue([])
+
+      // 試験実施
+      const result = await accountCodeController.deleteForAccountCode(accountCodeId)
+
+      // 正常削除の「1」を返す
+      expect(result).toEqual(1)
+    })
+
+    test('準正常：勘定科目削除（既に削除されている場合）', async () => {
+      // accountCodeId
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+
+      // 勘定科目検索（Mockデータ）
+      AccountCode.findOne = jest.fn((value) => {
+        return null
+      })
+
+      // 補助科目検索（Mockデータ）
+      subAccountCodeFindAllSpy.mockReturnValue([])
+
+      // 試験実施
+      const result = await accountCodeController.deleteForAccountCode(accountCodeId)
+
+      // 準正常削除の場合、「-1」を返す
+      expect(result).toBe(-1)
+    })
+
+    test('準正常：アップロードフォーマット削除（DBエラー）', async () => {
+      // accountCodeId
+      const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+
+      // 勘定科目検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      AccountCode.findOne = jest.fn((value) => {
+        return dbError
+      })
+
+      // 補助科目検索（Mockデータ）
+      subAccountCodeFindAllSpy.mockReturnValue([])
+
+      // 試験実施
+      const result = await accountCodeController.deleteForAccountCode(accountCodeId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
     })
   })
 })

@@ -50,7 +50,6 @@ window.onload = () => {
 Array.prototype.forEach.call(document.querySelectorAll('.deleteAccountCodeBtn'), (item) => {
   item.addEventListener('click', () => {
     const accountCodeId = item.getAttribute('uuid')
-    console.log(accountCodeId)
     $('#modalCodeDelBtn').setAttribute('uuid', accountCodeId)
   })
 })
