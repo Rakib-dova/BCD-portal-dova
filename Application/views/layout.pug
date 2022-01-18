@@ -54,8 +54,6 @@ html
                   else
                     p !{messages.noti[1]}
                 footer.modal-card-foot
-                  div.button-area
-                    a.button.cancel-button(data-target='confirmmodify-modal') 確認
 
     if messages.errnoti
       .modal.modal-fx-fadeInscale#errorConfirmmodify-modal.is-active
@@ -95,8 +93,6 @@ html
                             td= messages.errnoti[3][i].errorData
 
                 footer.modal-card-foot
-                  div.button-area
-                    a.button.cancel-button(data-target='errorConfirmmodify-modal') 確認
 
     block scripts
       script(src="/js/common-page.js")
