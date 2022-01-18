@@ -206,7 +206,7 @@ describe('deleteAccountCodeのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).not.toHaveBeenCalledWith(error500)
 
-      // 解約中の場合、レスポンスボディのresultで1を返す
+      // 解約中の場合、レスポンスボディのresultで0を返す
       expect(response.body.result).toBe(0)
     })
 
@@ -277,8 +277,6 @@ describe('deleteAccountCodeのテスト', () => {
       await deleteAccountCode.cbDeleteAccountCode(request, response, next)
 
       // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーの場合レスポンスボディのresultで0を返す
       expect(response.body.result).toBe(0)
     })
@@ -323,8 +321,6 @@ describe('deleteAccountCodeのテスト', () => {
       await deleteAccountCode.cbDeleteAccountCode(request, response, next)
 
       // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーの場合レスポンスボディのresultで0を返す
       expect(response.body.result).toBe(0)
     })
@@ -349,8 +345,6 @@ describe('deleteAccountCodeのテスト', () => {
       await deleteAccountCode.cbDeleteAccountCode(request, response, next)
 
       // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(error404)
       // 500エラーの場合レスポンスボディのresultで0を返す
       expect(response.body.result).toBe(0)
     })
