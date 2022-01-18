@@ -143,7 +143,8 @@ describe('routes.accountListのテスト', () => {
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
-        prevLocationName: '←勘定科目一括作成'
+        prevLocationName: '←勘定科目一括作成',
+        deleteModalTitle: '勘定科目削除'
       })
     })
 
@@ -187,7 +188,8 @@ describe('routes.accountListのテスト', () => {
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
-        prevLocationName: '←勘定科目一括作成'
+        prevLocationName: '←勘定科目一括作成',
+        deleteModalTitle: '勘定科目削除'
       })
     })
 
@@ -230,7 +232,8 @@ describe('routes.accountListのテスト', () => {
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
-        prevLocationName: '←勘定科目一括作成'
+        prevLocationName: '←勘定科目一括作成',
+        deleteModalTitle: '勘定科目削除'
       })
     })
 
@@ -273,7 +276,8 @@ describe('routes.accountListのテスト', () => {
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
-        prevLocationName: '←勘定科目一括作成'
+        prevLocationName: '←勘定科目一括作成',
+        deleteModalTitle: '勘定科目削除'
       })
     })
 
@@ -316,7 +320,8 @@ describe('routes.accountListのテスト', () => {
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
-        prevLocationName: '←勘定科目一括作成'
+        prevLocationName: '←勘定科目一括作成',
+        deleteModalTitle: '勘定科目削除'
       })
     })
 
@@ -359,7 +364,8 @@ describe('routes.accountListのテスト', () => {
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
-        prevLocationName: '←勘定科目一括作成'
+        prevLocationName: '←勘定科目一括作成',
+        deleteModalTitle: '勘定科目削除'
       })
     })
 
@@ -402,7 +408,8 @@ describe('routes.accountListのテスト', () => {
         setClassChangeBtn: 'checkChangeAccountCodeBtn',
         setClassDeleteBtn: 'deleteAccountCodeBtn',
         prevLocation: '/uploadAccount',
-        prevLocationName: '←勘定科目一括作成'
+        prevLocationName: '←勘定科目一括作成',
+        deleteModalTitle: '勘定科目削除'
       })
     })
 

@@ -62,7 +62,6 @@ const cbDeleteAccountCode = async (req, res, next) => {
       result: 0
     })
   }
-  console.log('q2123213')
   // 確認画面から渡されたaccountCodeId取得
   const accountCodeId = req.params.accountCodeId
 
