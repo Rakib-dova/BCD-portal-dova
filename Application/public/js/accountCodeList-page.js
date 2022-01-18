@@ -1,3 +1,22 @@
+// document.getElementById、document.getElementsByClassName省略
+const $ = function (tagObjName) {
+  const classNamePattern = '\\.+[a-zA-Z0-9]'
+  const idNamePatten = '\\#+[a-zA-Z0-9]'
+  const classNameReg = new RegExp(classNamePattern)
+  const idNameReg = new RegExp(idNamePatten)
+  let selectors
+
+  if (classNameReg.test(tagObjName)) {
+    selectors = document.querySelectorAll(tagObjName)
+  } else if (idNameReg.test(tagObjName)) {
+    selectors = document.querySelectorAll(tagObjName)[0]
+  } else {
+    return null
+  }
+  return Object.assign(selectors, Array.prototype, (type, event) => {
+    document.addEventListener(type, event)
+  })
+}
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
 const ua = window.navigator.userAgent
@@ -27,8 +46,42 @@ window.onload = () => {
   })
 }
 
+// 一覧から各レコードの削除ボタン押下
 Array.prototype.forEach.call(document.querySelectorAll('.deleteAccountCodeBtn'), (item) => {
   item.addEventListener('click', () => {
-    alert('現在機能追加中です。')
+    const accountCodeId = item.getAttribute('uuid')
+    console.log(accountCodeId)
+    $('#modalCodeDelBtn').setAttribute('uuid', accountCodeId)
+  })
+})
+
+// Modalの削除ボタン押下
+Array.prototype.forEach.call(document.querySelectorAll('#modalCodeDelBtn'), (item) => {
+  item.addEventListener('click', function (e) {
+    const accountCodeId = item.getAttribute('uuid')
+    const url = `/deleteAccountCode/${accountCodeId}`
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        // 削除失敗
+        switch (response.result) {
+          case 0:
+            alert('削除失敗しました。（システムエラー）')
+            break
+          case 1:
+            // ページ更新
+            location.reload()
+            break
+          case -1:
+            alert('既に削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
+            location.reload()
+            break
+        }
+      })
   })
 })

@@ -54,7 +54,7 @@ const cbGetIndex = async (req, res, next) => {
 
   if (accountCodeListArr instanceof Error) return next(errorHelper.create(500))
 
-  // アップロードフォーマットデータを画面に渡す。
+  // 勘定科目データを画面に渡す。
   res.render('accountCodeList', {
     title: '勘定科目一覧',
     engTitle: 'ACCOUNT CODE LIST',
@@ -69,7 +69,9 @@ const cbGetIndex = async (req, res, next) => {
     setClassChangeBtn: 'checkChangeAccountCodeBtn',
     setClassDeleteBtn: 'deleteAccountCodeBtn',
     prevLocation: '/uploadAccount',
-    prevLocationName: '←勘定科目一括作成'
+    prevLocationName: '←勘定科目一括作成',
+    // 削除モーダル表示
+    deleteModalTitle: '勘定科目削除'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
