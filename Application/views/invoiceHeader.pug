@@ -1,0 +1,102 @@
+﻿.box
+  .columns.m-0
+    .column-header.is-2-header.text-inbox.text-inbox-subtitle.text-inbox-common
+      | 請求書番号 
+    .column-header.text-inbox-common
+      | #{invoiceId}
+
+.box
+  .columns.m-0.wraper-columns
+    .column-header
+      p.text-inbox.text-inbox-subtitle.text-inbox-common 宛先
+        if customer
+          if customer.name !== 0
+          .columns.m-0.p-0
+            .column.p-0
+              p.text-overflow #{customer.name}
+        if customer.address
+          if customer.address.postalNumber && customer.address.postalNumber.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{customer.address.postbox} #{customer.address.postalNumber}
+          if customer.address.cityName && customer.address.cityName.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{customer.address.cityName}
+          if customer.address.streetName && customer.address.streetName.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{customer.address.streetName}
+          if customer.address.additionalStreetName && customer.address.additionalStreetName.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{customer.address.additionalStreetName}
+          if customer.address.country && customer.address.country.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{customer.address.country}
+        .columns.m-0.p-0
+          .column.p-0
+            |　
+        each id in customer.id
+          if id.schemeId === 'TS:REGNO'
+            .columns.m-0.p-0
+              .column.p-0
+                | 登録番号：#{id.value}
+          if id.schemeId === 'GLN'
+            .columns.m-0.p-0
+              .column.p-0
+                | GLN：#{id.value}
+          if id.schemeId === 'JP:CT'
+            .columns.m-0.p-0
+              .column.p-0
+                | 法人番号：#{id.value}
+
+    .column-header
+      p.text-inbox.text-inbox-subtitle.text-inbox-common 差出人
+      if supplier
+        if customer !== 0
+          .columns.m-0.p-0.wraper-columns
+            .column.p-0
+              p.text-overflow #{supplier.name}
+        if supplier.address
+          if supplier.address.postalNumber && supplier.address.postalNumber.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{supplier.address.postbox} #{supplier.address.postalNumber}
+          if supplier.address.cityName && supplier.address.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{supplier.address.cityName}
+          if supplier.address.streetName && supplier.address.streetName.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{supplier.address.streetName}
+          if supplier.address.additionalStreetName && supplier.address.additionalStreetName.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{supplier.address.additionalStreetName}
+          if supplier.address.country && supplier.address.country.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{supplier.address.country}
+          if supplier.email && supplier.email.length !== 0
+            .columns.m-0.p-0
+              .column.p-0
+                | #{supplier.email}
+        .columns.m-0.p-0
+          .column.p-0
+            |　
+        each id in supplier.id
+          if id.schemeId === 'TS:REGNO'
+            .columns.m-0.p-0
+              .column.p-0
+                | 登録番号：#{id.value}
+          if id.schemeId === 'GLN'
+            .columns.m-0.p-0
+              .column.p-0
+                | GLN：#{id.value}
+          if id.schemeId === 'JP:CT'
+            .columns.m-0.p-0
+              .column.p-0
+                | 法人番号：#{id.value}

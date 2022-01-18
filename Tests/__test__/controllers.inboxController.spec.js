@@ -5,7 +5,7 @@ jest.mock('../../Application/lib/logger')
 const inboxController = require('../../Application/controllers/inboxController')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const logger = require('../../Application/lib/logger')
-
+const InvoiceDetailObj = require('../../Application/lib/invoiceDetail')
 let accessTradeshiftSpy, errorSpy
 
 const searchResult1 = {
@@ -645,6 +645,176 @@ describe('inboxControllerのテスト', () => {
       const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
       // 期待結果
       expect(result).toEqual(result0)
+    })
+  })
+
+  describe('getInvoiceDetail', () => {
+    test('正常', async () => {
+      const dummyData = require('../mockInvoice/invoice32')
+      accessTradeshiftSpy.mockReturnValue(dummyData)
+      const resultDummyData = new InvoiceDetailObj(dummyData)
+      const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
+      expect(result).toEqual(resultDummyData)
+    })
+
+    test('正常：支払い条件ない', async () => {
+      const dummyData = require('../mockInvoice/invoice33')
+      accessTradeshiftSpy.mockReturnValue(dummyData)
+      const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
+
+      expect(result.payments).toEqual([])
+    })
+
+    test('正常：現金支払い', async () => {
+      const dummyData = require('../mockInvoice/invoice34')
+      accessTradeshiftSpy.mockReturnValue(dummyData)
+      const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
+
+      expect(result.payments).toEqual([
+        {
+          現金払い: {}
+        }
+      ])
+    })
+
+    test('正常：小切手払い', async () => {
+      const dummyData = require('../mockInvoice/invoice35')
+      accessTradeshiftSpy.mockReturnValue(dummyData)
+      const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
+
+      expect(result.payments).toEqual([
+        {
+          小切手払い: {}
+        }
+      ])
+    })
+
+    test('正常：BankCard', async () => {
+      const dummyData = require('../mockInvoice/invoice36')
+      accessTradeshiftSpy.mockReturnValue(dummyData)
+      const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
+
+      expect(result.payments).toEqual([
+        {
+          'Payment by bank card': {}
+        }
+      ])
+    })
+
+    test('正常：DirectDebit', async () => {
+      const dummyData = require('../mockInvoice/invoice37')
+      accessTradeshiftSpy.mockReturnValue(dummyData)
+      const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
+
+      expect(result.payments).toEqual([
+        {
+          'Payment by direct debit': [
+            { item: '銀行名', value: '赤銀行' },
+            { item: '支店名', value: '上野' },
+            { item: '科目', value: '当座' },
+            { item: '口座番号', value: '1130008' },
+            { item: '口座名義', value: '太郎' },
+            { item: '番地', value: '所在地１（任意）' },
+            { item: 'ビル名/フロア等', value: '所在地２（任意）' },
+            { item: '家屋番号', value: 'ビル名（任意）' },
+            { item: '都道府県', value: '市区町村（任意）' },
+            { item: '都道府県', value: '都道府県（任意）' },
+            { item: '郵便番号', value: '100-0000' },
+            { item: '所在地', value: '所在地（任意）' },
+            { item: '国', value: '国名（任意）' }
+          ]
+        }
+      ])
+    })
+
+    test('正常：銀行口座情報(国内)', async () => {
+      const dummyData = require('../mockInvoice/invoice38')
+      accessTradeshiftSpy.mockReturnValue(dummyData)
+      const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
+
+      expect(result.payments).toEqual([
+        {
+          '銀行口座情報(国内)': [
+            { item: '銀行名', value: '赤銀行' },
+            { item: '支店名', value: '上野' },
+            { item: '科目', value: '当座' },
+            { item: '口座番号', value: '1130008' },
+            { item: '口座名義', value: '太郎' },
+            { item: '番地', value: '所在地１（任意）' },
+            { item: 'ビル名/フロア等', value: '所在地２（任意）' },
+            { item: '家屋番号', value: 'ビル名（任意）' },
+            { item: '都道府県', value: '市区町村（任意）' },
+            { item: '都道府県', value: '都道府県（任意）' },
+            { item: '郵便番号', value: '100-0000' },
+            { item: '所在地', value: '所在地（任意）' },
+            { item: '国', value: '国名（任意）' }
+          ]
+        }
+      ])
+    })
+
+    test('正常：IBAN', async () => {
+      const dummyData = require('../mockInvoice/invoice39')
+      accessTradeshiftSpy.mockReturnValue(dummyData)
+      const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
+
+      expect(result.payments).toEqual([
+        {
+          IBANで支払う: [
+            { item: '銀行識別コード<br>/SWIFTコード', value: 'ABCDJPJSXXX' },
+            { item: 'IBAN', value: 'SWiftcodedesusu' },
+            { item: '説明', value: '国際電信送金で送金する' }
+          ]
+        }
+      ])
+    })
+
+    test('正常：国際電信送金', async () => {
+      const dummyData = require('../mockInvoice/invoice40')
+      accessTradeshiftSpy.mockReturnValue(dummyData)
+      const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
+
+      expect(result.payments).toEqual([
+        {
+          国際電信送金で支払う: [
+            { item: 'ABAナンバー', value: 'abanumber' },
+            { item: 'SWIFTコード', value: 'swiftcode' },
+            { item: 'IBAN', value: 'IBAN' },
+            { item: '銀行名', value: '' },
+            { item: '口座名義', value: '口座' },
+            { item: '番地', value: '所在地１（任意）' },
+            { item: 'ビル名/フロア等', value: '所在地２（任意）' },
+            { item: '家屋番号', value: 'ビル名（任意）' },
+            { item: '都道府県', value: '市区町村（任意）' },
+            { item: '都道府県', value: '都道府県（任意）' },
+            { item: '郵便番号', value: '100-0000' },
+            { item: '所在地', value: '所在地（任意）' },
+            { item: '国', value: '国名（任意）' },
+            { item: '説明', value: '支払いメモ - 支払いオプションがIBANの場合' }
+          ]
+        }
+      ])
+    })
+
+    test('正常：支払い条件', async () => {
+      const dummyData = require('../mockInvoice/invoice41')
+      accessTradeshiftSpy.mockReturnValue(dummyData)
+      const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
+
+      expect(result.payments).toEqual([
+        {
+          支払い条件: [
+            { item: '税コード', value: 'bd067e19-e7c4-4562-b511-56dbaa17aa37' },
+            { item: '説明', value: '説明' },
+            { item: '割引率', value: 10 },
+            { item: '決済開始日', value: '2021-12-10' },
+            { item: '決済終了日', value: '2021-12-16' },
+            { item: '割増率', value: 12 },
+            { item: 'ペナルティ開始日', value: '2021-12-10' },
+            { item: 'ペナルティ終了日', value: '2021-12-17' }
+          ]
+        }
+      ])
     })
   })
 })
