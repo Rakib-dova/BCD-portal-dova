@@ -156,6 +156,9 @@ describe('deleteAccountCodeのテスト', () => {
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
+      request.params = {
+        accountCodeId: '55555555-cb0b-48ad-857d-4b42a44ede13'
+      }
 
       findOneSpy.mockReturnValue(dataValues)
       findOneSpyContracts.mockReturnValue(contractdataValues)
@@ -214,6 +217,9 @@ describe('deleteAccountCodeのテスト', () => {
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.params = {
+        accountCodeId: '55555555-cb0b-48ad-857d-4b42a44ede13'
       }
 
       findOneSpy.mockReturnValue(dataValues)

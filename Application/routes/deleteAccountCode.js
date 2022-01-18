@@ -64,6 +64,11 @@ const cbDeleteAccountCode = async (req, res, next) => {
   }
   // 確認画面から渡されたaccountCodeId取得
   const accountCodeId = req.params.accountCodeId
+  if (!validate.isUUID(accountCodeId)) {
+    return res.send({
+      result: 0
+    })
+  }
 
   // 削除処理
   // resultOfDeletedAccountCode : 削除処理結果
