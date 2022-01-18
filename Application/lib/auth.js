@@ -1,6 +1,8 @@
 const passport = require('passport')
 const OAuth2Strategy = require('passport-oauth2')
 const jwt = require('jwt-simple')
+const httpsProxyAgent = require('https-proxy-agent')
+const agent = httpsProxyAgent(process.env.HTTP_PROXY || 'http://192.168.10.11:8080')
 
 const parseIdToken = (token) => {
   const decoded = Buffer.from(token.split('.')[1], 'base64').toString()
@@ -43,6 +45,7 @@ passport.deserializeUser(function (user, done) {
 
 /* Setting custom Authorization header */
 oauthStrategy._oauth2.setAuthMethod('Basic')
+oauthStrategy._oauth2.setAgent(agent)
 oauthStrategy._oauth2._customHeaders = { Authorization: oauthStrategy._oauth2.buildAuthHeader(authToken) }
 passport.use('tradeshift', oauthStrategy)
 
