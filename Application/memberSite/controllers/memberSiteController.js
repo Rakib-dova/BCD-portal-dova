@@ -54,7 +54,6 @@ const oauthTransfer = async (req, res, next) => {
     // 受領済みの為TokenCookieを削除
     // TODO:CookieDomeinを環境変数化すること
 
-    console.log()
     res.clearCookie(process.env.BCA_BC_COOKIE_NAME, {
       httpOnly: process.env.BCA_BC_COOKIE_HTTP_ONLY,
       domain: process.env.BCA_BC_COOKIE_DOMAIN,
