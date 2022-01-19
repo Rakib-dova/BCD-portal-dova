@@ -5,6 +5,10 @@ block content
     .hero-body.is-logo
       .container
 
+  //- 会員サイト連携開発追加
+  input(type="hidden" name="_csrf" value=csrfToken)
+  //- 会員サイト連携開発追加
+
   .container.is-max-widescreen
     //- .level-left.is-family-sans-serif
     //-   .level-item
@@ -264,4 +268,8 @@ block content
 
 block append scripts
   script(src="/js/portal-page.js")
+  //- 会員サイト連携開発追加 fingerpirnt未検証の場合、fingerprint値をXHRで送信する。
+  if (!fingerprintVerify)
+    script(src="/js/portal-page-memberSite.js")
+  //- 会員サイト連携開発追加
   // End of DigitalTrade Portal Page

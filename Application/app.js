@@ -155,6 +155,13 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(cookieParser());
+
+/**  会員サイト開発 20220228 */
+// TODO: CookieParserを復活
+const cookieParser = require('cookie-parser')
+app.use(cookieParser())
+/**  会員サイト開発 20220228 */
+
 app.use(express.static(path.join(__dirname, 'public')))
 
 // セッションにuserIdがあればappInsightに送信
@@ -212,7 +219,7 @@ app.use('/uploadFormatList', require('./routes/uploadFormatList').router)
 // アップロードフォーマット確認・変更
 app.use('/uploadFormatEdit', require('./routes/uploadFormatEdit').router)
 
-//設定
+// 設定
 // 設定
 // cancellation
 app.use('/cancellation', require('./routes/cancellation').router)
@@ -222,6 +229,12 @@ app.use('/change', require('./routes/change').router)
 
 // 請求書ダウンロード
 app.use('/csvDownload', require('./routes/csvDownload').router)
+
+/**  会員サイト開発 20220228 */
+// TODO:アプリ一覧からの遷移受付けエンドポイント
+app.use('/memberCooperation', require('./memberSite/routes/memberCooperationRouter').router)
+app.use('/fingerprintVerify', require('./memberSite/routes/fingerprintVerifyRouter').router)
+/**  会員サイト開発 20220228 */
 
 // notice
 const noticeHelper = require('./routes/helpers/notice')
