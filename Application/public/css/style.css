@@ -721,3 +721,12 @@ body > div.hero.is-small {
 .up-selected-file-title {
   transform: translateY(-22px);
 }
+
+.color-link-modal-header {
+  background-color: #3298dc;
+  border-bottom: 1px solid #0099ff;
+}
+
+.color-link-modal-header > .modal-card-title {
+  color: white;
+}
