@@ -9,6 +9,8 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const accountCodeController = require('../controllers/accountCodeController')
+const errorHelper = require('./helpers/error')
+const noticeHelper = require('./helpers/notice')
 
 const cbDeleteAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteAccountCode')
@@ -89,9 +91,59 @@ const cbDeleteAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbDeleteAccountCode')
 }
 
+const cbGetCheckAccountCode = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetCheckAccountCode')
+
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+
+  // 確認画面から渡されたaccountCodeId取得
+  const accountCodeId = req.params.checkAccountCode
+  if (!validate.isUUID(accountCodeId)) {
+    return res.send({
+      result: 0
+    })
+  }
+
+  // 勘定科目が削除されているのか確認
+  const resultOfCheckedAccountCode = await accountCodeController.checkDataForAccountCode(accountCodeId)
+
+  // result 1は存在すること、0はシステムエラー, -1は既に削除されたもの
+  res.send({
+    result: resultOfCheckedAccountCode
+  })
+  logger.info(constantsDefine.logMessage.INF001 + 'cbGetCheckAccountCode')
+}
+
 router.delete('/:accountCodeId', cbDeleteAccountCode)
+router.get('/:checkAccountCode', cbGetCheckAccountCode)
 
 module.exports = {
   router: router,
-  cbDeleteAccountCode: cbDeleteAccountCode
+  cbDeleteAccountCode: cbDeleteAccountCode,
+  cbGetCheckAccountCode: cbGetCheckAccountCode
 }
