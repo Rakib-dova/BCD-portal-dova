@@ -374,7 +374,7 @@ describe('deleteAccountCodeのテスト', () => {
       // 削除結果（Mock）
       checkDataForAccountCodeSpy.mockReturnValue(1)
 
-      // 勘定科目削除実施
+      // 勘定科目チェック
       await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
 
       // 正常の場合、レスポンスボディのresultで1を返す
@@ -399,7 +399,7 @@ describe('deleteAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptCancel.dataValues.contractStatus)
 
-      // 勘定科目削除実施
+      // 勘定科目チェック
       await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
 
       // 期待結果
@@ -431,7 +431,7 @@ describe('deleteAccountCodeのテスト', () => {
       // 削除結果（Mock）
       checkDataForAccountCodeSpy.mockReturnValue(-1)
 
-      // 勘定科目削除実施
+      // 勘定科目チェック
       await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
 
       // 準正常の場合（既に削除された場合）、レスポンスボディのresultで-1を返す
@@ -453,7 +453,7 @@ describe('deleteAccountCodeのテスト', () => {
         return '00'
       }
 
-      // 勘定科目削除実施
+      // 勘定科目チェック
       await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
 
       // 準正常の場合（DBエラー発生）、レスポンスボディのresultで0を返す
@@ -474,7 +474,7 @@ describe('deleteAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
 
-      // 勘定科目削除実施
+      // 勘定科目チェック
       await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
 
       // 期待結果
@@ -496,7 +496,7 @@ describe('deleteAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
 
-      // 勘定科目削除実施
+      // 勘定科目チェック
       await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
 
       // 期待結果
@@ -518,7 +518,7 @@ describe('deleteAccountCodeのテスト', () => {
       // DBからの契約情報を取得出来なかったことを想定する
       findOneSpyContracts.mockReturnValue(null)
 
-      // 勘定科目削除実施
+      // 勘定科目チェック
       await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
 
       // 期待結果
@@ -542,7 +542,7 @@ describe('deleteAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(999)
 
-      // 勘定科目削除実施
+      // 勘定科目チェック
       await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
 
       // 期待結果

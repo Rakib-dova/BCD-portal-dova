@@ -853,7 +853,7 @@ describe('subAccountCodeControllerのテスト', () => {
     })
 
     test('準正常：補助科目削除（既に削除されている場合）', async () => {
-      // accountCodeId
+      // subAccountCodeId
       const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 
       // 勘定科目検索（Mockデータ）
@@ -867,8 +867,8 @@ describe('subAccountCodeControllerのテスト', () => {
       // 準正常削除の場合、「-1」を返す
       expect(result).toBe(-1)
     })
-    test('準正常：アップロードフォーマット削除（DBエラー）', async () => {
-      // accountCodeId
+    test('準正常：補助科目削除（DBエラー）', async () => {
+      // subAccountCodeId
       const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 
       // 勘定科目検索（Mockデータ）
@@ -915,7 +915,7 @@ describe('subAccountCodeControllerのテスト', () => {
       expect(result).toEqual(1)
     })
     test('準正常：既に削除されたと想定する（既に削除されている場合）', async () => {
-      // accountCodeId
+      // subAccountCodeId
       const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 
       // 勘定科目検索（Mockデータ）
@@ -929,8 +929,8 @@ describe('subAccountCodeControllerのテスト', () => {
       // 準正常削除の場合、「-1」を返す
       expect(result).toEqual(-1)
     })
-    test('準正常：アップロードフォーマット削除（DBエラー）', async () => {
-      // accountCodeId
+    test('準正常：補助科目削除（DBエラー）', async () => {
+      // subAccountCodeId
       const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 
       // 勘定科目検索（Mockデータ）
