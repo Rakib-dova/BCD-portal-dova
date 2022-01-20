@@ -294,5 +294,24 @@ module.exports = {
       logger.error(error)
       return 0
     }
+  },
+  checkDataForAccountCode: async (accountCodeId) => {
+    try {
+      // 勘定科目を検索
+      const deleteTargetAccountCode = await AccountCode.findOne({
+        where: {
+          accountCodeId: accountCodeId
+        }
+      })
+
+      // nullの場合、既に削除されたと想定する。
+      if (deleteTargetAccountCode === null) return -1
+
+      // null以外の場合、正常想定
+      return 1
+    } catch (error) {
+      logger.error(error)
+      return 0
+    }
   }
 }
