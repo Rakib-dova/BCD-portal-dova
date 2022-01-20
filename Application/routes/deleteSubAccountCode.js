@@ -129,7 +129,7 @@ const cbGetCheckSubAccountCode = async (req, res, next) => {
     })
   }
 
-  // 勘定科目が削除されているのか確認
+  // 補助科目が削除されているのか確認
   const resultOfCheckedSubAccountCode = await subAccountCodeController.checkDataForSubAccountCode(subAccountCodeId)
 
   // result 1は存在すること、0はシステムエラー, -1は既に削除されたもの

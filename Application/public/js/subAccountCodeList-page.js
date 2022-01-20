@@ -62,11 +62,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.checkChangeSubAccountCo
         return { result: 'SYSERR' }
       })
       .then((response) => {
-        // 削除失敗
         switch (response.result) {
-          case 0:
-            alert('削除失敗しました。（システムエラー）')
-            break
           case 1:
             // 確認ページに遷移
             location.href = '/subAccountCodeEdit' + '/' + checkSubAccountCode
