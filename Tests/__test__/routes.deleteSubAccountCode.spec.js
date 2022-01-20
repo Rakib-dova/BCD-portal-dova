@@ -174,7 +174,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // 削除結果（Mock）
       deleteForSubAccountCodeSpy.mockReturnValue(1)
 
-      // 勘定科目削除実施
+      // 補助科目削除実施
       await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // request.flashが呼ばれ「る」
@@ -202,7 +202,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptCancel.dataValues.contractStatus)
 
-      // 勘定科目削除実施
+      // 補助科目削除実施
       await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 期待結果
@@ -235,7 +235,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // 削除結果（Mock）
       deleteForSubAccountCodeSpy.mockReturnValue(-1)
 
-      // 勘定科目削除実施
+      // 補助科目削除実施
       await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 準正常の場合（既に削除された場合）、レスポンスボディのresultで-1を返す
@@ -257,7 +257,7 @@ describe('deleteSubAccountCodeのテスト', () => {
         return '00'
       }
 
-      // 勘定科目削除実施
+      // 補助科目削除実施
       await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 準正常の場合（DBエラー発生）、レスポンスボディのresultで0を返す
@@ -277,7 +277,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractdataValues)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
-      // 勘定科目削除実施
+      // 補助科目削除実施
       await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 期待結果
@@ -299,7 +299,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
 
-      // 勘定科目削除実施
+      // 補助科目削除実施
       await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 期待結果
@@ -321,7 +321,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // DBからの契約情報を取得出来なかったことを想定する
       findOneSpyContracts.mockReturnValue(null)
 
-      // 勘定科目削除実施
+      // 補助科目削除実施
       await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 期待結果
@@ -345,7 +345,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(999)
 
-      // 勘定科目削除実施
+      // 科目削除実施
       await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 期待結果
@@ -375,7 +375,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // 削除結果（Mock）
       checkDataForSubAccountCodeSpy.mockReturnValue(1)
 
-      // 勘定科目削除実施
+      // 補助科目チェック
       await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 正常の場合、レスポンスボディのresultで1を返す
@@ -400,7 +400,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptCancel.dataValues.contractStatus)
 
-      // 勘定科目削除実施
+      // 補助科目チェック
       await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 期待結果
@@ -433,7 +433,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // 削除結果（Mock）
       checkDataForSubAccountCodeSpy.mockReturnValue(-1)
 
-      // 勘定科目削除実施
+      // 補助科目チェック
       await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 準正常の場合（既に削除された場合）、レスポンスボディのresultで-1を返す
@@ -455,7 +455,7 @@ describe('deleteSubAccountCodeのテスト', () => {
         return '00'
       }
 
-      // 勘定科目削除実施
+      // 補助科目チェック
       await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 準正常の場合（DBエラー発生）、レスポンスボディのresultで0を返す
@@ -475,7 +475,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractdataValues)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
-      // 勘定科目削除実施
+      // 補助科目チェック
       await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 期待結果
@@ -497,7 +497,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
 
-      // 勘定科目削除実施
+      // 補助科目チェック
       await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 期待結果
@@ -519,7 +519,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // DBからの契約情報を取得出来なかったことを想定する
       findOneSpyContracts.mockReturnValue(null)
 
-      // 勘定科目削除実施
+      // 補助科目削除実施
       await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 期待結果
@@ -543,7 +543,7 @@ describe('deleteSubAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(999)
 
-      // 勘定科目削除実施
+      // 補助科目削除実施
       await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 期待結果
