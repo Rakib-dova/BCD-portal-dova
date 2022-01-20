@@ -765,7 +765,7 @@ describe('accountCodeControllerのテスト', () => {
       // 準正常削除の場合、「-1」を返す
       expect(result).toEqual(-1)
     })
-    test('準正常：勘定科目削除（DBエラー）', async () => {
+    test('準正常：勘定科目チェック（DBエラー）', async () => {
       // accountCodeId
       const accountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 

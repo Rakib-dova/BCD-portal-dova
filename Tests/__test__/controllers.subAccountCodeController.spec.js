@@ -929,7 +929,7 @@ describe('subAccountCodeControllerのテスト', () => {
       // 準正常削除の場合、「-1」を返す
       expect(result).toEqual(-1)
     })
-    test('準正常：補助科目削除（DBエラー）', async () => {
+    test('準正常：補助科目チェック（DBエラー）', async () => {
       // subAccountCodeId
       const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 
