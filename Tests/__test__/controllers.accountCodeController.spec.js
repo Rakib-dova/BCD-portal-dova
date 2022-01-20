@@ -700,7 +700,7 @@ describe('accountCodeControllerのテスト', () => {
       expect(result).toBe(-1)
     })
 
-    test('準正常：アップロードフォーマット削除（DBエラー）', async () => {
+    test('準正常：勘定科目削除（DBエラー）', async () => {
       // accountCodeId
       const accountCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
 
@@ -752,7 +752,7 @@ describe('accountCodeControllerのテスト', () => {
     })
     test('準正常：既に削除されたと想定する（既に削除されている場合）', async () => {
       // accountCodeId
-      const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
+      const accountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 
       // 勘定科目検索（Mockデータ）
       AccountCode.findOne = jest.fn((value) => {
@@ -760,14 +760,14 @@ describe('accountCodeControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await accountCodeController.checkDataForAccountCode(subAccountCodeId)
+      const result = await accountCodeController.checkDataForAccountCode(accountCodeId)
 
       // 準正常削除の場合、「-1」を返す
       expect(result).toEqual(-1)
     })
     test('準正常：アップロードフォーマット削除（DBエラー）', async () => {
       // accountCodeId
-      const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
+      const accountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 
       // 勘定科目検索（Mockデータ）
       const dbError = new Error('DB Error')
@@ -776,7 +776,7 @@ describe('accountCodeControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await accountCodeController.checkDataForAccountCode(subAccountCodeId)
+      const result = await accountCodeController.checkDataForAccountCode(accountCodeId)
 
       // 準正常削除の場合、「0」を返す
       expect(result).toEqual(0)
