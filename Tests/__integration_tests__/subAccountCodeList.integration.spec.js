@@ -121,7 +121,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：登録申込、利用可能', async () => {
@@ -133,7 +133,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
   })
 
@@ -166,7 +166,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：登録受付、利用可能', async () => {
@@ -178,7 +178,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
   })
 
@@ -221,7 +221,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：契約中、利用可能', async () => {
@@ -233,7 +233,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
 
     // 機能・遷移確認
@@ -247,7 +247,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       expect(res.text).toMatch(/補助科目一覧/i)
       expect(res.text).toMatch(/新規登録する/i)
       expect(res.text).toMatch(/現在、補助科目はありません。新規登録するボタンから登録を行ってください。/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
 
     test('「←Homeへ戻る」リンク遷移確認（補助科目一括作成画面に遷移）', async () => {
@@ -265,8 +265,8 @@ describe('補助科目一覧のインテグレーションテスト', () => {
 
         await page.waitForTimeout(500)
 
-        // ポータル画面に遷移確認（補助科目一括作成画面が追加されたら変更必要）
-        expect(await page.url()).toBe('https://localhost:3000/portal')
+        // 補助科目一括作成画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/uploadSubAccount')
       }
       await browser.close()
     })
@@ -341,7 +341,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       expect(res.text).toMatch(/test/i)
       expect(res.text).toMatch(/確認・変更する/i)
       expect(res.text).toMatch(/削除/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
 
     test('補助科目登録画面「戻る」ボタン遷移確認（補助科目一覧画面に遷移）', async () => {
@@ -394,7 +394,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：変更申込、利用可能', async () => {
@@ -405,7 +405,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
   })
 
@@ -437,7 +437,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：変更受付、利用可能', async () => {
@@ -448,7 +448,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/補助科目一覧/i)
-      expect(res.text).toMatch(/←Homeに戻る/i)
+      expect(res.text).toMatch(/←補助科目一括作成/i)
     })
   })
 
