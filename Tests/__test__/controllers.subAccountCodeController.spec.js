@@ -312,7 +312,7 @@ describe('subAccountCodeControllerのテスト', () => {
   describe('getSubAccountCodeList', () => {
     test('正常', async () => {
       // 準備
-      // 勘定科目検索結果
+      // 補助科目検索結果
       SubAccountCodeGetsubAccountCodeListSpy.mockReturnValue(subAccountCodeListResult)
 
       // 試験実施
@@ -325,7 +325,7 @@ describe('subAccountCodeControllerのテスト', () => {
 
     test('異常：DBエラー', async () => {
       // 準備
-      // 勘定科目検索結果
+      // 補助科目検索結果
       const dbError = new Error()
       SubAccountCodeGetsubAccountCodeListSpy.mockImplementation(() => {
         throw dbError
@@ -856,7 +856,7 @@ describe('subAccountCodeControllerのテスト', () => {
       // subAccountCodeId
       const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 
-      // 勘定科目検索（Mockデータ）
+      // 補助科目検索（Mockデータ）
       SubAccountCode.findOne = jest.fn((value) => {
         return null
       })
@@ -871,7 +871,7 @@ describe('subAccountCodeControllerのテスト', () => {
       // subAccountCodeId
       const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 
-      // 勘定科目検索（Mockデータ）
+      // 補助科目検索（Mockデータ）
       const dbError = new Error('DB Error')
       SubAccountCode.findOne = jest.fn((value) => {
         return dbError
@@ -918,7 +918,7 @@ describe('subAccountCodeControllerのテスト', () => {
       // subAccountCodeId
       const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 
-      // 勘定科目検索（Mockデータ）
+      // 補助科目検索（Mockデータ）
       SubAccountCode.findOne = jest.fn((value) => {
         return null
       })
@@ -933,7 +933,7 @@ describe('subAccountCodeControllerのテスト', () => {
       // subAccountCodeId
       const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
 
-      // 勘定科目検索（Mockデータ）
+      // 補助科目検索（Mockデータ）
       const dbError = new Error('DB Error')
       SubAccountCode.findOne = jest.fn((value) => {
         throw dbError
