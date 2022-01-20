@@ -239,6 +239,9 @@ app.use('/uploadSubAccount', require('./routes/subAccountCodeUpload').router)
 // 補助科目設定
 app.use('/registSubAccountCode', require('./routes/registSubAccountCode').router)
 
+// 補助科目削除
+app.use('/deleteSubAccountCode', require('./routes/deleteSubAccountCode').router)
+
 // 補助科目確認・変更
 app.use('/subAccountCodeEdit', require('./routes/subAccountCodeEdit').router)
 

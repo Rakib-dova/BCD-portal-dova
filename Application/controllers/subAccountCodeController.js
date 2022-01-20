@@ -262,5 +262,29 @@ module.exports = {
       // 途中エラーが発生したら、ロールバック
       return error
     }
+  },
+  // 補助科目削除
+  deleteForSubAccountCode: async (subAccountCodeId) => {
+    try {
+      // 補助科目を検索
+      const deleteTargetSubAccountCode = await SubAccountCode.findOne({
+        where: {
+          subAccountCodeId: subAccountCodeId
+        }
+      })
+
+      // null：既に削除されたレコード
+      if (deleteTargetSubAccountCode === null) return -1
+
+      // 補助科目削除
+      logger.info(`${deleteTargetSubAccountCode.subAccountCodeId}のデータの削除処理を開始します。`)
+      await deleteTargetSubAccountCode.destroy()
+      logger.info(`${deleteTargetSubAccountCode.subAccountCodeId}のデータの削除処理を終了します。`)
+
+      return 1
+    } catch (error) {
+      logger.error(error)
+      return 0
+    }
   }
 }
