@@ -8,12 +8,12 @@ const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
-const accountCodeController = require('../controllers/accountCodeController')
+const subAccountCodeController = require('../controllers/subAccountCodeController')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 
-const cbDeleteAccountCode = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteAccountCode')
+const cbDeleteSubAccountCode = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteSubAccountCode')
 
   if (!req.session || !req.user?.userId) {
     return res.send({
@@ -64,35 +64,35 @@ const cbDeleteAccountCode = async (req, res, next) => {
       result: 0
     })
   }
-  // 確認画面から渡されたaccountCodeId取得
-  const accountCodeId = req.params.accountCodeId
-  if (!validate.isUUID(accountCodeId)) {
+  // 確認画面から渡されたsubAccountCodeId取得
+  const subAccountCodeId = req.params.subAccountCodeId
+  if (!validate.isUUID(subAccountCodeId)) {
     return res.send({
       result: 0
     })
   }
 
   // 削除処理
-  // resultOfDeletedAccountCode : 削除処理結果
-  //              -1 : 削除対象の勘定科目がない場合。
-  //               1 : 正常（勘定科目・補助科目の削除成功）
+  // resultOfDeletedSubAccountCode : 削除処理結果
+  //              -1 : 削除対象の補助科目がない場合。
+  //               1 : 正常（補助科目の削除成功）
   //               0 : エラー
-  const resultOfDeletedAccountCode = await accountCodeController.deleteForAccountCode(accountCodeId)
+  const resultOfDeletedSubAccountCode = await subAccountCodeController.deleteForSubAccountCode(subAccountCodeId)
 
   // 結果確認（正常）
-  if (resultOfDeletedAccountCode === 1) {
-    req.flash('info', '勘定科目を削除しました。')
+  if (resultOfDeletedSubAccountCode === 1) {
+    req.flash('info', '補助科目を削除しました。')
   }
 
   res.send({
-    result: resultOfDeletedAccountCode
+    result: resultOfDeletedSubAccountCode
   })
 
-  logger.info(constantsDefine.logMessage.INF001 + 'cbDeleteAccountCode')
+  logger.info(constantsDefine.logMessage.INF001 + 'cbDeleteSubAccountCode')
 }
 
-const cbGetCheckAccountCode = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbGetCheckAccountCode')
+const cbGetCheckSubAccountCode = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetCheckSubAccountCode')
 
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
@@ -121,29 +121,29 @@ const cbGetCheckAccountCode = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  // 確認画面から渡されたaccountCodeId取得
-  const accountCodeId = req.params.checkAccountCode
-  if (!validate.isUUID(accountCodeId)) {
+  // 確認画面から渡されたsubAccountCodeId取得
+  const subAccountCodeId = req.params.checkSubAccountCode
+  if (!validate.isUUID(subAccountCodeId)) {
     return res.send({
       result: 0
     })
   }
 
-  // 勘定科目が削除されているのか確認
-  const resultOfCheckedAccountCode = await accountCodeController.checkDataForAccountCode(accountCodeId)
+  // 補助科目が削除されているのか確認
+  const resultOfCheckedSubAccountCode = await subAccountCodeController.checkDataForSubAccountCode(subAccountCodeId)
 
   // result 1は存在すること、0はシステムエラー, -1は既に削除されたもの
   res.send({
-    result: resultOfCheckedAccountCode
+    result: resultOfCheckedSubAccountCode
   })
-  logger.info(constantsDefine.logMessage.INF001 + 'cbGetCheckAccountCode')
+  logger.info(constantsDefine.logMessage.INF001 + 'cbGetCheckSubAccountCode')
 }
 
-router.delete('/:accountCodeId', cbDeleteAccountCode)
-router.get('/:checkAccountCode', cbGetCheckAccountCode)
+router.delete('/:subAccountCodeId', cbDeleteSubAccountCode)
+router.get('/:checkSubAccountCode', cbGetCheckSubAccountCode)
 
 module.exports = {
   router: router,
-  cbDeleteAccountCode: cbDeleteAccountCode,
-  cbGetCheckAccountCode: cbGetCheckAccountCode
+  cbDeleteSubAccountCode: cbDeleteSubAccountCode,
+  cbGetCheckSubAccountCode: cbGetCheckSubAccountCode
 }

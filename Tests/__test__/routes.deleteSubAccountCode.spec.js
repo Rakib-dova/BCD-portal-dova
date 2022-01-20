@@ -5,7 +5,7 @@ jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
 
-const deleteAccountCode = require('../../Application/routes/deleteAccountCode')
+const deleteSubAccountCode = require('../../Application/routes/deleteSubAccountCode')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
@@ -13,9 +13,9 @@ const helper = require('../../Application/routes/helpers/middleware')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
-const AccountCodeController = require('../../Application/controllers/accountCodeController')
 const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
+const subAccountCodeController = require('../../Application/controllers/subAccountCodeController')
 const logger = require('../../Application/lib/logger.js')
 const path = require('path')
 
@@ -26,9 +26,9 @@ if (process.env.LOCALLY_HOSTED === 'true') {
 
 let request, response
 let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy
-let helpercheckContractStatusSpy, deleteForAccountCodeSpy, checkDataForAccountCodeSpy
+let helpercheckContractStatusSpy, deleteForSubAccountCodeSpy, checkDataForSubAccountCodeSpy
 
-describe('deleteAccountCodeのテスト', () => {
+describe('deleteSubAccountCodeのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
@@ -38,8 +38,8 @@ describe('deleteAccountCodeのテスト', () => {
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     pathSpy = jest.spyOn(path, 'join')
     helpercheckContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
-    deleteForAccountCodeSpy = jest.spyOn(AccountCodeController, 'deleteForAccountCode')
-    checkDataForAccountCodeSpy = jest.spyOn(AccountCodeController, 'checkDataForAccountCode')
+    deleteForSubAccountCodeSpy = jest.spyOn(subAccountCodeController, 'deleteForSubAccountCode')
+    checkDataForSubAccountCodeSpy = jest.spyOn(subAccountCodeController, 'checkDataForSubAccountCode')
   })
   afterEach(() => {
     request.resetMocked()
@@ -51,8 +51,8 @@ describe('deleteAccountCodeのテスト', () => {
     findOneSpyContracts.mockRestore()
     pathSpy.mockRestore()
     helpercheckContractStatusSpy.mockRestore()
-    deleteForAccountCodeSpy.mockRestore()
-    checkDataForAccountCodeSpy.mockRestore()
+    deleteForSubAccountCodeSpy.mockRestore()
+    checkDataForSubAccountCodeSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -144,14 +144,14 @@ describe('deleteAccountCodeのテスト', () => {
 
   describe('ルーティング', () => {
     test('deleteAccountCodeのルーティングを確認', async () => {
-      expect(deleteAccountCode.router.delete).toHaveBeenLastCalledWith(
-        '/:accountCodeId',
-        deleteAccountCode.cbDeleteAccountCode
+      expect(deleteSubAccountCode.router.delete).toHaveBeenLastCalledWith(
+        '/:subAccountCodeId',
+        deleteSubAccountCode.cbDeleteSubAccountCode
       )
     })
   })
 
-  describe('cbDeleteAccountCode', () => {
+  describe('cbDeleteSubAccountCode', () => {
     test('正常：削除完了', async () => {
       request.session = {
         usercontext: 'LoggedIn',
@@ -161,7 +161,7 @@ describe('deleteAccountCodeのテスト', () => {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
       request.params = {
-        accountCodeId: '55555555-cb0b-48ad-857d-4b42a44ede13'
+        subAccountCodeId: '55555555-cb0b-48ad-857d-4b42a44ede13'
       }
 
       findOneSpy.mockReturnValue(dataValues)
@@ -172,13 +172,13 @@ describe('deleteAccountCodeのテスト', () => {
       request.flash = jest.fn()
 
       // 削除結果（Mock）
-      deleteForAccountCodeSpy.mockReturnValue(1)
+      deleteForSubAccountCodeSpy.mockReturnValue(1)
 
-      // 勘定科目削除実施
-      await deleteAccountCode.cbDeleteAccountCode(request, response, next)
+      // 補助科目削除実施
+      await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('info', '勘定科目を削除しました。')
+      expect(request.flash).toHaveBeenCalledWith('info', '補助科目を削除しました。')
 
       // 正常の場合、レスポンスボディのresultで1を返す
       expect(response.body.result).toBe(1)
@@ -202,8 +202,8 @@ describe('deleteAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptCancel.dataValues.contractStatus)
 
-      // 勘定科目削除実施
-      await deleteAccountCode.cbDeleteAccountCode(request, response, next)
+      // 補助科目削除実施
+      await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -223,7 +223,7 @@ describe('deleteAccountCodeのテスト', () => {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
       request.params = {
-        accountCodeId: '55555555-cb0b-48ad-857d-4b42a44ede13'
+        subAccountCodeId: '55555555-cb0b-48ad-857d-4b42a44ede13'
       }
 
       findOneSpy.mockReturnValue(dataValues)
@@ -233,10 +233,10 @@ describe('deleteAccountCodeのテスト', () => {
       }
 
       // 削除結果（Mock）
-      deleteForAccountCodeSpy.mockReturnValue(-1)
+      deleteForSubAccountCodeSpy.mockReturnValue(-1)
 
-      // 勘定科目削除実施
-      await deleteAccountCode.cbDeleteAccountCode(request, response, next)
+      // 補助科目削除実施
+      await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 準正常の場合（既に削除された場合）、レスポンスボディのresultで-1を返す
       expect(response.body.result).toBe(-1)
@@ -257,8 +257,8 @@ describe('deleteAccountCodeのテスト', () => {
         return '00'
       }
 
-      // 勘定科目削除実施
-      await deleteAccountCode.cbDeleteAccountCode(request, response, next)
+      // 補助科目削除実施
+      await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 準正常の場合（DBエラー発生）、レスポンスボディのresultで0を返す
       expect(response.body.result).toBe(0)
@@ -277,8 +277,8 @@ describe('deleteAccountCodeのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractdataValues)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
-      // 勘定科目削除実施
-      await deleteAccountCode.cbDeleteAccountCode(request, response, next)
+      // 補助科目削除実施
+      await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 期待結果
       // 500エラーの場合レスポンスボディのresultで0を返す
@@ -299,8 +299,8 @@ describe('deleteAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
 
-      // 勘定科目削除実施
-      await deleteAccountCode.cbDeleteAccountCode(request, response, next)
+      // 補助科目削除実施
+      await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 期待結果
       // 404エラーの場合レスポンスボディのresultで0を返す
@@ -321,8 +321,8 @@ describe('deleteAccountCodeのテスト', () => {
       // DBからの契約情報を取得出来なかったことを想定する
       findOneSpyContracts.mockReturnValue(null)
 
-      // 勘定科目削除実施
-      await deleteAccountCode.cbDeleteAccountCode(request, response, next)
+      // 補助科目削除実施
+      await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 期待結果
       // 500エラーの場合レスポンスボディのresultで0を返す
@@ -345,15 +345,16 @@ describe('deleteAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(999)
 
-      // 勘定科目削除実施
-      await deleteAccountCode.cbDeleteAccountCode(request, response, next)
+      // 補助科目削除実施
+      await deleteSubAccountCode.cbDeleteSubAccountCode(request, response, next)
 
       // 期待結果
       // 500エラーの場合レスポンスボディのresultで0を返す
       expect(response.body.result).toBe(0)
     })
   })
-  describe('cbGetCheckAccountCode', () => {
+
+  describe('cbGetCheckSubAccountCode', () => {
     test('正常：存在する', async () => {
       request.session = {
         usercontext: 'LoggedIn',
@@ -363,7 +364,7 @@ describe('deleteAccountCodeのテスト', () => {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
       request.params = {
-        checkAccountCode: '55555555-cb0b-48ad-857d-4b42a44ede13'
+        checkSubAccountCode: '55555555-cb0b-48ad-857d-4b42a44ede13'
       }
 
       findOneSpy.mockReturnValue(dataValues)
@@ -372,10 +373,10 @@ describe('deleteAccountCodeのテスト', () => {
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
 
       // 削除結果（Mock）
-      checkDataForAccountCodeSpy.mockReturnValue(1)
+      checkDataForSubAccountCodeSpy.mockReturnValue(1)
 
-      // 勘定科目チェック
-      await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
+      // 補助科目チェック
+      await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 正常の場合、レスポンスボディのresultで1を返す
       expect(response.body.result).toBe(1)
@@ -399,8 +400,8 @@ describe('deleteAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptCancel.dataValues.contractStatus)
 
-      // 勘定科目チェック
-      await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
+      // 補助科目チェック
+      await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -420,7 +421,7 @@ describe('deleteAccountCodeのテスト', () => {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
       request.params = {
-        checkAccountCode: '55555555-cb0b-48ad-857d-4b42a44ede13'
+        checkSubAccountCode: '55555555-cb0b-48ad-857d-4b42a44ede13'
       }
 
       findOneSpy.mockReturnValue(dataValues)
@@ -428,11 +429,12 @@ describe('deleteAccountCodeのテスト', () => {
       helper.checkContractStatus = (req, res, nex) => {
         return '00'
       }
-      // 削除結果（Mock）
-      checkDataForAccountCodeSpy.mockReturnValue(-1)
 
-      // 勘定科目チェック
-      await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
+      // 削除結果（Mock）
+      checkDataForSubAccountCodeSpy.mockReturnValue(-1)
+
+      // 補助科目チェック
+      await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 準正常の場合（既に削除された場合）、レスポンスボディのresultで-1を返す
       expect(response.body.result).toBe(-1)
@@ -453,8 +455,8 @@ describe('deleteAccountCodeのテスト', () => {
         return '00'
       }
 
-      // 勘定科目チェック
-      await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
+      // 補助科目チェック
+      await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 準正常の場合（DBエラー発生）、レスポンスボディのresultで0を返す
       expect(response.body.result).toBe(0)
@@ -473,9 +475,8 @@ describe('deleteAccountCodeのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractdataValues)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
-
-      // 勘定科目チェック
-      await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
+      // 補助科目チェック
+      await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 期待結果
       // 500エラーの場合
@@ -496,8 +497,8 @@ describe('deleteAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
 
-      // 勘定科目チェック
-      await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
+      // 補助科目チェック
+      await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 期待結果
       // 500エラーの場合
@@ -518,8 +519,8 @@ describe('deleteAccountCodeのテスト', () => {
       // DBからの契約情報を取得出来なかったことを想定する
       findOneSpyContracts.mockReturnValue(null)
 
-      // 勘定科目チェック
-      await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
+      // 補助科目チェック
+      await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 期待結果
       // 500エラーの場合
@@ -542,8 +543,8 @@ describe('deleteAccountCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(999)
 
-      // 勘定科目チェック
-      await deleteAccountCode.cbGetCheckAccountCode(request, response, next)
+      // 補助科目チェック
+      await deleteSubAccountCode.cbGetCheckSubAccountCode(request, response, next)
 
       // 期待結果
       // 500エラーの場合
