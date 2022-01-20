@@ -32,9 +32,22 @@
                     td.text-center.td-overflow= item.accountCodeName                 
                     td.text-center
                       a.button.is-success(class= setClassChangeBtn name='confirmButton' href=`/subAccountCodeEdit/${item.subAccountCodeId}`) 確認・変更する
-                    td.show-modal
-                      a.button.is-danger(class= setClassDeleteBtn name='deleteButton') 削除
+                    td
+                      a.button.is-danger.show-modal(class= setClassDeleteBtn name='deleteButton' data-target = "code-delete-modal" uuid= item.subAccountCodeId) 削除
         .mt-1.has-text-left
           a.button.is-link.is-light(href= prevLocation) #{prevLocationName}
 
+        .modal.modal-fx-fadeInscale#code-delete-modal
+              .modal-background.cancel-button(data-target="code-delete-modal")
+              .modal-card
+                header.modal-card-head
+                  p.modal-card-title #{deleteModalTitle}
+                  button.delete(type="button" data-target="code-delete-modal")
+                section.modal-card-body
+                  p 削除しますか？
+                   input.input#modalUuid(type = "hidden" value = '')
+                footer.modal-card-foot
+                  div.button-area
+                    a.button.cancel-button(data-target='code-delete-modal') キャンセル
+                    a.button.is-danger.ml-6#modalCodeDelBtn(name='modalCodeDelBtn') 削除
     include footer

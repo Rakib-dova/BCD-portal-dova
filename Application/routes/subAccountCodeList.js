@@ -54,7 +54,7 @@ const cbGetIndex = async (req, res, next) => {
 
   if (subAccountCodeListArr instanceof Error) return next(errorHelper.create(500))
 
-  // アップロードフォーマットデータを画面に渡す。
+  // 補助科目データを画面に渡す。
   res.render('subAccountCodeList', {
     title: '補助科目一覧',
     engTitle: 'SUBACCOUNT CODE LIST',
@@ -69,7 +69,9 @@ const cbGetIndex = async (req, res, next) => {
     setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
     setClassDeleteBtn: 'deleteSubAccountCodeBtn',
     prevLocation: '/uploadSubAccount',
-    prevLocationName: '←補助科目一括作成'
+    prevLocationName: '←補助科目一括作成',
+    // 削除モーダル表示
+    deleteModalTitle: '補助科目削除'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
