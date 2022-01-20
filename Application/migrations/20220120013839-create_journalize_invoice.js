@@ -51,6 +51,14 @@ module.exports = {
       installmentAmount: {
         type: Sequelize.DataTypes.DECIMAL(13, 4),
         allowNull: true
+      },
+      createdAt: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: false
+      },
+      updatedAt: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: false
       }
     })
   },

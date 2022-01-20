@@ -49,13 +49,22 @@ module.exports = (sequelize, DataTypes) => {
       },
       installmentAmount: {
         type: DataTypes.DECIMAL(13, 4)
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false
       }
     },
     {
       sequelize,
       modelName: 'JournalizeInvoice',
       freezeTableName: true,
-      tableName: 'Journalize_invoice'
+      tableName: 'Journalize_invoice',
+      timestamps: true
     }
   )
   return JournalizeInvoice
