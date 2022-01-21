@@ -2,7 +2,7 @@ const validate = require('./validate')
 const bconCsvUnitcode = require('../lib/bconCsvUnitcode')
 const isUndefined = validate.isUndefined
 class InvoiceDetail {
-  constructor(invoice) {
+  constructor(invoice, journalizeInvoice) {
     if (isUndefined(invoice)) throw new Error('not create Invoice Object.')
     if (isUndefined(invoice.DocumentType) || invoice.DocumentType !== 'InvoiceType') {
       throw new Error('Document Type Error. is not invoice document.')
@@ -42,9 +42,9 @@ class InvoiceDetail {
     // 明細部分
     if (!isUndefined(invoice.InvoiceLine) && invoice.InvoiceLine.length !== 0) {
       if (!isUndefined(invoice.AllowanceCharge) && invoice.AllowanceCharge.length !== 0) {
-        this.setInvoiceLine(invoice.InvoiceLine, invoice.AllowanceCharge)
+        this.setInvoiceLine(invoice.InvoiceLine, invoice.AllowanceCharge, journalizeInvoice)
       } else {
-        this.setInvoiceLine(invoice.InvoiceLine, [])
+        this.setInvoiceLine(invoice.InvoiceLine, [], journalizeInvoice)
       }
     }
     this.setOptions(invoice)
@@ -641,7 +641,7 @@ class InvoiceDetail {
     }
   }
 
-  setInvoiceLine(invoiceLineContent, allowanceChargeContent) {
+  setInvoiceLine(invoiceLineContent, allowanceChargeContent, journalizeInvoice) {
     this.invoiceLine = []
 
     // 明細部分
@@ -1046,6 +1046,24 @@ class InvoiceDetail {
       meisai['明細-小計 (税抜)'] = item.LineExtensionAmount.value.toLocaleString('ja-JP') // ','処理必要
       this.invoiceLine.push(meisai)
     })
+
+    // 仕訳情報設定
+    if (journalizeInvoice.length !== 0) {
+      this.invoiceLine.forEach((invoiceLine, idx, invoiceLines) => {
+        invoiceLines[idx].journalize = []
+        journalizeInvoice.forEach((journalize) => {
+          if (invoiceLine['明細-項目ID'] === journalize.lineId) {
+            invoiceLines[idx].journalize.push({
+              lineNo: journalize.lineNo,
+              journalId: journalize.journalId,
+              accountCode: journalize.accountCode,
+              subAccountCode: journalize.subAccountCode,
+              installmentAmount: journalize.installmentAmount
+            })
+          }
+        })
+      })
+    }
 
     // 請求書の割引と追加料金
     const discountAndChargeAll = {}

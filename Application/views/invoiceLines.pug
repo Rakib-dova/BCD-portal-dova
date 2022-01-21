@@ -58,48 +58,94 @@
                 i.fas.fa-plus-circle
         .columns.m-0
           .column.p-0.lineAccountCode(id= `lineNo${idx + 1}`)
-            .columns.m-0.p-1(id= `lineNo${idx + 1}_lineAccountCode1`)
-              .column.is-one-third.p-0.border-div-rad-4
-                .field.is-horizontal.m-1.has-addons-centered
-                  .field-label.is-normal.m-0.text-center
-                    label 勘定科目コード
-                  .field-label.is-normal.m-0.text-center
-                    label 補助科目コード
-                  .field-label.is-normal.m-0.is-1.fixed-void-66
-                    label 　
-                .field.is-horizontal.p-1
-                  .field-body.m-1
-                    .field
-                      p.control
-                        input.input(type='text' name=`lineNo${idx + 1}_accountCode_1` readonly)
-                  .field-body.m-1
-                    .field
-                      p.control
-                        input.input(type='text' name=`lineNo${idx + 1}_subAccountCode_1` readonly)
-                  .field-body.m-1.is-1.none-flex-grow
-                    .field
-                      p.control
-                        button.button.is-link.show-modal(data-target='accountCode-modal') 検索
-              .column.is-0.p-1
-              .column.is-one-quarter.p-0.border-div-rad-4
-                .field.is-horizontal.m-1.has-addons-centered
-                  .field-label.is-normal.m-0.text-center
-                    label 分割金額
-                  .field-label.is-normal.m-0.is-1.fixed-void-66
-                    label 　
-                .field-body.p-1
-                  .field.is-horizontal
+            if key === "journalize" && value.length !== 0
+              each jValue, idx in value
+                .columns.m-0.p-1(id= `lineNo${idx + 1}_lineAccountCode1`)
+                  .column.is-one-third.p-0.border-div-rad-4
+                    .field.is-horizontal.m-1.has-addons-centered
+                      .field-label.is-normal.m-0.text-center
+                        label 勘定科目コード
+                      .field-label.is-normal.m-0.text-center
+                        label 補助科目コード
+                      .field-label.is-normal.m-0.is-1.fixed-void-66
+                        label 　
+                    .field.is-horizontal.p-1
+                      .field-body.m-1
+                        .field
+                          p.control
+                            input.input(type='text' name=`lineNo${idx + 1}_lineAccountCode1_accountCode` value= jValue.accountCode readonly)
+                      .field-body.m-1
+                        .field
+                          p.control
+                            input.input(type='text' name=`lineNo${idx + 1}_lineAccountCode1_subAccountCode` value= jValue.subAccountCode readonly)
+                      .field-body.m-1.is-1.none-flex-grow
+                        .field
+                          p.control
+                            a.button.is-link.show-modal(data-target='accountCode-modal') 検索
+                  .column.is-0.p-1
+                  .column.is-one-quarter.p-0.border-div-rad-4
+                    .field.is-horizontal.m-1.has-addons-centered
+                      .field-label.is-normal.m-0.text-center
+                        label 分割金額
+                      .field-label.is-normal.m-0.is-1.fixed-void-66
+                        label 　
+                    .field-body.p-1
+                      .field.is-horizontal
+                        .field-body.m-1
+                          .field
+                            p.control
+                              input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_input_amount` name=`lineNo${idx + 1}_lineAccountCode1_input_amount` readonly value= jValue.installmentAmount)
+                        .field-body.m-1.is-1.none-flex-grow
+                          .field
+                            p.control
+                              if idx !== 0
+                                a.button.show-modal.is-link.btn-insert-installmentAmount  入力
+                  .column
+                    a.red-color(id=`btn-minus-lineNo${idx + 1}-accountCode`)
+                      i.fas.fa-minus-circle
+            else
+              .columns.m-0.p-1(id= `lineNo${idx + 1}_lineAccountCode1`)
+                .column.is-one-third.p-0.border-div-rad-4
+                  .field.is-horizontal.m-1.has-addons-centered
+                    .field-label.is-normal.m-0.text-center
+                      label 勘定科目コード
+                    .field-label.is-normal.m-0.text-center
+                      label 補助科目コード
+                    .field-label.is-normal.m-0.is-1.fixed-void-66
+                      label 　
+                  .field.is-horizontal.p-1
                     .field-body.m-1
                       .field
                         p.control
-                          input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_input_amount` name=`lineNo${idx + 1}_lineAccountCode1_input_amount` readonly value= value)
+                          input.input(type='text' name=`lineNo${idx + 1}_lineAccountCode1_accountCode` value readonly)
+                    .field-body.m-1
+                      .field
+                        p.control
+                          input.input(type='text' name=`lineNo${idx + 1}_lineAccountCode1_subAccountCode` value readonly)
                     .field-body.m-1.is-1.none-flex-grow
                       .field
                         p.control
+                          a.button.is-link.show-modal(data-target='accountCode-modal') 検索
+                .column.is-0.p-1
+                .column.is-one-quarter.p-0.border-div-rad-4
+                  .field.is-horizontal.m-1.has-addons-centered
+                    .field-label.is-normal.m-0.text-center
+                      label 分割金額
+                    .field-label.is-normal.m-0.is-1.fixed-void-66
+                      label 　
+                  .field-body.p-1
+                    .field.is-horizontal
+                      .field-body.m-1
+                        .field
+                          p.control
+                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_input_amount` name=`lineNo${idx + 1}_lineAccountCode1_input_amount` readonly value)
+                      .field-body.m-1.is-1.none-flex-grow
+                        .field
+                          p.control
+                .column
+                  a.red-color(id=`btn-minus-lineNo${idx + 1}-accountCode`)
+                    i.fas.fa-minus-circle
 
-              .column
-                a.red-color(id=`btn-minus-lineNo${idx + 1}-accountCode`)
-                  i.fas.fa-minus-circle
     else
       .box
         - for (var [key,value] of Object.entries(item))

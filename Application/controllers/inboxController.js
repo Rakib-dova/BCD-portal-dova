@@ -1,4 +1,5 @@
 const apiManager = require('./apiManager')
+const JournalizeInvoice = require('../models').JournalizeInvoice
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
@@ -96,10 +97,18 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   }
 }
 
-const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId) {
+const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId, contractId) {
   const InvoiceDetail = require('../lib/invoiceDetail')
   const invoice = await apiManager.accessTradeshift(accessTk, refreshTk, 'get', `/documents/${invoiceId}`)
-  const displayInvoice = new InvoiceDetail(invoice)
+  const journalizeInvoice = await JournalizeInvoice.findAll({
+    where: {
+      invoiceId: invoiceId,
+      contractId: contractId
+    }
+  })
+
+  const displayInvoice = new InvoiceDetail(invoice, journalizeInvoice)
+
   return displayInvoice
 }
 module.exports = {
