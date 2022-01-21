@@ -22,17 +22,20 @@ parameters:
     default: dev
     values:
       - dev
+      - dev2
+      - docomoIDF
       - prodstg
       - prod
       - demo
       - test
+      - BuildandPush
 
 variables:
   - group: ${{ parameters.Environment }}
   - name: tag
-    value: $[format('{0:yyyyMMdd}', pipeline.startTime)]
+    value: $[format('{0:yyyyMMddHHmmss}', pipeline.startTime)]
   - name: devDeploy #開発環境デプロイフラグ
-    value: ${{ eq(parameters.Environment,'dev')}}
+    value: ${{ or(eq(parameters.Environment,'dev'), eq(parameters.Environment,'dev2'), eq(parameters.Environment,'docomoIDF'))}}
   - name: Deploy #prod, proddtg, demo環境デプロイフラグ
     value: ${{ or(eq(parameters.Environment,'prodstg'), eq(parameters.Environment,'prod'),eq(parameters.Environment,'demo'),eq(parameters.Environment,'test'))}}
   - name: japanwest #西日本デプロイフラグ
@@ -67,56 +70,41 @@ stages:
           - bash: sudo mkdir /home/upload
             displayName: Make directory for upload files
 
-          - task: gulp@0
-            displayName: "Run unit tests"
-            inputs:
-              gulpFile: Tests/gulpfile.js
-              targets: unittest
-              gulpjs: "Tests/node_modules/gulp/bin/gulp.js"
-              publishJUnitResults: true
-            enabled: false
-
           - bash: | 
               npm install jest-junit --save-dev
               cd ./Tests
+              npm install jest-runner-eslint --save-dev
               npm run test:ci
+              echo "##vso[task.setvariable variable=unittestsStatus]done"
             displayName: "Run unit tests"
+            name: "UnitTests"
             
           - task: PublishCodeCoverageResults@1
+            condition: eq(variables['unittestsStatus'],'done')
             displayName: 'Publish code coverage'
             inputs:
               codeCoverageTool: Cobertura
               summaryFileLocation: $(System.DefaultWorkingDirectory)/Tests/coverage/cobertura-coverage.xml
           
           - task: PublishTestResults@2
+            condition: eq(variables['unittestsStatus'],'done')
             displayName: 'Publish test results'
             inputs:
               testRunTitle: '${{ parameters.Environment }}'
               testResultsFormat: 'JUnit'
               testResultsFiles: '$(System.DefaultWorkingDirectory)/Tests/coverage/junit.xml'
 
-          - task: Docker@1
-            displayName: "Build an image"
+          - task: ArchiveFiles@2
             inputs:
-              containerregistrytype: "Container Registry"
-              dockerRegistryEndpoint: "Redhat Container Registry"
-              imageName: "$(repositoryName):$(tag)"
-              useDefaultContext: false
-              buildContext: "$(System.DefaultWorkingDirectory)/Application"
-
-          - task: Docker@2
-            displayName: "Tag an image"
-            inputs:
-              command: tag
-              arguments: "registry.redhat.io/$(repositoryName):$(tag) $(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
-
-          - task: Docker@1
-            displayName: "Push an image"
-            inputs:
-              azureSubscriptionEndpoint: "$(azureSubscriptionEndpoint)"
-              azureContainerRegistry: $(azureContainerResistoryName).azurecr.io
-              command: push
-              imageName: "$(repositoryName):$(tag)"
+              rootFolderOrFile: '$(System.DefaultWorkingDirectory)/Application'
+              includeRootFolder: false
+              archiveType: 'zip'
+              archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+              replaceExistingArchive: true
+          
+          - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+            artifact: drop
+            displayName: Publush Arifacts
 
   - stage: devDeploy
     dependsOn: BuildandPush
@@ -130,14 +118,16 @@ stages:
           runOnce:
             deploy:
               steps:
-                - task: AzureWebAppContainer@1
-                  condition: eq('${{parameters.Environment}}', 'dev')
-                  displayName: "Azure Web App on Container Deploy: $(appserviceName)"
-                  inputs:
-                    azureSubscription: "$(azureSubscriptionEndpoint)"
-                    appName: "$(appserviceName)"
-                    containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(Build.BuildId)"
-
+              - task: AzureWebApp@1
+                displayName: 'Azure Web App Deploy'
+                inputs:
+                  azureSubscription: $(azureSubscriptionEndpoint)
+                  appType: webAppLinux
+                  appName: $(appserviceName)
+                  resourceGroupName: $(portalRg)
+                  runtimeStack: NODE|14-lts
+                  package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+                  startUpCommand: npm run start
 
   - stage: Deploy
     pool:
@@ -228,28 +218,31 @@ stages:
               steps:
               - download: current 
                 displayName: Download artifacts
-              - task: AzureWebAppContainer@1
-                displayName: Deploy to staging slot of japaneast App Service
+              
+              - task: AzureWebApp@1
+                displayName: 'Deploy to staging slot of japaneast App Service'
                 inputs:
-                  azureSubscription: '$(azureSubscriptionEndpoint)'
-                  appName: '$(appServiceName)'
-                  deployToSlotOrASE: true
-                  slotName: 'staging'
-                  resourceGroupName: '$(portalRg)'
-                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
-                  appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
-
-              - task: AzureWebAppContainer@1
+                  azureSubscription: $(azureSubscriptionEndpoint)
+                  appType: webAppLinux
+                  appName: $(appServiceName)
+                  resourceGroupName: $(portalRg)
+                  runtimeStack: NODE|14-lts
+                  slotName: staging
+                  package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+                  startUpCommand: npm run start
+              
+              - task: AzureWebApp@1
+                displayName: 'Deploy to staging slot of japanwest App Service'
                 condition: eq(variables.japanwest,'True')
-                displayName: Deploy to staging slot of japanwest App Service
                 inputs:
-                  azureSubscription: '$(azureSubscriptionEndpoint)'
-                  appName: '$(appServiceSecName)'
-                  deployToSlotOrASE: true
-                  slotName: 'staging'
-                  resourceGroupName: '$(portalSecRg)'
-                  containers: "$(azureContainerResistoryName).azurecr.io/$(repositoryName):$(tag)"
-                  appSettings: -WEBSITES_ENABLE_APP_SERVICE_STORAGE "true"
+                  azureSubscription: $(azureSubscriptionEndpoint)
+                  appType: webAppLinux
+                  appName: $(appServiceSecName)
+                  resourceGroupName: $(portalSecRg)
+                  runtimeStack: NODE|14-lts
+                  slotName: staging
+                  package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+                  startUpCommand: npm run start
 
               - task: AzureCLI@2
                 condition: eq(variables.japanwest,'True')

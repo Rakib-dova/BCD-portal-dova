@@ -187,7 +187,11 @@ app.use('/auth', require('./routes/auth').router)
 
 app.use('/tenant', require('./routes/tenant').router)
 app.use('/user', require('./routes/user').router)
+
+// 住所検索
 app.use('/searchAddress', require('./routes/searchAddressApi').router)
+// 企業検索
+app.use('/searchCompanies', require('./routes/searchCompaniesApi').router)
 
 // 請求書一括アップロード
 // csvupload
@@ -209,11 +213,15 @@ app.use('/uploadFormatList', require('./routes/uploadFormatList').router)
 app.use('/uploadFormatEdit', require('./routes/uploadFormatEdit').router)
 
 //設定
+// 設定
 // cancellation
 app.use('/cancellation', require('./routes/cancellation').router)
 
 // 契約者情報の修正
 app.use('/change', require('./routes/change').router)
+
+// 請求書ダウンロード
+app.use('/csvDownload', require('./routes/csvDownload').router)
 
 // notice
 const noticeHelper = require('./routes/helpers/notice')

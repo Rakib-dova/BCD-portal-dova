@@ -157,6 +157,110 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
     })
+
+    test('ポータル画面で請求情報ダウンロード画面遷移', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal')
+      if (page.url() === 'https://localhost:3000/portal') {
+        await page.click(
+          'body > div.container.is-max-widescreen > columns > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div'
+        )
+        await page.waitForTimeout(1000)
+        const checkLocation = await page.evaluate(() => {
+          return location.href
+        })
+        expect(checkLocation).toEqual('https://localhost:3000/csvDownload')
+      }
+
+      await browser.close()
+    })
+
+    test('ポータル画面アイコン確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal', { waitUntil: 'networkidle0' })
+      const pageUrl = await page.url()
+      if (pageUrl === 'https://localhost:3000/portal') {
+        // ページ表示完了まで待ち
+        await page.waitForTimeout(1000)
+        const pageIcons = await page.evaluate(() => {
+          const iconTiles = []
+          // 内部サービスアイコンとコンテンツを読み込み
+          for (let row = 1; row < 3; row++) {
+            for (let col = 1; col < 4; col++) {
+              const iconObj = document.querySelector(
+                `body > div.container.is-max-widescreen > columns > div:nth-child(2) > div:nth-child(${row}) > div:nth-child(${col}) > div > a > div > div.media-content > p.title.is-5`
+              )
+              const contentObj = document.querySelector(
+                `body > div.container.is-max-widescreen > columns > div:nth-child(2) > div:nth-child(${row}) > div:nth-child(${col}) > div > a > div > div.media-content > p:nth-child(2)`
+              )
+              if (iconObj === null || iconObj === undefined) continue
+              iconTiles.push({
+                title: iconObj.innerText,
+                content: contentObj.innerText
+              })
+            }
+          }
+
+          // 外部サービスアイコンとコンテンツを読み込み
+          for (let row = 1; row < 3; row++) {
+            const iconObj = document.querySelector(
+              `body > div.container.is-max-widescreen > columns > div:nth-child(3) > div > div:nth-child(${row}) > div > a > div > div.media-content > p.title.is-5`
+            )
+            const contentObj = document.querySelector(
+              `body > div.container.is-max-widescreen > columns > div:nth-child(3) > div > div:nth-child(${row}) > div > a > div > div.media-content > p:nth-child(2)`
+            )
+            if (iconObj === null || iconObj === undefined) continue
+            iconTiles.push({
+              title: iconObj.innerText,
+              content: contentObj.innerText
+            })
+          }
+
+          return iconTiles
+        })
+
+        // アイコンタイトル
+        const iconTitle = [
+          '請求書一括作成',
+          '請求情報ダウンロード',
+          'サポート',
+          '設定',
+          // 'ファクタリング',
+          '銀行振込消込'
+        ]
+
+        // アイコンの説明
+        const iconContent = [
+          '指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。',
+          '送受信した請求情報をCSV形式でダウンロードできます。',
+          '設定方法、利用方法に関するお問い合わせが無料で利用できます。その他FAQを参照できます。',
+          '契約情報変更と解約を行うことができます。',
+          // '請求書（売掛金）を買い取らせていただくことで素早く簡単に現金化ができるサービスです。',
+          '専用の振込口座をご利用いただくことで振込名義人によらず請求先を特定できるサービスです。'
+        ]
+
+        // アイコンの配置とタイトル、アイコン説明をチェックする
+        iconTitle.forEach((item, idx) => {
+          expect(pageIcons[idx].title).toBe(item)
+          expect(pageIcons[idx].content).toBe(iconContent[idx])
+        })
+
+        // ブラウザ終了
+        await page.close()
+      }
+    })
   })
 
   describe('5.契約ステータス：変更申込', () => {

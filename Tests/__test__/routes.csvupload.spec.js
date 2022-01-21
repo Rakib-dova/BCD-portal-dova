@@ -62,7 +62,12 @@ let request,
   findByUploadFormatIdSpy,
   findUploadFormatIdSpy
 
-let createSpyInvoices, createSpyinvoicesDetail, findOneSpyInvoice, findOneSypTenant, findByUploadFormatIdIdentifierSpy
+let createSpyInvoices,
+  createSpyinvoicesDetail,
+  findOneSpyInvoice,
+  findOneSypTenant,
+  findByUploadFormatIdIdentifierSpy,
+  checkContractStatusSpy
 
 describe('csvuploadのテスト', () => {
   beforeEach(() => {
@@ -117,6 +122,9 @@ describe('csvuploadのテスト', () => {
     findOneSypTenant = jest.spyOn(tenantController, 'findOne')
     pathSpy = jest.spyOn(path, 'join')
     pathResolveSpy = jest.spyOn(path, 'resolve')
+    checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
+    logger.info = jest.fn()
+    logger.error = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -135,6 +143,7 @@ describe('csvuploadのテスト', () => {
     pathResolveSpy.mockRestore()
     findByUploadFormatIdIdentifierSpy.mockRestore()
     findUploadFormatIdSpy.mockRestore()
+    checkContractStatusSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -154,6 +163,7 @@ describe('csvuploadのテスト', () => {
   // DBの正常なユーザデータ
   const dataValues = {
     dataValues: {
+      userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
       tenantId: '3cfebb4f-2338-4dc7-9523-5423a027a880',
       userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
       appVersion: '0.0.1',
@@ -1022,8 +1032,9 @@ describe('csvuploadのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
-
       findAllByContractIdSpy.mockReturnValue(findAllResult)
+      checkContractStatusSpy.mockReturnValue('00')
+
       // 試験実施
       await csvupload.cbGetIndex(request, response, next)
 
@@ -1054,6 +1065,7 @@ describe('csvuploadのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な申込中の契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues2)
+      checkContractStatusSpy.mockReturnValue('30')
 
       // 試験実施
       await csvupload.cbGetIndex(request, response, next)
@@ -1083,6 +1095,7 @@ describe('csvuploadのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な解約受取中の契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues3)
+      checkContractStatusSpy.mockReturnValue('31')
 
       // 試験実施
       await csvupload.cbGetIndex(request, response, next)
@@ -1112,8 +1125,7 @@ describe('csvuploadのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの不正な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues4)
-
-      helper.checkContractStatus = 999
+      checkContractStatusSpy.mockReturnValue(999)
 
       // 試験実施
       await csvupload.cbGetIndex(request, response, next)
@@ -1130,8 +1142,6 @@ describe('csvuploadのテスト', () => {
       // requestのsession,userIdにnullを入れる
       request.session = null
       request.user = usernull
-
-      helper.checkContractStatus = 10
 
       // 試験実施
       await csvupload.cbGetIndex(request, response, next)
@@ -1276,6 +1286,7 @@ describe('csvuploadのテスト', () => {
       createSpyInvoices.mockReturnValue(invoiceData)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       // ファイルデータを設定
       request.body = {
@@ -1305,6 +1316,7 @@ describe('csvuploadのテスト', () => {
       createSpyInvoices.mockReturnValue(invoiceData)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       // ファイルデータを設定
       request.body = {
@@ -1334,6 +1346,7 @@ describe('csvuploadのテスト', () => {
       createSpyInvoices.mockReturnValue(invoiceData)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       // ファイルデータを設定
       request.body = {
@@ -1363,6 +1376,7 @@ describe('csvuploadのテスト', () => {
       createSpyInvoices.mockReturnValue(invoiceData)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       // ファイルデータを設定
       request.body = {
@@ -1391,6 +1405,7 @@ describe('csvuploadのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues2)
+      checkContractStatusSpy.mockReturnValue('30')
 
       // ファイルデータを設定
       request.body = {
@@ -1422,6 +1437,7 @@ describe('csvuploadのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues3)
+      checkContractStatusSpy.mockReturnValue('31')
 
       // ファイルデータを設定
       request.body = {
@@ -1460,8 +1476,6 @@ describe('csvuploadのテスト', () => {
         uploadFormatId: ''
       }
 
-      helper.checkContractStatus = 999
-
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
 
@@ -1485,14 +1499,13 @@ describe('csvuploadのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの不正な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues4)
+      checkContractStatusSpy.mockReturnValue(999)
 
       // ファイルデータを設定
       request.body = {
         fileData,
         uploadFormatId: ''
       }
-
-      helper.checkContractStatus = 999
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -1517,14 +1530,13 @@ describe('csvuploadのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       // ファイルデータを設定
       request.body = {
         fileData: fileData,
         uploadFormatId: ''
       }
-
-      helper.checkContractStatus = 0
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -1701,6 +1713,7 @@ describe('csvuploadのテスト', () => {
       createSpyInvoices.mockReturnValue(invoiceData)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       const csvFileName = 'fileData101.csv'
       const csvFilePath = path.resolve(`./testData/${csvFileName}`)
@@ -1739,6 +1752,7 @@ describe('csvuploadのテスト', () => {
       createSpyInvoices.mockReturnValue(invoiceData)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       const csvFileName = 'fileData201.csv'
       const csvFilePath = path.resolve(`./testData/${csvFileName}`)
@@ -1776,6 +1790,7 @@ describe('csvuploadのテスト', () => {
       createSpyInvoices.mockReturnValue(invoiceData)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       const csvFileName = 'accountIdTypeErr.csv'
       const csvFilePath = path.resolve(`./testData/${csvFileName}`)
@@ -1813,6 +1828,7 @@ describe('csvuploadのテスト', () => {
       createSpyInvoices.mockReturnValue(invoiceData)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       const csvFileName = 'fileDataSkipInvoice.csv'
       const csvFilePath = path.resolve(`./testData/${csvFileName}`)
@@ -1849,6 +1865,7 @@ describe('csvuploadのテスト', () => {
       createSpyInvoices.mockReturnValue(invoiceData)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
 
       const csvFileName = 'networkCheckData.csv'
       const csvFilePath = path.resolve(`./testData/${csvFileName}`)
@@ -2025,6 +2042,7 @@ describe('csvuploadのテスト', () => {
         fileData: fileData,
         uploadFormatId: ''
       }
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -2190,6 +2208,7 @@ describe('csvuploadのテスト', () => {
         fileData: fileData,
         uploadFormatId: ''
       }
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -2355,6 +2374,7 @@ describe('csvuploadのテスト', () => {
         fileData: fileData,
         uploadFormatId: ''
       }
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -2520,6 +2540,7 @@ describe('csvuploadのテスト', () => {
         fileData: fileData,
         uploadFormatId: ''
       }
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -2685,6 +2706,7 @@ describe('csvuploadのテスト', () => {
         fileData: fileData,
         uploadFormatId: ''
       }
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -2852,6 +2874,7 @@ describe('csvuploadのテスト', () => {
         fileData: fileData,
         uploadFormatId: ''
       }
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -3017,6 +3040,7 @@ describe('csvuploadのテスト', () => {
         fileData: fileData,
         uploadFormatId: ''
       }
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -3184,6 +3208,7 @@ describe('csvuploadのテスト', () => {
         fileData: fileData,
         uploadFormatId: ''
       }
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -3353,6 +3378,7 @@ describe('csvuploadのテスト', () => {
         fileData: fileData,
         uploadFormatId: ''
       }
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -7040,6 +7066,7 @@ describe('csvuploadのテスト', () => {
         fileData: fileData,
         uploadFormatId: ''
       }
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -7362,6 +7389,7 @@ describe('csvuploadのテスト', () => {
           return values
         }
       })
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbGetIndex(request, response, next)
@@ -7776,6 +7804,7 @@ describe('csvuploadのテスト', () => {
         fileData: fileData,
         uploadFormatId: ''
       }
+      checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await csvupload.cbPostUpload(request, response, next)
@@ -8245,6 +8274,90 @@ describe('csvuploadのテスト', () => {
       // 期待結果
       // JSONの内容が正しいこと
       expect(JSON.stringify(invoiceList[0].INVOICE.getDocument())).toBe(returnBconCsvUserUnit3)
+    })
+
+    test('準正常：アップロード中ファイルエラー発生される', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+
+      const user1 = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = {
+        ...user1,
+        email: '/\\'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
+
+      const exceptionData = 'file Exception'
+      const fileData = Buffer.from(exceptionData).toString('base64')
+
+      // ファイルデータを設定
+      request.body = {
+        fileData: fileData,
+        uploadFormatId: ''
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
+      // statusCode 200，bodyが合ってること
+      expect(response.statusCode).toBe(500)
+      expect(response.body).toBe(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    })
+
+    test('準正常：アップロード済、ファイル削除して、関数を終了する時ファイルエラー発生される', async () => {
+      // 準備
+      // requestのuserIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+
+      const user1 = {
+        ...user,
+        accessToken: 'dummyAccess'
+      }
+      request.user = {
+        ...user1
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      createSpyInvoices.mockReturnValue(invoiceData)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      checkContractStatusSpy.mockReturnValue('00')
+
+      const exceptionData = 'file Exception'
+      const fileData = Buffer.from(exceptionData).toString('base64')
+
+      pathSpy.mockReturnValue('//\\')
+      pathSpy.mockReturnValue('/home/upload/')
+
+      // ファイルデータを設定
+      request.body = {
+        fileData: fileData,
+        uploadFormatId: ''
+      }
+
+      // 試験実施
+      await csvupload.cbPostUpload(request, response, next)
+
+      // 期待結果
+      // statusCode 200，bodyが合ってること
+      expect(response.statusCode).toBe(500)
+      expect(response.body).toBe(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
     })
   })
 

@@ -74,7 +74,7 @@ const cbGetIndex = async (req, res, next) => {
       const invoiceAll =
         ~~invoice.dataValues.successCount + ~~invoice.dataValues.skipCount + ~~invoice.dataValues.failCount
       let status = false
-      if (~~invoice.dataValues.failCount === 0 && invoice.dataValues.failCount !== '-') {
+      if (~~invoice.dataValues.failCount === 0 && invoice.dataValues.failCount !== '-' && invoiceAll !== 0) {
         status = true
       }
 

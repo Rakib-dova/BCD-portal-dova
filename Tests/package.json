@@ -9,19 +9,21 @@
     "jest": "^26.6.3",
     "jest-express": "^1.12.0",
     "jest-puppeteer": "^4.4.0",
+    "jest-runner-eslint": "^1.0.0",
     "jsdom": "^16.4.0",
     "minimist": "^1.2.5",
     "multer": "^1.4.3",
     "puppeteer": "^5.5.0",
     "rss-parser": "^3.12.0",
-    "supertest": "^6.0.1"
+    "supertest": "^6.0.1",
+    "dom-parser": "^0.1.6"
   },
   "scripts": {
     "test": "cross-env LOCALLY_HOSTED=true NODE_ENV=development INVOICE_UPLOAD_PATH=/home/upload jest --silent=false --verbose",
     "test:coverage": "cross-env LOCALLY_HOSTED=true NODE_ENV=development INVOICE_UPLOAD_PATH=/home/upload jest --silent=false --verbose --coverage",
     "test:integration": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose --config jest.config.integration.js",
     "test:tools": "cross-env LOCALLY_HOSTED=true NODE_ENV=development jest --silent=false --verbose --config jest.config.tools.js",
-    "test:ci": "npm run test -- --watchAll=false --reporters=default --reporters=jest-junit --coverage --coverageReporters=cobertura",
+    "test:ci": "npm run test -- --config jest-ci.config.js --watchAll=false --reporters=default --reporters=jest-junit --coverage --coverageReporters=cobertura",
     "test:integrationCi": "npm run test:integration -- --watchAll=false --reporters=default --reporters=jest-junit --coverage --coverageReporters=cobertura --config jest.config.integration.js"
   },
   "devDependencies": {

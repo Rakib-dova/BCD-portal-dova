@@ -15,6 +15,7 @@
     "bunyan": "^1.8.14",
     "connect-redis": "^5.0.0",
     "csurf": "^1.11.0",
+    "dom-parser": "^0.1.6",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-flash": "0.0.2",

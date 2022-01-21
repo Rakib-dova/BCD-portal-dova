@@ -16,11 +16,12 @@ html
   body.has-navbar-fixed-top
     .navbar.is-dark.is-fixed-top
         .navbar-brand.is-family-noto-sans-bold
-          .navbar-item BConnectionデジタルトレード
-          //- a.navbar-brand(href='/') BConnectionデジタルトレード
-          a.navbar-item(href='/') 
-            span.fas.fa-home
-              | Home
+          if title !== 'ポータル'
+            .navbar-item BConnectionデジタルトレード
+            //- a.navbar-brand(href='/') BConnectionデジタルトレード
+            a.navbar-item(href='/') 
+              span.fas.fa-home
+                | Home
           .navbar-item.right
             img.ncom-logo(src='../image/ts-app-digitaltrade-ncom-logo.svg')
     
@@ -39,6 +40,19 @@ html
 
     if messages.info
       #message-info(title= messages.info[0])
-    
+
+    if messages.noti
+      .modal.modal-fx-fadeInscale#confirmmodify-modal.is-active
+              .modal-background.cancel-button(data-target="confirmmodify-modal")
+              .modal-card
+                header.modal-card-head
+                  p.modal-card-title= messages.noti[0]
+                  button.delete(type="button" data-target="confirmmodify-modal")
+                section.modal-card-body
+                  p !{messages.noti[1]}
+                footer.modal-card-foot
+                  div.button-area
+                    a.button.cancel-button(data-target='confirmmodify-modal') 確認
+
     block scripts
       script(src="/js/common-page.js")

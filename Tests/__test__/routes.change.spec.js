@@ -19,7 +19,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.env' })
 }
 
-let request, response, infoSpy, findOneSpy, findOneSpyContracts, createSpy
+let request, response, infoSpy, findOneSpy, findOneSpyContracts, createSpy, checkcontractStatusSpy
 describe('changeのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -27,6 +27,7 @@ describe('changeのテスト', () => {
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     createSpy = jest.spyOn(changOrderController, 'create')
+    checkcontractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     infoSpy = jest.spyOn(logger, 'info')
   })
   afterEach(() => {
@@ -37,6 +38,7 @@ describe('changeのテスト', () => {
     findOneSpy.mockRestore()
     findOneSpyContracts.mockRestore()
     createSpy.mockRestore()
+    checkcontractStatusSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -200,6 +202,7 @@ describe('changeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -230,6 +233,7 @@ describe('changeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
+      checkcontractStatusSpy.mockReturnValue('40')
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -255,6 +259,7 @@ describe('changeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingCancel)
+      checkcontractStatusSpy.mockReturnValue('41')
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -280,6 +285,7 @@ describe('changeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptContract)
+      checkcontractStatusSpy.mockReturnValue('10')
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -305,6 +311,7 @@ describe('changeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingContract)
+      checkcontractStatusSpy.mockReturnValue('11')
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -330,6 +337,7 @@ describe('changeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptChange)
+      checkcontractStatusSpy.mockReturnValue('40')
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -355,6 +363,7 @@ describe('changeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingChange)
+      checkcontractStatusSpy.mockReturnValue('41')
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -380,6 +389,7 @@ describe('changeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoDataUserRoleNotTenantAdmin)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -406,7 +416,7 @@ describe('changeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoNoData)
-      helper.checkContractStatus = 999
+      checkcontractStatusSpy.mockReturnValue(999)
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -434,7 +444,7 @@ describe('changeのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
-      helper.checkContractStatus = 0
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbGetChangeIndex(request, response, next)
@@ -643,6 +653,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -676,6 +687,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -708,6 +720,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -744,6 +757,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -779,6 +793,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -816,6 +831,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -856,6 +872,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -882,6 +899,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('30')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -908,6 +926,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingCancel)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('31')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -934,6 +953,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptContract)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('10')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -960,6 +980,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingContract)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('11')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -986,6 +1007,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptChange)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('40')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -1012,6 +1034,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptingChange)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('41')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -1038,6 +1061,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoDataUserRoleNotTenantAdmin)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -1078,6 +1102,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(createData)
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -1102,7 +1127,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoNoData)
       createSpy.mockReturnValue(createData)
-      helper.checkContractStatus = 999
+      checkcontractStatusSpy.mockReturnValue(999)
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)
@@ -1130,7 +1155,7 @@ describe('changeのテスト', () => {
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoDatatoBeUnderContract)
       createSpy.mockReturnValue(new Error('DB error mock'))
-      helper.checkContractStatus = 0
+      checkcontractStatusSpy.mockReturnValue('00')
 
       // 試験実施
       await change.cbPostChangeIndex(request, response, next)

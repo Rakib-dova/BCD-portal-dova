@@ -59,6 +59,9 @@ document.getElementsByName('confirmButton').forEach((item) => {
       }
     })
       .then((response) => response.json())
+      .catch(() => {
+        return { result: 'SYSERR' }
+      })
       .then((response) => {
         // 削除失敗
         switch (response.result) {
@@ -72,6 +75,9 @@ document.getElementsByName('confirmButton').forEach((item) => {
           case -1:
             alert('すでに削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
             location.reload()
+            break
+          default:
+            alert('システムエラーが発生しました。')
             break
         }
       })

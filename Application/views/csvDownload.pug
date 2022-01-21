@@ -1,0 +1,160 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans 請求情報ダウンロード
+        .subtitle.is-family-noto-sans CSV DOWNLOAD
+
+    .columns.is-centered
+     .column.is-11
+      .box
+       form#form(method="POST")
+        article.panel.is-info
+         h2.panel-heading 条件絞り込み
+         .panel-block.mr-4
+          .container
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel 請求書番号
+             .field-body
+               .field
+                 .control.has-icons-right
+                   input.input#invoiceNumber.itemForSearch(type="text" name="invoiceNumber" maxlength="100" pattern="^.{0,100}$")
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel ステータス
+             .field-body
+               .field
+                .box
+                 .control.has-icons-right
+                   .is-fullwidth.is-multiple
+                    each item in status
+                      input.m-3.p-1(type="checkbox" name="status" checked=true value=item)
+                      label.checkbox=item
+                      br
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel 販売/購入
+             .field-body
+               .field
+                 .control.has-icons-right
+                   .select.is-fullwidth
+                     select#buyAndSell(name="buyAndSell")
+                       each item in buyAndSell
+                         option= item
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel 発行日
+             .field-body
+               .field.is-grouped.is-grouped-multiline
+                 .control.is-expanded
+                   input.input#minIssuedate.itemForSearch(type="date" name="minIssuedate" value= minissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+                 .control
+                   div ～
+                 .control.is-expanded
+                   input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" value= maxissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel 送信企業
+             .field-body
+               .field.has-addons
+                 p.control.is-expanded
+                   input.input#sendTo(type='text' maxlength="100")
+                 p.control
+                   a.button.is-info#sendToSearchBtn 検索
+
+           .field.is-horizontal
+            .field-label.is-normal
+            .field-body#sendToSelectBtnField
+
+           .field.is-horizontal.is-invisible
+            .field-label.is-normal
+            .field-body.level
+              .container#displaySendToSearchResultField
+
+           .field.is-horizontal
+             .field-label.is-normal
+               label.bulmalabel 受信企業
+             .field-body
+               .field.has-addons
+                 p.control.is-expanded
+                   input.input#sendBy(type='text' maxlength="100")
+                 p.control
+                   a.button.is-info#sendBySearchBtn 検索
+
+           .field.is-horizontal
+            .field-label.is-normal
+            .field-body#sendBySelectBtnField
+
+           .field.is-horizontal.is-invisible
+            .field-label.is-normal
+            .field-body.level
+              .container#displaySendBySearchResultField
+
+           .field.is-horizontal
+            .field-label.is-normal
+            .field-body
+           
+
+
+        .field.is-grouped.is-grouped-centered
+          .control.mx-4
+            .mt-5.has-text-centered
+              div
+                p.border-csvdownload ※ダウンロードされる請求書数は100件以内となるように設定してください。
+              .column
+                div.button-area
+                  a.button.is-info#submit(type="submit")  CSVダウンロード
+            
+    template#templateAllSelectBtn
+        p.control
+          a.button.is-info 全選択
+        p.control
+        p.control
+          a.button.is-info 全解除
+        p.control
+        p.control
+          a.button ▲
+
+    template#templateSearchResultBox
+        .box.searchResultBox
+
+    template#templateSearchResultItem
+      .field.is-horizontal
+        .field-body
+          p.control
+            label.checkbox
+              input.m-3.p-1(type='checkbox' checked=false)
+         
+    .modal.modal-fx-fadeInscale#searchCompany-modal
+     .modal-background.cancel-button(data-target="searchCompany-modal")
+     .modal-card
+       header.modal-card-head
+         p.modal-card-title 企業検索
+         button.delete(type="button" data-target="searchCompany-modal")
+       section.modal-card-body
+         p.modal-card-result#modal-card-result
+       footer.modal-card-foot
+         div.button-area
+          a.button.cancel-button(data-target="searchCompany-modal") 確認
+
+    .modal.modal-fx-fadeInscale#checkStatus-modal
+     .modal-background.cancel-button(data-target="checkStatus-modal")
+     .modal-card
+       header.modal-card-head
+         p.modal-card-title ステータス
+         button.delete(type="button" data-target="checkStatus-modal")
+       section.modal-card-body
+         p.modal-card-result#modal-card-checkStatus
+       footer.modal-card-foot
+         div.button-area
+          a.button.cancel-button(data-target="checkStatus-modal") 確認
+
+    include footer
+
+block append scripts
+  //- 画面のJSファイル
+  script(src="/js/csvDownload-page.js")
