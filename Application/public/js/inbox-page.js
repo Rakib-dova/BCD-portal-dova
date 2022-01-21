@@ -28,6 +28,15 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       const cloneAccountCodeItem = document.importNode(templeAccountCodeItem.content, true)
       cloneAccountCodeItem.querySelector('.lineAccountcode').id = targetId
       // 名前の割り当て
+      // 勘定科目コードINPUT
+      cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').setAttribute('name', `${targetId}_accountCode`)
+      cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').id = `${targetId}_accountCode`
+      // 補助科目コードINPUT
+      cloneAccountCodeItem
+        .querySelector('.lineAccountCode_subAccountCode')
+        .setAttribute('name', `${targetId}_subAccountCode`)
+      cloneAccountCodeItem.querySelector('.lineAccountCode_subAccountCode').id = `${targetId}_subAccountCode`
+      // 分割金額
       cloneAccountCodeItem.querySelector('.inputInstallmentAmount').setAttribute('name', `${targetId}_input_amount`)
       cloneAccountCodeItem.querySelector('.inputInstallmentAmount').id = `${targetId}_input_amount`
       // 項目の分割金額の入力ボタン

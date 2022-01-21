@@ -5,14 +5,15 @@ block content
     div.title-box-journallzing
       h4.title-text-journallzing.text-inbox 仕訳情報設定
     .box
-      include invoiceHeader
-      include invoiceLines
-      include invoiceFooter
-      include invoiceOptions
-      include invoicePaymentMethod
-      .grouped-button
-        a.button.mr-6(href='/inboxList/1')  戻る
-        button.button.is-link 確認
+      form(method='POST')
+        include invoiceHeader
+        include invoiceLines
+        include invoiceFooter
+        include invoiceOptions
+        include invoicePaymentMethod
+        .grouped-button
+          a.button.mr-6(href='/inboxList/1')  戻る
+          button.button.is-link(type='submit') 確認
 
   template#templateLineAccountCodeItem
     .columns.m-0.p-1.lineAccountcode
@@ -28,15 +29,15 @@ block content
           .field-body.m-1
             .field
               p.control
-                input.input(type='text' name=`` readonly)
+                input.input.lineAccountCode_accountCode(type='text' name=`` readonly)
           .field-body.m-1
             .field
               p.control
-                input.input(type='text' name=`` readonly)
+                input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
           .field-body.m-1.is-1.none-flex-grow
             .field
               p.control
-                button.button.is-link 検索
+                a.button.is-link 検索
       .column.is-0.p-1
       .column.is-one-quarter.p-0.border-div-rad-4
         .field.is-horizontal.m-1.has-addons-centered
@@ -53,7 +54,7 @@ block content
             .field-body.m-1.is-1.none-flex-grow
               .field
                 p.control
-                  button.button.show-modal.is-link.btn-insert-installmentAmount  入力
+                  a.button.show-modal.is-link.btn-insert-installmentAmount  入力
       .column
         a.red-color.btn-minus-accountCode
           i.fas.fa-minus-circle
@@ -63,7 +64,7 @@ block content
     .modal-card.is-family-noto-sans
       header.modal-card-head.color-link-modal-header
         p.modal-card-title 勘定科目選択
-        button.delete(data-target="accountCode-modal")
+        a.delete(data-target="accountCode-modal")
       section.modal-card-body
           .columns.is-centered.m-0
             .column.p-1
@@ -106,16 +107,16 @@ block content
                   .columns.m-0
                     .column.p-0
                       div.button-area
-                        .button.is-link#btnSearchAccountCode(type="button") 検索
+                        a.button.is-link#btnSearchAccountCode(type="button") 検索
       footer.modal-card-foot.center-modal-footer-item
-        button.button.cancel-button(data-target='accountCode-modal') 閉じる
+        a.button.cancel-button(data-target='accountCode-modal') 閉じる
 
   .modal#insert-installmentAmount-modal
     .modal-background.cancel-button(data-target='insert-installmentAmount-modal')
     .modal-card.is-family-noto-sans
       header.modal-card-head.color-link-modal-header
         p.modal-card-title 分割金額入力
-        button.delete(data-target="insert-installmentAmount-modal")
+        a.delete(data-target="insert-installmentAmount-modal")
       section.modal-card-body
           .columns.is-centered.m-0
             .column.p-1
@@ -128,7 +129,7 @@ block content
                       input.input(type="text" id='inputInstallmentAmount' value maxlength=12 placeholder='金額を入力します。')
                   .field
                     p.control
-                      button.button.is-link#btn-insert 入力
+                      a.button.is-link#btn-insert 入力
           .columns
             .column.p-1
               p#installmentAmountErrMsg.text-center.input-label-required 　

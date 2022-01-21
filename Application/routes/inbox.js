@@ -56,7 +56,7 @@ const cbGetIndex = async (req, res, next) => {
   const invoiceId = req.params.invoiceId
   let result
   try {
-    result = await inboxController.getInvoiceDetail(accessToken, refreshToken, invoiceId)
+    result = await inboxController.getInvoiceDetail(accessToken, refreshToken, invoiceId, contract.contractId)
   } catch (error) {
     logger.error({ stack: error.stack, status: 1 })
     req.flash('noti', [notiTitle, 'システムエラーが発生しました。'])
