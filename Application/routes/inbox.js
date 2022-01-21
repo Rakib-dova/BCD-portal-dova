@@ -12,6 +12,14 @@ const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
 const notiTitle = '仕分け情報設定'
 
+const bodyParser = require('body-parser')
+router.use(
+  bodyParser.json({
+    type: 'application/json',
+    limit: '6826KB'
+  })
+)
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -176,7 +184,71 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+const cbPostGetCode = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostGetCode')
+
+  // 認証情報取得処理
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+
+  const targetAccountCode = req.body.accountCode ?? ''
+  const targetAccountCodeName = req.body.accountCodeName ?? ''
+  const targetSubAccountCode = req.body.subAccountCode ?? ''
+  const targetSubAccountCodeName = req.body.subAccountCodeName ?? ''
+
+  if (targetAccountCode.length > 10 || targetAccountCodeName.length > 40) {
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetCode')
+    return res.status(400).send('400 Bad Request')
+  }
+
+  const searchResult = await inboxController.getCode(
+    contract.contractId,
+    targetAccountCode,
+    targetAccountCodeName,
+    targetSubAccountCode,
+    targetSubAccountCodeName
+  )
+
+  const codeLists = []
+
+  searchResult.forEach((items) => {
+    const accountCode = items.accountCode
+    const accountCodeName = items.accountCodeName
+
+    codeLists.push([accountCode, accountCodeName, '', ''])
+  })
+
+  res.send(searchResult)
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetAccountCode')
+}
+
 router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)
+router.post('/getCode', helper.isAuthenticated, cbPostGetCode)
 
 module.exports = {
   router: router,

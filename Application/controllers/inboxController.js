@@ -1,5 +1,7 @@
 const apiManager = require('./apiManager')
 const JournalizeInvoice = require('../models').JournalizeInvoice
+const logger = require('../lib/logger')
+const accountCodeController = require('./accountCodeController')
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
@@ -111,7 +113,32 @@ const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId, contrac
 
   return displayInvoice
 }
+
+const getCode = async (contractId, accountCode, accountCodeName, subAccountCode, subAccountCodeName) => {
+  try {
+    const result = await accountCodeController.searchAccountCode(contractId, accountCode, accountCodeName)
+    console.log('result====', result)
+    // 検索結果オブジェクトに作成して返す
+    // return {
+    //   accountCode: result.accountCode,
+    //   accountCodeName: result.accountCodeName,
+    //   subAccountCode: '',
+    //   subAccountCodeName: ''
+    // }
+    return result
+  } catch (error) {
+    logger.error({
+      contractId: contractId,
+      accountCode: accountCode,
+      subAccountCode: subAccountCode,
+      stack: error.stack,
+      status: 0
+    })
+    return error
+  }
+}
 module.exports = {
   getInbox: getInbox,
-  getInvoiceDetail: getInvoiceDetail
+  getInvoiceDetail: getInvoiceDetail,
+  getCode: getCode
 }
