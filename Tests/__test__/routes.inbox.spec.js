@@ -25,8 +25,8 @@ let userControllerFindOneSpy,
   tenantControllerFindOneSpy,
   contractControllerFindContractSpyon,
   inboxControllerSpy,
-  checkDataForJournalizeInvoiceSpy,
-  getCodeSpy
+  getCodeSpy,
+  insertAndUpdateJournalizeInvoiceSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -79,8 +79,8 @@ describe('inboxのテスト', () => {
     contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
     inboxControllerSpy = jest.spyOn(inboxController, 'getInvoiceDetail')
     getCodeSpy = jest.spyOn(inboxController, 'getCode')
-    checkDataForJournalizeInvoiceSpy = jest.spyOn(inboxController, 'checkDataForJournalizeInvoice')
     request.flash = jest.fn()
+    insertAndUpdateJournalizeInvoiceSpy = jest.spyOn(inboxController, 'insertAndUpdateJournalizeInvoice')
   })
   afterEach(() => {
     request.resetMocked()
@@ -93,7 +93,7 @@ describe('inboxのテスト', () => {
     contractControllerFindContractSpyon.mockRestore()
     inboxControllerSpy.mockRestore()
     getCodeSpy.mockRestore()
-    checkDataForJournalizeInvoiceSpy.mockRestore()
+    insertAndUpdateJournalizeInvoiceSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -389,7 +389,7 @@ describe('inboxのテスト', () => {
   })
 
   describe('コールバック:cbPostGetCode', () => {
-    test('正常', async () => {
+    test('正常：勘定科目、補助科目が存在する場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...loggedInSession }
@@ -434,6 +434,51 @@ describe('inboxのテスト', () => {
           accountCodeName: 'テスト用勘定科目',
           subAccountCode: 'SUUT',
           subAccountCodeName: 'テスト用補助科目'
+        }
+      ])
+    })
+
+    test('正常：勘定科のみ存在する場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      getCodeSpy.mockReturnValue([
+        {
+          accountCodeId: '3e7d2225-90c6-410e-bed3-cd1384ca37a1',
+          contractId: '7e02d351-e4e4-44c4-8e4a-b9d0a6e097d0',
+          accountCodeName: 'テスト用勘定科目',
+          accountCode: 'UT',
+          createdAt: '2022-01-21T05:18:00.443Z',
+          updatedAt: '2022-01-21T05:18:00.443Z'
+        }
+      ])
+
+      // 試験実施
+      await inbox.cbPostGetCode(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 予想したデータがある
+      expect(response.send).toHaveBeenCalledWith([
+        {
+          accountCode: 'UT',
+          accountCodeName: 'テスト用勘定科目',
+          subAccountCode: '',
+          subAccountCodeName: ''
         }
       ])
     })
@@ -488,8 +533,64 @@ describe('inboxのテスト', () => {
       await inbox.cbPostGetCode(request, response, next)
 
       // 期待結果
-      // 404エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(400)
+      // response.statusが「400」
+      expect(response.status).toHaveBeenCalledWith(400)
+      expect(response.send).toHaveBeenCalledWith('400 Bad Request')
+    })
+
+    test('異常：勘定科目名４０文字超過', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[0] }
+      request.body = {
+        accountCode: 'AB001',
+        accountCodeName: '勘定科目名40桁まで確認勘定科目名40桁まで確認勘定科目名40桁まで確認勘定科目名40桁まで確認'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await inbox.cbPostGetCode(request, response, next)
+
+      // 期待結果
+      // response.statusが「400」
+      expect(response.status).toHaveBeenCalledWith(400)
+      expect(response.send).toHaveBeenCalledWith('400 Bad Request')
+    })
+
+    test('異常：userContextがLoggedInではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        accountCode: 'AB001',
+        accountCodeName: '勘定科目名UT'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await inbox.cbPostGetCode(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
     })
 
     test('500エラー:不正なContractデータの場合', async () => {
@@ -618,15 +719,32 @@ describe('inboxのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.body = {
+        lineId: 'UT001',
+        lineNo1_lineAccountCode1_accountCode: 'AB001',
+        lineNo1_lineAccountCode1_subAccountCode: 'SU001',
+        lineNo1_lineAccountCode1_input_amount: '30,000'
+      }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[6])
+      userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
 
-      tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
+        status: 0,
+        lineId: 'lineAccountCode4',
+        accountCode: 'AB001',
+        subAccountCode: 'SU001',
+        error: undefined
+      })
 
       // 試験実施
       await inbox.cbPostIndex(request, response, next)
@@ -639,9 +757,8 @@ describe('inboxのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // 解約手続き中画面が表示「される」
-      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
+
     test('正常：解約申込中の場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -670,6 +787,180 @@ describe('inboxのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('正常：未登録勘定科目の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const lineId = 'lineAccountCode4'
+      const accountCode = 'AB111'
+
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        lineId: 'UT001',
+        lineNo1_lineAccountCode1_accountCode: 'AB111',
+        lineNo1_lineAccountCode1_subAccountCode: 'SU001',
+        lineNo1_lineAccountCode1_input_amount: '30,000'
+      }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
+        status: -2,
+        lineId: lineId,
+        accountCode: accountCode,
+        subAccountCode: 'SU001',
+        error: undefined
+      })
+
+      // 試験実施
+      await inbox.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '仕訳情報設定',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の勘定科目「${accountCode}」は未登録勘定科目です。`,
+        'SYSERR'
+      ])
+    })
+
+    test('正常：未登録補助科目の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const lineId = 'lineAccountCode4'
+      const subAccountCode = 'SU111'
+
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        lineId: 'UT001',
+        lineNo1_lineAccountCode1_accountCode: 'AB001',
+        lineNo1_lineAccountCode1_subAccountCode: 'SU111',
+        lineNo1_lineAccountCode1_input_amount: '30,000'
+      }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
+        status: -3,
+        lineId: lineId,
+        accountCode: 'AB001',
+        subAccountCode: subAccountCode,
+        error: undefined
+      })
+
+      // 試験実施
+      await inbox.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '仕訳情報設定',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の補助科目「${subAccountCode}」は未登録補助科目です。`,
+        'SYSERR'
+      ])
+    })
+
+    test('異常:invoiceIdがUUIDではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        lineId: 'UT001',
+        lineNo1_lineAccountCode1_accountCode: 'AB001',
+        lineNo1_lineAccountCode1_subAccountCode: 'SU001',
+        lineNo1_lineAccountCode1_input_amount: '30,000'
+      }
+      request.params = {
+        invoiceId: 'TEST'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await inbox.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // response.statusが「400」
+      expect(response.status).toHaveBeenCalledWith(400)
+      expect(response.send).toHaveBeenCalledWith('400 Bad Request')
+    })
+
+    test('500エラー:DBエラーの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        lineId: 'UT001',
+        lineNo1_lineAccountCode1_accountCode: 'AB001',
+        lineNo1_lineAccountCode1_subAccountCode: 'SU001',
+        lineNo1_lineAccountCode1_input_amount: '30,000'
+      }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      const dbError = new Error('DB Error')
+      insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
+        status: 0,
+        lineId: 'lineAccountCode4',
+        accountCode: 'AB001',
+        subAccountCode: 'SU001',
+        error: dbError
+      })
+
+      // 試験実施
+      await inbox.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('500エラー:不正なContractデータの場合', async () => {

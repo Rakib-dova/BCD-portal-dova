@@ -285,7 +285,13 @@ const cbPostIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  // invoiceId取得及び確認
   const invoiceId = req.params.invoiceId
+  if (!validate.isUUID(invoiceId)) {
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+    return res.status(400).send('400 Bad Request')
+  }
+
   const { status, lineId, accountCode, subAccountCode, error } = await inboxController.insertAndUpdateJournalizeInvoice(
     contract.contractId,
     invoiceId,
@@ -294,21 +300,18 @@ const cbPostIndex = async (req, res, next) => {
 
   if (error instanceof Error || error === null) return next(errorHelper.create(500))
 
-  // 結果：0（正常変更）、-1（inovoiceIdエラー）、-2（未登録勘定科目）、-3（未登録補助科目）
+  // 結果：0（正常変更）、-1（未登録勘定科目）、-2（未登録補助科目）
   switch (status) {
     case 0:
       break
     case -1:
-      req.flash('noti', ['仕訳情報設定', 'システムエラーです。<BR>（後程、接続してください。）'])
-      return res.redirect('/inboxList/1')
-    case -2:
       req.flash('noti', [
         '仕訳情報設定',
         `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の勘定科目「${accountCode}」は未登録勘定科目です。`,
         'SYSERR'
       ])
       return res.redirect('/inboxList/1')
-    case -3:
+    case -2:
       req.flash('noti', [
         '仕訳情報設定',
         `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の補助科目「${subAccountCode}」は未登録補助科目です。`,
@@ -328,5 +331,7 @@ router.post('/:invoiceId', helper.isAuthenticated, cbPostIndex)
 
 module.exports = {
   router: router,
-  cbGetIndex: cbGetIndex
+  cbGetIndex: cbGetIndex,
+  cbPostGetCode: cbPostGetCode,
+  cbPostIndex: cbPostIndex
 }
