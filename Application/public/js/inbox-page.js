@@ -50,12 +50,127 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
         .addEventListener('click', btnInstallmentAmount)
       cloneAccountCodeItem.querySelector('.btn-minus-accountCode').dataset.target = targetId
       cloneAccountCodeItem.querySelector('.btn-minus-accountCode').addEventListener('click', btnMinusAccount)
+      cloneAccountCodeItem.querySelector('.btn-search-main').dataset.target = 'accountCode-modal'
+      cloneAccountCodeItem.querySelector('.btn-search-main').dataset.info = targetId
+      cloneAccountCodeItem.querySelector('.btn-search-main').addEventListener('click', btnSearchMain)
       // １番目のマイナスボタン隠す
       $(`#btn-minus-${this.dataset.target.replace('#', '')}-accountCode`).classList.add('is-invisible')
       target.appendChild(cloneAccountCodeItem)
     }
   })
 })
+
+// 2番目以降の勘定科目・補助科目検索ボタンイベント
+const btnSearchMain = function () {
+  const searchModal = document.getElementById('accountCode-modal')
+  if (searchModal) searchModal.classList.toggle('is-active')
+}
+
+// 仕訳情報検索
+$('#btnSearchAccountCode').addEventListener('click', function () {
+  // 検索ボタンが非活性化の時は動作しない
+  if ($('#btnSearchAccountCode').getAttribute('disabled') !== null) {
+    return
+  }
+  const accountCode = $('#searchModalAccountCode').value
+  const accountCodeName = $('#searchModalAccountCodeName').value
+  const subAccountCode = $('#searchModalSubAccountCode').value
+  const subAccountCodeName = $('#searchModalSubAccountCodeName').value
+
+  const $this = this
+  deleteDisplayModal()
+  $('#searchModalAccountCode').value = accountCode
+  $('#searchModalAccountCodeName').value = accountCodeName
+  $('#searchModalSubAccountCode').value = ''
+  $('#searchModalSubAccountCodeName').value = ''
+
+  const getAccountCode = new XMLHttpRequest()
+  getAccountCode.open('POST', '/inbox/getCode')
+  getAccountCode.setRequestHeader('Content-Type', 'application/json')
+  getAccountCode.onreadystatechange = function () {
+    if (getAccountCode.readyState === getAccountCode.DONE) {
+      switch (getAccountCode.status) {
+        case 200: {
+          const result = JSON.parse(getAccountCode.response)
+          if (result.length !== 0) {
+            console.log(result)
+            displayResultForCode(result)
+          } else {
+            // displayNoAccountCode()
+          }
+          break
+        }
+        default: {
+          deleteDisplayModal()
+          break
+        }
+      }
+    }
+    $this.classList.remove('is-loading')
+  }
+  $this.classList.add('is-loading')
+  getAccountCode.send(
+    JSON.stringify({
+      accountCode: accountCode,
+      accountCodeName: accountCodeName,
+      subAccountCode: subAccountCode,
+      subAccountCodeName: subAccountCodeName
+    })
+  )
+})
+
+// 検索結果を画面に表示
+const displayResultForCode = function (codeArr) {
+  const displayFieldResultBody = $('#displayFieldResultBody')
+  const searchResultCode = $('#searchResultCode')
+  codeArr.forEach((item) => {
+    const cloneSearchResultCodeTemplate = document.importNode(searchResultCode.content, true)
+    cloneSearchResultCodeTemplate.querySelector('.rowAccountCode').dataset.target = '#accountCode-modal'
+    cloneSearchResultCodeTemplate.querySelector('.rowAccountCode').dataset.accountCode = item.accountCode
+    cloneSearchResultCodeTemplate.querySelector('.columnNoAccountCodeMessage').classList.add('is-invisible')
+    cloneSearchResultCodeTemplate.querySelector('.columnAccountCode').innerText = item.accountCode
+    cloneSearchResultCodeTemplate.querySelector('.columnAccountCodeName').innerText = item.accountCodeName
+
+    displayFieldResultBody.appendChild(cloneSearchResultCodeTemplate)
+  })
+  $('.rowAccountCode').forEach((row) => {
+    row.addEventListener('click', function () {
+      $(this.dataset.target).classList.remove('is-active')
+      console.log(this.dataset.accountCode)
+      $('#lineNo1_lineAccountCode1_accountCode').value = this.dataset.accountCode
+      deleteDisplayModal()
+      // checkbtnCheck()
+    })
+    row.addEventListener('mouseover', function () {
+      this.classList.add('is-selected')
+    })
+    row.addEventListener('mouseout', function () {
+      this.classList.remove('is-selected')
+    })
+  })
+  $('#displayInvisible').classList.remove('is-invisible')
+}
+
+// 再検索の時、前の結果を消す
+const deleteDisplayModal = function () {
+  const displayFieldResultBody = $('#displayFieldResultBody')
+  if (displayFieldResultBody.children.length !== 0) {
+    const chidrenItem = []
+    Array.prototype.forEach.call(displayFieldResultBody.children, (item) => {
+      chidrenItem.push(item)
+    })
+    chidrenItem.forEach((item) => {
+      displayFieldResultBody.removeChild(item)
+    })
+  }
+
+  $('#searchModalAccountCode').value = ''
+  $('#searchModalAccountCodeName').value = ''
+  $('#searchModalSubAccountCode').value = ''
+  $('#searchModalSubAccountCodeName').value = ''
+
+  $('#displayInvisible').classList.add('is-invisible')
+}
 
 Array.prototype.forEach.call($('.btn-minus-accountCode'), (btnMinusAccount) => {
   btnMinusAccount.addEventListener('click', function () {})

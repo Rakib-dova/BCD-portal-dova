@@ -3,10 +3,10 @@ const db = require('../models')
 const AccountCode = db.AccountCode
 const SubAccountCode = db.SubAccountCode
 const JournalizeInvoice = db.JournalizeInvoice
-const constantsDefine = require('../constants')
 const logger = require('../lib/logger')
 const { v4: uuidV4 } = require('uuid')
 const validate = require('../lib/validate')
+const accountCodeController = require('./accountCodeController')
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
@@ -120,13 +120,21 @@ const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId, contrac
 }
 
 const insert = async (contract, values) => {
-  const functionName = 'inboxController.insert'
+  // journalize_invoiceテーブル
+  // journalId(PK)
+  // contractId(FK)
+  // invoiceId -請求書番号（UUID)
+  // lineNo-明細番号
+  // lineId-項目ID
+  // accountCode-勘定科目コード
+  // subAccountCode-補助科目コード
+  // installmentAmount-分割金額
+
   const contractId = contract.contractId
-  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
 
   try {
     // inovoiceIdチェック
-    if (!validate.isUUID(values.invoiceId)) return -2
+    if (!validate.isUUID(values.invoiceId)) return -1
 
     // 勘定科目コード有無確認
     const accountCodeSearchResult = await AccountCode.findOne({
@@ -136,19 +144,21 @@ const insert = async (contract, values) => {
       }
     })
     if (accountCodeSearchResult === null) {
-      return -1
+      return -2
     }
 
     // 補助科目勘コード有無確認
-    const accountCodeId = accountCodeSearchResult.accountCodeId
-    const subAccountCodeSearch = await SubAccountCode.findOne({
-      where: {
-        subjectCode: values.subAccountCode,
-        accountCodeId: accountCodeId
+    if (values.subAccountCode !== '') {
+      const accountCodeId = accountCodeSearchResult.accountCodeId
+      const subAccountCodeSearch = await SubAccountCode.findOne({
+        where: {
+          subjectCode: values.subAccountCode,
+          accountCodeId: accountCodeId
+        }
+      })
+      if (subAccountCodeSearch === null) {
+        return -3
       }
-    })
-    if (subAccountCodeSearch === null) {
-      return -1
     }
 
     // 問題ない場合DBに保存する。
@@ -171,7 +181,9 @@ const insert = async (contract, values) => {
   }
 }
 
-const checkDataForJournalizeInvoice = async (contractId, invoiceId) => {
+const checkDataForJournalizeInvoice = async (contract, invoiceId) => {
+  const contractId = contract.contractId
+
   try {
     const journalizeInvoice = await JournalizeInvoice.findAll({
       where: {
@@ -191,9 +203,34 @@ const checkDataForJournalizeInvoice = async (contractId, invoiceId) => {
   }
 }
 
+const getCode = async (contractId, accountCode, accountCodeName, subAccountCode, subAccountCodeName) => {
+  try {
+    const result = await accountCodeController.searchAccountCode(contractId, accountCode, accountCodeName)
+    console.log('result====', result)
+    // 検索結果オブジェクトに作成して返す
+    // return {
+    //   accountCode: result.accountCode,
+    //   accountCodeName: result.accountCodeName,
+    //   subAccountCode: '',
+    //   subAccountCodeName: ''
+    // }
+    return result
+  } catch (error) {
+    logger.error({
+      contractId: contractId,
+      accountCode: accountCode,
+      subAccountCode: subAccountCode,
+      stack: error.stack,
+      status: 0
+    })
+    return error
+  }
+}
+
 module.exports = {
   getInbox: getInbox,
   getInvoiceDetail: getInvoiceDetail,
   insert: insert,
-  checkDataForJournalizeInvoice: checkDataForJournalizeInvoice
+  checkDataForJournalizeInvoice: checkDataForJournalizeInvoice,
+  getCode: getCode
 }
