@@ -23,7 +23,9 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
   btnPlusAccount.addEventListener('click', function () {
     const target = $(this.dataset.target)
     if (target.querySelectorAll('.lineAccountcode').length < 9) {
+      // 仕訳情報のidを作成：lineNo明細詳細の順番_lineAccountCode仕訳情報の順番
       const targetId = `${target.id}_lineAccountCode${target.querySelectorAll('.lineAccountcode').length + 2}`
+      // templateから追加仕訳情報欄作成
       const templeAccountCodeItem = $('#templateLineAccountCodeItem')
       const cloneAccountCodeItem = document.importNode(templeAccountCodeItem.content, true)
       cloneAccountCodeItem.querySelector('.lineAccountcode').id = targetId
@@ -41,6 +43,7 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       cloneAccountCodeItem.querySelector('.inputInstallmentAmount').id = `${targetId}_input_amount`
       // 項目の分割金額の入力ボタン
       // 各ボタンあたりIDを割り当て
+      // 分割金額の入力ボタン
       cloneAccountCodeItem.querySelector('.btn-insert-installmentAmount').id = `btn_${targetId}_installmentAmount`
       cloneAccountCodeItem.querySelector('.btn-insert-installmentAmount').dataset.target =
         'insert-installmentAmount-modal'
@@ -48,11 +51,17 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       cloneAccountCodeItem
         .querySelector('.btn-insert-installmentAmount')
         .addEventListener('click', btnInstallmentAmount)
+
+      // 仕訳情報設定削除ボタン
       cloneAccountCodeItem.querySelector('.btn-minus-accountCode').dataset.target = targetId
       cloneAccountCodeItem.querySelector('.btn-minus-accountCode').addEventListener('click', btnMinusAccount)
+
+      // 勘定科目と補助科目検索ボタン
       cloneAccountCodeItem.querySelector('.btn-search-main').dataset.target = 'accountCode-modal'
       cloneAccountCodeItem.querySelector('.btn-search-main').dataset.info = targetId
-      cloneAccountCodeItem.querySelector('.btn-search-main').addEventListener('click', btnSearchMain)
+      cloneAccountCodeItem
+        .querySelector('.btn-search-main')
+        .addEventListener('click', btnSearchMain($('#accountCode-modal')))
       // １番目のマイナスボタン隠す
       $(`#btn-minus-${this.dataset.target.replace('#', '')}-accountCode`).classList.add('is-invisible')
       target.appendChild(cloneAccountCodeItem)
@@ -61,17 +70,22 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
 })
 
 // 2番目以降の勘定科目・補助科目検索ボタンイベント
-const btnSearchMain = function () {
-  const searchModal = document.getElementById('accountCode-modal')
-  if (searchModal) searchModal.classList.toggle('is-active')
+const btnSearchMain = function (searchModal) {
+  return function () {
+    if (this.dataset.info !== $('#accountCode-modal').dataset.info) {
+      deleteDisplayModal()
+    }
+    if (searchModal) searchModal.classList.toggle('is-active')
+    $('#accountCode-modal').dataset.info = this.dataset.info
+  }
 }
+
+$('#BtnlineAccountCodeSearch').addEventListener('click', btnSearchMain())
+
+$('#CloseSearchAccountCode').addEventListener('click', function () {})
 
 // 仕訳情報検索
 $('#btnSearchAccountCode').addEventListener('click', function () {
-  // 検索ボタンが非活性化の時は動作しない
-  if ($('#btnSearchAccountCode').getAttribute('disabled') !== null) {
-    return
-  }
   const accountCode = $('#searchModalAccountCode').value
   const accountCodeName = $('#searchModalAccountCodeName').value
   const subAccountCode = $('#searchModalSubAccountCode').value
@@ -81,8 +95,8 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
   deleteDisplayModal()
   $('#searchModalAccountCode').value = accountCode
   $('#searchModalAccountCodeName').value = accountCodeName
-  $('#searchModalSubAccountCode').value = ''
-  $('#searchModalSubAccountCodeName').value = ''
+  $('#searchModalSubAccountCode').value = subAccountCode
+  $('#searchModalSubAccountCodeName').value = subAccountCodeName
 
   const getAccountCode = new XMLHttpRequest()
   getAccountCode.open('POST', '/inbox/getCode')
@@ -93,7 +107,6 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
         case 200: {
           const result = JSON.parse(getAccountCode.response)
           if (result.length !== 0) {
-            console.log(result)
             displayResultForCode(result)
           } else {
             // displayNoAccountCode()
@@ -127,17 +140,21 @@ const displayResultForCode = function (codeArr) {
     const cloneSearchResultCodeTemplate = document.importNode(searchResultCode.content, true)
     cloneSearchResultCodeTemplate.querySelector('.rowAccountCode').dataset.target = '#accountCode-modal'
     cloneSearchResultCodeTemplate.querySelector('.rowAccountCode').dataset.accountCode = item.accountCode
+    cloneSearchResultCodeTemplate.querySelector('.rowAccountCode').dataset.subAccountCode = item.subAccountCode
     cloneSearchResultCodeTemplate.querySelector('.columnNoAccountCodeMessage').classList.add('is-invisible')
     cloneSearchResultCodeTemplate.querySelector('.columnAccountCode').innerText = item.accountCode
     cloneSearchResultCodeTemplate.querySelector('.columnAccountCodeName').innerText = item.accountCodeName
+    cloneSearchResultCodeTemplate.querySelector('.columnSubAccountCode').innerText = item.subAccountCode
+    cloneSearchResultCodeTemplate.querySelector('.columnSubAccountCodeName').innerText = item.subAccountCodeName
 
     displayFieldResultBody.appendChild(cloneSearchResultCodeTemplate)
   })
   $('.rowAccountCode').forEach((row) => {
     row.addEventListener('click', function () {
       $(this.dataset.target).classList.remove('is-active')
-      console.log(this.dataset.accountCode)
-      $('#lineNo1_lineAccountCode1_accountCode').value = this.dataset.accountCode
+      const inputTarget = $(this.dataset.target).dataset.info
+      $(`#${inputTarget}_accountCode`).value = this.dataset.accountCode
+      $(`#${inputTarget}_subAccountCode`).value = this.dataset.subAccountCode
       deleteDisplayModal()
       // checkbtnCheck()
     })
@@ -230,7 +247,6 @@ $('#btn-insert').addEventListener('click', function () {
       $('#installmentAmountErrMsg').innerText = '小計金額より高い金額は入力できません。'
       return null
     }
-    console.log(valueInput.value.toLocaleString('ja-JP'))
     $(`#${inputTarget}`).value = (~~valueInput.value).toLocaleString('ja-JP')
     $(`#${inputTarget.split('_')[0]}_lineAccountCode1_input_amount`).value = (
       totalAmmout - valueInput.value
