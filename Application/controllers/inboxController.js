@@ -332,7 +332,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
       })
     })
     if (checkAccountCodeF) {
-      result.status = -2
+      result.status = -1
       return result
     }
 
@@ -352,7 +352,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
       })
     })
     if (checkSubAccountF) {
-      result.status = -3
+      result.status = -2
     }
 
     // DBに保存データがない場合
