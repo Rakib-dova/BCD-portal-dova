@@ -1,7 +1,10 @@
 const apiManager = require('./apiManager')
-const JournalizeInvoice = require('../models').JournalizeInvoice
+const db = require('../models')
+const JournalizeInvoice = db.JournalizeInvoice
+const AccountCode = db.AccountCode
+const SubAccountCode = db.SubAccountCode
+const Op = db.Sequelize.Op
 const logger = require('../lib/logger')
-const accountCodeController = require('./accountCodeController')
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
@@ -102,6 +105,7 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
 const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId, contractId) {
   const InvoiceDetail = require('../lib/invoiceDetail')
   const invoice = await apiManager.accessTradeshift(accessTk, refreshTk, 'get', `/documents/${invoiceId}`)
+  console.log(JournalizeInvoice)
   const journalizeInvoice = await JournalizeInvoice.findAll({
     where: {
       invoiceId: invoiceId,
@@ -115,25 +119,53 @@ const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId, contrac
 }
 
 const getCode = async (contractId, accountCode, accountCodeName, subAccountCode, subAccountCodeName) => {
+  const whereIsAccountCode = { contractId: contractId }
+  const whereIsSubAccountCode = {}
+
+  if (accountCode.length !== 0) {
+    whereIsAccountCode.accountCode = {
+      [Op.like]: `%${accountCode}%`
+    }
+  }
+  if (accountCodeName.length !== 0) {
+    whereIsAccountCode.accountCodeName = {
+      [Op.like]: `%${accountCodeName}%`
+    }
+  }
+  if (subAccountCode.length !== 0) {
+    whereIsSubAccountCode.subjectCode = {
+      [Op.like]: `%${subAccountCode}%`
+    }
+  }
+  if (subAccountCodeName.length !== 0) {
+    whereIsSubAccountCode.subjectName = {
+      [Op.like]: `%${subAccountCodeName}%`
+    }
+  }
+
   try {
-    const result = await accountCodeController.searchAccountCode(contractId, accountCode, accountCodeName)
-    console.log('result====', result)
-    // 検索結果オブジェクトに作成して返す
-    // return {
-    //   accountCode: result.accountCode,
-    //   accountCodeName: result.accountCodeName,
-    //   subAccountCode: '',
-    //   subAccountCodeName: ''
-    // }
-    return result
-  } catch (error) {
-    logger.error({
-      contractId: contractId,
-      accountCode: accountCode,
-      subAccountCode: subAccountCode,
-      stack: error.stack,
-      status: 0
+    // 契約番号と補助科目IDでデータを取得（OUTER JOIN）
+    const targetAccountCodeSubAccountCodeJoin = await AccountCode.findAll({
+      raw: true,
+      include: [
+        {
+          model: SubAccountCode,
+          attributes: ['subAccountCodeId', 'accountCodeId', 'subjectCode', 'subjectName'],
+          where: {
+            ...whereIsSubAccountCode
+          }
+        }
+      ],
+      where: {
+        ...whereIsAccountCode
+      }
     })
+    console.log(targetAccountCodeSubAccountCodeJoin)
+
+    // 検索結果出力
+    return targetAccountCodeSubAccountCodeJoin
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
     return error
   }
 }
