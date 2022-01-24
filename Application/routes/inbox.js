@@ -234,16 +234,16 @@ const cbPostGetCode = async (req, res, next) => {
     targetSubAccountCodeName
   )
 
-  const codeLists = []
-
-  searchResult.forEach((items) => {
-    const accountCode = items.accountCode
-    const accountCodeName = items.accountCodeName
-
-    codeLists.push([accountCode, accountCodeName, '', ''])
+  const codeLists = searchResult.map((item) => {
+    return {
+      accountCode: item.accountCode,
+      accountCodeName: item.accountCodeName,
+      subAccountCode: item['SubAccountCodes.subjectCode'],
+      subAccountCodeName: item['SubAccountCodes.subjectName']
+    }
   })
 
-  res.send(searchResult)
+  res.send(codeLists)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetAccountCode')
 }
 

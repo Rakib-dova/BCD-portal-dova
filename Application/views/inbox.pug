@@ -121,11 +121,11 @@ block content
                       div.button-area
                         .button.is-link#btnSearchAccountCode(type="button") 検索
 
-          .columns.is-fullwidth
-            .column.is-fullwidth              
+          .columns.is-fullwidth.m-0
+            .column.is-fullwidth.p-0
               .field.is-horizontal.is-invisible#displayInvisible
-                .box
-                  .subtitle 検索結果  
+                .box.is-fullwidth.px-2
+                  .subtitle.m-3 検索結果 
                   table.table
                     thead
                       td 勘定科目コード
@@ -134,7 +134,7 @@ block content
                       td 補助科目名
                     tbody#displayFieldResultBody
       footer.modal-card-foot.center-modal-footer-item
-        a.button.cancel-button(data-target='accountCode-modal') 閉じる
+        a.button.cancel-button#CloseSearchAccountCode(data-target='accountCode-modal') 閉じる
 
 
 

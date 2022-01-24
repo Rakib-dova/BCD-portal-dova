@@ -59,7 +59,7 @@
         .columns.m-0
           .column.p-0.lineAccountCode(id= `lineNo${idx + 1}`)
             if key === "journalize" && value.length !== 0
-              each jValue, idx in value
+              each jValue, jdx in value
                 .columns.m-0.p-1(id= `lineNo${idx + 1}_lineAccountCode1`)
                   .column.is-one-third.p-0.border-div-rad-4
                     .field.is-horizontal.m-1.has-addons-centered
@@ -73,15 +73,15 @@
                       .field-body.m-1
                         .field
                           p.control
-                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_accountCode` name=`lineNo${idx + 1}_lineAccountCode1_accountCode` value= jValue.accountCode readonly)
+                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_accountCode` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_accountCode` value= jValue.accountCode readonly)
                       .field-body.m-1
                         .field
                           p.control
-                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_subAccountCode` name=`lineNo${idx + 1}_lineAccountCode1_subAccountCode` value= jValue.subAccountCode readonly)
+                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_subAccountCode` name=`lineNo${idx + 1}_lineAccountCode1${jdx + 1}_subAccountCode` value= jValue.subAccountCode readonly)
                       .field-body.m-1.is-1.none-flex-grow
                         .field
                           p.control
-                            a.button.is-link.show-modal.btn-search-main(data-target='accountCode-modal' data-info=`${idx + 1}`) 検索
+                            a.button.is-link.show-modal.btn-search-main(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`) 検索
                   .column.is-0.p-1
                   .column.is-one-quarter.p-0.border-div-rad-4
                     .field.is-horizontal.m-1.has-addons-centered
@@ -94,7 +94,7 @@
                         .field-body.m-1
                           .field
                             p.control
-                              input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_input_amount` name=`lineNo${idx + 1}_lineAccountCode1_input_amount` readonly value= jValue.installmentAmount)
+                              input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_input_amount` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_input_amount` readonly value= jValue.installmentAmount)
                         .field-body.m-1.is-1.none-flex-grow
                           .field
                             p.control
@@ -125,7 +125,7 @@
                     .field-body.m-1.is-1.none-flex-grow
                       .field
                         p.control
-                          a.button.is-link.show-modal(data-target='accountCode-modal' data-info=`${idx + 1}`) 検索
+                          a.button.is-link.show-modal#BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode1`) 検索
                 .column.is-0.p-1
                 .column.is-one-quarter.p-0.border-div-rad-4
                   .field.is-horizontal.m-1.has-addons-centered
@@ -138,7 +138,7 @@
                       .field-body.m-1
                         .field
                           p.control
-                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_input_amount` name=`lineNo${idx + 1}_lineAccountCode1_input_amount` readonly value)
+                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_input_amount` name=`lineNo${idx + 1}_lineAccountCode1_input_amount` readonly value= value)
                       .field-body.m-1.is-1.none-flex-grow
                         .field
                           p.control
