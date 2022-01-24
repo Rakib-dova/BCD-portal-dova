@@ -320,7 +320,7 @@ const cbPostIndex = async (req, res, next) => {
           for (let j = 1; j <= setCount; j++) {
             accountCode = req.body[`lineNo${i}_lineAccountCode${j}_accountCode`]
             subAccountCode = req.body[`lineNo${i}_lineAccountCode${j}_subAccountCode`]
-            installmentAmount = req.body[`lineNo${i}_lineAccountCode${j}_input_amount`]
+            installmentAmount = parseInt(req.body[`lineNo${i}_lineAccountCode${j}_input_amount`].replace(/,/g, ''))
 
             if ((accountCode !== '' || subAccountCode !== '') && installmentAmount !== '') {
               lineNo = i
@@ -334,6 +334,9 @@ const cbPostIndex = async (req, res, next) => {
                 subAccountCode,
                 installmentAmount
               })
+
+              // insertDBエラー処理
+              if (result instanceof Error || result === null) return next(errorHelper.create(500))
 
               // 結果：0（正常変更）、-1（inovoiceIdエラー）、-2（未登録勘定科目）、-3（未登録補助科目）
               switch (result) {
