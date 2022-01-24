@@ -3,7 +3,6 @@ const db = require('../models')
 const AccountCode = db.AccountCode
 const SubAccountCode = db.SubAccountCode
 const JournalizeInvoice = db.JournalizeInvoice
-const constantsDefine = require('../constants')
 const logger = require('../lib/logger')
 const { v4: uuidV4 } = require('uuid')
 const validate = require('../lib/validate')
