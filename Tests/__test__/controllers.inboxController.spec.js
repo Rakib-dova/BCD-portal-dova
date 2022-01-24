@@ -6,7 +6,17 @@ const inboxController = require('../../Application/controllers/inboxController')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const logger = require('../../Application/lib/logger')
 const InvoiceDetailObj = require('../../Application/lib/invoiceDetail')
-let accessTradeshiftSpy, errorSpy
+const AccountCode = require('../../Application/models').AccountCode
+const SubAccountCode = require('../../Application/models').SubAccountCode
+const JournalizeInvoice = require('../../Application/models').JournalizeInvoice
+let accessTradeshiftSpy,
+  errorSpy,
+  journalizeInvoiceFindAllSpy,
+  accountCodeFindOneSpy,
+  subAccountCodeFindOneSpy,
+  journalizeInvoiceCreateSpy
+
+const accountCodeMock = require('../mockDB/AccountCode_Table')
 
 const searchResult1 = {
   itemsPerPage: 20,
@@ -589,15 +599,24 @@ const accessToken = 'dummyAccessToken'
 const refreshToken = 'dummyRefreshToken'
 const pageId = 1
 const tenantId = '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+const contractId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
 
 describe('inboxControllerのテスト', () => {
   beforeEach(() => {
     accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
+    journalizeInvoiceFindAllSpy = jest.spyOn(JournalizeInvoice, 'findAll')
     errorSpy = jest.spyOn(logger, 'error')
+    accountCodeFindOneSpy = jest.spyOn(AccountCode, 'findOne')
+    subAccountCodeFindOneSpy = jest.spyOn(SubAccountCode, 'findOne')
+    journalizeInvoiceCreateSpy = jest.spyOn(JournalizeInvoice, 'create')
   })
   afterEach(() => {
     accessTradeshiftSpy.mockRestore()
     errorSpy.mockRestore()
+    subAccountCodeFindOneSpy.mockRestore()
+    journalizeInvoiceFindAllSpy.mockRestore()
+    accountCodeFindOneSpy.mockRestore()
+    journalizeInvoiceCreateSpy.mockRestore()
   })
 
   describe('getInbox', () => {
@@ -652,7 +671,8 @@ describe('inboxControllerのテスト', () => {
     test('正常', async () => {
       const dummyData = require('../mockInvoice/invoice32')
       accessTradeshiftSpy.mockReturnValue(dummyData)
-      const resultDummyData = new InvoiceDetailObj(dummyData)
+      journalizeInvoiceFindAllSpy.mockReturnValue([])
+      const resultDummyData = new InvoiceDetailObj(dummyData, [])
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
       expect(result).toEqual(resultDummyData)
     })
@@ -660,6 +680,7 @@ describe('inboxControllerのテスト', () => {
     test('正常：支払い条件ない', async () => {
       const dummyData = require('../mockInvoice/invoice33')
       accessTradeshiftSpy.mockReturnValue(dummyData)
+      journalizeInvoiceFindAllSpy.mockReturnValue([])
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
 
       expect(result.payments).toEqual([])
@@ -668,6 +689,7 @@ describe('inboxControllerのテスト', () => {
     test('正常：現金支払い', async () => {
       const dummyData = require('../mockInvoice/invoice34')
       accessTradeshiftSpy.mockReturnValue(dummyData)
+      journalizeInvoiceFindAllSpy.mockReturnValue([])
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
 
       expect(result.payments).toEqual([
@@ -680,6 +702,7 @@ describe('inboxControllerのテスト', () => {
     test('正常：小切手払い', async () => {
       const dummyData = require('../mockInvoice/invoice35')
       accessTradeshiftSpy.mockReturnValue(dummyData)
+      journalizeInvoiceFindAllSpy.mockReturnValue([])
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
 
       expect(result.payments).toEqual([
@@ -692,6 +715,7 @@ describe('inboxControllerのテスト', () => {
     test('正常：BankCard', async () => {
       const dummyData = require('../mockInvoice/invoice36')
       accessTradeshiftSpy.mockReturnValue(dummyData)
+      journalizeInvoiceFindAllSpy.mockReturnValue([])
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
 
       expect(result.payments).toEqual([
@@ -704,6 +728,7 @@ describe('inboxControllerのテスト', () => {
     test('正常：DirectDebit', async () => {
       const dummyData = require('../mockInvoice/invoice37')
       accessTradeshiftSpy.mockReturnValue(dummyData)
+      journalizeInvoiceFindAllSpy.mockReturnValue([])
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
 
       expect(result.payments).toEqual([
@@ -730,6 +755,7 @@ describe('inboxControllerのテスト', () => {
     test('正常：銀行口座情報(国内)', async () => {
       const dummyData = require('../mockInvoice/invoice38')
       accessTradeshiftSpy.mockReturnValue(dummyData)
+      journalizeInvoiceFindAllSpy.mockReturnValue([])
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
 
       expect(result.payments).toEqual([
@@ -756,6 +782,7 @@ describe('inboxControllerのテスト', () => {
     test('正常：IBAN', async () => {
       const dummyData = require('../mockInvoice/invoice39')
       accessTradeshiftSpy.mockReturnValue(dummyData)
+      journalizeInvoiceFindAllSpy.mockReturnValue([])
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
 
       expect(result.payments).toEqual([
@@ -772,6 +799,7 @@ describe('inboxControllerのテスト', () => {
     test('正常：国際電信送金', async () => {
       const dummyData = require('../mockInvoice/invoice40')
       accessTradeshiftSpy.mockReturnValue(dummyData)
+      journalizeInvoiceFindAllSpy.mockReturnValue([])
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
 
       expect(result.payments).toEqual([
@@ -799,6 +827,7 @@ describe('inboxControllerのテスト', () => {
     test('正常：支払い条件', async () => {
       const dummyData = require('../mockInvoice/invoice41')
       accessTradeshiftSpy.mockReturnValue(dummyData)
+      journalizeInvoiceFindAllSpy.mockReturnValue([])
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
 
       expect(result.payments).toEqual([
@@ -815,6 +844,94 @@ describe('inboxControllerのテスト', () => {
           ]
         }
       ])
+    })
+  })
+
+  describe('insert', () => {
+    // test('正常', async () => {
+    //   // 準備
+    //   const value = {
+    //     invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+    //     lineId: 'UT1',
+    //     lineNo: '1',
+    //     accountCode: 'AB001',
+    //     subAccountCode: 'SUUT',
+    //     installmentAmount: 3000
+    //   }
+
+    //   accountCodeFindOneSpy.mockReturnValue()
+    //   subAccountCodeFindOneSpy.mockReturnValue()
+
+    //   // 試験実施
+    //   const result = await inboxController.insert(contractId, value)
+
+    //   // 期待結果
+    //   // 想定した契約情報がReturnされていること
+    //   expect(result).toEqual(result1)
+    // })
+
+    test('正常:invoiceIdがUUIDではない場合', async () => {
+      // 準備
+      const value = {
+        invoiceId: 'TEST',
+        lineId: 'UT1',
+        lineNo: '1',
+        accountCode: 'AB001',
+        subAccountCode: 'SUUT',
+        installmentAmount: 3000
+      }
+
+      accountCodeFindOneSpy.mockReturnValue(accountCodeMock[0])
+
+      // 試験実施
+      const result = await inboxController.insert(contractId, value)
+
+      // 期待結果
+      // 想定した値がReturnされていること
+      expect(result).toEqual(-1)
+    })
+
+    test('正常:勘定科目コードが存在しない場合', async () => {
+      // 準備
+      const value = {
+        invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+        lineId: 'UT1',
+        lineNo: '1',
+        accountCode: 'AB001',
+        subAccountCode: 'SUUT',
+        installmentAmount: 3000
+      }
+
+      accountCodeFindOneSpy.mockReturnValue(null)
+
+      // 試験実施
+      const result = await inboxController.insert(contractId, value)
+
+      // 期待結果
+      // 想定した値がReturnされていること
+      expect(result).toEqual(-2)
+    })
+
+    test('正常:補助科目コードが存在しない場合', async () => {
+      // 準備
+      const value = {
+        invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+        lineId: 'UT1',
+        lineNo: '1',
+        accountCode: 'ACUT',
+        subAccountCode: 'SUUT',
+        installmentAmount: 3000
+      }
+
+      accountCodeFindOneSpy.mockReturnValueOnce(accountCodeMock[0])
+      subAccountCodeFindOneSpy.mockReturnValueOnce(null)
+
+      // 試験実施
+      const result = await inboxController.insert(contractId, value)
+
+      // 期待結果
+      // 想定した値がReturnされていること
+      expect(result).toEqual(-3)
     })
   })
 })
