@@ -37,7 +37,7 @@ block content
           .field-body.m-1.is-1.none-flex-grow
             .field
               p.control
-                a.button.is-link 検索
+                a.button.is-link.show-modal.btn-search-main(data-target='accountCode-modal') 検索
       .column.is-0.p-1
       .column.is-one-quarter.p-0.border-div-rad-4
         .field.is-horizontal.m-1.has-addons-centered
@@ -59,6 +59,18 @@ block content
         a.red-color.btn-minus-accountCode
           i.fas.fa-minus-circle
 
+  template#searchResultCode
+    tr.rowAccountCode
+      td.columnNoAccountCodeMessage
+        .field.is-horizontal
+          .field-body
+            p.control.noAccountCodeMessage              
+      td.columnAccountCode
+      td.columnAccountCodeName
+      td.columnSubAccountCode
+      td.columnSubAccountCodeName
+
+
   .modal#accountCode-modal
     .modal-background.cancel-button(data-target='accountCode-modal')
     .modal-card.is-family-noto-sans
@@ -74,7 +86,7 @@ block content
                 .field-body
                   .field
                     p.control
-                      input.input(type="text" id= parentIdForCodeInput value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum)
+                      input.input(type="text" id= 'searchModalAccountCode' value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum)
           .columns.is-centered.m-0
             .column.p-1
               .field.is-horizontal
@@ -83,7 +95,7 @@ block content
                 .field-body
                   .field
                     p.control
-                      input.input(type="text" id= parentIdForNameInput value maxlength=40 placeholder='文字列（40桁）')
+                      input.input(type="text" id= 'searchModalAccountCodeName' value maxlength=40 placeholder='文字列（40桁）')
           .columns.is-centered.m-0
             .column.p-1
               .field.is-horizontal
@@ -92,7 +104,7 @@ block content
                 .field-body
                   .field
                     p.control
-                      input.input(type="text" id= parentIdForCodeInput value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum)
+                      input.input(type="text" id= 'searchModalSubAccountCode' value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum)
           .columns.is-centered.m-0
             .column.p-1
               .field.is-horizontal
@@ -101,15 +113,30 @@ block content
                 .field-body
                   .field
                     p.control
-                      input.input(type="text" id= parentIdForNameInput value maxlength=40 placeholder='文字列（40桁）')
+                      input.input(type="text" id= 'searchModalSubAccountCodeName' value maxlength=40 placeholder='文字列（40桁）')
               .control
                 .field.is-grouped.is-grouped-centered
                   .columns.m-0
                     .column.p-0
                       div.button-area
-                        a.button.is-link#btnSearchAccountCode(type="button") 検索
+                        .button.is-link#btnSearchAccountCode(type="button") 検索
+
+          .columns.is-fullwidth
+            .column.is-fullwidth              
+              .field.is-horizontal.is-invisible#displayInvisible
+                .box
+                  .subtitle 検索結果  
+                  table.table
+                    thead
+                      td 勘定科目コード
+                      td 勘定科目名
+                      td 補助科目コード
+                      td 補助科目名
+                    tbody#displayFieldResultBody
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button(data-target='accountCode-modal') 閉じる
+
+
 
   .modal#insert-installmentAmount-modal
     .modal-background.cancel-button(data-target='insert-installmentAmount-modal')
