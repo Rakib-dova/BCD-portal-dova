@@ -8,6 +8,7 @@
               .column-header.is-2-header
                 p.text-left-lines.font-bold 項目ID
                 p.text-left-lines.mb-1= value
+                input(type="hidden" name='lineId' value=value )
             if key === '明細-内容' && value.length !== 0
               .column-header.is-5-header
                 p.font-bold  内容

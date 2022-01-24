@@ -178,7 +178,8 @@ const cbGetIndex = async (req, res, next) => {
     optionLine5: optionLine5,
     optionLine6: optionLine6,
     optionLine7: optionLine7,
-    optionLine8: optionLine8
+    optionLine8: optionLine8,
+    invoiceId: invoiceId
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -247,8 +248,143 @@ const cbPostGetCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetAccountCode')
 }
 
+const cbPostIndex = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
+  // 認証情報取得処理
+  if (!req.session || !req.user?.userId) {
+    return next(errorHelper.create(500))
+  }
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  req.session.userContext = 'LoggedIn'
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+
+  if (checkContractStatus === null || checkContractStatus === 999) {
+    return next(errorHelper.create(500))
+  }
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('cancelprocedure'))
+  }
+
+  try {
+    const invoiceId = req.params.invoiceId
+    const checkDataForJournalizeInvoice = await inboxController.checkDataForJournalizeInvoice(contract, invoiceId)
+
+    if (checkDataForJournalizeInvoice === 0) {
+      // 明細数確認
+      const line = Object.keys(req.body)
+      const lineCount = []
+      line.forEach((value) => {
+        lineCount.push(value.substring(6, value.indexOf('_')))
+      })
+
+      let setCount
+      let accountCode
+      let subAccountCode
+      let installmentAmount
+      let lineNo
+      let lineId
+      let result
+      for (let i = 1; i <= new Set(lineCount).size; i++) {
+        // 登録項目数確認
+        setCount = lineCount.filter((element) => `${i}` === element).length / 3
+
+        // 明細IDを取得
+        if (req.body.lineId.length > 1) {
+          lineId = req.body.lineId[i - 1]
+        } else {
+          lineId = req.body.lineId
+        }
+
+        if (Number.isInteger(setCount)) {
+          for (let j = 1; j <= setCount; j++) {
+            accountCode = req.body[`lineNo${i}_lineAccountCode${j}_accountCode`]
+            subAccountCode = req.body[`lineNo${i}_lineAccountCode${j}_subAccountCode`]
+            installmentAmount = req.body[`lineNo${i}_lineAccountCode${j}_input_amount`]
+
+            if ((accountCode !== '' || subAccountCode !== '') && installmentAmount !== '') {
+              lineNo = i
+
+              // DBに保存
+              result = await inboxController.insert(contract, {
+                invoiceId,
+                lineId,
+                lineNo,
+                accountCode,
+                subAccountCode,
+                installmentAmount
+              })
+
+              // 結果：0（正常変更）、-1（inovoiceIdエラー）、-2（未登録勘定科目）、-3（未登録補助科目）
+              switch (result) {
+                case 0:
+                  break
+                case -1:
+                  req.flash('noti', ['仕訳情報設定', 'システムエラーです。<BR>（後程、接続してください。）'])
+                  return res.redirect('/inboxList/1')
+                case -2:
+                  req.flash('noti', [
+                    '仕訳情報設定',
+                    `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の勘定科目「${accountCode}」は未登録勘定科目です。`,
+                    'SYSERR'
+                  ])
+                  return res.redirect('/inboxList/1')
+                case -3:
+                  req.flash('noti', [
+                    '仕訳情報設定',
+                    `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の補助科目「${subAccountCode}」は未登録補助科目です。`,
+                    'SYSERR'
+                  ])
+                  return res.redirect('/inboxList/1')
+              }
+            } else if ((accountCode !== '' || subAccountCode !== '') && installmentAmount === '') {
+              req.flash('noti', [
+                '仕訳情報設定',
+                `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の分割金額をもう一度確認お願いします。`,
+                'SYSERR'
+              ])
+              return res.redirect('/inboxList/1')
+            }
+          }
+        } else {
+          logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+          return next(errorHelper.create(500))
+        }
+      }
+    }
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+    req.flash('info', '仕訳情報設定が完了しました。')
+    res.redirect('/inboxList/1')
+  } catch (error) {
+    logger.error({ tenantId: req.user.tenantId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+    return next(errorHelper.create(500))
+  }
+}
+
 router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)
 router.post('/getCode', helper.isAuthenticated, cbPostGetCode)
+router.post('/:invoiceId', helper.isAuthenticated, cbPostIndex)
 
 module.exports = {
   router: router,
