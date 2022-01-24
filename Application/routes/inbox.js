@@ -178,8 +178,7 @@ const cbGetIndex = async (req, res, next) => {
     optionLine5: optionLine5,
     optionLine6: optionLine6,
     optionLine7: optionLine7,
-    optionLine8: optionLine8,
-    invoiceId: invoiceId
+    optionLine8: optionLine8
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -239,8 +238,8 @@ const cbPostGetCode = async (req, res, next) => {
     return {
       accountCode: item.accountCode,
       accountCodeName: item.accountCodeName,
-      subAccountCode: item['SubAccountCodes.subjectCode'],
-      subAccountCodeName: item['SubAccountCodes.subjectName']
+      subAccountCode: item['SubAccountCodes.subjectCode'] ?? '',
+      subAccountCodeName: item['SubAccountCodes.subjectName'] ?? ''
     }
   })
 
@@ -286,103 +285,41 @@ const cbPostIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  try {
-    const invoiceId = req.params.invoiceId
-    const checkDataForJournalizeInvoice = await inboxController.checkDataForJournalizeInvoice(contract, invoiceId)
+  const invoiceId = req.params.invoiceId
+  const { status, lineId, accountCode, subAccountCode, error } = await inboxController.insertAndUpdateJournalizeInvoice(
+    contract.contractId,
+    invoiceId,
+    req.body
+  )
 
-    if (checkDataForJournalizeInvoice === 0) {
-      // 明細数確認
-      const line = Object.keys(req.body)
-      const lineCount = []
-      line.forEach((value) => {
-        lineCount.push(value.substring(6, value.indexOf('_')))
-      })
+  if (error instanceof Error || error === null) return next(errorHelper.create(500))
 
-      let setCount
-      let accountCode
-      let subAccountCode
-      let installmentAmount
-      let lineNo
-      let lineId
-      let result
-      for (let i = 1; i <= new Set(lineCount).size; i++) {
-        // 登録項目数確認
-        setCount = lineCount.filter((element) => `${i}` === element).length / 3
-
-        // 明細IDを取得
-        if (req.body.lineId.length > 1) {
-          lineId = req.body.lineId[i - 1]
-        } else {
-          lineId = req.body.lineId
-        }
-
-        if (Number.isInteger(setCount)) {
-          for (let j = 1; j <= setCount; j++) {
-            accountCode = req.body[`lineNo${i}_lineAccountCode${j}_accountCode`]
-            subAccountCode = req.body[`lineNo${i}_lineAccountCode${j}_subAccountCode`]
-            installmentAmount = parseInt(req.body[`lineNo${i}_lineAccountCode${j}_input_amount`].replace(/,/g, ''))
-
-            if ((accountCode !== '' || subAccountCode !== '') && installmentAmount !== '') {
-              lineNo = i
-
-              // DBに保存
-              result = await inboxController.insert(contract, {
-                invoiceId,
-                lineId,
-                lineNo,
-                accountCode,
-                subAccountCode,
-                installmentAmount
-              })
-
-              // insertDBエラー処理
-              if (result instanceof Error || result === null) return next(errorHelper.create(500))
-
-              // 結果：0（正常変更）、-1（inovoiceIdエラー）、-2（未登録勘定科目）、-3（未登録補助科目）
-              switch (result) {
-                case 0:
-                  break
-                case -1:
-                  req.flash('noti', ['仕訳情報設定', 'システムエラーです。<BR>（後程、接続してください。）'])
-                  return res.redirect('/inboxList/1')
-                case -2:
-                  req.flash('noti', [
-                    '仕訳情報設定',
-                    `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の勘定科目「${accountCode}」は未登録勘定科目です。`,
-                    'SYSERR'
-                  ])
-                  return res.redirect('/inboxList/1')
-                case -3:
-                  req.flash('noti', [
-                    '仕訳情報設定',
-                    `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の補助科目「${subAccountCode}」は未登録補助科目です。`,
-                    'SYSERR'
-                  ])
-                  return res.redirect('/inboxList/1')
-              }
-            } else if ((accountCode !== '' || subAccountCode !== '') && installmentAmount === '') {
-              req.flash('noti', [
-                '仕訳情報設定',
-                `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の分割金額をもう一度確認お願いします。`,
-                'SYSERR'
-              ])
-              return res.redirect('/inboxList/1')
-            }
-          }
-        } else {
-          logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
-          return next(errorHelper.create(500))
-        }
-      }
-    }
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
-    req.flash('info', '仕訳情報設定が完了しました。')
-    res.redirect('/inboxList/1')
-  } catch (error) {
-    logger.error({ tenantId: req.user.tenantId, stack: error.stack, status: 0 })
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
-    return next(errorHelper.create(500))
+  // 結果：0（正常変更）、-1（inovoiceIdエラー）、-2（未登録勘定科目）、-3（未登録補助科目）
+  switch (status) {
+    case 0:
+      break
+    case -1:
+      req.flash('noti', ['仕訳情報設定', 'システムエラーです。<BR>（後程、接続してください。）'])
+      return res.redirect('/inboxList/1')
+    case -2:
+      req.flash('noti', [
+        '仕訳情報設定',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の勘定科目「${accountCode}」は未登録勘定科目です。`,
+        'SYSERR'
+      ])
+      return res.redirect('/inboxList/1')
+    case -3:
+      req.flash('noti', [
+        '仕訳情報設定',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の補助科目「${subAccountCode}」は未登録補助科目です。`,
+        'SYSERR'
+      ])
+      return res.redirect('/inboxList/1')
   }
+
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+  req.flash('info', '仕訳情報設定が完了しました。')
+  res.redirect('/inboxList/1')
 }
 
 router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)

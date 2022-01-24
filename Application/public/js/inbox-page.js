@@ -18,13 +18,23 @@ const $ = function (tagObjName) {
   })
 }
 
+// ローディング画面の初期化
+window.onload = function () {
+  Array.prototype.forEach.call($('.btn-insert-installmentAmount'), function (btn) {
+    btn.addEventListener('click', btnInstallmentAmount)
+  })
+
+  Array.prototype.forEach.call($('.BtnlineAccountCodeSearch'), function (btn) {
+    btn.addEventListener('click', btnSearchMain())
+  })
+}
 // プラスボタンの機能
 Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
   btnPlusAccount.addEventListener('click', function () {
     const target = $(this.dataset.target)
-    if (target.querySelectorAll('.lineAccountcode').length < 9) {
+    if (target.querySelectorAll('.lineAccountcode').length < 10) {
       // 仕訳情報のidを作成：lineNo明細詳細の順番_lineAccountCode仕訳情報の順番
-      const targetId = `${target.id}_lineAccountCode${target.querySelectorAll('.lineAccountcode').length + 2}`
+      const targetId = `${target.id}_lineAccountCode${target.querySelectorAll('.lineAccountcode').length + 1}`
       // templateから追加仕訳情報欄作成
       const templeAccountCodeItem = $('#templateLineAccountCodeItem')
       const cloneAccountCodeItem = document.importNode(templeAccountCodeItem.content, true)
@@ -41,6 +51,9 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       // 分割金額
       cloneAccountCodeItem.querySelector('.inputInstallmentAmount').setAttribute('name', `${targetId}_input_amount`)
       cloneAccountCodeItem.querySelector('.inputInstallmentAmount').id = `${targetId}_input_amount`
+      cloneAccountCodeItem
+        .querySelector('.inputInstallmentAmount')
+        .classList.add(`${targetId.split('_')[0]}_input_amount`)
       // 項目の分割金額の入力ボタン
       // 各ボタンあたりIDを割り当て
       // 分割金額の入力ボタン
@@ -79,8 +92,6 @@ const btnSearchMain = function (searchModal) {
     $('#accountCode-modal').dataset.info = this.dataset.info
   }
 }
-
-$('#BtnlineAccountCodeSearch').addEventListener('click', btnSearchMain())
 
 $('#CloseSearchAccountCode').addEventListener('click', function () {})
 
@@ -209,10 +220,10 @@ const btnMinusAccount = function () {
 }
 
 // 分割金額入力ボタン（モーダルの表示）
-const btnInstallmentAmount = function () {
+function btnInstallmentAmount() {
   const showModalTarget = $(`#${this.dataset.target}`)
   const inputTarget = this.dataset.input
-  $('#inputInstallmentAmount').value = ''
+  $('#inputInstallmentAmount').value = ~~$(`#${inputTarget}`).value.replaceAll(',', '')
   showModalTarget.classList.toggle('is-active')
   showModalTarget.querySelector('#btn-insert').dataset.target = inputTarget
   showModalTarget.querySelector('#installmentAmountErrMsg').innerText = '　'
@@ -241,16 +252,21 @@ $('#inputInstallmentAmount').addEventListener('blur', function () {
 $('#btn-insert').addEventListener('click', function () {
   const inputTarget = this.dataset.target
   const valueInput = $('#inputInstallmentAmount')
-  const totalAmmout = ~~$(`#${inputTarget.split('_')[0]}_lineAccountCode1_input_amount`).value.replaceAll(',', '')
+  const totalAmmout = ~~$(`#${inputTarget.split('_')[0]}Total`).value.replaceAll(',', '')
   if (~~valueInput.value !== 0) {
     if (totalAmmout - valueInput.value < 0) {
       $('#installmentAmountErrMsg').innerText = '小計金額より高い金額は入力できません。'
       return null
     }
     $(`#${inputTarget}`).value = (~~valueInput.value).toLocaleString('ja-JP')
-    $(`#${inputTarget.split('_')[0]}_lineAccountCode1_input_amount`).value = (
-      totalAmmout - valueInput.value
-    ).toLocaleString('ja-JP')
+    let checkTotalAmount = totalAmmout
+    Array.prototype.forEach.call($(`.${inputTarget.split('_')[0]}_input_amount`), (item, idx) => {
+      if (idx !== 0) {
+        checkTotalAmount -= ~~item.value.replaceAll(',', '')
+      }
+    })
+    $(`.${inputTarget.split('_')[0]}_input_amount`)[0].value = checkTotalAmount
+    $(`#${inputTarget.split('_')[0]}_lineAccountCode1_input_amount`).value = checkTotalAmount.toLocaleString('ja-JP')
     $('#insert-installmentAmount-modal').classList.toggle('is-active')
   } else {
     $('#installmentAmountErrMsg').innerText = '金額は1円以上を入力してください。'

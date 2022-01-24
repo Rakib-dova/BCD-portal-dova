@@ -1052,9 +1052,10 @@ class InvoiceDetail {
       this.invoiceLine.forEach((invoiceLine, idx, invoiceLines) => {
         invoiceLines[idx].journalize = []
         journalizeInvoice.forEach((journalize) => {
-          if (invoiceLine['明細-項目ID'] === journalize.lineId) {
+          if (~~invoiceLine['明細-項目ID'] === journalize.lineNo) {
             invoiceLines[idx].journalize.push({
               lineNo: journalize.lineNo,
+              lineId: journalize.lineId,
               journalId: journalize.journalId,
               accountCode: journalize.accountCode,
               subAccountCode: journalize.subAccountCode,

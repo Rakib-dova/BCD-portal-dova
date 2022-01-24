@@ -107,12 +107,15 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
 const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId, contractId) {
   const InvoiceDetail = require('../lib/invoiceDetail')
   const invoice = await apiManager.accessTradeshift(accessTk, refreshTk, 'get', `/documents/${invoiceId}`)
-  console.log(JournalizeInvoice)
   const journalizeInvoice = await JournalizeInvoice.findAll({
     where: {
       invoiceId: invoiceId,
       contractId: contractId
-    }
+    },
+    order: [
+      ['lineNo', 'ASC'],
+      ['lineId', 'ASC']
+    ]
   })
 
   const displayInvoice = new InvoiceDetail(invoice, journalizeInvoice)
@@ -182,31 +185,14 @@ const insert = async (contract, values) => {
   }
 }
 
-const checkDataForJournalizeInvoice = async (contract, invoiceId) => {
-  const contractId = contract.contractId
-
-  try {
-    const journalizeInvoice = await JournalizeInvoice.findAll({
-      where: {
-        invoiceId: invoiceId,
-        contractId: contractId
-      }
-    })
-
-    // データがない場合、新規登録と想定する。
-    if (journalizeInvoice.length === 0) return 0
-
-    // データがある場合
-    return journalizeInvoice
-  } catch (error) {
-    logger.error(error)
-    return -1
-  }
-}
-
 const getCode = async (contractId, accountCode, accountCodeName, subAccountCode, subAccountCodeName) => {
   const whereIsAccountCode = { contractId: contractId }
   const whereIsSubAccountCode = {}
+
+  accountCode = accountCode ?? ''
+  accountCodeName = accountCodeName ?? ''
+  subAccountCode = subAccountCode ?? ''
+  subAccountCodeName = subAccountCodeName ?? ''
 
   if (accountCode.length !== 0) {
     whereIsAccountCode.accountCode = {
@@ -231,6 +217,11 @@ const getCode = async (contractId, accountCode, accountCodeName, subAccountCode,
 
   try {
     // 契約番号と補助科目IDでデータを取得（OUTER JOIN）
+    const targetAccountCode = await AccountCode.findAll({
+      where: {
+        ...whereIsAccountCode
+      }
+    })
     const targetAccountCodeSubAccountCodeJoin = await AccountCode.findAll({
       raw: true,
       include: [
@@ -247,11 +238,171 @@ const getCode = async (contractId, accountCode, accountCodeName, subAccountCode,
       }
     })
 
+    const result = targetAccountCode.concat(targetAccountCodeSubAccountCodeJoin)
+    result.sort((a, b) => {
+      if (a.accountCode > b.accountCode) return 1
+      else if (a.accountCode < b.accountCode) return -1
+      else {
+        if (a['SubAccountCodes.subjectCode'] > b['SubAccountCodes.subjectCode']) return 1
+        else if (a['SubAccountCodes.subjectCode'] < b['SubAccountCodes.subjectCode']) return -1
+        else return 0
+      }
+    })
     // 検索結果出力
-    return targetAccountCodeSubAccountCodeJoin
+    return result
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
     return error
+  }
+}
+
+const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => {
+  const lines = data.lineId
+  delete data.lineId
+  const lineJournals = []
+  let accountLines = 1
+  const result = {
+    status: 0
+  }
+  try {
+    lines.forEach((idx) => {
+      lineJournals.push([])
+      while (accountLines < 11) {
+        if (
+          data[`lineNo${idx}_lineAccountCode${accountLines}_accountCode`] !== undefined &&
+          data[`lineNo${idx}_lineAccountCode${accountLines}_subAccountCode`] !== undefined &&
+          data[`lineNo${idx}_lineAccountCode${accountLines}_input_amount`] !== undefined &&
+          data[`lineNo${idx}_lineAccountCode${accountLines}_accountCode`].length !== 0 &&
+          data[`lineNo${idx}_lineAccountCode${accountLines}_input_amount`].length !== 0
+        ) {
+          lineJournals[idx - 1].push({
+            data: {
+              invoiceId: invoiceId,
+              contractId: contractId,
+              lineNo: ~~idx,
+              lineId: `lineAccountCode${accountLines}`,
+              accountCode: data[`lineNo${idx}_lineAccountCode${accountLines}_accountCode`],
+              subAccountCode: data[`lineNo${idx}_lineAccountCode${accountLines}_subAccountCode`],
+              installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLines}_input_amount`].replace(/,/g, '')
+            }
+          })
+        } else {
+          lineJournals[idx - 1].push({
+            data: null
+          })
+        }
+        accountLines++
+      }
+      accountLines = 1
+    })
+
+    const resultSearchJournals = await JournalizeInvoice.findAll({
+      where: {
+        contractId: contractId,
+        invoiceId: invoiceId
+      },
+      order: [
+        ['lineNo', 'ASC'],
+        ['lineId', 'ASC']
+      ]
+    })
+
+    // 登録前、勘定科目コード検証
+    let checkAccountCodeF = false
+    await lineJournals.forEach(async (accountLines) => {
+      await accountLines.forEach(async (item) => {
+        if (item.data !== null) {
+          result.accountCode = item.data.accountCode
+          result.lineId = item.data.lineId
+          const accInstance = await AccountCode.findOne({
+            where: {
+              contractId: contractId,
+              accountCode: item.data.accountCode
+            }
+          })
+          if (accInstance instanceof AccountCode === false) checkAccountCodeF = true
+        }
+      })
+    })
+    if (checkAccountCodeF) {
+      result.status = -2
+      return result
+    }
+
+    // 登録前、補助科目コード検証
+    let checkSubAccountF = false
+    await lineJournals.forEach(async (accountLines) => {
+      await accountLines.forEach(async (item) => {
+        if (item.data === null) return
+        if (item.data.accountCode.length !== 0 && item.data.subAccountCode.length !== 0) {
+          result.lineId = item.data.lineId
+          result.subAccountCode = item.data.subAccountCode
+          delete result.accountCode
+          if ((await getCode(item.data.contractId, item.data.accountCode, item.data.subAccountCode).length) === 0) {
+            checkSubAccountF = true
+          }
+        }
+      })
+    })
+    if (checkSubAccountF) {
+      result.status = -3
+    }
+
+    // DBに保存データがない場合
+    if (resultSearchJournals.length === 0) {
+      lineJournals.forEach(async (accountLines) => {
+        accountLines.forEach(async (item) => {
+          if (item === null) return null
+          const savedJournalItem = JournalizeInvoice.build({
+            ...item.data
+          })
+          await savedJournalItem.save()
+        })
+      })
+    }
+
+    // DBにデータが保存している場合
+    for (let idx = 0; idx < lines.length; idx++) {
+      for (let lineId = 0; lineId < 10; lineId++) {
+        const target = lineJournals[idx][lineId]
+        if (target.data !== null) {
+          resultSearchJournals.forEach((item) => {
+            if (~~target.data.lineNo === ~~item.lineNo && target.data.lineId === item.lineId) {
+              target.dbInstance = item
+              item.set({
+                ...target.data
+              })
+            }
+          })
+          if (target.dbInstance === undefined) {
+            target.dbInstance = JournalizeInvoice.build({
+              ...target.data
+            })
+          }
+        } else {
+          resultSearchJournals.forEach((item) => {
+            if (item.lineNo === idx + 1 && item.lineId === `lineAccountCode${lineId + 1}`) {
+              target.dbInstance = item
+            }
+          })
+        }
+      }
+    }
+
+    // 変更内容DBに保存
+    lineJournals.forEach(async (accountLines) => {
+      accountLines.forEach(async (item) => {
+        if (item.data !== null && item.dbInstance instanceof JournalizeInvoice) {
+          await item.dbInstance.save()
+        } else if (item.data == null && item.dbInstance instanceof JournalizeInvoice) {
+          await item.dbInstance.destroy()
+        }
+      })
+    })
+    return result
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    return { error }
   }
 }
 
@@ -259,6 +410,6 @@ module.exports = {
   getInbox: getInbox,
   getInvoiceDetail: getInvoiceDetail,
   insert: insert,
-  checkDataForJournalizeInvoice: checkDataForJournalizeInvoice,
-  getCode: getCode
+  getCode: getCode,
+  insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice
 }
