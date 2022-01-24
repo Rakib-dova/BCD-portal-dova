@@ -331,7 +331,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
       })
     })
     if (checkAccountCodeF) {
-      result.status = -2
+      result.status = -1
       return result
     }
 
@@ -351,20 +351,21 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
       })
     })
     if (checkSubAccountF) {
-      result.status = -3
+      result.status = -2
     }
 
     // DBに保存データがない場合
     if (resultSearchJournals.length === 0) {
       lineJournals.forEach(async (accountLines) => {
         accountLines.forEach(async (item) => {
-          if (item === null) return null
+          if (item.data === null) return null
           const savedJournalItem = JournalizeInvoice.build({
             ...item.data
           })
           await savedJournalItem.save()
         })
       })
+      return result
     }
 
     // DBにデータが保存している場合
