@@ -388,68 +388,10 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       expect(res.text).toMatch(/個/i)
       expect(res.text).toMatch(/100のJP 不課税 0%/i)
       expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/通貨/i)
     })
-
-    // 受領した請求書詳細画面仕訳情報モーダル確認
-    test('管理者、受領した請求書詳細画面仕訳情報モーダル確認', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto(`https://localhost:3000${redirectUrl}`)
-      if (page.url() === `https://localhost:3000${redirectUrl}`) {
-        await page.click(
-          '#lineNo1_lineAccountCode1 > div.column.is-one-third.p-0.border-div-rad-4 > div.field.is-horizontal.p-1 > div.field-body.m-1.is-1.none-flex-grow > div > p > a'
-        )
-
-        await page.waitForTimeout(500)
-
-        // 検索モーダルが表示されること確認
-        const checkSearchModal = await page.evaluate(() => {
-          return document.querySelector('#accountCode-modal').getAttribute('class')
-        })
-
-        expect(checkSearchModal).toBe('modal is-active')
-      }
-      await browser.close()
-    })
-
-    // 勘定科目コード検索機能確認
-    test('勘定科目コード検索機能確認', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto(`https://localhost:3000${redirectUrl}`)
-      if (page.url() === `https://localhost:3000${redirectUrl}`) {
-        await page.click(
-          '#lineNo1_lineAccountCode1 > div.column.is-one-third.p-0.border-div-rad-4 > div.field.is-horizontal.p-1 > div.field-body.m-1.is-1.none-flex-grow > div > p > a'
-        )
-        await page.waitForTimeout(500)
-        await page.type('#searchModalAccountCode', 'PBITEST')
-        await page.type('#searchModalAccountCodeName', 'インテグレーションテスト')
-        await page.type('#searchModalSubAccountCode', 'PBITESTSUB')
-        await page.type('#searchModalSubAccountCodeName', 'インテグレーションテスト')
-        await page.click('#btnSearchAccountCode')
-        await page.waitForTimeout(1000)
-
-        const checkAccountCodeName = await page.evaluate(() => {
-          return document.querySelector('#displayFieldBody > tr:nth-child(1) > td.columnAccountCodeName').innerText
-        })
-
-        expect(checkAccountCodeName).toMatch('インテグレーションテスト')
-      }
-      await browser.close()
-    })
-
+    
     test('一般ユーザ、受領した請求書詳細画面内容確認', async () => {
       const res = await request(app)
         .get('/inbox/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1')
@@ -483,6 +425,8 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       expect(res.text).toMatch(/個/i)
       expect(res.text).toMatch(/100のJP 不課税 0%/i)
       expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/通貨/i)
     })
   })
 
