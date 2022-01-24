@@ -20,12 +20,18 @@ const $ = function (tagObjName) {
 
 // ローディング画面の初期化
 window.onload = function () {
+  // 分割金額のボタンの機能設定
   Array.prototype.forEach.call($('.btn-insert-installmentAmount'), function (btn) {
     btn.addEventListener('click', btnInstallmentAmount)
   })
 
+  // 勘定科目・補助科目の検索ボタン機能設定
   Array.prototype.forEach.call($('.BtnlineAccountCodeSearch'), function (btn) {
     btn.addEventListener('click', btnSearchMain())
+  })
+
+  Array.prototype.forEach.call($('.btn-minus-accountCode'), function (btnMinus) {
+    btnMinus.addEventListener('click', btnMinusAccount)
   })
 }
 // プラスボタンの機能
@@ -75,8 +81,6 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       cloneAccountCodeItem
         .querySelector('.btn-search-main')
         .addEventListener('click', btnSearchMain($('#accountCode-modal')))
-      // １番目のマイナスボタン隠す
-      $(`#btn-minus-${this.dataset.target.replace('#', '')}-accountCode`).classList.add('is-invisible')
       target.appendChild(cloneAccountCodeItem)
     }
   })
@@ -200,22 +204,24 @@ const deleteDisplayModal = function () {
   $('#displayInvisible').classList.add('is-invisible')
 }
 
-Array.prototype.forEach.call($('.btn-minus-accountCode'), (btnMinusAccount) => {
-  btnMinusAccount.addEventListener('click', function () {})
-})
-
 // 仕訳情報の１番目アイテムのマイナスボタン機能追加
-// １番目の内容を消す
 const btnMinusAccount = function () {
-  const deleteTarget = this.dataset.target
-  const thisLineInput = $(`#${deleteTarget}_input_amount`)
-  const lineNoFirstInput = $(`#${deleteTarget.split('_')[0]}_lineAccountCode1_input_amount`)
-  lineNoFirstInput.value = (
-    ~~lineNoFirstInput.value.replaceAll(',', '') + ~~thisLineInput.value.replaceAll(',', '')
-  ).toLocaleString('ja-JP')
-  $(`#${deleteTarget}`).remove()
-  if ($(`#${deleteTarget.split('_')[0]}`).querySelectorAll('.lineAccountcode').length === 0) {
-    $(`#btn-minus-${deleteTarget.split('_')[0]}-accountCode`).classList.remove('is-invisible')
+  // １番目の内容を消す
+  if (this.dataset.target === `${this.id.split('_')[2]}_lineAccountCode1`) {
+    $(`#${this.id.split('_')[2]}_lineAccountCode1_accountCode`).value = ''
+    $(`#${this.id.split('_')[2]}_lineAccountCode1_subAccountCode`).value = ''
+    return null
+  } else {
+    const deleteTarget = this.dataset.target
+    const thisLineInput = $(`#${deleteTarget}_input_amount`)
+    const lineNoFirstInput = $(`#${deleteTarget.split('_')[0]}_lineAccountCode1_input_amount`)
+    lineNoFirstInput.value = (
+      ~~lineNoFirstInput.value.replaceAll(',', '') + ~~thisLineInput.value.replaceAll(',', '')
+    ).toLocaleString('ja-JP')
+    $(`#${deleteTarget}`).remove()
+    if ($(`#${deleteTarget.split('_')[0]}`).querySelectorAll('.lineAccountcode').length === 0) {
+      $(`#btn-minus-${deleteTarget.split('_')[0]}-accountCode`).classList.remove('is-invisible')
+    }
   }
 }
 
@@ -266,7 +272,6 @@ $('#btn-insert').addEventListener('click', function () {
       }
     })
     $(`.${inputTarget.split('_')[0]}_input_amount`)[0].value = checkTotalAmount
-    $(`#${inputTarget.split('_')[0]}_lineAccountCode1_input_amount`).value = checkTotalAmount.toLocaleString('ja-JP')
     $('#insert-installmentAmount-modal').classList.toggle('is-active')
   } else {
     $('#installmentAmountErrMsg').innerText = '金額は1円以上を入力してください。'

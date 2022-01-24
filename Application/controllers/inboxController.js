@@ -257,7 +257,13 @@ const getCode = async (contractId, accountCode, accountCodeName, subAccountCode,
 }
 
 const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => {
-  const lines = data.lineId
+  let lines = []
+  if (data.lineId instanceof Array === true) {
+    lines = data.lineId
+  } else {
+    lines.push(data.lineId)
+  }
+
   delete data.lineId
   const lineJournals = []
   let accountLines = 1
