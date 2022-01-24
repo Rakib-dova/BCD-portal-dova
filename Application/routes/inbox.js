@@ -238,8 +238,8 @@ const cbPostGetCode = async (req, res, next) => {
     return {
       accountCode: item.accountCode,
       accountCodeName: item.accountCodeName,
-      subAccountCode: item['SubAccountCodes.subjectCode'],
-      subAccountCodeName: item['SubAccountCodes.subjectName']
+      subAccountCode: item['SubAccountCodes.subjectCode'] ?? '',
+      subAccountCodeName: item['SubAccountCodes.subjectName'] ?? ''
     }
   })
 
