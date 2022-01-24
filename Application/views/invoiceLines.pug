@@ -103,7 +103,7 @@
                               if jdx !== 0
                                 a.button.is-link.btn-insert-installmentAmount(data-target='insert-installmentAmount-modal' data-input=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_input_amount`) 入力
                   .column
-                    a.red-color(id=`btn-minus-lineNo${idx + 1}-accountCode`)
+                    a.red-color.btn-minus-accountCode(id=`btn_minus_lineNo${idx + 1}_lineAccountCode${jdx + 1}` data-target=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`)
                       i.fas.fa-minus-circle
             else if key === "journalize" && value.length === 0
               .columns.m-0.p-1.lineAccountcode(id= `lineNo${idx + 1}_lineAccountCode1`)
@@ -140,7 +140,7 @@
                       .field-body.m-1
                         .field
                           p.control
-                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_input_amount` name=`lineNo${idx + 1}_lineAccountCode1_input_amount` readonly value= item['明細-小計 (税抜)'])
+                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_input_amount` name=`lineNo${idx + 1}_lineAccountCode1_input_amount` class=`lineNo${idx + 1}_input_amount` readonly  value= item['明細-小計 (税抜)'])
                       .field-body.m-1.is-1.none-flex-grow
                         .field
                           p.control
