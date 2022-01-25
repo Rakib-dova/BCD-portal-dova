@@ -97,7 +97,7 @@
                         .field-body.m-1
                           .field
                             p.control
-                              input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_input_amount` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_input_amount` class=`lineNo${idx + 1}_input_amount` readonly value= jValue.installmentAmount)
+                              input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_input_amount` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_input_amount` class=`lineNo${idx + 1}_input_amount` readonly value= `${jValue.installmentAmount.toLocaleString('ja-JP')}`)
                         .field-body.m-1.is-1.none-flex-grow
                           .field
                             p.control
