@@ -655,7 +655,7 @@ describe('inboxのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('500エラー：user.statusが0ではない場合', async () => {
+    test('404エラー：user.statusが0ではない場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...loggedInSession }
@@ -817,7 +817,7 @@ describe('inboxのテスト', () => {
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
-        status: -2,
+        status: -1,
         lineId: lineId,
         accountCode: accountCode,
         subAccountCode: 'SU001',
@@ -867,7 +867,7 @@ describe('inboxのテスト', () => {
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
-        status: -3,
+        status: -2,
         lineId: lineId,
         accountCode: 'AB001',
         subAccountCode: subAccountCode,

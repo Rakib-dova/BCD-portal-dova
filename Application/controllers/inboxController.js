@@ -195,14 +195,14 @@ const getCode = async (contractId, accountCode, accountCodeName, subAccountCode,
 const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => {
   // 明細ID取得
   let lines = []
-  if (data.lineId instanceof Array === true) {
+  if (Object.prototype.toString.call(data.lineNo) === '[object Array]') {
     lines = data.lineNo
   } else {
     lines.push(data.lineNo)
   }
 
   let lineId = []
-  if (data.lineNo instanceof Array === true) {
+  if (Object.prototype.toString.call(data.lineId) === '[object Array]') {
     lineId = data.lineId
   } else {
     lineId.push(data.lineId)
