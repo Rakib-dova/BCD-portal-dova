@@ -109,3 +109,33 @@
   flex-grow: 1;
   flex-shrink: 1;
 }
+
+.border-div-rad-4 {
+  border: 1px solid #363636;
+  border-radius: 4px;
+}
+
+.red-color {
+  color: #f14668;
+}
+
+.none-flex-grow {
+  flex-grow: 0;
+}
+
+.fixed-void-66 {
+  flex: none;
+  width: 66px;
+}
+
+.center-modal-footer-item {
+  justify-content: center;
+  text-align: center;
+}
+
+.item-title-modal-accountCode {
+  display: flex;
+  flex-basis: 28px;
+  justify-content: flex-end;
+  margin-right: 10px;
+}

@@ -344,7 +344,7 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inbox/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1')
 
-      await page.click('body > div.container > div.box > div.grouped-button > a')
+      await page.click('body > div.container > div.box > form > div.grouped-button > a')
 
       await page.waitForTimeout(1500)
 
@@ -388,8 +388,10 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       expect(res.text).toMatch(/個/i)
       expect(res.text).toMatch(/100のJP 不課税 0%/i)
       expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/通貨/i)
     })
-
+    
     test('一般ユーザ、受領した請求書詳細画面内容確認', async () => {
       const res = await request(app)
         .get('/inbox/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1')
@@ -423,6 +425,8 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       expect(res.text).toMatch(/個/i)
       expect(res.text).toMatch(/100のJP 不課税 0%/i)
       expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/通貨/i)
     })
   })
 
