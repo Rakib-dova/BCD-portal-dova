@@ -294,7 +294,7 @@ $('#btn-insert').addEventListener('click', function () {
         checkTotalAmount -= ~~item.value.replaceAll(',', '')
       }
     })
-    $(`.${inputTarget.split('_')[0]}_input_amount`)[0].value = checkTotalAmount
+    $(`.${inputTarget.split('_')[0]}_input_amount`)[0].value = checkTotalAmount.toLocaleString('ja-JP')
     $('#insert-installmentAmount-modal').classList.toggle('is-active')
   } else {
     $('#installmentAmountErrMsg').innerText = '金額は1円以上を入力してください。'
@@ -325,14 +325,14 @@ const checkJournalList = function () {
             accountCode: journal.querySelectorAll('input[type=text]')[0].value,
             subAccountCode: journal.querySelectorAll('input[type=text]')[1].value,
             journalNo: journalNo,
-            input_amount: journal.querySelectorAll('input[type=text]')[2].value
+            input_amount: ~~journal.querySelectorAll('input[type=text]')[2].value.replaceAll(',', '')
           }
         } else {
           journalLines[idx][jdx] = {
             accountCode: journal.querySelectorAll('input[type=text]')[0].value,
             subAccountCode: journal.querySelectorAll('input[type=text]')[1].value,
             journalNo: journalNo,
-            input_amount: journal.querySelectorAll('input[type=text]')[2].value
+            input_amount: ~~journal.querySelectorAll('input[type=text]')[2].value.replaceAll(',', '')
           }
         }
       })
@@ -344,8 +344,11 @@ const checkJournalList = function () {
   journalLines.forEach((lines, lineNo) => {
     lines.forEach((journal, journalNo) => {
       if (journalNo !== 0 && journal !== null) {
-        if (journalLines[lineNo][0].accountCode.length === 0 || journalLines[lineNo][0].input_amount.length === 0) {
-          if (lines.length !== 1) isFirstLineNull = true
+        if (journalLines[lineNo][0].accountCode.length === 0 || journalLines[lineNo][0].input_amount === 0) {
+          if (lines.length !== 1) {
+            isFirstLineNull = true
+            $('#error-message-body').innerText = '分割金額は1円以上を入力して下さい。'
+          }
         }
       }
     })
@@ -357,17 +360,22 @@ const checkJournalList = function () {
         return item !== null && item !== undefined
       })
       if (checkJournalLines.length === 1) {
-        total = ~~journalLines[i][j].input_amount.replaceAll(',', '')
+        total = ~~journalLines[i][j].input_amount
         break
       }
       if (journalLines[i][j] !== undefined) {
         if (journalLines[i][j].accountCode.length !== 0) {
-          total = total + ~~journalLines[i][j].input_amount.replaceAll(',', '')
+          total = total + ~~journalLines[i][j].input_amount
+          if (~~journalLines[i][j].input_amount === 0) {
+            isFirstLineNull = true
+            $('#error-message-body').innerText = '分割金額は1円以上を入力して下さい。'
+          }
         }
       }
     }
     if (total !== ~~$(`#lineNo${i + 1}Total`).value.replaceAll(',', '')) {
       isFirstLineNull = true
+      $('#error-message-body').innerText = '仕訳情報を正しく設定してください。'
     }
   }
 
