@@ -321,18 +321,11 @@ const checkJournalList = function () {
       journalLine.forEach((journal, jdx) => {
         const journalNo = journal.id.split('_')[1]
         if (journalNo === 'lineAccountCode1') {
-          if (
-            journal.querySelectorAll('input[type=text]')[0].value.length !== 0 &&
-            journal.querySelectorAll('input[type=text]')[2].value.length !== 0
-          ) {
-            journalLines[idx][0] = {
-              accountCode: journal.querySelectorAll('input[type=text]')[0].value,
-              subAccountCode: journal.querySelectorAll('input[type=text]')[1].value,
-              journalNo: journalNo,
-              input_amount: journal.querySelectorAll('input[type=text]')[2].value
-            }
-          } else {
-            journalLines[idx][0] = null
+          journalLines[idx][0] = {
+            accountCode: journal.querySelectorAll('input[type=text]')[0].value,
+            subAccountCode: journal.querySelectorAll('input[type=text]')[1].value,
+            journalNo: journalNo,
+            input_amount: journal.querySelectorAll('input[type=text]')[2].value
           }
         } else {
           journalLines[idx][jdx] = {
@@ -351,10 +344,33 @@ const checkJournalList = function () {
   journalLines.forEach((lines, lineNo) => {
     lines.forEach((journal, journalNo) => {
       if (journalNo !== 0 && journal !== null) {
-        if (journalLines[lineNo][0] === null) isFirstLineNull = true
+        if (journalLines[lineNo][0].accountCode.length === 0 || journalLines[lineNo][0].input_amount.length === 0) {
+          if (lines.length !== 1) isFirstLineNull = true
+        }
       }
     })
   })
+  for (let i = 0; i < journalLines.length; i++) {
+    let total = 0
+    for (let j = 0; j < journalLines[i].length; j++) {
+      const checkJournalLines = journalLines[i].filter(function (item) {
+        return item !== null && item !== undefined
+      })
+      if (checkJournalLines.length === 1) {
+        total = ~~journalLines[i][j].input_amount.replaceAll(',', '')
+        break
+      }
+      if (journalLines[i][j] !== undefined) {
+        if (journalLines[i][j].accountCode.length !== 0) {
+          total = total + ~~journalLines[i][j].input_amount.replaceAll(',', '')
+        }
+      }
+    }
+    if (total !== ~~$(`#lineNo${i + 1}Total`).value.replaceAll(',', '')) {
+      isFirstLineNull = true
+    }
+  }
+
   if (isFirstLineNull) {
     $('#error-message-modal').classList.add('is-active')
     return false
