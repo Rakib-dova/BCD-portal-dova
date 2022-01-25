@@ -57,6 +57,10 @@ module.exports = (sequelize, DataTypes) => {
       updatedAt: {
         type: DataTypes.DATE,
         allowNull: false
+      },
+      journalNo: {
+        type: DataTypes.STRING,
+        allowNull: false
       }
     },
     {
