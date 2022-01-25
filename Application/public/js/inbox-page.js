@@ -175,6 +175,7 @@ const displayResultForCode = function (codeArr) {
       const inputTarget = $(this.dataset.target).dataset.info
       $(`#${inputTarget}_accountCode`).value = this.dataset.accountCode
       $(`#${inputTarget}_subAccountCode`).value = this.dataset.subAccountCode
+      $('#btn-confirm').removeAttribute('disabled')
       deleteDisplayModal()
     })
     row.addEventListener('mouseover', function () {
@@ -227,7 +228,6 @@ const btnMinusAccount = function () {
   if (this.dataset.target === `${this.id.split('_')[2]}_lineAccountCode1`) {
     $(`#${this.id.split('_')[2]}_lineAccountCode1_accountCode`).value = ''
     $(`#${this.id.split('_')[2]}_lineAccountCode1_subAccountCode`).value = ''
-    return null
   } else {
     const deleteTarget = this.dataset.target
     const thisLineInput = $(`#${deleteTarget}_input_amount`)
@@ -240,6 +240,7 @@ const btnMinusAccount = function () {
       $(`#btn-minus-${deleteTarget.split('_')[0]}-accountCode`).classList.remove('is-invisible')
     }
   }
+  $('#btn-confirm').removeAttribute('disabled')
 }
 
 // 分割金額入力ボタン（モーダルの表示）
@@ -250,6 +251,7 @@ function btnInstallmentAmount() {
   showModalTarget.classList.toggle('is-active')
   showModalTarget.querySelector('#btn-insert').dataset.target = inputTarget
   showModalTarget.querySelector('#installmentAmountErrMsg').innerText = '　'
+  $('#btn-confirm').removeAttribute('disabled')
 }
 
 // 分割金額の入力欄の数字以外は入力できない
@@ -300,6 +302,7 @@ $('#btn-insert').addEventListener('click', function () {
 })
 
 $('#btn-confirm').addEventListener('click', function () {
+  if (this.getAttribute('disabled') === 'true') return
   if (checkJournalList()) $('#form').submit()
 })
 
