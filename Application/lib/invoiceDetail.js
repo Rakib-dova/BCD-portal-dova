@@ -48,6 +48,8 @@ class InvoiceDetail {
       }
     }
     this.setOptions(invoice)
+
+    console.log(JSON.stringify(this, null, 2))
   }
 
   setSupplier(accountingSupplierParty) {
@@ -649,7 +651,12 @@ class InvoiceDetail {
       const meisai = {}
       const meisaiDetail = []
       // '明細-項目ID'
-      meisai['明細-項目ID'] = item.ID.value
+      meisai.id = item.ID.value
+      if (item.Item.SellersItemIdentification) {
+        meisai['明細-項目ID'] = item.Item.SellersItemIdentification.ID.value
+      } else {
+        meisai['明細-項目ID'] = ''
+      }
 
       // 明細-内容の内容
       if (!validate.isUndefined(item.Item.Name.value)) {
@@ -1052,11 +1059,12 @@ class InvoiceDetail {
       this.invoiceLine.forEach((invoiceLine, idx, invoiceLines) => {
         invoiceLines[idx].journalize = []
         journalizeInvoice.forEach((journalize) => {
-          if (~~invoiceLine['明細-項目ID'] === journalize.lineNo) {
+          if (~~invoiceLine.id === journalize.lineNo) {
             invoiceLines[idx].journalize.push({
               lineNo: journalize.lineNo,
               lineId: journalize.lineId,
               journalId: journalize.journalId,
+              journalNo: journalize.journalNo,
               accountCode: journalize.accountCode,
               subAccountCode: journalize.subAccountCode,
               installmentAmount: journalize.installmentAmount
