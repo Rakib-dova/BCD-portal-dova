@@ -260,6 +260,7 @@ describe('subAccountCodeListのテスト', () => {
         title: '補助科目一覧',
         engTitle: 'SUBACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
+        deleteModalTitle: '補助科目削除',
         listArr: subAccountListArrOne,
         messageForNotItem: '現在、補助科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
@@ -304,6 +305,7 @@ describe('subAccountCodeListのテスト', () => {
         title: '補助科目一覧',
         engTitle: 'SUBACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
+        deleteModalTitle: '補助科目削除',
         listArr: [],
         messageForNotItem: '現在、補助科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
@@ -347,6 +349,7 @@ describe('subAccountCodeListのテスト', () => {
         title: '補助科目一覧',
         engTitle: 'SUBACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
+        deleteModalTitle: '補助科目削除',
         listArr: subAccountListArrOne,
         messageForNotItem: '現在、補助科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
@@ -390,6 +393,7 @@ describe('subAccountCodeListのテスト', () => {
         title: '補助科目一覧',
         engTitle: 'SUBACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
+        deleteModalTitle: '補助科目削除',
         listArr: subAccountListArrOne,
         messageForNotItem: '現在、補助科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
@@ -433,6 +437,7 @@ describe('subAccountCodeListのテスト', () => {
         title: '補助科目一覧',
         engTitle: 'SUBACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
+        deleteModalTitle: '補助科目削除',
         listArr: subAccountListArrOne,
         messageForNotItem: '現在、補助科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
@@ -476,6 +481,7 @@ describe('subAccountCodeListのテスト', () => {
         title: '補助科目一覧',
         engTitle: 'SUBACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
+        deleteModalTitle: '補助科目削除',
         listArr: subAccountListArrOne,
         messageForNotItem: '現在、補助科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム
@@ -521,6 +527,7 @@ describe('subAccountCodeListのテスト', () => {
         title: '補助科目一覧',
         engTitle: 'SUBACCOUNT CODE LIST',
         btnNameForRegister: '新規登録する',
+        deleteModalTitle: '補助科目削除',
         listArr: subAccountListArrOne,
         messageForNotItem: '現在、補助科目はありません。新規登録するボタンから登録を行ってください。',
         // リスト表示カラム

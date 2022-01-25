@@ -312,7 +312,7 @@ describe('subAccountCodeControllerのテスト', () => {
   describe('getSubAccountCodeList', () => {
     test('正常', async () => {
       // 準備
-      // 勘定科目検索結果
+      // 補助科目検索結果
       SubAccountCodeGetsubAccountCodeListSpy.mockReturnValue(subAccountCodeListResult)
 
       // 試験実施
@@ -325,7 +325,7 @@ describe('subAccountCodeControllerのテスト', () => {
 
     test('異常：DBエラー', async () => {
       // 準備
-      // 勘定科目検索結果
+      // 補助科目検索結果
       const dbError = new Error()
       SubAccountCodeGetsubAccountCodeListSpy.mockImplementation(() => {
         throw dbError
@@ -818,6 +818,132 @@ describe('subAccountCodeControllerのテスト', () => {
         status: 0
       })
       expect(result).toMatchObject(dbError)
+    })
+  })
+
+  // 補助科目削除
+  describe('deleteForSubAccountCode', () => {
+    test('正常', async () => {
+      // 準備
+      // 契約番号
+      const accountCodeId = 'f194969f-9307-4e18-a097-843aa6ce7b73'
+      const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
+
+      // 補助科目検索（Mockデータ）、削除対象の勘定科目と紐づいてる補助科目
+      const savedDate = new Date().toISOString()
+      const subAccounts = {
+        subAccountCodeId: '308e7acf-072d-4533-94f5-dcdf5972007e',
+        accountCodeId: accountCodeId,
+        subjectName: '補助科目1',
+        subjectCode: 'TEST1',
+        createdAt: savedDate,
+        updatedAt: savedDate,
+        dataValues: {
+          accountCodeId: accountCodeId
+        },
+        destroy: async () => {}
+      }
+      subAccountcodeFindOneSpy.mockReturnValue(subAccounts)
+      // 試験実施
+      const result = await subAccountCodeController.deleteForSubAccountCode(subAccountCodeId)
+
+      // 期待結果
+      // 正常削除の「1」を返す
+      expect(result).toEqual(1)
+    })
+
+    test('準正常：補助科目削除（既に削除されている場合）', async () => {
+      // subAccountCodeId
+      const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
+
+      // 補助科目検索（Mockデータ）
+      SubAccountCode.findOne = jest.fn((value) => {
+        return null
+      })
+
+      // 試験実施
+      const result = await subAccountCodeController.deleteForSubAccountCode(subAccountCodeId)
+
+      // 準正常削除の場合、「-1」を返す
+      expect(result).toBe(-1)
+    })
+    test('準正常：補助科目削除（DBエラー）', async () => {
+      // subAccountCodeId
+      const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
+
+      // 補助科目検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      SubAccountCode.findOne = jest.fn((value) => {
+        return dbError
+      })
+
+      // 試験実施
+      const result = await subAccountCodeController.deleteForSubAccountCode(subAccountCodeId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
+    })
+  })
+
+  describe('checkDataForSubAccountCode', () => {
+    test('正常', async () => {
+      // 準備
+      // 契約番号
+      const accountCodeId = 'f194969f-9307-4e18-a097-843aa6ce7b73'
+      const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
+
+      // 補助科目検索（Mockデータ）、削除対象の勘定科目と紐づいてる補助科目
+      const savedDate = new Date().toISOString()
+      const subAccounts = {
+        subAccountCodeId: '308e7acf-072d-4533-94f5-dcdf5972007e',
+        accountCodeId: accountCodeId,
+        subjectName: '補助科目1',
+        subjectCode: 'TEST1',
+        createdAt: savedDate,
+        updatedAt: savedDate,
+        dataValues: {
+          accountCodeId: accountCodeId
+        },
+        destroy: async () => {}
+      }
+      subAccountcodeFindOneSpy.mockReturnValue(subAccounts)
+      // 試験実施
+      const result = await subAccountCodeController.checkDataForSubAccountCode(subAccountCodeId)
+
+      // 期待結果
+      // 正常削除の「1」を返す
+      expect(result).toEqual(1)
+    })
+    test('準正常：既に削除されたと想定する（既に削除されている場合）', async () => {
+      // subAccountCodeId
+      const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
+
+      // 補助科目検索（Mockデータ）
+      SubAccountCode.findOne = jest.fn((value) => {
+        return null
+      })
+
+      // 試験実施
+      const result = await subAccountCodeController.checkDataForSubAccountCode(subAccountCodeId)
+
+      // 準正常削除の場合、「-1」を返す
+      expect(result).toEqual(-1)
+    })
+    test('準正常：補助科目チェック（DBエラー）', async () => {
+      // subAccountCodeId
+      const subAccountCodeId = '308e7acf-072d-4533-94f5-dcdf5972007e'
+
+      // 補助科目検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      SubAccountCode.findOne = jest.fn((value) => {
+        throw dbError
+      })
+
+      // 試験実施
+      const result = await subAccountCodeController.checkDataForSubAccountCode(subAccountCodeId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toEqual(0)
     })
   })
 })
