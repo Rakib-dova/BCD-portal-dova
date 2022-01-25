@@ -309,7 +309,7 @@ $('#btn-confirm').addEventListener('click', function () {
 const checkJournalList = function () {
   const journalLines = []
   Array.prototype.forEach.call($('.lineAccountCode'), (line) => {
-    if (line.id.match(/^lineNo[0-9]$/)) {
+    if (line.id.match(/^lineNo[0-9]{1,3}$/)) {
       journalLines.push(new Array(10))
     }
   })
