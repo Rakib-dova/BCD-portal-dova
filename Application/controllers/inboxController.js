@@ -114,7 +114,7 @@ const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId, contrac
     },
     order: [
       ['lineNo', 'ASC'],
-      ['lineId', 'ASC']
+      ['journalNo', 'ASC']
     ]
   })
 
@@ -257,12 +257,19 @@ const getCode = async (contractId, accountCode, accountCodeName, subAccountCode,
 const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => {
   let lines = []
   if (data.lineId instanceof Array === true) {
-    lines = data.lineId
+    lines = data.lineNo
   } else {
-    lines.push(data.lineId)
+    lines.push(data.lineNo)
   }
 
-  delete data.lineId
+  let lineId = []
+  if (data.lineNo instanceof Array === true) {
+    lineId = data.lineId
+  } else {
+    lineId.push(data.lineId)
+  }
+
+  delete data.lineNo
   const lineJournals = []
   let accountLines = 1
   const result = {
@@ -284,7 +291,8 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
               invoiceId: invoiceId,
               contractId: contractId,
               lineNo: ~~idx,
-              lineId: `lineAccountCode${accountLines}`,
+              lineId: lineId[~~idx - 1],
+              journalNo: `lineAccountCode${accountLines}`,
               accountCode: data[`lineNo${idx}_lineAccountCode${accountLines}_accountCode`],
               subAccountCode: data[`lineNo${idx}_lineAccountCode${accountLines}_subAccountCode`],
               installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLines}_input_amount`].replace(/,/g, '')
@@ -387,11 +395,11 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
 
     // DBにデータが保存している場合
     for (let idx = 0; idx < lines.length; idx++) {
-      for (let lineId = 0; lineId < 10; lineId++) {
-        const target = lineJournals[idx][lineId]
+      for (let journalNo = 0; journalNo < 10; journalNo++) {
+        const target = lineJournals[idx][journalNo]
         if (target.data !== null) {
           resultSearchJournals.forEach((item) => {
-            if (~~target.data.lineNo === ~~item.lineNo && target.data.lineId === item.lineId) {
+            if (~~target.data.lineNo === ~~item.lineNo && target.data.journalNo === item.journalNo) {
               target.dbInstance = item
               item.set({
                 ...target.data
@@ -405,7 +413,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
           }
         } else {
           resultSearchJournals.forEach((item) => {
-            if (item.lineNo === idx + 1 && item.lineId === `lineAccountCode${lineId + 1}`) {
+            if (~~item.lineNo === idx + 1 && item.journalNo === `lineAccountCode${journalNo + 1}`) {
               target.dbInstance = item
             }
           })
