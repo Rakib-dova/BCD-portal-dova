@@ -5,7 +5,7 @@ block content
     div.title-box-journallzing
       h4.title-text-journallzing.text-inbox 仕訳情報設定
     .box
-      form(method='POST')
+      form#form(method='POST')
         include invoiceHeader
         include invoiceLines
         include invoiceFooter
@@ -13,7 +13,7 @@ block content
         include invoicePaymentMethod
         .grouped-button
           a.button.mr-6(href='/inboxList/1')  戻る
-          button.button.is-link(type='submit') 登録
+          a.button.is-link#btn-confirm 登録
 
   template#templateLineAccountCodeItem
     .columns.m-0.p-1.lineAccountcode
@@ -162,6 +162,17 @@ block content
               p#installmentAmountErrMsg.text-center.input-label-required 　
       footer.modal-card-foot.center-modal-footer-item
         button.button.cancel-button(data-target='insert-installmentAmount-modal') 閉じる
+
+  .modal#error-message-modal
+    .modal-background.cancel-button(data-target='error-message-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 仕訳情報設定
+        a.delete(data-target="error-message-modal")
+      section.modal-card-body
+        p.error-message-body 　仕訳情報を正しく設定してください。
+      footer.modal-card-foot.center-modal-footer-item
+        button.button.cancel-button.is-link(data-target='error-message-modal') 確認
 
   include footer
 

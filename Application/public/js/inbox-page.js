@@ -34,6 +34,7 @@ window.onload = function () {
     btnMinus.addEventListener('click', btnMinusAccount)
   })
 }
+
 // プラスボタンの機能
 Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
   btnPlusAccount.addEventListener('click', function () {
@@ -297,3 +298,63 @@ $('#btn-insert').addEventListener('click', function () {
     $('#installmentAmountErrMsg').innerText = '金額は1円以上を入力してください。'
   }
 })
+
+$('#btn-confirm').addEventListener('click', function () {
+  if (checkJournalList()) $('#form').submit()
+})
+
+const checkJournalList = function () {
+  const journalLines = []
+  Array.prototype.forEach.call($('.lineAccountCode'), (line) => {
+    if (line.id.match(/^lineNo[0-9]$/)) {
+      journalLines.push(new Array(10))
+    }
+  })
+
+  Array.prototype.forEach.call($('.lineAccountCode'), (line, idx) => {
+    let journalIdx = 0
+    do {
+      const journalLine = line.querySelectorAll('.lineAccountcode')
+      journalLine.forEach((journal, jdx) => {
+        const journalNo = journal.id.split('_')[1]
+        if (journalNo === 'lineAccountCode1') {
+          if (
+            journal.querySelectorAll('input[type=text]')[0].value.length !== 0 &&
+            journal.querySelectorAll('input[type=text]')[2].value.length !== 0
+          ) {
+            journalLines[idx][0] = {
+              accountCode: journal.querySelectorAll('input[type=text]')[0].value,
+              subAccountCode: journal.querySelectorAll('input[type=text]')[1].value,
+              journalNo: journalNo,
+              input_amount: journal.querySelectorAll('input[type=text]')[2].value
+            }
+          } else {
+            journalLines[idx][0] = null
+          }
+        } else {
+          journalLines[idx][jdx] = {
+            accountCode: journal.querySelectorAll('input[type=text]')[0].value,
+            subAccountCode: journal.querySelectorAll('input[type=text]')[1].value,
+            journalNo: journalNo,
+            input_amount: journal.querySelectorAll('input[type=text]')[2].value
+          }
+        }
+      })
+      journalIdx++
+    } while (journalIdx < 10)
+  })
+
+  let isFirstLineNull = false
+  journalLines.forEach((lines, lineNo) => {
+    lines.forEach((journal, journalNo) => {
+      if (journalNo !== 0 && journal !== null) {
+        if (journalLines[lineNo][0] === null) isFirstLineNull = true
+      }
+    })
+  })
+  if (isFirstLineNull) {
+    $('#error-message-modal').classList.add('is-active')
+    return false
+  }
+  return true
+}
