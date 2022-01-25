@@ -1049,56 +1049,12 @@ describe('inboxControllerのテスト', () => {
       const accountCodeName = accountCodeMock[0].accountCodeName
       const subAccountCode = subAccountCodeMock[0].subjectCode
       const subACcountCodeName = subAccountCodeMock[0].subjectName
+      const dummyTargetAccountCodeSubAccountCodeJoin = []
 
-      accountCodeFindAllSpy.mockReturnValueOnce([accountCodeMock[0]])
-      accountCodeFindAllSpy.mockReturnValueOnce([subAccountCodeMock[0]])
-
-      const result = await inboxController.getCode(
-        contractId,
-        accountCode,
-        accountCodeName,
-        subAccountCode,
-        subACcountCodeName
-      )
-
-      expect(JSON.stringify([accountCodeMock[0], subAccountCodeMock[0]], null, 2)).toMatch(
-        JSON.stringify(result, null, 2)
-      )
-    })
-
-    test('正常：パラメタがない場合', async () => {
-      const accountCode = undefined
-      const accountCodeName = undefined
-      const subAccountCode = undefined
-      const subACcountCodeName = undefined
-
-      accountCodeFindAllSpy.mockReturnValueOnce([accountCodeMock[0]])
-      accountCodeFindAllSpy.mockReturnValueOnce([subAccountCodeMock[0]])
-
-      const result = await inboxController.getCode(
-        contractId,
-        accountCode,
-        accountCodeName,
-        subAccountCode,
-        subACcountCodeName
-      )
-
-      expect(JSON.stringify([accountCodeMock[0], subAccountCodeMock[0]], null, 2)).toMatch(
-        JSON.stringify(result, null, 2)
-      )
-    })
-
-    test('正常：パラメタがない場合', async () => {
-      const accountCode = undefined
-      const accountCodeName = undefined
-      const subAccountCode = undefined
-      const subACcountCodeName = undefined
-
-      const dummyTargetAccountCodeSubAccountCodeJoint = []
       accountCodeMock.forEach((item) => {
         subAccountCodeMock.forEach((subAccount) => {
           if (item.accountCodeId === subAccount.accountCodeId) {
-            dummyTargetAccountCodeSubAccountCodeJoint.push({
+            dummyTargetAccountCodeSubAccountCodeJoin.push({
               ...item,
               'SubAccountCodes.subjectCode': subAccount.subjectCode,
               'SubAccountCodes.subjectName': subAccount.subjectName,
@@ -1108,18 +1064,8 @@ describe('inboxControllerのテスト', () => {
         })
       })
 
-      accountCodeFindAllSpy.mockReturnValueOnce(accountCodeMock)
-      accountCodeFindAllSpy.mockReturnValueOnce(dummyTargetAccountCodeSubAccountCodeJoint)
-
-      const result = await inboxController.getCode(
-        contractId,
-        accountCode,
-        accountCodeName,
-        subAccountCode,
-        subACcountCodeName
-      )
-
-      dummyTargetAccountCodeSubAccountCodeJoint.sort((a, b) => {
+      const a = accountCodeMock.concat(dummyTargetAccountCodeSubAccountCodeJoin)
+      a.sort((a, b) => {
         if (a.accountCode > b.accountCode) return 1
         else if (a.accountCode < b.accountCode) return -1
         else {
@@ -1129,11 +1075,86 @@ describe('inboxControllerのテスト', () => {
         }
       })
 
-      console.log(result)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      accountCodeFindAllSpy.mockReturnValueOnce(a)
 
-      // expect(JSON.stringify(dummyTargetAccountCodeSubAccountCodeJoint, null, 2)).toMatch(
-      //   JSON.stringify(result, null, 2)
-      // )
+      const result = await inboxController.getCode(
+        contractId,
+        accountCode,
+        accountCodeName,
+        subAccountCode,
+        subACcountCodeName
+      )
+
+      expect(JSON.stringify(a, null, 2)).toMatch(JSON.stringify(result, null, 2))
+    })
+
+    test('正常：パラメタがない場合', async () => {
+      const accountCode = undefined
+      const accountCodeName = undefined
+      const subAccountCode = undefined
+      const subACcountCodeName = undefined
+
+      accountCodeFindAllSpy.mockReturnValueOnce([accountCodeMock[0]])
+      accountCodeFindAllSpy.mockReturnValueOnce([subAccountCodeMock[0]])
+
+      const result = await inboxController.getCode(
+        contractId,
+        accountCode,
+        accountCodeName,
+        subAccountCode,
+        subACcountCodeName
+      )
+
+      expect(JSON.stringify([accountCodeMock[0], subAccountCodeMock[0]], null, 2)).toMatch(
+        JSON.stringify(result, null, 2)
+      )
+    })
+
+    test('正常：パラメタがない場合', async () => {
+      const accountCode = undefined
+      const accountCodeName = undefined
+      const subAccountCode = undefined
+      const subACcountCodeName = undefined
+
+      const dummyTargetAccountCodeSubAccountCodeJoin = []
+      accountCodeMock.forEach((item) => {
+        subAccountCodeMock.forEach((subAccount) => {
+          if (item.accountCodeId === subAccount.accountCodeId) {
+            dummyTargetAccountCodeSubAccountCodeJoin.push({
+              ...item,
+              'SubAccountCodes.subjectCode': subAccount.subjectCode,
+              'SubAccountCodes.subjectName': subAccount.subjectName,
+              'SubAccountCodes.subAccountCodeId': subAccount.subAccountCodeId
+            })
+          }
+        })
+      })
+
+      const a = accountCodeMock.concat(dummyTargetAccountCodeSubAccountCodeJoin)
+
+      accountCodeFindAllSpy.mockReturnValueOnce(accountCodeMock)
+      accountCodeFindAllSpy.mockReturnValueOnce(dummyTargetAccountCodeSubAccountCodeJoin)
+
+      const result = await inboxController.getCode(
+        contractId,
+        accountCode,
+        accountCodeName,
+        subAccountCode,
+        subACcountCodeName
+      )
+
+      a.sort((a, b) => {
+        if (a.accountCode > b.accountCode) return 1
+        else if (a.accountCode < b.accountCode) return -1
+        else {
+          if (a['SubAccountCodes.subjectCode'] > b['SubAccountCodes.subjectCode']) return 1
+          else if (a['SubAccountCodes.subjectCode'] < b['SubAccountCodes.subjectCode']) return -1
+          else return 0
+        }
+      })
+
+      expect(JSON.stringify(a, null, 2)).toMatch(JSON.stringify(result, null, 2))
     })
 
     test('正常：DBエラー', async () => {
@@ -1166,7 +1187,7 @@ describe('inboxControllerのテスト', () => {
 
   describe('insertAndUpdateJournalizeInvoice', () => {
     const data = {
-      lineId: 1,
+      lineNo: 1,
       lineNo1_lineAccountCode1_accountCode: '',
       lineNo1_lineAccountCode1_subAccountCode: '',
       lineNo1_lineAccountCode1_input_amount: '1000'
@@ -1180,6 +1201,7 @@ describe('inboxControllerのテスト', () => {
 
     test('正常：明細が２個の時、何も操作なく「登録」ボタンを押す', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = ['1', '2']
       data.lineId = ['1', '2']
       journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
       const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
@@ -1188,7 +1210,7 @@ describe('inboxControllerのテスト', () => {
 
     test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
-      data.lineId = '1'
+      data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
@@ -1206,7 +1228,7 @@ describe('inboxControllerのテスト', () => {
 
     test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す、勘定科目がない場合', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
-      data.lineId = ['1', '2']
+      data.lineNo = ['1', '2']
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       accountCodeFindOneSpy.mockReturnValueOnce(null)
       journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
@@ -1216,7 +1238,7 @@ describe('inboxControllerのテスト', () => {
 
     test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、補助科目ない場合', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
-      data.lineId = '1'
+      data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
       const ab001 = new AccountCode()
@@ -1235,7 +1257,7 @@ describe('inboxControllerのテスト', () => {
 
     test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、DBにはデータがない場合', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
-      data.lineId = '1'
+      data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
       const ab001 = new AccountCode()
@@ -1262,7 +1284,7 @@ describe('inboxControllerのテスト', () => {
 
     test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ変更', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
-      data.lineId = '1'
+      data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
       const ab001 = new AccountCode()
@@ -1285,7 +1307,7 @@ describe('inboxControllerのテスト', () => {
         contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
         invoiceId: invoiceId,
         lineNo: 1,
-        lineId: 'lineAccountCode1',
+        journalNo: 'lineAccountCode1',
         accountCode: ab001.accountCode,
         subAccountCode: suut.subjectCode,
         departmentCode: null,
@@ -1303,7 +1325,7 @@ describe('inboxControllerのテスト', () => {
 
     test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ削除', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
-      data.lineId = '1'
+      data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
       const ab001 = new AccountCode()
@@ -1326,7 +1348,7 @@ describe('inboxControllerのテスト', () => {
         contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
         invoiceId: invoiceId,
         lineNo: 1,
-        lineId: 'lineAccountCode2',
+        journalNo: 'lineAccountCode2',
         accountCode: ab001.accountCode,
         subAccountCode: suut.subjectCode,
         departmentCode: null,
@@ -1344,7 +1366,7 @@ describe('inboxControllerのテスト', () => {
 
     test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、DBエラー', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
-      data.lineId = '1'
+      data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
       const ab001 = new AccountCode()
@@ -1367,7 +1389,7 @@ describe('inboxControllerのテスト', () => {
         contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
         invoiceId: invoiceId,
         lineNo: 1,
-        lineId: 'lineAccountCode2',
+        journalNo: 'lineAccountCode2',
         accountCode: ab001.accountCode,
         subAccountCode: suut.subjectCode,
         departmentCode: null,
