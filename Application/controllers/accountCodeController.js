@@ -255,5 +255,63 @@ module.exports = {
       })
       return error
     }
+  },
+  // 勘定科目削除
+  // 削除対象の勘定科目と紐づいてる補助科目も同時削除
+  deleteForAccountCode: async (accountCodeId) => {
+    try {
+      // 勘定科目を検索
+      const deleteTargetAccountCode = await AccountCode.findOne({
+        where: {
+          accountCodeId: accountCodeId
+        }
+      })
+
+      // null：既に削除されたレコード
+      if (deleteTargetAccountCode === null) return -1
+
+      // 削除対象の勘定科目と紐づいている補助科目検索
+      const deleteTargetSubAccountCode = await db.SubAccountCode.findAll({
+        where: {
+          accountCodeId: deleteTargetAccountCode.accountCodeId
+        }
+      })
+
+      // 削除対象の勘定科目と紐づいている補助科目削除
+      logger.info(`${deleteTargetAccountCode.accountCodeId}と紐づいてる補助科目の削除処理を開始します。`)
+      deleteTargetSubAccountCode.forEach(async (item) => {
+        await item.destroy()
+      })
+      logger.info(`${deleteTargetAccountCode.accountCodeId}と紐づいてる補助科目の削除処理を終了します。`)
+
+      // 勘定科目削除
+      logger.info(`${deleteTargetAccountCode.accountCodeId}のデータの削除処理を開始します。`)
+      await deleteTargetAccountCode.destroy()
+      logger.info(`${deleteTargetAccountCode.accountCodeId}のデータの削除処理を終了します。`)
+
+      return 1
+    } catch (error) {
+      logger.error(error)
+      return 0
+    }
+  },
+  checkDataForAccountCode: async (accountCodeId) => {
+    try {
+      // 勘定科目を検索
+      const deleteTargetAccountCode = await AccountCode.findOne({
+        where: {
+          accountCodeId: accountCodeId
+        }
+      })
+
+      // nullの場合、既に削除されたと想定する。
+      if (deleteTargetAccountCode === null) return -1
+
+      // null以外の場合、正常想定
+      return 1
+    } catch (error) {
+      logger.error(error)
+      return 0
+    }
   }
 }
