@@ -4,8 +4,6 @@ const AccountCode = db.AccountCode
 const SubAccountCode = db.SubAccountCode
 const JournalizeInvoice = db.JournalizeInvoice
 const logger = require('../lib/logger')
-const { v4: uuidV4 } = require('uuid')
-const validate = require('../lib/validate')
 const Op = db.Sequelize.Op
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
@@ -123,67 +121,6 @@ const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId, contrac
   return displayInvoice
 }
 
-const insert = async (contract, values) => {
-  // journalize_invoiceテーブル
-  // journalId(PK)
-  // contractId(FK)
-  // invoiceId -請求書番号（UUID)
-  // lineNo-明細番号
-  // lineId-項目ID
-  // accountCode-勘定科目コード
-  // subAccountCode-補助科目コード
-  // installmentAmount-分割金額
-
-  const contractId = contract.contractId
-
-  try {
-    // inovoiceIdチェック
-    if (!validate.isUUID(values.invoiceId)) return -1
-
-    // 勘定科目コード有無確認
-    const accountCodeSearchResult = await AccountCode.findOne({
-      where: {
-        contractId: contractId,
-        accountCode: values.accountCode
-      }
-    })
-    if (accountCodeSearchResult === null) {
-      return -2
-    }
-
-    // 補助科目勘コード有無確認
-    if (values.subAccountCode !== '') {
-      const accountCodeId = accountCodeSearchResult.accountCodeId
-      const subAccountCodeSearch = await SubAccountCode.findOne({
-        where: {
-          subjectCode: values.subAccountCode,
-          accountCodeId: accountCodeId
-        }
-      })
-      if (subAccountCodeSearch === null) {
-        return -3
-      }
-    }
-
-    // 問題ない場合DBに保存する。
-    const resultToInsertJournalizeInvoice = await JournalizeInvoice.create({
-      ...values,
-      journalId: uuidV4(),
-      contractId
-    })
-    // DB保存失敗したらモデルAccountCodeインスタンスではない
-    if (resultToInsertJournalizeInvoice instanceof JournalizeInvoice) {
-      return 0
-    } else {
-      return -1
-    }
-  } catch (error) {
-    // DBエラー発生したら処理
-    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
-    return error
-  }
-}
-
 const getCode = async (contractId, accountCode, accountCodeName, subAccountCode, subAccountCodeName) => {
   const whereIsAccountCode = { contractId: contractId }
   const whereIsSubAccountCode = {}
@@ -254,7 +191,9 @@ const getCode = async (contractId, accountCode, accountCodeName, subAccountCode,
   }
 }
 
+// 仕訳情報設定（登録、変更、削除）
 const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => {
+  // 明細ID取得
   let lines = []
   if (data.lineId instanceof Array === true) {
     lines = data.lineId
@@ -268,6 +207,8 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
   const result = {
     status: 0
   }
+
+  // 明細の仕訳設定情報を配列に作成
   try {
     lines.forEach((idx) => {
       lineJournals.push([])
@@ -300,6 +241,8 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
       accountLines = 1
     })
 
+    console.log(lineJournals)
+    // DBから仕訳情報設定確認
     const resultSearchJournals = await JournalizeInvoice.findAll({
       where: {
         contractId: contractId,
@@ -432,7 +375,6 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
 module.exports = {
   getInbox: getInbox,
   getInvoiceDetail: getInvoiceDetail,
-  insert: insert,
   getCode: getCode,
   insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice
 }

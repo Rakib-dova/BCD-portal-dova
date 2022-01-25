@@ -221,6 +221,7 @@ const cbPostGetCode = async (req, res, next) => {
   const targetSubAccountCode = req.body.subAccountCode ?? ''
   const targetSubAccountCodeName = req.body.subAccountCodeName ?? ''
 
+  // 勘定科目コード、勘定科目名文字数チェック
   if (targetAccountCode.length > 10 || targetAccountCodeName.length > 40) {
     logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetCode')
     return res.status(400).send('400 Bad Request')
@@ -298,7 +299,7 @@ const cbPostIndex = async (req, res, next) => {
     req.body
   )
 
-  if (error instanceof Error || error === null) return next(errorHelper.create(500))
+  if (error instanceof Error) return next(errorHelper.create(500))
 
   // 結果：0（正常変更）、-1（未登録勘定科目）、-2（未登録補助科目）
   switch (status) {

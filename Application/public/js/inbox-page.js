@@ -38,9 +38,13 @@ window.onload = function () {
 Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
   btnPlusAccount.addEventListener('click', function () {
     const target = $(this.dataset.target)
-    if (target.querySelectorAll('.lineAccountcode').length < 10) {
+    const lineAccountcodeLength = target.querySelectorAll('.lineAccountcode').length
+    if (lineAccountcodeLength < 10) {
       // 仕訳情報のidを作成：lineNo明細詳細の順番_lineAccountCode仕訳情報の順番
-      const targetId = `${target.id}_lineAccountCode${target.querySelectorAll('.lineAccountcode').length + 1}`
+      const tagetIdBase = `${target.id}_lineAccountCode`
+      const targetId = `${target.id}_lineAccountCode${
+        ~~target.querySelectorAll('.lineAccountcode')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
+      }`
       // templateから追加仕訳情報欄作成
       const templeAccountCodeItem = $('#templateLineAccountCodeItem')
       const cloneAccountCodeItem = document.importNode(templeAccountCodeItem.content, true)
@@ -124,7 +128,7 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
           if (result.length !== 0) {
             displayResultForCode(result)
           } else {
-            // displayNoAccountCode()
+            displayNoAccountCode()
           }
           break
         }
@@ -171,7 +175,6 @@ const displayResultForCode = function (codeArr) {
       $(`#${inputTarget}_accountCode`).value = this.dataset.accountCode
       $(`#${inputTarget}_subAccountCode`).value = this.dataset.subAccountCode
       deleteDisplayModal()
-      // checkbtnCheck()
     })
     row.addEventListener('mouseover', function () {
       this.classList.add('is-selected')
@@ -180,6 +183,19 @@ const displayResultForCode = function (codeArr) {
       this.classList.remove('is-selected')
     })
   })
+  $('#displayInvisible').classList.remove('is-invisible')
+}
+
+// 検索結果がない場合
+const displayNoAccountCode = function () {
+  const displayFieldBody = $('#displayFieldResultBody')
+  const searchResultCode = $('#searchResultCode')
+  const cloneSearchResultCodeTemplate = document.importNode(searchResultCode.content, true)
+  cloneSearchResultCodeTemplate.querySelector('.columnNoAccountCodeMessage').classList.remove('is-invisible')
+  cloneSearchResultCodeTemplate.querySelector('.columnNoAccountCodeMessage').setAttribute('colspan', '4')
+  cloneSearchResultCodeTemplate.querySelector('.noAccountCodeMessage').innerText =
+    '該当する勘定科目が存在しませんでした。'
+  displayFieldBody.appendChild(cloneSearchResultCodeTemplate)
   $('#displayInvisible').classList.remove('is-invisible')
 }
 
@@ -263,7 +279,11 @@ $('#btn-insert').addEventListener('click', function () {
     if (totalAmmout - valueInput.value < 0) {
       $('#installmentAmountErrMsg').innerText = '小計金額より高い金額は入力できません。'
       return null
+    } else if (totalAmmout - valueInput.value === 0) {
+      $('#installmentAmountErrMsg').innerText = '小計金額と同じ金額は入力できません。'
+      return null
     }
+
     $(`#${inputTarget}`).value = (~~valueInput.value).toLocaleString('ja-JP')
     let checkTotalAmount = totalAmmout
     Array.prototype.forEach.call($(`.${inputTarget.split('_')[0]}_input_amount`), (item, idx) => {
