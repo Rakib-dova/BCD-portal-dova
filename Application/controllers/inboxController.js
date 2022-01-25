@@ -215,17 +215,36 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
     status: 0
   }
 
+  const lineAccountCodeKey = Object.keys(data)
+
   // 明細の仕訳設定情報を配列に作成
   try {
     lines.forEach((idx) => {
+      // lineNoのlineAccountCode番号取得
+      const lineCount = []
+      lineAccountCodeKey.forEach((value) => {
+        const valueRelace = value.replace(`lineNo${idx}_lineAccountCode`, '')
+        const number = valueRelace.substring(0, valueRelace.indexOf('_'))
+        if (!isNaN(number) && value !== 'lineId') {
+          lineCount.push(number)
+        }
+      })
+      const lineAccountCodeNumber = [...new Set(lineCount)]
+
       lineJournals.push([])
+
       while (accountLines < 11) {
+        let accountLineNumber = 0
+        if (lineAccountCodeNumber[accountLines - 1] !== undefined) {
+          accountLineNumber = lineAccountCodeNumber[accountLines - 1]
+        }
+
         if (
-          data[`lineNo${idx}_lineAccountCode${accountLines}_accountCode`] !== undefined &&
-          data[`lineNo${idx}_lineAccountCode${accountLines}_subAccountCode`] !== undefined &&
-          data[`lineNo${idx}_lineAccountCode${accountLines}_input_amount`] !== undefined &&
-          data[`lineNo${idx}_lineAccountCode${accountLines}_accountCode`].length !== 0 &&
-          data[`lineNo${idx}_lineAccountCode${accountLines}_input_amount`].length !== 0
+          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`] !== undefined &&
+          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_subAccountCode`] !== undefined &&
+          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`] !== undefined &&
+          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`].length !== 0 &&
+          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].length !== 0
         ) {
           lineJournals[idx - 1].push({
             data: {
@@ -233,10 +252,13 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
               contractId: contractId,
               lineNo: ~~idx,
               lineId: lineId[~~idx - 1],
-              journalNo: `lineAccountCode${accountLines}`,
-              accountCode: data[`lineNo${idx}_lineAccountCode${accountLines}_accountCode`],
-              subAccountCode: data[`lineNo${idx}_lineAccountCode${accountLines}_subAccountCode`],
-              installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLines}_input_amount`].replace(/,/g, '')
+              journalNo: `lineAccountCode${accountLineNumber}`,
+              accountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`],
+              subAccountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_subAccountCode`],
+              installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(
+                /,/g,
+                ''
+              )
             }
           })
         } else {
@@ -249,7 +271,6 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
       accountLines = 1
     })
 
-    console.log(lineJournals)
     // DBから仕訳情報設定確認
     const resultSearchJournals = await JournalizeInvoice.findAll({
       where: {
