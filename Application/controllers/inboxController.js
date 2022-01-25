@@ -151,7 +151,6 @@ const insert = async (contract, values) => {
       return -2
     }
 
-    console.log(accountCodeSearchResult)
     // 補助科目勘コード有無確認
     if (values.subAccountCode !== '') {
       const accountCodeId = accountCodeSearchResult.accountCodeId
@@ -172,7 +171,6 @@ const insert = async (contract, values) => {
       journalId: uuidV4(),
       contractId
     })
-
     // DB保存失敗したらモデルAccountCodeインスタンスではない
     if (resultToInsertJournalizeInvoice instanceof JournalizeInvoice) {
       return 0
@@ -238,7 +236,6 @@ const getCode = async (contractId, accountCode, accountCodeName, subAccountCode,
         ...whereIsAccountCode
       }
     })
-
     const result = targetAccountCode.concat(targetAccountCodeSubAccountCodeJoin)
     result.sort((a, b) => {
       if (a.accountCode > b.accountCode) return 1
@@ -316,9 +313,10 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
 
     // 登録前、勘定科目コード検証
     let checkAccountCodeF = false
-    await lineJournals.forEach(async (accountLines) => {
-      await accountLines.forEach(async (item) => {
-        if (item.data !== null) {
+    for (let lines = 0; lines < lineJournals.length; lines++) {
+      for (let idx = 0; idx < 10; idx++) {
+        const item = lineJournals[lines][idx]
+        if (lineJournals[lines][idx].data !== null) {
           result.accountCode = item.data.accountCode
           result.lineId = item.data.lineId
           const accInstance = await AccountCode.findOne({
@@ -329,8 +327,8 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
           })
           if (accInstance instanceof AccountCode === false) checkAccountCodeF = true
         }
-      })
-    })
+      }
+    }
     if (checkAccountCodeF) {
       result.status = -1
       return result
@@ -338,21 +336,39 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
 
     // 登録前、補助科目コード検証
     let checkSubAccountF = false
-    await lineJournals.forEach(async (accountLines) => {
-      await accountLines.forEach(async (item) => {
-        if (item.data === null) return
+    for (let lines = 0; lines < lineJournals.length; lines++) {
+      for (let idx = 0; idx < 10; idx++) {
+        const item = lineJournals[lines][idx]
+        if (item.data === null) continue
+        if (item.data.subAccountCode.length === 0) continue
+        let checkSubAccount = null
         if (item.data.accountCode.length !== 0 && item.data.subAccountCode.length !== 0) {
           result.lineId = item.data.lineId
           result.subAccountCode = item.data.subAccountCode
           delete result.accountCode
-          if ((await getCode(item.data.contractId, item.data.accountCode, item.data.subAccountCode).length) === 0) {
-            checkSubAccountF = true
-          }
+          checkSubAccount = await AccountCode.findAll({
+            raw: true,
+            include: [
+              {
+                model: SubAccountCode,
+                attributes: ['subAccountCodeId', 'accountCodeId', 'subjectCode', 'subjectName'],
+                where: {
+                  subjectCode: item.data.subAccountCode
+                }
+              }
+            ],
+            where: {
+              contractId: contractId,
+              accountCode: item.data.accountCode
+            }
+          })
         }
-      })
-    })
+        if (checkSubAccount.length === 0) checkSubAccountF = true
+      }
+    }
     if (checkSubAccountF) {
       result.status = -2
+      return result
     }
 
     // DBに保存データがない場合
@@ -396,7 +412,6 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
         }
       }
     }
-
     // 変更内容DBに保存
     lineJournals.forEach(async (accountLines) => {
       accountLines.forEach(async (item) => {
