@@ -48,8 +48,6 @@ class InvoiceDetail {
       }
     }
     this.setOptions(invoice)
-
-    console.log(JSON.stringify(this, null, 2))
   }
 
   setSupplier(accountingSupplierParty) {
