@@ -151,3 +151,11 @@
 #field-invoiceLine {
   flex-direction: column;
 }
+
+.invisible {
+  display:none
+}
+
+p:focus {
+  outline: none;
+}
