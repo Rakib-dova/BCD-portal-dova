@@ -153,11 +153,7 @@ const getCode = async (contractId, accountCode, accountCodeName, subAccountCode,
 
   try {
     // 契約番号と補助科目IDでデータを取得（OUTER JOIN）
-    const targetAccountCode = await AccountCode.findAll({
-      where: {
-        ...whereIsAccountCode
-      }
-    })
+
     const targetAccountCodeSubAccountCodeJoin = await AccountCode.findAll({
       raw: true,
       include: [
@@ -178,6 +174,12 @@ const getCode = async (contractId, accountCode, accountCodeName, subAccountCode,
     if (subAccountCode !== '' || subAccountCodeName !== '') {
       result = targetAccountCodeSubAccountCodeJoin
     } else {
+      const targetAccountCode = await AccountCode.findAll({
+        where: {
+          ...whereIsAccountCode
+        }
+      })
+
       result = targetAccountCode.concat(targetAccountCodeSubAccountCodeJoin)
     }
 
