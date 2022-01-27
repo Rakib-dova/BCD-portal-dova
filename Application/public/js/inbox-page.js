@@ -60,6 +60,10 @@ $('#btn-bulkInsert').addEventListener('click', function () {
           templateLineAccountCodeItemModal.content,
           true
         )
+
+        // 1行目じゃない場合、タイトル削除
+        if (j > 0) cloneLineAccountCodeItemModalTemplate.getElementById('lineAccountCodeTitle').remove()
+
         cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_accountCode').value =
           lineAccountcodeList[j].accountCode
         cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_subAccountCode').value =
@@ -91,7 +95,9 @@ const getInvoiceLineList = function () {
       ? invoiceLine.querySelector('.priceAmount').innerText
       : ''
     const tax = invoiceLine.querySelector('.tax') ? invoiceLine.querySelector('.tax').innerText : ''
-    const total = invoiceLine.querySelector('.lineTotal') ? invoiceLine.querySelector('.lineTotal').value : ''
+    const total = invoiceLine.querySelector('.lineTotal')
+      ? ~~invoiceLine.querySelector('.lineTotal').value.replaceAll(',', '')
+      : ''
 
     return {
       invoiceLineNo: invoiceLineNo,
@@ -105,6 +111,7 @@ const getInvoiceLineList = function () {
     }
   })
 }
+
 // 仕訳情報一括入力モーダルのプラスボタン
 $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function () {
   const target = $(this.dataset.target)
@@ -118,6 +125,8 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
     cloneAccountcode.querySelector('.lineAccountcode').id = `${targetName}_lineAccountCode${idx}`
     cloneAccountcode.querySelector('.btn-minus-accountCode').id = `btn_minus_bulkInsertNo1_lineAccountCode${idx}`
     cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `bulkInsertNo1_lineAccountCode${idx}`
+    cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `${targetName}_lineAccountCode${idx}`
+    cloneAccountcode.querySelector('.btn-minus-accountCode').addEventListener('click', btnMinusAccount)
     target.appendChild(cloneAccountcode)
   } else {
     $('#error-message-journal-modal').innerText = '仕訳情報入力の上限は10個までです。'
@@ -330,23 +339,22 @@ const deleteDisplayModal = function () {
   $('#displayInvisible').classList.add('is-invisible')
 }
 
-// 仕訳情報の１番目アイテムのマイナスボタン機能追加
+// 仕訳情報のアイテムのマイナスボタン機能追加
 const btnMinusAccount = function () {
-  // １番目の内容を消す
-  if (this.dataset.target === `${this.id.split('_')[2]}_lineAccountCode1`) {
-    $(`#${this.id.split('_')[2]}_lineAccountCode1_accountCode`).value = ''
-    $(`#${this.id.split('_')[2]}_lineAccountCode1_subAccountCode`).value = ''
-  } else {
-    const deleteTarget = this.dataset.target
+  const deleteTarget = this.dataset.target
+  if (
+    document.getElementById(`#${deleteTarget}_input_amount`) !== undefined &&
+    document.getElementById(`#${deleteTarget}_input_amount`) !== null
+  ) {
     const thisLineInput = $(`#${deleteTarget}_input_amount`)
     const lineNoFirstInput = $(`#${deleteTarget.split('_')[0]}_lineAccountCode1_input_amount`)
     lineNoFirstInput.value = (
       ~~lineNoFirstInput.value.replaceAll(',', '') + ~~thisLineInput.value.replaceAll(',', '')
     ).toLocaleString('ja-JP')
-    $(`#${deleteTarget}`).remove()
-    if ($(`#${deleteTarget.split('_')[0]}`).querySelectorAll('.lineAccountcode').length === 0) {
-      $(`#btn-minus-${deleteTarget.split('_')[0]}-accountCode`).classList.remove('is-invisible')
-    }
+  }
+  $(`#${deleteTarget}`).remove()
+  if ($(`#${deleteTarget.split('_')[0]}`).querySelectorAll('.lineAccountcode').length === 0) {
+    $(`#btn-minus-${deleteTarget.split('_')[0]}-accountCode`).classList.remove('is-invisible')
   }
   $('#btn-confirm').removeAttribute('disabled')
 }
