@@ -66,13 +66,16 @@ describe('portalのテスト', () => {
   describe('コールバック:cbGetIndex', () => {
     test('正常', async () => {
       // 準備
+      // 会員サイト開発により追加
       const memberSiteCoopSessionDto = new MemberSiteSessionDto()
-      memberSiteCoopSessionDto.fingerprintVerifyFlg = true
+      memberSiteCoopSessionDto.memberSiteFlg = true
+      // 会員サイト開発により追加
+
       // requestのsession,userIdに正常値を入れる
       request.session = {
         userContext: 'NotLoggedIn',
         userRole: 'dummy',
-        memberSiteCoopSession: memberSiteCoopSessionDto
+        memberSiteCoopSession: memberSiteCoopSessionDto // 会員サイト開発により追加
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
@@ -200,8 +203,8 @@ describe('portalのテスト', () => {
         userRole: request.session.userRole,
         numberN: '0000011111',
         TS_HOST: process.env.TS_HOST,
-        fingerprintVerify: memberSiteCoopSessionDto.fingerprintVerifyFlg,
-        csrfToken: dummyTokne
+        memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg, // 会員サイト開発により追加
+        csrfToken: dummyTokne // 会員サイト開発により追加
       })
     })
 

@@ -10,18 +10,18 @@ const csrfProtection = csrf({ cookie: false })
 
 const logMessageDefine = require('../../constants').logMessage
 
-const fingerprintVerifyForwarder = (req, res, next) => {
+const idLinkingProcessForwarder = (req, res, next) => {
   // TODO:イベントコードを定義
-  logger.info(logMessageDefine.INF000 + ' fingerprintVerifyForwarder')
+  logger.info(logMessageDefine.INF000 + ' idLinkingProcessForwarder')
 
   // TODO:イベントコードを定義
-  logger.info(logMessageDefine.INF001 + ' fingerprintVerifyForwarder')
+  logger.info(logMessageDefine.INF001 + ' idLinkingProcessForwarder')
   return res.sendStatus(200)
 }
 
-router.post('/', csrfProtection, memberSiteController.fingerprintVerifyTransfer, fingerprintVerifyForwarder)
+router.post('/', csrfProtection, memberSiteController.idLinkingProcess, idLinkingProcessForwarder)
 
 module.exports = {
   router: router,
-  fingerprintVerifyForwarder: fingerprintVerifyForwarder
+  idLinkingProcessForwarder: idLinkingProcessForwarder
 }

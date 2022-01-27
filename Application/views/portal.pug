@@ -269,7 +269,8 @@ block content
 block append scripts
   script(src="/js/portal-page.js")
   //- 会員サイト連携開発追加 fingerpirnt未検証の場合、fingerprint値をXHRで送信する。
-  if (!fingerprintVerify)
+  //- TODO:ポータル画面表示時に紐づけを実施するように修正
+  if (memberSiteFlg)
     script(src="/js/portal-page-memberSite.js")
   //- 会員サイト連携開発追加
   // End of DigitalTrade Portal Page

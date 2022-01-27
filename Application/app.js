@@ -233,7 +233,7 @@ app.use('/csvDownload', require('./routes/csvDownload').router)
 /**  会員サイト開発 20220228 */
 // TODO:アプリ一覧からの遷移受付けエンドポイント
 app.use('/memberCooperation', require('./memberSite/routes/memberCooperationRouter').router)
-app.use('/fingerprintVerify', require('./memberSite/routes/fingerprintVerifyRouter').router)
+app.use('/idLinking', require('./memberSite/routes/idLinkingRouter').router)
 /**  会員サイト開発 20220228 */
 
 // notice

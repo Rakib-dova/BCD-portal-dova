@@ -10,7 +10,7 @@ jest.mock('../../../../../Application/node_modules/express', () => {
 // 会員サイト連携コントローラーをモック化
 jest.mock('../../../../../Application/memberSite/controllers/memberSiteController.js')
 // fingerprint検証エンドポイントルーター
-const fingerprintVerifyRouter = require('../../../../../Application/memberSite/routes/fingerprintVerifyRouter.js')
+const idLinkingRouter = require('../../../../../Application/memberSite/routes/idLinkingRouter')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
@@ -22,13 +22,13 @@ const logMessageDefine = require('../../../../../Application/constants').logMess
 // const csrfProtection = csrf({ cookie: false })
 
 let request, response
-let fingerprintVerifyTransferSpy, logerInfoSpy
-describe('fingerprintVerifyRouter UTテスト', () => {
+let idLinkingProcessSpy, logerInfoSpy
+describe('idLinkingRouter UTテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
 
-    fingerprintVerifyTransferSpy = jest.spyOn(memberSiteController, 'fingerprintVerifyTransfer')
+    idLinkingProcessSpy = jest.spyOn(memberSiteController, 'idLinkingProcess')
     logerInfoSpy = jest.spyOn(logger, 'info')
   })
   afterEach(() => {
@@ -36,37 +36,35 @@ describe('fingerprintVerifyRouter UTテスト', () => {
     response.resetMocked()
     next.mockReset()
 
-    fingerprintVerifyTransferSpy.mockRestore()
+    idLinkingProcessSpy.mockRestore()
     logerInfoSpy.mockRestore()
   })
 
   describe('01-02 ミドルウェア設定確認', () => {
     test('01 ミドルウェアCall', async () => {
-      // fingerprintVerifyRouter.use(csrfProtection)
-
       // 試験対象関数実行
-      expect(fingerprintVerifyRouter.router.post).toBeCalledWith(
+      expect(idLinkingRouter.router.post).toBeCalledWith(
         '/',
         expect.any(Function), // TODO:csrfProtectionが一致しない。暫定で通過させる
-        memberSiteController.fingerprintVerifyTransfer,
-        fingerprintVerifyRouter.fingerprintVerifyForwarder
+        memberSiteController.idLinkingProcess,
+        idLinkingRouter.idLinkingProcessForwarder
       )
     })
   })
 
   describe('01-03 ログ出力確認', () => {
-    test('01、02 fingerprintVerifyForwarder開始・終了ログの出力', async () => {
+    test('01、02 idLinkingProcessForwarder開始・終了ログの出力', async () => {
       // 試験対象関数実行
-      await fingerprintVerifyRouter.fingerprintVerifyForwarder(request, response, next)
-      expect(logerInfoSpy).toHaveBeenNthCalledWith(1, logMessageDefine.INF000 + ' fingerprintVerifyForwarder')
-      expect(logerInfoSpy).toHaveBeenNthCalledWith(2, logMessageDefine.INF001 + ' fingerprintVerifyForwarder')
+      await idLinkingRouter.idLinkingProcessForwarder(request, response, next)
+      expect(logerInfoSpy).toHaveBeenNthCalledWith(1, logMessageDefine.INF000 + ' idLinkingProcessForwarder')
+      expect(logerInfoSpy).toHaveBeenNthCalledWith(2, logMessageDefine.INF001 + ' idLinkingProcessForwarder')
     })
   })
 
   describe('01-04 アプトプットの確認', () => {
     test('01 リターン値の確認', async () => {
       // 試験対象関数実行
-      await fingerprintVerifyRouter.fingerprintVerifyForwarder(request, response, next)
+      await idLinkingRouter.idLinkingProcessForwarder(request, response, next)
       expect(response.sendStatus).toHaveBeenCalledWith(200)
     })
   })

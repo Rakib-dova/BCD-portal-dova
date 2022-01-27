@@ -9,7 +9,7 @@ jest.mock('../../Application/controllers/userController.js', () => ({
 }))
 
 const auth = require('../../Application/routes/auth')
-const memberSiteController = require('../../Application/memberSite/controllers/memberSiteController')
+const memberSiteController = require('../../Application/memberSite/controllers/memberSiteController') // 会員サイト開発により追加
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
@@ -48,7 +48,7 @@ describe('authのテスト', () => {
       expect(auth.router.get).toBeCalledWith(
         '/callback',
         expect.any(Function),
-        memberSiteController.oauthCallbackTransfer,
+        memberSiteController.oauthCallbackTransfer, // 会員サイト開発により追加
         auth.cbGetCallback
       )
       expect(auth.router.get).toBeCalledWith('/failure', auth.cbGetFailure)

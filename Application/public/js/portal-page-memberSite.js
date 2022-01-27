@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const requestXHR = new XMLHttpRequest()
-  requestXHR.open('POST', '/fingerprintVerify/', true)
+  requestXHR.open('POST', '/idLinking/', true)
   requestXHR.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
   requestXHR.setRequestHeader('csrf-token', document.getElementsByName('_csrf')[0].value)
 

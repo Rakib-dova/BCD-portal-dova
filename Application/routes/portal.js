@@ -134,7 +134,9 @@ const cbGetIndex = async (req, res, next) => {
     constructDataArr: constructDataArr,
     constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0,
     /* 会員サイト開発により追加 */
-    fingerprintVerify: req.session.memberSiteCoopSession.fingerprintVerifyFlg,
+    // TODO:ポータル表示時に紐づけを実施
+    // fingerprintVerify: req.session.memberSiteCoopSession.fingerprintVerifyFlg,
+    memberSiteFlg: req.session.memberSiteCoopSession.memberSiteFlg,
     csrfToken: req.csrfToken()
     /* 会員サイト開発により追加 */
   })
