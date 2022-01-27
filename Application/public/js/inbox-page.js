@@ -419,6 +419,11 @@ $('#btn-insert').addEventListener('click', function () {
 
 $('#btn-confirm').addEventListener('click', function () {
   if (this.getAttribute('disabled') === 'true') return
+  const dupleResult = duplicationCheck()
+  if (dupleResult.length > 0) {
+    document.getElementById(dupleResult[0].id).focus({ preventScroll: false })
+    return
+  }
   if (checkJournalList()) $('#form').submit()
 })
 
@@ -504,4 +509,58 @@ const checkJournalList = function () {
     return false
   }
   return true
+}
+
+// 重複された仕訳情報処理
+const duplicationCheck = function () {
+  const duplArray = []
+  // 画面に表示された項目別の仕訳情報を取得
+  const allInfomationline = document.querySelectorAll('.invoiceLine')
+
+  const koumokuInformationArray = []
+  for (let i = 0; i < allInfomationline.length; ++i) {
+    const lineCount = document.getElementById(`lineNo${i + 1}`).children.length
+    const lineInformationArray = []
+
+    for (let z = 0; z < lineCount; ++z) {
+      const accountCode = document.getElementById(`lineNo${i + 1}_lineAccountCode${z + 1}_accountCode`).value
+      const subAccountCode = document.getElementById(`lineNo${i + 1}_lineAccountCode${z + 1}_subAccountCode`).value
+      lineInformationArray.push([accountCode, subAccountCode])
+    }
+    koumokuInformationArray.push(duplicateCheckFunction(lineInformationArray))
+  }
+
+  koumokuInformationArray.map((item, idx) => {
+    const errMsg = document.getElementById(`duplicationErrMsg${idx + 1}`)
+    if (item === true) {
+      errMsg.innerText = '同じ仕訳情報は設定できません。'
+      errMsg.classList.remove('invisible')
+      errMsg.focus({ preventScroll: false })
+      duplArray.push(errMsg)
+    } else {
+      errMsg.classList.add('invisible')
+    }
+  })
+
+  return duplArray
+}
+
+// 重複検索関数
+const duplicateCheckFunction = function (array) {
+  const length = array.length
+  let duplicationFlag = false
+  let i, j, temp
+  for (i = 0; i < length - 1; i++) {
+    for (j = 0; j < length - 1 - i; j++) {
+      if (JSON.stringify(array[j]) === JSON.stringify(array[j + 1])) {
+        duplicationFlag = true
+        return duplicationFlag
+      } else {
+        temp = array[j]
+        array[j] = array[j + 1]
+        array[j + 1] = temp
+      }
+    }
+  }
+  return duplicationFlag
 }

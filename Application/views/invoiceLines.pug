@@ -60,11 +60,13 @@ if invoiceLine.length !== 0
             .column-header
               p.text-left-lines #{item.taxTotal.taxSubtotal.name}
         .columns.m-0
-          .column.is-2-header
+          .column.is-5-header
             .column-header.text-inbox.text-inbox-subtitle.text-inbox-common
               | 仕訳情報
               a.btn-plus-accountCode(data-target= `#lineNo${idx + 1}`)
                 i.fas.fa-plus-circle
+            .column-header.text-inbox-subtitle
+              p.input-label-required.invisible(id=`duplicationErrMsg${idx + 1}` tabIndex=0)                
         .columns.m-0
           .column.p-0.lineAccountCode(id= `lineNo${idx + 1}`)
             if key === "journalize" && value.length !== 0
