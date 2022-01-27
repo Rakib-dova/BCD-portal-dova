@@ -342,7 +342,7 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       })
       const page = await browser.newPage()
       await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inbox/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1')
+      await page.goto(`https://localhost:3000${redirectUrl}`)
 
       await page.click('body > div.container > div.box > form > div.grouped-button > a')
 
@@ -391,7 +391,7 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       expect(res.text).toMatch(/請求日/i)
       expect(res.text).toMatch(/通貨/i)
     })
-    
+
     test('一般ユーザ、受領した請求書詳細画面内容確認', async () => {
       const res = await request(app)
         .get('/inbox/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1')
@@ -427,6 +427,86 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       expect(res.text).toMatch(/合計 円/i)
       expect(res.text).toMatch(/請求日/i)
       expect(res.text).toMatch(/通貨/i)
+    })
+
+    test('仕訳一括設定モーダル確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      await page.click('#btn-bulkInsert')
+
+      await page.waitForTimeout(500)
+
+      // 仕訳一括設定モーダル開きをチェック
+      const checkOpenedModal = await page.evaluate(() => {
+        return Array.prototype.find.call(document.querySelector('#bulkInsert-journal-modal').classList, (item) => {
+          if (item === 'is-active') return true
+          return false
+        })
+      })
+
+      expect(checkOpenedModal).toBe('is-active')
+
+      await browser.close()
+    })
+
+    test('仕訳一括設定モーダル「＋」、「-」ボタン機能確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      await page.click('#btn-bulkInsert')
+
+      await page.waitForTimeout(500)
+
+      // 仕訳一括設定モーダル「＋」ボタンを押下する。
+      await page.evaluate(() => {
+        document.getElementById('btn-plus-accountCode-bulkInsert-modal').click()
+      })
+
+      await page.waitForTimeout(500)
+
+      // 仕訳設定の追加確認（追加成功：true, 追加失敗：false）
+      let checkLineAccountCoden = await page.evaluate(() => {
+        if (document.getElementById('bulkInsertNo1_lineAccountCode2') === null) {
+          return false
+        } else {
+          return true
+        }
+      })
+
+      expect(checkLineAccountCoden).toBe(true)
+
+      // 仕訳一括設定モーダル「-」ボタンを押下する。
+      await page.evaluate(() => {
+        document.getElementById('btn_minus_bulkInsertNo1_lineAccountCode2').click()
+      })
+
+      await page.waitForTimeout(500)
+
+      // 仕訳設定の削除確認（削除成功：true, 削除失敗：false）
+      checkLineAccountCoden = await page.evaluate(() => {
+        if (document.getElementById('bulkInsertNo1_lineAccountCode2') === null) {
+          return true
+        } else {
+          return false
+        }
+      })
+
+      expect(checkLineAccountCoden).toBe(true)
+
+      await browser.close()
     })
   })
 
