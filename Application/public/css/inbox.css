@@ -139,3 +139,15 @@
   justify-content: flex-end;
   margin-right: 10px;
 }
+
+#bulkInsert-journal-modal > .modal-card {
+  width: 93%;
+}
+
+.z-index-modal {
+  z-index: 99999;
+}
+
+#field-invoiceLine {
+  flex-direction: column;
+}

@@ -1,8 +1,14 @@
-﻿if invoiceLine.length !== 0
+﻿.box
+  .column.m-0
+    .column.px-0
+      p.text-inbox.text-inbox-subtitle.text-inbox-common.text-left-lines 仕訳情報一括入力
+    .column.pl-4.pt-0
+      a.button.is-link#btn-bulkInsert.show-modal(data-target='bulkInsert-journal-modal') 一括入力
+if invoiceLine.length !== 0
   each item, idx in invoiceLine
     if '明細-項目ID' in item
       .box
-        .columns.m-0
+        .columns.m-0.invoiceLine(id=`invoiceLine${idx + 1}`)
           - for (var [key,value] of Object.entries(item))
             if key === 'id' && value.length !== 0
               .column-header.is-2-header
@@ -15,40 +21,40 @@
                 p.font-bold  内容
                 each subItem in value
                   if subItem.item === '内容'
-                    p.mb-1= subItem.value
+                    p.mb-1.itemName= subItem.value
                   else
-                    p.mb-1= `${subItem.item}： ${subItem.value}`
+                    p.mb-1.itemName= `${subItem.item}： ${subItem.value}`
             if key === '明細-数量' && value.length !== 0
               .column-header.mr-1
                 p.text-right-lines.font-bold  数量
                 each subValue in value
                   if subValue !== 1
-                    p.text-right-lines.mb-1= subValue
+                    p.text-right-lines.mb-1.invoicedQuantity= subValue
                   else
-                    p.text-right-lines.mb-1= '　'
+                    p.text-right-lines.mb-1.invoicedQuantity= '　'
 
             if key === '明細-単位' && value.length !== 0
               .column-header.ml-1
                 p.text-left-lines.font-bold 単位
                 each subValue in value
                   if subValue !== 1
-                    p.text-left-lines.mb-1= subValue
+                    p.text-left-lines.mb-1.unitcode= subValue
                   else
-                    p.text-left-lines.mb-1= '　'
+                    p.text-left-lines.mb-1.unitcode= '　'
             if key === '明細-単価' && value.length !== 0
               .column-header
                 p.text-right-lines.font-bold  単価
                 each subValue in value
-                  p.text-right-lines.mb-1= subValue
+                  p.text-right-lines.mb-1.priceAmount= subValue
             if key === '明細-税（消費税／軽減税率／不課税／免税／非課税）' && value.length !== 0
               .column-header
                 p.text-right-lines.font-bold  税
-                p.text-right-lines.mb-1= value     
+                p.text-right-lines.mb-1.tax= value
             if key === '明細-小計 (税抜)' && value.length !== 0
               .column-header
                 p.text-right-lines.font-bold  小計 (税抜) 
                 p.text-right-lines.mb-1= value
-                  input(id=`lineNo${idx + 1}Total` type='hidden' value= value)
+                  input.lineTotal(id=`lineNo${idx + 1}Total` type='hidden' value= value)
         .columns
           if item.taxTotal.taxSubtotal.category === 'G' || item.taxTotal.taxSubtotal.category === 'Z'
             .column-header

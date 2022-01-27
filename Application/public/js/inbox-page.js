@@ -35,6 +35,60 @@ window.onload = function () {
   })
 }
 
+// 仕訳情報一括入力ボタンの機能
+$('#btn-bulkInsert').addEventListener('click', function () {
+  const invoiceLines = getInvoiceLineList()
+  if ($('.column-invoiceLine-journalModal').length < invoiceLines.length) {
+    for (let idx = 0; idx < invoiceLines.length; idx++) {
+      const templateInvoiceLine = $('#template-invoiceLine')
+      const cloneInvoiceLineTemplate = document.importNode(templateInvoiceLine.content, true)
+      cloneInvoiceLineTemplate.querySelector('.itemId').innerText = invoiceLines[idx].invoiceLineId
+      Array.prototype.forEach.call(invoiceLines[idx].itemName, (itemName) => {
+        cloneInvoiceLineTemplate.querySelector('.itemName').appendChild(itemName)
+      })
+      cloneInvoiceLineTemplate.querySelector('.invoicedQuantity').innerText = invoiceLines[idx].invoicedQuantity
+      cloneInvoiceLineTemplate.querySelector('.unitcode').innerText = invoiceLines[idx].unitcode
+      cloneInvoiceLineTemplate.querySelector('.priceAmount').innerText = invoiceLines[idx].priceAmount
+      cloneInvoiceLineTemplate.querySelector('.tax').innerText = invoiceLines[idx].tax
+      cloneInvoiceLineTemplate.querySelector('.total').innerText = invoiceLines[idx].total
+      $('#field-invoiceLine').appendChild(cloneInvoiceLineTemplate)
+    }
+  }
+})
+
+const getInvoiceLineList = function () {
+  return Array.prototype.map.call($('.invoiceLine'), (invoiceLine) => {
+    const invoiceLineNo = invoiceLine.querySelector('input[name=lineNo]')
+      ? invoiceLine.querySelector('input[name=lineNo]').value
+      : ''
+    const invoiceLineId = invoiceLine.querySelector('input[name=lineId]')
+      ? invoiceLine.querySelector('input[name=lineId]').value
+      : ''
+    const itemName = invoiceLine.querySelector('.itemName') ? invoiceLine.querySelectorAll('.itemName') : ''
+    const invoicedQuantity = invoiceLine.querySelector('.invoicedQuantity')
+      ? invoiceLine.querySelector('.invoicedQuantity').innerText
+      : ''
+    const unitcode = invoiceLine.querySelector('.unitcode') ? invoiceLine.querySelector('.unitcode').innerText : ''
+    const priceAmount = invoiceLine.querySelector('.priceAmount')
+      ? invoiceLine.querySelector('.priceAmount').innerText
+      : ''
+    const tax = invoiceLine.querySelector('.tax') ? invoiceLine.querySelector('.tax').innerText : ''
+    const total = invoiceLine.querySelector('.lineTotal')
+      ? ~~invoiceLine.querySelector('.lineTotal').value.replaceAll(',', '')
+      : ''
+    return {
+      invoiceLineNo: invoiceLineNo,
+      invoiceLineId: invoiceLineId,
+      itemName: itemName,
+      invoicedQuantity: invoicedQuantity,
+      unitcode: unitcode,
+      priceAmount: priceAmount,
+      tax: tax,
+      total: total
+    }
+  })
+}
+
 // プラスボタンの機能
 Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
   btnPlusAccount.addEventListener('click', function () {
@@ -306,7 +360,7 @@ $('#btn-confirm').addEventListener('click', function () {
   if (checkJournalList()) $('#form').submit()
 })
 
-const checkJournalList = function () {
+const getJournalList = function () {
   const journalLines = []
   Array.prototype.forEach.call($('.lineAccountCode'), (line) => {
     if (line.id.match(/^lineNo[0-9]{1,3}$/)) {
@@ -339,6 +393,10 @@ const checkJournalList = function () {
       journalIdx++
     } while (journalIdx < 10)
   })
+  return journalLines
+}
+const checkJournalList = function () {
+  const journalLines = getJournalList()
 
   let isFirstLineNull = false
   journalLines.forEach((lines, lineNo) => {
