@@ -51,11 +51,29 @@ $('#btn-bulkInsert').addEventListener('click', function () {
       cloneInvoiceLineTemplate.querySelector('.priceAmount').innerText = invoiceLines[idx].priceAmount
       cloneInvoiceLineTemplate.querySelector('.tax').innerText = invoiceLines[idx].tax
       cloneInvoiceLineTemplate.querySelector('.total').innerText = invoiceLines[idx].total
+
+      // 各明細の仕訳情報取得・表示
+      const lineAccountcodeList = getLineAccountcodeList(invoiceLines[idx].invoiceLineNo)
+      for (let j = 0; j < lineAccountcodeList.length; j++) {
+        const templateLineAccountCodeItemModal = $('#templateLineAccountCodeItemModal')
+        const cloneLineAccountCodeItemModalTemplate = document.importNode(
+          templateLineAccountCodeItemModal.content,
+          true
+        )
+        cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_accountCode').value =
+          lineAccountcodeList[j].accountCode
+        cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_subAccountCode').value =
+          lineAccountcodeList[j].subAccountCode
+
+        cloneInvoiceLineTemplate.querySelector('.box').append(cloneLineAccountCodeItemModalTemplate)
+      }
+
       $('#field-invoiceLine').appendChild(cloneInvoiceLineTemplate)
     }
   }
 })
 
+// 明細リスト取得
 const getInvoiceLineList = function () {
   return Array.prototype.map.call($('.invoiceLine'), (invoiceLine) => {
     const invoiceLineNo = invoiceLine.querySelector('input[name=lineNo]')
@@ -73,9 +91,8 @@ const getInvoiceLineList = function () {
       ? invoiceLine.querySelector('.priceAmount').innerText
       : ''
     const tax = invoiceLine.querySelector('.tax') ? invoiceLine.querySelector('.tax').innerText : ''
-    const total = invoiceLine.querySelector('.lineTotal')
-      ? ~~invoiceLine.querySelector('.lineTotal').value.replaceAll(',', '')
-      : ''
+    const total = invoiceLine.querySelector('.lineTotal') ? invoiceLine.querySelector('.lineTotal').value : ''
+
     return {
       invoiceLineNo: invoiceLineNo,
       invoiceLineId: invoiceLineId,
@@ -87,6 +104,25 @@ const getInvoiceLineList = function () {
       total: total
     }
   })
+}
+
+// 仕訳情報取得
+const getLineAccountcodeList = function (invoiceLineNo) {
+  const target = $(`#invoiceLine${invoiceLineNo}`).parentNode.querySelectorAll('.lineAccountcode')
+  const lineAccountCodeList = []
+  for (let i = 0; i < target.length; i++) {
+    const accountCode = $(`#lineNo${invoiceLineNo}_lineAccountCode${i + 1}_accountCode`).value
+    const subAccountCode = $(`#lineNo${invoiceLineNo}_lineAccountCode${i + 1}_subAccountCode`).value
+
+    if (accountCode !== '') {
+      lineAccountCodeList.push({
+        accountCode: accountCode,
+        subAccountCode: subAccountCode
+      })
+    }
+  }
+
+  return lineAccountCodeList
 }
 
 // プラスボタンの機能

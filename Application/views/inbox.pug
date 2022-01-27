@@ -100,6 +100,29 @@ block content
           .column-header
             p.text-right-lines.font-bold  小計 (税抜)
             p.text-right-lines.mb-1.total.text-overflow
+        .columns.m-0
+          .column.is-2-header
+            .column-header.text-inbox.text-inbox-subtitle.text-inbox-common
+              | 仕訳情報
+
+
+  template#templateLineAccountCodeItemModal
+   .columns.m-0.p-1.lineAccountcode
+     .column.is-two-fifths.p-0.border-div-rad-4
+       .field.is-horizontal.m-1.has-addons-centered
+         .field-label.is-normal.m-0.text-center
+           label 勘定科目コード
+         .field-label.is-normal.m-0.text-center
+           label 補助科目コード
+       .field.is-horizontal.p-1
+         .field-body.m-1
+           .field
+             p.control
+               input.input.lineAccountCode_accountCode(type='text' name=`` readonly)
+         .field-body.m-1
+           .field
+             p.control
+               input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
 
   .modal#accountCode-modal.z-index-modal
     .modal-background.cancel-button(data-target='accountCode-modal')
@@ -246,7 +269,7 @@ block content
         .columns#field-invoiceLine
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button(data-target='bulkInsert-journal-modal') 戻る
-        a.button.cancel-button.is-link(data-target='bulkInsert-journal-modal') 確認
+        a.button.cancel-button.is-link(data-target='bulkInsert-journal-modal') 反映
 
   include footer
 
