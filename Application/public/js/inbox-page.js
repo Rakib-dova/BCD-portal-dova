@@ -105,6 +105,24 @@ const getInvoiceLineList = function () {
     }
   })
 }
+// 仕訳情報一括入力モーダルのプラスボタン
+$('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function () {
+  const target = $(this.dataset.target)
+  const targetName = this.dataset.target.replaceAll('#', '')
+  const template = $('#template-journal-accountCode')
+  const lineAccountcodeLength = target.querySelectorAll('.lineAccountcode').length
+  if (lineAccountcodeLength < 10) {
+    const cloneAccountcode = document.importNode(template.content, true)
+    const idx = lineAccountcodeLength + 1
+    cloneAccountcode.querySelector('.lineAccountcode').dataset.idx = idx
+    cloneAccountcode.querySelector('.lineAccountcode').id = `${targetName}_lineAccountCode${idx}`
+    cloneAccountcode.querySelector('.btn-minus-accountCode').id = `btn_minus_bulkInsertNo1_lineAccountCode${idx}`
+    cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `bulkInsertNo1_lineAccountCode${idx}`
+    target.appendChild(cloneAccountcode)
+  } else {
+    $('#error-message-journal-modal').innerText = '仕訳情報入力の上限は10個までです。'
+  }
+})
 
 // 仕訳情報取得
 const getLineAccountcodeList = function (invoiceLineNo) {

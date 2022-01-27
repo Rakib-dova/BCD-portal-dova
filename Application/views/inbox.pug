@@ -124,6 +124,35 @@ block content
              p.control
                input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
 
+  template#template-journal-accountCode
+    .columns.m-0.p-1.lineAccountcode
+      .column.is-two-fifths.p-0.border-div-rad-4
+        .field.is-horizontal.m-1.has-addons-centered
+          .field-label.is-normal.m-0.text-center
+            label 勘定科目コード
+          .field-label.is-normal.m-0.text-center
+            label 補助科目コード
+          .field-label.is-normal.m-0.is-1.fixed-void-66
+            label 　
+        .field.is-horizontal.p-1
+          .field-body.m-1
+            .field
+              p.control
+                input.input(type='text' value readonly)
+          .field-body.m-1
+            .field
+              p.control
+                input.input(type='text'  value readonly)
+          .field-body.m-1.is-1.none-flex-grow
+            .field
+              p.control
+                a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
+      .column.is-0.p-1
+      .column.is-0.p-0.column-department
+      .column.is-0.p-1.column-minus-btn
+        a.red-color.btn-minus-accountCode(id=`btn_minus_bulkInsertNo1_lineAccountCode1` data-target=`bulkInsertNo1_lineAccountCode`)
+          i.fas.fa-minus-circle
+
   .modal#accountCode-modal.z-index-modal
     .modal-background.cancel-button(data-target='accountCode-modal')
     .modal-card.is-family-noto-sans
@@ -237,35 +266,41 @@ block content
               .columns.m-0
                 .column.is-3.pb-0
                   .text-inbox.text-inbox-subtitle.text-inbox-common.text-left-lines 仕訳情報
-                    a.btn-plus-accountCode-journal-modal(data-target= ``)
+                    a#btn-plus-accountCode-bulkInsert-modal(data-target= `#bulkInsertNo1`)
                       i.fas.fa-plus-circle
               .columns.m-0
                 .column
-                  p.error-message-journal-modal 　
-              .columns.m-0.p-1.base-bulkInsert-journal(id=`bulkInsertNo1`)
-                .column.is-two-fifths.p-0.border-div-rad-4.column-journal
-                  .field.is-horizontal.m-1.has-addons-centered
-                    .field-label.is-normal.m-0.text-center
-                      label 勘定科目コード
-                    .field-label.is-normal.m-0.text-center
-                      label 補助科目コード
-                    .field-label.is-normal.m-0.is-1.fixed-void-66
-                      label 　
-                  .field.is-horizontal.p-1
-                    .field-body.m-1
-                      .field
-                        p.control
-                          input.input(type='text' id=`bulkInsertNo1_lineAccountCode1_accountCode` value readonly)
-                    .field-body.m-1
-                      .field
-                        p.control
-                          input.input(type='text' id=`bulkInsertNo1_lineAccountCode1_subAccountCode` value readonly)
-                    .field-body.m-1.is-1.none-flex-grow
-                      .field
-                        p.control
-                          a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
-                .column.is-0.p-1
-                .column.is-two-fifths.p-0.column-department
+                  p#error-message-journal-modal.red-color 　
+              .columns.m-0.p-1.base-bulkInsert-journal
+                .column.p-0.lineAccountCode(id='bulkInsertNo1')
+                  .columns.m-0.p-1.lineAccountcode(id='bulkInsertNo1_lineAccountCode1' data-idx='1')
+                    .column.is-two-fifths.p-0.border-div-rad-4
+                      .field.is-horizontal.m-1.has-addons-centered
+                        .field-label.is-normal.m-0.text-center
+                          label 勘定科目コード
+                        .field-label.is-normal.m-0.text-center
+                          label 補助科目コード
+                        .field-label.is-normal.m-0.is-1.fixed-void-66
+                          label 　
+                      .field.is-horizontal.p-1
+                        .field-body.m-1
+                          .field
+                            p.control
+                              input.input(type='text' id=`bulkInsertNo1_lineAccountCode1_accountCode` value readonly)
+                        .field-body.m-1
+                          .field
+                            p.control
+                              input.input(type='text' id=`bulkInsertNo1_lineAccountCode1_subAccountCode` value readonly)
+                        .field-body.m-1.is-1.none-flex-grow
+                          .field
+                            p.control
+                              a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
+                    .column.is-0.p-1
+                    .column.is-0.p-0.column-department
+                    .column.is-0.p-1.column-minus-btn
+                      a.red-color.btn-minus-accountCode(id=`btn_minus_bulkInsertNo1_lineAccountCode1` data-target=`bulkInsertNo1_lineAccountCode`)
+                        i.fas.fa-minus-circle
+
         .columns#field-invoiceLine
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button(data-target='bulkInsert-journal-modal') 戻る
