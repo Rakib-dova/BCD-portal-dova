@@ -69,5 +69,5 @@ document.getElementById('btnCheck').addEventListener('click', function (e) {
 
 // 確認画面で「登録」ボタンを押すの場合、サーバーにデータを伝送
 document.querySelector('#submit').addEventListener('click', () => {
-  // document.querySelector('#form').submit()
+  document.querySelector('#form').submit()
 })
