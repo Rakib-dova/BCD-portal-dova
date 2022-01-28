@@ -248,6 +248,26 @@ describe('受領した請求書詳細画面のインテグレーションテス�
     })
   })
 
+  test('勘定科目と補助科目の登録', async () => {
+    const puppeteer = require('puppeteer')
+    const browser = await puppeteer.launch({
+      headless: true,
+      ignoreHTTPSErrors: true
+    })
+    const page = await browser.newPage()
+    await page.setCookie(acCookies[0])
+    await page.goto('https://localhost:3000/uploadAccount')
+
+    const [fileChooser] = await Promise.all([
+      page.waitForFileChooser(),
+      page.click('#accountCodeUpload > div > label > input')
+    ])
+
+    await fileChooser.accept(['./testData/accountCodeUpload_test11.csv'])
+
+    await page.click('#upload')
+  })
+
   describe('4.契約ステータス：契約中', () => {
     // テナントステータスが「契約中」、受領した請求書詳細画面直接接続-利用不可
     test('管理者、契約ステータス：契約中、受領した請求書詳細画面直接接続-利用不可', async () => {
@@ -507,6 +527,262 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       expect(checkLineAccountCoden).toBe(true)
 
       await browser.close()
+    })
+
+    test('仕訳一括設定で1個を入力', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: false,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+
+      // 仕訳情報設定の画面へ遷移
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      // 仕訳情報の個数を数える
+      const journalList = await page.evaluate(() => {
+        const lineAccountcode = document.querySelector('#lineNo1').querySelectorAll('.lineAccountcode')
+        return Array.prototype.map.call(lineAccountcode, (item) => {
+          return item.id
+        })
+      })
+
+      // 仕訳情報一括入力ボタンクリック
+      await page.click('#btn-bulkInsert')
+
+      // プラスボタン入力
+      await page.click('#btn-plus-accountCode-bulkInsert-modal')
+
+      // １番目の明細を選択
+      await page.evaluate(() => {
+        document.querySelector('#bulkInsertNo1_lineAccountCode1_accountCode').value = 'A001'
+        document.querySelector('#bulkInsertNo1_lineAccountCode2_accountCode').value = 'A002'
+        document
+          .querySelector(
+            '#field-invoiceLine > div:nth-child(1) > div > div.columns.m-0.invoiceLine-journalModal > div.column-header.is-2-header > div:nth-child(2) > div > input'
+          )
+          .click()
+      })
+
+      // 「登録」ボタンをクリック
+      await page.click('#btn-bulk-insert')
+
+      // モーダルが閉じるまで待ち
+      await page.waitForTimeout(3000)
+
+      // 一括入力モーダル画面閉じる
+      const resultOfModal = await page.evaluate(() => {
+        if (!document.querySelector('#bulkInsert-journal-modal').classList.value.match(/is-active/) !== null) {
+          document.querySelector('#bulkInsert-journal-modal').classList.remove('is-active')
+        }
+        return true
+      })
+
+      // モーダルが閉じたらresultOfModalはtrueになる
+      expect(resultOfModal).toBe(true)
+
+      // 仕訳情報の個数を数える
+      const newJournalList = await page.evaluate(() => {
+        const lineAccountcode = document.querySelector('#lineNo1').querySelectorAll('.lineAccountcode')
+        return Array.prototype.map.call(lineAccountcode, (item) => {
+          return item.id
+        })
+      })
+
+      expect(newJournalList.length).toBe(journalList.length + 1)
+    })
+
+    // データなしため、コメントにする。
+    // test('仕訳一括設定で200個を入力', async () => {
+    //   const puppeteer = require('puppeteer')
+    //   const browser = await puppeteer.launch({
+    //     headless: false,
+    //     ignoreHTTPSErrors: true
+    //   })
+    //   const page = await browser.newPage()
+    //   await page.setCookie(acCookies[0])
+
+    //   // 仕訳情報設定の画面へ遷移
+    //   await page.goto(`https://localhost:3000${redirectUrl}`)
+
+    //   // 仕訳情報の個数を数える
+    //   const journalList = await page.evaluate(() => {
+    //     const lineAccountcode = document.querySelector('#lineNo1').querySelectorAll('.lineAccountcode')
+    //     return Array.prototype.map.call(lineAccountcode, (item) => {
+    //       return item.id
+    //     })
+    //   })
+
+    //   // 仕訳情報一括入力ボタンクリック
+    //   await page.click('#btn-bulkInsert')
+
+    //   // 仕訳情報1目の検索実施
+    //   await page.click(
+    //     '#bulkInsertNo1_lineAccountCode1 > div.column.is-two-fifths.p-0.border-div-rad-4 > div.field.is-horizontal.p-1 > div.field-body.m-1.is-1.none-flex-grow > div > p > a'
+    //   )
+
+    //   // 検索モーダルでA001入力
+    //   await page.type('#searchModalAccountCode', 'A001')
+
+    //   // 検索ボタンクリック
+    //   await page.click('#btnSearchAccountCode')
+
+    //   // 検索結果を待ち
+    //   await page.waitForTimeout(500)
+
+    //   // 最初の行を選択
+    //   await page.click('#displayFieldResultBody > tr:nth-child(1)')
+
+    //   // １番目の明細を選択
+    //   await page.evaluate(() => {
+    //     document
+    //       .querySelector(
+    //         '#field-invoiceLine > div > div > div > div.column-header.is-2-header > div:nth-child(2) > div > input'
+    //       )
+    //       .click()
+    //   })
+
+    //   // 「登録」ボタンをクリック
+    //   await page.click('#btn-bulk-insert')
+
+    //   // モーダルが閉じるまで待ち
+    //   await page.waitForTimeout(500)
+
+    //   // 一括入力モーダル画面閉じる
+    //   const resultOfModal = await page.evaluate(() => {
+    //     return document.querySelector('#bulkInsert-journal-modal').classList.value.match(/is-active/) !== null
+    //   })
+
+    //   // モーダルが閉じたらresultOfModalはtrueになる
+    //   expect(resultOfModal).toBe(true)
+
+    //   // 仕訳情報の個数を数える
+    //   const newJournalList = await page.evaluate(() => {
+    //     const lineAccountcode = document.querySelector('#lineNo1').querySelectorAll('.lineAccountcode')
+    //     return Array.prototype.map.call(lineAccountcode, (item) => {
+    //       return item.id
+    //     })
+    //   })
+
+    //   expect(newJournalList.length).toBe(journalList.length + 1)
+    // })
+
+    test('エラー仕訳情報を１項目以上入力してください。', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+
+      // 仕訳情報設定の画面へ遷移
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      // 仕訳情報一括入力ボタンクリック
+      await page.click('#btn-bulkInsert')
+
+      // 「登録」ボタンをクリック
+      await page.click('#btn-bulk-insert')
+
+      // モーダルエラーメッセージ表示の待ち
+      await page.waitForTimeout(1000)
+
+      // 一括入力モーダル画面閉じる
+      const errorMsg = await page.evaluate(() => {
+        const errMsg = document.querySelector('#error-message-journal-modal').innerText
+        return errMsg
+      })
+
+      // モーダルが閉じたらresultOfModalはtrueになる
+      expect(errorMsg).toMatch('仕訳情報を１項目以上入力してください。')
+    })
+
+    test('エラー対象となる明細を選択してください。', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+
+      // 仕訳情報設定の画面へ遷移
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      // 仕訳情報一括入力ボタンクリック
+      await page.click('#btn-bulkInsert')
+
+      // 仕訳情報1目の検索実施
+      await page.click(
+        '#bulkInsertNo1_lineAccountCode1 > div.column.is-two-fifths.p-0.border-div-rad-4 > div.field.is-horizontal.p-1 > div.field-body.m-1.is-1.none-flex-grow > div > p > a'
+      )
+
+      // 検索モーダルでA001入力
+      await page.type('#searchModalAccountCode', 'A001')
+
+      // 検索ボタンクリック
+      await page.click('#btnSearchAccountCode')
+
+      // 検索結果を待ち
+      await page.waitForTimeout(1000)
+
+      // 最初の行を選択
+      await page.click('#displayFieldResultBody > tr:nth-child(1)')
+
+      // 検索結果を待ち
+      await page.waitForTimeout(1000)
+
+      // 「登録」ボタンをクリック
+      await page.click('#btn-bulk-insert')
+
+      // モーダルが閉じるまで待ち
+      await page.waitForTimeout(500)
+
+      // 一括入力モーダル画面閉じる
+      const errorMsg = await page.evaluate(() => {
+        return document.querySelector('#error-message-journal-modal').innerText
+      })
+
+      // モーダルが閉じたらresultOfModalはtrueになる
+      expect(errorMsg).toMatch('対象となる明細を選択してください。')
+    })
+
+    test('エラー仕訳情報入力の上限は10個までです。', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+
+      // 仕訳情報設定の画面へ遷移
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      // 仕訳情報一括入力ボタンクリック
+      await page.click('#btn-bulkInsert')
+
+      // 検索結果を待ち
+      await page.waitForTimeout(1000)
+
+      // プラスボタンクリック
+      for (let cnt = 1; cnt < 12; cnt++) {
+        await page.click('#btn-plus-accountCode-bulkInsert-modal')
+      }
+
+      // エラーメッセージが表示されるまで待ち
+      await page.waitForTimeout(1000)
+
+      // 一括入力モーダル画面閉じる
+      const errorMsg = await page.evaluate(() => {
+        return document.querySelector('#error-message-journal-modal').innerText
+      })
+
+      // モーダルが閉じたらresultOfModalはtrueになる
+      expect(errorMsg).toMatch('仕訳情報入力の上限は10個までです。')
     })
   })
 

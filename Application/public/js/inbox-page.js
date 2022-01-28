@@ -580,6 +580,7 @@ $('#btn-bulk-insert').addEventListener('click', function () {
   // if (checkBulkList()) $('#form').submit()
   if (checkBulkList()) {
     addBulkList()
+    $(`#${this.dataset.target}`).classList.remove('is-active')
   }
 })
 
@@ -651,15 +652,15 @@ const addBulkList = function () {
       }
     })
     if (selectedInvoice[lineIdx] === true) {
-      for (let journalIdx = cnt; journalIdx < 10; journalIdx++) {
+      for (let journalIdx = cnt, bulkIdx = 0; journalIdx < 11; journalIdx++, bulkIdx++) {
         if (
           invoiceLine[journalIdx] !== undefined &&
           invoiceLine[journalIdx].accountCode.length === 0 &&
           invoiceLine[journalIdx].subAccountCode.length === 0
         ) {
           invoiceLine[journalIdx] = {
-            accountCode: bulkList[journalIdx].accountCode,
-            subAccountCode: bulkList[journalIdx].subAccountCode,
+            accountCode: bulkList[bulkIdx].accountCode,
+            subAccountCode: bulkList[bulkIdx].subAccountCode,
             journalNo: `lineAccountCode${journalIdx + 1}`,
             input_amount: 0,
             isNewItem: false
@@ -669,10 +670,10 @@ const addBulkList = function () {
           $(`#lineNo${lineIdx + 1}_lineAccountCode${journalIdx + 1}_subAccountCode`).value =
             invoiceLine[journalIdx].subAccountCode
         }
-        if (invoiceLine[journalIdx] === undefined && bulkList[journalIdx] !== undefined) {
+        if (invoiceLine[journalIdx] === undefined && bulkList[bulkIdx] !== undefined) {
           invoiceLine[journalIdx] = {
-            accountCode: bulkList[journalIdx].accountCode,
-            subAccountCode: bulkList[journalIdx].subAccountCode,
+            accountCode: bulkList[bulkIdx].accountCode,
+            subAccountCode: bulkList[bulkIdx].subAccountCode,
             journalNo: `lineAccountCode${journalIdx + 1}`,
             input_amount: 0,
             isNewItem: true
@@ -684,7 +685,6 @@ const addBulkList = function () {
       if (journal.isNewItem === undefined) journal.isNewItem = false
     })
   })
-
   invoiceLines.forEach((invoiceLine, idx) => {
     invoiceLine.forEach((journal, jdx) => {
       if (journal.isNewItem) {
