@@ -868,8 +868,8 @@ describe('inboxControllerのテスト', () => {
       const accountCodeName = accountCodeMock[0].accountCodeName
       const subAccountCode = subAccountCodeMock[0].subjectCode
       const subACcountCodeName = subAccountCodeMock[0].subjectName
-      const a = []
-      accountCodeFindAllSpy.mockReturnValueOnce(a)
+      const expectResult = []
+      accountCodeFindAllSpy.mockReturnValueOnce(expectResult)
 
       const result = await inboxController.getCode(
         contractId,
@@ -879,7 +879,7 @@ describe('inboxControllerのテスト', () => {
         subACcountCodeName
       )
 
-      expect(JSON.stringify(result, null, 2)).toMatch(JSON.stringify(a, null, 2))
+      expect(JSON.stringify(result, null, 2)).toMatch(JSON.stringify(expectResult, null, 2))
     })
 
     test('正常：パラメタがない場合', async () => {
