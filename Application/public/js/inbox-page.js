@@ -138,7 +138,7 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
       .addEventListener('click', btnSearchMain($('#accountCode-modal')))
     target.appendChild(cloneAccountcode)
   } else {
-    $('#error-message-journal-modal').innerText = '仕訳情報入力の上限は10個までです。'
+    $('#error-message-journal-modal').innerText = '仕訳情報入力の上限は１０項目までです。'
   }
 })
 
