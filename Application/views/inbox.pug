@@ -81,7 +81,7 @@ block content
                 p.text-left-lines.mb-1.itemId.text-overflow
             .columns.m-0
               .column.p-0.column-selectbox
-                input(type='checkbox')
+                input.isCheckedForInvoiceLine(type='checkbox')
           .column-header.is-5-header.itemName
             p.font-bold  内容
             p.mb-1.itemName.text-overflow
@@ -126,33 +126,35 @@ block content
                input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
 
   template#template-journal-accountCode
-    .columns.m-0.p-1.lineAccountcode
-      .column.is-two-fifths.p-0.border-div-rad-4
-        .field.is-horizontal.m-1.has-addons-centered
-          .field-label.is-normal.m-0.text-center
-            label 勘定科目コード
-          .field-label.is-normal.m-0.text-center
-            label 補助科目コード
-          .field-label.is-normal.m-0.is-1.fixed-void-66
-            label 　
-        .field.is-horizontal.p-1
-          .field-body.m-1
-            .field
-              p.control
-                input.input(type='text' value readonly)
-          .field-body.m-1
-            .field
-              p.control
-                input.input(type='text'  value readonly)
-          .field-body.m-1.is-1.none-flex-grow
-            .field
-              p.control
-                a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
-      .column.is-0.p-1
-      .column.is-0.p-0.column-department
-      .column.is-0.p-1.column-minus-btn
-        a.red-color.btn-minus-accountCode(id=`btn_minus_bulkInsertNo1_lineAccountCode1` data-target=`bulkInsertNo1_lineAccountCode`)
-          i.fas.fa-minus-circle
+    .columns.m-0.base-bulkInsert-journal
+      .column.p-0.lineAccountCodeForBulk(id='bulkInsertNo1')
+        .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1')
+          .column.is-two-fifths.p-0.border-div-rad-4
+            .field.is-horizontal.m-1.has-addons-centered
+              .field-label.is-normal.m-0.text-center
+                label 勘定科目コード
+              .field-label.is-normal.m-0.text-center
+                label 補助科目コード
+              .field-label.is-normal.m-0.is-1.fixed-void-66
+                label 　
+            .field.is-horizontal.p-1
+              .field-body.m-1
+                .field
+                  p.control
+                    input.input.input-accountCode(type='text' value readonly)
+              .field-body.m-1
+                .field
+                  p.control
+                    input.input.input-subAccountCode(type='text'  value readonly)
+              .field-body.m-1.is-1.none-flex-grow
+                .field
+                  p.control
+                    a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
+          .column.is-0.p-1
+          .column.is-0.p-0.column-department
+          .column.is-0.p-1.column-minus-btn
+            a.red-color.btn-minus-accountCode(id=`btn_minus_bulkInsertNo1_lineAccountCode1` data-target=`bulkInsertNo1_lineAccountCode`)
+              i.fas.fa-minus-circle
 
   .modal#accountCode-modal.z-index-modal
     .modal-background.cancel-button(data-target='accountCode-modal')
@@ -259,7 +261,7 @@ block content
     .modal-background.cancel-button(data-target='bulkInsert-journal-modal')
     .modal-card.is-fullwidth.is-family-noto-sans
       header.modal-card-head.color-link-modal-header
-        p.modal-card-title 仕訳情報情報一括設定
+        p.modal-card-title 仕訳情報一括設定
       section.modal-card-body
         .columns
           .column
@@ -273,8 +275,8 @@ block content
                 .column
                   p#error-message-journal-modal.red-color 　
               .columns.m-0.p-1.base-bulkInsert-journal
-                .column.p-0.lineAccountCode(id='bulkInsertNo1')
-                  .columns.m-0.p-1.lineAccountcode(id='bulkInsertNo1_lineAccountCode1' data-idx='1')
+                .column.p-0.lineAccountCodeForBulk(id='bulkInsertNo1')
+                  .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1' data-idx='1')
                     .column.is-two-fifths.p-0.border-div-rad-4
                       .field.is-horizontal.m-1.has-addons-centered
                         .field-label.is-normal.m-0.text-center
@@ -287,11 +289,11 @@ block content
                         .field-body.m-1
                           .field
                             p.control
-                              input.input(type='text' id=`bulkInsertNo1_lineAccountCode1_accountCode` value readonly)
+                              input.input.input-accountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_accountCode` value readonly)
                         .field-body.m-1
                           .field
                             p.control
-                              input.input(type='text' id=`bulkInsertNo1_lineAccountCode1_subAccountCode` value readonly)
+                              input.input.input-subAccountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_subAccountCode` value readonly)
                         .field-body.m-1.is-1.none-flex-grow
                           .field
                             p.control
@@ -302,7 +304,7 @@ block content
         .columns#field-invoiceLine
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button(data-target='bulkInsert-journal-modal') 戻る
-        a.button.cancel-button.is-link(data-target='bulkInsert-journal-modal') 反映
+        a.button.is-link#btn-bulk-insert(data-target='bulkInsert-journal-modal') 反映
 
   include footer
 
