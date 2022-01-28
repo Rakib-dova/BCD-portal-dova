@@ -520,7 +520,7 @@ const checkJournalList = function () {
   return true
 }
 
-// 重複された仕訳情報処理
+// 重複された仕訳情報処理(仕訳情報設定画面)
 const duplicationCheck = function () {
   const duplArray = []
   // 画面に表示された項目別の仕訳情報を取得
@@ -528,17 +528,20 @@ const duplicationCheck = function () {
 
   const koumokuInformationArray = []
   for (let i = 0; i < allInfomationline.length; ++i) {
-    const lineCount = document.getElementById(`lineNo${i + 1}`).children.length
+    const children = document.getElementById(`lineNo${i + 1}`).children
     const lineInformationArray = []
 
-    for (let z = 0; z < lineCount; ++z) {
-      const accountCode = document.getElementById(`lineNo${i + 1}_lineAccountCode${z + 1}_accountCode`).value
-      const subAccountCode = document.getElementById(`lineNo${i + 1}_lineAccountCode${z + 1}_subAccountCode`).value
-      lineInformationArray.push([accountCode, subAccountCode])
-    }
+    // 勘定科目と補助科目を取得
+    Array.prototype.forEach.call(
+      children, (item) => {
+        const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
+        const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
+        lineInformationArray.push([accountCode, subAccountCode])
+      })
     koumokuInformationArray.push(duplicateCheckFunction(lineInformationArray))
   }
 
+  // 重複がある明細項目づつエラーメッセージを設定する。
   koumokuInformationArray.map((item, idx) => {
     const errMsg = document.getElementById(`duplicationErrMsg${idx + 1}`)
     if (item === true) {
@@ -549,9 +552,36 @@ const duplicationCheck = function () {
     } else {
       errMsg.classList.add('invisible')
     }
+    return 0
   })
 
   return duplArray
+}
+
+// 重複された仕訳情報処理(仕訳情報設定画面モーダル)
+const duplicationCheckModal = function () {
+  // モーダル画面に表示された項目別の仕訳情報を取得
+  const children = document.querySelectorAll('.lineAccountcodeForBulk')
+  const koumokuInformationArray = []
+
+  // 勘定科目と補助科目を取得
+  Array.prototype.forEach.call(
+    children, (item) => {
+      const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
+      const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
+      koumokuInformationArray.push([accountCode, subAccountCode])
+    })
+  const dupleResult = duplicateCheckFunction(koumokuInformationArray)
+
+  // 重複された場合エラーメッセージ表示
+  const errMsg = $('#error-message-journal-modal')
+  if (dupleResult) {
+    errMsg.innerText = '同じ仕訳情報は設定できません。'
+    return true
+  } else {
+    errMsg.innerText = ''
+    return false
+  }
 }
 
 // 重複検索関数
@@ -579,6 +609,10 @@ $('#btn-bulk-insert').addEventListener('click', function () {
   if (this.getAttribute('disabled') === 'true') return
   // if (checkBulkList()) $('#form').submit()
   if (checkBulkList()) {
+    if (duplicationCheckModal()) {
+      $('#error-message-journal-modal').focus({ preventScroll: false })
+      return
+    }
     addBulkList()
     $(`#${this.dataset.target}`).classList.remove('is-active')
   }
