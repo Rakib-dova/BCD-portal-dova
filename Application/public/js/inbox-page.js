@@ -10,6 +10,7 @@ const $ = function (tagObjName) {
     selectors = document.querySelectorAll(tagObjName)
   } else if (idNameReg.test(tagObjName)) {
     selectors = document.querySelectorAll(tagObjName)[0]
+    if (selectors === undefined) return null
   } else {
     return null
   }
@@ -118,7 +119,6 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
   const targetName = this.dataset.target.replaceAll('#', '')
   const template = $('#template-journal-accountCode')
   const lineAccountcodeLength = target.querySelectorAll('.lineAccountcodeForBulk').length
-  console.log(lineAccountcodeLength)
   if (lineAccountcodeLength < 10) {
     const cloneAccountcode = document.importNode(template.content, true)
     const idx = lineAccountcodeLength + 1
@@ -351,10 +351,7 @@ const deleteDisplayModal = function () {
 // 仕訳情報のアイテムのマイナスボタン機能追加
 const btnMinusAccount = function () {
   const deleteTarget = this.dataset.target
-  if (
-    document.getElementById(`#${deleteTarget}_input_amount`) !== undefined &&
-    document.getElementById(`#${deleteTarget}_input_amount`) !== null
-  ) {
+  if ($(`#${deleteTarget}_input_amount`) !== undefined && $(`#${deleteTarget}_input_amount`) !== null) {
     const thisLineInput = $(`#${deleteTarget}_input_amount`)
     const lineNoFirstInput = $(`#${deleteTarget.split('_')[0]}_lineAccountCode1_input_amount`)
     lineNoFirstInput.value = (
@@ -362,9 +359,7 @@ const btnMinusAccount = function () {
     ).toLocaleString('ja-JP')
   }
   $(`#${deleteTarget}`).remove()
-  if ($(`#${deleteTarget.split('_')[0]}`).querySelectorAll('.lineAccountcodeForBulk').length === 0) {
-    $(`#btn-minus-${deleteTarget.split('_')[0]}-accountCode`).classList.remove('is-invisible')
-  }
+
   $('#btn-confirm').removeAttribute('disabled')
 }
 
@@ -395,6 +390,11 @@ $('#inputInstallmentAmount').addEventListener('blur', function () {
     if (!regExp.test(this.value)) {
       this.value = this.value.substr(0, this.value.length - 1)
     }
+  }
+})
+$('#inputInstallmentAmount').addEventListener('focus', function () {
+  if (~~this.value === 0) {
+    this.value = ''
   }
 })
 
@@ -578,9 +578,12 @@ const duplicateCheckFunction = function (array) {
 $('#btn-bulk-insert').addEventListener('click', function () {
   if (this.getAttribute('disabled') === 'true') return
   // if (checkBulkList()) $('#form').submit()
-  checkBulkList()
+  if (checkBulkList()) {
+    addBulkList()
+  }
 })
 
+// 一括入力「登録」のバリデーションチェック
 const checkBulkList = function () {
   const bulkLines = getBulkList()
   const selectedInvocieLine = getSelectedInvoiceLine()
@@ -598,13 +601,8 @@ const checkBulkList = function () {
     bulkLines.forEach(() => {
       count++
     })
-    console.log(bulkLines)
-    console.log(bulkLines.length)
-    console.log(count)
-    console.log(lineAccountcodeList.length)
     if (count + lineAccountcodeList.length > 10) {
       if (selectedInvocieLine[idx]) {
-        console.log('1231231313')
         returnValue.limitLines = true
       }
     }
@@ -636,13 +634,123 @@ const checkBulkList = function () {
     $('#error-message-journal-modal').innerText = ''
   }
 
-  // let isFirstLineNull = false
-  // for (let i = 0; i < bulkLines.length; i++) {
-  //   if (total !== ~~$(`#lineNo${i + 1}Total`).value.replaceAll(',', '')) {
-  //     isFirstLineNull = true
-  //     $('#error-message-body').innerText = '仕訳情報を正しく設定してください。'
-  //   }
-  // }
+  return !returnValue.bulkLines & returnValue.checked & !returnValue.limitLines
+}
+
+// 一括入力反映
+const addBulkList = function () {
+  const bulkList = getBulkList()
+  const selectedInvoice = getSelectedInvoiceLine()
+  const invoiceLines = getJournalList()
+
+  invoiceLines.forEach((invoiceLine, lineIdx) => {
+    let cnt = 0
+    invoiceLine.forEach((journal) => {
+      if (journal.accountCode.length !== 0) {
+        cnt++
+      }
+    })
+    if (selectedInvoice[lineIdx] === true) {
+      for (let journalIdx = cnt; journalIdx < 10; journalIdx++) {
+        if (
+          invoiceLine[journalIdx] !== undefined &&
+          invoiceLine[journalIdx].accountCode.length === 0 &&
+          invoiceLine[journalIdx].subAccountCode.length === 0
+        ) {
+          invoiceLine[journalIdx] = {
+            accountCode: bulkList[journalIdx].accountCode,
+            subAccountCode: bulkList[journalIdx].subAccountCode,
+            journalNo: `lineAccountCode${journalIdx + 1}`,
+            input_amount: 0,
+            isNewItem: false
+          }
+          $(`#lineNo${lineIdx + 1}_lineAccountCode${journalIdx + 1}_accountCode`).value =
+            invoiceLine[journalIdx].accountCode
+          $(`#lineNo${lineIdx + 1}_lineAccountCode${journalIdx + 1}_subAccountCode`).value =
+            invoiceLine[journalIdx].subAccountCode
+        }
+        if (invoiceLine[journalIdx] === undefined && bulkList[journalIdx] !== undefined) {
+          invoiceLine[journalIdx] = {
+            accountCode: bulkList[journalIdx].accountCode,
+            subAccountCode: bulkList[journalIdx].subAccountCode,
+            journalNo: `lineAccountCode${journalIdx + 1}`,
+            input_amount: 0,
+            isNewItem: true
+          }
+        }
+      }
+    }
+    invoiceLine.forEach((journal) => {
+      if (journal.isNewItem === undefined) journal.isNewItem = false
+    })
+  })
+
+  invoiceLines.forEach((invoiceLine, idx) => {
+    invoiceLine.forEach((journal, jdx) => {
+      if (journal.isNewItem) {
+        const lineNo = `lineNo${idx + 1}`
+        const tagetIdBase = `${lineNo}_lineAccountCode${jdx + 1}`
+        const templeAccountCodeItem = $('#templateLineAccountCodeItem')
+        const cloneAccountCodeItem = document.importNode(templeAccountCodeItem.content, true)
+
+        cloneAccountCodeItem.querySelector('.lineAccountcode').id = `${tagetIdBase}`
+
+        // 名前の割り当て
+        // 勘定科目コードINPUT
+        cloneAccountCodeItem
+          .querySelector('.lineAccountCode_accountCode')
+          .setAttribute('name', `${tagetIdBase}_accountCode`)
+        cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').id = `${tagetIdBase}_accountCode`
+        cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').name = `${tagetIdBase}_accountCode`
+        cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').value = journal.accountCode
+
+        // 補助科目コードINPUT
+        cloneAccountCodeItem
+          .querySelector('.lineAccountCode_subAccountCode')
+          .setAttribute('name', `${tagetIdBase}_subAccountCode`)
+        cloneAccountCodeItem.querySelector('.lineAccountCode_subAccountCode').id = `${tagetIdBase}_subAccountCode`
+        cloneAccountCodeItem.querySelector('.lineAccountCode_subAccountCode').name = `${tagetIdBase}_subAccountCode`
+        cloneAccountCodeItem.querySelector('.lineAccountCode_subAccountCode').value = journal.subAccountCode
+
+        // 分割金額
+        cloneAccountCodeItem
+          .querySelector('.inputInstallmentAmount')
+          .setAttribute('name', `${tagetIdBase}_input_amount`)
+        cloneAccountCodeItem.querySelector('.inputInstallmentAmount').id = `${tagetIdBase}_input_amount`
+        cloneAccountCodeItem.querySelector('.inputInstallmentAmount').name = `${tagetIdBase}_input_amount`
+        cloneAccountCodeItem
+          .querySelector('.inputInstallmentAmount')
+          .classList.add(`${tagetIdBase.split('_')[0]}_input_amount`)
+
+        // 項目の分割金額の入力ボタン
+        // 各ボタンあたりIDを割り当て
+        // 分割金額の入力ボタン
+        cloneAccountCodeItem.querySelector('.btn-insert-installmentAmount').id = `btn_${tagetIdBase}_installmentAmount`
+        cloneAccountCodeItem.querySelector('.btn-insert-installmentAmount').dataset.target =
+          'insert-installmentAmount-modal'
+        cloneAccountCodeItem.querySelector(
+          '.btn-insert-installmentAmount'
+        ).dataset.input = `${tagetIdBase}_input_amount`
+        cloneAccountCodeItem
+          .querySelector('.btn-insert-installmentAmount')
+          .addEventListener('click', btnInstallmentAmount)
+
+        // 勘定科目と補助科目検索ボタン
+        cloneAccountCodeItem.querySelector('.btn-search-main').dataset.target = 'accountCode-modal'
+        cloneAccountCodeItem.querySelector('.btn-search-main').dataset.info = `${tagetIdBase}`
+        cloneAccountCodeItem
+          .querySelector('.btn-search-main')
+          .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+
+        // マイナスボタン追加
+        cloneAccountCodeItem.querySelector('.btn-minus-accountCode').id = `btn_minus_${lineNo}_accountCode`
+        cloneAccountCodeItem.querySelector('.btn-minus-accountCode').dataset.target = `${tagetIdBase}`
+        cloneAccountCodeItem.querySelector('.btn-minus-accountCode').addEventListener('click', btnMinusAccount)
+        const target = $(`#${lineNo}`)
+        target.appendChild(cloneAccountCodeItem)
+      }
+    })
+  })
 }
 
 const getSelectedInvoiceLine = function () {
