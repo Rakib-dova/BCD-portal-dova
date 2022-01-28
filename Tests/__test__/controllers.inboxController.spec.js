@@ -868,33 +868,7 @@ describe('inboxControllerのテスト', () => {
       const accountCodeName = accountCodeMock[0].accountCodeName
       const subAccountCode = subAccountCodeMock[0].subjectCode
       const subACcountCodeName = subAccountCodeMock[0].subjectName
-      const dummyTargetAccountCodeSubAccountCodeJoin = []
-
-      accountCodeMock.forEach((item) => {
-        subAccountCodeMock.forEach((subAccount) => {
-          if (item.accountCodeId === subAccount.accountCodeId) {
-            dummyTargetAccountCodeSubAccountCodeJoin.push({
-              ...item,
-              'SubAccountCodes.subjectCode': subAccount.subjectCode,
-              'SubAccountCodes.subjectName': subAccount.subjectName,
-              'SubAccountCodes.subAccountCodeId': subAccount.subAccountCodeId
-            })
-          }
-        })
-      })
-
-      const a = accountCodeMock.concat(dummyTargetAccountCodeSubAccountCodeJoin)
-      a.sort((a, b) => {
-        if (a.accountCode > b.accountCode) return 1
-        else if (a.accountCode < b.accountCode) return -1
-        else {
-          if (a['SubAccountCodes.subjectCode'] > b['SubAccountCodes.subjectCode']) return 1
-          else if (a['SubAccountCodes.subjectCode'] < b['SubAccountCodes.subjectCode']) return -1
-          else return 0
-        }
-      })
-
-      accountCodeFindAllSpy.mockReturnValueOnce([])
+      const a = []
       accountCodeFindAllSpy.mockReturnValueOnce(a)
 
       const result = await inboxController.getCode(
@@ -905,7 +879,7 @@ describe('inboxControllerのテスト', () => {
         subACcountCodeName
       )
 
-      expect(JSON.stringify(a, null, 2)).toMatch(JSON.stringify(result, null, 2))
+      expect(JSON.stringify(result, null, 2)).toMatch(JSON.stringify(a, null, 2))
     })
 
     test('正常：パラメタがない場合', async () => {
@@ -925,8 +899,8 @@ describe('inboxControllerのテスト', () => {
         subACcountCodeName
       )
 
-      expect(JSON.stringify([accountCodeMock[0], subAccountCodeMock[0]], null, 2)).toMatch(
-        JSON.stringify(result, null, 2)
+      expect(JSON.stringify(result, null, 2)).toMatch(
+        JSON.stringify([subAccountCodeMock[0], accountCodeMock[0]], null, 2)
       )
     })
 
@@ -950,10 +924,10 @@ describe('inboxControllerのテスト', () => {
         })
       })
 
-      const a = accountCodeMock.concat(dummyTargetAccountCodeSubAccountCodeJoin)
+      const expectResult = accountCodeMock.concat(dummyTargetAccountCodeSubAccountCodeJoin)
 
-      accountCodeFindAllSpy.mockReturnValueOnce(accountCodeMock)
       accountCodeFindAllSpy.mockReturnValueOnce(dummyTargetAccountCodeSubAccountCodeJoin)
+      accountCodeFindAllSpy.mockReturnValueOnce(accountCodeMock)
 
       const result = await inboxController.getCode(
         contractId,
@@ -963,7 +937,7 @@ describe('inboxControllerのテスト', () => {
         subACcountCodeName
       )
 
-      a.sort((a, b) => {
+      expectResult.sort((a, b) => {
         if (a.accountCode > b.accountCode) return 1
         else if (a.accountCode < b.accountCode) return -1
         else {
@@ -973,7 +947,7 @@ describe('inboxControllerのテスト', () => {
         }
       })
 
-      expect(JSON.stringify(a, null, 2)).toMatch(JSON.stringify(result, null, 2))
+      expect(JSON.stringify(result, null, 2)).toMatch(JSON.stringify(expectResult, null, 2))
     })
 
     test('正常：DBエラー', async () => {
