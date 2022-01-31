@@ -245,6 +245,10 @@ app.use('/deleteSubAccountCode', require('./routes/deleteSubAccountCode').router
 // 補助科目確認・変更
 app.use('/subAccountCodeEdit', require('./routes/subAccountCodeEdit').router)
 
+// ------------部門データ
+// 部門データ設定
+app.use('/registDepartmentCode', require('./routes/registDepartmentCode').router)
+
 // 受領した請求書一覧
 app.use('/inboxList', require('./routes/inboxList').router)
 // 受領した請求書
