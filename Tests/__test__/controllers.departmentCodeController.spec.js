@@ -78,7 +78,7 @@ describe('accountCodeControllerのテスト', () => {
       expect(result).toEqual(true)
     })
 
-    test('異常：重複された勘定科目登録する時', async () => {
+    test('異常：重複された部門データ登録する時', async () => {
       // 準備
       departmentCodefindAllSpy.mockReturnValue([codeDepartmentDataResult])
       createSpy.mockReturnValue(codeDepartmentDataResult)
@@ -138,7 +138,7 @@ describe('accountCodeControllerのテスト', () => {
       departmentCodefindAllSpy.mockReturnValue([])
       createSpy.mockReturnValue(dbError)
 
-      // 勘定科目登録時、画面から渡されるデータ
+      // 部門データ登録時、画面から渡されるデータ
       const departmentCodeName = 'パソコン'
       const departmentCode = 'AAA'
 
