@@ -532,7 +532,7 @@ describe('受領した請求書詳細画面のインテグレーションテス�
     test('仕訳一括設定で1個を入力', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true
       })
       const page = await browser.newPage()
@@ -553,7 +553,10 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.click('#btn-bulkInsert')
 
       // プラスボタン入力
-      await page.click('#btn-plus-accountCode-bulkInsert-modal')
+      // 仕訳一括設定モーダル「＋」ボタンを押下する。
+      await page.evaluate(() => {
+        document.getElementById('btn-plus-accountCode-bulkInsert-modal').click()
+      })
 
       // １番目の明細を選択
       await page.evaluate(() => {
@@ -592,6 +595,8 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       })
 
       expect(newJournalList.length).toBe(journalList.length + 1)
+
+      await browser.close()
     })
 
     // データなしため、コメントにする。
@@ -698,6 +703,8 @@ describe('受領した請求書詳細画面のインテグレーションテス�
 
       // モーダルが閉じたらresultOfModalはtrueになる
       expect(errorMsg).toMatch('仕訳情報を１項目以上入力してください。')
+
+      await browser.close()
     })
 
     test('エラー対象となる明細を選択してください。', async () => {
@@ -748,6 +755,8 @@ describe('受領した請求書詳細画面のインテグレーションテス�
 
       // モーダルが閉じたらresultOfModalはtrueになる
       expect(errorMsg).toMatch('対象となる明細を選択してください。')
+
+      await browser.close()
     })
 
     test('エラー仕訳情報入力の上限は10個までです。', async () => {
@@ -765,12 +774,13 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       // 仕訳情報一括入力ボタンクリック
       await page.click('#btn-bulkInsert')
 
-      // 検索結果を待ち
-      await page.waitForTimeout(1000)
+      await page.waitForTimeout(500)
 
       // プラスボタンクリック
       for (let cnt = 1; cnt < 12; cnt++) {
-        await page.click('#btn-plus-accountCode-bulkInsert-modal')
+        await page.evaluate(() => {
+          document.getElementById('btn-plus-accountCode-bulkInsert-modal').click()
+        })
       }
 
       // エラーメッセージが表示されるまで待ち
@@ -782,7 +792,9 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       })
 
       // モーダルが閉じたらresultOfModalはtrueになる
-      expect(errorMsg).toMatch('仕訳情報入力の上限は10個までです。')
+      expect(errorMsg).toMatch('仕訳情報入力の上限は１０項目までです。')
+
+      await browser.close()
     })
   })
 

@@ -119,20 +119,26 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
   const targetName = this.dataset.target.replaceAll('#', '')
   const template = $('#template-journal-accountCode')
   const lineAccountcodeLength = target.querySelectorAll('.lineAccountcodeForBulk').length
+
   if (lineAccountcodeLength < 10) {
+    // 仕訳情報のidを作成：lineNo明細詳細の順番_lineAccountCode仕訳情報の順番
+    const tagetIdBase = `${targetName}_lineAccountCode`
+    const targetId = `${targetName}_lineAccountCode${
+      ~~target.querySelectorAll('.lineAccountcodeForBulk')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
+    }`
     const cloneAccountcode = document.importNode(template.content, true)
     const idx = lineAccountcodeLength + 1
     cloneAccountcode.querySelector('.lineAccountcodeForBulk').dataset.idx = idx
-    cloneAccountcode.querySelector('.lineAccountcodeForBulk').id = `${targetName}_lineAccountCode${idx}`
-    cloneAccountcode.querySelector('.input-accountCode').id = `bulkInsertNo1_lineAccountCode${idx}_accountCode`
-    cloneAccountcode.querySelector('.input-subAccountCode').id = `bulkInsertNo1_lineAccountCode${idx}_subAccountCode`
-    cloneAccountcode.querySelector('.btn-minus-accountCode').id = `btn_minus_bulkInsertNo1_lineAccountCode${idx}`
-    cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `bulkInsertNo1_lineAccountCode${idx}`
-    cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `${targetName}_lineAccountCode${idx}`
+    cloneAccountcode.querySelector('.lineAccountcodeForBulk').id = targetId
+    cloneAccountcode.querySelector('.input-accountCode').id = `${targetId}_accountCode`
+    cloneAccountcode.querySelector('.input-subAccountCode').id = `${targetId}_subAccountCode`
+    cloneAccountcode.querySelector('.btn-minus-accountCode').id = `btn_minus_${targetId}`
+    cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `${targetId}`
+    cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `${targetId}`
     cloneAccountcode.querySelector('.btn-minus-accountCode').addEventListener('click', btnMinusAccount)
     // 勘定科目と補助科目検索ボタン
     cloneAccountcode.querySelector('.BtnlineAccountCodeSearch').dataset.target = 'accountCode-modal'
-    cloneAccountcode.querySelector('.BtnlineAccountCodeSearch').dataset.info = `bulkInsertNo1_lineAccountCode${idx}`
+    cloneAccountcode.querySelector('.BtnlineAccountCodeSearch').dataset.info = `${targetId}`
     cloneAccountcode
       .querySelector('.BtnlineAccountCodeSearch')
       .addEventListener('click', btnSearchMain($('#accountCode-modal')))
@@ -405,10 +411,10 @@ $('#btn-insert').addEventListener('click', function () {
   const totalAmmout = ~~$(`#${inputTarget.split('_')[0]}Total`).value.replaceAll(',', '')
   if (~~valueInput.value !== 0) {
     if (totalAmmout - valueInput.value < 0) {
-      $('#installmentAmountErrMsg').innerText = '小計金額より高い金額は入力できません。'
+      $('#installmentAmountErrMsg').innerText = '分割金額の合計が小計金額を超えています。'
       return null
     } else if (totalAmmout - valueInput.value === 0) {
-      $('#installmentAmountErrMsg').innerText = '小計金額と同じ金額は入力できません。'
+      $('#installmentAmountErrMsg').innerText = '分割金額の合計が小計金額を超えています。'
       return null
     }
 
@@ -532,12 +538,11 @@ const duplicationCheck = function () {
     const lineInformationArray = []
 
     // 勘定科目と補助科目を取得
-    Array.prototype.forEach.call(
-      children, (item) => {
-        const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
-        const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
-        lineInformationArray.push([accountCode, subAccountCode])
-      })
+    Array.prototype.forEach.call(children, (item) => {
+      const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
+      const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
+      lineInformationArray.push([accountCode, subAccountCode])
+    })
     koumokuInformationArray.push(duplicateCheckFunction(lineInformationArray))
   }
 
@@ -565,12 +570,11 @@ const duplicationCheckModal = function () {
   const koumokuInformationArray = []
 
   // 勘定科目と補助科目を取得
-  Array.prototype.forEach.call(
-    children, (item) => {
-      const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
-      const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
-      koumokuInformationArray.push([accountCode, subAccountCode])
-    })
+  Array.prototype.forEach.call(children, (item) => {
+    const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
+    const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
+    koumokuInformationArray.push([accountCode, subAccountCode])
+  })
   const dupleResult = duplicateCheckFunction(koumokuInformationArray)
 
   // 重複された場合エラーメッセージ表示
@@ -607,15 +611,26 @@ const duplicateCheckFunction = function (array) {
 // Modal反映ボタン
 $('#btn-bulk-insert').addEventListener('click', function () {
   if (this.getAttribute('disabled') === 'true') return
-  // if (checkBulkList()) $('#form').submit()
+
+  // エラーチェック
+  let errorCheckFlag = false
+
   if (checkBulkList()) {
     if (duplicationCheckModal()) {
-      $('#error-message-journal-modal').focus({ preventScroll: false })
-      return
+      errorCheckFlag = true
     }
-    addBulkList()
-    $(`#${this.dataset.target}`).classList.remove('is-active')
+  } else {
+    errorCheckFlag = true
   }
+
+  // エラーがある場合、ぽす
+  if (errorCheckFlag) {
+    $('#error-message-journal-modal').focus({ preventScroll: false })
+    return
+  }
+
+  addBulkList()
+  $(`#${this.dataset.target}`).classList.remove('is-active')
 })
 
 // 一括入力「登録」のバリデーションチェック
