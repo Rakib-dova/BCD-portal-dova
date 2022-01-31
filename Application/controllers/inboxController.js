@@ -116,6 +116,13 @@ const getInvoiceDetail = async function (accessTk, refreshTk, invoiceId, contrac
     ]
   })
 
+  journalizeInvoice.sort((next, prev) => {
+    const nextJournalNo = next.journalNo.split('lineAccountCode')[1]
+    const prevJournalNo = prev.journalNo.split('lineAccountCode')[1]
+
+    return nextJournalNo - prevJournalNo
+  })
+
   const displayInvoice = new InvoiceDetail(invoice, journalizeInvoice)
 
   return displayInvoice
