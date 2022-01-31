@@ -17,15 +17,15 @@ const jwt = require('jwt-simple')
  * ・TOKEN_ENC_PASS : 鍵パスワード\
  * ・TOKEN_ENC_SALT : ソルト
  *
- * @param {string} userId ユーザID
+ * @param {string} userId ユーザID(UUID.v4を想定)
  * @param {string} data 暗号化対象文字列
  * @returns {string} 暗号化文字列
  */
 exports.encrypt = function (userId, data) {
   let encString = null
   const algorithm = 'aes-256-cbc' // アルゴリズム
-  const password = process.env.TOKEN_ENC_PASS // 鍵長 32byte 次で生成したもの: console.log(crypto.randomBytes(32).toString('base64'))
-  const salt = process.env.TOKEN_ENC_SALT // ソルト 16byte 次で生成したもの: console.log(crypto.randomBytes(16).toString('base64'))
+  const password = process.env.BCA_TOKEN_ENC_PASS // 鍵長 32byte 次で生成したもの: console.log(crypto.randomBytes(32).toString('base64'))
+  const salt = process.env.BCA_TOKEN_ENC_SALT // ソルト 16byte 次で生成したもの: console.log(crypto.randomBytes(16).toString('base64'))
 
   // パラメータチェック
   if (userId == null || data == null || !password || !salt) return encString
@@ -42,7 +42,9 @@ exports.encrypt = function (userId, data) {
     encString += cipher.final('base64')
   } catch (err) {
     encString = null
+    // console.log('encrypt() err[%O]', err)
   }
+  // console.log('encrypt() return=%s', encString)
   return encString
 }
 
@@ -56,15 +58,15 @@ exports.encrypt = function (userId, data) {
  * ・TOKEN_ENC_PASS : 鍵パスワード\
  * ・TOKEN_ENC_SALT : ソルト
  *
- * @param {string} userId　ユーザID
+ * @param {string} userId ユーザID(UUID.v4を想定)
  * @param {string} data 暗号化文字列
  * @returns {string} 復号化文字列
  */
 exports.decrypt = function (userId, data) {
   let decString = null
   const algorithm = 'aes-256-cbc' // アルゴリズム
-  const password = process.env.TOKEN_ENC_PASS // 鍵長 32byte 次で生成したもの: console.log(crypto.randomBytes(32).toString('base64'))
-  const salt = process.env.TOKEN_ENC_SALT // ソルト 16byte 次で生成したもの: console.log(crypto.randomBytes(16).toString('base64'))
+  const password = process.env.BCA_TOKEN_ENC_PASS // 鍵長 32byte 次で生成したもの: console.log(crypto.randomBytes(32).toString('base64'))
+  const salt = process.env.BCA_TOKEN_ENC_SALT // ソルト 16byte 次で生成したもの: console.log(crypto.randomBytes(16).toString('base64'))
 
   // パラメータチェック
   if (userId == null || data == null || !password || !salt) return decString
@@ -97,15 +99,10 @@ exports.decrypt = function (userId, data) {
  * @returns {string | null } ハッシュ化したパスワード文字列
  */
 exports.hashPassword = function (userId, password) {
-  const hashStr = null
-  const str = null
+  let hashStr = null
   if (userId == null || password == null) return hashStr
-  try {
-    str = password + userId
+  const str = password + userId
     hashStr = crypto.createHash('sha512').update(str, 'utf8').digest('hex')
-  } catch (err) {
-    hashStr = null
-  }
   return hashStr
 }
 
@@ -126,19 +123,22 @@ exports.encodeJwtToken = function (payload) {
   const secret = process.env.BCA_JWT_HMAC_KEY
   const algorithm = 'HS256'
 
+  // パラメータチェック
+  if (!payload) return token
+
   // 秘密鍵チェック
   if (!secret) return token
 
   // JSON形式チェック
   try {
     JSON.parse(payload)
+    token = jwt.encode(payload, secret, algorithm)
   } catch (err) {
-    console.debug('JSONエラー')
-    return token
+    token = null
   }
 
   // JWT暗号化
-  return jwt.encode(payload, secret, algorithm)
+  return token
 }
 
 /**
@@ -157,6 +157,9 @@ exports.decodeJwtToken = function (token) {
   const secret = process.env.BCA_JWT_HMAC_KEY
   const algorithm = 'HS256'
 
+  // パラメータチェック
+  if (!token) return jwtToken
+
   // 秘密鍵チェック
   if (!secret) return jwtToken
 
@@ -164,7 +167,7 @@ exports.decodeJwtToken = function (token) {
   try {
     jwtToken = jwt.decode(token, secret, false, algorithm)
   } catch (err) {
-    return jwtToken
+    jwtToken = null
   }
   return jwtToken
 }
