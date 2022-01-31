@@ -12,6 +12,10 @@ module.exports = {
   SUBACCOUNTCODE_KEY: '補助科目コード',
   SUBACCOUNTNAME_KEY: '補助科目名',
 
+  // 部門データ
+  DEPARTMENTCODE_KEY: '部門コード',
+  DEPARTMENTNAME_KEY: '部門名',
+
   // 名
   NAME_LENGTH: 40
 }
