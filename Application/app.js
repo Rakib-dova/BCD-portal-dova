@@ -249,8 +249,13 @@ app.use('/subAccountCodeEdit', require('./routes/subAccountCodeEdit').router)
 // 部門データ設定
 app.use('/registDepartmentCode', require('./routes/registDepartmentCode').router)
 
+// 部門データ一括作成
+app.use('/uploadDepartment', require('./routes/departmentCodeUpload').router)
+
+// ------------受領した請求書
 // 受領した請求書一覧
 app.use('/inboxList', require('./routes/inboxList').router)
+
 // 受領した請求書
 app.use('/inbox', require('./routes/inbox').router)
 
