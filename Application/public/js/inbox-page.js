@@ -38,14 +38,31 @@ window.onload = function () {
 
 // 仕訳情報一括入力ボタンの機能
 $('#btn-bulkInsert').addEventListener('click', function () {
+  // 仕訳情報一括入力モーダル初期化
   const invoiceLines = getInvoiceLineList()
+  if ($('.column-invoiceLine-journalModal').length !== 0) {
+    $('.column-invoiceLine-journalModal').forEach((el) => {
+      el.remove()
+    })
+  }
+
+  // 勘定科目検索初期化
+  const lineAccountCodeForBulkCount = $('.lineAccountCodeForBulk').length
+  if (lineAccountCodeForBulkCount !== 1) {
+    for (let i = 0; i < lineAccountCodeForBulkCount - 1; i++) {
+      $('.lineAccountCodeForBulk')[1].remove()
+    }
+  }
+  $('#bulkInsertNo1_lineAccountCode1_accountCode').value = ''
+  $('#bulkInsertNo1_lineAccountCode1_subAccountCode').value = ''
+
   if ($('.column-invoiceLine-journalModal').length < invoiceLines.length) {
     for (let idx = 0; idx < invoiceLines.length; idx++) {
       const templateInvoiceLine = $('#template-invoiceLine')
       const cloneInvoiceLineTemplate = document.importNode(templateInvoiceLine.content, true)
       cloneInvoiceLineTemplate.querySelector('.itemId').innerText = invoiceLines[idx].invoiceLineId
       Array.prototype.forEach.call(invoiceLines[idx].itemName, (itemName) => {
-        cloneInvoiceLineTemplate.querySelector('.itemName').appendChild(itemName)
+        cloneInvoiceLineTemplate.querySelector('.itemName').appendChild(itemName.cloneNode(true))
       })
       cloneInvoiceLineTemplate.querySelector('.invoicedQuantity').innerText = invoiceLines[idx].invoicedQuantity
       cloneInvoiceLineTemplate.querySelector('.unitcode').innerText = invoiceLines[idx].unitcode
@@ -153,9 +170,8 @@ const getLineAccountcodeList = function (invoiceLineNo) {
   const target = $(`#invoiceLine${invoiceLineNo}`).parentNode.querySelectorAll('.lineAccountcode')
   const lineAccountCodeList = []
   for (let i = 0; i < target.length; i++) {
-    const accountCode = $(`#lineNo${invoiceLineNo}_lineAccountCode${i + 1}_accountCode`).value
-    const subAccountCode = $(`#lineNo${invoiceLineNo}_lineAccountCode${i + 1}_subAccountCode`).value
-
+    const accountCode = $(`#${target[i].id}_accountCode`).value
+    const subAccountCode = $(`#${target[i].id}_subAccountCode`).value
     if (accountCode !== '') {
       lineAccountCodeList.push({
         accountCode: accountCode,

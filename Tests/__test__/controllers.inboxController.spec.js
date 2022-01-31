@@ -21,6 +21,38 @@ let accessTradeshiftSpy,
 const accountCodeMock = require('../mockDB/AccountCode_Table')
 const subAccountCodeMock = require('../mockDB/SubAccountCode_Table')
 
+// JournalFindAll結果
+const dbAllJournal = [
+  {
+    journalId: '3ad79a8c-44e7-45a2-8df3-a362aece83bd',
+    contractId: 'd4ab57d5-55ac-4329-ad60-c56ab482d22a',
+    invoiceId: '87344782-c2ad-5ff4-9c92-c3be2323b538',
+    lineNo: 2,
+    lineId: '2',
+    accountCode: 'PBI3165AC0',
+    subAccountCode: 'PBI3165SU1',
+    departmentCode: null,
+    installmentAmount: 1000,
+    createdAt: new Date('2022-01-31T04:30:00.000Z'),
+    updatedAt: new Date('2021-01-31T04:30:00.000Z'),
+    journalNo: 'lineAccountCode1'
+  },
+  {
+    journalId: '3ad79a8c-44e7-45a2-8df3-a362aece83bd',
+    contractId: 'd4ab57d5-55ac-4329-ad60-c56ab482d22a',
+    invoiceId: '87344782-c2ad-5ff4-9c92-c3be2323b538',
+    lineNo: 2,
+    lineId: '2',
+    accountCode: 'PBI3165AC0',
+    subAccountCode: 'PBI3165SU2',
+    departmentCode: null,
+    installmentAmount: 1000,
+    createdAt: new Date('2022-01-31T04:30:00.000Z'),
+    updatedAt: new Date('2021-01-31T04:30:00.000Z'),
+    journalNo: 'lineAccountCode2'
+  }
+]
+
 const searchResult1 = {
   itemsPerPage: 20,
   itemCount: 4,
@@ -686,8 +718,8 @@ describe('inboxControllerのテスト', () => {
     test('正常', async () => {
       const dummyData = require('../mockInvoice/invoice32')
       accessTradeshiftSpy.mockReturnValue(dummyData)
-      journalizeInvoiceFindAllSpy.mockReturnValue([])
-      const resultDummyData = new InvoiceDetailObj(dummyData, [])
+      journalizeInvoiceFindAllSpy.mockReturnValue(dbAllJournal)
+      const resultDummyData = new InvoiceDetailObj(dummyData, dbAllJournal)
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
       expect(result).toEqual(resultDummyData)
     })
