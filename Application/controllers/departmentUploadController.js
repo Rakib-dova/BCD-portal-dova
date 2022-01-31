@@ -164,9 +164,10 @@ const upload = async function (_file, contract) {
     }
 
     // アップロードファイル削除
-    // if ((await removeFile(newFilePath)) === true && result === null) {
-    //   result = 0
-    // }
+    if ((await removeFile(newFilePath)) === true && result === null) {
+      result = 0
+    }
+
     logger.info(constantsDefine.logMessage.INF001 + 'departmentUploadControllerupload')
     if (errorMsg.length !== 0) {
       errorMsg.unshift({ header: ['行数', '部門コード', '部門名', '詳細'] })
