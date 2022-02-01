@@ -116,7 +116,7 @@
 }
 
 .red-color {
-  color: #f14668;
+  color: red;
 }
 
 .none-flex-grow {
@@ -138,4 +138,24 @@
   flex-basis: 28px;
   justify-content: flex-end;
   margin-right: 10px;
+}
+
+#bulkInsert-journal-modal > .modal-card {
+  width: 93%;
+}
+
+.z-index-modal {
+  z-index: 99999;
+}
+
+#field-invoiceLine {
+  flex-direction: column;
+}
+
+.invisible {
+  display: none;
+}
+
+p:focus {
+  outline: none;
 }

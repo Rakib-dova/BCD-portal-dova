@@ -123,7 +123,7 @@ module.exports = {
           schemeURI: 'http://tradeshift.com/api/1.0/userId'
         },
         Name: {
-          value: '浩 河西'
+          value: 'バイヤー'
         },
         ElectronicMail: {
           value: 'jikim@cseltd.co.jp'
@@ -131,10 +131,10 @@ module.exports = {
       },
       Person: {
         FirstName: {
-          value: '浩'
+          value: 'バ'
         },
         FamilyName: {
-          value: '河西'
+          value: 'イヤー'
         }
       }
     }
