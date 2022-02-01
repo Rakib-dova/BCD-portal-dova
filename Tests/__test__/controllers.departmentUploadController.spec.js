@@ -69,7 +69,7 @@ describe('departmentUploadControllerのテスト', () => {
   }
 
   // 部門データ1
-  // 請求書が1つの場合
+  // 部門データが1つの場合
   const departmentCodeFileData1 = Buffer.from(
     fs.readFileSync('./testData/departmentCodeUpload_test1.csv', {
       encoding: 'utf-8',
@@ -186,7 +186,10 @@ describe('departmentUploadControllerのテスト', () => {
       // 部門データ一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test2.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(departmentCodeFileData2), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(departmentCodeFileData2), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test2.csv')
       const file = {
         userId: 'userId',
@@ -210,7 +213,10 @@ describe('departmentUploadControllerのテスト', () => {
       // 部門データ一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test3.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(departmentCodeFileData3), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(departmentCodeFileData3), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test3.csv')
       const file = {
         userId: 'userId',
@@ -234,7 +240,10 @@ describe('departmentUploadControllerのテスト', () => {
       // 部門データ一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test4.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(departmentCodeFileData4), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(departmentCodeFileData4), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test4.csv')
       const file = {
         userId: 'userId',
@@ -258,7 +267,10 @@ describe('departmentUploadControllerのテスト', () => {
       // 部門データ一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test5.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(departmentCodeFileData5), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(departmentCodeFileData5), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test5.csv')
       const file = {
         userId: 'userId',
@@ -282,7 +294,10 @@ describe('departmentUploadControllerのテスト', () => {
       // 部門データ一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test6.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(departmentCodeFileData6), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(departmentCodeFileData6), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test6.csv')
       const file = {
         userId: 'userId',
@@ -314,7 +329,10 @@ describe('departmentUploadControllerのテスト', () => {
       // 部門データ一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test7.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(departmentCodeFileData7), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(departmentCodeFileData7), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test7.csv')
       const file = {
         userId: 'userId',
@@ -341,7 +359,10 @@ describe('departmentUploadControllerのテスト', () => {
       // 部門データ一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test8.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(departmentCodeFileData8), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(departmentCodeFileData8), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test8.csv')
       const file = {
         userId: 'userId',
@@ -388,7 +409,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockClear()
       departmentCodeControllerInsertSpy.mockReturnValueOnce(false)
 
-      // // 試験実施
+      // 試験実施
       const result = await departmentUploadController.upload(file, contractNormal)
 
       // 期待結果
@@ -418,12 +439,15 @@ describe('departmentUploadControllerのテスト', () => {
       // 部門データ一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test1.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(departmentCodeFileData1), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(departmentCodeFileData1), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test1.csv')
       const insertError = new Error('insert Error')
       departmentCodeControllerInsertSpy.mockReturnValue(insertError)
 
-      // // 試験実施
+      // 試験実施
       const result = await departmentUploadController.upload(file, contractNormal)
 
       // 期待結果
@@ -445,13 +469,16 @@ describe('departmentUploadControllerのテスト', () => {
       // 部門データ一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test1.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(departmentCodeFileData1), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(departmentCodeFileData1), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test1.csv')
       departmentCodeControllerInsertSpy.mockImplementation(() => {
         throw new Error('CSVファイル削除エラー')
       })
 
-      // // 試験実施
+      // 試験実施
       const result = await departmentUploadController.upload(file, contractNormal)
 
       // 期待結果
@@ -470,7 +497,10 @@ describe('departmentUploadControllerのテスト', () => {
       // 部門データ一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test9.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(departmentCodeFileData9), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(departmentCodeFileData9), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test9.csv')
 
       departmentCodeControllerInsertSpy.mockReturnValue(true)
@@ -489,7 +519,10 @@ describe('departmentUploadControllerのテスト', () => {
       // 部門データ一括作成
       const fs = require('fs')
       const uploadFilePath = path.resolve('/home/upload/test9.csv')
-      fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(departmentCodeFileData9), 'base64').toString('utf8'))
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(departmentCodeFileData9), 'base64').toString('utf8')
+      )
       pathSpy.mockReturnValue('/home/upload/test9.csv')
 
       departmentCodeControllerInsertSpy.mockReturnValue(true)

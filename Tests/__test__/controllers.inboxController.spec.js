@@ -21,6 +21,38 @@ let accessTradeshiftSpy,
 const accountCodeMock = require('../mockDB/AccountCode_Table')
 const subAccountCodeMock = require('../mockDB/SubAccountCode_Table')
 
+// JournalFindAll結果
+const dbAllJournal = [
+  {
+    journalId: '3ad79a8c-44e7-45a2-8df3-a362aece83bd',
+    contractId: 'd4ab57d5-55ac-4329-ad60-c56ab482d22a',
+    invoiceId: '87344782-c2ad-5ff4-9c92-c3be2323b538',
+    lineNo: 2,
+    lineId: '2',
+    accountCode: 'PBI3165AC0',
+    subAccountCode: 'PBI3165SU1',
+    departmentCode: null,
+    installmentAmount: 1000,
+    createdAt: new Date('2022-01-31T04:30:00.000Z'),
+    updatedAt: new Date('2021-01-31T04:30:00.000Z'),
+    journalNo: 'lineAccountCode1'
+  },
+  {
+    journalId: '3ad79a8c-44e7-45a2-8df3-a362aece83bd',
+    contractId: 'd4ab57d5-55ac-4329-ad60-c56ab482d22a',
+    invoiceId: '87344782-c2ad-5ff4-9c92-c3be2323b538',
+    lineNo: 2,
+    lineId: '2',
+    accountCode: 'PBI3165AC0',
+    subAccountCode: 'PBI3165SU2',
+    departmentCode: null,
+    installmentAmount: 1000,
+    createdAt: new Date('2022-01-31T04:30:00.000Z'),
+    updatedAt: new Date('2021-01-31T04:30:00.000Z'),
+    journalNo: 'lineAccountCode2'
+  }
+]
+
 const searchResult1 = {
   itemsPerPage: 20,
   itemCount: 4,
@@ -686,8 +718,8 @@ describe('inboxControllerのテスト', () => {
     test('正常', async () => {
       const dummyData = require('../mockInvoice/invoice32')
       accessTradeshiftSpy.mockReturnValue(dummyData)
-      journalizeInvoiceFindAllSpy.mockReturnValue([])
-      const resultDummyData = new InvoiceDetailObj(dummyData, [])
+      journalizeInvoiceFindAllSpy.mockReturnValue(dbAllJournal)
+      const resultDummyData = new InvoiceDetailObj(dummyData, dbAllJournal)
       const result = await inboxController.getInvoiceDetail(accessToken, refreshToken, 'dummyInvoiceId')
       expect(result).toEqual(resultDummyData)
     })
@@ -868,34 +900,8 @@ describe('inboxControllerのテスト', () => {
       const accountCodeName = accountCodeMock[0].accountCodeName
       const subAccountCode = subAccountCodeMock[0].subjectCode
       const subACcountCodeName = subAccountCodeMock[0].subjectName
-      const dummyTargetAccountCodeSubAccountCodeJoin = []
-
-      accountCodeMock.forEach((item) => {
-        subAccountCodeMock.forEach((subAccount) => {
-          if (item.accountCodeId === subAccount.accountCodeId) {
-            dummyTargetAccountCodeSubAccountCodeJoin.push({
-              ...item,
-              'SubAccountCodes.subjectCode': subAccount.subjectCode,
-              'SubAccountCodes.subjectName': subAccount.subjectName,
-              'SubAccountCodes.subAccountCodeId': subAccount.subAccountCodeId
-            })
-          }
-        })
-      })
-
-      const a = accountCodeMock.concat(dummyTargetAccountCodeSubAccountCodeJoin)
-      a.sort((a, b) => {
-        if (a.accountCode > b.accountCode) return 1
-        else if (a.accountCode < b.accountCode) return -1
-        else {
-          if (a['SubAccountCodes.subjectCode'] > b['SubAccountCodes.subjectCode']) return 1
-          else if (a['SubAccountCodes.subjectCode'] < b['SubAccountCodes.subjectCode']) return -1
-          else return 0
-        }
-      })
-
-      accountCodeFindAllSpy.mockReturnValueOnce([])
-      accountCodeFindAllSpy.mockReturnValueOnce(a)
+      const expectResult = []
+      accountCodeFindAllSpy.mockReturnValueOnce(expectResult)
 
       const result = await inboxController.getCode(
         contractId,
@@ -905,7 +911,7 @@ describe('inboxControllerのテスト', () => {
         subACcountCodeName
       )
 
-      expect(JSON.stringify(a, null, 2)).toMatch(JSON.stringify(result, null, 2))
+      expect(JSON.stringify(result, null, 2)).toMatch(JSON.stringify(expectResult, null, 2))
     })
 
     test('正常：パラメタがない場合', async () => {
@@ -925,8 +931,8 @@ describe('inboxControllerのテスト', () => {
         subACcountCodeName
       )
 
-      expect(JSON.stringify([accountCodeMock[0], subAccountCodeMock[0]], null, 2)).toMatch(
-        JSON.stringify(result, null, 2)
+      expect(JSON.stringify(result, null, 2)).toMatch(
+        JSON.stringify([subAccountCodeMock[0], accountCodeMock[0]], null, 2)
       )
     })
 
@@ -950,10 +956,10 @@ describe('inboxControllerのテスト', () => {
         })
       })
 
-      const a = accountCodeMock.concat(dummyTargetAccountCodeSubAccountCodeJoin)
+      const expectResult = accountCodeMock.concat(dummyTargetAccountCodeSubAccountCodeJoin)
 
-      accountCodeFindAllSpy.mockReturnValueOnce(accountCodeMock)
       accountCodeFindAllSpy.mockReturnValueOnce(dummyTargetAccountCodeSubAccountCodeJoin)
+      accountCodeFindAllSpy.mockReturnValueOnce(accountCodeMock)
 
       const result = await inboxController.getCode(
         contractId,
@@ -963,7 +969,7 @@ describe('inboxControllerのテスト', () => {
         subACcountCodeName
       )
 
-      a.sort((a, b) => {
+      expectResult.sort((a, b) => {
         if (a.accountCode > b.accountCode) return 1
         else if (a.accountCode < b.accountCode) return -1
         else {
@@ -973,7 +979,7 @@ describe('inboxControllerのテスト', () => {
         }
       })
 
-      expect(JSON.stringify(a, null, 2)).toMatch(JSON.stringify(result, null, 2))
+      expect(JSON.stringify(result, null, 2)).toMatch(JSON.stringify(expectResult, null, 2))
     })
 
     test('正常：DBエラー', async () => {
