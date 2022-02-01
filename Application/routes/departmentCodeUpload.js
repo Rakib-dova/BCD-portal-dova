@@ -10,7 +10,7 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const upload = require('multer')({ dest: process.env.INVOICE_UPLOAD_PATH })
-const departmentUploadController = require('../controllers/departmentUploadController')
+const departmentCodeUploadController = require('../controllers/departmentCodeUploadController')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -55,7 +55,7 @@ const cbGetIndex = async (req, res, next) => {
     procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
     procedureComment2: '2. CSVファイルに部門データを記入',
     procedureComment2Children: [
-      'A列：部門コード　英・数字のみ（10桁）',
+      'A列：部門コード　英・数字・カナのみ（10桁）',
       'B列：部門名　　　文字列（40桁）',
       '※1ファイルで作成できる部門データの数は200まで'
     ],
@@ -119,7 +119,7 @@ const cbPostIndex = async (req, res, next) => {
 
   // req.file.userId設定
   req.file.userId = req.user.userId
-  const status = await departmentUploadController.upload(req.file, contract)
+  const status = await departmentCodeUploadController.upload(req.file, contract)
 
   if (status instanceof Error) {
     req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.SYSERR000, 'SYSERR'])
