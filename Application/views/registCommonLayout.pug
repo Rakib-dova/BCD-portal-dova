@@ -78,7 +78,10 @@ block content
                               .control
                                 .columns.ml-0.pl-0.alignCenterChild
                                   .column.pl-0
-                                    input.input(type="text" id= idForCodeInput name= idForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
+                                    if isRegistDepartmentCode
+                                      input.input(type="text" id= idForCodeInput name= idForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字・カナのみ（10桁）' pattern=inputPatternEngNumKana required) 
+                                    else
+                                      input.input(type="text" id= idForCodeInput name= idForCodeInput value= valueForCodeInput maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum required) 
                             .field
                               label(for= idForNameInput).input-label #{codeNameLabel}
                               p(id= requiredTagName).input-label-required.input-label （必須）
