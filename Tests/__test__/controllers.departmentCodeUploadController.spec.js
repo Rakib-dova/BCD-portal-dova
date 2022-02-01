@@ -2,7 +2,7 @@
 jest.mock('../../Application/models')
 jest.mock('../../Application/lib/logger')
 
-const departmentUploadController = require('../../Application/controllers/departmentUploadController')
+const departmentCodeUploadController = require('../../Application/controllers/departmentCodeUploadController')
 const departmentCodeController = require('../../Application/controllers/departmentCodeController')
 const logger = require('../../Application/lib/logger')
 const DepartmentCode = require('../../Application/models').DepartmentCode
@@ -25,7 +25,7 @@ dbDepartmentCodeTable.push(codeDepartmentDataResult)
 let errorSpy, contractId, findAllSpy, infoSpy, createSpy, findOneSpy, transactionSpy
 let pathSpy, departmentCodeControllerInsertSpy
 
-describe('departmentUploadControllerのテスト', () => {
+describe('departmentCodeUploadControllerのテスト', () => {
   beforeEach(() => {
     createSpy = jest.spyOn(DepartmentCode, 'create')
     findAllSpy = jest.spyOn(DepartmentCode, 'findAll')
@@ -172,7 +172,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValue(true)
 
       // 試験実施
-      const result = await departmentUploadController.upload(file, contractNormal)
+      const result = await departmentCodeUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -199,7 +199,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValue(true)
 
       // 試験実施
-      const result = await departmentUploadController.upload(file, contractNormal)
+      const result = await departmentCodeUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -226,7 +226,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValue(true)
 
       // 試験実施
-      const result = await departmentUploadController.upload(file, contractNormal)
+      const result = await departmentCodeUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -253,7 +253,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValue(true)
 
       // 試験実施
-      const result = await departmentUploadController.upload(file, contractNormal)
+      const result = await departmentCodeUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -280,7 +280,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValue(true)
 
       // 試験実施
-      const result = await departmentUploadController.upload(file, contractNormal)
+      const result = await departmentCodeUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -307,7 +307,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValue(true)
 
       // 試験実施
-      const result = await departmentUploadController.upload(file, contractNormal)
+      const result = await departmentCodeUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -342,7 +342,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValue(false)
 
       // 試験実施
-      const result = await departmentUploadController.upload(file, contractNormal)
+      const result = await departmentCodeUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -372,7 +372,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValue(true)
 
       // 試験実施
-      const result = await departmentUploadController.upload(file, contractNormal)
+      const result = await departmentCodeUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -410,7 +410,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValueOnce(false)
 
       // 試験実施
-      const result = await departmentUploadController.upload(file, contractNormal)
+      const result = await departmentCodeUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -448,7 +448,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValue(insertError)
 
       // 試験実施
-      const result = await departmentUploadController.upload(file, contractNormal)
+      const result = await departmentCodeUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -479,7 +479,7 @@ describe('departmentUploadControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await departmentUploadController.upload(file, contractNormal)
+      const result = await departmentCodeUploadController.upload(file, contractNormal)
 
       // 期待結果
       // 想定したデータがReturnされていること
@@ -506,7 +506,7 @@ describe('departmentUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValue(true)
 
       // 試験実施
-      const result = await departmentUploadController.remove(uploadFilePath)
+      const result = await departmentCodeUploadController.remove(uploadFilePath)
 
       // 期待結果
       expect(result).toEqual(true)
@@ -531,7 +531,7 @@ describe('departmentUploadControllerのテスト', () => {
       const noUploadFilePath = '/home/upload\\/test9.csv'
       let result
       try {
-        result = await departmentUploadController.remove(noUploadFilePath)
+        result = await departmentCodeUploadController.remove(noUploadFilePath)
       } catch (err) {
         result = err
       }
@@ -549,7 +549,7 @@ describe('departmentUploadControllerのテスト', () => {
       // 試験実施
       let result
       try {
-        result = await departmentUploadController.remove(noUploadFilePath)
+        result = await departmentCodeUploadController.remove(noUploadFilePath)
       } catch (err) {
         result = err
       }

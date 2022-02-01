@@ -25,7 +25,7 @@ constantsDefine({
   // 部門コードエラーメッセージ
   DEPARTMENTCODEERR000: `${codeValidDefine.DEPARTMENTCODE_KEY}が未入力です。`,
   DEPARTMENTCODEERR001: `${codeValidDefine.DEPARTMENTCODE_KEY}は${codeValidDefine.CODE_LENGTH}文字以内で入力してください。`,
-  DEPARTMENTCODEERR002: `${codeValidDefine.DEPARTMENTCODE_KEY}は英数字で入力してください。`,
+  DEPARTMENTCODEERR002: `${codeValidDefine.DEPARTMENTCODE_KEY}は英数字カナで入力してください。`,
   DEPARTMENTCODEERR003: `入力した${codeValidDefine.DEPARTMENTCODE_KEY}は既に登録されています。`,
 
   // 部門名エラーメッセージ

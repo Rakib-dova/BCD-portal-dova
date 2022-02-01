@@ -9,11 +9,11 @@ const constants = require('../constants')
 const validate = require('../lib/validate')
 
 const upload = async function (_file, contract) {
-  logger.info(constantsDefine.logMessage.INF000 + 'departmentUploadController.upload')
+  logger.info(constantsDefine.logMessage.INF000 + 'departmentCodeUploadController.upload')
 
   let result = null
 
-  // filename設定
+  // filename変更
   const today = new Date().getTime()
   const filename = '部門データ' + '_' + today + '_' + _file.userId + '_' + _file.originalname + '.csv'
   const originName = path.resolve(filePath, _file.filename)
@@ -108,7 +108,7 @@ const upload = async function (_file, contract) {
         let errorCheck = false
 
         // 部門コードバリデーションチェック
-        const checkCode = validate.isCode(uploadDepartmentCode[idx].code, prefix)
+        const checkCode = validate.isDepartmentCode(uploadDepartmentCode[idx].code, prefix)
         switch (checkCode) {
           case '':
             break
@@ -168,7 +168,7 @@ const upload = async function (_file, contract) {
       result = 0
     }
 
-    logger.info(constantsDefine.logMessage.INF001 + 'departmentUploadControllerupload')
+    logger.info(constantsDefine.logMessage.INF001 + 'departmentCodeUploadController.upload')
     if (errorMsg.length !== 0) {
       errorMsg.unshift({ header: ['行数', '部門コード', '部門名', '詳細'] })
       return errorMsg
@@ -176,28 +176,28 @@ const upload = async function (_file, contract) {
     return result
   } catch (error) {
     logger.error({ contractId: contract.contractId, stack: error.stack, status: 0 })
-    logger.info(constantsDefine.logMessage.INF001 + 'departmentUploadController.upload')
+    logger.info(constantsDefine.logMessage.INF001 + 'departmentCodeUploadController.upload')
     return error
   }
 }
 
 // CSVファイル削除機能
 const removeFile = async (deleteFilePath) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'departmentUploadController.remove')
+  logger.info(constantsDefine.logMessage.INF000 + 'departmentCodeUploadController.remove')
   const deleteFile = path.join(deleteFilePath)
 
   if (fs.existsSync(deleteFile)) {
     try {
       fs.unlinkSync(deleteFile)
-      logger.info(constantsDefine.logMessage.INF001 + 'departmentUploadController.remove')
+      logger.info(constantsDefine.logMessage.INF001 + 'departmentCodeUploadController.remove')
       return true
     } catch (error) {
-      logger.info(constantsDefine.logMessage.INF001 + 'departmentUploadController.remove')
+      logger.info(constantsDefine.logMessage.INF001 + 'departmentCodeUploadController.remove')
       throw error
     }
   } else {
     // 削除対象がない場合、サーバーエラー画面表示
-    logger.info(constantsDefine.logMessage.INF001 + 'departmentUploadController.remove')
+    logger.info(constantsDefine.logMessage.INF001 + 'departmentCodeUploadController.remove')
     const deleteError = new Error('CSVファイル削除エラー')
     throw deleteError
   }
