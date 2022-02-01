@@ -56,6 +56,9 @@ $('#btn-bulkInsert').addEventListener('click', function () {
   $('#bulkInsertNo1_lineAccountCode1_accountCode').value = ''
   $('#bulkInsertNo1_lineAccountCode1_subAccountCode').value = ''
 
+  // エラーメッセージ初期化
+  $('#error-message-journal-modal').innerText = ''
+
   if ($('.column-invoiceLine-journalModal').length < invoiceLines.length) {
     for (let idx = 0; idx < invoiceLines.length; idx++) {
       const templateInvoiceLine = $('#template-invoiceLine')
