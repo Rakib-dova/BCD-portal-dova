@@ -113,7 +113,7 @@ describe('departmentCodeUploadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでdepartmentUploadが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('departmentUpload', {
+      expect(response.render).toHaveBeenCalledWith('departmentCodeUpload', {
         uploadCommonLayoutTitle: '部門データ一括作成',
         uploadCommonLayoutEngTitle: 'BULK UPLOAD DEPARTMENT CODE',
         fileInputName: 'bulkDepartmentCode',
@@ -126,7 +126,7 @@ describe('departmentCodeUploadのテスト', () => {
           procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
           procedureComment2: '2. CSVファイルに部門データを記入',
           procedureComment2Children: [
-            'A列：部門コード　英・数字のみ（10桁）',
+            'A列：部門コード　英・数字・カナのみ（10桁）',
             'B列：部門名　　　文字列（40桁）',
             '※1ファイルで作成できる部門データの数は200まで'
           ],
