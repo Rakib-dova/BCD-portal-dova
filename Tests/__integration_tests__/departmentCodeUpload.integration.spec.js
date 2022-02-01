@@ -300,13 +300,11 @@ describe('部門データ一括作成のインテグレーションテスト', (
       expect(errorMsg).toMatch('部門コードが未入力です。')
       expect(errorMsg).toMatch('部門コードは10文字以内で入力してください。')
       expect(errorMsg).toMatch('入力した部門コードは既に登録されています。')
-      expect(errorMsg).toMatch('部門コードは英数字で入力してください。')
+      expect(errorMsg).toMatch('部門コードは英数字カナで入力してください。')
       expect(errorMsg).toMatch('部門名が未入力です。')
       expect(errorMsg).toMatch('部門名は40文字以内で入力してください。')
       expect(errorMsg).toMatch('部門コードが未入力です。,部門名が未入力です。')
-      expect(errorMsg).toMatch(
-        '部門コードは10文字以内で入力してください。,部門名は40文字以内で入力してください。'
-      )
+      expect(errorMsg).toMatch('部門コードは10文字以内で入力してください。,部門名は40文字以内で入力してください。')
 
       await browser.close()
     })

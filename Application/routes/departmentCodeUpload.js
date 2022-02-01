@@ -55,7 +55,7 @@ const cbGetIndex = async (req, res, next) => {
     procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
     procedureComment2: '2. CSVファイルに部門データを記入',
     procedureComment2Children: [
-      'A列：部門コード　英・数字のみ（10桁）',
+      'A列：部門コード　英・数字・カナのみ（10桁）',
       'B列：部門名　　　文字列（40桁）',
       '※1ファイルで作成できる部門データの数は200まで'
     ],

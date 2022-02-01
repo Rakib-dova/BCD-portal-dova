@@ -14,13 +14,13 @@ const noticeHelper = require('../../Application/routes/helpers/notice')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
-const departmentUploadController = require('../../Application/controllers/departmentUploadController.js')
+const departmentCodeUploadController = require('../../Application/controllers/departmentCodeUploadController.js')
 const logger = require('../../Application/lib/logger.js')
 
 let request, response, infoSpy
 let userControllerFindOneSpy,
   contractControllerFindOneSpy,
-  departmentUploadControllerUploadSpy,
+  departmentCodeUploadControllerUploadSpy,
   tenatnsFindOneSpy,
   userControllerFindAndUpdate,
   contractControllerFindContractSpy,
@@ -55,7 +55,7 @@ describe('departmentCodeUploadのテスト', () => {
     tenatnsFindOneSpy = jest.spyOn(tenantController, 'findOne')
     request.flash = jest.fn()
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
-    departmentUploadControllerUploadSpy = jest.spyOn(departmentUploadController, 'upload')
+    departmentCodeUploadControllerUploadSpy = jest.spyOn(departmentCodeUploadController, 'upload')
   })
   afterEach(() => {
     request.resetMocked()
@@ -68,7 +68,7 @@ describe('departmentCodeUploadのテスト', () => {
     userControllerFindAndUpdate.mockRestore()
     tenatnsFindOneSpy.mockRestore()
     checkContractStatusSpy.mockRestore()
-    departmentUploadControllerUploadSpy.mockRestore()
+    departmentCodeUploadControllerUploadSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -336,7 +336,7 @@ describe('departmentCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // dpeartmentUploadController.uploadのモックバリュー
-      departmentUploadControllerUploadSpy.mockReturnValue(0)
+      departmentCodeUploadControllerUploadSpy.mockReturnValue(0)
 
       // 試験実施
       await departmentCodeUpload.cbPostIndex(request, response, next)
@@ -372,7 +372,7 @@ describe('departmentCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // dpeartmentUploadController.uploadのモックバリュー
-      departmentUploadControllerUploadSpy.mockReturnValue(new Error())
+      departmentCodeUploadControllerUploadSpy.mockReturnValue(new Error())
 
       // 試験実施
       await departmentCodeUpload.cbPostIndex(request, response, next)
@@ -412,7 +412,7 @@ describe('departmentCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // dpeartmentUploadController.uploadのモックバリュー
-      departmentUploadControllerUploadSpy.mockReturnValue(-1)
+      departmentCodeUploadControllerUploadSpy.mockReturnValue(-1)
 
       // 試験実施
       await departmentCodeUpload.cbPostIndex(request, response, next)
@@ -452,7 +452,7 @@ describe('departmentCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // dpeartmentUploadController.uploadのモックバリュー
-      departmentUploadControllerUploadSpy.mockReturnValue(-2)
+      departmentCodeUploadControllerUploadSpy.mockReturnValue(-2)
 
       // 試験実施
       await departmentCodeUpload.cbPostIndex(request, response, next)
@@ -488,7 +488,7 @@ describe('departmentCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // dpeartmentUploadController.uploadのモックバリュー
-      departmentUploadControllerUploadSpy.mockReturnValue(-3)
+      departmentCodeUploadControllerUploadSpy.mockReturnValue(-3)
 
       // 試験実施
       await departmentCodeUpload.cbPostIndex(request, response, next)
@@ -528,7 +528,7 @@ describe('departmentCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // dpeartmentUploadController.uploadのモックバリュー
-      departmentUploadControllerUploadSpy.mockReturnValue(-4)
+      departmentCodeUploadControllerUploadSpy.mockReturnValue(-4)
 
       // 試験実施
       await departmentCodeUpload.cbPostIndex(request, response, next)
@@ -564,7 +564,7 @@ describe('departmentCodeUploadのテスト', () => {
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // dpeartmentUploadController.uploadのモックバリュー
-      departmentUploadControllerUploadSpy.mockReturnValue([])
+      departmentCodeUploadControllerUploadSpy.mockReturnValue([])
 
       // 試験実施
       await departmentCodeUpload.cbPostIndex(request, response, next)
