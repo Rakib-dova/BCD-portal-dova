@@ -10,7 +10,7 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const upload = require('multer')({ dest: process.env.INVOICE_UPLOAD_PATH })
-const departmentUploadController = require('../controllers/departmentUploadController')
+const departmentCodeUploadController = require('../controllers/departmentCodeUploadController')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -119,7 +119,7 @@ const cbPostIndex = async (req, res, next) => {
 
   // req.file.userId設定
   req.file.userId = req.user.userId
-  const status = await departmentUploadController.upload(req.file, contract)
+  const status = await departmentCodeUploadController.upload(req.file, contract)
 
   if (status instanceof Error) {
     req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.SYSERR000, 'SYSERR'])
