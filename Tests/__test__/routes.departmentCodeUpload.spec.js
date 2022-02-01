@@ -73,7 +73,11 @@ describe('departmentCodeUploadのテスト', () => {
 
   describe('ルーティング', () => {
     test('departmentCodeUploadのルーティングを確認', async () => {
-      expect(departmentCodeUpload.router.get).toBeCalledWith('/', helper.isAuthenticated, departmentCodeUpload.cbGetIndex)
+      expect(departmentCodeUpload.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        departmentCodeUpload.cbGetIndex
+      )
 
       expect(departmentCodeUpload.router.post).toBeCalledWith(
         '/',
@@ -108,7 +112,7 @@ describe('departmentCodeUploadのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでaccountUploadが呼ばれ「る」
+      // response.renderでdepartmentUploadが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('departmentUpload', {
         uploadCommonLayoutTitle: '部門データ一括作成',
         uploadCommonLayoutEngTitle: 'BULK UPLOAD DEPARTMENT CODE',
@@ -186,7 +190,7 @@ describe('departmentCodeUploadのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -384,7 +388,7 @@ describe('departmentCodeUploadのテスト', () => {
         'システムエラーです。<BR>（後程、接続してください。）',
         'SYSERR'
       ])
-      // 部門データ一覧へリダイレクトされ「る」
+      // 部門データ一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
     })
 
@@ -424,7 +428,7 @@ describe('departmentCodeUploadのテスト', () => {
         'ヘッダーが指定のものと異なります。',
         'SYSERR'
       ])
-      // 部門データ一覧へリダイレクトされ「る」
+      // 部門データ一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
     })
 
@@ -460,7 +464,7 @@ describe('departmentCodeUploadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
-      // 部門データ一覧へリダイレクトされ「る」
+      // 部門データ一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
     })
 
@@ -500,7 +504,7 @@ describe('departmentCodeUploadのテスト', () => {
         '部門データが200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>  （一度に取り込める部門データは200件までとなります。）',
         'SYSERR'
       ])
-      // 部門データ一覧へリダイレクトされ「る」
+      // 部門データ一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
     })
 
@@ -536,7 +540,7 @@ describe('departmentCodeUploadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
-      // 部門データ一覧へリダイレクトされ「る」
+      // 部門データ一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
     })
 
@@ -577,7 +581,7 @@ describe('departmentCodeUploadのテスト', () => {
         'SYSERR',
         []
       ])
-      // 部門データ一覧へリダイレクトされ「る」
+      // 部門データ一括作成へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
     })
 
@@ -679,7 +683,7 @@ describe('departmentCodeUploadのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('500エラー：user.statusが0ではない場合', async () => {
+    test('404エラー：user.statusが0ではない場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
