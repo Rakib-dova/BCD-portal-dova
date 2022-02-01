@@ -22,13 +22,26 @@ constantsDefine({
   SUBACCOUNTNAMEERR000: `${codeValidDefine.SUBACCOUNTNAME_KEY}が未入力です。`,
   SUBACCOUNTNAMEERR001: `${codeValidDefine.SUBACCOUNTNAME_KEY}は${codeValidDefine.NAME_LENGTH}文字以内で入力してください。`,
 
-  // CSVファイル件数
+  // 部門コードエラーメッセージ
+  DEPARTMENTCODEERR000: `${codeValidDefine.DEPARTMENTCODE_KEY}が未入力です。`,
+  DEPARTMENTCODEERR001: `${codeValidDefine.DEPARTMENTCODE_KEY}は${codeValidDefine.CODE_LENGTH}文字以内で入力してください。`,
+  DEPARTMENTCODEERR002: `${codeValidDefine.DEPARTMENTCODE_KEY}は英数字カナで入力してください。`,
+  DEPARTMENTCODEERR003: `入力した${codeValidDefine.DEPARTMENTCODE_KEY}は既に登録されています。`,
+
+  // 部門名エラーメッセージ
+  DEPARTMENTNAMEERR000: `${codeValidDefine.DEPARTMENTNAME_KEY}が未入力です。`,
+  DEPARTMENTNAMEERR001: `${codeValidDefine.DEPARTMENTNAME_KEY}は${codeValidDefine.NAME_LENGTH}文字以内で入力してください。`,
+
+  // --------------------CSVファイル件数
   // 勘定科目上限値超過
   ACCOUNTCOUNTERR000:
     '勘定科目が200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>  （一度に取り込める勘定科目は200件までとなります。）',
   // 補助科目上限値超過
   SUBACCOUNTCOUNTERR000:
     '補助科目が200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>（一度に取り込める補助科目は200件までとなります。）',
+  // 部門データ上限値超過
+  DEPARTMENTCOUNTERR000:
+    '部門データが200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>  （一度に取り込める部門データは200件までとなります。）',
 
   // --------------------共通メッセージ--------------------
   // システムエラー

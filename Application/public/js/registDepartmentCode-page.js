@@ -7,8 +7,8 @@ window.onload = () => {
 
 // 「確認」ボタンの機能（バリデーションチェック）
 document.getElementById('btnCheck').addEventListener('click', function (e) {
-  // 英数文字正規式
-  const regExpEngNumber = '^[a-zA-Z0-9+]*$'
+  // 英数カナ文字正規式
+  const regExpEngNumber = '^[a-zA-Z0-9ァ-ヶー　+]*$'
   let errorFlag = false
 
   document.querySelector('#RequiredErrorMesageForCode').classList.add('is-invisible')

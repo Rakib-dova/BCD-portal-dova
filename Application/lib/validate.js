@@ -430,6 +430,21 @@ const isCode = function (code, prefix) {
   }
 }
 
+// 部門コード
+const isDepartmentCode = function (code, prefix) {
+  const inputPatternEngNum = '^[a-zA-Z0-9ァ-ヶー　+]*$'
+  const regex = new RegExp(inputPatternEngNum)
+  if (code.length < 1) {
+    return `${prefix}CODEERR000`
+  } else if (code.length > constantsDefine.codeValidDefine.CODE_LENGTH) {
+    return `${prefix}CODEERR001`
+  } else if (!regex.test(code)) {
+    return `${prefix}CODEERR002`
+  } else {
+    return ''
+  }
+}
+
 const isName = function (name, prefix) {
   if (name.length < 1) {
     return `${prefix}NAMEERR000`
@@ -476,5 +491,6 @@ module.exports = {
   isUndefined: isUndefined,
   isNumberRegular: isNumberRegular,
   isCode: isCode,
-  isName: isName
+  isName: isName,
+  isDepartmentCode: isDepartmentCode
 }
