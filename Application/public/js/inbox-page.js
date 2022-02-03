@@ -125,6 +125,27 @@ const getInvoiceLineList = function () {
       : ''
     const tax = invoiceLine.querySelector('.tax') ? invoiceLine.querySelector('.tax').innerText : ''
     const total = invoiceLine.querySelector('.lineTotal') ? invoiceLine.querySelector('.lineTotal').value : ''
+    const account = new Array(10)
+    for (let idx = 0; idx < 10; idx++) {
+      const node = invoiceLine.parentNode.querySelectorAll('.lineAccountcode')[idx]
+      if (node) {
+        account[idx] = {
+          node: node,
+          accountCode: node.querySelectorAll('input[type=text]')[0].value,
+          subAccountCode: node.querySelectorAll('input[type=text]')[1].value,
+          departmentCode: node.querySelectorAll('input[type=text]')[2].value,
+          amount: node.querySelectorAll('input[type=text]')[3].value
+        }
+      } else {
+        account[idx] = {
+          node: null,
+          accountCode: null,
+          subAccountCode: null,
+          departmentCode: null,
+          amount: null
+        }
+      }
+    }
 
     return {
       invoiceLineNo: invoiceLineNo,
@@ -134,7 +155,8 @@ const getInvoiceLineList = function () {
       unitcode: unitcode,
       priceAmount: priceAmount,
       tax: tax,
-      total: total
+      total: total,
+      account: account
     }
   })
 }
@@ -344,7 +366,7 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
   )
 })
 
-// 部門データ検索
+// 部門データモーダルの内の検索ボタン
 $('#btnSearchDepartmentCode').addEventListener('click', function () {
   const inputPatternEngNumKana = '^[a-zA-Z0-9ァ-ヶー　+]*$'
   const departmentCode = $('#searchModalDepartmentCode').value
@@ -638,8 +660,11 @@ $('#btn-insert').addEventListener('click', function () {
   }
 })
 
+// 「登録」ボタンクリック
 $('#btn-confirm').addEventListener('click', function () {
+  // 「登録」ボタンが非活性の場合、終了する。
   if (this.getAttribute('disabled') === 'true') return
+
   const dupleResult = duplicationCheck()
   if (dupleResult.length > 0) {
     document.getElementById(dupleResult[0].id).focus({ preventScroll: false })
@@ -648,6 +673,7 @@ $('#btn-confirm').addEventListener('click', function () {
   if (checkJournalList()) $('#form').submit()
 })
 
+// 仕訳情報を取得関数
 const getJournalList = function () {
   const journalLines = []
   Array.prototype.forEach.call($('.lineAccountCode'), (line) => {
@@ -683,10 +709,24 @@ const getJournalList = function () {
   })
   return journalLines
 }
+// 仕訳情報のバリデーションチェックする。
 const checkJournalList = function () {
-  const journalLines = getJournalList()
-
+  const journalLines = getInvoiceLineList().map((invoiceLine) => {
+    const line = new Array(10)
+    invoiceLine.account.forEach((account, idx) => {
+      if (account.node) {
+        line[idx] = {
+          accountCode: account.accountCode,
+          subAccountCode: account.subAccountCode,
+          input_amount: account.amount,
+          journalNo: `lineAccountCode${idx + 1}`
+        }
+      }
+    })
+    return line
+  })
   let isFirstLineNull = false
+  // 勘定科目が設定した仕訳情報の計上が0円になっている場合、エラーを表示
   journalLines.forEach((lines, lineNo) => {
     lines.forEach((journal, journalNo) => {
       if (journalNo !== 0 && journal !== null) {
@@ -699,26 +739,32 @@ const checkJournalList = function () {
       }
     })
   })
+  //
   for (let i = 0; i < journalLines.length; i++) {
     let total = 0
     for (let j = 0; j < journalLines[i].length; j++) {
+      // チェックする仕訳情報を絞り込む。
       const checkJournalLines = journalLines[i].filter(function (item) {
         return item !== null && item !== undefined
       })
+
+      // 仕訳情報が設定されていない小計チェック用
       if (checkJournalLines.length === 1) {
-        total = ~~journalLines[i][j].input_amount
+        total = ~~journalLines[i][j].input_amount.replaceAll(',', '')
         break
       }
+      // 設定した仕訳情報の計上金額をチェック用
       if (journalLines[i][j] !== undefined) {
         if (journalLines[i][j].accountCode.length !== 0) {
-          total = total + ~~journalLines[i][j].input_amount
-          if (~~journalLines[i][j].input_amount === 0) {
+          total = total + ~~journalLines[i][j].input_amount.replaceAll(',', '')
+          if (~~journalLines[i][j].input_amount.replaceAll(',', '') === 0) {
             isFirstLineNull = true
             $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
           }
         }
       }
     }
+    // 金額が誤りがある場合
     if (total !== ~~$(`#lineNo${i + 1}Total`).value.replaceAll(',', '')) {
       isFirstLineNull = true
       $('#error-message-body').innerText = '仕訳情報を正しく設定してください。'
@@ -752,6 +798,23 @@ const duplicationCheck = function () {
     koumokuInformationArray.push(duplicateCheckFunction(lineInformationArray))
   }
 
+  // 部門データの重複をチェック
+  const invoiceLines = getInvoiceLineList()
+  invoiceLines.forEach((line, lineIdx) => {
+    line.account.forEach((account, accidx, accArr) => {
+      if (account.node) {
+        for (let idx = 0; idx < accArr.length; idx++) {
+          if (account.node !== accArr[idx].node && accArr[idx].node !== null) {
+            if (account.departmentCode.length === 0 || accArr[idx].departmentCode.length === 0) continue
+            if (account.departmentCode === accArr[idx].departmentCode) {
+              koumokuInformationArray[lineIdx] = true
+            }
+          }
+        }
+      }
+    })
+  })
+
   // 重複がある明細項目づつエラーメッセージを設定する。
   koumokuInformationArray.map((item, idx) => {
     const errMsg = document.getElementById(`duplicationErrMsg${idx + 1}`)
@@ -781,7 +844,23 @@ const duplicationCheckModal = function () {
     const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
     koumokuInformationArray.push([accountCode, subAccountCode])
   })
-  const dupleResult = duplicateCheckFunction(koumokuInformationArray)
+  let dupleResult = duplicateCheckFunction(koumokuInformationArray)
+
+  // 部門データの重複をチェック
+  Array.prototype.forEach.call(children, (journal, jdx, journalArr) => {
+    for (let idx = jdx; idx < journalArr.length; idx++) {
+      if (journal !== journalArr[idx]) {
+        const dep1 = journal.querySelectorAll('input[type=text]')[2].value
+        const dep2 = journalArr[idx].querySelectorAll('input[type=text]')[2].value
+        if (dep1.length === 0 || dep2.length === 0) {
+          continue
+        }
+        if (dep1 === dep2) {
+          dupleResult = true
+        }
+      }
+    }
+  })
 
   // 重複された場合エラーメッセージ表示
   const errMsg = $('#error-message-journal-modal')
