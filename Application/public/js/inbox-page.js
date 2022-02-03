@@ -285,6 +285,7 @@ const btnSearchMain = function (searchModal) {
 // 2番目以降の部門データ検索ボタンイベント
 const btnSearchDepartmentCode = function (searchModal) {
   return function () {
+    $('#searchDepartmentModalErrMsg').innerText = ''
     if (this.dataset.info !== $('#departmentCode-modal').dataset.info) {
       deleteDepartmentResultDisplayModal()
     }
@@ -347,51 +348,81 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
 
 // 部門データ検索
 $('#btnSearchDepartmentCode').addEventListener('click', function () {
+  const inputPatternEngNumKana = '^[a-zA-Z0-9ァ-ヶー　+]*$'
   const departmentCode = $('#searchModalDepartmentCode').value
   const departmentCodeName = $('#searchModalDepartmentCodeName').value
+  const inputPatternEngNumKanaRegExp = new RegExp(inputPatternEngNumKana)
 
-  // const $this = this
+  const $this = this
+  // モーダル初期化
   deleteDepartmentResultDisplayModal()
+
+  // 部門コードのバリデーションチェック
+  if (!inputPatternEngNumKanaRegExp.test(departmentCode)) {
+    $('#searchDepartmentModalErrMsg').innerText = '入力値が間違いました。'
+    $('#searchModalDepartmentCode').value = departmentCode
+    $('#searchModalDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+
+  // 部門コードと部門名の桁数チェック
+  if (departmentCode.length > 10 && departmentCodeName.length > 40) {
+    $('#searchDepartmentModalErrMsg').innerText =
+      '部門コードは10桁まで入力してください。 部門名は40桁まで入力してください。'
+    $('#searchModalDepartmentCode').value = departmentCode
+    $('#searchModalDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+  // 部門コードの桁数チェック
+  if (departmentCode.length > 10) {
+    $('#searchDepartmentModalErrMsg').innerText = '部門コードは10桁まで入力してください。'
+    $('#searchModalDepartmentCode').value = departmentCode
+    $('#searchModalDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+  // 部門名の桁数チェック
+  if (departmentCodeName.length > 40) {
+    $('#searchDepartmentModalErrMsg').innerText = '部門名は40桁まで入力してください。'
+    $('#searchModalDepartmentCode').value = departmentCode
+    $('#searchModalDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+
+  // 初期化されたキーワードを入力
   $('#searchModalDepartmentCode').value = departmentCode
   $('#searchModalDepartmentCodeName').value = departmentCodeName
 
-  // const getAccountCode = new XMLHttpRequest()
-  // getAccountCode.open('POST', '/inbox/getCode')
-  // getAccountCode.setRequestHeader('Content-Type', 'application/json')
-  // getAccountCode.onreadystatechange = function () {
-  //   if (getAccountCode.readyState === getAccountCode.DONE) {
-  //     switch (getAccountCode.status) {
-  //       case 200: {
-  //         const result = JSON.parse(getAccountCode.response)
-  //         if (result.length !== 0) {
-  //           displayResultForCode(result)
-  //         } else {
-  //           displayNoDepartmentCode()
-  //         }
-  //         break
-  //       }
-  //       default: {
-  //         deleteDepartmentResultDisplayModal()
-  //         break
-  //       }
-  //     }
-  //   }
-  //   $this.classList.remove('is-loading')
-  // }
-  // $this.classList.add('is-loading')
-  // getAccountCode.send(
-  //   JSON.stringify({
-  //     departmentCode: departmentCode,
-  //     departmentCodeName: departmentCodeName
-  //   })
-  // )
-
-  // ダミーデータ
-  const result = [
-    { departmentCode: 'TEST1', departmentCodeName: 'ダミー部門データ1' },
-    { departmentCode: 'TEST2', departmentCodeName: 'ダミー部門データ2' }
-  ]
-  displayResultForDepartmentCode(result)
+  // サーバーからデータ取得
+  const getAccountCode = new XMLHttpRequest()
+  getAccountCode.open('POST', '/inbox/department')
+  getAccountCode.setRequestHeader('Content-Type', 'application/json')
+  getAccountCode.onreadystatechange = function () {
+    if (getAccountCode.readyState === getAccountCode.DONE) {
+      switch (getAccountCode.status) {
+        case 200: {
+          const result = JSON.parse(getAccountCode.response)
+          if (result.length !== 0) {
+            displayResultForDepartmentCode(result)
+          } else {
+            displayNoDepartmentCode()
+          }
+          break
+        }
+        default: {
+          deleteDepartmentResultDisplayModal()
+          break
+        }
+      }
+    }
+    $this.classList.remove('is-loading')
+  }
+  $this.classList.add('is-loading')
+  getAccountCode.send(
+    JSON.stringify({
+      departmentCode: departmentCode,
+      departmentCodeName: departmentCodeName
+    })
+  )
 })
 
 // 勘定科目コード、補助科目検索結果を画面に表示
@@ -437,14 +468,12 @@ const displayResultForDepartmentCode = function (codeArr) {
   codeArr.forEach((item) => {
     const cloneSearchResultDepartmentCodeTemplate = document.importNode(searchResultDepartmentCode.content, true)
     cloneSearchResultDepartmentCodeTemplate.querySelector('.rowDepartmentCode').dataset.target = '#departmentCode-modal'
-    cloneSearchResultDepartmentCodeTemplate.querySelector('.rowDepartmentCode').dataset.departmentCode =
-      item.departmentCode
+    cloneSearchResultDepartmentCodeTemplate.querySelector('.rowDepartmentCode').dataset.departmentCode = item.code
     cloneSearchResultDepartmentCodeTemplate
       .querySelector('.columnNoDepartmentCodeMessage')
       .classList.add('is-invisible')
-    cloneSearchResultDepartmentCodeTemplate.querySelector('.columnDepartmentCode').innerText = item.departmentCode
-    cloneSearchResultDepartmentCodeTemplate.querySelector('.columnDepartmentCodeName').innerText =
-      item.departmentCodeName
+    cloneSearchResultDepartmentCodeTemplate.querySelector('.columnDepartmentCode').innerText = item.code
+    cloneSearchResultDepartmentCodeTemplate.querySelector('.columnDepartmentCodeName').innerText = item.name
     displayFieldDepartmentResultBody.appendChild(cloneSearchResultDepartmentCodeTemplate)
   })
   $('.rowDepartmentCode').forEach((row) => {
