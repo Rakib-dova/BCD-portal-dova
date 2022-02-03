@@ -250,7 +250,7 @@ app.use('/change', require('./routes/change').router)
 app.use('/csvDownload', require('./routes/csvDownload').router)
 
 // 奉行クラウド連携
-app.use('/bugyo', require('../obc/obc'))
+app.use('/bugyo', require('./obc/obc'))
 
 // notice
 const noticeHelper = require('./routes/helpers/notice')
