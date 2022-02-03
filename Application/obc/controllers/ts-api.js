@@ -44,8 +44,6 @@ api.baseUrl = () => 'https://' + process.env.TS_API_HOST.replace('api-', '')
 // Get Account Info
 api.getAccount = async (ctx) => getClient(ctx).get('/account/info')
 
-api.getCurrentUser = async (ctx) => getClient(ctx).get('/account/info/user')
-
 /** Users */
 // Get User Info
 api.getUser = async (ctx) => getClient(ctx).get('/account/info/user')
