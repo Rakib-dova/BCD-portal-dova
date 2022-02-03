@@ -8,6 +8,7 @@ const logger = require('../../Application/lib/logger')
 const InvoiceDetailObj = require('../../Application/lib/invoiceDetail')
 const AccountCode = require('../../Application/models').AccountCode
 const SubAccountCode = require('../../Application/models').SubAccountCode
+const DepartmentCode = require('../../Application/models').DepartmentCode
 const JournalizeInvoice = require('../../Application/models').JournalizeInvoice
 
 let accessTradeshiftSpy,
@@ -16,10 +17,13 @@ let accessTradeshiftSpy,
   accountCodeFindOneSpy,
   accountCodeFindAllSpy,
   subAccountCodeFindOneSpy,
-  journalizeInvoiceCreateSpy
+  journalizeInvoiceCreateSpy,
+  departmentCodeFindOneSpy,
+  departmentCodeFindAllSpy
 
 const accountCodeMock = require('../mockDB/AccountCode_Table')
 const subAccountCodeMock = require('../mockDB/SubAccountCode_Table')
+const departmentCodeMock = require('../mockDB/DepartmentCode_Table')
 
 // JournalFindAll結果
 const dbAllJournal = [
@@ -643,6 +647,8 @@ describe('inboxControllerのテスト', () => {
     accountCodeFindOneSpy = jest.spyOn(AccountCode, 'findOne')
     accountCodeFindAllSpy = jest.spyOn(AccountCode, 'findAll')
     subAccountCodeFindOneSpy = jest.spyOn(SubAccountCode, 'findOne')
+    departmentCodeFindOneSpy = jest.spyOn(DepartmentCode, 'findOne')
+    departmentCodeFindAllSpy = jest.spyOn(DepartmentCode, 'findAll')
     journalizeInvoiceCreateSpy = jest.spyOn(JournalizeInvoice, 'create')
     JournalizeInvoice.build = jest.fn(function (values) {
       const keys = Object.keys(values)
@@ -664,6 +670,8 @@ describe('inboxControllerのテスト', () => {
     accountCodeFindOneSpy.mockRestore()
     accountCodeFindAllSpy.mockRestore()
     journalizeInvoiceCreateSpy.mockRestore()
+    departmentCodeFindOneSpy.mockRestore()
+    departmentCodeFindAllSpy.mockRestore()
   })
 
   describe('getInbox', () => {
@@ -1015,6 +1023,7 @@ describe('inboxControllerのテスト', () => {
       lineNo: 1,
       lineNo1_lineAccountCode1_accountCode: '',
       lineNo1_lineAccountCode1_subAccountCode: '',
+      lineNo1_lineAccountCode1_departmentCode: '',
       lineNo1_lineAccountCode1_input_amount: '1000'
     }
     test('正常：明細が１個の時、何も操作なく「登録」ボタンを押す', async () => {
@@ -1080,11 +1089,33 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(-2)
     })
 
+    test('正常：明細が１個の時、勘定科目と部門データ操作し「登録」ボタンを押す、部門データない場合', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = 'AB001'
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = 'DE001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      departmentCodeFindOneSpy.mockReturnValueOnce([])
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(-3)
+    })
+
     test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、DBにはデータがない場合', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
+      data.lineNo1_lineAccountCode1_departmentCode = ''
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
       ab001.contractId = accountCodeMock[0].contractId
@@ -1231,6 +1262,81 @@ describe('inboxControllerのテスト', () => {
 
       const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
       expect(result.error).toBe(dbError)
+    })
+  })
+
+  describe('getDepartment', () => {
+    test('正常：パラメタが2個ある場合', async () => {
+      const departmentCode = departmentCodeMock[0].departmentCode
+      const departmentCodeName = departmentCodeMock[0].departmentCodeName
+      const expectResult = []
+      departmentCodeFindAllSpy.mockReturnValueOnce(expectResult)
+
+      const result = await inboxController.getDepartment(contractId, departmentCode, departmentCodeName)
+
+      expect(JSON.stringify(result, null, 2)).toMatch(JSON.stringify(expectResult, null, 2))
+    })
+
+    test('正常：パラメタがない場合', async () => {
+      const departmentCode = undefined
+      const departmentCodeName = undefined
+
+      const expectResult = [
+        {
+          status: 0,
+          searchResult: [
+            {
+              code: 'DE001',
+              name: 'テスト用部門データ1'
+            }
+          ]
+        }
+      ]
+
+      departmentCodeFindAllSpy.mockReturnValueOnce([departmentCodeMock[0]])
+
+      const result = await inboxController.getDepartment(contractId, departmentCode, departmentCodeName)
+
+      expect(JSON.stringify(result, null, 2)).toMatch(JSON.stringify(expectResult[0], null, 2))
+    })
+
+    test('正常：パラメタがない場合（複数）', async () => {
+      const departmentCode = undefined
+      const departmentCodeName = undefined
+
+      const departments = departmentCodeMock.map((department) => {
+        return {
+          code: department.departmentCode,
+          name: department.departmentCodeName
+        }
+      })
+
+      const expectResult = { status: 0, searchResult: departments }
+
+      departmentCodeFindAllSpy.mockReturnValueOnce(departmentCodeMock)
+
+      const result = await inboxController.getDepartment(contractId, departmentCode, departmentCodeName)
+
+      expect(JSON.stringify(result, null, 2)).toMatch(JSON.stringify(expectResult, null, 2))
+    })
+
+    test('正常：DBエラー', async () => {
+      const departmentCode = departmentCodeMock[0].departmentCode
+      const departmentCodeName = departmentCodeMock[0].departmentCodeName
+
+      const dbError = new Error('DB Conncetion Error')
+      departmentCodeFindAllSpy.mockImplementation(() => {
+        throw dbError
+      })
+
+      const result = await inboxController.getDepartment(contractId, departmentCode, departmentCodeName)
+
+      expect(errorSpy).toHaveBeenCalledWith({
+        contractId: contractId,
+        stack: dbError.stack,
+        status: 0
+      })
+      expect(result).toEqual({ status: -1, searchResult: dbError })
     })
   })
 })
