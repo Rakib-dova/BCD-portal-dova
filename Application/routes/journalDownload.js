@@ -171,57 +171,54 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // 送信企業X受信企業ごとに検索
-  let sentToIdx = 0
   let documentsResult
   let resultForQuery
-  do {
-    const company = sentTo[sentToIdx]
-    let sentByIdx = 0
-    do {
-      const sentByCompany = sentBy[sentByIdx]
-      findDocumentQuery.sentTo = sentTo[0]
-      if (sentByCompany !== noCompany[0]) findDocumentQuery.sentBy = sentByCompany
-      if (company !== sentByCompany) {
-        const sendQuery = qs
-          .stringify(findDocumentQuery)
-          .replace(/%26/g, '&')
-          .replace(/%3D/g, '=')
-          .replace(/%5B0%5D/g, '')
-          .replace(/%5B1%5D/g, '')
-          .replace(/%5B2%5D/g, '')
-          .replace(/%5B3%5D/g, '')
-        // 請求書を検索する
-        let pageId = 0
-        let numPages = 1
+  const company = sentTo[0]
+  let sentByIdx = 0
 
-        do {
-          resultForQuery = await apiManager.accessTradeshift(
-            req.user.accessToken,
-            req.user.refreshToken,
-            'get',
-            `${findDocuments}?${sendQuery}&limit=100&page=${pageId}`
-          )
-          numPages = resultForQuery.numPages ?? 1
-          // 最初検索の場合結果オブジェクト作成
-          if (pageId === 0 && !(documentsResult?.Document ?? false)) {
-            documentsResult = {
-              ...resultForQuery
-            }
-          } else {
-            // 検索結果がある場合結果リストに追加
-            resultForQuery.Document.forEach((item) => {
-              // 結果リストの数をを増加
-              documentsResult.itemCount++
-              documentsResult.Document.push(item)
-            })
+  do {
+    const sentByCompany = sentBy[sentByIdx]
+    findDocumentQuery.sentTo = sentTo[0]
+    if (sentByCompany !== noCompany[0]) findDocumentQuery.sentBy = sentByCompany
+    if (company !== sentByCompany) {
+      const sendQuery = qs
+        .stringify(findDocumentQuery)
+        .replace(/%26/g, '&')
+        .replace(/%3D/g, '=')
+        .replace(/%5B0%5D/g, '')
+        .replace(/%5B1%5D/g, '')
+        .replace(/%5B2%5D/g, '')
+        .replace(/%5B3%5D/g, '')
+      // 請求書を検索する
+      let pageId = 0
+      let numPages = 1
+
+      do {
+        resultForQuery = await apiManager.accessTradeshift(
+          req.user.accessToken,
+          req.user.refreshToken,
+          'get',
+          `${findDocuments}?${sendQuery}&limit=100&page=${pageId}`
+        )
+        numPages = resultForQuery.numPages ?? 1
+        // 最初検索の場合結果オブジェクト作成
+        if (pageId === 0 && !(documentsResult?.Document ?? false)) {
+          documentsResult = {
+            ...resultForQuery
           }
-          pageId++
-        } while (pageId < numPages)
-      }
-      sentByIdx++
-    } while (sentByIdx < sentBy.length)
-    sentToIdx++
-  } while (sentToIdx < sentTo.length)
+        } else {
+          // 検索結果がある場合結果リストに追加
+          resultForQuery.Document.forEach((item) => {
+            // 結果リストの数をを増加
+            documentsResult.itemCount++
+            documentsResult.Document.push(item)
+          })
+        }
+        pageId++
+      } while (pageId < numPages)
+    }
+    sentByIdx++
+  } while (sentByIdx < sentBy.length)
 
   let filename = ''
   // resultForQuery（API呼出）エラー検査
