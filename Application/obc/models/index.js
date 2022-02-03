@@ -9,7 +9,14 @@ const config = require('../config/config.json')[env]
 const db = {}
 
 let sequelize
-if (config.use_env_variable) {
+if (process.env.OBC_DB_USER && process.env.OBC_DB_PASS) {
+  sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.OBC_DB_USER,
+    process.env.OBC_DB_PASS,
+    Object.assign({}, config, { host: process.env.DB_HOST })
+  )
+} else if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config)
 } else {
   sequelize = new Sequelize(config.database, config.username, config.password, config)

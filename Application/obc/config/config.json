@@ -16,9 +16,16 @@
   },
   "production": {
     "username": "obc",
-    "password": "Welcome1",
-    "database": "PortalAppDB",
-    "host": "192.168.33.13",
-    "dialect": "mssql"
+    "password": "BcGHr5v2TGDKsXY",
+    "database": "BCD-obcIDF-db-dev",
+    "host": "bcd-obcidf-dbserver-dev.database.windows.net",
+    "dialect": "mssql",
+    "logging": false,
+    "dialectOptions": {
+      "options": {
+        "validateBulkLoadParameters": true,
+        "encrypt": true
+      }
+    }
   }
 }
