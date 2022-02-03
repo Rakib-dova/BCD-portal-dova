@@ -39,6 +39,22 @@ block content
               p.control
                 a.button.is-link.show-modal.btn-search-main(data-target='accountCode-modal') 検索
       .column.is-0.p-1
+      .column.is-one-fifth.p-0.border-div-rad-4
+        .field.is-horizontal.m-1.has-addons-centered
+          .field-label.is-normal.m-0.text-center
+            label 部門コード
+          .field-label.is-normal.m-0.is-1.fixed-void-66
+            label 　
+        .field.is-horizontal.p-1
+          .field-body.m-1
+            .field
+              p.control
+                input.input.lineAccountCode_departmentCode(type='text' name=`` readonly)
+          .field-body.m-1.is-1.none-flex-grow
+            .field
+              p.control
+                a.button.is-link.show-modal.show-modal.btn-search-departmentCode(data-target='departmentCode-modal') 検索
+      .column.is-0.p-1
       .column.is-one-quarter.p-0.border-div-rad-4
         .field.is-horizontal.m-1.has-addons-centered
           .field-label.is-normal.m-0.text-center
@@ -69,6 +85,15 @@ block content
       td.columnAccountCodeName
       td.columnSubAccountCode
       td.columnSubAccountCodeName
+
+  template#searchResultDepartmentCode
+    tr.rowDepartmentCode
+      td.columnNoDepartmentCodeMessage
+        .field.is-horizontal
+          .field-body
+            p.control.noDepartmentCodeMessage
+      td.columnDepartmentCode
+      td.columnDepartmentCodeName
 
   template#template-invoiceLine
     .column.column-invoiceLine-journalModal
@@ -124,6 +149,16 @@ block content
            .field
              p.control
                input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
+     .column.is-0.p-1
+     .column.is-one-fifth.p-0.border-div-rad-4
+      .field.is-horizontal.m-1.has-addons-centered
+        .field-label.is-normal.m-0.text-center
+          label 部門コード
+      .field.is-horizontal.p-1
+        .field-body.m-1
+          .field
+            p.control
+              input.input.lineAccountCode_departmentCode(type='text' name=`` value readonly)
 
   template#template-journal-accountCode
     .columns.m-0.base-bulkInsert-journal
@@ -150,6 +185,22 @@ block content
                 .field
                   p.control
                     a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
+          .column.is-0.p-1
+          .column.is-one-fifth.p-0.border-div-rad-4
+           .field.is-horizontal.m-1.has-addons-centered
+             .field-label.is-normal.m-0.text-center
+               label 部門コード
+             .field-label.is-normal.m-0.is-1.fixed-void-66
+               label 　
+           .field.is-horizontal.p-1
+             .field-body.m-1
+               .field
+                 p.control
+                   input.input.input-departmentCode(type='text'  value readonly)
+             .field-body.m-1.is-1.none-flex-grow
+               .field
+                 p.control
+                   a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
           .column.is-0.p-1
           .column.is-0.p-0.column-department
           .column.is-0.p-1.column-minus-btn
@@ -220,6 +271,51 @@ block content
                     tbody#displayFieldResultBody
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button#CloseSearchAccountCode(data-target='accountCode-modal') 閉じる
+
+  .modal#departmentCode-modal.z-index-modal
+    .modal-background.cancel-button(data-target='departmentCode-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 部門データ選択
+        a.delete(data-target="departmentCode-modal")
+      section.modal-card-body
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 部門コード
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalDepartmentCode' value maxlength=10 placeholder='英・数字・カナのみ（10桁）' pattern=inputPatternEngNum)
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 部門目名
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalDepartmentCodeName' value maxlength=40 placeholder='文字列（40桁）')
+              .control
+                .field.is-grouped.is-grouped-centered
+                  .columns.m-0
+                    .column.p-0
+                      div.button-area
+                        .button.is-link#btnSearchDepartmentCode(type="button") 検索
+
+          .columns.is-fullwidth.m-0
+            .column.is-fullwidth.p-0
+              .field.is-invisible#departmentResultDisplayInvisible
+                .box.px-2
+                  .subtitle.m-3 検索結果 
+                  table.table.is-fullwidth
+                    thead
+                      td 部門コード
+                      td 部門目名
+                    tbody#displayFieldDepartmentResultBody
+      footer.modal-card-foot.center-modal-footer-item
+        a.button.cancel-button#CloseSearchDepartmentCode(data-target='departmentCode-modal') 閉じる
 
   .modal#insert-installmentAmount-modal
     .modal-background.cancel-button(data-target='insert-installmentAmount-modal')
@@ -299,7 +395,21 @@ block content
                             p.control
                               a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
                     .column.is-0.p-1
-                    .column.is-0.p-0.column-department
+                    .column.is-one-fifth.p-0.border-div-rad-4
+                      .field.is-horizontal.m-1.has-addons-centered
+                        .field-label.is-normal.m-0.text-center
+                          label 部門コード
+                        .field-label.is-normal.m-0.is-1.fixed-void-66
+                          label 　
+                      .field.is-horizontal.p-1
+                        .field-body.m-1
+                          .field
+                            p.control
+                              input.input.input-departmentCode(type='text' id=`bulkInsertNo1_lineAccountCode1_departmentCode` value readonly)
+                        .field-body.m-1.is-1.none-flex-grow
+                          .field
+                            p.control
+                              a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
 
         .columns#field-invoiceLine
       footer.modal-card-foot.center-modal-footer-item

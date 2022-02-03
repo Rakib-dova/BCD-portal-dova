@@ -1065,6 +1065,7 @@ class InvoiceDetail {
               journalNo: journalize.journalNo,
               accountCode: journalize.accountCode,
               subAccountCode: journalize.subAccountCode,
+              departmentCode: journalize.departmentCode,
               installmentAmount: journalize.installmentAmount
             })
           }
