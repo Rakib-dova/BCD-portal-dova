@@ -5,6 +5,8 @@ const SubAccountCode = db.SubAccountCode
 const JournalizeInvoice = db.JournalizeInvoice
 const logger = require('../lib/logger')
 const Op = db.Sequelize.Op
+const department = db.DepartmentCode
+const constantsDefine = require('../constants')
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
@@ -418,9 +420,52 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
   }
 }
 
+const getDepartment = async (_contractId, _departmentCode, _departmentName) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'getDepartment')
+  const contractId = _contractId ?? ''
+  const departmentCode = _departmentCode ?? ''
+  const departmentName = _departmentName ?? ''
+
+  try {
+    const where = {
+      contractId: contractId
+    }
+    if (departmentCode.length !== 0) {
+      where.departmentCode = {
+        [Op.like]: `%${departmentCode}%`
+      }
+    }
+    if (departmentName.length !== 0) {
+      where.departmentCodeName = {
+        [Op.like]: `%${departmentName}%`
+      }
+    }
+    const departments = (
+      await department.findAll({
+        where: {
+          ...where
+        }
+      })
+    ).map((department) => {
+      return {
+        code: department.departmentCode,
+        name: department.departmentCodeName
+      }
+    })
+
+    logger.info(constantsDefine.logMessage.INF001 + 'getDepartment')
+    return { status: 0, searchResult: departments }
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'getDepartment')
+    return { status: -1, searchResult: error }
+  }
+}
+
 module.exports = {
   getInbox: getInbox,
   getInvoiceDetail: getInvoiceDetail,
   getCode: getCode,
-  insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice
+  insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice,
+  getDepartment: getDepartment
 }
