@@ -544,6 +544,15 @@ img.logo-ncom {
   padding-left: 10px;
 }
 
+.border-journaldownload {
+  display: inline-block;
+  text-align: left;
+  max-width: 100%;
+  position: relative;
+  box-sizing: inherit;
+  width: 567px;
+}
+
 .column-csvupload {
   display: block;
   flex-basis: 0;
