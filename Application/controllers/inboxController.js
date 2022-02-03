@@ -450,7 +450,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
 
 const getDepartment = async (_contractId, _departmentCode, _departmentName) => {
   logger.info(constantsDefine.logMessage.INF000 + 'getDepartment')
-  const contractId = _contractId ?? ''
+  const contractId = _contractId
   const departmentCode = _departmentCode ?? ''
   const departmentName = _departmentName ?? ''
 
