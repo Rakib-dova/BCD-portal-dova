@@ -2,6 +2,7 @@ const apiManager = require('./apiManager')
 const db = require('../models')
 const AccountCode = db.AccountCode
 const SubAccountCode = db.SubAccountCode
+const DepartmentCode = db.DepartmentCode
 const JournalizeInvoice = db.JournalizeInvoice
 const logger = require('../lib/logger')
 const Op = db.Sequelize.Op
@@ -261,6 +262,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
         if (
           data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`] !== undefined &&
           data[`lineNo${idx}_lineAccountCode${accountLineNumber}_subAccountCode`] !== undefined &&
+          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_departmentCode`] !== undefined &&
           data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`] !== undefined &&
           data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`].length !== 0 &&
           data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].length !== 0
@@ -274,6 +276,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
               journalNo: `lineAccountCode${accountLineNumber}`,
               accountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`],
               subAccountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_subAccountCode`],
+              departmentCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_departmentCode`],
               installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(
                 /,/g,
                 ''
@@ -359,6 +362,31 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
     }
     if (checkSubAccountF) {
       result.status = -2
+      return result
+    }
+
+    // 登録前、部門データ検証
+    let checkDepartmentCodeF = false
+    for (let lines = 0; lines < lineJournals.length; lines++) {
+      for (let idx = 0; idx < 10; idx++) {
+        const item = lineJournals[lines][idx]
+        if (item.data === null) continue
+        if (item.data.departmentCode.length === 0) continue
+        if (item.data.accountCode.length !== 0 && item.data.departmentCode.length !== 0) {
+          result.departmentCode = item.data.departmentCode
+          result.lineId = item.data.lineId
+          const departmentInstance = await DepartmentCode.findOne({
+            where: {
+              contractId: contractId,
+              departmentCode: item.data.departmentCode
+            }
+          })
+          if (departmentInstance instanceof DepartmentCode === false) checkDepartmentCodeF = true
+        }
+      }
+    }
+    if (checkDepartmentCodeF) {
+      result.status = -3
       return result
     }
 

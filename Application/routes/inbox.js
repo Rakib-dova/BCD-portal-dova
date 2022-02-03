@@ -293,11 +293,8 @@ const cbPostIndex = async (req, res, next) => {
     return res.status(400).send('400 Bad Request')
   }
 
-  const { status, lineId, accountCode, subAccountCode, error } = await inboxController.insertAndUpdateJournalizeInvoice(
-    contract.contractId,
-    invoiceId,
-    req.body
-  )
+  const { status, lineId, accountCode, subAccountCode, departmentCode, error } =
+    await inboxController.insertAndUpdateJournalizeInvoice(contract.contractId, invoiceId, req.body)
 
   if (error instanceof Error) return next(errorHelper.create(500))
 
@@ -316,6 +313,13 @@ const cbPostIndex = async (req, res, next) => {
       req.flash('noti', [
         '仕訳情報設定',
         `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の補助科目「${subAccountCode}」は未登録補助科目です。`,
+        'SYSERR'
+      ])
+      return res.redirect('/inboxList/1')
+    case -3:
+      req.flash('noti', [
+        '仕訳情報設定',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の部門データ「${departmentCode}」は未登録部門データです。`,
         'SYSERR'
       ])
       return res.redirect('/inboxList/1')
