@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja-JP">
+
+<head>
+	{{> header title='デジタルトレード 商奉行クラウド連携'}}
+</head>
+
+<body>
+	{{> navber}}
+	<section class="section">
+		<input type="hidden" id="formatId" value="{{ formatId }}" />
+		<div class="container is-fullhd">
+			<div class="box">
+				<nav class="breadcrumb" aria-label="breadcrumbs">
+					<ul>
+						<li><a href="/bugyo/menu">機能一覧</a></li>
+						<li><a href="/bugyo/invoice_format_list">請求書フォーマット一覧</a></li>
+						<li class="is-active"><a href="/bugyo/invoice_format/{{ formatId }}"
+								aria-current="page">フォーマット{{ modeName }}</a></li>
+					</ul>
+				</nav>
+				{{> notification}}
+				<form id="form" method="POST" target="preview" action="/bugyo/invoice_format/preview">
+					<input type="hidden" name="_csrf" value="{{ csrfToken }}">
+					<div class="columns is-desktop">
+						<div class="column">
+							<div class="card" style="height: 100%">
+								<header class="card-header">
+									<div class="card-header-title">
+										<p>フォーマット{{ modeName }}</p>
+										<div class="is-clearfix is-flex-grow-5">
+											<a class="button is-link m-1 is-pulled-right" href="/bugyo/invoice_format_list">一覧へ戻る</a>
+										</div>
+									</div>
+								</header>
+								<div class="card-content">
+									<div class="block">
+										<form class="form">
+											<div class="field">
+												<span class="has-text-weight-bold">フォーマット名 <span class="has-text-danger">(必須)</span></span>
+												<div class="control">
+													<input type="text" class="input" id="formatName" name="name"
+														value="{{formatName}}" {{#if builtin}} disabled{{/if}}/>
+												</div>
+											</div>
+										</form>
+									</div>
+									<div class="block">
+										<span class="has-text-weight-bold">追加項目</span>
+										<div style="max-height: 330px; overflow-y: scroll">
+										<table class="table is-fullwidth is-bordered">
+											<tbody>
+												{{#each items}}
+												<tr>
+													<td class="has-text-centered">
+														<input type="checkbox" class="invoiceItems" name="items"
+															value="{{ key }}" {{#if selected}}checked{{/if}} {{#if ../builtin}} disabled{{/if}}/>
+													</td>
+													<td>{{ name }}</td>
+												</tr>
+												{{/each}}
+											</tbody>
+										</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="column">
+							<div class="card">
+								<header class="card-header is-align-items-center">
+									<div class="m-1">
+										<p class="is-small">フォーマット確認用宛先<span data-tooltip="フォーマット内容を確認するための一時的な宛先です。選択した宛先情報がプレビュー内に反映されます。実際に請求書が送信されることはありません。"><i class="far fa-question-circle"></i></span></p>
+										<div class="select">
+											<select id="recipient" name="recipient">
+												<option class="has-text-light" value=""></option>
+												{{#each connections}}
+												<option value="{{ id }}"{{#if selected}} selected{{/if}}>{{ name }}</option>
+												{{/each}}
+											</select>
+										</div>
+									</div>
+									<div class="mr-1 is-clearfix is-flex-grow-5">
+										<div class="is-pulled-right">
+											<button type="button" id="preview-button" class="button is-success">プレビュー</button>
+											<button type="button" id="save-button" class="button is-primary"{{#if builtin}} disabled{{/if}}>保存</button>
+										</div>
+									</div>
+								</header>
+								<div class="card-content">
+									<div id="preview-wrapper">
+										<iframe id="preview" name="preview"></iframe>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</section>
+</body>
+<script src="obc/js/invoice_format.js"></script>
+
+</html>

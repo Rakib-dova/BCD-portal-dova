@@ -1,0 +1,24 @@
+{
+  "development": {
+    "username": "obc",
+    "password": "Welcome1",
+    "database": "PortalAppDB",
+    "host": "192.168.33.13",
+    "dialect": "mssql"
+  },
+  "test": {
+    "username": "obc",
+    "password": "Welcome1",
+    "database": "PortalAppDB",
+    "host": "192.168.33.13",
+    "dialect": "mssql",
+    "logging": false
+  },
+  "production": {
+    "username": "obc",
+    "password": "Welcome1",
+    "database": "PortalAppDB",
+    "host": "192.168.33.13",
+    "dialect": "mssql"
+  }
+}
