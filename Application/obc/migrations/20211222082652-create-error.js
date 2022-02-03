@@ -1,27 +1,33 @@
 'use strict'
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Errors', {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
+    await queryInterface.createTable(
+      'Errors',
+      {
+        id: {
+          allowNull: false,
+          autoIncrement: true,
+          primaryKey: true,
+          type: Sequelize.INTEGER
+        },
+        userUuid: {
+          allowNull: false,
+          type: Sequelize.UUID
+        },
+        invoiceNo: {
+          allowNull: false,
+          type: Sequelize.STRING(6)
+        },
+        message: {
+          type: Sequelize.STRING(1000)
+        }
       },
-      userUuid: {
-        allowNull: false,
-        type: Sequelize.UUID
-      },
-      invoiceNo: {
-        allowNull: false,
-        type: Sequelize.STRING(6)
-      },
-      message: {
-        type: Sequelize.STRING(1000)
+      {
+        schema: 'obc'
       }
-    })
+    )
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Errors')
+    await queryInterface.dropTable('Errors', { schema: 'obc' })
   }
 }
