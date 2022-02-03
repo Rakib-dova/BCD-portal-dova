@@ -21,7 +21,7 @@ const $ = function (tagObjName) {
 
 // ローディング画面の初期化
 window.onload = function () {
-  // 分割金額のボタンの機能設定
+  // 計上金額のボタンの機能設定
   Array.prototype.forEach.call($('.btn-insert-installmentAmount'), function (btn) {
     btn.addEventListener('click', btnInstallmentAmount)
   })
@@ -124,9 +124,7 @@ const getInvoiceLineList = function () {
       ? invoiceLine.querySelector('.priceAmount').innerText
       : ''
     const tax = invoiceLine.querySelector('.tax') ? invoiceLine.querySelector('.tax').innerText : ''
-    const total = invoiceLine.querySelector('.lineTotal')
-      ? ~~invoiceLine.querySelector('.lineTotal').value.replaceAll(',', '')
-      : ''
+    const total = invoiceLine.querySelector('.lineTotal') ? invoiceLine.querySelector('.lineTotal').value : ''
 
     return {
       invoiceLineNo: invoiceLineNo,
@@ -232,15 +230,15 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
         .querySelector('.lineAccountCode_departmentCode')
         .setAttribute('name', `${targetId}_departmentCode`)
       cloneAccountCodeItem.querySelector('.lineAccountCode_departmentCode').id = `${targetId}_departmentCode`
-      // 分割金額
+      // 計上金額
       cloneAccountCodeItem.querySelector('.inputInstallmentAmount').setAttribute('name', `${targetId}_input_amount`)
       cloneAccountCodeItem.querySelector('.inputInstallmentAmount').id = `${targetId}_input_amount`
       cloneAccountCodeItem
         .querySelector('.inputInstallmentAmount')
         .classList.add(`${targetId.split('_')[0]}_input_amount`)
-      // 項目の分割金額の入力ボタン
+      // 項目の計上金額の入力ボタン
       // 各ボタンあたりIDを割り当て
-      // 分割金額の入力ボタン
+      // 計上金額の入力ボタン
       cloneAccountCodeItem.querySelector('.btn-insert-installmentAmount').id = `btn_${targetId}_installmentAmount`
       cloneAccountCodeItem.querySelector('.btn-insert-installmentAmount').dataset.target =
         'insert-installmentAmount-modal'
@@ -548,7 +546,7 @@ const btnMinusAccount = function () {
   $('#btn-confirm').removeAttribute('disabled')
 }
 
-// 分割金額入力ボタン（モーダルの表示）
+// 計上金額入力ボタン（モーダルの表示）
 function btnInstallmentAmount() {
   const showModalTarget = $(`#${this.dataset.target}`)
   const inputTarget = this.dataset.input
@@ -559,7 +557,7 @@ function btnInstallmentAmount() {
   $('#btn-confirm').removeAttribute('disabled')
 }
 
-// 分割金額の入力欄の数字以外は入力できない
+// 計上金額の入力欄の数字以外は入力できない
 $('#inputInstallmentAmount').addEventListener('keyup', function () {
   const pattern = '^[0-9]+$'
   const regExp = new RegExp(pattern)
@@ -590,10 +588,10 @@ $('#btn-insert').addEventListener('click', function () {
   const totalAmmout = ~~$(`#${inputTarget.split('_')[0]}Total`).value.replaceAll(',', '')
   if (~~valueInput.value !== 0) {
     if (totalAmmout - valueInput.value < 0) {
-      $('#installmentAmountErrMsg').innerText = '分割金額の合計が小計金額を超えています。'
+      $('#installmentAmountErrMsg').innerText = '計上金額の合計が小計金額を超えています。'
       return null
     } else if (totalAmmout - valueInput.value === 0) {
-      $('#installmentAmountErrMsg').innerText = '分割金額の合計が小計金額を超えています。'
+      $('#installmentAmountErrMsg').innerText = '計上金額の合計が小計金額を超えています。'
       return null
     }
 
@@ -666,7 +664,7 @@ const checkJournalList = function () {
         if (journalLines[lineNo][0].accountCode.length === 0 || journalLines[lineNo][0].input_amount === 0) {
           if (lines.length !== 1) {
             isFirstLineNull = true
-            $('#error-message-body').innerText = '分割金額は1円以上を入力して下さい。'
+            $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
           }
         }
       }
@@ -687,7 +685,7 @@ const checkJournalList = function () {
           total = total + ~~journalLines[i][j].input_amount
           if (~~journalLines[i][j].input_amount === 0) {
             isFirstLineNull = true
-            $('#error-message-body').innerText = '分割金額は1円以上を入力して下さい。'
+            $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
           }
         }
       }
@@ -952,7 +950,7 @@ const addBulkList = function () {
         cloneAccountCodeItem.querySelector('.lineAccountCode_departmentCode').name = `${tagetIdBase}_departmentCode`
         cloneAccountCodeItem.querySelector('.lineAccountCode_departmentCode').value = journal.departmentCode
 
-        // 分割金額
+        // 計上金額
         cloneAccountCodeItem
           .querySelector('.inputInstallmentAmount')
           .setAttribute('name', `${tagetIdBase}_input_amount`)
@@ -962,9 +960,9 @@ const addBulkList = function () {
           .querySelector('.inputInstallmentAmount')
           .classList.add(`${tagetIdBase.split('_')[0]}_input_amount`)
 
-        // 項目の分割金額の入力ボタン
+        // 項目の計上金額の入力ボタン
         // 各ボタンあたりIDを割り当て
-        // 分割金額の入力ボタン
+        // 計上金額の入力ボタン
         cloneAccountCodeItem.querySelector('.btn-insert-installmentAmount').id = `btn_${tagetIdBase}_installmentAmount`
         cloneAccountCodeItem.querySelector('.btn-insert-installmentAmount').dataset.target =
           'insert-installmentAmount-modal'
