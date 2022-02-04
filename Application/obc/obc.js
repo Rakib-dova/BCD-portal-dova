@@ -21,5 +21,7 @@ router.use('/invoice_format', require('./routes/invoice_format'))
 router.use('/send_invoice', require('./routes/send_invoice'))
 // 設定 得意先紐付け
 router.use('/settings_connection', require('./routes/settings_connection'))
+// ポータル
+router.use('/portal', require('./routes/portal'))
 
 module.exports = router
