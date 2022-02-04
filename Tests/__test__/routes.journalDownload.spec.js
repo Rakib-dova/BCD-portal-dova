@@ -2920,6 +2920,42 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain('割引３')
     })
 
+    test('正常:仕訳情報がない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01031',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      journalfindAllSpy.mockReturnValue([])
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '請求書ダウンロード',
+        '条件に合致する請求書が見つかりませんでした。'
+      ])
+      // ポータルにリダイレクト「される」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/journalDownload')
+      expect(response.getHeader('Location')).toEqual('/journalDownload')
+    })
+
     test('正常:請求書複数の場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
