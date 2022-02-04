@@ -14,7 +14,8 @@ const noticeHelper = require('../../Application/routes/helpers/notice')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
-const tenantController = require('../../Application/controllers/tenantController')
+const tenantController = require('../../Application/controllers/tenantController.js')
+const journalDownloadController = require('../../Application/controllers/journalDownloadController.js')
 const logger = require('../../Application/lib/logger.js')
 const DOMParser = require('dom-parser')
 const notiTitle = '請求書ダウンロード'
@@ -31,21 +32,23 @@ journalizeResult.subAccountCode = 'subAccountCode'
 journalizeResult.installmentAmount = 51222
 journalizeResult.createdAt = new Date('2021-07-09T04:30:00.000Z')
 journalizeResult.updatedAt = new Date('2021-07-09T04:30:00.000Z')
+journalizeResult.journalNo = 'lineAccountCode1'
 
 let request, response, infoSpy
 let userControllerFindOneSpy,
   contractControllerFindOneSpy,
   tenantControllerFindOneSpy,
   contractControllerFindContractSpyon,
-  journalfindAllSpy
+  journalfindAllSpy,
+  getSentToCompanySpy
 
 const dbJournalTable = []
 const dbJournal100Table = []
 dbJournal100Table.length = 100
 
-dbJournal100Table.forEach((item, idx, arr) => {
+for (let idx = 0; idx < 100; ++idx) {
+  const item = new JournalizeInvoice()
   const { v4: uuidV4 } = require('uuid')
-  arr[idx] = new JournalizeInvoice()
   item.journalId = uuidV4()
   item.contractId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
   item.invoiceId = '3b3ff8ac-f544-4eee-a4b0-0ca7a0edacjs'
@@ -56,9 +59,9 @@ dbJournal100Table.forEach((item, idx, arr) => {
   item.installmentAmount = 51222 + 1
   item.createdAt = new Date('2021-11-25T04:30:00.000Z')
   item.updatedAt = new Date('2021-11-25T04:30:00.000Z')
-})
-
-dbJournalTable.push(journalizeResult)
+  item.journalNo = `lineAccountCode${idx + 1}`
+  dbJournalTable.push(item)
+}
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -104,6 +107,7 @@ describe('journalDownloadのテスト', () => {
     tenantControllerFindOneSpy = jest.spyOn(tenantController, 'findOne')
     contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
     journalfindAllSpy = jest.spyOn(JournalizeInvoice, 'findAll')
+    getSentToCompanySpy = jest.spyOn(journalDownloadController, 'getSentToCompany')
     request.flash = jest.fn()
   })
   afterEach(() => {
@@ -116,6 +120,7 @@ describe('journalDownloadのテスト', () => {
     tenantControllerFindOneSpy.mockRestore()
     contractControllerFindContractSpyon.mockRestore()
     journalfindAllSpy.mockRestore()
+    getSentToCompanySpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -140,8 +145,6 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
-
-      journalfindAllSpy.mockReturnValue(dbJournalTable)
 
       // 試験実施
       await journalDownload.cbGetIndex(request, response, next)
@@ -3033,6 +3036,86 @@ describe('journalDownloadのテスト', () => {
       expect(request.flash).toHaveBeenCalledWith('noti', [
         '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
+      ])
+      // ポータルにリダイレクト「される」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/journalDownload')
+      expect(response.getHeader('Location')).toEqual('/journalDownload')
+    })
+
+    test('準正常:企業検索エラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01031'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      const apiError = new Error('API ERROR')
+      getSentToCompanySpy.mockReturnValue(apiError)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '請求書ダウンロード',
+        'APIエラーが発生しました。時間を空けてもう一度試してください。'
+      ])
+      // ポータルにリダイレクト「される」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/journalDownload')
+      expect(response.getHeader('Location')).toEqual('/journalDownload')
+    })
+
+    test('準正常:仕訳DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      const dbError = new Error('DB ERROR')
+      journalfindAllSpy.mockReturnValue(dbError)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '請求書ダウンロード',
+        'システムエラーが発生しました。時間を空けてもう一度試してください。'
       ])
       // ポータルにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/journalDownload')
