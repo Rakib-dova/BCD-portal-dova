@@ -20,7 +20,6 @@
     "database": "BCD-obcIDF-db-dev",
     "host": "bcd-obcidf-dbserver-dev.database.windows.net",
     "dialect": "mssql",
-    "logging": false,
     "dialectOptions": {
       "options": {
         "validateBulkLoadParameters": true,
