@@ -113,7 +113,7 @@ const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(displayNew))
 router.get('/:formatId', ...middleware, csrfProtection, handler(displayEdit))
 router.post('/preview', ...middleware, csrfProtection, handler(preview))
-router.post('/', ...middleware, csrfProtection, save, (err, req, res) => res.send({ status: 'ng', message: err }))
+router.post('/', ...middleware, csrfProtection, save)
 router.post('/:formatId', ...middleware, csrfProtection, save)
 
 module.exports = router
