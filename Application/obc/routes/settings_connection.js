@@ -98,6 +98,7 @@ const display = async (req, res, next) => {
  */
 const save = async (req, res, next) => {
   const data = req.body
+  console.log(data)
   await obc.importCustomer(req, customer.convertTo(data.tenants))
   await Formats.assign(req, data.formats)
   res.send({ status: 'ok', message: '得意先の紐付けが完了しました。' })
