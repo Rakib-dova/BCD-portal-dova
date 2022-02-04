@@ -1281,10 +1281,10 @@ describe('inboxのテスト', () => {
 
       const departmentCodeDbError = new Error('DepartmentCode Table Error')
 
-      getDepartmentSpy.mockReturnValueOnce(departmentCodeDbError)
-
-      // 試験実施
-      await inbox.cbPostDepartment(request, response, next)
+      getDepartmentSpy.mockReturnValueOnce({
+        status: 0,
+        searchResult: departmentCodeDbError
+      })
 
       // 試験実施
       await inbox.cbPostDepartment(request, response, next)
