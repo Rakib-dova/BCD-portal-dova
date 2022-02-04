@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja-JP">
+
+<head>
+	{{> header title='デジタルトレード 商奉行クラウド連携'}}
+</head>
+
+<body>
+	{{> navber}}
+	<section class="section">
+		<div class="container is-fullhd">
+			<div class="box">
+				<nav class="breadcrumb" aria-label="breadcrumbs">
+					<ul>
+						<li><a href="/bugyo/menu">機能一覧</a></li>
+						<li class="is-active"><a href="/bugyo/invoice_format_list" aria-current="page">発行先管理</a></li>
+					</ul>
+				</nav>
+				{{> notification}}
+				<div class="box">
+					<div class="field">
+						<div class="control">
+							<button class="button is-link save-button">保存</button>
+						</div>
+					</div>
+					<table id="customerList" class="table is-fullwidth is-bordered">
+						<thead>
+							<tr>
+								<th class="sort" data-sort="lastUpdated">最終更新日時</th>
+								<th class="sort" data-sort="customerId" style="width: 150px;">得意先コード<br/>(請求先コード)</th>
+								<th class="sort" data-sort="customerName" style="min-width: 250px;">得意先名</th>
+								<th>紐付け先テナント名</th>
+								<th>紐付け先テナント住所</th>
+								<th>
+									<span>選択中のフォーマット</span>
+									<div class="field is-grouped">
+										<div class="control">
+											<div class="select is-small">
+												<select class="apply-selector">
+													<option></option>
+													{{#each formats}}
+													<option value="{{ id }}">{{ name }}</option>
+													{{/each}}
+												</select>
+											</div>
+										</div>
+										<div class="control">
+											<button class="button is-small is-info apply-button">一括適用</button>
+										</div>
+									</div>
+								</th>
+							</tr>
+						</thead>
+						<tbody class="list">
+							{{#if customers}}
+								{{#each customers}}
+								<tr>
+									<td class="lastUpdated">{{ lastUpdated }}</td>
+									<td class="customerId">{{ customerId }}{{#if billingId}}<br/>({{ billingId }}){{/if}}</td>
+									<td class="customerName">{{ customerName }}</td>
+									<td>
+										<div class="select is-small">
+											<select name="connectionSelect" data-customerid="{{ customerId }}">
+												<option></option>
+												{{#each connections}}
+												<option value="{{ companyAccountId }}" data-address="{{ address }}" data-url="{{ url }}" {{#if selected }}selected{{/if}}>{{ companyName }}</option>
+												{{/each}}
+											</select>
+										</div>
+									</td>
+									<td>
+										<p class="address"></p>
+										<a class="button is-link is-small profile" target="_blank">
+											<span>企業プロフィール確認</span>
+											<span class="icon">
+												<i class="fas fa-external-link-alt"></i>
+											</span>
+										</a>
+									</td>
+									<td>
+										<div class="field is-grouped">
+											<div class="control">
+												<div class="select is-small">
+													<select name="formatSelector" data-customerid="{{ customerId }}">
+														<option></option>
+														{{#each formats}}
+														<option value="{{ id }}" {{#if selected }}selected{{/if}}>{{ name }}</option>
+														{{/each}}
+													</select>
+												</div>
+											</div>
+											<div class="control">
+												<input type="checkbox" class="checkbox is-small apply-target">
+											</div>
+										</div>
+									</td>
+								</tr>
+								{{/each}}
+							{{else}}
+								<tr><td colspan="6" class="has-text-centered">得意先が登録されていません</td></tr>
+							{{/if}}
+						</tbody>
+					</table>
+					<div class="field">
+						<div class="control">
+							<button class="button is-link save-button">保存</button>
+						</div>
+					</div>
+				</div>
+			</div>
+	</section>
+	<input type="hidden" name="_csrf" value="{{ csrfToken }}">
+</body>
+
+<script src="/obc/js/list.min.js"></script>
+<script src="/obc/js/settings_connection.js"></script>
+
+</html>

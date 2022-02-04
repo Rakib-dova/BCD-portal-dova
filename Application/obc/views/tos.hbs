@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja-JP">
+	<head>
+		{{> header title='デジタルトレード 商奉行クラウド連携'}}
+	</head>
+	<body>
+		<section class="section">
+			<container class="is-max-widescreen">
+				<form method="POST">
+					<input type="hidden" name="_csrf" value="{{ csrfToken }}">
+					<input type="hidden" name="version" value="{{ tos.version }}">
+					<article class="panel is-info">
+						<h2 class="panel-heading">ご利用にあたって</h2>
+						<div class="panel-block">
+							<div class="container">
+								<p class="ml-4">利用規約に同意して「次へ」ボタンを押してください。</p>
+								<div class="columns is-centered">
+									<div class="column is-four-fifths">
+										<div class="terms-of-service">
+											{{{ tos.content }}}
+										</div>
+									</div>
+								</div>
+								<div class="columns is-centered">
+									<div class="column is-four-fifths">
+										<div class="field is-grouped is-grouped-centered">
+											<p class="control">
+												<input id="agreement" type="checkbox" class="is-normal" required disabled>
+												<label for="agreement">利用規約に同意します (最後まで利用規約をスクロールしてください)</label>
+											</p>
+										</div>
+									</div>
+								</div>
+								<div class="columns is-centered">
+									<div class="column is-four-fifths">
+										<div class="field is-grouped is-grouped-centered">
+											<p class="control">
+												<button id="next" class="button is-link" disabled>次へ</button>
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</article>
+				</form>
+			</container>
+		</section>
+	</body>
+	<script src="/obc/js/tos.js"></script>
+</html>

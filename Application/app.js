@@ -143,7 +143,7 @@ const flash = require('express-flash')
 app.use(flash())
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'))
+app.set('views', [path.join(__dirname, 'views'), path.join(__dirname, 'obc/views')])
 app.set('view engine', 'pug')
 
 // body-parser
@@ -268,6 +268,9 @@ app.use('/change', require('./routes/change').router)
 
 // 請求書ダウンロード
 app.use('/csvDownload', require('./routes/csvDownload').router)
+
+// 奉行クラウド連携
+app.use('/bugyo', require('./obc/obc'))
 
 // notice
 const noticeHelper = require('./routes/helpers/notice')

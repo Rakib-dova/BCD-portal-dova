@@ -19,15 +19,9 @@ trigger:
 parameters:
   - name: Environment
     type: string
-    default: dev
+    default: obc
     values:
-      - dev
-      - dev2
-      - docomoIDF
-      - prodstg
-      - prod
-      - demo
-      - test
+      - obc
       - BuildandPush
 
 variables:
@@ -35,7 +29,7 @@ variables:
   - name: tag
     value: $[format('{0:yyyyMMddHHmmss}', pipeline.startTime)]
   - name: devDeploy #開発環境デプロイフラグ
-    value: ${{ or(eq(parameters.Environment,'dev'), eq(parameters.Environment,'dev2'), eq(parameters.Environment,'docomoIDF'))}}
+    value: ${{ eq(parameters.Environment,'obc')}}
   - name: Deploy #prod, proddtg, demo環境デプロイフラグ
     value: ${{ or(eq(parameters.Environment,'prodstg'), eq(parameters.Environment,'prod'),eq(parameters.Environment,'demo'),eq(parameters.Environment,'test'))}}
   - name: japanwest #西日本デプロイフラグ
