@@ -154,7 +154,8 @@ const cbPostIndex = async (req, res, next) => {
 
   // エラーを確認する
   if (sentTo instanceof Error) {
-    errorHandle(sentTo, res, req)
+    req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
+    return res.redirect(303, '/journalDownload')
   }
 
   // 送信企業の条件のチェック
@@ -225,14 +226,7 @@ const cbPostIndex = async (req, res, next) => {
   if (resultForQuery instanceof Error) {
     errorHandle(resultForQuery, res, req)
   } else {
-    // documentsResultのデータ有無確認
-    if (!documentsResult) {
-      req.flash('noti', [
-        notiTitle,
-        '請求書ダウンロードに失敗しました。<br>（送信企業と受信企業で同じ企業を選択している場合はどちらか一方をチェックしてください。）'
-      ])
-      res.redirect(303, '/journalDownload')
-    } else if (documentsResult.itemCount === 0) {
+    if (documentsResult.itemCount === 0) {
       // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
       // 条件に合わせるデータがない場合、お知らせを表示する。
       req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
@@ -256,6 +250,7 @@ const cbPostIndex = async (req, res, next) => {
           return 0
         })
         // 請求書番号（UUID）を取得した場合
+        let chkInvoice = false
         if (documentId !== '') {
           // 請求書番号（UUID）で請求書情報取得（とれシフAPI呼出）
           invoicesForDownload = await journalDownloadController.createInvoiceDataForDownload(
@@ -270,11 +265,18 @@ const cbPostIndex = async (req, res, next) => {
             errorHandle(invoicesForDownload, res, req)
           }
 
-          filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
-          res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-          res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
+          if (invoicesForDownload.length !== 0) {
+            filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
+            res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+            res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
+          } else {
+            chkInvoice = true
+          }
         } else {
-          // 条件に合わせるデータがない場合、お知らせを表示する。
+          chkInvoice = true
+        }
+        // 条件に合わせるデータがない場合、お知らせを表示する。
+        if (chkInvoice) {
           req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
           res.redirect(303, '/journalDownload')
         }
@@ -288,7 +290,8 @@ const cbPostIndex = async (req, res, next) => {
 
         // エラーを確認する
         if (invoicesForDownload instanceof Error) {
-          errorHandle(invoicesForDownload, res, req)
+          req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
+          return res.redirect(303, '/journalDownload')
         }
 
         filename = encodeURIComponent(`${today}_請求書.csv`)
@@ -1911,12 +1914,16 @@ const dataToJson = (invoiceData, journalData) => {
     }
 
     if (journalData !== undefined && journalData !== '') {
-      for (let no = 0; no < journalData.length; ++no) {
-        if (journalData[no].lineNo === i + 1) {
-          invoice[`仕訳情報${no + 1}-勘定科目コード`] = journalData[no].accountCode
-          invoice[`仕訳情報${no + 1}-補助科目コード`] = journalData[no].subAccountCode
-          // invoice[`仕訳情報${no + 1}-部門コード`] = journalData[no].departmentCode
-          invoice[`仕訳情報${no + 1}-計上金額`] = journalData[no].installmentAmount
+      const lineJournaData = journalData.filter((data) => {
+        return data.lineNo === i + 1
+      })
+
+      for (let no = 0; no < lineJournaData.length; ++no) {
+        if (lineJournaData[no].lineNo === i + 1) {
+          invoice[`仕訳情報${no + 1}-勘定科目コード`] = lineJournaData[no].accountCode
+          invoice[`仕訳情報${no + 1}-補助科目コード`] = lineJournaData[no].subAccountCode
+          // invoice[`仕訳情報${no + 1}-部門コード`] = lineJournaData[no].departmentCode
+          invoice[`仕訳情報${no + 1}-計上金額`] = lineJournaData[no].installmentAmount
         }
       }
     }
