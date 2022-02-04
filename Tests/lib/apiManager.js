@@ -306,7 +306,6 @@ const axios = {
       }
       default: {
         if (paramateter.minIssuedate === '1990-01-01') {
-          console.log('default 1')
           this.result.data = {
             itemPerPage: 25,
             itemCount: 1,
@@ -316,6 +315,7 @@ const axios = {
             Document: [dcouments.Document[0], dcouments.Document[8]]
           }
         } else if (
+          paramateter.state &&
           paramateter.state.join('') === 'DELIVEREDACCEPTEDPAID_UNCONFIRMEDPAID_CONFIRMED' &&
           paramateter.minissuedate === '9999-99-99' &&
           paramateter.maxissuedate === '9999-99-99'
