@@ -250,6 +250,7 @@ const cbPostIndex = async (req, res, next) => {
           return 0
         })
         // 請求書番号（UUID）を取得した場合
+        let chkInvoice = false
         if (documentId !== '') {
           // 請求書番号（UUID）で請求書情報取得（とれシフAPI呼出）
           invoicesForDownload = await journalDownloadController.createInvoiceDataForDownload(
@@ -264,11 +265,18 @@ const cbPostIndex = async (req, res, next) => {
             errorHandle(invoicesForDownload, res, req)
           }
 
-          filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
-          res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-          res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
+          if (invoicesForDownload.length !== 0) {
+            filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
+            res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+            res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
+          } else {
+            chkInvoice = true
+          }
         } else {
-          // 条件に合わせるデータがない場合、お知らせを表示する。
+          chkInvoice = true
+        }
+        // 条件に合わせるデータがない場合、お知らせを表示する。
+        if (chkInvoice) {
           req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
           res.redirect(303, '/journalDownload')
         }

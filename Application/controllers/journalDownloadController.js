@@ -61,7 +61,7 @@ const createInvoiceDataForDownload = async (accessToken, refreshToken, documents
     // 最初の請求書の場合
     if (idx === 0) {
       fileData += jsonToCsv(dataToJson(invoice, journalizeInvoice))
-      fileData += String.fromCharCode(0x0a) // 改行の追加
+      fileData += String.fromCharCode(0x0d) + String.fromCharCode(0x0a) // 改行の追加
       // 最初以外の請求書の場合
     } else {
       const rows = jsonToCsv(dataToJson(invoice, journalizeInvoice)).split(/\r?\n|\r/)
@@ -69,7 +69,7 @@ const createInvoiceDataForDownload = async (accessToken, refreshToken, documents
         // ヘッダ除外したもののみ追加
         if (row !== 0) {
           fileData += rows[row]
-          fileData += String.fromCharCode(0x0a) // 改行の追加
+          fileData += String.fromCharCode(0x0d) + String.fromCharCode(0x0a) // 改行の追加
         }
       }
     }
