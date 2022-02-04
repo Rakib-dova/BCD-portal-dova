@@ -8,6 +8,9 @@ const router = express.Router()
 hbs.registerPartials(path.join(__dirname, 'views/partials'))
 hbs.registerHelper('currency', (number) => number?.toLocaleString())
 
+router.use(express.urlencoded({ extended: true }))
+router.use(express.json());
+
 router.use('/auth', require('./routes/auth'))
 // メイン画面
 router.use('/menu', require('./routes/menu'))

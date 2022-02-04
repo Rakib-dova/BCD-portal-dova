@@ -98,7 +98,6 @@ const display = async (req, res, next) => {
  */
 const save = async (req, res, next) => {
   const data = req.body
-  console.log(data)
   await obc.importCustomer(req, customer.convertTo(data.tenants))
   await Formats.assign(req, data.formats)
   res.send({ status: 'ok', message: '得意先の紐付けが完了しました。' })
@@ -106,6 +105,6 @@ const save = async (req, res, next) => {
 
 const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(display))
-router.post('/save', ...middleware, csrfProtection, handler(save), (req, res, next) => res.send({ status: 'ng', message: '内部エラー'}))
+router.post('/save', ...middleware, csrfProtection, handler(save))
 
 module.exports = router
