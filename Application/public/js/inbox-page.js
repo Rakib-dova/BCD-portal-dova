@@ -529,7 +529,7 @@ const displayNoAccountCode = function () {
 
 // 部門データ検索結果がない場合
 const displayNoDepartmentCode = function () {
-  const displayFieldDepartmentResultBody = $('#departmentResultDisplayInvisible')
+  const displayFieldDepartmentResultBody = $('#displayFieldDepartmentResultBody')
   const searchResultDepartmentCode = $('#searchResultDepartmentCode')
   const cloneSearchResultDepartmentCodeTemplate = document.importNode(searchResultDepartmentCode.content, true)
   cloneSearchResultDepartmentCodeTemplate
