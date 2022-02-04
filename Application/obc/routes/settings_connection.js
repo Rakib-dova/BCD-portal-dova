@@ -105,6 +105,6 @@ const save = async (req, res, next) => {
 
 const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(display))
-router.post('/save', ...middleware, csrfProtection, handler(save))
+router.post('/save', ...middleware, csrfProtection, handler(save), (req, res, next) => res.send({ status: 'ng', message: '内部エラー'}))
 
 module.exports = router
