@@ -94,10 +94,26 @@ if invoiceLine.length !== 0
                           p.control
                             a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`) 検索
                   .column.is-0.p-1
+                  .column.is-one-fifth.p-0.border-div-rad-4
+                   .field.is-horizontal.m-1.has-addons-centered
+                     .field-label.is-normal.m-0.text-center
+                       label 部門コード
+                     .field-label.is-normal.m-0.is-1.fixed-void-66
+                       label 　
+                   .field.is-horizontal.p-1
+                     .field-body.m-1
+                       .field
+                         p.control
+                           input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_departmentCode` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_departmentCode` value=jValue.departmentCode readonly)
+                     .field-body.m-1.is-1.none-flex-grow
+                       .field
+                         p.control
+                           a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`) 検索
+                  .column.is-0.p-1
                   .column.is-one-quarter.p-0.border-div-rad-4
                     .field.is-horizontal.m-1.has-addons-centered
                       .field-label.is-normal.m-0.text-center
-                        label 分割金額
+                        label 計上金額
                       .field-label.is-normal.m-0.is-1.fixed-void-66
                         label 　
                     .field-body.p-1
@@ -139,10 +155,26 @@ if invoiceLine.length !== 0
                         p.control
                           a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode1`) 検索
                 .column.is-0.p-1
+                .column.is-one-fifth.p-0.border-div-rad-4
+                  .field.is-horizontal.m-1.has-addons-centered
+                    .field-label.is-normal.m-0.text-center
+                      label 部門コード
+                    .field-label.is-normal.m-0.is-1.fixed-void-66
+                      label 　
+                  .field.is-horizontal.p-1
+                    .field-body.m-1
+                      .field
+                        p.control
+                          input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_departmentCode` name=`lineNo${idx + 1}_lineAccountCode1_departmentCode` value readonly)
+                    .field-body.m-1.is-1.none-flex-grow
+                      .field
+                        p.control
+                          a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode1`) 検索
+                .column.is-0.p-1
                 .column.is-one-quarter.p-0.border-div-rad-4
                   .field.is-horizontal.m-1.has-addons-centered
                     .field-label.is-normal.m-0.text-center
-                      label 分割金額
+                      label 計上金額
                     .field-label.is-normal.m-0.is-1.fixed-void-66
                       label 　
                   .field-body.p-1

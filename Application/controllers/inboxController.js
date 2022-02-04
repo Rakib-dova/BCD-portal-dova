@@ -2,9 +2,12 @@ const apiManager = require('./apiManager')
 const db = require('../models')
 const AccountCode = db.AccountCode
 const SubAccountCode = db.SubAccountCode
+const DepartmentCode = db.DepartmentCode
 const JournalizeInvoice = db.JournalizeInvoice
 const logger = require('../lib/logger')
 const Op = db.Sequelize.Op
+const department = db.DepartmentCode
+const constantsDefine = require('../constants')
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
@@ -259,6 +262,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
         if (
           data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`] !== undefined &&
           data[`lineNo${idx}_lineAccountCode${accountLineNumber}_subAccountCode`] !== undefined &&
+          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_departmentCode`] !== undefined &&
           data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`] !== undefined &&
           data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`].length !== 0 &&
           data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].length !== 0
@@ -272,6 +276,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
               journalNo: `lineAccountCode${accountLineNumber}`,
               accountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`],
               subAccountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_subAccountCode`],
+              departmentCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_departmentCode`],
               installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(
                 /,/g,
                 ''
@@ -360,6 +365,31 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
       return result
     }
 
+    // 登録前、部門データ検証
+    let checkDepartmentCodeF = false
+    for (let lines = 0; lines < lineJournals.length; lines++) {
+      for (let idx = 0; idx < 10; idx++) {
+        const item = lineJournals[lines][idx]
+        if (item.data === null) continue
+        if (item.data.departmentCode.length === 0) continue
+        if (item.data.accountCode.length !== 0 && item.data.departmentCode.length !== 0) {
+          result.departmentCode = item.data.departmentCode
+          result.lineId = item.data.lineId
+          const departmentInstance = await DepartmentCode.findOne({
+            where: {
+              contractId: contractId,
+              departmentCode: item.data.departmentCode
+            }
+          })
+          if (departmentInstance instanceof DepartmentCode === false) checkDepartmentCodeF = true
+        }
+      }
+    }
+    if (checkDepartmentCodeF) {
+      result.status = -3
+      return result
+    }
+
     // DBに保存データがない場合
     if (resultSearchJournals.length === 0) {
       lineJournals.forEach(async (accountLines) => {
@@ -418,9 +448,52 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
   }
 }
 
+const getDepartment = async (_contractId, _departmentCode, _departmentName) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'getDepartment')
+  const contractId = _contractId
+  const departmentCode = _departmentCode ?? ''
+  const departmentName = _departmentName ?? ''
+
+  try {
+    const where = {
+      contractId: contractId
+    }
+    if (departmentCode.length !== 0) {
+      where.departmentCode = {
+        [Op.like]: `%${departmentCode}%`
+      }
+    }
+    if (departmentName.length !== 0) {
+      where.departmentCodeName = {
+        [Op.like]: `%${departmentName}%`
+      }
+    }
+    const departments = (
+      await department.findAll({
+        where: {
+          ...where
+        }
+      })
+    ).map((department) => {
+      return {
+        code: department.departmentCode,
+        name: department.departmentCodeName
+      }
+    })
+
+    logger.info(constantsDefine.logMessage.INF001 + 'getDepartment')
+    return { status: 0, searchResult: departments }
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'getDepartment')
+    return { status: -1, searchResult: error }
+  }
+}
+
 module.exports = {
   getInbox: getInbox,
   getInvoiceDetail: getInvoiceDetail,
   getCode: getCode,
-  insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice
+  insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice,
+  getDepartment: getDepartment
 }

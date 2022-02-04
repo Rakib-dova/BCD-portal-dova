@@ -293,11 +293,8 @@ const cbPostIndex = async (req, res, next) => {
     return res.status(400).send('400 Bad Request')
   }
 
-  const { status, lineId, accountCode, subAccountCode, error } = await inboxController.insertAndUpdateJournalizeInvoice(
-    contract.contractId,
-    invoiceId,
-    req.body
-  )
+  const { status, lineId, accountCode, subAccountCode, departmentCode, error } =
+    await inboxController.insertAndUpdateJournalizeInvoice(contract.contractId, invoiceId, req.body)
 
   if (error instanceof Error) return next(errorHelper.create(500))
 
@@ -319,6 +316,13 @@ const cbPostIndex = async (req, res, next) => {
         'SYSERR'
       ])
       return res.redirect('/inboxList/1')
+    case -3:
+      req.flash('noti', [
+        '仕訳情報設定',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の部門データ「${departmentCode}」は未登録部門データです。`,
+        'SYSERR'
+      ])
+      return res.redirect('/inboxList/1')
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
@@ -326,6 +330,65 @@ const cbPostIndex = async (req, res, next) => {
   res.redirect('/inboxList/1')
 }
 
+const cbPostDepartment = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostDepartment')
+
+  // 認証情報取得処理
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+
+  const departmentCode = req.body.departmentCode ?? ''
+  const departmentName = req.body.departmentCodeName ?? ''
+  const contractId = contract.contractId
+
+  // 部門データの桁数のチェック
+  if (departmentCode.length > 10 || departmentName.length > 40) {
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostDepartment')
+    return res.status(400).send('400 Bad Request')
+  }
+
+  // DBの部門データを検索する。
+  const { status, searchResult } = await inboxController.getDepartment(contractId, departmentCode, departmentName)
+
+  if (searchResult instanceof Error) {
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostDepartment')
+    return res.status(500).send('500 Internal Server Error')
+  }
+
+  // 検索結果
+  // 0：検索処理が正常になること
+  switch (status) {
+    case 0:
+      return res.status(200).send(searchResult)
+  }
+}
+
+router.post('/department', helper.isAuthenticated, cbPostDepartment)
 router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)
 router.post('/getCode', helper.isAuthenticated, cbPostGetCode)
 router.post('/:invoiceId', helper.isAuthenticated, cbPostIndex)
@@ -334,5 +397,6 @@ module.exports = {
   router: router,
   cbGetIndex: cbGetIndex,
   cbPostGetCode: cbPostGetCode,
-  cbPostIndex: cbPostIndex
+  cbPostIndex: cbPostIndex,
+  cbPostDepartment: cbPostDepartment
 }

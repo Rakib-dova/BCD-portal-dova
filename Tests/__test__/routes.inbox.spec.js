@@ -26,7 +26,8 @@ let userControllerFindOneSpy,
   contractControllerFindContractSpyon,
   inboxControllerSpy,
   getCodeSpy,
-  insertAndUpdateJournalizeInvoiceSpy
+  insertAndUpdateJournalizeInvoiceSpy,
+  getDepartmentSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -81,6 +82,7 @@ describe('inboxのテスト', () => {
     getCodeSpy = jest.spyOn(inboxController, 'getCode')
     request.flash = jest.fn()
     insertAndUpdateJournalizeInvoiceSpy = jest.spyOn(inboxController, 'insertAndUpdateJournalizeInvoice')
+    getDepartmentSpy = jest.spyOn(inboxController, 'getDepartment')
   })
   afterEach(() => {
     request.resetMocked()
@@ -94,6 +96,7 @@ describe('inboxのテスト', () => {
     inboxControllerSpy.mockRestore()
     getCodeSpy.mockRestore()
     insertAndUpdateJournalizeInvoiceSpy.mockRestore()
+    getDepartmentSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -101,6 +104,7 @@ describe('inboxのテスト', () => {
       expect(inbox.router.get).toBeCalledWith('/:invoiceId', helper.isAuthenticated, inbox.cbGetIndex)
       expect(inbox.router.post).toBeCalledWith('/getCode', helper.isAuthenticated, inbox.cbPostGetCode)
       expect(inbox.router.post).toBeCalledWith('/:invoiceId', helper.isAuthenticated, inbox.cbPostIndex)
+      expect(inbox.router.post).toBeCalledWith('/department', helper.isAuthenticated, inbox.cbPostDepartment)
     })
   })
 
@@ -889,6 +893,57 @@ describe('inboxのテスト', () => {
       ])
     })
 
+    test('正常：未登録部門コードの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const lineId = 'lineAccountCode4'
+      const departmentCode = 'DE001'
+
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        lineId: 'UT001',
+        lineNo1_lineAccountCode1_accountCode: 'AB001',
+        lineNo1_lineAccountCode1_subAccountCode: 'SU111',
+        lineNo1_lineAccountCode1_departmentCode: 'DE001',
+        lineNo1_lineAccountCode1_input_amount: '30,000'
+      }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
+        status: -3,
+        lineId: lineId,
+        accountCode: 'DE001',
+        departmentCode: departmentCode,
+        error: undefined
+      })
+
+      // 試験実施
+      await inbox.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '仕訳情報設定',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の部門データ「${departmentCode}」は未登録部門データです。`,
+        'SYSERR'
+      ])
+    })
+
     test('異常:invoiceIdがUUIDではない場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -1076,6 +1131,310 @@ describe('inboxのテスト', () => {
 
       // 試験実施
       await inbox.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+  })
+
+  describe('コールバック:cbPostDepartment', () => {
+    test('正常：部門データが存在する場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      getDepartmentSpy.mockReturnValueOnce({
+        status: 0,
+        searchResult: [
+          {
+            code: 'DE001',
+            name: 'テスト用部門データ1'
+          }
+        ]
+      })
+
+      // 試験実施
+      await inbox.cbPostDepartment(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 予想したデータがある
+      expect(response.send).toHaveBeenCalledWith([
+        {
+          code: 'DE001',
+          name: 'テスト用部門データ1'
+        }
+      ])
+    })
+
+    test('正常：解約申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[6])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
+
+      // 試験実施
+      await inbox.cbPostDepartment(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('異常：部門コード１０文字超過', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[0] }
+      request.body = { departmentCode: 'UTDepartmentCode' }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await inbox.cbPostDepartment(request, response, next)
+
+      // 期待結果
+      // response.statusが「400」
+      expect(response.status).toHaveBeenCalledWith(400)
+      expect(response.send).toHaveBeenCalledWith('400 Bad Request')
+    })
+
+    test('異常：部門名４０文字超過', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[0] }
+      request.body = {
+        departmentCode: 'AB001',
+        departmentCodeName: '部門名40桁まで確認部門名40桁まで確認部門名40桁まで確認部門名40桁まで確認部門名40桁まで確認'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await inbox.cbPostDepartment(request, response, next)
+
+      // 期待結果
+      // response.statusが「400」
+      expect(response.status).toHaveBeenCalledWith(400)
+      expect(response.send).toHaveBeenCalledWith('400 Bad Request')
+    })
+
+    test('異常ー：部門データ検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      const departmentCodeDbError = new Error('DepartmentCode Table Error')
+
+      getDepartmentSpy.mockReturnValueOnce({
+        status: 0,
+        searchResult: departmentCodeDbError
+      })
+
+      // 試験実施
+      await inbox.cbPostDepartment(request, response, next)
+
+      // 期待結果
+      // response.statusが「500」
+      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith('500 Internal Server Error')
+    })
+
+    test('異常：userContextがLoggedInではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        departmentCode: 'AB001',
+        departmentCodeName: '部門名UT'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await inbox.cbPostDepartment(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+    })
+
+    test('500エラー:不正なContractデータの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[7])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[7])
+
+      // 試験実施
+      await inbox.cbPostDepartment(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：requestのsession,userIdがnullの場合', async () => {
+      // 試験実施
+      await inbox.cbPostGetCode(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      const userDbError = new Error('User Table Error')
+      userControllerFindOneSpy.mockReturnValue(userDbError)
+
+      // 試験実施
+      await inbox.cbPostDepartment(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('404エラー：user.statusが0ではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[8])
+
+      // 試験実施
+      await inbox.cbPostDepartment(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(404))
+    })
+
+    test('500エラー：contracts検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      const contractDbError = new Error('Contracts Table Error')
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+      contractControllerFindOneSpy.mockReturnValue(contractDbError)
+
+      // 試験実施
+      await inbox.cbPostDepartment(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：テナントと契約テーブル検索結果無', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      tenantControllerFindOneSpy.mockReturnValue(null)
+      contractControllerFindContractSpyon.mockReturnValue(null)
+
+      // 試験実施
+      await inbox.cbPostGetCode(request, response, next)
 
       // 期待結果
       // 500エラーがエラーハンドリング「される」
