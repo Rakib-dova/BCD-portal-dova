@@ -78,7 +78,6 @@ const save = async (req, values) => {
   format.updatedUser = values.user
   format.updatedAt = new Date()
   format.changed('updatedAt', true)
-  console.log(format)
   await format.save()
 
   await Item.destroy({

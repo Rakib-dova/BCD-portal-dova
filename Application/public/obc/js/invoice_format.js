@@ -29,8 +29,12 @@ $(() => {
       data: JSON.stringify(data)
     })
       .done(function (response) {
-        if (formatId != response.formatId) {
-          window.location.href = '/bugyo/invoice_format/' + response.formatId
+        if (response.status == 'ok') {
+          if (formatId != response.formatId) {
+            window.location.href = '/bugyo/invoice_format/' + response.formatId
+          }
+        else {
+          notice(response.message, 'is-danger')
         }
       })
       .fail(function (xhr) {

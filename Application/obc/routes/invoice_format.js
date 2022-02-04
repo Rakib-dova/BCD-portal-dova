@@ -100,20 +100,20 @@ const save = handler(async (req, res, next) => {
   const username = formatUsername(user)
 
   // フォーマットを保存
-  formatId = await Formats.save(req, {
+  const formatId = await Formats.save(req, {
     id: req.params.formatId,
     name: request.name,
     user: username,
     items: request.items
   })
-  res.send({ formatId: formatId })
+  res.send({ status: 'ok', formatId: formatId })
 })
 
 const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(displayNew))
 router.get('/:formatId', ...middleware, csrfProtection, handler(displayEdit))
 router.post('/preview', ...middleware, csrfProtection, handler(preview))
-router.post('/', ...middleware, csrfProtection, save)
+router.post('/', ...middleware, csrfProtection, save, (err, req, res) => res.send({ status: 'ng', message: err }))
 router.post('/:formatId', ...middleware, csrfProtection, save)
 
 module.exports = router
