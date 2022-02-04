@@ -268,6 +268,26 @@ describe('受領した請求書詳細画面のインテグレーションテス�
     await page.click('#upload')
   })
 
+  test('部門データの登録', async () => {
+    const puppeteer = require('puppeteer')
+    const browser = await puppeteer.launch({
+      headless: true,
+      ignoreHTTPSErrors: true
+    })
+    const page = await browser.newPage()
+    await page.setCookie(acCookies[0])
+    await page.goto('https://localhost:3000/uploadDepartment')
+
+    const [fileChooser] = await Promise.all([
+      page.waitForFileChooser(),
+      page.click('#accountCodeUpload > div > label > input')
+    ])
+
+    await fileChooser.accept(['./testData/departmentCodeUpload_test11.csv'])
+
+    await page.click('#upload')
+  })
+
   describe('4.契約ステータス：契約中', () => {
     // テナントステータスが「契約中」、受領した請求書詳細画面直接接続-利用不可
     test('管理者、契約ステータス：契約中、受領した請求書詳細画面直接接続-利用不可', async () => {
@@ -562,6 +582,8 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.evaluate(() => {
         document.querySelector('#bulkInsertNo1_lineAccountCode1_accountCode').value = 'A001'
         document.querySelector('#bulkInsertNo1_lineAccountCode2_accountCode').value = 'A002'
+        document.querySelector('#bulkInsertNo1_lineAccountCode1_departmentCode').value = 'TEST1'
+        document.querySelector('#bulkInsertNo1_lineAccountCode2_departmentCode').value = 'TEST2'
         document
           .querySelector(
             '#field-invoiceLine > div:nth-child(1) > div > div.columns.m-0.invoiceLine-journalModal > div.column-header.is-2-header > div:nth-child(2) > div > input'
@@ -569,7 +591,7 @@ describe('受領した請求書詳細画面のインテグレーションテス�
           .click()
       })
 
-      // 「登録」ボタンをクリック
+      // 「反映」ボタンをクリック
       await page.click('#btn-bulk-insert')
 
       // モーダルが閉じるまで待ち
@@ -599,80 +621,105 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await browser.close()
     })
 
-    // データなしため、コメントにする。
-    // test('仕訳一括設定で200個を入力', async () => {
-    //   const puppeteer = require('puppeteer')
-    //   const browser = await puppeteer.launch({
-    //     headless: false,
-    //     ignoreHTTPSErrors: true
-    //   })
-    //   const page = await browser.newPage()
-    //   await page.setCookie(acCookies[0])
+    test('仕訳一括設定で200個を入力', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
 
-    //   // 仕訳情報設定の画面へ遷移
-    //   await page.goto(`https://localhost:3000${redirectUrl}`)
+      // 仕訳情報設定の画面へ遷移
+      await page.goto(`https://localhost:3000${redirectUrl}`)
 
-    //   // 仕訳情報の個数を数える
-    //   const journalList = await page.evaluate(() => {
-    //     const lineAccountcode = document.querySelector('#lineNo1').querySelectorAll('.lineAccountcode')
-    //     return Array.prototype.map.call(lineAccountcode, (item) => {
-    //       return item.id
-    //     })
-    //   })
+      // 仕訳情報の個数を数える
+      const journalList = await page.evaluate(() => {
+        const journaList = []
+        for (let lineNo = 1; lineNo < 201; lineNo++) {
+          const lineAccountcode = document.querySelector(`#lineNo${lineNo}`).querySelectorAll('.lineAccountcode')
+          journaList.push(
+            Array.prototype.map.call(lineAccountcode, (item) => {
+              return item.id
+            })
+          )
+        }
+        return journaList
+      })
 
-    //   // 仕訳情報一括入力ボタンクリック
-    //   await page.click('#btn-bulkInsert')
+      // 仕訳情報一括入力ボタンクリック
+      await page.click('#btn-bulkInsert')
 
-    //   // 仕訳情報1目の検索実施
-    //   await page.click(
-    //     '#bulkInsertNo1_lineAccountCode1 > div.column.is-two-fifths.p-0.border-div-rad-4 > div.field.is-horizontal.p-1 > div.field-body.m-1.is-1.none-flex-grow > div > p > a'
-    //   )
+      // プラスボタン入力
+      // 仕訳一括設定モーダル「＋」ボタンを押下する。
+      for (let cnt = 0; cnt < 10; cnt++) {
+        await page.evaluate(() => {
+          document.getElementById('btn-plus-accountCode-bulkInsert-modal').click()
+        })
+      }
 
-    //   // 検索モーダルでA001入力
-    //   await page.type('#searchModalAccountCode', 'A001')
+      // 仕訳情報の登録
+      await page.evaluate(() => {
+        document.querySelector('#bulkInsertNo1_lineAccountCode1_accountCode').value = 'A001'
+        document.querySelector('#bulkInsertNo1_lineAccountCode2_accountCode').value = 'A002'
+        document.querySelector('#bulkInsertNo1_lineAccountCode3_accountCode').value = 'A003'
+        document.querySelector('#bulkInsertNo1_lineAccountCode4_accountCode').value = 'A004'
+        document.querySelector('#bulkInsertNo1_lineAccountCode5_accountCode').value = 'A005'
+        document.querySelector('#bulkInsertNo1_lineAccountCode6_accountCode').value = 'A006'
+        document.querySelector('#bulkInsertNo1_lineAccountCode7_accountCode').value = 'A007'
+        document.querySelector('#bulkInsertNo1_lineAccountCode8_accountCode').value = 'A008'
+        document.querySelector('#bulkInsertNo1_lineAccountCode9_accountCode').value = 'A009'
+        document.querySelector('#bulkInsertNo1_lineAccountCode10_accountCode').value = 'A010'
+        document.querySelector('#bulkInsertNo1_lineAccountCode1_departmentCode').value = 'TEST1'
+        document.querySelector('#bulkInsertNo1_lineAccountCode2_departmentCode').value = 'TEST2'
+        document.querySelector('#bulkInsertNo1_lineAccountCode3_departmentCode').value = 'TEST3'
+        document.querySelector('#bulkInsertNo1_lineAccountCode4_departmentCode').value = 'TEST4'
+        document.querySelector('#bulkInsertNo1_lineAccountCode5_departmentCode').value = 'TEST5'
+        document.querySelector('#bulkInsertNo1_lineAccountCode6_departmentCode').value = 'TEST6'
+        document.querySelector('#bulkInsertNo1_lineAccountCode7_departmentCode').value = 'TEST7'
+        document.querySelector('#bulkInsertNo1_lineAccountCode8_departmentCode').value = 'TEST8'
+        document.querySelector('#bulkInsertNo1_lineAccountCode9_departmentCode').value = 'TEST9'
+        document.querySelector('#bulkInsertNo1_lineAccountCode10_departmentCode').value = 'TEST10'
+        for (let id = 1; id < 201; id++) {
+          document
+            .querySelector(
+              `#field-invoiceLine > div:nth-child(${id}) > div > div.columns.m-0.invoiceLine-journalModal > div.column-header.is-2-header > div:nth-child(2) > div > input`
+            )
+            .click()
+        }
+      })
 
-    //   // 検索ボタンクリック
-    //   await page.click('#btnSearchAccountCode')
+      // 「反映」ボタンをクリック
+      await page.click('#btn-bulk-insert')
 
-    //   // 検索結果を待ち
-    //   await page.waitForTimeout(500)
+      // モーダルが閉じるまで待ち
+      await page.waitForTimeout(5000)
 
-    //   // 最初の行を選択
-    //   await page.click('#displayFieldResultBody > tr:nth-child(1)')
+      // 一括入力モーダル画面閉じる
+      await page.evaluate(() => {
+        return document.querySelector('#bulkInsert-journal-modal').classList.value.match(/is-active/) !== null
+      })
 
-    //   // １番目の明細を選択
-    //   await page.evaluate(() => {
-    //     document
-    //       .querySelector(
-    //         '#field-invoiceLine > div > div > div > div.column-header.is-2-header > div:nth-child(2) > div > input'
-    //       )
-    //       .click()
-    //   })
+      // 仕訳情報の個数を数える
+      const newJournalList = await page.evaluate(() => {
+        const lineAccount = []
+        for (let lineNo = 1; lineNo < 201; lineNo++) {
+          const lineAccountcode = document.querySelector(`#lineNo${lineNo}`).querySelectorAll('.lineAccountcode')
+          lineAccount.push(
+            Array.prototype.map.call(lineAccountcode, (item) => {
+              return item.id
+            })
+          )
+        }
+        return lineAccount
+      })
 
-    //   // 「登録」ボタンをクリック
-    //   await page.click('#btn-bulk-insert')
+      for (let lineNo = 0; lineNo < 200; lineNo++) {
+        expect(newJournalList[lineNo].length).toBe(journalList[lineNo].length + 9)
+      }
 
-    //   // モーダルが閉じるまで待ち
-    //   await page.waitForTimeout(500)
-
-    //   // 一括入力モーダル画面閉じる
-    //   const resultOfModal = await page.evaluate(() => {
-    //     return document.querySelector('#bulkInsert-journal-modal').classList.value.match(/is-active/) !== null
-    //   })
-
-    //   // モーダルが閉じたらresultOfModalはtrueになる
-    //   expect(resultOfModal).toBe(true)
-
-    //   // 仕訳情報の個数を数える
-    //   const newJournalList = await page.evaluate(() => {
-    //     const lineAccountcode = document.querySelector('#lineNo1').querySelectorAll('.lineAccountcode')
-    //     return Array.prototype.map.call(lineAccountcode, (item) => {
-    //       return item.id
-    //     })
-    //   })
-
-    //   expect(newJournalList.length).toBe(journalList.length + 1)
-    // })
+      await browser.close()
+    })
 
     test('エラー仕訳情報を１項目以上入力してください。', async () => {
       const puppeteer = require('puppeteer')
