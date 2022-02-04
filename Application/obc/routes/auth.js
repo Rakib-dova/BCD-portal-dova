@@ -4,7 +4,7 @@ const logger = require('../../lib/logger')
 const obcApi = require('../controllers/apihelper').bugyoApi()
 const { handler } = require('./helpers/util')
 
-const REDIRECT_URL = `https://${process.env.HOST}/bugyo/auth/callback/`
+const REDIRECT_URL = `https://${process.env.TS_HOST}/bugyo/auth/callback/`
 const CLIENT_ID = process.env.OBC_API_CLIENT_ID
 
 const auth = async (req, res, next) => {
