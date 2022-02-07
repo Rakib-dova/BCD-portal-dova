@@ -6,6 +6,8 @@ const departmentCodeController = require('../../Application/controllers/departme
 const logger = require('../../Application/lib/logger')
 const DepartmentCode = require('../../Application/models').DepartmentCode
 const sequelize = require('../../Application/models').sequelize
+const timestamp = require('../../Application/lib/utils').timestampForList
+const departmentCodeMock = require('../mockDB/DepartmentCode_Table')
 const codeDepartmentId = '5a927284-57c9-4594-9ed8-472d261a6102'
 const codeDepartmentDataResult = new DepartmentCode()
 codeDepartmentDataResult.departmentCodeId = codeDepartmentId
@@ -17,6 +19,18 @@ codeDepartmentDataResult.updatedAt = new Date('2022-01-28T04:30:00.000Z')
 
 const dbDepartmentCodeTable = []
 dbDepartmentCodeTable.push(codeDepartmentDataResult)
+
+const dbDepartmentCode100Table = []
+dbDepartmentCode100Table.length = 100
+dbDepartmentCode100Table.forEach((item, idx, arr) => {
+  const { v4: uuidV4 } = require('uuid')
+  arr[idx] = new DepartmentCode()
+  item.departmentCodeId = uuidV4()
+  item.contractId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
+  item.departmentCodeName = `DEP${idx}`
+  item.departmentCode = `部門名${idx + 1}`
+  item.updatedAt = new Date('2021-11-25T04:30:00.000Z')
+})
 
 let errorSpy, contractId, departmentCodefindAllSpy, infoSpy, createSpy, findOneSpy, transactionSpy
 
@@ -148,6 +162,131 @@ describe('accountCodeControllerのテスト', () => {
       // 期待結果
       // 想定したデータがReturnされていること
       expect(result).toEqual(false)
+    })
+  })
+
+  describe('getDepartmentCodeList', () => {
+    test('正常:データがない場合', async () => {
+      // 準備
+      // 部門データDB
+      departmentCodefindAllSpy.mockReturnValue([])
+
+      // コントラクターID
+      const contractId = '6e396429-169b-4a3a-9a66-07d4f3ffd23e'
+
+      // 試験実施
+      const result = await departmentCodeController.getDepartmentCodeList(contractId)
+
+      // 期待結果
+      expect(result).toEqual([])
+    })
+
+    test('正常:データ100件ある場合', async () => {
+      // 準備
+      // 部門データDB
+      departmentCodefindAllSpy.mockReturnValue(dbDepartmentCode100Table)
+
+      // コントラクターID
+      const contractId = '6e396429-169b-4a3a-9a66-07d4f3ffd23e'
+
+      // 試験実施
+      const result = await departmentCodeController.getDepartmentCodeList(contractId)
+
+      // 期待値作成
+      const expectResult = dbDepartmentCode100Table.map((item, idx) => {
+        return {
+          no: idx + 1,
+          accountCodeId: item.accountCodeId,
+          accountCode: item.accountCodeName,
+          accountCodeName: item.accountCode,
+          updatedAt: timestamp(item.updatedAt)
+        }
+      })
+
+      // 期待結果
+      expect(result).toEqual(expectResult)
+    })
+
+    test('正常:データ1件ある場合', async () => {
+      // 準備
+      // 部門データDB
+      departmentCodefindAllSpy.mockReturnValue([dbDepartmentCodeTable[0]])
+
+      // コントラクターID
+      const contractId = '6e396429-169b-4a3a-9a66-07d4f3ffd23e'
+
+      // 試験実施
+      const result = await departmentCodeController.getDepartmentCodeList(contractId)
+
+      // 期待値作成
+      const expectResult = [
+        {
+          no: 1,
+          departmentCodeId: dbDepartmentCodeTable[0].departmentCodeId,
+          departmentCode: dbDepartmentCodeTable[0].departmentCode,
+          departmentCodeName: dbDepartmentCodeTable[0].departmentCodeName,
+          updatedAt: timestamp(new Date(dbDepartmentCodeTable[0].updatedAt))
+        }
+      ]
+
+      // 期待結果
+      expect(result).toEqual(expectResult)
+    })
+
+    test('異常：FindAll DBエラー', async () => {
+      // 準備
+      // コード検索時、エラーが発生する場合
+      const dbPoolError = new Error('DB POOL Error')
+      departmentCodefindAllSpy.mockReturnValue(dbPoolError)
+
+      // コントラクターID
+      const contractId = '6e396429-169b-4a3a-9a66-07d4f3ffd23e'
+
+      // 試験実施
+      await departmentCodeController.getDepartmentCodeList(contractId)
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(errorSpy).toHaveBeenCalledWith({ contractId: contractId, stack: expect.anything(), status: 0 })
+    })
+  })
+
+  describe('getDepartmentCode', () => {
+    test('正常：検索対象がある場合', async () => {
+      // 準備
+      // 部門データがある場合
+      findOneSpy.mockReturnValue(departmentCodeMock[0])
+
+      // contractId
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+
+      // 試験実施
+      const result = await departmentCodeController.getDepartmentCode(contractId)
+
+      expect(result).toEqual({
+        departmentCode: departmentCodeMock[0].departmentCode,
+        departmentCodeName: departmentCodeMock[0].departmentCodeName
+      })
+    })
+    test('異常：findOne DBエラー', async () => {
+      // 準備
+      // DBエラー
+      const errorDbPool = new Error('DB POOL ERROR')
+      findOneSpy.mockImplementation(() => {
+        throw errorDbPool
+      })
+
+      // contractId
+      const contractId = '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9'
+
+      // 試験実施
+      await departmentCodeController.getDepartmentCode(contractId)
+
+      expect(errorSpy).toHaveBeenCalledWith({
+        contractId: contractId,
+        stack: expect.anything(),
+        status: 0
+      })
     })
   })
 })
