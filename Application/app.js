@@ -262,6 +262,12 @@ app.use('/registDepartmentCode', require('./routes/registDepartmentCode').router
 // 部門データ一括作成
 app.use('/uploadDepartment', require('./routes/departmentCodeUpload').router)
 
+// 部門データ削除
+app.use('/deleteDepartmentCode', require('./routes/deleteDepartmentCode').router)
+
+// 部門データ確認・変更
+app.use('/departmentCodeEdit', require('./routes/departmentCodeEdit').router)
+
 // ------------受領した請求書
 // 受領した請求書一覧
 app.use('/inboxList', require('./routes/inboxList').router)
