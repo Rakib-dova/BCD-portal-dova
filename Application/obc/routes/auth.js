@@ -24,6 +24,7 @@ const callback = async (req, res, next) => {
   // テナントIDを取得する
   const tenant = await obcApi.searchTenant(req)
   req.session.bugyo.tenant_id = tenant[0].id
+  logger.info({ tenant: tenant[0].id }, 'OBC Authentication Succeeded')
   res.redirect(303, '/bugyo/menu')
 }
 

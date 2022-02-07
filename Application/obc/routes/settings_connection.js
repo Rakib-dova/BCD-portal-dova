@@ -4,7 +4,7 @@ const ts = require('../controllers/apihelper').tradeshiftApi()
 const obc = require('../controllers/apihelper').bugyoApi()
 const customer = require('./helpers/customer')
 const Formats = require('./helpers/formats')
-const { handler, currentTenantId } = require('./helpers/util')
+const { handler } = require('./helpers/util')
 
 // CSRF対策
 const csrf = require('csurf')

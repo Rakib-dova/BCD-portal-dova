@@ -1,3 +1,4 @@
+'use strict'
 const define = require('node-constants')(exports)
 define({
   // 一回の請求書発行の最大数

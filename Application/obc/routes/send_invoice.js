@@ -14,8 +14,6 @@ const messages = require('./helpers/messages')
 const {
   User,
   Tenant,
-  Format,
-  Item,
   Error,
   Sequelize: { Op }
 } = require('../models')

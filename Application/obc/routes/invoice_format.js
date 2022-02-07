@@ -1,6 +1,7 @@
 'use strict'
 const express = require('express')
 const fs = require('fs')
+const path = require('path')
 const { v4: uuidv4 } = require('uuid')
 
 const ts = require('../controllers/apihelper').tradeshiftApi()
@@ -51,7 +52,7 @@ const displayEdit = async (req, res, next) => {
 }
 
 const previewData = (items) => {
-  const data = JSON.parse(fs.readFileSync(__dirname + '/../../public/obc/assets/invoice_preview.json', 'utf-8'))
+  const data = JSON.parse(fs.readFileSync(path.join(__dirname, '../../public/obc/assets/invoice_preview.json'), 'utf-8'))
   const convert = BillIssue.converter((key) => items.includes(key))
   return convert(BillIssue.build(data).shift())
 }

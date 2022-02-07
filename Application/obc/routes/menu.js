@@ -13,7 +13,7 @@ const middleware = require('./helpers/middleware')
  */
 const display = async (req, res, next) => {
   const tenantId = currentTenantId(req)
-  const [user, created] = await User.findOrCreate({
+  const [user] = await User.findOrCreate({
     where: { uuid: tenantId },
     defaults: {
       uuid: tenantId
