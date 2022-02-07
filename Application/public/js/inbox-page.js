@@ -793,27 +793,11 @@ const duplicationCheck = function () {
     Array.prototype.forEach.call(children, (item) => {
       const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
       const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
-      lineInformationArray.push([accountCode, subAccountCode])
+      const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
+      lineInformationArray.push([accountCode, subAccountCode, department])
     })
     koumokuInformationArray.push(duplicateCheckFunction(lineInformationArray))
   }
-
-  // 部門データの重複をチェック
-  const invoiceLines = getInvoiceLineList()
-  invoiceLines.forEach((line, lineIdx) => {
-    line.account.forEach((account, accidx, accArr) => {
-      if (account.node) {
-        for (let idx = 0; idx < accArr.length; idx++) {
-          if (account.node !== accArr[idx].node && accArr[idx].node !== null) {
-            if (account.departmentCode.length === 0 || accArr[idx].departmentCode.length === 0) continue
-            if (account.departmentCode === accArr[idx].departmentCode) {
-              koumokuInformationArray[lineIdx] = true
-            }
-          }
-        }
-      }
-    })
-  })
 
   // 重複がある明細項目づつエラーメッセージを設定する。
   koumokuInformationArray.map((item, idx) => {
@@ -842,25 +826,10 @@ const duplicationCheckModal = function () {
   Array.prototype.forEach.call(children, (item) => {
     const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
     const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
-    koumokuInformationArray.push([accountCode, subAccountCode])
+    const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
+    koumokuInformationArray.push([accountCode, subAccountCode, department])
   })
-  let dupleResult = duplicateCheckFunction(koumokuInformationArray)
-
-  // 部門データの重複をチェック
-  Array.prototype.forEach.call(children, (journal, jdx, journalArr) => {
-    for (let idx = jdx; idx < journalArr.length; idx++) {
-      if (journal !== journalArr[idx]) {
-        const dep1 = journal.querySelectorAll('input[type=text]')[2].value
-        const dep2 = journalArr[idx].querySelectorAll('input[type=text]')[2].value
-        if (dep1.length === 0 || dep2.length === 0) {
-          continue
-        }
-        if (dep1 === dep2) {
-          dupleResult = true
-        }
-      }
-    }
-  })
+  const dupleResult = duplicateCheckFunction(koumokuInformationArray)
 
   // 重複された場合エラーメッセージ表示
   const errMsg = $('#error-message-journal-modal')
