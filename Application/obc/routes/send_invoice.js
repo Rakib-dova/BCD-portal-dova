@@ -351,7 +351,7 @@ const send = async (req, res, next) => {
   }
   // 発行済み請求書番号を更新
   if (maxInvoiceId) {
-    User.update(
+    await User.update(
       { lastInvoiceNo: maxInvoiceId },
       {
         where: {
