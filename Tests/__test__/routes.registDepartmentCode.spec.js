@@ -127,7 +127,7 @@ describe('registAccountCodeのテスト', () => {
         modalTitle: '部門データ設定確認',
         backUrl: '/departmentCodeList',
         logTitle: '部門データ登録',
-        logTitleEng: 'REGIST DEPARTMENT CODE',
+        logTitleEng: 'REGIST DEPARTMENT',
         isRegistDepartmentCode: true,
         pTagForcheckInput1: 'checksetDepartmentCodeInputId',
         pTagForcheckInput2: 'checksetDepartmentCodeNameInputId',

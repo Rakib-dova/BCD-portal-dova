@@ -131,7 +131,7 @@ describe('routes.departmentListのテスト', () => {
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('departmentCodeList', {
         title: '部門データ一覧',
-        engTitle: 'DEPARTMENT CODE LIST',
+        engTitle: 'DEPARTMENT LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
         messageForNotItem: '現在、部門データはありません。新規登録するボタンから登録を行ってください。',
@@ -177,7 +177,7 @@ describe('routes.departmentListのテスト', () => {
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('departmentCodeList', {
         title: '部門データ一覧',
-        engTitle: 'DEPARTMENT CODE LIST',
+        engTitle: 'DEPARTMENT LIST',
         btnNameForRegister: '新規登録する',
         listArr: departmentCodeListArrFour,
         messageForNotItem: '現在、部門データはありません。新規登録するボタンから登録を行ってください。',
@@ -222,7 +222,7 @@ describe('routes.departmentListのテスト', () => {
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('departmentCodeList', {
         title: '部門データ一覧',
-        engTitle: 'DEPARTMENT CODE LIST',
+        engTitle: 'DEPARTMENT LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
         messageForNotItem: '現在、部門データはありません。新規登録するボタンから登録を行ってください。',
@@ -267,7 +267,7 @@ describe('routes.departmentListのテスト', () => {
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('departmentCodeList', {
         title: '部門データ一覧',
-        engTitle: 'DEPARTMENT CODE LIST',
+        engTitle: 'DEPARTMENT LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
         messageForNotItem: '現在、部門データはありません。新規登録するボタンから登録を行ってください。',
@@ -312,7 +312,7 @@ describe('routes.departmentListのテスト', () => {
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('departmentCodeList', {
         title: '部門データ一覧',
-        engTitle: 'DEPARTMENT CODE LIST',
+        engTitle: 'DEPARTMENT LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
         messageForNotItem: '現在、部門データはありません。新規登録するボタンから登録を行ってください。',
@@ -357,7 +357,7 @@ describe('routes.departmentListのテスト', () => {
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('departmentCodeList', {
         title: '部門データ一覧',
-        engTitle: 'DEPARTMENT CODE LIST',
+        engTitle: 'DEPARTMENT LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
         messageForNotItem: '現在、部門データはありません。新規登録するボタンから登録を行ってください。',
@@ -402,7 +402,7 @@ describe('routes.departmentListのテスト', () => {
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('departmentCodeList', {
         title: '部門データ一覧',
-        engTitle: 'DEPARTMENT CODE LIST',
+        engTitle: 'DEPARTMENT LIST',
         btnNameForRegister: '新規登録する',
         listArr: [],
         messageForNotItem: '現在、部門データはありません。新規登録するボタンから登録を行ってください。',

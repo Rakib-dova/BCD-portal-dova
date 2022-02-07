@@ -76,7 +76,7 @@ const cbGetIndex = async (req, res, next) => {
     checkModalLabel1: '部門コード',
     checkModalLabel2: '部門名',
     logTitle: '部門データ確認・変更',
-    logTitleEng: 'EDIT DEPARTMENT CODE'
+    logTitleEng: 'EDIT DEPARTMENT'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
