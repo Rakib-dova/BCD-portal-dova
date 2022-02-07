@@ -1,7 +1,8 @@
 #check-modal > div.modal-card.is-family-noto-sans > section > table > tbody > tr > td:nth-child(1) {
   width: 150px !important;
 }
-#displayInvisible {
+#displayInvisible,
+#departmentResultDisplayInvisible {
   width: 100%;
 }
 
@@ -10,14 +11,17 @@
 }
 
 #displayInvisible > div,
-#displayInvisible > div > table {
+#displayInvisible > div > table,
+#departmentResultDisplayInvisible > div,
+#departmentResultDisplayInvisible > div > table {
   width: 100%;
   max-height: 300px;
   overflow: auto;
   margin-bottom: 20px;
 }
 
-#displayInvisible > div > table > thead > tr {
+#displayInvisible > div > table > thead > tr,
+#departmentResultDisplayInvisible > div > table > thead > tr {
   position: sticky;
   top: 0;
   transform: translate(0px, -20px);
@@ -25,7 +29,9 @@
   background-color: white;
   z-index: 5;
 }
-#displayInvisible > div > table > thead > tr > td {
+
+#displayInvisible > div > table > thead > tr > td,
+#departmentResultDisplayInvisible > div > table > thead > tr > td {
   position: sticky;
   top: 0;
   background-color: hsl(204deg 71% 53%);
@@ -36,13 +42,15 @@
   vertical-align: bottom;
 }
 
-#displayFieldBody > tr > td:hover {
+#displayFieldBody > tr > td:hover,
+#departmentResultDisplayInvisible > tr > td:hover {
   cursor: pointer;
 }
 
 /* 
   ・勘定科目検索時のテーブル高さ
 */
-#displayInvisible {
+#displayInvisible,
+#departmentResultDisplayInvisible {
   max-height: 290px;
 }
