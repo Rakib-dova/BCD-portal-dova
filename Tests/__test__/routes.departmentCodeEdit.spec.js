@@ -3,8 +3,8 @@
 jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
-process.env.INVOICE_UPLOAD_PATH ?? JSON.stringify({ INVOICE_UPLOAD_PATH: './testData' })
-const departmentCodeUpload = require('../../Application/routes/departmentCodeUpload')
+
+const departmentCodeEdit = require('../../Application/routes/departmentCodeEdit')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
@@ -14,17 +14,18 @@ const noticeHelper = require('../../Application/routes/helpers/notice')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
-const departmentCodeUploadController = require('../../Application/controllers/departmentCodeUploadController.js')
+const departmentCodeController = require('../../Application/controllers/departmentCodeController.js')
 const logger = require('../../Application/lib/logger.js')
 
 let request, response, infoSpy
 let userControllerFindOneSpy,
   contractControllerFindOneSpy,
-  departmentCodeUploadControllerUploadSpy,
+  departmentCodeControllerGetDepartmentCodeSpy,
   tenatnsFindOneSpy,
   userControllerFindAndUpdate,
   contractControllerFindContractSpy,
-  checkContractStatusSpy
+  checkContractStatusSpy,
+  updatedDepartmentCodeSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -41,8 +42,9 @@ const session = {
 const Users = require('../mockDB/Users_Table')
 const Contracts = require('../mockDB/Contracts_Table')
 const Tenants = require('../mockDB/Tenants_Table')
+const DepartmentCode = require('../mockDB/DepartmentCode_Table')
 
-describe('departmentCodeUploadのテスト', () => {
+describe('departmentCodeEditのテスト', () => {
   beforeEach(() => {
     request = new Request()
     request.body = {}
@@ -52,10 +54,11 @@ describe('departmentCodeUploadのテスト', () => {
     userControllerFindAndUpdate = jest.spyOn(userController, 'findAndUpdate')
     contractControllerFindOneSpy = jest.spyOn(contractController, 'findOne')
     contractControllerFindContractSpy = jest.spyOn(contractController, 'findContract')
+    departmentCodeControllerGetDepartmentCodeSpy = jest.spyOn(departmentCodeController, 'getDepartmentCode')
     tenatnsFindOneSpy = jest.spyOn(tenantController, 'findOne')
     request.flash = jest.fn()
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
-    departmentCodeUploadControllerUploadSpy = jest.spyOn(departmentCodeUploadController, 'upload')
+    updatedDepartmentCodeSpy = jest.spyOn(departmentCodeController, 'updatedDepartmentCode')
   })
   afterEach(() => {
     request.resetMocked()
@@ -66,24 +69,23 @@ describe('departmentCodeUploadのテスト', () => {
     contractControllerFindOneSpy.mockRestore()
     contractControllerFindContractSpy.mockRestore()
     userControllerFindAndUpdate.mockRestore()
+    departmentCodeControllerGetDepartmentCodeSpy.mockRestore()
     tenatnsFindOneSpy.mockRestore()
     checkContractStatusSpy.mockRestore()
-    departmentCodeUploadControllerUploadSpy.mockRestore()
+    updatedDepartmentCodeSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
-    test('departmentCodeUploadのルーティングを確認', async () => {
-      expect(departmentCodeUpload.router.get).toBeCalledWith(
-        '/',
+    test('departmentCodeのルーティングを確認', async () => {
+      expect(departmentCodeEdit.router.get).toBeCalledWith(
+        '/:departmentCodeId',
         helper.isAuthenticated,
-        departmentCodeUpload.cbGetIndex
+        departmentCodeEdit.cbGetIndex
       )
-
-      expect(departmentCodeUpload.router.post).toBeCalledWith(
-        '/',
+      expect(departmentCodeEdit.router.post).toBeCalledWith(
+        '/:departmentCodeId',
         helper.isAuthenticated,
-        expect.any(Function),
-        departmentCodeUpload.cbPostIndex
+        departmentCodeEdit.cbPostIndex
       )
     })
   })
@@ -103,38 +105,85 @@ describe('departmentCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // DBからの正常な部門データ情報取得を想定する
+      departmentCodeControllerGetDepartmentCodeSpy.mockReturnValue(DepartmentCode[0])
 
       // 試験実施
-      await departmentCodeUpload.cbGetIndex(request, response, next)
+      await departmentCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでdepartmentUploadが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('departmentCodeUpload', {
-        uploadCommonLayoutTitle: '部門データ一括作成',
-        uploadCommonLayoutEngTitle: 'BULK UPLOAD DEPARTMENT',
-        fileInputName: 'bulkDepartmentCode',
-        cautionForSelectedFile: 'ファイルを選択してください。',
-        listLocation: '/departmentCodeList',
-        listLoacationName: '部門データ一覧→',
-        accountCodeUpload: '/uploadDepartment',
-        procedureContents: {
-          procedureTitle: '(手順)',
-          procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
-          procedureComment2: '2. CSVファイルに部門データを記入',
-          procedureComment2Children: [
-            'A列：部門コード　英・数字・カナのみ（10桁）',
-            'B列：部門名　　　文字列（40桁）',
-            '※1ファイルで作成できる部門データの数は200まで'
-          ],
-          procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
-          procedureComment4: '4.「アップロード開始」ボタンをクリック'
-        },
-        formatFileLocation: '../html/部門データ一括作成フォーマット.csv',
-        formatFileLinkText: 'アップロード用CSVファイルダウンロード'
+      // response.renderでregistDepartmentCodeが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('registDepartmentCode', {
+        codeName: '部門データ確認・変更',
+        codeLabel: '部門コード',
+        codeNameLabel: '部門名',
+        requiredTagCode: 'departmentCodeTagRequired',
+        requiredTagName: 'departmentCodeNameRequired',
+        idForCodeInput: 'setDepartmentCodeInputId',
+        idForNameInput: 'setDepartmentCodeNameInputId',
+        logTitle: '部門データ確認・変更',
+        logTitleEng: 'EDIT DEPARTMENT',
+        modalTitle: '部門データ設定確認',
+        backUrl: '/departmentCodeList',
+        isRegistDepartmentCode: true,
+        pTagForcheckInput1: 'checksetDepartmentCodeInputId',
+        pTagForcheckInput2: 'checksetDepartmentCodeNameInputId',
+        checkModalLabel1: '部門コード',
+        checkModalLabel2: '部門名',
+        valueForCodeInput: DepartmentCode[0].departmentCode,
+        valueForNameInput: DepartmentCode[0].departmentCodeName
+      })
+    })
+
+    test('正常：データがない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // DBからのnullの部門データ情報取得を想定する
+      departmentCodeControllerGetDepartmentCodeSpy.mockReturnValue(null)
+
+      // 試験実施
+      await departmentCodeEdit.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでregistDepartmentCodeが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('registDepartmentCode', {
+        codeName: '部門データ確認・変更',
+        codeLabel: '部門コード',
+        codeNameLabel: '部門名',
+        requiredTagCode: 'departmentCodeTagRequired',
+        requiredTagName: 'departmentCodeNameRequired',
+        idForCodeInput: 'setDepartmentCodeInputId',
+        idForNameInput: 'setDepartmentCodeNameInputId',
+        logTitle: '部門データ確認・変更',
+        logTitleEng: 'EDIT DEPARTMENT',
+        modalTitle: '部門データ設定確認',
+        backUrl: '/departmentCodeList',
+        isRegistDepartmentCode: true,
+        pTagForcheckInput1: 'checksetDepartmentCodeInputId',
+        pTagForcheckInput2: 'checksetDepartmentCodeNameInputId',
+        checkModalLabel1: '部門コード',
+        checkModalLabel2: '部門名',
+        valueForCodeInput: '',
+        valueForNameInput: ''
       })
     })
 
@@ -154,7 +203,7 @@ describe('departmentCodeUploadのテスト', () => {
       checkContractStatusSpy.mockReturnValue('30')
 
       // 試験実施
-      await departmentCodeUpload.cbGetIndex(request, response, next)
+      await departmentCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -181,7 +230,7 @@ describe('departmentCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[8])
 
       // 試験実施
-      await departmentCodeUpload.cbGetIndex(request, response, next)
+      await departmentCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -190,19 +239,19 @@ describe('departmentCodeUploadのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // 500エラーがエラーハンドリング「される」
+      // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
       // 試験実施
-      await departmentCodeUpload.cbGetIndex(request, response, next)
+      await departmentCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
-      // 500エラーがエラーハンドリング「される」
+      // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -217,13 +266,13 @@ describe('departmentCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(userDbError)
 
       // 試験実施
-      await departmentCodeUpload.cbGetIndex(request, response, next)
+      await departmentCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
-      // 500エラーがエラーハンドリング「される」
+      // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -237,7 +286,7 @@ describe('departmentCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[8])
 
       // 試験実施
-      await departmentCodeUpload.cbGetIndex(request, response, next)
+      await departmentCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
       expect(next).toHaveBeenCalledWith(errorHelper.create(404))
@@ -255,12 +304,37 @@ describe('departmentCodeUploadのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(contractDbError)
 
       // 試験実施
-      await departmentCodeUpload.cbGetIndex(request, response, next)
+      await departmentCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
+    test('500エラー：不正な部門データの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常な部門データ情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue('00')
+      const departmentCodeDbError = new Error('AccountCodeCode Table Error')
+      // DBからのnullの部門データ情報取得を想定する
+      departmentCodeControllerGetDepartmentCodeSpy.mockReturnValue(departmentCodeDbError)
+      // checkContractStatusからreturnされる値設定
+
+      // 試験実施
+      await departmentCodeEdit.cbGetIndex(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
     test('500エラー：不正なcheckContractStatus(null)', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -280,7 +354,7 @@ describe('departmentCodeUploadのテスト', () => {
       checkContractStatusSpy.mockReturnValue(null)
 
       // 試験実施
-      await departmentCodeUpload.cbGetIndex(request, response, next)
+      await departmentCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -306,26 +380,51 @@ describe('departmentCodeUploadのテスト', () => {
       // checkContractStatusからreturnされる値設定
       checkContractStatusSpy.mockReturnValue(999)
       // 試験実施
-      await departmentCodeUpload.cbGetIndex(request, response, next)
+      await departmentCodeEdit.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
+
+    test('異常：異常経路接続', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, userContext: 'NotLoggedIn' }
+      request.user = { ...Users[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await departmentCodeEdit.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('NotLoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('dummy')
+      // 400エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+    })
   })
 
   describe('コールバック:cbPostIndex', () => {
-    test('正常：部門データ一括作成', async () => {
+    test('正常：部門コードと部門名変更', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...Users[0] }
-      request.file = {
-        originalname: 'test1.csv',
-        userId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
-        fileName: 'filename'
-      }
+      request.params.departmentCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setDepartmentCodeInputId = 'AA001'
+      request.body.setDepartmentCodeNameInputId = '費用科目'
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -335,33 +434,29 @@ describe('departmentCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // dpeartmentUploadController.uploadのモックバリュー
-      departmentCodeUploadControllerUploadSpy.mockReturnValue(0)
+      // departmentCodeController.updatedDepartmentCodeのモックバリュー
+      updatedDepartmentCodeSpy.mockReturnValue(0)
 
       // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
+      await departmentCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('info', '部門データ取込が完了しました。')
       // 部門データ一覧へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/portal')
+      expect(response.redirect).toHaveBeenCalledWith('/departmentCodeList')
     })
 
-    test('異常：部門データ一括作成', async () => {
+    test('準正常：部門コードと部門名の値は変更なくて変更ボタン押下する。', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...Users[0] }
-      request.file = {
-        originalname: 'test1.csv',
-        userId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
-        fileName: 'filename'
-      }
+      request.params.departmentCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setDepartmentCodeInputId = 'AA001'
+      request.body.setDepartmentCodeNameInputId = '費用科目'
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -371,37 +466,29 @@ describe('departmentCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // dpeartmentUploadController.uploadのモックバリュー
-      departmentCodeUploadControllerUploadSpy.mockReturnValue(new Error())
+      // departmentCodeController.updatedDepartmentCodeのモックバリュー
+      updatedDepartmentCodeSpy.mockReturnValue(1)
 
       // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
+      await departmentCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', [
-        '取込に失敗しました。',
-        'システムエラーです。<BR>（後程、接続してください。）',
-        'SYSERR'
-      ])
-      // 部門データ一括作成へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
+      // 部門データ変更画面へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith(`/departmentCodeEdit/${request.params.departmentCodeId}`)
     })
 
-    test('準正常：部門取込が完了（ヘッダーに誤り）', async () => {
+    test('準正常：既存部門コードがある場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...Users[0] }
-      request.file = {
-        originalname: 'test1.csv',
-        userId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
-        fileName: 'filename'
-      }
+      request.params.departmentCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setDepartmentCodeInputId = 'AA001'
+      request.body.setDepartmentCodeNameInputId = '費用科目'
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -411,178 +498,19 @@ describe('departmentCodeUploadのテスト', () => {
       tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // dpeartmentUploadController.uploadのモックバリュー
-      departmentCodeUploadControllerUploadSpy.mockReturnValue(-1)
+      // departmentCodeController.updatedDepartmentCodeのモックバリュー
+      updatedDepartmentCodeSpy.mockReturnValue(-1)
 
       // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
+      await departmentCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', [
-        '取込に失敗しました。',
-        'ヘッダーが指定のものと異なります。',
-        'SYSERR'
-      ])
-      // 部門データ一括作成へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
-    })
-
-    test('準正常：部門取込が完了（取込データが存在しない）', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.user = { ...Users[0] }
-      request.file = {
-        originalname: 'test1.csv',
-        userId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
-        fileName: 'filename'
-      }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
-      // DBからの正常なコントラクター情報取得を想定する
-      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // dpeartmentUploadController.uploadのモックバリュー
-      departmentCodeUploadControllerUploadSpy.mockReturnValue(-2)
-
-      // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
-
-      // 期待結果
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
-      // 部門データ一括作成へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
-    })
-
-    test('準正常：部門取込が完了（一度に取り込める部門データは200件以上）', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.user = { ...Users[0] }
-      request.file = {
-        originalname: 'test1.csv',
-        userId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
-        fileName: 'filename'
-      }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
-      // DBからの正常なコントラクター情報取得を想定する
-      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // dpeartmentUploadController.uploadのモックバリュー
-      departmentCodeUploadControllerUploadSpy.mockReturnValue(-3)
-
-      // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
-
-      // 期待結果
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', [
-        '取込に失敗しました。',
-        '部門データが200件を超えています。<BR>CSVファイルを確認後もう一度アップロードしてください。<BR>  （一度に取り込める部門データは200件までとなります。）',
-        'SYSERR'
-      ])
-      // 部門データ一括作成へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
-    })
-
-    test('準正常：部門データ取込が完了（一部行目に誤り）', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.user = { ...Users[0] }
-      request.file = {
-        originalname: 'test1.csv',
-        userId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
-        fileName: 'filename'
-      }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
-      // DBからの正常なコントラクター情報取得を想定する
-      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // dpeartmentUploadController.uploadのモックバリュー
-      departmentCodeUploadControllerUploadSpy.mockReturnValue(-4)
-
-      // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
-
-      // 期待結果
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
-      // 部門データ一括作成へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
-    })
-
-    test('準正常：部門データ取込が完了（重複する部門コードスキップ）', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.user = { ...Users[0] }
-      request.file = {
-        originalname: 'test1.csv',
-        userId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
-        fileName: 'filename'
-      }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
-      // DBからの正常なコントラクター情報取得を想定する
-      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // dpeartmentUploadController.uploadのモックバリュー
-      departmentCodeUploadControllerUploadSpy.mockReturnValue([])
-
-      // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
-
-      // 期待結果
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('errnoti', [
-        '取込に失敗しました。',
-        '下記表に記載されている内容を修正して、再アップロードして下さい。',
-        'SYSERR',
-        []
-      ])
-      // 部門データ一括作成へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/uploadDepartment')
+      // 部門データ変更画面へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith(`/departmentCodeEdit/${request.params.departmentCodeId}`)
     })
 
     test('準正常：解約申込中の場合', async () => {
@@ -590,11 +518,6 @@ describe('departmentCodeUploadのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...Users[6] }
-      request.file = {
-        originalname: 'test1.csv',
-        userId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
-        fileName: 'filename'
-      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[6])
@@ -603,7 +526,7 @@ describe('departmentCodeUploadのテスト', () => {
       checkContractStatusSpy.mockReturnValue('30')
 
       // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
+      await departmentCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -621,11 +544,6 @@ describe('departmentCodeUploadのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...Users[9] }
-      request.file = {
-        originalname: 'test1.csv',
-        userId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
-        fileName: 'filename'
-      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[9])
@@ -637,7 +555,7 @@ describe('departmentCodeUploadのテスト', () => {
       contractControllerFindContractSpy.mockReturnValue(Contracts[7])
 
       // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
+      await departmentCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -652,7 +570,7 @@ describe('departmentCodeUploadのテスト', () => {
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
       // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
+      await departmentCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -673,7 +591,7 @@ describe('departmentCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(userDbError)
 
       // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
+      await departmentCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -683,7 +601,7 @@ describe('departmentCodeUploadのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('404エラー：user.statusが0ではない場合', async () => {
+    test('500エラー：user.statusが0ではない場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -693,7 +611,7 @@ describe('departmentCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[8])
 
       // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
+      await departmentCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
       expect(next).toHaveBeenCalledWith(errorHelper.create(404))
@@ -711,7 +629,7 @@ describe('departmentCodeUploadのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(contractDbError)
 
       // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
+      await departmentCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
@@ -736,7 +654,7 @@ describe('departmentCodeUploadのテスト', () => {
       checkContractStatusSpy.mockReturnValue(null)
 
       // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
+      await departmentCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -762,12 +680,196 @@ describe('departmentCodeUploadのテスト', () => {
       // checkContractStatusからreturnされる値設定
       checkContractStatusSpy.mockReturnValue(999)
       // 試験実施
-      await departmentCodeUpload.cbPostIndex(request, response, next)
+      await departmentCodeEdit.cbPostIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('異常：部門データコントローラのエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.departmentCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setDepartmentCodeInputId = 'AA001'
+      request.body.setDepartmentCodeNameInputId = '費用科目'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // departmentCodeController.updatedDepartmentCodeのモックバリュー
+      const dbError = new Error('DB Pool Error')
+      updatedDepartmentCodeSpy.mockReturnValue(dbError)
+
+      // 試験実施
+      await departmentCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('異常：異常経路接続', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, userContext: 'NotLoggedIn' }
+      request.user = { ...Users[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await departmentCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('NotLoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('dummy')
+      // 400エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+    })
+
+    test('異常：パラメータがヌールの場合：departmentCodeId', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.departmentCodeId = null
+      request.body.setDepartmentCodeInputId = 'AA001'
+      request.body.setDepartmentCodeNameInputId = '費用科目'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // departmentCodeController.updatedDepartmentCodeのモックバリュー
+      updatedDepartmentCodeSpy.mockReturnValue(-2)
+
+      // 試験実施
+      await departmentCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 部門データ一覧画面へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/departmentCodeList')
+    })
+
+    test('異常：パラメータがヌールの場合：departmentCode', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.departmentCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setDepartmentCodeInputId = null
+      request.body.setDepartmentCodeNameInputId = '費用科目'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await departmentCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 部門データ一覧画面へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/departmentCodeEdit/74a9717e-4ed8-4430-9109-9ab7e850bdc7')
+    })
+
+    test('異常：パラメータがヌールの場合：departmentCode', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.departmentCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setDepartmentCodeInputId = 'AB001'
+      request.body.setDepartmentCodeNameInputId = null
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await departmentCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 部門データ一覧画面へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/departmentCodeEdit/74a9717e-4ed8-4430-9109-9ab7e850bdc7')
+    })
+
+    test('異常：変更の瞬間対象データが無：departmentCode', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[0] }
+      request.params.departmentCodeId = '74a9717e-4ed8-4430-9109-9ab7e850bdc7'
+      request.body.setDepartmentCodeInputId = 'AB001'
+      request.body.setDepartmentCodeNameInputId = 'abcd'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // DBからの正常なテナント情報取得を想定する
+      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
+      // DBからの正常なコントラクター情報取得を想定する
+      contractControllerFindContractSpy.mockReturnValue(Contracts[0])
+      // departmentCodeController.updatedDepartmentCodeのモックバリュー
+      updatedDepartmentCodeSpy.mockReturnValue(-2)
+
+      // 試験実施
+      await departmentCodeEdit.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 部門データ一覧画面へリダイレクトされ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/departmentCodeList')
     })
   })
 })
