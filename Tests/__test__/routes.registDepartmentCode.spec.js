@@ -125,7 +125,7 @@ describe('registAccountCodeのテスト', () => {
         idForCodeInput: 'setDepartmentCodeInputId',
         idForNameInput: 'setDepartmentCodeNameInputId',
         modalTitle: '部門データ設定確認',
-        backUrl: '/',
+        backUrl: '/departmentCodeList',
         logTitle: '部門データ登録',
         logTitleEng: 'REGIST DEPARTMENT CODE',
         isRegistDepartmentCode: true,
@@ -346,7 +346,7 @@ describe('registAccountCodeのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
 
-      expect(response.getHeader('Location')).toEqual('/portal')
+      expect(response.getHeader('Location')).toEqual('/departmentCodeList')
     })
 
     test('異常:部門データ登録に失敗した場合。', async () => {
