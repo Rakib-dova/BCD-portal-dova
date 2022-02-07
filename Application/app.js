@@ -253,6 +253,9 @@ app.use('/deleteSubAccountCode', require('./routes/deleteSubAccountCode').router
 app.use('/subAccountCodeEdit', require('./routes/subAccountCodeEdit').router)
 
 // ------------部門データ
+// 部門データ一覧
+app.use('/departmentCodeList', require('./routes/departmentCodeList').router)
+
 // 部門データ設定
 app.use('/registDepartmentCode', require('./routes/registDepartmentCode').router)
 
