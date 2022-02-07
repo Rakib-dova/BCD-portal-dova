@@ -69,7 +69,7 @@ const cbGetIndex = async (req, res, next) => {
     uploadCommonLayoutEngTitle: 'BULK UPLOAD DEPARTMENT CODE',
     fileInputName: 'bulkDepartmentCode',
     cautionForSelectedFile: 'ファイルを選択してください。',
-    listLocation: '/portal',
+    listLocation: '/departmentCodeList',
     listLoacationName: '部門データ一覧→',
     accountCodeUpload: '/uploadDepartment',
     procedureContents: procedureContents,
