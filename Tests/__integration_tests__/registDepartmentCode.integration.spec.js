@@ -286,7 +286,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
       await browser.close()
     })
 
-    // // 部門コード11桁以上の場合（数字）
+    // 部門コード11桁以上の場合（数字）
     test('バリデーションチェック、部門コード11桁以上の場合（数字）', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
@@ -312,7 +312,33 @@ describe('部門データ作成のインテグレーションテスト', () => {
       await browser.close()
     })
 
-    // 部門コード11桁以上の場合（英・数字）
+    // 部門コード11桁以上の場合（カタカナ）
+    test('バリデーションチェック、部門コード11桁以上の場合（カタカナ）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/registDepartmentCode')
+      if (page.url() === 'https://localhost:3000/registDepartmentCode') {
+        await page.type('#setDepartmentCodeInputId', 'アイウエオカキクケコサシスセソ')
+        await page.type('#setDepartmentCodeNameInputId', '')
+
+        // 入力値が変わっていること確認
+        const checksetDepartmentCodeInputId = await page.evaluate(() => {
+          return document.querySelector('#setDepartmentCodeInputId').value
+        })
+
+        expect(checksetDepartmentCodeInputId.length).toBe(10)
+        expect(checksetDepartmentCodeInputId).toBe('アイウエオカキクケコ')
+      }
+      await browser.close()
+    })
+
+    // 部門コード11桁以上の場合（英・数字・カナ）
     test('バリデーションチェック、部門コード11桁以上の場合（英・数字）', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
@@ -324,7 +350,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registDepartmentCode')
       if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.type('#setDepartmentCodeInputId', 'test1234567890')
+        await page.type('#setDepartmentCodeInputId', 'testアイ12345678')
         await page.type('#setDepartmentCodeNameInputId', '')
 
         // 入力値が変わっていること確認
@@ -333,7 +359,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
         })
 
         expect(checksetDepartmentCodeInputId.length).toBe(10)
-        expect(checksetDepartmentCodeInputId).toBe('test123456')
+        expect(checksetDepartmentCodeInputId).toBe('testアイ1234')
       }
       await browser.close()
     })
@@ -367,8 +393,8 @@ describe('部門データ作成のインテグレーションテスト', () => {
       await browser.close()
     })
 
-    // 部門コード英・数字以外入力
-    test('バリデーションチェック、部門コード英・数字以外入力', async () => {
+    // 部門コード英・数字・カナ以外入力
+    test('バリデーションチェック、部門コード英・数字・カナ以外入力', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -379,7 +405,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registDepartmentCode')
       if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.type('#setDepartmentCodeInputId', 'テスト')
+        await page.type('#setDepartmentCodeInputId', '試験')
         await page.type('#setDepartmentCodeNameInputId', 'インテグレーションテスト')
 
         await page.waitForTimeout(500)
