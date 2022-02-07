@@ -226,7 +226,7 @@ const build = (data) => {
  * 請求データから請求書番号を重複を省いて抽出する
  */
 const extractIds = (data) => {
-  return [...new Set(data.map((val) => val.SD5011002))].sort()
+  return [...new Set(data.map((val) => val.SD5011002).filter((id) => id))].sort()
 }
 
 /**
