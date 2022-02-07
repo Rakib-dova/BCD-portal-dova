@@ -61,5 +61,57 @@ module.exports = {
       logger.error({ contractId: uploadContractId, stack: error.stack, status: 0 })
       return error
     }
+  },
+  // 取得したデータを画面に表示するデータに加工
+  // 加工物
+  // {
+  //    no：                  部門データの順番
+  //    departmentCodeId：    部門データのユニークID
+  //    departmentCode：      部門コード
+  //    departmentCodeName：  部門名
+  //    updatedAt：           部門データの登録時間と更新時間
+  // }
+  getDepartmentCodeList: async (contractId) => {
+    try {
+      const timestamp = require('../lib/utils').timestampForList
+      // 契約番号により部門データをDBから取得（部門コードを昇順にする）
+      const listDepartmentCode = await DepartmentCode.findAll({
+        where: {
+          contractId: contractId
+        },
+        order: [['departmentCode', 'ASC']]
+      })
+
+      // 出力用データに加工する。
+      const resultDeparmentCodeList = listDepartmentCode.map((item, idx) => {
+        return {
+          no: idx + 1,
+          departmentCodeId: item.departmentCodeId,
+          departmentCode: item.departmentCode,
+          departmentCodeName: item.departmentCodeName,
+          updatedAt: timestamp(item.updatedAt)
+        }
+      })
+      return resultDeparmentCodeList
+    } catch (error) {
+      logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+      return error
+    }
+  },
+  getDepartmentCode: async (contractId, departmentCodeId) => {
+    try {
+      // 契約情報と部門データキーでDBのデータを検索する。
+      const result = await DepartmentCode.findOne({
+        where: {
+          contractId: contractId,
+          departmentCodeId: departmentCodeId
+        }
+      })
+      // 検索結果オブジェクトに作成して返す
+      return { departmentCode: result.departmentCode, departmentCodeName: result.departmentCodeName }
+    } catch (error) {
+      logger.error({ contractId: contractId, departmentCodeId: departmentCodeId, stack: error.stack, status: 0 })
+      return error
+    }
   }
 }

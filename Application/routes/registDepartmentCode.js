@@ -53,7 +53,7 @@ const cbGetRegistDepartmentCode = async (req, res, next) => {
     idForCodeInput: 'setDepartmentCodeInputId',
     idForNameInput: 'setDepartmentCodeNameInputId',
     modalTitle: '部門データ設定確認',
-    backUrl: '/',
+    backUrl: '/departmentCodeList',
     logTitle: '部門データ登録',
     logTitleEng: 'REGIST DEPARTMENT CODE',
     isRegistDepartmentCode: true,
@@ -111,7 +111,7 @@ const cbPostRegistDepartmentCode = async (req, res, next) => {
   if (result) {
     // 正常に登録ができた場合
     req.flash('info', '部門データを登録しました。')
-    res.redirect('/portal')
+    res.redirect('/departmentCodeList')
   } else {
     // 失敗した時
     req.flash('noti', ['部門データ登録', '部門データ登録に失敗しました。'])
