@@ -38,7 +38,7 @@ const getClient = (ctx) => {
   return instance
 }
 
-api.baseUrl = () => 'https://' + process.env.TS_API_HOST.replace('api-', '')
+api.baseUrl = () => 'https://' + process.env.TS_HOST
 
 /** Accounts */
 // Get Account Info
