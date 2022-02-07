@@ -243,14 +243,15 @@ const min = (lhs, rhs) => {
 const renderData = async (ctx, from, to) => {
   const tenantId = currentTenantId(ctx)
   const unissuedNo = await getUnissuedNo(tenantId)
+  const popupNotice = !(from || to || unissuedNo)
+  const unissuedFrom = unissuedNo || normalizeInvoiceId(1)
   const customerIds = await getCustomerIds(ctx)
-  const targetIds = await getInvoiceIds(ctx, customerIds, from || unissuedNo, to)
+  const targetIds = await getInvoiceIds(ctx, customerIds, from || unissuedFrom, to)
   const errors = await getErrors(tenantId, from, to)
   const allIds = [...new Set([...targetIds, ...Object.keys(errors)])].sort()
   const { items, count } = await importInvoices(ctx, tenantId, allIds)
 
-  const first = items[0]?.invoiceId
-  const displayFrom = from || min(items[0]?.invoiceId, unissuedNo || normalizeInvoiceId(1))
+  const displayFrom = from || min(items[0]?.invoiceId, unissuedFrom)
   const displayTo = to || items[items.length - 1]?.invoiceId || displayFrom
   const notice = []
   if (count > constants.system.MAX_SEND_SIZE) {
@@ -264,7 +265,7 @@ const renderData = async (ctx, from, to) => {
     docManagerUrl: `${ts.baseUrl()}/#/Tradeshift.DocumentManager`,
     total: items.length,
     timestamp: new Date().toFormat('YYYY年MM月DD日 HH24時MI分SS秒'),
-    popupNotice: !(from || to || unissuedNo),
+    popupNotice,
     from: displayFrom,
     to: displayTo,
     invoices: items,
