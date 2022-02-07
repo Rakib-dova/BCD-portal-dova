@@ -147,7 +147,7 @@ app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 
 // body-parser
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb', parameterLimit: 6400 }))
 
 // uncomment after placing your favicon in /public
 // app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -212,6 +212,13 @@ app.use('/uploadFormatList', require('./routes/uploadFormatList').router)
 // アップロードフォーマット確認・変更
 app.use('/uploadFormatEdit', require('./routes/uploadFormatEdit').router)
 
+// 請求情報ダウンロード
+// 請求情報
+app.use('/csvDownload', require('./routes/csvDownload').router)
+
+// 仕訳情報
+app.use('/journalDownload', require('./routes/journalDownload').router)
+
 // 仕訳情報設定
 // ------------勘定科目
 // 勘定科目一覧
@@ -245,8 +252,17 @@ app.use('/deleteSubAccountCode', require('./routes/deleteSubAccountCode').router
 // 補助科目確認・変更
 app.use('/subAccountCodeEdit', require('./routes/subAccountCodeEdit').router)
 
+// ------------部門データ
+// 部門データ設定
+app.use('/registDepartmentCode', require('./routes/registDepartmentCode').router)
+
+// 部門データ一括作成
+app.use('/uploadDepartment', require('./routes/departmentCodeUpload').router)
+
+// ------------受領した請求書
 // 受領した請求書一覧
 app.use('/inboxList', require('./routes/inboxList').router)
+
 // 受領した請求書
 app.use('/inbox', require('./routes/inbox').router)
 
@@ -256,9 +272,6 @@ app.use('/cancellation', require('./routes/cancellation').router)
 
 // 契約者情報の修正
 app.use('/change', require('./routes/change').router)
-
-// 請求書ダウンロード
-app.use('/csvDownload', require('./routes/csvDownload').router)
 
 // notice
 const noticeHelper = require('./routes/helpers/notice')

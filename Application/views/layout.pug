@@ -36,6 +36,7 @@ html
       - var inputPatternCampaignCode = '^([a-zA-Z0-9]{1,10})$' // キャンペーンコード 半角英数
       - var inputPattarnHankakuSeisu = '^[1-9][0-9]{0,6}$' //１以上の半角整数
       - var inputPatternEngNum = '^[a-zA-Z0-9+]*$' // 英数字のみ
+      - var inputPatternEngNumKana = '^[a-zA-Z0-9ァ-ヶー　+]*$' // 英数字カナのみ
     block content
 
     if messages.info
