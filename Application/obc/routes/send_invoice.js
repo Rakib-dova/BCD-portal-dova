@@ -77,16 +77,16 @@ const getErrors = async (tenantId, from, to) => {
   let condition = {
     userUuid: tenantId
   }
-  if (from || to) {
-    let narrowing = null
-    if (from && to) {
-      narrowing = { [Op.between]: [from, to] }
-    } else if (from) {
-      narrowing = { [Op.gte]: from }
-    } else if (to) {
-      narrowing = { [Op.lte]: to }
-    }
+  let narrowing = null
+  if (from && to) {
+    narrowing = { [Op.between]: [from, to] }
+  } else if (from) {
+    narrowing = { [Op.gte]: from }
+  } else if (to) {
+    narrowing = { [Op.lte]: to }
+  }
 
+  if (narrowing) {
     condition = {
       [Op.and]: [condition, { invoiceNo: narrowing }]
     }
