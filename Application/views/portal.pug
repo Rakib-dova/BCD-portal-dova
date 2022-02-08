@@ -76,8 +76,8 @@ block content
                     .media-left
                       img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
                     .media-content
-                      p.title.is-5 仕訳情報設定
-                      p 勘定科目と補助科目をユーザーカスタマイズができます。
+                      p.title.is-5 仕訳情報管理
+                      p 請求書に対して勘定科目などの仕訳情報を設定できます。また、仕訳情報をCSV形式でダウンロードできます。
 
         .columns.is-desktop.is-family-noto-sans
           .column.hvr-float
@@ -196,7 +196,7 @@ block content
       .modal-background.cancel-button(data-target='registAccountCode-modal')
       .modal-card.is-family-noto-sans
         header.modal-card-head
-          p.modal-card-title 仕訳情報設定
+          p.modal-card-title 仕訳情報管理
           button.delete(data-target="registAccountCode-modal")
         section.modal-card-body
           nav.panel
@@ -215,7 +215,7 @@ block content
             a.panel-block(href='/inboxList/1')
               span.panel-icon
                 i.fas.fa-file
-              p 受領した請求書一覧
+              p 受領請求書への仕訳情報設定
             a.panel-block(href='/journalDownload')
              span.panel-icon
                i.fas.fa-file

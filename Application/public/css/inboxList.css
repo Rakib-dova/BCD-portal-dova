@@ -38,6 +38,7 @@
   text-overflow: ellipsis;
   width: 128px;
   height: 35px;
+  pointer-events: none;
 }
 
 .a-status-PAID_UNCONFIRMED {
@@ -58,6 +59,7 @@
   text-overflow: ellipsis;
   width: 128px;
   height: 35px;
+  pointer-events: none;
 }
 .a-status-ACCEPTED {
   background-color: #0065a3;
@@ -77,6 +79,7 @@
   text-overflow: ellipsis;
   width: 128px;
   height: 35px;
+  pointer-events: none;
 }
 .a-status-DELIVERED {
   background-color: #85c06d;
@@ -94,6 +97,7 @@
   cursor: default;
   overflow: hidden;
   text-overflow: ellipsis;
+  pointer-events: none;
 }
 
 .a-previous-none {
