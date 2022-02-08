@@ -260,7 +260,7 @@ describe('部門データ一括作成のインテグレーションテスト', (
       await page.waitForTimeout(500)
 
       // portal画面にに移動すること確認
-      expect(await page.url()).toMatch('https://localhost:3000/portal')
+      expect(await page.url()).toMatch('https://localhost:3000/departmentCodeList')
 
       await browser.close()
     })

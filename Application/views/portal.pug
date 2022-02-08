@@ -62,7 +62,7 @@ block content
                     p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
           .column.hvr-float
             .box.iconBox.textOverflow
-              a.show-modal(data-target='csvDownload-modal')
+              a(href='/csvDownload')
                 .media.appdesc
                   .media-left
                     img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
@@ -208,18 +208,18 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 補助科目設定
-            a.panel-block(href='/registDepartmentCode')
+            a.panel-block(href='/departmentCodeList')
               span.panel-icon
                 i.fas.fa-file
               p 部門データ設定 
-            a.panel-block(href='/uploadDepartment')
-              span.panel-icon
-                i.fas.fa-file
-              p 部門データ一括作成               
             a.panel-block(href='/inboxList/1')
               span.panel-icon
                 i.fas.fa-file
               p 受領した請求書一覧
+            a.panel-block(href='/journalDownload')
+             span.panel-icon
+               i.fas.fa-file
+             p 仕訳情報ダウンロード
         footer.modal-card-foot
 
     .modal#csvDownload-modal
@@ -234,10 +234,6 @@ block content
              span.panel-icon
                i.fas.fa-file
              p 請求情報ダウンロード
-           a.panel-block(href='/journalDownload')
-             span.panel-icon
-               i.fas.fa-file
-             p 仕訳情報ダウンロード
        footer.modal-card-foot
 
      .modal#config-modal

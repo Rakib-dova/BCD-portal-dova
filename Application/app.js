@@ -147,7 +147,8 @@ app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug')
 
 // body-parser
-app.use(bodyParser.urlencoded({ extended: true, limit: '5mb', parameterLimit: 6400 }))
+// 受領した請求書の仕訳情報の設定のパラメータの最大数：8400個
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb', parameterLimit: 8400 }))
 
 // uncomment after placing your favicon in /public
 // app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -253,11 +254,20 @@ app.use('/deleteSubAccountCode', require('./routes/deleteSubAccountCode').router
 app.use('/subAccountCodeEdit', require('./routes/subAccountCodeEdit').router)
 
 // ------------部門データ
+// 部門データ一覧
+app.use('/departmentCodeList', require('./routes/departmentCodeList').router)
+
 // 部門データ設定
 app.use('/registDepartmentCode', require('./routes/registDepartmentCode').router)
 
 // 部門データ一括作成
 app.use('/uploadDepartment', require('./routes/departmentCodeUpload').router)
+
+// 部門データ削除
+app.use('/deleteDepartmentCode', require('./routes/deleteDepartmentCode').router)
+
+// 部門データ確認・変更
+app.use('/departmentCodeEdit', require('./routes/departmentCodeEdit').router)
 
 // ------------受領した請求書
 // 受領した請求書一覧
