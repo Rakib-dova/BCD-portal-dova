@@ -55,5 +55,13 @@ module.exports = [
     departmentCode: 'DE007',
     createdAt: new Date('2021-11-25 03:07:58.0710000 +00:00'),
     updatedAt: new Date('2021-11-25 03:07:58.0710000 +00:00')
+  },
+  {
+    departmentCodeId: '74a9717e-4ed8-4430-9109-9ab7e850bdc7',
+    contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
+    departmentCodeName: 'テスト用部門データ8',
+    departmentCode: 'DE008',
+    createdAt: new Date('2021-11-25 03:00:48.3040000 +00:00'),
+    updatedAt: new Date('2021-11-25 03:00:48.3040000 +00:00')
   }
 ]

@@ -9,7 +9,7 @@ jest.setTimeout(60000) // jestのタイムアウトを60秒とする
 
 const getCookies = require('./getCookies')
 
-describe('部門データ作成のインテグレーションテスト', () => {
+describe('部門データ一覧のインテグレーションテスト', () => {
   let acCookies
   let userCookies
   let testTenantId
@@ -39,10 +39,10 @@ describe('部門データ作成のインテグレーションテスト', () => {
   })
 
   describe('1.契約ステータス：未登録', () => {
-    // 利用登録をしていないため、部門データ作成ページ利用できない
+    // 利用登録をしていないため、部門データ一覧ページ利用できない
     test('管理者、契約ステータス：未登録、利用不可', async () => {
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(500)
 
@@ -50,10 +50,9 @@ describe('部門データ作成のインテグレーションテスト', () => {
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
-    // 利用登録をしていないため、部門データ作成ページ利用できない
     test('一般ユーザ、契約ステータス：未登録、利用不可', async () => {
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(500)
 
@@ -112,34 +111,34 @@ describe('部門データ作成のインテグレーションテスト', () => {
   })
 
   describe('3.契約ステータス：登録申込', () => {
-    // テナントステータスが「新規申込」、部門データ作成ページ利用可能
+    // テナントステータスが「新規申込」、部門データ一覧ページ利用可能
     test('管理者、契約ステータス：登録申込、利用可能', async () => {
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/部門データ/i)
-      expect(res.text).toMatch(/部門コード/i)
-      expect(res.text).toMatch(/部門名/i)
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：登録申込、利用可能', async () => {
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/部門データ/i)
-      expect(res.text).toMatch(/部門コード/i)
-      expect(res.text).toMatch(/部門名/i)
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
     })
   })
 
   describe('4.契約ステータス：登録受付', () => {
-    // テナントステータスが「新規受付」、部門データ作成ページ利用可能
+    // テナントステータスが「新規受付」、部門データ一覧ページ利用可能
     test('管理者、契約ステータス：登録受付、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -160,31 +159,31 @@ describe('部門データ作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/部門データ/i)
-      expect(res.text).toMatch(/部門コード/i)
-      expect(res.text).toMatch(/部門名/i)
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：登録受付、利用可能', async () => {
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/部門データ/i)
-      expect(res.text).toMatch(/部門コード/i)
-      expect(res.text).toMatch(/部門名/i)
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
     })
   })
 
   describe('5.契約ステータス：契約中', () => {
-    // テナントステータスが「契約中」、部門データ作成ページ利用可能
+    // テナントステータスが「契約中」、部門データ一覧ページ利用可能
     test('管理者、契約ステータス：契約中、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -207,32 +206,135 @@ describe('部門データ作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/部門データ/i)
-      expect(res.text).toMatch(/部門コード/i)
-      expect(res.text).toMatch(/部門名/i)
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：契約中、利用可能', async () => {
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/部門データ/i)
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
+    })
+
+    // 機能・遷移確認
+    test('登録した部門データが１件もない場合、画面確認', async () => {
+      const res = await request(app)
+        .get('/departmentCodeList')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/現在、部門データはありません。新規登録するボタンから登録を行ってください。/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
+    })
+
+    test('「←部門データ一括作成」リンク遷移確認（部門データ一括作成画面に遷移）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/departmentCodeList')
+      if (page.url() === 'https://localhost:3000/departmentCodeList') {
+        await page.click('body > div.max-width > div > div > div.mt-1.has-text-left > a')
+
+        await page.waitForTimeout(500)
+
+        // 部門データ一括作成画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/uploadDepartment')
+      }
+      await browser.close()
+    })
+
+    test('「新規登録する」ボタン遷移確認（部門データ登録画面に遷移）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/departmentCodeList')
+      if (page.url() === 'https://localhost:3000/departmentCodeList') {
+        await page.click('body > div.max-width > div > div > a')
+
+        await page.waitForTimeout(500)
+
+        // 部門データ登録画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/registDepartmentCode')
+      }
+      await browser.close()
+    })
+
+    test('部門データ登録後、部門データ一覧に遷移確認（部門データ一覧画面に遷移）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/registDepartmentCode')
+      if (page.url() === 'https://localhost:3000/registDepartmentCode') {
+        await page.type('#setDepartmentCodeInputId', 'intgration')
+        await page.type('#setDepartmentCodeNameInputId', 'test')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#btnCheck')
+
+        await page.waitForTimeout(500)
+
+        await page.click('#submit')
+
+        await page.waitForTimeout(500)
+
+        // 部門データ一覧画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/departmentCodeList')
+      }
+      await browser.close()
+    })
+
+    test('登録した部門データがある場合、画面確認', async () => {
+      const res = await request(app)
+        .get('/departmentCodeList')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/新規登録する/i)
+      expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/intgration/i)
       expect(res.text).toMatch(/部門名/i)
+      expect(res.text).toMatch(/test/i)
+      expect(res.text).toMatch(/最新更新日/i)
+      expect(res.text).toMatch(/確認・変更する/i)
+      expect(res.text).toMatch(/削除/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
     })
 
-    // バリデーションチェック
-
-    // 部門コード未入力
-    test('バリデーションチェック、部門コード未入力', async () => {
+    test('部門データ登録画面「戻る」ボタン遷移確認（部門データ一覧画面に遷移）', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -243,276 +345,19 @@ describe('部門データ作成のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registDepartmentCode')
       if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.type('#setDepartmentCodeInputId', '')
-        await page.type('#setDepartmentCodeNameInputId', 'インテグレーションテスト')
+        await page.click('#return-btn')
 
         await page.waitForTimeout(500)
 
-        await page.click('#btnCheck')
-
-        // エラーメッセージが表示されること確認
-        const checkErrorMessage = await page.evaluate(() => {
-          return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
-        })
-
-        expect(checkErrorMessage).toBe('input-label-required')
-      }
-      await browser.close()
-    })
-
-    // 部門コード11桁以上の場合（英語）
-    test('バリデーションチェック、部門コード11桁以上の場合（英語）', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registDepartmentCode')
-      if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.type('#setDepartmentCodeInputId', 'intgrationTest')
-        await page.type('#setDepartmentCodeNameInputId', '')
-
-        // 入力値が変わっていること確認
-        const checksetDepartmentCodeInputId = await page.evaluate(() => {
-          return document.querySelector('#setDepartmentCodeInputId').value
-        })
-
-        expect(checksetDepartmentCodeInputId.length).toBe(10)
-        expect(checksetDepartmentCodeInputId).toBe('intgration')
-      }
-      await browser.close()
-    })
-
-    // 部門コード11桁以上の場合（数字）
-    test('バリデーションチェック、部門コード11桁以上の場合（数字）', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registDepartmentCode')
-      if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.type('#setDepartmentCodeInputId', '12345678901234567890')
-        await page.type('#setDepartmentCodeNameInputId', '')
-
-        // 入力値が変わっていること確認
-        const checksetDepartmentCodeInputId = await page.evaluate(() => {
-          return document.querySelector('#setDepartmentCodeInputId').value
-        })
-
-        expect(checksetDepartmentCodeInputId.length).toBe(10)
-        expect(checksetDepartmentCodeInputId).toBe('1234567890')
-      }
-      await browser.close()
-    })
-
-    // 部門コード11桁以上の場合（カタカナ）
-    test('バリデーションチェック、部門コード11桁以上の場合（カタカナ）', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registDepartmentCode')
-      if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.type('#setDepartmentCodeInputId', 'アイウエオカキクケコサシスセソ')
-        await page.type('#setDepartmentCodeNameInputId', '')
-
-        // 入力値が変わっていること確認
-        const checksetDepartmentCodeInputId = await page.evaluate(() => {
-          return document.querySelector('#setDepartmentCodeInputId').value
-        })
-
-        expect(checksetDepartmentCodeInputId.length).toBe(10)
-        expect(checksetDepartmentCodeInputId).toBe('アイウエオカキクケコ')
-      }
-      await browser.close()
-    })
-
-    // 部門コード11桁以上の場合（英・数字・カナ）
-    test('バリデーションチェック、部門コード11桁以上の場合（英・数字）', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registDepartmentCode')
-      if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.type('#setDepartmentCodeInputId', 'testアイ12345678')
-        await page.type('#setDepartmentCodeNameInputId', '')
-
-        // 入力値が変わっていること確認
-        const checksetDepartmentCodeInputId = await page.evaluate(() => {
-          return document.querySelector('#setDepartmentCodeInputId').value
-        })
-
-        expect(checksetDepartmentCodeInputId.length).toBe(10)
-        expect(checksetDepartmentCodeInputId).toBe('testアイ1234')
-      }
-      await browser.close()
-    })
-
-    // 部門コードをコンソールで11桁以上を入力した場合
-    test('バリデーションチェック、部門コードをコンソールで11桁以上を入力した場合', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registDepartmentCode')
-      if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.evaluate(() => (document.querySelector('#setDepartmentCodeInputId').value = 'test1234567890'))
-        await page.type('#setDepartmentCodeNameInputId', '')
-
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // エラーメッセージが表示されること確認
-        const checkErrorMessage = await page.evaluate(() => {
-          return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
-        })
-
-        expect(checkErrorMessage).toBe('input-label-required')
-      }
-      await browser.close()
-    })
-
-    // 部門コード英・数字・カナ以外入力
-    test('バリデーションチェック、部門コード英・数字・カナ以外入力', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registDepartmentCode')
-      if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.type('#setDepartmentCodeInputId', '試験')
-        await page.type('#setDepartmentCodeNameInputId', 'インテグレーションテスト')
-
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // エラーメッセージが表示されること確認
-        const checkErrorMessage = await page.evaluate(() => {
-          return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
-        })
-
-        expect(checkErrorMessage).toBe('input-label-required')
-      }
-      await browser.close()
-    })
-
-    // 部門名未入力
-    test('バリデーションチェック、部門名未入力', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registDepartmentCode')
-      if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.type('#setDepartmentCodeInputId', 'test')
-        await page.type('#setDepartmentCodeNameInputId', '')
-
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // エラーメッセージが表示されること確認
-        const checkErrorMessage = await page.evaluate(() => {
-          return document.querySelector('#RequiredErrorMesageForName').getAttribute('class')
-        })
-
-        expect(checkErrorMessage).toBe('input-label-required')
-      }
-      await browser.close()
-    })
-
-    // 部門名41桁以上入力
-    test('バリデーションチェック、部門名41桁以上入力', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registDepartmentCode')
-      if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.type('#setDepartmentCodeInputId', '')
-        await page.type('#setDepartmentCodeNameInputId', 'あいうえおabcdefg123456789あいうえおabcdefg123456789')
-
-        // 入力値が変わっていること確認
-        const checksetDeparmentCodeNameInputId = await page.evaluate(() => {
-          return document.querySelector('#setDepartmentCodeNameInputId').value
-        })
-
-        expect(checksetDeparmentCodeNameInputId.length).toBe(40)
-        expect(checksetDeparmentCodeNameInputId).toBe('あいうえおabcdefg123456789あいうえおabcdefg1234567')
-      }
-      await browser.close()
-    })
-
-    // 部門名をコンソールで41桁以上を入力した場合
-    test('バリデーションチェック、部門名をコンソールで41桁以上を入力した場合', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/registDepartmentCode')
-      if (page.url() === 'https://localhost:3000/registDepartmentCode') {
-        await page.type('#setDepartmentCodeInputId', 'test')
-        await page.evaluate(
-          () =>
-            (document.querySelector('#setDepartmentCodeInputId').value =
-              'あいうえおabcdefg123456789あいうえおabcdefg123456789')
-        )
-
-        await page.waitForTimeout(500)
-
-        await page.click('#btnCheck')
-
-        // エラーメッセージが表示されること確認
-        const checkErrorMessage = await page.evaluate(() => {
-          return document.querySelector('#RequiredErrorMesageForName').getAttribute('class')
-        })
-
-        expect(checkErrorMessage).toBe('input-label-required')
+        // 部門データ一覧画面に遷移確認
+        expect(await page.url()).toBe('https://localhost:3000/departmentCodeList')
       }
       await browser.close()
     })
   })
 
   describe('6.契約ステータス：変更申込', () => {
-    // テナントステータスが「変更申込」、部門データ作成ページ利用可能
+    // テナントステータスが「変更申込」、部門データ一覧ページ利用可能
     test('管理者、契約ステータス：変更申込、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -533,31 +378,29 @@ describe('部門データ作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/部門データ/i)
-      expect(res.text).toMatch(/部門コード/i)
-      expect(res.text).toMatch(/部門名/i)
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：変更申込、利用可能', async () => {
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/部門データ/i)
-      expect(res.text).toMatch(/部門コード/i)
-      expect(res.text).toMatch(/部門名/i)
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
     })
   })
 
   describe('7.契約ステータス：変更受付', () => {
-    // テナントステータスが「変更受付」、部門データ作成ページ利用可能
+    // テナントステータスが「変更受付」、部門データ一覧ページ利用可能
     test('管理者、契約ステータス：変更受付、利用可能', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -578,31 +421,29 @@ describe('部門データ作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/部門データ/i)
-      expect(res.text).toMatch(/部門コード/i)
-      expect(res.text).toMatch(/部門名/i)
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
     })
 
     test('一般ユーザ、契約ステータス：変更受付、利用可能', async () => {
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/部門データ/i)
-      expect(res.text).toMatch(/部門コード/i)
-      expect(res.text).toMatch(/部門名/i)
+      expect(res.text).toMatch(/部門データ一覧/i)
+      expect(res.text).toMatch(/←部門データ一括作成/i)
     })
   })
 
   describe('8.契約ステータス：解約申込', () => {
-    // テナントステータスが「解約申込」、部門データ作成ページ利用不可
+    // テナントステータスが「解約申込」、部門データ一覧ページ利用不可
     test('管理者、契約ステータス：解約申込、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -639,7 +480,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
@@ -649,7 +490,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
 
     test('一般ユーザ、契約ステータス：解約申込、利用不可', async () => {
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
@@ -659,7 +500,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
   })
 
   describe('9.契約ステータス：解約受付', () => {
-    // テナントステータスが「解約受付」、部門データ作成ページ利用不可
+    // テナントステータスが「解約受付」、部門データ一覧ページ利用不可
     test('管理者、契約ステータス：解約受付、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -681,7 +522,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
@@ -691,7 +532,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
 
     test('一般ユーザ、契約ステータス：解約受付、利用不可', async () => {
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
@@ -701,7 +542,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
   })
 
   describe('10.契約ステータス：解約', () => {
-    // テナントステータスが「解約」、部門データ作成ページ利用不可
+    // テナントステータスが「解約」、部門データ一覧ページ利用不可
     test('管理者、契約ステータス：解約、利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
@@ -735,7 +576,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
       }
 
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(500)
 
@@ -745,7 +586,7 @@ describe('部門データ作成のインテグレーションテスト', () => {
 
     test('一般ユーザ、契約ステータス：解約、利用不可', async () => {
       const res = await request(app)
-        .get('/registDepartmentCode')
+        .get('/departmentCodeList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(500)
 

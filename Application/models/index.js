@@ -17,6 +17,9 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
       validateBulkLoadParameters: true,
       encrypt: true
     }
+  },
+  pool: {
+    max: 20 // 仕訳情報の最大件数（2000件）の保存の時、poolが足りないのため、基本5個から変更
   }
 })
 /*

@@ -66,10 +66,10 @@ const cbGetIndex = async (req, res, next) => {
   // アップロードフォーマットデータを画面に渡す。
   res.render('departmentCodeUpload', {
     uploadCommonLayoutTitle: '部門データ一括作成',
-    uploadCommonLayoutEngTitle: 'BULK UPLOAD DEPARTMENT CODE',
+    uploadCommonLayoutEngTitle: 'BULK UPLOAD DEPARTMENT',
     fileInputName: 'bulkDepartmentCode',
     cautionForSelectedFile: 'ファイルを選択してください。',
-    listLocation: '/portal',
+    listLocation: '/departmentCodeList',
     listLoacationName: '部門データ一覧→',
     accountCodeUpload: '/uploadDepartment',
     procedureContents: procedureContents,
