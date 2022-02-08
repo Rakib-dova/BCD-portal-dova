@@ -602,6 +602,65 @@ describe('departmentCodeControllerのテスト', () => {
     })
   })
 
+  describe('deleteForDepartmentCode', () => {
+    test('正常：部門データ削除', async () => {
+      // departmentCodeId
+      const departmentCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+
+      // 部門データ検索（Mockデータ）
+      DepartmentCode.findOne = jest.fn((value) => {
+        return {
+          departmentCodeId: value,
+          dataValues: {
+            departmentCodeId: value
+          },
+          destroy: async () => {}
+        }
+      })
+
+      // 試験実施
+      const result = await departmentCodeController.deleteForDepartmentCode(departmentCodeId)
+
+      // 正常削除の「1」を返す
+      expect(result).toEqual(1)
+    })
+
+    test('準正常：部門データ削除（既に削除されている場合）', async () => {
+      // departmentCodeId
+      const departmentCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+
+      // 部門データ検索（Mockデータ）
+      DepartmentCode.findOne = jest.fn((value) => {
+        return null
+      })
+
+      // 試験実施
+      const result = await departmentCodeController.deleteForDepartmentCode(departmentCodeId)
+
+      // 準正常削除の場合、「-1」を返す
+      expect(result).toBe(-1)
+    })
+
+    test('準正常：部門データ削除（DBエラー）', async () => {
+      // departmentCodeId
+      const departmentCodeId = '0ab2343d-9d98-4614-b68b-78929bd84fee'
+
+      // 部門データ検索（Mockデータ）
+      const dbError = new Error('DB Error')
+
+      // 部門データ検索（Mockデータ）
+      DepartmentCode.findOne = jest.fn((value) => {
+        return dbError
+      })
+
+      // 試験実施
+      const result = await departmentCodeController.deleteForDepartmentCode(departmentCodeId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
+    })
+  })
+
   describe('checkDataForDepartmentCode', () => {
     test('正常', async () => {
       // 準備
