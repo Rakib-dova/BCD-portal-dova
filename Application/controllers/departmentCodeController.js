@@ -257,6 +257,30 @@ module.exports = {
       return error
     }
   },
+  // 部門データ削除
+  deleteForDepartmentCode: async (departmentCodeId) => {
+    try {
+      // 部門データを検索
+      const deleteTargetDepartmentCode = await DepartmentCode.findOne({
+        where: {
+          departmentCodeId: departmentCodeId
+        }
+      })
+
+      // null：既に削除されたレコード
+      if (deleteTargetDepartmentCode === null) return -1
+
+      // 部門データ削除
+      logger.info(`${deleteTargetDepartmentCode.departmentCodeId}のデータの削除処理を開始します。`)
+      await deleteTargetDepartmentCode.destroy()
+      logger.info(`${deleteTargetDepartmentCode.departmentCodeId}のデータの削除処理を終了します。`)
+
+      return 1
+    } catch (error) {
+      logger.error(error)
+      return 0
+    }
+  },
   checkDataForDepartmentCode: async (departmentCodeId) => {
     try {
       // 部門データを検索

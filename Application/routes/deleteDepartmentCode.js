@@ -72,6 +72,22 @@ const cbDeleteDepartmentCode = async (req, res, next) => {
     })
   }
 
+  // 削除処理
+  // resultOfDeletedDepartmentCode : 削除処理結果
+  //              -1 : 削除対象の部門データがない場合。
+  //               1 : 正常（部門データの削除成功）
+  //               0 : エラー
+  const resultOfDeletedDepartmentCode = await departmentCodeController.deleteForDepartmentCode(departmentCodeId)
+
+  // 結果確認（正常）
+  if (resultOfDeletedDepartmentCode === 1) {
+    req.flash('info', '部門データを削除しました。')
+  }
+
+  res.send({
+    result: resultOfDeletedDepartmentCode
+  })
+
   logger.info(constantsDefine.logMessage.INF001 + 'cbDeleteDepartmentCode')
 }
 
