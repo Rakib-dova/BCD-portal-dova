@@ -564,3 +564,7 @@ iframe#preview {
   border: 1px gray solid;
   overflow-y: scroll;
 }
+
+.box.menu {
+  height: 100%;
+}
