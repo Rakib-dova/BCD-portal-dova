@@ -26,7 +26,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
 
 let request, response
 let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy
-let helpercheckContractStatusSpy, checkDataForDepartmentCodeSpy
+let helpercheckContractStatusSpy, deleteForDepartmentCodeSpy, checkDataForDepartmentCodeSpy
 
 describe('deleteDepartmentCodeのテスト', () => {
   beforeEach(() => {
@@ -39,6 +39,7 @@ describe('deleteDepartmentCodeのテスト', () => {
     pathSpy = jest.spyOn(path, 'join')
     helpercheckContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     checkDataForDepartmentCodeSpy = jest.spyOn(departmentCodeController, 'checkDataForDepartmentCode')
+    deleteForDepartmentCodeSpy = jest.spyOn(departmentCodeController, 'deleteForDepartmentCode')
   })
   afterEach(() => {
     request.resetMocked()
@@ -51,6 +52,7 @@ describe('deleteDepartmentCodeのテスト', () => {
     pathSpy.mockRestore()
     helpercheckContractStatusSpy.mockRestore()
     checkDataForDepartmentCodeSpy.mockRestore()
+    deleteForDepartmentCodeSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -224,6 +226,7 @@ describe('deleteDepartmentCodeのテスト', () => {
       helper.checkContractStatus = (req, res, nex) => {
         return '00'
       }
+
       // 削除結果（Mock）
       checkDataForDepartmentCodeSpy.mockReturnValue(-1)
 
@@ -248,6 +251,9 @@ describe('deleteDepartmentCodeのテスト', () => {
       helper.checkContractStatus = (req, res, nex) => {
         return '00'
       }
+
+      // 削除結果（Mock）
+      checkDataForDepartmentCodeSpy.mockReturnValue(0)
 
       // 部門データチェック
       await deleteDepartmentCode.cbGetCheckDepartmentCode(request, response, next)
@@ -365,16 +371,19 @@ describe('deleteDepartmentCodeのテスト', () => {
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
 
+      // 削除結果（Mock）
+      deleteForDepartmentCodeSpy.mockReturnValue(1)
+
       request.flash = jest.fn()
 
       // 部門データ削除実施
       await deleteDepartmentCode.cbDeleteDepartmentCode(request, response, next)
 
       // request.flashが呼ばれ「る」
-      // expect(request.flash).toHaveBeenCalledWith('info', '部門データを削除しました。')
+      expect(request.flash).toHaveBeenCalledWith('info', '部門データを削除しました。')
 
       // 正常の場合、レスポンスボディのresultで1を返す
-      // expect(response.body.result).toBe(1)
+      expect(response.body.result).toBe(1)
     })
 
     test('準正常：解約中', async () => {
@@ -425,11 +434,14 @@ describe('deleteDepartmentCodeのテスト', () => {
         return '00'
       }
 
+      // 削除結果（Mock）
+      deleteForDepartmentCodeSpy.mockReturnValue(-1)
+
       // 部門データ削除実施
       await deleteDepartmentCode.cbDeleteDepartmentCode(request, response, next)
 
       // 準正常の場合（既に削除された場合）、レスポンスボディのresultで-1を返す
-      // expect(response.body.result).toBe(-1)
+      expect(response.body.result).toBe(-1)
     })
 
     test('準正常:DBエラー発生', async () => {
