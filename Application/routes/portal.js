@@ -18,6 +18,12 @@ const parser = new Parser({
   }
 })
 
+/* 会員サイト開発により追加 */
+// CSR対策
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+/* 会員サイト開発により追加 */
+
 const cbGetIndex = async (req, res, next) => {
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
@@ -116,7 +122,6 @@ const cbGetIndex = async (req, res, next) => {
         message: constants.portalMsg.NEWS_CONN_ERR
       })
     })
-
   // ユーザ権限も画面に送る
   res.render('portal', {
     title: 'ポータル',
@@ -127,11 +132,17 @@ const cbGetIndex = async (req, res, next) => {
     newsDataArr: newsDataArr,
     newsDataArrSize: newsDataArrSize,
     constructDataArr: constructDataArr,
-    constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0
+    constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0,
+    /* 会員サイト開発により追加 */
+    // TODO:ポータル表示時に紐づけを実施
+    // fingerprintVerify: req.session.memberSiteCoopSession.fingerprintVerifyFlg,
+    memberSiteFlg: req.session.memberSiteCoopSession.memberSiteFlg,
+    csrfToken: req.csrfToken()
+    /* 会員サイト開発により追加 */
   })
 }
 
-router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetIndex)
+router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, csrfProtection, cbGetIndex)
 
 module.exports = {
   router: router,

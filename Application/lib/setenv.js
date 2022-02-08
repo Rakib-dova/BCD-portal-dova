@@ -26,4 +26,28 @@ exports.config = (env) => {
 
   const { INVOICE_UPLOAD_PATH } = JSON.parse(env.INVOICE_UPLOAD_PATH.replace(/'/g, '"'))
   process.env.INVOICE_UPLOAD_PATH = INVOICE_UPLOAD_PATH
+
+  // 会員サイト連携開発により追加
+  const {
+    BCA_BC_COOKIE_NAME,
+    BCA_BC_COOKIE_DOMAIN,
+    BCA_BC_COOKIE_PATH,
+    BCA_BC_COOKIE_HTTP_ONLY,
+    BCA_BC_COOKIE_SAME_SITE,
+    BCA_BC_COOKIE_SECURE
+  } = JSON.parse(env.BCA_BC_COOKIE.replace(/'/g, '"'))
+  process.env.BCA_BC_COOKIE_NAME = BCA_BC_COOKIE_NAME
+  process.env.BCA_BC_COOKIE_DOMAIN = BCA_BC_COOKIE_DOMAIN
+  process.env.BCA_BC_COOKIE_PATH = BCA_BC_COOKIE_PATH
+  if (BCA_BC_COOKIE_HTTP_ONLY === 'true') {
+    process.env.BCA_BC_COOKIE_HTTP_ONLY = true
+  } else {
+    process.env.BCA_BC_COOKIE_HTTP_ONLY = false
+  }
+  process.env.BCA_BC_COOKIE_SAME_SITE = BCA_BC_COOKIE_SAME_SITE
+  if (BCA_BC_COOKIE_SECURE === 'true') {
+    process.env.BCA_BC_COOKIE_SECURE = true
+  } else {
+    process.env.BCA_BC_COOKIE_SECURE = false
+  }
 }
