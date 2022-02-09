@@ -1,9 +1,9 @@
 {
   "development": {
     "username": "sa",
-    "password": "YiK5XRBYniKP",
+    "password": "Welcome1",
     "database": "PortalAppDB",
-    "host": "localhost",
+    "host": "192.168.33.13",
     "dialect": "mssql",
     "logging": false
   },
