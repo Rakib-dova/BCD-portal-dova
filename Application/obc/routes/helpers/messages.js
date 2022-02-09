@@ -2,17 +2,15 @@
 
 const { Message } = require('../../models')
 
-const messages = {}
-
 /**
- * Messages テーブルから全てのメッセージ定義を読み込み messages オブジェクトに格納する
+ * Messages テーブルから全てのメッセージ定義を読み込む
  */
 const load = async () => {
+  const messages = {}
   for (let entry of await Message.findAll()) {
     messages[entry.code] = entry.message
   }
+  return messages
 }
 
-load()
-
-module.exports = messages
+module.exports = load()
