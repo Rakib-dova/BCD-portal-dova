@@ -51,7 +51,7 @@ function validate() {
 
 $(() => {
   new List('customerList', {
-    valueNames: ['lastUpdated', 'customerId', 'customerName']
+    valueNames: ['customerId', 'customerName']
   })
 
   $('[name="connectionSelect"').each((index, element) => changeTenant(element))

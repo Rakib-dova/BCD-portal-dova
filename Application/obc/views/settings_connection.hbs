@@ -26,7 +26,6 @@
 					<table id="customerList" class="table is-fullwidth is-bordered">
 						<thead>
 							<tr>
-								<th class="sort" data-sort="lastUpdated">最終更新日時</th>
 								<th class="sort customer-code" data-sort="customerId">得意先コード<br/>(請求先コード)</th>
 								<th class="sort" data-sort="customerName">得意先名</th>
 								<th>紐付け先テナント名</th>
@@ -55,7 +54,6 @@
 							{{#if customers}}
 								{{#each customers}}
 								<tr>
-									<td class="lastUpdated">{{ lastUpdated }}</td>
 									<td class="customerId">{{ customerId }}{{#if billingId}}<br/>({{ billingId }}){{/if}}</td>
 									<td class="customerName">{{ customerName }}</td>
 									<td>
