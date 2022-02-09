@@ -568,3 +568,7 @@ iframe#preview {
 .box.menu {
   height: 100%;
 }
+
+th.customer-code {
+  width: 9em;
+}
