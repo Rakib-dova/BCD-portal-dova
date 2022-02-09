@@ -29,6 +29,12 @@ const user = {
   refreshToken: 'dummyRefreshToken'
 }
 
+// 自分自身の企業情報
+const accountCompanyResult = {
+  CompanyAccountId: '15e2d952-8ba0-42a4-8582-b234cb4a2001',
+  CompanyName: '株式会社テスト1'
+}
+
 // ネットワークが紐づいている企業検索結果
 const companyResult = {
   itemsPerPage: 25,
@@ -102,7 +108,7 @@ describe('searchCompaniesApiのテスト', () => {
       }
 
       // apiのreturn値を想定する
-      apiManagerSpy.mockReturnValueOnce({ ...companyResult })
+      apiManagerSpy.mockReturnValueOnce({ ...accountCompanyResult }).mockReturnValueOnce({ ...companyResult })
 
       // 試験実施
       await searchCompaniesApi.cbSearchCompanies(request, response)
@@ -111,6 +117,7 @@ describe('searchCompaniesApiのテスト', () => {
       // response.statusが200
       expect(response.status).toHaveBeenCalledWith(200)
       // response.bodyに予想したデータが入っている
+      expect(response.body).toContainEqual(accountCompanyResult)
       expect(response.body).toContainEqual(companyResult.Connection[0])
       expect(response.body).toContainEqual(companyResult.Connection[1])
     })
@@ -127,7 +134,11 @@ describe('searchCompaniesApiのテスト', () => {
       }
 
       // apiのreturn値を想定する
-      apiManagerSpy.mockReturnValueOnce({ ...companyResultPage1 }).mockReturnValueOnce({ ...companyResultPage2 })
+      // apiManagerSpy.mockReturnValueOnce({ ...companyResultPage1 }).mockReturnValueOnce({ ...companyResultPage2 })
+      apiManagerSpy
+        .mockReturnValueOnce({ ...accountCompanyResult })
+        .mockReturnValueOnce({ ...companyResultPage1 })
+        .mockReturnValueOnce({ ...companyResultPage2 })
 
       // 試験実施
       await searchCompaniesApi.cbSearchCompanies(request, response)
@@ -136,6 +147,7 @@ describe('searchCompaniesApiのテスト', () => {
       // response.statusが200
       expect(response.status).toHaveBeenCalledWith(200)
       // response.bodyに予想したデータが入っている
+      expect(response.body).toContainEqual(accountCompanyResult)
       expect(response.body).toContainEqual(companyResultPage1.Connection[0])
       expect(response.body).toContainEqual(companyResultPage1.Connection[1])
       expect(response.body).toContainEqual(companyResultPage2.Connection[0])
