@@ -1,7 +1,9 @@
 $(() => {
   $('.terms-of-service').on('scroll', (event) => {
     let element = event.target
-    $('#agreement').prop('disabled', element.scrollHeight != element.clientHeight + element.scrollTop)
+    const scrollPosition = element.clientHeight + element.scrollTop
+    const proximity = 0
+    $('#agreement').prop('disabled', (element.scrollHeight - scrollPosition) / element.scrollHeight > proximity)
   })
 
   $('#agreement').on('change', (event) => {
