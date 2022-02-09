@@ -8,7 +8,9 @@ const REDIRECT_URL = `https://${process.env.HOST}/bugyo/auth/callback/`
 const CLIENT_ID = process.env.OBC_API_CLIENT_ID
 
 const auth = async (req, res, next) => {
+  console.log('== process.env.HOST / process.env.OBC_API_AUTH_URL / process.env.OBC_API_CLIENT_ID /  ================\n', process.env.HOST, process.env.OBC_API_AUTH_URL, process.env.OBC_API_CLIENT_ID)
   const url = `${process.env.OBC_API_AUTH_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URL}`
+  console.log('== url =======================\n', url)
   res.redirect(303, url)
 }
 

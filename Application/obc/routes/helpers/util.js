@@ -4,7 +4,7 @@
  * 非同期ハンドラーを構成する
  */
 const handler = (fn) => (req, res, next) => {
-  console.log(req.method, req.baseUrl + req.path, req.query)
+  console.log('== handler =================\n', req.method, req.baseUrl + req.path, req.query)
   fn(req, res, next).catch(next)
 }
 
