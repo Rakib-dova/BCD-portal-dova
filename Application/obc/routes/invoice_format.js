@@ -94,7 +94,7 @@ const formatUsername = (user) => {
 /**
  * 保存処理
  */
-const save = handler(async (req, res, next) => {
+const save = async (req, res, next) => {
   const request = req.body
 
   const user = await ts.getUser(req)
@@ -108,13 +108,13 @@ const save = handler(async (req, res, next) => {
     items: request.items
   })
   res.send({ status: 'ok', formatId: formatId })
-})
+}
 
 const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(displayNew))
 router.get('/:formatId', ...middleware, csrfProtection, handler(displayEdit))
 router.post('/preview', ...middleware, csrfProtection, handler(preview))
-router.post('/', ...middleware, csrfProtection, save)
-router.post('/:formatId', ...middleware, csrfProtection, save)
+router.post('/', ...middleware, csrfProtection, handler(save))
+router.post('/:formatId', ...middleware, csrfProtection, handler(save))
 
 module.exports = router
