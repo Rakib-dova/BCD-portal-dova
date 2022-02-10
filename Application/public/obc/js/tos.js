@@ -2,7 +2,7 @@ $(() => {
   $('.terms-of-service').on('scroll', (event) => {
     let element = event.target
     const scrollPosition = element.clientHeight + element.scrollTop
-    const proximity = 0
+    const proximity = 0.001
     $('#agreement').prop('disabled', (element.scrollHeight - scrollPosition) / element.scrollHeight > proximity)
   })
 
