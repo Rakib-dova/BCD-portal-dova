@@ -33,6 +33,7 @@ $(() => {
           if (formatId != response.formatId) {
             window.location.href = '/bugyo/invoice_format/' + response.formatId
           }
+          notice(response.message)
         }
         else {
           notice(response.message, 'is-danger')

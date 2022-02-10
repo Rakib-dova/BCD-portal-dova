@@ -107,7 +107,7 @@ const save = async (req, res, next) => {
     user: username,
     items: request.items
   })
-  res.send({ status: 'ok', formatId: formatId })
+  res.send({ status: 'ok', formatId: formatId, message: '請求書フォーマットを保存しました。' })
 }
 
 const router = express.Router()
