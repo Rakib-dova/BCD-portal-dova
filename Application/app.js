@@ -143,7 +143,7 @@ const flash = require('express-flash')
 app.use(flash())
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'))
+app.set('views', [path.join(__dirname, 'views'), path.join(__dirname, 'obc/views')])
 app.set('view engine', 'pug')
 
 // body-parser
@@ -298,6 +298,9 @@ app.use('/csvDownload', require('./routes/csvDownload').router)
 app.use('/memberCooperation', require('./memberSite/routes/memberCooperationRouter').router)
 app.use('/idLinking', require('./memberSite/routes/idLinkingRouter').router)
 /**  会員サイト開発 20220228 */
+
+// 奉行クラウド連携
+app.use('/bugyo', require('./obc/obc'))
 
 // notice
 const noticeHelper = require('./routes/helpers/notice')
