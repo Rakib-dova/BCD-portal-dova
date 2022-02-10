@@ -1,4 +1,15 @@
+function activateSendButton() {
+  let count = $('#unissuedList tbody tr[id][data-error=""]').length
+  $('#sendBtn').prop('disabled', count == 0)
+}
+
+function updateUnissued() {
+  let count = $('#unissuedList tbody tr[id]').length
+  $('#unissued').text(count)
+}
+
 $(() => {
+  activateSendButton()
   new List('unissuedList', {
     valueNames: [
       'invoiceId',
@@ -129,6 +140,8 @@ $(() => {
             $(val).remove()
           }
         })
+        updateUnissued()
+        activateSendButton()
       })
       .fail(function (xhr) {
         notice(xhr.status + ' ' + xhr.statusText, 'is-danger')
