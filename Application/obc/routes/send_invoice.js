@@ -353,9 +353,12 @@ const send = async (req, res, next) => {
       { lastInvoiceNo: maxInvoiceId },
       {
         where: {
-          [Op.and]: {
-            uuid: tenantId,
-            lastInvoiceNo: { [Op.lt]: maxInvoiceId }
+          uuid: tenantId,
+          lastInvoiceNo: {
+            [Op.or]: {
+              [Op.eq]: null,
+              [Op.lt]: maxInvoiceId
+            }
           }
         }
       }
