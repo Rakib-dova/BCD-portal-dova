@@ -9,6 +9,14 @@ const handler = (fn) => (req, res, next) => {
 }
 
 /**
+ * Ajax用非同期ハンドラーを構成する
+ */
+const api = (fn, message) => (req, res, next) => {
+  console.log(req.method, req.baseUrl + req.path, req.query)
+  fn(req, res, next).catch((error) => res.send({ status: 'ng', message: message ?? error.message }))
+}
+
+/**
  * リクエストからログイン中のテナントIDを取り出す
  */
 const currentTenantId = (req) => req.user.tenantId
@@ -26,6 +34,7 @@ const condition = (itemKey, operator, value) => {
 
 module.exports = {
   handler,
+  api,
   currentTenantId,
   condition
 }

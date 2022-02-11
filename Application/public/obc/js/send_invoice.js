@@ -58,11 +58,15 @@ $(() => {
         data: fd
       })
         .done(function (response) {
-          // 一覧テーブルにファイル名を設定
-          let name = uploadFile[0].name
-          $('#' + documentId + ' .attachments').append(
-            `<span class="attached-file"><a href="${response.url}">${name}</a><button class="delete" data-file="${name}"></button><br/></span>`
-          )
+          if (response.status == 'ok') {
+            // 一覧テーブルにファイル名を設定
+            let name = uploadFile[0].name
+            $('#' + documentId + ' .attachments').append(
+              `<span class="attached-file"><a href="${response.url}">${name}</a><button class="delete" data-file="${name}"></button><br/></span>`
+            )
+          } else {
+            notice(response.message, 'is-danger')
+          }
         })
         .fail(function (xhr) {
           notice(xhr.status + ' ' + xhr.statusText, 'is-danger')
@@ -87,8 +91,12 @@ $(() => {
       }
     })
       .done(function (response) {
-        target.closest('.attached-file').remove()
-        notice(response.message)
+        if (response.status == 'ok') {
+          target.closest('.attached-file').remove()
+          notice(response.message)
+        } else {
+          notice(response.message, 'is-danger')
+        }
       })
       .fail(function (xhr) {
         notice(xhr.status + ' ' + xhr.statusText, 'is-danger')

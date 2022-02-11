@@ -17,7 +17,7 @@ const {
   Error,
   Sequelize: { Op }
 } = require('../models')
-const { handler, currentTenantId } = require('./helpers/util')
+const { handler, api, currentTenantId } = require('./helpers/util')
 require('date-utils')
 
 // CSRF対策
@@ -387,8 +387,19 @@ const upload = multer({ dest: 'uploads/' })
 
 router.get('/', ...middleware, csrfProtection, handler(display))
 router.post('/', ...middleware, csrfProtection, handler(displayWithRange))
-router.post('/attachment', upload.array('file', 1), ...middleware, csrfProtection, handler(addAttachment))
-router.delete('/attachment/:documentId/:filename', ...middleware, csrfProtection, handler(deleteAttachment))
+router.post(
+  '/attachment',
+  upload.array('file', 1),
+  ...middleware,
+  csrfProtection,
+  api(addAttachment, '添付ファイルの追加に失敗しました')
+)
+router.delete(
+  '/attachment/:documentId/:filename',
+  ...middleware,
+  csrfProtection,
+  api(deleteAttachment, '添付ファイルの削除に失敗しました')
+)
 router.post('/send', ...middleware, csrfProtection, handler(send))
 
 module.exports = router
