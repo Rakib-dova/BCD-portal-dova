@@ -37,6 +37,9 @@ const searchBody = (option = {}) => {
  * 得意先データを変換
  */
 const convertFrom = (response) => {
+  if (!response.map) {
+    return []
+  }
   return response.map((item) => {
     return {
       customerId: item.AR2010001, // 得意先コード
