@@ -1,7 +1,7 @@
 'use strict'
 const express = require('express')
 const formats = require('./helpers/formats')
-const { handler } = require('./helpers/util')
+const { handler, api } = require('./helpers/util')
 require('date-utils')
 
 // CSRF対策
@@ -39,6 +39,6 @@ const deleteFormat = async (req, res) => {
 
 const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(display))
-router.delete('/:formatId', ...middleware, csrfProtection, handler(deleteFormat))
+router.delete('/:formatId', ...middleware, csrfProtection, api(deleteFormat, 'フォーマットの削除に失敗しました。'))
 
 module.exports = router

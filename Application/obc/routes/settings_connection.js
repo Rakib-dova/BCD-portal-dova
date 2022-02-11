@@ -4,7 +4,7 @@ const ts = require('../controllers/apihelper').tradeshiftApi()
 const obc = require('../controllers/apihelper').bugyoApi()
 const customer = require('./helpers/customer')
 const Formats = require('./helpers/formats')
-const { handler } = require('./helpers/util')
+const { handler, api } = require('./helpers/util')
 
 // CSRF対策
 const csrf = require('csurf')
@@ -105,6 +105,6 @@ const save = async (req, res, next) => {
 
 const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(display))
-router.post('/save', ...middleware, csrfProtection, handler(save))
+router.post('/save', ...middleware, csrfProtection, api(save, '得意先の紐付けに失敗しました。'))
 
 module.exports = router
