@@ -124,6 +124,9 @@ const findAllDocuments = async (ctx) => {
     totalPages = documents.numPages
     page = documents.pageId + 1
     for (let document of documents.Document) {
+      if (result[document.ID]?.outbox) {
+        continue
+      }
       result[document.ID] = {
         outbox: document.State != 'DRAFT',
         created: false,
@@ -314,13 +317,21 @@ const deleteAttachment = async (req, res, next) => {
  */
 const send = async (req, res, next) => {
   const tenantId = currentTenantId(req)
+  const { from, to, items } = req.body
 
   // 前回エラーをクリアする
-  await Error.destroy({ where: { userUuid: tenantId } })
+  await Error.destroy({
+    where: {
+      userUuid: tenantId,
+      invoiceNo: {
+        [Op.between]: [from, to]
+      }
+    }
+  })
 
   let errors = {}
   let maxInvoiceId = null
-  for (let { documentId, invoiceId, error } of req.body) {
+  for (let { documentId, invoiceId, error } of items) {
     if (error) {
       // 取り込み時のエラーを登録
       await Error.create({

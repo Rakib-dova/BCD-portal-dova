@@ -104,9 +104,13 @@ $(() => {
     // 読込中
     $('#sendBtn').addClass('is-loading')
     $('#confirmModal').removeClass('is-active')
-    let data = []
+    let data = {
+      from: $('#fromNo').val(),
+      to: $('#toNo').val(),
+      items: []
+    }
     $('#unissuedList tbody tr').each((index, val) => {
-      data.push({
+      data.items.push({
         documentId: val.id,
         invoiceId: $(val).data('invoiceid'),
         error: $(val).data('error')
