@@ -118,7 +118,7 @@ const documentReference = (postfix, type) => {
  */
 const taxSubtotal = (template) => {
   return (key, data) => {
-    return processArray(data, key, template).filter((e) => e.TaxableAmount && e.TaxAmount)
+    return processArray(data, key, template).filter((e) => e.TaxableAmount?.value && e.TaxAmount?.value)
   }
 }
 
