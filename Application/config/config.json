@@ -1,11 +1,13 @@
 {
   "development": {
     "username": "sa",
-    "password": "Welcome1",
+    "password": "YiK5XRBYniKP",
     "database": "PortalAppDB",
-    "host": "192.168.33.13",
+    "host": "localhost",
     "dialect": "mssql",
-    "logging": false
+    "options": {
+      "validateBulkLoadParameters": false
+    }
   },
   "test": {
     "username": "root",
