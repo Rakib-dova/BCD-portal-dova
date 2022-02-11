@@ -128,7 +128,7 @@ $(() => {
         let errors = response.errors || {}
         $('#unissuedList tbody tr').each((index, val) => {
           if (errors[val.id]) {
-            $(val).addClass('has-background-danger-light').data('error', errors[val.id])
+            $(val).addClass('has-background-danger-light').attr('data-error', errors[val.id])
             $(val)
               .find('.invoiceId')
               .prepend(
