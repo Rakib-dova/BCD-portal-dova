@@ -1,0 +1,18 @@
+.grouped-button {
+  position: relative;
+  left: 50%;
+  justify-content: center;
+  transform: translateX(-66px);
+}
+
+.border-div-rad-4 {
+  border: 1px solid #363636;
+  border-radius: 4px;
+}
+
+.item-title-modal-approve {
+  display: flex;
+  flex-basis: 28px;
+  justify-content: flex-end;
+  margin-right: 10px;
+}
