@@ -22,7 +22,7 @@ const $ = function (tagObjName) {
 // 「確認」ボタンの機能（バリデーションチェック）
 $('#btnCheck').addEventListener('click', function (e) {
   // 英数文字正規式
-  const regExpEngNumber = '^[a-zA-Z0-9+]*$'
+  const regExpEngNumber = '^[a-zA-Z0-9]*$'
   let errorFlag = false
 
   if (this.getAttribute('disabled') !== null) {
@@ -31,6 +31,17 @@ $('#btnCheck').addEventListener('click', function (e) {
 
   $('#RequiredErrorMesageForCode').classList.add('is-invisible')
   $('#RequiredErrorMesageForName').classList.add('is-invisible')
+
+  // 勘定科目コードの英数文字ではない場合
+  if (
+    !$('#setAccountCodeInputIdResult').value.match(regExpEngNumber) &&
+    $('#setAccountCodeInputIdResult').value.length > 0 &&
+    $('#setAccountCodeInputIdResult').value.length < 11
+  ) {
+    $('#RequiredErrorMesageForAccountCode').innerHTML = '入力値が間違いました。'
+    $('#RequiredErrorMesageForAccountCode').classList.remove('is-invisible')
+    errorFlag = true
+  }
 
   // 補助科目コードが未入力の場合
   if ($('#setSubAccountCodeInputId').value.length === 0) {
@@ -238,6 +249,7 @@ $('#btnAccountCodeClear').addEventListener('click', function () {
   $('#btnOpenAccountCodeModal').removeAttribute('disabled')
   $('#btnCheck').setAttribute('disabled', true)
   $('#setAccountCodeInputIdResultColumn').classList.add('is-invisible')
+  $('#RequiredErrorMesageForAccountCode').classList.add('is-invisible')
   this.setAttribute('disabled', true)
   this.classList.add('is-invisible')
 })
