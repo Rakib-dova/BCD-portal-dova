@@ -1,3 +1,7 @@
+'use strict'
+
+// 承認順番
+const approveUserNumbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -30,35 +34,66 @@ window.onload = function () {
 // 2番目以降の勘定科目・補助科目検索ボタンイベント
 const btnSearchMain = function (searchModal) {
   return function () {
-    if (this.dataset.info !== $('#accountCode-modal').dataset.info) {
-      deleteDisplayModal()
-    }
     if (searchModal) searchModal.classList.toggle('is-active')
-    $('#accountCode-modal').dataset.info = this.dataset.info
+    $('#approveRoute-modal').dataset.info = this.dataset.info
   }
 }
 
-// 承認者再検索の時、前の結果を消す
-const deleteDisplayModal = function () {
-  const displayFieldResultBody = $('#displayFieldResultBody')
-  if (displayFieldResultBody.children.length !== 0) {
-    const chidrenItem = []
-    Array.prototype.forEach.call(displayFieldResultBody.children, (item) => {
-      chidrenItem.push(item)
-    })
-    chidrenItem.forEach((item) => {
-      displayFieldResultBody.removeChild(item)
-    })
-  }
-
-
-// 検索ボタンクリック時
-$('#btnSearchApproveUser').addEventListener('click', function () {
-  // 検索ボタンが非活性化の時は動作しない
-  if (this.getAttribute('disabled') !== null) {
-    return
-  }
-  const dataTarget = this.getAttribute('data-target')
-  $(dataTarget).classList.add('is-active')
+// 承認者追加ボタンクリック時
+$('#btnAddApproveRoute').addEventListener('click', function () {
+  const target = $(this.dataset.target)
+  addApproveUsers(target)
 })
 
+// マイナスボタン機能追加
+const btnMinusApproveRoute = function () {
+  const deleteTarget = this.dataset.target
+  $(`#${deleteTarget}`).remove()
+  const approveUserList = $('#bulkInsertNo1')
+  approveUserList.querySelectorAll('.lineApproveRoute').forEach((item, idx) => {
+    item.querySelector('.input-approveRouteUserNumber').innerText = `${approveUserNumbers[idx]}次承認`
+  })
+}
+
+const addApproveUsers = function (target) {
+  const lineApproveRouteLength = target.querySelectorAll('.lineApproveRoute').length
+  if (lineApproveRouteLength < 10) {
+    // 承認者のidを作成：lineNo明細詳細の順番_lineApproveRoute承認者の順番
+    const tagetIdBase = `${target.id}_lineApproveRoute`
+    const targetId = `${target.id}_lineApproveRoute${
+      ~~document.querySelectorAll('.lineApproveRoute')[lineApproveRouteLength].id.replaceAll(tagetIdBase, '') + 1
+    }`
+    // templateから追加承認者追加作成
+    const templateLineApproveRouteItem = $('#templateLineApproveRouteItem')
+    const cloneApproveRouteItem = document.importNode(templateLineApproveRouteItem.content, true)
+    cloneApproveRouteItem.querySelector('.lineApproveRoute').id = targetId
+    // 承認者順番
+    cloneApproveRouteItem.querySelector('.input-approveRouteUserNumber').setAttribute('name', `${targetId}_approveUserNumber${lineApproveRouteLength + 1}`)
+    cloneApproveRouteItem.querySelector('.input-approveRouteUserNumber').innerText = `${approveUserNumbers[lineApproveRouteLength]}次承認`
+    // 承認者名INPUT
+    cloneApproveRouteItem.querySelector('.input-approveRouteUserName').setAttribute('name', `${targetId}_approveUserName`)
+    cloneApproveRouteItem.querySelector('.input-approveRouteUserName').id = `${targetId}_approveUserName`
+    // メールアドレスINPUT
+    cloneApproveRouteItem
+      .querySelector('.input-approveRouteUserMailAddress')
+      .setAttribute('name', `${targetId}_approveUserMailAddress`)
+    cloneApproveRouteItem.querySelector('.input-approveRouteUserMailAddress').id = `${targetId}_approveUserMailAddress`
+
+    // 承認者削除ボタン
+    cloneApproveRouteItem.querySelector('.btn-minus-approveRoute').dataset.target = targetId
+    cloneApproveRouteItem.querySelector('.btn-minus-approveRoute').addEventListener('click', btnMinusApproveRoute)
+
+    // 承認者検索ボタン
+    cloneApproveRouteItem.querySelector('.btn-search-main').dataset.target = 'approveRoute-modal'
+    cloneApproveRouteItem.querySelector('.btn-search-main').dataset.info = targetId
+    cloneApproveRouteItem
+      .querySelector('.btn-search-main')
+      .addEventListener('click', btnSearchMain($('#approveRoute-modal')))
+    const approveUserList = $('#bulkInsertNo1')
+    if (lineApproveRouteLength < 1) {
+      approveUserList.insertBefore(cloneApproveRouteItem, approveUserList.childNodes[0])
+    } else {
+      approveUserList.insertBefore(cloneApproveRouteItem, approveUserList.childNodes[lineApproveRouteLength])
+    }
+  }
+}

@@ -33,13 +33,13 @@ block content
                             .columns
                               .column
                                 .column.ml-0.pl-0 
-                                  .button.is-link.mr-2#btnOpenApproveRouteModal(type="button") 承認者追加
-                                .column.p-0.lineAccountCodeForBulk(id='bulkInsertNo1')
-                                  .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1' data-idx='1')
+                                  .button.is-link.mr-2#btnAddApproveRoute(type="button" data-target= `#bulkInsertNo1`) 承認者追加
+                                .column.p-0.lineApproveRoute(id='bulkInsertNo1')
+                                  .columns.m-0.p-1.lineApproveRouteForLast(id='bulkInsertNo1_lineApproveRouteLast' data-idx='1')
                                     .column.p-0.border-div-rad-4
                                       .field.is-horizontal.m-1.has-addons-centered
                                         .field-label.is-normal.m-0.text-center
-                                          label 最終経理承認                                      
+                                          label 承認準                                     
                                         .field-label.is-normal.m-0.text-center
                                           label 最終承認者名
                                         .field-label.is-normal.m-0.text-center
@@ -61,9 +61,12 @@ block content
                                         .field-body.m-1.is-4.text-center
                                           .field
                                             p.control
-                                              a.button.is-link.show-modal.btn-search-main.BtnlineApproveRouteUserSearch(data-target='ApproveRoute-modal') 検索
+                                              a.button.is-link.show-modal.btn-search-main.BtnlineApproveRouteUserSearch(data-target='approveRoute-modal') 検索
                                     .column.is-0.p-1
-                              
+                                      .column.is-invisible
+                                        a.red-color.btn-minus-approveRoute
+                                          i.fas.fa-minus-circle
+
                   .grouped-button                                  
                     a.button.mr-6(href='/portal')  戻る
                     a.button.is-link#btn-confirm(disabled='true') 登録
@@ -158,6 +161,38 @@ block content
                     tbody#displayFieldResultBody
                  
       footer.modal-card-foot.modal-address-foot
+
+  template#templateLineApproveRouteItem
+      .columns.m-0.p-1.lineApproveRoute
+        .column.p-0.border-div-rad-4
+          .field.is-horizontal.m-1.has-addons-centered
+            .field-label.is-normal.m-0.text-center
+              label 承認準                                      
+            .field-label.is-normal.m-0.text-center
+              label 承認者名
+            .field-label.is-normal.m-0.text-center
+              label メールアドレス
+            .field-label.is-normal.m-0.fixed-void-66
+              label 　
+          .field.is-horizontal.p-1
+            .field-body.m-1
+              .field.text-center
+                p.control.input-approveRouteUserNumber                                                                             
+            .field-body.m-1
+              .field
+                p.control
+                  input.input.input-approveRouteUserName(type='text' name=`` value readonly)
+            .field-body.m-1
+              .field
+                p.control
+                  input.input.input-approveRouteUserMailAddress(type='text' id=`` value readonly)
+            .field-body.m-1.is-4.text-center
+              .field
+                p.control
+                  a.button.is-link.show-modal.btn-search-main.BtnlineApproveRouteUserSearch(data-target='approveRoute-modal') 検索
+        .column.is-0.p-1.column-minus-btn
+          a.red-color.btn-minus-approveRoute
+            i.fas.fa-minus-circle
 
   template#searchResultCode
     tr.rowApproveUsers
