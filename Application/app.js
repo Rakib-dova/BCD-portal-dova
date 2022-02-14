@@ -276,6 +276,10 @@ app.use('/inboxList', require('./routes/inboxList').router)
 // 受領した請求書
 app.use('/inbox', require('./routes/inbox').router)
 
+// ------------承認ルート
+// 承認ルート登録
+app.use('/registApproveRoute', require('./routes/registApproveRoute').router)
+
 // 設定
 // cancellation
 app.use('/cancellation', require('./routes/cancellation').router)
