@@ -23,11 +23,11 @@ module.exports = {
         type: Sequelize.UUID
       },
       prevApproveUser: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.UUID
       },
       nextApproveUser: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.UUID
       },
       lastApproveUserId: {
