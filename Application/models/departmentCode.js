@@ -31,11 +31,18 @@ module.exports = (sequelize, DataTypes) => {
       },
       departmentCodeName: {
         allowNull: false,
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        validate: {
+          len: [1, 40]
+        }
       },
       departmentCode: {
         allowNull: false,
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        validate: {
+          is: /^[a-zA-Z0-9ァ-ヶー]*$/i,
+          len: [1, 10]
+        }
       },
       createdAt: {
         type: DataTypes.DATE,
