@@ -23,7 +23,7 @@
 }
 
 .red-color {
-  color: red;
+  color: red !important;
 }
 
 #displayInvisible > div {

@@ -25,7 +25,7 @@ const $ = function (tagObjName) {
 
 // ローディング画面の初期化
 window.onload = function () {
-  // 勘定科目・補助科目の検索ボタン機能設定
+  // 承認者検索ボタン機能設定
   Array.prototype.forEach.call($('.BtnlineApproveRouteUserSearch'), function (btn) {
     btn.addEventListener('click', btnSearchMain())
   })
@@ -114,6 +114,8 @@ $('#btn-search-approver').addEventListener('click', function () {
 
 // 検索ボタンクリック時、機能
 const BtnlineApproveRouteUserSearch = function () {
+  // エラーメッセージ初期化
+  revertElements()
   const target = $('#approveRoute-modal').dataset.target
   // 承認者検索モーダルの表示
   $('#approveRoute-modal').classList.add('is-active')
@@ -133,6 +135,8 @@ $('#BtnlineApproveRouteUserSearch').addEventListener('click', BtnlineApproveRout
 
 // 承認者追加ボタンクリック時
 $('#btnAddApproveRoute').addEventListener('click', function () {
+  // エラーメッセージ初期化
+  revertElements()
   const target = $(this.dataset.target)
   addApproveUsers(target)
 })
@@ -190,5 +194,117 @@ const addApproveUsers = function (target) {
     } else {
       approveUserList.insertBefore(cloneApproveRouteItem, approveUserList.childNodes[lineApproveRouteLength])
     }
+  } else {
+    $('#error-message-approveRoute').innerText = '承認者追加の上限は１０名までです。'
   }
+}
+
+// 登録ボタンクリック時
+$('#btn-confirm').addEventListener('click', function () {
+  // 初期化
+  revertElements()
+  // 「登録」ボタンが非活性の場合、終了する。
+  if (this.getAttribute('disabled') === 'true') return
+  const approveUserArr = []
+  const approveUsers = document.querySelectorAll('.input-approveRouteUserName')
+  const lastapproveUser = document.getElementById('lastLineApproveRoute_approveUserName')
+  approveUsers.forEach(item => {
+    approveUserArr.push(item.value)
+  })
+
+  approveUserArr.push(lastapproveUser.value)
+  const validationCheckResult = validationCheck(approveUserArr)
+  if (!validationCheckResult) {
+    const duplicationCheckResult = duplicationCheck(approveUserArr)
+    if (duplicationCheckResult) {
+      $('#error-message-approveRoute').innerText = '同一の承認者が設定されています。'
+    } else {
+      // 登録処理
+      alert('登録処理')
+    }
+  }
+})
+
+// 重複された承認者処理
+const duplicationCheck = function (approveUserArr) {
+  const result = duplicateCheckFunction(approveUserArr)
+  return result
+}
+
+// 未設定チェック
+const validationCheck = function (approveUserArr) {
+  // 承認ルート名チェック
+  const setApproveRouteNameInputId = document.getElementById('setApproveRouteNameInputId').value
+  if (setApproveRouteNameInputId === '' || setApproveRouteNameInputId === undefined) {
+    document.getElementById('RequiredErrorMesageForApproveRoute').innerHTML = '承認ルート名が未入力です。'
+    document.getElementById('RequiredErrorMesageForApproveRoute').classList.remove('is-invisible')
+    return true
+  } else if (setApproveRouteNameInputId.length > 40) {
+    document.getElementById('RequiredErrorMesageForApproveRoute').innerHTML = '承認ルート名は40桁以内で入力してください。'
+    document.getElementById('RequiredErrorMesageForApproveRoute').classList.remove('is-invisible')
+    return true
+  }
+
+  // 承認者未設定チェック
+  const lastUseridx = approveUserArr.length
+  const approveUsersArr = document.getElementById('bulkInsertNo1').childNodes
+  const result = []
+  approveUserArr.forEach((name, idx) => {
+    if (name === '' || name === undefined) {
+      if (idx === (lastUseridx - 1)) {
+        document.getElementById('lastLineApproveRoute_approveUserName').value = '未設定'
+        document.getElementById('lastLineApproveRoute_approveUserName').classList.add('red-color')
+      } else {
+        approveUsersArr.forEach((line, index) => {
+          if (idx === index) {
+            line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].value = '未設定'
+            line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].classList.add('red-color')
+          }
+        })
+      }
+      result.push(idx + 1)
+    }
+  })
+
+  if (result.length > 0) {
+    $('#error-message-approveRoute').innerText = `無効なユーザが承認ルートに設定されています。（承認順：${[...result]}）`
+    return true
+  } else {
+    return false
+  }
+}
+
+// 重複検索関数
+const duplicateCheckFunction = function (array) {
+  const length = array.length
+  let duplicationFlag = false
+  let i, j, temp
+  for (i = 0; i < length - 1; i++) {
+    for (j = 0; j < length - 1 - i; j++) {
+      if (JSON.stringify(array[j]) === JSON.stringify(array[j + 1])) {
+        duplicationFlag = true
+        return duplicationFlag
+      } else {
+        temp = array[j]
+        array[j] = array[j + 1]
+        array[j + 1] = temp
+      }
+    }
+  }
+  return duplicationFlag
+}
+
+// エラーメッセージ初期化
+const revertElements = function () {
+  console.log(document.getElementById('RequiredErrorMesageForApproveRoute'))
+  document.getElementById('RequiredErrorMesageForApproveRoute').innerHTML = ''
+  document.getElementById('RequiredErrorMesageForApproveRoute').classList.add('is-invisible')
+  $('#error-message-approveRoute').innerText = ''
+  const approveUserNotLastArr = document.getElementById('bulkInsertNo1').childNodes
+  approveUserNotLastArr.forEach((line) => {
+    if (line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].value === '未設定') {
+      line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].value = ''
+    }
+    line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].classList.remove('red-color')
+  })
 }

@@ -20,9 +20,9 @@ block content
                       .field.card
                         .card-content
                           .field
-                            label(for= idForCodeInput).input-label #{approveRouteNameLabel}
-                            p(id= requiredTagCode).input-label-required.input-label （必須）
-                            p#RequiredErrorMesageForCode.input-label-required.is-invisible
+                            label(for= idForApproveRouteNameInput).input-label #{approveRouteNameLabel}
+                            p(id= requiredTagApproveRouteName).input-label-required.input-label （必須）
+                            p#RequiredErrorMesageForApproveRoute.input-label-required.is-invisible
                             .control
                               .columns.ml-0.pl-0.alignCenterChild
                                 .column.pl-0
@@ -34,12 +34,15 @@ block content
                               .column
                                 .column.ml-0.pl-0 
                                   .button.is-link.mr-2#btnAddApproveRoute(type="button" data-target= `#bulkInsertNo1`) 承認者追加
+                                .columns.m-0
+                                  .column
+                                    p#error-message-approveRoute.red-color(tabIndex=0)  　                                  
                                 .column.p-0.lineApproveRoute(id='bulkInsertNo1')
                                   .columns.m-0.p-1.lineApproveRouteForLast(id='bulkInsertNo1_lineApproveRouteLast' data-idx='1')
                                     .column.p-0.border-div-rad-4
                                       .field.is-horizontal.m-1.has-addons-centered
                                         .field-label.is-normal.m-0.text-center
-                                          label 承認準                                     
+                                          label 承認順                                     
                                         .field-label.is-normal.m-0.text-center
                                           label 最終承認者名
                                         .field-label.is-normal.m-0.text-center
@@ -70,7 +73,7 @@ block content
 
                   .grouped-button                                  
                     a.button.mr-6(href='/portal')  戻る
-                    a.button.is-link#btn-confirm(disabled='true') 登録
+                    a.button.is-link#btn-confirm 確認
   .modal#check-modal
     .modal-background.cancel-button(data-target='check-modal')
     .modal-card.is-family-noto-sans
@@ -166,7 +169,7 @@ block content
         .column.p-0.border-div-rad-4
           .field.is-horizontal.m-1.has-addons-centered
             .field-label.is-normal.m-0.text-center
-              label 承認準                                      
+              label 承認順                                      
             .field-label.is-normal.m-0.text-center
               label 承認者名
             .field-label.is-normal.m-0.text-center
