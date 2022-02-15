@@ -1,0 +1,220 @@
+extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans #{logTitle}
+        .subtitle.is-family-noto-sans #{logTitleEng}
+
+    .columns.is-centered
+      .column.is-11
+        .container.is-max-widescreen.is-family-noto-sans
+          form#form(method="POST")
+            article.panel.is-info
+              h2.panel-heading #{panelHead}
+              .panel-block
+                .container.mb-6
+                  .columns.is-centered.is-fullwidth
+                    .column.is-fullwidth
+                      .field.card
+                        .card-content
+                          .field
+                            label(for= idForApproveRouteNameInput).input-label #{approveRouteNameLabel}
+                            p(id= requiredTagApproveRouteName).input-label-required.input-label （必須）
+                            p#RequiredErrorMesageForApproveRoute.input-label-required.is-invisible
+                            .control
+                              .columns.ml-0.pl-0.alignCenterChild
+                                .column.pl-0
+                                  input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= valueForApproveRouteNameInput maxlength=40 placeholder='全角・半角文字・英数字40文字まで' required) 
+                      .field.card                                    
+                        .card-content
+                          .field
+                            .columns
+                              .column
+                                .column.ml-0.pl-0 
+                                  .button.is-link.mr-2#btnAddApproveRoute(type="button" data-target= `#bulkInsertNo1`) 承認者追加
+                                .columns.m-0
+                                  .column
+                                    p#error-message-approveRoute.red-color(tabIndex=0)  　                                  
+                                .column.p-0.lineApproveRoute(id='bulkInsertNo1')
+                                  .columns.m-0.p-1.lineApproveRouteForLast(id='bulkInsertNo1_lineApproveRouteLast' data-idx='1')
+                                    .column.p-0.border-div-rad-4
+                                      .field.is-horizontal.m-1.has-addons-centered
+                                        .field-label.is-normal.m-0.text-center
+                                          label 承認順                                     
+                                        .field-label.is-normal.m-0.text-center
+                                          label 最終承認者名
+                                        .field-label.is-normal.m-0.text-center
+                                          label メールアドレス
+                                        .field-label.is-normal.m-0.fixed-void-66
+                                          label 　
+                                      .field.is-horizontal.p-1
+                                        .field-body.m-1
+                                          .field.text-center
+                                            p.control 最終承認                                                                             
+                                        .field-body.m-1
+                                          .field
+                                            p.control
+                                              input.input.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` value readonly)
+                                        .field-body.m-1
+                                          .field
+                                            p.control
+                                              input.input.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` value readonly)
+                                              input(type='hidden' name=`uuid`)
+                                        .field-body.m-1.is-4.text-center
+                                          .field
+                                            p.control
+                                              a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
+                                    .column.is-0.p-1
+                                      .column.is-invisible
+                                        a.red-color.btn-minus-approveRoute
+                                          i.fas.fa-minus-circle
+
+                  .grouped-button                                  
+                    a.button.mr-6(href='/portal')  戻る
+                    a.button.is-link#btn-confirm 確認
+  .modal#check-modal
+    .modal-background.cancel-button(data-target='check-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head
+        p.modal-card-title.title.mb-0 #{modalTitle}
+        button.delete(data-target='check-modal')
+      section.modal-card-body
+        table.table.is-striped.is-bordered.is-fullwidth
+          tbody
+            tr
+              td 承認者名（姓）
+              td
+                p#checksetApproveUserLastNameInputId
+            tr
+              td 承認者名（名）
+              td
+                p#checksetApproveUserFirstNameInputId
+            tr
+              td メールアドレス
+              td
+                p#checksetApproveUserMailAddressInputId                
+      footer.modal-card-foot
+        div.button-area
+          a.button#cancel-btn.cancel-button(data-target='check-modal') キャンセル
+          a.button.is-success#submit 登録
+  
+  .modal#caution-modal
+    .modal-background.cancel-button(data-target='caution-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head
+        p.modal-card-title.title.mb-0 
+        button.delete(data-target='caution-modal')
+      section.modal-card-body
+        p#caution-message
+      footer.modal-card-foot
+        div.button-area
+          a.button.is-danger.cancel-button(data-target='caution-modal') 確認
+
+  .modal.modal-fx-fadeInscale#approveRoute-modal
+    .modal-background.cancel-button(data-target="approveRoute-modal")
+    .modal-card
+      header.modal-card-head
+        p.modal-card-title #{modalTitle}
+        button#deleteApproveRoute-modal.delete(type="button" data-target="approveRoute-modal")
+      section.modal-card-body
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-approve
+                  label 承認者名（姓）
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalApproveUserLastName' value )
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-approve
+                  label 承認者名（名）
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalApproveUserFirstName' value )
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-approve
+                  label メールアドレス
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalApproveUserMailAddress' value )
+              .control
+                .field.is-grouped.is-grouped-centered
+                  .columns.m-0
+                    .column.p-0
+                      div.button-area
+                        .button.is-link#btn-search-approver(type="button") 検索
+
+          .columns.is-fullwidth.m-0
+            .column.is-fullwidth.p-0
+              .field.is-horizontal#displayInvisible
+                .box.px-2
+                  .columns.is-fullwidth.m-0
+                    .column.border-div-rad-0.search-approver-name.is-6 承認者名
+                    .column.border-div-rad-0.search-approver-email.is-6 メールアドレス
+                  .row#approver-list
+                 
+      footer.modal-card-foot.modal-address-foot
+
+  template#templateLineApproveRouteItem
+      .columns.m-0.p-1.lineApproveRoute
+        .column.p-0.border-div-rad-4
+          .field.is-horizontal.m-1.has-addons-centered
+            .field-label.is-normal.m-0.text-center
+              label 承認順                                      
+            .field-label.is-normal.m-0.text-center
+              label 承認者名
+            .field-label.is-normal.m-0.text-center
+              label メールアドレス
+            .field-label.is-normal.m-0.fixed-void-66
+              label 　
+          .field.is-horizontal.p-1
+            .field-body.m-1
+              .field.text-center
+                p.control.input-approveRouteUserNumber                                                                             
+            .field-body.m-1
+              .field
+                p.control
+                  input.input.input-approveRouteUserName(type='text' name=`` value readonly)
+            .field-body.m-1
+              .field
+                p.control
+                  input.input.input-approveRouteUserMailAddress(type='text' id=`` value readonly)
+                  input(type='hidden')
+            .field-body.m-1.is-4.text-center
+              .field
+                p.control
+                  a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-target='approveRoute-modal') 検索
+        .column.is-0.p-1.column-minus-btn
+          a.red-color.btn-minus-approveRoute
+            i.fas.fa-minus-circle
+
+  template#searchResultCode
+    tr.rowApproveUsers
+      td.columnNoApproveUser
+        .field.is-horizontal
+          .field-body
+            p.control.noApproveUserMessage              
+      td.columnApproveUserName
+      td.columnApproveUserMailAddress
+  include footer
+
+  template#template-approverList
+    .columns.is-fullwidth.m-0.is-6.columns-tr
+      .column.column-td.is-6
+        p#name
+        input#id(type='hidden')
+      .column.column-td.is-6
+        p#email
+
+block append scripts
+  script(src="/js/registApproveRoute-page.js")
+  link(rel='stylesheet', type='text/css', href='/css/registApproveRoute.css')
