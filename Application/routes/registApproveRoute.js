@@ -47,10 +47,8 @@ const cbGetRegistApproveRoute = async (req, res, next) => {
   res.render('registApproveRoute', {
     panelHead: '条件絞り込み',
     approveRouteNameLabel: '承認ルート名',
-    codeNameLabel: '勘定科目名',
     requiredTagApproveRouteName: 'approveRouteNameTagRequired',
     idForApproveRouteNameInput: 'setApproveRouteNameInputId',
-    idForNameInput: 'setAccountCodeNameInputId',
     modalTitle: '承認者検索',
     backUrl: '/portal',
     logTitle: '承認ルート登録',

@@ -39,6 +39,7 @@ const btnSearchMain = function (searchModal) {
   }
 }
 
+// 承認者検索機能
 $('#btn-search-approver').addEventListener('click', function () {
   // ボタンローディング
   this.classList.add('is-loading')
@@ -157,6 +158,7 @@ const btnMinusApproveRoute = function () {
   })
 }
 
+// 承認者追加ボタン機能
 const addApproveUsers = function (target) {
   const lineApproveRouteLength = target.querySelectorAll('.lineApproveRoute').length
   if (lineApproveRouteLength < 10) {
