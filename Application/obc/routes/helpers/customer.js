@@ -44,7 +44,7 @@ const convertFrom = (response) => {
     return {
       customerId: item.AR2010001, // 得意先コード
       billingId: item.AR2010001 === item.SD2010701 ? '' : item.SD2010701, // 請求先コード
-      customerName: item.AR2010007, // 得意先略称
+      customerName: item.AR2010003, // 得意先名
       companyId: item.AR2010113, // 紐付いた企業アカウントID
       lastUpdated: Parser.forDate([item.AR2010014]) // 最終更新日時
     }
