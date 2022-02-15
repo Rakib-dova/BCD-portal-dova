@@ -211,24 +211,59 @@ $('#btn-confirm').addEventListener('click', function () {
   revertElements()
   // 「登録」ボタンが非活性の場合、終了する。
   if (this.getAttribute('disabled') === 'true') return
-  const approveUserArr = []
-  const approveUsers = document.querySelectorAll('.input-approveRouteUserName')
-  const lastapproveUser = document.getElementById('lastLineApproveRoute_approveUserName')
-  approveUsers.forEach((item) => {
-    approveUserArr.push(item.value)
+  const approveUserNameArr = []
+  const validateUserNameArr = []
+  const approveUserMailAddressArr = []
+  const approveUserNames = document.querySelectorAll('.input-approveRouteUserName')
+  const approveUserMailAddersses = document.querySelectorAll('.input-approveRouteUserMailAddress')
+  const lastapproveUserName = document.getElementById('lastLineApproveRoute_approveUserName')
+  const lastapproveUserMailAddresses = document.getElementById('lastLineApproveRoute_approveUserMailAddress')
+  approveUserNames.forEach((item) => {
+    approveUserNameArr.push(item.value)
+    validateUserNameArr.push(item.value)
   })
 
-  approveUserArr.push(lastapproveUser.value)
-  const validationCheckResult = validationCheck(approveUserArr)
+  approveUserMailAddersses.forEach((item) => {
+    approveUserMailAddressArr.push(item.value)
+  })
+
+  validateUserNameArr.push(lastapproveUserName.value)
+  const validationCheckResult = validationCheck(validateUserNameArr)
   if (!validationCheckResult) {
-    const duplicationCheckResult = duplicationCheck(approveUserArr)
+    const duplicationCheckResult = duplicationCheck(validateUserNameArr)
     if (duplicationCheckResult) {
       $('#error-message-approveRoute').innerText = '同一の承認者が設定されています。'
     } else {
       // 登録処理
-      $('#form').submit()
+      while ($('#approver-list-check').firstChild) {
+        $('#approver-list-check').removeChild($('#approver-list-check').firstChild)
+      }
+
+      if (approveUserNameArr.length !== 0) {
+        for (let i = 0; i < approveUserNameArr.length; i++) {
+          const templateApproverCheckList = $('#template-approverCheckList')
+          const cloneApproverCheckList = document.importNode(templateApproverCheckList.content, true)
+          cloneApproverCheckList.querySelector('#id-check').innerText = `${i + 1}次承認`
+          cloneApproverCheckList.querySelector('#name-check').innerText = approveUserNameArr[i]
+          cloneApproverCheckList.querySelector('#email-check').innerText = approveUserMailAddressArr[i]
+          $('#approver-list-check').append(cloneApproverCheckList)
+        }
+      }
+      const templateApproverCheckList = $('#template-approverCheckList')
+      const cloneApproverCheckList = document.importNode(templateApproverCheckList.content, true)
+      cloneApproverCheckList.querySelector('#id-check').innerText = '最終承認'
+      cloneApproverCheckList.querySelector('#name-check').innerText = lastapproveUserName.value
+      cloneApproverCheckList.querySelector('#email-check').innerText = lastapproveUserMailAddresses.value
+      $('#approver-list-check').append(cloneApproverCheckList)
+
+      document.querySelector('#check-modal').classList.add('is-active')
     }
   }
+})
+
+// 確認画面で「登録」ボタンを押すの場合、サーバーにデータを伝送
+document.querySelector('#submit').addEventListener('click', () => {
+  document.querySelector('#form').submit()
 })
 
 // 重複された承認者処理

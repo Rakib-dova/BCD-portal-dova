@@ -79,23 +79,18 @@ block content
     .modal-background.cancel-button(data-target='check-modal')
     .modal-card.is-family-noto-sans
       header.modal-card-head
-        p.modal-card-title.title.mb-0 #{modalTitle}
+        p.modal-card-title.title.mb-0 承認ルート設定確認
         button.delete(data-target='check-modal')
       section.modal-card-body
-        table.table.is-striped.is-bordered.is-fullwidth
-          tbody
-            tr
-              td 承認者名（姓）
-              td
-                p#checksetApproveUserLastNameInputId
-            tr
-              td 承認者名（名）
-              td
-                p#checksetApproveUserFirstNameInputId
-            tr
-              td メールアドレス
-              td
-                p#checksetApproveUserMailAddressInputId                
+        .columns.is-fullwidth.m-0
+          .column.is-fullwidth.p-0
+            .field.is-horizontal#displayInvisible
+              .box.px-2
+                .columns.is-fullwidth.m-0
+                  .column.border-div-rad-0.is-2 承認順
+                  .column.border-div-rad-0.is-3 承認者名
+                  .column.border-div-rad-0.is-7 メールアドレス
+                .row#approver-list-check
       footer.modal-card-foot
         div.button-area
           a.button#cancel-btn.cancel-button(data-target='check-modal') キャンセル
@@ -215,6 +210,15 @@ block content
         input#id(type='hidden')
       .column.column-td.is-6
         p#email
+
+  template#template-approverCheckList
+    .columns.is-fullwidth.m-0.is-6
+      .column.column-td.is-2
+        p#id-check
+      .column.column-td.is-3
+        p#name-check
+      .column.column-td.is-7
+        p#email-check
 
 block append scripts
   script(src="/js/registApproveRoute-page.js")
