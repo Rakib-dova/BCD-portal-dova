@@ -3,13 +3,19 @@ const apiManager = require('./apiManager')
 const qs = require('qs')
 const Approver = require('../lib/approver/Approver')
 const logger = require('../lib/logger')
+const constantsDefine = require('../constants')
+const db = require('../models')
+const ApproveRoute = db.ApproveRoute
+const ApproveUser = db.ApproveUser
+
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   const userAccountsArr = []
   const queryObj = {
-    limit: 1,
+    limit: 25,
     page: 0,
     numPages: 1
   }
+
   do {
     // トレードシフトからユーザー情報を取得する。
     const queryString = `/account/${tenantId}/users?${qs.stringify(queryObj)}`
@@ -72,6 +78,93 @@ const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   return searchUsers
 }
 
+const insertApprover = async (contract, values) => {
+  const functionName = 'approverController.insertApprover'
+  // 関数開始表示
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+
+  let resultToInsertUser = null
+  const uuids = values.uuid
+
+  try {
+    let duplicatedFlag = false
+
+    // 重複コード検索
+    const resultSearchRoute = await ApproveRoute.findAll({
+      where: {
+        approveRouteName: values.setApproveRouteNameInputId,
+        contractId: contract
+      }
+    })
+
+    // 重複コード検索（sequelize大小文字区別しないため）
+    resultSearchRoute.forEach((item) => {
+      if (item.accountCode === values.accountCode) {
+        duplicatedFlag = true
+      }
+    })
+
+    // 重複コードある場合、登録拒否処理
+    if (duplicatedFlag) {
+      return 1
+    }
+
+    // 重複コードない場合DBに保存する。（ApproveRoute）
+    const resultToInsertRoute = await ApproveRoute.create({
+      contractId: contract,
+      approveRouteName: values.setApproveRouteNameInputId
+    })
+
+    // DB保存失敗したらモデルApproveRouteインスタンスではない
+    if (resultToInsertRoute instanceof ApproveRoute === false) {
+      return -1
+    }
+
+    // 重複コードない場合DBに保存する。（ApproveUser）
+    // 承認者が一人の場合
+    if (uuids instanceof Array === false) {
+      resultToInsertUser = await ApproveUser.create({
+        approveRouteId: resultToInsertRoute.approveRouteId,
+        approveUser: values.uuid,
+        prevApproveUser: null,
+        nextApproveUser: null,
+        isLastApproveUser: false
+      })
+    } else {
+      for (let i = 0; i < uuids.length; i++) {
+        let isLastApproveUser = false
+
+        if (i === uuids.length - 1) {
+          isLastApproveUser = true
+        }
+
+        resultToInsertUser = await ApproveUser.create({
+          approveRouteId: resultToInsertRoute.approveRouteId,
+          approveUser: uuids[i],
+          prevApproveUser: uuids[i - 1] ?? null,
+          nextApproveUser: uuids[i + 1] ?? null,
+          isLastApproveUser: isLastApproveUser
+        })
+      }
+    }
+
+    // 関数終了表示
+    logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+
+    // DB保存失敗したらモデルApproveRouteインスタンスではない
+    if (resultToInsertUser instanceof ApproveUser === false) {
+      return -1
+    }
+
+    return 0
+  } catch (error) {
+    // DBエラー発生したら処理
+    logger.error({ contractId: contract, stack: error.stack, status: 0 })
+    return error
+  }
+}
+
 module.exports = {
-  getApprover: getApprover
+  getApprover: getApprover,
+  insertApprover: insertApprover
 }
