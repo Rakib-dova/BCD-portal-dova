@@ -3,8 +3,13 @@
 const logger = require('../../Application/lib/logger')
 const apiManager = require('../../Application/controllers/apiManager')
 const approverController = require('../../Application/controllers/approverController')
+const db = require('../../Application/models')
+const ApproveRoute = db.ApproveRoute
+const ApproveUser = db.ApproveUser
 
 let errorSpy, infoSpy, accessTradeshift
+let approveRouteFindAll, approverouteCreate
+let approveUserCreate
 
 const findUsers = {
   itemsPerPage: 25,
@@ -72,16 +77,23 @@ const findUsers = {
   ],
   PrimaryUser: ''
 }
+
 describe('approverControllerのテスト', () => {
   beforeEach(() => {
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
     accessTradeshift = jest.spyOn(apiManager, 'accessTradeshift')
+    approveRouteFindAll = jest.spyOn(ApproveRoute, 'findAll')
+    approverouteCreate = jest.spyOn(ApproveRoute, 'create')
+    approveUserCreate = jest.spyOn(ApproveUser, 'create')
   })
   afterEach(() => {
     errorSpy.mockRestore()
     infoSpy.mockRestore()
     accessTradeshift.mockRestore()
+    approveRouteFindAll.mockRestore()
+    approverouteCreate.mockRestore()
+    approveUserCreate.mockRestore()
   })
 
   describe('getApprover', () => {
@@ -297,6 +309,217 @@ describe('approverControllerのテスト', () => {
       // 期待結果
       // 想定したデータがReturnされていること
       expect(result).toEqual(-2)
+    })
+  })
+
+  describe('insertApprover', () => {
+    test('正常:DBには最初の登録', async () => {
+      // contract
+      const contract = 'dummy-contract'
+      // DB登録するデータ
+      const values = {
+        setApproveRouteNameInputId: 'dummy-approve-route-name',
+        accountCode: 'dummy-account-code',
+        uuid: 'dummy-uuid'
+      }
+
+      const expectApproveRoute = ApproveRoute.build({
+        contract,
+        approveRouteName: values.setApproveRouteNameInputId
+      })
+
+      const expectApproveUser = ApproveUser.build({
+        approveRouteId: expectApproveRoute.approveRouteId,
+        approveUser: values.uuid,
+        prevApproveUser: null,
+        nextApproveUser: null,
+        isLastApproveUser: false
+      })
+
+      // 最初DBにはデータがない
+      approveRouteFindAll.mockReturnValueOnce([])
+
+      // createで保存されたらApproveRouteオブジェクトを返す
+      approverouteCreate.mockReturnValueOnce(expectApproveRoute)
+
+      // ユーザ生成
+      approveUserCreate.mockReturnValueOnce(expectApproveUser)
+
+      // 試験実施
+      const insertResult = await approverController.insertApprover(contract, values)
+
+      // 期待結果
+      // 結果値が０になる
+      expect(insertResult).toBe(0)
+    })
+
+    test('正常:DBには最初の登録(複数ユーザ)', async () => {
+      // contract
+      const contract = 'dummy-contract'
+      // DB登録するデータ
+      const values = {
+        setApproveRouteNameInputId: 'dummy-approve-route-name',
+        accountCode: 'dummy-account-code',
+        uuid: ['dummy-uuid1', 'dymmy-uuid2']
+      }
+
+      const expectApproveRoute = ApproveRoute.build({
+        contract,
+        approveRouteName: values.setApproveRouteNameInputId
+      })
+
+      const expectApproveUser1 = ApproveUser.build({
+        approveRouteId: expectApproveRoute.approveRouteId,
+        approveUser: values.uuid,
+        prevApproveUser: null,
+        nextApproveUser: 'dummy-uuid1',
+        isLastApproveUser: false
+      })
+
+      const expectApproveUser2 = ApproveUser.build({
+        approveRouteId: expectApproveRoute.approveRouteId,
+        approveUser: values.uuid,
+        prevApproveUser: 'dymmy-uuid2',
+        nextApproveUser: null,
+        isLastApproveUser: true
+      })
+
+      // 最初DBにはデータがない
+      approveRouteFindAll.mockReturnValueOnce([])
+
+      // createで保存されたらApproveRouteオブジェクトを返す
+      approverouteCreate.mockReturnValueOnce(expectApproveRoute)
+
+      // ユーザ生成
+      approveUserCreate.mockReturnValueOnce(expectApproveUser2)
+      approveUserCreate.mockReturnValueOnce(expectApproveUser1)
+
+      // 試験実施
+      const insertResult = await approverController.insertApprover(contract, values)
+
+      // 期待結果
+      // 結果値が０になる
+      expect(insertResult).toBe(0)
+    })
+
+    test('正常:重複の場合', async () => {
+      // contract
+      const contract = 'dummy-contract'
+      // DB登録するデータ
+      const values = {
+        setApproveRouteNameInputId: 'dummy-approve-route-name',
+        accountCode: 'dummy-account-code',
+        uuid: ['dummy-uuid1', 'dymmy-uuid2']
+      }
+
+      const expectApproveRoute = ApproveRoute.build({
+        contract,
+        approveRouteName: values.setApproveRouteNameInputId
+      })
+
+      // 最初DBにはデータがない
+      approveRouteFindAll.mockReturnValueOnce([expectApproveRoute])
+
+      // 試験実施
+      const insertResult = await approverController.insertApprover(contract, values)
+
+      // 期待結果
+      // 結果値が1になる
+      expect(insertResult).toBe(1)
+    })
+
+    test('準正常:承認ルート登録失敗', async () => {
+      // contract
+      const contract = 'dummy-contract'
+      // DB登録するデータ
+      const values = {
+        setApproveRouteNameInputId: 'dummy-approve-route-name',
+        accountCode: 'dummy-account-code',
+        uuid: 'dummy-uuid'
+      }
+
+      // 最初DBにはデータがない
+      approveRouteFindAll.mockReturnValueOnce([])
+
+      // createで保存されたらApproveRouteオブジェクトを返す
+      approverouteCreate.mockReturnValueOnce(null)
+
+      // 試験実施
+      const insertResult = await approverController.insertApprover(contract, values)
+
+      // 期待結果
+      // 結果値が０になる
+      expect(insertResult).toBe(-1)
+    })
+
+    test('正常:ユーザ登録失敗', async () => {
+      // contract
+      const contract = 'dummy-contract'
+      // DB登録するデータ
+      const values = {
+        setApproveRouteNameInputId: 'dummy-approve-route-name',
+        accountCode: 'dummy-account-code',
+        uuid: 'dummy-uuid'
+      }
+
+      const expectApproveRoute = ApproveRoute.build({
+        contract,
+        accountCode: 'dummy-account-code',
+        approveRouteName: values.setApproveRouteNameInputId
+      })
+
+      // 最初DBにはデータがない
+      approveRouteFindAll.mockReturnValueOnce([])
+
+      // createで保存されたらApproveRouteオブジェクトを返す
+      approverouteCreate.mockReturnValueOnce(expectApproveRoute)
+
+      // ユーザ生成
+      approveUserCreate.mockReturnValueOnce(null)
+
+      // 試験実施
+      const insertResult = await approverController.insertApprover(contract, values)
+
+      // 期待結果
+      // 結果値が０になる
+      expect(insertResult).toBe(-1)
+    })
+
+    test('正常:システムエラー発生', async () => {
+      // contract
+      const contract = 'dummy-contract'
+      // DB登録するデータ
+      const values = {
+        setApproveRouteNameInputId: 'dummy-approve-route-name',
+        accountCode: 'dummy-account-code',
+        uuid: 'dummy-uuid'
+      }
+
+      const expectApproveRoute = ApproveRoute.build({
+        contract,
+        accountCode: 'dummy-account-code',
+        approveRouteName: values.setApproveRouteNameInputId
+      })
+
+      const dbError = new Error('SequelizeConnectionError')
+      dbError.stack = 'SequelizeConnectionError'
+      // 最初DBにはデータがない
+      approveRouteFindAll.mockImplementation(() => {
+        throw dbError
+      })
+
+      // createで保存されたらApproveRouteオブジェクトを返す
+      approverouteCreate.mockReturnValueOnce(expectApproveRoute)
+
+      // ユーザ生成
+      approveUserCreate.mockReturnValueOnce(null)
+
+      // 試験実施
+      const insertResult = await approverController.insertApprover(contract, values)
+
+      // 期待結果
+      // 結果値が０になる
+      expect(insertResult).toBe(dbError)
     })
   })
 })
