@@ -193,6 +193,8 @@ app.use('/user', require('./routes/user').router)
 app.use('/searchAddress', require('./routes/searchAddressApi').router)
 // 企業検索
 app.use('/searchCompanies', require('./routes/searchCompaniesApi').router)
+// 承認者検索
+app.use('/searchApprover', require('./routes/searchApprover').router)
 
 // 請求書一括アップロード
 // csvupload

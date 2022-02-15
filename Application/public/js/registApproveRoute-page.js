@@ -39,6 +39,98 @@ const btnSearchMain = function (searchModal) {
   }
 }
 
+$('#btn-search-approver').addEventListener('click', function () {
+  // ボタンローディング
+  this.classList.add('is-loading')
+  // API 通信の用意
+  const approverApi = new XMLHttpRequest()
+  // キーワードの取得
+  const searchKeyword = {
+    firstName: $('#searchModalApproveUserLastName').value,
+    lastName: $('#searchModalApproveUserFirstName').value,
+    email: $('#searchModalApproveUserMailAddress').value
+  }
+  approverApi.open('POST', '/searchApprover', true)
+  approverApi.setRequestHeader('Content-Type', 'application/json')
+  approverApi.onreadystatechange = function () {
+    if (approverApi.readyState === approverApi.DONE) {
+      if (approverApi.status === 200) {
+        // サーバーから送信したデータの取得
+        const approvers = JSON.parse(approverApi.responseText)
+        // 既存の検索結果を取り消す
+        while ($('#approver-list').firstChild) {
+          $('#approver-list').removeChild($('#approver-list').firstChild)
+        }
+        // データがある場合、承認者を表示
+        if (approvers.length !== 0) {
+          approvers.forEach((approver) => {
+            const templateApproverList = $('#template-approverList')
+            const cloneApproverList = document.importNode(templateApproverList.content, true)
+            cloneApproverList.querySelector('#name').innerText = approver.name
+            cloneApproverList.querySelector('#email').innerText = approver.email
+            cloneApproverList.querySelector('#id').value = approver.id
+            $('#approver-list').append(cloneApproverList)
+          })
+          // 検索結果の行クリック時、入力欄へデータ入力
+          Array.prototype.forEach.call($('#approver-list').querySelectorAll('.columns'), (item) => {
+            item.addEventListener('click', function () {
+              const target = $('#approveRoute-modal').dataset.target
+              const name = this.querySelector('#name').innerText
+              const email = this.querySelector('#email').innerText
+              const id = this.querySelector('#id').value
+              $(`#${target}`).querySelectorAll('input[type=text]')[0].value = name
+              $(`#${target}`).querySelectorAll('input[type=text]')[1].value = email
+              $(`#${target}`).querySelectorAll('input[type=hidden]')[0].value = id
+              $('#approveRoute-modal').classList.remove('is-active')
+            })
+          })
+          // データがない場合、結果文言の表示（臨時）
+        } else {
+          const templateApproverList = $('#template-approverList')
+          const cloneApproverList = document.importNode(templateApproverList.content, true)
+          cloneApproverList.querySelector('.columns').innerHTML = '<p>検索結果がありません。</p>'
+          $('#approver-list').append(cloneApproverList)
+        }
+        // トレードシフトのアクセストークンが消えた時
+      } else if (approverApi.status === 401) {
+        const templateApproverList = $('#template-approverList')
+        const cloneApproverList = document.importNode(templateApproverList.content, true)
+        cloneApproverList.querySelector('.columns').innerHTML = '<p>上段のHOMEを押下して再実施をお願いします。</p>'
+        $('#approver-list').append(cloneApproverList)
+        // サーバー側のデータの加工の時エラーが発生した時
+      } else if (approverApi.status === 500) {
+        const templateApproverList = $('#template-approverList')
+        const cloneApproverList = document.importNode(templateApproverList.content, true)
+        cloneApproverList.querySelector('.columns').innerHTML = '<p>システムエラーが発生しました。</p>'
+        $('#approver-list').append(cloneApproverList)
+      }
+    }
+    // サーバーからデータを取得した後、ローディングを消す
+    $('#btn-search-approver').classList.remove('is-loading')
+  }
+  // サーバー側にデータ送信
+  approverApi.send(JSON.stringify(searchKeyword))
+})
+
+// 検索ボタンクリック時、機能
+const BtnlineApproveRouteUserSearch = function () {
+  const target = $('#approveRoute-modal').dataset.target
+  // 承認者検索モーダルの表示
+  $('#approveRoute-modal').classList.add('is-active')
+
+  // 入力ターゲティングの設定
+  const inputTarget = this.dataset.id
+  $('#approveRoute-modal').dataset.target = inputTarget
+  if (inputTarget !== target) {
+    while ($('#approver-list').firstChild) {
+      $('#approver-list').removeChild($('#approver-list').firstChild)
+    }
+  }
+}
+
+// ボタンに機能を付与
+$('#BtnlineApproveRouteUserSearch').addEventListener('click', BtnlineApproveRouteUserSearch)
+
 // 承認者追加ボタンクリック時
 $('#btnAddApproveRoute').addEventListener('click', function () {
   const target = $(this.dataset.target)
@@ -68,10 +160,16 @@ const addApproveUsers = function (target) {
     const cloneApproveRouteItem = document.importNode(templateLineApproveRouteItem.content, true)
     cloneApproveRouteItem.querySelector('.lineApproveRoute').id = targetId
     // 承認者順番
-    cloneApproveRouteItem.querySelector('.input-approveRouteUserNumber').setAttribute('name', `${targetId}_approveUserNumber${lineApproveRouteLength + 1}`)
-    cloneApproveRouteItem.querySelector('.input-approveRouteUserNumber').innerText = `${approveUserNumbers[lineApproveRouteLength]}次承認`
+    cloneApproveRouteItem
+      .querySelector('.input-approveRouteUserNumber')
+      .setAttribute('name', `${targetId}_approveUserNumber${lineApproveRouteLength + 1}`)
+    cloneApproveRouteItem.querySelector(
+      '.input-approveRouteUserNumber'
+    ).innerText = `${approveUserNumbers[lineApproveRouteLength]}次承認`
     // 承認者名INPUT
-    cloneApproveRouteItem.querySelector('.input-approveRouteUserName').setAttribute('name', `${targetId}_approveUserName`)
+    cloneApproveRouteItem
+      .querySelector('.input-approveRouteUserName')
+      .setAttribute('name', `${targetId}_approveUserName`)
     cloneApproveRouteItem.querySelector('.input-approveRouteUserName').id = `${targetId}_approveUserName`
     // メールアドレスINPUT
     cloneApproveRouteItem
@@ -84,11 +182,8 @@ const addApproveUsers = function (target) {
     cloneApproveRouteItem.querySelector('.btn-minus-approveRoute').addEventListener('click', btnMinusApproveRoute)
 
     // 承認者検索ボタン
-    cloneApproveRouteItem.querySelector('.btn-search-main').dataset.target = 'approveRoute-modal'
-    cloneApproveRouteItem.querySelector('.btn-search-main').dataset.info = targetId
-    cloneApproveRouteItem
-      .querySelector('.btn-search-main')
-      .addEventListener('click', btnSearchMain($('#approveRoute-modal')))
+    cloneApproveRouteItem.querySelector('.btn-search-main').dataset.id = `${targetId}`
+    cloneApproveRouteItem.querySelector('.btn-search-main').addEventListener('click', BtnlineApproveRouteUserSearch)
     const approveUserList = $('#bulkInsertNo1')
     if (lineApproveRouteLength < 1) {
       approveUserList.insertBefore(cloneApproveRouteItem, approveUserList.childNodes[0])
