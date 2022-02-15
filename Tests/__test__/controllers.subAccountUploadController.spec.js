@@ -187,6 +187,14 @@ describe('subAccountUploadControllerのテスト', () => {
     })
   ).toString('base64')
 
+  // BUG3763対応
+  const subAccountCodeFileData12 = Buffer.from(
+    fs.readFileSync('./testData/subAccountCodeUpload_test12.csv', {
+      encoding: 'utf-8',
+      flag: 'r'
+    })
+  ).toString('base64')
+
   describe('upload', () => {
     test('正常', async () => {
       // 準備
@@ -430,6 +438,258 @@ describe('subAccountUploadControllerのテスト', () => {
           idx: 1,
           subjectCode: '1111111111111111',
           subjectName: 'TEST1homei'
+        }
+      ])
+    })
+
+    test('異常：BUG3763対応(特殊文字バリデーションチェック)', async () => {
+      // 準備
+      findAllSpy.mockReturnValue(dbAccountCodeTable)
+      createSpy.mockReturnValue(codeAccountDataResult)
+      // 補助科目一括作成
+      const fs = require('fs')
+      const uploadFilePath = path.resolve('/home/upload/testBUG3763.csv')
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(subAccountCodeFileData12), 'base64').toString('utf8')
+      )
+      pathSpy.mockReturnValue('/home/upload/testBUG3763.csv')
+      const file = {
+        userId: 'userId',
+        originalname: 'testBUG3763.csv',
+        filename: '8d73eae9e5bcd33f5863b9251a76c551'
+      }
+
+      // 試験実施
+      const result = await subAccountUploadController.upload(file, contractNormal)
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual([
+        { header: ['行数', '勘定科目コード', '補助科目コード', '補助科目名', '詳細'] },
+        {
+          idx: 1,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673!',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 2,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673"',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 3,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673#',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 4,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673$',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 5,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673%',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 6,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673&',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 7,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: "BUG3673'",
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 8,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673(',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 9,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673)',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 10,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673-',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 11,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673=',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 12,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673~',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 13,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673^',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 14,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673\\',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 15,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673|',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 16,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673@',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 17,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673`',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 18,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673[',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 19,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673{',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 20,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673]',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 21,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673}',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 22,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673+',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 23,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673;',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 24,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673*',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 25,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673:',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 26,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673<',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 27,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673>',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 28,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673.',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 29,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673/',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 30,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673?',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 31,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673\\',
+          subjectName: 'BUG3673'
+        },
+        {
+          idx: 32,
+          accountCode: 'TEST2',
+          errorData: '補助科目コードは英数字で入力してください。',
+          subjectCode: 'BUG3673_',
+          subjectName: 'BUG3673'
         }
       ])
     })
