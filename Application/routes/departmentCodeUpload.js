@@ -140,7 +140,7 @@ const cbPostIndex = async (req, res, next) => {
       // 正常
       case 0:
         req.flash('info', '部門データ取込が完了しました。')
-        return res.redirect('/portal')
+        return res.redirect('/departmentCodeList')
       // ヘッダー不一致
       case -1:
         req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.CODEHEADERERR000, 'SYSERR'])

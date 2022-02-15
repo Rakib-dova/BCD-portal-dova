@@ -49,11 +49,18 @@ module.exports = (sequelize, DataTypes) => {
       },
       subjectName: {
         allowNull: false,
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        validate: {
+          len: [1, 40]
+        }
       },
       subjectCode: {
         allowNull: false,
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        validate: {
+          is: /^[a-zA-Z0-9]*$/i,
+          len: [1, 10]
+        }
       },
       createdAt: {
         type: DataTypes.DATE,

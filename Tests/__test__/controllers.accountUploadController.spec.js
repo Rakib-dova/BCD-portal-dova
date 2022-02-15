@@ -161,6 +161,14 @@ describe('accountUploadControllerのテスト', () => {
     })
   ).toString('base64')
 
+  // 英数字以外の特殊文字
+  const accountCodeFileData12 = Buffer.from(
+    fs.readFileSync('./testData/accountCodeUpload_test12.csv', {
+      encoding: 'utf-8',
+      flag: 'r'
+    })
+  ).toString('base64')
+
   describe('upload', () => {
     test('正常', async () => {
       // 準備
@@ -343,6 +351,67 @@ describe('accountUploadControllerのテスト', () => {
       expect(result).toEqual([
         { header: ['行数', '勘定科目コード', '勘定科目名', '詳細'] },
         { code: '11111111111', errorData: '勘定科目コードは10文字以内で入力してください。', idx: 1, name: '現金' }
+      ])
+    })
+
+    test('異常：BUG3763対応(特殊文字バリデーションチェック)', async () => {
+      // 準備
+      findAllSpy.mockReturnValue(dbAccountCodeTable)
+      createSpy.mockReturnValue(codeAccountDataResult)
+      // 勘定科目一括作成
+      const fs = require('fs')
+      const uploadFilePath = path.resolve('/home/upload/testBUG3763.csv')
+      fs.writeFileSync(
+        uploadFilePath,
+        Buffer.from(decodeURIComponent(accountCodeFileData12), 'base64').toString('utf8')
+      )
+      pathSpy.mockReturnValue('/home/upload/testBUG3763.csv')
+      const file = {
+        userId: 'userId',
+        originalname: 'testBUG3763.csv',
+        filename: '8d73eae9e5bcd33f5863b9251a76c551'
+      }
+      accountCodeControllerInsertSpy.mockReturnValue(false)
+
+      // 試験実施
+      const result = await accountUploadController.upload(file, contractNormal)
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual([
+        { header: ['行数', '勘定科目コード', '勘定科目名', '詳細'] },
+        { code: 'BUG3763!', errorData: '勘定科目コードは英数字で入力してください。', idx: 1, name: 'BUG3763' },
+        { code: 'BUG3763"', errorData: '勘定科目コードは英数字で入力してください。', idx: 2, name: 'BUG3763' },
+        { code: 'BUG3763#', errorData: '勘定科目コードは英数字で入力してください。', idx: 3, name: 'BUG3763' },
+        { code: 'BUG3763$', errorData: '勘定科目コードは英数字で入力してください。', idx: 4, name: 'BUG3763' },
+        { code: 'BUG3763%', errorData: '勘定科目コードは英数字で入力してください。', idx: 5, name: 'BUG3763' },
+        { code: 'BUG3763&', errorData: '勘定科目コードは英数字で入力してください。', idx: 6, name: 'BUG3763' },
+        { code: "BUG3763'", errorData: '勘定科目コードは英数字で入力してください。', idx: 7, name: 'BUG3763' },
+        { code: 'BUG3763(', errorData: '勘定科目コードは英数字で入力してください。', idx: 8, name: 'BUG3763' },
+        { code: 'BUG3763)', errorData: '勘定科目コードは英数字で入力してください。', idx: 9, name: 'BUG3763' },
+        { code: 'BUG3763-', errorData: '勘定科目コードは英数字で入力してください。', idx: 10, name: 'BUG3763' },
+        { code: 'BUG3763=', errorData: '勘定科目コードは英数字で入力してください。', idx: 11, name: 'BUG3763' },
+        { code: 'BUG3763~', errorData: '勘定科目コードは英数字で入力してください。', idx: 12, name: 'BUG3763' },
+        { code: 'BUG3763^', errorData: '勘定科目コードは英数字で入力してください。', idx: 13, name: 'BUG3763' },
+        { code: 'BUG3763\\', errorData: '勘定科目コードは英数字で入力してください。', idx: 14, name: 'BUG3763' },
+        { code: 'BUG3763|', errorData: '勘定科目コードは英数字で入力してください。', idx: 15, name: 'BUG3763' },
+        { code: 'BUG3763@', errorData: '勘定科目コードは英数字で入力してください。', idx: 16, name: 'BUG3763' },
+        { code: 'BUG3763`', errorData: '勘定科目コードは英数字で入力してください。', idx: 17, name: 'BUG3763' },
+        { code: 'BUG3763[', errorData: '勘定科目コードは英数字で入力してください。', idx: 18, name: 'BUG3763' },
+        { code: 'BUG3763{', errorData: '勘定科目コードは英数字で入力してください。', idx: 19, name: 'BUG3763' },
+        { code: 'BUG3763]', errorData: '勘定科目コードは英数字で入力してください。', idx: 20, name: 'BUG3763' },
+        { code: 'BUG3763}', errorData: '勘定科目コードは英数字で入力してください。', idx: 21, name: 'BUG3763' },
+        { code: 'BUG3763+', errorData: '勘定科目コードは英数字で入力してください。', idx: 22, name: 'BUG3763' },
+        { code: 'BUG3763;', errorData: '勘定科目コードは英数字で入力してください。', idx: 23, name: 'BUG3763' },
+        { code: 'BUG3763*', errorData: '勘定科目コードは英数字で入力してください。', idx: 24, name: 'BUG3763' },
+        { code: 'BUG3763:', errorData: '勘定科目コードは英数字で入力してください。', idx: 25, name: 'BUG3763' },
+        { code: 'BUG3763<', errorData: '勘定科目コードは英数字で入力してください。', idx: 26, name: 'BUG3763' },
+        { code: 'BUG3763>', errorData: '勘定科目コードは英数字で入力してください。', idx: 27, name: 'BUG3763' },
+        { code: 'BUG3763.', errorData: '勘定科目コードは英数字で入力してください。', idx: 28, name: 'BUG3763' },
+        { code: 'BUG3763/', errorData: '勘定科目コードは英数字で入力してください。', idx: 29, name: 'BUG3763' },
+        { code: 'BUG3763?', errorData: '勘定科目コードは英数字で入力してください。', idx: 30, name: 'BUG3763' },
+        { code: 'BUG3763\\', errorData: '勘定科目コードは英数字で入力してください。', idx: 31, name: 'BUG3763' },
+        { code: 'BUG3763_', errorData: '勘定科目コードは英数字で入力してください。', idx: 32, name: 'BUG3763' }
       ])
     })
 
