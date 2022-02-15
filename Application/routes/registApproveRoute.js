@@ -75,6 +75,7 @@ const cbPostRegistApproveRoute = async (req, res, next) => {
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
 
   // DBから契約情報取得
   const contract = await contractController.findOne(req.user.tenantId)

@@ -99,7 +99,7 @@ const insertApprover = async (contract, values) => {
 
     // 重複コード検索（sequelize大小文字区別しないため）
     resultSearchRoute.forEach((item) => {
-      if (item.accountCode === values.accountCode) {
+      if (item.approveRouteName === values.setApproveRouteNameInputId) {
         duplicatedFlag = true
       }
     })

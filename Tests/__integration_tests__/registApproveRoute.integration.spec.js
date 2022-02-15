@@ -268,7 +268,7 @@ describe('承認ルート登録のインテグレーションテスト', () => {
         const checkApproveUserNumbers = await page.evaluate(() => {
           const chkApproveUserNumbers = []
           const approveUserList = document.querySelectorAll('#bulkInsertNo1')[0]
-          approveUserList.querySelectorAll('.lineApproveRoute').forEach((item, idx) => {
+          approveUserList.querySelectorAll('.lineApproveRoute').forEach((item) => {
             chkApproveUserNumbers.push(item.querySelector('.input-approveRouteUserNumber').innerText)
           })
           return chkApproveUserNumbers
