@@ -53,10 +53,20 @@ const cbPostSearchApprover = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
+  if (req.body.firstName === undefined && req.body.lastName === undefined && req.body.email === undefined) {
+    return res.status(403).send('403 client forbidden')
+  }
+
+  const emailPattern = '^[a-zA-Z0-9-._+]+@[a-zA-Z0-9-._+]+$'
+  const emailRegExp = new RegExp(emailPattern)
+  if (!emailRegExp.test(req.body.email) && req.body.email.trim().length > 0) {
+    return res.status(403).send('403 client forbidden')
+  }
+
   const keyword = {
-    firstName: req.body.firstName ?? '',
-    lastName: req.body.lastName ?? '',
-    email: req.body.email ?? ''
+    firstName: req.body.firstName || '',
+    lastName: req.body.lastName || '',
+    email: req.body.email || ''
   }
 
   const accToken = req.user.accessToken
