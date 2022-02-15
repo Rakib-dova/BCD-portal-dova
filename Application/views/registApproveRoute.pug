@@ -58,10 +58,11 @@ block content
                                           .field
                                             p.control
                                               input.input.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` value readonly)
+                                              input(type='hidden')
                                         .field-body.m-1.is-4.text-center
                                           .field
                                             p.control
-                                              a.button.is-link.show-modal.btn-search-main.BtnlineApproveRouteUserSearch(data-target='approveRoute-modal') 検索
+                                              a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
                                     .column.is-0.p-1
                                       .column.is-invisible
                                         a.red-color.btn-minus-approveRoute
@@ -147,18 +148,16 @@ block content
                   .columns.m-0
                     .column.p-0
                       div.button-area
-                        .button.is-link#btnSearchApproveUser(type="button") 検索
+                        .button.is-link#btn-search-approver(type="button") 検索
 
           .columns.is-fullwidth.m-0
             .column.is-fullwidth.p-0
               .field.is-horizontal#displayInvisible
-                .box.is-fullwidth.px-2
-                  .subtitle.m-3 検索結果 
-                  table.table
-                    thead
-                      td 担当者名
-                      td メールアドレス
-                    tbody#displayFieldResultBody
+                .box.px-2
+                  .columns.is-fullwidth.m-0
+                    .column.border-div-rad-0.search-approver-name.is-6 承認者名
+                    .column.border-div-rad-0.search-approver-email.is-6 メールアドレス
+                  .row#approver-list
                  
       footer.modal-card-foot.modal-address-foot
 
@@ -186,10 +185,11 @@ block content
               .field
                 p.control
                   input.input.input-approveRouteUserMailAddress(type='text' id=`` value readonly)
+                  input(type='hidden')
             .field-body.m-1.is-4.text-center
               .field
                 p.control
-                  a.button.is-link.show-modal.btn-search-main.BtnlineApproveRouteUserSearch(data-target='approveRoute-modal') 検索
+                  a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-target='approveRoute-modal') 検索
         .column.is-0.p-1.column-minus-btn
           a.red-color.btn-minus-approveRoute
             i.fas.fa-minus-circle
@@ -203,6 +203,15 @@ block content
       td.columnApproveUserName
       td.columnApproveUserMailAddress
   include footer
+
+  template#template-approverList
+    .columns.is-fullwidth.m-0.is-6.columns-tr
+      .column.column-td.is-6
+        p#name
+        input#id(type='hidden')
+      .column.column-td.is-6
+        p#email
+
 block append scripts
   script(src="/js/registApproveRoute-page.js")
   link(rel='stylesheet', type='text/css', href='/css/registApproveRoute.css')
