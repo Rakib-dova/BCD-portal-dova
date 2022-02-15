@@ -109,14 +109,14 @@ describe('registApproveRouteのテスト', () => {
       expect(response.render).toBeCalledWith('registApproveRoute', {
         panelHead: '条件絞り込み',
         approveRouteNameLabel: '承認ルート名',
+        backUrl: '/portal',
         codeNameLabel: '勘定科目名',
-        requiredTagName: 'approveRouteNameTagRequired',
         idForApproveRouteNameInput: 'setApproveRouteNameInputId',
         idForNameInput: 'setAccountCodeNameInputId',
         modalTitle: '承認者検索',
-        backUrl: '/accountCodeList',
         logTitle: '承認ルート登録',
-        logTitleEng: 'REGIST APPROVE ROUTE'
+        logTitleEng: 'REGIST APPROVE ROUTE',
+        requiredTagApproveRouteName: 'approveRouteNameTagRequired'
       })
     })
 
