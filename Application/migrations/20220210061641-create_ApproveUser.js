@@ -18,7 +18,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.UUID
       },
-      approveUsers: {
+      approveUser: {
         allowNull: false,
         type: Sequelize.UUID
       },
@@ -30,9 +30,9 @@ module.exports = {
         allowNull: true,
         type: Sequelize.UUID
       },
-      lastApproveUserId: {
+      isLastApproveUser: {
         allowNull: false,
-        type: Sequelize.UUID
+        type: Sequelize.BOOLEAN
       },
       createdAt: {
         allowNull: false,

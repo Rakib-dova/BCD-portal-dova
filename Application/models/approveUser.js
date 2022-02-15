@@ -29,21 +29,21 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         type: DataTypes.UUID
       },
-      approveUsers: {
+      approveUser: {
         allowNull: false,
         type: DataTypes.UUID
       },
       prevApproveUser: {
-        allowNull: false,
+        allowNull: true,
         type: DataTypes.UUID
       },
       nextApproveUser: {
-        allowNull: false,
+        allowNull: true,
         type: DataTypes.UUID
       },
-      lastApproveUserId: {
+      isLastApproveUser: {
         allowNull: false,
-        type: DataTypes.UUID
+        type: DataTypes.BOOLEAN
       },
       createdAt: {
         type: DataTypes.DATE,
