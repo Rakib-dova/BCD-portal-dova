@@ -1,5 +1,5 @@
 'use strict'
-const { Model } = require('sequelize')
+const { Model, UUIDV4 } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class ApproveUser extends Model {
     /**
@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       approveUserId: {
         type: DataTypes.UUID,
         primaryKey: true,
-        allowNull: false
+        defaultValue: UUIDV4
       },
       approveRouteId: {
         allowNull: false,

@@ -97,6 +97,12 @@ $('#btn-search-approver').addEventListener('click', function () {
         const cloneApproverList = document.importNode(templateApproverList.content, true)
         cloneApproverList.querySelector('.columns').innerHTML = '<p>上段のHOMEを押下して再実施をお願いします。</p>'
         $('#approver-list').append(cloneApproverList)
+        // メールアドレス形式でない場合
+      } else if (approverApi.status === 403) {
+        const templateApproverList = $('#template-approverList')
+        const cloneApproverList = document.importNode(templateApproverList.content, true)
+        cloneApproverList.querySelector('.columns').innerHTML = '<p>検索条件に誤りがあります。</p>'
+        $('#approver-list').append(cloneApproverList)
         // サーバー側のデータの加工の時エラーが発生した時
       } else if (approverApi.status === 500) {
         const templateApproverList = $('#template-approverList')
@@ -156,9 +162,10 @@ const addApproveUsers = function (target) {
   if (lineApproveRouteLength < 10) {
     // 承認者のidを作成：lineNo明細詳細の順番_lineApproveRoute承認者の順番
     const tagetIdBase = `${target.id}_lineApproveRoute`
-    const targetId = `${target.id}_lineApproveRoute${
+    const number =
       ~~document.querySelectorAll('.lineApproveRoute')[lineApproveRouteLength].id.replaceAll(tagetIdBase, '') + 1
-    }`
+    const targetId = `${target.id}_lineApproveRoute${number}`
+
     // templateから追加承認者追加作成
     const templateLineApproveRouteItem = $('#templateLineApproveRouteItem')
     const cloneApproveRouteItem = document.importNode(templateLineApproveRouteItem.content, true)
@@ -171,16 +178,13 @@ const addApproveUsers = function (target) {
       '.input-approveRouteUserNumber'
     ).innerText = `${approveUserNumbers[lineApproveRouteLength]}次承認`
     // 承認者名INPUT
-    cloneApproveRouteItem
-      .querySelector('.input-approveRouteUserName')
-      .setAttribute('name', `${targetId}_approveUserName`)
+    cloneApproveRouteItem.querySelector('.input-approveRouteUserName').setAttribute('name', 'userName')
     cloneApproveRouteItem.querySelector('.input-approveRouteUserName').id = `${targetId}_approveUserName`
     // メールアドレスINPUT
-    cloneApproveRouteItem
-      .querySelector('.input-approveRouteUserMailAddress')
-      .setAttribute('name', `${targetId}_approveUserMailAddress`)
+    cloneApproveRouteItem.querySelector('.input-approveRouteUserMailAddress').setAttribute('name', 'mailAddress')
     cloneApproveRouteItem.querySelector('.input-approveRouteUserMailAddress').id = `${targetId}_approveUserMailAddress`
-
+    // uuid
+    cloneApproveRouteItem.querySelector('input[type=hidden]').setAttribute('name', 'uuid')
     // 承認者削除ボタン
     cloneApproveRouteItem.querySelector('.btn-minus-approveRoute').dataset.target = targetId
     cloneApproveRouteItem.querySelector('.btn-minus-approveRoute').addEventListener('click', btnMinusApproveRoute)
@@ -208,7 +212,7 @@ $('#btn-confirm').addEventListener('click', function () {
   const approveUserArr = []
   const approveUsers = document.querySelectorAll('.input-approveRouteUserName')
   const lastapproveUser = document.getElementById('lastLineApproveRoute_approveUserName')
-  approveUsers.forEach(item => {
+  approveUsers.forEach((item) => {
     approveUserArr.push(item.value)
   })
 
@@ -220,7 +224,7 @@ $('#btn-confirm').addEventListener('click', function () {
       $('#error-message-approveRoute').innerText = '同一の承認者が設定されています。'
     } else {
       // 登録処理
-      alert('登録処理')
+      $('#form').submit()
     }
   }
 })
@@ -240,7 +244,8 @@ const validationCheck = function (approveUserArr) {
     document.getElementById('RequiredErrorMesageForApproveRoute').classList.remove('is-invisible')
     return true
   } else if (setApproveRouteNameInputId.length > 40) {
-    document.getElementById('RequiredErrorMesageForApproveRoute').innerHTML = '承認ルート名は40桁以内で入力してください。'
+    document.getElementById('RequiredErrorMesageForApproveRoute').innerHTML =
+      '承認ルート名は40桁以内で入力してください。'
     document.getElementById('RequiredErrorMesageForApproveRoute').classList.remove('is-invisible')
     return true
   }
@@ -251,14 +256,16 @@ const validationCheck = function (approveUserArr) {
   const result = []
   approveUserArr.forEach((name, idx) => {
     if (name === '' || name === undefined) {
-      if (idx === (lastUseridx - 1)) {
+      if (idx === lastUseridx - 1) {
         document.getElementById('lastLineApproveRoute_approveUserName').value = '未設定'
         document.getElementById('lastLineApproveRoute_approveUserName').classList.add('red-color')
       } else {
         approveUsersArr.forEach((line, index) => {
           if (idx === index) {
             line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].value = '未設定'
-            line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].classList.add('red-color')
+            line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].classList.add(
+              'red-color'
+            )
           }
         })
       }
@@ -267,7 +274,9 @@ const validationCheck = function (approveUserArr) {
   })
 
   if (result.length > 0) {
-    $('#error-message-approveRoute').innerText = `無効なユーザが承認ルートに設定されています。（承認順：${[...result]}）`
+    $('#error-message-approveRoute').innerText = `無効なユーザが承認ルートに設定されています。（承認順：${[
+      ...result
+    ]}）`
     return true
   } else {
     return false
@@ -296,7 +305,6 @@ const duplicateCheckFunction = function (array) {
 
 // エラーメッセージ初期化
 const revertElements = function () {
-  console.log(document.getElementById('RequiredErrorMesageForApproveRoute'))
   document.getElementById('RequiredErrorMesageForApproveRoute').innerHTML = ''
   document.getElementById('RequiredErrorMesageForApproveRoute').classList.add('is-invisible')
   $('#error-message-approveRoute').innerText = ''
@@ -305,6 +313,8 @@ const revertElements = function () {
     if (line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].value === '未設定') {
       line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].value = ''
     }
-    line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].classList.remove('red-color')
+    line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].classList.remove(
+      'red-color'
+    )
   })
 }
