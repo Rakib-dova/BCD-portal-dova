@@ -251,32 +251,15 @@ const validationCheck = function (approveUserArr) {
   }
 
   // 承認者未設定チェック
-  const lastUseridx = approveUserArr.length
-  const approveUsersArr = document.getElementById('bulkInsertNo1').childNodes
   const result = []
-  approveUserArr.forEach((name, idx) => {
-    if (name === '' || name === undefined) {
-      if (idx === lastUseridx - 1) {
-        document.getElementById('lastLineApproveRoute_approveUserName').value = '未設定'
-        document.getElementById('lastLineApproveRoute_approveUserName').classList.add('red-color')
-      } else {
-        approveUsersArr.forEach((line, index) => {
-          if (idx === index) {
-            line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].value = '未設定'
-            line.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].classList.add(
-              'red-color'
-            )
-          }
-        })
-      }
+  document.getElementById('bulkInsertNo1').childNodes.forEach((item, idx) => {
+    const value = item.childNodes[0].childNodes[1].childNodes[1].childNodes[0].childNodes[0].childNodes[0].value
+    if (value === '' || value === undefined) {
       result.push(idx + 1)
     }
   })
-
   if (result.length > 0) {
-    $('#error-message-approveRoute').innerText = `無効なユーザが承認ルートに設定されています。（承認順：${[
-      ...result
-    ]}）`
+    $('#error-message-approveRoute').innerText = '担当者を設定して下さい。'
     return true
   } else {
     return false
