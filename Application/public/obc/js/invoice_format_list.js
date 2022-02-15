@@ -26,6 +26,10 @@ $(() => {
         processData: false
       })
         .done(function (response) {
+          if (response.status == 'redirect') {
+            window.location.href = response.url
+            return
+          }
           if (response.status == 'ok') {
             $(row).remove()
             notice(`${name}を削除しました`)

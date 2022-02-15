@@ -39,6 +39,6 @@ const deleteFormat = async (req, res) => {
 
 const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(display))
-router.delete('/:formatId', ...middleware, csrfProtection, api(deleteFormat, 'フォーマットの削除に失敗しました。'))
+router.delete('/:formatId', ...api([...middleware, csrfProtection], deleteFormat, 'フォーマットの削除に失敗しました。'))
 
 module.exports = router

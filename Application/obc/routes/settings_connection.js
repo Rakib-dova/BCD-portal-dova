@@ -105,6 +105,6 @@ const save = async (req, res, next) => {
 
 const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(display))
-router.post('/save', ...middleware, csrfProtection, api(save, '得意先の紐付けに失敗しました。'))
+router.post('/save', ...api([...middleware, csrfProtection], save, '得意先の紐付けに失敗しました。'))
 
 module.exports = router

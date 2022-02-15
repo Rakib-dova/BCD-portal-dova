@@ -116,7 +116,7 @@ const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(displayNew))
 router.get('/:formatId', ...middleware, csrfProtection, handler(displayEdit))
 router.post('/preview', ...middleware, csrfProtection, handler(preview))
-router.post('/', ...middleware, csrfProtection, api(save, '請求書フォーマットの保存に失敗しました。'))
-router.post('/:formatId', ...middleware, csrfProtection, api(save, '請求書フォーマットの保存に失敗しました。'))
+router.post('/', ...api([...middleware, csrfProtection], save, '請求書フォーマットの保存に失敗しました。'))
+router.post('/:formatId', ...api([...middleware, csrfProtection], save, '請求書フォーマットの保存に失敗しました。'))
 
 module.exports = router

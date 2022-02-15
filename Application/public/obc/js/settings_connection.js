@@ -93,6 +93,10 @@ $(() => {
       data: JSON.stringify(data)
     })
       .done(function (response) {
+        if (response.status == 'redirect') {
+          window.location.href = response.url
+          return
+        }
         notice(response.message, response.status == 'ok' ? 'is-success' : 'is-danger')
       })
       .fail(function (xhr) {

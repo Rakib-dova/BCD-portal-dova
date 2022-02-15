@@ -58,6 +58,10 @@ $(() => {
         data: fd
       })
         .done(function (response) {
+          if (response.status == 'redirect') {
+            window.location.href = response.url
+            return
+          }
           if (response.status == 'ok') {
             // 一覧テーブルにファイル名を設定
             let name = uploadFile[0].name
@@ -91,6 +95,10 @@ $(() => {
       }
     })
       .done(function (response) {
+        if (response.status == 'redirect') {
+          window.location.href = response.url
+          return
+        }
         if (response.status == 'ok') {
           target.closest('.attached-file').remove()
           notice(response.message)
@@ -136,6 +144,10 @@ $(() => {
       data: JSON.stringify(data)
     })
       .done(function (response) {
+        if (response.status == 'redirect') {
+          window.location.href = response.url
+          return
+        }
         notice(response.message, response.status == 'ok' ? 'is-success' : 'is-danger')
         let errors = response.errors || {}
         $('#unissuedList tbody tr').each((index, val) => {

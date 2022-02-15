@@ -390,16 +390,12 @@ router.post('/', ...middleware, csrfProtection, handler(displayWithRange))
 router.post(
   '/attachment',
   upload.array('file', 1),
-  ...middleware,
-  csrfProtection,
-  api(addAttachment, '添付ファイルの追加に失敗しました')
+  ...api([...middleware, csrfProtection], addAttachment, '添付ファイルの追加に失敗しました')
 )
 router.delete(
   '/attachment/:documentId/:filename',
-  ...middleware,
-  csrfProtection,
-  api(deleteAttachment, '添付ファイルの削除に失敗しました')
+  ...api([...middleware, csrfProtection], deleteAttachment, '添付ファイルの削除に失敗しました')
 )
-router.post('/send', ...middleware, csrfProtection, handler(send))
+router.post('/send', ...api([...middleware, csrfProtection], send, '請求書の発行に失敗しました。'))
 
 module.exports = router
