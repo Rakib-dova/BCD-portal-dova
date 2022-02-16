@@ -200,6 +200,8 @@ app.use('/user', require('./routes/user').router)
 app.use('/searchAddress', require('./routes/searchAddressApi').router)
 // 企業検索
 app.use('/searchCompanies', require('./routes/searchCompaniesApi').router)
+// 承認者検索
+app.use('/searchApprover', require('./routes/searchApprover').router)
 
 // 請求書一括アップロード
 // csvupload
@@ -282,6 +284,10 @@ app.use('/inboxList', require('./routes/inboxList').router)
 
 // 受領した請求書
 app.use('/inbox', require('./routes/inbox').router)
+
+// ------------承認ルート
+// 承認ルート登録
+app.use('/registApproveRoute', require('./routes/registApproveRoute').router)
 
 // 設定
 // cancellation
