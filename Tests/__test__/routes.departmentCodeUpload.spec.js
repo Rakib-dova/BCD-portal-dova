@@ -349,7 +349,7 @@ describe('departmentCodeUploadのテスト', () => {
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('info', '部門データ取込が完了しました。')
       // 部門データ一覧へリダイレクトされ「る」
-      expect(response.redirect).toHaveBeenCalledWith('/portal')
+      expect(response.redirect).toHaveBeenCalledWith('/departmentCodeList')
     })
 
     test('異常：部門データ一括作成', async () => {
