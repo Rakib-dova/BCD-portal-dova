@@ -12,8 +12,8 @@
 			<div class="box">
 				<nav class="breadcrumb" aria-label="breadcrumbs">
 					<ul>
-						<li><a href="/bugyo/menu">機能一覧</a></li>
-						<li class="is-active"><a href="/bugyo/invoice_format_list" aria-current="page">発行先管理</a></li>
+						<li><a href="/bugyo/menu">連携トップ</a></li>
+						<li class="is-active"><a href="/bugyo/invoice_format_list" aria-current="page">発行先とフォーマットの選択</a></li>
 					</ul>
 				</nav>
 				{{> notification}}
@@ -26,10 +26,9 @@
 					<table id="customerList" class="table is-fullwidth is-bordered">
 						<thead>
 							<tr>
-								<th class="sort" data-sort="lastUpdated">最終更新日時</th>
-								<th class="sort" data-sort="customerId" style="width: 150px;">得意先コード<br/>(請求先コード)</th>
-								<th class="sort" data-sort="customerName" style="min-width: 250px;">得意先名</th>
-								<th>紐付け先テナント名</th>
+								<th class="sort customer-code" data-sort="customerId">得意先コード<br/>(請求先コード)</th>
+								<th class="sort" data-sort="customerName">得意先名</th>
+								<th class="tenant-name">紐付け先テナント名</th>
 								<th>紐付け先テナント住所</th>
 								<th>
 									<span>選択中のフォーマット</span>
@@ -55,7 +54,6 @@
 							{{#if customers}}
 								{{#each customers}}
 								<tr>
-									<td class="lastUpdated">{{ lastUpdated }}</td>
 									<td class="customerId">{{ customerId }}{{#if billingId}}<br/>({{ billingId }}){{/if}}</td>
 									<td class="customerName">{{ customerName }}</td>
 									<td>

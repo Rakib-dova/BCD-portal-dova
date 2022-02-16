@@ -568,3 +568,11 @@ iframe#preview {
 .box.menu {
   height: 100%;
 }
+
+th.customer-code {
+  width: 9em;
+}
+
+th.tenant-name {
+  min-width: 11em;
+}

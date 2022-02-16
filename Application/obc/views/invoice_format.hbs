@@ -13,7 +13,7 @@
 			<div class="box">
 				<nav class="breadcrumb" aria-label="breadcrumbs">
 					<ul>
-						<li><a href="/bugyo/menu">機能一覧</a></li>
+						<li><a href="/bugyo/menu">連携トップ</a></li>
 						<li><a href="/bugyo/invoice_format_list">請求書フォーマット一覧</a></li>
 						<li class="is-active"><a href="/bugyo/invoice_format/{{ formatId }}"
 								aria-current="page">フォーマット{{ modeName }}</a></li>
@@ -39,7 +39,7 @@
 											<div class="field">
 												<span class="has-text-weight-bold">フォーマット名 <span class="has-text-danger">(必須)</span></span>
 												<div class="control">
-													<input type="text" class="input" id="formatName" name="name"
+													<input type="text" class="input" id="formatName" name="name" maxlength="30"
 														value="{{formatName}}" {{#if builtin}} disabled{{/if}}/>
 												</div>
 											</div>

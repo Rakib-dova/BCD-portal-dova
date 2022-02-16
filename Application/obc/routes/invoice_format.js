@@ -8,7 +8,7 @@ const ts = require('../controllers/apihelper').tradeshiftApi()
 const BillIssue = require('./helpers/billIssue')
 const Documents = require('./helpers/documents')
 const Formats = require('./helpers/formats')
-const { handler, currentTenantId } = require('./helpers/util')
+const { handler, api, currentTenantId } = require('./helpers/util')
 
 // CSRF対策
 const csrf = require('csurf')
@@ -52,7 +52,9 @@ const displayEdit = async (req, res, next) => {
 }
 
 const previewData = (items) => {
-  const data = JSON.parse(fs.readFileSync(path.join(__dirname, '../../public/obc/assets/invoice_preview.json'), 'utf-8'))
+  const data = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '../../public/obc/assets/invoice_preview.json'), 'utf-8')
+  )
   const convert = BillIssue.converter((key) => items.includes(key))
   return convert(BillIssue.build(data).shift())
 }
@@ -94,7 +96,7 @@ const formatUsername = (user) => {
 /**
  * 保存処理
  */
-const save = handler(async (req, res, next) => {
+const save = async (req, res, next) => {
   const request = req.body
 
   const user = await ts.getUser(req)
@@ -107,14 +109,14 @@ const save = handler(async (req, res, next) => {
     user: username,
     items: request.items
   })
-  res.send({ status: 'ok', formatId: formatId })
-})
+  res.send({ status: 'ok', formatId: formatId, message: '請求書フォーマットを保存しました。' })
+}
 
 const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(displayNew))
 router.get('/:formatId', ...middleware, csrfProtection, handler(displayEdit))
 router.post('/preview', ...middleware, csrfProtection, handler(preview))
-router.post('/', ...middleware, csrfProtection, save)
-router.post('/:formatId', ...middleware, csrfProtection, save)
+router.post('/', ...api([...middleware, csrfProtection], save, '請求書フォーマットの保存に失敗しました。'))
+router.post('/:formatId', ...api([...middleware, csrfProtection], save, '請求書フォーマットの保存に失敗しました。'))
 
 module.exports = router

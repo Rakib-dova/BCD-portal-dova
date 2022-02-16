@@ -17,7 +17,7 @@ const {
   Error,
   Sequelize: { Op }
 } = require('../models')
-const { handler, currentTenantId } = require('./helpers/util')
+const { handler, api, currentTenantId } = require('./helpers/util')
 require('date-utils')
 
 // CSRF対策
@@ -124,6 +124,9 @@ const findAllDocuments = async (ctx) => {
     totalPages = documents.numPages
     page = documents.pageId + 1
     for (let document of documents.Document) {
+      if (result[document.ID]?.outbox) {
+        continue
+      }
       result[document.ID] = {
         outbox: document.State != 'DRAFT',
         created: false,
@@ -268,7 +271,7 @@ const renderData = async (ctx, from, to) => {
     to: displayTo,
     invoices: items,
     notice,
-    messages
+    messages: await messages
   }
 }
 
@@ -314,13 +317,21 @@ const deleteAttachment = async (req, res, next) => {
  */
 const send = async (req, res, next) => {
   const tenantId = currentTenantId(req)
+  const { from, to, items } = req.body
 
   // 前回エラーをクリアする
-  await Error.destroy({ where: { userUuid: tenantId } })
+  await Error.destroy({
+    where: {
+      userUuid: tenantId,
+      invoiceNo: {
+        [Op.between]: [from, to]
+      }
+    }
+  })
 
   let errors = {}
   let maxInvoiceId = null
-  for (let { documentId, invoiceId, error } of req.body) {
+  for (let { documentId, invoiceId, error } of items) {
     if (error) {
       // 取り込み時のエラーを登録
       await Error.create({
@@ -353,9 +364,12 @@ const send = async (req, res, next) => {
       { lastInvoiceNo: maxInvoiceId },
       {
         where: {
-          [Op.and]: {
-            uuid: tenantId,
-            lastInvoiceNo: { [Op.lt]: maxInvoiceId }
+          uuid: tenantId,
+          lastInvoiceNo: {
+            [Op.or]: {
+              [Op.eq]: null,
+              [Op.lt]: maxInvoiceId
+            }
           }
         }
       }
@@ -373,8 +387,15 @@ const upload = multer({ dest: 'uploads/' })
 
 router.get('/', ...middleware, csrfProtection, handler(display))
 router.post('/', ...middleware, csrfProtection, handler(displayWithRange))
-router.post('/attachment', upload.array('file', 1), ...middleware, csrfProtection, handler(addAttachment))
-router.delete('/attachment/:documentId/:filename', ...middleware, csrfProtection, handler(deleteAttachment))
-router.post('/send', ...middleware, csrfProtection, handler(send))
+router.post(
+  '/attachment',
+  upload.array('file', 1),
+  ...api([...middleware, csrfProtection], addAttachment, '添付ファイルの追加に失敗しました')
+)
+router.delete(
+  '/attachment/:documentId/:filename',
+  ...api([...middleware, csrfProtection], deleteAttachment, '添付ファイルの削除に失敗しました')
+)
+router.post('/send', ...api([...middleware, csrfProtection], send, '請求書の発行に失敗しました。'))
 
 module.exports = router

@@ -186,7 +186,7 @@ const mapping = [
     cnv: Parser.forInteger
   },
   {
-    key: 'InvoiceLine/DocumentReference.[0].ID/Note',
+    key: 'InvoiceLine/DocumentReference.[0]/Note',
     src: 'SD5014038',
     label: '明細 備考'
   },

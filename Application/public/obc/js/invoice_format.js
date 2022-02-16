@@ -29,10 +29,15 @@ $(() => {
       data: JSON.stringify(data)
     })
       .done(function (response) {
+        if (response.status == 'redirect') {
+          window.location.href = response.url
+          return
+        }
         if (response.status == 'ok') {
           if (formatId != response.formatId) {
             window.location.href = '/bugyo/invoice_format/' + response.formatId
           }
+          notice(response.message)
         }
         else {
           notice(response.message, 'is-danger')

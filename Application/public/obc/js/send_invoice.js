@@ -1,4 +1,15 @@
+function activateSendButton() {
+  let count = $('#unissuedList tbody tr[id][data-error=""]').length
+  $('#sendBtn').prop('disabled', count == 0)
+}
+
+function updateUnissued() {
+  let count = $('#unissuedList tbody tr[id]').length
+  $('#unissued').text(count)
+}
+
 $(() => {
+  activateSendButton()
   new List('unissuedList', {
     valueNames: [
       'invoiceId',
@@ -47,11 +58,19 @@ $(() => {
         data: fd
       })
         .done(function (response) {
-          // 一覧テーブルにファイル名を設定
-          let name = uploadFile[0].name
-          $('#' + documentId + ' .attachments').append(
-            `<span class="attached-file"><a href="${response.url}">${name}</a><button class="delete" data-file="${name}"></button><br/></span>`
-          )
+          if (response.status == 'redirect') {
+            window.location.href = response.url
+            return
+          }
+          if (response.status == 'ok') {
+            // 一覧テーブルにファイル名を設定
+            let name = uploadFile[0].name
+            $('#' + documentId + ' .attachments').append(
+              `<span class="attached-file"><a href="${response.url}">${name}</a><button class="delete" data-file="${name}"></button><br/></span>`
+            )
+          } else {
+            notice(response.message, 'is-danger')
+          }
         })
         .fail(function (xhr) {
           notice(xhr.status + ' ' + xhr.statusText, 'is-danger')
@@ -76,8 +95,16 @@ $(() => {
       }
     })
       .done(function (response) {
-        target.closest('.attached-file').remove()
-        notice(response.message)
+        if (response.status == 'redirect') {
+          window.location.href = response.url
+          return
+        }
+        if (response.status == 'ok') {
+          target.closest('.attached-file').remove()
+          notice(response.message)
+        } else {
+          notice(response.message, 'is-danger')
+        }
       })
       .fail(function (xhr) {
         notice(xhr.status + ' ' + xhr.statusText, 'is-danger')
@@ -93,9 +120,13 @@ $(() => {
     // 読込中
     $('#sendBtn').addClass('is-loading')
     $('#confirmModal').removeClass('is-active')
-    let data = []
+    let data = {
+      from: $('#fromNo').val(),
+      to: $('#toNo').val(),
+      items: []
+    }
     $('#unissuedList tbody tr').each((index, val) => {
-      data.push({
+      data.items.push({
         documentId: val.id,
         invoiceId: $(val).data('invoiceid'),
         error: $(val).data('error')
@@ -113,11 +144,15 @@ $(() => {
       data: JSON.stringify(data)
     })
       .done(function (response) {
+        if (response.status == 'redirect') {
+          window.location.href = response.url
+          return
+        }
         notice(response.message, response.status == 'ok' ? 'is-success' : 'is-danger')
         let errors = response.errors || {}
         $('#unissuedList tbody tr').each((index, val) => {
           if (errors[val.id]) {
-            $(val).addClass('has-background-danger-light').data('error', errors[val.id])
+            $(val).addClass('has-background-danger-light').attr('data-error', errors[val.id])
             $(val)
               .find('.invoiceId')
               .prepend(
@@ -129,6 +164,8 @@ $(() => {
             $(val).remove()
           }
         })
+        updateUnissued()
+        activateSendButton()
       })
       .fail(function (xhr) {
         notice(xhr.status + ' ' + xhr.statusText, 'is-danger')

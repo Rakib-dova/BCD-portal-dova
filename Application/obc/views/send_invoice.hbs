@@ -12,7 +12,7 @@
 			<div class="box">
 				<nav class="breadcrumb is-clearfix" aria-label="breadcrumbs">
 					<ul class="is-pulled-left">
-						<li><a href="/bugyo/menu">機能一覧</a></li>
+						<li><a href="/bugyo/menu">連携トップ</a></li>
 						<li class="is-active"><a href="/bugyo/send_invoice" aria-current="page">請求書発行</a></li>
 					</ul>
 					<div class="is-pulled-right">
@@ -28,11 +28,13 @@
 				{{> notification}}
 				<div class="block">
 					<p>未発行の請求書は
-						<span class="has-text-weight-bold is-underlined has-text-danger">{{total}}</span>
+						<span id="unissued" class="has-text-weight-bold is-underlined has-text-danger">{{total}}</span>
 						件です。
 					</p>
 					<p>(最終更新日時：{{timestamp}})</p>
 				</div>
+				<input type="hidden" id="fromNo" value="{{ from }}">
+				<input type="hidden" id="toNo" value="{{ to }}">
 				<div class="block is-clearfix">
 					<div class="field is-pulled-left">
 						<p class="control is-pulled-left">

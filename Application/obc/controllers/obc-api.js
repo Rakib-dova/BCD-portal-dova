@@ -4,6 +4,26 @@ const chalk = require('chalk')
 
 const api = {}
 
+const retry = async (instance, ctx) => {
+  console.log('Retring...')
+  // リフレッシュを試行するフロー
+  const token = await instance.post('/oauth2/token', {
+    grant_type: 'refresh_token',
+    client_secret: ctx.session.bugyo.refresh_token,
+    redirect_uri: `https://${process.env.HOST}/bugyo/auth/callback/`,
+    client_id: process.env.OBC_API_CLIENT_ID,
+    client_secret: process.env.OBC_API_CLIENT_SECRET
+  })
+  console.log(`Token: ${token}`)
+  ctx.session.bugyo = Object.assign(ctx.session.bugyo, token)
+
+  // json文字列になっているままだとエラーになる為
+  if (typeof config.data === 'string') {
+    config.data = JSON.parse(config.data)
+  }
+  return await instance.request(error.config)
+}
+
 const getClient = (ctx, isUnAuth = false, isUnTenant = false) => {
   let headers = {
     'X-OBC-SubscriptionKey': process.env.OBC_API_SUBSCRIPTION_KEY
@@ -38,10 +58,14 @@ const getClient = (ctx, isUnAuth = false, isUnTenant = false) => {
       return response.status === 200 ? response.data : response
     },
     function (error) {
-      console.log(error)
-      console.log(`${error.response.status}:${error.response.statusText}`)
-      console.log(error.response.data)
-      throw error
+      if (error.response?.status === '401') {
+        return retry(instance, ctx)
+      } else {
+        console.log(error)
+        console.log(`${error.response.status}:${error.response.statusText}`)
+        console.log(error.response.data)
+        throw error
+      }
     }
   )
 

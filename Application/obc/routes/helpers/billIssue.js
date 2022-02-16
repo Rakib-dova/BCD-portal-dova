@@ -169,6 +169,10 @@ const build = (data) => {
     }
   }
 
+  if (!data.forEach) {
+    return []
+  }
+
   let entries = mapping.filter((e) => e.attr)
   let result = []
   let bill = newBill()
@@ -226,6 +230,9 @@ const build = (data) => {
  * 請求データから請求書番号を重複を省いて抽出する
  */
 const extractIds = (data) => {
+  if (!data.map) {
+    return []
+  }
   return [...new Set(data.map((val) => val.SD5011002).filter((id) => id))].sort()
 }
 

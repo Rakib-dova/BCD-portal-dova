@@ -9,6 +9,26 @@ const handler = (fn) => (req, res, next) => {
 }
 
 /**
+ * Ajax用非同期ハンドラーを構成する
+ */
+const api = (middleware, fn, message) => {
+  const wrap = (mw) => (req, res, next) => {
+    const original = res.redirect
+    res.redirect = (arg1, arg2) => res.send({ status: 'redirect', url: arg2 ?? arg1 })
+    try {
+      return mw(req, res, next)
+    } finally {
+      res.redirect = original
+    }
+  }
+  return [
+    ...middleware.map(wrap),
+    handler(fn),
+    (err, req, res, next) => res.send({ status: 'ng', message: message ?? error.message })
+  ]
+}
+
+/**
  * リクエストからログイン中のテナントIDを取り出す
  */
 const currentTenantId = (req) => req.user.tenantId
@@ -26,6 +46,7 @@ const condition = (itemKey, operator, value) => {
 
 module.exports = {
   handler,
+  api,
   currentTenantId,
   condition
 }
