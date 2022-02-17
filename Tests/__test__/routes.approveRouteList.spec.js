@@ -59,7 +59,7 @@ const Users = require('../mockDB/Users_Table')
 const Tenants = require('../mockDB/Tenants_Table')
 const Contracts = require('../mockDB/Contracts_Table')
 
-describe('inboxListのテスト', () => {
+describe('approveRouteListのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
@@ -85,7 +85,7 @@ describe('inboxListのテスト', () => {
   })
 
   describe('ルーティング', () => {
-    test('inboxListのルーティングを確認', async () => {
+    test('approveRouteListのルーティングを確認', async () => {
       expect(approveRouteList.router.get).toBeCalledWith('/', helper.isAuthenticated, approveRouteList.cbGetIndex)
     })
   })
@@ -106,7 +106,7 @@ describe('inboxListのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
-      // 承認ルートDB検索
+      // 承認ルートDB検索結果：ない場合
       approveRouteFindAllSpy.mockReturnValueOnce([])
 
       // 試験実施
@@ -117,7 +117,7 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxListが呼ばれ「る」
+      // response.renderでapproveRouteListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('approveRouteList', {
         approveRouteListArr: []
       })
@@ -138,7 +138,7 @@ describe('inboxListのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
-      // 承認ルートDB検索
+      // 承認ルートDB検索結果の用意
       const approveRouteArr = []
       const approveRoute1 = ApproveRoute.build({
         contractId: Contracts[0].contractId,
@@ -192,7 +192,7 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxListが呼ばれ「る」
+      // response.renderでapproveRouteListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('approveRouteList', {
         approveRouteListArr: expectResult
       })
@@ -366,7 +366,7 @@ describe('inboxListのテスト', () => {
         'SequelizeConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)'
       )
       dbError.stack = 'SequelizeConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)'
-      // 承認ルートDB検索
+      // 承認ルートDB検索の時エラーが発生
       approveRouteFindAllSpy.mockImplementation(() => {
         throw dbError
       })
@@ -379,7 +379,7 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxListが呼ばれ「る」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })

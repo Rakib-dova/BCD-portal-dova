@@ -574,7 +574,7 @@ describe('approverControllerのテスト', () => {
       })
       approveRoute2.ApproveUsers = [approveRoute1approver2approver1, approveRoute1approver2approver2]
       approveRouteArr.push(approveRoute1, approveRoute2)
-      // DBのデータが場合
+      // DBのデータがある場合
       approveRouteFindAll.mockReturnValueOnce(approveRouteArr)
 
       const result = await approverController.getApproveRouteList(contractId)
