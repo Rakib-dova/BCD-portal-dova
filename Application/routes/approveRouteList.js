@@ -9,6 +9,7 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
+const approverController = require('../controllers/approverController')
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -49,32 +50,11 @@ const cbGetIndex = async (req, res, next) => {
   }
 
   // 承認者ルート取得（ダミーデータ）
-  const approveRouteListArr = [
-    {
-      uuid: '15dad396-8bd3-4856-b4a2-e252d98989d0',
-      No: 1,
-      approveRouteName: 'a0001',
-      approverCount: 8
-    },
-    {
-      uuid: '25dad396-8bd3-4856-b4a2-e252d98989d0',
-      No: 2,
-      approveRouteName: 'a0002',
-      approverCount: 3
-    },
-    {
-      uuid: '35dad396-8bd3-4856-b4a2-e252d98989d0',
-      No: 3,
-      approveRouteName: 'b0001',
-      approverCount: 11
-    },
-    {
-      uuid: '45dad396-8bd3-4856-b4a2-e252d98989d0',
-      No: 4,
-      approveRouteName: 'b0002',
-      approverCount: 5
-    }
-  ]
+  const approveRouteListArr = await approverController.getApproveRouteList(contract.contractId)
+
+  if (approveRouteListArr instanceof Error) {
+    return next(errorHelper.create(500))
+  }
 
   // 承認者ルートデータを画面に渡す。
   res.render('approveRouteList', {

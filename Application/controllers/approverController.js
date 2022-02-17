@@ -164,7 +164,37 @@ const insertApprover = async (contract, values) => {
   }
 }
 
+const getApproveRouteList = async (contractId) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'approverController.getApproveRouteList')
+  try {
+    const approveRoutes = await ApproveRoute.findAll({
+      include: [
+        {
+          model: ApproveUser
+        }
+      ],
+      where: {
+        contractId: contractId,
+        deleteFlag: false
+      },
+      order: [['approveRouteName', 'ASC']]
+    })
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.getApproveRouteList')
+    return approveRoutes.map((approveRoute, idx) => {
+      return {
+        No: idx + 1,
+        approveRouteName: approveRoute.approveRouteName,
+        approverCount: approveRoute.ApproveUsers.length
+      }
+    })
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.getApproveRouteList')
+    return error
+  }
+}
 module.exports = {
   getApprover: getApprover,
-  insertApprover: insertApprover
+  insertApprover: insertApprover,
+  getApproveRouteList: getApproveRouteList
 }
