@@ -13,4 +13,4 @@ const load = async () => {
   return messages
 }
 
-module.exports = load()
+module.exports = load

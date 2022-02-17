@@ -271,7 +271,7 @@ const renderData = async (ctx, from, to) => {
     to: displayTo,
     invoices: items,
     notice,
-    messages: await messages
+    messages: await messages()
   }
 }
 
