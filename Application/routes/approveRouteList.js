@@ -49,7 +49,7 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  // 承認者ルート取得（ダミーデータ）
+  // 承認者ルート取得
   const approveRouteListArr = await approverController.getApproveRouteList(contract.contractId)
 
   if (approveRouteListArr instanceof Error) {

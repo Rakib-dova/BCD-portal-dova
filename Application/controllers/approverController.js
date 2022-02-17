@@ -164,6 +164,11 @@ const insertApprover = async (contract, values) => {
   }
 }
 
+/**
+ * 登録した承認ルートを検索する。
+ * @param {uuid} contractId デジトレの利用の契約者の識別番号
+ * @returns {object} {No：通番, approveRouteName：承認ルート名, approverCount：承認者の数}
+ */
 const getApproveRouteList = async (contractId) => {
   logger.info(constantsDefine.logMessage.INF000 + 'approverController.getApproveRouteList')
   try {
