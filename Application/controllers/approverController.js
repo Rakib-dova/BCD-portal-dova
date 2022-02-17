@@ -179,6 +179,16 @@ const getApproveRouteList = async (contractId) => {
       },
       order: [['approveRouteName', 'ASC']]
     })
+    // 承認ルートの名を昇順ソード
+    approveRoutes.sort((a, b) => {
+      if (a.approveRouteName > b.approveRouteName) return 1
+      else if (a.approveRouteName < b.approveRouteName) return -1
+      else {
+        if (a.ApproveUsers.length - b.ApproveUsers.length > 0) return 1
+        else if (a.ApproveUsers.length - b.ApproveUsers.length < 0) return -1
+        else return 0
+      }
+    })
     logger.info(constantsDefine.logMessage.INF001 + 'approverController.getApproveRouteList')
     return approveRoutes.map((approveRoute, idx) => {
       return {
