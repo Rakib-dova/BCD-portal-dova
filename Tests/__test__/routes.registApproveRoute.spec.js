@@ -120,14 +120,12 @@ describe('registApproveRouteのテスト', () => {
       expect(response.render).toBeCalledWith('registApproveRoute', {
         panelHead: '条件絞り込み',
         approveRouteNameLabel: '承認ルート名',
-        backUrl: '/portal',
-        codeNameLabel: '勘定科目名',
+        requiredTagApproveRouteName: 'approveRouteNameTagRequired',
         idForApproveRouteNameInput: 'setApproveRouteNameInputId',
-        idForNameInput: 'setAccountCodeNameInputId',
         modalTitle: '承認者検索',
+        backUrl: '/approveRouteList',
         logTitle: '承認ルート登録',
-        logTitleEng: 'REGIST APPROVE ROUTE',
-        requiredTagApproveRouteName: 'approveRouteNameTagRequired'
+        logTitleEng: 'REGIST APPROVE ROUTE'
       })
     })
 
@@ -339,8 +337,8 @@ describe('registApproveRouteのテスト', () => {
 
       // 期待結果
       // 承認ルートページレンダリングを呼び出し
-      expect(request.flash).toBeCalledWith('info', '承認ルート設定が完了しました。')
-      expect(response.redirect).toBeCalledWith('/portal')
+      expect(request.flash).toBeCalledWith('info', '承認ルートを登録しました。')
+      expect(response.redirect).toBeCalledWith('/approveRouteList')
     })
 
     test('準正常：既に登録されている', async () => {
