@@ -174,7 +174,8 @@ const getApproveRouteList = async (contractId) => {
         }
       ],
       where: {
-        contractId: contractId
+        contractId: contractId,
+        deleteFlag: false
       },
       order: [['approveRouteName', 'ASC']]
     })
