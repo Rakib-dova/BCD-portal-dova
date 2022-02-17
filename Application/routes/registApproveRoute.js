@@ -104,7 +104,7 @@ const cbPostRegistApproveRoute = async (req, res, next) => {
   switch (resultInsert) {
     case 0:
       // 正常に登録ができた場合
-      req.flash('info', '承認ルート設定が完了しました。')
+      req.flash('info', '承認ルートを登録しました。')
       res.redirect('/approveRouteList')
       break
     case 1:
