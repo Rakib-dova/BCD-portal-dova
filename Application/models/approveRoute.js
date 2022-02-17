@@ -45,6 +45,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false,
         timestamps: true
+      },
+      deleteFlag: {
+        type: DataTypes.BOOLEAN
       }
     },
     {
