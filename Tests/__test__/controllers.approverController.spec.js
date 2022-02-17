@@ -522,4 +522,81 @@ describe('approverControllerのテスト', () => {
       expect(insertResult).toBe(dbError)
     })
   })
+
+  describe('getApproveRouteList', () => {
+    test('正常：承認ルートがない場合', async () => {
+      const contractId = 'dummy-contractid'
+      // DBのデータがない場合
+      approveRouteFindAll.mockReturnValueOnce([])
+
+      const result = await approverController.getApproveRouteList(contractId)
+
+      expect(result).toHaveLength(0)
+    })
+
+    test('正常：承認ルートがある場合', async () => {
+      const contractId = 'dummy-contractid'
+
+      // 承認ルートDB検索
+      const approveRouteArr = []
+      const approveRoute1 = ApproveRoute.build({
+        contractId: 'dummy-contractid',
+        approveRouteName: '承認ルート1',
+        createdAt: new Date('2022-02-17T05:12:15.623Z'),
+        updatedAt: new Date('2022-02-17T05:12:15.623Z'),
+        deleteFlag: false
+      })
+      const approveRoute1approver1 = ApproveUser.build({
+        approveRouteId: approveRoute1.approveRouteId,
+        approveUser: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+        prevApproveUser: null,
+        nextApproveUser: null
+      })
+      approveRoute1.ApproveUsers = [approveRoute1approver1]
+      const approveRoute2 = ApproveRoute.build({
+        contractId: 'dummy-contractid',
+        approveRouteName: '承認ルート2',
+        createdAt: new Date('2022-02-17T05:12:15.623Z'),
+        updatedAt: new Date('2022-02-17T05:12:15.623Z'),
+        deleteFlag: true
+      })
+      const approveRoute1approver2approver1 = ApproveUser.build({
+        approveRouteId: approveRoute2.approveRouteId,
+        approveUser: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+        prevApproveUser: null,
+        nextApproveUser: '3b6a13d6-cb89-414b-9597-175ba89329aa'
+      })
+      const approveRoute1approver2approver2 = ApproveUser.build({
+        approveRouteId: approveRoute2.approveRouteId,
+        approveUser: '3b6a13d6-cb89-414b-9597-175ba89329aa',
+        prevApproveUser: approveRoute1approver2approver1.approveUser,
+        nextApproveUser: null
+      })
+      approveRoute2.ApproveUsers = [approveRoute1approver2approver1, approveRoute1approver2approver2]
+      approveRouteArr.push(approveRoute1, approveRoute2)
+      // DBのデータがある場合
+      approveRouteFindAll.mockReturnValueOnce(approveRouteArr)
+
+      const result = await approverController.getApproveRouteList(contractId)
+
+      expect(result).toHaveLength(2)
+    })
+
+    test('正常：検索時、DBエラー発生', async () => {
+      const contractId = 'dummy-contractid'
+
+      const dbError = new Error(
+        'SequelizeConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)'
+      )
+      dbError.stack = 'SequelizeConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)'
+      // 承認ルートDBエラー発生
+      approveRouteFindAll.mockImplementation(() => {
+        throw dbError
+      })
+
+      const result = await approverController.getApproveRouteList(contractId)
+
+      expect(result).toBe(dbError)
+    })
+  })
 })

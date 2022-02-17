@@ -164,7 +164,52 @@ const insertApprover = async (contract, values) => {
   }
 }
 
+/**
+ * 登録した承認ルートを検索する。
+ * @param {uuid} contractId デジトレの利用の契約者の識別番号
+ * @returns {object} {No：通番, approveRouteName：承認ルート名, approverCount：承認者の数}
+ */
+const getApproveRouteList = async (contractId) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'approverController.getApproveRouteList')
+  try {
+    const approveRoutes = await ApproveRoute.findAll({
+      include: [
+        {
+          model: ApproveUser
+        }
+      ],
+      where: {
+        contractId: contractId,
+        deleteFlag: false
+      },
+      order: [['approveRouteName', 'ASC']]
+    })
+    // 承認ルートの名を昇順ソード
+    approveRoutes.sort((a, b) => {
+      if (a.approveRouteName > b.approveRouteName) return 1
+      else if (a.approveRouteName < b.approveRouteName) return -1
+      else {
+        if (a.ApproveUsers.length - b.ApproveUsers.length > 0) return 1
+        else if (a.ApproveUsers.length - b.ApproveUsers.length < 0) return -1
+        else return 0
+      }
+    })
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.getApproveRouteList')
+    return approveRoutes.map((approveRoute, idx) => {
+      return {
+        No: idx + 1,
+        approveRouteName: approveRoute.approveRouteName,
+        approverCount: approveRoute.ApproveUsers.length
+      }
+    })
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.getApproveRouteList')
+    return error
+  }
+}
 module.exports = {
   getApprover: getApprover,
-  insertApprover: insertApprover
+  insertApprover: insertApprover,
+  getApproveRouteList: getApproveRouteList
 }

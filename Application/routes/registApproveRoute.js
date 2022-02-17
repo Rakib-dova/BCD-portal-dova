@@ -50,7 +50,7 @@ const cbGetRegistApproveRoute = async (req, res, next) => {
     requiredTagApproveRouteName: 'approveRouteNameTagRequired',
     idForApproveRouteNameInput: 'setApproveRouteNameInputId',
     modalTitle: '承認者検索',
-    backUrl: '/portal',
+    backUrl: '/approveRouteList',
     logTitle: '承認ルート登録',
     logTitleEng: 'REGIST APPROVE ROUTE'
   })
@@ -104,8 +104,8 @@ const cbPostRegistApproveRoute = async (req, res, next) => {
   switch (resultInsert) {
     case 0:
       // 正常に登録ができた場合
-      req.flash('info', '承認ルート設定が完了しました。')
-      res.redirect('/portal')
+      req.flash('info', '承認ルートを登録しました。')
+      res.redirect('/approveRouteList')
       break
     case 1:
       req.flash('noti', ['承認ルート登録', '入力した承認ルートは既に登録されています。'])
