@@ -50,7 +50,7 @@ module.exports = {
       return digitaltradeTokenInfo
     } catch (error) {
       // エラー内容をログ出力
-      logger.error({ error: error.message }, 'ERR-MB999 getDigitaltradeTokenBydtToken:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 getDigitaltradeTokenBydtToken:runtime Error')
       return error
     }
   },
@@ -80,7 +80,7 @@ module.exports = {
       return digitaltradeTokenInfo
     } catch (error) {
       // エラー内容をログ出力
-      logger.error({ error: error.message }, 'ERR-MB999 getFingerprintBydigitaltradeId:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 getFingerprintBydigitaltradeId:runtime Error')
       return error
     }
   },
@@ -142,7 +142,7 @@ module.exports = {
       return serviceLinkageInfo
     } catch (error) {
       // エラー内容をログ出力
-      logger.error({ error: error.message }, 'ERR-MB999 getServiceLinkageIdBydigitaltradeId:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 getServiceLinkageIdBydigitaltradeId:runtime Error')
       return error
     }
   },
@@ -200,7 +200,7 @@ module.exports = {
       return updated
     } catch (error) {
       // エラー内容をログ出力
-      logger.error({ error: error.message }, 'ERR-MB999 updateServiceLinkageId:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 updateServiceLinkageId:runtime Error')
       return error
     }
   },
@@ -254,7 +254,7 @@ module.exports = {
       return created
     } catch (error) {
       // エラー内容をログ出力
-      logger.error({ error: error.message }, 'ERR-MB999 createServiceLinkageId:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 createServiceLinkageId:runtime Error')
       return error
     }
   },
