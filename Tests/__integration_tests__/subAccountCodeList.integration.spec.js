@@ -338,6 +338,7 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       expect(res.text).toMatch(/補助科目名/i)
       expect(res.text).toMatch(/subTest/i)
       expect(res.text).toMatch(/勘定科目名/i)
+      expect(res.text).toMatch(/最新更新日/i)
       expect(res.text).toMatch(/test/i)
       expect(res.text).toMatch(/確認・変更する/i)
       expect(res.text).toMatch(/削除/i)
@@ -355,9 +356,10 @@ describe('補助科目一覧のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/registSubAccountCode')
       if (page.url() === 'https://localhost:3000/registSubAccountCode') {
+        await page.waitForTimeout(1000)
         await page.click('#return-btn')
 
-        await page.waitForTimeout(500)
+        await page.waitForTimeout(1000)
 
         // 補助科目一覧画面に遷移確認
         expect(await page.url()).toBe('https://localhost:3000/subAccountCodeList')

@@ -20,6 +20,7 @@
                   th.width-13.text-center #{subjectCode}
                   th.width-13.text-center #{subjectName}
                   th.width-13.text-center #{accountCodeName}
+                  th.width-13.text-center #{updatedDate}
                   th.width-10.text-center 
                   th.width-10.text-center 
               tbody
@@ -29,7 +30,8 @@
                     th.text-center.td-overflow= item.no
                     td.text-center.td-overflow= item.subjectCode
                     td.text-center.td-overflow= item.subjectName
-                    td.text-center.td-overflow= item.accountCodeName                 
+                    td.text-center.td-overflow= item.accountCodeName
+                    td.text-center.td-overflow= item.updatedAt
                     td.text-center
                       a.button.is-success(class= setClassChangeBtn uuid= item.subAccountCodeId) 確認・変更する
                     td
