@@ -291,6 +291,13 @@ const cbPostIndex = async (req, res, next) => {
         // エラーを確認する
         if (invoicesForDownload instanceof Error) {
           req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
+          logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+          return res.redirect(303, '/journalDownload')
+        }
+
+        if (invoicesForDownload.length === 0) {
+          req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+          logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
           return res.redirect(303, '/journalDownload')
         }
 
