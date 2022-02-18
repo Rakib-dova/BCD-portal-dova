@@ -20,6 +20,21 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'approveRouteId' // k1
       })
     }
+
+    static async getApproveRoute(contractId, approveRouteId) {
+      const approveUser = require('./').ApproveUser
+      const approveRoute = await this.findAll({
+        raw: true,
+        include: {
+          model: approveUser
+        },
+        where: {
+          contractId: contractId,
+          approveRouteId: approveRouteId
+        }
+      })
+      return approveRoute
+    }
   }
   ApproveRoute.init(
     {
