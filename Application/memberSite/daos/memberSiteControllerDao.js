@@ -114,7 +114,7 @@ module.exports = {
       return updated
     } catch (error) {
       // エラー内容をログ出力
-      logger.error({ error: error.message }, 'ERR-MB999 updateDtTokenFlg:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 updateDtTokenFlg:runtime Error')
       return error
     }
   },
@@ -285,7 +285,7 @@ module.exports = {
       logger.info(logMessageDefine.INF001 + 'deleteDigitaltradeToken')
       return deleted
     } catch (error) {
-      logger.error({ error: error.message }, 'ERR-MB999 deleteDigitaltradeToken:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 deleteDigitaltradeToken:runtime Error')
       return error
     }
   }
