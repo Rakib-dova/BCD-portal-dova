@@ -26,3 +26,38 @@ window.onload = () => {
     })
   })
 }
+
+// 「確認・変更」ボタン押下時の処理
+// Array.prototype.forEach.call(document.querySelectorAll('.confirmButton'), (item) => {
+//   item.addEventListener('click', function (e) {
+//     const checkApproveRoute = item.getAttribute('uuid')
+//     console.log(checkApproveRoute)
+//     // const url = `/approveRouteEdit/${checkApproveRoute}`
+//     const url = `/approveRouteEdit`
+//     fetch(url, {
+//       method: 'GET',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       }
+//     })
+//       .then((response) => response.json())
+//       .catch(() => {
+//         return { result: 'SYSERR' }
+//       })
+//       .then((response) => {
+//         switch (response.result) {
+//           case 1:
+//             // 確認ページに遷移
+//             location.href = '/approveRouteEdit' + '/' + checkApproveRoute
+//             break
+//           case -1:
+//             alert('既に削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
+//             location.reload()
+//             break
+//           default:
+//             alert('システムエラーが発生しました。')
+//             break
+//         }
+//       })
+//   })
+// })
