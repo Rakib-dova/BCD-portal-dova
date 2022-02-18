@@ -32,7 +32,7 @@ block content
                     td.text-center= item.approverCount                
                     td.text-center
                       //- 確認・変更する機能追加の際、show-modalクラス、data-target、confiration-modalモーダル削除必要
-                      a.button.is-success.confirmButton(name='confirmButton' uuid= item.uuid href='/approveRouteEdit') 確認・変更する
+                      a.button.is-success.confirmButton(name='confirmButton' href= `/approveRouteEdit/${item.uuid}`) 確認・変更する
                     td.text-center
                       a.button.is-danger.show-modal(type = "button" name = 'deleteButton' data-target = "confirationDelete-modal" uuid= item.uuid) 削除
                     td.text-center

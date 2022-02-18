@@ -27,29 +27,28 @@ block content
                               .columns.ml-0.pl-0.alignCenterChild
                                 .column.pl-0
                                   if isApproveRouteEdit
-                                    input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= '承認ルート名1' maxlength=40 placeholder='全角・半角文字・英数字40文字まで' readonly) 
+                                    input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= approveRouteName maxlength=40 placeholder='全角・半角文字・英数字40文字まで' readonly)
                                   else
-                                    input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= valueForApproveRouteNameInput maxlength=40 placeholder='全角・半角文字・英数字40文字まで' required)   
-                      .field.card                                    
+                                    input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= valueForApproveRouteNameInput maxlength=40 placeholder='全角・半角文字・英数字40文字まで' required)
+                      .field.card
                         .card-content
                           .field
                             .columns
                               .column
-                                .column.ml-0.pl-0 
+                                .column.ml-0.pl-0
                                   .button.is-link.mr-2#btnAddApproveRoute(type="button" data-target= `#bulkInsertNo1`) 承認者追加
                                 .columns.m-0
                                   .column
-                                    p#error-message-approveRoute.red-color(tabIndex=0)                                
+                                    p#error-message-approveRoute.red-color(tabIndex=0)
                                 .column.p-0.lineApproveRoute(id='bulkInsertNo1')
                                   if isApproveRouteEdit
                                     -var numberList = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
-                                    -var list = approveUsers
-                                    each item, idx in list
+                                    each item, idx in approveUsers
                                       .columns.m-0.p-1.lineApproveRouteForLast(id=`bulkInsertNo1_lineApproveRoute1` data-idx='1')
                                         .column.p-0.border-div-rad-4
                                           .field.is-horizontal.m-1.has-addons-centered
                                             .field-label.is-normal.m-0.text-center
-                                              label 承認順                                     
+                                              label 承認順
                                             .field-label.is-normal.m-0.text-center
                                               label 承認者名
                                             .field-label.is-normal.m-0.text-center
@@ -60,15 +59,15 @@ block content
                                             .field-body.m-1
                                               .field.text-center.padding-left-30
                                                 label.input-label.text-center #{numberList[idx]}次承認
-                                                p.input-label-required.input-label.text-center  （必須）                                                                             
+                                                p.input-label-required.input-label.text-center  （必須）
                                             .field-body.m-1
                                               .field
                                                 p.control
-                                                  input.input.input-approveRouteUserName(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.userName readonly) 
+                                                  input.input.input-approveRouteUserName(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.getName() readonly)
                                             .field-body.m-1
                                               .field
                                                 p.control
-                                                  input.input.input-approveRouteUserMailAddress(type='text' id=`lineApproveRoute_approveUserMailAddress` name=`mailAddress` value=item.userEmail readonly) 
+                                                  input.input.input-approveRouteUserMailAddress(type='text' id=`lineApproveRoute_approveUserMailAddress` name=`mailAddress` value= item.getMail() readonly)
                                                   input(type='hidden' name=`uuid`)
                                             .field-body.m-1.is-4.text-center
                                               .field
@@ -79,40 +78,46 @@ block content
                                             a.red-color.btn-minus-approveRoute
                                               i.fas.fa-minus-circle
                                                                                 
-                                    .columns.m-0.p-1.lineApproveRouteForLast(id='bulkInsertNo1_lineApproveRouteLast' data-idx='1')
-                                      .column.p-0.border-div-rad-4
-                                        .field.is-horizontal.m-1.has-addons-centered
-                                          .field-label.is-normal.m-0.text-center
-                                            label 承認順                                     
-                                          .field-label.is-normal.m-0.text-center
-                                            label 最終承認者名
-                                          .field-label.is-normal.m-0.text-center
-                                            label メールアドレス
-                                          .field-label.is-normal.m-0.fixed-void-66
-                                            label
-                                        .field.is-horizontal.p-1
-                                          .field-body.m-1
-                                            .field.text-center.padding-left-30
-                                              label.input-label.text-center 最終承認
-                                              p.input-label-required.input-label.text-center  （必須）                                                                             
-                                          .field-body.m-1
-                                            .field
-                                              p.control
-                                                input.input.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` value= '最終承認者' readonly)
-                                          .field-body.m-1
-                                            .field
-                                              p.control
-                                                input.input.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` value='testLast@test.com' readonly)
-                                                input(type='hidden' name=`uuid`)
-                                          .field-body.m-1.is-4.text-center
-                                            .field
-                                              p.control
-                                                a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
-                                      .column.is-0.p-1
-                                        .column.is-invisible
-                                          a.red-color.btn-minus-approveRoute
-                                            i.fas.fa-minus-circle                                                                         
-                  .grouped-button                                  
+                                  .columns.m-0.p-1.lineApproveRouteForLast(id='bulkInsertNo1_lineApproveRouteLast' data-idx='1')
+                                    .column.p-0.border-div-rad-4
+                                      .field.is-horizontal.m-1.has-addons-centered
+                                        .field-label.is-normal.m-0.text-center
+                                          label 承認順
+                                        .field-label.is-normal.m-0.text-center
+                                          label 最終承認者名
+                                        .field-label.is-normal.m-0.text-center
+                                          label メールアドレス
+                                        .field-label.is-normal.m-0.fixed-void-66
+                                          label
+                                      .field.is-horizontal.p-1
+                                        .field-body.m-1
+                                          .field.text-center.padding-left-30
+                                            label.input-label.text-center 最終承認
+                                            p.input-label-required.input-label.text-center  （必須）
+                                        .field-body.m-1
+                                          .field
+                                            p.control
+                                              if lastApprover
+                                                input.input.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` value=lastApprover.getName() readonly)
+                                              else
+                                                input.input.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` readonly)
+                                        .field-body.m-1
+                                          .field
+                                            p.control
+                                              if lastApprover
+                                                input.input.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` value=lastApprover.getMail() readonly)
+                                              else
+                                                input.input.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` readonly)
+                                              input(type='hidden' name=`uuid`)
+                                        .field-body.m-1.is-4.text-center
+                                          .field
+                                            p.control
+                                              a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
+                                    .column.is-0.p-1
+                                      .column.is-invisible
+                                        a.red-color.btn-minus-approveRoute
+                                          i.fas.fa-minus-circle
+                  .grouped-button
                     a.button.mr-6(href= backUrl) 戻る
                     a.button.is-link#btn-confirm 確認
   .modal#check-modal
@@ -140,7 +145,7 @@ block content
     .modal-background.cancel-button(data-target='caution-modal')
     .modal-card.is-family-noto-sans
       header.modal-card-head
-        p.modal-card-title.title.mb-0 
+        p.modal-card-title.title.mb-0
         button.delete(data-target='caution-modal')
       section.modal-card-body
         p#caution-message
@@ -205,7 +210,7 @@ block content
         .column.p-0.border-div-rad-4
           .field.is-horizontal.m-1.has-addons-centered
             .field-label.is-normal.m-0.text-center
-              label 承認順                                      
+              label 承認順
             .field-label.is-normal.m-0.text-center
               label 承認者名
             .field-label.is-normal.m-0.text-center
@@ -215,7 +220,7 @@ block content
           .field.is-horizontal.p-1
             .field-body.m-1
               .field.text-center
-                p.control.input-approveRouteUserNumber                                                                             
+                p.control.input-approveRouteUserNumber
             .field-body.m-1
               .field
                 p.control
@@ -238,7 +243,7 @@ block content
       td.columnNoApproveUser
         .field.is-horizontal
           .field-body
-            p.control.noApproveUserMessage              
+            p.control.noApproveUserMessage
       td.columnApproveUserName
       td.columnApproveUserMailAddress
   include footer
