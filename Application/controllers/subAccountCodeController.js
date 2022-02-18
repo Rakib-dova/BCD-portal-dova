@@ -5,6 +5,7 @@ const SubAccountCode = db.SubAccountCode
 const subAccountCodeModel = require('../models').SubAccountCode
 const constantsDefine = require('../constants')
 const { v4: uuidV4 } = require('uuid')
+const utils = require('../lib/utils')
 
 module.exports = {
   // subAccountCodeテーブル
@@ -92,7 +93,8 @@ module.exports = {
           subjectCode: item.subjectCode,
           subjectName: item.subjectName,
           accountCodeName: item.accountCodeName,
-          subAccountCodeId: item.subAccountCodeId
+          subAccountCodeId: item.subAccountCodeId,
+          updatedAt: utils.timestampForList(item.updatedAt)
         }
       })
     } catch (error) {

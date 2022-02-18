@@ -55,7 +55,7 @@ const cbGetIndex = async (req, res, next) => {
   const registedAccountCodeList = await accountCodeController.getAccountCodeList(contract.contractId)
 
   if (registedAccountCodeList.length === 0) {
-    req.flash('noti', ['補助科目登録', '事前に勘定科目登録する必要があります。'])
+    req.flash('noti', ['補助科目登録', '事前に勘定科目を登録する必要があります。'])
   }
 
   res.render('registSubAccountCode', {
