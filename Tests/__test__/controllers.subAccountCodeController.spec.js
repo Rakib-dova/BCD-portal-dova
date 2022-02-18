@@ -7,6 +7,7 @@ const logger = require('../../Application/lib/logger')
 const AccountCode = require('../../Application/models').AccountCode
 const SubAccountCode = require('../../Application/models').SubAccountCode
 const accountCodeMock = require('../mockDB/AccountCode_Table')
+const utils = require('../../Application/lib/utils')
 
 const codeAccountId = '5a927284-57c9-4594-9ed8-472d261a6102'
 const subAccountCodeId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
@@ -94,17 +95,23 @@ describe('subAccountCodeControllerのテスト', () => {
     {
       subjectCode: 'TEST1',
       subjectName: '補助科目1',
-      accountCodeName: '勘定科目1'
+      accountCodeName: '勘定科目1',
+      subAccountCodeId: 'dummy-sub-code-1',
+      updatedAt: new Date('2022-02-17')
     },
     {
       subjectCode: 'TEST2',
       subjectName: '補助科目2',
-      accountCodeName: '勘定科目2'
+      accountCodeName: '勘定科目2',
+      subAccountCodeId: 'dummy-sub-code-2',
+      updatedAt: new Date('2022-02-18')
     },
     {
       subjectCode: 'TEST3',
       subjectName: '補助科目3',
-      accountCodeName: '勘定科目3'
+      accountCodeName: '勘定科目3',
+      subAccountCodeId: 'dummy-sub-code-3',
+      updatedAt: new Date('2022-02-19')
     }
   ]
 
@@ -318,9 +325,16 @@ describe('subAccountCodeControllerのテスト', () => {
       // 試験実施
       const result = await subAccountCodeController.getSubAccountCodeList()
 
+      // 予想結果作成
+      const expectResult = subAccountCodeListResult.map((item, idx) => {
+        item.no = idx + 1
+        item.updatedAt = utils.timestampForList(item.updatedAt)
+        return item
+      })
+
       // 期待結果
       // 想定したデータがReturnされていること
-      expect(result).toEqual(subAccountControllerResult)
+      expect(result).toEqual(expectResult)
     })
 
     test('異常：DBエラー', async () => {
