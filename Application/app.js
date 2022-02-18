@@ -158,7 +158,7 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '5mb', parameterLimit: 84
 // app.use(cookieParser());
 
 /**  会員サイト開発 20220228 */
-// TODO: CookieParserを復活
+// CookieParserのコメントアウトを解除
 const cookieParser = require('cookie-parser')
 app.use(cookieParser())
 /**  会員サイト開発 20220228 */
@@ -294,7 +294,7 @@ app.use('/change', require('./routes/change').router)
 app.use('/csvDownload', require('./routes/csvDownload').router)
 
 /**  会員サイト開発 20220228 */
-// TODO:アプリ一覧からの遷移受付けエンドポイント
+// アプリ一覧からの遷移受付けエンドポイント
 app.use('/memberCooperation', require('./memberSite/routes/memberCooperationRouter').router)
 app.use('/idLinking', require('./memberSite/routes/idLinkingRouter').router)
 /**  会員サイト開発 20220228 */

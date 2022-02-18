@@ -8,7 +8,7 @@
 jest.mock('../../../../../Application/models')
 
 // テスト準備セット
-const db = require('../../../../../Application/memberSite/models').sequelize
+const db = require('../../../../../Application/models').sequelize
 const logger = require('../../../../../Application/lib/logger.js')
 const logMessageDefine = require('../../../../../Application/constants').logMessage
 const { Op } = require('../../../../../Application/node_modules/sequelize')
@@ -17,9 +17,9 @@ const { Op } = require('../../../../../Application/node_modules/sequelize')
 const menberSiteControllerDao = require('../../../../../Application/memberSite/daos/memberSiteControllerDao')
 
 // テスト対象利用ライブラリ（モック対象）
-const digitaltradeTokenModel = require('../../../../../Application/memberSite/models').DigitaltradeToken
-const serviceLinkageIdModel = require('../../../../../Application/memberSite/models').ServiceLinkageIdManagement
-const authHistoryModel = require('../../../../../Application/memberSite/models').AuthenticationHistory
+const digitaltradeTokenModel = require('../../../../../Application/models').DigitaltradeToken
+const serviceLinkageIdModel = require('../../../../../Application/models').ServiceLinkageIdManagement
+const authHistoryModel = require('../../../../../Application/models').AuthenticationHistory
 const MemberSiteCoopSession = require('../../../../../Application/memberSite/dtos/memberSiteSessionDto')
 
 /* テスト内デフォルト定数 */
@@ -104,9 +104,11 @@ describe('memberSiteControllerDao UTテスト', () => {
         // 試験対象関数実行
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 開始 =======')
 
-        await menberSiteControllerDao.getDigitaltradeTokenBydtToken(digitaltradeTokenDBMemberValue.dtToken)
+        const result = await menberSiteControllerDao.getDigitaltradeTokenBydtToken(
+          digitaltradeTokenDBMemberValue.dtToken
+        )
         expect(loggerErrorSpy).toHaveBeenCalledWith(
-          { error: findOneError.message },
+          { error: result.stack },
           'ERR-MB999 getDigitaltradeTokenBydtToken:runtime Error'
         )
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 終了 =======')
@@ -181,12 +183,12 @@ describe('memberSiteControllerDao UTテスト', () => {
         // 試験対象関数実行
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 開始 =======')
 
-        await menberSiteControllerDao.getFingerprintBydigitaltradeId(
+        const result = await menberSiteControllerDao.getFingerprintBydigitaltradeId(
           digitaltradeTokenDBMemberValue.digitaltradeId,
           digitaltradeTokenDBMemberValue.dtToken
         )
         expect(loggerErrorSpy).toHaveBeenCalledWith(
-          { error: findOneError.message },
+          { error: result.stack },
           'ERR-MB999 getFingerprintBydigitaltradeId:runtime Error'
         )
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 終了 =======')
@@ -248,11 +250,8 @@ describe('memberSiteControllerDao UTテスト', () => {
         // 試験対象関数実行
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 開始 =======')
 
-        await menberSiteControllerDao.updateDtTokenFlg(digitaltradeTokenDBMemberValue.dtToken)
-        expect(loggerErrorSpy).toHaveBeenCalledWith(
-          { error: mockError.message },
-          'ERR-MB999 updateDtTokenFlg:runtime Error'
-        )
+        const result = await menberSiteControllerDao.updateDtTokenFlg(digitaltradeTokenDBMemberValue.dtToken)
+        expect(loggerErrorSpy).toHaveBeenCalledWith({ error: result.stack }, 'ERR-MB999 updateDtTokenFlg:runtime Error')
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 終了 =======')
       })
     })
@@ -314,9 +313,11 @@ describe('memberSiteControllerDao UTテスト', () => {
         // 試験対象関数実行
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 開始 =======')
 
-        await menberSiteControllerDao.getServiceLinkageIdBydigitaltradeId(serviceLinkageIdInfo.digitaltradeId)
+        const result = await menberSiteControllerDao.getServiceLinkageIdBydigitaltradeId(
+          serviceLinkageIdInfo.digitaltradeId
+        )
         expect(loggerErrorSpy).toHaveBeenCalledWith(
-          { error: mockError.message },
+          { error: result.stack },
           'ERR-MB999 getServiceLinkageIdBydigitaltradeId:runtime Error'
         )
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 終了 =======')
@@ -393,9 +394,9 @@ describe('memberSiteControllerDao UTテスト', () => {
         // 試験対象関数実行
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 開始 =======')
 
-        await menberSiteControllerDao.updateServiceLinkageId(memberSiteDto)
+        const result = await menberSiteControllerDao.updateServiceLinkageId(memberSiteDto)
         expect(loggerErrorSpy).toHaveBeenCalledWith(
-          { error: mockError.message },
+          { error: result.stack },
           'ERR-MB999 updateServiceLinkageId:runtime Error'
         )
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 終了 =======')
@@ -496,9 +497,9 @@ describe('memberSiteControllerDao UTテスト', () => {
         // 試験対象関数実行
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 開始 =======')
 
-        await menberSiteControllerDao.createServiceLinkageId(memberSiteDto)
+        const result = await menberSiteControllerDao.createServiceLinkageId(memberSiteDto)
         expect(loggerErrorSpy).toHaveBeenCalledWith(
-          { error: mockError.message },
+          { error: result.stack },
           'ERR-MB999 createServiceLinkageId:runtime Error'
         )
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 終了 =======')
@@ -590,9 +591,9 @@ describe('memberSiteControllerDao UTテスト', () => {
         // 試験対象関数実行
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 開始 =======')
 
-        await menberSiteControllerDao.deleteDigitaltradeToken(memberSiteDto)
+        const result = await menberSiteControllerDao.deleteDigitaltradeToken(memberSiteDto)
         expect(loggerErrorSpy).toHaveBeenCalledWith(
-          { error: mockError.message },
+          { error: result.stack },
           'ERR-MB999 deleteDigitaltradeToken:runtime Error'
         )
         logger.trace({ testCase: expect.getState().currentTestName }, '======= 終了 =======')
