@@ -199,7 +199,8 @@ const getApproveRouteList = async (contractId) => {
       return {
         No: idx + 1,
         approveRouteName: approveRoute.approveRouteName,
-        approverCount: approveRoute.ApproveUsers.length
+        approverCount: approveRoute.ApproveUsers.length,
+        uuid: approveRoute.approveRouteId
       }
     })
   } catch (error) {

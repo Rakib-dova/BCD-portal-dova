@@ -26,7 +26,10 @@ block content
                             .control
                               .columns.ml-0.pl-0.alignCenterChild
                                 .column.pl-0
-                                  input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= valueForApproveRouteNameInput maxlength=40 placeholder='全角・半角文字・英数字40文字まで' required) 
+                                  if isApproveRouteEdit
+                                    input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= '承認ルート名1' maxlength=40 placeholder='全角・半角文字・英数字40文字まで' readonly) 
+                                  else
+                                    input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= valueForApproveRouteNameInput maxlength=40 placeholder='全角・半角文字・英数字40文字まで' required)   
                       .field.card                                    
                         .card-content
                           .field
@@ -38,40 +41,77 @@ block content
                                   .column
                                     p#error-message-approveRoute.red-color(tabIndex=0)                                
                                 .column.p-0.lineApproveRoute(id='bulkInsertNo1')
-                                  .columns.m-0.p-1.lineApproveRouteForLast(id='bulkInsertNo1_lineApproveRouteLast' data-idx='1')
-                                    .column.p-0.border-div-rad-4
-                                      .field.is-horizontal.m-1.has-addons-centered
-                                        .field-label.is-normal.m-0.text-center
-                                          label 承認順                                     
-                                        .field-label.is-normal.m-0.text-center
-                                          label 最終承認者名
-                                        .field-label.is-normal.m-0.text-center
-                                          label メールアドレス
-                                        .field-label.is-normal.m-0.fixed-void-66
-                                          label
-                                      .field.is-horizontal.p-1
-                                        .field-body.m-1
-                                          .field.text-center.padding-left-30
-                                            label.input-label.text-center 最終承認
-                                            p.input-label-required.input-label.text-center  （必須）                                                                             
-                                        .field-body.m-1
-                                          .field
-                                            p.control
-                                              input.input.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` value readonly)
-                                        .field-body.m-1
-                                          .field
-                                            p.control
-                                              input.input.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` value readonly)
-                                              input(type='hidden' name=`uuid`)
-                                        .field-body.m-1.is-4.text-center
-                                          .field
-                                            p.control
-                                              a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
-                                    .column.is-0.p-1
-                                      .column.is-invisible
-                                        a.red-color.btn-minus-approveRoute
-                                          i.fas.fa-minus-circle
-
+                                  if isApproveRouteEdit
+                                    -var numberList = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+                                    -var list = approveUsers
+                                    each item, idx in list
+                                      .columns.m-0.p-1.lineApproveRouteForLast(id=`bulkInsertNo1_lineApproveRoute1` data-idx='1')
+                                        .column.p-0.border-div-rad-4
+                                          .field.is-horizontal.m-1.has-addons-centered
+                                            .field-label.is-normal.m-0.text-center
+                                              label 承認順                                     
+                                            .field-label.is-normal.m-0.text-center
+                                              label 承認者名
+                                            .field-label.is-normal.m-0.text-center
+                                              label メールアドレス
+                                            .field-label.is-normal.m-0.fixed-void-66
+                                              label
+                                          .field.is-horizontal.p-1
+                                            .field-body.m-1
+                                              .field.text-center.padding-left-30
+                                                label.input-label.text-center #{numberList[idx]}次承認
+                                                p.input-label-required.input-label.text-center  （必須）                                                                             
+                                            .field-body.m-1
+                                              .field
+                                                p.control
+                                                  input.input.input-approveRouteUserName(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.userName readonly) 
+                                            .field-body.m-1
+                                              .field
+                                                p.control
+                                                  input.input.input-approveRouteUserMailAddress(type='text' id=`lineApproveRoute_approveUserMailAddress` name=`mailAddress` value=item.userEmail readonly) 
+                                                  input(type='hidden' name=`uuid`)
+                                            .field-body.m-1.is-4.text-center
+                                              .field
+                                                p.control
+                                                  a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
+                                        .column.is-0.p-1
+                                          .column
+                                            a.red-color.btn-minus-approveRoute
+                                              i.fas.fa-minus-circle
+                                                                                
+                                    .columns.m-0.p-1.lineApproveRouteForLast(id='bulkInsertNo1_lineApproveRouteLast' data-idx='1')
+                                      .column.p-0.border-div-rad-4
+                                        .field.is-horizontal.m-1.has-addons-centered
+                                          .field-label.is-normal.m-0.text-center
+                                            label 承認順                                     
+                                          .field-label.is-normal.m-0.text-center
+                                            label 最終承認者名
+                                          .field-label.is-normal.m-0.text-center
+                                            label メールアドレス
+                                          .field-label.is-normal.m-0.fixed-void-66
+                                            label
+                                        .field.is-horizontal.p-1
+                                          .field-body.m-1
+                                            .field.text-center.padding-left-30
+                                              label.input-label.text-center 最終承認
+                                              p.input-label-required.input-label.text-center  （必須）                                                                             
+                                          .field-body.m-1
+                                            .field
+                                              p.control
+                                                input.input.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` value= '最終承認者' readonly)
+                                          .field-body.m-1
+                                            .field
+                                              p.control
+                                                input.input.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` value='testLast@test.com' readonly)
+                                                input(type='hidden' name=`uuid`)
+                                          .field-body.m-1.is-4.text-center
+                                            .field
+                                              p.control
+                                                a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
+                                      .column.is-0.p-1
+                                        .column.is-invisible
+                                          a.red-color.btn-minus-approveRoute
+                                            i.fas.fa-minus-circle                                                                         
                   .grouped-button                                  
                     a.button.mr-6(href= backUrl) 戻る
                     a.button.is-link#btn-confirm 確認
