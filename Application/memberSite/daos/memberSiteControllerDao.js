@@ -7,16 +7,16 @@
 
 // const db = require('../models')
 // サービス連携ID管理テーブル
-const serviceLinkageModel = require('../models').ServiceLinkageIdManagement
+const serviceLinkageModel = require('../../models').ServiceLinkageIdManagement
 
 // デジタルトレードトークンテーブル
-const digitaltradeTokenModel = require('../models').DigitaltradeToken
+const digitaltradeTokenModel = require('../../models').DigitaltradeToken
 
 // 認証履歴テーブル
-const authHistoryModel = require('../models').AuthenticationHistory
+const authHistoryModel = require('../../models').AuthenticationHistory
 
 const logger = require('../../lib/logger')
-const db = require('../models')
+const db = require('../../models')
 const { Op } = require('sequelize')
 
 const logMessageDefine = require('../../constants').logMessage
