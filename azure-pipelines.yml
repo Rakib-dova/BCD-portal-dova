@@ -252,6 +252,7 @@ stages:
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
+                #スクリプト修正から
                 vmStatus=`az vm get-instance-view -n $(vmPipelineName) -g $(operationRg)  --query instanceView.statuses[1].displayStatus  -o tsv`
                 if [ "$vmStatus" == "VM deallocated" ]; then
                   az vm start -g $(operationRg)  -n $(vmPipelineName)
