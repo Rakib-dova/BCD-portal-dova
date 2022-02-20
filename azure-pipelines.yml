@@ -29,6 +29,12 @@ parameters:
       - demo
       - test
       - BuildandTest
+  - name: isPreDeploy_prodstgOpt
+    type: boolean
+    default: false
+    values:
+      - false
+      - true
 
 variables:
   - group: ${{ parameters.Environment }}
@@ -40,6 +46,8 @@ variables:
     value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
   - name: vmPipeline #パイプライン起動停止フラグ
     value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
+  - name: preDeploy #デプロイ前正常性確認フラグ
+    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.isPreDeploy_prodstgOpt,true)) }}
 
 stages:
   - stage: BuildandTest
@@ -236,4 +244,15 @@ stages:
               package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
               startUpCommand: npm run start
               
-              
+          - task: AzureCLI@2
+            condition: eq(variables.preDeploy,'True')
+            displayName: update releaseBackEndpool to connect to JapanaWest App service Staging Slot
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                vmStatus=`az vm get-instance-view -n $(vmPipelineName) -g $(operationRg)  --query instanceView.statuses[1].displayStatus  -o tsv`
+                if [ "$vmStatus" == "VM deallocated" ]; then
+                  az vm start -g $(operationRg)  -n $(vmPipelineName)
+                fi
