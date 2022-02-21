@@ -129,7 +129,7 @@ describe('承認ルート確認・変更のインテグレーションテスト'
 
       const testApproveUser = new db.ApproveUser({
         approveRouteId: testApproveRoute.approveRouteId,
-        approveUser: userId,
+        approveUser: testTenantId,
         prevApproveUser: null,
         nextApproveUser: null,
         isLastApproveUser: 0
@@ -369,37 +369,7 @@ describe('承認ルート確認・変更のインテグレーションテスト'
       await browser.close()
     })
 
-    // バリデーションチェック
-
-    // 承認ルート名未入力
-    test('バリデーションチェック、承認ルート名未入力', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto(`https://localhost:3000${redirectUrl}`)
-      if (page.url() === `https://localhost:3000${redirectUrl}`) {
-        await page.evaluate(() => (document.querySelector('#setApproveRouteNameInputId').value = ''))
-
-        await page.waitForTimeout(500)
-
-        await page.click('#btn-confirm')
-
-        // エラーメッセージが表示されること確認
-        const checkErrorMessage = await page.evaluate(() => {
-          return document.querySelector('#RequiredErrorMesageForCode').getAttribute('class')
-        })
-
-        expect(checkErrorMessage).toBe('input-label-required')
-      }
-      await browser.close()
-    })
-
-    test('変更した承認ルートの内容を承認ルート一覧で確認', async () => {
+    test('登録した承認ルートの内容を承認ルート一覧で確認', async () => {
       const res = await request(app)
         .get('/approveRouteList')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
@@ -419,8 +389,7 @@ describe('承認ルート確認・変更のインテグレーションテスト'
       expect(res.text).toMatch(/←Homeへ戻る/i)
     })
 
-    // 変更した承認ルートの内容を承認ルート確認・変更画面で確認
-    test('変更した承認ルートの内容を承認ルート確認・変更画面で確認', async () => {
+    test('登録した承認ルートの内容を承認ルート確認・変更画面で確認', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -436,7 +405,7 @@ describe('承認ルート確認・変更のインテグレーションテスト'
           return document.querySelector('#setApproveRouteNameInputId').value
         })
 
-        expect(checkSetAccountCodeInputId).toBe('承認ルート名1')
+        expect(checkSetAccountCodeInputId).toBe('integrationApproveRoute')
       }
       await browser.close()
     })
@@ -706,20 +675,20 @@ describe('承認ルート確認・変更のインテグレーションテスト'
       const res = await request(app)
         .get('/approveRouteEdit')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
+        .expect(400)
 
       // 画面内容確認
-      expect(res.text).toMatch(/現在解約手続き中です。/i)
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('一般ユーザ、契約ステータス：解約受付、承認ルート確認・変更ページ直接接続-利用不可', async () => {
+    test('一般ユーザ、契約ステータス：解約申込、承認ルート確認・変更ページ直接接続-利用不可', async () => {
       const res = await request(app)
         .get('/approveRouteEdit')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
+        .expect(400)
 
       // 画面内容確認
-      expect(res.text).toMatch(/現在解約手続き中です。/i)
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
     test('管理者、登録した承認ルートの確認・変更画面へアクセス、利用不可', async () => {
@@ -780,20 +749,20 @@ describe('承認ルート確認・変更のインテグレーションテスト'
       const res = await request(app)
         .get('/approveRouteEdit')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(500)
+        .expect(400)
 
       // 画面内容確認
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('一般ユーザ、契約ステータス：解約、承認ルート確認・変更ページ直接接続-利用不可', async () => {
+    test('一般ユーザ、契約ステータス：解約申込、承認ルート確認・変更ページ直接接続-利用不可', async () => {
       const res = await request(app)
         .get('/approveRouteEdit')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(500)
+        .expect(400)
 
       // 画面内容確認
-      expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
+      expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
     test('管理者、登録した承認ルートの確認・変更画面へアクセス、利用不可', async () => {
