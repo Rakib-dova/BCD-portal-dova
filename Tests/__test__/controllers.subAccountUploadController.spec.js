@@ -399,7 +399,7 @@ describe('subAccountUploadControllerのテスト', () => {
         {
           accountCode: 'TEST1kankoaaaaaa',
           errorData:
-            '勘定科目コードは10文字以内で入力してください。,補助科目コードは10文字以内で入力してください。,補助科目名は40文字以内で入力してください。',
+            '勘定科目コードは10文字以内で入力してください。補助科目コードは10文字以内で入力してください。補助科目名は40文字以内で入力してください。',
           idx: 1,
           subjectCode: 'TEST1hokoaaaaaaaaaaaaaa',
           subjectName: 'TEST1homeiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'

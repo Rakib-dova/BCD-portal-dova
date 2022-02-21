@@ -126,7 +126,7 @@ const upload = async function (_file, contract) {
             break
           default:
             errorCheck = true
-            errorData += errorData ? `,${constants.codeErrMsg[checkName]}` : `${constants.codeErrMsg[checkName]}`
+            errorData += `${constants.codeErrMsg[checkName]}`
 
             break
         }
