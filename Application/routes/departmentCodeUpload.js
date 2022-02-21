@@ -57,7 +57,8 @@ const cbGetIndex = async (req, res, next) => {
     procedureComment2Children: [
       'A列：部門コード　英・数字・カナのみ（10桁）',
       'B列：部門名　　　文字列（40桁）',
-      '※1ファイルで作成できる部門データの数は200まで'
+      '※1ファイルで作成できる部門データの数は200まで',
+      '※文字コードはUTF-8 BOM付で作成してください'
     ],
     procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
     procedureComment4: '4.「アップロード開始」ボタンをクリック'
@@ -140,7 +141,7 @@ const cbPostIndex = async (req, res, next) => {
       // 正常
       case 0:
         req.flash('info', '部門データ取込が完了しました。')
-        return res.redirect('/portal')
+        return res.redirect('/departmentCodeList')
       // ヘッダー不一致
       case -1:
         req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.CODEHEADERERR000, 'SYSERR'])

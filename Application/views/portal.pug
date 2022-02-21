@@ -5,6 +5,10 @@ block content
     .hero-body.is-logo
       .container
 
+  //- 会員サイト連携開発追加
+  input(type="hidden" name="_csrf" value=csrfToken)
+  //- 会員サイト連携開発追加
+
   .container.is-max-widescreen
     //- .level-left.is-family-sans-serif
     //-   .level-item
@@ -76,10 +80,19 @@ block content
                     .media-left
                       img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
                     .media-content
-                      p.title.is-5 仕訳情報設定
-                      p 勘定科目と補助科目をユーザーカスタマイズができます。
+                      p.title.is-5 仕訳情報管理
+                      p 請求書に対して勘定科目などの仕訳情報を設定できます。また、仕訳情報をCSV形式でダウンロードできます。
 
         .columns.is-desktop.is-family-noto-sans
+          .column.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='bugyo-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../obc/images/ts-app-digitaltrade-appicon.svg')
+                  .media-content
+                    p.title.is-5 商奉行#[sup &reg;]クラウド連携
+                    p 請求書情報を商奉行クラウド間で連携できます。
           .column.hvr-float
             .box.iconBox.textOverflow
               a.show-modal(data-target='support-modal')
@@ -100,7 +113,6 @@ block content
                       p.title.is-5 設定
                       p 契約情報変更と解約を行うことができます。
                       p 解約の場合は取り消しはできません。
-          .column.hvr-float
       .column.is-12.menu
        p.olta-title-font-size 提携サービス
         .columns.is-desktop.is-family-noto-sans
@@ -144,31 +156,31 @@ block content
               p 設定方法、ご利用方法のお問い合わせ
         footer.modal-card-foot
       
-      .modal#csvupload-modal
-        .modal-background.cancel-button(data-target='csvupload-modal')
-        .modal-card.is-family-noto-sans
-          header.modal-card-head
-            p.modal-card-title.title.mb-0 請求書一括作成
-            button.delete(data-target="csvupload-modal")
-          section.modal-card-body
-            nav.panel
-              a.panel-block(href='/csvupload') 
-                span.panel-icon
-                  i.fas.fa-file
-                p 請求書一括作成
-              a.panel-block(href='/uploadFormatList') 
-                span.panel-icon
-                  i.fas.fa-file
-                p 請求書アップロードフォーマット一覧
-              a.panel-block(download href="../html/請求書一括作成フォーマット.csv")
-                span.panel-icon
-                  i.fas.fa-file
-                p アップロード用請求書フォーマットcsvダウンロード
-              a.panel-block(download href="../html/【Bconnectionデジタルトレードアプリ】操作マニュアル_請求書一括作成.pdf")
-                span.panel-icon
-                  i.fas.fa-file
-                p 操作マニュアルダウンロード
-          footer.modal-card-foot
+    .modal#csvupload-modal
+      .modal-background.cancel-button(data-target='csvupload-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title.title.mb-0 請求書一括作成
+          button.delete(data-target="csvupload-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/csvupload') 
+              span.panel-icon
+                i.fas.fa-file
+              p 請求書一括作成
+            a.panel-block(href='/uploadFormatList') 
+              span.panel-icon
+                i.fas.fa-file
+              p 請求書アップロードフォーマット一覧
+            a.panel-block(download href="../html/請求書一括作成フォーマット.csv")
+              span.panel-icon
+                i.fas.fa-file
+              p アップロード用請求書フォーマットcsvダウンロード
+            a.panel-block(download href="../html/【Bconnectionデジタルトレードアプリ】操作マニュアル_請求書一括作成.pdf")
+              span.panel-icon
+                i.fas.fa-file
+              p 操作マニュアルダウンロード
+        footer.modal-card-foot
 
     .modal#support-confirmation-modal
       .modal-background.cancel-button(data-target='support-confirmation-modal')
@@ -196,7 +208,7 @@ block content
       .modal-background.cancel-button(data-target='registAccountCode-modal')
       .modal-card.is-family-noto-sans
         header.modal-card-head
-          p.modal-card-title 仕訳情報設定
+          p.modal-card-title 仕訳情報管理
           button.delete(data-target="registAccountCode-modal")
         section.modal-card-body
           nav.panel
@@ -215,28 +227,32 @@ block content
             a.panel-block(href='/inboxList/1')
               span.panel-icon
                 i.fas.fa-file
-              p 受領した請求書一覧
+              p 受領請求書への仕訳情報設定
             a.panel-block(href='/journalDownload')
              span.panel-icon
                i.fas.fa-file
              p 仕訳情報ダウンロード
+            a.panel-block(href='/approveRouteList')
+             span.panel-icon
+               i.fas.fa-file
+             p 承認ルート一覧
         footer.modal-card-foot
 
     .modal#csvDownload-modal
-     .modal-background.cancel-button(data-target='csvDownload-modal')
-     .modal-card.is-family-noto-sans
-       header.modal-card-head
-         p.modal-card-title 請求情報ダウンロード
-         button.delete(data-target="csvDownload-modal")
-       section.modal-card-body
-         nav.panel
-           a.panel-block(href='/csvDownload')
-             span.panel-icon
-               i.fas.fa-file
-             p 請求情報ダウンロード
-       footer.modal-card-foot
+      .modal-background.cancel-button(data-target='csvDownload-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title 請求情報ダウンロード
+          button.delete(data-target="csvDownload-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/csvDownload')
+              span.panel-icon
+                i.fas.fa-file
+              p 請求情報ダウンロード
+        footer.modal-card-foot
 
-     .modal#config-modal
+    .modal#config-modal
       .modal-background.cancel-button(data-target='config-modal')
       .modal-card.is-family-noto-sans
         header.modal-card-head
@@ -254,7 +270,7 @@ block content
               p 解約
         footer.modal-card-foot
     
-     .modal#factoring-modal
+    .modal#factoring-modal
       .modal-background.cancel-button(data-target='factoring-modal')
       .modal-card#olta-modal-card
         header.modal-card-head
@@ -275,7 +291,7 @@ block content
           a.olta-link-underline(href='https://www.olta.co.jp/lp/bconnection/?utm_source=digitatrad&utm_campaign=lp&utm_medium=alliance&utm_term=DIGITALTRAD' target='_blank') https://www.olta.co.jp/lp/bconnection/
         footer.modal-card-foot
 
-     .modal#settlement-modal
+    .modal#settlement-modal
       .modal-background.cancel-button(data-target='settlement-modal')
       .modal-card#olta-modal-card
         header.modal-card-head
@@ -295,8 +311,31 @@ block content
           p  お問合せ・お申込みは下記リンクから。※リンク先は外部サイトとなります。
           a.olta-link-underline(href='https://www.nttsmarttrade.co.jp/bconnection_lp/' target='_blank') https://www.nttsmarttrade.co.jp/bconnection_lp/
         footer.modal-card-foot
+    
+    .modal#bugyo-modal
+      .modal-background.cancel-button(data-target='bugyo-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title.title.mb-0 商奉行クラウド連携
+          button.delete(data-target="bugyo-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/bugyo/menu' target='_top')
+              span.panel-icon
+                i.fas.fa-file
+              p 利用開始
+            a.panel-block(download href="../html/【Bconnectionデジタルトレードアプリ】操作マニュアル_請求書一括作成.pdf")
+              span.panel-icon
+                i.fas.fa-file
+              p 操作マニュアルダウンロード
+        footer.modal-card-foot
   include footer
 
 block append scripts
   script(src="/js/portal-page.js")
+  //- 会員サイト連携開発追加 fingerpirnt未検証の場合、fingerprint値をXHRで送信する。
+  //- TODO:ポータル画面表示時に紐づけを実施するように修正
+  if (memberSiteFlg)
+    script(src="/js/portal-page-memberSite.js")
+  //- 会員サイト連携開発追加
   // End of DigitalTrade Portal Page

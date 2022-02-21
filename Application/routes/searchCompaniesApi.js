@@ -36,6 +36,30 @@ const cbSearchCompanies = async (req, res) => {
   // 検索する企業名を格納
   const companyName = req.body.companyName
 
+  // 自分自身の企業をaccountAPIで取得
+  const accountCompanyResult = await apiManager.accessTradeshift(
+    req.user.accessToken,
+    req.user.refreshToken,
+    'get',
+    '/account'
+  )
+
+  // accountCompanyResultのエラー確認
+  if (accountCompanyResult instanceof Error) {
+    // APIエラーが発生した場合
+    return errorHandle(accountCompanyResult, res, req)
+  } else {
+    // 検索した企業名と比較し、部分一致したら格納
+    if (accountCompanyResult.CompanyName && accountCompanyResult.CompanyAccountId) {
+      if (accountCompanyResult.CompanyName.indexOf(companyName) !== -1) {
+        resultCompanies.push({
+          CompanyName: accountCompanyResult.CompanyName,
+          CompanyAccountId: accountCompanyResult.CompanyAccountId
+        })
+      }
+    }
+  }
+
   // 企業名を検索できるように変更
   const encodeCompanyName = encodeURI(companyName)
   const sendQuery = `query=${encodeCompanyName}`
