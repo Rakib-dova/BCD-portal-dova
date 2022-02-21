@@ -56,6 +56,9 @@ const cbGetIndex = async (req, res, next) => {
     contract.contractId,
     approveRouteId
   )
+
+  if (approveRouteAndApprover instanceof Error) return next(errorHelper.create(500))
+
   const lastApprover = approveRouteAndApprover.users.pop()
 
   res.render('registApproveRoute', {
