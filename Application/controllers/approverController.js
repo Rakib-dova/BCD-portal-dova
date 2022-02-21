@@ -249,9 +249,6 @@ const getApproveRoute = async (accessToken, refreshToken, contract, approveRoute
         header = approveRouteApprovers[idx]
       }
       idx++
-      if (idx === approveRouteApprovers.length && header === null) {
-        return -2
-      }
     }
 
     const users = []

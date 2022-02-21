@@ -59,6 +59,12 @@ const cbGetIndex = async (req, res, next) => {
 
   if (approveRouteAndApprover instanceof Error) return next(errorHelper.create(500))
 
+  switch (approveRouteAndApprover) {
+    case -1:
+      req.flash('noti', ['承認ルート一覧', '当該承認ルートをDBから見つかりませんでした。'])
+      return res.redirect('/approveRouteList')
+  }
+
   const lastApprover = approveRouteAndApprover.users.pop()
 
   res.render('registApproveRoute', {

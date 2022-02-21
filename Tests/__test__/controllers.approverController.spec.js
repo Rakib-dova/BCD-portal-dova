@@ -983,51 +983,6 @@ describe('approverControllerのテスト', () => {
       expect(result).toBe(-1)
     })
 
-    test('準正常：1次承認者が削除されている場合', async () => {
-      // ダミーデータの用意
-      const accessToken = 'dummy-acesstoken'
-      const refreshToken = 'dummy-refreshToken'
-      const contractId = 'dummy-contractId'
-      const approveRouteId = 'dummy-approve-routeId'
-
-      // ApproveRoute.getApproveRoute承認ルートを検索
-      approveGetApproveRoute.mockReturnValueOnce([
-        {
-          approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
-          contractId: 'dummy-contractId',
-          approveRouteName: 'UTテスト承認ルート',
-          createdAt: new Date('2022-02-18'),
-          updatedAt: new Date('2022-02-18'),
-          deleteFlag: false,
-          'ApproveUsers.approveUserId': '1e5e24aa-77c3-4571-a93c-5caa0e336ddb',
-          'ApproveUsers.approveRouteId': '6693f071-9150-4005-bb06-3f8d30724f9b',
-          'ApproveUsers.approveUser': 'aa974511-8188-4022-bd86-45e251fd259e',
-          'ApproveUsers.prevApproveUser': '8b087e49-6a91-4fc2-8dc8-f30f56d9acd6',
-          'ApproveUsers.nextApproveUser': null,
-          'ApproveUsers.isLastApproveUser': true,
-          'ApproveUsers.createdAt': new Date('2022-02-18'),
-          'ApproveUsers.updatedAt': new Date('2022-02-18')
-        }
-      ])
-
-      // 承認ルートのユーザー
-      approveUserFindOne.mockReturnValueOnce(
-        ApproveUser.build({
-          approveUserId: '1e5e24aa-77c3-4571-a93c-5caa0e336ddb',
-          approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
-          approveUser: 'aa974511-8188-4022-bd86-45e251fd259e',
-          prevApproveUser: '8b087e49-6a91-4fc2-8dc8-f30f56d9acd6',
-          nextApproveUser: null,
-          isLastApproveUser: false
-        })
-      )
-
-      // 試験実施
-      const result = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
-
-      expect(result).toBe(-2)
-    })
-
     test('準正常：DBエラー発生', async () => {
       // ダミーデータの用意
       const accessToken = 'dummy-acesstoken'
