@@ -131,6 +131,8 @@ const insertApprover = async (contract, values) => {
         isLastApproveUser: false
       })
     } else {
+      let prev = null
+      let header = null
       for (let i = 0; i < uuids.length; i++) {
         let isLastApproveUser = false
 
@@ -138,13 +140,25 @@ const insertApprover = async (contract, values) => {
           isLastApproveUser = true
         }
 
+        let currentUser = null
         resultToInsertUser = await ApproveUser.create({
           approveRouteId: resultToInsertRoute.approveRouteId,
           approveUser: uuids[i],
-          prevApproveUser: uuids[i - 1] ?? null,
-          nextApproveUser: uuids[i + 1] ?? null,
+          prevApproveUser: null,
+          nextApproveUser: null,
           isLastApproveUser: isLastApproveUser
         })
+        currentUser = resultToInsertUser
+        if (header === null) {
+          header = currentUser
+          prev = header
+        } else {
+          prev.nextApproveUser = currentUser.approveUserId
+          currentUser.prevApproveUser = prev.approveUserId
+          await prev.save()
+          await currentUser.save()
+          prev = currentUser
+        }
       }
     }
 
@@ -187,19 +201,15 @@ const getApproveRouteList = async (contractId) => {
     // 承認ルートの名を昇順ソード
     approveRoutes.sort((a, b) => {
       if (a.approveRouteName > b.approveRouteName) return 1
-      else if (a.approveRouteName < b.approveRouteName) return -1
-      else {
-        if (a.ApproveUsers.length - b.ApproveUsers.length > 0) return 1
-        else if (a.ApproveUsers.length - b.ApproveUsers.length < 0) return -1
-        else return 0
-      }
+      else return -1
     })
     logger.info(constantsDefine.logMessage.INF001 + 'approverController.getApproveRouteList')
     return approveRoutes.map((approveRoute, idx) => {
       return {
         No: idx + 1,
         approveRouteName: approveRoute.approveRouteName,
-        approverCount: approveRoute.ApproveUsers.length
+        approverCount: approveRoute.ApproveUsers.length,
+        uuid: approveRoute.approveRouteId
       }
     })
   } catch (error) {
@@ -208,8 +218,77 @@ const getApproveRouteList = async (contractId) => {
     return error
   }
 }
+
+/**
+ * 登録した承認ルートを検索する。
+ * @param {string} accessToken トレードシフトのAPIアクセストークン
+ * @param {string} refreshToken トレードシフトのAPIアクセストークン
+ * @param {uuid} contract デジトレの利用の契約者の識別番号
+ * @param {uuid} approveRouteId 登録した承認ルートの識別番号
+ * @returns {object}
+ */
+const getApproveRoute = async (accessToken, refreshToken, contract, approveRouteId) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'approverController.getApproveRoute')
+  try {
+    const approveRouteApprovers = await ApproveRoute.getApproveRoute(contract, approveRouteId)
+    if (approveRouteApprovers.length === 0) {
+      return -1
+    }
+    const query = '/account/users'
+    const approveRoute = {
+      approveRouteId: approveRouteApprovers[0].approveRouteId,
+      contractId: approveRouteApprovers[0].contractId,
+      name: approveRouteApprovers[0].approveRouteName
+    }
+
+    // header検索
+    let header = null
+    let idx = 0
+    while (approveRouteApprovers[idx]) {
+      if (approveRouteApprovers[idx]['ApproveUsers.prevApproveUser'] === null) {
+        header = approveRouteApprovers[idx]
+      }
+      idx++
+    }
+
+    const users = []
+    const headerId = header['ApproveUsers.approveUserId']
+    let currUser = await ApproveUser.findOne({
+      where: {
+        approveUserId: headerId
+      }
+    })
+    let next = null
+    while (currUser) {
+      const userId = currUser.approveUser
+      next = currUser.nextApproveUser
+      users.push(
+        new Approver(await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${query}/${userId}`))
+      )
+      if (next) {
+        currUser = await ApproveUser.findOne({
+          where: {
+            approveUserId: next
+          }
+        })
+      } else {
+        currUser = null
+      }
+    }
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.getApproveRoute')
+    return {
+      ...approveRoute,
+      users: users
+    }
+  } catch (error) {
+    logger.error({ contractId: contract, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.getApproveRoute')
+    return error
+  }
+}
 module.exports = {
   getApprover: getApprover,
   insertApprover: insertApprover,
-  getApproveRouteList: getApproveRouteList
+  getApproveRouteList: getApproveRouteList,
+  getApproveRoute: getApproveRoute
 }

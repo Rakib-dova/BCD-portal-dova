@@ -290,6 +290,8 @@ app.use('/inbox', require('./routes/inbox').router)
 app.use('/registApproveRoute', require('./routes/registApproveRoute').router)
 // 承認ルート一覧
 app.use('/approveRouteList', require('./routes/approveRouteList').router)
+// 承認ルート確認
+app.use('/approveRouteEdit', require('./routes/approveRouteEdit').router)
 
 // 設定
 // cancellation
