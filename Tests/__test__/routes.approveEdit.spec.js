@@ -381,7 +381,7 @@ describe('approveRouteListのテスト', () => {
       // response.renderでapproveRouteListが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', [
         '承認ルート一覧',
-        '当該勘定科目をDBから見つかりませんでした。'
+        '当該承認ルートをDBから見つかりませんでした。'
       ])
       expect(response.redirect).toHaveBeenCalledWith('/approveRouteList')
     })
