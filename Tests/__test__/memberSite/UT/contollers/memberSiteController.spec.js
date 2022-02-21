@@ -646,13 +646,13 @@ describe('memberSiteController UTテスト', () => {
       //   expect(next).toHaveBeenCalledWith(errorHelper.create(500))
       //   logger.trace({ testCase: expect.getState().currentTestName }, '======= 終了 =======')
       // })
-      })
+    })
 
     describe('07 正常処理', () => {
       beforeEach(() => {
         request.session = {}
         memberSiteSessionDto = new MemberSiteCoopSessionDto()
-    })
+      })
       afterEach(() => {})
       test('01 アプリ一覧からの遷移', async () => {
         /* テスト条件設定 */

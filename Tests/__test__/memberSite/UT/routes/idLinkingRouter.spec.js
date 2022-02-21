@@ -45,7 +45,7 @@ describe('idLinkingRouter UTテスト', () => {
       // 試験対象関数実行
       expect(idLinkingRouter.router.post).toBeCalledWith(
         '/',
-        expect.any(Function), // TODO:csrfProtectionが一致しない。暫定で通過させる
+        expect.any(Function), // csrfProtectionが一致しない。暫定で通過させる
         memberSiteController.idLinkingProcess,
         idLinkingRouter.idLinkingProcessForwarder
       )
