@@ -102,7 +102,7 @@ exports.hashPassword = function (userId, password) {
   let hashStr = null
   if (userId == null || password == null) return hashStr
   const str = password + userId
-    hashStr = crypto.createHash('sha512').update(str, 'utf8').digest('hex')
+  hashStr = crypto.createHash('sha512').update(str, 'utf8').digest('hex')
   return hashStr
 }
 

@@ -7,16 +7,16 @@
 
 // const db = require('../models')
 // サービス連携ID管理テーブル
-const serviceLinkageModel = require('../models').ServiceLinkageIdManagement
+const serviceLinkageModel = require('../../models').ServiceLinkageIdManagement
 
 // デジタルトレードトークンテーブル
-const digitaltradeTokenModel = require('../models').DigitaltradeToken
+const digitaltradeTokenModel = require('../../models').DigitaltradeToken
 
 // 認証履歴テーブル
-const authHistoryModel = require('../models').AuthenticationHistory
+const authHistoryModel = require('../../models').AuthenticationHistory
 
 const logger = require('../../lib/logger')
-const db = require('../models')
+const db = require('../../models')
 const { Op } = require('sequelize')
 
 const logMessageDefine = require('../../constants').logMessage
@@ -50,7 +50,7 @@ module.exports = {
       return digitaltradeTokenInfo
     } catch (error) {
       // エラー内容をログ出力
-      logger.error({ error: error.message }, 'ERR-MB999 getDigitaltradeTokenBydtToken:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 getDigitaltradeTokenBydtToken:runtime Error')
       return error
     }
   },
@@ -62,7 +62,6 @@ module.exports = {
    * @returns
    */
   getFingerprintBydigitaltradeId: async (digitaltradeId, digitaltradeToken) => {
-    // TODO:イベントコードを定義
     logger.info(logMessageDefine.INF000 + 'getFingerprintBydigitaltradeId')
 
     try {
@@ -77,13 +76,11 @@ module.exports = {
           tokenflg: true
         }
       })
-      // TODO:イベントコードを定義
       logger.info(logMessageDefine.INF001 + 'getFingerprintBydigitaltradeId')
       return digitaltradeTokenInfo
     } catch (error) {
       // エラー内容をログ出力
-      // TODO:イベントコードを定義
-      logger.error({ error: error.message }, 'ERR-MB999 getFingerprintBydigitaltradeId:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 getFingerprintBydigitaltradeId:runtime Error')
       return error
     }
   },
@@ -96,7 +93,6 @@ module.exports = {
    * @returns {object} デジタルトレードトークン
    */
   updateDtTokenFlg: async (dtToken) => {
-    // TODO:イベントコードを定義
     logger.info(logMessageDefine.INF000 + 'updateDtTokenFlg')
 
     try {
@@ -114,13 +110,11 @@ module.exports = {
           { transaction: t }
         )
       })
-      // TODO:イベントコードを定義
       logger.info(logMessageDefine.INF001 + 'updateDtTokenFlg')
       return updated
     } catch (error) {
       // エラー内容をログ出力
-      // TODO:イベントコードを定義
-      logger.error({ error: error.message }, 'ERR-MB999 updateDtTokenFlg:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 updateDtTokenFlg:runtime Error')
       return error
     }
   },
@@ -131,7 +125,6 @@ module.exports = {
    * @returns
    */
   getServiceLinkageIdBydigitaltradeId: async (digitaltradeId) => {
-    // TODO:イベントコードを定義
     logger.info(logMessageDefine.INF000 + 'getServiceLinkageIdBydigitaltradeId')
     try {
       logger.debug({ digitaltradeId: digitaltradeId }, 'getServiceLinkageIdBydigitaltradeId')
@@ -144,12 +137,12 @@ module.exports = {
           deleteFlag: false
         }
       })
-      // TODO:イベントコードを定義
+
       logger.info(logMessageDefine.INF001 + 'getServiceLinkageIdBydigitaltradeId')
       return serviceLinkageInfo
     } catch (error) {
       // エラー内容をログ出力
-      logger.error({ error: error.message }, 'ERR-MB999 getServiceLinkageIdBydigitaltradeId:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 getServiceLinkageIdBydigitaltradeId:runtime Error')
       return error
     }
   },
@@ -160,7 +153,6 @@ module.exports = {
    * @returns
    */
   updateServiceLinkageId: async (mSiteSessionDto) => {
-    // TODO:イベントコードを定義
     logger.info(logMessageDefine.INF000 + 'updateServiceLinkageId')
     logger.debug({ mSiteSessionDto: mSiteSessionDto }, 'updateServiceLinkageId')
     try {
@@ -203,12 +195,12 @@ module.exports = {
           { transaction: t }
         )
       })
-      // TODO:イベントコードを定義
+
       logger.info(logMessageDefine.INF001 + 'updateServiceLinkageId')
       return updated
     } catch (error) {
       // エラー内容をログ出力
-      logger.error({ error: error.message }, 'ERR-MB999 updateServiceLinkageId:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 updateServiceLinkageId:runtime Error')
       return error
     }
   },
@@ -219,7 +211,6 @@ module.exports = {
    * @returns
    */
   createServiceLinkageId: async (mSiteSessionDto) => {
-    // TODO:イベントコードを定義
     logger.info(logMessageDefine.INF000 + 'createServiceLinkageId')
 
     try {
@@ -258,13 +249,12 @@ module.exports = {
           { transaction: t }
         )
       })
-      // TODO:イベントコードを定義
+
       logger.info(logMessageDefine.INF001 + 'createServiceLinkageId')
       return created
     } catch (error) {
       // エラー内容をログ出力
-      // TODO:イベントコードを定義
-      logger.error({ error: error.message }, 'ERR-MB999 createServiceLinkageId:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 createServiceLinkageId:runtime Error')
       return error
     }
   },
@@ -275,7 +265,6 @@ module.exports = {
    * @returns
    */
   deleteDigitaltradeToken: async (mSiteSessionDto) => {
-    // TODO:イベントコードを定義
     logger.info(logMessageDefine.INF000 + 'deleteDigitaltradeToken')
 
     try {
@@ -293,12 +282,10 @@ module.exports = {
           { transaction: t }
         )
       })
-      // TODO:イベントコードを定義
       logger.info(logMessageDefine.INF001 + 'deleteDigitaltradeToken')
       return deleted
     } catch (error) {
-      // TODO:イベントコードを定義
-      logger.error({ error: error.message }, 'ERR-MB999 deleteDigitaltradeToken:runtime Error')
+      logger.error({ error: error.stack }, 'ERR-MB999 deleteDigitaltradeToken:runtime Error')
       return error
     }
   }
