@@ -40,6 +40,19 @@ block content
                                 .columns.m-0
                                   .column
                                     p#error-message-approveRoute.red-color(tabIndex=0)
+                                      - let noneUserCnt = 0
+                                      - let noneSettingUser = ''
+                                      - const noneUserList  = []
+                                      each noneSettingUser, idx in approveUsers
+                                        if noneSettingUser.getName().trim() === '未設定'
+                                          - noneUserCnt++
+                                          - noneUserList.push(idx + 1)
+                                      if lastApprover.getName().trim() === '未設定'
+                                        - noneUserCnt++
+                                        - noneUserList.push('最終')
+                                      if noneUserCnt !== 0
+                                        - noneSettingUser = `無効なユーザが承認ルートに設定されています。（承認順：${noneUserList.join(', ')}）`
+                                      | #{noneSettingUser}
                                 .column.p-0.lineApproveRoute(id='bulkInsertNo1')
                                   if isApproveRouteEdit
                                     -var numberList = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
@@ -63,11 +76,14 @@ block content
                                             .field-body.m-1
                                               .field
                                                 p.control
-                                                  input.input.input-approveRouteUserName(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.getName() readonly)
+                                                  if item.getName().trim() === '未設定'
+                                                    div#none-user-name #{item.getName()}
+                                                  if item.getName().trim() !== '未設定'
+                                                    input.input.input-approveRouteUserName(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.getName().trim() readonly)
                                             .field-body.m-1
                                               .field
                                                 p.control
-                                                  input.input.input-approveRouteUserMailAddress(type='text' id=`lineApproveRoute_approveUserMailAddress` name=`mailAddress` value= item.getMail() readonly)
+                                                  input.input.input-approveRouteUserMailAddress(type='text' id=`lineApproveRoute_approveUserMailAddress` name=`mailAddress` value= item.getMail().trim() readonly)
                                                   input(type='hidden' name=`uuid`)
                                             .field-body.m-1.is-4.text-center
                                               .field
@@ -98,7 +114,11 @@ block content
                                           .field
                                             p.control
                                               if lastApprover
-                                                input.input.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` value=lastApprover.getName() readonly)
+                                                if lastApprover.getName().trim() === '未設定'
+                                                  div#none-user-name
+                                                    | #{lastApprover.getName()}
+                                                if lastApprover.getName().trim() !== '未設定'
+                                                  input.input.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` value=lastApprover.getName() readonly)
                                               else
                                                 input.input.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` readonly)
                                         .field-body.m-1
