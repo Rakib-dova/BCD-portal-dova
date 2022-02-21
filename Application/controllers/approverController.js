@@ -236,6 +236,9 @@ const getApproveRoute = async (accessToken, refreshToken, contract, approveRoute
   logger.info(constantsDefine.logMessage.INF000 + 'approverController.getApproveRoute')
   try {
     const approveRouteApprovers = await ApproveRoute.getApproveRoute(contract, approveRouteId)
+    if (approveRouteApprovers.length === 0) {
+      return -1
+    }
     const query = '/account/users'
     const approveRoute = {
       approveRouteId: approveRouteApprovers[0].approveRouteId,
