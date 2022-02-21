@@ -438,6 +438,196 @@ describe('journalDownloadのテスト', () => {
       )
     })
 
+    test('正常:0件(請求書番号あり、仕訳情報の設定なし)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      journalfindAllSpy.mockReturnValue([])
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // エラーメッセージの表示
+      expect(request.flash).toBeCalledWith('noti', [
+        '請求書ダウンロード',
+        '条件に合致する請求書が見つかりませんでした。'
+      ])
+      expect(response.redirect).toBeCalledWith(303, '/journalDownload')
+    })
+
+    test('正常:0件(請求書番号あり、仕訳情報の設定なし、検索した請求書なし)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01000',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      journalfindAllSpy.mockReturnValue([])
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // エラーメッセージの表示
+      expect(request.flash).toBeCalledWith('noti', [
+        '請求書ダウンロード',
+        '条件に合致する請求書が見つかりませんでした。'
+      ])
+      expect(response.redirect).toBeCalledWith(303, '/journalDownload')
+    })
+
+    test('正常:0件(請求書番号なし、仕訳情報の設定なし)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: '',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      journalfindAllSpy.mockReturnValue([])
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // エラーメッセージの表示
+      expect(request.flash).toBeCalledWith('noti', [
+        '請求書ダウンロード',
+        '条件に合致する請求書が見つかりませんでした。'
+      ])
+      expect(response.redirect).toBeCalledWith(303, '/journalDownload')
+    })
+
+    test('正常:0件(請求書番号なし、仕訳情報の設定なし、検索した請求書なし)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: '',
+        minIssuedate: '9999-99-98',
+        maxIssuedate: '9999-99-98'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      journalfindAllSpy.mockReturnValue([])
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // エラーメッセージの表示
+      expect(request.flash).toBeCalledWith('noti', [
+        '請求書ダウンロード',
+        '条件に合致する請求書が見つかりませんでした。'
+      ])
+      expect(response.redirect).toBeCalledWith(303, '/journalDownload')
+    })
+
+    test('正常:同じ請求書番号、ドキュメントのUUIDが違う請求書の仕訳情報が設定されている場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      journalfindAllSpy.mockReturnValue([])
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // エラーメッセージの表示
+      expect(request.flash).toBeCalledWith('noti', [
+        '請求書ダウンロード',
+        '条件に合致する請求書が見つかりませんでした。'
+      ])
+      expect(response.redirect).toBeCalledWith(303, '/journalDownload')
+    })
+
     test('正常:受信企業あり・送信企業あり', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
