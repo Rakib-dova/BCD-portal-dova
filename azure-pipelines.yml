@@ -244,19 +244,6 @@ stages:
               package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
               startUpCommand: npm run start
               
-          - task: AzureCLI@2
-            condition: eq(variables.ManualOperation,'True')
-            displayName: update releaseBackEndpool to connect to JapanaWest App service Staging Slot
-            inputs:
-              azureSubscription: '$(azureSubscription)'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                #スクリプト修正から
-                vmStatus=`az vm get-instance-view -n $(vmPipelineName) -g $(operationRg)  --query instanceView.statuses[1].displayStatus  -o tsv`
-                if [ "$vmStatus" == "VM deallocated" ]; then
-                  az vm start -g $(operationRg)  -n $(vmPipelineName)
-                fi
 
       - job: preManualOperation
         dependsOn: DeployStagingSlots
