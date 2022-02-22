@@ -331,7 +331,7 @@ stages:
                       Write-Host '$(swapSlots2Status)'
 
       - job: postManualOperation
-        dependsOn: DeployStagingSlots
+        dependsOn: SwapSlots
         condition: eq(variables.ManualOperation,'True')
         pool:
           name: server
