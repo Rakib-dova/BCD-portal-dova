@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     static async getsubAccountCodeList(contract) {
       try {
         const result = await sequelize.query(
-          'SELECT subjectName, subjectCode, accountCodeName, subAccountCodeId FROM dbo.SubAccountCode INNER JOIN dbo.AccountCode ON dbo.SubAccountCode.accountCodeId = dbo.AccountCode.accountCodeId  WHERE dbo.AccountCode.contractId = ?  ORDER BY subjectCode',
+          'SELECT subjectName, subjectCode, accountCodeName, subAccountCodeId, dbo.SubAccountCode.updatedAt as updatedAt FROM dbo.SubAccountCode INNER JOIN dbo.AccountCode ON dbo.SubAccountCode.accountCodeId = dbo.AccountCode.accountCodeId  WHERE dbo.AccountCode.contractId = ?  ORDER BY subjectCode',
           { replacements: [contract.dataValues.contractId], type: QueryTypes.SELECT }
         )
 

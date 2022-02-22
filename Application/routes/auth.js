@@ -38,7 +38,7 @@ router.get('/', passport.authenticate('tradeshift', { scope: 'openid offline' })
 
 /*  会員サイト開発 20220228 */
 // callback受領時に会員サイト連携動作をミドルウェアに追加
-// TODO:Callback応答部
+// Callback応答部
 router.get(
   '/callback',
   passport.authenticate('tradeshift', { failureRedirect: '/auth/failure' }),

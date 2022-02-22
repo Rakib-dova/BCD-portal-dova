@@ -11,10 +11,8 @@ const csrfProtection = csrf({ cookie: false })
 const logMessageDefine = require('../../constants').logMessage
 
 const idLinkingProcessForwarder = (req, res, next) => {
-  // TODO:イベントコードを定義
   logger.info(logMessageDefine.INF000 + ' idLinkingProcessForwarder')
 
-  // TODO:イベントコードを定義
   logger.info(logMessageDefine.INF001 + ' idLinkingProcessForwarder')
   return res.sendStatus(200)
 }

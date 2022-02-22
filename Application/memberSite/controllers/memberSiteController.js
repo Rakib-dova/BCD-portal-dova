@@ -16,7 +16,6 @@ const logMessageDefine = require('../../constants').logMessage
  * アプリ一覧からの遷移処理を制御する
  */
 const oauthTransfer = async (req, res, next) => {
-  // TODO:イベントコードを定義
   logger.info(logMessageDefine.INF000 + 'oauthTransfer')
   try {
     // 会員サイト連携セッションがない場合は作成
@@ -27,7 +26,6 @@ const oauthTransfer = async (req, res, next) => {
     // Token所持の確認
     if (req.cookies?.digitaltradeToken === undefined) {
       // デジタルトレードトークンを保持せずアクセスしている為、不正アクセスとする。
-      // TODO:イベントコードを定義
       logger.error('ERR-MB100 ILLEGAL Access:No digitaltradeToken')
       return next(errorHelper.create(400))
     }
@@ -53,9 +51,8 @@ const oauthTransfer = async (req, res, next) => {
     mSiteSessionDto.tradeshiftRedirectExecutionFlg = true
     mSiteSessionDto.fingerprintVerifyFlg = false
     req.session.memberSiteCoopSession = mSiteSessionDto
-    // 受領済みの為TokenCookieを削除
-    // TODO:CookieDomeinを環境変数化すること
 
+    // 受領済みの為TokenCookieを削除
     res.clearCookie(process.env.BCA_BC_COOKIE_NAME, {
       httpOnly: process.env.BCA_BC_COOKIE_HTTP_ONLY,
       domain: process.env.BCA_BC_COOKIE_DOMAIN,
@@ -65,11 +62,9 @@ const oauthTransfer = async (req, res, next) => {
     })
 
     logger.debug({ 'req.session.memberSiteCoopSession': req.session.memberSiteCoopSession }, 'oauthTransfer')
-    // TODO:イベントコードを定義
     logger.info(logMessageDefine.INF001 + 'oauthTransfer')
     return next()
   } catch (error) {
-    // TODO: エラーハンドリング
     logger.error({ error: error.message }, 'ERR-MB999 RunTime Error')
     return next(errorHelper.create(500))
   }
@@ -81,17 +76,15 @@ const oauthTransfer = async (req, res, next) => {
  * 連携しない場合は、処理を通過する。
  */
 const oauthCallbackTransfer = async (req, res, next) => {
-  // TODO:イベントコードを定義
   logger.info(logMessageDefine.INF000 + 'oauthCallbackTransfer')
 
   try {
-  // 会員サイト連携セッションがない場合は作成
-  const mSiteSessionDto = req.session?.memberSiteCoopSession || new MemberSiteCoopSessionDto()
+    // 会員サイト連携セッションがない場合は作成
+    const mSiteSessionDto = req.session?.memberSiteCoopSession || new MemberSiteCoopSessionDto()
     logger.trace(mSiteSessionDto)
 
     // oauth実行検証
     if (!req.session || !req.user?.userId) {
-      // TODO: イベントコードを定義
       logger.error('ERR-MB101 Illegal transition:oauth NG')
       return next(errorHelper.create(500))
     }
@@ -121,7 +114,6 @@ const oauthCallbackTransfer = async (req, res, next) => {
       mSiteSessionDto.fingerprintVerifyFlg = false
 
       // 受領済みの為TokenCookieを削除
-      // TODO:CookieDomeinを環境変数化すること
       res.clearCookie(process.env.BCA_BC_COOKIE_NAME, {
         httpOnly: process.env.BCA_BC_COOKIE_HTTP_ONLY,
         domain: process.env.BCA_BC_COOKIE_DOMAIN,
@@ -135,16 +127,13 @@ const oauthCallbackTransfer = async (req, res, next) => {
     // 「トレードシフトOauhtエンドポイント」を使用したかの判定
     if (mSiteSessionDto.memberSiteFlg && mSiteSessionDto.bcdAppValidFlg) {
       // アプリ一覧 直接起動からの遷移
-      // TODO:イベントコードを定義
       logger.info('INF-MB102 App list transition')
       // 利用状況パラメータはセッション情報を引き継ぐ為、設定無
     } else if (mSiteSessionDto.memberSiteFlg && !mSiteSessionDto.bcdAppValidFlg) {
       // アプリ一覧 有効化手順画面からの遷移
-      // TODO:イベントコードを定義
       logger.info('INF-MB103 App activation procedure screen')
     } else {
       // 会員サイトを利用していない場合
-      // TODO:イベントコードを定義
       logger.info('INF-MB104 No use of member site')
       // 利用状況パラメータはセッション情報を引き継ぐ為、設定無
     }
@@ -170,7 +159,6 @@ const oauthCallbackTransfer = async (req, res, next) => {
       return next()
     }
   } catch (error) {
-    // TODO: イベントコードを定義
     logger.error({ error: error.message }, 'ERR-MB999 RunTime Error')
     return next(errorHelper.create(500))
   }
@@ -183,7 +171,6 @@ const oauthCallbackTransfer = async (req, res, next) => {
  * また、ID紐づけはfingerprint値の検証が完了後のみ実施する。
  */
 const idAssociation = async (mSiteSessionDto) => {
-  // TODO:イベントコードを定義
   logger.info(logMessageDefine.INF000 + 'idAssociation')
   logger.debug({ mSiteSessionDto: mSiteSessionDto }, 'idAssociation')
   try {
@@ -198,14 +185,12 @@ const idAssociation = async (mSiteSessionDto) => {
         return serviceLinkageInfo
       } else if (serviceLinkageInfo === null) {
         // 紐づけ情報がない場合、新規登録
-        // TODO:イベントコードを定義
         logger.info('INF-MB105 No ServiceLinkageId')
         const insertResult = await memberSiteControllerDao.createServiceLinkageId(mSiteSessionDto)
         if (insertResult instanceof Error) {
           return insertResult
         }
       } else {
-        // TODO:イベントコードを定義
         logger.info('INF-MB106 ServiceLinkageId exists')
         // 紐づけ情報がある場合、トレシフID情報に変更があるかを確認
         logger.debug(
@@ -227,7 +212,6 @@ const idAssociation = async (mSiteSessionDto) => {
           serviceLinkageInfo.serviceSubId !== mSiteSessionDto.tradeshiftTenantId
         ) {
           // ID情報が変更されている場合
-          // TODO:イベントコードを定義
           logger.info('INF-MB107 ID info has been changed')
           // ID紐づけ更新処理
           const updateResult = await memberSiteControllerDao.updateServiceLinkageId(mSiteSessionDto)
@@ -236,16 +220,13 @@ const idAssociation = async (mSiteSessionDto) => {
           }
         } else {
           // ID情報が変更されていない場合
-          // TODO:イベントコードを定義
           logger.info('INF-MB108 ID info has not changed')
         }
       }
     }
-    // TODO:イベントコードを定義
     logger.info(logMessageDefine.INF001 + 'idAssociation')
     return true
   } catch (error) {
-    // TODO: イベントコードを定義
     logger.error({ error: error.message }, 'ERR-MB999 idAssociation:Runtime error')
     return error
   }
@@ -260,7 +241,6 @@ const idAssociation = async (mSiteSessionDto) => {
  */
 const cookieTokenVerify = async (jwtToken, mSiteSessionDto) => {
   try {
-    // TODO: イベントコードを定義
     logger.info(logMessageDefine.INF000 + 'cookieTokenVerify')
     logger.debug({ jwtToken: jwtToken }, 'cookieTokenVerify')
 
@@ -269,7 +249,6 @@ const cookieTokenVerify = async (jwtToken, mSiteSessionDto) => {
     logger.debug({ jwtVerifyResult: jwtVerifyResult }, 'cookieTokenVerify')
     if (jwtVerifyResult === null) {
       // 不正JWTの受領
-      // TODO: イベントコードを定義
       logger.error('ERR-MB109 Received invalid JWT')
       const error = new Error('Illegal JWT Error')
       error.name = 'ILLEGAL_TOKEN'
@@ -285,7 +264,6 @@ const cookieTokenVerify = async (jwtToken, mSiteSessionDto) => {
     logger.debug({ digitaltaldeTokenInfo: digitaltaldeTokenInfo }, 'cookieTokenVerify')
     // デジタルトレードトークン情報が取得できない場合はエラー
     if (digitaltaldeTokenInfo === null) {
-      // TODO: イベントコードを定義
       logger.error('ERR-MB110 Received invalid digitaltradeToken')
       const error = new Error('Illegal digitaltradeToken Error')
       error.name = 'ILLEGAL_TOKEN'
@@ -303,11 +281,9 @@ const cookieTokenVerify = async (jwtToken, mSiteSessionDto) => {
     mSiteSessionDto.digitaltradeToken = digitaltaldeTokenInfo.dtToken
     mSiteSessionDto.digitaltradeId = digitaltaldeTokenInfo.digitaltradeId
 
-    // TODO: イベントコードを定義
     logger.info(logMessageDefine.INF001 + 'cookieTokenVerify')
     return true
   } catch (error) {
-    // TODO: イベントコードを定義
     logger.error({ error: error.message }, 'ERR-MB999 cookieTokenVerify:Runtime error')
     return error
   }
@@ -320,7 +296,6 @@ const cookieTokenVerify = async (jwtToken, mSiteSessionDto) => {
  * @param {*} next
  */
 const idLinkingProcess = async (req, res, next) => {
-  // TODO: イベントコードを定義
   logger.info(logMessageDefine.INF000 + 'idLinkingProcess')
   try {
     // 会員サイト連携セッションがない場合は作成
@@ -329,7 +304,6 @@ const idLinkingProcess = async (req, res, next) => {
 
     // oauth実行検証
     if (!req.session || !req.user?.userId) {
-      // TODO: イベントコードを定義
       logger.error('ERR-MB101 Illegal transition:oauth NG')
       return next(errorHelper.create(500))
     }
@@ -338,33 +312,31 @@ const idLinkingProcess = async (req, res, next) => {
     const fingerprintString = req.body?.fingerprint
     if (!fingerprintString) {
       // fingerpritパラメータを受領していない場合
-      // TODO:イベントコードを定義
       logger.error('ERR-MB111 fingerprint is undefined')
       return next(errorHelper.create(400))
     } else {
       logger.trace({ fingerprintString: fingerprintString }, 'fingerprint Recive : idLinkingProcess')
-      // TODO:portalで紐づけを行うように修正
+
       if (!mSiteSessionDto.fingerprintVerifyFlg) {
-      // fingerprintをデジトレトークン情報と検証する
-      const fingerprintVerifyResult = await privateFunc.fingerprintVerify(fingerprintString, mSiteSessionDto)
-      if (fingerprintVerifyResult instanceof Error) {
-        if (fingerprintVerifyResult.name === 'ILLEGAL_FINGERPRINT') {
+        // fingerprintをデジトレトークン情報と検証する
+        const fingerprintVerifyResult = await privateFunc.fingerprintVerify(fingerprintString, mSiteSessionDto)
+        if (fingerprintVerifyResult instanceof Error) {
+          if (fingerprintVerifyResult.name === 'ILLEGAL_FINGERPRINT') {
             logger.trace('idLinkingProcess:Illegal fingerprint')
-          return next(errorHelper.create(400))
+            return next(errorHelper.create(400))
+          } else {
+            return next(errorHelper.create(500))
+          }
         } else {
-          return next(errorHelper.create(500))
+          // fingerprint検証成功の場合
+          // デジトレトークンを削除
+          const deleteResult = await memberSiteControllerDao.deleteDigitaltradeToken(mSiteSessionDto)
+          if (deleteResult instanceof Error) {
+            return next(errorHelper.create(500))
+          }
+          mSiteSessionDto.fingerprintVerifyFlg = true
         }
-      } else {
-        // fingerprint検証成功の場合
-        // デジトレトークンを削除
-        const deleteResult = await memberSiteControllerDao.deleteDigitaltradeToken(mSiteSessionDto)
-        if (deleteResult instanceof Error) {
-          return next(errorHelper.create(500))
-        }
-          // TODO:potal表示時に紐づけるように修正
-        mSiteSessionDto.fingerprintVerifyFlg = true
       }
-    }
     }
 
     // ID紐づけ処理
@@ -375,11 +347,9 @@ const idLinkingProcess = async (req, res, next) => {
 
     // セッションに設定
     req.session.memberSiteCoopSession = mSiteSessionDto
-    // TODO: イベントコードを定義
     logger.info(logMessageDefine.INF001 + 'idLinkingProcess')
     return next()
   } catch (error) {
-    // TODO: イベントコードを定義
     logger.error({ error: error.message }, 'ERR-MB999 idLinkingProcess:Runtime error')
     return next(errorHelper.create(500))
   }
@@ -391,7 +361,6 @@ const idLinkingProcess = async (req, res, next) => {
  * @param {*} mSiteSessionDto
  */
 const fingerprintVerify = async (fingerprint, mSiteSessionDto) => {
-  // TODO: イベントコードを定義
   logger.info(logMessageDefine.INF000 + 'fingerprintVerify')
   logger.debug({ fingerprint: fingerprint }, 'fingerprintVerify')
   try {
@@ -408,18 +377,15 @@ const fingerprintVerify = async (fingerprint, mSiteSessionDto) => {
 
     // fingerprint値が検証NGの場合はエラー
     if (digitaltaldeTokenInfo?.fingerprint !== fingerprint) {
-      // TODO: イベントコードを定義
       logger.error('ERR-MB112 fingerprintVerify:Illegal fingerprint')
       const error = new Error('Illegal Fingerprint Error')
       error.name = 'ILLEGAL_FINGERPRINT'
       return error
     }
 
-    // TODO: イベントコードを定義
     logger.info(logMessageDefine.INF001 + 'fingerprintVerify')
     return true
   } catch (error) {
-    // TODO: イベントコードを定義
     logger.error({ error: error.message }, 'ERR-MB999 fingerprintVerify:Runtime error')
     return error
   }
