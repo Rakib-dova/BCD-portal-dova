@@ -265,7 +265,7 @@ stages:
           name: server
         steps:
           - task: ManualValidation@0
-            displayName: "本番スロットスワップ前手動正常性確認"
+            displayName: "本番スロットスワップ前手動正常性確認①"
             inputs:
               notifyUsers: |
                 dendo@actec2.onmicrosoft.com
@@ -285,6 +285,14 @@ stages:
                     Write-host "#############After operation"#############"
                     az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv 
                   ・確認用端末（$(vmPipelineName)）でデジトレアプリにアクセスし、正常性確認を実施
+
+          - task: ManualValidation@0
+            displayName: "本番スロットスワップ前手動正常性確認②"
+            inputs:
+              notifyUsers: |
+                dendo@actec2.onmicrosoft.com
+                nakamura@actec2.onmicrosoft.com
+              instructions: |
                 ・東App Service ステージングスロットの正常性確認
                   ・以下コマンドを実行して確認用バックエンドプールに東App Service ステージングスロットを設定
                     $n="$(frontdoorName)"
@@ -342,7 +350,7 @@ stages:
           name: server
         steps:
           - task: ManualValidation@0
-            displayName: "本番スロットスワップ後手動正常性確認"
+            displayName: "本番スロットスワップ後手動正常性確認①"
             inputs:
               notifyUsers: |
                 dendo@actec2.onmicrosoft.com
@@ -361,7 +369,14 @@ stages:
                     az network front-door backend-pool backend update -f $n -g $g --pool-name $q --index 1 --address "$appserviceName.azurewebsites.net"
                     Write-host "#############After operation"#############"
                     az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv 
-                  ・踏み台サーバー（BCD-ACS-01-xxx）でデジトレアプリにアクセスし、正常性確認を実施
+                  ・踏み台サーバー（BCD-ACS-01-sec-xxx）でデジトレアプリにアクセスし、正常性確認を実施
+          - task: ManualValidation@0
+            displayName: "本番スロットスワップ後手動正常性確認②"
+            inputs:
+              notifyUsers: |
+                dendo@actec2.onmicrosoft.com
+                nakamura@actec2.onmicrosoft.com
+              instructions: |
                 ・東App Serviceの正常性確認
                   ・以下コマンドを実行して確認用バックエンドプールに東App Service ステージングスロットを設定
                     $n="$(frontdoorName)"
