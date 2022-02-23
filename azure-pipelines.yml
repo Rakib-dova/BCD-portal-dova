@@ -46,7 +46,7 @@ variables:
     value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
   - name: vmPipeline #パイプライン起動停止フラグ
     value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
-  - name: ManualOperation #デプロイ前正常性確認フラグ
+  - name: ManualOperation #正常性確認実施フラグ
     value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.isManualOperation_prodstgOpt,true)) }}
 
 stages:
@@ -260,17 +260,21 @@ stages:
               instructions: |
                 ・西App Service ステージングスロットの正常性確認
                   ・以下コマンドを実行して確認用バックエンドプールに西App Service ステージングスロットを設定
-                    Write-host "商用 Front Door 確認用端末のみステージングスロット（新デジトレアプリ）に向ける"
+                    ー－－－－－－コマンドここからー－－－－－－
+                    Write-host "商用 Front Door 確認用端末のみステージングスロット（ビリングアプリ）に向ける"
                     $n="$(frontdoorName)"
-                    $g="$(portalSecRg)"
+                    $g="$(portalRg)"
                     $q="$(backendpoolReleaseName)"
                     $appserviceName="$(appServiceSecName)"
                     Write-host "#############Before operation##################"
                     az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv
                     Write-host "#############Execute##################"
-                    az network front-door backend-pool backend update -f $n -g $g --pool-name $q --index 1 --address "$appserviceName-staging.azurewebsites.net"
-                    Write-host "#############After operation"#############"
-                    az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv 
+                    az network front-door backend-pool backend update -f $n -g $g --pool-name $q --index 1 --address "$appserviceName-staging.azurewebsites.net" --backend-host-header "$appserviceName-staging.azurewebsites.net"
+                    Write-host "#############After operation#############"
+                    Write-host "期待値：$appserviceName-staging.azurewebsites.net"
+                    $result=az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv 
+                    Write-host "結果　：$result"
+                    ー－－－－－－コマンドここまでー－－－－－－
                   ・確認用端末（$(vmPipelineName)）でデジトレアプリにアクセスし、正常性確認を実施
 
           - task: ManualValidation@0
@@ -282,6 +286,8 @@ stages:
               instructions: |
                 ・東App Service ステージングスロットの正常性確認
                   ・以下コマンドを実行して確認用バックエンドプールに東App Service ステージングスロットを設定
+                    ー－－－－－－コマンドここからー－－－－－－
+                    Write-host "商用 Front Door 確認用端末のみステージングスロット（ビリングアプリ）に向ける"
                     $n="$(frontdoorName)"
                     $g="$(portalRg)"
                     $q="$(backendpoolReleaseName)"
@@ -289,9 +295,12 @@ stages:
                     Write-host "#############Before operation##################"
                     az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv
                     Write-host "#############Execute##################"
-                    az network front-door backend-pool backend update -f $n -g $g --pool-name $q --index 1 --address "$appserviceName-staging.azurewebsites.net"
-                    Write-host "#############After operation"#############"
-                    az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv 
+                    az network front-door backend-pool backend update -f $n -g $g --pool-name $q --index 1 --address "$appserviceName-staging.azurewebsites.net" --backend-host-header "$appserviceName-staging.azurewebsites.net"
+                    Write-host "#############After operation#############"
+                    Write-host "期待値：$appserviceName-staging.azurewebsites.net"
+                    $result=az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv 
+                    Write-host "結果　：$result"
+                    ー－－－－－－コマンドここまでー－－－－－－
                     ・確認用端末（$(vmPipelineName)）でデジトレアプリにアクセスし、正常性確認を実施
 
       - deployment: SwapSlots
@@ -329,6 +338,28 @@ stages:
                       Write-Host "##vso[task.setvariable variable=swapSlots2Status]Success"
                       Write-Host 'swapSlots2Status'
                       Write-Host '$(swapSlots2Status)'
+            on:
+              failure: 
+                steps:
+                - task: AzureCLI@2
+                  condition: and(eq(variables.japanwest,'True'),eq(variables['swapSlots1Status'], 'Success'))
+                  displayName: Swap slots on japanwest App Service
+                  inputs:
+                    azureSubscription: '$(azureSubscription)'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      az webapp deployment slot swap --slot 'staging' --action 'swap' `
+                      --name $(appServiceSecName) -g $(portalSecRg)
+
+                - powershell: |
+                    #undo
+                    cd Application
+                    $migrationCnt=cat $(Pipeline.Workspace)/variables/migrationCnt
+                    for ($i=0; $i -le $migrationCnt-1; $i++){
+                      npx sequelize  db:migrate:undo --env ${{ parameters.Environment }}
+                    }
+                  displayName: npx sequelize  db:migrate:undo
 
       - job: postManualOperation
         dependsOn: SwapSlots
@@ -344,18 +375,6 @@ stages:
                 nakamura@actec2.onmicrosoft.com
               instructions: |
                 ・西App Serviceの正常性確認
-                  ・以下コマンドを実行して確認用バックエンドプールに西App Service ステージングスロットを設定
-                    Write-host "商用 Front Door 確認用端末のみステージングスロット（新デジトレアプリ）に向ける"
-                    $n="$(frontdoorName)"
-                    $g="$(portalSecRg)"
-                    $q="$(backendpoolReleaseName)"
-                    $appserviceName="$(appServiceSecName)"
-                    Write-host "#############Before operation##################"
-                    az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv
-                    Write-host "#############Execute##################"
-                    az network front-door backend-pool backend update -f $n -g $g --pool-name $q --index 1 --address "$appserviceName.azurewebsites.net"
-                    Write-host "#############After operation"#############"
-                    az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv 
                   ・踏み台サーバー（BCD-ACS-01-sec-xxx）でデジトレアプリにアクセスし、正常性確認を実施
           - task: ManualValidation@0
             displayName: "本番スロットスワップ後手動正常性確認②"
@@ -365,15 +384,5 @@ stages:
                 nakamura@actec2.onmicrosoft.com
               instructions: |
                 ・東App Serviceの正常性確認
-                  ・以下コマンドを実行して確認用バックエンドプールに東App Service ステージングスロットを設定
-                    $n="$(frontdoorName)"
-                    $g="$(portalRg)"
-                    $q="$(backendpoolReleaseName)"
-                    $appserviceName="$(appServiceName)"
-                    Write-host "#############Before operation##################"
-                    az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv
-                    Write-host "#############Execute##################"
-                    az network front-door backend-pool backend update -f $n -g $g --pool-name $q --index 1 --address "$appserviceName.azurewebsites.net"
-                    Write-host "#############After operation"#############"
-                    az network front-door backend-pool backend list -f $n -g $g --pool-name $q --query "[] .address" -o tsv 
                   ・踏み台サーバー（BCD-ACS-01-xxx）でデジトレアプリにアクセスし、正常性確認を実施
+
