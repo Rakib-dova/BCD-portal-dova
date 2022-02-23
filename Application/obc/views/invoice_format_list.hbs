@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja-JP">
+
+<head>
+	{{> header title='デジタルトレード 商奉行クラウド連携'}}
+</head>
+
+<body>
+	{{> navber}}
+	<section class="section">
+		<div class="container is-fullhd">
+			<div class="box">
+				<nav class="breadcrumb is-clearfix" aria-label="breadcrumbs">
+					<ul class="is-pulled-left">
+						<li><a href="/bugyo/menu">連携トップ</a></li>
+						<li class="is-active"><a href="/bugyo/invoice_format_list" aria-current="page">請求書フォーマット一覧</a></li>
+					</ul>
+					<div class="is-pulled-right">
+						<a href="/bugyo/invoice_format" class="button is-link">新規作成</a>
+					</div>
+				</nav>
+				{{> notification}}
+				<div class="box">
+					<table id="formatlist" class="table is-fullwidth is-bordered">
+						<thead>
+							<tr>
+								<th class="sort" data-sort="name" style="min-width: 250px;">フォーマット名</i></th>
+								<th class="sort" data-sort="createdUser">作成者</i></th>
+								<th class="sort" data-sort="createdAt">作成日</i></th>
+								<th class="sort" data-sort="updatedUser">更新者</i></th>
+								<th class="sort" data-sort="updatedAt">更新日</i></th>
+								<th>アクション</th>
+							</tr>
+						</thead>
+						<tbody class="list">
+							{{#each formats}}
+							<tr>
+								<td><a href="/bugyo/invoice_format/{{ id }}" class="name">{{ name }}</a></td>
+								<td class="createdUser">{{ createdUser }}</td>
+								<td class="createdAt">{{ createdAt }}</td>
+								<td class="updatedUser">{{ updatedUser }}</td>
+								<td class="updatedAt">{{ updatedAt }}</td>
+								<td><button class="button is-small is-danger delete-format" data-id="{{id}}" data-name="{{name}}" {{#if builtin}}disabled{{/if}}>削除</td>
+							</tr>
+							{{/each}}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</section>
+	<div class="modal">
+		<div class="modal-background"></div>
+		<div class="modal-card">
+			<header class="modal-card-head">
+				<p class="modal-card-title">削除確認</p>
+			</header>
+			<section class="modal-card-body">
+				<p>フォーマット「<span id="name-for-deletion"></span>」を削除します。よろしいですか?</p>
+			</section>
+			<footer class="modal-card-foot">
+				<button class="button is-danger delete-button">はい</button>
+				<button class="button close-button">いいえ</button>
+			</footer>
+		</div>
+	</div>
+	<input type="hidden" name="_csrf" value="{{ csrfToken }}">
+</body>
+
+<script src="/obc/js/list.min.js"></script>
+<script src="/obc/js/invoice_format_list.js"></script>
+
+</html>

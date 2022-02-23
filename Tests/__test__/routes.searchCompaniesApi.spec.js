@@ -122,30 +122,6 @@ describe('searchCompaniesApiのテスト', () => {
       expect(response.body).toContainEqual(companyResult.Connection[1])
     })
 
-    test('正常:検索した企業名がAccountの企業名と一致しない場合', async () => {
-      // 準備
-      // sessionとuserに正常値を想定する
-      request.session = { ...session }
-      request.user = { ...user }
-
-      // 検索する企業名想定する
-      request.body = {
-        companyName: 'dummy'
-      }
-
-      // apiのreturn値を想定する
-      apiManagerSpy.mockReturnValueOnce({ ...accountCompanyResult }).mockReturnValueOnce({ ...companyResult })
-
-      // 試験実施
-      await searchCompaniesApi.cbSearchCompanies(request, response)
-
-      // 期待結果
-      // response.statusが200
-      expect(response.status).toHaveBeenCalledWith(200)
-      // response.bodyに予想したデータが入っている
-      expect(response.body).not.toContainEqual(accountCompanyResult)
-    })
-
     test('正常:企業が指定したリミットより多い場合', async () => {
       // 準備
       // sessionとuserに正常値を想定する
@@ -158,6 +134,7 @@ describe('searchCompaniesApiのテスト', () => {
       }
 
       // apiのreturn値を想定する
+      // apiManagerSpy.mockReturnValueOnce({ ...companyResultPage1 }).mockReturnValueOnce({ ...companyResultPage2 })
       apiManagerSpy
         .mockReturnValueOnce({ ...accountCompanyResult })
         .mockReturnValueOnce({ ...companyResultPage1 })
@@ -263,7 +240,7 @@ describe('searchCompaniesApiのテスト', () => {
         companyName: '株式会社'
       }
 
-      apiManagerSpy.mockReturnValueOnce({ ...accountCompanyResult }).mockReturnValueOnce(errorResult400)
+      apiManagerSpy.mockReturnValueOnce(errorResult400)
 
       // 試験実施
       await searchCompaniesApi.cbSearchCompanies(request, response)
@@ -286,7 +263,7 @@ describe('searchCompaniesApiのテスト', () => {
         companyName: '株式会社'
       }
 
-      apiManagerSpy.mockReturnValueOnce({ ...accountCompanyResult }).mockReturnValueOnce(errorResult500)
+      apiManagerSpy.mockReturnValueOnce(errorResult500)
 
       // 試験実施
       await searchCompaniesApi.cbSearchCompanies(request, response)

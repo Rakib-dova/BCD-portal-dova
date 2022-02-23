@@ -250,7 +250,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         .split(',')
 
       const checkPageHeader = await page.evaluate(() => {
-        const pageHeader = document.querySelectorAll('.text-center#dataItem')
+        const pageHeader = document.querySelectorAll('.text-center.dataItem')
         const result = []
         pageHeader.forEach((item) => {
           result.push(item.innerText)
@@ -259,7 +259,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       })
 
       const checkPageData = await page.evaluate(() => {
-        const pageData = document.querySelectorAll('.text-center#dataValue')
+        const pageData = document.querySelectorAll('.text-center.dataValue')
         const result = []
         pageData.forEach((item) => {
           result.push(item.innerText)
@@ -268,11 +268,11 @@ describe('ルーティングのインテグレーションテスト', () => {
       })
 
       targetHeader.map((item, index) => {
-        expect(item).toBe(checkPageHeader[index])
+        expect(checkPageHeader[index]).toBe(item)
         return ''
       })
       targetBody.map((item, index) => {
-        expect(item).toBe(checkPageData[index])
+        expect(checkPageData[index]).toBe(item)
         return ''
       })
 
@@ -366,7 +366,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         .split(',')
 
       const checkPageHeader = await page.evaluate(() => {
-        const pageHeader = document.querySelectorAll('.text-center#dataItem')
+        const pageHeader = document.querySelectorAll('.text-center.dataItem')
         const result = []
         pageHeader.forEach((item) => {
           result.push(item.innerText)
@@ -375,7 +375,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       })
 
       const checkPageData = await page.evaluate(() => {
-        const pageData = document.querySelectorAll('.text-center#dataValue')
+        const pageData = document.querySelectorAll('.text-center.dataValue')
         const result = []
         pageData.forEach((item) => {
           result.push(item.innerText)
@@ -467,6 +467,8 @@ describe('ルーティングのインテグレーションテスト', () => {
       await page.type('#keyOthers', 'zz')
 
       await page.click('#submit')
+
+      await page.waitForTimeout(1000)
 
       expect(await page.url()).toMatch('https://localhost:3000/uploadFormat')
 

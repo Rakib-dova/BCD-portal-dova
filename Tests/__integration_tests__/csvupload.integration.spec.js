@@ -152,7 +152,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
       expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください。/i) // タイトル
       expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
     })
 
@@ -164,7 +164,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
       expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください。/i) // タイトル
       expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
     })
 
@@ -412,7 +412,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
       expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください。/i) // タイトル
       expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
     })
 
@@ -424,7 +424,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
       expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください。/i) // タイトル
       expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
     })
 
@@ -590,7 +590,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
       expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください。/i) // タイトル
       expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
     })
 
@@ -602,7 +602,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
       expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください。/i) // タイトル
       expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
     })
 
@@ -730,7 +730,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
       expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください。/i) // タイトル
       expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
     })
 
@@ -742,7 +742,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
       expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください。/i) // タイトル
       expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
     })
 
@@ -843,7 +843,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
       expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください。/i) // タイトル
       expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
     })
 
@@ -856,7 +856,7 @@ describe('ルーティングのインテグレーションテスト', () => {
 
       expect(res.text).toMatch(/ - BConnectionデジタルトレード/i) // タイトル
       expect(res.text).toMatch(/請求書一括作成/i) // タイトル
-      expect(res.text).toMatch(/ファイルを選択してください/i) // タイトル
+      expect(res.text).toMatch(/ファイルを選択してください。/i) // タイトル
       expect(res.text).toMatch(/取込結果一覧 →/i) // タイトル
     })
   })

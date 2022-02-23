@@ -315,6 +315,7 @@ const axios = {
             Document: [dcouments.Document[0], dcouments.Document[8]]
           }
         } else if (
+          paramateter.state &&
           paramateter.state.join('') === 'DELIVEREDACCEPTEDPAID_UNCONFIRMEDPAID_CONFIRMED' &&
           paramateter.minissuedate === '9999-99-99' &&
           paramateter.maxissuedate === '9999-99-99'

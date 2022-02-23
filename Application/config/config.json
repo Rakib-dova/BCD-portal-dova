@@ -5,7 +5,9 @@
     "database": "PortalAppDB",
     "host": "localhost",
     "dialect": "mssql",
-    "logging": false
+    "options": {
+      "validateBulkLoadParameters": false
+    }
   },
   "test": {
     "username": "root",

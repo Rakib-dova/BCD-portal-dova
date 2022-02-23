@@ -9,6 +9,7 @@ jest.mock('../../Application/controllers/userController.js', () => ({
 }))
 
 const auth = require('../../Application/routes/auth')
+const memberSiteController = require('../../Application/memberSite/controllers/memberSiteController') // 会員サイト開発により追加
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
@@ -44,7 +45,12 @@ describe('authのテスト', () => {
   describe('ルーティング', () => {
     test('authのルーティングを確認', async () => {
       expect(auth.router.get).toBeCalledWith('/', expect.any(Function))
-      expect(auth.router.get).toBeCalledWith('/callback', expect.any(Function), auth.cbGetCallback)
+      expect(auth.router.get).toBeCalledWith(
+        '/callback',
+        expect.any(Function),
+        memberSiteController.oauthCallbackTransfer, // 会員サイト開発により追加
+        auth.cbGetCallback
+      )
       expect(auth.router.get).toBeCalledWith('/failure', auth.cbGetFailure)
     })
   })

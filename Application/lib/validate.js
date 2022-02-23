@@ -414,6 +414,47 @@ const checkNetworkConnection = function (companyNetworkConnectionList, targetCon
   return ''
 }
 
+// 仕訳のバリデーションチェック
+// コード
+const isCode = function (code, prefix) {
+  const inputPatternEngNum = '^[a-zA-Z0-9]*$'
+  const regex = new RegExp(inputPatternEngNum)
+  if (code.length < 1) {
+    return `${prefix}CODEERR000`
+  } else if (code.length > constantsDefine.codeValidDefine.CODE_LENGTH) {
+    return `${prefix}CODEERR001`
+  } else if (!regex.test(code)) {
+    return `${prefix}CODEERR002`
+  } else {
+    return ''
+  }
+}
+
+// 部門コード
+const isDepartmentCode = function (code, prefix) {
+  const inputPatternEngNum = '^[a-zA-Z0-9ァ-ヶー]*$'
+  const regex = new RegExp(inputPatternEngNum)
+  if (code.length < 1) {
+    return `${prefix}CODEERR000`
+  } else if (code.length > constantsDefine.codeValidDefine.CODE_LENGTH) {
+    return `${prefix}CODEERR001`
+  } else if (!regex.test(code)) {
+    return `${prefix}CODEERR002`
+  } else {
+    return ''
+  }
+}
+
+const isName = function (name, prefix) {
+  if (name.length < 1) {
+    return `${prefix}NAMEERR000`
+  } else if (name.length > constantsDefine.codeValidDefine.NAME_LENGTH) {
+    return `${prefix}NAMEERR001`
+  } else {
+    return ''
+  }
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -448,5 +489,8 @@ module.exports = {
   isDescription: isDescription,
   checkNetworkConnection: checkNetworkConnection,
   isUndefined: isUndefined,
-  isNumberRegular: isNumberRegular
+  isNumberRegular: isNumberRegular,
+  isCode: isCode,
+  isName: isName,
+  isDepartmentCode: isDepartmentCode
 }

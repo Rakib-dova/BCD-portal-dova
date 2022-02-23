@@ -1,4 +1,4 @@
-﻿'use strict'
+'use strict'
 if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.env' })
 }
@@ -143,11 +143,12 @@ const flash = require('express-flash')
 app.use(flash())
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'))
+app.set('views', [path.join(__dirname, 'views'), path.join(__dirname, 'obc/views')])
 app.set('view engine', 'pug')
 
 // body-parser
-app.use(bodyParser.urlencoded({ extended: false }))
+// 受領した請求書の仕訳情報の設定のパラメータの最大数：8400個
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb', parameterLimit: 8400 }))
 
 // uncomment after placing your favicon in /public
 // app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -155,6 +156,13 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(cookieParser());
+
+/**  会員サイト開発 20220228 */
+// CookieParserのコメントアウトを解除
+const cookieParser = require('cookie-parser')
+app.use(cookieParser())
+/**  会員サイト開発 20220228 */
+
 app.use(express.static(path.join(__dirname, 'public')))
 
 // セッションにuserIdがあればappInsightに送信
@@ -212,7 +220,69 @@ app.use('/uploadFormatList', require('./routes/uploadFormatList').router)
 // アップロードフォーマット確認・変更
 app.use('/uploadFormatEdit', require('./routes/uploadFormatEdit').router)
 
-//設定
+// 請求情報ダウンロード
+// 請求情報
+app.use('/csvDownload', require('./routes/csvDownload').router)
+
+// 仕訳情報
+app.use('/journalDownload', require('./routes/journalDownload').router)
+
+// 仕訳情報設定
+// ------------勘定科目
+// 勘定科目一覧
+app.use('/accountCodeList', require('./routes/accountCodeList').router)
+
+// 勘定科目設定
+app.use('/registAccountCode', require('./routes/registAccountCode').router)
+
+// 勘定科目削除
+app.use('/deleteAccountCode', require('./routes/deleteAccountCode').router)
+
+// 勘定科目確認・変更
+app.use('/accountCodeEdit', require('./routes/accountCodeEdit').router)
+
+// 勘定科目一括作成
+app.use('/uploadAccount', require('./routes/accountCodeUpload').router)
+
+// ------------補助科目
+// 補助科目一覧
+app.use('/subAccountCodeList', require('./routes/subAccountCodeList').router)
+
+// 補助科目一括作成
+app.use('/uploadSubAccount', require('./routes/subAccountCodeUpload').router)
+
+// 補助科目設定
+app.use('/registSubAccountCode', require('./routes/registSubAccountCode').router)
+
+// 補助科目削除
+app.use('/deleteSubAccountCode', require('./routes/deleteSubAccountCode').router)
+
+// 補助科目確認・変更
+app.use('/subAccountCodeEdit', require('./routes/subAccountCodeEdit').router)
+
+// ------------部門データ
+// 部門データ一覧
+app.use('/departmentCodeList', require('./routes/departmentCodeList').router)
+
+// 部門データ設定
+app.use('/registDepartmentCode', require('./routes/registDepartmentCode').router)
+
+// 部門データ一括作成
+app.use('/uploadDepartment', require('./routes/departmentCodeUpload').router)
+
+// 部門データ削除
+app.use('/deleteDepartmentCode', require('./routes/deleteDepartmentCode').router)
+
+// 部門データ確認・変更
+app.use('/departmentCodeEdit', require('./routes/departmentCodeEdit').router)
+
+// ------------受領した請求書
+// 受領した請求書一覧
+app.use('/inboxList', require('./routes/inboxList').router)
+
+// 受領した請求書
+app.use('/inbox', require('./routes/inbox').router)
+
 // 設定
 // cancellation
 app.use('/cancellation', require('./routes/cancellation').router)
@@ -222,6 +292,15 @@ app.use('/change', require('./routes/change').router)
 
 // 請求書ダウンロード
 app.use('/csvDownload', require('./routes/csvDownload').router)
+
+/**  会員サイト開発 20220228 */
+// アプリ一覧からの遷移受付けエンドポイント
+app.use('/memberCooperation', require('./memberSite/routes/memberCooperationRouter').router)
+app.use('/idLinking', require('./memberSite/routes/idLinkingRouter').router)
+/**  会員サイト開発 20220228 */
+
+// 奉行クラウド連携
+app.use('/bugyo', require('./obc/obc'))
 
 // notice
 const noticeHelper = require('./routes/helpers/notice')

@@ -15,6 +15,8 @@ const functionName = 'cbPostIndex'
 const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
 const csvDownloadController = require('../controllers/csvDownloadController.js')
 
+const notiTitle = '請求書ダウンロード'
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -85,7 +87,7 @@ const cbPostIndex = async (req, res, next) => {
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(400))
   }
 
   // DBからuserデータ取得
@@ -94,11 +96,12 @@ const cbPostIndex = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
   if (user instanceof Error || user === null) {
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
+    return res.redirect(303, '/csvDownload')
   }
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) {
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(404))
   }
 
   // DBから契約情報取得
@@ -106,7 +109,8 @@ const cbPostIndex = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) {
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
+    return res.redirect(303, '/csvDownload')
   }
 
   const deleteFlag = contract.dataValues.deleteFlag
@@ -114,11 +118,11 @@ const cbPostIndex = async (req, res, next) => {
 
   const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
   if (checkContractStatus === null || checkContractStatus === 999) {
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+    return next(errorHelper.create(400))
   }
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return res.status(400).send()
+    return next(noticeHelper.create('cancelprocedure'))
   }
 
   req.session.userContext = 'LoggedIn'
@@ -219,7 +223,7 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   if (findDocumentQuery.state.length === 0) {
-    req.flash('noti', ['請求書ダウンロード', 'ステータスをいずれかのの１つ選択してください。'])
+    req.flash('noti', [notiTitle, 'ステータスをいずれかのの１つ選択してください。'])
     logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
     return res.redirect(303, '/csvDownload')
   }
@@ -328,14 +332,14 @@ const cbPostIndex = async (req, res, next) => {
     // documentsResultのデータ有無確認
     if (!documentsResult) {
       req.flash('noti', [
-        '請求書ダウンロード',
+        notiTitle,
         '請求書ダウンロードに失敗しました。<br>（送信企業と受信企業で同じ企業を選択している場合はどちらか一方をチェックしてください。）'
       ])
       res.redirect(303, '/csvDownload')
     } else if (documentsResult.itemCount === 0) {
       // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
       // 条件に合わせるデータがない場合、お知らせを表示する。
-      req.flash('noti', ['請求書ダウンロード', '条件に合致する請求書が見つかりませんでした。'])
+      req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
       res.redirect(303, '/csvDownload')
     } else {
       const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
@@ -378,7 +382,7 @@ const cbPostIndex = async (req, res, next) => {
           }
         } else {
           // 条件に合わせるデータがない場合、お知らせを表示する。
-          req.flash('noti', ['請求書ダウンロード', '条件に合致する請求書が見つかりませんでした。'])
+          req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
           res.redirect(303, '/csvDownload')
         }
       } else {
@@ -414,7 +418,7 @@ const errorHandle = (documentsResult, _res, _req) => {
       },
       documentsResult.name
     )
-    _req.flash('noti', ['請求書ダウンロード', constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
+    _req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
     _res.redirect(303, '/csvDownload')
   } else if (String(documentsResult.response?.status).slice(0, 1) === '5') {
     // 500番エラーの場合
@@ -427,7 +431,7 @@ const errorHandle = (documentsResult, _res, _req) => {
       },
       documentsResult.toString()
     )
-    _req.flash('noti', ['請求書ダウンロード', constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
+    _req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
     _res.redirect(303, '/csvDownload')
   }
 }
