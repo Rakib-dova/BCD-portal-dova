@@ -311,8 +311,6 @@ stages:
           runOnce:            
             deploy:
               steps: 
-                - download: current 
-                  displayName: Download artifacts
                 - task: AzureCLI@2
                   condition: eq(variables.japanwest,'True')
                   displayName: Swap slots on japanwest App Service
