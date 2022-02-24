@@ -1037,6 +1037,7 @@ describe('approverControllerのテスト', () => {
       })
       const result = await approverController.duplicateApproveRoute(approveRoute)
 
+      // 結果確認
       expect(result.approveRouteName).toMatch(approveRoute.setApproveRouteNameInputId)
       expect(result.approverUsers.length).toBe(0)
       expect(result.lastApprover).toEqual(lastApprover)
@@ -1068,6 +1069,7 @@ describe('approverControllerのテスト', () => {
       })
       const result = await approverController.duplicateApproveRoute(approveRoute)
 
+      // 結果確認
       expect(result.approveRouteName).toMatch(approveRoute.setApproveRouteNameInputId)
       expect(result.approverUsers.length).toBe(1)
       expect(result.approverUsers[0]).toEqual(approver)
