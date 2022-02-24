@@ -129,7 +129,6 @@ const cbPostRegistApproveRoute = async (req, res, next) => {
       break
     case 1:
       req.flash('noti', ['承認ルート登録', '入力した承認ルート名は既に登録されています。'])
-      console.log(req.body)
       req.session.body = req.body
       res.redirect('/registApproveRoute')
       break
