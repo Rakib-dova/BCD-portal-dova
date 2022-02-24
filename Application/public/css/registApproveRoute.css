@@ -127,6 +127,11 @@
   max-width: 572px;
 }
 
+.field-overflow {
+  overflow: auto;
+  white-space: nowrap;
+}
+
 .item-text-overflow {
   overflow: hidden;
   white-space: nowrap;

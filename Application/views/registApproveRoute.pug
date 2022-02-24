@@ -58,8 +58,8 @@ block content
                                   if isApproveRouteEdit
                                     -var numberList = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
                                     each item, idx in approveUsers
-                                      .columns.m-0.p-1.lineApproveRoute(id=`bulkInsertNo1_lineApproveRoute${idx+1}` data-idx='1')
-                                        .column.p-0.border-div-rad-4
+                                      .columns.m-0.p-1.lineApproveRoute(id=`bulkInsertNo1_lineApproveRoute${idx+1}`)
+                                        .column.p-0.border-div-rad-4.field-overflow
                                           .field.is-horizontal.m-1.has-addons-centered
                                             .field-label.is-normal.m-0.text-center.flex-none.width-20percent
                                               label 承認順
@@ -67,7 +67,7 @@ block content
                                               label 承認者名
                                             .field-label.is-normal.m-0.text-center.flex-none.width-45percent.padding-left-5
                                               label メールアドレス
-                                            .field-label.is-normal.m-0.fixed-void-66.width-10percent
+                                            .field-label.is-normal.m-0.width-10percent
                                               label
                                           .field.is-horizontal.p-1
                                             .field-body.m-1.flex-none.width-20percent
@@ -97,8 +97,8 @@ block content
                                     if approveUsers
                                       -var numberList = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
                                         each item, idx in approveUsers
-                                          .columns.m-0.p-1.lineApproveRoute(id=`bulkInsertNo1_lineApproveRoute${idx + 1}` data-idx='1')
-                                            .column.p-0.border-div-rad-4
+                                          .columns.m-0.p-1.lineApproveRoute (id=`bulkInsertNo1_lineApproveRoute${idx + 1}`)
+                                            .column.p-0.border-div-rad-4.field-overflow
                                               .field.is-horizontal.m-1.has-addons-centered
                                                 .field-label.is-normal.m-0.text-center
                                                   label 承認順
@@ -106,7 +106,7 @@ block content
                                                   label 承認者名
                                                 .field-label.is-normal.m-0.text-center
                                                   label メールアドレス
-                                                .field-label.is-normal.m-0.fixed-void-66
+                                                .field-label.is-normal.m-0
                                                   label
                                               .field.is-horizontal.p-1
                                                 .field-body.m-1
@@ -132,7 +132,7 @@ block content
                                                 a.red-color.btn-minus-approveRoute(data-target=`bulkInsertNo1_lineApproveRoute${idx + 1}`)
                                                   i.fas.fa-minus-circle                  
                                   .columns.m-0.p-1.lineApproveRouteForLast(id='bulkInsertNo1_lineApproveRouteLast' data-idx='1')
-                                    .column.p-0.border-div-rad-4
+                                    .column.p-0.border-div-rad-4.field-overflow
                                       .field.is-horizontal.m-1.has-addons-centered
                                         .field-label.is-normal.m-0.text-center.flex-none.width-20percent
                                           label 承認順
@@ -140,7 +140,7 @@ block content
                                           label 最終承認者名
                                         .field-label.is-normal.m-0.text-center.flex-none.width-45percent.padding-left-5
                                           label メールアドレス
-                                        .field-label.is-normal.m-0.fixed-void-66.width-10percent
+                                        .field-label.is-normal.m-0.width-10percent
                                           label
                                       .field.is-horizontal.p-1
                                         .field-body.m-1.flex-none.width-20percent
@@ -167,7 +167,7 @@ block content
                                               else
                                                 input.input.item-text-overflow.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` readonly)
                                                 input(type='hidden' name=`uuid`)
-                                        .field-body.m-1.is-4.text-center.fixed-void-66
+                                        .field-body.m-1.is-4.text-center
                                           .field
                                             p.control
                                               a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
@@ -272,7 +272,7 @@ block content
 
   template#templateLineApproveRouteItem
       .columns.m-0.p-1.lineApproveRoute
-        .column.p-0.border-div-rad-4
+        .column.p-0.border-div-rad-4.field-overflow
           .field.is-horizontal.m-1.has-addons-centered
             .field-label.is-normal.m-0.text-center.flex-none.width-20percent
               label 承認順
@@ -280,7 +280,7 @@ block content
               label 承認者名
             .field-label.is-normal.m-0.text-center.flex-none.width-45percent.padding-left-5
               label メールアドレス
-            .field-label.is-normal.m-0.fixed-void-66.width-10percent
+            .field-label.is-normal.m-0.width-10percent
               label 　
           .field.is-horizontal.p-1
             .field-body.m-1.flex-none.width-20percent.padding-rigth-1
@@ -295,7 +295,7 @@ block content
                 p.control
                   input.input.item-text-overflow.input-approveRouteUserMailAddress(type='text' id=`` title= value value readonly)
                   input(type='hidden')
-            .field-body.m-1.is-4.text-center.fixed-void-66
+            .field-body.m-1.is-4.text-center
               .field
                 p.control
                   a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-target='approveRoute-modal') 検索
