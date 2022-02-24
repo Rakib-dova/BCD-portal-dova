@@ -1016,4 +1016,62 @@ describe('approverControllerのテスト', () => {
       expect(result).toBe(dbError)
     })
   })
+
+  describe('duplicateApproveRoute', () => {
+    test('正常：単数最終承認者', async () => {
+      // パラメータ作成
+      const approveRoute = {
+        setApproveRouteNameInputId: 'UTテストコード',
+        userName: 'テスト ユーザー',
+        mailAddress: 'dev.master.bconnection+flow3.002@gmail.com',
+        uuid: '81ae1ddf-0017-471c-962b-b4dac1b72117'
+      }
+
+      // approverオブジェクト作成
+      const lastApprover = new ApproveObj({
+        FirstName: 'テスト',
+        LastName: 'ユーザー',
+        Username: 'dev.master.bconnection+flow3.002@gmail.com',
+        Memberships: [{ GroupId: null }],
+        Id: approveRoute.uuid
+      })
+      const result = await approverController.duplicateApproveRoute(approveRoute)
+
+      expect(result.approveRouteName).toMatch(approveRoute.setApproveRouteNameInputId)
+      expect(result.approverUsers.length).toBe(0)
+      expect(result.lastApprover).toEqual(lastApprover)
+    })
+
+    test('正常：複数承認者', async () => {
+      // パラメータ作成
+      const approveRoute = {
+        setApproveRouteNameInputId: 'UTテストコード',
+        userName: ['テスト ユーザー1', 'テスト ユーザー2'],
+        mailAddress: ['dev.master.bconnection+flow3.001@gmail.com', 'dev.master.bconnection+flow3.002@gmail.com'],
+        uuid: ['81ae1ddf-0017-471c-962b-b4dac1b72117', '81ae1ddf-0017-aaa-962b-b4dac1b72117']
+      }
+
+      // approverオブジェクト作成
+      const approver = new ApproveObj({
+        FirstName: 'テスト',
+        LastName: 'ユーザー1',
+        Username: 'dev.master.bconnection+flow3.001@gmail.com',
+        Memberships: [{ GroupId: null }],
+        Id: approveRoute.uuid[0]
+      })
+      const lastApprover = new ApproveObj({
+        FirstName: 'テスト',
+        LastName: 'ユーザー2',
+        Username: 'dev.master.bconnection+flow3.002@gmail.com',
+        Memberships: [{ GroupId: null }],
+        Id: approveRoute.uuid[1]
+      })
+      const result = await approverController.duplicateApproveRoute(approveRoute)
+
+      expect(result.approveRouteName).toMatch(approveRoute.setApproveRouteNameInputId)
+      expect(result.approverUsers.length).toBe(1)
+      expect(result.approverUsers[0]).toEqual(approver)
+      expect(result.lastApprover).toEqual(lastApprover)
+    })
+  })
 })
