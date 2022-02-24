@@ -78,7 +78,7 @@ const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   return searchUsers
 }
 
-const insertApprover = async (contract, values, tenantId) => {
+const insertApprover = async (contract, values) => {
   const functionName = 'approverController.insertApprover'
   // 関数開始表示
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -287,8 +287,19 @@ const getApproveRoute = async (accessToken, refreshToken, contract, approveRoute
   }
 }
 
+/**
+ * 重複した承認ルートの内容を再表示のため、データ加工する
+ * @param {object} approveRoute
+ * setApproveRouteNameInputId: 承認ルート名
+ * userName：画面から指定した承認者名（一つの場合String、複数の場合Array)
+ * mailAddres：画面からしてした承認者のメールアドレス（一つの場合String、複数の場合Array)
+ * uuid：承認者のトレードシフトのId(uuid識別番号)
+ * @returns {object}
+ * approveRouteName 承認ルート名
+ * approveUsers 一次から十次Approverオブジェクト
+ * lastApprover 最終Approverオブジェクト
+ */
 const duplicateApproveRoute = async (approveRoute) => {
-  console.log(approveRoute)
   const approveRouteName = approveRoute.setApproveRouteNameInputId
   const approverUsers = []
   let lastApprover = null
