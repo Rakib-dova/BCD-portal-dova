@@ -58,7 +58,7 @@ block content
                                   if isApproveRouteEdit
                                     -var numberList = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
                                     each item, idx in approveUsers
-                                      .columns.m-0.p-1.lineApproveRouteForLast(id=`bulkInsertNo1_lineApproveRoute1` data-idx='1')
+                                      .columns.m-0.p-1.lineApproveRoute(id=`bulkInsertNo1_lineApproveRoute${idx+1}` data-idx='1')
                                         .column.p-0.border-div-rad-4
                                           .field.is-horizontal.m-1.has-addons-centered
                                             .field-label.is-normal.m-0.text-center
@@ -72,8 +72,8 @@ block content
                                           .field.is-horizontal.p-1
                                             .field-body.m-1
                                               .field.text-center.padding-left-30
-                                                label.input-label.text-center #{numberList[idx]}次承認
-                                                p.input-label-required.input-label.text-center  （必須）
+                                                label.input-label.input-approveRouteUserNumber.text-center #{numberList[idx]}次承認
+                                                p.input-label-required.input-label.text-center  
                                             .field-body.m-1
                                               .field
                                                 p.control
@@ -85,16 +85,52 @@ block content
                                               .field
                                                 p.control
                                                   input.input.input-approveRouteUserMailAddress(type='text' id=`lineApproveRoute_approveUserMailAddress` name=`mailAddress` value= item.getMail().trim() readonly)
-                                                  input(type='hidden' name=`uuid`)
+                                                  input(type='hidden' name=`uuid` value= item.getId())
                                             .field-body.m-1.is-4.text-center
                                               .field
                                                 p.control
                                                   a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
-                                        .column.is-0.p-1
-                                          .column
-                                            a.red-color.btn-minus-approveRoute
+                                        .column.is-0.p-1.column-minus-btn
+                                            a.red-color.btn-minus-approveRoute(data-target=`bulkInsertNo1_lineApproveRoute${idx+1}`)
                                               i.fas.fa-minus-circle
-                                                                                
+                                  else
+                                    if approveUsers
+                                      -var numberList = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+                                        each item, idx in approveUsers
+                                          .columns.m-0.p-1.lineApproveRoute(id=`bulkInsertNo1_lineApproveRoute${idx + 1}` data-idx='1')
+                                            .column.p-0.border-div-rad-4
+                                              .field.is-horizontal.m-1.has-addons-centered
+                                                .field-label.is-normal.m-0.text-center
+                                                  label 承認順
+                                                .field-label.is-normal.m-0.text-center
+                                                  label 承認者名
+                                                .field-label.is-normal.m-0.text-center
+                                                  label メールアドレス
+                                                .field-label.is-normal.m-0.fixed-void-66
+                                                  label
+                                              .field.is-horizontal.p-1
+                                                .field-body.m-1
+                                                  .field.text-center.padding-left-30
+                                                    label.input-label.text-center #{numberList[idx]}次承認
+                                                .field-body.m-1
+                                                  .field
+                                                    p.control
+                                                      if item.getName().trim() === '未設定'
+                                                        div#none-user-name #{item.getName()}
+                                                      if item.getName().trim() !== '未設定'
+                                                        input.input.input-approveRouteUserName(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.getName().trim() readonly)
+                                                .field-body.m-1
+                                                  .field
+                                                    p.control
+                                                      input.input.input-approveRouteUserMailAddress(type='text' id=`lineApproveRoute_approveUserMailAddress` name=`mailAddress` value= item.getMail().trim() readonly)
+                                                      input(type='hidden' name=`uuid` value= item.getId())
+                                                .field-body.m-1.is-4.text-center
+                                                  .field
+                                                    p.control
+                                                      a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
+                                            .column.is-0.p-1.column-minus-btn
+                                                a.red-color.btn-minus-approveRoute(data-target=`bulkInsertNo1_lineApproveRoute${idx + 1}`)
+                                                  i.fas.fa-minus-circle                  
                                   .columns.m-0.p-1.lineApproveRouteForLast(id='bulkInsertNo1_lineApproveRouteLast' data-idx='1')
                                     .column.p-0.border-div-rad-4
                                       .field.is-horizontal.m-1.has-addons-centered
@@ -127,17 +163,17 @@ block content
                                             p.control
                                               if lastApprover
                                                 input.input.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` value=lastApprover.getMail() readonly)
+                                                input(type='hidden' name=`uuid` value=lastApprover.getId())
                                               else
                                                 input.input.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` readonly)
-                                              input(type='hidden' name=`uuid`)
+                                                input(type='hidden' name=`uuid`)
                                         .field-body.m-1.is-4.text-center
                                           .field
                                             p.control
                                               a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
                                     .column.is-0.p-1
                                       .column.is-invisible
-                                        a.red-color.btn-minus-approveRoute
-                                          i.fas.fa-minus-circle
+                                        
                   .grouped-button
                     a.button.mr-6(href= backUrl) 戻る
                     a.button.is-link#btn-confirm 確認

@@ -286,9 +286,59 @@ const getApproveRoute = async (accessToken, refreshToken, contract, approveRoute
     return error
   }
 }
+
+/**
+ * 重複した承認ルートの内容を再表示のため、データ加工する
+ * @param {object} approveRoute
+ * setApproveRouteNameInputId: 承認ルート名
+ * userName：画面から指定した承認者名（一つの場合String、複数の場合Array)
+ * mailAddres：画面からしてした承認者のメールアドレス（一つの場合String、複数の場合Array)
+ * uuid：承認者のトレードシフトのId(uuid識別番号)
+ * @returns {object}
+ * approveRouteName 承認ルート名
+ * approveUsers 一次から十次Approverオブジェクト
+ * lastApprover 最終Approverオブジェクト
+ */
+const duplicateApproveRoute = async (approveRoute) => {
+  const approveRouteName = approveRoute.setApproveRouteNameInputId
+  const approverUsers = []
+  let lastApprover = null
+  const nameSep = / |\u3000/
+  if (approveRoute.userName instanceof Array === false) {
+    approverUsers.push(
+      new Approver({
+        tenantId: null,
+        FirstName: approveRoute.userName.split(nameSep)[0],
+        LastName: approveRoute.userName.split(nameSep)[1],
+        Username: approveRoute.mailAddress,
+        Memberships: [{ GroupId: null }],
+        Id: approveRoute.uuid
+      })
+    )
+  } else {
+    const userNames = approveRoute.userName
+    userNames.forEach((approver, idx) => {
+      approverUsers.push(
+        new Approver({
+          tenantId: null,
+          FirstName: approver.split(nameSep)[0],
+          LastName: approver.split(nameSep)[1],
+          Username: approveRoute.mailAddress[idx],
+          Memberships: [{ GroupId: null }],
+          Id: approveRoute.uuid[idx]
+        })
+      )
+    })
+  }
+  lastApprover = approverUsers.pop()
+
+  return { approveRouteName, approverUsers, lastApprover }
+}
+
 module.exports = {
   getApprover: getApprover,
   insertApprover: insertApprover,
   getApproveRouteList: getApproveRouteList,
-  getApproveRoute: getApproveRoute
+  getApproveRoute: getApproveRoute,
+  duplicateApproveRoute: duplicateApproveRoute
 }
