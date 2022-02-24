@@ -293,6 +293,40 @@ describe('承認ルート登録のインテグレーションテスト', () => {
       await browser.close()
     })
 
+    test('未入力の場合、エラーメッセージ確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/registApproveRoute')
+      if (page.url() === 'https://localhost:3000/registApproveRoute') {
+        for (let cnt = 0; cnt < 11; cnt++) {
+          await page.click('#btn-confirm')
+          await page.waitForTimeout(500)
+        }
+
+        // エラーメッセージ確認
+        const checkApprovNameErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#RequiredErrorMesageForApproveRoute').innerText
+        })
+
+        expect(checkApprovNameErrorMessage).toBe('承認ルート名が未入力です。')
+
+        const checkApproverErrorMessage = await page.evaluate(() => {
+          return document.querySelector('#error-message-approveRoute').innerText
+        })
+
+        expect(checkApproverErrorMessage).toBe('承認者を設定してください。')
+      }
+
+      await browser.close()
+    })
+
     test('承認者追加ボタン10回超過の場合、エラーメッセージ確認', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
@@ -321,7 +355,7 @@ describe('承認ルート登録のインテグレーションテスト', () => {
       await browser.close()
     })
 
-    test('承認者名未入力の場合、エラーメッセージ確認', async () => {
+    test('承認者検索モーダル確認', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
