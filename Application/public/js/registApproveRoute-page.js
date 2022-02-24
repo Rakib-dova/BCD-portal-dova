@@ -29,6 +29,13 @@ window.onload = function () {
   Array.prototype.forEach.call($('.BtnlineApproveRouteUserSearch'), function (btn) {
     btn.addEventListener('click', btnSearchMain())
   })
+
+  // 削除簿tン機能活性化
+  if ($('.btn-minus-approveRoute').length !== 0) {
+    Array.prototype.forEach.call($('.btn-minus-approveRoute'), (btnMinus) => {
+      btnMinus.addEventListener('click', btnMinusApproveRoute)
+    })
+  }
 }
 
 // 2番目以降の勘定科目・補助科目検索ボタンイベント
@@ -274,17 +281,18 @@ const duplicationCheck = function (approveUserArr) {
 
 // 未設定チェック
 const validationCheck = function (approveUserArr) {
+  let isChecked = false
   // 承認ルート名チェック
   const setApproveRouteNameInputId = document.getElementById('setApproveRouteNameInputId').value
   if (setApproveRouteNameInputId === '' || setApproveRouteNameInputId === undefined) {
     document.getElementById('RequiredErrorMesageForApproveRoute').innerHTML = '承認ルート名が未入力です。'
     document.getElementById('RequiredErrorMesageForApproveRoute').classList.remove('is-invisible')
-    return true
+    isChecked = true
   } else if (setApproveRouteNameInputId.length > 40) {
     document.getElementById('RequiredErrorMesageForApproveRoute').innerHTML =
       '承認ルート名は40桁以内で入力してください。'
     document.getElementById('RequiredErrorMesageForApproveRoute').classList.remove('is-invisible')
-    return true
+    isChecked = true
   }
 
   // 承認者未設定チェック
@@ -296,11 +304,11 @@ const validationCheck = function (approveUserArr) {
     }
   })
   if (result.length > 0) {
-    $('#error-message-approveRoute').innerText = '担当者を設定して下さい。'
-    return true
-  } else {
-    return false
+    $('#error-message-approveRoute').innerText = '承認者を設定してください。'
+    isChecked = true
   }
+
+  return isChecked
 }
 
 // 重複検索関数

@@ -23,6 +23,10 @@ class Approver {
   getMail() {
     return this.Username
   }
+
+  getId() {
+    return this.Id
+  }
 }
 
 module.exports = Approver

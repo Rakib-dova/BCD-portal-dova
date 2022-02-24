@@ -78,7 +78,7 @@ const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   return searchUsers
 }
 
-const insertApprover = async (contract, values) => {
+const insertApprover = async (contract, values, tenantId) => {
   const functionName = 'approverController.insertApprover'
   // 関数開始表示
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -286,9 +286,48 @@ const getApproveRoute = async (accessToken, refreshToken, contract, approveRoute
     return error
   }
 }
+
+const duplicateApproveRoute = async (approveRoute) => {
+  console.log(approveRoute)
+  const approveRouteName = approveRoute.setApproveRouteNameInputId
+  const approverUsers = []
+  let lastApprover = null
+  const nameSep = / |\u3000/
+  if (approveRoute.userName instanceof Array === false) {
+    approverUsers.push(
+      new Approver({
+        tenantId: null,
+        FirstName: approveRoute.userName.split(nameSep)[0],
+        LastName: approveRoute.userName.split(nameSep)[1],
+        Username: approveRoute.mailAddress,
+        Memberships: [{ GroupId: null }],
+        Id: approveRoute.uuid
+      })
+    )
+  } else {
+    const userNames = approveRoute.userName
+    userNames.forEach((approver, idx) => {
+      approverUsers.push(
+        new Approver({
+          tenantId: null,
+          FirstName: approver.split(nameSep)[0],
+          LastName: approver.split(nameSep)[1],
+          Username: approveRoute.mailAddress[idx],
+          Memberships: [{ GroupId: null }],
+          Id: approveRoute.uuid[idx]
+        })
+      )
+    })
+  }
+  lastApprover = approverUsers.pop()
+
+  return { approveRouteName, approverUsers, lastApprover }
+}
+
 module.exports = {
   getApprover: getApprover,
   insertApprover: insertApprover,
   getApproveRouteList: getApproveRouteList,
-  getApproveRoute: getApproveRoute
+  getApproveRoute: getApproveRoute,
+  duplicateApproveRoute: duplicateApproveRoute
 }
