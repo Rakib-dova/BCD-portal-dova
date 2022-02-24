@@ -30,7 +30,7 @@ window.onload = function () {
     btn.addEventListener('click', btnSearchMain())
   })
 
-  // 削除簿tン機能活性化
+  // 削除ボタン機能活性化
   if ($('.btn-minus-approveRoute').length !== 0) {
     Array.prototype.forEach.call($('.btn-minus-approveRoute'), (btnMinus) => {
       btnMinus.addEventListener('click', btnMinusApproveRoute)
