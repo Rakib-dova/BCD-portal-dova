@@ -87,7 +87,9 @@ $('#btn-search-approver').addEventListener('click', function () {
               const email = this.querySelector('#email').innerText
               const id = this.querySelector('#id').value
               $(`#${target}`).querySelectorAll('input[type=text]')[0].value = name
+              $(`#${target}`).querySelectorAll('input[type=text]')[0].setAttribute('title', name)
               $(`#${target}`).querySelectorAll('input[type=text]')[1].value = email
+              $(`#${target}`).querySelectorAll('input[type=text]')[1].setAttribute('title', email)
               $(`#${target}`).querySelectorAll('input[type=hidden]')[0].value = id
               $('#approveRoute-modal').classList.remove('is-active')
             })
@@ -212,15 +214,17 @@ const addApproveUsers = function (target) {
   }
 }
 
-// 登録ボタンクリック時
+// 確認ボタンクリック時
 $('#btn-confirm').addEventListener('click', function () {
   // 初期化
   revertElements()
-  // 「登録」ボタンが非活性の場合、終了する。
+  // 「確認」ボタンが非活性の場合、終了する。
   if (this.getAttribute('disabled') === 'true') return
   const approveUserNameArr = []
   const validateUserNameArr = []
   const approveUserMailAddressArr = []
+  const approveRouteName = document.getElementById('setApproveRouteNameInputId').value
+  const approveRouteNameInput = document.getElementById('approveRouteName_checkModal')
   const approveUserNames = document.querySelectorAll('.input-approveRouteUserName')
   const approveUserMailAddersses = document.querySelectorAll('.input-approveRouteUserMailAddress')
   const lastapproveUserName = document.getElementById('lastLineApproveRoute_approveUserName')
@@ -241,18 +245,21 @@ $('#btn-confirm').addEventListener('click', function () {
     if (duplicationCheckResult) {
       $('#error-message-approveRoute').innerText = '同一の承認者が設定されています。'
     } else {
-      // 登録処理
+      // 確認画面表示処理
       while ($('#approver-list-check').firstChild) {
         $('#approver-list-check').removeChild($('#approver-list-check').firstChild)
       }
 
+      approveRouteNameInput.value = approveRouteName
       if (approveUserNameArr.length !== 0) {
         for (let i = 0; i < approveUserNameArr.length; i++) {
           const templateApproverCheckList = $('#template-approverCheckList')
           const cloneApproverCheckList = document.importNode(templateApproverCheckList.content, true)
-          cloneApproverCheckList.querySelector('#id-check').innerText = `${i + 1}次承認`
+          cloneApproverCheckList.querySelector('#id-check').innerText = `${approveUserNumbers[i]}次承認`
           cloneApproverCheckList.querySelector('#name-check').innerText = approveUserNameArr[i]
+          cloneApproverCheckList.querySelector('#name-check').setAttribute('title', `${approveUserNameArr[i]}`)
           cloneApproverCheckList.querySelector('#email-check').innerText = approveUserMailAddressArr[i]
+          cloneApproverCheckList.querySelector('#email-check').setAttribute('title', `${approveUserMailAddressArr[i]}`)
           $('#approver-list-check').append(cloneApproverCheckList)
         }
       }
@@ -260,7 +267,9 @@ $('#btn-confirm').addEventListener('click', function () {
       const cloneApproverCheckList = document.importNode(templateApproverCheckList.content, true)
       cloneApproverCheckList.querySelector('#id-check').innerText = '最終承認'
       cloneApproverCheckList.querySelector('#name-check').innerText = lastapproveUserName.value
+      cloneApproverCheckList.querySelector('#name-check').setAttribute('title', `${lastapproveUserName.value}`)
       cloneApproverCheckList.querySelector('#email-check').innerText = lastapproveUserMailAddresses.value
+      cloneApproverCheckList.querySelector('#email-check').setAttribute('title', `${lastapproveUserMailAddresses.value}`)
       $('#approver-list-check').append(cloneApproverCheckList)
 
       document.querySelector('#check-modal').classList.add('is-active')
