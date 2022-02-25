@@ -73,6 +73,7 @@ $('#btn-search-approver').addEventListener('click', function () {
               const name = this.querySelector('#name').innerText
               const email = this.querySelector('#email').innerText
               const id = this.querySelector('#id').value
+              $(`#${target}`).querySelectorAll('input[type=text]')[0].classList.remove('none-user-name')
               $(`#${target}`).querySelectorAll('input[type=text]')[0].value = name
               $(`#${target}`).querySelectorAll('input[type=text]')[0].setAttribute('title', name)
               $(`#${target}`).querySelectorAll('input[type=text]')[1].value = email
@@ -258,7 +259,9 @@ $('#btn-confirm').addEventListener('click', function () {
       cloneApproverCheckList.querySelector('#name-check').innerText = lastapproveUserName.value
       cloneApproverCheckList.querySelector('#name-check').setAttribute('title', `${lastapproveUserName.value}`)
       cloneApproverCheckList.querySelector('#email-check').innerText = lastapproveUserMailAddresses.value
-      cloneApproverCheckList.querySelector('#email-check').setAttribute('title', `${lastapproveUserMailAddresses.value}`)
+      cloneApproverCheckList
+        .querySelector('#email-check')
+        .setAttribute('title', `${lastapproveUserMailAddresses.value}`)
       $('#approver-list-check').append(cloneApproverCheckList)
 
       document.querySelector('#check-modal').classList.add('is-active')
