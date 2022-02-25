@@ -25,24 +25,11 @@ const $ = function (tagObjName) {
 
 // ローディング画面の初期化
 window.onload = function () {
-  // 承認者検索ボタン機能設定
-  Array.prototype.forEach.call($('.BtnlineApproveRouteUserSearch'), function (btn) {
-    btn.addEventListener('click', btnSearchMain())
-  })
-
   // 削除ボタン機能活性化
   if ($('.btn-minus-approveRoute').length !== 0) {
     Array.prototype.forEach.call($('.btn-minus-approveRoute'), (btnMinus) => {
       btnMinus.addEventListener('click', btnMinusApproveRoute)
     })
-  }
-}
-
-// 2番目以降の勘定科目・補助科目検索ボタンイベント
-const btnSearchMain = function (searchModal) {
-  return function () {
-    if (searchModal) searchModal.classList.toggle('is-active')
-    $('#approveRoute-modal').dataset.info = this.dataset.info
   }
 }
 
@@ -147,7 +134,9 @@ const BtnlineApproveRouteUserSearch = function () {
 }
 
 // ボタンに機能を付与
-$('#BtnlineApproveRouteUserSearch').addEventListener('click', BtnlineApproveRouteUserSearch)
+Array.prototype.forEach.call($('.BtnlineApproveRouteUserSearch'), function (btn) {
+  btn.addEventListener('click', BtnlineApproveRouteUserSearch)
+})
 
 // 承認者追加ボタンクリック時
 $('#btnAddApproveRoute').addEventListener('click', function () {
@@ -163,7 +152,7 @@ const btnMinusApproveRoute = function () {
   $(`#${deleteTarget}`).remove()
   const approveUserList = $('#bulkInsertNo1')
   approveUserList.querySelectorAll('.lineApproveRoute').forEach((item, idx) => {
-    item.querySelector('.input-approveRouteUserNumber').innerText = `${approveUserNumbers[idx]}次承認`
+    item.querySelector('.input-approveRouteUserNumber').innerHTML = `${approveUserNumbers[idx]}次承認`
   })
 }
 
