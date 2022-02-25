@@ -190,14 +190,27 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
   try {
     let duplicatedFlag = false
 
-    // 重複コード検索
+    // 変更する承認ルートが既に変更された場合
+    const isUpdated = await ApproveRoute.findOne({
+      where: {
+        contractId: contract,
+        approveRouteId: prevApproveRouteId,
+        updateFlag: true
+      }
+    })
+    if (isUpdated) {
+      return 1
+    }
+
+    // 重複の承認ルート名をチェックのため、DBから変更対象以外の承認ルートを取得
     const resultSearchRoute = await ApproveRoute.findAll({
       where: {
         approveRouteName: values.setApproveRouteNameInputId,
         contractId: contract,
         approveRouteId: {
           [Op.ne]: prevApproveRouteId
-        }
+        },
+        updateFlag: false
       }
     })
 
@@ -217,7 +230,7 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
     const resultToInsertRoute = await ApproveRoute.create({
       contractId: contract,
       approveRouteName: values.setApproveRouteNameInputId,
-      prevApproveRouteId: prevApproveRouteId
+      prevAprroveRouteId: prevApproveRouteId
     })
 
     // DB保存失敗したらモデルApproveRouteインスタンスではない
