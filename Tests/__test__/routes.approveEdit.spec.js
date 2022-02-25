@@ -19,6 +19,7 @@ const ApproveRoute = require('../../Application/models').ApproveRoute
 const Approver = require('../../Application/models').ApproveUser
 const logger = require('../../Application/lib/logger.js')
 const ApproverObj = require('../../Application/lib/approver/Approver')
+const { v4: uuidV4 } = require('uuid')
 
 let request, response, infoSpy
 let userControllerFindOneSpy,
@@ -26,7 +27,10 @@ let userControllerFindOneSpy,
   tenantControllerFindOneSpy,
   contractControllerFindContractSpyon,
   approveRoutegetApproveRouteSpy,
-  approverFindOne
+  approveRouteFindOne,
+  approverFindOne,
+  approveRouteFindAll,
+  approveRouteUpdate
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -126,6 +130,25 @@ const approveRouteTestData = [
     'ApproveUsers.createdAt': new Date('2022-02-18'),
     'ApproveUsers.updatedAt': new Date('2022-02-18')
   }
+]
+
+const approveRouteTestData2 = [
+  ApproveRoute.build({
+    approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
+    contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+    approveRouteName: 'UTテスト承認ルート',
+    createdAt: new Date('2022-02-18'),
+    updatedAt: new Date('2022-02-18'),
+    deleteFlag: false
+  }),
+  ApproveRoute.build({
+    approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9c',
+    contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+    approveRouteName: 'utテスト承認ルート',
+    createdAt: new Date('2022-02-18'),
+    updatedAt: new Date('2022-02-18'),
+    deleteFlag: false
+  })
 ]
 
 const approver = [
@@ -263,8 +286,17 @@ describe('approveRouteListのテスト', () => {
     tenantControllerFindOneSpy = jest.spyOn(tenantController, 'findOne')
     contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
     approveRoutegetApproveRouteSpy = jest.spyOn(ApproveRoute, 'getApproveRoute')
+    approveRouteFindAll = jest.spyOn(ApproveRoute, 'findAll')
     approverFindOne = jest.spyOn(Approver, 'findOne')
     request.flash = jest.fn()
+    ApproveRoute.create = jest.fn((initData) => {
+      return ApproveRoute.build(initData)
+    })
+    approveRouteUpdate = jest.spyOn(ApproveRoute, 'update')
+    Approver.create = jest.fn((initData) => {
+      return Approver.build(initData)
+    })
+    approveRouteFindOne = jest.spyOn(ApproveRoute, 'findOne')
   })
   afterEach(() => {
     request.resetMocked()
@@ -276,7 +308,10 @@ describe('approveRouteListのテスト', () => {
     tenantControllerFindOneSpy.mockRestore()
     contractControllerFindContractSpyon.mockRestore()
     approveRoutegetApproveRouteSpy.mockRestore()
+    approveRouteFindAll.mockRestore()
     approverFindOne.mockRestore()
+    approveRouteUpdate.mockRestore()
+    approveRouteFindOne.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -285,6 +320,11 @@ describe('approveRouteListのテスト', () => {
         '/:approveRouteId',
         helper.isAuthenticated,
         approveRouteEdit.cbGetIndex
+      )
+      expect(approveRouteEdit.router.post).toBeCalledWith(
+        '/:approveRouteId',
+        helper.isAuthenticated,
+        approveRouteEdit.cbPostEditApproveRoute
       )
     })
   })
@@ -590,6 +630,375 @@ describe('approveRouteListのテスト', () => {
 
       // 試験実施
       await approveRouteEdit.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+  })
+
+  describe('コールバック：cbPostEditApproveRoute', () => {
+    test('正常', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const uuid = uuidV4()
+      const approveRouteId = uuidV4()
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        setApproveRouteNameInputId: 'utテスト承認ルート',
+        uuid: uuid
+      }
+      request.params.approveRouteId = approveRouteId
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 変更されていない場合
+      approveRouteFindOne.mockReturnValueOnce(null)
+
+      // 承認ルートDB検索結果
+      approveRoutegetApproveRouteSpy.mockReturnValueOnce(approveRouteTestData)
+
+      // 承認ルート重複検索結果：データがない場合
+      approveRouteFindAll.mockReturnValueOnce([approveRouteTestData2[0]])
+
+      // 登録した承認ルート検索結果
+      approveRoutegetApproveRouteSpy.mockReturnValueOnce({})
+
+      // 承認ルートのアップデート結果
+      approveRouteUpdate.mockReturnValueOnce([1, null])
+
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでapproveRouteListが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('info', '承認ルートの変更が完了しました。')
+      expect(response.redirect).toHaveBeenCalledWith('/approveRouteList')
+    })
+
+    test('準正常：重複の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const uuid = uuidV4()
+      const approveRouteId = '5c7b47dc-ddf5-475e-9285-c4042f096170'
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        setApproveRouteNameInputId: 'UTテスト承認ルート',
+        uuid: uuid
+      }
+      request.params.approveRouteId = approveRouteId
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 変更されていない場合
+      approveRouteFindOne.mockReturnValueOnce(null)
+
+      // 承認ルートDB検索結果
+      approveRoutegetApproveRouteSpy.mockReturnValueOnce(approveRouteTestData)
+
+      // 承認ルート重複検索結果：データがない場合
+      approveRouteFindAll.mockReturnValueOnce([approveRouteTestData2[0]])
+
+      // 登録した承認ルート検索結果
+      approveRoutegetApproveRouteSpy.mockReturnValueOnce({})
+
+      // 承認ルートのアップデート結果
+      approveRouteUpdate.mockReturnValueOnce([1, null])
+
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでapproveRouteListが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '承認ルート変更',
+        '入力した承認ルート名は既に登録されています。'
+      ])
+      expect(response.redirect).toHaveBeenCalledWith(`/approveRouteEdit/${approveRouteId}`)
+    })
+
+    test('準正常：アップデート失敗', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const uuid = uuidV4()
+      const approveRouteId = '5c7b47dc-ddf5-475e-9285-c4042f096170'
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        setApproveRouteNameInputId: 'UTテスト承認ルート2',
+        uuid: uuid
+      }
+      request.params.approveRouteId = approveRouteId
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 変更されていない場合
+      approveRouteFindOne.mockReturnValueOnce(null)
+
+      // 承認ルートDB検索結果
+      approveRoutegetApproveRouteSpy.mockReturnValueOnce(approveRouteTestData)
+
+      // 承認ルート重複検索結果：データがない場合
+      approveRouteFindAll.mockReturnValueOnce(approveRouteTestData2)
+
+      // 登録した承認ルート検索結果
+      approveRoutegetApproveRouteSpy.mockReturnValueOnce({})
+
+      // 承認ルートのアップデート結果
+      approveRouteUpdate.mockReturnValueOnce(0)
+
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでapproveRouteListが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', ['承認ルート変更', '承認ルート登録に失敗しました。'])
+      expect(response.redirect).toHaveBeenCalledWith(`/approveRouteEdit/${approveRouteId}`)
+    })
+
+    test('正常：解約申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[6])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
+
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('500エラー:不正なContractデータの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[7])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[7])
+
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('400エラー：ログインではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, userContext: 'notLoggedIn' }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[7])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[7])
+
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('notLoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('dummy')
+      // 400エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+    })
+
+    test('500エラー：requestのsession,userIdがnullの場合', async () => {
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      const userDbError = new Error('User Table Error')
+      userControllerFindOneSpy.mockReturnValue(userDbError)
+
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user.statusが0ではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[8])
+
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(404))
+    })
+
+    test('500エラー：contracts検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      const contractDbError = new Error('Contracts Table Error')
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+      contractControllerFindOneSpy.mockReturnValue(contractDbError)
+
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：テナントと契約テーブル検索結果無', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      tenantControllerFindOneSpy.mockReturnValue(null)
+      contractControllerFindContractSpyon.mockReturnValue(null)
+
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('DBエラー：テーブル検索失敗', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      const dbError = new Error(
+        'SequelizeConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)'
+      )
+      dbError.stack = 'SequelizeConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)'
+      // 承認ルートDB検索の時エラーが発生
+      approverFindOne.mockImplementation(() => {
+        throw dbError
+      })
+
+      // 試験実施
+      await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている

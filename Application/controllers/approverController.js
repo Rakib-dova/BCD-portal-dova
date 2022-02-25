@@ -7,6 +7,7 @@ const constantsDefine = require('../constants')
 const db = require('../models')
 const ApproveRoute = db.ApproveRoute
 const ApproveUser = db.ApproveUser
+const Op = db.Sequelize.Op
 
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   const userAccountsArr = []
@@ -89,7 +90,7 @@ const insertApprover = async (contract, values) => {
   try {
     let duplicatedFlag = false
 
-    // 重複コード検索
+    // 重複の承認ルート名検索
     const resultSearchRoute = await ApproveRoute.findAll({
       where: {
         approveRouteName: values.setApproveRouteNameInputId,
@@ -97,19 +98,19 @@ const insertApprover = async (contract, values) => {
       }
     })
 
-    // 重複コード検索（sequelize大小文字区別しないため）
+    // 重複の承認ルート名検索（sequelize大小文字区別しないため）
     resultSearchRoute.forEach((item) => {
       if (item.approveRouteName === values.setApproveRouteNameInputId) {
         duplicatedFlag = true
       }
     })
 
-    // 重複コードある場合、登録拒否処理
+    // 重複の承認ルート名がある場合、登録拒否処理
     if (duplicatedFlag) {
       return 1
     }
 
-    // 重複コードない場合DBに保存する。（ApproveRoute）
+    // 重複の承認ルート名ない場合DBに保存する。（ApproveRoute）
     const resultToInsertRoute = await ApproveRoute.create({
       contractId: contract,
       approveRouteName: values.setApproveRouteNameInputId
@@ -120,7 +121,7 @@ const insertApprover = async (contract, values) => {
       return -1
     }
 
-    // 重複コードない場合DBに保存する。（ApproveUser）
+    // 重複の承認ルート名がない場合DBに保存する。（ApproveUser）
     // 承認者が一人の場合
     if (uuids instanceof Array === false) {
       resultToInsertUser = await ApproveUser.create({
@@ -178,6 +179,145 @@ const insertApprover = async (contract, values) => {
   }
 }
 
+const editApprover = async (accTk, refreshTk, contract, values, prevApproveRouteId) => {
+  const functionName = 'approverController.editApprover'
+  // 関数開始表示
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+
+  let resultToInsertUser = null
+  const uuids = values.uuid
+
+  try {
+    let duplicatedFlag = false
+
+    // 変更する承認ルートが既に変更された場合
+    const isUpdated = await ApproveRoute.findOne({
+      where: {
+        contractId: contract,
+        approveRouteId: prevApproveRouteId,
+        updateFlag: true
+      }
+    })
+    if (isUpdated) {
+      return 1
+    }
+
+    // 重複の承認ルート名をチェックのため、DBから変更対象以外の承認ルートを取得
+    const resultSearchRoute = await ApproveRoute.findAll({
+      where: {
+        approveRouteName: values.setApproveRouteNameInputId,
+        contractId: contract,
+        approveRouteId: {
+          [Op.ne]: prevApproveRouteId
+        },
+        updateFlag: false
+      }
+    })
+
+    // 重複の承認ルート名検索（sequelize大小文字区別しないため）
+    resultSearchRoute.forEach((item) => {
+      if (item.approveRouteName === values.setApproveRouteNameInputId) {
+        duplicatedFlag = true
+      }
+    })
+
+    // 重複の承認ルート名がある場合、登録拒否処理
+    if (duplicatedFlag) {
+      return 1
+    }
+
+    // 重複の承認ルート名がない場合DBに保存する。（ApproveRoute）
+    const resultToInsertRoute = await ApproveRoute.create({
+      contractId: contract,
+      approveRouteName: values.setApproveRouteNameInputId,
+      prevAprroveRouteId: prevApproveRouteId
+    })
+
+    // DB保存失敗したらモデルApproveRouteインスタンスではない
+    if (resultToInsertRoute instanceof ApproveRoute === false) {
+      return -1
+    }
+
+    // 重複の承認ルート名がない場合DBに保存する。（ApproveUser）
+    // 承認者が一人の場合
+    if (uuids instanceof Array === false) {
+      resultToInsertUser = await ApproveUser.create({
+        approveRouteId: resultToInsertRoute.approveRouteId,
+        approveUser: values.uuid,
+        prevApproveUser: null,
+        nextApproveUser: null,
+        isLastApproveUser: false
+      })
+    } else {
+      let prev = null
+      let header = null
+      for (let i = 0; i < uuids.length; i++) {
+        let isLastApproveUser = false
+
+        if (i === uuids.length - 1) {
+          isLastApproveUser = true
+        }
+
+        let currentUser = null
+        resultToInsertUser = await ApproveUser.create({
+          approveRouteId: resultToInsertRoute.approveRouteId,
+          approveUser: uuids[i],
+          prevApproveUser: null,
+          nextApproveUser: null,
+          isLastApproveUser: isLastApproveUser
+        })
+        currentUser = resultToInsertUser
+        if (header === null) {
+          header = currentUser
+          prev = header
+        } else {
+          prev.nextApproveUser = currentUser.approveUserId
+          currentUser.prevApproveUser = prev.approveUserId
+          await prev.save()
+          await currentUser.save()
+          prev = currentUser
+        }
+      }
+    }
+
+    const approveRouteAndApprover = await getApproveRoute(accTk, refreshTk, contract, prevApproveRouteId)
+
+    // DB保存失敗したらモデルApproveRouteインスタンスではない
+    if (approveRouteAndApprover === -1) {
+      return -1
+    }
+
+    const prevApproveRouteSetUpdateFlag = await ApproveRoute.update(
+      {
+        updateFlag: true
+      },
+      {
+        where: {
+          approveRouteId: prevApproveRouteId
+        }
+      }
+    )
+
+    // DB保存失敗したらモデルApproveRouteインスタンスではない
+    if (!prevApproveRouteSetUpdateFlag) {
+      return -1
+    }
+
+    // 関数終了表示
+    logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+
+    // DB保存失敗したらモデルApproveRouteインスタンスではない
+    if (resultToInsertUser instanceof ApproveUser === false) {
+      return -1
+    }
+
+    return 0
+  } catch (error) {
+    // DBエラー発生したら処理
+    logger.error({ contractId: contract, stack: error.stack, status: 0 })
+    return error
+  }
+}
 /**
  * 登録した承認ルートを検索する。
  * @param {uuid} contractId デジトレの利用の契約者の識別番号
@@ -194,7 +334,8 @@ const getApproveRouteList = async (contractId) => {
       ],
       where: {
         contractId: contractId,
-        deleteFlag: false
+        deleteFlag: false,
+        updateFlag: false
       },
       order: [['approveRouteName', 'ASC']]
     })
@@ -338,6 +479,7 @@ const duplicateApproveRoute = async (approveRoute) => {
 module.exports = {
   getApprover: getApprover,
   insertApprover: insertApprover,
+  editApprover: editApprover,
   getApproveRouteList: getApproveRouteList,
   getApproveRoute: getApproveRoute,
   duplicateApproveRoute: duplicateApproveRoute

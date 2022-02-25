@@ -26,10 +26,8 @@ block content
                             .control
                               .columns.ml-0.pl-0.alignCenterChild
                                 .column.pl-0
-                                  if isApproveRouteEdit
-                                    input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= approveRouteName maxlength=40 placeholder='全角・半角文字・英数字40文字まで' readonly)
-                                  else
-                                    input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= valueForApproveRouteNameInput maxlength=40 placeholder='全角・半角文字・英数字40文字まで' required)
+                                  input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= approveRouteName maxlength=40 placeholder='全角・半角文字・英数字40文字まで' required)
+
                       .field.card
                         .card-content
                           .field
@@ -78,7 +76,7 @@ block content
                                               .field
                                                 p.control
                                                   if item.getName().trim() === '未設定'
-                                                    div#none-user-name #{item.getName()}
+                                                    input.input.item-text-overflow.input-approveRouteUserName.none-user-name(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.getName().trim() title=item.getName().trim() readonly)
                                                   if item.getName().trim() !== '未設定'
                                                     input.input.item-text-overflow.input-approveRouteUserName(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.getName().trim() title=item.getName().trim() readonly)
                                             .field-body.m-1.flex-none.width-45percent
@@ -89,7 +87,7 @@ block content
                                             .field-body.m-1.is-4.text-center.width-45percent
                                               .field
                                                 p.control
-                                                  a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
+                                                  a.button.is-link.btn-search-main.BtnlineApproveRouteUserSearch(data-id=`bulkInsertNo1_lineApproveRoute${idx+1}`) 検索
                                         .column.is-0.p-1.column-minus-btn
                                             a.red-color.btn-minus-approveRoute(data-target=`bulkInsertNo1_lineApproveRoute${idx+1}`)
                                               i.fas.fa-minus-circle
@@ -116,7 +114,7 @@ block content
                                                   .field
                                                     p.control
                                                       if item.getName().trim() === '未設定'
-                                                        div#none-user-name #{item.getName()}
+                                                        input.input.item-text-overflow.input-approveRouteUserName.none-user-name(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.getName().trim() title=item.getName().trim() readonly)
                                                       if item.getName().trim() !== '未設定'
                                                         input.input.item-text-overflow.input-approveRouteUserName(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.getName().trim() title=item.getName().trim() readonly)
                                                 .field-body.m-1.flex-none.width-45percent
@@ -152,8 +150,7 @@ block content
                                             p.control
                                               if lastApprover
                                                 if lastApprover.getName().trim() === '未設定'
-                                                  div#none-user-name
-                                                    | #{lastApprover.getName()}
+                                                  input.input.item-text-overflow.input-approveRouteLastUserName.none-user-name(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` value=lastApprover.getName() title=lastApprover.getName() readonly)
                                                 if lastApprover.getName().trim() !== '未設定'
                                                   input.input.item-text-overflow.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` value=lastApprover.getName() title=lastApprover.getName() readonly)
                                               else
