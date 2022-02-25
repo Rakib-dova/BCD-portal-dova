@@ -90,7 +90,7 @@ const insertApprover = async (contract, values) => {
   try {
     let duplicatedFlag = false
 
-    // 重複コード検索
+    // 重複の承認ルート名検索
     const resultSearchRoute = await ApproveRoute.findAll({
       where: {
         approveRouteName: values.setApproveRouteNameInputId,
@@ -98,19 +98,19 @@ const insertApprover = async (contract, values) => {
       }
     })
 
-    // 重複コード検索（sequelize大小文字区別しないため）
+    // 重複の承認ルート名検索（sequelize大小文字区別しないため）
     resultSearchRoute.forEach((item) => {
       if (item.approveRouteName === values.setApproveRouteNameInputId) {
         duplicatedFlag = true
       }
     })
 
-    // 重複コードある場合、登録拒否処理
+    // 重複の承認ルート名がある場合、登録拒否処理
     if (duplicatedFlag) {
       return 1
     }
 
-    // 重複コードない場合DBに保存する。（ApproveRoute）
+    // 重複の承認ルート名ない場合DBに保存する。（ApproveRoute）
     const resultToInsertRoute = await ApproveRoute.create({
       contractId: contract,
       approveRouteName: values.setApproveRouteNameInputId
@@ -121,7 +121,7 @@ const insertApprover = async (contract, values) => {
       return -1
     }
 
-    // 重複コードない場合DBに保存する。（ApproveUser）
+    // 重複の承認ルート名がない場合DBに保存する。（ApproveUser）
     // 承認者が一人の場合
     if (uuids instanceof Array === false) {
       resultToInsertUser = await ApproveUser.create({
@@ -214,19 +214,19 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
       }
     })
 
-    // 重複コード検索（sequelize大小文字区別しないため）
+    // 重複の承認ルート名検索（sequelize大小文字区別しないため）
     resultSearchRoute.forEach((item) => {
       if (item.approveRouteName === values.setApproveRouteNameInputId) {
         duplicatedFlag = true
       }
     })
 
-    // 重複コードある場合、登録拒否処理
+    // 重複の承認ルート名がある場合、登録拒否処理
     if (duplicatedFlag) {
       return 1
     }
 
-    // 重複コードない場合DBに保存する。（ApproveRoute）
+    // 重複の承認ルート名がない場合DBに保存する。（ApproveRoute）
     const resultToInsertRoute = await ApproveRoute.create({
       contractId: contract,
       approveRouteName: values.setApproveRouteNameInputId,
@@ -238,7 +238,7 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
       return -1
     }
 
-    // 重複コードない場合DBに保存する。（ApproveUser）
+    // 重複の承認ルート名がない場合DBに保存する。（ApproveUser）
     // 承認者が一人の場合
     if (uuids instanceof Array === false) {
       resultToInsertUser = await ApproveUser.create({

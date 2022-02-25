@@ -1220,7 +1220,7 @@ describe('approverControllerのテスト', () => {
       // 変更するデータが変更されている場合結果
       approveRouteFindOne.mockReturnValueOnce(null)
 
-      // 重複コード検索結果：データがない場合
+      // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([])
 
       // 更新した承認ルートを保存する。
@@ -1360,7 +1360,7 @@ describe('approverControllerのテスト', () => {
       // 変更するデータが変更されている場合結果
       approveRouteFindOne.mockReturnValueOnce(null)
 
-      // 重複コード検索結果：データがない場合
+      // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
           contract: contract,
@@ -1423,7 +1423,7 @@ describe('approverControllerのテスト', () => {
       // 変更するデータが変更されている場合結果
       approveRouteFindOne.mockReturnValueOnce(null)
 
-      // 重複コード検索結果：データがない場合
+      // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
           contract: contract,
@@ -1461,7 +1461,7 @@ describe('approverControllerのテスト', () => {
       // 変更するデータが変更されている場合結果
       approveRouteFindOne.mockReturnValueOnce(null)
 
-      // 重複コード検索結果：データがない場合
+      // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
           contract: contract,
@@ -1502,7 +1502,7 @@ describe('approverControllerのテスト', () => {
       // 変更するデータが変更されている場合結果
       approveRouteFindOne.mockReturnValueOnce(null)
 
-      // 重複コード検索結果：データがない場合
+      // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
           contract: contract,
@@ -1562,7 +1562,7 @@ describe('approverControllerのテスト', () => {
       // 変更するデータが変更されている場合結果
       approveRouteFindOne.mockReturnValueOnce(null)
 
-      // 重複コード検索結果：データがない場合
+      // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
           contract: contract,
@@ -1641,7 +1641,7 @@ describe('approverControllerのテスト', () => {
       // 変更するデータが変更されている場合結果
       approveRouteFindOne.mockReturnValueOnce(null)
 
-      // 重複コード検索結果：データがない場合
+      // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
           contract: contract,
@@ -1713,7 +1713,7 @@ describe('approverControllerのテスト', () => {
       // 変更するデータが変更されている場合結果
       approveRouteFindOne.mockReturnValueOnce(null)
 
-      // 重複コード検索結果：データがない場合
+      // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
           contract: contract,
