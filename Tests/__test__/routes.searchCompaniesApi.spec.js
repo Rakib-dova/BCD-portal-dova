@@ -240,7 +240,8 @@ describe('searchCompaniesApiのテスト', () => {
         companyName: '株式会社'
       }
 
-      apiManagerSpy.mockReturnValueOnce(errorResult400)
+      // apiのreturn値を想定する
+      apiManagerSpy.mockReturnValueOnce({ ...accountCompanyResult }).mockReturnValueOnce(errorResult400)
 
       // 試験実施
       await searchCompaniesApi.cbSearchCompanies(request, response)

@@ -56,60 +56,96 @@ block content
                                   if isApproveRouteEdit
                                     -var numberList = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
                                     each item, idx in approveUsers
-                                      .columns.m-0.p-1.lineApproveRouteForLast(id=`bulkInsertNo1_lineApproveRoute1` data-idx='1')
-                                        .column.p-0.border-div-rad-4
+                                      .columns.m-0.p-1.lineApproveRoute(id=`bulkInsertNo1_lineApproveRoute${idx+1}`)
+                                        .column.p-0.border-div-rad-4.field-overflow
                                           .field.is-horizontal.m-1.has-addons-centered
-                                            .field-label.is-normal.m-0.text-center
+                                            .field-label.is-normal.m-0.text-center.flex-none.width-20percent
                                               label 承認順
-                                            .field-label.is-normal.m-0.text-center
+                                            .field-label.is-normal.m-0.text-center.flex-none.width-25percent.padding-left-3
                                               label 承認者名
-                                            .field-label.is-normal.m-0.text-center
+                                            .field-label.is-normal.m-0.text-center.flex-none.width-45percent.padding-left-5
                                               label メールアドレス
-                                            .field-label.is-normal.m-0.fixed-void-66
+                                            .field-label.is-normal.m-0.width-10percent
                                               label
                                           .field.is-horizontal.p-1
-                                            .field-body.m-1
-                                              .field.text-center.padding-left-30
-                                                label.input-label.text-center #{numberList[idx]}次承認
-                                                p.input-label-required.input-label.text-center  （必須）
-                                            .field-body.m-1
+                                            .field-body.m-1.flex-none.width-20percent
+                                              .field.text-center.padding-left-20
+                                                label.input-label.input-approveRouteUserNumber.text-center #{numberList[idx]}次承認 
+                                                p.input-label-required.input-label.text-center 
+                                            .field-body.m-1.flex-none.width-25percent
                                               .field
                                                 p.control
                                                   if item.getName().trim() === '未設定'
                                                     div#none-user-name #{item.getName()}
                                                   if item.getName().trim() !== '未設定'
-                                                    input.input.input-approveRouteUserName(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.getName().trim() readonly)
-                                            .field-body.m-1
+                                                    input.input.item-text-overflow.input-approveRouteUserName(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.getName().trim() title=item.getName().trim() readonly)
+                                            .field-body.m-1.flex-none.width-45percent
                                               .field
                                                 p.control
-                                                  input.input.input-approveRouteUserMailAddress(type='text' id=`lineApproveRoute_approveUserMailAddress` name=`mailAddress` value= item.getMail().trim() readonly)
-                                                  input(type='hidden' name=`uuid`)
-                                            .field-body.m-1.is-4.text-center
+                                                  input.input.item-text-overflow.input-approveRouteUserMailAddress(type='text' id=`lineApproveRoute_approveUserMailAddress` name=`mailAddress` value= item.getMail().trim() title= item.getMail().trim() readonly)
+                                                  input(type='hidden' name=`uuid` value= item.getId())
+                                            .field-body.m-1.is-4.text-center.width-45percent
                                               .field
                                                 p.control
                                                   a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
-                                        .column.is-0.p-1
-                                          .column
-                                            a.red-color.btn-minus-approveRoute
+                                        .column.is-0.p-1.column-minus-btn
+                                            a.red-color.btn-minus-approveRoute(data-target=`bulkInsertNo1_lineApproveRoute${idx+1}`)
                                               i.fas.fa-minus-circle
-                                                                                
+                                  else
+                                    if approveUsers
+                                      -var numberList = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
+                                        each item, idx in approveUsers
+                                          .columns.m-0.p-1.lineApproveRoute(id=`bulkInsertNo1_lineApproveRoute${idx + 1}`)
+                                            .column.p-0.border-div-rad-4.field-overflow
+                                              .field.is-horizontal.m-1.has-addons-centered
+                                                .field-label.is-normal.m-0.text-center.flex-none.width-20percent
+                                                  label 承認順
+                                                .field-label.is-normal.m-0.text-center.flex-none.width-25percent.padding-left-3
+                                                  label 承認者名
+                                                .field-label.is-normal.m-0.text-center.flex-none.width-45percent.padding-left-5
+                                                  label メールアドレス
+                                                .field-label.is-normal.m-0.width-10percent
+                                                  label
+                                              .field.is-horizontal.p-1
+                                                .field-body.m-1.flex-none.width-20percent
+                                                  .field.text-center.padding-left-30
+                                                    label.input-label.text-center.input-approveRouteUserNumber #{numberList[idx]}次承認
+                                                .field-body.m-1.flex-none.width-25percent
+                                                  .field
+                                                    p.control
+                                                      if item.getName().trim() === '未設定'
+                                                        div#none-user-name #{item.getName()}
+                                                      if item.getName().trim() !== '未設定'
+                                                        input.input.item-text-overflow.input-approveRouteUserName(type='text' id=`lineApproveRoute_approveUserName` name=`userName` value=item.getName().trim() title=item.getName().trim() readonly)
+                                                .field-body.m-1.flex-none.width-45percent
+                                                  .field
+                                                    p.control
+                                                      input.input.item-text-overflow.input-approveRouteUserMailAddress(type='text' id=`lineApproveRoute_approveUserMailAddress` name=`mailAddress` value= item.getMail().trim() title= item.getMail().trim() readonly)
+                                                      input(type='hidden' name=`uuid` value= item.getId())
+                                                .field-body.m-1.is-4.text-center
+                                                  .field
+                                                    p.control
+                                                      a.button.is-link.btn-search-main.BtnlineApproveRouteUserSearch(data-id=`bulkInsertNo1_lineApproveRoute${idx + 1}`) 検索
+                                            .column.is-0.p-1.column-minus-btn
+                                                a.red-color.btn-minus-approveRoute(data-target=`bulkInsertNo1_lineApproveRoute${idx + 1}`)
+                                                  i.fas.fa-minus-circle                  
                                   .columns.m-0.p-1.lineApproveRouteForLast(id='bulkInsertNo1_lineApproveRouteLast' data-idx='1')
-                                    .column.p-0.border-div-rad-4
+                                    .column.p-0.border-div-rad-4.field-overflow
                                       .field.is-horizontal.m-1.has-addons-centered
-                                        .field-label.is-normal.m-0.text-center
+                                        .field-label.is-normal.m-0.text-center.flex-none.width-20percent
                                           label 承認順
-                                        .field-label.is-normal.m-0.text-center
+                                        .field-label.is-normal.m-0.text-center.flex-none.width-25percent.padding-left-3
                                           label 最終承認者名
-                                        .field-label.is-normal.m-0.text-center
+                                        .field-label.is-normal.m-0.text-center.flex-none.width-45percent.padding-left-5
                                           label メールアドレス
-                                        .field-label.is-normal.m-0.fixed-void-66
+                                        .field-label.is-normal.m-0.width-10percent
                                           label
                                       .field.is-horizontal.p-1
-                                        .field-body.m-1
-                                          .field.text-center.padding-left-30
+                                        .field-body.m-1.flex-none.width-20percent
+                                          .field.text-center.padding-left-20
                                             label.input-label.text-center 最終承認
                                             p.input-label-required.input-label.text-center  （必須）
-                                        .field-body.m-1
+                                        .field-body.m-1.flex-none.width-25percent
                                           .field
                                             p.control
                                               if lastApprover
@@ -117,31 +153,31 @@ block content
                                                   div#none-user-name
                                                     | #{lastApprover.getName()}
                                                 if lastApprover.getName().trim() !== '未設定'
-                                                  input.input.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` value=lastApprover.getName() readonly)
+                                                  input.input.item-text-overflow.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` value=lastApprover.getName() title=lastApprover.getName() readonly)
                                               else
-                                                input.input.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` readonly)
-                                        .field-body.m-1
+                                                input.input.item-text-overflow.input-approveRouteLastUserName(type='text' id=`lastLineApproveRoute_approveUserName` name=`userName` readonly)
+                                        .field-body.m-1.flex-none.width-45percent
                                           .field
                                             p.control
                                               if lastApprover
-                                                input.input.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` value=lastApprover.getMail() readonly)
+                                                input.input.item-text-overflow.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` value=lastApprover.getMail() title=lastApprover.getMail() readonly)
+                                                input(type='hidden' name=`uuid` value=lastApprover.getId())
                                               else
-                                                input.input.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` readonly)
-                                              input(type='hidden' name=`uuid`)
+                                                input.input.item-text-overflow.input-approveRouteLastUserMailAddress(type='text' id=`lastLineApproveRoute_approveUserMailAddress` name=`mailAddress` readonly)
+                                                input(type='hidden' name=`uuid`)
                                         .field-body.m-1.is-4.text-center
                                           .field
                                             p.control
-                                              a.button.is-link.btn-search-main#BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
+                                              a.button.is-link.btn-search-main.BtnlineApproveRouteUserSearch(data-id='bulkInsertNo1_lineApproveRouteLast') 検索
                                     .column.is-0.p-1
                                       .column.is-invisible
-                                        a.red-color.btn-minus-approveRoute
-                                          i.fas.fa-minus-circle
+                                        
                   .grouped-button
                     a.button.mr-6(href= backUrl) 戻る
                     a.button.is-link#btn-confirm 確認
   .modal#check-modal
     .modal-background.cancel-button(data-target='check-modal')
-    .modal-card.is-family-noto-sans
+    .modal-card.is-family-noto-sans.approveRoute-modal-width
       header.modal-card-head
         p.modal-card-title.title.mb-0 承認ルート設定確認
         button.delete(data-target='check-modal')
@@ -150,10 +186,18 @@ block content
           .column.is-fullwidth.p-0
             .field.is-horizontal#displayInvisible
               .box.px-2
+                label(for= 'approveRouteName_checkModal').input-label #{approveRouteNameLabel}
+                p(id= requiredTagApproveRouteName).input-label-required.input-label （必須）
+                .control
+                  .columns.ml-0.pl-0.alignCenterChild
+                    .column.pl-0
+                      input.input(type="text" id= 'approveRouteName_checkModal' name= 'approveRouteName_checkModal'  maxlength=40 readonly required)                    
+            .field.is-horizontal#displayInvisible
+              .box.px-2
                 .columns.is-fullwidth.m-0
-                  .column.border-div-rad-0.is-2 承認順
-                  .column.border-div-rad-0.is-3 承認者名
-                  .column.border-div-rad-0.is-7 メールアドレス
+                  .column.border-div-rad-0.flex-none.width-10percent 承認順
+                  .column.border-div-rad-0.flex-none.width-25percent 承認者名
+                  .column.border-div-rad-0.flex-none.width-45percent メールアドレス
                 .row#approver-list-check
       footer.modal-card-foot
         div.button-area
@@ -174,7 +218,7 @@ block content
 
   .modal.modal-fx-fadeInscale#approveRoute-modal
     .modal-background.cancel-button(data-target="approveRoute-modal")
-    .modal-card
+    .modal-card.approveRoute-modal-width
       header.modal-card-head
         p.modal-card-title #{modalTitle}
         button#deleteApproveRoute-modal.delete(type="button" data-target="approveRoute-modal")
@@ -226,28 +270,28 @@ block content
 
   template#templateLineApproveRouteItem
       .columns.m-0.p-1.lineApproveRoute
-        .column.p-0.border-div-rad-4
+        .column.p-0.border-div-rad-4.field-overflow
           .field.is-horizontal.m-1.has-addons-centered
-            .field-label.is-normal.m-0.text-center
+            .field-label.is-normal.m-0.text-center.flex-none.width-20percent
               label 承認順
-            .field-label.is-normal.m-0.text-center
+            .field-label.is-normal.m-0.text-center.flex-none.width-25percent.padding-left-3
               label 承認者名
-            .field-label.is-normal.m-0.text-center
+            .field-label.is-normal.m-0.text-center.flex-none.width-45percent.padding-left-5
               label メールアドレス
-            .field-label.is-normal.m-0.fixed-void-66
+            .field-label.is-normal.m-0.width-10percent
               label 　
           .field.is-horizontal.p-1
-            .field-body.m-1
+            .field-body.m-1.flex-none.width-20percent.padding-rigth-1
               .field.text-center
                 p.control.input-approveRouteUserNumber
-            .field-body.m-1
+            .field-body.m-1.flex-none.width-25percent
               .field
                 p.control
-                  input.input.input-approveRouteUserName(type='text' name=`` value readonly)
-            .field-body.m-1
+                  input.input.item-text-overflow.input-approveRouteUserName(type='text' name=`` title= value value readonly)
+            .field-body.m-1.flex-none.width-45percent
               .field
                 p.control
-                  input.input.input-approveRouteUserMailAddress(type='text' id=`` value readonly)
+                  input.input.item-text-overflow.input-approveRouteUserMailAddress(type='text' id=`` title= value value readonly)
                   input(type='hidden')
             .field-body.m-1.is-4.text-center
               .field
@@ -264,25 +308,25 @@ block content
           .field-body
             p.control.noApproveUserMessage
       td.columnApproveUserName
-      td.columnApproveUserMailAddress
+      td.text-overflow.columnApproveUserMailAddress
   include footer
 
   template#template-approverList
     .columns.is-fullwidth.m-0.is-6.columns-tr
       .column.column-td.is-6
-        p#name
+        p.text-overflow#name
         input#id(type='hidden')
       .column.column-td.is-6
-        p#email
+        p.text-overflow#email
 
   template#template-approverCheckList
     .columns.is-fullwidth.m-0.is-6
-      .column.column-td.is-2
+      .column.column-td.flex-none.width-10percent
         p#id-check
-      .column.column-td.is-3
-        p#name-check
-      .column.column-td.is-7
-        p#email-check
+      .column.column-td.flex-none.width-25percent
+        p.item-text-overflow#name-check
+      .column.column-td.flex-none.width-45percent
+        p.item-text-overflow#email-check
 
 block append scripts
   script(src="/js/registApproveRoute-page.js")
