@@ -67,20 +67,40 @@ const cbGetIndex = async (req, res, next) => {
 
   const lastApprover = approveRouteAndApprover.users.pop()
 
-  res.render('registApproveRoute', {
-    panelHead: '条件絞り込み',
-    approveRouteNameLabel: '承認ルート名',
-    requiredTagApproveRouteName: 'approveRouteNameTagRequired',
-    idForApproveRouteNameInput: 'setApproveRouteNameInputId',
-    isApproveRouteEdit: true,
-    modalTitle: '承認者検索',
-    backUrl: '/approveRouteList',
-    logTitle: '承認ルート確認・変更',
-    logTitleEng: 'EDIT APPROVE ROUTE',
-    approveRouteName: approveRouteAndApprover.name,
-    approveUsers: approveRouteAndApprover.users,
-    lastApprover: lastApprover
-  })
+  if (req.session.body) {
+    const body = { ...req.session.body }
+    delete req.session.body
+    const resultDuplicate = await approverController.duplicateApproveRoute(body)
+    res.render('registApproveRoute', {
+      panelHead: '条件絞り込み',
+      approveRouteNameLabel: '承認ルート名',
+      requiredTagApproveRouteName: 'approveRouteNameTagRequired',
+      idForApproveRouteNameInput: 'setApproveRouteNameInputId',
+      isApproveRouteEdit: false,
+      modalTitle: '承認者検索',
+      backUrl: '/approveRouteList',
+      logTitle: '承認ルート確認・変更',
+      logTitleEng: 'EDIT APPROVE ROUTE',
+      approveRouteName: resultDuplicate.approveRouteName,
+      approveUsers: resultDuplicate.approverUsers,
+      lastApprover: resultDuplicate.lastApprover
+    })
+  } else {
+    res.render('registApproveRoute', {
+      panelHead: '条件絞り込み',
+      approveRouteNameLabel: '承認ルート名',
+      requiredTagApproveRouteName: 'approveRouteNameTagRequired',
+      idForApproveRouteNameInput: 'setApproveRouteNameInputId',
+      isApproveRouteEdit: true,
+      modalTitle: '承認者検索',
+      backUrl: '/approveRouteList',
+      logTitle: '承認ルート確認・変更',
+      logTitleEng: 'EDIT APPROVE ROUTE',
+      approveRouteName: approveRouteAndApprover.name,
+      approveUsers: approveRouteAndApprover.users,
+      lastApprover: lastApprover
+    })
+  }
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
