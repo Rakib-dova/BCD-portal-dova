@@ -9,7 +9,7 @@ const ApproveUser = db.ApproveUser
 const ApproveObj = require('../../Application/lib/approver/Approver')
 
 let errorSpy, infoSpy, accessTradeshift
-let approveRouteFindAll, approverouteCreate, approveGetApproveRoute, approveRouteUpdate
+let approveRouteFindAll, approverouteCreate, approveGetApproveRoute, approveRouteUpdate, approveRouteFindOne
 let approveUserCreate, approveUserFindOne
 
 const findUsers = {
@@ -119,6 +119,7 @@ describe('approverControllerのテスト', () => {
     approveGetApproveRoute = jest.spyOn(ApproveRoute, 'getApproveRoute')
     approveUserFindOne = jest.spyOn(ApproveUser, 'findOne')
     ApproveUser.save = jest.fn()
+    approveRouteFindOne = jest.spyOn(ApproveRoute, 'findOne')
   })
 
   afterEach(() => {
@@ -131,6 +132,7 @@ describe('approverControllerのテスト', () => {
     approveGetApproveRoute.mockRestore()
     approveUserFindOne.mockRestore()
     approveRouteUpdate.mockRestore()
+    approveRouteFindOne.mockRestore()
   })
 
   describe('getApprover', () => {
@@ -1092,7 +1094,10 @@ describe('approverControllerのテスト', () => {
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
 
-      // 重複コード検索結果：データがない場合
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(null)
+
+      // 重複承認ルート検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([])
 
       // 更新した承認ルートを保存する。
@@ -1211,6 +1216,9 @@ describe('approverControllerのテスト', () => {
         ]
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(null)
 
       // 重複コード検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([])
@@ -1349,6 +1357,9 @@ describe('approverControllerのテスト', () => {
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
 
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(null)
+
       // 重複コード検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
@@ -1409,6 +1420,9 @@ describe('approverControllerのテスト', () => {
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
 
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(null)
+
       // 重複コード検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
@@ -1443,6 +1457,9 @@ describe('approverControllerのテスト', () => {
         uuid: 'aa974511-8188-4022-bd86-45e251fd259e'
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(null)
 
       // 重複コード検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
@@ -1481,6 +1498,9 @@ describe('approverControllerのテスト', () => {
         uuid: 'aa974511-8188-4022-bd86-45e251fd259e'
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(null)
 
       // 重複コード検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
@@ -1538,6 +1558,9 @@ describe('approverControllerのテスト', () => {
         uuid: 'aa974511-8188-4022-bd86-45e251fd259e'
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(null)
 
       // 重複コード検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
@@ -1615,6 +1638,9 @@ describe('approverControllerのテスト', () => {
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
 
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(null)
+
       // 重複コード検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
@@ -1684,6 +1710,9 @@ describe('approverControllerのテスト', () => {
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
 
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(null)
+
       // 重複コード検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
@@ -1724,6 +1753,37 @@ describe('approverControllerのテスト', () => {
 
       // 期待結果
       expect(result).toEqual(dbError)
+    })
+
+    test('準正常:登録ボタン多数の押下する場合', async () => {
+      const accessToken = 'dummy-access-token-data'
+      const refreshToken = 'dummy-refresh-token-data'
+      const contract = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const value = {
+        setApproveRouteNameInputId: 'test2',
+        uuid: 'aa974511-8188-4022-bd86-45e251fd259e'
+      }
+      const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'test2'
+        })
+      )
+
+      // 試験実施
+      const result = await approverController.editApprover(
+        accessToken,
+        refreshToken,
+        contract,
+        value,
+        prevApproveRouteId
+      )
+
+      // 期待結果
+      expect(result).toEqual(1)
     })
   })
 })

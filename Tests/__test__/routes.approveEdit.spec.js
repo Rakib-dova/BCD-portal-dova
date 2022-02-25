@@ -27,6 +27,7 @@ let userControllerFindOneSpy,
   tenantControllerFindOneSpy,
   contractControllerFindContractSpyon,
   approveRoutegetApproveRouteSpy,
+  approveRouteFindOne,
   approverFindOne,
   approveRouteFindAll,
   approveRouteUpdate
@@ -295,6 +296,7 @@ describe('approveRouteListのテスト', () => {
     Approver.create = jest.fn((initData) => {
       return Approver.build(initData)
     })
+    approveRouteFindOne = jest.spyOn(ApproveRoute, 'findOne')
   })
   afterEach(() => {
     request.resetMocked()
@@ -309,6 +311,7 @@ describe('approveRouteListのテスト', () => {
     approveRouteFindAll.mockRestore()
     approverFindOne.mockRestore()
     approveRouteUpdate.mockRestore()
+    approveRouteFindOne.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -661,6 +664,9 @@ describe('approveRouteListのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
+      // 変更されていない場合
+      approveRouteFindOne.mockReturnValueOnce(null)
+
       // 承認ルートDB検索結果
       approveRoutegetApproveRouteSpy.mockReturnValueOnce(approveRouteTestData)
 
@@ -707,6 +713,9 @@ describe('approveRouteListのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 変更されていない場合
+      approveRouteFindOne.mockReturnValueOnce(null)
 
       // 承認ルートDB検索結果
       approveRoutegetApproveRouteSpy.mockReturnValueOnce(approveRouteTestData)
@@ -757,6 +766,9 @@ describe('approveRouteListのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 変更されていない場合
+      approveRouteFindOne.mockReturnValueOnce(null)
 
       // 承認ルートDB検索結果
       approveRoutegetApproveRouteSpy.mockReturnValueOnce(approveRouteTestData)
