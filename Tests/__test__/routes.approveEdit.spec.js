@@ -456,6 +456,82 @@ describe('approveRouteListのテスト', () => {
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
 
+    test('準正常：重複の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const body = {
+        setApproveRouteNameInputId: 'テスト',
+        userName: ['管理者2 契約フロー確認用3', '管理者1 契約フロー確認用3'],
+        mailAddress: ['dev.master.bconnection+flow3.002@gmail.com', 'dev.master.bconnection+flow3.001@gmail.com'],
+        uuid: ['81ae1ddf-0017-471c-962b-b4dac1b72117', '2c15aaf5-8b75-4b85-97ef-418948ed6f9b']
+      }
+      request.session = { ...session, body: { ...body } }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 承認ルートDB検索結果
+      approveRoutegetApproveRouteSpy.mockReturnValueOnce(approveRouteTestData)
+
+      // 承認ユーザーDB検索結果
+      approverFindOne.mockImplementation((options) => {
+        const approveUserId = options.where.approveUserId
+        let result = null
+        for (let idx = 0; idx < approver.length; idx++) {
+          if (approver[idx].approveUserId === approveUserId) {
+            result = approver[idx]
+          }
+        }
+        return result
+      })
+
+      // 承認者オブジェクト作成
+      const approverUsers = [
+        new ApproverObj({
+          FirstName: '管理者2',
+          LastName: '契約フロー確認用3',
+          Username: 'dev.master.bconnection+flow3.002@gmail.com',
+          Id: '81ae1ddf-0017-471c-962b-b4dac1b72117',
+          Memberships: [{ GroupId: null }]
+        })
+      ]
+
+      const lastApprover = new ApproverObj({
+        FirstName: '管理者1',
+        LastName: '契約フロー確認用3',
+        Username: 'dev.master.bconnection+flow3.001@gmail.com',
+        Id: '2c15aaf5-8b75-4b85-97ef-418948ed6f9b',
+        Memberships: [{ GroupId: null }]
+      })
+
+      // 試験実施
+      await approveRouteEdit.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 承認ルートページレンダリングを呼び出し
+      expect(response.render).toBeCalledWith('registApproveRoute', {
+        panelHead: '条件絞り込み',
+        approveRouteNameLabel: '承認ルート名',
+        requiredTagApproveRouteName: 'approveRouteNameTagRequired',
+        idForApproveRouteNameInput: 'setApproveRouteNameInputId',
+        isApproveRouteEdit: false,
+        modalTitle: '承認者検索',
+        backUrl: '/approveRouteList',
+        logTitle: '承認ルート確認・変更',
+        logTitleEng: 'EDIT APPROVE ROUTE',
+        approveRouteName: body.setApproveRouteNameInputId,
+        approveUsers: approverUsers,
+        lastApprover: lastApprover
+      })
+    })
+
     test('500エラー:不正なContractデータの場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
