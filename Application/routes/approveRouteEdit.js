@@ -131,7 +131,6 @@ const cbPostEditApproveRoute = async (req, res, next) => {
     req.body,
     prevApproveRouteId
   )
-
   if (resultInsert instanceof Error) return next(errorHelper.create(500))
 
   switch (resultInsert) {
@@ -142,7 +141,6 @@ const cbPostEditApproveRoute = async (req, res, next) => {
       break
     case 1:
       req.flash('noti', ['承認ルート変更', '入力した承認ルート名は既に登録されています。'])
-      console.log(req.body)
       req.session.body = req.body
       res.redirect(`/approveRouteEdit/${prevApproveRouteId}`)
       break

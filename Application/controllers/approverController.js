@@ -7,6 +7,7 @@ const constantsDefine = require('../constants')
 const db = require('../models')
 const ApproveRoute = db.ApproveRoute
 const ApproveUser = db.ApproveUser
+const Op = db.Sequelize.Op
 
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   const userAccountsArr = []
@@ -193,7 +194,10 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
     const resultSearchRoute = await ApproveRoute.findAll({
       where: {
         approveRouteName: values.setApproveRouteNameInputId,
-        contractId: contract
+        contractId: contract,
+        approveRouteId: {
+          [Op.ne]: prevApproveRouteId
+        }
       }
     })
 
@@ -266,7 +270,7 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
     const approveRouteAndApprover = await getApproveRoute(accTk, refreshTk, contract, prevApproveRouteId)
 
     // DB保存失敗したらモデルApproveRouteインスタンスではない
-    if (approveRouteAndApprover === '') {
+    if (approveRouteAndApprover === -1) {
       return -1
     }
 
