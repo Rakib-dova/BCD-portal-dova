@@ -49,13 +49,13 @@ $('#btn-search-approver').addEventListener('click', function () {
   approverApi.setRequestHeader('Content-Type', 'application/json')
   approverApi.onreadystatechange = function () {
     if (approverApi.readyState === approverApi.DONE) {
+      // 既存の検索結果を取り消す
+      while ($('#approver-list').firstChild) {
+        $('#approver-list').removeChild($('#approver-list').firstChild)
+      }
       if (approverApi.status === 200) {
         // サーバーから送信したデータの取得
         const approvers = JSON.parse(approverApi.responseText)
-        // 既存の検索結果を取り消す
-        while ($('#approver-list').firstChild) {
-          $('#approver-list').removeChild($('#approver-list').firstChild)
-        }
         // データがある場合、承認者を表示
         if (approvers.length !== 0) {
           approvers.forEach((approver) => {
