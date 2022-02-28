@@ -8,7 +8,7 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    return await queryInterface.createTable('ApproveRequest', {
+    return await queryInterface.createTable('RequestApproval', {
       requestId: {
         primaryKey: true,
         type: Sequelize.DataTypes.UUID,
@@ -48,7 +48,7 @@ module.exports = {
         },
         allowNull: false
       },
-      stauts: {
+      status: {
         type: Sequelize.DataTypes.INTEGER,
         references: {
           model: {
@@ -76,6 +76,6 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    return await queryInterface.dropTable('ApproveRequest')
+    return await queryInterface.dropTable('RequestApproval')
   }
 }

@@ -1,7 +1,7 @@
 'use strict'
 const { Model, UUIDV4 } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class ApproveRequest extends Model {
+  class RequestApproval extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -10,25 +10,25 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       // https://qiita.com/NewGyu/items/83390aa17dce1ffb4cd3
-      ApproveRequest.belongsTo(models.Contract, {
+      RequestApproval.belongsTo(models.Contract, {
         foreignKey: 'contractId', // k1を指定
         targetKey: 'contractId' // k2を指定
       })
-      ApproveRequest.belongsTo(models.ApproveRoute, {
+      RequestApproval.belongsTo(models.ApproveRoute, {
         foreignKey: 'approveRouteId', // k1を指定
         targetKey: 'approveRouteId' // k2を指定
       })
-      ApproveRequest.belongsTo(models.User, {
-        foreignKey: 'userId', // k1を指定
+      RequestApproval.belongsTo(models.User, {
+        foreignKey: 'requester', // k1を指定
         targetKey: 'userId' // k2を指定
       })
-      ApproveRequest.belongsTo(models.ApproveStatus, {
-        foreignKey: 'no', // k1を指定
-        targetKey: 'no' // k2を指定
+      RequestApproval.belongsTo(models.ApproveStatus, {
+        foreignKey: 'status', // k1を指定
+        targetKey: 'code' // k2を指定
       })
     }
   }
-  ApproveRequest.init(
+  RequestApproval.init(
     {
       requestId: {
         type: DataTypes.UUID,
@@ -81,10 +81,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'ApproveRequest',
-      tableName: 'ApproveRequest',
-      timestamps: true
+      modelName: 'RequestApproval',
+      tableName: 'RequestApproval',
+      timestamps: false
     }
   )
-  return ApproveRequest
+  return RequestApproval
 }
