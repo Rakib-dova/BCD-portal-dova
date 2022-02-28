@@ -6,6 +6,7 @@ const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
+const requestApprovalController = require('../controllers/requestApprovalController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
@@ -55,6 +56,17 @@ const cbGetIndex = async (req, res, next) => {
   const pageId = ~~req.params.page
   const tenantId = user.tenantId
   const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+
+  // 請求書の承認依頼検索
+  for (let i = 0; i < result.list.length; i++) {
+    const requestApproval = await requestApprovalController.findOneRequestApproval(
+      contract.contractId,
+      result.list[i].documentId
+    )
+    if (requestApproval instanceof Error) return next(errorHelper.create(500))
+
+    if (requestApproval !== null) result.list[i].approveStatus = requestApproval.status
+  }
 
   // 受領した請求書一覧レンダリング
   res.render('inboxList', {
