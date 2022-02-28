@@ -285,6 +285,9 @@ app.use('/inboxList', require('./routes/inboxList').router)
 // 受領した請求書
 app.use('/inbox', require('./routes/inbox').router)
 
+// 承認依頼画面
+app.use('/requestApproval', require('./routes/requestApproval').router)
+
 // ------------承認ルート
 // 承認ルート登録
 app.use('/registApproveRoute', require('./routes/registApproveRoute').router)
