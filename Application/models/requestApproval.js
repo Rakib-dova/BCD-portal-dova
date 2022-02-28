@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       })
       RequestApproval.belongsTo(models.ApproveStatus, {
         foreignKey: 'status', // k1を指定
-        targetKey: 'code' // k2を指定
+        targetKey: 'no' // k2を指定
       })
     }
   }
