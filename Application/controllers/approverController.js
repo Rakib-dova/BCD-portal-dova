@@ -7,6 +7,7 @@ const constantsDefine = require('../constants')
 const db = require('../models')
 const ApproveRoute = db.ApproveRoute
 const ApproveUser = db.ApproveUser
+const Op = db.Sequelize.Op
 
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   const userAccountsArr = []
@@ -335,10 +336,54 @@ const duplicateApproveRoute = async (approveRoute) => {
   return { approveRouteName, approverUsers, lastApprover }
 }
 
+const searchApproveRouteList = async (_contractId, _approveRouteName) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'searchApproveRouteList')
+  const contractId = _contractId
+  const approveRouteName = _approveRouteName ?? ''
+
+  try {
+    const where = {
+      contractId: contractId
+    }
+    if (approveRouteName.length !== 0) {
+      where.approveRouteName = {
+        [Op.like]: `%${approveRouteName}%`
+      }
+    }
+    const approveRoutes = (
+      await ApproveRoute.findAll({
+        include: [
+          {
+            model: ApproveUser
+          }
+        ],
+        where: {
+          ...where
+        }
+      })
+    ).map((approveRoute, idx) => {
+      return {
+        No: idx + 1,
+        approveRouteName: approveRoute.approveRouteName,
+        approverCount: approveRoute.ApproveUsers.length,
+        uuid: approveRoute.approveRouteId
+      }
+    })
+
+    logger.info(constantsDefine.logMessage.INF001 + 'searchApproveRouteList')
+    return { status: 0, searchResult: approveRoutes }
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'searchApproveRouteList')
+    return { status: -1, searchResult: error }
+  }
+}
+
 module.exports = {
   getApprover: getApprover,
   insertApprover: insertApprover,
   getApproveRouteList: getApproveRouteList,
   getApproveRoute: getApproveRoute,
-  duplicateApproveRoute: duplicateApproveRoute
+  duplicateApproveRoute: duplicateApproveRoute,
+  searchApproveRouteList: searchApproveRouteList
 }
