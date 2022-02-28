@@ -49,12 +49,12 @@ module.exports = {
         allowNull: false
       },
       status: {
-        type: Sequelize.DataTypes.INTEGER,
+        type: Sequelize.DataTypes.STRING(2),
         references: {
           model: {
             tableName: 'ApproveStatus'
           },
-          key: 'no'
+          key: 'code'
         },
         allowNull: false
       },

@@ -9,13 +9,9 @@ module.exports = {
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
     await queryInterface.createTable('ApproveStatus', {
-      no: {
-        allowNull: false,
-        primaryKey: true,
-        type: Sequelize.DataTypes.INTEGER
-      },
       code: {
         allowNull: false,
+        primaryKey: true,
         type: Sequelize.DataTypes.STRING(2)
       },
       name: {
