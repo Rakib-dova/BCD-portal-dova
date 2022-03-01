@@ -22,7 +22,6 @@ const $ = function (tagObjName) {
 // メッセージ文字数確認
 $('#inputMsg').addEventListener('keyup', function () {
   $('#msgCount').innerText = '(' + $('#inputMsg').value.length + '/1500)'
-  console.log($('#inputMsg').value.length)
 
   if ($('#inputMsg').value.length > 1500) {
     $('#inputMsg').value($('#inputMsg').value.substring(0, 1500))
@@ -96,7 +95,6 @@ const displayResultForApproveRoute = function (codeArr) {
   const displayFieldApproveRouteResultBody = $('#displayFieldApproveRouteResultBody')
   const searchResultApproveRoute = $('#searchResultApproveRoute')
   codeArr.forEach((item) => {
-    console.log(item)
     const cloneSearchResultApproveRouteTemplate = document.importNode(searchResultApproveRoute.content, true)
     cloneSearchResultApproveRouteTemplate.querySelector('.rowApproveRoute').dataset.target = '#approveRoute-modal'
     cloneSearchResultApproveRouteTemplate.querySelector('.rowApproveRoute').dataset.approveRoute = item.uuid
@@ -104,21 +102,29 @@ const displayResultForApproveRoute = function (codeArr) {
     cloneSearchResultApproveRouteTemplate.querySelector('.columnNumber').innerText = item.No
     cloneSearchResultApproveRouteTemplate.querySelector('.columnApproveRoute').innerText = item.approveRouteName
     cloneSearchResultApproveRouteTemplate.querySelector('.columnApproveRouteUserCount').innerText = item.approverCount
+    cloneSearchResultApproveRouteTemplate.querySelector('.btnDetailApproveRoute').dataset.target = item.uuid
+    cloneSearchResultApproveRouteTemplate.querySelector('.btnSelectApproveRoute').dataset.target = item.uuid
     displayFieldApproveRouteResultBody.appendChild(cloneSearchResultApproveRouteTemplate)
   })
+  // 選択する行に色付ける
   $('.rowApproveRoute').forEach((row) => {
-    row.addEventListener('click', function () {
-      $(this.dataset.target).classList.remove('is-active')
-      const inputTarget = $(this.dataset.target).dataset.info
-      $(`#${inputTarget}_departmentCode`).value = this.dataset.departmentCode
-      $('#btn-confirm').removeAttribute('disabled')
-      deleteApproveRouteResultDisplayModal()
-    })
     row.addEventListener('mouseover', function () {
       this.classList.add('is-selected')
     })
     row.addEventListener('mouseout', function () {
       this.classList.remove('is-selected')
+    })
+  })
+  $('.btnDetailApproveRoute').forEach((btnDetailApproveRoute) => {
+    btnDetailApproveRoute.addEventListener('click', function () {
+      getDetailApproveRoute(this.dataset.target, 'btnDetailApproveRoute')
+    })
+  })
+  //
+  $('.btnSelectApproveRoute').forEach((btnSelected) => {
+    btnSelected.addEventListener('click', function () {
+      const approveRouteId = this.dataset.target
+      getDetailApproveRoute(approveRouteId, 'btnSelectApproveRoute')
     })
   })
   $('#approveRouteResultDisplayInvisible').classList.remove('is-invisible')
@@ -127,12 +133,142 @@ const displayResultForApproveRoute = function (codeArr) {
 // 承認ルート検索結果がない場合
 const displayNoApproveRoute = function () {
   const displayFieldApproveRouteResultBody = $('#displayFieldApproveRouteResultBody')
-  const searchResultApproveRoute = $('#searchModalApproveRoute')
-  const cloneSearchResultApproveRouteTemplate = document.importNode(searchResultApproveRoute.content, true)
-  cloneSearchResultApproveRouteTemplate.querySelector('.columnNoApproveRouteMessage').classList.remove('is-invisible')
-  cloneSearchResultApproveRouteTemplate.querySelector('.columnNoApproveRouteMessage').setAttribute('colspan', '2')
-  cloneSearchResultApproveRouteTemplate.querySelector('.columnNoApproveRouteMessage').innerText =
-    '該当する部門データが存在しませんでした。'
-  displayFieldApproveRouteResultBody.appendChild(cloneSearchResultApproveRouteTemplate)
+  const noResultElement = document.createElement('tr')
+  const noResultElementRow = document.createElement('td')
+  noResultElementRow.setAttribute('colspan', '6')
+  noResultElementRow.innerText = '承認ルートがありません。事前に「承認ルート画面」から承認ルートを登録してください。'
+  noResultElement.appendChild(noResultElementRow)
+  displayFieldApproveRouteResultBody.appendChild(noResultElement)
   $('#approveRouteResultDisplayInvisible').classList.remove('is-invisible')
 }
+
+const getDetailApproveRoute = function (_approveRouteId, btnName) {
+  const getDetailApproveRoute = new XMLHttpRequest()
+  getDetailApproveRoute.open('POST', '/requestApproval/detailApproveRoute', true)
+  getDetailApproveRoute.setRequestHeader('Content-Type', 'application/json')
+  getDetailApproveRoute.onreadystatechange = function () {
+    if (getDetailApproveRoute.readyState === getDetailApproveRoute.DONE) {
+      let result = null
+      switch (getDetailApproveRoute.status) {
+        case 200:
+          result = JSON.parse(getDetailApproveRoute.response)
+          break
+      }
+      let attachBoard = null
+      let targetModal = null
+      switch (btnName) {
+        case 'btnDetailApproveRoute':
+          attachBoard = $('#display-detail-approveRoute')
+          targetModal = $('#detail-approveRoute-modal')
+          break
+        case 'btnSelectApproveRoute':
+          attachBoard = $('#displayRequestApprovaRoute')
+          targetModal = $('#approveRoute-modal')
+          break
+      }
+      displayDetailApproveRoute(result, attachBoard)
+      targetModal.classList.toggle('is-active')
+    }
+  }
+
+  getDetailApproveRoute.send(
+    JSON.stringify({
+      approveRouteId: _approveRouteId
+    })
+  )
+}
+
+const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
+  console.log(detailApproveRoute)
+  while (blackboard.firstChild) {
+    blackboard.removeChild(blackboard.firstChild)
+  }
+
+  const result = detailApproveRoute
+  const approValNo = [
+    '一次承認',
+    '二次承認',
+    '三次承認',
+    '四次承認',
+    '五次承認',
+    '六次承認',
+    '七次承認',
+    '八次承認',
+    '九次承認',
+    '十次承認',
+    '最終承認'
+  ]
+  const approver = result.users
+  const template = $('#template-display-detail-approveRoute')
+  const cloneTemplate = document.importNode(template.content, true)
+  const approveRouteIdHidden = document.createElement('input')
+  const approveRouteName = document.createElement('p')
+  approveRouteIdHidden.setAttribute('name', 'approveRouteId')
+  approveRouteIdHidden.setAttribute('type', 'hidden')
+  approveRouteIdHidden.value = result.approveRouteId
+  approveRouteName.innerText = result.name
+  cloneTemplate.querySelector('#approveRouteName').appendChild(approveRouteName)
+  cloneTemplate.querySelector('#approveRouteName').appendChild(approveRouteIdHidden)
+  const creatApproverRow = function (noText, name, mail) {
+    const element = document.createElement('div')
+    const noElement = document.createElement('div')
+    const nameElement = document.createElement('div')
+    const mailElement = document.createElement('div')
+    element.classList.add('columns')
+    noElement.classList.add('column')
+    nameElement.classList.add('column')
+    mailElement.classList.add('column')
+    noElement.innerText = noText
+    nameElement.innerText = name
+    mailElement.innerText = mail
+    element.appendChild(noElement)
+    element.appendChild(nameElement)
+    element.appendChild(mailElement)
+    return element
+  }
+  const approverLen = approver.length
+  for (let idx = 0; idx < approverLen; idx++) {
+    let no = null
+    if (idx < approverLen - 1) {
+      no = approValNo[idx]
+    } else {
+      no = approValNo.slice(-1)
+    }
+    const rowLastApprover = creatApproverRow(
+      no,
+      `${approver[idx].FirstName} ${approver[idx].LastName}`,
+      approver[idx].Username
+    )
+    cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(rowLastApprover)
+  }
+  blackboard.appendChild(cloneTemplate)
+}
+
+$('#btn-confirm').addEventListener('click', function () {
+  const invoiceList = $('.invoiceLine')
+  if (!$('#journal-list').first) {
+    Array.prototype.forEach.call(invoiceList, (invoiceLine) => {
+      const cloneInvoice = document.importNode(invoiceLine.parentNode, true)
+      Array.prototype.forEach.call(cloneInvoice.querySelectorAll('input'), (input) => {
+        input.removeAttribute('name')
+      })
+      $('#journal-list').appendChild(cloneInvoice)
+    })
+  }
+
+  // 依頼者のメッセージの表示
+  $('#text-requester-message').value = $('#inputMsg').value
+
+  // 承認ルート各民モーダルに表示
+  const checkApproveRoute = $('#check-request-approve-route')
+  while (checkApproveRoute.firstChild) {
+    checkApproveRoute.removeChild(checkApproveRoute.firstChild)
+  }
+  const displayRequestApprovaRoute = $('#displayRequestApprovaRoute')
+  const cloneDiplay = document.importNode(displayRequestApprovaRoute, true)
+  $('#check-request-approve-route').appendChild(cloneDiplay)
+})
+
+$('#btn-approval').addEventListener('click', function () {
+  $('#approval').submit()
+})

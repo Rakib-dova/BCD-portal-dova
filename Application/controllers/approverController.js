@@ -7,6 +7,7 @@ const constantsDefine = require('../constants')
 const db = require('../models')
 const ApproveRoute = db.ApproveRoute
 const ApproveUser = db.ApproveUser
+const Request = db.RequestApproval
 const Op = db.Sequelize.Op
 
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
@@ -195,6 +196,7 @@ const getApproveRouteList = async (contractId) => {
       ],
       where: {
         contractId: contractId,
+        updateFlag: false,
         deleteFlag: false
       },
       order: [['approveRouteName', 'ASC']]
@@ -336,6 +338,16 @@ const duplicateApproveRoute = async (approveRoute) => {
   return { approveRouteName, approverUsers, lastApprover }
 }
 
+/**
+ * 承認依頼の承認ルート検索関数。
+ * @param {uuid} _contractId  // 契約者の識別番号
+ * @param {string} _approveRouteName // 承認ルート名
+ * @returns {object} // 承認ルート検索結果
+ * No：順番
+ * approveRouteName: 承認ルート名
+ * approverCount: 承認者の数
+ * uuid: 承認ルートの固有番号
+ */
 const searchApproveRouteList = async (_contractId, _approveRouteName) => {
   logger.info(constantsDefine.logMessage.INF000 + 'searchApproveRouteList')
   const contractId = _contractId
@@ -343,7 +355,9 @@ const searchApproveRouteList = async (_contractId, _approveRouteName) => {
 
   try {
     const where = {
-      contractId: contractId
+      contractId: contractId,
+      updateFlag: false,
+      deleteFlag: false
     }
     if (approveRouteName.length !== 0) {
       where.approveRouteName = {
@@ -379,11 +393,32 @@ const searchApproveRouteList = async (_contractId, _approveRouteName) => {
   }
 }
 
+const requestApproval = async (contractId, approveRouteId, invoiceId, message) => {
+  try {
+    const request = Request.build({
+      conractId: contractId,
+      approveRouteId: approveRouteId,
+      invoiceId: invoiceId,
+      message: message
+    })
+    if (request instanceof Request === false) {
+      return -1
+    }
+    console.log(request)
+    request.save(9)
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'searchApproveRouteList')
+    return error
+  }
+}
+
 module.exports = {
   getApprover: getApprover,
   insertApprover: insertApprover,
   getApproveRouteList: getApproveRouteList,
   getApproveRoute: getApproveRoute,
   duplicateApproveRoute: duplicateApproveRoute,
-  searchApproveRouteList: searchApproveRouteList
+  searchApproveRouteList: searchApproveRouteList,
+  requestApproval: requestApproval
 }

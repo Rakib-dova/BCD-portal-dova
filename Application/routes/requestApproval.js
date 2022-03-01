@@ -175,10 +175,63 @@ const cbGetRequestApproval = async (req, res, next) => {
     optionLine5: optionLine5,
     optionLine6: optionLine6,
     optionLine7: optionLine7,
-    optionLine8: optionLine8
+    optionLine8: optionLine8,
+    documentId: invoiceId
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRequestApproval')
+}
+
+const cbPostSaveApproval = async (req, res, next) => {}
+
+const cbPostGetDetailApproveRoute = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetRequestApproval')
+
+  // 認証情報取得処理
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+
+  if (req.body.approveRouteId === undefined) {
+    return res.status(400).send('bad request')
+  }
+
+  const accessToken = req.user.accessToken
+  const refreshToken = req.user.refreshToken
+  const contractId = contract.contractId
+  const approveRouteId = req.body.approveRouteId
+
+  const approveRoute = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
+
+  res.status(200).send({
+    approveRouteId: approveRouteId,
+    name: approveRoute.name,
+    users: approveRoute.users
+  })
 }
 
 const cbPostGetApproveRoute = async (req, res, next) => {
@@ -234,11 +287,66 @@ const cbPostGetApproveRoute = async (req, res, next) => {
   }
 }
 
+const cbPostApproval = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostApproval')
+
+  // 認証情報取得処理
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+
+  const contractId = contract.contractId
+  const invoiceId = req.params.invoiceId
+  const message = req.body.message
+  const approveRouteId = req.body.approveRouteId
+
+  const result = await approverController.requestApproval(contractId, approveRouteId, invoiceId, message)
+  switch (result) {
+    case 0:
+      req.flash('noti', '承認依頼を完了しました。')
+      res.redirect('/inbox/1')
+      break
+    default:
+      res.redirect('back')
+  }
+
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostApproval')
+}
+
 router.get('/:invoiceId', helper.isAuthenticated, cbGetRequestApproval)
 router.post('/approveRoute', helper.isAuthenticated, cbPostGetApproveRoute)
+router.post('/detailApproveRoute', helper.isAuthenticated, cbPostGetDetailApproveRoute)
+router.post('/:invoiceId', helper.isAuthenticated, cbPostApproval)
 
 module.exports = {
   router: router,
   cbGetRequestApproval: cbGetRequestApproval,
-  cbPostGetApproveRoute: cbPostGetApproveRoute
+  cbPostGetApproveRoute: cbPostGetApproveRoute,
+  cbPostSaveApproval: cbPostSaveApproval,
+  cbPostGetDetailApproveRoute: cbPostGetDetailApproveRoute,
+  cbPostApproval: cbPostApproval
 }
