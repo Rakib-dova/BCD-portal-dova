@@ -397,7 +397,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
     // 支払依頼画面内容確認
     test('管理者、支払依頼画面内容確認', async () => {
       const res = await request(app)
-        .get('/inbox/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1')
+        .get('/requestApproval/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 

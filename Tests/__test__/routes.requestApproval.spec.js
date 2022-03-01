@@ -166,7 +166,6 @@ const optionLine3 = [
   { columnName: '納品開始日', columnData: '2022-02-28' },
   { columnName: '契約書番号', columnData: 'dummyContractDocumentRef' },
   { columnName: '部門', columnData: '1000' }
-
 ]
 const optionLine4 = [
   { columnName: '納品終了日', columnData: '2022-03-31' },
@@ -318,7 +317,7 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 承認ルートページレンダリングを呼び出し
       expect(response.render).toBeCalledWith('requestApproval', {
         ...inboxControllerGetInvoiceDetailResult,
@@ -349,7 +348,7 @@ describe('requestApprovalのテスト', () => {
 
       await requestApproval.cbGetRequestApproval(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
@@ -377,7 +376,7 @@ describe('requestApprovalのテスト', () => {
 
       await requestApproval.cbGetRequestApproval(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
@@ -396,7 +395,7 @@ describe('requestApprovalのテスト', () => {
 
       await requestApproval.cbGetRequestApproval(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
@@ -410,7 +409,7 @@ describe('requestApprovalのテスト', () => {
       // 実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
@@ -430,7 +429,7 @@ describe('requestApprovalのテスト', () => {
 
       await requestApproval.cbGetRequestApproval(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
@@ -450,7 +449,7 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 
-      // 期待結果
+      // 結果確認
       expect(next).toHaveBeenCalledWith(errorHelper.create(404))
     })
 
@@ -468,7 +467,7 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 
-      // 期待結果
+      // 結果確認
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -489,7 +488,7 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
@@ -512,7 +511,7 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
@@ -540,14 +539,14 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 受領請求書への仕訳情報設定へリダイレクトされ「る」
       expect(request.flash).toBeCalledWith('noti', ['承認依頼', 'システムエラーが発生しました。'])
       expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
   })
 
-  describe('コールバック:cbPostRegistApproveRoute', () => {
+  describe('コールバック:cbPostGetApproveRoute', () => {
     test('正常', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -567,88 +566,11 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbPostGetApproveRoute(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 承認ルートページレンダリングを呼び出し
       expect(response.status).toHaveBeenCalledWith(200)
       expect(response.send).toHaveBeenCalledWith(searchResult1.searchResult)
     })
-
-    // test('準正常：既に登録されている', async () => {
-    //   // 準備
-    //   // requestのsession,userIdに正常値を入れる
-    //   request.session = { ...session }
-    //   request.user = { ...user[0] }
-
-    //   // DBからの正常なユーザデータの取得を想定する
-    //   userControllerFindOneSpy.mockReturnValue(Users[0])
-    //   // DBからの正常な契約情報取得を想定する
-    //   contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
-    //   // ユーザ権限チェック結果設定
-    //   checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
-
-    //   // insertApproverの正常
-    //   approverControllerSearchApproveRouteList.mockReturnValue(1)
-    //   // 試験実施
-    //   await requestApproval.cbPostGetApproveRoute(request, response, next)
-
-    //   // 期待結果
-    //   // 承認ルートページレンダリングを呼び出し
-    //   expect(request.flash).toBeCalledWith('noti', ['承認ルート登録', '入力した承認ルート名は既に登録されています。'])
-    //   expect(response.redirect).toBeCalledWith('/registApproveRoute')
-    // })
-
-    // test('準正常：登録失敗', async () => {
-    //   // 準備
-    //   // requestのsession,userIdに正常値を入れる
-    //   request.session = { ...session }
-    //   request.user = { ...user[0] }
-
-    //   // DBからの正常なユーザデータの取得を想定する
-    //   userControllerFindOneSpy.mockReturnValue(Users[0])
-    //   // DBからの正常な契約情報取得を想定する
-    //   contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
-    //   // ユーザ権限チェック結果設定
-    //   checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
-
-    //   // insertApproverの正常
-    //   approverControllerSearchApproveRouteList.mockReturnValue(-1)
-    //   // 試験実施
-    //   await requestApproval.cbPostGetApproveRoute(request, response, next)
-
-    //   // 期待結果
-    //   // 承認ルートページレンダリングを呼び出し
-    //   expect(request.flash).toBeCalledWith('noti', ['承認ルート登録', '承認ルート登録に失敗しました。'])
-    //   expect(response.redirect).toBeCalledWith('/registApproveRoute')
-    // })
-
-    // test('準正常：登録失敗', async () => {
-    //   // 準備
-    //   // requestのsession,userIdに正常値を入れる
-    //   request.session = { ...session }
-    //   request.user = { ...user[0] }
-
-    //   // DBからの正常なユーザデータの取得を想定する
-    //   userControllerFindOneSpy.mockReturnValue(Users[0])
-    //   // DBからの正常な契約情報取得を想定する
-    //   contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
-    //   // ユーザ権限チェック結果設定
-    //   checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
-
-    //   const dbError = new Error('SequelizeConnectionError')
-    //   dbError.stack = 'SequelizeConnectionError'
-    //   // insertApproverのエラー発生
-    //   approverControllerSearchApproveRouteList.mockReturnValue(dbError)
-    //   // 試験実施
-    //   await requestApproval.cbPostGetApproveRoute(request, response, next)
-
-    //   // 期待結果
-    //   // 404，500エラーがエラーハンドリング「されない」
-    //   expect(next).not.toHaveBeenCalledWith(error404)
-    //   expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-    // })
 
     test('正常：解約申込中の場合', async () => {
       // 準備
@@ -666,7 +588,7 @@ describe('requestApprovalのテスト', () => {
 
       await requestApproval.cbPostGetApproveRoute(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
 
@@ -694,7 +616,7 @@ describe('requestApprovalのテスト', () => {
 
       await requestApproval.cbPostGetApproveRoute(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
@@ -713,13 +635,12 @@ describe('requestApprovalのテスト', () => {
 
       await requestApproval.cbPostGetApproveRoute(request, response, next)
 
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      // expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -727,11 +648,9 @@ describe('requestApprovalのテスト', () => {
       // 実施
       await requestApproval.cbPostGetApproveRoute(request, response, next)
 
-      // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-
-      // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -747,11 +666,9 @@ describe('requestApprovalのテスト', () => {
 
       await requestApproval.cbPostGetApproveRoute(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404，500エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-
-      // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -767,7 +684,7 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbPostGetApproveRoute(request, response, next)
 
-      // 期待結果
+      // 結果確認
       expect(next).toHaveBeenCalledWith(errorHelper.create(404))
     })
 
@@ -785,7 +702,7 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbPostGetApproveRoute(request, response, next)
 
-      // 期待結果
+      // 結果確認
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -806,7 +723,7 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbPostGetApproveRoute(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
@@ -829,7 +746,7 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbPostGetApproveRoute(request, response, next)
 
-      // 期待結果
+      // 結果確認
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
@@ -856,8 +773,8 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbPostGetApproveRoute(request, response, next)
 
-      // 期待結果
-      // 404エラーがエラーハンドリング「されない」
+      // 結果確認
+      // 500エラーがエラーハンドリング「される」
       expect(response.status).toHaveBeenCalledWith(500)
       expect(response.send).toHaveBeenCalledWith('500 Internal Server Error')
     })
