@@ -5,7 +5,7 @@ block content
     div.title-box-journallzing
       h4.title-text-journallzing.text-inbox 承認依頼
     .box
-      form#form(method='POST' action=`/requestApproval/${documentId}`)
+      form#form(method='POST' action=`/requestApproval/save/${documentId}`)
         include invoiceHeader
         include requestApprovalInvoiceLines
         include invoiceFooter
@@ -13,7 +13,7 @@ block content
         include requestApprovaRoute
         .grouped-button
           a.button.mr-6(href=`/inbox/${documentId}`) 仕訳情報設定へ
-          a.button.mr-6.is-success#btn-save 保存
+          button.button.mr-6.is-success(type='submit') 保存
           a.button.is-link.show-modal#btn-confirm(data-target='check-approval-modal') 確認
 
   template#templateLineAccountCodeItem

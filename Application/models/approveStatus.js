@@ -27,7 +27,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: 'ApproveStatus',
-      tableName: 'ApproveStatus'
+      tableName: 'ApproveStatus',
+      timestamps: false
     }
   )
   return ApproveStatus

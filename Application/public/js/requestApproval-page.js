@@ -179,7 +179,6 @@ const getDetailApproveRoute = function (_approveRouteId, btnName) {
 }
 
 const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
-  console.log(detailApproveRoute)
   while (blackboard.firstChild) {
     blackboard.removeChild(blackboard.firstChild)
   }
