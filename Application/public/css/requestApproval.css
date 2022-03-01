@@ -58,7 +58,7 @@
   position: relative;
   left: 50%;
   justify-content: center;
-  transform: translateX(-121px);
+  transform: translateX(-221px);
 }
 
 .column-header {
@@ -160,10 +160,31 @@ p:focus {
   outline: none;
 }
 
+.input-comment-size {
+  margin-top: 0.75rem;
+  width: 100%;
+  resize: none;
+  font-size: 16px;
+}
+
+#search-modal-card {
+  width: 1000px !important;
+}
+
+.green-color {
+  background-color: green !important;
+  color: white;
+}
+
+.purple-color {
+  background-color: purple !important;
+  color: white;
+}
+
 #check-approval-modal > .modal-card {
   width: 100%;
 }
 
-.columns .rows {
-  flex-flow: column;
+#detail-approveRoute-modal > .modal-card {
+  width: 65%;
 }

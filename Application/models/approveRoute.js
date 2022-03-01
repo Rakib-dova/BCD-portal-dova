@@ -30,7 +30,8 @@ module.exports = (sequelize, DataTypes) => {
         },
         where: {
           contractId: contractId,
-          approveRouteId: approveRouteId
+          approveRouteId: approveRouteId,
+          updateFlag: false
         }
       })
       return approveRoute

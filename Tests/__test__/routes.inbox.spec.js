@@ -150,7 +150,8 @@ describe('inboxのテスト', () => {
         optionLine5: createOptions(5, dummyData.options),
         optionLine6: createOptions(6, dummyData.options),
         optionLine7: createOptions(7, dummyData.options),
-        optionLine8: createOptions(8, dummyData.options)
+        optionLine8: createOptions(8, dummyData.options),
+        documentId: request.params.invoiceId
       })
     })
 
@@ -350,7 +351,8 @@ describe('inboxのテスト', () => {
         optionLine5: [],
         optionLine6: [],
         optionLine7: {},
-        optionLine8: {}
+        optionLine8: {},
+        documentId: request.params.invoiceId
       })
     })
 

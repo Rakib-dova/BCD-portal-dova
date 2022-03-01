@@ -1,18 +1,20 @@
 'use strict'
+
 const express = require('express')
 const router = express.Router()
 const helper = require('./helpers/middleware')
+const validate = require('../lib/validate')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
-const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
-const notiTitle = '仕分け情報設定'
+const notiTitle = '承認依頼'
 
 const bodyParser = require('body-parser')
+const approverController = require('../controllers/approverController')
 router.use(
   bodyParser.json({
     type: 'application/json',
@@ -20,12 +22,11 @@ router.use(
   })
 )
 
-const cbGetIndex = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
+const cbGetRequestApproval = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetRequestApproval')
+
   // 認証情報取得処理
-  if (!req.session || !req.user?.userId) {
-    return next(errorHelper.create(500))
-  }
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
@@ -35,6 +36,7 @@ const cbGetIndex = async (req, res, next) => {
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
 
   // DBから契約情報取得
   const contract = await contractController.findOne(req.user.tenantId)
@@ -42,21 +44,15 @@ const cbGetIndex = async (req, res, next) => {
   // 契約情報未登録の場合もエラーを上げる
   if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
-  req.session.userContext = 'LoggedIn'
-
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
-  if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
-  }
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return next(noticeHelper.create('cancelprocedure'))
-  }
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
   // ページ取得
   const accessToken = req.user.accessToken
@@ -168,8 +164,25 @@ const cbGetIndex = async (req, res, next) => {
     optionLine8.columnName = 'その他特記事項'
     optionLine8.columnData = result.options.note
   }
+  let isSaved = false
+  if (req.session.isSaved) {
+    isSaved = true
+  }
+  const contractId = contract.contractId
+  let approveRouteId = null
+  let message = null
+  let approveRoute = null
+  const approval = await approverController.readApproval(contractId, invoiceId, isSaved)
+  if (approval) {
+    approveRouteId = approval.approveRouteId
+    message = approval.message
+  }
+  if (approveRouteId) {
+    approveRoute = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
+  }
 
-  res.render('inbox', {
+  // 承認依頼画面render
+  res.render('requestApproval', {
     ...result,
     optionLine1: optionLine1,
     optionLine2: optionLine2,
@@ -179,14 +192,16 @@ const cbGetIndex = async (req, res, next) => {
     optionLine6: optionLine6,
     optionLine7: optionLine7,
     optionLine8: optionLine8,
-    documentId: invoiceId
+    documentId: invoiceId,
+    message: message,
+    approveRoute: approveRoute
   })
 
-  logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
+  logger.info(constantsDefine.logMessage.INF001 + 'cbGetRequestApproval')
 }
 
-const cbPostGetCode = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbPostGetCode')
+const cbPostSave = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostSave')
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
@@ -216,76 +231,6 @@ const cbPostGetCode = async (req, res, next) => {
   if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
-
-  const targetAccountCode = req.body.accountCode ?? ''
-  const targetAccountCodeName = req.body.accountCodeName ?? ''
-  const targetSubAccountCode = req.body.subAccountCode ?? ''
-  const targetSubAccountCodeName = req.body.subAccountCodeName ?? ''
-
-  // 勘定科目コード、勘定科目名文字数チェック
-  if (targetAccountCode.length > 10 || targetAccountCodeName.length > 40) {
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetCode')
-    return res.status(400).send('400 Bad Request')
-  }
-
-  const searchResult = await inboxController.getCode(
-    contract.contractId,
-    targetAccountCode,
-    targetAccountCodeName,
-    targetSubAccountCode,
-    targetSubAccountCodeName
-  )
-
-  const codeLists = searchResult.map((item) => {
-    return {
-      accountCode: item.accountCode,
-      accountCodeName: item.accountCodeName,
-      subAccountCode: item['SubAccountCodes.subjectCode'] ?? '',
-      subAccountCodeName: item['SubAccountCodes.subjectName'] ?? ''
-    }
-  })
-
-  res.send(codeLists)
-  logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetAccountCode')
-}
-
-const cbPostIndex = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
-  // 認証情報取得処理
-  if (!req.session || !req.user?.userId) {
-    return next(errorHelper.create(500))
-  }
-
-  // DBからuserデータ取得
-  const user = await userController.findOne(req.user.userId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // user未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
-
-  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
-
-  // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
-
-  req.session.userContext = 'LoggedIn'
-
-  // ユーザ権限を取得
-  req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
-
-  if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
-  }
-
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return next(noticeHelper.create('cancelprocedure'))
-  }
 
   // invoiceId取得及び確認
   const invoiceId = req.params.invoiceId
@@ -294,45 +239,29 @@ const cbPostIndex = async (req, res, next) => {
     return res.status(400).send('400 Bad Request')
   }
 
-  const { status, lineId, accountCode, subAccountCode, departmentCode, error } =
-    await inboxController.insertAndUpdateJournalizeInvoice(contract.contractId, invoiceId, req.body)
+  const contractId = contract.contractId
+  const message = req.body.message
+  const requester = req.user.userId
+  const approveRouteId = req.body.approveRouteId
+  const result = await approverController.saveMessage(contractId, invoiceId, requester, message, approveRouteId)
 
-  if (error instanceof Error) return next(errorHelper.create(500))
-
-  // 結果：0（正常変更）、-1（未登録勘定科目）、-2（未登録補助科目）
-  switch (status) {
+  switch (result) {
     case 0:
+      req.flash('info', 'メッセージを保存しました。')
+      req.session.isSaved = true
+      res.redirect(`/requestApproval/${invoiceId}`)
       break
-    case -1:
-      req.flash('noti', [
-        '仕訳情報設定',
-        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の勘定科目「${accountCode}」は未登録勘定科目です。`,
-        'SYSERR'
-      ])
-      return res.redirect('/inboxList/1')
-    case -2:
-      req.flash('noti', [
-        '仕訳情報設定',
-        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の補助科目「${subAccountCode}」は未登録補助科目です。`,
-        'SYSERR'
-      ])
-      return res.redirect('/inboxList/1')
-    case -3:
-      req.flash('noti', [
-        '仕訳情報設定',
-        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の部門データ「${departmentCode}」は未登録部門データです。`,
-        'SYSERR'
-      ])
-      return res.redirect('/inboxList/1')
+    default:
+      req.flash('noti', ['支払依頼', '保存失敗しました。'])
+      res.redirect(`/requestApproval/${invoiceId}`)
+      break
   }
 
-  logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
-  req.flash('info', '仕訳情報設定を保存しました。')
-  res.redirect(`/inbox/${invoiceId}`)
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostSave')
 }
 
-const cbPostDepartment = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbPostDepartment')
+const cbPostGetDetailApproveRoute = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetRequestApproval')
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
@@ -363,21 +292,64 @@ const cbPostDepartment = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  const departmentCode = req.body.departmentCode ?? ''
-  const departmentName = req.body.departmentCodeName ?? ''
-  const contractId = contract.contractId
-
-  // 部門データの桁数のチェック
-  if (departmentCode.length > 10 || departmentName.length > 40) {
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostDepartment')
-    return res.status(400).send('400 Bad Request')
+  if (req.body.approveRouteId === undefined) {
+    return res.status(400).send('bad request')
   }
 
-  // DBの部門データを検索する。
-  const { status, searchResult } = await inboxController.getDepartment(contractId, departmentCode, departmentName)
+  const accessToken = req.user.accessToken
+  const refreshToken = req.user.refreshToken
+  const contractId = contract.contractId
+  const approveRouteId = req.body.approveRouteId
+
+  const approveRoute = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
+
+  res.status(200).send({
+    approveRouteId: approveRouteId,
+    name: approveRoute.name,
+    users: approveRoute.users
+  })
+}
+
+const cbPostGetApproveRoute = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostGetApproveRoute')
+
+  // 認証情報取得処理
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+
+  const departmentCode = req.body.approveRoute ?? ''
+  const contractId = contract.contractId
+
+  // DBの承認ルートを検索する。
+  const { status, searchResult } = await approverController.searchApproveRouteList(contractId, departmentCode)
 
   if (searchResult instanceof Error) {
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostDepartment')
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostGetApproveRoute')
     return res.status(500).send('500 Internal Server Error')
   }
 
@@ -389,15 +361,69 @@ const cbPostDepartment = async (req, res, next) => {
   }
 }
 
-router.post('/department', helper.isAuthenticated, cbPostDepartment)
-router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)
-router.post('/getCode', helper.isAuthenticated, cbPostGetCode)
-router.post('/:invoiceId', helper.isAuthenticated, cbPostIndex)
+const cbPostApproval = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbPostApproval')
+
+  // 認証情報取得処理
+  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+
+  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
+
+  const contractId = contract.contractId
+  const invoiceId = req.params.invoiceId
+  const requester = req.user.userId
+  const message = req.body.message
+  const approveRouteId = req.body.approveRouteId
+
+  const result = await approverController.requestApproval(contractId, approveRouteId, invoiceId, requester, message)
+  switch (result) {
+    case 0:
+      req.flash('info', '承認依頼を完了しました。')
+      res.redirect('/inboxList/1')
+      break
+    default:
+      req.flash('noti', ['支払依頼', '必ず保存してください。'])
+      res.redirect(`/requestApproval/${invoiceId}`)
+  }
+
+  logger.info(constantsDefine.logMessage.INF001 + 'cbPostApproval')
+}
+
+router.get('/:invoiceId', helper.isAuthenticated, cbGetRequestApproval)
+router.post('/approveRoute', helper.isAuthenticated, cbPostGetApproveRoute)
+router.post('/detailApproveRoute', helper.isAuthenticated, cbPostGetDetailApproveRoute)
+router.post('/:invoiceId', helper.isAuthenticated, cbPostApproval)
+router.post('/save/:invoiceId', helper.isAuthenticated, cbPostSave)
 
 module.exports = {
   router: router,
-  cbGetIndex: cbGetIndex,
-  cbPostGetCode: cbPostGetCode,
-  cbPostIndex: cbPostIndex,
-  cbPostDepartment: cbPostDepartment
+  cbGetRequestApproval: cbGetRequestApproval,
+  cbPostGetApproveRoute: cbPostGetApproveRoute,
+  cbPostSave: cbPostSave,
+  cbPostGetDetailApproveRoute: cbPostGetDetailApproveRoute,
+  cbPostApproval: cbPostApproval
 }

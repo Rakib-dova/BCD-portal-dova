@@ -7,7 +7,10 @@ const constantsDefine = require('../constants')
 const db = require('../models')
 const ApproveRoute = db.ApproveRoute
 const ApproveUser = db.ApproveUser
+const Request = db.RequestApproval
+const Status = db.ApproveStatus
 const Op = db.Sequelize.Op
+const userController = require('./userController')
 
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   const userAccountsArr = []
@@ -476,11 +479,192 @@ const duplicateApproveRoute = async (approveRoute) => {
   return { approveRouteName, approverUsers, lastApprover }
 }
 
+/**
+ * 承認依頼の承認ルート検索関数。
+ * @param {uuid} _contractId  // 契約者の識別番号
+ * @param {string} _approveRouteName // 承認ルート名
+ * @returns {object} // 承認ルート検索結果
+ * No：順番
+ * approveRouteName: 承認ルート名
+ * approverCount: 承認者の数
+ * uuid: 承認ルートの固有番号
+ */
+const searchApproveRouteList = async (_contractId, _approveRouteName) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'searchApproveRouteList')
+  const contractId = _contractId
+  const approveRouteName = _approveRouteName ?? ''
+
+  try {
+    const where = {
+      contractId: contractId,
+      updateFlag: false,
+      deleteFlag: false
+    }
+    if (approveRouteName.length !== 0) {
+      where.approveRouteName = {
+        [Op.like]: `%${approveRouteName}%`
+      }
+    }
+    const approveRoutes = (
+      await ApproveRoute.findAll({
+        include: [
+          {
+            model: ApproveUser
+          }
+        ],
+        where: {
+          ...where
+        }
+      })
+    ).map((approveRoute, idx) => {
+      return {
+        No: idx + 1,
+        approveRouteName: approveRoute.approveRouteName,
+        approverCount: approveRoute.ApproveUsers.length,
+        uuid: approveRoute.approveRouteId
+      }
+    })
+
+    logger.info(constantsDefine.logMessage.INF001 + 'searchApproveRouteList')
+    return { status: 0, searchResult: approveRoutes }
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'searchApproveRouteList')
+    return { status: -1, searchResult: error }
+  }
+}
+
+const requestApproval = async (contractId, approveRouteId, invoiceId, requesterId, message) => {
+  try {
+    const requester = await userController.findOne(requesterId)
+    const status = await Status.findOne({
+      where: {
+        name: {
+          [Op.like]: '処理依頼中'
+        }
+      }
+    })
+    const request =
+      (await Request.findOne({
+        where: {
+          contractId: contractId,
+          invoiceId: invoiceId
+        }
+      })) ||
+      Request.build({
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: requester.userId,
+        status: status.code,
+        message: message
+      })
+    if (request.isSaved === false) return -1
+    if (request instanceof Request === false) {
+      return -1
+    } else {
+      request.approveRouteId = approveRouteId
+      request.requester = requester.userId
+      request.status = status.code
+      request.message = message
+    }
+    await request.save()
+    return 0
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'searchApproveRouteList')
+    return error
+  }
+}
+
+// メッセージ変更
+const saveMessage = async (contractId, invoiceId, requester, message, approveRouteId) => {
+  try {
+    const saveData = {
+      contractId: contractId,
+      invoiceId: invoiceId,
+      requester: requester,
+      message: message
+    }
+    if (approveRouteId) {
+      saveData.approveRouteId = approveRouteId
+    }
+
+    const status = await Status.findOne({
+      where: {
+        name: {
+          [Op.like]: '未処理'
+        }
+      }
+    })
+
+    if (status) {
+      saveData.status = status.code
+    }
+    let request = await Request.findOne({
+      where: {
+        contractId: contractId,
+        invoiceId: invoiceId
+      }
+    })
+
+    if (request === null) {
+      request = Request.build(saveData)
+    } else {
+      request.message = message
+      if (approveRouteId) {
+        request.approveRouteId = approveRouteId
+      }
+    }
+
+    request.isSaved = true
+    request.save()
+    return 0
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    return error
+  }
+}
+
+const readApproval = async (contractId, invoiceId, isSaved) => {
+  try {
+    const status = await Status.findOne({
+      where: {
+        name: {
+          [Op.like]: '未処理'
+        }
+      }
+    })
+    const request = await Request.findOne({
+      where: {
+        contractId: contractId,
+        invoiceId: invoiceId,
+        status: status.code
+      }
+    })
+    if (request === null) return null
+    else {
+      if (isSaved === false) {
+        request.isSaved = false
+        await request.save()
+      }
+      return request
+    }
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    return error
+  }
+}
+
 module.exports = {
   getApprover: getApprover,
   insertApprover: insertApprover,
   editApprover: editApprover,
   getApproveRouteList: getApproveRouteList,
   getApproveRoute: getApproveRoute,
-  duplicateApproveRoute: duplicateApproveRoute
+  duplicateApproveRoute: duplicateApproveRoute,
+  searchApproveRouteList: searchApproveRouteList,
+  requestApproval: requestApproval,
+  saveMessage: saveMessage,
+  readApproval: readApproval
 }
