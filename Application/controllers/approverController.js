@@ -7,7 +7,10 @@ const constantsDefine = require('../constants')
 const db = require('../models')
 const ApproveRoute = db.ApproveRoute
 const ApproveUser = db.ApproveUser
+const Request = db.RequestApproval
+const Status = db.ApproveStatus
 const Op = db.Sequelize.Op
+const userController = require('./userController')
 
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   const userAccountsArr = []
@@ -476,6 +479,16 @@ const duplicateApproveRoute = async (approveRoute) => {
   return { approveRouteName, approverUsers, lastApprover }
 }
 
+/**
+ * 承認依頼の承認ルート検索関数。
+ * @param {uuid} _contractId  // 契約者の識別番号
+ * @param {string} _approveRouteName // 承認ルート名
+ * @returns {object} // 承認ルート検索結果
+ * No：順番
+ * approveRouteName: 承認ルート名
+ * approverCount: 承認者の数
+ * uuid: 承認ルートの固有番号
+ */
 const searchApproveRouteList = async (_contractId, _approveRouteName) => {
   logger.info(constantsDefine.logMessage.INF000 + 'searchApproveRouteList')
   const contractId = _contractId
@@ -483,7 +496,9 @@ const searchApproveRouteList = async (_contractId, _approveRouteName) => {
 
   try {
     const where = {
-      contractId: contractId
+      contractId: contractId,
+      updateFlag: false,
+      deleteFlag: false
     }
     if (approveRouteName.length !== 0) {
       where.approveRouteName = {
@@ -519,6 +534,35 @@ const searchApproveRouteList = async (_contractId, _approveRouteName) => {
   }
 }
 
+const requestApproval = async (contractId, approveRouteId, invoiceId, requesterId, message) => {
+  try {
+    const requester = await userController.findOne(requesterId)
+    // const status = await Status.findOne({
+    //   where: {
+    //     name: '処理依頼中'
+    //   }
+    // })
+    const request = Request.build({
+      contractId: contractId,
+      approveRouteId: approveRouteId,
+      invoiceId: invoiceId,
+      requester: requester.userId,
+      status: '10',
+      message: message
+    })
+    if (request instanceof Request === false) {
+      return -1
+    }
+    console.log(request)
+    request.save()
+    return 0
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'searchApproveRouteList')
+    return error
+  }
+}
+
 module.exports = {
   getApprover: getApprover,
   insertApprover: insertApprover,
@@ -526,5 +570,6 @@ module.exports = {
   getApproveRouteList: getApproveRouteList,
   getApproveRoute: getApproveRoute,
   duplicateApproveRoute: duplicateApproveRoute,
-  searchApproveRouteList: searchApproveRouteList
+  searchApproveRouteList: searchApproveRouteList,
+  requestApproval: requestApproval
 }

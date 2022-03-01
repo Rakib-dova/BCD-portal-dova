@@ -5,15 +5,16 @@ block content
     div.title-box-journallzing
       h4.title-text-journallzing.text-inbox 承認依頼
     .box
-      form#form(method='POST')
+      form#form(method='POST' action=`/requestApproval/${documentId}`)
         include invoiceHeader
         include requestApprovalInvoiceLines
         include invoiceFooter
         include requestApprovaMessage
         include requestApprovaRoute
         .grouped-button
-          a.button.mr-6(href='/inboxList/1')  仕訳情報設定へ
-          a.button.is-link#btn-confirm(disabled='true') 確認
+          a.button.mr-6(href=`/inbox/${documentId}`) 仕訳情報設定へ
+          a.button.mr-6.is-success#btn-save 保存
+          a.button.is-link.show-modal#btn-confirm(data-target='check-approval-modal') 確認
 
   template#templateLineAccountCodeItem
     .columns.m-0.p-1.lineAccountcode
@@ -72,10 +73,10 @@ block content
       td.columnNumber
       td.columnApproveRoute
       td.columnApproveRouteUserCount 
-      td.btnShow
-        a.button.purple-color#btnShowApproveRoute 承認ルート確認
+      td
+        a.button.purple-color.btnDetailApproveRoute(data-target='detail-approveRoute-modal') 承認ルート確認
       td.btnSelect
-        a.button.green-color#btnSelectApproveRoute 選択
+        a.button.green-color.btnSelectApproveRoute(data-target='approveRoute-modal') 選択
 
   template#template-invoiceLine
     .column.column-invoiceLine-journalModal
@@ -147,7 +148,16 @@ block content
             a.red-color.btn-minus-accountCode(id=`btn_minus_bulkInsertNo1_lineAccountCode1` data-target=`bulkInsertNo1_lineAccountCode`)
               i.fas.fa-minus-circle
 
-  .modal#approveRoute-modal.z-index-modal
+  template#template-display-detail-approveRoute
+    .columns
+      .column
+        p 承認ルート名
+      .column#approveRouteName
+    .columns
+      .column
+    section#displayDetailApproveRouteTable
+
+  .modal#approveRoute-modal
     .modal-background.cancel-button(data-target='approveRoute-modal')
     .modal-card.is-family-noto-sans#search-modal-card
       header.modal-card-head.color-link-modal-header
@@ -189,6 +199,36 @@ block content
                     tbody#displayFieldApproveRouteResultBody
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button#CloseSearchDepartmentCode(data-target='approveRoute-modal') 閉じる
+
+  .modal#detail-approveRoute-modal.z-index-modal
+    .modal-background.cancel-button(data-target='detail-approveRoute-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 承認ルート確認
+        a.delete(data-target='detail-approveRoute-modal')
+      section.modal-card-body
+        .box#display-detail-approveRoute
+      footer.modal-card-foot.center-modal-footer-item
+        a.button.cancel-button(data-target='detail-approveRoute-modal') 閉じる
+
+  .modal#check-approval-modal
+    .modal-background.cancel-button(data-target='check-approval-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 支払依頼確認
+        a.delete(data-target='check-approval-modal')
+      section.modal-card-body
+        form#approval(method='POST', action=`/requestApproval/${documentId}`)
+          include invoiceHeader
+          .box#journal-list
+          include invoiceFooter
+          .box#check-request-approval-message
+            textarea#text-requester-message(rows='12' cols='186' name='message' readonly='readonly')
+          .box#check-request-approve-route
+
+      footer.modal-card-foot.center-modal-footer-item
+        a.button.cancel-button.mr-6(data-target='check-approval-modal') 閉じる
+        a.button.is-link#btn-approval 依頼
 
   include footer
 

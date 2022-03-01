@@ -58,7 +58,7 @@
   position: relative;
   left: 50%;
   justify-content: center;
-  transform: translateX(-66px);
+  transform: translateX(-121px);
 }
 
 .column-header {
@@ -158,4 +158,12 @@
 
 p:focus {
   outline: none;
+}
+
+#check-approval-modal > .modal-card {
+  width: 100%;
+}
+
+.columns .rows {
+  flex-flow: column;
 }
