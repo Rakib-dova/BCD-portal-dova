@@ -250,10 +250,24 @@ const searchResult1 = {
   ]
 }
 
+const searchResult2 = {
+  name: 'hello2',
+  users: [
+    {
+      Id: 'dummyId',
+      tenantId: 'dummytenantId',
+      FirstName: 'dummyFirstName',
+      LastName: 'dummyLastName',
+      Username: 'dummyUsername'
+    }
+  ]
+}
+
 let errorSpy, infoSpy
 let request, response
 let userControllerFindOneSpy, contractControllerFindOneSpy, checkContractStatusSpy
 let approverControllerSearchApproveRouteList, inboxControllerGetInvoiceDetail
+let approverControllerGetApproveRoute, approverControllerRequestApproval
 
 describe('requestApprovalのテスト', () => {
   beforeEach(() => {
@@ -267,6 +281,8 @@ describe('requestApprovalのテスト', () => {
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     approverControllerSearchApproveRouteList = jest.spyOn(approverController, 'searchApproveRouteList')
     inboxControllerGetInvoiceDetail = jest.spyOn(inboxController, 'getInvoiceDetail')
+    approverControllerGetApproveRoute = jest.spyOn(approverController, 'getApproveRoute')
+    approverControllerRequestApproval = jest.spyOn(approverController, 'requestApproval')
   })
   afterEach(() => {
     request.resetMocked()
@@ -279,6 +295,8 @@ describe('requestApprovalのテスト', () => {
     checkContractStatusSpy.mockRestore()
     approverControllerSearchApproveRouteList.mockRestore()
     inboxControllerGetInvoiceDetail.mockRestore()
+    approverControllerGetApproveRoute.mockRestore()
+    approverControllerRequestApproval.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -293,6 +311,18 @@ describe('requestApprovalのテスト', () => {
         '/approveRoute',
         helper.isAuthenticated,
         requestApproval.cbPostGetApproveRoute
+      )
+
+      expect(requestApproval.router.post).toBeCalledWith(
+        '/detailApproveRoute',
+        helper.isAuthenticated,
+        requestApproval.cbPostGetDetailApproveRoute
+      )
+
+      expect(requestApproval.router.post).toBeCalledWith(
+        '/:invoiceId',
+        helper.isAuthenticated,
+        requestApproval.cbPostApproval
       )
     })
   })
@@ -777,6 +807,479 @@ describe('requestApprovalのテスト', () => {
       // 500エラーがエラーハンドリング「される」
       expect(response.status).toHaveBeenCalledWith(500)
       expect(response.send).toHaveBeenCalledWith('500 Internal Server Error')
+    })
+  })
+
+  describe('コールバック:cbPostSaveApproval', () => { })
+  describe('コールバック:cbPostGetDetailApproveRoute', () => {
+    test('正常', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        approveRouteId: 'dummyId'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      approverControllerGetApproveRoute.mockReturnValue(searchResult2)
+
+      // 試験実施
+      await requestApproval.cbPostGetDetailApproveRoute(request, response, next)
+      // 結果確認
+      // 承認ルートページレンダリングを呼び出し
+      expect(response.status).toHaveBeenCalledWith(200)
+      expect(response.send).toHaveBeenCalledWith({
+        approveRouteId: request.body.approveRouteId,
+        name: searchResult2.name,
+        users: searchResult2.users
+      })
+    })
+
+    test('正常：解約申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[5].dataValues.contractStatus)
+
+      await requestApproval.cbPostGetDetailApproveRoute(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('400エラー:LoggedInではないsessionの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...notLoggedInsession }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[5].dataValues.contractStatus)
+
+      await requestApproval.cbPostGetDetailApproveRoute(request, response, next)
+
+      // 結果確認
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+    })
+
+    test('400エラー:requestのbodyのapproveRouteIdの値がundefinedの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      approverControllerGetApproveRoute.mockReturnValue(searchResult2)
+
+      // 試験実施
+      await requestApproval.cbPostGetDetailApproveRoute(request, response, next)
+      // 結果確認
+      // 承認ルートページレンダリングを呼び出し
+      expect(response.status).toHaveBeenCalledWith(400)
+      expect(response.send).toHaveBeenCalledWith('bad request')
+    })
+
+    test('500エラー:不正なContractデータの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(null)
+
+      await requestApproval.cbPostGetDetailApproveRoute(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：requestのsession,userIdがnullの場合', async () => {
+      // 実施
+      await requestApproval.cbPostGetDetailApproveRoute(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      const userDbError = new Error('User Table Error')
+      userControllerFindOneSpy.mockReturnValue(userDbError)
+
+      await requestApproval.cbPostGetDetailApproveRoute(request, response, next)
+
+      // 結果確認
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user.statusが0ではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[8])
+
+      // 試験実施
+      await requestApproval.cbPostGetDetailApproveRoute(request, response, next)
+
+      // 結果確認
+      expect(next).toHaveBeenCalledWith(errorHelper.create(404))
+    })
+
+    test('500エラー：contracts検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      const contractDbError = new Error('Contracts Table Error')
+      contractControllerFindOneSpy.mockReturnValue(contractDbError)
+
+      // 試験実施
+      await requestApproval.cbPostGetDetailApproveRoute(request, response, next)
+
+      // 結果確認
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：不正なcheckContractStatus(null)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(null)
+
+      // 試験実施
+      await requestApproval.cbPostGetDetailApproveRoute(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：不正なcheckContractStatus(999)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(999)
+
+      // 試験実施
+      await requestApproval.cbPostGetDetailApproveRoute(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+  })
+
+  describe('コールバック:cbPostApproval', () => {
+    test('正常', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        approveRouteId: 'dummyId'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      approverControllerRequestApproval.mockReturnValue(0)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+      // 結果確認
+      // 承認依頼ページレンダリングを呼び出し
+      expect(request.flash).toBeCalledWith('info', '承認依頼を完了しました。')
+      expect(response.redirect).toHaveBeenCalledWith('/inbox/1')
+    })
+
+    test('正常：解約申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[5].dataValues.contractStatus)
+
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('400エラー:LoggedInではないsessionの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...notLoggedInsession }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[5].dataValues.contractStatus)
+
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+    })
+
+    test('500エラー:不正なContractデータの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(null)
+
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：requestのsession,userIdがnullの場合', async () => {
+      // 実施
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      const userDbError = new Error('User Table Error')
+      userControllerFindOneSpy.mockReturnValue(userDbError)
+
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user.statusが0ではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[8])
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      expect(next).toHaveBeenCalledWith(errorHelper.create(404))
+    })
+
+    test('500エラー：contracts検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      const contractDbError = new Error('Contracts Table Error')
+      contractControllerFindOneSpy.mockReturnValue(contractDbError)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：不正なcheckContractStatus(null)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(null)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：不正なcheckContractStatus(999)', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(999)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：approverController結果が0以外', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        approveRouteId: 'dummyId'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      approverControllerRequestApproval.mockReturnValue(-1)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+      // 結果確認
+      // 前のページを呼び出し
+      expect(response.redirect).toHaveBeenCalledWith('back')
     })
   })
 })
