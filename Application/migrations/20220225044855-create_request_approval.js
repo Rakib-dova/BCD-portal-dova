@@ -32,7 +32,7 @@ module.exports = {
           },
           key: 'approveRouteId'
         },
-        allowNull: false
+        allowNull: true
       },
       invoiceId: {
         type: Sequelize.DataTypes.UUID,
@@ -65,6 +65,11 @@ module.exports = {
       create: {
         type: Sequelize.DataTypes.DATE,
         allowNull: false
+      },
+      isSaved: {
+        type: Sequelize.DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
       }
     })
   },
