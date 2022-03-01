@@ -16,6 +16,7 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const inboxController = require('../../Application/controllers/inboxController')
+const requestApprovalController = require('../../Application/controllers/requestApprovalController')
 const logger = require('../../Application/lib/logger.js')
 
 let request, response, infoSpy
@@ -23,7 +24,8 @@ let userControllerFindOneSpy,
   contractControllerFindOneSpy,
   tenantControllerFindOneSpy,
   contractControllerFindContractSpyon,
-  inboxControllerSpy
+  inboxControllerSpy,
+  requestApprovalControllerSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -124,6 +126,7 @@ describe('inboxListのテスト', () => {
     tenantControllerFindOneSpy = jest.spyOn(tenantController, 'findOne')
     contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
     inboxControllerSpy = jest.spyOn(inboxController, 'getInbox')
+    requestApprovalControllerSpy = jest.spyOn(requestApprovalController, 'findOneRequestApproval')
     request.flash = jest.fn()
   })
   afterEach(() => {
@@ -136,6 +139,7 @@ describe('inboxListのテスト', () => {
     tenantControllerFindOneSpy.mockRestore()
     contractControllerFindContractSpyon.mockRestore()
     inboxControllerSpy.mockRestore()
+    requestApprovalControllerSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -159,6 +163,8 @@ describe('inboxListのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      requestApprovalControllerSpy.mockReturnValue([])
 
       // inboxControllerのgetInobox実施結果設定
       inboxControllerSpy.mockReturnValue(searchResult1)
@@ -208,6 +214,34 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('正常：500エラー:requestApprovalエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      const dbError = new Error('DB Conncetion Error')
+      requestApprovalControllerSpy.mockReturnValue(dbError)
+
+      // inboxControllerのgetInobox実施結果設定
+      inboxControllerSpy.mockReturnValue(searchResult1)
+      // 試験実施
+      await inboxList.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('500エラー:不正なContractデータの場合', async () => {
