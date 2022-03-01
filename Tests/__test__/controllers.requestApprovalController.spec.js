@@ -6,7 +6,7 @@ const RequestApproval = db.RequestApproval
 const requestApprovalController = require('../../Application/controllers/requestApprovalController')
 
 let findOneSpy, errorSpy, contractId, documentId
-describe('tenantControllerのテスト', () => {
+describe('requestApprovalControllerのテスト', () => {
   beforeEach(() => {
     findOneSpy = jest.spyOn(RequestApproval, 'findOne')
     errorSpy = jest.spyOn(logger, 'error')
