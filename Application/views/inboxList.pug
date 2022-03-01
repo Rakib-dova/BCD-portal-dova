@@ -10,63 +10,83 @@ block content
     .columns.is-centered
       .column.is-11
         .box
-          if listArr.length !== 0
-            table.table.is-fullwidth.is-hoverable.table-fixed
-              thead
-                tr
-                  th.width-5.text-center No
-                  th.width-10.text-center 請求書番号
-                  th.width-10.text-center ステータス
-                  th.width-10.text-center 通貨
-                  th.width-10.text-center 金額
-                  th.width-10.text-center 送信企業
-                  th.width-10.text-center 受信企業
-                  th.width-10.text-center 更新日
-                  th.width-10.text-center 期限日
-                  th.width-10.text-center 
-              tbody.display-row
-                each item in listArr
-                  tr
-                    th.text-center.td-overflow= item.no
-                    td.text-center.td-overflow= item.invoiceNo
-                    td.text-center.td-overflow
-                      if item.status === 0
-                        a.a-status-PAID_UNCONFIRMED 入金確認済み
-                      else if item.status === 1
-                        a.a-status-PAID_CONFIRMED 送金済み
-                      else if item.status === 2
-                        a.a-status-ACCEPTED 受理済み
-                      else if item.status === 3
-                        a.a-status-DELIVERED 受信済み
-                    td.text-center.td-overflow= item.currency
-                    td.text-center.td-overflow= item.ammount
-                    td.text-center.td-overflow= item.sentTo
-                    td.text-center.td-overflow= item.sentBy
-                    td.text-center.td-overflow= item.updated
-                    td.text-center.td-overflow= item.expire
-                    td.text-center.display-row-td
-                      a.button.is-success.td-overflow.display-row-td-button(href=`/requestApproval/${item.documentId}`) 仕訳情報設定
-            nav.pagination.is-centered(role='navigation' aria-label='pagination')
-              - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
-              - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
-              if (page - 1 !== 0) 
-                a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
-              else
-                a.a-previous-none 前のページ
-              if maxPageNo < numPages
-                a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
-              else 
-                a.a-next-none 次のページ
-              
-              ul.pagination-list
-                while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
+          .media-content
+              .tabs.is-boxed.is-medium
+                ul
+                  li.is-active
+                    a#informationTab
+                      span 支払依頼
                   li
-                    if page === currPage
-                      a.pagination-link.is-current(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
-                    else
-                      a.pagination-link(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
-          else 
-            p 現在、受領した請求書一覧はありません。
+                    a#constructTab
+                      span 承認待ち
+              .tab-content
+                .tab-pane.is-active#informationTab
+                  if listArr.length !== 0
+                    table.table.is-fullwidth.is-hoverable.table-fixed
+                      thead
+                        tr
+                          th.width-5.text-center No
+                          th.width-10.text-center 請求書番号
+                          th.width-10.text-center 請求書ステータス
+                          th.width-10.text-center 承認ステータス
+                          th.width-10.text-center 通貨
+                          th.width-10.text-center 金額
+                          th.width-10.text-center 送信企業
+                          th.width-10.text-center 受信企業
+                          th.width-10.text-center 更新日
+                          th.width-10.text-center 期限日
+                          th.width-10.text-center
+                      tbody.display-row
+                        each item in listArr
+                          tr
+                            th.text-center.td-overflow= item.no
+                            td.text-center.td-overflow= item.invoiceNo
+                            td.text-center.td-overflow
+                              if item.status === 0
+                                a.a-status-PAID_UNCONFIRMED 入金確認済み
+                              else if item.status === 1
+                                a.a-status-PAID_CONFIRMED 送金済み
+                              else if item.status === 2
+                                a.a-status-ACCEPTED 受理済み
+                              else if item.status === 3
+                                a.a-status-DELIVERED 受信済み
+                            td.text-center.td-overflow
+                              if item.approveStatus === 2
+                                a.a-approveStatus-WAITING 承認依頼中
+                              else
+                                a.a-approveStatus-UNTREATED 未処理
+                            td.text-center.td-overflow= item.currency
+                            td.text-center.td-overflow= item.ammount
+                            td.text-center.td-overflow= item.sentTo
+                            td.text-center.td-overflow= item.sentBy
+                            td.text-center.td-overflow= item.updated
+                            td.text-center.td-overflow= item.expire
+                            td.text-center.display-row-td
+                              a.button.is-success.td-overflow.display-row-td-button(href=`/requestApproval/${item.documentId}`) 仕訳情報設定
+                    nav.pagination.is-centered(role='navigation' aria-label='pagination')
+                      - var page = currPage % 5 === 0 ? currPage - 4 : ~~(currPage / 5) * 5 + 1
+                      - var maxPageNo = ~~(page / 5) * 5 + 5 + 1
+                      if (page - 1 !== 0)
+                        a.pagination-previous(href= `/inboxList/${page - 1}`) 前のページ
+                      else
+                        a.a-previous-none 前のページ
+                      if maxPageNo < numPages
+                        a.pagination-next(href= `/inboxList/${maxPageNo}`) 次のページ
+                      else
+                        a.a-next-none 次のページ
+
+                      ul.pagination-list
+                        while page < (maxPageNo < numPages ? maxPageNo : numPages + 1)
+                          li
+                            if page === currPage
+                              a.pagination-link.is-current(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
+                            else
+                              a.pagination-link(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
+                  else
+                    p 現在、受領した請求書一覧はありません。
+
+                .tab-pane#constructTab
+                  p 現在、承認待ち請求書はありません。
 
         .mt-1.has-text-left
           a.button.is-link.is-light(href='/portal') ←Homeへ戻る
