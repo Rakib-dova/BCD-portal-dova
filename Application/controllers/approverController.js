@@ -597,6 +597,7 @@ const saveMessage = async (contractId, invoiceId, requester, message, approveRou
         }
       }
     })
+
     if (status) {
       saveData.status = status.code
     }
@@ -611,11 +612,12 @@ const saveMessage = async (contractId, invoiceId, requester, message, approveRou
       request = Request.build(saveData)
     } else {
       request.message = message
-      request.isSaved = true
       if (approveRouteId) {
         request.approveRouteId = approveRouteId
       }
     }
+
+    request.isSaved = true
     request.save()
     return 0
   } catch (error) {
