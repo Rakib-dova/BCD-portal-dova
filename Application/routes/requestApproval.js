@@ -406,7 +406,7 @@ const cbPostApproval = async (req, res, next) => {
       res.redirect('/inboxList/1')
       break
     default:
-      req.flash('noti ', ['支払依頼', '必ず保存してください。'])
+      req.flash('noti', ['支払依頼', '必ず保存してください。'])
       res.redirect(`/requestApproval/${invoiceId}`)
   }
 
