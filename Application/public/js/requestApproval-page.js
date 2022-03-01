@@ -209,24 +209,21 @@ const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
   approveRouteName.innerText = result.name
   cloneTemplate.querySelector('#approveRouteName').appendChild(approveRouteName)
   cloneTemplate.querySelector('#approveRouteName').appendChild(approveRouteIdHidden)
-  const creatApproverRow = function (noText, name, mail) {
+  const createApproverRow = function (noText, name) {
     const element = document.createElement('div')
     const noElement = document.createElement('div')
     const nameElement = document.createElement('div')
-    const mailElement = document.createElement('div')
     element.classList.add('columns')
     noElement.classList.add('column')
     nameElement.classList.add('column')
-    mailElement.classList.add('column')
     noElement.innerText = noText
     nameElement.innerText = name
-    mailElement.innerText = mail
     element.appendChild(noElement)
     element.appendChild(nameElement)
-    element.appendChild(mailElement)
     return element
   }
   const approverLen = approver.length
+  cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(createApproverRow('承認順', '承認者'))
   for (let idx = 0; idx < approverLen; idx++) {
     let no = null
     if (idx < approverLen - 1) {
@@ -234,19 +231,18 @@ const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
     } else {
       no = approValNo.slice(-1)
     }
-    const rowLastApprover = creatApproverRow(
-      no,
-      `${approver[idx].FirstName} ${approver[idx].LastName}`,
-      approver[idx].Username
-    )
+    const rowLastApprover = createApproverRow(no, `${approver[idx].FirstName} ${approver[idx].LastName}`)
     cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(rowLastApprover)
   }
   blackboard.appendChild(cloneTemplate)
 }
 
 $('#btn-confirm').addEventListener('click', function () {
+  while ($('#journal-list').firstChild) {
+    $('#journal-list').removeChild($('#journal-list').firstChild)
+  }
   const invoiceList = $('.invoiceLine')
-  if (!$('#journal-list').first) {
+  if (!$('#journal-list').firstChild) {
     Array.prototype.forEach.call(invoiceList, (invoiceLine) => {
       const cloneInvoice = document.importNode(invoiceLine.parentNode, true)
       Array.prototype.forEach.call(cloneInvoice.querySelectorAll('input'), (input) => {

@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       })
       RequestApproval.belongsTo(models.ApproveStatus, {
         foreignKey: 'status', // k1を指定
-        targetKey: 'no' // k2を指定
+        targetKey: 'code' // k2を指定
       })
     }
   }
@@ -69,14 +69,15 @@ module.exports = (sequelize, DataTypes) => {
           model: {
             tableName: 'ApproveStatus'
           },
-          key: 'no'
+          key: 'code'
         }
       },
       message: { type: DataTypes.STRING, allowNull: false },
       create: {
         type: DataTypes.DATE,
         allowNull: false,
-        timestamps: true
+        timestamps: true,
+        defaultValue: new Date()
       }
     },
     {

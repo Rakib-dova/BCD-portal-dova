@@ -123,7 +123,8 @@ describe('承認ルート確認・変更のインテグレーションテスト'
         approveRouteId: v4(),
         contractId: contract.contractId,
         approveRouteName: 'integrationApproveRoute',
-        deleteFlag: 0
+        deleteFlag: 0,
+        updateFlag: 0
       })
       await testApproveRoute.save()
 

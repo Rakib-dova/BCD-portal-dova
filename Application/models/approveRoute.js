@@ -64,6 +64,13 @@ module.exports = (sequelize, DataTypes) => {
       },
       deleteFlag: {
         type: DataTypes.BOOLEAN
+      },
+      updateFlag: {
+        type: DataTypes.BOOLEAN
+      },
+      prevAprroveRouteId: {
+        allowNull: true,
+        type: DataTypes.UUID
       }
     },
     {

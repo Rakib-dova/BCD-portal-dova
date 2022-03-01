@@ -321,13 +321,14 @@ const cbPostApproval = async (req, res, next) => {
 
   const contractId = contract.contractId
   const invoiceId = req.params.invoiceId
+  const requester = req.user.userId
   const message = req.body.message
   const approveRouteId = req.body.approveRouteId
 
-  const result = await approverController.requestApproval(contractId, approveRouteId, invoiceId, message)
+  const result = await approverController.requestApproval(contractId, approveRouteId, invoiceId, requester, message)
   switch (result) {
     case 0:
-      req.flash('noti', '承認依頼を完了しました。')
+      req.flash('info', '承認依頼を完了しました。')
       res.redirect('/inbox/1')
       break
     default:

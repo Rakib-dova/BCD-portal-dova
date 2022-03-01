@@ -14,14 +14,10 @@ module.exports = (sequelize, DataTypes) => {
   }
   ApproveStatus.init(
     {
-      no: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        allowNull: false
-      },
       code: {
         allowNull: false,
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        primaryKey: true
       },
       name: {
         allowNull: false,
