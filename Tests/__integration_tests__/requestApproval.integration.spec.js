@@ -120,19 +120,17 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      redirectUrl = await page.evaluate(() => {
-        return document
-          .querySelector(
-            'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-          )
-          .getAttribute('href')
-      })
-
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
       await page.waitForTimeout(1500)
+
+      redirectUrl = await page.evaluate(() => {
+        return document.querySelector('#form > div.grouped-button > a.button.is-link').getAttribute('href')
+      })
+
+      await page.click('#form > div.grouped-button > a.button.is-link')
+
+      await page.waitForTimeout(1000)
 
       // 支払依頼画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -150,11 +148,13 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
       await page.waitForTimeout(1500)
+
+      await page.click('#form > div.grouped-button > a.button.is-link')
+
+      await page.waitForTimeout(1000)
 
       // 支払依頼画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -213,11 +213,13 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
       await page.waitForTimeout(1500)
+
+      await page.click('#form > div.grouped-button > a.button.is-link')
+
+      await page.waitForTimeout(1000)
 
       // 支払依頼画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -235,57 +237,19 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
       await page.waitForTimeout(1500)
+
+      await page.click('#form > div.grouped-button > a.button.is-link')
+
+      await page.waitForTimeout(1000)
 
       // 支払依頼画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
       browser.close()
     })
-  })
-
-  test('勘定科目と補助科目の登録', async () => {
-    const puppeteer = require('puppeteer')
-    const browser = await puppeteer.launch({
-      headless: true,
-      ignoreHTTPSErrors: true
-    })
-    const page = await browser.newPage()
-    await page.setCookie(acCookies[0])
-    await page.goto('https://localhost:3000/uploadAccount')
-
-    const [fileChooser] = await Promise.all([
-      page.waitForFileChooser(),
-      page.click('#accountCodeUpload > div > label > input')
-    ])
-
-    await fileChooser.accept(['./testData/accountCodeUpload_test11.csv'])
-
-    await page.click('#upload')
-  })
-
-  test('部門データの登録', async () => {
-    const puppeteer = require('puppeteer')
-    const browser = await puppeteer.launch({
-      headless: true,
-      ignoreHTTPSErrors: true
-    })
-    const page = await browser.newPage()
-    await page.setCookie(acCookies[0])
-    await page.goto('https://localhost:3000/uploadDepartment')
-
-    const [fileChooser] = await Promise.all([
-      page.waitForFileChooser(),
-      page.click('#accountCodeUpload > div > label > input')
-    ])
-
-    await fileChooser.accept(['./testData/departmentCodeUpload_test11.csv'])
-
-    await page.click('#upload')
   })
 
   describe('4.契約ステータス：契約中', () => {
@@ -340,11 +304,13 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
       await page.waitForTimeout(1500)
+
+      await page.click('#form > div.grouped-button > a.button.is-link')
+
+      await page.waitForTimeout(1000)
 
       // 支払依頼画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -362,11 +328,13 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
       await page.waitForTimeout(1500)
+
+      await page.click('#form > div.grouped-button > a.button.is-link')
+
+      await page.waitForTimeout(1000)
 
       // 支払依頼画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -384,12 +352,14 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto(`https://localhost:3000${redirectUrl}`)
 
-      await page.click('#form > div.grouped-button > a.button.mr-6')
+      await page.click('#form > div.grouped-button > a:nth-child(1)')
 
       await page.waitForTimeout(1500)
 
+      const inboxUrl = 'inbox/' + redirectUrl.split('/')[2]
+
       // 受領した請求書一覧画面に遷移確認
-      expect(await page.url()).toBe('https://localhost:3000/inboxList/1')
+      expect(await page.url()).toBe(`https://localhost:3000/${inboxUrl}`)
 
       await browser.close()
     })
@@ -397,76 +367,46 @@ describe('支払依頼画面のインテグレーションテスト', () => {
     // 支払依頼画面内容確認
     test('管理者、支払依頼画面内容確認', async () => {
       const res = await request(app)
-        .get('/requestApproval/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1')
+        .get(redirectUrl)
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
       expect(res.text).toMatch(/請求書番号/i)
-      expect(res.text).toMatch(/A01002/i)
       expect(res.text).toMatch(/宛先/i)
-      expect(res.text).toMatch(/114-0003/i)
-      expect(res.text).toMatch(/東京都/i)
-      expect(res.text).toMatch(/豊島5丁目/i)
-      expect(res.text).toMatch(/日本/i)
       expect(res.text).toMatch(/差出人/i)
-      expect(res.text).toMatch(/150-0002/i)
-      expect(res.text).toMatch(/渋谷区渋谷/i)
-      expect(res.text).toMatch(/請求日/i)
-      expect(res.text).toMatch(/2021-08-23/i)
-      expect(res.text).toMatch(/通貨/i)
-      expect(res.text).toMatch(/円/i)
-      expect(res.text).toMatch(/項目ID/i)
-      expect(res.text).toMatch(/内容/i)
-      expect(res.text).toMatch(/数量/i)
-      expect(res.text).toMatch(/単位/i)
-      expect(res.text).toMatch(/単価/i)
-      expect(res.text).toMatch(/税/i)
-      expect(res.text).toMatch(/小計（税抜）/i)
-      expect(res.text).toMatch(/テスト/i)
-      expect(res.text).toMatch(/100/i)
-      expect(res.text).toMatch(/個/i)
-      expect(res.text).toMatch(/100のJP 不課税 0%/i)
+      expect(res.text).toMatch(/仕訳情報/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/計上金額/i)
       expect(res.text).toMatch(/合計 円/i)
-      expect(res.text).toMatch(/請求日/i)
-      expect(res.text).toMatch(/通貨/i)
+      expect(res.text).toMatch(/メッセージ/i)
+      expect(res.text).toMatch(/仕訳情報設定へ/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/確認/i)
     })
 
     test('一般ユーザ、支払依頼画面内容確認', async () => {
       const res = await request(app)
-        .get('/inbox/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1')
+        .get(redirectUrl)
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(200)
 
       // 画面内容確認
       expect(res.text).toMatch(/請求書番号/i)
-      expect(res.text).toMatch(/A01002/i)
       expect(res.text).toMatch(/宛先/i)
-      expect(res.text).toMatch(/114-0003/i)
-      expect(res.text).toMatch(/東京都/i)
-      expect(res.text).toMatch(/豊島5丁目/i)
-      expect(res.text).toMatch(/日本/i)
       expect(res.text).toMatch(/差出人/i)
-      expect(res.text).toMatch(/150-0002/i)
-      expect(res.text).toMatch(/渋谷区渋谷/i)
-      expect(res.text).toMatch(/請求日/i)
-      expect(res.text).toMatch(/2021-08-23/i)
-      expect(res.text).toMatch(/通貨/i)
-      expect(res.text).toMatch(/円/i)
-      expect(res.text).toMatch(/項目ID/i)
-      expect(res.text).toMatch(/内容/i)
-      expect(res.text).toMatch(/数量/i)
-      expect(res.text).toMatch(/単位/i)
-      expect(res.text).toMatch(/単価/i)
-      expect(res.text).toMatch(/税/i)
-      expect(res.text).toMatch(/小計（税抜）/i)
-      expect(res.text).toMatch(/テスト/i)
-      expect(res.text).toMatch(/100/i)
-      expect(res.text).toMatch(/個/i)
-      expect(res.text).toMatch(/100のJP 不課税 0%/i)
+      expect(res.text).toMatch(/仕訳情報/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/計上金額/i)
       expect(res.text).toMatch(/合計 円/i)
-      expect(res.text).toMatch(/請求日/i)
-      expect(res.text).toMatch(/通貨/i)
+      expect(res.text).toMatch(/メッセージ/i)
+      expect(res.text).toMatch(/仕訳情報設定へ/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/確認/i)
     })
 
     test('メッセージ入力文字数確認（1,500文字まで）', async () => {
@@ -576,11 +516,13 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
       await page.waitForTimeout(1500)
+
+      await page.click('#form > div.grouped-button > a.button.is-link')
+
+      await page.waitForTimeout(1000)
 
       // 支払依頼画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -598,11 +540,13 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
       await page.waitForTimeout(1500)
+
+      await page.click('#form > div.grouped-button > a.button.is-link')
+
+      await page.waitForTimeout(1000)
 
       // 支払依頼画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -661,11 +605,13 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
       await page.waitForTimeout(1500)
+
+      await page.click('#form > div.grouped-button > a.button.is-link')
+
+      await page.waitForTimeout(1000)
 
       // 支払依頼画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -683,11 +629,13 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
       await page.waitForTimeout(1500)
+
+      await page.click('#form > div.grouped-button > a.button.is-link')
+
+      await page.waitForTimeout(1000)
 
       // 支払依頼画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
