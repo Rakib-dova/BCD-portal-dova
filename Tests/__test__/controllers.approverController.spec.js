@@ -1076,4 +1076,112 @@ describe('approverControllerのテスト', () => {
       expect(result.lastApprover).toEqual(lastApprover)
     })
   })
+
+  describe('searchApproveRouteList', () => {
+    test('正常：承認ルート検索', async () => {
+      // パラメータ作成
+      const contract = 'dummy-contract'
+      const approveRouteName = '承認ルート'
+
+      // 承認ルートDB検索
+      const approveRouteArr = []
+      const approveRoute1 = ApproveRoute.build({
+        contractId: 'dummy-contractid',
+        approveRouteName: '承認ルート1',
+        createdAt: new Date('2022-02-17T05:12:15.623Z'),
+        updatedAt: new Date('2022-02-17T05:12:15.623Z'),
+        deleteFlag: false
+      })
+      const approveRoute1approver1 = ApproveUser.build({
+        approveRouteId: approveRoute1.approveRouteId,
+        approveUser: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+        prevApproveUser: null,
+        nextApproveUser: null
+      })
+      approveRoute1.ApproveUsers = [approveRoute1approver1]
+      const approveRoute2 = ApproveRoute.build({
+        contractId: 'dummy-contractid',
+        approveRouteName: '承認ルート2',
+        createdAt: new Date('2022-02-17T05:12:15.623Z'),
+        updatedAt: new Date('2022-02-17T05:12:15.623Z'),
+        deleteFlag: true
+      })
+      const approveRoute3 = ApproveRoute.build({
+        contractId: 'dummy-contractid',
+        approveRouteName: '承認ルート0',
+        createdAt: new Date('2022-02-17T05:12:15.623Z'),
+        updatedAt: new Date('2022-02-17T05:12:15.623Z'),
+        deleteFlag: true
+      })
+      const approveRoute3approver1 = ApproveUser.build({
+        approveRouteId: approveRoute3.approveRouteId,
+        approveUser: '7fa489ad-4c50-43d6-aaaa-1279877c8ef5',
+        prevApproveUser: null,
+        nextApproveUser: null
+      })
+      approveRoute3.ApproveUsers = [approveRoute3approver1]
+      const approveRoute1approver2approver1 = ApproveUser.build({
+        approveRouteId: approveRoute2.approveRouteId,
+        approveUser: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+        prevApproveUser: null,
+        nextApproveUser: '3b6a13d6-cb89-414b-9597-175ba89329aa'
+      })
+      const approveRoute1approver2approver2 = ApproveUser.build({
+        approveRouteId: approveRoute2.approveRouteId,
+        approveUser: '3b6a13d6-cb89-414b-9597-175ba89329aa',
+        prevApproveUser: approveRoute1approver2approver1.approveUser,
+        nextApproveUser: null
+      })
+      approveRoute2.ApproveUsers = [approveRoute1approver2approver1, approveRoute1approver2approver2]
+      approveRouteArr.push(approveRoute1, approveRoute2, approveRoute3)
+
+      // DBのデータがない場合
+      approveRouteFindAll.mockReturnValue(approveRouteArr)
+
+      const result = await approverController.searchApproveRouteList(contract, approveRouteName)
+
+      // 結果確認
+      expect(result.status).toBe(0)
+      expect(result.searchResult).toStrictEqual([
+        { No: 1, approveRouteName: '承認ルート1', approverCount: 1, uuid: approveRoute1.approveRouteId },
+        { No: 2, approveRouteName: '承認ルート2', approverCount: 2, uuid: approveRoute2.approveRouteId },
+        { No: 3, approveRouteName: '承認ルート0', approverCount: 1, uuid: approveRoute3.approveRouteId }
+      ])
+    })
+
+    test('正常：承認ルート名がnullの場合', async () => {
+      // パラメータ作成
+      const contract = 'dummy-contract'
+      const approveRouteName = null
+
+      // 承認ルートDB検索
+      const approveRouteArr = []
+      approveRouteFindAll.mockReturnValue(approveRouteArr)
+
+      const result = await approverController.searchApproveRouteList(contract, approveRouteName)
+
+      // 結果確認
+      expect(result.status).toBe(0)
+      expect(result.searchResult).toStrictEqual([])
+    })
+
+    test('正常：DBエラー', async () => {
+      const contract = 'dummy-contract'
+      const approveRouteName = 'test'
+
+      const dbError = new Error('DB Conncetion Error')
+      approveRouteFindAll.mockImplementation(() => {
+        throw dbError
+      })
+
+      const result = await approverController.searchApproveRouteList(contract, approveRouteName)
+
+      expect(errorSpy).toHaveBeenCalledWith({
+        contractId: contract,
+        stack: dbError.stack,
+        status: 0
+      })
+      expect(result).toEqual({ status: -1, searchResult: dbError })
+    })
+  })
 })
