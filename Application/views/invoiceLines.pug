@@ -66,7 +66,7 @@ if invoiceLine.length !== 0
               a.btn-plus-accountCode(data-target= `#lineNo${idx + 1}`)
                 i.fas.fa-plus-circle
             .column-header.text-inbox-subtitle
-              p.input-label-required.invisible(id=`duplicationErrMsg${idx + 1}` tabIndex=0)                
+              p.input-label-required.invisible(id=`error-message-lineNo${idx + 1}` tabIndex=0)
         .columns.m-0
           .column.p-0.lineAccountCode(id= `lineNo${idx + 1}`)
             if key === "journalize" && value.length !== 0

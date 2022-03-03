@@ -301,6 +301,9 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
         .addEventListener('click', btnSearchDepartmentCode($('#departmentCode-modal')))
 
       target.appendChild(cloneAccountCodeItem)
+    } else {
+      $(`#error-message-${target.id}`).innerText = '仕訳情報入力の上限は１０項目までです。'
+      $(`#error-message-${target.id}`).classList.remove('invisible')
     }
   })
 })
@@ -815,7 +818,7 @@ const duplicationCheck = function () {
 
   // 重複がある明細項目づつエラーメッセージを設定する。
   koumokuInformationArray.map((item, idx) => {
-    const errMsg = document.getElementById(`duplicationErrMsg${idx + 1}`)
+    const errMsg = document.getElementById(`error-message-lineNo${idx + 1}`)
     if (item === true) {
       errMsg.innerText = '同じ仕訳情報は設定できません。'
       errMsg.classList.remove('invisible')
