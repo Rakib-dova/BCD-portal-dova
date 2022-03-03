@@ -164,14 +164,17 @@ const cbGetRequestApproval = async (req, res, next) => {
     optionLine8.columnName = 'その他特記事項'
     optionLine8.columnData = result.options.note
   }
-  let isSaved = false
-  if (req.session.isSaved) {
-    isSaved = true
-  }
+
   const contractId = contract.contractId
   let approveRouteId = null
   let message = null
   let approveRoute = null
+  let isSaved = false
+  if (req.session.requestApproval) {
+    message = req.session.requestApproval.message
+    approveRouteId = req.session.requestApproval.approveRouteId
+    isSaved = req.session.requestApproval.isSaved
+  }
   const approval = await approverController.readApproval(contractId, invoiceId, isSaved)
   if (approval) {
     approveRouteId = approval.approveRouteId
@@ -248,7 +251,10 @@ const cbPostSave = async (req, res, next) => {
   switch (result) {
     case 0:
       req.flash('info', 'メッセージを保存しました。')
-      req.session.isSaved = true
+      req.session.requestApproval = {
+        isSaved: true
+      }
+      delete req.session.isSaved
       res.redirect(`/requestApproval/${invoiceId}`)
       break
     default:
@@ -399,6 +405,18 @@ const cbPostApproval = async (req, res, next) => {
   const message = req.body.message
   const approveRouteId = req.body.approveRouteId
 
+  // 承認ルートに誤りがある場合
+  const isApproveRoute = await approverController.checkApproveRoute(contractId, approveRouteId)
+  if (isApproveRoute === false) {
+    req.flash('noti', ['支払い依頼', '承認ルートを指定してください。'])
+    req.session.requestApproval = {
+      message: message,
+      isSaved: false
+    }
+    logger.info(constantsDefine.logMessage.INF001 + 'cbPostApproval')
+    return res.redirect(`/requestApproval/${invoiceId}`)
+  }
+
   const result = await approverController.requestApproval(contractId, approveRouteId, invoiceId, requester, message)
   switch (result) {
     case 0:
@@ -407,6 +425,11 @@ const cbPostApproval = async (req, res, next) => {
       break
     default:
       req.flash('noti', ['支払依頼', '必ず保存してください。'])
+      req.session.requestApproval = {
+        message: message,
+        approveRouteId: approveRouteId,
+        isSaved: false
+      }
       res.redirect(`/requestApproval/${invoiceId}`)
   }
 
