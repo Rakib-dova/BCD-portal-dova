@@ -175,3 +175,10 @@ p:focus {
   resize: none;
   font-size: 16px;
 }
+
+#prevUserMessage {
+  color: #ffa800 !important;
+  font-size: 18px;
+  line-height: 27px;
+  font-weight: bold;
+}

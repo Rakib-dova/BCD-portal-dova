@@ -10,7 +10,7 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
-const notiTitle = '仕分け情報設定'
+const notiTitle = '承認する支払依頼確認'
 
 const bodyParser = require('body-parser')
 router.use(
@@ -64,7 +64,24 @@ const cbGetIndex = async (req, res, next) => {
   const invoiceId = req.params.invoiceId
   let result
   const contractId = contract.contractId
+  // const userId = req.user.userId
 
+  // 依頼した請求書が支払依頼資格を奪われた場合
+  const requestApproval = await approvalInboxController.getRequestApproval(contractId, invoiceId)
+  // if (requestApproval === null) {
+  //   req.flash('noti', [notiTitle, '当該請求書は支払依頼の文書ではありません。'])
+  //   return res.redirect('/approvalInboxList/1')
+  // }
+  const approverRouteId = requestApproval.approveRouteId
+
+  // 依頼者と承認ルートの承認者のかを確認する。
+  // const isNotRequesterAndApporever = !(await approvalInboxController.checkUser(contractId, userId, invoiceId))
+  // if (isNotRequesterAndApporever) {
+  //   req.flash('noti', [notiTitle, '当該文書について承認権限がないため、仕訳情報画面へ遷移しました。'])
+  //   return res.redirect(`/inbox/${invoiceId}`)
+  // }
+
+  // 文書情報をトレードシフトから持ち込み
   try {
     result = await inboxController.getInvoiceDetail(accessToken, refreshToken, invoiceId, contract.contractId)
   } catch (error) {
@@ -73,14 +90,13 @@ const cbGetIndex = async (req, res, next) => {
     return res.redirect('/approvalInboxList/1')
   }
 
-  const requestApproval = await approvalInboxController.getRequestApproval(contractId, invoiceId)
-  const approverRouteId = requestApproval.approveRouteId
   const approveRoute = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approverRouteId)
-
+  const prevUser = requestApproval.prevUser
   res.render('approvalInbox', {
     ...result,
     documentId: invoiceId,
-    approveRoute: approveRoute
+    approveRoute: approveRoute,
+    prevUser: prevUser
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -96,16 +112,81 @@ const approvalInboxController = {
    * @param {uuid} invoiceId
    * @returns {RequestApproval} RequestApproval
    */
-  getRequestApproval: async (contractId, invoiceId) => {
+  getRequestApproval: async (accessToken, refreshToken, contractId, invoiceId) => {
+    const userMessage = [
+      'ユーザー１のメッセージ',
+      'ユーザー２のメッセージ',
+      'ユーザー３のメッセージ',
+      'ユーザー４のメッセージ',
+      'ユーザー５のメッセージ',
+      'ユーザー６のメッセージ',
+      'ユーザー７のメッセージ',
+      'ユーザー８のメッセージ',
+      'ユーザー９のメッセージ',
+      'ユーザー１０のメッセージ',
+      'ユーザー１１のメッセージ'
+    ]
     const RequestApproval = require('../models').RequestApproval
-    const request = RequestApproval.build({
+    const requestApproval = RequestApproval.build({
       contractId: contractId,
       approveRouteId: 'dummy-data',
       invoiceId: invoiceId,
       message: 'ダミーデータのメッセージ'
     })
+    const requestId = requestApproval.requestId
+    const approveRouteId = requestApproval.approveRouteId
+    const request = {
+      contractId: requestApproval.contractId,
+      approveRoute: await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId),
+      invoiceId: invoiceId,
+      message: requestApproval.message,
+      status: '11',
+      approvals: [],
+      prevUser: {
+        name: null,
+        message: null
+      }
+    }
+
+    let prev = null
+    let next = null
+    for (let idx = 0; idx < request.approveRoute.users.length; idx++) {
+      if (!prev) {
+        prev = new Approval({
+          contractId: contractId,
+          request: requestId,
+          message: userMessage[idx],
+          status: ApprovalStatusList[0]
+        })
+        request.approvals.push(prev)
+      } else {
+        next = new Approval({
+          contractId: contractId,
+          request: requestId,
+          message: userMessage[idx],
+          status: ApprovalStatusList[0].id
+        })
+        prev.next = next
+        next.prev = prev
+        prev = next
+        request.approvals.push(next)
+      }
+    }
+
+    if (~~request.status - 10 === 0) {
+      request.prevUser.name = '依頼者'
+      request.prevUser.message = request.message
+    } else {
+      request.prevUser.name =
+        request.approveRoute.users[~~request.status - 11].FirstName +
+        request.approveRoute.users[~~request.status - 11].LastName
+      request.prevUser.message = request.approvals[~~request.status - 11].message
+    }
+
     return request
-  }
+  },
+
+  checkUser: async () => {}
 }
 
 const approverController = {
@@ -138,6 +219,32 @@ const approverController = {
     }
 
     return dummyApproveRoute
+  }
+}
+
+const ApprovalStatusList = []
+class ApprovalStatus {
+  constructor(init) {
+    this.id = init.id
+    this.code = init.code
+  }
+}
+
+ApprovalStatusList.push(new ApprovalStatus({ id: '10', code: '承認待ち' }))
+ApprovalStatusList.push(new ApprovalStatus({ id: '00', code: '承認済み' }))
+ApprovalStatusList.push(new ApprovalStatus({ id: '99', code: '差し戻し' }))
+
+class Approval {
+  constructor(init) {
+    const { v4: uuid } = require('uuid')
+    this.approvalId = uuid()
+    this.contractId = init.contractId
+    this.request = init.request
+    this.message = init.message
+    this.status = init.status
+    this.prev = null
+    this.next = null
+    this.approvalDate = null
   }
 }
 

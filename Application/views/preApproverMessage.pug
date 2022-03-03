@@ -1,6 +1,7 @@
 ﻿.box
   .columns.m-0
-    .column-header.is-2-header.text-inbox.text-inbox-subtitle.text-inbox-common
-      | 前の承認者んからメッセージ
+    .column-header#prevUserMessage
+      | #{prevUser.name}のさんからメッセージ
+  .columns.m-0
     .column-header.text-inbox-common
-      | #{prevApproverMessage}
+      | #{prevUser.message}
