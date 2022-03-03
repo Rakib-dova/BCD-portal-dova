@@ -159,53 +159,6 @@ block content
             p.control
               input.input.lineAccountCode_departmentCode(type='text' name=`` value readonly)
 
-  template#template-journal-accountCode
-    .columns.m-0.base-bulkInsert-journal
-      .column.p-0.lineAccountCodeForBulk(id='bulkInsertNo1')
-        .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1')
-          .column.is-two-fifths.p-0.border-div-rad-4
-            .field.is-horizontal.m-1.has-addons-centered
-              .field-label.is-normal.m-0.text-center
-                label 勘定科目コード
-              .field-label.is-normal.m-0.text-center
-                label 補助科目コード
-              .field-label.is-normal.m-0.is-1.fixed-void-66
-                label 　
-            .field.is-horizontal.p-1
-              .field-body.m-1
-                .field
-                  p.control
-                    input.input.input-accountCode(type='text' value readonly)
-              .field-body.m-1
-                .field
-                  p.control
-                    input.input.input-subAccountCode(type='text'  value readonly)
-              .field-body.m-1.is-1.none-flex-grow
-                .field
-                  p.control
-                    a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
-          .column.is-0.p-1
-          .column.is-one-fifth.p-0.border-div-rad-4
-           .field.is-horizontal.m-1.has-addons-centered
-             .field-label.is-normal.m-0.text-center
-               label 部門コード
-             .field-label.is-normal.m-0.is-1.fixed-void-66
-               label 　
-           .field.is-horizontal.p-1
-             .field-body.m-1
-               .field
-                 p.control
-                   input.input.input-departmentCode(type='text'  value readonly)
-             .field-body.m-1.is-1.none-flex-grow
-               .field
-                 p.control
-                   a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
-          .column.is-0.p-1
-          .column.is-0.p-0.column-department
-          .column.is-0.p-1.column-minus-btn
-            a.red-color.btn-minus-accountCode(id=`btn_minus_bulkInsertNo1_lineAccountCode1` data-target=`bulkInsertNo1_lineAccountCode`)
-              i.fas.fa-minus-circle
-
   .modal#accountCode-modal.z-index-modal
     .modal-background.cancel-button(data-target='accountCode-modal')
     .modal-card.is-family-noto-sans

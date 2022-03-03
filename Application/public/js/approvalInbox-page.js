@@ -33,6 +33,28 @@ if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
   if (elm) elm.parentNode.removeChild(elm)
 }
 
+// ローディング画面の初期化
+window.onload = function () {
+  // 計上金額のボタンの機能設定
+  Array.prototype.forEach.call($('.btn-insert-installmentAmount'), function (btn) {
+    btn.addEventListener('click', btnInstallmentAmount)
+  })
+
+  // 勘定科目・補助科目の検索ボタン機能設定
+  Array.prototype.forEach.call($('.BtnlineAccountCodeSearch'), function (btn) {
+    btn.addEventListener('click', btnSearchMain())
+  })
+
+  // 部門データの検索ボタン機能設定
+  Array.prototype.forEach.call($('.BtnlineDepartmentCodeSearch'), function (btn) {
+    btn.addEventListener('click', btnSearchDepartmentCode())
+  })
+
+  Array.prototype.forEach.call($('.btn-minus-accountCode'), function (btnMinus) {
+    btnMinus.addEventListener('click', btnMinusAccount)
+  })
+}
+
 // プラスボタンの機能
 Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
   btnPlusAccount.addEventListener('click', function () {
@@ -97,6 +119,9 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
         .addEventListener('click', btnSearchDepartmentCode($('#departmentCode-modal')))
 
       target.appendChild(cloneAccountCodeItem)
+    } else {
+      $(`#error-message-${target.id}`).innerText = '仕訳情報入力の上限は１０項目までです。'
+      $(`#error-message-${target.id}`).classList.remove('invisible')
     }
   })
 })
@@ -307,7 +332,6 @@ const displayResultForDepartmentCode = function (codeArr) {
       $(this.dataset.target).classList.remove('is-active')
       const inputTarget = $(this.dataset.target).dataset.info
       $(`#${inputTarget}_departmentCode`).value = this.dataset.departmentCode
-      $('#btn-confirm').removeAttribute('disabled')
       deleteDepartmentResultDisplayModal()
     })
     row.addEventListener('mouseover', function () {
@@ -409,7 +433,6 @@ function btnInstallmentAmount() {
   showModalTarget.classList.toggle('is-active')
   showModalTarget.querySelector('#btn-insert').dataset.target = inputTarget
   showModalTarget.querySelector('#installmentAmountErrMsg').innerText = '　'
-  $('#btn-confirm').removeAttribute('disabled')
 }
 
 // 計上金額の入力欄の数字以外は入力できない
@@ -478,6 +501,15 @@ $('#checkApproval').addEventListener('click', function () {
   while ($('#journal-list').firstChild) {
     $('#journal-list').removeChild($('#journal-list').firstChild)
   }
+
+  const dupleResult = duplicationCheck()
+  if (dupleResult.length > 0) {
+    document.getElementById(dupleResult[0].id).focus({ preventScroll: false })
+    return
+  }
+
+  if (!checkJournalList()) return
+
   const invoiceList = $('.invoiceLine')
   if (!$('#journal-list').firstChild) {
     Array.prototype.forEach.call(invoiceList, (invoiceLine) => {
@@ -503,3 +535,185 @@ $('#checkApproval').addEventListener('click', function () {
 
   $('#check-approval-modal').classList.toggle('is-active')
 })
+
+// 重複された仕訳情報処理(仕訳情報設定画面)
+const duplicationCheck = function () {
+  const duplArray = []
+  // 画面に表示された項目別の仕訳情報を取得
+  const allInfomationline = document.querySelectorAll('.invoiceLine')
+
+  const koumokuInformationArray = []
+  for (let i = 0; i < allInfomationline.length; ++i) {
+    const children = document.getElementById(`lineNo${i + 1}`).children
+    const lineInformationArray = []
+
+    // 勘定科目と補助科目を取得
+    Array.prototype.forEach.call(children, (item) => {
+      const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
+      const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
+      const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
+      lineInformationArray.push([accountCode, subAccountCode, department])
+    })
+    koumokuInformationArray.push(duplicateCheckFunction(lineInformationArray))
+  }
+
+  // 重複がある明細項目づつエラーメッセージを設定する。
+  koumokuInformationArray.map((item, idx) => {
+    const errMsg = document.getElementById(`error-message-lineNo${idx + 1}`)
+    if (item === true) {
+      errMsg.innerText = '同じ仕訳情報は設定できません。'
+      errMsg.classList.remove('invisible')
+      errMsg.focus({ preventScroll: false })
+      duplArray.push(errMsg)
+    } else {
+      errMsg.classList.add('invisible')
+    }
+    return 0
+  })
+
+  return duplArray
+}
+
+// 重複検索関数
+const duplicateCheckFunction = function (array) {
+  const length = array.length
+  let duplicationFlag = false
+  let i, j, temp
+  for (i = 0; i < length - 1; i++) {
+    for (j = 0; j < length - 1 - i; j++) {
+      if (JSON.stringify(array[j]) === JSON.stringify(array[j + 1])) {
+        duplicationFlag = true
+        return duplicationFlag
+      } else {
+        temp = array[j]
+        array[j] = array[j + 1]
+        array[j + 1] = temp
+      }
+    }
+  }
+  return duplicationFlag
+}
+
+// 仕訳情報のバリデーションチェックする。
+const checkJournalList = function () {
+  const journalLines = getInvoiceLineList().map((invoiceLine) => {
+    const line = new Array(10)
+    invoiceLine.account.forEach((account, idx) => {
+      if (account.node) {
+        line[idx] = {
+          accountCode: account.accountCode,
+          subAccountCode: account.subAccountCode,
+          input_amount: account.amount,
+          journalNo: `lineAccountCode${idx + 1}`
+        }
+      }
+    })
+    return line
+  })
+  let isFirstLineNull = false
+  // 勘定科目が設定した仕訳情報の計上が0円になっている場合、エラーを表示
+  journalLines.forEach((lines, lineNo) => {
+    lines.forEach((journal, journalNo) => {
+      if (journalNo !== 0 && journal !== null) {
+        if (journalLines[lineNo][0].accountCode.length === 0 || journalLines[lineNo][0].input_amount === 0) {
+          if (lines.length !== 1) {
+            isFirstLineNull = true
+            $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
+          }
+        }
+      }
+    })
+  })
+
+  for (let i = 0; i < journalLines.length; i++) {
+    let total = 0
+    for (let j = 0; j < journalLines[i].length; j++) {
+      // チェックする仕訳情報を絞り込む。
+      const checkJournalLines = journalLines[i].filter(function (item) {
+        return item !== null && item !== undefined
+      })
+
+      // 仕訳情報が設定されていない小計チェック用
+      if (checkJournalLines.length === 1) {
+        total = ~~journalLines[i][j].input_amount.replaceAll(',', '')
+        break
+      }
+      // 設定した仕訳情報の計上金額をチェック用
+      if (journalLines[i][j] !== undefined) {
+        if (journalLines[i][j].accountCode.length !== 0) {
+          total = total + ~~journalLines[i][j].input_amount.replaceAll(',', '')
+          if (~~journalLines[i][j].input_amount.replaceAll(',', '') === 0) {
+            isFirstLineNull = true
+            $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
+          }
+        }
+      }
+    }
+    // 金額が誤りがある場合
+    if (total !== ~~$(`#lineNo${i + 1}Total`).value.replaceAll(',', '')) {
+      isFirstLineNull = true
+      $('#error-message-body').innerText = '仕訳情報を正しく設定してください。'
+    }
+  }
+
+  if (isFirstLineNull) {
+    $('#error-message-modal').classList.add('is-active')
+    return false
+  }
+  return true
+}
+
+// 明細リスト取得
+const getInvoiceLineList = function () {
+  return Array.prototype.map.call($('.invoiceLine'), (invoiceLine) => {
+    const invoiceLineNo = invoiceLine.querySelector('input[name=lineNo]')
+      ? invoiceLine.querySelector('input[name=lineNo]').value
+      : ''
+    const invoiceLineId = invoiceLine.querySelector('input[name=lineId]')
+      ? invoiceLine.querySelector('input[name=lineId]').value
+      : ''
+    const itemName = invoiceLine.querySelector('.itemName') ? invoiceLine.querySelectorAll('.itemName') : ''
+    const invoicedQuantity = invoiceLine.querySelector('.invoicedQuantity')
+      ? invoiceLine.querySelector('.invoicedQuantity').innerText
+      : ''
+    const unitcode = invoiceLine.querySelector('.unitcode') ? invoiceLine.querySelector('.unitcode').innerText : ''
+    const priceAmount = invoiceLine.querySelector('.priceAmount')
+      ? invoiceLine.querySelector('.priceAmount').innerText
+      : ''
+    const tax = invoiceLine.querySelector('.tax') ? invoiceLine.querySelector('.tax').innerText : ''
+    const total = invoiceLine.querySelector('.lineTotal') ? invoiceLine.querySelector('.lineTotal').value : ''
+    const account = new Array(10)
+    for (let idx = 0; idx < 10; idx++) {
+      const node = invoiceLine.parentNode.querySelectorAll('.lineAccountcode')[idx]
+      if (node) {
+        account[idx] = {
+          node: node,
+          accountCode: node.querySelectorAll('input[type=text]')[0].value,
+          subAccountCode: node.querySelectorAll('input[type=text]')[1].value,
+          departmentCode: node.querySelectorAll('input[type=text]')[2].value,
+          amount: node.querySelectorAll('input[type=text]')[3].value
+        }
+      } else {
+        account[idx] = {
+          node: null,
+          accountCode: null,
+          subAccountCode: null,
+          departmentCode: null,
+          amount: null
+        }
+      }
+    }
+
+    return {
+      invoiceLineNo: invoiceLineNo,
+      invoiceLineId: invoiceLineId,
+      itemName: itemName,
+      invoicedQuantity: invoicedQuantity,
+      unitcode: unitcode,
+      priceAmount: priceAmount,
+      tax: tax,
+      total: total,
+      account: account
+    }
+  })
+}
