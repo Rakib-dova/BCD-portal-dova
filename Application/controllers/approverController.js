@@ -11,6 +11,7 @@ const Request = db.RequestApproval
 const Status = db.ApproveStatus
 const Op = db.Sequelize.Op
 const userController = require('./userController')
+const validate = require('../lib/validate')
 
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   const userAccountsArr = []
@@ -656,6 +657,29 @@ const readApproval = async (contractId, invoiceId, isSaved) => {
   }
 }
 
+/**
+ *
+ * @param {uuid} contractId 承認ルートの識別番号
+ * @param {uuid} approveRouteId 承認ルートの識別番号
+ * @returns {Boolean} 承認ルートが存在する場合true、ない場合fasle
+ */
+const checkApproveRoute = async (contractId, approveRouteId) => {
+  try {
+    if (!validate.isUUID(approveRouteId)) return false
+    const approveRoute = await ApproveRoute.findOne({
+      where: {
+        approveRouteId: approveRouteId,
+        contractId: contractId
+      }
+    })
+    if (approveRoute instanceof ApproveRoute === false) return false
+    return true
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    return error
+  }
+}
+
 module.exports = {
   getApprover: getApprover,
   insertApprover: insertApprover,
@@ -666,5 +690,6 @@ module.exports = {
   searchApproveRouteList: searchApproveRouteList,
   requestApproval: requestApproval,
   saveMessage: saveMessage,
-  readApproval: readApproval
+  readApproval: readApproval,
+  checkApproveRoute: checkApproveRoute
 }
