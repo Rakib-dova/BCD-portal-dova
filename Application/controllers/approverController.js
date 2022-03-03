@@ -13,6 +13,14 @@ const Op = db.Sequelize.Op
 const userController = require('./userController')
 const validate = require('../lib/validate')
 
+/**
+ *
+ * @param {string} accTk アクセストークン
+ * @param {string} refreshTk リフレッシュトークン
+ * @param {uuid} tenantId テナント
+ * @param {object} keyword 氏名やメールアドレス
+ * @returns {Array} ユーザー情報
+ */
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
   const userAccountsArr = []
   const queryObj = {
