@@ -294,7 +294,7 @@ app.use('/departmentCodeEdit', require('./routes/departmentCodeEdit').router)
 // 受領した請求書一覧
 app.use('/inboxList', require('./routes/inboxList').router)
 // 承認待ち一覧
-app.use('/approvalInboxList', require('./routes/approvalInboxList').router)
+// app.use('/approvalInboxList', require('./routes/approvalInboxList').router)
 
 // 受領した請求書
 app.use('/inbox', require('./routes/inbox').router)

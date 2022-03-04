@@ -156,3 +156,7 @@
   white-space: nowrap;
   order: 3;
 }
+
+.linkToApproval:hover {
+  cursor: pointer;
+}
