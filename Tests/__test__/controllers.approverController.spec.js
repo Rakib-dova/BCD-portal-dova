@@ -10,6 +10,7 @@ const ApproveUser = db.ApproveUser
 const RequestApproval = db.RequestApproval
 const ApproveStatus = db.ApproveStatus
 const ApproveObj = require('../../Application/lib/approver/Approver')
+const validate = require('../../Application/lib/validate')
 
 let errorSpy, infoSpy, accessTradeshift
 let approveRouteFindAll,
@@ -21,6 +22,7 @@ let approveRouteFindAll,
   approveStatusFindOne,
   userControllerFindOne
 let approveUserCreate, approveUserFindOne
+let validateIsUUID
 
 const findUsers = {
   itemsPerPage: 25,
@@ -134,6 +136,7 @@ describe('approverControllerのテスト', () => {
     approveStatusFindOne = jest.spyOn(ApproveStatus, 'findOne')
     userControllerFindOne = jest.spyOn(userController, 'findOne')
     RequestApproval.save = jest.fn()
+    validateIsUUID = jest.spyOn(validate, 'isUUID')
   })
 
   afterEach(() => {
@@ -150,6 +153,7 @@ describe('approverControllerのテスト', () => {
     requestApprovalFindOne.mockRestore()
     approveStatusFindOne.mockRestore()
     userControllerFindOne.mockRestore()
+    validateIsUUID.mockRestore()
   })
 
   describe('getApprover', () => {
@@ -2339,6 +2343,79 @@ describe('approverControllerのテスト', () => {
       })
 
       await approverController.readApproval(contractId, invoiceId, false)
+
+      expect(errorSpy).toHaveBeenCalledWith({
+        contractId: contractId,
+        stack: dbError.stack,
+        status: 0
+      })
+    })
+  })
+
+  describe('checkApproveRoute', () => {
+    test('正常：承認ルートが存在する場合', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contract = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      // validateの結果
+      validateIsUUID.mockReturnValue(true)
+
+      // DBのデータがある場合
+      approveRouteFindOne.mockReturnValueOnce(
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'checkApproveRouteTest'
+        })
+      )
+
+      const result = await approverController.checkApproveRoute(contractId, approveRouteId)
+
+      // 結果確認
+      expect(result).toBe(true)
+    })
+
+    test('準正常：apporveRouteIdがUUIDではない場合', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'dummyApproveRouteId'
+
+      // validateの結果
+      validateIsUUID.mockReturnValue(false)
+      const result = await approverController.checkApproveRoute(contractId, approveRouteId)
+
+      // 結果確認
+      expect(result).toBe(false)
+    })
+
+    test('準正常：DB検索の結果がApproveRoute形式ではない場合', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      // validateの結果
+      validateIsUUID.mockReturnValue(true)
+
+      // DBのデータがある場合
+      approveRouteFindOne.mockReturnValueOnce(null)
+      const result = await approverController.checkApproveRoute(contractId, approveRouteId)
+
+      // 結果確認
+      expect(result).toBe(false)
+    })
+
+    test('エラー：DBエラー', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      const dbError = new Error('DB Conncetion Error')
+      approveRouteFindOne.mockImplementation(() => {
+        throw dbError
+      })
+
+      await approverController.checkApproveRoute(contractId, approveRouteId)
 
       expect(errorSpy).toHaveBeenCalledWith({
         contractId: contractId,

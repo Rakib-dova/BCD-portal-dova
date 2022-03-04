@@ -439,7 +439,6 @@ describe('userControllerのテスト', () => {
       expect(errorSpy).toHaveBeenCalledWith({ user: userId, stack: encryptError.stack, status: 2 }, encryptError.name)
     })
   })
-
   describe('create', () => {
     test('正常(db.sequelize.transaction)', async () => {
       // 準備
@@ -622,7 +621,36 @@ describe('userControllerのテスト', () => {
       )
     })
 
-    test('Contract.findOneがnullの場合: DBエラー時(db.sequelize.transaction)', async () => {
+    test('Contract.findOneの結果がnullの場合: DBエラー時(db.sequelize.transaction)', async () => {
+      // 準備
+      // Tradeshiftからの正常なユーザデータ(必要最小限)の取得を想定する
+      accessTradeshiftSpy.mockReturnValue({
+        CompanyAccountId: null,
+        Memberships: [
+          {
+            UserId: userId,
+            Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+          }
+        ]
+      })
+
+      // リフレッシュトークンの正常な暗号化ができた場合を想定する
+      encryptSpy.mockReturnValue('dummyEncryptedRefreshToken')
+      // findOneの結果を空のオブジェクトに想定する
+      Contract.findOne = jest.fn((values) => {
+        return {}
+      })
+
+      const contractInformationNewOrder = require('../../Application/orderTemplate/contractInformationnewOrder.json')
+
+      // 試験実施
+      const result = await userController.create(accessToken, refreshToken, contractInformationNewOrder)
+
+      // 期待結果
+      // 想定したデータが返ること
+      expect(result).toEqual(null)
+    })
+    test('Contract.findOneでDBエラーの場合: DBエラー時(db.sequelize.transaction)', async () => {
       // 準備
       // Tradeshiftからの正常なユーザデータ(必要最小限)の取得を想定する
       accessTradeshiftSpy.mockReturnValue({
@@ -650,6 +678,59 @@ describe('userControllerのテスト', () => {
       // 期待結果
       // 想定したデータが返ること
       expect(result).toEqual(dbError)
+    })
+  })
+  describe('delete', () => {
+    test('正常(db.sequelize.transaction)', async () => {
+      // 準備
+      // DBからの正常なユーザデータの取得を想定する
+      userFindOneSpy.mockReturnValue({
+        userId: userId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: 'dummyRefreshToken',
+        subRefreshToken: null,
+        userStatus: 0,
+        lastRefreshedAt: null,
+        createdAt: '2021-01-25T08:45:49.803Z',
+        updatedAt: '2021-01-25T08:45:49.803Z'
+      })
+      User.destroy = jest.fn((values) => {
+        return 1
+      })
+      User.count = jest.fn((values) => {
+        return 0
+      })
+      Tenant.destroy = jest.fn((values) => {
+        return 1
+      })
+      // 試験実施
+      const result = await userController.delete(userId)
+
+      // 期待結果
+      // DBから取得した情報がReturnされていること
+      expect(result).toEqual(1)
+    })
+
+    test('異常：DBエラーの場合', async () => {
+      // 準備
+
+      // DBエラーを想定する
+      const dbError = new Error('DB error')
+      db.transaction = jest.fn(async (callback) => {
+        throw dbError
+      })
+
+      // 試験実施
+      await userController.delete(userId)
+
+      // 期待結果
+      // 想定したデータが返ること
+      expect(errorSpy).toHaveBeenCalledWith(
+        { user: userId, stack: dbError.stack, status: 0 },
+        dbError.name
+      )
     })
   })
 })
