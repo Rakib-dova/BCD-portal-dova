@@ -95,29 +95,20 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
     return null
   }
 }
-const hasPowerOfEditing = async (userId, requestApproval) => {
-  const contract = requestApproval.contractId
+
+const hasPowerOfEditing = async (contractId, userId, requestApproval) => {
   try {
     if (requestApproval === null) return -1
-    if (userId !== requestApproval.requester) return false
-    if (
-      requestApproval.approveRoute.users.find((user) => {
-        if (userId === user.id) return true
-        return false
-      }) === undefined
-    ) {
-      return false
-    }
 
     const status = requestApproval.status
     const idx = ~~status - 10
-    if (requestApproval.approvals[idx].idx !== userId) {
+    if (requestApproval.approvals[idx].approver.Id !== userId) {
       return false
     }
 
     return true
   } catch (error) {
-    logger.error({ contractId: contract, stack: error.stack, status: 0 })
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
     return -1
   }
 }

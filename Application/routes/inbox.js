@@ -171,7 +171,7 @@ const cbGetIndex = async (req, res, next) => {
 
   const contractId = contract.contractId
   const isRequestApproval = await inboxController.getRequestApproval(contractId, invoiceId)
-  let presentation = 'ibox'
+  let presentation = 'inbox'
 
   if (isRequestApproval) {
     presentation = 'readonlyInbox'
