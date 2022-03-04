@@ -1388,6 +1388,9 @@ describe('requestApprovalのテスト', () => {
       request.body = {
         approveRouteId: 'dummyId'
       }
+      request.params = {
+        invoiceId: '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -1403,8 +1406,8 @@ describe('requestApprovalのテスト', () => {
       await requestApproval.cbPostApproval(request, response, next)
       // 結果確認
       // 承認依頼ページレンダリングを呼び出し
-      expect(request.flash).toBeCalledWith('info', '承認依頼を完了しました。')
-      expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
+      expect(request.flash).toBeCalledWith('noti', ['支払い依頼', '承認ルートを指定してください。'])
+      expect(response.redirect).toHaveBeenCalledWith(`/requestApproval/${request.params.invoiceId}`)
     })
 
     test('正常：解約申込中の場合', async () => {
