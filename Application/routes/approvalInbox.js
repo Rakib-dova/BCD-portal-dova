@@ -81,17 +81,6 @@ const cbGetIndex = async (req, res, next) => {
     return res.redirect('/inboxList/1')
   }
 
-  // 依頼者と承認ルートの承認者のかを確認する。
-  const isNotRequesterAndApporever = !(await approvalInboxController.isRequesterAndApprover(
-    contractId,
-    userId,
-    requestApproval
-  ))
-  if (isNotRequesterAndApporever) {
-    req.flash('noti', [notiTitle, '当該文書について承認権限がないため、仕訳情報画面へ遷移しました。'])
-    return res.redirect('/inboxList/1')
-  }
-
   // 文書情報をトレードシフトから持ち込み
   try {
     result = await inboxController.getInvoiceDetail(accessToken, refreshToken, invoiceId, contract.contractId)
@@ -103,8 +92,18 @@ const cbGetIndex = async (req, res, next) => {
 
   const approveRoute = requestApproval.approveRoute
   const prevUser = requestApproval.prevUser
-  res.render('approvalInbox', {
+
+  // 依頼者と承認ルートの承認者のかを確認する。
+  const hasPowerOfEditing = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval)
+
+  let presentation = 'readonlyApprovalInbox'
+  if (hasPowerOfEditing) {
+    presentation = 'approvalInbox'
+  }
+
+  res.render(presentation, {
     ...result,
+    title: '承認依頼',
     documentId: invoiceId,
     approveRoute: approveRoute,
     prevUser: prevUser

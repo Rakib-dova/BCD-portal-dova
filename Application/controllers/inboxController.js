@@ -7,6 +7,7 @@ const JournalizeInvoice = db.JournalizeInvoice
 const logger = require('../lib/logger')
 const Op = db.Sequelize.Op
 const department = db.DepartmentCode
+const RequestApproval = db.RequestApproval
 const constantsDefine = require('../constants')
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
@@ -490,10 +491,38 @@ const getDepartment = async (_contractId, _departmentCode, _departmentName) => {
   }
 }
 
+/**
+ *
+ * @param {uuid} contractId コントラクター識別番号
+ * @param {uuid} invoiceId 請求書uuid番号
+ * @returns 支払依頼の場合true、ない場合false
+ */
+const getRequestApproval = async (contractId, invoiceId) => {
+  try {
+    // 検索のため、依頼中ステータス作成
+    const requestStatus = []
+    for (let id = 10; id < 21; id++) {
+      requestStatus.push({ status: `${id}` })
+    }
+    const requestApproval = await RequestApproval.findOne({
+      where: {
+        contractId: contractId,
+        invoiceId: invoiceId,
+        [Op.or]: requestStatus
+      }
+    })
+    if (requestApproval instanceof RequestApproval === false) return false
+    return true
+  } catch (error) {
+    return error
+  }
+}
+
 module.exports = {
   getInbox: getInbox,
   getInvoiceDetail: getInvoiceDetail,
   getCode: getCode,
   insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice,
-  getDepartment: getDepartment
+  getDepartment: getDepartment,
+  getRequestApproval: getRequestApproval
 }

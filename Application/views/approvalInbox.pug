@@ -3,13 +3,13 @@
 block content
   .container
     div.title-box-journallzing
-      h4.title-text-journallzing.text-inbox 仕訳情報設定
+      h4.title-text-journallzing.text-inbox #{title}
     .box
       form#form(method='POST')
-        include preApproverMessage
-        include invoiceHeader
+        include approvalInboxpreApproverMessage
+        include approvalInboxHeader
         include approvalInboxInvoiceLines
-        include invoiceFooter
+        include approvalInvoiceFooter
         include approvaInboxMessage
         include approvalInboxApprovRoute
         .grouped-button

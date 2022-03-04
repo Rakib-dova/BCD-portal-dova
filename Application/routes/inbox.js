@@ -169,7 +169,15 @@ const cbGetIndex = async (req, res, next) => {
     optionLine8.columnData = result.options.note
   }
 
-  res.render('inbox', {
+  const contractId = contract.contractId
+  const isRequestApproval = await inboxController.getRequestApproval(contractId, invoiceId)
+  let presentation = 'ibox'
+
+  if (isRequestApproval) {
+    presentation = 'readonlyInbox'
+  }
+
+  res.render(presentation, {
     ...result,
     optionLine1: optionLine1,
     optionLine2: optionLine2,
@@ -181,7 +189,6 @@ const cbGetIndex = async (req, res, next) => {
     optionLine8: optionLine8,
     documentId: invoiceId
   })
-
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
