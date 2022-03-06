@@ -12,6 +12,13 @@ const RequestApproval = db.RequestApproval
 const ApproveStatus = db.ApproveStatus
 const validate = require('../../Application/lib/validate')
 
+// アクセストークンの用意
+const accessToken = 'dummy-access-token'
+const refreshToken = 'dummy-refresh-token'
+const contract = 'dummy'
+const invoiceId = 'dummy'
+const tenant = 'dummy-tennant'
+
 let errorSpy, infoSpy, accessTradeshift
 let approveRouteFindAll,
   approverouteCreate,
@@ -70,13 +77,6 @@ describe('approvalInboxControllerのテスト', () => {
   describe('getRequestApproval', () => {
     test('正常：承認依頼取得', async () => {
       // 準備
-      // アクセストークンの用意
-      const accessToken = 'dummy-access-token'
-      const refreshToken = 'dummy-refresh-token'
-      const contract = 'dummy'
-      const invoiceId = 'dummy'
-      const tenant = 'dummy-tennant'
-
       const expectGetApproveRoute = {
         users: [
           {
@@ -87,6 +87,7 @@ describe('approvalInboxControllerのテスト', () => {
           }
         ]
       }
+
       // 検索予想結果
       const expectResult = {
         requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
@@ -176,20 +177,13 @@ describe('approvalInboxControllerのテスト', () => {
       expect(result.approvals[0].message).toEqual(expectResult.approvals[0].message)
       expect(result.approvals[0].next).toEqual(expectResult.approvals[0].next)
       expect(result.approvals[0].prev).toEqual(expectResult.approvals[0].prev)
-      expect(result.approvals[0].request).toEqual(expectResult.approvals[0].request)
+      expect(result.approvals[0].request).toEqual(expect.any(Object))
       expect(result.approvals[0].status).toEqual(expectResult.approvals[0].status)
       expect(result.prevUser).toEqual(expectResult.prevUser)
     })
 
     test('正常：承認依頼取得(userのidとrequestApproval.requesterが間違っている場合)', async () => {
       // 準備
-      // アクセストークンの用意
-      const accessToken = 'dummy-access-token'
-      const refreshToken = 'dummy-refresh-token'
-      const contract = 'dummy'
-      const invoiceId = 'dummy'
-      const tenant = 'dummy-tennant'
-
       const expectGetApproveRoute = {
         users: [
           {
@@ -305,20 +299,417 @@ describe('approvalInboxControllerのテスト', () => {
       expect(result.approvals[0].message).toEqual(expectResult.approvals[0].message)
       expect(result.approvals[0].next).toEqual(expect.any(Object))
       expect(result.approvals[0].prev).toEqual(expectResult.approvals[0].prev)
-      expect(result.approvals[0].request).toEqual(expectResult.approvals[0].request)
+      expect(result.approvals[0].request).toEqual(expect.any(Object))
       expect(result.approvals[0].status).toEqual(expectResult.approvals[0].status)
       expect(result.prevUser).toEqual(expectResult.prevUser)
     })
 
+    test('正常：承認依頼取得(request.statusテスト)', async () => {
+      // 準備
+      const expectGetApproveRoute = {
+        users: [
+          {
+            No: 1,
+            approveRouteName: 'dummyRouteName',
+            approverCount: 'dummyCount',
+            uuid: 'dummyUUID'
+          },
+          {
+            No: 2,
+            approveRouteName: 'dummyRouteName2',
+            approverCount: 'dummyCount2',
+            uuid: 'dummyUserUUID33333'
+          }
+        ]
+      }
+      // 検索予想結果
+      const expectResult = {
+        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+        message: 'dummyData',
+        status: 10,
+        requester: 'dummyUserUUID',
+        approveRoute: {
+          users: [
+            {
+              No: 1,
+              approveRouteName: 'dummyRouteName',
+              approverCount: 'dummyCount',
+              uuid: 'dummyUserUUID22222'
+            },
+            {
+              No: 2,
+              approveRouteName: 'dummyRouteName2',
+              approverCount: 'dummyCount2',
+              uuid: 'dummyUserUUID33333'
+            },
+            {
+              No: 3,
+              approveRouteName: 'dummyRouteName3',
+              approverCount: 'dummyCount3',
+              uuid: 'dummyUserUUID44444'
+            },
+            {
+              No: 4,
+              approveRouteName: 'dummyRouteName4',
+              approverCount: 'dummyCount4',
+              uuid: 'dummyUserUUID44444'
+            },
+            {
+              No: 5,
+              approveRouteName: 'dummyRouteName5',
+              approverCount: 'dummyCount5',
+              uuid: 'dummyUserUUID55555'
+            },
+            {
+              No: 6,
+              approveRouteName: 'dummyRouteName6',
+              approverCount: 'dummyCount6',
+              uuid: 'dummyUserUUID6666'
+            },
+            {
+              No: 7,
+              approveRouteName: 'dummyRouteName7',
+              approverCount: 'dummyCount7',
+              uuid: 'dummyUserUUID77777'
+            },
+            {
+              No: 8,
+              approveRouteName: 'dummyRouteName8',
+              approverCount: 'dummyCount8',
+              uuid: 'dummyUserUUID88888'
+            },
+            {
+              No: 9,
+              approveRouteName: 'dummyRouteName9',
+              approverCount: 'dummyCount9',
+              uuid: 'dummyUserUUID99999'
+            },
+            {
+              No: 10,
+              approveRouteName: 'dummyRouteName10',
+              approverCount: 'dummyCount10',
+              uuid: 'dummyUserUUID101010'
+            }
+          ]
+        },
+        approvals: [
+          {
+            approvalDate: null,
+            approvalId: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
+            approver: {
+              No: 1,
+              approveRouteName: 'dummyRouteName',
+              approverCount: 'dummyCount',
+              uuid: 'dummyUUID'
+            },
+            contractId: 'dummy',
+            message: null,
+            next: {},
+            prev: null,
+            request: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+            status: 20
+          }
+        ],
+        prevUser: {
+          message: null,
+          name: null
+        }
+      }
+      const expectGetApprover = [
+        {
+          id: 'dummyUUID',
+          name: 'dummyName',
+          email: 'dummyEmail'
+        },
+        {
+          id: 'dummyId',
+          name: 'dummyName',
+          email: 'dummyEmail'
+        }
+      ]
+      const expectRequestApproval = RequestApproval.build({
+        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+        approveRouteId: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+        requester: 'dummyId',
+        status: 10,
+        message: 'dummyData',
+        create: new Date(),
+        isSaved: true
+      })
+
+      approverControllerGetApprover.mockReturnValue(expectGetApprover)
+      requestApprovalFindOne.mockReturnValue(expectRequestApproval)
+      approverControllerGetApproveRoute.mockReturnValue(expectGetApproveRoute)
+
+      // 試験実施
+      const result = await approvalInboxController.getRequestApproval(
+        accessToken,
+        refreshToken,
+        contract,
+        invoiceId,
+        tenant
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result.status).toEqual(expectResult.status)
+    })
+
+    test('正常：承認依頼取得(request.statusテスト1)', async () => {
+      // 準備
+      const expectGetApproveRoute = {
+        users: [
+          {
+            No: 1,
+            approveRouteName: 'dummyRouteName',
+            approverCount: 'dummyCount',
+            uuid: 'dummyUserUUID22222'
+          },
+          {
+            No: 2,
+            approveRouteName: 'dummyRouteName2',
+            approverCount: 'dummyCount2',
+            uuid: 'dummyUserUUID33333'
+          },
+          {
+            No: 3,
+            approveRouteName: 'dummyRouteName3',
+            approverCount: 'dummyCount3',
+            uuid: 'dummyUserUUID44444'
+          },
+          {
+            No: 4,
+            approveRouteName: 'dummyRouteName4',
+            approverCount: 'dummyCount4',
+            uuid: 'dummyUserUUID44444'
+          },
+          {
+            No: 5,
+            approveRouteName: 'dummyRouteName5',
+            approverCount: 'dummyCount5',
+            uuid: 'dummyUserUUID55555'
+          },
+          {
+            No: 6,
+            approveRouteName: 'dummyRouteName6',
+            approverCount: 'dummyCount6',
+            uuid: 'dummyUserUUID6666'
+          },
+          {
+            No: 7,
+            approveRouteName: 'dummyRouteName7',
+            approverCount: 'dummyCount7',
+            uuid: 'dummyUserUUID77777'
+          },
+          {
+            No: 8,
+            approveRouteName: 'dummyRouteName8',
+            approverCount: 'dummyCount8',
+            uuid: 'dummyUserUUID88888'
+          },
+          {
+            No: 9,
+            approveRouteName: 'dummyRouteName9',
+            approverCount: 'dummyCount9',
+            uuid: 'dummyUserUUID99999'
+          },
+          {
+            No: 10,
+            approveRouteName: 'dummyRouteName10',
+            approverCount: 'dummyCount10',
+            uuid: 'dummyUserUUID101010'
+          },
+          {
+            No: 11,
+            approveRouteName: 'dummyRouteName11',
+            approverCount: 'dummyCount11',
+            uuid: 'dummyUserUUID111111'
+          }
+        ],
+        approvals: [
+          {
+            message: 'message1'
+          },
+          {
+            message: 'message2'
+          },
+          {
+            message: 'message3'
+          },
+          {
+            message: 'message4'
+          },
+          {
+            message: 'message5'
+          },
+          {
+            message: 'message6'
+          },
+          {
+            message: 'message7'
+          },
+          {
+            message: 'message8'
+          },
+          {
+            message: 'message9'
+          },
+          {
+            message: 'message10'
+          },
+          {
+            message: 'message11'
+          }
+        ]
+      }
+      // 検索予想結果
+      const expectResult = {
+        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+        message: 'dummyData',
+        status: 11,
+        requester: 'dummyUserUUID',
+        approveRoute: {
+          users: [
+            {
+              No: 1,
+              approveRouteName: 'dummyRouteName',
+              approverCount: 'dummyCount',
+              uuid: 'dummyUserUUID22222'
+            },
+            {
+              No: 2,
+              approveRouteName: 'dummyRouteName2',
+              approverCount: 'dummyCount2',
+              uuid: 'dummyUserUUID33333'
+            },
+            {
+              No: 3,
+              approveRouteName: 'dummyRouteName3',
+              approverCount: 'dummyCount3',
+              uuid: 'dummyUserUUID44444'
+            },
+            {
+              No: 4,
+              approveRouteName: 'dummyRouteName4',
+              approverCount: 'dummyCount4',
+              uuid: 'dummyUserUUID44444'
+            },
+            {
+              No: 5,
+              approveRouteName: 'dummyRouteName5',
+              approverCount: 'dummyCount5',
+              uuid: 'dummyUserUUID55555'
+            },
+            {
+              No: 6,
+              approveRouteName: 'dummyRouteName6',
+              approverCount: 'dummyCount6',
+              uuid: 'dummyUserUUID6666'
+            },
+            {
+              No: 7,
+              approveRouteName: 'dummyRouteName7',
+              approverCount: 'dummyCount7',
+              uuid: 'dummyUserUUID77777'
+            },
+            {
+              No: 8,
+              approveRouteName: 'dummyRouteName8',
+              approverCount: 'dummyCount8',
+              uuid: 'dummyUserUUID88888'
+            },
+            {
+              No: 9,
+              approveRouteName: 'dummyRouteName9',
+              approverCount: 'dummyCount9',
+              uuid: 'dummyUserUUID99999'
+            },
+            {
+              No: 10,
+              approveRouteName: 'dummyRouteName10',
+              approverCount: 'dummyCount10',
+              uuid: 'dummyUserUUID101010'
+            },
+            {
+              No: 11,
+              approveRouteName: 'dummyRouteName11',
+              approverCount: 'dummyCount11',
+              uuid: 'dummyUserUUID111111'
+            }
+          ]
+        },
+        approvals: [
+          {
+            approvalDate: null,
+            approvalId: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
+            approver: {
+              No: 1,
+              approveRouteName: 'dummyRouteName',
+              approverCount: 'dummyCount',
+              uuid: 'dummyUUID'
+            },
+            contractId: 'dummy',
+            message: null,
+            next: {},
+            prev: null,
+            request: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+            status: 11
+          }
+        ],
+        prevUser: {
+          message: null,
+          name: null
+        }
+      }
+      const expectGetApprover = [
+        {
+          id: 'dummyUUID',
+          name: 'dummyName',
+          email: 'dummyEmail'
+        },
+        {
+          id: 'dummyId',
+          name: 'dummyName',
+          email: 'dummyEmail'
+        }
+      ]
+      const expectRequestApproval = RequestApproval.build({
+        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+        approveRouteId: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+        requester: 'dummyId',
+        status: 11,
+        message: 'dummyData',
+        create: new Date(),
+        isSaved: true
+      })
+
+      approverControllerGetApprover.mockReturnValue(expectGetApprover)
+      requestApprovalFindOne.mockReturnValue(expectRequestApproval)
+      approverControllerGetApproveRoute.mockReturnValue(expectGetApproveRoute)
+
+      // 試験実施
+      const result = await approvalInboxController.getRequestApproval(
+        accessToken,
+        refreshToken,
+        contract,
+        invoiceId,
+        tenant
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result.status).toEqual(expectResult.status)
+    })
     test('準正常:RequestApproval検索の結果がRequestApproval形式ではない場合', async () => {
       // 準備
-      // アクセストークンの用意
-      const accessToken = 'dummy-access-token'
-      const refreshToken = 'dummy-refresh-token'
-      const contract = 'dummy'
-      const invoiceId = 'dummy'
-      const tenant = 'dummy-tennant'
-
       const expectGetApproveRoute = {
         users: [
           {
@@ -359,12 +750,6 @@ describe('approvalInboxControllerのテスト', () => {
 
     test('準正常:DBエラー', async () => {
       // 準備
-      // アクセストークンの用意
-      const accessToken = 'dummy-access-token'
-      const refreshToken = 'dummy-refresh-token'
-      const contract = 'dummy'
-      const invoiceId = 'dummy'
-      const tenant = 'dummy-tennant'
       const dbError = new Error('DB Conncetion Error')
       approverControllerGetApprover.mockImplementation(() => {
         throw dbError
