@@ -247,11 +247,11 @@ stages:
 
       - job: preManualOperation
         dependsOn: DeployStagingSlots
-        condition: eq(variables.ManualOperation,'True')
         pool:
           name: server
         steps:
           - task: ManualValidation@0
+            condition: eq(variables.ManualOperation,'True')
             displayName: "本番スロットスワップ前手動正常性確認②"
             inputs:
               notifyUsers: |
@@ -294,11 +294,11 @@ stages:
 
       - job: postManualOperation1
         dependsOn: SwapSlots1
-        condition: eq(variables.ManualOperation,'True')
         pool:
           name: server
         steps:
           - task: ManualValidation@0
+            condition: eq(variables.ManualOperation,'True')
             displayName: "本番スロットスワップ後手動正常性確認①"
             inputs:
               notifyUsers: |
@@ -353,11 +353,11 @@ stages:
 
       - job: postManualOperation2
         dependsOn: SwapSlots2
-        condition: eq(variables.ManualOperation,'True')
         pool:
           name: server
         steps:
           - task: ManualValidation@0
+            condition: eq(variables.ManualOperation,'True')
             displayName: "本番スロットスワップ後手動正常性確認②"
             inputs:
               notifyUsers: |
