@@ -158,6 +158,31 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
     })
 
     test('管理者、支払依頼を出す', async () => {
+      const contract = await db.Contract.findOne({
+        where: {
+          tenantId: testTenantId
+        }
+      })
+
+      const v4 = require('uuid').v4
+      const testApproveRoute = new db.ApproveRoute({
+        approveRouteId: v4(),
+        contractId: contract.contractId,
+        approveRouteName: 'integrationApproveRoute',
+        deleteFlag: 0,
+        updateFlag: 0
+      })
+      await testApproveRoute.save()
+
+      const testApproveUser = new db.ApproveUser({
+        approveRouteId: testApproveRoute.approveRouteId,
+        approveUser: 'aa974511-8188-4022-bd86-45e251fd259e',
+        prevApproveUser: null,
+        nextApproveUser: null,
+        isLastApproveUser: 0
+      })
+      await testApproveUser.save()
+
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -174,58 +199,55 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       redirectUrl = await page.evaluate(() => {
         return document.querySelector('#form > div.grouped-button > a.button.is-link').getAttribute('href')
       })
-      approvalInbox = redirectUrl.replace('/inbox/', '')
+
+      approvalInbox = redirectUrl.replace('/requestApproval/', '')
       redirectUrl = '/approvalInbox/' + approvalInbox
 
+      // 支払依頼へボタン押下
       await page.click('#form > div.grouped-button > a.button.is-link')
 
-      await page.waitForTimeout(1000)
+      await page.waitForTimeout(2000)
 
-      await page.click(
-        '#lineNo1_lineAccountCode1 > div.column.is-one-third.p-0.border-div-rad-4 > div.field.is-horizontal.p-1 > div.field-body.m-1.is-1.none-flex-grow > div > p > a'
-      )
+      // 支払依頼画面にredirectする。
+      expect(page.url()).toBe(`https://localhost:3000/requestApproval/${approvalInbox}`)
 
-      await page.waitForTimeout(1000)
-
-      await page.click('#btnSearchAccountCode')
-
-      await page.waitForTimeout(1000)
-
-      await page.click('#displayFieldResultBody > tr:nth-child(1)')
-
-      await page.waitForTimeout(1000)
-
-      await page.click('#btn-confirm')
-
-      await page.waitForTimeout(3000)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      await page.type('#inputMsg', 'インテグレーションテスト')
-
+      // 承認ルート選択ボタン押下
       await page.click('#btn-approveRouteInsert')
 
       await page.waitForTimeout(1000)
+
+      // 承認ルート検索
+      await page.click('#btnSearchApproveRoute')
+
+      await page.waitForTimeout(1500)
 
       await page.click('#displayFieldApproveRouteResultBody > tr > td.btnSelect > a')
 
       await page.waitForTimeout(1000)
 
+      // メッセージ入力
+      await page.type('#inputMsg', 'インテグレーションテスト')
+
+      // 保存ボタン押下
       await page.click('#form > div.grouped-button > button')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(7000)
 
+      // 支払依頼画面にredirectする。
+      expect(page.url()).toBe(`https://localhost:3000/requestApproval/${approvalInbox}`)
+
+      // 確認ボタン押下
       await page.click('#btn-confirm')
 
       await page.waitForTimeout(1000)
 
+      // 依頼ボタン押下
       await page.click('#btn-approval')
 
-      await page.waitForTimeout(3000)
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000/requestApproval/${approvalInbox}`)
+      await page.waitForTimeout(2000)
+
+      // 一覧画面にredirectする。
+      expect(await page.url()).toBe('https://localhost:3000/inboxList/1')
 
       browser.close()
     })
@@ -951,6 +973,12 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
   describe('後処理', () => {
     test('userデータ削除', async () => {
+      const contract = await db.Contract.findOne({
+        where: {
+          tenantId: testTenantId
+        }
+      })
+      await db.User.RequestApproval({ where: { contractId: contract.contractId } })
       await db.User.destroy({ where: { tenantId: testTenantId } })
       await db.Tenant.destroy({ where: { tenantId: testTenantId } })
     })
