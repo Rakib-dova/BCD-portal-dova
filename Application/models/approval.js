@@ -79,16 +79,71 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       },
       approveUser1: { type: DataTypes.UUID, allowNull: true },
+      approvalDate1: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
       approveUser2: { type: DataTypes.UUID, allowNull: true },
+      approvalDate2: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
       approveUser3: { type: DataTypes.UUID, allowNull: true },
+      approvalDate3: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
       approveUser4: { type: DataTypes.UUID, allowNull: true },
+      approvalDate4: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
       approveUser5: { type: DataTypes.UUID, allowNull: true },
+      approvalDate5: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
       approveUser6: { type: DataTypes.UUID, allowNull: true },
+      approvalDate6: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
       approveUser7: { type: DataTypes.UUID, allowNull: true },
+      approvalDate7: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
       approveUser8: { type: DataTypes.UUID, allowNull: true },
+      approvalDate8: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
       approveUser9: { type: DataTypes.UUID, allowNull: true },
+      approvalDate9: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
       approveUser10: { type: DataTypes.UUID, allowNull: true },
+      approvalDate10: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
       approveUserLast: { type: DataTypes.UUID, allowNull: false },
+      approvalDateLast: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
       approveUserCount: { type: DataTypes.INTEGER, allowNull: false },
       message: { type: DataTypes.STRING, allowNull: false },
       approvedAt: {
