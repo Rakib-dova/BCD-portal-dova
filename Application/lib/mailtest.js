@@ -33,6 +33,10 @@ const sendMailFromO365 = (sentTo, subject, text) => {
   })
 }
 
+module.exports = {
+  sendMailFromO365: sendMailFromO365
+}
+
 const sentTo = 'hirohashi.nttbiz@gmail.com'
 const subject = '請求番号XXXに関する承認依頼'
 const invoiceId = 1234
