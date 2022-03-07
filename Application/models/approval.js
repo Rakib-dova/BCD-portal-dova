@@ -74,6 +74,22 @@ module.exports = (sequelize, DataTypes) => {
           key: 'code'
         }
       },
+      approveRouteName: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      approveUser1: { type: DataTypes.UUID, allowNull: true },
+      approveUser2: { type: DataTypes.UUID, allowNull: true },
+      approveUser3: { type: DataTypes.UUID, allowNull: true },
+      approveUser4: { type: DataTypes.UUID, allowNull: true },
+      approveUser5: { type: DataTypes.UUID, allowNull: true },
+      approveUser6: { type: DataTypes.UUID, allowNull: true },
+      approveUser7: { type: DataTypes.UUID, allowNull: true },
+      approveUser8: { type: DataTypes.UUID, allowNull: true },
+      approveUser9: { type: DataTypes.UUID, allowNull: true },
+      approveUser10: { type: DataTypes.UUID, allowNull: true },
+      approveUserLast: { type: DataTypes.UUID, allowNull: false },
+      approveUserCount: { type: DataTypes.INTEGER, allowNull: false },
       message: { type: DataTypes.STRING, allowNull: false },
       approvedAt: {
         type: DataTypes.DATE,

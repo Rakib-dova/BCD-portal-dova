@@ -54,6 +54,58 @@ module.exports = {
         },
         allowNull: false
       },
+      approveRouteName: {
+        type: Sequelize.DataTypes.STRING(40),
+        allowNull: false
+      },
+      approveUser1: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approveUser2: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approveUser3: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approveUser4: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approveUser5: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approveUser6: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approveUser7: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approveUser8: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approveUser9: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approveUser10: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approveUserLast: {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: false
+      },
+      approveUserCount: {
+        type: Sequelize.DataTypes.INTEGER,
+        allowNull: false
+      },
       message: {
         type: Sequelize.DataTypes.STRING(1500),
         allowNull: false
