@@ -65,7 +65,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
       status: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         references: {
           model: {
             tableName: 'ApproveStatus'
