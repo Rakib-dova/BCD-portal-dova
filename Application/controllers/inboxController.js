@@ -482,6 +482,13 @@ const getDepartment = async (_contractId, _departmentCode, _departmentName) => {
       }
     })
 
+    departments.sort((a, b) => {
+      if (a.code > b.code) return 1
+      else {
+        return -1
+      }
+    })
+
     logger.info(constantsDefine.logMessage.INF001 + 'getDepartment')
     return { status: 0, searchResult: departments }
   } catch (error) {
