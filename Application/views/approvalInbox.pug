@@ -1,0 +1,334 @@
+﻿extends layout
+
+block content
+  .container
+    div.title-box-journallzing
+      h4.title-text-journallzing.text-inbox #{title}
+    .box
+      form#form(method='POST')
+        include approvalInboxpreApproverMessage
+        include approvalInboxHeader
+        include approvalInboxInvoiceLines
+        include approvalInvoiceFooter
+        include approvaInboxMessage
+        include approvalInboxApprovRoute
+        .grouped-button
+          a.button.mr-6(href='/approvalInboxList/1')  戻る
+          a.button.is-link#checkApproval 承認
+
+  template#templateLineAccountCodeItem
+    .columns.m-0.p-1.lineAccountcode
+      .column.is-one-third.p-0.border-div-rad-4
+        .field.is-horizontal.m-1.has-addons-centered
+          .field-label.is-normal.m-0.text-center
+            label 勘定科目コード
+          .field-label.is-normal.m-0.text-center
+            label 補助科目コード
+          .field-label.is-normal.m-0.is-1.fixed-void-66
+            label 　
+        .field.is-horizontal.p-1
+          .field-body.m-1
+            .field
+              p.control
+                input.input.lineAccountCode_accountCode(type='text' name=`` readonly)
+          .field-body.m-1
+            .field
+              p.control
+                input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
+          .field-body.m-1.is-1.none-flex-grow
+            .field
+              p.control
+                a.button.is-link.show-modal.btn-search-main(data-target='accountCode-modal') 検索
+      .column.is-0.p-1
+      .column.is-one-fifth.p-0.border-div-rad-4
+        .field.is-horizontal.m-1.has-addons-centered
+          .field-label.is-normal.m-0.text-center
+            label 部門コード
+          .field-label.is-normal.m-0.is-1.fixed-void-66
+            label 　
+        .field.is-horizontal.p-1
+          .field-body.m-1
+            .field
+              p.control
+                input.input.lineAccountCode_departmentCode(type='text' name=`` readonly)
+          .field-body.m-1.is-1.none-flex-grow
+            .field
+              p.control
+                a.button.is-link.show-modal.show-modal.btn-search-departmentCode(data-target='departmentCode-modal') 検索
+      .column.is-0.p-1
+      .column.is-one-quarter.p-0.border-div-rad-4
+        .field.is-horizontal.m-1.has-addons-centered
+          .field-label.is-normal.m-0.text-center
+            label 計上金額
+          .field-label.is-normal.m-0.is-1.fixed-void-66
+            label 　
+        .field-body.p-1
+          .field.is-horizontal
+            .field-body.m-1
+              .field
+                p.control
+                  input.input.inputInstallmentAmount(type='text' name='' readonly value=0)
+            .field-body.m-1.is-1.none-flex-grow
+              .field
+                p.control
+                  a.button.show-modal.is-link.btn-insert-installmentAmount  入力
+      .column
+        a.red-color.btn-minus-accountCode
+          i.fas.fa-minus-circle
+
+  template#searchResultCode
+    tr.rowAccountCode
+      td.columnNoAccountCodeMessage
+        .field.is-horizontal
+          .field-body
+            p.control.noAccountCodeMessage              
+      td.columnAccountCode
+      td.columnAccountCodeName
+      td.columnSubAccountCode
+      td.columnSubAccountCodeName
+
+  template#searchResultDepartmentCode
+    tr.rowDepartmentCode
+      td.columnNoDepartmentCodeMessage
+        .field.is-horizontal
+          .field-body
+            p.control.noDepartmentCodeMessage
+      td.columnDepartmentCode
+      td.columnDepartmentCodeName
+
+  template#template-invoiceLine
+    .column.column-invoiceLine-journalModal
+      .box
+        .columns.m-0.invoiceLine-journalModal
+          .column-header.is-2-header
+            .columns.m-0
+              .column.p-0
+                p.text-left-lines.font-bold 項目ID
+                p.text-left-lines.mb-1.itemId.text-overflow
+            .columns.m-0
+              .column.p-0.column-selectbox
+                input.isCheckedForInvoiceLine(type='checkbox')
+          .column-header.is-5-header.itemName
+            p.font-bold  内容
+            p.mb-1.itemName.text-overflow
+          .column-header.mr-1
+            p.text-right-lines.font-bold  数量
+            p.text-right-lines.mb-1.invoicedQuantity.text-overflow
+          .column-header.ml-1
+            p.text-left-lines.font-bold 単位
+            p.text-left-lines.mb-1.unitcode.text-overflow
+          .column-header
+            p.text-right-lines.font-bold  単価
+            p.text-right-lines.mb-1.priceAmount.text-overflow
+          .column-header
+            p.text-right-lines.font-bold  税
+            p.text-right-lines.mb-1.tax.text-overflow
+          .column-header
+            p.text-right-lines.font-bold  小計 (税抜)
+            p.text-right-lines.mb-1.total.text-overflow
+
+  template#templateLineAccountCodeItemModal
+   .columns.m-0#lineAccountCodeTitle
+     .column.is-2-header
+       .column-header.text-inbox.text-inbox-subtitle.text-inbox-common
+         | 仕訳情報
+   .columns.m-0.p-1.lineAccountcode
+     .column.is-two-fifths.p-0.border-div-rad-4
+       .field.is-horizontal.m-1.has-addons-centered
+         .field-label.is-normal.m-0.text-center
+           label 勘定科目コード
+         .field-label.is-normal.m-0.text-center
+           label 補助科目コード
+       .field.is-horizontal.p-1
+         .field-body.m-1
+           .field
+             p.control
+               input.input.lineAccountCode_accountCode(type='text' name=`` readonly)
+         .field-body.m-1
+           .field
+             p.control
+               input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
+     .column.is-0.p-1
+     .column.is-one-fifth.p-0.border-div-rad-4
+      .field.is-horizontal.m-1.has-addons-centered
+        .field-label.is-normal.m-0.text-center
+          label 部門コード
+      .field.is-horizontal.p-1
+        .field-body.m-1
+          .field
+            p.control
+              input.input.lineAccountCode_departmentCode(type='text' name=`` value readonly)
+
+  .modal#accountCode-modal.z-index-modal
+    .modal-background.cancel-button(data-target='accountCode-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 勘定科目選択
+        a.delete(data-target="accountCode-modal")
+      section.modal-card-body
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 勘定科目コード
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalAccountCode' value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum)
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 勘定科目名
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalAccountCodeName' value maxlength=40 placeholder='文字列（40桁）')
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 補助科目コード
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalSubAccountCode' value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum)
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 補助科目名
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalSubAccountCodeName' value maxlength=40 placeholder='文字列（40桁）')
+              .control
+                .field.is-grouped.is-grouped-centered
+                  .columns.m-0
+                    .column.p-0
+                      div.button-area
+                        .button.is-link#btnSearchAccountCode(type="button") 検索
+
+          .columns.is-fullwidth.m-0
+            .column.is-fullwidth.p-0
+              .field.is-horizontal.is-invisible#displayInvisible
+                .box.is-fullwidth.px-2
+                  .subtitle.m-3 検索結果 
+                  table.table
+                    thead
+                      td 勘定科目コード
+                      td 勘定科目名
+                      td 補助科目コード
+                      td 補助科目名
+                    tbody#displayFieldResultBody
+      footer.modal-card-foot.center-modal-footer-item
+        a.button.cancel-button#CloseSearchAccountCode(data-target='accountCode-modal') 閉じる
+
+  .modal#departmentCode-modal.z-index-modal
+    .modal-background.cancel-button(data-target='departmentCode-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 部門データ選択
+        a.delete(data-target="departmentCode-modal")
+      section.modal-card-body
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 部門コード
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalDepartmentCode' value maxlength=10 placeholder='英・数字・カナのみ（10桁）' pattern=inputPatternEngNumKana)
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 部門名
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalDepartmentCodeName' value maxlength=40 placeholder='文字列（40桁）')
+              .control
+                .field.is-grouped.is-grouped-centered
+                  .columns.m-0
+                    .column.p-3
+                      div.button-area
+                        .button.is-link#btnSearchDepartmentCode(type="button") 検索
+
+          .columns.is-centered.m-0
+            .column.is-fullwidth.p-0
+              p.text-center.input-label-required#searchDepartmentModalErrMsg
+
+          .columns.is-fullwidth.m-0
+            .column.is-fullwidth.p-0
+              .field.is-invisible#departmentResultDisplayInvisible
+                .box.px-2
+                  .subtitle.m-3 検索結果 
+                  table.table.is-fullwidth
+                    thead
+                      td 部門コード
+                      td 部門名
+                    tbody#displayFieldDepartmentResultBody
+      footer.modal-card-foot.center-modal-footer-item
+        a.button.cancel-button#CloseSearchDepartmentCode(data-target='departmentCode-modal') 閉じる
+
+  .modal#insert-installmentAmount-modal
+    .modal-background.cancel-button(data-target='insert-installmentAmount-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 計上金額入力
+        a.delete(data-target="insert-installmentAmount-modal")
+      section.modal-card-body
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 計上金額
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id='inputInstallmentAmount' value maxlength=12 placeholder='金額を入力します。')
+                  .field
+                    p.control
+                      a.button.is-link#btn-insert 反映
+          .columns
+            .column.p-1
+              p#installmentAmountErrMsg.text-center.input-label-required 　
+      footer.modal-card-foot.center-modal-footer-item
+        button.button.cancel-button(data-target='insert-installmentAmount-modal') 閉じる
+
+  .modal#error-message-modal
+    .modal-background.cancel-button(data-target='error-message-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 仕訳情報設定
+        a.delete(data-target="error-message-modal")
+      section.modal-card-body
+        p#error-message-body 　仕訳情報を正しく設定してください。
+      footer.modal-card-foot.center-modal-footer-item
+        button.button.cancel-button.is-link(data-target='error-message-modal') 確認
+
+  .modal#check-approval-modal
+    .modal-background.cancel-button(data-target='check-approval-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 支払依頼確認
+        a.delete(data-target='check-approval-modal')
+      section.modal-card-body
+        form#approval(method='POST', action=`/requestApproval/${documentId}`)
+          include invoiceHeader
+          .box#journal-list
+          include invoiceFooter
+          .box#check-request-approval-message
+            textarea.input-comment-size(rows='10' readonly='readonly')
+          .box#check-request-approve-route
+      footer.modal-card-foot.center-modal-footer-item
+        a.button.cancel-button.mr-6(data-target='check-approval-modal') キャンセル
+        a.button.is-link#btn-approval 承認
+
+  include footer
+
+block append scripts
+  script(src="/js/approvalInbox-page.js")
+  link(rel='stylesheet', type='text/css', href='/css/approvalInbox.css')

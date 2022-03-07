@@ -9,25 +9,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'requestId',
         targetKey: 'requestId'
       })
-      // approveUserId ForeignKey
-      Approval.belongsTo(models.ApproveUser, {
-        foreignKey: 'approveUserId',
-        targetKey: 'approveUserId'
-      })
       // approvalStatus ForeignKey
       Approval.belongsTo(models.ApprovalStatus, {
         foreignKey: 'approvalStatus',
         targetKey: 'code'
-      })
-      // prevApproveUserId ForeignKey
-      Approval.belongsTo(models.ApproveUser, {
-        foreignKey: 'prevApproveUserId',
-        targetKey: 'prevApproveUser'
-      })
-      // nextApproveUserId ForeignKey
-      Approval.belongsTo(models.ApproveUser, {
-        foreignKey: 'nextApproveUserId',
-        targetKey: 'nextApproveUser'
       })
     }
   }
@@ -47,14 +32,8 @@ module.exports = (sequelize, DataTypes) => {
           key: 'requestId'
         }
       },
-      approveUserId: {
-        type: DataTypes.UUID,
-        references: {
-          model: {
-            tableName: 'ApproveUser'
-          },
-          key: 'approveUserId'
-        }
+      requestUserId: {
+        type: DataTypes.UUID
       },
       approveRouteId: {
         type: DataTypes.UUID,

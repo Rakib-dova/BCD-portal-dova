@@ -24,14 +24,8 @@ module.exports = {
         },
         allowNull: false
       },
-      approveUserId: {
+      requestUserId: {
         type: Sequelize.DataTypes.UUID,
-        references: {
-          model: {
-            tableName: 'ApproveUser'
-          },
-          key: 'approveUserId'
-        },
         allowNull: false
       },
       approveRouteId: {
