@@ -436,7 +436,7 @@ describe('approvalInboxのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       expect(errorSpy).toHaveBeenCalledWith({ stack: dbError.stack, status: 1 })
       expect(request.flash).toHaveBeenCalledWith('noti', ['承認する支払依頼確認', 'システムエラーが発生しました。'])
-      expect(response.redirect).toHaveBeenCalledWith('/approvalInboxList/1')
+      expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
   })
 })

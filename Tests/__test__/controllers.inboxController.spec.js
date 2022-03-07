@@ -662,7 +662,7 @@ describe('inboxControllerのテスト', () => {
     })
     JournalizeInvoice.save = jest.fn(async function () {})
     JournalizeInvoice.destory = jest.fn(async function () {})
-    JournalizeInvoice.set = jest.fn(function () { })
+    JournalizeInvoice.set = jest.fn(function () {})
     requestApprovalFindOneSpy = jest.spyOn(DepartmentCode, 'findOne')
   })
   afterEach(() => {
@@ -1290,8 +1290,8 @@ describe('inboxControllerのテスト', () => {
           status: 0,
           searchResult: [
             {
-              code: 'DE001',
-              name: 'テスト用部門データ1'
+              code: 'DE003',
+              name: 'テスト用部門データ3'
             }
           ]
         }
@@ -1312,6 +1312,13 @@ describe('inboxControllerのテスト', () => {
         return {
           code: department.departmentCode,
           name: department.departmentCodeName
+        }
+      })
+
+      departments.sort((a, b) => {
+        if (a.code > b.code) return 1
+        else {
+          return -1
         }
       })
 
@@ -1347,13 +1354,10 @@ describe('inboxControllerのテスト', () => {
   describe('getRequestApproval', () => {
     test('正常：DB検索の結果が支払依頼の場合', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
-      const expectApprovalFindOne = new RequestApproval({ })
+      const expectApprovalFindOne = new RequestApproval({})
       requestApprovalFindOneSpy.mockReturnValueOnce(expectApprovalFindOne)
 
-      const result = await inboxController.getRequestApproval(
-        contractId,
-        invoiceId
-      )
+      const result = await inboxController.getRequestApproval(contractId, invoiceId)
 
       expect(result).toBe(true)
     })
@@ -1363,10 +1367,7 @@ describe('inboxControllerのテスト', () => {
       const expectApprovalFindOne = {}
       requestApprovalFindOneSpy.mockReturnValueOnce(expectApprovalFindOne)
 
-      const result = await inboxController.getRequestApproval(
-        contractId,
-        invoiceId
-      )
+      const result = await inboxController.getRequestApproval(contractId, invoiceId)
 
       expect(result).toBe(false)
     })
@@ -1377,10 +1378,7 @@ describe('inboxControllerのテスト', () => {
         throw dbError
       })
 
-      const result = await inboxController.getRequestApproval(
-        contractId,
-        invoiceId
-      )
+      const result = await inboxController.getRequestApproval(contractId, invoiceId)
       expect(result).toEqual(dbError)
     })
   })
