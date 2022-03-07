@@ -62,7 +62,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
-      approvalDate1: {
+      approvalAt1: {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
@@ -70,7 +70,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
-      approvalDate2: {
+      approvalAt2: {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
@@ -78,7 +78,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
-      approvalDate3: {
+      approvalAt3: {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
@@ -86,7 +86,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
-      approvalDate4: {
+      approvalAt4: {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
@@ -94,7 +94,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
-      approvalDate5: {
+      approvalAt5: {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
@@ -102,7 +102,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
-      approvalDate6: {
+      approvalAt6: {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
@@ -110,7 +110,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
-      approvalDate7: {
+      approvalAt7: {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
@@ -118,7 +118,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
-      approvalDate8: {
+      approvalAt8: {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
@@ -126,7 +126,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
-      approvalDate9: {
+      approvalAt9: {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
@@ -134,7 +134,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
-      approvalDate10: {
+      approvalAt10: {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
@@ -142,7 +142,7 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: false
       },
-      approvalDateLast: {
+      approvalAtLast: {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },

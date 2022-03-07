@@ -79,67 +79,67 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       },
       approveUser1: { type: DataTypes.UUID, allowNull: true },
-      approvalDate1: {
+      approvalAt1: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
       approveUser2: { type: DataTypes.UUID, allowNull: true },
-      approvalDate2: {
+      approvalAt2: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
       approveUser3: { type: DataTypes.UUID, allowNull: true },
-      approvalDate3: {
+      approvalAt3: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
       approveUser4: { type: DataTypes.UUID, allowNull: true },
-      approvalDate4: {
+      approvalAt4: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
       approveUser5: { type: DataTypes.UUID, allowNull: true },
-      approvalDate5: {
+      approvalAt5: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
       approveUser6: { type: DataTypes.UUID, allowNull: true },
-      approvalDate6: {
+      approvalAt6: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
       approveUser7: { type: DataTypes.UUID, allowNull: true },
-      approvalDate7: {
+      approvalAt7: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
       approveUser8: { type: DataTypes.UUID, allowNull: true },
-      approvalDate8: {
+      approvalAt8: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
       approveUser9: { type: DataTypes.UUID, allowNull: true },
-      approvalDate9: {
+      approvalAt9: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
       approveUser10: { type: DataTypes.UUID, allowNull: true },
-      approvalDate10: {
+      approvalAt10: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
       approveUserLast: { type: DataTypes.UUID, allowNull: false },
-      approvalDateLast: {
+      approvalAtLast: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
