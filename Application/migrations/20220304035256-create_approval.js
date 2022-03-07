@@ -62,45 +62,89 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
+      approvalDate1: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
       approveUser2: {
         type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approvalDate2: {
+        type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
       approveUser3: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
+      approvalDate3: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
       approveUser4: {
         type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approvalDate4: {
+        type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
       approveUser5: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
+      approvalDate5: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
       approveUser6: {
         type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approvalDate6: {
+        type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
       approveUser7: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
+      approvalDate7: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
       approveUser8: {
         type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approvalDate8: {
+        type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
       approveUser9: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
+      approvalDate9: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
       approveUser10: {
         type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approvalDate10: {
+        type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
       approveUserLast: {
         type: Sequelize.DataTypes.UUID,
         allowNull: false
+      },
+      approvalDateLast: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
       },
       approveUserCount: {
         type: Sequelize.DataTypes.INTEGER,
