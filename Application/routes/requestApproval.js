@@ -404,6 +404,8 @@ const cbPostApproval = async (req, res, next) => {
   const requester = req.user.userId
   const message = req.body.message
   const approveRouteId = req.body.approveRouteId
+  const accessToken = req.user.accessToken
+  const refreshToken = req.user.refreshToken
 
   // 承認ルートに誤りがある場合
   const isApproveRoute = await approverController.checkApproveRoute(contractId, approveRouteId)
@@ -417,7 +419,8 @@ const cbPostApproval = async (req, res, next) => {
     return res.redirect(`/requestApproval/${invoiceId}`)
   }
 
-  const result = await approverController.requestApproval(contractId, approveRouteId, invoiceId, requester, message)
+  const requestResult = await approverController.requestApproval(contractId, approveRouteId, invoiceId, requester, message)
+  const result = await approverController.saveApproval(contractId, approveRouteId, requester, message, accessToken, refreshToken, requestResult)
   switch (result) {
     case 0:
       req.flash('info', '承認依頼を完了しました。')

@@ -24,14 +24,8 @@ module.exports = {
         },
         allowNull: false
       },
-      approveUserId: {
+      requestUserId: {
         type: Sequelize.DataTypes.UUID,
-        references: {
-          model: {
-            tableName: 'ApproveUser'
-          },
-          key: 'approveUserId'
-        },
         allowNull: false
       },
       approveRouteId: {
@@ -62,45 +56,89 @@ module.exports = {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
+      approvalAt1: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
       approveUser2: {
         type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approvalAt2: {
+        type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
       approveUser3: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
+      approvalAt3: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
       approveUser4: {
         type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approvalAt4: {
+        type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
       approveUser5: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
+      approvalAt5: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
       approveUser6: {
         type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approvalAt6: {
+        type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
       approveUser7: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
+      approvalAt7: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
       approveUser8: {
         type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approvalAt8: {
+        type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
       approveUser9: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
+      approvalAt9: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
       approveUser10: {
         type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      },
+      approvalAt10: {
+        type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
       approveUserLast: {
         type: Sequelize.DataTypes.UUID,
         allowNull: false
+      },
+      approvalAtLast: {
+        type: Sequelize.DataTypes.DATE,
+        allowNull: true
       },
       approveUserCount: {
         type: Sequelize.DataTypes.INTEGER,

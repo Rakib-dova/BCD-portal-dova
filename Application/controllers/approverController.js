@@ -9,10 +9,11 @@ const ApproveRoute = db.ApproveRoute
 const ApproveUser = db.ApproveUser
 const Request = db.RequestApproval
 const Status = db.ApproveStatus
+const ApprovalModel = db.Approval
+const ApprovalStatus = db.ApprovalStatus
 const Op = db.Sequelize.Op
 const userController = require('./userController')
 const validate = require('../lib/validate')
-
 /**
  *
  * @param {string} accTk アクセストークン
@@ -578,6 +579,93 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
       request.message = message
     }
     await request.save()
+    return request
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'searchApproveRouteList')
+    return error
+  }
+}
+
+const saveApproval = async (contractId, approveRouteId, requesterId, message, accessToken, refreshToken, request) => {
+  try {
+    // approvalテーブルに承認者情報を保存
+    const requester = await userController.findOne(requesterId)
+    const approvalStatus = await ApprovalStatus.findOne({
+      where: {
+        name: {
+          [Op.like]: '承認待ち'
+        }
+      }
+    })
+    const approveRoute = await ApproveRoute.findOne({
+      where: {
+        approveRouteId: approveRouteId,
+        contractId: contractId
+      }
+    })
+    const approveRouteApprovers = await ApproveRoute.getApproveRoute(contractId, approveRouteId)
+
+    // header検索
+    const query = '/account/users'
+    let header = null
+    let idx = 0
+    while (approveRouteApprovers[idx]) {
+      if (approveRouteApprovers[idx]['ApproveUsers.prevApproveUser'] === null) {
+        header = approveRouteApprovers[idx]
+      }
+      idx++
+    }
+
+    const users = []
+    const headerId = header['ApproveUsers.approveUserId']
+    let currUser = await ApproveUser.findOne({
+      where: {
+        approveUserId: headerId
+      }
+    })
+    let next = null
+    while (currUser) {
+      const userId = currUser.approveUser
+      next = currUser.nextApproveUser
+      users.push(
+        new Approver(await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${query}/${userId}`))
+      )
+      if (next) {
+        currUser = await ApproveUser.findOne({
+          where: {
+            approveUserId: next
+          }
+        })
+      } else {
+        currUser = null
+      }
+    }
+
+    console.log(requester, 'requester')
+    const approvalmodel = await ApprovalModel.build({
+      requestId: request.requestId,
+      requestUserId: requester.userId,
+      approveRouteId: approveRouteId,
+      approvalStatus: approvalStatus.code,
+      approveRouteName: approveRoute.approveRouteName
+    })
+
+    for (let i = 0; i < 10; i++) {
+      if (users[i] && i < users.length - 1) {
+        approvalmodel[`approveUser${i + 1}`] = users[i].Id
+      } else {
+        approvalmodel[`approveUser${i + 1}`] = null
+      }
+      approvalmodel[`approvalAt${i + 1}`] = null
+    }
+    approvalmodel.approveUserLast = users[users.length - 1].Id
+    approvalmodel.approvalAtLast = null
+    approvalmodel.approveUserCount = users.length
+    approvalmodel.message = message
+    console.log(approvalmodel)
+    await approvalmodel.save()
+
     return 0
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
@@ -699,5 +787,6 @@ module.exports = {
   requestApproval: requestApproval,
   saveMessage: saveMessage,
   readApproval: readApproval,
-  checkApproveRoute: checkApproveRoute
+  checkApproveRoute: checkApproveRoute,
+  saveApproval: saveApproval
 }
