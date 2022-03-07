@@ -666,7 +666,7 @@ const readApproval = async (contractId, invoiceId, isSaved) => {
 }
 
 /**
- *
+ * 承認ルート存在確認。
  * @param {uuid} contractId 承認ルートの識別番号
  * @param {uuid} approveRouteId 承認ルートの識別番号
  * @returns {Boolean} 承認ルートが存在する場合true、ない場合fasle

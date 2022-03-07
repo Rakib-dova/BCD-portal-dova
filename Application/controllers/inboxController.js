@@ -492,7 +492,7 @@ const getDepartment = async (_contractId, _departmentCode, _departmentName) => {
 }
 
 /**
- *
+ * 支払依頼の情報（承認タブに表示する情報）を取得する。
  * @param {uuid} contractId コントラクター識別番号
  * @param {uuid} invoiceId 請求書uuid番号
  * @returns 支払依頼の場合true、ない場合false
