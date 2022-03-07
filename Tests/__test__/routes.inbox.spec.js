@@ -141,7 +141,7 @@ describe('inboxのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxListが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('inbox', {
+      expect(response.render).toHaveBeenCalledWith('readonlyInbox', {
         ...dummyData,
         optionLine1: createOptions(1, dummyData.options),
         optionLine2: createOptions(2, dummyData.options),
@@ -339,7 +339,7 @@ describe('inboxのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxListが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('inbox', {
+      expect(response.render).toHaveBeenCalledWith('readonlyInbox', {
         ...dummyData,
         optionLine1: [
           { columnName: '請求日', columnData: '2022-01-07' },

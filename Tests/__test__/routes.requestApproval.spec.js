@@ -279,7 +279,7 @@ let errorSpy, infoSpy
 let request, response
 let userControllerFindOneSpy, contractControllerFindOneSpy, checkContractStatusSpy
 let approverControllerSearchApproveRouteList, inboxControllerGetInvoiceDetail
-let approverControllerGetApproveRoute, approverControllerRequestApproval
+let approverControllerGetApproveRoute, approverControllerRequestApproval, approverControlleCcheckApproveRoute
 let approverControllerReadApproval, approverControllerSaveMessage
 
 describe('requestApprovalのテスト', () => {
@@ -298,6 +298,7 @@ describe('requestApprovalのテスト', () => {
     approverControllerRequestApproval = jest.spyOn(approverController, 'requestApproval')
     approverControllerReadApproval = jest.spyOn(approverController, 'readApproval')
     approverControllerSaveMessage = jest.spyOn(approverController, 'saveMessage')
+    approverControlleCcheckApproveRoute = jest.spyOn(approverController, 'checkApproveRoute')
   })
   afterEach(() => {
     request.resetMocked()
@@ -314,6 +315,7 @@ describe('requestApprovalのテスト', () => {
     approverControllerRequestApproval.mockRestore()
     approverControllerReadApproval.mockRestore()
     approverControllerSaveMessage.mockRestore()
+    approverControlleCcheckApproveRoute.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -348,7 +350,11 @@ describe('requestApprovalのテスト', () => {
     test('正常', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
-      request.session = { ...session, isSaved: true }
+      request.session = {
+        ...session,
+        requestApproval: { message: 'test', approveRouteId: '', isSaved: true },
+        isSaved: true
+      }
       request.user = { ...user[0] }
       request.params = {
         invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
@@ -381,7 +387,7 @@ describe('requestApprovalのテスト', () => {
         optionLine7: optionLine7,
         optionLine8: optionLine8,
         documentId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904',
-        message: null,
+        message: 'test',
         approveRoute: null
       })
     })
@@ -1388,6 +1394,9 @@ describe('requestApprovalのテスト', () => {
       request.body = {
         approveRouteId: 'dummyId'
       }
+      request.params = {
+        invoiceId: '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -1397,6 +1406,7 @@ describe('requestApprovalのテスト', () => {
       // ユーザ権限チェック結果設定
       checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
 
+      approverControlleCcheckApproveRoute.mockReturnValue(true)
       approverControllerRequestApproval.mockReturnValue(0)
 
       // 試験実施
@@ -1404,7 +1414,6 @@ describe('requestApprovalのテスト', () => {
       // 結果確認
       // 承認依頼ページレンダリングを呼び出し
       expect(request.flash).toBeCalledWith('info', '承認依頼を完了しました。')
-      expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
 
     test('正常：解約申込中の場合', async () => {
@@ -1607,6 +1616,37 @@ describe('requestApprovalのテスト', () => {
       // ユーザ権限チェック結果設定
       checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
 
+      approverControlleCcheckApproveRoute.mockReturnValue(true)
+      approverControllerRequestApproval.mockReturnValue(-1)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+      // 結果確認
+      // 前のページを呼び出し
+      expect(response.redirect).toHaveBeenCalledWith('/requestApproval/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904')
+    })
+
+    test('500エラー：approverControllerのcheckApproveRouteがfalseの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        approveRouteId: 'dummyId'
+      }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      approverControlleCcheckApproveRoute.mockReturnValue(false)
       approverControllerRequestApproval.mockReturnValue(-1)
 
       // 試験実施

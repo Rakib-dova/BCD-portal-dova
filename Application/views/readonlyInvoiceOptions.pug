@@ -1,0 +1,81 @@
+﻿.box
+  table.max-width
+    thead.max-width
+      tr
+        - var list = optionLine1
+        each item in list
+          th.width-10= item.columnName
+    tbody
+      tr
+        - var list = optionLine1
+        each item in list                  
+          td.pb-2.td-overflow= item.columnData
+
+    thead
+      tr
+        - var list = optionLine2
+        each item in list
+          th.width-10= item.columnName
+    tbody
+      tr
+        - var list = optionLine2
+        each item in list                  
+          td.pb-2.td-overflow= item.columnData
+    thead
+      tr
+        - var list = optionLine3
+        each item in list
+          th.width-10= item.columnName
+    tbody
+      tr
+        - var list = optionLine3
+        each item in list                  
+          td.pb-2.td-overflow= item.columnData
+    thead
+      tr
+        - var list = optionLine4
+        each item in list
+          th.width-10= item.columnName
+    tbody
+      tr
+        - var list = optionLine4
+        each item in list                  
+          td.pb-2.td-overflow= item.columnData               
+    thead
+      tr
+        - var list = optionLine5
+        each item in list
+          th.width-10= item.columnName
+    tbody
+      tr
+        - var list = optionLine5
+        each item in list                  
+          td.pb-2.td-overflow= item.columnData
+    thead
+      tr
+        - var list = optionLine6
+        each item in list
+          th.width-10= item.columnName
+    tbody
+      tr
+        - var list = optionLine6
+        each item in list                  
+          td.pb-2.td-overflow= item.columnData
+
+  if optionLine7.columnName
+    .columns.p-0.m-0
+      .column.width-10.p-0.m-0
+        p.width-10.text-inbox.text-inbox-subtitle.text-inbox-common
+          | #{optionLine7.columnName}
+    .columns.p-0.m-0
+      .column.pb-2.p-0
+        p
+          | #{optionLine7.columnData}
+  hr
+  .columns.p-0.m-0
+    .column.width-10.p-0
+      p.text-inbox.text-inbox-subtitle.text-inbox-common #{optionLine8.columnName}
+  .columns.wraper-columns.p-0.m-0
+    .column.p-0
+      p.pb-2
+        | #{optionLine8.columnData}

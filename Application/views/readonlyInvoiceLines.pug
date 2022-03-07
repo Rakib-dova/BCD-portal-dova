@@ -1,10 +1,4 @@
-﻿.box
-  .column.m-0
-    .column.px-0
-      p.text-inbox.text-inbox-subtitle.text-inbox-common.text-left-lines 仕訳情報一括入力
-    .column.pl-4.pt-0
-      a.button.is-link#btn-bulkInsert.show-modal(data-target='bulkInsert-journal-modal') 一括入力
-if invoiceLine.length !== 0
+﻿if invoiceLine.length !== 0
   each item, idx in invoiceLine
     if '明細-項目ID' in item
       .box
@@ -63,15 +57,13 @@ if invoiceLine.length !== 0
           .column.is-5-header
             .column-header.text-inbox.text-inbox-subtitle.text-inbox-common
               | 仕訳情報
-              a.btn-plus-accountCode(data-target= `#lineNo${idx + 1}`)
-                i.fas.fa-plus-circle
             .column-header.text-inbox-subtitle
-              p.input-label-required.invisible(id=`error-message-lineNo${idx + 1}` tabIndex=0)
+              p.input-label-required.invisible
         .columns.m-0
-          .column.p-0.lineAccountCode(id= `lineNo${idx + 1}`)
+          .column.p-0.lineAccountCode
             if key === "journalize" && value.length !== 0
               each jValue, jdx in value
-                .columns.m-0.p-1.lineAccountcode(id= `lineNo${idx + 1}_lineAccountCode${jdx + 1}`)
+                .columns.m-0.p-1.lineAccountcode
                   .column.is-one-third.p-0.border-div-rad-4
                     .field.is-horizontal.m-1.has-addons-centered
                       .field-label.is-normal.m-0.text-center
@@ -84,15 +76,14 @@ if invoiceLine.length !== 0
                       .field-body.m-1
                         .field
                           p.control
-                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_accountCode` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_accountCode` value= jValue.accountCode readonly)
+                            input.input(type='text' value= jValue.accountCode readonly)
                       .field-body.m-1
                         .field
                           p.control
-                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_subAccountCode` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_subAccountCode` value= jValue.subAccountCode readonly)
+                            input.input(type='text' value= jValue.subAccountCode readonly)
                       .field-body.m-1.is-1.none-flex-grow
                         .field
                           p.control
-                            a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`) 検索
                   .column.is-0.p-1
                   .column.is-one-fifth.p-0.border-div-rad-4
                    .field.is-horizontal.m-1.has-addons-centered
@@ -104,11 +95,10 @@ if invoiceLine.length !== 0
                      .field-body.m-1
                        .field
                          p.control
-                           input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_departmentCode` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_departmentCode` value=jValue.departmentCode readonly)
+                           input.input(type='text' value=jValue.departmentCode readonly)
                      .field-body.m-1.is-1.none-flex-grow
                        .field
                          p.control
-                           a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`) 検索
                   .column.is-0.p-1
                   .column.is-one-quarter.p-0.border-div-rad-4
                     .field.is-horizontal.m-1.has-addons-centered
@@ -121,16 +111,13 @@ if invoiceLine.length !== 0
                         .field-body.m-1
                           .field
                             p.control
-                              input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_input_amount` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_input_amount` class=`lineNo${idx + 1}_input_amount` readonly value= `${jValue.installmentAmount.toLocaleString('ja-JP')}`)
+                              input.input(type='text' value= `${jValue.installmentAmount.toLocaleString('ja-JP')}` readonly)
                         .field-body.m-1.is-1.none-flex-grow
                           .field
                             p.control
-                              if jdx !== 0
-                                a.button.is-link.btn-insert-installmentAmount(data-target='insert-installmentAmount-modal' data-input=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_input_amount`) 入力
                   if jdx !== 0
                     .column
-                      a.red-color.btn-minus-accountCode(id=`btn_minus_lineNo${idx + 1}_accountCode` data-target=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`)
-                        i.fas.fa-minus-circle
+                      
             else
               .columns.m-0.p-1.lineAccountcode(id= `lineNo${idx + 1}_lineAccountCode1`)
                 .column.is-one-third.p-0.border-div-rad-4
@@ -145,15 +132,14 @@ if invoiceLine.length !== 0
                     .field-body.m-1
                       .field
                         p.control
-                          input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_accountCode` name=`lineNo${idx + 1}_lineAccountCode1_accountCode` value readonly)
+                          input.input(type='text' value readonly)
                     .field-body.m-1
                       .field
                         p.control
-                          input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_subAccountCode` name=`lineNo${idx + 1}_lineAccountCode1_subAccountCode` value readonly)
+                          input.input(type='text' value readonly)
                     .field-body.m-1.is-1.none-flex-grow
                       .field
                         p.control
-                          a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode1`) 検索
                 .column.is-0.p-1
                 .column.is-one-fifth.p-0.border-div-rad-4
                   .field.is-horizontal.m-1.has-addons-centered
@@ -165,11 +151,10 @@ if invoiceLine.length !== 0
                     .field-body.m-1
                       .field
                         p.control
-                          input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_departmentCode` name=`lineNo${idx + 1}_lineAccountCode1_departmentCode` value readonly)
+                          input.input(type='text' value readonly)
                     .field-body.m-1.is-1.none-flex-grow
                       .field
                         p.control
-                          a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode1`) 検索
                 .column.is-0.p-1
                 .column.is-one-quarter.p-0.border-div-rad-4
                   .field.is-horizontal.m-1.has-addons-centered
@@ -182,7 +167,7 @@ if invoiceLine.length !== 0
                       .field-body.m-1
                         .field
                           p.control
-                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_input_amount` name=`lineNo${idx + 1}_lineAccountCode1_input_amount` class=`lineNo${idx + 1}_input_amount` readonly  value= item['明細-小計 (税抜)'])
+                            input.input(type='text' value= item['明細-小計 (税抜)'] readonly)
                       .field-body.m-1.is-1.none-flex-grow
                         .field
                           p.control
