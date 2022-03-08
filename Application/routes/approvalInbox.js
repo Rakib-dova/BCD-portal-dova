@@ -156,7 +156,7 @@ const cbPostApprove = async (req, res, next) => {
   const hasNotPowerOfEditing = !(await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval))
   if (hasNotPowerOfEditing) {
     logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
-    return req.redirect(`/approvalInbox/${invoiceId}`)
+    return res.redirect(`/approvalInbox/${invoiceId}`)
   }
 
   // 仕訳情報が変更が合うる場合保存する。
