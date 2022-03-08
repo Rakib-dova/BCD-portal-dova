@@ -73,7 +73,7 @@ module.exports = (sequelize, DataTypes) => {
           key: 'code'
         }
       },
-      message: { type: DataTypes.STRING, allowNull: false },
+      message: { type: DataTypes.STRING, allowNull: true },
       create: {
         type: DataTypes.DATE,
         allowNull: false,

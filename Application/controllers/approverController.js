@@ -9,8 +9,7 @@ const ApproveRoute = db.ApproveRoute
 const ApproveUser = db.ApproveUser
 const Request = db.RequestApproval
 const Status = db.ApproveStatus
-const ApprovalModel = db.Approval
-const ApprovalStatus = db.ApprovalStatus
+const Approval = db.Approval
 const Op = db.Sequelize.Op
 const userController = require('./userController')
 const validate = require('../lib/validate')
@@ -582,7 +581,7 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
     return request
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
-    logger.info(constantsDefine.logMessage.INF001 + 'searchApproveRouteList')
+    logger.info(constantsDefine.logMessage.INF001 + 'requestApproval')
     return error
   }
 }
@@ -591,10 +590,10 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
   try {
     // approvalテーブルに承認者情報を保存
     const requester = await userController.findOne(requesterId)
-    const approvalStatus = await ApprovalStatus.findOne({
+    const approveStatus = await Status.findOne({
       where: {
         name: {
-          [Op.like]: '承認待ち'
+          [Op.like]: '処理依頼中'
         }
       }
     })
@@ -642,12 +641,11 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
       }
     }
 
-    console.log(requester, 'requester')
-    const approvalmodel = await ApprovalModel.build({
+    const approvalmodel = await Approval.build({
       requestId: request.requestId,
       requestUserId: requester.userId,
       approveRouteId: approveRouteId,
-      approvalStatus: approvalStatus.code,
+      approveStatus: approveStatus.code,
       approveRouteName: approveRoute.approveRouteName
     })
 
@@ -663,13 +661,12 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     approvalmodel.approvalAtLast = null
     approvalmodel.approveUserCount = users.length
     approvalmodel.message = message
-    console.log(approvalmodel)
     await approvalmodel.save()
 
     return 0
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
-    logger.info(constantsDefine.logMessage.INF001 + 'searchApproveRouteList')
+    logger.info(constantsDefine.logMessage.INF001 + 'saveApproval')
     return error
   }
 }
@@ -776,6 +773,63 @@ const checkApproveRoute = async (contractId, approveRouteId) => {
   }
 }
 
+const updateApprove = async (contractId, approveRouteId, message) => {
+  try {
+    let userNo
+    const userData = {}
+    const selectApproval = await Approval.findOne({
+      where: {
+        approveRouteId: approveRouteId
+      }
+    })
+
+    if (selectApproval instanceof Approval === false) return false
+
+    const status = await Status.findOne({
+      where: {
+        code: ~~selectApproval.approveStatus + 1 + ''
+      }
+    })
+
+    if (~~selectApproval.approveStatus === 20) {
+      userNo = 'Last'
+    } else if (~~selectApproval.approveStatus >= 10 && ~~selectApproval.approveStatus <= 19) {
+      userNo = ~~selectApproval.approveStatus - 9
+    }
+
+    userData[`approvalAt${userNo}`] = new Date()
+    userData.approveStatus = status.code
+    if (message !== '' && message !== undefined) {
+      userData[`message${userNo}`] = message
+    }
+
+    const updateApproval = await Approval.update(userData, {
+      where: {
+        approvalId: selectApproval.approvalId
+      }
+    })
+
+    if (!updateApproval) return false
+
+    const updateReqeust = await Request.update(
+      { status: status.code },
+      {
+        where: {
+          approveRouteId: approveRouteId
+        }
+      }
+    )
+
+    if (!updateReqeust) return false
+
+    return true
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    logger.info(constantsDefine.logMessage.INF001 + 'updateApprove')
+    return error
+  }
+}
+
 module.exports = {
   getApprover: getApprover,
   insertApprover: insertApprover,
@@ -788,5 +842,6 @@ module.exports = {
   saveMessage: saveMessage,
   readApproval: readApproval,
   checkApproveRoute: checkApproveRoute,
-  saveApproval: saveApproval
+  saveApproval: saveApproval,
+  updateApprove: updateApprove
 }

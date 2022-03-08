@@ -10,8 +10,8 @@ module.exports = (sequelize, DataTypes) => {
         targetKey: 'requestId'
       })
       // approvalStatus ForeignKey
-      Approval.belongsTo(models.ApprovalStatus, {
-        foreignKey: 'approvalStatus',
+      Approval.belongsTo(models.ApproveStatus, {
+        foreignKey: 'approveStatus',
         targetKey: 'code'
       })
     }
@@ -44,11 +44,11 @@ module.exports = (sequelize, DataTypes) => {
           key: 'approveRouteId'
         }
       },
-      approvalStatus: {
+      approveStatus: {
         type: DataTypes.STRING,
         references: {
           model: {
-            tableName: 'ApprovalStatus'
+            tableName: 'ApproveStatus'
           },
           key: 'code'
         }
@@ -63,68 +63,78 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         timestamps: true
       },
+      message1: { type: DataTypes.STRING, allowNull: true },
       approveUser2: { type: DataTypes.UUID, allowNull: true },
       approvalAt2: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
+      message2: { type: DataTypes.STRING, allowNull: true },
       approveUser3: { type: DataTypes.UUID, allowNull: true },
       approvalAt3: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
+      message3: { type: DataTypes.STRING, allowNull: true },
       approveUser4: { type: DataTypes.UUID, allowNull: true },
       approvalAt4: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
+      message4: { type: DataTypes.STRING, allowNull: true },
       approveUser5: { type: DataTypes.UUID, allowNull: true },
       approvalAt5: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
+      message5: { type: DataTypes.STRING, allowNull: true },
       approveUser6: { type: DataTypes.UUID, allowNull: true },
       approvalAt6: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
+      message6: { type: DataTypes.STRING, allowNull: true },
       approveUser7: { type: DataTypes.UUID, allowNull: true },
       approvalAt7: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
+      message7: { type: DataTypes.STRING, allowNull: true },
       approveUser8: { type: DataTypes.UUID, allowNull: true },
       approvalAt8: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
+      message8: { type: DataTypes.STRING, allowNull: true },
       approveUser9: { type: DataTypes.UUID, allowNull: true },
       approvalAt9: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
+      message9: { type: DataTypes.STRING, allowNull: true },
       approveUser10: { type: DataTypes.UUID, allowNull: true },
       approvalAt10: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
+      message10: { type: DataTypes.STRING, allowNull: true },
       approveUserLast: { type: DataTypes.UUID, allowNull: false },
       approvalAtLast: {
         type: DataTypes.DATE,
         allowNull: true,
         timestamps: true
       },
+      messageLast: { type: DataTypes.STRING, allowNull: true },
       approveUserCount: { type: DataTypes.INTEGER, allowNull: false },
-      message: { type: DataTypes.STRING, allowNull: false },
       approvedAt: {
         type: DataTypes.DATE,
         allowNull: false,

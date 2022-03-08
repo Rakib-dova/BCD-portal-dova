@@ -720,3 +720,7 @@ const getInvoiceLineList = function () {
     }
   })
 }
+
+$('#btn-approve').addEventListener('click', function () {
+  $('#approval').submit()
+})
