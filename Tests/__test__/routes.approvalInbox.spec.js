@@ -16,6 +16,7 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const approvalInboxController = require('../../Application/controllers/approvalInboxController')
+const approverController = require('../../Application/controllers/approverController')
 const inboxController = require('../../Application/controllers/inboxController')
 const ApproveRoute = require('../../Application/models').ApproveRoute
 const Approver = require('../../Application/models').ApproveUser
@@ -33,12 +34,19 @@ let userControllerFindOneSpy,
   approveRouteUpdate,
   approvalInboxControllerGetRequestApproval,
   approvalInboxControllerHasPowerOfEditing,
-  inboxControllerGetInvoiceDetail
+  approvalInboxControllerInsertAndUpdateJournalizeInvoice,
+  inboxControllerGetInvoiceDetail,
+  approverControllerUpdateApprove
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
 error404.name = 'Not Found'
 error404.status = 404
+
+const notSession = {
+  userContext: 'NotLoggedIn',
+  userRole: 'dummy'
+}
 
 const user = [
   {
@@ -149,6 +157,11 @@ describe('approvalInboxのテスト', () => {
     approvalInboxControllerGetRequestApproval = jest.spyOn(approvalInboxController, 'getRequestApproval')
     approvalInboxControllerHasPowerOfEditing = jest.spyOn(approvalInboxController, 'hasPowerOfEditing')
     inboxControllerGetInvoiceDetail = jest.spyOn(inboxController, 'getInvoiceDetail')
+    approvalInboxControllerInsertAndUpdateJournalizeInvoice = jest.spyOn(
+      approvalInboxController,
+      'insertAndUpdateJournalizeInvoice'
+    )
+    approverControllerUpdateApprove = jest.spyOn(approverController, 'updateApprove')
   })
   afterEach(() => {
     request.resetMocked()
@@ -168,11 +181,19 @@ describe('approvalInboxのテスト', () => {
     approvalInboxControllerGetRequestApproval.mockRestore()
     inboxControllerGetInvoiceDetail.mockRestore()
     approvalInboxControllerHasPowerOfEditing.mockRestore()
+    approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockRestore()
+    approverControllerUpdateApprove.mockRestore()
   })
 
   describe('ルーティング', () => {
     test('approvalInboxのルーティングを確認', async () => {
       expect(approvalInbox.router.get).toBeCalledWith('/:invoiceId', helper.isAuthenticated, approvalInbox.cbGetIndex)
+
+      expect(approvalInbox.router.post).toBeCalledWith(
+        '/:invoiceId',
+        helper.isAuthenticated,
+        approvalInbox.cbPostApprove
+      )
     })
   })
 
@@ -437,6 +458,502 @@ describe('approvalInboxのテスト', () => {
       expect(errorSpy).toHaveBeenCalledWith({ stack: dbError.stack, status: 1 })
       expect(request.flash).toHaveBeenCalledWith('noti', ['承認する支払依頼確認', 'システムエラーが発生しました。'])
       expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
+    })
+  })
+  describe('コールバック:cbPostApprove', () => {
+    test('正常', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, requestApproval: { approval: 'test' } }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
+      approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
+      approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockReturnValue({
+        status: 0,
+        lineId: 'lineAccountCode4',
+        accountCode: 'AB001',
+        subAccountCode: 'SU001',
+        error: undefined
+      })
+      approverControllerUpdateApprove.mockReturnValue(true)
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404がエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでapproveRouteListが呼ばれ「る」
+    })
+
+    test('正常：依頼者・承認ルートに含まれていない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, requestApproval: { approval: 'test' } }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
+      approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(false)
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404がエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでapproveRouteListが呼ばれ「る」
+      expect(response.redirect).toHaveBeenCalledWith(`/approvalInbox/${request.params.invoiceId}`)
+    })
+
+    test('エラー：承認失敗', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, requestApproval: { approval: 'test' } }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
+      approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
+      approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockReturnValue({
+        status: 0,
+        lineId: 'lineAccountCode4',
+        accountCode: 'AB001',
+        subAccountCode: 'SU001',
+        error: undefined
+      })
+      approverControllerUpdateApprove.mockReturnValue(false)
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404がエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでapproveRouteListが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', ['支払依頼', '承認に失敗しました。'])
+      expect(response.redirect).toHaveBeenCalledWith(`/approvalInbox/${request.params.invoiceId}`)
+    })
+
+    test('正常：不正な勘定科目の場合', async () => {
+      // 準備
+      const lineId = 'lineAccountCode4'
+      const accountCode = 'AB001'
+      const subAccountCode = 'SU111'
+
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, requestApproval: { approval: 'test' } }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
+      approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
+      approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockReturnValue({
+        status: -1,
+        lineId: lineId,
+        accountCode: accountCode,
+        subAccountCode: subAccountCode,
+        error: undefined
+      })
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404がエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでapproveRouteListが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '承認依頼',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の勘定科目「${accountCode}」は未登録勘定科目です。`,
+        'SYSERR'
+      ])
+      expect(response.redirect).toHaveBeenCalledWith(`/approvalInbox/${request.params.invoiceId}`)
+    })
+
+    test('正常：不正な補助科目の場合', async () => {
+      // 準備
+      const lineId = 'lineAccountCode4'
+      const subAccountCode = 'SU111'
+
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, requestApproval: { approval: 'test' } }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
+      approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
+      approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockReturnValue({
+        status: -2,
+        lineId: lineId,
+        accountCode: 'AB001',
+        subAccountCode: subAccountCode,
+        error: undefined
+      })
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404がエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでapproveRouteListが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '承認依頼',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の補助科目「${subAccountCode}」は未登録補助科目です。`,
+        'SYSERR'
+      ])
+      expect(response.redirect).toHaveBeenCalledWith(`/approvalInbox/${request.params.invoiceId}`)
+    })
+
+    test('正常：不正な部門データの場合', async () => {
+      // 準備
+      const lineId = 'lineAccountCode4'
+      const departmentCode = 'DE001'
+
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, requestApproval: { approval: 'test' } }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
+      approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
+      approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockReturnValue({
+        status: -3,
+        lineId: lineId,
+        accountCode: 'DE001',
+        departmentCode: departmentCode,
+        error: undefined
+      })
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404がエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでapproveRouteListが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '承認依頼',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の部門データ「${departmentCode}」は未登録部門データです。`,
+        'SYSERR'
+      ])
+      expect(response.redirect).toHaveBeenCalledWith(`/approvalInbox/${request.params.invoiceId}`)
+    })
+
+    test('正常：不正な部門データの場合', async () => {
+      // 準備
+      const lineId = 'lineAccountCode4'
+      const subAccountCode = 'SU001'
+
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, requestApproval: { approval: 'test' } }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
+      approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
+
+      const dbError = new Error('DB Error')
+      approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockReturnValue({
+        status: 0,
+        lineId: lineId,
+        accountCode: 'AB001',
+        subAccountCode: subAccountCode,
+        error: dbError
+      })
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー:不正なContractデータの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[7])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[7])
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：requestのsession,userIdがnullの場合', async () => {
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      const userDbError = new Error('User Table Error')
+      userControllerFindOneSpy.mockReturnValue(userDbError)
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user.statusが0ではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[8])
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(404))
+    })
+
+    test('500エラー：contracts検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      const contractDbError = new Error('Contracts Table Error')
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+      contractControllerFindOneSpy.mockReturnValue(contractDbError)
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：テナントと契約テーブル検索結果無', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      tenantControllerFindOneSpy.mockReturnValue(null)
+      contractControllerFindContractSpyon.mockReturnValue(null)
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('正常：解約申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[6])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('異常：userContextがLoggedInではない場合', async () => {
+      // 準備
+      request.session = { ...notSession }
+      request.user = { ...user[0] }
+      request.body = {
+        departmentCode: 'AB001',
+        departmentCodeName: '部門名UT'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 400エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
     })
   })
 })

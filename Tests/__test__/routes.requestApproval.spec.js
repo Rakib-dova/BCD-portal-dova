@@ -279,7 +279,10 @@ let errorSpy, infoSpy
 let request, response
 let userControllerFindOneSpy, contractControllerFindOneSpy, checkContractStatusSpy
 let approverControllerSearchApproveRouteList, inboxControllerGetInvoiceDetail
-let approverControllerGetApproveRoute, approverControllerRequestApproval, approverControlleCcheckApproveRoute
+let approverControllerGetApproveRoute,
+  approverControllerRequestApproval,
+  approverControllerCheckApproveRoute,
+  approverControllerSaveApproval
 let approverControllerReadApproval, approverControllerSaveMessage
 
 describe('requestApprovalのテスト', () => {
@@ -298,7 +301,8 @@ describe('requestApprovalのテスト', () => {
     approverControllerRequestApproval = jest.spyOn(approverController, 'requestApproval')
     approverControllerReadApproval = jest.spyOn(approverController, 'readApproval')
     approverControllerSaveMessage = jest.spyOn(approverController, 'saveMessage')
-    approverControlleCcheckApproveRoute = jest.spyOn(approverController, 'checkApproveRoute')
+    approverControllerCheckApproveRoute = jest.spyOn(approverController, 'checkApproveRoute')
+    approverControllerSaveApproval = jest.spyOn(approverController, 'saveApproval')
   })
   afterEach(() => {
     request.resetMocked()
@@ -315,7 +319,8 @@ describe('requestApprovalのテスト', () => {
     approverControllerRequestApproval.mockRestore()
     approverControllerReadApproval.mockRestore()
     approverControllerSaveMessage.mockRestore()
-    approverControlleCcheckApproveRoute.mockRestore()
+    approverControllerCheckApproveRoute.mockRestore()
+    approverControllerSaveApproval.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -1406,8 +1411,9 @@ describe('requestApprovalのテスト', () => {
       // ユーザ権限チェック結果設定
       checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
 
-      approverControlleCcheckApproveRoute.mockReturnValue(true)
+      approverControllerCheckApproveRoute.mockReturnValue(true)
       approverControllerRequestApproval.mockReturnValue(0)
+      approverControllerSaveApproval.mockReturnValue(0)
 
       // 試験実施
       await requestApproval.cbPostApproval(request, response, next)
@@ -1616,7 +1622,7 @@ describe('requestApprovalのテスト', () => {
       // ユーザ権限チェック結果設定
       checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
 
-      approverControlleCcheckApproveRoute.mockReturnValue(true)
+      approverControllerCheckApproveRoute.mockReturnValue(true)
       approverControllerRequestApproval.mockReturnValue(-1)
 
       // 試験実施
@@ -1646,7 +1652,7 @@ describe('requestApprovalのテスト', () => {
       // ユーザ権限チェック結果設定
       checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
 
-      approverControlleCcheckApproveRoute.mockReturnValue(false)
+      approverControllerCheckApproveRoute.mockReturnValue(false)
       approverControllerRequestApproval.mockReturnValue(-1)
 
       // 試験実施
