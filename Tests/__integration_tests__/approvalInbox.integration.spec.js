@@ -29,54 +29,6 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       userCookies = await getCookies(app, request, getTenantId, userId, userSecret)
       // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
       // DBクリア
-      const contract = await db.Contract.findAll({ where: { tenantId: getTenantId.id } })
-      contract.forEach(async (contract) => {
-        const contractId = contract.contractId
-        const tenantId = getTenantId.id
-        const where = { contractId: contractId }
-        const accountCodes = db.AccountCode.findAll({ where })
-        const approveRoutes = db.ApproveRoute.findAll({ where })
-        const cancellations = db.Cancellation.findAll({ where })
-        const departmentsCode = db.DepartmentCode.findAll({ where })
-        const invoices = db.Invoice.findAll({ tenantId: tenantId })
-        const journalizeInvoice = db.JournalizeInvoice.findAll({ where })
-        const orders = db.Order.findAll({ where })
-        const requestApproval = db.RequestApproval.findAll({ where })
-        ;(await accountCodes).forEach(async (accountCode) => {
-          const accountCodeId = accountCode.accountCodeId
-          const where = { accountCodeId: accountCodeId }
-          const subAccountCodes = await db.SubAccountCode.findAll({ where })
-          subAccountCodes.forEach((subAccountCode) => {
-            subAccountCode.destroy()
-          })
-          accountCode.destroy()
-        })
-        ;(await approveRoutes).forEach(async (approveRoute) => {
-          const approveRouteId = approveRoute.approveRouteId
-          const where = { approveRouteId: approveRouteId }
-          const approveUsers = await db.ApproveUser.findAll({ where })
-          approveUsers.forEach((approveUser) => {
-            approveUser.destroy()
-          })
-          approveRoute.destroy()
-        })
-        ;(await cancellations).forEach((accountCode) => accountCode.destroy())
-        ;(await departmentsCode).forEach((accountCode) => accountCode.destroy())
-        ;(await invoices).forEach(async (invoice) => {
-          const invoicesId = invoice.invoicesId
-          const where = {
-            invoicesId: invoicesId
-          }
-          const invoiceDetails = await db.InvoiceDetail.findAll({ where })
-          invoiceDetails.forEach((invoiceDetail) => {
-            invoiceDetail.destroy()
-          })
-          invoice.destroy()
-        })
-        ;(await journalizeInvoice).forEach((accountCode) => accountCode.destroy())
-        ;(await orders).forEach((accountCode) => accountCode.destroy())
-        ;(await requestApproval).forEach((accountCode) => accountCode.destroy())
-      })
       await db.User.destroy({ where: { tenantId: getTenantId.id } })
       await db.Tenant.destroy({ where: { tenantId: getTenantId.id } })
     })
@@ -136,10 +88,10 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
   })
 
   describe('2.契約ステータス：登録申込', () => {
-    // テナントステータスが「登録申込」、支払依頼画面直接接続-利用不可
-    test('管理者、契約ステータス：登録申込、支払依頼画面直接接続-利用不可', async () => {
+    // テナントステータスが「登録申込」、パラメータがない場合
+    test('管理者、契約ステータス：登録申込、パラメータがない場合-利用不可', async () => {
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -147,9 +99,9 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('一般ユーザ、契約ステータス：登録申込、支払依頼画面直接接続-利用不可', async () => {
+    test('一般ユーザ、契約ステータス：登録申込、パラメータがない場合-利用不可', async () => {
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
 
@@ -194,7 +146,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       redirectUrl = await page.evaluate(() => {
         return document.querySelector('#form > div.grouped-button > a.button.is-link').getAttribute('href')
@@ -208,7 +160,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       await page.waitForTimeout(2000)
 
-      // 支払依頼画面にredirectする。
+      // 承認依頼画面にredirectする。
       expect(page.url()).toBe(`https://localhost:3000/requestApproval/${approvalInbox}`)
 
       // 承認ルート選択ボタン押下
@@ -219,11 +171,11 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       // 承認ルート検索
       await page.click('#btnSearchApproveRoute')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       await page.click('#displayFieldApproveRouteResultBody > tr > td.btnSelect > a')
 
-      await page.waitForTimeout(1000)
+      await page.waitForTimeout(2500)
 
       // メッセージ入力
       await page.type('#inputMsg', 'インテグレーションテスト')
@@ -233,7 +185,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       await page.waitForTimeout(7000)
 
-      // 支払依頼画面にredirectする。
+      // 承認依頼画面にredirectする。
       expect(page.url()).toBe(`https://localhost:3000/requestApproval/${approvalInbox}`)
 
       // 確認ボタン押下
@@ -244,7 +196,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       // 依頼ボタン押下
       await page.click('#btn-approval')
 
-      await page.waitForTimeout(2000)
+      await page.waitForTimeout(3000)
 
       // 一覧画面にredirectする。
       expect(await page.url()).toBe('https://localhost:3000/inboxList/1')
@@ -252,34 +204,43 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       browser.close()
     })
 
-    test('一般ユーザ、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+    test('管理者、契約ステータス：登録申込、承認者ではない場合', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
+      // 画面内容確認
+      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).not.toMatch(/インテグレーションテスト/i)
+      expect(res.text).toMatch(/承認ルート名/i)
+      expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/戻る/i)
+    })
 
-      await page.waitForTimeout(1500)
+    test('一般ユーザ、契約ステータス：登録申込、承認者の場合', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
 
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/インテグレーションテスト/i)
+      expect(res.text).toMatch(/承認ルート名/i)
+      expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/承認/i)
     })
   })
 
   describe('3.契約ステータス：登録受付', () => {
-    // テナントステータスが「登録受付」、支払依頼画面直接接続-利用不可
-    test('管理者、契約ステータス：登録受付、支払依頼画面直接接続-利用不可', async () => {
+    // テナントステータスが「登録受付」、パラメータがない場合
+    test('管理者、契約ステータス：登録受付、パラメータがない場合-利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -299,7 +260,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       }
 
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -307,9 +268,9 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('一般ユーザ、契約ステータス：登録受付、支払依頼画面直接接続-利用不可', async () => {
+    test('一般ユーザ、契約ステータス：登録受付、パラメータがない場合-利用不可', async () => {
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
 
@@ -317,58 +278,43 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('管理者、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+    test('管理者、契約ステータス：登録受付、承認者ではない場合', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(1500)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).not.toMatch(/インテグレーションテスト/i)
+      expect(res.text).toMatch(/承認ルート名/i)
+      expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/戻る/i)
     })
 
-    test('一般ユーザ、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+    test('一般ユーザ、契約ステータス：登録受付、承認者の場合', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(1500)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/インテグレーションテスト/i)
+      expect(res.text).toMatch(/承認ルート名/i)
+      expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/承認/i)
     })
   })
 
   describe('4.契約ステータス：契約中', () => {
-    // テナントステータスが「契約中」、支払依頼画面直接接続-利用不可
-    test('管理者、契約ステータス：契約中、支払依頼画面直接接続-利用不可', async () => {
+    // テナントステータスが「契約中」、パラメータがない場合
+    test('管理者、契約ステータス：契約中、パラメータがない場合-利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -390,7 +336,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       }
 
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -398,9 +344,9 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('一般ユーザ、契約ステータス：契約中、支払依頼画面直接接続-利用不可', async () => {
+    test('一般ユーザ、契約ステータス：契約中、パラメータがない場合-利用不可', async () => {
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
 
@@ -408,119 +354,55 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('管理者、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+    test('管理者、契約ステータス：契約中、承認者ではない場合', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(1500)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).not.toMatch(/インテグレーションテスト/i)
+      expect(res.text).toMatch(/承認ルート名/i)
+      expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/戻る/i)
     })
 
-    test('一般ユーザ、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+    test('一般ユーザ、契約ステータス：契約中、承認者の場合', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(1500)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/インテグレーションテスト/i)
+      expect(res.text).toMatch(/承認ルート名/i)
+      expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/承認/i)
     })
 
-    test('「仕訳情報設定へ」ボタン遷移確認（受領した請求書一覧画面に遷移）', async () => {
+    test('「戻る」ボタン遷移確認（受領請求書への仕訳情報設定画面に遷移）', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
         ignoreHTTPSErrors: true
       })
       const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
+      await page.setCookie(userCookies[0])
       await page.goto(`https://localhost:3000${redirectUrl}`)
 
-      await page.click('#form > div.grouped-button > a:nth-child(1)')
-
+      await page.click('#form > div.grouped-button > a.button.mr-6')
       await page.waitForTimeout(1500)
 
-      const inboxUrl = 'inbox/' + redirectUrl.split('/')[2]
-
-      // 受領した請求書一覧画面に遷移確認
-      expect(await page.url()).toBe(`https://localhost:3000/${inboxUrl}`)
-
+      // 受領請求書への仕訳情報設定画面に遷移確認
+      expect(page.url()).toBe('https://localhost:3000/inboxList/1')
       await browser.close()
-    })
-
-    // 支払依頼画面内容確認
-    test('管理者、支払依頼画面内容確認', async () => {
-      const res = await request(app)
-        .get(redirectUrl)
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      // 画面内容確認
-      expect(res.text).toMatch(/請求書番号/i)
-      expect(res.text).toMatch(/宛先/i)
-      expect(res.text).toMatch(/差出人/i)
-      expect(res.text).toMatch(/仕訳情報/i)
-      expect(res.text).toMatch(/勘定科目コード/i)
-      expect(res.text).toMatch(/補助科目コード/i)
-      expect(res.text).toMatch(/部門コード/i)
-      expect(res.text).toMatch(/計上金額/i)
-      expect(res.text).toMatch(/合計 円/i)
-      expect(res.text).toMatch(/メッセージ/i)
-      expect(res.text).toMatch(/仕訳情報設定へ/i)
-      expect(res.text).toMatch(/保存/i)
-      expect(res.text).toMatch(/確認/i)
-    })
-
-    test('一般ユーザ、支払依頼画面内容確認', async () => {
-      const res = await request(app)
-        .get(redirectUrl)
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      // 画面内容確認
-      expect(res.text).toMatch(/請求書番号/i)
-      expect(res.text).toMatch(/宛先/i)
-      expect(res.text).toMatch(/差出人/i)
-      expect(res.text).toMatch(/仕訳情報/i)
-      expect(res.text).toMatch(/勘定科目コード/i)
-      expect(res.text).toMatch(/補助科目コード/i)
-      expect(res.text).toMatch(/部門コード/i)
-      expect(res.text).toMatch(/計上金額/i)
-      expect(res.text).toMatch(/合計 円/i)
-      expect(res.text).toMatch(/メッセージ/i)
-      expect(res.text).toMatch(/仕訳情報設定へ/i)
-      expect(res.text).toMatch(/保存/i)
-      expect(res.text).toMatch(/確認/i)
     })
 
     test('メッセージ入力文字数確認（1,500文字まで）', async () => {
@@ -530,59 +412,49 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         ignoreHTTPSErrors: true
       })
       const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
+      await page.setCookie(userCookies[0])
       await page.goto(`https://localhost:3000${redirectUrl}`)
 
-      await page.type(
-        '#inputMsg',
-        'あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefg'
-      )
-
+      await page.click('#checkApproval')
       await page.waitForTimeout(500)
 
-      const msg = await page.evaluate(() => {
-        return document.querySelector('#inputMsg').value
+      // 支払依頼確認モーダル表示確認
+      const checkModal = await page.evaluate(() => {
+        return document.querySelector('#check-approval-modal').getAttribute('class')
       })
 
-      // 受領した請求書一覧画面に遷移確認
-      expect(msg).toBe(
-        'あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcd'
-      )
-
+      expect(checkModal).toBe('modal is-active')
       await browser.close()
     })
 
-    test('承認ルート検索モーダル確認', async () => {
+    test('支払依頼確認モーダル表示確認', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
         ignoreHTTPSErrors: true
       })
       const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
+      await page.setCookie(userCookies[0])
       await page.goto(`https://localhost:3000${redirectUrl}`)
-
-      await page.click('#btn-approveRouteInsert')
-
+      await page.type(
+        '#inputMsg',
+        'あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefg'
+      )
       await page.waitForTimeout(500)
-
-      // 仕訳一括設定モーダル開きをチェック
-      const checkOpenedModal = await page.evaluate(() => {
-        return Array.prototype.find.call(document.querySelector('#approveRoute-modal').classList, (item) => {
-          if (item === 'is-active') return true
-          return false
-        })
+      const msg = await page.evaluate(() => {
+        return document.querySelector('#inputMsg').value
       })
-
-      expect(checkOpenedModal).toBe('is-active')
-
+      // 受領した請求書一覧画面に遷移確認
+      expect(msg).toBe(
+        'あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcd'
+      )
       await browser.close()
     })
   })
 
   describe('5.契約ステータス：変更申込', () => {
-    // テナントステータスが「変更申込」、支払依頼画面直接接続-利用不可
-    test('管理者、契約ステータス：変更申込、支払依頼画面直接接続-利用不可', async () => {
+    // テナントステータスが「変更申込」、パラメータがない場合
+    test('管理者、契約ステータス：変更申込、パラメータがない場合-利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -602,7 +474,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       }
 
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -610,9 +482,9 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('一般ユーザ、契約ステータス：変更申込、支払依頼画面直接接続-利用不可', async () => {
+    test('一般ユーザ、契約ステータス：変更申込、パラメータがない場合-利用不可', async () => {
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
 
@@ -620,58 +492,43 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('管理者、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+    test('管理者、契約ステータス：変更申込、承認者ではない場合', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(1500)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).not.toMatch(/インテグレーションテスト/i)
+      expect(res.text).toMatch(/承認ルート名/i)
+      expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/戻る/i)
     })
 
-    test('一般ユーザ、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+    test('一般ユーザ、契約ステータス：変更申込、承認者の場合', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(1500)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/インテグレーションテスト/i)
+      expect(res.text).toMatch(/承認ルート名/i)
+      expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/承認/i)
     })
   })
 
   describe('6.契約ステータス：変更受付', () => {
-    // テナントステータスが「変更受付」、支払依頼画面直接接続-利用不可
-    test('管理者、契約ステータス：変更受付、支払依頼画面直接接続-利用不可', async () => {
+    // テナントステータスが「変更受付」、パラメータがない場合
+    test('管理者、契約ステータス：変更受付、パラメータがない場合-利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -691,7 +548,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       }
 
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -699,9 +556,9 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('一般ユーザ、契約ステータス：変更受付、支払依頼画面直接接続-利用不可', async () => {
+    test('一般ユーザ、契約ステータス：変更受付、パラメータがない場合-利用不可', async () => {
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
 
@@ -709,58 +566,43 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('管理者、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+    test('管理者、契約ステータス：変更受付、承認者ではない場合', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(1500)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).not.toMatch(/インテグレーションテスト/i)
+      expect(res.text).toMatch(/承認ルート名/i)
+      expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/戻る/i)
     })
 
-    test('一般ユーザ、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto(`https://localhost:3000/approvalInbox/${approvalInbox}`)
+    test('一般ユーザ、契約ステータス：変更受付、承認者の場合', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(1500)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/インテグレーションテスト/i)
+      expect(res.text).toMatch(/承認ルート名/i)
+      expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/承認/i)
     })
   })
 
   describe('7.契約ステータス：解約申込', () => {
-    // テナントステータスが「解約申込」、支払依頼画面直接接続-利用不可
-    test('管理者、契約ステータス：解約申込、支払依頼画面直接接続-利用不可', async () => {
+    // テナントステータスが「解約申込」、パラメータがない場合
+    test('管理者、契約ステータス：解約申込、パラメータがない場合-利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -796,7 +638,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       }
 
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -804,9 +646,9 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('一般ユーザ、契約ステータス：解約申込、支払依頼画面直接接続-利用不可', async () => {
+    test('一般ユーザ、契約ステータス：解約申込、パラメータがない場合-利用不可', async () => {
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
 
@@ -814,7 +656,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('管理者、支払依頼画面へアクセス、利用不可', async () => {
+    test('管理者、契約ステータス：解約申込、承認者ではない場合-利用不可', async () => {
       const res = await request(app)
         .get(redirectUrl)
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -824,7 +666,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/現在解約手続き中です。/i)
     })
 
-    test('一般ユーザ、支払依頼画面へアクセス、利用不可', async () => {
+    test('一般ユーザ、契約ステータス：解約申込、承認者の場合-利用不可', async () => {
       const res = await request(app)
         .get(redirectUrl)
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
@@ -836,8 +678,8 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
   })
 
   describe('8.契約ステータス：解約受付', () => {
-    // テナントステータスが「解約受付」、支払依頼画面直接接続-利用不可
-    test('管理者、契約ステータス：解約受付、支払依頼画面直接接続-利用不可', async () => {
+    // テナントステータスが「解約受付」、パラメータがない場合
+    test('管理者、契約ステータス：解約受付、パラメータがない場合-利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -858,7 +700,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       }
 
       const res = await request(app)
-        .get(`/approvalIbox/${approvalInbox}`)
+        .get('/approvalInbox')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -866,9 +708,9 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('一般ユーザ、契約ステータス：解約受付、支払依頼画面直接接続-利用不可', async () => {
+    test('一般ユーザ、契約ステータス：解約受付、パラメータがない場合-利用不可', async () => {
       const res = await request(app)
-        .get('/requestApproval')
+        .get('/approvalInbox')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
 
@@ -876,7 +718,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('管理者、支払依頼画面へアクセス、利用不可', async () => {
+    test('管理者、契約ステータス：解約受付、承認者ではない場合-利用不可', async () => {
       const res = await request(app)
         .get(redirectUrl)
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -886,7 +728,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/現在解約手続き中です。/i)
     })
 
-    test('一般ユーザ、支払依頼画面へアクセス、利用不可', async () => {
+    test('一般ユーザ、契約ステータス：解約受付、承認者の場合-利用不可', async () => {
       const res = await request(app)
         .get(redirectUrl)
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
@@ -898,8 +740,8 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
   })
 
   describe('9.契約ステータス：解約', () => {
-    // テナントステータスが「解約」、支払依頼画面直接接続-利用不可
-    test('管理者、契約ステータス：解約、支払依頼画面直接接続-利用不可', async () => {
+    // テナントステータスが「解約」、パラメータがない場合
+    test('管理者、契約ステータス：解約、パラメータがない場合-利用不可', async () => {
       const contract = await db.Contract.findOne({
         where: {
           tenantId: testTenantId
@@ -932,7 +774,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       }
 
       const res = await request(app)
-        .get(`/approvalIbox/${approvalInbox}`)
+        .get('/approvalInbox')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(400)
 
@@ -940,9 +782,9 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('一般ユーザ、契約ステータス：解約、支払依頼画面直接接続-利用不可', async () => {
+    test('一般ユーザ、契約ステータス：解約受付、パラメータがない場合-利用不可', async () => {
       const res = await request(app)
-        .get(`/approvalIbox/${approvalInbox}`)
+        .get('/approvalInbox')
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(400)
 
@@ -950,9 +792,9 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('管理者、支払依頼画面へアクセス、利用不可', async () => {
+    test('管理者、承認依頼画面へアクセス、利用不可', async () => {
       const res = await request(app)
-        .get(`/approvalIbox/${approvalInbox}`)
+        .get(redirectUrl)
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
         .expect(500)
 
@@ -960,9 +802,9 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
-    test('一般ユーザ、支払依頼画面へアクセス、利用不可', async () => {
+    test('一般ユーザ、承認依頼画面へアクセス、利用不可', async () => {
       const res = await request(app)
-        .get(`/approvalIbox/${approvalInbox}`)
+        .get(redirectUrl)
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(500)
 
@@ -978,7 +820,15 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
           tenantId: testTenantId
         }
       })
-      await db.User.RequestApproval({ where: { contractId: contract.contractId } })
+
+      const requestId = await db.RequestApproval.findOne({
+        where: {
+          contractId: contract.contractId
+        }
+      })
+
+      await db.Approval.destroy({ where: { requestId: requestId.requestId } })
+      await db.RequestApproval.destroy({ where: { contractId: contract.contractId } })
       await db.User.destroy({ where: { tenantId: testTenantId } })
       await db.Tenant.destroy({ where: { tenantId: testTenantId } })
     })
