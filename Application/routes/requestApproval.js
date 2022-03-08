@@ -184,6 +184,9 @@ const cbGetRequestApproval = async (req, res, next) => {
     approveRoute = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
   }
 
+  console.log(approval)
+  console.log(req.session.requestApproval)
+
   // 承認依頼画面render
   res.render('requestApproval', {
     ...result,
@@ -252,9 +255,10 @@ const cbPostSave = async (req, res, next) => {
     case 0:
       req.flash('info', 'メッセージを保存しました。')
       req.session.requestApproval = {
-        isSaved: true
+        isSaved: true,
+        message: message,
+        approveRouteId: approveRouteId
       }
-      delete req.session.isSaved
       res.redirect(`/requestApproval/${invoiceId}`)
       break
     default:
@@ -419,8 +423,22 @@ const cbPostApproval = async (req, res, next) => {
     return res.redirect(`/requestApproval/${invoiceId}`)
   }
 
-  const requestResult = await approverController.requestApproval(contractId, approveRouteId, invoiceId, requester, message)
-  const result = await approverController.saveApproval(contractId, approveRouteId, requester, message, accessToken, refreshToken, requestResult)
+  const requestResult = await approverController.requestApproval(
+    contractId,
+    approveRouteId,
+    invoiceId,
+    requester,
+    message
+  )
+  const result = await approverController.saveApproval(
+    contractId,
+    approveRouteId,
+    requester,
+    message,
+    accessToken,
+    refreshToken,
+    requestResult
+  )
   switch (result) {
     case 0:
       req.flash('info', '承認依頼を完了しました。')

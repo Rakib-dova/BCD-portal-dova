@@ -195,7 +195,13 @@ app.use(function (req, res, next) {
 // ミドルウェア
 app.use(function (req, res, next) {
   const url = req.url
-  if (url.match('/requestApproval/') === null) {
+  if (
+    url.match('/requestApproval/') === null &&
+    url.match('/approvalInbox/') === null &&
+    url.match('/favicon.ico') === null &&
+    url.match('/inbox/getCode') === null &&
+    url.match(' /inbox/department') === null
+  ) {
     delete req.session.requestApproval
   }
   next()
