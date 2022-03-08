@@ -778,6 +778,9 @@ const checkJournalList = function () {
             isFirstLineNull = true
             $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
           }
+        } else {
+          isFirstLineNull = true
+          $('#error-message-body').innerText = '仕訳情報を正しく設定してください。'
         }
       }
     }

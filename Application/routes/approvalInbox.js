@@ -87,7 +87,7 @@ const cbGetIndex = async (req, res, next) => {
   } catch (error) {
     logger.error({ stack: error.stack, status: 1 })
     req.flash('noti', [notiTitle, 'システムエラーが発生しました。'])
-    return res.redirect('/approvalInboxList/1')
+    return res.redirect('/inboxList/1')
   }
 
   const approveRoute = requestApproval.approveRoute

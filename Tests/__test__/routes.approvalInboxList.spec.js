@@ -4,7 +4,7 @@ jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
 
-const approvalInbox = require('../../Application/routes/approvalInbox')
+const approvalInboxList = require('../../Application/routes/approvalInboxList')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
@@ -15,25 +15,17 @@ const apiManager = require('../../Application/controllers/apiManager.js')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
-const approvalInboxController = require('../../Application/controllers/approvalInboxController')
 const inboxController = require('../../Application/controllers/inboxController')
-const ApproveRoute = require('../../Application/models').ApproveRoute
-const Approver = require('../../Application/models').ApproveUser
+const requestApprovalController = require('../../Application/controllers/requestApprovalController')
 const logger = require('../../Application/lib/logger.js')
 
-let request, response, infoSpy, errorSpy
+let request, response, infoSpy
 let userControllerFindOneSpy,
   contractControllerFindOneSpy,
   tenantControllerFindOneSpy,
   contractControllerFindContractSpyon,
-  approveRoutegetApproveRouteSpy,
-  approveRouteFindOne,
-  approverFindOne,
-  approveRouteFindAll,
-  approveRouteUpdate,
-  approvalInboxControllerGetRequestApproval,
-  approvalInboxControllerHasPowerOfEditing,
-  inboxControllerGetInvoiceDetail
+  inboxControllerSpy,
+  requestApprovalControllerSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -59,21 +51,8 @@ const user = [
   }
 ]
 const session = {
-  userContext: 'LoggedIn',
+  userContext: 'NotLoggedIn',
   userRole: 'dummy'
-}
-
-const resultInvoice = {
-  dataValues: {
-    invoicesId: '344fb8b1-0416-48db-8a1a-17c080192094',
-    tenantId: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
-    csvFileName: 'テスト請求書一括作成.csv',
-    successCount: -1,
-    failCount: -1,
-    skipCount: -1,
-    createdAt: '2021-08-26T08:01:50.973Z',
-    updatedAt: '2021-08-26T08:01:50.973Z'
-  }
 }
 
 // モックテーブル定義
@@ -81,98 +60,95 @@ const Users = require('../mockDB/Users_Table')
 const Tenants = require('../mockDB/Tenants_Table')
 const Contracts = require('../mockDB/Contracts_Table')
 
-const expectGetRequestApproval = {
-  requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-  contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
-  invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
-  message: 'dummyData',
-  status: 'dummyData',
-  requester: 'dummyUserUUID',
-  approveRoute: {
-    users: [
-      {
-        No: 1,
-        approveRouteName: 'dummyRouteName',
-        approverCount: 'dummyCount',
-        id: 'dummyUserUUID'
-      }
-    ]
-  },
-  approvals: [
+const searchResult1 = {
+  list: [
     {
-      approvalDate: null,
-      approvalId: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
-      approver: {
-        No: 1,
-        approveRouteName: 'dummyRouteName',
-        approverCount: 'dummyCount',
-        id: 'dummyUserUUID'
-      },
-      contractId: 'dummy',
-      message: null,
-      next: null,
-      prev: null,
-      request: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-      status: '10'
+      no: 1,
+      invoiceNo: 'PB1649meisai001',
+      status: 0,
+      currency: 'JPY',
+      ammount: '3,080,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-27',
+      expire: '2021-11-10',
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+    },
+    {
+      no: 2,
+      invoiceNo: 'PBI2848supplier_送金済み',
+      status: 0,
+      currency: 'JPY',
+      ammount: '91,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-22',
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f'
+    },
+    {
+      no: 3,
+      invoiceNo: 'PBI2848supplier_承認済み',
+      status: 1,
+      currency: 'JPY',
+      ammount: '178,320',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd'
+    },
+    {
+      no: 4,
+      invoiceNo: 'PBI2848supplier_受信済み',
+      status: 2,
+      currency: 'JPY',
+      ammount: '67,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537'
     }
   ],
-
-  prevUser: {
-    message: null,
-    name: null
-  }
+  numPages: 1,
+  currPage: 1
 }
 
-describe('approvalInboxのテスト', () => {
+describe('approvalInboxListのテスト', () => {
   beforeEach(() => {
     request = new Request()
     response = new Response()
     infoSpy = jest.spyOn(logger, 'info')
-    errorSpy = jest.spyOn(logger, 'error')
     apiManager.accessTradeshift = require('../lib/apiManager')
     userControllerFindOneSpy = jest.spyOn(userController, 'findOne')
     contractControllerFindOneSpy = jest.spyOn(contractController, 'findOne')
     tenantControllerFindOneSpy = jest.spyOn(tenantController, 'findOne')
     contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
-    approveRoutegetApproveRouteSpy = jest.spyOn(ApproveRoute, 'getApproveRoute')
-    approveRouteFindAll = jest.spyOn(ApproveRoute, 'findAll')
-    approverFindOne = jest.spyOn(Approver, 'findOne')
+    inboxControllerSpy = jest.spyOn(inboxController, 'getInbox')
+    requestApprovalControllerSpy = jest.spyOn(requestApprovalController, 'findOneRequestApproval')
     request.flash = jest.fn()
-    ApproveRoute.create = jest.fn((initData) => {
-      return ApproveRoute.build(initData)
-    })
-    approveRouteUpdate = jest.spyOn(ApproveRoute, 'update')
-    Approver.create = jest.fn((initData) => {
-      return Approver.build(initData)
-    })
-    approveRouteFindOne = jest.spyOn(ApproveRoute, 'findOne')
-    approvalInboxControllerGetRequestApproval = jest.spyOn(approvalInboxController, 'getRequestApproval')
-    approvalInboxControllerHasPowerOfEditing = jest.spyOn(approvalInboxController, 'hasPowerOfEditing')
-    inboxControllerGetInvoiceDetail = jest.spyOn(inboxController, 'getInvoiceDetail')
   })
   afterEach(() => {
     request.resetMocked()
     response.resetMocked()
     next.mockReset()
     infoSpy.mockRestore()
-    errorSpy.mockRestore()
     userControllerFindOneSpy.mockRestore()
     contractControllerFindOneSpy.mockRestore()
     tenantControllerFindOneSpy.mockRestore()
     contractControllerFindContractSpyon.mockRestore()
-    approveRoutegetApproveRouteSpy.mockRestore()
-    approveRouteFindAll.mockRestore()
-    approverFindOne.mockRestore()
-    approveRouteUpdate.mockRestore()
-    approveRouteFindOne.mockRestore()
-    approvalInboxControllerGetRequestApproval.mockRestore()
-    inboxControllerGetInvoiceDetail.mockRestore()
-    approvalInboxControllerHasPowerOfEditing.mockRestore()
+    inboxControllerSpy.mockRestore()
+    requestApprovalControllerSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
-    test('approvalInboxのルーティングを確認', async () => {
-      expect(approvalInbox.router.get).toBeCalledWith('/:invoiceId', helper.isAuthenticated, approvalInbox.cbGetIndex)
+    test('approvalInboxListのルーティングを確認', async () => {
+      expect(approvalInboxList.router.get).toBeCalledWith(
+        '/:page',
+        helper.isAuthenticated,
+        approvalInboxList.cbGetIndex
+      )
     })
   })
 
@@ -182,9 +158,6 @@ describe('approvalInboxのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
-      request.params = {
-        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
-      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -195,60 +168,24 @@ describe('approvalInboxのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
-      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
-      inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
-      approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
+      requestApprovalControllerSpy.mockReturnValue([])
 
+      // inboxControllerのgetInobox実施結果設定
+      inboxControllerSpy.mockReturnValue(searchResult1)
       // 試験実施
-      await approvalInbox.cbGetIndex(request, response, next)
+      await approvalInboxList.cbGetIndex(request, response, next)
 
       // 期待結果
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでapproveRouteListが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('approvalInbox', {
-        ...resultInvoice,
-        title: '承認依頼',
-        documentId: request.params.invoiceId,
-        approveRoute: expectGetRequestApproval.approveRoute,
-        prevUser: expectGetRequestApproval.prevUser
+      // response.renderでapprovalInboxListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('approvalInboxList', {
+        listArr: searchResult1.list,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage
       })
-    })
-
-    test('正常:承認ルートデータがない場合', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.user = { ...user[0] }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
-      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
-
-      // 承認ルートDB検索結果
-      approveRoutegetApproveRouteSpy.mockReturnValueOnce([])
-
-      // 試験実施
-      await approvalInbox.cbGetIndex(request, response, next)
-
-      // 期待結果
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでapproveRouteListが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', [
-        '承認する支払依頼確認',
-        '当該請求書は支払依頼の文書ではありません。'
-      ])
-      expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
 
     test('正常：解約申込中の場合', async () => {
@@ -266,8 +203,10 @@ describe('approvalInboxのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
 
+      // inboxControllerのgetInobox実施結果設定
+      inboxControllerSpy.mockReturnValue(searchResult1)
       // 試験実施
-      await approvalInbox.cbGetIndex(request, response, next)
+      await approvalInboxList.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404，500エラーがエラーハンドリング「されない」
@@ -279,6 +218,34 @@ describe('approvalInboxのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('正常：500エラー:requestApprovalエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      const dbError = new Error('DB Conncetion Error')
+      requestApprovalControllerSpy.mockReturnValue(dbError)
+
+      // inboxControllerのgetInobox実施結果設定
+      inboxControllerSpy.mockReturnValue(searchResult1)
+      // 試験実施
+      await approvalInboxList.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('500エラー:不正なContractデータの場合', async () => {
@@ -296,8 +263,10 @@ describe('approvalInboxのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[7])
 
+      // inboxControllerのgetInobox実施結果設定
+      inboxControllerSpy.mockReturnValue(searchResult1)
       // 試験実施
-      await approvalInbox.cbGetIndex(request, response, next)
+      await approvalInboxList.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -312,7 +281,7 @@ describe('approvalInboxのテスト', () => {
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
       // 試験実施
-      await approvalInbox.cbGetIndex(request, response, next)
+      await approvalInboxList.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -333,7 +302,7 @@ describe('approvalInboxのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(userDbError)
 
       // 試験実施
-      await approvalInbox.cbGetIndex(request, response, next)
+      await approvalInboxList.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「されない」
@@ -353,7 +322,7 @@ describe('approvalInboxのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[8])
 
       // 試験実施
-      await approvalInbox.cbGetIndex(request, response, next)
+      await approvalInboxList.cbGetIndex(request, response, next)
 
       // 期待結果
       // 404エラーがエラーハンドリング「される」
@@ -373,7 +342,7 @@ describe('approvalInboxのテスト', () => {
       contractControllerFindOneSpy.mockReturnValue(contractDbError)
 
       // 試験実施
-      await approvalInbox.cbGetIndex(request, response, next)
+      await approvalInboxList.cbGetIndex(request, response, next)
 
       // 期待結果
       // 500エラーがエラーハンドリング「される」
@@ -393,50 +362,11 @@ describe('approvalInboxのテスト', () => {
       contractControllerFindContractSpyon.mockReturnValue(null)
 
       // 試験実施
-      await approvalInbox.cbGetIndex(request, response, next)
+      await approvalInboxList.cbGetIndex(request, response, next)
 
       // 期待結果
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-    })
-
-    test('DBエラー：テーブル検索失敗', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.user = { ...user[0] }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
-      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
-
-      const dbError = new Error(
-        'SequelizeConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)'
-      )
-      dbError.stack = 'SequelizeConnectionError: Failed to connect to localhost:1433 - Could not connect (sequence)'
-      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
-      approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
-      // DB検索の時エラーが発生
-      inboxControllerGetInvoiceDetail.mockImplementation(() => {
-        throw dbError
-      })
-
-      // 試験実施
-      await approvalInbox.cbGetIndex(request, response, next)
-
-      // 期待結果
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      expect(errorSpy).toHaveBeenCalledWith({ stack: dbError.stack, status: 1 })
-      expect(request.flash).toHaveBeenCalledWith('noti', ['承認する支払依頼確認', 'システムエラーが発生しました。'])
-      expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
   })
 })
