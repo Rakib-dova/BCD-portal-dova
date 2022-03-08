@@ -184,9 +184,6 @@ const cbGetRequestApproval = async (req, res, next) => {
     approveRoute = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
   }
 
-  console.log(approval)
-  console.log(req.session.requestApproval)
-
   // 承認依頼画面render
   res.render('requestApproval', {
     ...result,

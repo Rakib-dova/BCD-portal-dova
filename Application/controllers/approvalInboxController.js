@@ -66,7 +66,7 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
       })
       const approver = new Approval({
         contractId: contract,
-        request: request,
+        requestId: request.requestId,
         message: selectApproval[`message${idx + 1}`],
         status: ApprovalStatusList[0].id,
         approver: request.approveRoute.users[idx]
@@ -75,8 +75,8 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
         prev = approver
       } else {
         next = approver
-        prev.next = next
-        next.prev = prev
+        prev.next = next.approvalId
+        next.prev = prev.approvalId
         prev = next
       }
       request.approvals.push(approver)
