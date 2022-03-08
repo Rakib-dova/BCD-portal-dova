@@ -316,7 +316,7 @@ block content
         p.modal-card-title 支払依頼確認
         a.delete(data-target='check-approval-modal')
       section.modal-card-body
-        form#approval(method='POST', action=`/requestApproval/${documentId}`)
+        form#approval(method='POST', action=`/approvalInbox/${documentId}`)
           include invoiceHeader
           .box#journal-list
           include invoiceFooter
@@ -325,7 +325,7 @@ block content
           .box#check-request-approve-route
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button.mr-6(data-target='check-approval-modal') キャンセル
-        a.button.is-link#btn-approval 承認
+        button.button.is-link#btn-approval(type='submit') 承認
 
   include footer
 

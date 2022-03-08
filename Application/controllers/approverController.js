@@ -550,7 +550,7 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
     const status = await Status.findOne({
       where: {
         name: {
-          [Op.like]: '処理依頼中'
+          [Op.like]: '承認依頼中'
         }
       }
     })
@@ -642,7 +642,6 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
       }
     }
 
-    console.log(requester, 'requester')
     const approvalmodel = await ApprovalModel.build({
       requestId: request.requestId,
       requestUserId: requester.userId,
@@ -663,7 +662,6 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     approvalmodel.approvalAtLast = null
     approvalmodel.approveUserCount = users.length
     approvalmodel.message = message
-    console.log(approvalmodel)
     await approvalmodel.save()
 
     return 0

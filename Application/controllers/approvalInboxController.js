@@ -53,7 +53,7 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
     for (let idx = 0; idx < request.approveRoute.users.length; idx++) {
       const approver = new Approval({
         contractId: contract,
-        request: request,
+        request: request.requestId,
         message: null,
         status: ApprovalStatusList[0].id,
         approver: request.approveRoute.users[idx]
@@ -113,9 +113,21 @@ const hasPowerOfEditing = async (contractId, userId, requestApproval) => {
   }
 }
 
+/**
+ *
+ * @param {uuid} contractId
+ * @param {uuid} invoiceId
+ * @param {object} data
+ */
+const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => {
+  const inboxController = require('./inboxController')
+  return await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+}
+
 module.exports = {
   getRequestApproval: getRequestApproval,
-  hasPowerOfEditing: hasPowerOfEditing
+  hasPowerOfEditing: hasPowerOfEditing,
+  insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice
 }
 
 const ApprovalStatusList = []

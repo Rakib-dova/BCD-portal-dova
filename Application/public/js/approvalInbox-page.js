@@ -514,9 +514,6 @@ $('#checkApproval').addEventListener('click', function () {
   if (!$('#journal-list').firstChild) {
     Array.prototype.forEach.call(invoiceList, (invoiceLine) => {
       const cloneInvoice = document.importNode(invoiceLine.parentNode, true)
-      Array.prototype.forEach.call(cloneInvoice.querySelectorAll('input'), (input) => {
-        input.removeAttribute('name')
-      })
       $('#journal-list').appendChild(cloneInvoice)
     })
   }
@@ -720,3 +717,7 @@ const getInvoiceLineList = function () {
     }
   })
 }
+
+$('#btn-approval').addEventListener('click', function () {
+  $('#approval').submit()
+})
