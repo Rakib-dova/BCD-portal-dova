@@ -20,6 +20,7 @@ const parser = new Parser({
     Accept: 'text/html'
   }
 })
+const MemberSiteSessionDto = require('../../Application/memberSite/dtos/memberSiteSessionDto')
 
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
@@ -56,6 +57,7 @@ describe('portalのテスト', () => {
         helper.isAuthenticated,
         helper.isTenantRegistered,
         helper.isUserRegistered,
+        expect.any(Function),
         portal.cbGetIndex
       )
     })
@@ -64,10 +66,16 @@ describe('portalのテスト', () => {
   describe('コールバック:cbGetIndex', () => {
     test('正常', async () => {
       // 準備
+      // 会員サイト開発により追加
+      const memberSiteCoopSessionDto = new MemberSiteSessionDto()
+      memberSiteCoopSessionDto.memberSiteFlg = true
+      // 会員サイト開発により追加
+
       // requestのsession,userIdに正常値を入れる
       request.session = {
         userContext: 'NotLoggedIn',
-        userRole: 'dummy'
+        userRole: 'dummy',
+        memberSiteCoopSession: memberSiteCoopSessionDto // 会員サイト開発により追加
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
@@ -167,6 +175,12 @@ describe('portalのテスト', () => {
           })
         })
 
+      // CSRF対策
+      const dummyTokne = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyTokne
+      })
+
       // 試験実施
       await portal.cbGetIndex(request, response, next)
 
@@ -188,7 +202,9 @@ describe('portalのテスト', () => {
         tenantId: request.user.tenantId,
         userRole: request.session.userRole,
         numberN: '0000011111',
-        TS_HOST: process.env.TS_HOST
+        TS_HOST: process.env.TS_HOST,
+        memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg, // 会員サイト開発により追加
+        csrfToken: dummyTokne // 会員サイト開発により追加
       })
     })
 

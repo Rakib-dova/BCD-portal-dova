@@ -73,7 +73,7 @@ document.getElementsByName('confirmButton').forEach((item) => {
             location.href = '/uploadFormatEdit' + '/' + uuid
             break
           case -1:
-            alert('すでに削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
+            alert('既に削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
             location.reload()
             break
           default:
@@ -115,7 +115,7 @@ document.getElementsByName('modalDelBtn').forEach((item) => {
             location.reload()
             break
           case -1:
-            alert('すでに削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
+            alert('既に削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
             location.reload()
             break
         }

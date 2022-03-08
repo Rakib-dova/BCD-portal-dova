@@ -423,24 +423,24 @@ module.exports = {
 
       // ユーザカスタマイズされた税と単位がある場合削除する。
       if (deleteTargetUploadFormatIdentifier) {
-        logger.info(`${deleteTargetUploadFormat.uploadFormatId}のIdentifierデータを削除開始します。`)
+        logger.info(`${deleteTargetUploadFormat.uploadFormatId}のIdentifierデータの削除処理を開始します。`)
         deleteTargetUploadFormatIdentifier.forEach(async (item) => {
           await item.destroy()
         })
-        logger.info(`${deleteTargetUploadFormat.uploadFormatId}のIdentifierデータを削除終了します。`)
+        logger.info(`${deleteTargetUploadFormat.uploadFormatId}のIdentifierデータの削除処理を終了します。`)
       }
 
       // ユーザカスタマイズヘッダ削除
-      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のDetailデータを削除開始します。`)
+      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のDetailデータの削除処理を開始します。`)
       deleteTargetUploadFormatDetail.forEach(async (item) => {
         await item.destroy()
       })
-      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のDetailデータを削除終了します。`)
+      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のDetailデータの削除処理を終了します。`)
 
       // アップロードフォーマット削除
-      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のデータを削除終了します。`)
+      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のデータの削除処理を終了します。`)
       await deleteTargetUploadFormat.destroy()
-      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のデータを削除終了します。`)
+      logger.info(`${deleteTargetUploadFormat.uploadFormatId}のデータの削除処理を終了します。`)
 
       return 1
     } catch (error) {
