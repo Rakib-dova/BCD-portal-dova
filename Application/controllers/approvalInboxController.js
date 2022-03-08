@@ -5,6 +5,7 @@ const approverController = require('./approverController')
 const db = require('../models')
 const Op = db.Sequelize.Op
 const RequestApproval = db.RequestApproval
+const DbApproval = db.Approval
 
 const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId, tenant) => {
   try {
@@ -34,6 +35,7 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
       }
       return false
     })
+
     const request = {
       requestId: requestApproval.requestId,
       contractId: requestApproval.contractId,
@@ -51,19 +53,24 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
     let prev = null
     let next = null
     for (let idx = 0; idx < request.approveRoute.users.length; idx++) {
+      const selectApproval = await DbApproval.findOne({
+        where: {
+          approveRouteId: approveRouteId
+        }
+      })
       const approver = new Approval({
         contractId: contract,
-        request: request,
-        message: null,
-        status: ApprovalStatusList[0].id,
+        requestId: request.requestId,
+        message: selectApproval[`message${idx + 1}`],
+        status: request.status,
         approver: request.approveRoute.users[idx]
       })
       if (!prev) {
         prev = approver
       } else {
         next = approver
-        prev.next = next
-        next.prev = prev
+        prev.next = next.approvalId
+        next.prev = prev.approvalId
         prev = next
       }
       request.approvals.push(approver)
@@ -86,9 +93,10 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
       case 8:
       case 9:
       case 10:
-        request.prevUser.name = request.approveRoute.users[userNo - 1]
-        request.prevUser.message = request.approveRoute.approvals[userNo - 1].message
+        request.prevUser.name = request.approveRoute.users[userNo - 1].getName()
+        request.prevUser.message = request.approvals[userNo - 1].message
     }
+
     return request
   } catch (error) {
     logger.error({ contractId: contract, stack: error.stack, status: 0 })
@@ -113,9 +121,21 @@ const hasPowerOfEditing = async (contractId, userId, requestApproval) => {
   }
 }
 
+/**
+ * 仕訳情報保存
+ * @param {uuid} contractId
+ * @param {uuid} invoiceId
+ * @param {object} data
+ */
+const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => {
+  const inboxController = require('./inboxController')
+  return await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+}
+
 module.exports = {
   getRequestApproval: getRequestApproval,
-  hasPowerOfEditing: hasPowerOfEditing
+  hasPowerOfEditing: hasPowerOfEditing,
+  insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice
 }
 
 const ApprovalStatusList = []
