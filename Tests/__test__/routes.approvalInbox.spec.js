@@ -739,7 +739,7 @@ describe('approvalInboxのテスト', () => {
       expect(response.redirect).toHaveBeenCalledWith(`/approvalInbox/${request.params.invoiceId}`)
     })
 
-    test('正常：不正な部門データの場合', async () => {
+    test('エラー：不正な部門データの場合', async () => {
       // 準備
       const lineId = 'lineAccountCode4'
       const subAccountCode = 'SU001'
