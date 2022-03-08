@@ -60,7 +60,7 @@ module.exports = {
       },
       message: {
         type: Sequelize.DataTypes.STRING(1500),
-        allowNull: false
+        allowNull: true
       },
       create: {
         type: Sequelize.DataTypes.DATE,

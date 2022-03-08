@@ -718,6 +718,6 @@ const getInvoiceLineList = function () {
   })
 }
 
-$('#btn-approval').addEventListener('click', function () {
+$('#btn-approve').addEventListener('click', function () {
   $('#approval').submit()
 })

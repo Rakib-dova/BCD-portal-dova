@@ -38,11 +38,11 @@ module.exports = {
         },
         allowNull: false
       },
-      approvalStatus: {
+      approveStatus: {
         type: Sequelize.DataTypes.STRING(2),
         references: {
           model: {
-            tableName: 'ApprovalStatus'
+            tableName: 'ApproveStatus'
           },
           key: 'code'
         },
@@ -60,12 +60,20 @@ module.exports = {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
+      message1: {
+        type: Sequelize.DataTypes.STRING(1500),
+        allowNull: true
+      },
       approveUser2: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
       approvalAt2: {
         type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
+      message2: {
+        type: Sequelize.DataTypes.STRING(1500),
         allowNull: true
       },
       approveUser3: {
@@ -76,12 +84,20 @@ module.exports = {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
+      message3: {
+        type: Sequelize.DataTypes.STRING(1500),
+        allowNull: true
+      },
       approveUser4: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
       approvalAt4: {
         type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
+      message4: {
+        type: Sequelize.DataTypes.STRING(1500),
         allowNull: true
       },
       approveUser5: {
@@ -92,12 +108,20 @@ module.exports = {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
+      message5: {
+        type: Sequelize.DataTypes.STRING(1500),
+        allowNull: true
+      },
       approveUser6: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
       approvalAt6: {
         type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
+      message6: {
+        type: Sequelize.DataTypes.STRING(1500),
         allowNull: true
       },
       approveUser7: {
@@ -108,12 +132,20 @@ module.exports = {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
+      message7: {
+        type: Sequelize.DataTypes.STRING(1500),
+        allowNull: true
+      },
       approveUser8: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
       approvalAt8: {
         type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
+      message8: {
+        type: Sequelize.DataTypes.STRING(1500),
         allowNull: true
       },
       approveUser9: {
@@ -124,12 +156,20 @@ module.exports = {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
+      message9: {
+        type: Sequelize.DataTypes.STRING(1500),
+        allowNull: true
+      },
       approveUser10: {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       },
       approvalAt10: {
         type: Sequelize.DataTypes.DATE,
+        allowNull: true
+      },
+      message10: {
+        type: Sequelize.DataTypes.STRING(1500),
         allowNull: true
       },
       approveUserLast: {
@@ -140,12 +180,12 @@ module.exports = {
         type: Sequelize.DataTypes.DATE,
         allowNull: true
       },
+      messageLast: {
+        type: Sequelize.DataTypes.STRING(1500),
+        allowNull: true
+      },
       approveUserCount: {
         type: Sequelize.DataTypes.INTEGER,
-        allowNull: false
-      },
-      message: {
-        type: Sequelize.DataTypes.STRING(1500),
         allowNull: false
       },
       approvedAt: {
