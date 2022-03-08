@@ -36,17 +36,11 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
       return false
     })
 
-    let messageNumber
-    if (requestStatus === '10') {
-      messageNumber = ~~requestStatus - 9 + ''
-    } else {
-      messageNumber = ''
-    }
     const request = {
       requestId: requestApproval.requestId,
       contractId: requestApproval.contractId,
       invoiceId: requestApproval.invoiceId,
-      message: requestApproval[`message${messageNumber}`],
+      message: requestApproval.message,
       status: requestApproval.status,
       approveRoute: await approverController.getApproveRoute(accessToken, refreshToken, contract, approveRouteId),
       approvals: [],
@@ -66,17 +60,17 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
       })
       const approver = new Approval({
         contractId: contract,
-        request: request,
+        requestId: request.requestId,
         message: selectApproval[`message${idx + 1}`],
-        status: ApprovalStatusList[0].id,
+        status: request.status,
         approver: request.approveRoute.users[idx]
       })
       if (!prev) {
         prev = approver
       } else {
         next = approver
-        prev.next = next
-        next.prev = prev
+        prev.next = next.approvalId
+        next.prev = prev.approvalId
         prev = next
       }
       request.approvals.push(approver)
@@ -128,7 +122,7 @@ const hasPowerOfEditing = async (contractId, userId, requestApproval) => {
 }
 
 /**
- *
+ * 仕訳情報保存
  * @param {uuid} contractId
  * @param {uuid} invoiceId
  * @param {object} data

@@ -593,7 +593,7 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     const approveStatus = await Status.findOne({
       where: {
         name: {
-          [Op.like]: '処理依頼中'
+          [Op.like]: '承認依頼中'
         }
       }
     })
