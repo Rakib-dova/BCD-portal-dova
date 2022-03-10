@@ -407,3 +407,4 @@ stages:
     - script:  |
         npm i
         npm run chrome -- spec/scenario_ci_001.js
+      workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
