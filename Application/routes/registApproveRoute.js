@@ -49,7 +49,7 @@ const cbGetRegistApproveRoute = async (req, res, next) => {
     delete req.session.body
     const { approveRouteName, approverUsers, lastApprover } = await approverController.duplicateApproveRoute(body)
     res.render('registApproveRoute', {
-      panelHead: '条件絞り込み',
+      panelHead: '承認ルート',
       approveRouteNameLabel: '承認ルート名',
       requiredTagApproveRouteName: 'approveRouteNameTagRequired',
       idForApproveRouteNameInput: 'setApproveRouteNameInputId',
@@ -64,7 +64,7 @@ const cbGetRegistApproveRoute = async (req, res, next) => {
     })
   } else {
     res.render('registApproveRoute', {
-      panelHead: '条件絞り込み',
+      panelHead: '承認ルート',
       approveRouteNameLabel: '承認ルート名',
       requiredTagApproveRouteName: 'approveRouteNameTagRequired',
       idForApproveRouteNameInput: 'setApproveRouteNameInputId',
