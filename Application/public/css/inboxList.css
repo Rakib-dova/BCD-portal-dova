@@ -179,6 +179,25 @@
   pointer-events: none;
 }
 
+.a-approveStatus-RETURNED {
+  background-color: #eb250b;
+  border-color: transparent;
+  color: #fff;
+  border-width: 1px;
+  justify-content: center;
+  padding-bottom: 7px;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: calc(0.5em - 1px);
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 4px;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
 .a-previous-none {
   color: #fff;
   border-color: #fff !important;
