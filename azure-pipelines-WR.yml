@@ -51,7 +51,7 @@ variables:
   - name: ManualOperation #正常性確認実施フラグ
     value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.isManualOperation_prodstgOpt,true)) }}
 
-# stages:
+   stages:
 #   - stage: BuildandTest
 #     pool:
 #       vmImage: ubuntu-latest
