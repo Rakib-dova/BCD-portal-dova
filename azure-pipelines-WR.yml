@@ -19,7 +19,7 @@ trigger:
 parameters:
   - name: Environment
     type: string
-    default: dev
+    default: dev_WR
     values:
       - dev_WR
       - dev
