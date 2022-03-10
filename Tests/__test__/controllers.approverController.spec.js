@@ -20,13 +20,14 @@ let approveRouteFindAll,
   approveRouteUpdate,
   approveRouteFindOne,
   requestApprovalFindOne,
+  requestApprovalFindAll,
   approveStatusFindOne,
   userControllerFindOne,
   RequestApprovalUpdate,
   approvalUpdate
 let approveUserCreate, approveUserFindOne
 let validateIsUUID
-let approvalFindOne
+let approvalFindOne, approvalFindAll
 
 const findUsers = {
   itemsPerPage: 25,
@@ -137,6 +138,7 @@ describe('approverControllerのテスト', () => {
     ApproveUser.save = jest.fn()
     approveRouteFindOne = jest.spyOn(ApproveRoute, 'findOne')
     requestApprovalFindOne = jest.spyOn(RequestApproval, 'findOne')
+    requestApprovalFindAll = jest.spyOn(RequestApproval, 'findAll')
     approveStatusFindOne = jest.spyOn(ApproveStatus, 'findOne')
     userControllerFindOne = jest.spyOn(userController, 'findOne')
     RequestApproval.save = jest.fn()
@@ -154,6 +156,7 @@ describe('approverControllerのテスト', () => {
       return result
     })
     approvalFindOne = jest.spyOn(Approval, 'findOne')
+    approvalFindAll = jest.spyOn(Approval, 'findAll')
     approvalUpdate = jest.spyOn(Approval, 'update')
   })
 
@@ -169,10 +172,12 @@ describe('approverControllerのテスト', () => {
     approveRouteUpdate.mockRestore()
     approveRouteFindOne.mockRestore()
     requestApprovalFindOne.mockRestore()
+    requestApprovalFindAll.mockRestore()
     approveStatusFindOne.mockRestore()
     userControllerFindOne.mockRestore()
     validateIsUUID.mockRestore()
     approvalFindOne.mockRestore()
+    approvalFindAll.mockRestore()
     RequestApprovalUpdate.mockRestore()
     approvalUpdate.mockRestore()
   })
@@ -1122,6 +1127,194 @@ describe('approverControllerのテスト', () => {
       expect(result.approverUsers.length).toBe(1)
       expect(result.approverUsers[0]).toEqual(approver)
       expect(result.lastApprover).toEqual(lastApprover)
+    })
+  })
+
+  describe('deleteApproveRoute', () => {
+    test('正常：承認ルート削除', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      db.sequelize.transaction = jest.fn(async (callback) => {
+        return await callback()
+      })
+
+      approveRouteFindOne.mockReturnValue({
+        approveRouteId: approveRouteId,
+        destroy: async () => {}
+      })
+
+      // 承認ルート検索（Mockデータ）
+      approvalFindAll.mockReturnValue([{
+        destroy: async () => {}
+      }])
+
+      requestApprovalFindAll.mockReturnValue([{
+        destroy: async () => {}
+      }])
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 正常削除の場合、「1」を返す
+      expect(result).toBe(1)
+    })
+
+    test('準正常：承認ルート削除（既に削除されている場合）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      approveRouteFindOne.mockReturnValue(null)
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「-1」を返す
+      expect(result).toBe(-1)
+    })
+
+    test('準正常：承認ルート削除（承認ルート検索DBエラー）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      approveRouteFindOne.mockReturnValue(dbError)
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
+    })
+
+    test('準正常：承認ルート削除（承認検索DBエラー）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      approveRouteFindOne.mockReturnValue({
+        approveRouteId: approveRouteId,
+        destroy: async () => {}
+      })
+
+      // 紐づいている承認検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      approvalFindAll.mockReturnValue(dbError)
+
+      // 紐づいている承認依頼検索（Mockデータ）
+      requestApprovalFindAll.mockReturnValue([{
+        destroy: async () => {}
+      }])
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
+    })
+
+    test('準正常：承認ルート削除（承認削除DBエラー）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      approveRouteFindOne.mockReturnValue({
+        approveRouteId: approveRouteId,
+        destroy: async () => {}
+      })
+
+      // 紐づいている承認検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      approvalFindAll.mockReturnValue([{
+        destroy: () => Promise.reject(dbError)
+      }])
+
+      // 紐づいている承認依頼検索（Mockデータ）
+      requestApprovalFindAll.mockReturnValue([{
+        destroy: async () => {}
+      }])
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
+    })
+
+    test('準正常：承認ルート削除（承認依頼検索DBエラー）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      approveRouteFindOne.mockReturnValue({
+        approveRouteId: approveRouteId,
+        destroy: async () => {}
+      })
+
+      // 紐づいている承認検索（Mockデータ）
+      approvalFindAll.mockReturnValue([{
+        destroy: async () => {}
+      }])
+
+      // 紐づいている承認依頼検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      requestApprovalFindAll.mockReturnValue(dbError)
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
+    })
+
+    test('準正常：承認ルート削除（承認依頼削除DBエラー）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      approveRouteFindOne.mockReturnValue({
+        approveRouteId: approveRouteId,
+        destroy: async () => {}
+      })
+
+      // 紐づいている承認検索（Mockデータ）
+      approvalFindAll.mockReturnValue([{
+        destroy: async () => {}
+      }])
+
+      // 紐づいている承認依頼検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      requestApprovalFindAll.mockReturnValue([{
+        destroy: () => Promise.reject(dbError)
+      }])
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
+    })
+
+    test('準正常：承認ルート削除（承認ルート削除DBエラー）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      approveRouteFindOne.mockReturnValue({
+        approveRouteId: approveRouteId,
+        destroy: () => Promise.reject(dbError)
+      })
+
+      // 紐づいている承認検索（Mockデータ）
+      approvalFindAll.mockReturnValue([{
+        destroy: async () => {}
+      }])
+
+      // 紐づいている承認依頼検索（Mockデータ）
+      requestApprovalFindAll.mockReturnValue([{
+        destroy: () => {}
+      }])
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
     })
   })
 

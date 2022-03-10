@@ -47,7 +47,11 @@ block content
                   p.modal-card-title 承認ルート削除
                   button.delete(type="button" data-target="confirationDelete-modal")
                 section.modal-card-body
-                  p 機能準備中です。
+                  p 削除しますか？
+                footer.modal-card-foot
+                  div.button-area
+                    a.button.cancel-button(data-target='confirationDelete-modal') キャンセル
+                    a.button.is-danger.ml-6#modalDelBtn(name='modalDelBtn') 削除
 
         .modal.modal-fx-fadeInscale#confirmationHidden-modal
               .modal-background.cancel-button(data-target="confirmationHidden-modal")

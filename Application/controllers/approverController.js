@@ -489,6 +489,69 @@ const duplicateApproveRoute = async (approveRoute) => {
 }
 
 /**
+ * 承認ルートと紐づいているレコードを削除する。
+ * @param {uuid} approveRouteId デジトレの利用の契約者の識別番号
+ * @returns {int} 1：正常_削除成功, -1：削除対象のがない場合, 0：エラー
+ */
+const deleteApproveRoute = async (approveRouteId) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'approverController.deleteApproveRoute')
+
+  try {
+    // 承認ルートを検索
+    const deleteTargetApproveRoute = await ApproveRoute.findOne({
+      where: {
+        approveRouteId: approveRouteId
+      }
+    })
+
+    // null：既に削除されたレコード
+    if (deleteTargetApproveRoute === null) return -1
+
+    await db.sequelize.transaction(async (t) => {
+      // 削除対象の承認ルート&承認依頼と紐づいている承認を取得
+      const deleteTargetApproval = await Approval.findAll({
+        where: {
+          approveRouteId: deleteTargetApproveRoute.approveRouteId
+        }
+      })
+
+      // 削除対象の承認ルート&承認依頼と紐づいている承認を削除
+      logger.info(`${deleteTargetApproveRoute.approveRouteId}と紐づいてる承認の削除処理を開始します。`)
+      await Promise.all(deleteTargetApproval.map(async (item) => {
+        return await item.destroy({ transaction: t })
+      }))
+      logger.info(`${deleteTargetApproveRoute.approveRouteId}と紐づいてる承認の削除処理を終了します。`)
+
+      // 削除対象の承認ルートと紐づいている承認依頼を取得
+      const deleteTargetRequestApproval = await Request.findAll({
+        where: {
+          approveRouteId: deleteTargetApproveRoute.approveRouteId
+        }
+      })
+
+      // 削除対象の承認ルートと紐づいている承認依頼を削除
+      logger.info(`${deleteTargetApproveRoute.approveRouteId}と紐づいてる承認依頼の削除処理を開始します。`)
+      await Promise.all(deleteTargetRequestApproval.map(async (item) => {
+        return await item.destroy({ transaction: t })
+      }))
+      logger.info(`${deleteTargetApproveRoute.approveRouteId}と紐づいてる承認依頼の削除処理を終了します。`)
+
+      // 承認ルート削除
+      logger.info(`${deleteTargetApproveRoute.approveRouteId}の承認ルートの削除処理を開始します。`)
+      await deleteTargetApproveRoute.destroy({ transaction: t })
+      logger.info(`${deleteTargetApproveRoute.approveRouteId}の承認ルートの削除処理を終了します。`)
+    })
+
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.deleteApproveRoute')
+    return 1
+  } catch (error) {
+    logger.error(error)
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.deleteApproveRoute')
+    return 0
+  }
+}
+
+/**
  * 承認依頼の承認ルート検索関数。
  * @param {uuid} _contractId  // 契約者の識別番号
  * @param {string} _approveRouteName // 承認ルート名
@@ -836,6 +899,7 @@ module.exports = {
   editApprover: editApprover,
   getApproveRouteList: getApproveRouteList,
   getApproveRoute: getApproveRoute,
+  deleteApproveRoute: deleteApproveRoute,
   duplicateApproveRoute: duplicateApproveRoute,
   searchApproveRouteList: searchApproveRouteList,
   requestApproval: requestApproval,
