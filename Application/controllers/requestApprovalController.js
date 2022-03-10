@@ -9,7 +9,8 @@ const findOneRequestApproval = async (contractId, documentId) => {
       where: {
         contractId: contractId,
         invoiceId: documentId
-      }
+      },
+      order: [['create', 'DESC']]
     })
   } catch (error) {
     logger.error({ contractId: contractId, invoiceId: documentId, stack: error.stack, status: 0 }, error.name)
