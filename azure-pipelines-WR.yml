@@ -21,6 +21,7 @@ parameters:
     type: string
     default: dev
     values:
+      - dev_WR
       - dev
       - dev2
       - docomoIDF
@@ -29,7 +30,7 @@ parameters:
       - demo
       - test
       - BuildandTest
-      - WR
+
   - name: isManualOperation_prodstgOpt
     type: boolean
     default: false
