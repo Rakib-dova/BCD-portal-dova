@@ -127,7 +127,8 @@ const searchResult2 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-22',
-      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f'
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
+      approveStatus: '90'
     },
     {
       no: 4,
@@ -139,7 +140,8 @@ const searchResult2 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537'
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+      approveStatus: '90'
     }
   ],
   numPages: 1,
@@ -168,7 +170,8 @@ const searchResult1Rejected = {
       sentBy: 'バイヤー1',
       updated: '2021-12-27',
       expire: '2021-11-10',
-      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+      approveStatus: '90'
     },
     {
       no: 2,
@@ -180,7 +183,8 @@ const searchResult1Rejected = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-22',
-      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f'
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
+      approveStatus: '90'
     },
     {
       no: 3,
@@ -192,7 +196,8 @@ const searchResult1Rejected = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd'
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
+      approveStatus: '90'
     },
     {
       no: 4,
@@ -204,7 +209,8 @@ const searchResult1Rejected = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537'
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+      approveStatus: '90'
     }
   ],
   numPages: 1,
@@ -242,16 +248,6 @@ const searchResult2Rejected = {
   currPage: 1
 }
 
-const returnRequestApprovalRejected = {
-  requestId: 'dummyId',
-  contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
-  approveRouteId: 'dummyId',
-  invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-  requester: 'dummyrequester',
-  status: '90',
-  name: '差し戻し'
-}
-
 describe('inboxListのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -282,7 +278,11 @@ describe('inboxListのテスト', () => {
   describe('ルーティング', () => {
     test('inboxListのルーティングを確認', async () => {
       expect(inboxList.router.get).toBeCalledWith('/:page', helper.isAuthenticated, inboxList.cbGetIndex)
-      expect(inboxList.router.get).toBeCalledWith('/redirected/:page', helper.isAuthenticated, inboxList.cbGetIndexRedirected)
+      expect(inboxList.router.get).toBeCalledWith(
+        '/redirected/:page',
+        helper.isAuthenticated,
+        inboxList.cbGetIndexRedirected
+      )
     })
   })
 
@@ -353,38 +353,11 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList', {
-        listArr: searchResult2.list,
-        numPages: searchResult2.numPages,
-        currPage: searchResult2.currPage,
+        listArr: searchResult1.list,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
         rejectedFlag: false,
-        requestApprovalList: [
-          {
-            no: 1,
-            invoiceNo: 'PB1649meisai001',
-            status: 0,
-            currency: 'JPY',
-            ammount: '3,080,000',
-            sentTo: 'サプライヤー1',
-            sentBy: 'バイヤー1',
-            updated: '2021-12-27',
-            expire: '2021-11-10',
-            documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-            approveStatus: '90'
-          },
-          {
-            no: 3,
-            invoiceNo: 'PBI2848supplier_承認済み',
-            status: 1,
-            currency: 'JPY',
-            ammount: '178,320',
-            sentTo: 'サプライヤー1',
-            sentBy: 'バイヤー1',
-            updated: '2021-12-16',
-            expire: '2021-12-28',
-            documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
-            approveStatus: '90'
-          }
-        ]
+        requestApprovalList: searchResult1Rejected.list
       })
     })
 
@@ -626,7 +599,7 @@ describe('inboxListのテスト', () => {
       requestApprovalControllerSpy.mockReturnValue(returnRequestApproval)
 
       // inboxControllerのgetInobox実施結果設定
-      inboxControllerSpy.mockReturnValue(searchResult1Rejected)
+      inboxControllerSpy.mockReturnValue(searchResult2Rejected)
       // 試験実施
       await inboxList.cbGetIndexRedirected(request, response, next)
 
@@ -637,38 +610,11 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList', {
-        listArr: searchResult2Rejected.list,
-        numPages: searchResult2Rejected.numPages,
-        currPage: searchResult2Rejected.currPage,
+        listArr: searchResult2.list,
+        numPages: searchResult2.numPages,
+        currPage: searchResult2.currPage,
         rejectedFlag: true,
-        requestApprovalList: [
-          {
-            no: 1,
-            invoiceNo: 'PB1649meisai001',
-            status: 0,
-            currency: 'JPY',
-            ammount: '3,080,000',
-            sentTo: 'サプライヤー1',
-            sentBy: 'バイヤー1',
-            updated: '2021-12-27',
-            expire: '2021-11-10',
-            documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-            approveStatus: '90'
-          },
-          {
-            no: 3,
-            invoiceNo: 'PBI2848supplier_承認済み',
-            status: 1,
-            currency: 'JPY',
-            ammount: '178,320',
-            sentTo: 'サプライヤー1',
-            sentBy: 'バイヤー1',
-            updated: '2021-12-16',
-            expire: '2021-12-28',
-            documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
-            approveStatus: '90'
-          }
-        ]
+        requestApprovalList: searchResult2Rejected.list
       })
     })
 

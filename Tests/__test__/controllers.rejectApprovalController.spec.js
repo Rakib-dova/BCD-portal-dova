@@ -3,15 +3,24 @@
 const logger = require('../../Application/lib/logger')
 const db = require('../../Application/models')
 const RequestApproval = db.RequestApproval
+const Approval = db.Approval
 const Status = db.ApproveStatus
 const rejectApporovalController = require('../../Application/controllers/rejectApporovalController')
 
-let requestApprovalFindOneSpy, statusFindOne, requestApprovalUpdateSpy, errorSpy, contractId, documentId, rejectMessage
+let requestApprovalFindOneSpy,
+  statusFindOne,
+  requestApprovalUpdateSpy,
+  approvalUpdateSpy,
+  errorSpy,
+  contractId,
+  documentId,
+  rejectMessage
 describe('rejectApporovalControllerのテスト', () => {
   beforeEach(() => {
     requestApprovalFindOneSpy = jest.spyOn(RequestApproval, 'findOne')
     statusFindOne = jest.spyOn(Status, 'findOne')
     requestApprovalUpdateSpy = jest.spyOn(RequestApproval, 'update')
+    approvalUpdateSpy = jest.spyOn(Approval, 'update')
     errorSpy = jest.spyOn(logger, 'error')
   })
   afterEach(() => {
@@ -19,6 +28,7 @@ describe('rejectApporovalControllerのテスト', () => {
     statusFindOne.mockRestore()
     requestApprovalUpdateSpy.mockRestore()
     errorSpy.mockRestore()
+    approvalUpdateSpy.mockRestore()
   })
 
   contractId = '12345678-bdac-4195-80b9-1ea64b8cb70c'
@@ -54,10 +64,24 @@ describe('rejectApporovalControllerのテスト', () => {
       expect(result).toBe(true)
     })
 
-    test('準正常:updateの結果がfalseの場合', async () => {
+    test('準正常:RequestApprovalのupdateの結果がfalseの場合', async () => {
       statusFindOne.mockReturnValue(returnStatus)
       requestApprovalFindOneSpy.mockReturnValue(returnRequestApproval)
       requestApprovalUpdateSpy.mockReturnValue(false)
+
+      // 試験実施
+      const result = await rejectApporovalController.rejectApprove(contractId, documentId, rejectMessage)
+
+      // 期待結果
+      //  取得した結果がReturnされていること
+      expect(result).toBe(false)
+    })
+
+    test('準正常:Approvalのupdateの結果がfalseの場合', async () => {
+      statusFindOne.mockReturnValue(returnStatus)
+      requestApprovalFindOneSpy.mockReturnValue(returnRequestApproval)
+      requestApprovalUpdateSpy.mockReturnValue(true)
+      approvalUpdateSpy.mockReturnValue(false)
 
       // 試験実施
       const result = await rejectApporovalController.rejectApprove(contractId, documentId, rejectMessage)
@@ -76,13 +100,11 @@ describe('rejectApporovalControllerのテスト', () => {
       // 試験実施
       await rejectApporovalController.rejectApprove(contractId, documentId, rejectMessage)
 
-      expect(errorSpy).toHaveBeenCalledWith(
-        {
-          invoiceId: documentId,
-          stack: dbError.stack,
-          status: 0
-        }
-      )
+      expect(errorSpy).toHaveBeenCalledWith({
+        invoiceId: documentId,
+        stack: dbError.stack,
+        status: 0
+      })
     })
   })
 })
