@@ -388,3 +388,12 @@ stages:
                 if [ "$vmStatus" == "VM running" ]; then
                   az vm deallocate -g  $(operationRg)  -n $(vmPipelineName)
                 fi
+
+  - stage: chromeStage
+    dependsOn: devDeploy
+    jobs:
+    - job: chrome_scenario001
+      steps:
+      - script:  |
+          npm i
+          npm run chrome -- spec/scenario_ci_001.js
