@@ -11,6 +11,7 @@ trigger:
   paths:
     include:
       - Application
+      - bcd-e2e-tests
     exclude:
       - Documents
       - Tests
@@ -51,7 +52,7 @@ variables:
   - name: ManualOperation #正常性確認実施フラグ
     value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.isManualOperation_prodstgOpt,true)) }}
 
-   stages:
+# stages:
 #   - stage: BuildandTest
 #     pool:
 #       vmImage: ubuntu-latest
@@ -389,11 +390,9 @@ variables:
 #                   az vm deallocate -g  $(operationRg)  -n $(vmPipelineName)
 #                 fi
 
+stages:
 
   - stage: chromeStage
-    paths:
-    include:
-      - bcd-e2e-tests
     jobs:
     - job: chrome_scenario001
       steps:
