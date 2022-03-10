@@ -721,3 +721,43 @@ const getInvoiceLineList = function () {
 $('#btn-approve').addEventListener('click', function () {
   $('#approval').submit()
 })
+
+// 差し戻しモーダルの表示
+$('#rejectApproval').addEventListener('click', function () {
+  // 明細初期化
+  const rejectModalLine = $('#reject-approval-modal').querySelector('#journal-list-reject-modal')
+  while (rejectModalLine.firstChild) {
+    rejectModalLine.removeChild(rejectModalLine.firstChild)
+  }
+
+  // 明細取得
+  const invoiceList = $('.invoiceLine')
+  if (!rejectModalLine.firstChild) {
+    Array.prototype.forEach.call(invoiceList, (invoiceLine) => {
+      const cloneInvoice = document.importNode(invoiceLine.parentNode, true)
+      const lineInpt = cloneInvoice.querySelectorAll('input')
+      Array.prototype.forEach.call(lineInpt, (invoiceLine) => {
+        invoiceLine.removeAttribute('name')
+      })
+      rejectModalLine.appendChild(cloneInvoice)
+    })
+  }
+
+  // 担当者のメッセージを表示
+  $('#reject-request-approval-message > textarea').value = $('#inputMsg').value
+
+  // 承認ルート各民モーダルに表示
+  const checkApproveRoute = $('#reject-request-approve-route')
+  while (checkApproveRoute.firstChild) {
+    checkApproveRoute.removeChild(checkApproveRoute.firstChild)
+  }
+  const displayRequestApprovaRoute = $('#displayRequestApprovaRoute')
+  const cloneDiplay = document.importNode(displayRequestApprovaRoute, true)
+  checkApproveRoute.appendChild(cloneDiplay)
+
+  $('#reject-approval-modal').classList.toggle('is-active')
+})
+
+$('#btn-reject').addEventListener('click', function () {
+  $('#reject').submit()
+})
