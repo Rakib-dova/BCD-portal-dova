@@ -391,11 +391,19 @@ variables:
 #                 fi
 
 stages:
-
-  - stage: chromeStage
-    jobs:
-    - job: chrome_scenario001
-      steps:
-      - script:  |
-          npm i
-          npm run chrome -- spec/scenario_ci_001.js
+- stage: npm_settingStage
+  jobs:
+  - job: npm_settingJob
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '10.x'
+      displayName: 'Install Node.js'
+      
+- stage: chromeStage
+  jobs:
+  - job: chrome_scenario001
+    steps:
+    - script:  |
+        npm i
+        npm run chrome -- spec/scenario_ci_001.js
