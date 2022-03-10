@@ -2777,7 +2777,6 @@ describe('approverControllerのテスト', () => {
   describe('updateApprove', () => {
     test('正常：１次承認者', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
       const requestId = 'dummy-request'
       const requestUserId = 'dummy-User-id'
@@ -2786,12 +2785,13 @@ describe('approverControllerのテスト', () => {
         apprvoeRouteName: 'UTコード'
       })
 
-      const dummyApproval = Approval.build({
+      const dummyApproval = await Approval.build({
         requestId: requestId,
         requestUserId: requestUserId,
         approveRouteId: approveRoute.approveRouteId,
         approveStatus: '11',
-        approveRouteName: approveRoute.approveRouteName
+        approveRouteName: approveRoute.approveRouteName,
+        approveUserCount: 1
       })
       approvalFindOne.mockReturnValueOnce(dummyApproval)
 
@@ -2803,47 +2803,48 @@ describe('approverControllerのテスト', () => {
       approvalUpdate.mockReturnValueOnce(dummyApproval)
       RequestApprovalUpdate.mockReturnValueOnce({})
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, requestId, message)
 
       expect(result).toBeTruthy()
     })
 
     test('正常：最終承認者', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
       const requestId = 'dummy-request'
       const requestUserId = 'dummy-User-id'
-      const approveRoute = ApproveRoute.build({
+      const approveRoute = await ApproveRoute.build({
         contractId: contractId,
         apprvoeRouteName: 'UTコード'
       })
 
-      const dummyApproval = Approval.build({
+      const dummyApproval = await Approval.build({
         requestId: requestId,
         requestUserId: requestUserId,
         approveRouteId: approveRoute.approveRouteId,
         approveStatus: '20',
         approveRouteName: approveRoute.approveRouteName
       })
-      approvalFindOne.mockReturnValueOnce(dummyApproval)
+      dummyApproval.approveUserCount = 11
+      await dummyApproval.save()
+      approvalFindOne.mockReturnValue(dummyApproval)
 
-      const dummyStatus = ApproveStatus.build({
+      const dummyStatus = await ApproveStatus.build({
         code: '10',
         name: '承認依頼中'
       })
-      approveStatusFindOne.mockReturnValueOnce(dummyStatus)
-      approvalUpdate.mockReturnValueOnce(dummyApproval)
-      RequestApprovalUpdate.mockReturnValueOnce({})
+      approveStatusFindOne.mockReturnValue(dummyStatus)
+      approvalUpdate.mockReturnValue(dummyApproval)
+      RequestApprovalUpdate.mockReturnValue({})
+      approveRouteFindOne.mockReturnValue(approveRoute)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, requestId, message)
 
       expect(result).toBeTruthy()
     })
 
     test('準正常：承認依頼アップデート失敗➀', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
       const requestId = 'dummy-request'
       const requestUserId = 'dummy-User-id'
@@ -2868,14 +2869,13 @@ describe('approverControllerのテスト', () => {
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce(null)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, requestId, message)
 
       expect(result).toBeFalsy()
     })
 
     test('準正常：承認依頼アップデート失敗②', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
       const requestId = 'dummy-request'
       const requestUserId = 'dummy-User-id'
@@ -2901,14 +2901,13 @@ describe('approverControllerのテスト', () => {
       approvalUpdate.mockReturnValueOnce({})
       RequestApprovalUpdate.mockReturnValueOnce(null)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, requestId, message)
 
       expect(result).toBeFalsy()
     })
 
     test('準正常：承認依頼アップデート失敗', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
       const requestId = 'dummy-request'
       const requestUserId = 'dummy-User-id'
@@ -2937,7 +2936,7 @@ describe('approverControllerのテスト', () => {
         throw dbError
       })
 
-      await approverController.updateApprove(contractId, approveRouteId, message)
+      await approverController.updateApprove(contractId, requestId, message)
 
       expect(errorSpy).toHaveBeenCalledWith({
         contractId: contractId,
@@ -2948,14 +2947,48 @@ describe('approverControllerのテスト', () => {
 
     test('準正常：承認ルート検索失敗', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = 'dummy-approveRouteId'
+      const requestId = 'dummy-request'
       const message = '承認する。'
+      const approveRoute = ApproveRoute.build({
+        contractId: contractId,
+        approveRouteName: 'UTコード'
+      })
 
-      approvalFindOne.mockReturnValueOnce(null)
+      approvalFindOne.mockReturnValueOnce(approveRoute)
+      approveStatusFindOne.mockReturnValueOnce(null)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, requestId, message)
 
       expect(result).toBeFalsy()
+    })
+
+    test('準正常：承認ルート検索失敗', async () => {
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const requestId = 'dummy-request'
+      const message = '承認する。'
+      const code = '12'
+      const requestUserId = 'dummy-User-id'
+      const approveRoute = ApproveRoute.build({
+        contractId: contractId,
+        approveRouteName: 'UTコード'
+      })
+      const dummyApproval = Approval.build({
+        requestId: requestId,
+        requestUserId: requestUserId,
+        approveRouteId: approveRoute.approveRouteId,
+        approveStatus: '11',
+        approveRouteName: approveRoute.approveRouteName
+      })
+      approvalFindOne.mockReturnValueOnce(dummyApproval)
+      const dbError = new Error(`${code} is not found in approveStatus table`)
+      approveStatusFindOne.mockReturnValueOnce(null)
+      approveStatusFindOne.mockImplementation(() => {
+        throw dbError
+      })
+
+      const result = await approverController.updateApprove(contractId, requestId, message)
+
+      expect(result.toString()).toBe(dbError.toString())
     })
   })
 })
