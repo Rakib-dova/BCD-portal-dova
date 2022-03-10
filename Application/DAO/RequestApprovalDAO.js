@@ -60,6 +60,4 @@ class RequestApprovalDAO extends DAO {
   }
 }
 
-module.exports = function (contractId) {
-  return new RequestApprovalDAO(contractId)
-}
+module.exports = RequestApprovalDAO

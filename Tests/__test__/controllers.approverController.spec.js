@@ -12,6 +12,10 @@ const ApproveStatus = db.ApproveStatus
 const Approval = db.Approval
 const ApproveObj = require('../../Application/lib/approver/Approver')
 const validate = require('../../Application/lib/validate')
+const ApproveStatusDAO = require('../../Application/DAO/ApproveStatusDAO')
+const RequestApprovalDAO = require('../../Application/DAO/RequestApprovalDAO')
+
+jest.mock('../../Application/DAO/RequestApprovalDAO')
 
 let errorSpy, infoSpy, accessTradeshift
 let approveRouteFindAll,
@@ -27,7 +31,7 @@ let approveRouteFindAll,
 let approveUserCreate, approveUserFindOne
 let validateIsUUID
 let approvalFindOne
-
+let approveStatusDAOGetStatusCode
 const findUsers = {
   itemsPerPage: 25,
   itemCount: 1,
@@ -155,6 +159,7 @@ describe('approverControllerのテスト', () => {
     })
     approvalFindOne = jest.spyOn(Approval, 'findOne')
     approvalUpdate = jest.spyOn(Approval, 'update')
+    approveStatusDAOGetStatusCode = jest.spyOn(ApproveStatusDAO, 'getStautsCode')
   })
 
   afterEach(() => {
@@ -175,6 +180,7 @@ describe('approverControllerのテスト', () => {
     approvalFindOne.mockRestore()
     RequestApprovalUpdate.mockRestore()
     approvalUpdate.mockRestore()
+    approveStatusDAOGetStatusCode.mockRestore()
   })
 
   describe('getApprover', () => {
@@ -1938,7 +1944,7 @@ describe('approverControllerのテスト', () => {
   })
 
   describe('requestApproval', () => {
-    test('正常：承認依頼', async () => {
+    test('正常：新規作成承認依頼', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -1946,7 +1952,6 @@ describe('approverControllerのテスト', () => {
       const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
       const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const message = 'messege'
-      const status = 10
 
       const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
@@ -1965,20 +1970,21 @@ describe('approverControllerのテスト', () => {
         updatedAt: '2021-01-25T08:45:49.803Z'
       })
 
-      approveStatusFindOne.mockReturnValueOnce(status)
-
       const testData = await RequestApproval.build({
         requestId: requestId,
         contractId: contractId,
         approveRouteId: approveRouteId,
         invoiceId: invoiceId,
         requester: userId,
-        status: status,
+        status: '10',
         message: message,
         create: '2021-01-25T08:45:49.803Z',
         isSaved: true
       })
-      testData.save = jest.fn()
+
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
 
       requestApprovalFindOne.mockReturnValueOnce(testData)
 
@@ -1994,14 +2000,14 @@ describe('approverControllerのテスト', () => {
       expect(result).toBe(testData)
     })
 
-    test('エラー：承認依頼取得失敗（未保存）', async () => {
+    test('正常：保存したデータがある場合承認依頼', async () => {
       // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
       const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
       const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const message = 'messege'
-      const status = 10
 
       const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
@@ -2020,8 +2026,24 @@ describe('approverControllerのテスト', () => {
         updatedAt: '2021-01-25T08:45:49.803Z'
       })
 
-      approveStatusFindOne.mockReturnValueOnce(status)
-      requestApprovalFindOne.mockReturnValueOnce(null)
+      const testData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+      testData.save = jest.fn()
+
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(null)
+      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(testData)
+
+      requestApprovalFindOne.mockReturnValueOnce(testData)
 
       const result = await approverController.requestApproval(
         contractId,
@@ -2032,17 +2054,17 @@ describe('approverControllerのテスト', () => {
       )
 
       // 結果確認
-      expect(result).toBe(-1)
+      expect(result).toBe(testData)
     })
 
-    test('エラー：承認依頼取得失敗（未保存）', async () => {
+    test('エラー：保存したことがある支払依頼の依頼失敗場合', async () => {
       // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
       const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
       const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const message = 'messege'
-      const status = 10
 
       const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
@@ -2061,58 +2083,157 @@ describe('approverControllerのテスト', () => {
         updatedAt: '2021-01-25T08:45:49.803Z'
       })
 
-      approveStatusFindOne.mockReturnValueOnce(status)
-
-      const dbError = new Error('DB Conncetion Error')
-      requestApprovalFindOne.mockReturnValueOnce(dbError)
-
-      const result = await approverController.requestApproval(
-        contractId,
-        approveRouteId,
-        invoiceId,
-        requesterId,
-        message
-      )
-
-      // 結果確認
-      expect(result).toBe(-1)
-    })
-
-    test('エラー：DBエラー', async () => {
-      // パラメータ作成
-      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
-      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
-      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const message = 'messege'
-      const status = 10
-
-      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
-
-      // DBのデータがある場合
-      userControllerFindOne.mockReturnValueOnce({
-        userId: userId,
-        tenantId: tenantId,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        appVersion: '0.0.1',
-        refreshToken: 'dummyRefreshToken',
-        subRefreshToken: null,
-        userStatus: 0,
-        lastRefreshedAt: null,
-        createdAt: '2021-01-25T08:45:49.803Z',
-        updatedAt: '2021-01-25T08:45:49.803Z'
+      const testData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
       })
+      testData.save = jest.fn()
 
-      approveStatusFindOne.mockReturnValueOnce(status)
-
-      const dbError = new Error('DB Conncetion Error')
-      requestApprovalFindOne.mockImplementation(() => {
-        throw dbError
-      })
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(null)
 
       await approverController.requestApproval(contractId, approveRouteId, invoiceId, requesterId, message)
 
+      // 結果確認
+      expect(errorSpy).toHaveBeenCalled()
+    })
+
+    test('エラー：承認依頼取得失敗（未保存）', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
+      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const message = 'messege'
+
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
+
+      // DBのデータがある場合
+      userControllerFindOne.mockReturnValueOnce({
+        userId: userId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: 'dummyRefreshToken',
+        subRefreshToken: null,
+        userStatus: 0,
+        lastRefreshedAt: null,
+        createdAt: '2021-01-25T08:45:49.803Z',
+        updatedAt: '2021-01-25T08:45:49.803Z'
+      })
+
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(null)
+      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(null)
+
+      const result = await approverController.requestApproval(
+        contractId,
+        approveRouteId,
+        invoiceId,
+        requesterId,
+        message
+      )
+
+      // 結果確認
+      expect(result).toBe(-1)
+    })
+
+    test('エラー：DBエラー➀', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
+      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
+
+      // DBのデータがある場合
+      userControllerFindOne.mockReturnValueOnce({
+        userId: userId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: 'dummyRefreshToken',
+        subRefreshToken: null,
+        userStatus: 0,
+        lastRefreshedAt: null,
+        createdAt: '2021-01-25T08:45:49.803Z',
+        updatedAt: '2021-01-25T08:45:49.803Z'
+      })
+
+      const dbError = new Error('DB Conncetion Error')
+      approveStatusDAOGetStatusCode.mockImplementation(() => {
+        throw dbError
+      })
+
+      const result = await approverController.requestApproval(
+        contractId,
+        approveRouteId,
+        invoiceId,
+        requesterId,
+        message
+      )
+
+      // 結果確認
+      expect(result).toBe(dbError)
+      expect(errorSpy).toHaveBeenCalledWith({
+        contractId: contractId,
+        stack: dbError.stack,
+        status: 0
+      })
+    })
+
+    test('エラー：DBエラー②', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
+      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const message = 'messege'
+
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
+
+      // DBのデータがある場合
+      userControllerFindOne.mockReturnValueOnce({
+        userId: userId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: 'dummyRefreshToken',
+        subRefreshToken: null,
+        userStatus: 0,
+        lastRefreshedAt: null,
+        createdAt: '2021-01-25T08:45:49.803Z',
+        updatedAt: '2021-01-25T08:45:49.803Z'
+      })
+
+      const dbError = new Error('DB Conncetion Error')
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockImplementation(() => {
+        throw dbError
+      })
+
+      const result = await approverController.requestApproval(
+        contractId,
+        approveRouteId,
+        invoiceId,
+        requesterId,
+        message
+      )
+
+      expect(result).toBe(dbError)
       expect(errorSpy).toHaveBeenCalledWith({
         contractId: contractId,
         stack: dbError.stack,
@@ -2124,12 +2245,60 @@ describe('approverControllerのテスト', () => {
   describe('saveMessage', () => {
     test('正常：初回保存', async () => {
       // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
       const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
       const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const message = 'messege'
-      const status = 10
+
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
+
+      // DBのデータがある場合
+      userControllerFindOne.mockReturnValueOnce({
+        userId: userId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: 'dummyRefreshToken',
+        subRefreshToken: null,
+        userStatus: 0,
+        lastRefreshedAt: null,
+        createdAt: '2021-01-25T08:45:49.803Z',
+        updatedAt: '2021-01-25T08:45:49.803Z'
+      })
+      const testData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+      testData.save = jest.fn()
+
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
+      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(null)
+      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
+
+      const result = await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
+
+      // 結果確認
+      expect(result).toBe(0)
+    })
+
+    test('正常：初回保存:承認ルート未設定', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = undefined
+      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
+      const requesterId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const message = 'messege'
 
       const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
@@ -2148,8 +2317,20 @@ describe('approverControllerのテスト', () => {
         updatedAt: '2021-01-25T08:45:49.803Z'
       })
 
-      approveStatusFindOne.mockReturnValueOnce(status)
-      requestApprovalFindOne.mockReturnValueOnce(null)
+      const expectRequestApproval = await RequestApproval.build({})
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
+      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(null)
+      RequestApprovalDAO.prototype.createRequestApproval.mockImplementation(async (values) => {
+        const requstApproval = await expectRequestApproval.set({ ...values })
+        requstApproval.save = jest.fn(() => {
+          return requstApproval
+        })
+        return requstApproval
+      })
+      RequestApprovalDAO.prototype.saveRequestApproval.mockImplementation(async (requestApproval) => {
+        await requestApproval.save()
+        return requestApproval
+      })
 
       const result = await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
 
@@ -2157,7 +2338,52 @@ describe('approverControllerのテスト', () => {
       expect(result).toBe(0)
     })
 
-    test('正常：すでに保存されている承認依頼のメッセージ。承認ルート上書き保存', async () => {
+    test('正常：既に保存:承認ルート未設定', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = undefined
+      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
+      const requesterId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const message = 'messege'
+
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
+
+      // DBのデータがある場合
+      userControllerFindOne.mockReturnValueOnce({
+        userId: userId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: 'dummyRefreshToken',
+        subRefreshToken: null,
+        userStatus: 0,
+        lastRefreshedAt: null,
+        createdAt: '2021-01-25T08:45:49.803Z',
+        updatedAt: '2021-01-25T08:45:49.803Z'
+      })
+
+      const expectRequestApproval = await RequestApproval.build({})
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
+      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockImplementation(async (values) => {
+        const requstApproval = await expectRequestApproval.set({ ...values })
+        requstApproval.save = jest.fn(() => {
+          return requstApproval
+        })
+        return requstApproval
+      })
+      RequestApprovalDAO.prototype.saveRequestApproval.mockImplementation(async (requestApproval) => {
+        await requestApproval.save()
+        return requestApproval
+      })
+
+      const result = await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
+
+      // 結果確認
+      expect(result).toBe(0)
+    })
+
+    test('正常：既に保存されている承認依頼のメッセージ。承認ルート上書き保存', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -2199,7 +2425,10 @@ describe('approverControllerのテスト', () => {
       })
       testData.save = jest.fn()
 
-      requestApprovalFindOne.mockReturnValueOnce(testData)
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
+      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
 
       const result = await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
 
@@ -2207,14 +2436,13 @@ describe('approverControllerのテスト', () => {
       expect(result).toBe(0)
     })
 
-    test('エラー：DBエラー', async () => {
+    test('エラー：初回保存失敗', async () => {
       // パラメータ作成
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
       const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
       const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const message = 'messege'
-      const status = 10
 
       const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
@@ -2233,20 +2461,64 @@ describe('approverControllerのテスト', () => {
         updatedAt: '2021-01-25T08:45:49.803Z'
       })
 
-      approveStatusFindOne.mockReturnValueOnce(status)
+      const testData = await RequestApproval.build({})
+      testData.save = jest.fn()
 
-      const dbError = new Error('DB Conncetion Error')
-      requestApprovalFindOne.mockImplementation(() => {
-        throw dbError
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
+      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockImplementation((values) => {
+        testData.set(values)
+        return testData
+      })
+      RequestApprovalDAO.prototype.saveRequestApproval.mockImplementation(() => {
+        return null
       })
 
       await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
 
-      expect(errorSpy).toHaveBeenCalledWith({
-        contractId: contractId,
-        stack: dbError.stack,
-        status: 0
+      expect(errorSpy).toHaveBeenCalled()
+    })
+
+    test('エラー：既に保存した支払依頼の保存失敗', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
+      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const message = 'messege'
+
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
+
+      // DBのデータがある場合
+      userControllerFindOne.mockReturnValueOnce({
+        userId: userId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: 'dummyRefreshToken',
+        subRefreshToken: null,
+        userStatus: 0,
+        lastRefreshedAt: null,
+        createdAt: '2021-01-25T08:45:49.803Z',
+        updatedAt: '2021-01-25T08:45:49.803Z'
       })
+
+      const testData = await RequestApproval.build({})
+      testData.save = jest.fn()
+
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
+      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockImplementation(null)
+      RequestApprovalDAO.prototype.createRequestApproval.mockImplementation((values) => {
+        testData.set(values)
+        return testData
+      })
+      RequestApprovalDAO.prototype.saveRequestApproval.mockImplementation(() => {
+        return null
+      })
+
+      await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
+
+      expect(errorSpy).toHaveBeenCalled()
     })
   })
 

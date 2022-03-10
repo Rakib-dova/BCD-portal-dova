@@ -13,6 +13,8 @@ const Approval = db.Approval
 const Op = db.Sequelize.Op
 const userController = require('./userController')
 const validate = require('../lib/validate')
+const approveStatusDAO = require('../DAO/ApproveStatusDAO')
+const RequestApprovalDAO = require('../DAO/RequestApprovalDAO')
 /**
  *
  * @param {string} accTk アクセストークン
@@ -554,13 +556,12 @@ const searchApproveRouteList = async (_contractId, _approveRouteName) => {
  */
 const requestApproval = async (contractId, approveRouteId, invoiceId, requesterId, message) => {
   try {
-    const approveStatusDAO = require('../DAO/ApproveStatusDAO')
-    const requestApprovalDAO = require('../DAO/RequestApprovalDAO')(contractId)
+    const requestApprovalDAO = new RequestApprovalDAO(contractId)
     const requester = await userController.findOne(requesterId)
     const waitingWorkflowStatusCode = await approveStatusDAO.getStautsCode('承認依頼中')
 
     const oldRequest = await requestApprovalDAO.getpreWorkflowRequestApproval(invoiceId)
-    console.log(oldRequest)
+
     if (!oldRequest) {
       const newRequest = await requestApprovalDAO.createRequestApproval(
         requester.userId,
@@ -574,8 +575,6 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
       await newRequest.save()
       return newRequest
     }
-
-    if (oldRequest instanceof Request === false) return -1
 
     await requestApprovalDAO.updateRequestApproval(
       oldRequest,
@@ -695,7 +694,7 @@ const saveMessage = async (contractId, invoiceId, requester, message, approveRou
       approveRouteId = null
     }
 
-    const requestApprovalDAO = require('../DAO/RequestApprovalDAO')(contractId)
+    const requestApprovalDAO = new RequestApprovalDAO(contractId)
     const approveStatusDAO = require('../DAO/ApproveStatusDAO')
     const oldRequestApproval = await requestApprovalDAO.getpreWorkflowRequestApproval(invoiceId)
     const preWorkflowStatusCode = await approveStatusDAO.getStautsCode('未処理')
@@ -707,7 +706,6 @@ const saveMessage = async (contractId, invoiceId, requester, message, approveRou
         approveRouteId,
         message
       )
-      console.log(newRequestApproval)
       if ((await requestApprovalDAO.saveRequestApproval(newRequestApproval)) !== newRequestApproval) {
         throw new Error('failed save a message')
       }
