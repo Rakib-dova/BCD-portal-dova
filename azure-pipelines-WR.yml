@@ -391,6 +391,7 @@ stages:
                 fi
 
   - stage: npm_settingStage
+    dependsOn: BuildandTest
     jobs:
     - job: npm_settingJob
       steps:
@@ -400,6 +401,7 @@ stages:
         displayName: 'Install Node.js'
   
   - stage: chromeStage
+    dependsOn: npm_settingStage
     jobs:
     - job: chrome_scenario001
       steps:
