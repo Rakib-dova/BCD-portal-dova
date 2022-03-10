@@ -69,11 +69,9 @@ const cbGetIndex = async (req, res, next) => {
     if (requestApproval !== null) {
       result.list[i].approveStatus = requestApproval.status
       requestApprovalList.push(result.list[i])
-      result.list.splice(i, 1)
     }
   }
 
-  console.log('here')
   // 受領した請求書一覧レンダリング
   res.render('inboxList', {
     listArr: result.list,
@@ -143,7 +141,6 @@ const cbGetIndexRedirected = async (req, res, next) => {
     if (requestApproval !== null) {
       result.list[i].approveStatus = requestApproval.status
       requestApprovalList.push(result.list[i])
-      result.list.splice(i, 1)
     }
   }
 

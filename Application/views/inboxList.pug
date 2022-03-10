@@ -93,8 +93,11 @@ block content
                                 td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
                                   a.a-approveStatus-APPROVING 十次承認済み
                               else if item.approveStatus === '00'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
+                                td.text-center.td-overflow
                                   a.a-approveStatus-APPROVED 最終承認済み
+                              else if item.approveStatus === '90'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-RETURNED 差し戻し
                               else
                                 td.text-center.td-overflow
                                   a.a-approveStatus-UNTREATED 未処理
@@ -192,11 +195,11 @@ block content
                                 td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
                                   a.a-approveStatus-APPROVING 十次承認済み
                               else if item.approveStatus === '00'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
+                                td.text-center.td-overflow
                                   a.a-approveStatus-APPROVED 最終承認済み
                               else if item.approveStatus === '90'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-RETURNED 差し戻し                                
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-RETURNED 差し戻し
                               else
                                 td.text-center.td-overflow
                                   a.a-approveStatus-UNTREATED 未処理
@@ -275,8 +278,11 @@ block content
                                 td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
                                   a.a-approveStatus-APPROVING 十次承認済み
                               else if item.approveStatus === '00'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
+                                td.text-center.td-overflow
                                   a.a-approveStatus-APPROVED 最終承認済み
+                              else if item.approveStatus === '90'
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-RETURNED 差し戻し
                               else
                                 td.text-center.td-overflow
                                   a.a-approveStatus-UNTREATED 未処理
@@ -374,11 +380,11 @@ block content
                                 td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
                                   a.a-approveStatus-APPROVING 十次承認済み
                               else if item.approveStatus === '00'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
+                                td.text-center.td-overflow
                                   a.a-approveStatus-APPROVED 最終承認済み
                               else if item.approveStatus === '90'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-RETURNED 差し戻し                                
+                                td.text-center.td-overflow
+                                  a.a-approveStatus-RETURNED 差し戻し
                               else
                                 td.text-center.td-overflow
                                   a.a-approveStatus-UNTREATED 未処理

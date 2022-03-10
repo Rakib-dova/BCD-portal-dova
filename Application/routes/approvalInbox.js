@@ -105,7 +105,7 @@ const cbGetIndex = async (req, res, next) => {
 
   res.render(presentation, {
     ...result,
-    title: '承認依頼',
+    title: '支払依頼',
     documentId: invoiceId,
     approveRoute: approveRoute,
     prevUser: prevUser
@@ -151,6 +151,7 @@ const cbPostApprove = async (req, res, next) => {
   const requestApproval = req.session.requestApproval.approval
   const invoiceId = req.params.invoiceId
   const data = req.body
+  const requestId = requestApproval.requestId
 
   // 依頼者と承認ルートの承認者のかを確認する。
   const hasNotPowerOfEditing = !(await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval))
@@ -170,7 +171,7 @@ const cbPostApprove = async (req, res, next) => {
       break
     case -1:
       req.flash('noti', [
-        '承認依頼',
+        '支払依頼',
         `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の勘定科目「${accountCode}」は未登録勘定科目です。`,
         'SYSERR'
       ])
@@ -178,7 +179,7 @@ const cbPostApprove = async (req, res, next) => {
       break
     case -2:
       req.flash('noti', [
-        '承認依頼',
+        '支払依頼',
         `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の補助科目「${subAccountCode}」は未登録補助科目です。`,
         'SYSERR'
       ])
@@ -186,7 +187,7 @@ const cbPostApprove = async (req, res, next) => {
       break
     case -3:
       req.flash('noti', [
-        '承認依頼',
+        '支払依頼',
         `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の部門データ「${departmentCode}」は未登録部門データです。`,
         'SYSERR'
       ])
@@ -195,9 +196,10 @@ const cbPostApprove = async (req, res, next) => {
   }
 
   const message = req.body.message
-  const approveRouteId = req.body.approveRouteId
 
-  const result = await approverController.updateApprove(contractId, approveRouteId, message)
+  const result = await approverController.updateApprove(contractId, requestId, message)
+
+  if (result instanceof Error === true) return next(errorHelper.create(500))
 
   if (result) {
     req.flash('info', '承認が完了しました。')

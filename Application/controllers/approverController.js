@@ -783,29 +783,36 @@ const checkApproveRoute = async (contractId, approveRouteId) => {
   }
 }
 
-const updateApprove = async (contractId, approveRouteId, message) => {
+const updateApprove = async (contractId, requestId, message) => {
   try {
     let userNo
     const userData = {}
     const selectApproval = await Approval.findOne({
       where: {
-        approveRouteId: approveRouteId
+        requestId: requestId
       }
     })
 
     if (selectApproval instanceof Approval === false) return false
 
+    let code = null
+    const approveStatus = ~~selectApproval.approveStatus
+    const approveUserCount = selectApproval.approveUserCount
+    const activeApproverNo = approveStatus - 9
+    if (approveUserCount === activeApproverNo) {
+      code = '00'
+      userNo = 'Last'
+    } else if (activeApproverNo >= 1 && activeApproverNo <= 10) {
+      code = `${approveStatus + 1}`
+      userNo = `${activeApproverNo}`
+    }
     const status = await Status.findOne({
       where: {
-        code: ~~selectApproval.approveStatus + 1 + ''
+        code: code
       }
     })
 
-    if (~~selectApproval.approveStatus === 20) {
-      userNo = 'Last'
-    } else if (~~selectApproval.approveStatus >= 10 && ~~selectApproval.approveStatus <= 19) {
-      userNo = ~~selectApproval.approveStatus - 9
-    }
+    if (status === null) throw new Error(`${code} is not found in approveStatus table`)
 
     userData[`approvalAt${userNo}`] = new Date()
     userData.approveStatus = status.code
@@ -825,7 +832,7 @@ const updateApprove = async (contractId, approveRouteId, message) => {
       { status: status.code },
       {
         where: {
-          approveRouteId: approveRouteId
+          requestId: requestId
         }
       }
     )
