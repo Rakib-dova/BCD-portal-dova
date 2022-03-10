@@ -119,7 +119,7 @@ describe('registApproveRouteのテスト', () => {
       // 期待結果
       // 承認ルートページレンダリングを呼び出し
       expect(response.render).toBeCalledWith('registApproveRoute', {
-        panelHead: '条件絞り込み',
+        panelHead: '承認ルート',
         approveRouteNameLabel: '承認ルート名',
         requiredTagApproveRouteName: 'approveRouteNameTagRequired',
         idForApproveRouteNameInput: 'setApproveRouteNameInputId',
@@ -359,7 +359,7 @@ describe('registApproveRouteのテスト', () => {
       // 期待結果
       // 承認ルートページレンダリングを呼び出し
       expect(response.render).toBeCalledWith('registApproveRoute', {
-        panelHead: '条件絞り込み',
+        panelHead: '承認ルート',
         approveRouteNameLabel: '承認ルート名',
         requiredTagApproveRouteName: 'approveRouteNameTagRequired',
         idForApproveRouteNameInput: 'setApproveRouteNameInputId',

@@ -1938,7 +1938,7 @@ describe('approverControllerのテスト', () => {
   })
 
   describe('requestApproval', () => {
-    test('正常：承認依頼', async () => {
+    test.only('正常：承認依頼', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -1950,6 +1950,9 @@ describe('approverControllerのテスト', () => {
 
       const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
+
+      const requestApprovalDAO = require('../../Application/DAO/RequestApprovalDAO')(contractId)
+      const requestApprovalDAOSpy = jest.spyOn(requestApprovalDAO, 'saveRequestApproval')
 
       // DBのデータがある場合
       userControllerFindOne.mockReturnValueOnce({
@@ -1965,7 +1968,7 @@ describe('approverControllerのテスト', () => {
         updatedAt: '2021-01-25T08:45:49.803Z'
       })
 
-      approveStatusFindOne.mockReturnValueOnce(status)
+      approveStatusFindOne.mockReturnValue(status)
 
       const testData = await RequestApproval.build({
         requestId: requestId,
@@ -1978,10 +1981,12 @@ describe('approverControllerのテスト', () => {
         create: '2021-01-25T08:45:49.803Z',
         isSaved: true
       })
-      testData.save = jest.fn()
+      RequestApproval.save = jest.fn()
+      // await testData.toString().save()
+      await requestApprovalDAO.saveRequestApproval(testData.toString())
 
       requestApprovalFindOne.mockReturnValueOnce(testData)
-
+      // requestApprovalDAOSpy.mockReturnValueOnce(true)
       const result = await approverController.requestApproval(
         contractId,
         approveRouteId,
@@ -1990,8 +1995,11 @@ describe('approverControllerのテスト', () => {
         message
       )
 
+      console.log(result)
+
       // 結果確認
       expect(result).toBe(testData)
+      requestApprovalDAOSpy.mockRestore()
     })
 
     test('エラー：承認依頼取得失敗（未保存）', async () => {
