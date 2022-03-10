@@ -391,7 +391,7 @@ stages:
                 fi
 
   - stage: npm_settingStage
-    dependsOn: BuildandTest
+    dependsOn: devDeploy
     jobs:
     - job: npm_settingJob
       steps:
