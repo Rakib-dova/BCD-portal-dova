@@ -415,5 +415,5 @@ stages:
       steps:
       - script:  |
           npm i
-          npm run ${{ parameters.browser }} --spec/scenario001.js
+          npm run e2e  --spec/scenario001.js
         workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
