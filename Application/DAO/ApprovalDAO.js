@@ -7,6 +7,7 @@ class ApprovalDAO extends DAO {
     super()
     this.contractId = contractId
     this.Op = this.DTO.Sequelize.Op
+    this.requestApproval = this.DTO.RequestApproval
     this.DTO = this.DTO.Approval
     this.approveStatusDAO = require('./ApproveStatusDAO')
   }
@@ -35,6 +36,13 @@ class ApprovalDAO extends DAO {
           [this.Op.notIn]: [workflowDone, rejectWorkflow]
         }
       },
+      raw: true,
+      include: [
+        {
+          model: this.requestApproval,
+          attribute: ['invoiceId']
+        }
+      ],
       order: [['approvedAt', 'DESC']]
     })
     return approvals

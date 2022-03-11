@@ -82,7 +82,6 @@ const cbGetIndex = async (req, res, next) => {
       }
     }
   }
-  console.log(requestApprovalList, 'requestApprovalList')
 
   // 受領した請求書一覧レンダリング
   res.render('inboxList', {
@@ -208,11 +207,15 @@ const cbGetWorkflow = async (req, res, next) => {
 
   const userId = user.userId
   const contractId = contract.contractId
-  const workflow = await inboxController.getWorkflow(userId, contractId)
+  const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(
+    req.user.accessToken,
+    req.user.refreshToken,
+    user.tenantId
+  )
+  const workflow = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
 
   if (workflow instanceof Error === true) res.status(500).send('サーバーエラーが発生しました。')
 
-  console.log(workflow)
   res.status(200).send(workflow)
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetWorkflow')
 }

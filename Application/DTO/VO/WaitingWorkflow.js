@@ -1,51 +1,52 @@
+const processStatus = {
+  PAID_CONFIRMED: 0, // 入金確認済み
+  PAID_UNCONFIRMED: 1, // 送金済み
+  ACCEPTED: 2, // 受理済み
+  DELIVERED: 3 // 受信済み
+}
+const timeStamp = require('../../lib/utils').timestampForList
 class WaitingWorkflow {
   constructor() {
     this.documentId = ''
-    this.invoiceNo = ''
+    this.invoiceid = ''
     this.status = ''
     this.workflowStatus = ''
-    this.curr = 'JPN'
-    this.current = ''
+    this.currency = ''
+    this.amount = ''
     this.sendBy = ''
     this.sendTo = ''
-    this.updatedAt = ''
-    this.expire = ''
+    this.updatedAt = '-'
+    this.expire = '-'
     this.createdAt = ''
+    this.processStatus = ''
   }
 
   convertRequestApprovalToWorkflow(requestApproval) {
-    this.setInvoiceNo(requestApproval.approveRouteName)
+    this.setDocumentId(requestApproval.invoiceId)
     this.setWorkflowStatus(requestApproval.status)
     this.setCreatedAt(requestApproval.create)
   }
 
   convertApprovalToWorkflow(approval) {
-    this.setInvoiceNo(approval.approveRouteName)
-    this.setStatus(approval.approveRouteName)
+    this.setDocumentId(approval['RequestApproval.invoiceId'])
     this.setWorkflowStatus(approval.approveStatus)
     this.setCreatedAt(approval.approvedAt)
   }
 
-  setDocumentId(id) {
-    this.documentId = id
+  setDocumentId(documentId) {
+    this.documentId = documentId
   }
 
-  setInvoiceNo(invoiceNo) {
-    this.invoiceNo = invoiceNo
+  getDocumentId() {
+    return this.documentId
+  }
+
+  setInvoiceId(invoiceid) {
+    this.invoiceid = invoiceid
   }
 
   setStatus(status) {
-    switch (status) {
-      case '00':
-        this.workflowStatus = '承認済み'
-        break
-      case '10':
-        this.workflowStatus = '承認待ち'
-        break
-      case '20':
-        this.workflowStatus = '差し戻し'
-        break
-    }
+    this.status = status
   }
 
   setSendBy(sendBy) {
@@ -106,6 +107,37 @@ class WaitingWorkflow {
   setCreatedAt(date) {
     if (date instanceof Date) {
       this.createdAt = date
+    }
+  }
+
+  setAmount(amount) {
+    this.amount = amount
+  }
+
+  setCurrency(currency) {
+    this.currency = currency
+  }
+
+  setDocument(document) {
+    this.setInvoiceId(document.ID)
+    this.setStatus(processStatus[document.UnifiedState])
+    document.ItemInfos.forEach((item) => {
+      switch (item.type) {
+        case 'document.currency':
+          this.setCurrency(item.value)
+          break
+        case 'document.total':
+          this.setAmount(~~item.value)
+          break
+      }
+    })
+    this.setSendBy(document.SenderCompanyName ?? '-')
+    this.setSendTo(document.ReceiverCompanyName ?? '-')
+    if (document.LastEdit) {
+      this.setUpdatedAt(timeStamp(new Date(document.LastEdit)))
+    }
+    if (document.DueDate) {
+      this.setExpire(timeStamp(new Date(document.DueDate)))
     }
   }
 }

@@ -84,7 +84,17 @@ class RequestApprovalDTO {
       workflow.convertApprovalToWorkflow(approval)
       waitingWorkflows.push(workflow)
     })
+
+    for (let idx = 0; idx < waitingWorkflows.length; idx++) {
+      const document = await this.tradeshiftDTO.findDocuments(waitingWorkflows[idx].documentId)
+      waitingWorkflows[idx].setDocument(document)
+    }
+
     return waitingWorkflows
+  }
+
+  setTradeshiftDTO(tradeshiftDTO) {
+    this.tradeshiftDTO = tradeshiftDTO
   }
 }
 

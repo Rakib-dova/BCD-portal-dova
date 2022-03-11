@@ -9,7 +9,6 @@ const Op = db.Sequelize.Op
 const department = db.DepartmentCode
 const RequestApproval = db.RequestApproval
 const constantsDefine = require('../constants')
-const WaitingWorkflow = require('../DTO/VO/WaitingWorkflow')
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
@@ -530,10 +529,12 @@ const getRequestApproval = async (contractId, invoiceId) => {
  * 承認待ちのリストを取得
  * @param {uuid} userId ユーザーの識別番号
  * @param {uuid} contractId コントラクター識別番号
+ * @param {object} tradeshiftDTO トレードシフトのdata transfer
  * @returns {array<WaitingWorkflow>} 承認待ちのリスト
  */
-const getWorkflow = async (userId, contractId) => {
+const getWorkflow = async (userId, contractId, tradeshiftDTO) => {
   const requestApprovalDTO = new (require('../DTO/RequestApprovalDTO'))(contractId)
+  requestApprovalDTO.setTradeshiftDTO(tradeshiftDTO)
   return await requestApprovalDTO.getWaitingWorkflowisMine(userId)
 }
 
