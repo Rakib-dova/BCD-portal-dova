@@ -172,23 +172,23 @@ const cbGetWorkflow = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetWorkflow')
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
-    return next(errorHelper.create(500))
+    return res.status(401).send('認証に失敗しました。')
   }
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+  if (user instanceof Error || user === null) return res.status(403).send('許可されていません。')
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (user.dataValues?.userStatus !== 0) return res.status(403).send('許可されていません。')
 
   // DBから契約情報取得
   const contract = await contractController.findOne(req.user.tenantId)
   // データベースエラーは、エラーオブジェクトが返る
   // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+  if (contract instanceof Error || contract === null) return res.status(403).send('許可されていません。')
 
   req.session.userContext = 'LoggedIn'
 
@@ -199,18 +199,18 @@ const cbGetWorkflow = async (req, res, next) => {
   const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
   if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
+    return res.status(403).send('許可されていません。')
   }
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return next(noticeHelper.create('cancelprocedure'))
+    return res.status(403).send('許可されていません。')
   }
 
   const userId = user.userId
   const contractId = contract.contractId
   const workflow = await inboxController.getWorkflow(userId, contractId)
 
-  if (workflow instanceof Error === true) res.status(503).send('サーバーエラーが発生しました。')
+  if (workflow instanceof Error === true) res.status(500).send('サーバーエラーが発生しました。')
 
   console.log(workflow)
   res.status(200).send(workflow)

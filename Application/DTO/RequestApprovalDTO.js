@@ -6,6 +6,11 @@ class RequestApprovalDTO {
     this.approvalDAO = new (require('../DAO/ApprovalDAO'))(contractId)
   }
 
+  /**
+   * ユーザーが依頼した請求書を検索
+   * @param {uuid} userId ユーザーの識別番号
+   * @returns {array<promise<Model>>} 依頼した請求書リスト
+   */
   async getRequestApproval(userId) {
     const requestApprovals = await this.requestApprovalDAO.getAllRequestApproval()
     const myRequestApprovals = []
@@ -30,6 +35,11 @@ class RequestApprovalDTO {
     return myRequestApprovals
   }
 
+  /**
+   * ユーザーに届いたすぐ決済する支払依頼請求書検索
+   * @param {uuid} userId ユーザーの識別番号
+   * @returns {array<promise<Model>>} 自分に届いた支払依頼リスト
+   */
   async getApproval(userId) {
     const waitingApprovals = await this.approvalDAO.getWaitingApprovals()
     const isMineApproval = []
@@ -53,6 +63,11 @@ class RequestApprovalDTO {
     return isMineApproval
   }
 
+  /**
+   * 自分の支払依頼とすぐ決裁する必要がある請求書を検索する。
+   * @param {uuid} userId ユーザーの識別番号
+   * @returns {array<WaitingWorkflow>} 「承認待ち」のリスト
+   */
   async getWaitingWorkflowisMine(userId) {
     const myRequestApprovals = await this.getRequestApproval(userId)
     const waitingApprovalsMe = await this.getApproval(userId)

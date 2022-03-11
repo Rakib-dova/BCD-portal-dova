@@ -12,21 +12,6 @@ if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
   if (elm) elm.parentNode.removeChild(elm)
 }
 
-// window.onload = () => {
-//   document.querySelectorAll('.tabs').forEach((tab) => {
-//     tab.querySelectorAll('li').forEach((li) => {
-//       li.onclick = () => {
-//         tab.querySelector('li.is-active').classList.remove('is-active')
-//         li.classList.add('is-active')
-//         tab.nextElementSibling.querySelector('.tab-pane.is-active').classList.remove('is-active')
-//         tab.nextElementSibling
-//           .querySelector('.tab-pane#' + li.firstElementChild.getAttribute('id'))
-//           .classList.add('is-active')
-//       }
-//     })
-//   })
-// }
-
 Array.prototype.forEach.call(document.querySelectorAll('.linkToApproval'), (approveStatus) => {
   approveStatus.addEventListener('click', function () {
     const target = this.dataset.target
@@ -148,7 +133,7 @@ $('#constructTab').addEventListener('click', function () {
               expire,
               btn
             ])
-            appendChilds($('.display-row')[1], [row])
+            appendChilds($('.tab-content > .tab-pane:nth-child(2) > .tabe > .display-row')[0], [row])
           })
 
           $('.tab-pane.is-active')[0].classList.remove('is-active')
@@ -167,6 +152,16 @@ $('#constructTab').addEventListener('click', function () {
           const nothing = document.createElement('p')
           nothing.innerText = 'エラーが発生しました。'
           appendChilds(constructTab, [nothing])
+          $('.tab-pane.is-active')[0].classList.remove('is-active')
+          $(
+            'body > div.max-width > div > div > div.box > div > div.tabs.is-boxed.is-medium > ul > li:nth-child(1)'
+          )[0].classList.remove('is-active')
+
+          $('#constructTab').classList.add('is-active')
+          $(
+            'body > div.max-width > div > div > div.box > div > div.tabs.is-boxed.is-medium > ul > li:nth-child(2)'
+          )[0].classList.add('is-active')
+          $('.tab-content > .tab-pane')[1].classList.add('is-active')
           break
         }
       }
