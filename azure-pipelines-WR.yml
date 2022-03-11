@@ -399,7 +399,7 @@ variables:
 #                 fi
 stages:
   - stage: npm_settingStage
-    dependsOn: devDeploy
+#    dependsOn: devDeploy
     jobs:
     - job: npm_settingJob
       steps:
@@ -409,7 +409,7 @@ stages:
         displayName: 'Install Node.js'
   
   - stage: scenario001Stage
-    dependsOn: npm_settingStage
+#    dependsOn: npm_settingStage
     jobs:
     - job: scenario001
       steps:
