@@ -41,6 +41,7 @@ steps:
     cd ./bcd-e2e-tests
     npm i
   displayName: 'npm install'
+  workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
 
 - script: |
     cd ./bcd-e2e-tests
