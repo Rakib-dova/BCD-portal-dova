@@ -37,7 +37,7 @@ steps:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
 
-- powershell: |
+- bash: | 
     cd ./bcd-e2e-tests
     npm i
     echo ${{ parameters.browser }}
