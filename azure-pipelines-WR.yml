@@ -38,10 +38,12 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
+    cd ./bcd-e2e-tests
     npm i
   displayName: 'npm install'
 
 - script: |
+    cd ./bcd-e2e-tests
     npm run ${{ parameters.browser }} -- spec/scenario_ci_001.js
   displayName: 'npm run'
   workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
