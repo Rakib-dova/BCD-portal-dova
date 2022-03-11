@@ -525,11 +525,16 @@ const getRequestApproval = async (contractId, invoiceId) => {
   }
 }
 
+const getWorkflow = async (userId, contractId) => {
+  const requestApprovalDTO = new (require('../DTO/RequestApprovalDTO'))(contractId)
+  return await requestApprovalDTO.getWaitingWorkflowisMine(userId)
+}
 module.exports = {
   getInbox: getInbox,
   getInvoiceDetail: getInvoiceDetail,
   getCode: getCode,
   insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice,
   getDepartment: getDepartment,
-  getRequestApproval: getRequestApproval
+  getRequestApproval: getRequestApproval,
+  getWorkflow: getWorkflow
 }

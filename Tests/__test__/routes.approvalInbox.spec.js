@@ -231,7 +231,7 @@ describe('approvalInboxのテスト', () => {
       // response.renderでapproveRouteListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('approvalInbox', {
         ...resultInvoice,
-        title: '承認依頼',
+        title: '支払依頼',
         documentId: request.params.invoiceId,
         approveRoute: expectGetRequestApproval.approveRoute,
         prevUser: expectGetRequestApproval.prevUser
@@ -630,7 +630,7 @@ describe('approvalInboxのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでapproveRouteListが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', [
-        '承認依頼',
+        '支払依頼',
         `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の勘定科目「${accountCode}」は未登録勘定科目です。`,
         'SYSERR'
       ])
@@ -681,7 +681,7 @@ describe('approvalInboxのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでapproveRouteListが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', [
-        '承認依頼',
+        '支払依頼',
         `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の補助科目「${subAccountCode}」は未登録補助科目です。`,
         'SYSERR'
       ])
@@ -732,7 +732,7 @@ describe('approvalInboxのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでapproveRouteListが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', [
-        '承認依頼',
+        '支払依頼',
         `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の部門データ「${departmentCode}」は未登録部門データです。`,
         'SYSERR'
       ])

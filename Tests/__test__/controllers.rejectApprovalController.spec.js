@@ -55,6 +55,7 @@ describe('rejectApporovalControllerのテスト', () => {
       statusFindOne.mockReturnValue(returnStatus)
       requestApprovalFindOneSpy.mockReturnValue(returnRequestApproval)
       requestApprovalUpdateSpy.mockReturnValue(true)
+      approvalUpdateSpy.mockReturnValue(true)
 
       // 試験実施
       const result = await rejectApporovalController.rejectApprove(contractId, documentId, rejectMessage)

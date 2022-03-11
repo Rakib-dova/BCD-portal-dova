@@ -154,6 +154,8 @@ describe('approverControllerのテスト', () => {
       result.requestUserId = init.requestUserId
       result.approveStatus = init.approveStatus
       result.approveRouteName = init.approveRouteName
+      result.rejectedUser = init.rejectedUser
+      result.rejectedMessage = init.rejectedMessage
       result.save = jest.fn()
       return result
     })
@@ -3098,6 +3100,7 @@ describe('approverControllerのテスト', () => {
         approveStatus: '20',
         approveRouteName: approveRoute.approveRouteName
       })
+      dummyApproval.approveUserCount = 11
       approvalFindOne.mockReturnValueOnce(dummyApproval)
 
       const dummyStatus = ApproveStatus.build({
@@ -3228,6 +3231,160 @@ describe('approverControllerのテスト', () => {
       const result = await approverController.updateApprove(contractId, approveRouteId, message)
 
       expect(result).toBeFalsy()
+    })
+
+    test('異常系：ApproveStatus検索結果がnullの場合', async () => {
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'dummy-approveRouteId'
+      const message = '承認する。'
+      const requestId = 'dummy-request'
+      const requestUserId = 'dummy-User-id'
+      const approveRoute = ApproveRoute.build({
+        contractId: contractId,
+        apprvoeRouteName: 'UTコード'
+      })
+
+      const dummyApproval = Approval.build({
+        requestId: requestId,
+        requestUserId: requestUserId,
+        approveRouteId: approveRoute.approveRouteId,
+        approveStatus: '11',
+        approveRouteName: approveRoute.approveRouteName
+      })
+      approvalFindOne.mockReturnValueOnce(dummyApproval)
+
+      approveStatusFindOne.mockReturnValueOnce(null)
+
+      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+
+      expect(result).toStrictEqual(new Error('12 is not found in approveStatus table'))
+    })
+  })
+
+  describe('getApprovalFromRejected', () => {
+    test('正常', async () => {
+      // 準備
+      // アクセストークンの用意
+      const accessToken = 'dummy-access-token'
+      const refreshToken = 'dummy-refresh-token'
+      const tenantId = 'dummy-tennant'
+      const contractId = 'dummy-contractId'
+      const requestId = '27f7188b-f6c7-4b5e-9826-96052bba495c'
+
+      const dummyApproval = Approval.build({
+        requestId: requestId,
+        requestUserId: 'dummy-requestUserId',
+        approveStatus: '90',
+        rejectedUser: 'aa974511-8188-4022-bd86-45e251fd259e',
+        rejectedMessage: 'UTテスト差し戻し'
+      })
+
+      approvalFindOne.mockReturnValueOnce(dummyApproval)
+
+      // トレードシフトから取得データ
+      const findUsers1 = { ...findUsers }
+      // トレードシフトのユーザー情報取得
+      accessTradeshift.mockReturnValueOnce(findUsers1)
+
+      // 検索予想結果
+      const expectResult = {
+        message: 'UTテスト差し戻し',
+        name: 'テスト 一般2'
+      }
+
+      // 試験実施
+      const result = await approverController.getApprovalFromRejected(
+        accessToken,
+        refreshToken,
+        tenantId,
+        contractId,
+        requestId
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(expectResult)
+    })
+
+    test('正常：requestIdがUUIDではない場合', async () => {
+      // 準備
+      // アクセストークンの用意
+      const accessToken = 'dummy-access-token'
+      const refreshToken = 'dummy-refresh-token'
+      const tenantId = 'dummy-tennant'
+      const contractId = 'dummy-contractId'
+      const requestId = 'dummy-requestId'
+
+      // 試験実施
+      const result = await approverController.getApprovalFromRejected(
+        accessToken,
+        refreshToken,
+        tenantId,
+        contractId,
+        requestId
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(false)
+    })
+
+    test('異常系：ApprovalDBエラーが発生した場合', async () => {
+      // 準備
+      // アクセストークンの用意
+      const accessToken = 'dummy-access-token'
+      const refreshToken = 'dummy-refresh-token'
+      const tenantId = 'dummy-tennant'
+      const contractId = 'dummy-contractId'
+      const requestId = '27f7188b-f6c7-4b5e-9826-96052bba495c'
+
+      const dbError = new Error('DB Error')
+      approvalFindOne.mockReturnValue(dbError)
+
+      // 試験実施
+      const result = await approverController.getApprovalFromRejected(
+        accessToken,
+        refreshToken,
+        tenantId,
+        contractId,
+        requestId
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(false)
+    })
+
+    test('異常系：エラーが発生した場合', async () => {
+      // 準備
+      // アクセストークンの用意
+      const accessToken = 'dummy-access-token'
+      const refreshToken = 'dummy-refresh-token'
+      const tenantId = 'dummy-tennant'
+      const contractId = 'dummy-contractId'
+      const requestId = '27f7188b-f6c7-4b5e-9826-96052bba495c'
+
+      // トレードシフトから取得データ
+      const findUsers1 = { ...findUsers }
+      // トレードシフトのユーザー情報取得
+      accessTradeshift.mockReturnValueOnce(findUsers1)
+
+      // 検索予想結果
+
+      // 試験実施
+      const result = await approverController.getApprovalFromRejected(
+        accessToken,
+        refreshToken,
+        tenantId,
+        contractId,
+        requestId
+      )
+
+      const sequelizeConnectionError = new Error('The "config.server" property is required and must be of type string.')
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(sequelizeConnectionError)
     })
   })
 })

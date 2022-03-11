@@ -4,8 +4,8 @@ block content
   .max-width
     section.hero.is-small.is-com
       .hero-body-noImage
-        .title.is-family-noto-sans 受領請求書への仕訳情報設定
-        .subtitle.is-family-noto-sans SET JOURNAL ON RECEIVED INVOICES
+        .title.is-family-noto-sans 支払一覧
+        .subtitle.is-family-noto-sans PAYMENT REQUEST LIST
 
     .columns.is-centered
       .column.is-11
@@ -132,87 +132,21 @@ block content
                       p 現在、受領した請求書一覧はありません。
 
                   .tab-pane#constructTab
-                    if requestApprovalList.length !== 0
-                      table.table.is-fullwidth.is-hoverable.table-fixed
-                        thead
-                          tr
-                            th.width-5.text-center No
-                            th.width-10.text-center 請求書番号
-                            th.width-10.text-center 請求書ステータス
-                            th.width-10.text-center 承認ステータス
-                            th.width-10.text-center 通貨
-                            th.width-10.text-center 金額
-                            th.width-10.text-center 送信企業
-                            th.width-10.text-center 受信企業
-                            th.width-10.text-center 更新日
-                            th.width-10.text-center 期限日
-                            th.width-10.text-center
-                        tbody.display-row
-                          each item, idx in requestApprovalList
-                            tr
-                              th.text-center.td-overflow= idx + 1
-                              td.text-center.td-overflow= item.invoiceNo
-                              td.text-center.td-overflow
-                                if item.status === 0
-                                  a.a-status-PAID_UNCONFIRMED 入金確認済み
-                                else if item.status === 1
-                                  a.a-status-PAID_CONFIRMED 送金済み
-                                else if item.status === 2
-                                  a.a-status-ACCEPTED 受理済み
-                                else if item.status === 3
-                                  a.a-status-DELIVERED 受信済み
-                              if item.approveStatus === '10'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-WAITING 承認依頼中
-                              else if item.approveStatus === '11'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-APPROVING 一次承認済み
-                              else if item.approveStatus === '12'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-APPROVING 二次承認済み
-                              else if item.approveStatus === '13'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-APPROVING 三次承認済み
-                              else if item.approveStatus === '14'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-APPROVING 四次承認済み
-                              else if item.approveStatus === '15'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-APPROVING 五次承認済み
-                              else if item.approveStatus === '16'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-APPROVING 六次承認済み
-                              else if item.approveStatus === '17'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-APPROVING 七次承認済み
-                              else if item.approveStatus === '18'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-APPROVING 八次承認済み
-                              else if item.approveStatus === '19'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-APPROVING 九次承認済み
-                              else if item.approveStatus === '20'
-                                td.text-center.td-overflow.linkToApproval(data-target=`/approvalInbox/${item.documentId}`)
-                                  a.a-approveStatus-APPROVING 十次承認済み
-                              else if item.approveStatus === '00'
-                                td.text-center.td-overflow
-                                  a.a-approveStatus-APPROVED 最終承認済み
-                              else if item.approveStatus === '90'
-                                td.text-center.td-overflow
-                                  a.a-approveStatus-RETURNED 差し戻し
-                              else
-                                td.text-center.td-overflow
-                                  a.a-approveStatus-UNTREATED 未処理
-                              td.text-center.td-overflow= item.currency
-                              td.text-center.td-overflow= item.ammount
-                              td.text-center.td-overflow= item.sentTo
-                              td.text-center.td-overflow= item.sentBy
-                              td.text-center.td-overflow= item.updated
-                              td.text-center.td-overflow= item.expire
-                              td.text-center.display-row-td
-                                a.button.is-success.td-overflow.display-row-td-button(href=`/inbox/${item.documentId}`) 仕訳情報設定                  
-                    else
-                      p 現在、承認待ち請求書はありません。
+                    table.table.is-fullwidth.is-hoverable.table-fixed
+                      thead
+                        tr
+                          th.width-5.text-center No
+                          th.width-10.text-center 請求書番号
+                          th.width-10.text-center 請求書ステータス
+                          th.width-10.text-center 承認ステータス
+                          th.width-10.text-center 通貨
+                          th.width-10.text-center 金額
+                          th.width-10.text-center 送信企業
+                          th.width-10.text-center 受信企業
+                          th.width-10.text-center 更新日
+                          th.width-10.text-center 期限日
+                          th.width-10.text-center
+                      tbody.display-row           
                 else
                   .tab-pane#informationTab
                     if listArr.length !== 0
