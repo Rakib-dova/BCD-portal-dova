@@ -847,6 +847,30 @@ const updateApprove = async (contractId, requestId, message) => {
   }
 }
 
+/**
+ * 差し戻しされた承認データ取得。
+ * @param {uuid} contractId 承認ルートの識別番号
+ * @param {uuid} requestId 支払依頼ID
+ * @returns {approval} 差し戻しされた承認データ
+ */
+const getApprovalFromRejected = async (contractId, requestId) => {
+  try {
+    if (!validate.isUUID(requestId)) return false
+    const approval = await Approval.findOne({
+      where: {
+        requestId: requestId,
+        approveStatus: '90'
+      },
+      order: [['approvedAt', 'DESC']]
+    })
+    if (approval instanceof Approval === false) return false
+    return approval
+  } catch (error) {
+    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
+    return error
+  }
+}
+
 module.exports = {
   getApprover: getApprover,
   insertApprover: insertApprover,
@@ -860,5 +884,6 @@ module.exports = {
   readApproval: readApproval,
   checkApproveRoute: checkApproveRoute,
   saveApproval: saveApproval,
-  updateApprove: updateApprove
+  updateApprove: updateApprove,
+  getApprovalFromRejected: getApprovalFromRejected
 }

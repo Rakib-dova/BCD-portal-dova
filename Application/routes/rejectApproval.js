@@ -55,9 +55,10 @@ const cbPostApprove = async (req, res, next) => {
   const contractId = contract.contractId
   const invoiceId = req.params.invoiceId
   const message = req.body.message
+  const userId = req.user.userId
 
   // 差し戻し処理
-  const result = await rejectApprovalController.rejectApprove(contractId, invoiceId, message)
+  const result = await rejectApprovalController.rejectApprove(contractId, invoiceId, message, userId)
   if (result) {
     req.flash('info', '承認依頼を差し戻しました。')
     res.redirect('/inboxList/redirected/1')

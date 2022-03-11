@@ -140,7 +140,14 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         timestamps: true,
         defaultValue: new Date()
-      }
+      },
+      rejectedUser: { type: DataTypes.UUID, allowNull: true },
+      rejectedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
+      rejectedMessage: { type: DataTypes.STRING, allowNull: true }
     },
     {
       sequelize,
