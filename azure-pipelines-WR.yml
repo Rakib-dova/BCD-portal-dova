@@ -41,6 +41,7 @@ steps:
     cd ./bcd-e2e-tests
     npm i
     npm run ${{ parameters.browser }} -- spec/scenario_ci_001.js
+    npm run e2e-report
   displayName: 'npm run'
   workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
 
