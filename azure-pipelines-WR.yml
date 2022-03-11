@@ -41,7 +41,7 @@ steps:
     cd ./bcd-e2e-tests
     npm i
     echo ${{ parameters.browser }}
-    npm run ${{ parameters.browser }} -- spec/scenario001.js
+    npm run e2e -- spec/scenario001.js
     npm run e2e-report
     dir
   displayName: 'npm run'
