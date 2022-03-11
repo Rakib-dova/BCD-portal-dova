@@ -43,3 +43,9 @@ steps:
     npm run ${{ parameters.browser }} -- spec/scenario_ci_001.js
   displayName: 'npm run'
   workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
+
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testRunner: JUnit
+    testResultsFiles: '**/index.html'
