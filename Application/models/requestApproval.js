@@ -14,10 +14,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'contractId', // k1を指定
         targetKey: 'contractId' // k2を指定
       })
-      RequestApproval.belongsTo(models.ApproveRoute, {
-        foreignKey: 'approveRouteId', // k1を指定
-        targetKey: 'approveRouteId' // k2を指定
-      })
       RequestApproval.belongsTo(models.User, {
         foreignKey: 'requester', // k1を指定
         targetKey: 'userId' // k2を指定
@@ -46,12 +42,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       approveRouteId: {
         type: DataTypes.UUID,
-        references: {
-          model: {
-            tableName: 'ApproveRoute'
-          },
-          key: 'approveRouteId'
-        },
         allowNull: true
       },
       invoiceId: { type: DataTypes.UUID, allowNull: false },
