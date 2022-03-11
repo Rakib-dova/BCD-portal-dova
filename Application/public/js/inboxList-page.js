@@ -54,87 +54,107 @@ $('#constructTab').addEventListener('click', function () {
         case 200: {
           const response = JSON.parse(getWorkflow.response)
 
+          console.log(response)
+
           if (response.length === 0) {
             const nothing = document.createElement('p')
             nothing.innerText = '現在、承認待ち請求書はありません。'
             appendChilds(constructTab, [nothing])
-            return
+          } else {
+            appendChilds($('.tab-pane#constructTab')[0], [createTable()])
+            response.forEach((item, idx) => {
+              const row = document.createElement('tr')
+
+              const no = document.createElement('th')
+              addColumnCSS(no)
+              no.innerText = idx + 1
+
+              const invoiceNo = document.createElement('td')
+              addColumnCSS(invoiceNo)
+              invoiceNo.innerText = item.invoiceid
+
+              const status = document.createElement('td')
+              const statusLink = document.createElement('a')
+              addColumnCSS(status)
+              switch (item.status) {
+                case 0:
+                  addCss(statusLink, ['a-status-PAID_UNCONFIRMED'])
+                  statusLink.innerText = '入金確認済み'
+                  break
+                case 1:
+                  addCss(statusLink, ['a-status-PAID_CONFIRMED'])
+                  statusLink.innerText = '送金済み'
+                  break
+                case 2:
+                  addCss(statusLink, ['a-status-ACCEPTED'])
+                  statusLink.innerText = '受理済み'
+                  break
+                case 3:
+                  addCss(statusLink, ['a-status-DELIVERED'])
+                  statusLink.innerText = '受信済み'
+                  break
+              }
+              appendChilds(status, [statusLink])
+
+              const workflowStatus = document.createElement('td')
+              const workflowLink = document.createElement('a')
+              if (item.workflowStatus === '承認依頼中') {
+                workflowLink.classList.add('a-approveStatus-WAITING')
+              } else {
+                workflowLink.classList.add('a-approveStatus-APPROVING')
+              }
+              workflowLink.innerText = item.workflowStatus
+              appendChilds(workflowStatus, [workflowLink])
+              addColumnCSS(workflowStatus)
+
+              const curr = document.createElement('td')
+              addColumnCSS(curr)
+              curr.innerText = item.currency
+
+              const currency = document.createElement('td')
+              addColumnCSS(currency)
+              currency.innerText = item.amount.toLocaleString('ja-JP')
+
+              const sentBy = document.createElement('td')
+              addColumnCSS(sentBy)
+              sentBy.innerText = item.sendBy
+
+              const sentTo = document.createElement('td')
+              addColumnCSS(sentTo)
+              sentTo.innerText = item.sendTo
+
+              const updatedAt = document.createElement('td')
+              addColumnCSS(updatedAt)
+              updatedAt.innerText = item.updatedAt.toLocaleString('ja-JP')
+
+              const expire = document.createElement('td')
+              addColumnCSS(expire)
+              expire.innerText = item.expire
+
+              const btn = document.createElement('td')
+              addCss(btn, ['text-center', 'display-row-td'])
+              const btnLink = document.createElement('a')
+              addCss(btnLink, ['button', 'is-success', 'td-overflow', 'display-row-td-btton'])
+              appendChilds(btn, [btnLink])
+              btnLink.setAttribute('href', `/inbox/${item.documentId}`)
+              btnLink.innerText = '仕訳情報設定'
+
+              appendChilds(row, [
+                no,
+                invoiceNo,
+                status,
+                workflowStatus,
+                curr,
+                currency,
+                sentBy,
+                sentTo,
+                updatedAt,
+                expire,
+                btn
+              ])
+              appendChilds($('.tab-content > .tab-pane:nth-child(2) > .table > .display-row')[0], [row])
+            })
           }
-
-          appendChilds($('.tab-pane#constructTab')[0], [createTable()])
-          response.forEach((item, idx) => {
-            const row = document.createElement('tr')
-
-            const no = document.createElement('th')
-            addColumnCSS(no)
-            no.innerText = idx + 1
-
-            const invoiceNo = document.createElement('td')
-            addColumnCSS(invoiceNo)
-            invoiceNo.innerText = item.invoiceNo
-
-            const status = document.createElement('td')
-            addColumnCSS(status)
-            status.innerText = item.status
-
-            const workflowStatus = document.createElement('td')
-            const workflowLink = document.createElement('a')
-            if (item.workflowStatus === '承認依頼中') {
-              workflowLink.classList.add('a-approveStatus-WAITING')
-            } else {
-              workflowLink.classList.add('a-approveStatus-APPROVING')
-            }
-            workflowLink.innerText = item.workflowStatus
-            appendChilds(workflowStatus, [workflowLink])
-            addColumnCSS(workflowStatus)
-
-            const curr = document.createElement('td')
-            addColumnCSS(curr)
-            curr.innerText = item.curr
-
-            const currency = document.createElement('td')
-            addColumnCSS(currency)
-            currency.innerText = item.current
-
-            const sentBy = document.createElement('td')
-            addColumnCSS(sentBy)
-            sentBy.innerText = item.sendBy
-
-            const sentTo = document.createElement('td')
-            addColumnCSS(sentTo)
-            sentTo.innerText = item.sendTo
-
-            const updatedAt = document.createElement('td')
-            addColumnCSS(updatedAt)
-            updatedAt.innerText = item.updatedAt
-
-            const expire = document.createElement('td')
-            addColumnCSS(expire)
-            expire.innerText = item.expire
-
-            const btn = document.createElement('td')
-            addCss(btn, ['text-center', 'display-row-td'])
-            const btnLink = document.createElement('a')
-            addCss(btnLink, ['button', 'is-success', 'td-overflow', 'display-row-td-btton'])
-            appendChilds(btn, [btnLink])
-            btnLink.setAttribute('href', `/inbox/${item.documentId}`)
-            btnLink.innerText = '仕訳情報設定'
-
-            appendChilds(row, [
-              no,
-              invoiceNo,
-              status,
-              workflowStatus,
-              curr,
-              currency,
-              sentBy,
-              sentTo,
-              updatedAt,
-              expire,
-              btn
-            ])
-            appendChilds($('.tab-content > .tab-pane:nth-child(2) > .tabe > .display-row')[0], [row])
-          })
 
           $('.tab-pane.is-active')[0].classList.remove('is-active')
           $(
@@ -200,7 +220,7 @@ function addCss(htmlElement, classList) {
 }
 function createTable() {
   const table = document.createElement('table')
-  addCss(table, ['tabe', 'is-fullwidth', 'is-hoverable', 'table-fixed'])
+  addCss(table, ['table', 'is-fullwidth', 'is-hoverable', 'table-fixed'])
 
   const subTitle = [
     'No',

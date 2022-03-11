@@ -7,6 +7,7 @@ const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const requestApprovalController = require('../controllers/requestApprovalController.js')
+const approvalInboxController = require('../controllers/approvalInboxController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
@@ -64,11 +65,21 @@ const cbGetIndex = async (req, res, next) => {
       contract.contractId,
       result.list[i].documentId
     )
+
     if (requestApproval instanceof Error) return next(errorHelper.create(500))
 
     if (requestApproval !== null) {
       result.list[i].approveStatus = requestApproval.status
-      requestApprovalList.push(result.list[i])
+      const resultIds = await approvalInboxController.getApproval(requestApproval.requestId)
+      if (!resultIds) {
+        continue
+      }
+      if (user.userId === resultIds.approveUserId) {
+        requestApprovalList.push(result.list[i])
+      }
+      if (user.userId === resultIds.requestUserId) {
+        requestApprovalList.push(result.list[i])
+      }
     }
   }
 
@@ -196,11 +207,15 @@ const cbGetWorkflow = async (req, res, next) => {
 
   const userId = user.userId
   const contractId = contract.contractId
-  const workflow = await inboxController.getWorkflow(userId, contractId)
+  const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(
+    req.user.accessToken,
+    req.user.refreshToken,
+    user.tenantId
+  )
+  const workflow = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
 
   if (workflow instanceof Error === true) res.status(500).send('サーバーエラーが発生しました。')
 
-  console.log(workflow)
   res.status(200).send(workflow)
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetWorkflow')
 }
