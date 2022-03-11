@@ -16,6 +16,15 @@ parameters:
 trigger:
 - none
 
+paths:
+  include:
+    - bcd-e2e-tests
+  exclude:
+    - Documents
+    - Tests
+    - '*.yml'
+    - Application
+
 pool:
   vmImage: windows-2019
 
@@ -32,3 +41,4 @@ steps:
 - script: |
     npm run ${{ parameters.browser }} -- spec/scenario_ci_001.js
   displayName: 'npm run'
+  workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
