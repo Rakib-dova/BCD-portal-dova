@@ -188,3 +188,10 @@ p:focus {
 #detail-approveRoute-modal > .modal-card {
   width: 65%;
 }
+
+#rejectedUserMessage {
+  color: #ffa800 !important;
+  font-size: 18px;
+  line-height: 27px;
+  font-weight: bold;
+}

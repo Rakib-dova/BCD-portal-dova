@@ -166,20 +166,33 @@ const cbGetRequestApproval = async (req, res, next) => {
   }
 
   const contractId = contract.contractId
+  const tenantId = contract.tenantId
   let approveRouteId = null
   let message = null
   let approveRoute = null
   let isSaved = false
+  let rejectedUser = null
   if (req.session.requestApproval) {
     message = req.session.requestApproval.message
     approveRouteId = req.session.requestApproval.approveRouteId
     isSaved = req.session.requestApproval.isSaved
   }
   const approval = await approverController.readApproval(contractId, invoiceId, isSaved)
-  if (approval) {
+  if (approval && approval.status === '80') {
     approveRouteId = approval.approveRouteId
     message = approval.message
+  } else if (approval && approval.status === '90' && approval.requester === req.user.userId) {
+    rejectedUser = await approverController.getApprovalFromRejected(
+      accessToken,
+      refreshToken,
+      tenantId,
+      contractId,
+      approval.requestId
+    )
+
+    if (rejectedUser instanceof Error) return next(errorHelper.create(500))
   }
+
   if (approveRouteId) {
     approveRoute = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
   }
@@ -197,7 +210,8 @@ const cbGetRequestApproval = async (req, res, next) => {
     optionLine8: optionLine8,
     documentId: invoiceId,
     message: message,
-    approveRoute: approveRoute
+    approveRoute: approveRoute,
+    rejectedUser: rejectedUser
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRequestApproval')

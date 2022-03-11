@@ -163,6 +163,9 @@ p:focus {
 #check-approval-modal > .modal-card {
   width: 100%;
 }
+#reject-approval-modal > .modal-card {
+  width: 100%;
+}
 
 .columns .rows {
   flex-flow: column;
