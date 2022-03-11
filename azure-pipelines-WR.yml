@@ -14,18 +14,7 @@ parameters:
   - edge
 
 trigger:
-  branches:
-    include:
-      - refs/heads/snake_case
-  paths:
-    include:
-      - bcd-e2e-tests
-    exclude:
-      - Documents
-      - Tests
-      - '*.yml'
-      - Application
-
+- none
 
 pool:
   vmImage: windows-2019
