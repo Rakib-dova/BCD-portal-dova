@@ -178,8 +178,7 @@ const cbGetRequestApproval = async (req, res, next) => {
     isSaved = req.session.requestApproval.isSaved
   }
   const approval = await approverController.readApproval(contractId, invoiceId, isSaved)
-
-  if (approval && approval.status === 80) {
+  if (approval && approval.status === '80') {
     approveRouteId = approval.approveRouteId
     message = approval.message
   } else if (approval && approval.status === '90' && approval.requester === req.user.userId) {
