@@ -40,22 +40,23 @@ steps:
 - script: |
     cd ./bcd-e2e-tests
     npm i
+    echo ${{ parameters.browser }}
     npm run ${{ parameters.browser }} -- spec/scenario_ci_001.js
     npm run e2e-report
     dir
   displayName: 'npm run'
   workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
 
-- task: PublishTestResults@2
-  condition: succeededOrFailed()
-  inputs:
-    testRunner: JUnit
-    testResultsFiles: '**/*.json'
+# - task: PublishTestResults@2
+#   condition: succeededOrFailed()
+#   inputs:
+#     testRunner: JUnit
+#     testResultsFiles: '**/*.json'
 
-- task: PublishPipelineArtifact@1
-  inputs:
-    targetPath: $(Build.SourcesDirectory)/build
-    artifactName: report
-- task: DownloadPipelineArtifact@2
-  inputs:
-    patterns: '**/*.zip'
+# - task: PublishPipelineArtifact@1
+#   inputs:
+#     targetPath: $(Build.SourcesDirectory)/build
+#     artifactName: report
+# - task: DownloadPipelineArtifact@2
+#   inputs:
+#     patterns: '**/*.zip'
