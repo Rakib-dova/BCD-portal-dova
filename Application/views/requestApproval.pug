@@ -6,6 +6,7 @@ block content
       h4.title-text-journallzing.text-inbox 支払依頼
     .box
       form#form(method='POST' action=`/requestApproval/save/${documentId}`)
+        include requestApprovalRejectedMessage
         include invoiceHeader
         include requestApprovalInvoiceLines
         include invoiceFooter
