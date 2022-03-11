@@ -49,4 +49,12 @@ steps:
   condition: succeededOrFailed()
   inputs:
     testRunner: JUnit
-    testResultsFiles: '**/index.html'
+    testResultsFiles: '**/*.json'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: $(Agent.TempDirectory)/build
+    artifactName: report
+- task: DownloadPipelineArtifact@2
+  inputs:
+    patterns: '**/*.zip'
