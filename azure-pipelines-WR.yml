@@ -39,6 +39,14 @@ parameters:
       - false
       - true
 
+- name: browser
+  type: string
+  default: chrome
+  values:
+  - chrome
+  - firefox
+  - edge
+
 variables:
   - group: ${{ parameters.Environment }}
   - name: devDeploy #開発環境デプロイフラグ
@@ -400,12 +408,12 @@ stages:
           versionSpec: '10.x'
         displayName: 'Install Node.js'
   
-  - stage: chromeStage
+  - stage: scenario001Stage
     dependsOn: npm_settingStage
     jobs:
-    - job: chrome_scenario001
+    - job: scenario001
       steps:
       - script:  |
           npm i
-          npm run e2e --spec/scenario001.js
+          npm run ${{ parameters.browser }} --spec/scenario001.js
         workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
