@@ -156,11 +156,62 @@ const cbGetIndexRedirected = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndexRedirected')
 }
 
+const cbGetWorkflow = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'cbGetWorkflow')
+  // 認証情報取得処理
+  if (!req.session || !req.user?.userId) {
+    return next(errorHelper.create(500))
+  }
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  req.session.userContext = 'LoggedIn'
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+
+  if (checkContractStatus === null || checkContractStatus === 999) {
+    return next(errorHelper.create(500))
+  }
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('cancelprocedure'))
+  }
+
+  const userId = user.userId
+  const contractId = contract.contractId
+  const workflow = await inboxController.getWorkflow(userId, contractId)
+
+  if (workflow instanceof Error === true) res.status(503).send('サーバーエラーが発生しました。')
+
+  console.log(workflow)
+  res.status(200).send(workflow)
+  logger.info(constantsDefine.logMessage.INF001 + 'cbGetWorkflow')
+}
+
+router.get('/getWorkflow', cbGetWorkflow)
 router.get('/:page', helper.isAuthenticated, cbGetIndex)
 router.get('/redirected/:page', helper.isAuthenticated, cbGetIndexRedirected)
 
 module.exports = {
   router: router,
   cbGetIndex: cbGetIndex,
-  cbGetIndexRedirected: cbGetIndexRedirected
+  cbGetIndexRedirected: cbGetIndexRedirected,
+  cbGetWorkflow: cbGetWorkflow
 }
