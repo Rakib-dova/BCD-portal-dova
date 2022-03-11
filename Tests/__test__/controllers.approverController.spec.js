@@ -3098,6 +3098,7 @@ describe('approverControllerのテスト', () => {
         approveStatus: '20',
         approveRouteName: approveRoute.approveRouteName
       })
+      dummyApproval.approveUserCount = 11
       approvalFindOne.mockReturnValueOnce(dummyApproval)
 
       const dummyStatus = ApproveStatus.build({
