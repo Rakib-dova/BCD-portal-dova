@@ -42,6 +42,7 @@ steps:
     npm i
     npm run ${{ parameters.browser }} -- spec/scenario_ci_001.js
     npm run e2e-report
+    dir
   displayName: 'npm run'
   workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
 
@@ -53,7 +54,7 @@ steps:
 
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: $(Agent.TempDirectory)/build
+    targetPath: $(Build.SourcesDirectory)/build
     artifactName: report
 - task: DownloadPipelineArtifact@2
   inputs:
