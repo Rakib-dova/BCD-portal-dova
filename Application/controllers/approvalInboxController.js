@@ -121,6 +121,31 @@ const hasPowerOfEditing = async (contractId, userId, requestApproval) => {
   }
 }
 
+const getApproval = async (requestId) => {
+  try {
+    const dbApproval = await DbApproval.findOne({
+      where: {
+        requestId: requestId
+      }
+    })
+    if (!dbApproval) {
+      return null
+    }
+    const status = dbApproval.approveStatus
+    const userNo = ~~status - 9
+    const approveUserId = dbApproval[`approveUser${userNo}`]
+    const requesterUserId = dbApproval.requestUserId
+
+    return {
+      approveUserId: approveUserId,
+      requesterUserId: requesterUserId
+    }
+  } catch (error) {
+    logger.error({ requestId: requestId, stack: error.stack, status: 0 })
+    return null
+  }
+}
+
 /**
  * 仕訳情報保存
  * @param {uuid} contractId
@@ -135,7 +160,8 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
 module.exports = {
   getRequestApproval: getRequestApproval,
   hasPowerOfEditing: hasPowerOfEditing,
-  insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice
+  insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice,
+  getApproval: getApproval
 }
 
 const ApprovalStatusList = []

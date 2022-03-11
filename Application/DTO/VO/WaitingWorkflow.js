@@ -14,13 +14,54 @@ class WaitingWorkflow {
   }
 
   convertRequestApprovalToWorkflow(requestApproval) {
+    this.setInvoiceNo(requestApproval.approveRouteName)
     this.setWorkflowStatus(requestApproval.status)
     this.setCreatedAt(requestApproval.create)
   }
 
   convertApprovalToWorkflow(approval) {
+    this.setInvoiceNo(approval.approveRouteName)
+    this.setStatus(approval.approveRouteName)
     this.setWorkflowStatus(approval.approveStatus)
     this.setCreatedAt(approval.approvedAt)
+  }
+
+  setDocumentId(id) {
+    this.documentId = id
+  }
+
+  setInvoiceNo(invoiceNo) {
+    this.invoiceNo = invoiceNo
+  }
+
+  setStatus(status) {
+    switch (status) {
+      case '00':
+        this.workflowStatus = '承認済み'
+        break
+      case '10':
+        this.workflowStatus = '承認待ち'
+        break
+      case '20':
+        this.workflowStatus = '差し戻し'
+        break
+    }
+  }
+
+  setSendBy(sendBy) {
+    this.sendBy = sendBy
+  }
+
+  setSendTo(sendTo) {
+    this.sendTo = sendTo
+  }
+
+  setUpdatedAt(updatedAt) {
+    this.updatedAt = updatedAt
+  }
+
+  setExpire(expire) {
+    this.expire = expire
   }
 
   setWorkflowStatus(code) {
