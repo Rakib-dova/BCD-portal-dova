@@ -14,21 +14,24 @@ parameters:
   - edge
 
 trigger:
-- none
+  branches:
+    include:
+      - refs/heads/snake_case
+  paths:
+    include:
+      - bcd-e2e-tests
+    exclude:
+      - Documents
+      - Tests
+      - '*.yml'
+      - Application
 
-paths:
-  include:
-    - bcd-e2e-tests
-  exclude:
-    - Documents
-    - Tests
-    - '*.yml'
-    - Application
 
 pool:
   vmImage: windows-2019
 
 steps:
+
 - task: NodeTool@0
   inputs:
     versionSpec: '10.x'
