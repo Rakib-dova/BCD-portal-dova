@@ -732,20 +732,14 @@ const saveMessage = async (contractId, invoiceId, requester, message, approveRou
 
 const readApproval = async (contractId, invoiceId, isSaved) => {
   try {
-    const status = await Status.findOne({
-      where: {
-        name: {
-          [Op.like]: '未処理'
-        }
-      }
-    })
     const request = await Request.findOne({
       where: {
         contractId: contractId,
-        invoiceId: invoiceId,
-        status: status.code
-      }
+        invoiceId: invoiceId
+      },
+      order: [['create', 'DESC']]
     })
+
     if (request === null) return null
     else {
       if (isSaved === false) {
@@ -853,7 +847,7 @@ const updateApprove = async (contractId, requestId, message) => {
  * @param {uuid} requestId 支払依頼ID
  * @returns {approval} 差し戻しされた承認データ
  */
-const getApprovalFromRejected = async (contractId, requestId) => {
+const getApprovalFromRejected = async (accessToken, refreshToken, tenant, contractId, requestId) => {
   try {
     if (!validate.isUUID(requestId)) return false
     const approval = await Approval.findOne({
@@ -861,10 +855,30 @@ const getApprovalFromRejected = async (contractId, requestId) => {
         requestId: requestId,
         approveStatus: '90'
       },
-      order: [['approvedAt', 'DESC']]
+      order: [['rejectedMessage', 'DESC']]
     })
+
     if (approval instanceof Approval === false) return false
-    return approval
+
+    const users = await getApprover(accessToken, refreshToken, tenant, {
+      firstName: '',
+      lastName: '',
+      email: ''
+    })
+
+    const requester = users.find((user) => {
+      if (user.id === approval.rejectedUser) {
+        return true
+      }
+      return false
+    })
+
+    const rejectedUser = {
+      name: requester.name,
+      message: approval.rejectedMessage
+    }
+
+    return rejectedUser
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
     return error

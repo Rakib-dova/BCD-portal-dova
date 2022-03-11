@@ -24,7 +24,8 @@ const rejectApprove = async (contractId, invoiceId, message, userId) => {
       where: {
         contractId: contractId,
         invoiceId: invoiceId
-      }
+      },
+      order: [['create', 'DESC']]
     })
 
     const updateRequestApproval = await Request.update(
@@ -39,32 +40,14 @@ const rejectApprove = async (contractId, invoiceId, message, userId) => {
     )
     if (!updateRequestApproval) return false
 
-    let userNo
     const userData = {}
-    const selectApproval = await Approval.findOne({
-      where: {
-        requestId: rejectedRequest.requestId
-      }
-    })
-
-    if (selectApproval instanceof Approval === false) return false
-
-    const approveStatus = ~~selectApproval.approveStatus
-    const approveUserCount = selectApproval.approveUserCount
-    const activeApproverNo = approveStatus - 9
-    if (approveUserCount === activeApproverNo) {
-      userNo = 'Last'
-    } else if (activeApproverNo >= 1 && activeApproverNo <= 10) {
-      userNo = `${activeApproverNo}`
-    }
 
     userData.approveStatus = status.code
     userData.rejectedUser = userId
     userData.rejectedAt = new Date()
-    userData.rejectedMessage = message
 
     if (message !== '' && message !== undefined) {
-      userData[`message${userNo}`] = message
+      userData.rejectedMessage = message
     }
 
     const updateApproval = await Approval.update(userData, {
