@@ -39,13 +39,13 @@ parameters:
       - false
       - true
 
-- name: browser
-  type: string
-  default: chrome
-  values:
-  - chrome
-  - firefox
-  - edge
+  - name: browser
+    type: string
+    default: chrome
+    values:
+    - chrome
+    - firefox
+    - edge
 
 variables:
   - group: ${{ parameters.Environment }}
