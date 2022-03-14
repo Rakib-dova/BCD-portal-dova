@@ -13,14 +13,13 @@ stages:
   - stage: e2eTestStage
     jobs:
       - job: e2eTestJob
-        # variables:
-        #   npm_config_cache: $(Pipeline.Workspace)\node_modules
+        variables:
+          npm_config_cache: $(Pipeline.Workspace)\bcd-e2e-tests\node_modules
         steps:
           - task: CacheBeta@0
             inputs:
               key: $(Build.SourcesDirectory)\bcd-e2e-tests\package-lock.json
-              path: $(Build.SourcesDirectory)\bcd-e2e-tests\node_modules
-              # path: $(npm_config_cache)
+              path: $(npm_config_cache)
             displayName: Cache npm
 
           - task: CacheBeta@0
@@ -31,18 +30,18 @@ stages:
 
           - script: |
               npm i
-            workingDirectory: "$(Build.SourcesDirectory)/bcd-e2e-tests"
-            displayName: "install"
+            workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
+            displayName: install
 
           - script: |
               npm run e2e -- spec/citest.js
-            workingDirectory: "$(Build.SourcesDirectory)/bcd-e2e-tests"
-            displayName: "test"
+            workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
+            displayName: test
 
           - script: |
               npm run e2e-report
-            workingDirectory: "$(Build.SourcesDirectory)/bcd-e2e-tests"
-            displayName: "report"
+            workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
+            displayName: report
             condition: succeededOrFailed()
 #  workingDirectory: '$(Build.SourcesDirectory)\bcd-e2e-tests'
 
