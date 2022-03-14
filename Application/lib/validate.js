@@ -417,7 +417,7 @@ const checkNetworkConnection = function (companyNetworkConnectionList, targetCon
 // 仕訳のバリデーションチェック
 // コード
 const isCode = function (code, prefix) {
-  const inputPatternEngNum = '^[a-zA-Z0-9+]*$'
+  const inputPatternEngNum = '^[a-zA-Z0-9]*$'
   const regex = new RegExp(inputPatternEngNum)
   if (code.length < 1) {
     return `${prefix}CODEERR000`
@@ -432,7 +432,7 @@ const isCode = function (code, prefix) {
 
 // 部門コード
 const isDepartmentCode = function (code, prefix) {
-  const inputPatternEngNum = '^[a-zA-Z0-9ァ-ヶー　+]*$'
+  const inputPatternEngNum = '^[a-zA-Z0-9ァ-ヶー]*$'
   const regex = new RegExp(inputPatternEngNum)
   if (code.length < 1) {
     return `${prefix}CODEERR000`

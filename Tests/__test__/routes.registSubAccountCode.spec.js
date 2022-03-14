@@ -195,7 +195,7 @@ describe('registSubAccountCodeのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
 
-      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目登録', '事前に勘定科目登録する必要があります。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['補助科目登録', '事前に勘定科目を登録する必要があります。'])
     })
 
     test('正常：解約申込中の場合', async () => {

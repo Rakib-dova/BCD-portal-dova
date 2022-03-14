@@ -66,6 +66,7 @@ const cbGetIndex = async (req, res, next) => {
     subjectCode: '補助科目コード',
     subjectName: '補助科目名',
     accountCodeName: '勘定科目名',
+    updatedDate: '最新更新日',
     setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
     setClassDeleteBtn: 'deleteSubAccountCodeBtn',
     prevLocation: '/uploadSubAccount',

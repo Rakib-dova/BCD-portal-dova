@@ -244,18 +244,18 @@ stages:
                   package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
                   startUpCommand: npm run start
 
-              - task: AzureCLI@2
-                condition: eq(variables.japanwest,'True')
-                displayName: Priolity down on japanwest App Service
-                inputs:
-                  azureSubscription: '$(azureSubscriptionEndpoint)'
-                  scriptType: 'ps'
-                  scriptLocation: 'inlineScript'
-                  inlineScript: |
-                    az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
-                    az network front-door backend-pool backend update  -g $(portalRg)  `
-                    --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
-                    --priority 2 --index 2 #西日本Azure Functionの優先度を下げる
+              # - task: AzureCLI@2
+              #   condition: eq(variables.japanwest,'True')
+              #   displayName: Priolity down on japanwest App Service
+              #   inputs:
+              #     azureSubscription: '$(azureSubscriptionEndpoint)'
+              #     scriptType: 'ps'
+              #     scriptLocation: 'inlineScript'
+              #     inlineScript: |
+              #       az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
+              #       az network front-door backend-pool backend update  -g $(portalRg)  `
+              #       --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+              #       --priority 2 --index 2 #西日本Azure Functionの優先度を下げる
             
             deploy:
               steps: 
@@ -273,32 +273,32 @@ stages:
                       --name $(appServiceSecName) -g $(portalSecRg)
                       Write-Host "##vso[task.setvariable variable=swapSlots1Status]Success"
 
-            routeTraffic:
-              steps:
-              - task: AzureCLI@2
-                condition: eq(variables.japanwest,'True')
-                displayName: Priolity down on japaneast App Service
-                inputs:
-                  azureSubscription: '$(azureSubscriptionEndpoint)'
-                  scriptType: 'ps'
-                  scriptLocation: 'inlineScript'
-                  inlineScript: |
-                    az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
-                    az network front-door backend-pool backend update  -g $(portalRg)  `
-                    --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
-                    --priority 3 --index 1 #東日本App Serviceの優先度を下げる
+            # routeTraffic:
+            #   steps:
+            #   - task: AzureCLI@2
+            #     condition: eq(variables.japanwest,'True')
+            #     displayName: Priolity down on japaneast App Service
+            #     inputs:
+            #       azureSubscription: '$(azureSubscriptionEndpoint)'
+            #       scriptType: 'ps'
+            #       scriptLocation: 'inlineScript'
+            #       inlineScript: |
+            #         az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
+            #         az network front-door backend-pool backend update  -g $(portalRg)  `
+            #         --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+            #         --priority 3 --index 1 #東日本App Serviceの優先度を下げる
 
-              - task: AzureCLI@2
-                condition: eq(variables.japanwest,'True')
-                displayName: Priolity up on japanwest App Service
-                inputs:
-                  azureSubscription: '$(azureSubscriptionEndpoint)'
-                  scriptType: 'ps'
-                  scriptLocation: 'inlineScript'
-                  inlineScript: |
-                    az network front-door backend-pool backend update  -g $(portalRg)  `
-                    --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
-                    --priority 1 --index 2 #西日本App Serviceの優先度を上げる
+            #   - task: AzureCLI@2
+            #     condition: eq(variables.japanwest,'True')
+            #     displayName: Priolity up on japanwest App Service
+            #     inputs:
+            #       azureSubscription: '$(azureSubscriptionEndpoint)'
+            #       scriptType: 'ps'
+            #       scriptLocation: 'inlineScript'
+            #       inlineScript: |
+            #         az network front-door backend-pool backend update  -g $(portalRg)  `
+            #         --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+            #         --priority 1 --index 2 #西日本App Serviceの優先度を上げる
             on:
               failure: 
                 steps:
@@ -313,33 +313,33 @@ stages:
                       az webapp deployment slot swap --slot 'staging' --action 'swap' `
                       --name $(appServiceSecName) -g $(portalSecRg)
 
-                - task: AzureCLI@2
-                  displayName: Priolity up on japaneast App Service
-                  condition: eq(variables.japanwest,'True')
-                  inputs:
-                    azureSubscription: '$(azureSubscriptionEndpoint)'
-                    scriptType: 'ps'
-                    scriptLocation: 'inlineScript'
-                    inlineScript: |
-                      az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
-                      az network front-door backend-pool backend update  -g $(portalRg)  `
-                      --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
-                      --priority 1 --index 1 #東日本App Serviceの優先度を上げる
+                # - task: AzureCLI@2
+                #   displayName: Priolity up on japaneast App Service
+                #   condition: eq(variables.japanwest,'True')
+                #   inputs:
+                #     azureSubscription: '$(azureSubscriptionEndpoint)'
+                #     scriptType: 'ps'
+                #     scriptLocation: 'inlineScript'
+                #     inlineScript: |
+                #       az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
+                #       az network front-door backend-pool backend update  -g $(portalRg)  `
+                #       --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                #       --priority 1 --index 1 #東日本App Serviceの優先度を上げる
                 
-                - task: AzureCLI@2
-                  displayName: Priolity up on japanwest App Service
-                  condition: eq(variables.japanwest,'True')
-                  inputs:
-                    azureSubscription: '$(azureSubscriptionEndpoint)'
-                    scriptType: 'ps'
-                    scriptLocation: 'inlineScript'
-                    inlineScript: |
+                # - task: AzureCLI@2
+                #   displayName: Priolity up on japanwest App Service
+                #   condition: eq(variables.japanwest,'True')
+                #   inputs:
+                #     azureSubscription: '$(azureSubscriptionEndpoint)'
+                #     scriptType: 'ps'
+                #     scriptLocation: 'inlineScript'
+                #     inlineScript: |
                       
-                      az network front-door backend-pool backend update  -g $(portalRg)  `
-                      --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
-                      --priority 1 --index 2 #西日本Azure Functionの優先度を上げる
-                      #AGENT_JOBSTATUS ='SucceededWithIssues'
-                      $env:AGENT_JOBSTATUS ='SucceededWithIssues'
+                #       az network front-door backend-pool backend update  -g $(portalRg)  `
+                #       --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                #       --priority 1 --index 2 #西日本Azure Functionの優先度を上げる
+                #       #AGENT_JOBSTATUS ='SucceededWithIssues'
+                #       $env:AGENT_JOBSTATUS ='SucceededWithIssues'
 
                 - powershell: |
                     #undo
@@ -374,20 +374,20 @@ stages:
                       Write-Host 'swapSlots2Status'
                       Write-Host '$(swapSlots2Status)'
 
-            routeTraffic:
-              steps:
-                - task: AzureCLI@2
-                  condition: eq(variables.japanwest,'True')
-                  displayName: Priolity up on japaneast App Service
-                  inputs:
-                    azureSubscription: '$(azureSubscriptionEndpoint)'
-                    scriptType: 'ps'
-                    scriptLocation: 'inlineScript'
-                    inlineScript: |
-                      az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
-                      az network front-door backend-pool backend update  -g $(portalRg)  `
-                      --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
-                      --priority 1 --index 1 #東日本App Serviceの優先度を上げる
+            # routeTraffic:
+            #   steps:
+            #     - task: AzureCLI@2
+            #       condition: eq(variables.japanwest,'True')
+            #       displayName: Priolity up on japaneast App Service
+            #       inputs:
+            #         azureSubscription: '$(azureSubscriptionEndpoint)'
+            #         scriptType: 'ps'
+            #         scriptLocation: 'inlineScript'
+            #         inlineScript: |
+            #           az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
+            #           az network front-door backend-pool backend update  -g $(portalRg)  `
+            #           --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+            #           --priority 1 --index 1 #東日本App Serviceの優先度を上げる
 
             on:
               failure: 
@@ -414,30 +414,30 @@ stages:
                       az webapp deployment slot swap --slot 'staging' --action 'swap' `
                       --name $(appServiceSecName) -g $(portalSecRg)
 
-                - task: AzureCLI@2
-                  condition: eq(variables.japanwest,'True')
-                  displayName: Priolity up on japaneast App Service
-                  inputs:
-                    azureSubscription: '$(azureSubscriptionEndpoint)'
-                    scriptType: 'ps'
-                    scriptLocation: 'inlineScript'
-                    inlineScript: |
-                      az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
-                      az network front-door backend-pool backend update  -g $(portalRg)  `
-                      --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
-                      --priority 1 --index 1 #東日本App Serviceの優先度を上げる
+                # - task: AzureCLI@2
+                #   condition: eq(variables.japanwest,'True')
+                #   displayName: Priolity up on japaneast App Service
+                #   inputs:
+                #     azureSubscription: '$(azureSubscriptionEndpoint)'
+                #     scriptType: 'ps'
+                #     scriptLocation: 'inlineScript'
+                #     inlineScript: |
+                #       az config set extension.use_dynamic_install=yes_without_prompt #拡張機能を自動的にインストールする設定
+                #       az network front-door backend-pool backend update  -g $(portalRg)  `
+                #       --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                #       --priority 1 --index 1 #東日本App Serviceの優先度を上げる
                 
-                - task: AzureCLI@2
-                  condition: eq(variables.japanwest,'True')
-                  displayName: Priolity up on japanwest App Service
-                  inputs:
-                    azureSubscription: '$(azureSubscriptionEndpoint)'
-                    scriptType: 'ps'
-                    scriptLocation: 'inlineScript'
-                    inlineScript: |
-                      az network front-door backend-pool backend update  -g $(portalRg)  `
-                      --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
-                      --priority 1 --index 2 #西日本Azure Functionの優先度を上げる
+                # - task: AzureCLI@2
+                #   condition: eq(variables.japanwest,'True')
+                #   displayName: Priolity up on japanwest App Service
+                #   inputs:
+                #     azureSubscription: '$(azureSubscriptionEndpoint)'
+                #     scriptType: 'ps'
+                #     scriptLocation: 'inlineScript'
+                #     inlineScript: |
+                #       az network front-door backend-pool backend update  -g $(portalRg)  `
+                #       --front-door-name   $(frontdoorName)  --pool-name $(backendPoolName) `
+                #       --priority 1 --index 2 #西日本Azure Functionの優先度を上げる
 
                 - powershell: |
                     #undo

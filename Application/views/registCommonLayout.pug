@@ -22,6 +22,7 @@ block content
                               .column
                                 label(for= parentIdForCodeInputResult).input-label #{parentCodeLabel}
                                 p(id= requiredTagParentCodeLabel).input-label-required.input-label （必須）
+                                p#RequiredErrorMesageForAccountCode.input-label-required.is-invisible
                                 .control
                                   .columns.ml-0.pl-0
                                     if valueForCodeInput

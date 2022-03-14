@@ -10,6 +10,7 @@ export function $(tagObjName) {
     selectors = document.querySelectorAll(tagObjName)
   } else if (idNameReg.test(tagObjName)) {
     selectors = document.querySelectorAll(tagObjName)[0]
+    if (selectors === undefined) return null
   } else {
     return null
   }

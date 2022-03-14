@@ -143,7 +143,7 @@ const flash = require('express-flash')
 app.use(flash())
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'))
+app.set('views', [path.join(__dirname, 'views'), path.join(__dirname, 'obc/views')])
 app.set('view engine', 'pug')
 
 // body-parser
@@ -156,6 +156,13 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '5mb', parameterLimit: 84
 // app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(cookieParser());
+
+/**  会員サイト開発 20220228 */
+// CookieParserのコメントアウトを解除
+const cookieParser = require('cookie-parser')
+app.use(cookieParser())
+/**  会員サイト開発 20220228 */
+
 app.use(express.static(path.join(__dirname, 'public')))
 
 // セッションにuserIdがあればappInsightに送信
@@ -182,6 +189,25 @@ app.use(function (req, res, next) {
   next()
 })
 
+// 一時保存機能
+// 支払依頼のユーザーが入力して承認ルート未設定や
+// 未保存ですぐ依頼の時、画面の入力した内容保存する
+// ミドルウェア
+app.use(function (req, res, next) {
+  const url = req.url
+
+  if (
+    url.match('/requestApproval/') === null &&
+    url.match('/approvalInbox/') === null &&
+    url.match('/favicon.ico') === null &&
+    url.match('/inbox/getCode') === null &&
+    url.match('/inbox/department') === null
+  ) {
+    delete req.session.requestApproval
+  }
+  next()
+})
+
 app.use('/', require('./routes/index').router)
 app.use('/portal', require('./routes/portal').router)
 app.use('/auth', require('./routes/auth').router)
@@ -193,6 +219,8 @@ app.use('/user', require('./routes/user').router)
 app.use('/searchAddress', require('./routes/searchAddressApi').router)
 // 企業検索
 app.use('/searchCompanies', require('./routes/searchCompaniesApi').router)
+// 承認者検索
+app.use('/searchApprover', require('./routes/searchApprover').router)
 
 // 請求書一括アップロード
 // csvupload
@@ -272,9 +300,27 @@ app.use('/departmentCodeEdit', require('./routes/departmentCodeEdit').router)
 // ------------受領した請求書
 // 受領した請求書一覧
 app.use('/inboxList', require('./routes/inboxList').router)
+// 承認待ち一覧
+// app.use('/approvalInboxList', require('./routes/approvalInboxList').router)
 
 // 受領した請求書
 app.use('/inbox', require('./routes/inbox').router)
+// 支払依頼の請求書
+app.use('/approvalInbox', require('./routes/approvalInbox').router)
+
+// 承認依頼画面
+app.use('/requestApproval', require('./routes/requestApproval').router)
+
+// 承認依頼差し戻し
+app.use('/rejectApproval', require('./routes/rejectApproval').router)
+
+// ------------承認ルート
+// 承認ルート登録
+app.use('/registApproveRoute', require('./routes/registApproveRoute').router)
+// 承認ルート一覧
+app.use('/approveRouteList', require('./routes/approveRouteList').router)
+// 承認ルート確認
+app.use('/approveRouteEdit', require('./routes/approveRouteEdit').router)
 
 // 設定
 // cancellation
@@ -282,6 +328,18 @@ app.use('/cancellation', require('./routes/cancellation').router)
 
 // 契約者情報の修正
 app.use('/change', require('./routes/change').router)
+
+// 請求書ダウンロード
+app.use('/csvDownload', require('./routes/csvDownload').router)
+
+/**  会員サイト開発 20220228 */
+// アプリ一覧からの遷移受付けエンドポイント
+app.use('/memberCooperation', require('./memberSite/routes/memberCooperationRouter').router)
+app.use('/idLinking', require('./memberSite/routes/idLinkingRouter').router)
+/**  会員サイト開発 20220228 */
+
+// 奉行クラウド連携
+app.use('/bugyo', require('./obc/obc'))
 
 // notice
 const noticeHelper = require('./routes/helpers/notice')
