@@ -119,6 +119,8 @@ describe('受領した請求書一覧のインテグレーションテスト', (
         .expect(200)
 
       // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/承認待ち/i)
       expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/請求書番号/i)
       expect(res.text).toMatch(/ステータス/i)
@@ -138,6 +140,8 @@ describe('受領した請求書一覧のインテグレーションテスト', (
         .expect(200)
 
       // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/承認待ち/i)
       expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/請求書番号/i)
       expect(res.text).toMatch(/ステータス/i)
@@ -178,6 +182,8 @@ describe('受領した請求書一覧のインテグレーションテスト', (
         .expect(200)
 
       // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/承認待ち/i)
       expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/請求書番号/i)
       expect(res.text).toMatch(/ステータス/i)
@@ -197,6 +203,8 @@ describe('受領した請求書一覧のインテグレーションテスト', (
         .expect(200)
 
       // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/承認待ち/i)
       expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/請求書番号/i)
       expect(res.text).toMatch(/ステータス/i)
@@ -239,6 +247,8 @@ describe('受領した請求書一覧のインテグレーションテスト', (
         .expect(200)
 
       // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/承認待ち/i)
       expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/請求書番号/i)
       expect(res.text).toMatch(/ステータス/i)
@@ -258,6 +268,8 @@ describe('受領した請求書一覧のインテグレーションテスト', (
         .expect(200)
 
       // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/承認待ち/i)
       expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/請求書番号/i)
       expect(res.text).toMatch(/ステータス/i)
@@ -289,6 +301,73 @@ describe('受領した請求書一覧のインテグレーションテスト', (
 
       // 画面内容確認
       expect(res.text).toMatch(/現在、受領した請求書一覧はありません。/i)
+    })
+
+    test('管理者、「承認待ち」タブの切替え', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/inboxList/1')
+      if (page.url() === 'https://localhost:3000/inboxList/1') {
+        await page.click(
+          'body > div.max-width > div > div > div.box > div > div.tabs.is-boxed.is-medium > ul > li:nth-child(2) > a'
+        )
+
+        await page.waitForTimeout(500)
+
+        // 承認待ちタブが表示される。
+        const isActive1 = await page.evaluate(() => {
+          return document.querySelector(
+            'body > div.max-width > div > div > div.box > div > div.tabs.is-boxed.is-medium > ul > li:nth-child(2)'
+          ).classList.value
+        })
+        expect(isActive1).toMatch(/is-active/i)
+
+        const isActive2 = await page.evaluate(() => {
+          return document.querySelector('.tab-content > .tab-pane:nth-child(2)').classList.value
+        })
+        expect(isActive2).toMatch(/is-active/i)
+      }
+
+      await browser.close()
+    })
+
+    test('一般ユーザ、「承認待ち」タブの切替え', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: false,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto('https://localhost:3000/inboxList/1')
+      if (page.url() === 'https://localhost:3000/inboxList/1') {
+        await page.click(
+          'body > div.max-width > div > div > div.box > div > div.tabs.is-boxed.is-medium > ul > li:nth-child(2) > a'
+        )
+
+        await page.waitForTimeout(500)
+
+        // 承認待ちタブが表示される。
+        const isActive1 = await page.evaluate(() => {
+          return document.querySelector(
+            'body > div.max-width > div > div > div.box > div > div.tabs.is-boxed.is-medium > ul > li:nth-child(2)'
+          ).classList.value
+        })
+        expect(isActive1).toMatch(/is-active/i)
+
+        const isActive2 = await page.evaluate(() => {
+          return document.querySelector('.tab-content > .tab-pane:nth-child(2)').classList.value
+        })
+        expect(isActive2).toMatch(/is-active/i)
+      }
+      // await browser.close()
     })
 
     test('管理者、「←Homeへ戻る」リンク遷移確認（ポータルへ移動）', async () => {
@@ -361,6 +440,8 @@ describe('受領した請求書一覧のインテグレーションテスト', (
         .expect(200)
 
       // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/承認待ち/i)
       expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/請求書番号/i)
       expect(res.text).toMatch(/ステータス/i)
@@ -380,6 +461,8 @@ describe('受領した請求書一覧のインテグレーションテスト', (
         .expect(200)
 
       // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/承認待ち/i)
       expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/請求書番号/i)
       expect(res.text).toMatch(/ステータス/i)
@@ -420,6 +503,8 @@ describe('受領した請求書一覧のインテグレーションテスト', (
         .expect(200)
 
       // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/承認待ち/i)
       expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/請求書番号/i)
       expect(res.text).toMatch(/ステータス/i)
@@ -439,6 +524,8 @@ describe('受領した請求書一覧のインテグレーションテスト', (
         .expect(200)
 
       // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/承認待ち/i)
       expect(res.text).toMatch(/No/i)
       expect(res.text).toMatch(/請求書番号/i)
       expect(res.text).toMatch(/ステータス/i)

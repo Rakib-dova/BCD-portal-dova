@@ -83,7 +83,7 @@ describe('approvalInboxControllerのテスト', () => {
   })
 
   describe('getRequestApproval', () => {
-    test('正常：承認依頼取得ステータス：10', async () => {
+    test('正常：支払依頼取得ステータス：10', async () => {
       // 準備
       const expectGetApproveRoute = {
         users: [
@@ -197,7 +197,7 @@ describe('approvalInboxControllerのテスト', () => {
       expect(result.prevUser).toEqual(expectResult.prevUser)
     })
 
-    test('正常：承認依頼取得ステータス：11', async () => {
+    test('正常：支払依頼取得ステータス：11', async () => {
       // 準備
       const expectGetApproveRoute = {
         users: [
@@ -361,7 +361,7 @@ describe('approvalInboxControllerのテスト', () => {
       expect(result.prevUser).toEqual(expectResult.prevUser)
     })
 
-    test('正常：承認依頼取得(userのidとrequestApproval.requesterが間違っている場合)', async () => {
+    test('正常：支払依頼取得(userのidとrequestApproval.requesterが間違っている場合)', async () => {
       // 準備
       const expectGetApproveRoute = {
         users: [
@@ -491,7 +491,7 @@ describe('approvalInboxControllerのテスト', () => {
       expect(result.prevUser).toEqual(expectResult.prevUser)
     })
 
-    test('正常：承認依頼取得(request.statusテスト)', async () => {
+    test('正常：支払依頼取得(request.statusテスト)', async () => {
       // 準備
       const expectGetApproveRoute = {
         users: [
@@ -655,7 +655,7 @@ describe('approvalInboxControllerのテスト', () => {
       expect(result.status).toEqual(expectResult.status)
     })
 
-    test('正常：承認依頼取得(request.statusテスト1)', async () => {
+    test('正常：支払依頼取得(request.statusテスト1)', async () => {
       // 準備
       const expectGetApproveRoute = {
         users: [

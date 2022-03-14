@@ -1,6 +1,9 @@
 'use strict'
 jest.mock('../../Application/models')
 jest.mock('../../Application/lib/logger')
+jest.mock('../../Application/DAO/RequestApprovalDAO')
+jest.mock('../../Application/DTO/TradeshiftDTO')
+jest.mock('../../Application/DAO/ApprovalDAO')
 
 const inboxController = require('../../Application/controllers/inboxController')
 const apiManager = require('../../Application/controllers/apiManager.js')
@@ -11,6 +14,35 @@ const SubAccountCode = require('../../Application/models').SubAccountCode
 const DepartmentCode = require('../../Application/models').DepartmentCode
 const JournalizeInvoice = require('../../Application/models').JournalizeInvoice
 const RequestApproval = require('../../Application/models').RequestApproval
+const ApproveStatus = require('../../Application/models').ApproveStatus
+const Approval = require('../../Application/models').Approval
+const RequestApprovalDAO = require('../../Application/DAO/RequestApprovalDAO')
+const TradeshiftDTO = require('../../Application/DTO/TradeshiftDTO')
+const ApprovalDAO = require('../../Application/DAO/ApprovalDAO')
+const timeStamp = require('../../Application/lib/utils').timestampForList
+
+const modelsBuilder = function (modelName) {
+  return function (values) {
+    const models = require('../../Application/models')
+    const keys = Object.keys(values)
+    const modes = new models[modelName]()
+    keys.forEach((key) => {
+      modes[key] = values[key]
+    })
+    return modes
+  }
+}
+
+const getWorkflowStatusCode = (name) => {
+  switch (name) {
+    case '最終承認済み':
+      return '00'
+    case '差し戻し':
+      return '90'
+    case '未処理':
+      return '80'
+  }
+}
 
 let accessTradeshiftSpy,
   errorSpy,
@@ -21,7 +53,13 @@ let accessTradeshiftSpy,
   journalizeInvoiceCreateSpy,
   departmentCodeFindOneSpy,
   departmentCodeFindAllSpy,
-  requestApprovalFindOneSpy
+  requestApprovalFindOneSpy,
+  requestApprovalDTOgetWaitingWorkflowisMineSpy,
+  ApproveStatusFindOneSpy,
+  requestApprovalDAOGetAllRequestApproval,
+  tradeshiftDTOFindDocuments,
+  approvalDAOGetWaitingApprovals,
+  requestApprovalFindAll
 
 const accountCodeMock = require('../mockDB/AccountCode_Table')
 const subAccountCodeMock = require('../mockDB/SubAccountCode_Table')
@@ -652,18 +690,20 @@ describe('inboxControllerのテスト', () => {
     departmentCodeFindOneSpy = jest.spyOn(DepartmentCode, 'findOne')
     departmentCodeFindAllSpy = jest.spyOn(DepartmentCode, 'findAll')
     journalizeInvoiceCreateSpy = jest.spyOn(JournalizeInvoice, 'create')
-    JournalizeInvoice.build = jest.fn(function (values) {
-      const keys = Object.keys(values)
-      const newJournal = new JournalizeInvoice()
-      keys.forEach((key) => {
-        newJournal[key] = values[key]
-      })
-      return newJournal
-    })
+    JournalizeInvoice.build = jest.fn(modelsBuilder('JournalizeInvoice'))
     JournalizeInvoice.save = jest.fn(async function () {})
     JournalizeInvoice.destory = jest.fn(async function () {})
     JournalizeInvoice.set = jest.fn(function () {})
     requestApprovalFindOneSpy = jest.spyOn(DepartmentCode, 'findOne')
+    requestApprovalDTOgetWaitingWorkflowisMineSpy = jest.fn(async function () {})
+    ApproveStatusFindOneSpy = jest.spyOn(ApproveStatus, 'findOne')
+    requestApprovalDAOGetAllRequestApproval = jest.spyOn(RequestApprovalDAO.prototype, 'getAllRequestApproval')
+    tradeshiftDTOFindDocuments = jest.spyOn(TradeshiftDTO.prototype, 'findDocuments')
+    approvalDAOGetWaitingApprovals = jest.spyOn(ApprovalDAO.prototype, 'getWaitingApprovals')
+    RequestApproval.build = jest.fn(modelsBuilder('RequestApproval'))
+    RequestApproval.prototype.getWorkflowStatusCode = jest.fn(getWorkflowStatusCode)
+    requestApprovalFindAll = jest.fn(Approval, 'findAll')
+    Approval.build = jest.fn(modelsBuilder('Approval'))
   })
   afterEach(() => {
     accessTradeshiftSpy.mockRestore()
@@ -676,6 +716,13 @@ describe('inboxControllerのテスト', () => {
     departmentCodeFindOneSpy.mockRestore()
     departmentCodeFindAllSpy.mockRestore()
     requestApprovalFindOneSpy.mockRestore()
+    requestApprovalDTOgetWaitingWorkflowisMineSpy.mockRestore()
+    ApproveStatusFindOneSpy.mockRestore()
+    requestApprovalDAOGetAllRequestApproval.mockRestore()
+    requestApprovalDAOGetAllRequestApproval.mockRestore()
+    tradeshiftDTOFindDocuments.mockRestore()
+    approvalDAOGetWaitingApprovals.mockRestore()
+    requestApprovalFindAll.mockRestore()
   })
 
   describe('getInbox', () => {
@@ -1380,6 +1427,428 @@ describe('inboxControllerのテスト', () => {
 
       const result = await inboxController.getRequestApproval(contractId, invoiceId)
       expect(result).toEqual(dbError)
+    })
+  })
+
+  describe('getWorkflow', () => {
+    test('正常:対象がない', async () => {
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce([])
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+
+      const finalExpectResult = []
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+      expect(result).toStrictEqual(finalExpectResult)
+    })
+
+    test('正常:自分が依頼した場合', async () => {
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+
+      const getAllRequestApproval = []
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: 'ut-test1'
+        })
+      )
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: 'ut-test2'
+        })
+      )
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: 'ut-test3'
+        })
+      )
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: 'ut-test4'
+        })
+      )
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+      const document2 = {
+        ID: 'UTテスト2',
+        UnifiedState: 'PAID_CONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '200.00' }
+        ],
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+      const document3 = {
+        ID: 'UTテスト3',
+        UnifiedState: 'ACCEPTED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '300.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+      const document4 = {
+        ID: 'UTテスト4',
+        UnifiedState: 'DELIVERED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '400.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: null,
+        DueDate: null
+      }
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document2)
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document3)
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document4)
+
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+      expect(result.length).toBe(4)
+      expect(result[0]).toHaveProperty('documentId', 'ut-test1')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+
+      expect(result[1]).toHaveProperty('documentId', 'ut-test2')
+      expect(result[1]).toHaveProperty('invoiceid', 'UTテスト2')
+      expect(result[1]).toHaveProperty('status', 0)
+      expect(result[1]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[1]).toHaveProperty('currency', 'JPY')
+      expect(result[1]).toHaveProperty('amount', '200')
+      expect(result[1]).toHaveProperty('sendBy', '-')
+      expect(result[1]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[1]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[1]).toHaveProperty('expire', timeStamp(new Date()))
+
+      expect(result[2]).toHaveProperty('documentId', 'ut-test3')
+      expect(result[2]).toHaveProperty('invoiceid', 'UTテスト3')
+      expect(result[2]).toHaveProperty('status', 2)
+      expect(result[2]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[2]).toHaveProperty('currency', 'JPY')
+      expect(result[2]).toHaveProperty('amount', '300')
+      expect(result[2]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[2]).toHaveProperty('sendTo', '-')
+      expect(result[2]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[2]).toHaveProperty('expire', timeStamp(new Date()))
+
+      expect(result[3]).toHaveProperty('documentId', 'ut-test4')
+      expect(result[3]).toHaveProperty('invoiceid', 'UTテスト4')
+      expect(result[3]).toHaveProperty('status', 3)
+      expect(result[3]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[3]).toHaveProperty('currency', 'JPY')
+      expect(result[3]).toHaveProperty('amount', '400')
+      expect(result[3]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[3]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[3]).toHaveProperty('updatedAt', '-')
+      expect(result[3]).toHaveProperty('expire', '-')
+    })
+
+    test('正常:自分に依頼がきた時', async () => {
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce([])
+
+      const waitingApprovals = []
+      // 最終承認者になって、承認担当者になっているもの
+      waitingApprovals.push(
+        Approval.build({
+          requestId: 'dummyRequestid1',
+          requestUserId: 'dummyRequester1',
+          approveRouteId: 'dummyRouteId',
+          approveStatus: '10',
+          approveRouteName: 'UTテスト1',
+          approveUser1: null,
+          approvalAt1: null,
+          message1: null,
+          approveUser2: null,
+          approvalAt2: null,
+          message2: null,
+          approveUser3: null,
+          approvalAt3: null,
+          message3: null,
+          approveUser4: null,
+          approvalAt4: null,
+          message4: null,
+          approveUser5: null,
+          approvalAt5: null,
+          message5: null,
+          approveUser6: null,
+          approvalAt6: null,
+          message6: null,
+          approveUser7: null,
+          approvalAt7: null,
+          message7: null,
+          approveUser8: null,
+          approvalAt8: null,
+          message8: null,
+          approveUser9: null,
+          approvalAt9: null,
+          message9: null,
+          approveUser10: null,
+          approvalAt10: null,
+          message10: null,
+          approveUserLast: 'dummyUserId',
+          approvalAtLast: null,
+          messageLast: null,
+          approveUserCount: 1,
+          rejectedUser: null,
+          rejectedAt: null,
+          rejectedMessage: null,
+          'RequestApproval.invoiceId': 'ut-test1'
+        })
+      )
+      // まだ、承認担当者になっていないもの
+      waitingApprovals.push(
+        Approval.build({
+          requestId: 'dummyRequestid1',
+          requestUserId: 'dummyRequester1',
+          approveRouteId: 'dummyRouteId',
+          approveStatus: '10',
+          approveRouteName: 'UTテスト2',
+          approveUser1: 'approveUser1',
+          approvalAt1: null,
+          message1: null,
+          approveUser2: 'dummyUserId',
+          approvalAt2: null,
+          message2: null,
+          approveUser3: null,
+          approvalAt3: null,
+          message3: null,
+          approveUser4: null,
+          approvalAt4: null,
+          message4: null,
+          approveUser5: null,
+          approvalAt5: null,
+          message5: null,
+          approveUser6: null,
+          approvalAt6: null,
+          message6: null,
+          approveUser7: null,
+          approvalAt7: null,
+          message7: null,
+          approveUser8: null,
+          approvalAt8: null,
+          message8: null,
+          approveUser9: null,
+          approvalAt9: null,
+          message9: null,
+          approveUser10: null,
+          approvalAt10: null,
+          message10: null,
+          approveUserLast: 'UtLastUser',
+          approvalAtLast: null,
+          messageLast: null,
+          approveUserCount: 3,
+          rejectedUser: null,
+          rejectedAt: null,
+          rejectedMessage: null,
+          'RequestApproval.invoiceId': 'ut-test2'
+        })
+      )
+      // 承認担当者になったもの
+      waitingApprovals.push(
+        Approval.build({
+          requestId: 'dummyRequestid1',
+          requestUserId: 'dummyRequester1',
+          approveRouteId: 'dummyRouteId',
+          approveStatus: '11',
+          approveRouteName: 'UTテスト2',
+          approveUser1: 'approveUser1',
+          approvalAt1: new Date(2022, 4, 14),
+          message1: 'Thank you',
+          approveUser2: 'dummyUserId',
+          approvalAt2: null,
+          message2: null,
+          approveUser3: null,
+          approvalAt3: null,
+          message3: null,
+          approveUser4: null,
+          approvalAt4: null,
+          message4: null,
+          approveUser5: null,
+          approvalAt5: null,
+          message5: null,
+          approveUser6: null,
+          approvalAt6: null,
+          message6: null,
+          approveUser7: null,
+          approvalAt7: null,
+          message7: null,
+          approveUser8: null,
+          approvalAt8: null,
+          message8: null,
+          approveUser9: null,
+          approvalAt9: null,
+          message9: null,
+          approveUser10: null,
+          approvalAt10: null,
+          message10: null,
+          approveUserLast: 'UtLastUser',
+          approvalAtLast: null,
+          messageLast: null,
+          approveUserCount: 3,
+          rejectedUser: null,
+          rejectedAt: null,
+          rejectedMessage: null,
+          'RequestApproval.invoiceId': 'ut-test3'
+        })
+      )
+      // 承認担当者が終わったもの
+      waitingApprovals.push(
+        Approval.build({
+          requestId: 'dummyRequestid1',
+          requestUserId: 'dummyRequester1',
+          approveRouteId: 'dummyRouteId',
+          approveStatus: '12',
+          approveRouteName: 'UTテスト2',
+          approveUser1: 'approveUser1',
+          approvalAt1: new Date(2022, 4, 14),
+          message1: 'Thank you',
+          approveUser2: 'dummyUserId',
+          approvalAt2: new Date(2022, 4, 14),
+          message2: 'ありがとう',
+          approveUser3: 'approveUser3',
+          approvalAt3: null,
+          message3: null,
+          approveUser4: null,
+          approvalAt4: null,
+          message4: null,
+          approveUser5: null,
+          approvalAt5: null,
+          message5: null,
+          approveUser6: null,
+          approvalAt6: null,
+          message6: null,
+          approveUser7: null,
+          approvalAt7: null,
+          message7: null,
+          approveUser8: null,
+          approvalAt8: null,
+          message8: null,
+          approveUser9: null,
+          approvalAt9: null,
+          message9: null,
+          approveUser10: null,
+          approvalAt10: null,
+          message10: null,
+          approveUserLast: 'UtLastUser',
+          approvalAtLast: null,
+          messageLast: null,
+          approveUserCount: 4,
+          rejectedUser: null,
+          rejectedAt: null,
+          rejectedMessage: null,
+          'RequestApproval.invoiceId': 'ut-test4'
+        })
+      )
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce(waitingApprovals)
+
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+      const document2 = {
+        ID: 'UTテスト3',
+        UnifiedState: 'PAID_CONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '200.00' }
+        ],
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document2)
+
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+      expect(result.length).toBe(2)
+      expect(result[0]).toHaveProperty('documentId', 'ut-test1')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+
+      expect(result[1]).toHaveProperty('documentId', 'ut-test3')
+      expect(result[1]).toHaveProperty('invoiceid', 'UTテスト3')
+      expect(result[1]).toHaveProperty('status', 0)
+      expect(result[1]).toHaveProperty('workflowStatus', '一次承認済み')
+      expect(result[1]).toHaveProperty('currency', 'JPY')
+      expect(result[1]).toHaveProperty('amount', '200')
+      expect(result[1]).toHaveProperty('sendBy', '-')
+      expect(result[1]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[1]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[1]).toHaveProperty('expire', timeStamp(new Date()))
     })
   })
 })

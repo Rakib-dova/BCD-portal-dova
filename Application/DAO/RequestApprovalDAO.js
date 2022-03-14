@@ -22,6 +22,13 @@ class RequestApprovalDAO extends DAO {
     return requestApproval
   }
 
+  async getAllRequestApproval() {
+    const allRequestApproval = await this.DTO.findAll({
+      order: [['create', 'DESC']]
+    })
+    return allRequestApproval
+  }
+
   async getpreWorkflowRequestApproval(invoiceId) {
     const preWorkflowStatusCode = await this.getWorkflowStatusCode('未処理')
     const requstApproval = await this.getRequestApproval(invoiceId, preWorkflowStatusCode)
