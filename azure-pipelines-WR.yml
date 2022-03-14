@@ -1,7 +1,7 @@
 # Node.js
 # Build a general Node.js project with npm.
 # Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+# https:\\docs.microsoft.com\azure\devops\pipelines\languages\javascript
 
 trigger:
   - none
@@ -13,11 +13,13 @@ stages:
   - stage: e2eTestStage
     jobs:
       - job: e2eTestJob
+        variables:
+          npm_config_cache: $(Pipeline.Workspace)\bcd-e2e-tests\node_modules
         steps:
           - task: CacheBeta@0
             inputs:
               key: $(Build.SourcesDirectory)\bcd-e2e-tests\package-lock.json
-              path: $(Build.SourcesDirectory)\bcd-e2e-tests\node_modules
+              path: $(npm_config_cache)
             displayName: Cache npm
 
           - task: CacheBeta@0
@@ -27,38 +29,24 @@ stages:
             displayName: Cache browser
 
           - script: |
-              dir $(Build.SourcesDirectory)
-              dir $(Build.SourcesDirectory)\bcd-e2e-tests
-              echo $(Build.SourcesDirectory)\bcd-e2e-tests\package-lock.json
+              npm i
+            workingDirectory: $(Build.SourcesDirectory)\bcd-e2e-tests
+            displayName: install
 
-          # - script: |
-          #     npm i
-          #   workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
-          #   displayName: install
+          - script: |
+              npm run e2e -- spec\citest.js
+            workingDirectory: $(Build.SourcesDirectory)\bcd-e2e-tests
+            displayName: test
 
-          # - script: |
-          #     npm run e2e -- spec/citest.js
-          #   workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
-          #   displayName: test
+          - script: |
+              npm run e2e-report
+            workingDirectory: $(Build.SourcesDirectory)\bcd-e2e-tests
+            displayName: report
+            condition: succeededOrFailed()
 
-          # - script: |
-          #     npm run e2e-report
-          #   workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
-          #   displayName: report
-          #   condition: succeededOrFailed()
-
-#  workingDirectory: '$(Build.SourcesDirectory)\bcd-e2e-tests'
-
-# - task: PublishTestResults@2
-#   condition: succeededOrFailed()
-#   inputs:
-#     testRunner: JUnit
-#     testResultsFiles: '**/*.json'
-
-# - task: PublishPipelineArtifact@1
-#   inputs:
-#     targetPath: $(Build.SourcesDirectory)\build
-#     artifactName: report
-# - task: DownloadPipelineArtifact@2
-#   inputs:
-#     patterns: '**/*.zip'
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: $(Build.SourcesDirectory)\bcd-e2e-tests\build
+              artifactName: report
+            displayName: artifact
+            condition: succeededOrFailed()
