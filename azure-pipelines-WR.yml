@@ -39,6 +39,6 @@ steps:
   displayName: 'npm install'
 
 - script: |
-    npm run e2e -- spec/citest.js
+    npm run e2e -- spec/scenario001.js
   workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
   displayName: 'npm run'
