@@ -11,7 +11,7 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
-const notiTitle = '承認依頼'
+const notiTitle = '支払依頼'
 
 const bodyParser = require('body-parser')
 const approverController = require('../controllers/approverController')
@@ -197,7 +197,7 @@ const cbGetRequestApproval = async (req, res, next) => {
     approveRoute = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
   }
 
-  // 承認依頼画面render
+  // 支払依頼画面render
   res.render('requestApproval', {
     ...result,
     optionLine1: optionLine1,
@@ -441,6 +441,7 @@ const cbPostApproval = async (req, res, next) => {
     requester,
     message
   )
+
   const result = await approverController.saveApproval(
     contractId,
     approveRouteId,
@@ -452,7 +453,7 @@ const cbPostApproval = async (req, res, next) => {
   )
   switch (result) {
     case 0:
-      req.flash('info', '承認依頼を完了しました。')
+      req.flash('info', '支払依頼を完了しました。')
       res.redirect('/inboxList/1')
       break
     default:
