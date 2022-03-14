@@ -22,7 +22,6 @@ block content
                   th.width-8.text-center 登録されている承認者数
                   th.width-8.text-center 
                   th.width-5.text-center 
-                  th.width-5.text-center 
               tbody
                 - var list = approveRouteListArr
                 each item in list
@@ -35,8 +34,6 @@ block content
                       a.button.is-success.confirmButton(name='confirmButton' href= `/approveRouteEdit/${item.uuid}`) 確認・変更する
                     td.text-center
                       a.button.is-danger.show-modal(type = "button" name = 'deleteButton' data-target = "confirationDelete-modal" uuid= item.uuid) 削除
-                    td.text-center
-                      a.button.is-primary.show-modal(type = "button" name = 'hiddenButton' data-target = "confirmationHidden-modal" uuid= item.uuid) 非表示
         .mt-1.has-text-left
           a.button.is-link.is-light(href="/portal") ←Homeへ戻る
 
@@ -52,15 +49,6 @@ block content
                   div.button-area
                     a.button.cancel-button(data-target='confirationDelete-modal') キャンセル
                     a.button.is-danger.ml-6#modalDelBtn(name='modalDelBtn') 削除
-
-        .modal.modal-fx-fadeInscale#confirmationHidden-modal
-              .modal-background.cancel-button(data-target="confirmationHidden-modal")
-              .modal-card
-                header.modal-card-head
-                  p.modal-card-title 承認ルート非表示
-                  button.delete(type="button" data-target="confirmationHidden-modal")
-                section.modal-card-body
-                  p 機能準備中です。
 
     include footer
 
