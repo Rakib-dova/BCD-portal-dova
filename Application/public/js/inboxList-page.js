@@ -113,7 +113,7 @@ $('#constructTab').addEventListener('click', function () {
 
               const currency = document.createElement('td')
               addColumnCSS(currency)
-              currency.innerText = item.amount.toLocaleString('ja-JP')
+              currency.innerText = item.amount.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 
               const sentBy = document.createElement('td')
               addColumnCSS(sentBy)
@@ -136,8 +136,8 @@ $('#constructTab').addEventListener('click', function () {
               const btnLink = document.createElement('a')
               addCss(btnLink, ['button', 'is-success', 'td-overflow', 'display-row-td-btton'])
               appendChilds(btn, [btnLink])
-              btnLink.setAttribute('href', `/inbox/${item.documentId}`)
-              btnLink.innerText = '仕訳情報設定'
+              btnLink.setAttribute('href', `/approvalInbox/${item.documentId}`)
+              btnLink.innerText = '依頼内容確認'
 
               appendChilds(row, [
                 no,
