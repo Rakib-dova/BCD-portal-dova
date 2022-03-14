@@ -40,6 +40,6 @@ steps:
 
 - script: |
     cd bcd-e2e-tests
-    npm run e2e --spec/citest.js
+    npm run e2e -- spec/citest.js
   workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
   displayName: 'npm run'
