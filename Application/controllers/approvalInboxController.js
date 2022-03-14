@@ -1,7 +1,6 @@
 'use strict'
 
 const logger = require('../lib/logger')
-const approverController = require('./approverController')
 const db = require('../models')
 const Op = db.Sequelize.Op
 const RequestApproval = db.RequestApproval
@@ -9,11 +8,9 @@ const DbApproval = db.Approval
 
 const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId, tenant) => {
   try {
-    const users = await approverController.getApprover(accessToken, refreshToken, tenant, {
-      firstName: '',
-      lastName: '',
-      email: ''
-    })
+    const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenant)
+    tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
+
     // 検索のため、依頼中ステータス作成
     const requestStatus = []
     for (let id = 10; id < 21; id++) {
@@ -28,13 +25,42 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
     })
     if (requestApproval instanceof RequestApproval === false) return null
 
-    const approveRouteId = requestApproval.approveRouteId
-    const requester = users.find((user) => {
-      if (user.id === requestApproval.requester) {
-        return true
+    const approval = await DbApproval.findOne({
+      where: {
+        requestId: requestApproval.requestId
       }
-      return false
     })
+
+    const approvalData = approval.dataValues
+    const approveUserCount = approval.dataValues.approveUserCount
+
+    const userList = []
+    const keys = Object.keys(approvalData)
+
+    for (let i = 0; i < keys.length; i++) {
+      const approveUser = {}
+      let userAccounts
+      if (keys[i].includes('approveUser') && !keys[i].includes('approveUserCount')) {
+        const no = keys[i].replace('approveUser', '')
+        switch (approvalData[keys[i]]) {
+          case null:
+            break
+
+          default:
+            approveUser[`${keys[i]}`] = approvalData[keys[i]]
+            userAccounts = await tradeshiftDTO.findUser(approvalData[keys[i]])
+            userAccounts.message = approvalData[`message${no}`]
+            userList.push(userAccounts)
+            break
+        }
+      }
+    }
+
+    if (userList.length !== approveUserCount) {
+      return null
+    }
+
+    const requester = await tradeshiftDTO.findUser(requestApproval.requester)
 
     const request = {
       requestId: requestApproval.requestId,
@@ -42,7 +68,7 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
       invoiceId: requestApproval.invoiceId,
       message: requestApproval.message,
       status: requestApproval.status,
-      approveRoute: await approverController.getApproveRoute(accessToken, refreshToken, contract, approveRouteId),
+      approveRoute: { name: approval.approveRouteName, users: userList },
       approvals: [],
       prevUser: {
         name: null,
@@ -50,36 +76,10 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
       }
     }
 
-    let prev = null
-    let next = null
-    for (let idx = 0; idx < request.approveRoute.users.length; idx++) {
-      const selectApproval = await DbApproval.findOne({
-        where: {
-          requestId: request.requestId
-        }
-      })
-      const approver = new Approval({
-        contractId: contract,
-        requestId: request.requestId,
-        message: selectApproval[`message${idx + 1}`],
-        status: request.status,
-        approver: request.approveRoute.users[idx]
-      })
-      if (!prev) {
-        prev = approver
-      } else {
-        next = approver
-        prev.next = next.approvalId
-        next.prev = prev.approvalId
-        prev = next
-      }
-      request.approvals.push(approver)
-    }
-
     const userNo = ~~request.status - 10
     switch (userNo) {
       case 0: {
-        request.prevUser.name = requester.name
+        request.prevUser.name = requester.getName()
         request.prevUser.message = request.message
         break
       }
@@ -94,7 +94,7 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
       case 9:
       case 10:
         request.prevUser.name = request.approveRoute.users[userNo - 1].getName()
-        request.prevUser.message = request.approvals[userNo - 1].message
+        request.prevUser.message = request.approveRoute.users[userNo - 1].message
     }
 
     return request
@@ -110,7 +110,7 @@ const hasPowerOfEditing = async (contractId, userId, requestApproval) => {
 
     const status = requestApproval.status
     const idx = ~~status - 10
-    if (requestApproval.approvals[idx].approver.Id !== userId) {
+    if (requestApproval.approveRoute.users[idx].id !== userId) {
       return false
     }
 
@@ -136,31 +136,4 @@ module.exports = {
   getRequestApproval: getRequestApproval,
   hasPowerOfEditing: hasPowerOfEditing,
   insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice
-}
-
-const ApprovalStatusList = []
-class ApprovalStatus {
-  constructor(init) {
-    this.id = init.id
-    this.code = init.code
-  }
-}
-
-ApprovalStatusList.push(new ApprovalStatus({ id: '10', code: '承認待ち' }))
-ApprovalStatusList.push(new ApprovalStatus({ id: '00', code: '承認済み' }))
-ApprovalStatusList.push(new ApprovalStatus({ id: '99', code: '差し戻し' }))
-
-class Approval {
-  constructor(init) {
-    const { v4: uuid } = require('uuid')
-    this.approvalId = uuid()
-    this.contractId = init.contractId
-    this.approver = init.approver
-    this.request = init.request
-    this.message = init.message
-    this.status = init.status
-    this.prev = null
-    this.next = null
-    this.approvalDate = null
-  }
 }

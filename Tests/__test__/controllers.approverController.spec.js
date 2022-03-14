@@ -32,6 +32,7 @@ let approveUserCreate, approveUserFindOne
 let validateIsUUID
 let approvalFindOne
 let approveStatusDAOGetStatusCode
+
 const findUsers = {
   itemsPerPage: 25,
   itemCount: 1,
@@ -1130,6 +1131,71 @@ describe('approverControllerのテスト', () => {
       expect(result.approverUsers.length).toBe(1)
       expect(result.approverUsers[0]).toEqual(approver)
       expect(result.lastApprover).toEqual(lastApprover)
+    })
+  })
+
+  describe('deleteApproveRoute', () => {
+    test('正常：承認ルート削除', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      db.sequelize.transaction = jest.fn(async (callback) => {
+        return await callback()
+      })
+
+      approveRouteFindOne.mockReturnValue({
+        approveRouteId: approveRouteId,
+        destroy: async () => {}
+      })
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 正常削除の場合、「1」を返す
+      expect(result).toBe(1)
+    })
+
+    test('準正常：承認ルート削除（既に削除されている場合）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      approveRouteFindOne.mockReturnValue(null)
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「-1」を返す
+      expect(result).toBe(-1)
+    })
+
+    test('準正常：承認ルート削除（承認ルート検索DBエラー）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      approveRouteFindOne.mockReturnValue(dbError)
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
+    })
+
+    test('準正常：承認ルート削除（承認ルート削除DBエラー）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      approveRouteFindOne.mockReturnValue({
+        approveRouteId: approveRouteId,
+        destroy: () => Promise.reject(dbError)
+      })
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
     })
   })
 

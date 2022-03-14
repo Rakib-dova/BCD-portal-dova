@@ -491,7 +491,40 @@ const duplicateApproveRoute = async (approveRoute) => {
 }
 
 /**
- * 支払依頼の承認ルート検索関数。
+ * 承認ルートと紐づいているレコードを削除する。
+ * @param {uuid} approveRouteId デジトレの利用の契約者の識別番号
+ * @returns {int} 1：正常_削除成功, -1：削除対象のがない場合, 0：エラー
+ */
+const deleteApproveRoute = async (approveRouteId) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'approverController.deleteApproveRoute')
+
+  try {
+    // 承認ルートを検索
+    const deleteTargetApproveRoute = await ApproveRoute.findOne({
+      where: {
+        approveRouteId: approveRouteId
+      }
+    })
+
+    // null：既に削除されたレコード
+    if (deleteTargetApproveRoute === null) return -1
+
+    // 承認ルート削除
+    logger.info(`${deleteTargetApproveRoute.approveRouteId}の承認ルートの削除処理を開始します。`)
+    await deleteTargetApproveRoute.destroy()
+    logger.info(`${deleteTargetApproveRoute.approveRouteId}の承認ルートの削除処理を終了します。`)
+
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.deleteApproveRoute')
+    return 1
+  } catch (error) {
+    logger.error(error)
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.deleteApproveRoute')
+    return 0
+  }
+}
+
+/**
+ * 承認依頼の承認ルート検索関数。
  * @param {uuid} _contractId  // 契約者の識別番号
  * @param {string} _approveRouteName // 承認ルート名
  * @returns {object} // 承認ルート検索結果
@@ -891,6 +924,7 @@ module.exports = {
   editApprover: editApprover,
   getApproveRouteList: getApproveRouteList,
   getApproveRoute: getApproveRoute,
+  deleteApproveRoute: deleteApproveRoute,
   duplicateApproveRoute: duplicateApproveRoute,
   searchApproveRouteList: searchApproveRouteList,
   requestApproval: requestApproval,
