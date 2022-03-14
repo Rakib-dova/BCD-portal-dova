@@ -7,7 +7,6 @@ const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const requestApprovalController = require('../controllers/requestApprovalController.js')
-const approvalInboxController = require('../controllers/approvalInboxController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
@@ -57,7 +56,6 @@ const cbGetIndex = async (req, res, next) => {
   const pageId = ~~req.params.page
   const tenantId = user.tenantId
   const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
-  const requestApprovalList = []
 
   // 請求書の承認依頼検索
   for (let i = 0; i < result.list.length; i++) {
@@ -70,23 +68,12 @@ const cbGetIndex = async (req, res, next) => {
 
     if (requestApproval !== null) {
       result.list[i].approveStatus = requestApproval.status
-      const resultIds = await approvalInboxController.getApproval(requestApproval.requestId)
-      if (!resultIds) {
-        continue
-      }
-      if (user.userId === resultIds.approveUserId) {
-        requestApprovalList.push(result.list[i])
-      }
-      if (user.userId === resultIds.requestUserId) {
-        requestApprovalList.push(result.list[i])
-      }
     }
   }
 
   // 受領した請求書一覧レンダリング
   res.render('inboxList', {
     listArr: result.list,
-    requestApprovalList: requestApprovalList,
     numPages: result.numPages,
     currPage: result.currPage,
     rejectedFlag: false
@@ -212,6 +199,7 @@ const cbGetWorkflow = async (req, res, next) => {
     req.user.refreshToken,
     user.tenantId
   )
+
   const workflow = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
 
   if (workflow instanceof Error === true) res.status(500).send('サーバーエラーが発生しました。')
