@@ -8,7 +8,6 @@
             p 承認ルート名
           .column#approveRouteName
             p #{approveRoute.name}
-            input(type='hidden' name='approveRouteId' value=`${approveRoute.approveRouteId}`)
         .columns
           .column
         section#displayDetailApproveRouteTable
@@ -20,10 +19,10 @@
             if idx < userLen - 1
               .columns
                 .column #{approvalNo[idx]}
-                .column #{user.FirstName} #{user.LastName}
+                .column #{user.firstName} #{user.lastName}
             else
               .columns
                 .column #{approvalNo.slice(-1)}
-                .column #{user.FirstName} #{user.LastName}
+                .column #{user.firstName} #{user.lastName}
 
                      

@@ -591,7 +591,7 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
   try {
     const requestApprovalDAO = new RequestApprovalDAO(contractId)
     const requester = await userController.findOne(requesterId)
-    const waitingWorkflowStatusCode = await approveStatusDAO.getStautsCode('承認依頼中')
+    const waitingWorkflowStatusCode = await approveStatusDAO.getStautsCode('支払依頼中')
 
     const oldRequest = await requestApprovalDAO.getpreWorkflowRequestApproval(invoiceId)
 
@@ -645,7 +645,7 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     // approvalテーブルに承認者情報を保存
     const approveStatusDAO = require('../DAO/ApproveStatusDAO')
     const requester = await userController.findOne(requesterId)
-    const waitWorkflowStatusCode = await approveStatusDAO.getStautsCode('承認依頼中')
+    const waitWorkflowStatusCode = await approveStatusDAO.getStautsCode('支払依頼中')
     const approveRoute = await ApproveRoute.findOne({
       where: {
         approveRouteId: approveRouteId,
