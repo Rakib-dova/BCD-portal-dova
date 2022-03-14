@@ -3,14 +3,15 @@
 block content
   .container
     div.title-box-journallzing
-      h4.title-text-journallzing.text-inbox 承認依頼
+      h4.title-text-journallzing.text-inbox 支払依頼
     .box
       form#form(method='POST' action=`/requestApproval/save/${documentId}`)
+        include requestApprovalRejectedMessage
         include invoiceHeader
         include requestApprovalInvoiceLines
         include invoiceFooter
-        include requestApprovaMessage
-        include requestApprovaRoute
+        include requestApprovalMessage
+        include requestApprovalRoute
         .grouped-button
           a.button.mr-6(href=`/inbox/${documentId}`) 仕訳情報設定へ
           button.button.mr-6.is-success(type='submit') 保存

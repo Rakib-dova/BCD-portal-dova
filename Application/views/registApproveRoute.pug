@@ -27,7 +27,7 @@ block content
                               .columns.ml-0.pl-0.alignCenterChild
                                 .column.pl-0
                                   if isApproveRouteEdit
-                                    input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= approveRouteName maxlength=40 placeholder='全角・半角文字・英数字40文字まで' readonly)
+                                    input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= approveRouteName maxlength=40 placeholder='全角・半角文字・英数字40文字まで' required)
                                   else
                                     input.input(type="text" id= idForApproveRouteNameInput name= idForApproveRouteNameInput value= valueForApproveRouteNameInput maxlength=40 placeholder='全角・半角文字・英数字40文字まで' required)
                       .field.card

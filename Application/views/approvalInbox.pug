@@ -14,6 +14,7 @@ block content
         include approvalInboxApprovRoute
         .grouped-button
           a.button.mr-6(href='/inboxList/1')  戻る
+          a.button.is-danger.mr-6#rejectApproval 差し戻し
           a.button.is-link#checkApproval 承認
 
   template#templateLineAccountCodeItem
@@ -326,6 +327,24 @@ block content
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button.mr-6(data-target='check-approval-modal') キャンセル
         a.button.is-link#btn-approve 承認
+
+  .modal#reject-approval-modal
+    .modal-background.cancel-button(data-target='reject-approval-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 差し戻し確認
+        a.delete(data-target='reject-approval-modal')
+      section.modal-card-body
+        form#reject(method='POST' action=`/rejectApproval/${documentId}`)
+          include invoiceHeader
+          .box#journal-list-reject-modal
+          include invoiceFooter
+          .box#reject-request-approval-message
+            textarea.input-comment-size(row='10' name='message' readonly='readonly')
+          .box#reject-request-approve-route
+      footer.modal-card-foot.center-modal-footer-item
+        a.button.cancel-button.mr-6(data-target='reject-approval-modal') キャンセル
+        a.button.is-danger#btn-reject 差し戻し
 
   include footer
 

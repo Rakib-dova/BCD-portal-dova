@@ -55,7 +55,7 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
     for (let idx = 0; idx < request.approveRoute.users.length; idx++) {
       const selectApproval = await DbApproval.findOne({
         where: {
-          approveRouteId: approveRouteId
+          requestId: request.requestId
         }
       })
       const approver = new Approval({

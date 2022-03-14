@@ -160,7 +160,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       await page.waitForTimeout(2000)
 
-      // 承認依頼画面にredirectする。
+      // 支払依頼画面にredirectする。
       expect(page.url()).toBe(`https://localhost:3000/requestApproval/${approvalInbox}`)
 
       // 承認ルート選択ボタン押下
@@ -185,7 +185,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       await page.waitForTimeout(7000)
 
-      // 承認依頼画面にredirectする。
+      // 支払依頼画面にredirectする。
       expect(page.url()).toBe(`https://localhost:3000/requestApproval/${approvalInbox}`)
 
       // 確認ボタン押下
@@ -211,7 +211,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
@@ -227,13 +227,14 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
       expect(res.text).toMatch(/最終承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/差し戻し/i)
       expect(res.text).toMatch(/承認/i)
     })
   })
@@ -285,7 +286,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
@@ -301,13 +302,14 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
       expect(res.text).toMatch(/最終承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/差し戻し/i)
       expect(res.text).toMatch(/承認/i)
     })
   })
@@ -361,7 +363,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
@@ -377,13 +379,14 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
       expect(res.text).toMatch(/最終承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/差し戻し/i)
       expect(res.text).toMatch(/承認/i)
     })
 
@@ -405,7 +408,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       await browser.close()
     })
 
-    test('メッセージ入力文字数確認（1,500文字まで）', async () => {
+    test('支払依頼確認モーダル表示確認', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -427,7 +430,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       await browser.close()
     })
 
-    test('支払依頼確認モーダル表示確認', async () => {
+    test('メッセージ入力文字数確認（1,500文字まで）', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -450,6 +453,28 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       )
       await browser.close()
     })
+
+    test('差し戻死後、一覧遷移', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      await page.click('#rejectApproval')
+      await page.waitForTimeout(500)
+
+      await page.click('#btn-reject')
+      await page.waitForTimeout(500)
+
+      // 支払依頼一覧に遷移
+      expect(page.url()).toBe('https://localhost:3000/inboxList/redirected/1')
+
+      await browser.close()
+    })
   })
 
   describe('5.契約ステータス：変更申込', () => {
@@ -468,6 +493,47 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
           {
             where: {
               tenantId: testTenantId
+            }
+          }
+        )
+      }
+
+      // 支払依頼ステータス戻し
+      const invoiceId = redirectUrl.replace('/approvalInbox/', '')
+      const requestApproval = await db.RequestApproval.findOne({
+        where: {
+          invoiceId: invoiceId
+        }
+      })
+
+      const approval = await db.Approval.findOne({
+        where: {
+          requestId: requestApproval.dataValues.requestId
+        }
+      })
+
+      if (approval.dataValues.approveStatus !== '10') {
+        await db.Approval.update(
+          {
+            approveStatus: '10'
+          },
+          {
+            where: {
+              requestId: requestApproval.dataValues.requestId
+            }
+          }
+        )
+      }
+
+      if (requestApproval.dataValues.status !== '10') {
+        await db.RequestApproval.update(
+          {
+            status: '10',
+            message: 'インテグレーションテスト'
+          },
+          {
+            where: {
+              invoiceId: invoiceId
             }
           }
         )
@@ -499,7 +565,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
@@ -515,13 +581,14 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
       expect(res.text).toMatch(/最終承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/差し戻し/i)
       expect(res.text).toMatch(/承認/i)
     })
   })
@@ -573,7 +640,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
@@ -589,13 +656,14 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         .expect(200)
 
       // 画面内容確認
-      expect(res.text).toMatch(/承認依頼/i)
+      expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
       expect(res.text).toMatch(/最終承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/差し戻し/i)
       expect(res.text).toMatch(/承認/i)
     })
   })
@@ -792,7 +860,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
-    test('管理者、承認依頼画面へアクセス、利用不可', async () => {
+    test('管理者、支払依頼画面へアクセス、利用不可', async () => {
       const res = await request(app)
         .get(redirectUrl)
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
@@ -802,7 +870,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/お探しのページは見つかりませんでした。/i)
     })
 
-    test('一般ユーザ、承認依頼画面へアクセス、利用不可', async () => {
+    test('一般ユーザ、支払依頼画面へアクセス、利用不可', async () => {
       const res = await request(app)
         .get(redirectUrl)
         .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)

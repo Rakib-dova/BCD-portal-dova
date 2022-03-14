@@ -36,13 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID
       },
       approveRouteId: {
-        type: DataTypes.UUID,
-        references: {
-          model: {
-            tableName: 'ApproveRoute'
-          },
-          key: 'approveRouteId'
-        }
+        type: DataTypes.UUID
       },
       approveStatus: {
         type: DataTypes.STRING,
@@ -140,7 +134,14 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         timestamps: true,
         defaultValue: new Date()
-      }
+      },
+      rejectedUser: { type: DataTypes.UUID, allowNull: true },
+      rejectedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        timestamps: true
+      },
+      rejectedMessage: { type: DataTypes.STRING, allowNull: true }
     },
     {
       sequelize,
