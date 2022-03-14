@@ -59,7 +59,8 @@ describe('CI TEST', function () {
 
     // 指定したURLに遷移する
     await page.goto(config.baseUrl);
-
+    expect('AAA').to.equal('意図的にエラー', 'アップロードフォーマット一覧ページに遷移すること');
+/*
     // ログインを行う
     await loginPage.doLogin('hikita-toshiyuki+ci@webrage.jp', 'Hr(5ER,s#Wx%');
     await tradeShiftTopPage.waitForLoading();
@@ -77,5 +78,6 @@ describe('CI TEST', function () {
     await uploadFormatTopPage.waitForLoading();
     expect(await uploadFormatTopPage.getTitle()).to.equal('アップロードフォーマット一覧', 'アップロードフォーマット一覧ページに遷移すること');
     expect(await uploadFormatTopPage.getTitle()).to.equal('意図的にエラー', 'アップロードフォーマット一覧ページに遷移すること');
+*/
   });
 });
