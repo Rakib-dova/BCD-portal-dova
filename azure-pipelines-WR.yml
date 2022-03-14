@@ -15,8 +15,8 @@ steps:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
 
-- bash: | 
-    cd ./bcd-e2e-tests
+- script: | 
+    cd bcd-e2e-tests
     npm i
     npm run e2e -- spec/scenario001.js
     npm run e2e-report
