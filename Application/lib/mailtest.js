@@ -5,19 +5,31 @@ const transporter = nodemailer.createTransport({
   port: 587, // ポート
   use_authentication: true,
   auth: {
-    user: 'bcdt-mailsend-test@actec2.onmicrosoft.com', // ユーザー名
-    pass: 'Vy&Rn*(/Ft5Z' // パスワード
+    //user: 'bcdt-mailsend-test@actec2.onmicrosoft.com', // ユーザー名
+    //pass: 'Vy&Rn*(/Ft5Z' // パスワード
+    //user: 'no-reply-dev1@bcdtapp.onmicrosoft.com', // ユーザー名
+    user: 'no-reply-dev1@bcdtapp.onmicrosoft.com', // ユーザー名
+    pass: 'BJ+V-BmQ#p^F69i' // パスワード
+    //user: 'no-reply-stg@bcdtapp.onmicrosoft.com', // ユーザー名
+    //pass: 'Dh7DLWLxuERXr_W' // パスワード
   }
 })
 
 const sendMailFromO365 = (sentTo, subject, text) => {
   const mailOptions = {
-    from: 'bcdt-mailsend-test@actec2.onmicrosoft.com',
+    //from: 'bcdt-mailsend-test@actec2.onmicrosoft.com',
+    //from: 'no-reply-dev1@bcdtapp.onmicrosoft.com',
+    from: 'no-reply-dev1@tsdev.biz',
+    //from: 'no-reply-stg@tsdev.biz',
+    //from: 'no-reply-dev1@tsdev.biz',
     to: sentTo,
+    /*
     envelope: {
-      from: 'bcdt-mailsend-test@actec2.onmicrosoft.com', // バウンスメールの戻り先アドレス
+      from: 'no-reply-dev1@tsdev.biz', // バウンスメールの戻り先アドレス
+      from: 'no-reply-dev1@bcdtapp.onmicrosoft.com', // バウンスメールの戻り先アドレス
       to: sentTo // 実際の送信先
     },
+    */
     subject: subject,
     text: text
   }
