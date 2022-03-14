@@ -4,23 +4,35 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 trigger:
-- none
+  - none
 
 pool:
   vmImage: windows-2019
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
+stages:
+  - stage: aaa
+    jobs:
+      - job: bbb
+        variables:
+          npm_config_cache: $(Pipeline.Workspace)/.npm
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: "10.x"
+            displayName: "Install Node.js"
 
-- script: | 
-    cd bcd-e2e-tests
-    npm i
-    npm run e2e -- spec/scenario001.js
-    npm run e2e-report
-  displayName: 'npm run'
+          - task: CacheBeta@0
+            inputs:
+              key: $(Build.SourcesDirectory)/bcd-e2e-tests/package-lock.json
+              path: $(npm_config_cache)
+            displayName: Cache npm
+
+          - script: |
+              cd bcd-e2e-tests
+              npm ci
+              npm run e2e -- spec/citest.js
+              npm run e2e-report
+            displayName: "npm run"
 #  workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
 
 # - task: PublishTestResults@2
