@@ -30,7 +30,8 @@ stages:
 
           - script: |
               dir
-              echo $(Pipeline.Workspace)\bcd-e2e-tests\node_modules
+              dir $(Build.SourcesDirectory)
+              dir $(Build.SourcesDirectory)\bcd-e2e-tests
               echo $(Build.SourcesDirectory)\bcd-e2e-tests\package-lock.json
 
           # - script: |
