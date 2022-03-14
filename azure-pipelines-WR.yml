@@ -32,10 +32,6 @@ steps:
   inputs:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
-
-- script: |
-     echo "hello this is test"
-     echo "browser you have chosen is "${{ parameters.browser }} 
  
 - script: |
     cd bcd-e2e-tests
@@ -45,4 +41,5 @@ steps:
 - script: |
     cd bcd-e2e-tests
     npm run ${{ parameters.browser }} -- spec/citest.js
+  workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
   displayName: 'npm run'
