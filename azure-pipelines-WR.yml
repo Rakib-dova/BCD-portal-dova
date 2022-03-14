@@ -34,12 +34,11 @@ steps:
   displayName: 'Install Node.js'
  
 - script: |
-    cd bcd-e2e-tests
     npm i
+  workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
   displayName: 'npm install'
 
 - script: |
-    cd bcd-e2e-tests
     npm run e2e -- spec/citest.js
   workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
   displayName: 'npm run'
