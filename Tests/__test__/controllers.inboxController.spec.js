@@ -11,6 +11,7 @@ const SubAccountCode = require('../../Application/models').SubAccountCode
 const DepartmentCode = require('../../Application/models').DepartmentCode
 const JournalizeInvoice = require('../../Application/models').JournalizeInvoice
 const RequestApproval = require('../../Application/models').RequestApproval
+const ApproveStatus = require('../../Application/models').ApproveStatus
 
 let accessTradeshiftSpy,
   errorSpy,
@@ -21,7 +22,12 @@ let accessTradeshiftSpy,
   journalizeInvoiceCreateSpy,
   departmentCodeFindOneSpy,
   departmentCodeFindAllSpy,
-  requestApprovalFindOneSpy
+  requestApprovalFindOneSpy,
+  requestApprovalDTOgetWaitingWorkflowisMineSpy,
+  ApproveStatusFindOneSpy,
+  requestApprovalDTOGetRequestApprovalSpy,
+  requestApprovalDAOGetAllRequestApproval,
+  requestApprovalFindAllSpy
 
 const accountCodeMock = require('../mockDB/AccountCode_Table')
 const subAccountCodeMock = require('../mockDB/SubAccountCode_Table')
@@ -664,6 +670,11 @@ describe('inboxControllerのテスト', () => {
     JournalizeInvoice.destory = jest.fn(async function () {})
     JournalizeInvoice.set = jest.fn(function () {})
     requestApprovalFindOneSpy = jest.spyOn(DepartmentCode, 'findOne')
+    requestApprovalDTOgetWaitingWorkflowisMineSpy = jest.fn(async function () {})
+    ApproveStatusFindOneSpy = jest.spyOn(ApproveStatus, 'findOne')
+    requestApprovalDTOGetRequestApprovalSpy = jest.fn(async function () {})
+    requestApprovalDAOGetAllRequestApproval = jest.fn(async function () {})
+    requestApprovalFindAllSpy = jest.spyOn(RequestApproval, 'findAll')
   })
   afterEach(() => {
     accessTradeshiftSpy.mockRestore()
@@ -676,6 +687,10 @@ describe('inboxControllerのテスト', () => {
     departmentCodeFindOneSpy.mockRestore()
     departmentCodeFindAllSpy.mockRestore()
     requestApprovalFindOneSpy.mockRestore()
+    requestApprovalDTOgetWaitingWorkflowisMineSpy.mockRestore()
+    ApproveStatusFindOneSpy.mockRestore()
+    requestApprovalDTOGetRequestApprovalSpy.mockRestore()
+    requestApprovalDAOGetAllRequestApproval.mockRestore()
   })
 
   describe('getInbox', () => {
@@ -1380,6 +1395,30 @@ describe('inboxControllerのテスト', () => {
 
       const result = await inboxController.getRequestApproval(contractId, invoiceId)
       expect(result).toEqual(dbError)
+    })
+  })
+
+  describe('getWorkflow', () => {
+    test('正常', async () => {
+      const userId = 'dummyUserId'
+      const tradeshiftDTO = {
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        tenantId: tenantId,
+        apiManager: {}
+      }
+      const expectResult = {}
+      requestApprovalDTOgetWaitingWorkflowisMineSpy.mockReturnValue(expectResult)
+      const expectResultOfGetRequestApproval = [{}, {}]
+      requestApprovalDAOGetAllRequestApproval.mockReturnValue(expectResultOfGetRequestApproval)
+      ApproveStatusFindOneSpy.mockReturnValue({
+        code: 'dummyCode'
+      })
+      requestApprovalFindAllSpy.mockReturnValue(expectResultOfGetRequestApproval)
+      // requestApprovalDTOGetRequestApprovalSpy.mockReturnValue(expectResult)
+      const finalExpectResult = []
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+      expect(result).toStrictEqual(finalExpectResult)
     })
   })
 })
