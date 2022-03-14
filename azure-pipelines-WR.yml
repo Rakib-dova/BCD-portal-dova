@@ -18,10 +18,8 @@ steps:
 - bash: | 
     cd ./bcd-e2e-tests
     npm i
-    echo ${{ parameters.browser }}
     npm run e2e -- spec/scenario001.js
     npm run e2e-report
-    dir
   displayName: 'npm run'
 #  workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
 
