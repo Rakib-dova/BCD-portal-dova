@@ -6,19 +6,15 @@ pool:
   vmImage: windows-2019
 
 stages:
-  - stage: npm_settingStage
+  - stage: e2eTestStage
     jobs:
-      - job: npm_settingJob
+      - job: e2eTestJob
         steps:
           - task: NodeTool@0
             inputs:
               versionSpec: "10.x"
             displayName: "Install Node.js"
 
-  - stage: chromeStage
-    jobs:
-      - job: chrome_scenario001
-        steps:
           - script: |
               npm i
             workingDirectory: "$(Build.SourcesDirectory)/bcd-e2e-tests"
