@@ -68,7 +68,7 @@ class WaitingWorkflow {
   setWorkflowStatus(code) {
     switch (code) {
       case '10':
-        this.workflowStatus = '承認依頼中'
+        this.workflowStatus = '支払依頼中'
         break
       case '11':
         this.workflowStatus = '一次承認済み'

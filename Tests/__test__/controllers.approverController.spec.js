@@ -1946,7 +1946,7 @@ describe('approverControllerのテスト', () => {
   })
 
   describe('requestApproval', () => {
-    test('正常：新規作成承認依頼', async () => {
+    test('正常：新規作成支払依頼', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -2002,7 +2002,7 @@ describe('approverControllerのテスト', () => {
       expect(result).toBe(testData)
     })
 
-    test('正常：保存したデータがある場合承認依頼', async () => {
+    test('正常：保存したデータがある場合支払依頼', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -2109,7 +2109,7 @@ describe('approverControllerのテスト', () => {
       expect(errorSpy).toHaveBeenCalled()
     })
 
-    test('エラー：承認依頼取得失敗（未保存）', async () => {
+    test('エラー：支払依頼取得失敗（未保存）', async () => {
       // パラメータ作成
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
@@ -2385,7 +2385,7 @@ describe('approverControllerのテスト', () => {
       expect(result).toBe(0)
     })
 
-    test('正常：既に保存されている承認依頼のメッセージ。承認ルート上書き保存', async () => {
+    test('正常：既に保存されている支払依頼のメッセージ。承認ルート上書き保存', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -2525,7 +2525,7 @@ describe('approverControllerのテスト', () => {
   })
 
   describe('readApproval', () => {
-    test('正常：すでに保存されている承認依頼のメッセージ。承認ルート上書き保存', async () => {
+    test('正常：すでに保存されている支払依頼のメッセージ。承認ルート上書き保存', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -2575,7 +2575,7 @@ describe('approverControllerのテスト', () => {
       expect(result).toBe(testData)
     })
 
-    test('正常：承認依頼取得結果null', async () => {
+    test('正常：支払依頼取得結果null', async () => {
       // パラメータ作成
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
@@ -2749,7 +2749,7 @@ describe('approverControllerのテスト', () => {
       )
 
       // 承認ステータスの用意
-      const approveStatus = { code: '80', name: '承認依頼中' }
+      const approveStatus = { code: '80', name: '支払依頼中' }
       approveStatusFindOne.mockReturnValueOnce(approveStatus)
 
       // 承認ルートの用意
@@ -2880,7 +2880,7 @@ describe('approverControllerのテスト', () => {
       )
 
       // 承認ステータスの用意
-      const approveStatus = { code: '80', name: '承認依頼中' }
+      const approveStatus = { code: '80', name: '支払依頼中' }
       approveStatusFindOne.mockReturnValueOnce(approveStatus)
 
       // 承認ルートの用意
@@ -2990,7 +2990,7 @@ describe('approverControllerのテスト', () => {
       )
 
       // 承認ステータスの用意
-      const approveStatus = { code: '80', name: '承認依頼中' }
+      const approveStatus = { code: '80', name: '支払依頼中' }
       approveStatusFindOne.mockReturnValueOnce(approveStatus)
 
       // 承認ルートの用意
@@ -3071,7 +3071,7 @@ describe('approverControllerのテスト', () => {
 
       const dummyStatus = ApproveStatus.build({
         code: '10',
-        name: '承認依頼中'
+        name: '支払依頼中'
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce(dummyApproval)
@@ -3105,7 +3105,7 @@ describe('approverControllerのテスト', () => {
 
       const dummyStatus = ApproveStatus.build({
         code: '10',
-        name: '承認依頼中'
+        name: '支払依頼中'
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce(dummyApproval)
@@ -3116,7 +3116,7 @@ describe('approverControllerのテスト', () => {
       expect(result).toBeTruthy()
     })
 
-    test('準正常：承認依頼アップデート失敗➀', async () => {
+    test('準正常：支払依頼アップデート失敗➀', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
@@ -3138,7 +3138,7 @@ describe('approverControllerのテスト', () => {
 
       const dummyStatus = ApproveStatus.build({
         code: '10',
-        name: '承認依頼中'
+        name: '支払依頼中'
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce(null)
@@ -3148,7 +3148,7 @@ describe('approverControllerのテスト', () => {
       expect(result).toBeFalsy()
     })
 
-    test('準正常：承認依頼アップデート失敗②', async () => {
+    test('準正常：支払依頼アップデート失敗②', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
@@ -3170,7 +3170,7 @@ describe('approverControllerのテスト', () => {
 
       const dummyStatus = ApproveStatus.build({
         code: '10',
-        name: '承認依頼中'
+        name: '支払依頼中'
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce({})
@@ -3181,7 +3181,7 @@ describe('approverControllerのテスト', () => {
       expect(result).toBeFalsy()
     })
 
-    test('準正常：承認依頼アップデート失敗', async () => {
+    test('準正常：支払依頼アップデート失敗', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
@@ -3203,7 +3203,7 @@ describe('approverControllerのテスト', () => {
 
       const dummyStatus = ApproveStatus.build({
         code: '10',
-        name: '承認依頼中'
+        name: '支払依頼中'
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       const dbError = new Error('DB Connection Error')
