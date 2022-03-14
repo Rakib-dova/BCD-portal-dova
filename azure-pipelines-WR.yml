@@ -14,7 +14,7 @@ stages:
     jobs:
       - job: e2eTestJob
         variables:
-          npm_config_cache: $(Pipeline.Workspace)\.npm
+          npm_config_cache: $(Pipeline.Workspace)\node_modules
         steps:
           - task: NodeTool@0
             inputs:
