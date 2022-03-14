@@ -27,21 +27,26 @@ stages:
               path: $(npm_config_cache)
             displayName: Cache npm
 
+          - task: CacheBeta@0
+            inputs:
+              key: $(Build.SourcesDirectory)/bcd-e2e-tests/package-lock.json
+              path: "C:/Users/VssAdministrator/AppData/Local/ms-playwright"
+            displayName: Cache browser
+
           - script: |
               cd bcd-e2e-tests
               npm ci
-              npm run e2e -- spec/citest.js
-              npm run e2e-report
             displayName: "install"
 
           - script: |
+              cd bcd-e2e-tests
               npm run e2e -- spec/citest.js
             displayName: "test"
 
           - script: |
+              cd bcd-e2e-tests
               npm run e2e-report
             displayName: "report"
-
 #  workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
 
 # - task: PublishTestResults@2
