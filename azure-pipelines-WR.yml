@@ -2,6 +2,10 @@
 # Build a general Node.js project with npm.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  - none
+
 pool:
   vmImage: windows-2019
 
@@ -9,11 +13,20 @@ stages:
   - stage: e2eTestStage
     jobs:
       - job: e2eTestJob
+        variables:
+          npm_config_cache: $(Pipeline.Workspace)\node_modules
         steps:
-          - task: NodeTool@0
+          - task: CacheBeta@0
             inputs:
-              versionSpec: "10.x"
-            displayName: "Install Node.js"
+              key: $(Build.SourcesDirectory)\bcd-e2e-tests\package-lock.json
+              path: $(npm_config_cache)
+            displayName: Cache npm
+
+          - task: CacheBeta@0
+            inputs:
+              key: $(Build.SourcesDirectory)\bcd-e2e-tests\package-lock.json
+              path: C:\Users\VssAdministrator\AppData\Local\ms-playwright
+            displayName: Cache browser
 
           - script: |
               npm i
@@ -29,3 +42,18 @@ stages:
               npm run e2e-report
             workingDirectory: "$(Build.SourcesDirectory)/bcd-e2e-tests"
             displayName: "report"
+#  workingDirectory: '$(Build.SourcesDirectory)\bcd-e2e-tests'
+
+# - task: PublishTestResults@2
+#   condition: succeededOrFailed()
+#   inputs:
+#     testRunner: JUnit
+#     testResultsFiles: '**/*.json'
+
+# - task: PublishPipelineArtifact@1
+#   inputs:
+#     targetPath: $(Build.SourcesDirectory)\build
+#     artifactName: report
+# - task: DownloadPipelineArtifact@2
+#   inputs:
+#     patterns: '**/*.zip'
