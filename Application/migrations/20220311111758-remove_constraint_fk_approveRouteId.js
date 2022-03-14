@@ -15,12 +15,17 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     return [
       await queryInterface.removeConstraint('RequestApproval', fkNameForRequestApproval),
-      await queryInterface.removeConstraint('Approval', fkNameForApproval)
+      await queryInterface.removeConstraint('Approval', fkNameForApproval),
+      await queryInterface.removeColumn('Approval', 'approveRouteId')
     ]
   },
 
   down: async (queryInterface, Sequelize) => {
     return [
+      await queryInterface.addColumn('Approval', 'approveRouteId', {
+        type: Sequelize.DataTypes.UUID,
+        allowNull: true
+      }),
       await queryInterface.addConstraint('RequestApproval', {
         fields: ['approveRouteId'],
         type: 'foreign key',
