@@ -29,20 +29,26 @@ stages:
             displayName: Cache browser
 
           - script: |
-              npm i
-            workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
-            displayName: install
+              dir
+              echo $(Pipeline.Workspace)\bcd-e2e-tests\node_modules
+              echo $(Build.SourcesDirectory)\bcd-e2e-tests\package-lock.json
 
-          - script: |
-              npm run e2e -- spec/citest.js
-            workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
-            displayName: test
+          # - script: |
+          #     npm i
+          #   workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
+          #   displayName: install
 
-          - script: |
-              npm run e2e-report
-            workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
-            displayName: report
-            condition: succeededOrFailed()
+          # - script: |
+          #     npm run e2e -- spec/citest.js
+          #   workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
+          #   displayName: test
+
+          # - script: |
+          #     npm run e2e-report
+          #   workingDirectory: $(Build.SourcesDirectory)/bcd-e2e-tests
+          #   displayName: report
+          #   condition: succeededOrFailed()
+
 #  workingDirectory: '$(Build.SourcesDirectory)\bcd-e2e-tests'
 
 # - task: PublishTestResults@2
