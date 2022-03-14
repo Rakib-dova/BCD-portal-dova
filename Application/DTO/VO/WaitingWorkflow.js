@@ -127,7 +127,7 @@ class WaitingWorkflow {
           this.setCurrency(item.value)
           break
         case 'document.total':
-          this.setAmount(~~item.value)
+          this.setAmount(item.value.split('.')[0])
           break
       }
     })
