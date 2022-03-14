@@ -21,5 +21,7 @@ stages:
         steps:
           - script: |
               npm i
+            workingDirectory: "$(Build.SourcesDirectory)/bcd-e2e-tests"
+          - script: |
               npm run e2e -- spec/citest.js
             workingDirectory: "$(Build.SourcesDirectory)/bcd-e2e-tests"
