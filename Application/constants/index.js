@@ -9,6 +9,7 @@ const portalMsg = require('./portalMsg.js')
 const csvFormatDefine = require('./csvFormatDefine.js')
 const codeValidDefine = require('./codeValidDefine.js')
 const codeErrMsg = require('./codeErrMsg')
+const mailMsg = require('./constMailMsg.js')
 
 module.exports = {
   logMessage,
@@ -21,5 +22,6 @@ module.exports = {
   invoiceErrMsgForUploadFormat,
   csvFormatDefine,
   codeValidDefine,
-  codeErrMsg
+  codeErrMsg,
+  mailMsg
 }

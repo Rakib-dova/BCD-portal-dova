@@ -9,6 +9,7 @@ const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
+const sendMail = require('../lib/sendMail')
 const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
 const notiTitle = '承認依頼'
@@ -450,9 +451,27 @@ const cbPostApproval = async (req, res, next) => {
     refreshToken,
     requestResult
   )
+
+  let approvers
+
   switch (result) {
     case 0:
       req.flash('info', '承認依頼を完了しました。')
+
+      // メール送信
+      try {
+        approvers = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
+
+        await sendMail.mail(
+          approvers.users[0].Username,
+          constantsDefine.mailMsg.ReqAppr.subject,
+          constantsDefine.mailMsg.ReqAppr.text
+        )
+      } catch (error) {
+        logger.warn(constantsDefine.logMessage.MAILWAN000 + 'approverController.getApproveRoute')
+        req.flash('noti', ['支払依頼', 'メール送信に失敗しました。'])
+      }
+
       res.redirect('/inboxList/1')
       break
     default:
