@@ -3,16 +3,6 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
-parameters:
-- name: browser
-  displayName: Choose browser you want to run with.
-  type: string
-  default: chrome
-  values:
-  - chrome
-  - firefox
-  - edge
-
 trigger:
 - none
 
@@ -20,7 +10,6 @@ pool:
   vmImage: windows-2019
 
 steps:
-
 - task: NodeTool@0
   inputs:
     versionSpec: '10.x'
@@ -34,7 +23,7 @@ steps:
     npm run e2e-report
     dir
   displayName: 'npm run'
-  workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
+#  workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
 
 # - task: PublishTestResults@2
 #   condition: succeededOrFailed()
