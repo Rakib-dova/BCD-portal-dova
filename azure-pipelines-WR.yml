@@ -13,13 +13,11 @@ stages:
   - stage: e2eTestStage
     jobs:
       - job: e2eTestJob
-        variables:
-          npm_config_cache: $(Pipeline.Workspace)\bcd-e2e-tests\node_modules
         steps:
           - task: CacheBeta@0
             inputs:
               key: $(Build.SourcesDirectory)\bcd-e2e-tests\package-lock.json
-              path: $(npm_config_cache)
+              path: $(Build.SourcesDirectory)\bcd-e2e-tests\node_modules
             displayName: Cache npm
 
           - task: CacheBeta@0
@@ -29,7 +27,6 @@ stages:
             displayName: Cache browser
 
           - script: |
-              dir
               dir $(Build.SourcesDirectory)
               dir $(Build.SourcesDirectory)\bcd-e2e-tests
               echo $(Build.SourcesDirectory)\bcd-e2e-tests\package-lock.json
