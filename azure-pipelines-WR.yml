@@ -44,9 +44,21 @@ stages:
             displayName: report
             condition: succeededOrFailed()
 
-          - task: PublishPipelineArtifact@1
+          - task: CopyFiles@2
             inputs:
-              targetPath: $(Build.SourcesDirectory)\bcd-e2e-tests\build
-              artifactName: report
-            displayName: artifact
-            condition: succeededOrFailed()
+              Contents: |
+                $(Build.SourcesDirectory)/bcd-e2e-tests/build/autotest-report/**/*
+              TargetFolder: "$(Build.ArtifactStagingDirectory)"
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+              ArtifactName: "report"
+              publishLocation: "Container"
+
+          # - task: PublishPipelineArtifact@1
+          #   inputs:
+          #     targetPath: $(Build.SourcesDirectory)\bcd-e2e-tests\build
+          #     artifactName: report
+          #   displayName: artifact
+          #   condition: succeededOrFailed()
