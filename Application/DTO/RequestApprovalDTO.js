@@ -31,7 +31,6 @@ class RequestApprovalDTO {
       }
       if (requestApproval.requester === userId && isWorkflowStatus) myRequestApprovals.push(requestApproval)
     })
-    await this.getApproval(userId)
     return myRequestApprovals
   }
 
