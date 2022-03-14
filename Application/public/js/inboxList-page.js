@@ -26,3 +26,10 @@ window.onload = () => {
     })
   })
 }
+
+Array.prototype.forEach.call(document.querySelectorAll('.linkToApproval'), (approveStatus) => {
+  approveStatus.addEventListener('click', function () {
+    const target = this.dataset.target
+    location.href = target
+  })
+})

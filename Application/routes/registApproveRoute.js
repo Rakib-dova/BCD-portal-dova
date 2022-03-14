@@ -44,16 +44,36 @@ const cbGetRegistApproveRoute = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  res.render('registApproveRoute', {
-    panelHead: '条件絞り込み',
-    approveRouteNameLabel: '承認ルート名',
-    requiredTagApproveRouteName: 'approveRouteNameTagRequired',
-    idForApproveRouteNameInput: 'setApproveRouteNameInputId',
-    modalTitle: '承認者検索',
-    backUrl: '/approveRouteList',
-    logTitle: '承認ルート登録',
-    logTitleEng: 'REGIST APPROVE ROUTE'
-  })
+  if (req.session.body) {
+    const body = { ...req.session.body }
+    delete req.session.body
+    const { approveRouteName, approverUsers, lastApprover } = await approverController.duplicateApproveRoute(body)
+    res.render('registApproveRoute', {
+      panelHead: '承認ルート',
+      approveRouteNameLabel: '承認ルート名',
+      requiredTagApproveRouteName: 'approveRouteNameTagRequired',
+      idForApproveRouteNameInput: 'setApproveRouteNameInputId',
+      isApproveRouteEdit: false,
+      modalTitle: '承認者検索',
+      backUrl: '/approveRouteList',
+      logTitle: '承認ルート登録',
+      logTitleEng: 'REGIST APPROVE ROUTE',
+      valueForApproveRouteNameInput: approveRouteName,
+      approveUsers: approverUsers,
+      lastApprover: lastApprover
+    })
+  } else {
+    res.render('registApproveRoute', {
+      panelHead: '承認ルート',
+      approveRouteNameLabel: '承認ルート名',
+      requiredTagApproveRouteName: 'approveRouteNameTagRequired',
+      idForApproveRouteNameInput: 'setApproveRouteNameInputId',
+      modalTitle: '承認者検索',
+      backUrl: '/approveRouteList',
+      logTitle: '承認ルート登録',
+      logTitleEng: 'REGIST APPROVE ROUTE'
+    })
+  }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegistApproveRoute')
 }
@@ -108,7 +128,8 @@ const cbPostRegistApproveRoute = async (req, res, next) => {
       res.redirect('/approveRouteList')
       break
     case 1:
-      req.flash('noti', ['承認ルート登録', '入力した承認ルートは既に登録されています。'])
+      req.flash('noti', ['承認ルート登録', '入力した承認ルート名は既に登録されています。'])
+      req.session.body = req.body
       res.redirect('/registApproveRoute')
       break
     case -1:

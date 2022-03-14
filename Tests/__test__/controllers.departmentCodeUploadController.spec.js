@@ -653,7 +653,7 @@ describe('departmentCodeUploadControllerのテスト', () => {
       departmentCodeControllerInsertSpy.mockReturnValue(true)
 
       // 試験実施
-      const noUploadFilePath = '/home/upload\\/test9.csv'
+      const noUploadFilePath = '/home/upload???/test9.csv'
       let result
       try {
         result = await departmentCodeUploadController.remove(noUploadFilePath)
@@ -669,7 +669,13 @@ describe('departmentCodeUploadControllerのテスト', () => {
 
     test('異常:削除エラー', async () => {
       // 準備
-      const noUploadFilePath = '/etc/resolv.conf'
+      const fs = require('fs')
+      let noUploadFilePath = null
+      if (fs.existsSync('/etc/resolv.conf')) {
+        noUploadFilePath = '/etc/resolv.conf'
+      } else {
+        noUploadFilePath = '/Windows/System32/drivers/etc/hosts'
+      }
 
       // 試験実施
       let result
@@ -680,9 +686,15 @@ describe('departmentCodeUploadControllerのテスト', () => {
       }
       // 期待結果
       // 削除エラー（権限エラー）が返されること
-      expect(() => {
-        throw result
-      }).toThrowError('permission denied')
+      if (process.platform === 'win32') {
+        expect(() => {
+          throw result
+        }).toThrowError('operation not permitted')
+      } else {
+        expect(() => {
+          throw result
+        }).toThrowError('permission denied')
+      }
     })
   })
 })

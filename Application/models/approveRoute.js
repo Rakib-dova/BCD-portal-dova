@@ -20,6 +20,22 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'approveRouteId' // k1
       })
     }
+
+    static async getApproveRoute(contractId, approveRouteId) {
+      const approveUser = require('./').ApproveUser
+      const approveRoute = await this.findAll({
+        raw: true,
+        include: {
+          model: approveUser
+        },
+        where: {
+          contractId: contractId,
+          approveRouteId: approveRouteId,
+          updateFlag: false
+        }
+      })
+      return approveRoute
+    }
   }
   ApproveRoute.init(
     {
@@ -48,6 +64,13 @@ module.exports = (sequelize, DataTypes) => {
       },
       deleteFlag: {
         type: DataTypes.BOOLEAN
+      },
+      updateFlag: {
+        type: DataTypes.BOOLEAN
+      },
+      prevAprroveRouteId: {
+        allowNull: true,
+        type: DataTypes.UUID
       }
     },
     {

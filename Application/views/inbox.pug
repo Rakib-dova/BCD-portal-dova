@@ -13,7 +13,8 @@ block content
         include invoicePaymentMethod
         .grouped-button
           a.button.mr-6(href='/inboxList/1')  戻る
-          a.button.is-link#btn-confirm(disabled='true') 登録
+          a.button.mr-6.is-success#btn-confirm 保存
+          a.button.is-link(href=`/requestApproval/${documentId}`) 支払依頼へ
 
   template#templateLineAccountCodeItem
     .columns.m-0.p-1.lineAccountcode
@@ -125,8 +126,6 @@ block content
           .column-header
             p.text-right-lines.font-bold  小計 (税抜)
             p.text-right-lines.mb-1.total.text-overflow
-
-
 
   template#templateLineAccountCodeItemModal
    .columns.m-0#lineAccountCodeTitle
@@ -419,6 +418,55 @@ block content
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button(data-target='bulkInsert-journal-modal') 戻る
         a.button.is-link#btn-bulk-insert(data-target='bulkInsert-journal-modal') 反映
+
+  .modal#check-approval-modal
+    .modal-background.cancel-button(data-target='check-approval-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 支払依頼確認
+        a.delete(data-target='check-approval-modal')
+      section.modal-card-body
+        .columns.header
+          .column.is-one-fifth 請求書番号
+          .column.text-inbox-common.check-modal-invoiceId #{invoiceId}
+        .columns.senderAndreviever
+          .column
+            .columns.rows
+              .column.text-inbox-common 宛先
+              .column.p-0
+                p.text-overflow #{customer.name}
+              if customer.address.postalNumber.length !== 0
+                .column.p-0
+                  | #{customer.address.postbox} #{customer.address.postalNumber}
+              if customer.address.streetName.length !== 0
+                .column.p-0
+                  | #{customer.address.streetName}
+              if customer.address.additionalStreetName.length !== 0
+                .column.p-0
+                  | #{customer.address.additionalStreetName}
+              if customer.address.country.length !== 0
+                .column.p-0
+                  | #{customer.address.country}
+              each id in customer.id
+                if id.schemeId === 'TS:REGNO'
+                  .column.p-0
+                    | 登録番号：#{id.value}
+                if id.schemeId === 'GLN'
+                  .column.p-0
+                    | GLN：#{id.value}
+                if id.schemeId === 'JP:CT'
+                  .column.p-0
+                    | 法人番号：#{id.value}
+          .column
+            .columns
+              .column 差出人
+
+
+      footer.modal-card-foot.center-modal-footer-item
+        a.button.cancel-button(data-target='check-approval-modal') 閉じる
+        a.button.is-link(href=`/requestApproval/${documentId}`) 依頼
+        
+
 
   include footer
 

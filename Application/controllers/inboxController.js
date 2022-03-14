@@ -7,6 +7,7 @@ const JournalizeInvoice = db.JournalizeInvoice
 const logger = require('../lib/logger')
 const Op = db.Sequelize.Op
 const department = db.DepartmentCode
+const RequestApproval = db.RequestApproval
 const constantsDefine = require('../constants')
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
@@ -481,6 +482,13 @@ const getDepartment = async (_contractId, _departmentCode, _departmentName) => {
       }
     })
 
+    departments.sort((a, b) => {
+      if (a.code > b.code) return 1
+      else {
+        return -1
+      }
+    })
+
     logger.info(constantsDefine.logMessage.INF001 + 'getDepartment')
     return { status: 0, searchResult: departments }
   } catch (error) {
@@ -490,10 +498,38 @@ const getDepartment = async (_contractId, _departmentCode, _departmentName) => {
   }
 }
 
+/**
+ * 支払依頼の情報（承認タブに表示する情報）を取得する。
+ * @param {uuid} contractId コントラクター識別番号
+ * @param {uuid} invoiceId 請求書uuid番号
+ * @returns 支払依頼の場合true、ない場合false
+ */
+const getRequestApproval = async (contractId, invoiceId) => {
+  try {
+    // 検索のため、依頼中ステータス作成
+    const requestStatus = []
+    for (let id = 10; id < 21; id++) {
+      requestStatus.push({ status: `${id}` })
+    }
+    const requestApproval = await RequestApproval.findOne({
+      where: {
+        contractId: contractId,
+        invoiceId: invoiceId,
+        [Op.or]: requestStatus
+      }
+    })
+    if (requestApproval instanceof RequestApproval === false) return false
+    return true
+  } catch (error) {
+    return error
+  }
+}
+
 module.exports = {
   getInbox: getInbox,
   getInvoiceDetail: getInvoiceDetail,
   getCode: getCode,
   insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice,
-  getDepartment: getDepartment
+  getDepartment: getDepartment,
+  getRequestApproval: getRequestApproval
 }

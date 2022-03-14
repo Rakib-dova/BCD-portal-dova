@@ -25,17 +25,11 @@ const $ = function (tagObjName) {
 
 // ローディング画面の初期化
 window.onload = function () {
-  // 承認者検索ボタン機能設定
-  Array.prototype.forEach.call($('.BtnlineApproveRouteUserSearch'), function (btn) {
-    btn.addEventListener('click', btnSearchMain())
-  })
-}
-
-// 2番目以降の勘定科目・補助科目検索ボタンイベント
-const btnSearchMain = function (searchModal) {
-  return function () {
-    if (searchModal) searchModal.classList.toggle('is-active')
-    $('#approveRoute-modal').dataset.info = this.dataset.info
+  // 削除ボタン機能活性化
+  if ($('.btn-minus-approveRoute').length !== 0) {
+    Array.prototype.forEach.call($('.btn-minus-approveRoute'), (btnMinus) => {
+      btnMinus.addEventListener('click', btnMinusApproveRoute)
+    })
   }
 }
 
@@ -55,13 +49,13 @@ $('#btn-search-approver').addEventListener('click', function () {
   approverApi.setRequestHeader('Content-Type', 'application/json')
   approverApi.onreadystatechange = function () {
     if (approverApi.readyState === approverApi.DONE) {
+      // 既存の検索結果を取り消す
+      while ($('#approver-list').firstChild) {
+        $('#approver-list').removeChild($('#approver-list').firstChild)
+      }
       if (approverApi.status === 200) {
         // サーバーから送信したデータの取得
         const approvers = JSON.parse(approverApi.responseText)
-        // 既存の検索結果を取り消す
-        while ($('#approver-list').firstChild) {
-          $('#approver-list').removeChild($('#approver-list').firstChild)
-        }
         // データがある場合、承認者を表示
         if (approvers.length !== 0) {
           approvers.forEach((approver) => {
@@ -79,8 +73,11 @@ $('#btn-search-approver').addEventListener('click', function () {
               const name = this.querySelector('#name').innerText
               const email = this.querySelector('#email').innerText
               const id = this.querySelector('#id').value
+              $(`#${target}`).querySelectorAll('input[type=text]')[0].classList.remove('none-user-name')
               $(`#${target}`).querySelectorAll('input[type=text]')[0].value = name
+              $(`#${target}`).querySelectorAll('input[type=text]')[0].setAttribute('title', name)
               $(`#${target}`).querySelectorAll('input[type=text]')[1].value = email
+              $(`#${target}`).querySelectorAll('input[type=text]')[1].setAttribute('title', email)
               $(`#${target}`).querySelectorAll('input[type=hidden]')[0].value = id
               $('#approveRoute-modal').classList.remove('is-active')
             })
@@ -138,7 +135,9 @@ const BtnlineApproveRouteUserSearch = function () {
 }
 
 // ボタンに機能を付与
-$('#BtnlineApproveRouteUserSearch').addEventListener('click', BtnlineApproveRouteUserSearch)
+Array.prototype.forEach.call($('.BtnlineApproveRouteUserSearch'), function (btn) {
+  btn.addEventListener('click', BtnlineApproveRouteUserSearch)
+})
 
 // 承認者追加ボタンクリック時
 $('#btnAddApproveRoute').addEventListener('click', function () {
@@ -154,7 +153,7 @@ const btnMinusApproveRoute = function () {
   $(`#${deleteTarget}`).remove()
   const approveUserList = $('#bulkInsertNo1')
   approveUserList.querySelectorAll('.lineApproveRoute').forEach((item, idx) => {
-    item.querySelector('.input-approveRouteUserNumber').innerText = `${approveUserNumbers[idx]}次承認`
+    item.querySelector('.input-approveRouteUserNumber').innerHTML = `${approveUserNumbers[idx]}次承認`
   })
 }
 
@@ -205,15 +204,17 @@ const addApproveUsers = function (target) {
   }
 }
 
-// 登録ボタンクリック時
+// 確認ボタンクリック時
 $('#btn-confirm').addEventListener('click', function () {
   // 初期化
   revertElements()
-  // 「登録」ボタンが非活性の場合、終了する。
+  // 「確認」ボタンが非活性の場合、終了する。
   if (this.getAttribute('disabled') === 'true') return
   const approveUserNameArr = []
   const validateUserNameArr = []
   const approveUserMailAddressArr = []
+  const approveRouteName = document.getElementById('setApproveRouteNameInputId').value
+  const approveRouteNameInput = document.getElementById('approveRouteName_checkModal')
   const approveUserNames = document.querySelectorAll('.input-approveRouteUserName')
   const approveUserMailAddersses = document.querySelectorAll('.input-approveRouteUserMailAddress')
   const lastapproveUserName = document.getElementById('lastLineApproveRoute_approveUserName')
@@ -234,18 +235,21 @@ $('#btn-confirm').addEventListener('click', function () {
     if (duplicationCheckResult) {
       $('#error-message-approveRoute').innerText = '同一の承認者が設定されています。'
     } else {
-      // 登録処理
+      // 確認画面表示処理
       while ($('#approver-list-check').firstChild) {
         $('#approver-list-check').removeChild($('#approver-list-check').firstChild)
       }
 
+      approveRouteNameInput.value = approveRouteName
       if (approveUserNameArr.length !== 0) {
         for (let i = 0; i < approveUserNameArr.length; i++) {
           const templateApproverCheckList = $('#template-approverCheckList')
           const cloneApproverCheckList = document.importNode(templateApproverCheckList.content, true)
-          cloneApproverCheckList.querySelector('#id-check').innerText = `${i + 1}次承認`
+          cloneApproverCheckList.querySelector('#id-check').innerText = `${approveUserNumbers[i]}次承認`
           cloneApproverCheckList.querySelector('#name-check').innerText = approveUserNameArr[i]
+          cloneApproverCheckList.querySelector('#name-check').setAttribute('title', `${approveUserNameArr[i]}`)
           cloneApproverCheckList.querySelector('#email-check').innerText = approveUserMailAddressArr[i]
+          cloneApproverCheckList.querySelector('#email-check').setAttribute('title', `${approveUserMailAddressArr[i]}`)
           $('#approver-list-check').append(cloneApproverCheckList)
         }
       }
@@ -253,7 +257,11 @@ $('#btn-confirm').addEventListener('click', function () {
       const cloneApproverCheckList = document.importNode(templateApproverCheckList.content, true)
       cloneApproverCheckList.querySelector('#id-check').innerText = '最終承認'
       cloneApproverCheckList.querySelector('#name-check').innerText = lastapproveUserName.value
+      cloneApproverCheckList.querySelector('#name-check').setAttribute('title', `${lastapproveUserName.value}`)
       cloneApproverCheckList.querySelector('#email-check').innerText = lastapproveUserMailAddresses.value
+      cloneApproverCheckList
+        .querySelector('#email-check')
+        .setAttribute('title', `${lastapproveUserMailAddresses.value}`)
       $('#approver-list-check').append(cloneApproverCheckList)
 
       document.querySelector('#check-modal').classList.add('is-active')
@@ -274,17 +282,18 @@ const duplicationCheck = function (approveUserArr) {
 
 // 未設定チェック
 const validationCheck = function (approveUserArr) {
+  let isChecked = false
   // 承認ルート名チェック
   const setApproveRouteNameInputId = document.getElementById('setApproveRouteNameInputId').value
   if (setApproveRouteNameInputId === '' || setApproveRouteNameInputId === undefined) {
     document.getElementById('RequiredErrorMesageForApproveRoute').innerHTML = '承認ルート名が未入力です。'
     document.getElementById('RequiredErrorMesageForApproveRoute').classList.remove('is-invisible')
-    return true
+    isChecked = true
   } else if (setApproveRouteNameInputId.length > 40) {
     document.getElementById('RequiredErrorMesageForApproveRoute').innerHTML =
       '承認ルート名は40桁以内で入力してください。'
     document.getElementById('RequiredErrorMesageForApproveRoute').classList.remove('is-invisible')
-    return true
+    isChecked = true
   }
 
   // 承認者未設定チェック
@@ -296,11 +305,11 @@ const validationCheck = function (approveUserArr) {
     }
   })
   if (result.length > 0) {
-    $('#error-message-approveRoute').innerText = '担当者を設定して下さい。'
-    return true
-  } else {
-    return false
+    $('#error-message-approveRoute').innerText = '承認者を設定してください。'
+    isChecked = true
   }
+
+  return isChecked
 }
 
 // 重複検索関数

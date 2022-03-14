@@ -179,7 +179,8 @@ describe('approveRouteListのテスト', () => {
         return {
           No: idx + 1,
           approveRouteName: approve.approveRouteName,
-          approverCount: approve.ApproveUsers.length
+          approverCount: approve.ApproveUsers.length,
+          uuid: approve.approveRouteId
         }
       })
       approveRouteFindAllSpy.mockReturnValueOnce(approveRouteArr)

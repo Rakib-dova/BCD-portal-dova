@@ -24,7 +24,7 @@ const api = (middleware, fn, message) => {
   return [
     ...middleware.map(wrap),
     handler(fn),
-    (err, req, res, next) => res.send({ status: 'ng', message: message ?? error.message })
+    (err, req, res, next) => res.send({ status: 'ng', message: message ?? err.message })
   ]
 }
 

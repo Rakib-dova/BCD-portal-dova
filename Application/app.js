@@ -189,6 +189,25 @@ app.use(function (req, res, next) {
   next()
 })
 
+// 一時保存機能
+// 支払依頼のユーザーが入力して承認ルート未設定や
+// 未保存ですぐ依頼の時、画面の入力した内容保存する
+// ミドルウェア
+app.use(function (req, res, next) {
+  const url = req.url
+
+  if (
+    url.match('/requestApproval/') === null &&
+    url.match('/approvalInbox/') === null &&
+    url.match('/favicon.ico') === null &&
+    url.match('/inbox/getCode') === null &&
+    url.match('/inbox/department') === null
+  ) {
+    delete req.session.requestApproval
+  }
+  next()
+})
+
 app.use('/', require('./routes/index').router)
 app.use('/portal', require('./routes/portal').router)
 app.use('/auth', require('./routes/auth').router)
@@ -281,15 +300,27 @@ app.use('/departmentCodeEdit', require('./routes/departmentCodeEdit').router)
 // ------------受領した請求書
 // 受領した請求書一覧
 app.use('/inboxList', require('./routes/inboxList').router)
+// 承認待ち一覧
+// app.use('/approvalInboxList', require('./routes/approvalInboxList').router)
 
 // 受領した請求書
 app.use('/inbox', require('./routes/inbox').router)
+// 支払依頼の請求書
+app.use('/approvalInbox', require('./routes/approvalInbox').router)
+
+// 承認依頼画面
+app.use('/requestApproval', require('./routes/requestApproval').router)
+
+// 承認依頼差し戻し
+app.use('/rejectApproval', require('./routes/rejectApproval').router)
 
 // ------------承認ルート
 // 承認ルート登録
 app.use('/registApproveRoute', require('./routes/registApproveRoute').router)
 // 承認ルート一覧
 app.use('/approveRouteList', require('./routes/approveRouteList').router)
+// 承認ルート確認
+app.use('/approveRouteEdit', require('./routes/approveRouteEdit').router)
 
 // 設定
 // cancellation

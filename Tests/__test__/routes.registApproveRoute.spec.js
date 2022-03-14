@@ -51,6 +51,7 @@ const notLoggedInsession = {
 // モックテーブル定義
 const Users = require('../mockDB/Users_Table')
 const Contracts = require('../mockDB/Contracts_Table')
+const Approver = require('../../Application/lib/approver/Approver')
 
 let errorSpy, infoSpy
 let request, response
@@ -118,7 +119,7 @@ describe('registApproveRouteのテスト', () => {
       // 期待結果
       // 承認ルートページレンダリングを呼び出し
       expect(response.render).toBeCalledWith('registApproveRoute', {
-        panelHead: '条件絞り込み',
+        panelHead: '承認ルート',
         approveRouteNameLabel: '承認ルート名',
         requiredTagApproveRouteName: 'approveRouteNameTagRequired',
         idForApproveRouteNameInput: 'setApproveRouteNameInputId',
@@ -313,6 +314,65 @@ describe('registApproveRouteのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
+
+    test('準正常：重複の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const body = {
+        setApproveRouteNameInputId: 'テスト',
+        userName: ['管理者2 契約フロー確認用3', '管理者1 契約フロー確認用3'],
+        mailAddress: ['dev.master.bconnection+flow3.002@gmail.com', 'dev.master.bconnection+flow3.001@gmail.com'],
+        uuid: ['81ae1ddf-0017-471c-962b-b4dac1b72117', '2c15aaf5-8b75-4b85-97ef-418948ed6f9b']
+      }
+      request.session = { ...session, body: { ...body } }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      // 承認者オブジェクト作成
+      const approverUsers = [
+        new Approver({
+          FirstName: '管理者2',
+          LastName: '契約フロー確認用3',
+          Username: 'dev.master.bconnection+flow3.002@gmail.com',
+          Id: '81ae1ddf-0017-471c-962b-b4dac1b72117',
+          Memberships: [{ GroupId: null }]
+        })
+      ]
+      const lastApprover = new Approver({
+        FirstName: '管理者1',
+        LastName: '契約フロー確認用3',
+        Username: 'dev.master.bconnection+flow3.001@gmail.com',
+        Id: '2c15aaf5-8b75-4b85-97ef-418948ed6f9b',
+        Memberships: [{ GroupId: null }]
+      })
+
+      // 試験実施
+      await registerApproveRoute.cbGetRegistApproveRoute(request, response, next)
+
+      // 期待結果
+      // 承認ルートページレンダリングを呼び出し
+      expect(response.render).toBeCalledWith('registApproveRoute', {
+        panelHead: '承認ルート',
+        approveRouteNameLabel: '承認ルート名',
+        requiredTagApproveRouteName: 'approveRouteNameTagRequired',
+        idForApproveRouteNameInput: 'setApproveRouteNameInputId',
+        isApproveRouteEdit: false,
+        modalTitle: '承認者検索',
+        backUrl: '/approveRouteList',
+        logTitle: '承認ルート登録',
+        logTitleEng: 'REGIST APPROVE ROUTE',
+        valueForApproveRouteNameInput: body.setApproveRouteNameInputId,
+        approveUsers: approverUsers,
+        lastApprover: lastApprover
+      })
+    })
   })
 
   describe('コールバック:cbPostRegistApproveRoute', () => {
@@ -362,7 +422,7 @@ describe('registApproveRouteのテスト', () => {
 
       // 期待結果
       // 承認ルートページレンダリングを呼び出し
-      expect(request.flash).toBeCalledWith('noti', ['承認ルート登録', '入力した承認ルートは既に登録されています。'])
+      expect(request.flash).toBeCalledWith('noti', ['承認ルート登録', '入力した承認ルート名は既に登録されています。'])
       expect(response.redirect).toBeCalledWith('/registApproveRoute')
     })
 

@@ -169,7 +169,15 @@ const cbGetIndex = async (req, res, next) => {
     optionLine8.columnData = result.options.note
   }
 
-  res.render('inbox', {
+  const contractId = contract.contractId
+  const isRequestApproval = await inboxController.getRequestApproval(contractId, invoiceId)
+  let presentation = 'inbox'
+
+  if (isRequestApproval) {
+    presentation = 'readonlyInbox'
+  }
+
+  res.render(presentation, {
     ...result,
     optionLine1: optionLine1,
     optionLine2: optionLine2,
@@ -178,9 +186,9 @@ const cbGetIndex = async (req, res, next) => {
     optionLine5: optionLine5,
     optionLine6: optionLine6,
     optionLine7: optionLine7,
-    optionLine8: optionLine8
+    optionLine8: optionLine8,
+    documentId: invoiceId
   })
-
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
@@ -326,8 +334,8 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
-  req.flash('info', '仕訳情報設定が完了しました。')
-  res.redirect('/inboxList/1')
+  req.flash('info', '仕訳情報設定を保存しました。')
+  res.redirect(`/inbox/${invoiceId}`)
 }
 
 const cbPostDepartment = async (req, res, next) => {
