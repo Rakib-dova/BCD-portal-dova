@@ -32,7 +32,16 @@ stages:
               npm ci
               npm run e2e -- spec/citest.js
               npm run e2e-report
-            displayName: "npm run"
+            displayName: "install"
+
+          - script: |
+              npm run e2e -- spec/citest.js
+            displayName: "test"
+
+          - script: |
+              npm run e2e-report
+            displayName: "report"
+
 #  workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
 
 # - task: PublishTestResults@2
