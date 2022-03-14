@@ -38,9 +38,11 @@ steps:
      echo "browser you have chosen is "${{ parameters.browser }} 
  
 - script: |
+    cd bcd-e2e-tests
     npm i
   displayName: 'npm install'
 
 - script: |
+    cd bcd-e2e-tests
     npm run ${{ parameters.browser }} -- spec/citest.js
   displayName: 'npm run'
