@@ -2,22 +2,24 @@
 # Build a general Node.js project with npm.
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+pool:
+  vmImage: windows-2019
 
 stages:
-- stage: npm_settingStage
-  jobs:
-  - job: npm_settingJob
-    steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '10.x'
-      displayName: 'Install Node.js'
-      
-- stage: chromeStage
-  jobs:
-  - job: chrome_scenario001
-    steps:
-    - script:  |
-        npm i
-        npm run e2e -- spec/citest.js
-      workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
+  - stage: npm_settingStage
+    jobs:
+      - job: npm_settingJob
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: "10.x"
+            displayName: "Install Node.js"
+
+  - stage: chromeStage
+    jobs:
+      - job: chrome_scenario001
+        steps:
+          - script: |
+              npm i
+              npm run e2e -- spec/citest.js
+            workingDirectory: "$(Build.SourcesDirectory)/bcd-e2e-tests"
