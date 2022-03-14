@@ -3,62 +3,44 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
+parameters:
+- name: browser
+  displayName: Choose browser you want to run with.
+  type: string
+  default: chrome
+  values:
+  - chrome
+  - firefox
+  - edge
+
 trigger:
-  - none
+- none
+
+schedules:
+- cron: "0 8 * * *"
+  displayName: run schedule for 17:00(8)
+  branches:
+    include:
+    - main
+#    always: true
 
 pool:
   vmImage: windows-2019
 
-stages:
-  - stage: aaa
-    jobs:
-      - job: bbb
-        variables:
-          npm_config_cache: $(Pipeline.Workspace)/.npm
-        steps:
-          - task: NodeTool@0
-            inputs:
-              versionSpec: "10.x"
-            displayName: "Install Node.js"
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
 
-          - task: CacheBeta@0
-            inputs:
-              key: $(Build.SourcesDirectory)/bcd-e2e-tests/package-lock.json
-              path: $(npm_config_cache)
-            displayName: Cache npm
+- script: |
+     echo "hello this is test"
+     echo "browser you have chosen is "${{ parameters.browser }} 
+ 
+- script: |
+    npm i
+  displayName: 'npm install'
 
-          - task: CacheBeta@0
-            inputs:
-              key: $(Build.SourcesDirectory)/bcd-e2e-tests/package-lock.json
-              path: "C:/Users/VssAdministrator/AppData/Local/ms-playwright"
-            displayName: Cache browser
-
-          - script: |
-              cd bcd-e2e-tests
-              npm ci
-            displayName: "install"
-
-          - script: |
-              cd bcd-e2e-tests
-              npm run e2e -- spec/citest.js
-            displayName: "test"
-
-          - script: |
-              cd bcd-e2e-tests
-              npm run e2e-report
-            displayName: "report"
-#  workingDirectory: '$(Build.SourcesDirectory)/bcd-e2e-tests'
-
-# - task: PublishTestResults@2
-#   condition: succeededOrFailed()
-#   inputs:
-#     testRunner: JUnit
-#     testResultsFiles: '**/*.json'
-
-# - task: PublishPipelineArtifact@1
-#   inputs:
-#     targetPath: $(Build.SourcesDirectory)/build
-#     artifactName: report
-# - task: DownloadPipelineArtifact@2
-#   inputs:
-#     patterns: '**/*.zip'
+- script: |
+    npm run ${{ parameters.browser }} -- spec/citest.js
+  displayName: 'npm run'
