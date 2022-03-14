@@ -8,7 +8,7 @@ let localFlag = process.env.local_flag == 'true' ? true : false;
 // Chromeブラウザを起動する
 function openChrome(chromium) {
   const options = {
-    headless: false,
+    //headless: false,
     channel: 'chrome',
     args: ['--window-size=1536,864']
   }
@@ -19,7 +19,7 @@ exports.openChrome = openChrome;
 // Edgeブラウザを起動する
 function openEdge(chromium) {
   const options = {
-    headless: false,
+    //headless: false,
     channel: 'msedge',
     args: ['--window-size=1536,864'],
   }
@@ -30,7 +30,7 @@ exports.openEdge = openEdge;
 // Firefoxブラウザを起動する 
 function openFirefox(firefox) {
   const options = {
-    headless: false,
+    //headless: false,
   }
   return firefox.launch(options);
 }
