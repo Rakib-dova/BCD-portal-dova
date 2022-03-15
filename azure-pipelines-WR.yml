@@ -84,4 +84,5 @@ stages:
               dir $(Pipeline.Workspace)
               dir $(Build.SourcesDirectory)
               dir $(DIR)
+              dir C:\Users\VssAdministrator\AppData\Local\ms-playwright
             displayName: echo
