@@ -12,6 +12,8 @@ const validate = require('../lib/validate')
 const constants = require('../constants')
 const inboxController = require('../controllers/inboxController')
 const approvalInboxController = require('../controllers/approvalInboxController')
+const db = require('../models')
+const requestApproval = db.RequestApproval
 const Parser = require('rss-parser')
 const parser = new Parser({
   headers: {
@@ -124,8 +126,7 @@ const cbGetIndex = async (req, res, next) => {
       })
     })
 
-  // 通知件数取得処理
-  let rejectedNoticeCnt = 0
+  // 通知件数取得処理(支払依頼件数)
   let requestNoticeCnt = 0
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
@@ -156,6 +157,17 @@ const cbGetIndex = async (req, res, next) => {
         case '十次承認済み':
           ++requestNoticeCnt
           break
+      }
+    }
+  }
+
+  // 請求書の承認依頼検索(差し戻し件数)
+  let rejectedNoticeCnt = 0
+  const requestApprovals = await requestApproval.findAll()
+  for (let i = 0; i < requestApprovals.length; i++) {
+    if (requestApprovals[i].dataValues.requester === user.userId) {
+      if (requestApprovals[i].dataValues.status === '90') {
+        ++rejectedNoticeCnt
       }
     }
   }

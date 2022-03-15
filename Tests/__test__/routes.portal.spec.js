@@ -14,6 +14,8 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const inboxController = require('../../Application/controllers/inboxController')
 const approvalInboxController = require('../../Application/controllers/approvalInboxController')
+const db = require('../../Application/models')
+const requestApprovalModel = db.RequestApproval
 const logger = require('../../Application/lib/logger.js')
 const constants = require('../../Application/constants')
 const Parser = require('../../Application/node_modules/rss-parser')
@@ -138,13 +140,83 @@ const requestApproval = {
 }
 
 const noRequestApproval = {}
+
+const resultofRequestApprovals = [
+  {
+    dataValues: {
+      requestId: '0e11ba9a-bd33-46f0-87db-cca918e2bb87',
+      contractId: '198851fe-f220-4c7a-9aca-a08f744e45ae',
+      approveRouteId: 'bdaea953-79f3-4560-8209-8d0e1710a224',
+      invoiceId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
+      requester: 'c7dc9c91-41ec-4209-8c11-b68e4f84c1de',
+      status: '10',
+      message: 'test1234',
+      create: '2022-03-15T04:59:18.436Z',
+      isSaved: false
+    },
+    _previousDataValues: {
+      requestId: '0e11ba9a-bd33-46f0-87db-cca918e2bb87',
+      contractId: '198851fe-f220-4c7a-9aca-a08f744e45ae',
+      approveRouteId: 'bdaea953-79f3-4560-8209-8d0e1710a224',
+      invoiceId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
+      requester: 'c7dc9c91-41ec-4209-8c11-b68e4f84c1de',
+      status: '10',
+      message: 'test1234',
+      create: '2022-03-15T04:59:18.436Z',
+      isSaved: false
+    },
+    _changed: {},
+    _options: {
+      isNewRecord: false,
+      _schema: null,
+      _schemaDelimiter: '',
+      raw: true,
+      attributes: []
+    },
+    isNewRecord: false
+  },
+  {
+    dataValues: {
+      requestId: '14c82982-1562-4cfb-b13a-a83578db0f39',
+      contractId: '198851fe-f220-4c7a-9aca-a08f744e45ae',
+      approveRouteId: 'bdaea953-79f3-4560-8209-8d0e1710a224',
+      invoiceId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
+      requester: '12345678-cb0b-48ad-857d-4b42a44ede13',
+      status: '90',
+      message: 'test1234',
+      create: '2022-03-15T04:59:18.436Z',
+      isSaved: false
+    },
+    _previousDataValues: {
+      requestId: '14c82982-1562-4cfb-b13a-a83578db0f39',
+      contractId: '198851fe-f220-4c7a-9aca-a08f744e45ae',
+      approveRouteId: 'bdaea953-79f3-4560-8209-8d0e1710a224',
+      invoiceId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
+      requester: '12345678-cb0b-48ad-857d-4b42a44ede13',
+      status: '90',
+      message: 'test1234',
+      create: '2022-03-15T04:59:18.436Z',
+      isSaved: false
+    },
+    _changed: {},
+    _options: {
+      isNewRecord: false,
+      _schema: null,
+      _schemaDelimiter: '',
+      raw: true,
+      attributes: []
+    },
+    isNewRecord: false
+  }
+]
+
 if (process.env.LOCALLY_HOSTED === 'true') {
   // NODE_ENVはJestがデフォルトでtestに指定する。dotenvで上書きできなかったため、package.jsonの実行引数でdevelopmentを指定
   require('dotenv').config({ path: './config/.env' })
 }
 
 let request, response, infoSpy, findOneSpy, findOneSpyContracts, parseUrlSpy
-let approvalInboxControllerGetRequestApprovalSpy, approvalInboxControllerHasPowerOfEditingSpy, inboxControllerSpy
+let approvalInboxControllerGetRequestApprovalSpy, approvalInboxControllerHasPowerOfEditingSpy, inboxControllerSpy, requestApprovalModelFindAllSpy
 describe('portalのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -156,6 +228,7 @@ describe('portalのテスト', () => {
     inboxControllerSpy = jest.spyOn(inboxController, 'getWorkflow')
     approvalInboxControllerGetRequestApprovalSpy = jest.spyOn(approvalInboxController, 'getRequestApproval')
     approvalInboxControllerHasPowerOfEditingSpy = jest.spyOn(approvalInboxController, 'hasPowerOfEditing')
+    requestApprovalModelFindAllSpy = jest.spyOn(requestApprovalModel, 'findAll')
   })
   afterEach(() => {
     request.resetMocked()
@@ -168,6 +241,7 @@ describe('portalのテスト', () => {
     inboxControllerSpy.mockRestore()
     approvalInboxControllerGetRequestApprovalSpy.mockRestore()
     approvalInboxControllerHasPowerOfEditingSpy.mockRestore()
+    requestApprovalModelFindAllSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -218,7 +292,8 @@ describe('portalのテスト', () => {
           lastRefreshedAt: null,
           createdAt: '2021-01-25T08:45:49.803Z',
           updatedAt: '2021-01-25T08:45:49.803Z'
-        }
+        },
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       })
       findOneSpyContracts.mockReturnValue({
         dataValues: {
@@ -258,6 +333,7 @@ describe('portalのテスト', () => {
       inboxControllerSpy.mockReturnValue(workflow)
       approvalInboxControllerGetRequestApprovalSpy.mockReturnValue(requestApproval)
       approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(true)
+      requestApprovalModelFindAllSpy.mockReturnValueOnce(resultofRequestApprovals)
       // 試験実施
       await portal.cbGetIndex(request, response, next)
 
@@ -282,7 +358,7 @@ describe('portalのテスト', () => {
         TS_HOST: process.env.TS_HOST,
         memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
         csrfToken: dummyTokne /* 会員サイト開発により追加 */,
-        rejectedNoticeCnt: 0,
+        rejectedNoticeCnt: 1,
         requestNoticeCnt: 7
       })
     })
@@ -378,6 +454,7 @@ describe('portalのテスト', () => {
       inboxControllerSpy.mockReturnValue(noWorkFlow)
       approvalInboxControllerGetRequestApprovalSpy.mockReturnValue(noRequestApproval)
       approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(false)
+      requestApprovalModelFindAllSpy.mockReturnValueOnce(resultofRequestApprovals)
       // 試験実施
       await portal.cbGetIndex(request, response, next)
 
@@ -508,6 +585,7 @@ describe('portalのテスト', () => {
       inboxControllerSpy.mockReturnValue(noWorkFlow)
       approvalInboxControllerGetRequestApprovalSpy.mockReturnValue(noRequestApproval)
       approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(false)
+      requestApprovalModelFindAllSpy.mockReturnValueOnce([])
 
       // 試験実施
       await portal.cbGetIndex(request, response, next)
@@ -934,6 +1012,7 @@ describe('portalのテスト', () => {
       inboxControllerSpy.mockReturnValue(noWorkFlow)
       approvalInboxControllerGetRequestApprovalSpy.mockReturnValue(noRequestApproval)
       approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(false)
+      requestApprovalModelFindAllSpy.mockReturnValueOnce(resultofRequestApprovals)
 
       // 試験実施
       await portal.cbGetIndex(request, response, next)
