@@ -9,8 +9,8 @@ let localFlag = process.env.local_flag == 'true' ? true : false;
 function openChrome(chromium) {
   const options = {
     //headless: false,
-//    channel: 'chrome',
-//    args: ['--window-size=1536,864']
+   channel: 'chrome',
+   args: ['--window-size=1536,864']
   }
   return chromium.launch(options);
 }
@@ -20,8 +20,8 @@ exports.openChrome = openChrome;
 function openEdge(chromium) {
   const options = {
     //headless: false,
-//    channel: 'msedge',
-//    args: ['--window-size=1536,864'],
+   channel: 'msedge',
+   args: ['--window-size=1536,864'],
   }
   return chromium.launch(options);
 }
@@ -29,9 +29,9 @@ exports.openEdge = openEdge;
 
 // Firefoxブラウザを起動する 
 function openFirefox(firefox) {
-//  const options = {
-    //headless: false,
-//  }
+  const options = {
+    // headless: false,
+  }
   return firefox.launch(options);
 }
 exports.openFirefox = openFirefox;
