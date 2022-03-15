@@ -124,7 +124,6 @@ const cbGetIndex = async (req, res, next) => {
     })
 
   const requestNoticeCnt = 2
-  const approvalNoticeCnt = 100
   const rejectedNoticeCnt = 3
 
   // ユーザ権限も画面に送る
@@ -140,7 +139,6 @@ const cbGetIndex = async (req, res, next) => {
     constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0,
     memberSiteFlg: req.session.memberSiteCoopSession.memberSiteFlg /* 会員サイト開発により追加 */,
     csrfToken: req.csrfToken() /* 会員サイト開発により追加 */,
-    approvalNoticeCnt: approvalNoticeCnt,
     rejectedNoticeCnt: rejectedNoticeCnt,
     requestNoticeCnt: requestNoticeCnt
   })
