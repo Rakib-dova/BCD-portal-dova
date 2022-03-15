@@ -2,7 +2,7 @@
 jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
-
+jest.mock('rss-parser')
 const portal = require('../../Application/routes/portal')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
@@ -14,7 +14,7 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const logger = require('../../Application/lib/logger.js')
 const constants = require('../../Application/constants')
-const Parser = require('rss-parser')
+const Parser = require('../../Application/node_modules/rss-parser')
 const parser = new Parser({
   headers: {
     Accept: 'text/html'
@@ -27,7 +27,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
   require('dotenv').config({ path: './config/.env' })
 }
 
-let request, response, infoSpy, findOneSpy, findOneSpyContracts
+let request, response, infoSpy, findOneSpy, findOneSpyContracts, parseUrlSpy
 describe('portalのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -35,6 +35,7 @@ describe('portalのテスト', () => {
     infoSpy = jest.spyOn(logger, 'info')
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
+    parseUrlSpy = jest.spyOn(Parser.prototype, 'parseURL')
   })
   afterEach(() => {
     request.resetMocked()
@@ -43,6 +44,7 @@ describe('portalのテスト', () => {
     infoSpy.mockRestore()
     findOneSpy.mockRestore()
     findOneSpyContracts.mockRestore()
+    parseUrlSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -64,6 +66,101 @@ describe('portalのテスト', () => {
   })
 
   describe('コールバック:cbGetIndex', () => {
+    test('正常：支払依頼が来た時', async () => {
+      // 準備
+      // 会員サイト開発により追加
+      const memberSiteCoopSessionDto = new MemberSiteSessionDto()
+      memberSiteCoopSessionDto.memberSiteFlg = true
+      // 会員サイト開発により追加
+
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy',
+        memberSiteCoopSession: memberSiteCoopSessionDto // 会員サイト開発により追加
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue({
+        dataValues: {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: null,
+          userStatus: 0,
+          lastRefreshedAt: null,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
+      findOneSpyContracts.mockReturnValue({
+        dataValues: {
+          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: '0000011111',
+          contractStatus: '10',
+          deleteFlag: false,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
+
+      // お知らせ取得
+      const constructDataArr = {
+        items: []
+      }
+      const newsDataArr = {
+        items: []
+      }
+
+      parseUrlSpy.mockImplementationOnce(async () => {
+        return newsDataArr
+      })
+      parseUrlSpy.mockImplementationOnce(async () => {
+        return constructDataArr
+      })
+
+      const expectDateArr = [{ message: '現在、お知らせはありません。' }]
+      const expectconstructDataArr = [{ message: '現在、工事故障情報はありません。' }]
+      // CSRF対策
+      const dummyTokne = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyTokne
+      })
+
+      // 試験実施
+      await portal.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでportalが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('portal', {
+        constructDataArr: expectconstructDataArr,
+        constructDataArrSize: expectconstructDataArr[0].title ? expectconstructDataArr.length : 0,
+        newsDataArr: expectDateArr,
+        newsDataArrSize: newsDataArr.items.length,
+        title: 'ポータル',
+        tenantId: request.user.tenantId,
+        userRole: request.session.userRole,
+        numberN: '0000011111',
+        TS_HOST: process.env.TS_HOST,
+        memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
+        csrfToken: dummyTokne /* 会員サイト開発により追加 */,
+        rejectedNoticeCnt: 3,
+        requestNoticeCnt: 2
+      })
+    })
+
     test('正常', async () => {
       // 準備
       // 会員サイト開発により追加
@@ -108,72 +205,43 @@ describe('portalのテスト', () => {
       })
 
       // お知らせ取得
-      const newsDataArr = []
-      let newsDataArrSize
-
-      await parser
-        .parseURL('https://support.ntt.com/informationRss/goods/rss/bconnection')
-        .then((feed) => {
-          newsDataArrSize = feed.items.length
-          if (newsDataArrSize === 0) {
-            newsDataArr.push({
-              message: constants.portalMsg.NEWS_NONE
-            })
-          } else {
-            let getlength = 3
-            if (newsDataArrSize < 3) {
-              getlength = newsDataArrSize
-            }
-
-            for (let i = 0; i < getlength; i++) {
-              const day = new Date(feed.items[i].date)
-
-              newsDataArr.push({
-                date: day.getFullYear() + '年' + (day.getMonth() + 1) + '月' + day.getDate() + '日',
-                title: feed.items[i].title,
-                link: feed.items[i].link
-              })
-            }
-          }
-        })
-        .catch((error) => {
-          console.error('RSS 取得失敗', error)
-          newsDataArrSize = 0
-          newsDataArr.push({
-            message: constants.portalMsg.NEWS_CONN_ERR
-          })
-        })
-
-      // 工事・故障情報取得
-      let constructDataArr = []
-
-      await parser
-        .parseURL('https://support.ntt.com/bconnection/maintenance/list/rss')
-        .then((feed) => {
-          if (feed.items.length === 0) {
-            constructDataArr.push({
-              message: constants.portalMsg.MAINTENANCE_NON
-            })
-          } else {
-            const newsLimit = 3
-            constructDataArr = feed.items.map((item) => {
-              const day = new Date(item.date)
-              return {
-                date: `${day.getFullYear()}年${day.getMonth() + 1}月${day.getDate()}日`,
-                title: item.title,
-                link: item.link
-              }
-            })
-            constructDataArr.length = newsLimit < feed.items.length ? newsLimit : feed.items.length
-          }
-        })
-        .catch((error) => {
-          console.error('RSS 取得失敗', error)
-          constructDataArr.length = 0
-          constructDataArr.push({
-            message: constants.portalMsg.NEWS_CONN_ERR
-          })
-        })
+      const constructDataArr = {
+        items: []
+      }
+      const newsDataArr = {
+        items: []
+      }
+      const rssMaker = function (title, link, date) {
+        return {
+          title: title,
+          link: link,
+          date: date
+        }
+      }
+      constructDataArr.items.push(rssMaker('BConnection RSS 1', 'http://test', '2022-03-08'))
+      constructDataArr.items.push(rssMaker('BConnection RSS 2', 'http://test', '2022-03-08'))
+      newsDataArr.items.push(rssMaker('BConnection RSS2 1', 'http://test', '2022-03-08'))
+      newsDataArr.items.push(rssMaker('BConnection RSS2 2', 'http://test', '2022-03-08'))
+      const expectDateArr = newsDataArr.items.map((item) => {
+        const day = new Date(item.date)
+        return {
+          ...item,
+          date: day.getFullYear() + '年' + (day.getMonth() + 1) + '月' + day.getDate() + '日'
+        }
+      })
+      const expectconstructDataArr = constructDataArr.items.map((item) => {
+        const day = new Date(item.date)
+        return {
+          ...item,
+          date: day.getFullYear() + '年' + (day.getMonth() + 1) + '月' + day.getDate() + '日'
+        }
+      })
+      parseUrlSpy.mockImplementationOnce(async () => {
+        return newsDataArr
+      })
+      parseUrlSpy.mockImplementationOnce(async () => {
+        return constructDataArr
+      })
 
       // CSRF対策
       const dummyTokne = 'testCsrfToken'
@@ -194,17 +262,146 @@ describe('portalのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでportalが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('portal', {
-        constructDataArr: constructDataArr,
-        constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0,
-        newsDataArr: newsDataArr,
-        newsDataArrSize: newsDataArrSize,
+        constructDataArr: expectconstructDataArr,
+        constructDataArrSize: expectconstructDataArr[0].title ? expectconstructDataArr.length : 0,
+        newsDataArr: expectDateArr,
+        newsDataArrSize: expectDateArr.length,
         title: 'ポータル',
         tenantId: request.user.tenantId,
         userRole: request.session.userRole,
         numberN: '0000011111',
         TS_HOST: process.env.TS_HOST,
-        memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg, // 会員サイト開発により追加
-        csrfToken: dummyTokne // 会員サイト開発により追加
+        memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
+        csrfToken: dummyTokne /* 会員サイト開発により追加 */,
+        rejectedNoticeCnt: 3,
+        requestNoticeCnt: 2
+      })
+    })
+
+    test('正常:RSS３件以上の場合', async () => {
+      // 準備
+      // 会員サイト開発により追加
+      const memberSiteCoopSessionDto = new MemberSiteSessionDto()
+      memberSiteCoopSessionDto.memberSiteFlg = true
+      // 会員サイト開発により追加
+
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy',
+        memberSiteCoopSession: memberSiteCoopSessionDto // 会員サイト開発により追加
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue({
+        dataValues: {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: null,
+          userStatus: 0,
+          lastRefreshedAt: null,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
+      findOneSpyContracts.mockReturnValue({
+        dataValues: {
+          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: '0000011111',
+          contractStatus: '10',
+          deleteFlag: false,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
+
+      // お知らせ取得
+      const constructDataArr = {
+        items: []
+      }
+      const newsDataArr = {
+        items: []
+      }
+      const rssMaker = function (title, link, date) {
+        return {
+          title: title,
+          link: link,
+          date: date
+        }
+      }
+      constructDataArr.items.push(rssMaker('BConnection RSS 1', 'http://test', '2022-03-08'))
+      constructDataArr.items.push(rssMaker('BConnection RSS 2', 'http://test', '2022-03-08'))
+      constructDataArr.items.push(rssMaker('BConnection RSS 3', 'http://test', '2021-12-09'))
+      constructDataArr.items.push(rssMaker('BConnection RSS 4', 'http://test', '2021-12-10'))
+      newsDataArr.items.push(rssMaker('BConnection RSS2 1', 'http://test', '2022-03-08'))
+      newsDataArr.items.push(rssMaker('BConnection RSS2 2', 'http://test', '2022-03-08'))
+      newsDataArr.items.push(rssMaker('BConnection RSS2 3', 'http://test', '2021-12-09'))
+      newsDataArr.items.push(rssMaker('BConnection RSS2 4', 'http://test', '2021-12-10'))
+      const expectDateArr = []
+      newsDataArr.items.forEach((item, idx) => {
+        if (idx < 3) {
+          const day = new Date(item.date)
+          expectDateArr.push({
+            ...item,
+            date: day.getFullYear() + '年' + (day.getMonth() + 1) + '月' + day.getDate() + '日'
+          })
+        }
+      })
+      const expectconstructDataArr = []
+      constructDataArr.items.forEach((item, idx) => {
+        if (idx < 3) {
+          const day = new Date(item.date)
+          expectconstructDataArr.push({
+            ...item,
+            date: day.getFullYear() + '年' + (day.getMonth() + 1) + '月' + day.getDate() + '日'
+          })
+        }
+      })
+      parseUrlSpy.mockImplementationOnce(async () => {
+        return newsDataArr
+      })
+      parseUrlSpy.mockImplementationOnce(async () => {
+        return constructDataArr
+      })
+
+      // CSRF対策
+      const dummyTokne = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyTokne
+      })
+
+      // 試験実施
+      await portal.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでportalが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('portal', {
+        constructDataArr: expectconstructDataArr,
+        constructDataArrSize: expectconstructDataArr[0].title ? expectconstructDataArr.length : 0,
+        newsDataArr: expectDateArr,
+        newsDataArrSize: newsDataArr.items.length,
+        title: 'ポータル',
+        tenantId: request.user.tenantId,
+        userRole: request.session.userRole,
+        numberN: '0000011111',
+        TS_HOST: process.env.TS_HOST,
+        memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
+        csrfToken: dummyTokne /* 会員サイト開発により追加 */,
+        rejectedNoticeCnt: 3,
+        requestNoticeCnt: 2
       })
     })
 
@@ -541,6 +738,93 @@ describe('portalのテスト', () => {
       expect(request.session?.userRole).toBe('dummy')
       // response.renderが呼ばれ「ない」
       expect(response.render).not.toHaveBeenCalled()
+    })
+
+    test('準正常:RSSエラーが発生', async () => {
+      // 準備
+      // 会員サイト開発により追加
+      const memberSiteCoopSessionDto = new MemberSiteSessionDto()
+      memberSiteCoopSessionDto.memberSiteFlg = true
+      // 会員サイト開発により追加
+
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy',
+        memberSiteCoopSession: memberSiteCoopSessionDto // 会員サイト開発により追加
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue({
+        dataValues: {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: null,
+          userStatus: 0,
+          lastRefreshedAt: null,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
+      findOneSpyContracts.mockReturnValue({
+        dataValues: {
+          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: '0000011111',
+          contractStatus: '10',
+          deleteFlag: false,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
+
+      // お知らせ取得
+      const refusedError = new Error('connect ECONNREFUSED 127.0.0.1:443')
+      parseUrlSpy.mockImplementationOnce(async () => {
+        throw refusedError
+      })
+      parseUrlSpy.mockImplementationOnce(async () => {
+        return refusedError
+      })
+
+      // CSRF対策
+      const dummyTokne = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyTokne
+      })
+
+      // 試験実施
+      await portal.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでportalが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('portal', {
+        constructDataArr: [{ message: '接続エラーが発生しました。' }],
+        constructDataArrSize: 0,
+        newsDataArr: [{ message: '接続エラーが発生しました。' }],
+        newsDataArrSize: 0,
+        title: 'ポータル',
+        tenantId: request.user.tenantId,
+        userRole: request.session.userRole,
+        numberN: '0000011111',
+        TS_HOST: process.env.TS_HOST,
+        memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
+        csrfToken: dummyTokne /* 会員サイト開発により追加 */,
+        rejectedNoticeCnt: 3,
+        requestNoticeCnt: 2
+      })
     })
   })
 })

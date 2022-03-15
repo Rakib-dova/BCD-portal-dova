@@ -202,19 +202,12 @@ const cbGetApprovals = async (req, res, next) => {
     }
   }
 
-  let rejectedFlag = true
-
-  if (req.session.waitingApprovalList) {
-    rejectedFlag = true
-    delete req.session.waitingApprovalList
-  }
-
   // 受領した請求書一覧レンダリング
   res.render('inboxList', {
     listArr: result.list,
     numPages: result.numPages,
     currPage: result.currPage,
-    rejectedFlag: rejectedFlag
+    rejectedFlag: true
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetApprovals')
@@ -227,5 +220,6 @@ router.get('/:page', helper.isAuthenticated, cbGetIndex)
 module.exports = {
   router: router,
   cbGetIndex: cbGetIndex,
-  cbGetWorkflow: cbGetWorkflow
+  cbGetWorkflow: cbGetWorkflow,
+  cbGetApprovals: cbGetApprovals
 }
