@@ -122,6 +122,11 @@ const cbGetIndex = async (req, res, next) => {
         message: constants.portalMsg.NEWS_CONN_ERR
       })
     })
+
+  const requestNoticeCnt = 2
+  const approvalNoticeCnt = 100
+  const rejectedNoticeCnt = 3
+
   // ユーザ権限も画面に送る
   res.render('portal', {
     title: 'ポータル',
@@ -133,10 +138,11 @@ const cbGetIndex = async (req, res, next) => {
     newsDataArrSize: newsDataArrSize,
     constructDataArr: constructDataArr,
     constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0,
-    /* 会員サイト開発により追加 */
-    memberSiteFlg: req.session.memberSiteCoopSession.memberSiteFlg,
-    csrfToken: req.csrfToken()
-    /* 会員サイト開発により追加 */
+    memberSiteFlg: req.session.memberSiteCoopSession.memberSiteFlg /* 会員サイト開発により追加 */,
+    csrfToken: req.csrfToken() /* 会員サイト開発により追加 */,
+    approvalNoticeCnt: approvalNoticeCnt,
+    rejectedNoticeCnt: rejectedNoticeCnt,
+    requestNoticeCnt: requestNoticeCnt
   })
 }
 
