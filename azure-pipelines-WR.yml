@@ -79,3 +79,9 @@ stages:
               artifactName: report
             displayName: artifact
             condition: succeededOrFailed()
+
+          - script: |
+              dir $(Pipeline.Workspace)
+              dir $(Build.SourcesDirectory)
+              dir $(DIR)
+            displayName: echo
