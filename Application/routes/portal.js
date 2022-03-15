@@ -10,7 +10,8 @@ const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const validate = require('../lib/validate')
 const constants = require('../constants')
-
+const inboxController = require('../controllers/inboxController')
+const approvalInboxController = require('../controllers/approvalInboxController')
 const Parser = require('rss-parser')
 const parser = new Parser({
   headers: {
@@ -123,8 +124,41 @@ const cbGetIndex = async (req, res, next) => {
       })
     })
 
-  const requestNoticeCnt = 2
-  const rejectedNoticeCnt = 3
+  // 通知件数取得処理
+  let rejectedNoticeCnt = 0
+  let requestNoticeCnt = 0
+  const accessToken = req.user.accessToken
+  const refreshToken = req.user.refreshToken
+  const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, user.tenantId)
+
+  const workflow = await inboxController.getWorkflow(user.userId, contract.contractId, tradeshiftDTO)
+  for (let i = 0; i < workflow.length; i++) {
+    const requestApproval = await approvalInboxController.getRequestApproval(
+      accessToken,
+      refreshToken,
+      contract.contractId,
+      workflow[i].documentId,
+      user.tenantId
+    )
+    const result = await approvalInboxController.hasPowerOfEditing(contract.contractId, user.userId, requestApproval)
+    if (result === true) {
+      switch (workflow[i].workflowStatus) {
+        case '支払依頼中':
+        case '一次承認済み':
+        case '二次承認済み':
+        case '三次承認済み':
+        case '四次承認済み':
+        case '五次承認済み':
+        case '六次承認済み':
+        case '七次承認済み':
+        case '八次承認済み':
+        case '九次承認済み':
+        case '十次承認済み':
+          ++requestNoticeCnt
+          break
+      }
+    }
+  }
 
   // ユーザ権限も画面に送る
   res.render('portal', {
