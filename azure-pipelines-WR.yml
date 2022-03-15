@@ -49,7 +49,7 @@ stages:
               dir $(Pipeline.Workspace)
               dir $(Build.SourcesDirectory)
               dir $(DIR)
-              dir C:\Users\VssAdministrator\AppData\Local\ms-playwright
+              dir C:\Users\VssAdministrator\AppData\Local
             displayName: echo
 
           - task: CacheBeta@0
@@ -61,7 +61,7 @@ stages:
           - task: CacheBeta@0
             inputs:
               key: $(DIR)\package-lock.json
-              path: C:\Users\VssAdministrator\AppData\Local\ms-playwright
+              path: C:\Users\VssAdministrator\AppData\Local
             displayName: Cache browser
 
           - script: |
@@ -98,5 +98,5 @@ stages:
               dir $(Pipeline.Workspace)
               dir $(Build.SourcesDirectory)
               dir $(DIR)
-              dir C:\Users\VssAdministrator\AppData\Local\ms-playwright
+              dir C:\Users\VssAdministrator\AppData\Local
             displayName: echo
