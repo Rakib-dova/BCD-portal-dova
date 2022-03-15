@@ -4,31 +4,28 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 parameters:
-  - name: values
-    type: object
-    default:
-      - "Azure"
-      - "Pipelines"
-      - "Learning"
+  - name: scenario
+    displayName: Choose scenario you want to run with.
+    type: string
+    default: scenario001.js
+    values:
+      - scenario001.js
+      - scenario002.js
+      - scenario003.js
 
-# parameters:
-#   - name: scenario
-#     displayName: Choose scenario you want to run with.
-#     type: string
-#     default: scenario001.js
-#     values:
-#       - scenario001.js
-#       - scenario002.js
-#       - scenario003.js
+  - name: browser
+    displayName: Choose browser you want to run with.
+    type: string
+    default: chrome
+    values:
+      - chrome
+      - firefox
+      - edge
 
-#   - name: browser
-#     displayName: Choose browser you want to run with.
-#     type: string
-#     default: chrome
-#     values:
-#       - chrome
-#       - firefox
-#       - edge
+  - browsers:
+      - chrome
+      - firefox
+      - edge
 
 trigger:
   - none
@@ -54,9 +51,9 @@ stages:
     jobs:
       - job: e2eTestJob
         steps:
-          - ${{ each value in parameters.values }}:
-              - script: echo ${{ value }}
-                displayName: ${{ value }}
+          - ${{ each value in parameters.browsers }}:
+              - script: echo ${{ value }}."
+                displayName: script ${{ value }}
 
           # - task: Cache@2
           #   inputs:
