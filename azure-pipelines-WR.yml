@@ -12,6 +12,7 @@ parameters:
       - scenario001.js
       - scenario002.js
       - scenario003.js
+
   - name: browser
     displayName: Choose browser you want to run with.
     type: string
@@ -45,37 +46,30 @@ stages:
     jobs:
       - job: e2eTestJob
         steps:
-          # - task: Cache@2
-          #   inputs:
-          #     key: $(DIR)\package-lock.json
-          #     path: $(DIR)\node_modules
-          #   displayName: Cache npm
-
-          # - task: Cache@2
-          #   inputs:
-          #     key: $(DIR)\package-lock.json
-          #     path: C:\Users\VssAdministrator\AppData\Local\ms-playwright
-          #   displayName: Cache browser
-
           - task: Cache@2
             inputs:
               key: $(DIR)\package-lock.json
-              path: $(Pipeline.Workspace)/.npm
+              path: $(DIR)\node_modules
             displayName: Cache npm
 
           - task: Cache@2
             inputs:
               key: $(DIR)\package-lock.json
-              path: $(Pipeline.Workspace)/.playwright
+              path: C:\Users\VssAdministrator\AppData\Local\ms-playwright
             displayName: Cache browser
 
           - script: |
-              npm ci
+              npm i
             workingDirectory: $(DIR)
             displayName: install
 
+  - stage: e2eTestStage
+    jobs:
+      - job: chrome
+        steps:
           - script: |
-              npm run ${{parameters.browser}} -- spec\${{parameters.scenario}}
+              npm run chrome -- spec\scenario003.js
+              # npm run ${{parameters.browser}} -- spec\${{parameters.scenario}}
             workingDirectory: $(DIR)
             displayName: test
 
@@ -88,20 +82,27 @@ stages:
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: $(DIR)\build\autotest-report
-              artifactName: report
+              artifactName: report1
             displayName: artifact
             condition: succeededOrFailed()
 
-          # - task: PublishPipelineArtifact@1
-          #   inputs:
-          #     targetPath: $(DIR)\node_modules
-          #     artifactName: node_modules
-          #   displayName: artifact
-          #   condition: succeededOrFailed()
+      - job: firefox
+        steps:
+          - script: |
+              npm run chrome -- spec\citest.js
+              # npm run ${{parameters.browser}} -- spec\${{parameters.scenario}}
+            workingDirectory: $(DIR)
+            displayName: test
 
-          # - task: PublishPipelineArtifact@1
-          #   inputs:
-          #     targetPath: C:\Users\VssAdministrator\AppData\Local\ms-playwright
-          #     artifactName: browser
-          #   displayName: artifact
-          #   condition: succeededOrFailed()
+          - script: |
+              npm run e2e-report
+            workingDirectory: $(DIR)
+            displayName: report
+            condition: succeededOrFailed()
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: $(DIR)\build\autotest-report
+              artifactName: report2
+            displayName: artifact
+            condition: succeededOrFailed()
