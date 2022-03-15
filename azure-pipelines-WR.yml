@@ -45,6 +45,13 @@ stages:
     jobs:
       - job: e2eTestJob
         steps:
+          - script: |
+              dir $(Pipeline.Workspace)
+              dir $(Build.SourcesDirectory)
+              dir $(DIR)
+              dir C:\Users\VssAdministrator\AppData\Local\ms-playwright
+            displayName: echo
+
           - task: CacheBeta@0
             inputs:
               key: $(DIR)\package-lock.json
@@ -56,6 +63,13 @@ stages:
               key: $(DIR)\package-lock.json
               path: C:\Users\VssAdministrator\AppData\Local\ms-playwright
             displayName: Cache browser
+
+          - script: |
+              dir $(Pipeline.Workspace)
+              dir $(Build.SourcesDirectory)
+              dir $(DIR)
+              dir C:\Users\VssAdministrator\AppData\Local\ms-playwright
+            displayName: echo
 
           - script: |
               npm i
