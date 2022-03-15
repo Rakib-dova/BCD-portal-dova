@@ -57,10 +57,10 @@ stages:
               path: C:\Users\VssAdministrator\AppData\Local\ms-playwright
             displayName: Cache browser
 
-          # - script: |
-          #     npm i
-          #   workingDirectory: $(DIR)
-          #   displayName: install
+          - script: |
+              npm i
+            workingDirectory: $(DIR)
+            displayName: install
 
           - script: |
               npm run ${{parameters.browser}} -- spec\${{parameters.scenario}}
