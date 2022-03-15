@@ -3,8 +3,39 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https:\\docs.microsoft.com\azure\devops\pipelines\languages\javascript
 
+parameters:
+  - name: scenario
+    displayName: Choose scenario you want to run with.
+    type: string
+    default: scenario001.js
+    values:
+      - scenario001.js
+      - scenario002.js
+      - scenario003.js
+  - name: browser
+    displayName: Choose browser you want to run with.
+    type: string
+    default: chrome
+    values:
+      - chrome
+      - firefox
+      - edge
+
 trigger:
   - none
+pr:
+  - none
+
+schedules:
+  - cron: "0 8 * * *"
+    displayName: run schedule for 17:00(8)
+    branches:
+      include:
+        - release_step5_WR
+    always: true
+
+variables:
+  DIR: $(Build.SourcesDirectory)\bcd-e2e-tests
 
 pool:
   vmImage: windows-2019
@@ -13,40 +44,38 @@ stages:
   - stage: e2eTestStage
     jobs:
       - job: e2eTestJob
-        variables:
-          npm_config_cache: $(Pipeline.Workspace)\bcd-e2e-tests\node_modules
         steps:
           - task: CacheBeta@0
             inputs:
-              key: $(Build.SourcesDirectory)\bcd-e2e-tests\package-lock.json
-              path: $(npm_config_cache)
+              key: $(DIR)\package-lock.json
+              path: $(DIR)\node_modules
             displayName: Cache npm
 
           - task: CacheBeta@0
             inputs:
-              key: $(Build.SourcesDirectory)\bcd-e2e-tests\package-lock.json
+              key: $(DIR)\package-lock.json
               path: C:\Users\VssAdministrator\AppData\Local\ms-playwright
             displayName: Cache browser
 
           - script: |
               npm i
-            workingDirectory: $(Build.SourcesDirectory)\bcd-e2e-tests
+            workingDirectory: $(DIR)
             displayName: install
 
           - script: |
-              npm run e2e -- spec\citest.js
-            workingDirectory: $(Build.SourcesDirectory)\bcd-e2e-tests
+              npm run $(browser) -- spec\$(scenario)
+            workingDirectory: $(DIR)
             displayName: test
 
           - script: |
               npm run e2e-report
-            workingDirectory: $(Build.SourcesDirectory)\bcd-e2e-tests
+            workingDirectory: $(DIR)
             displayName: report
             condition: succeededOrFailed()
 
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: $(Build.SourcesDirectory)\bcd-e2e-tests\build\autotest-report
+              targetPath: $(DIR)\build\autotest-report
               artifactName: report
             displayName: artifact
             condition: succeededOrFailed()
