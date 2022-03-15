@@ -35,9 +35,6 @@ module.exports = (sequelize, DataTypes) => {
       requestUserId: {
         type: DataTypes.UUID
       },
-      approveRouteId: {
-        type: DataTypes.UUID
-      },
       approveStatus: {
         type: DataTypes.STRING,
         references: {

@@ -300,18 +300,16 @@ app.use('/departmentCodeEdit', require('./routes/departmentCodeEdit').router)
 // ------------受領した請求書
 // 受領した請求書一覧
 app.use('/inboxList', require('./routes/inboxList').router)
-// 承認待ち一覧
-// app.use('/approvalInboxList', require('./routes/approvalInboxList').router)
 
 // 受領した請求書
 app.use('/inbox', require('./routes/inbox').router)
 // 支払依頼の請求書
 app.use('/approvalInbox', require('./routes/approvalInbox').router)
 
-// 承認依頼画面
+// 支払依頼画面
 app.use('/requestApproval', require('./routes/requestApproval').router)
 
-// 承認依頼差し戻し
+// 支払依頼差し戻し
 app.use('/rejectApproval', require('./routes/rejectApproval').router)
 
 // ------------承認ルート
@@ -319,6 +317,8 @@ app.use('/rejectApproval', require('./routes/rejectApproval').router)
 app.use('/registApproveRoute', require('./routes/registApproveRoute').router)
 // 承認ルート一覧
 app.use('/approveRouteList', require('./routes/approveRouteList').router)
+// 承認ルート削除
+app.use('/deleteApproveRoute', require('./routes/deleteApproveRoute').router)
 // 承認ルート確認
 app.use('/approveRouteEdit', require('./routes/approveRouteEdit').router)
 

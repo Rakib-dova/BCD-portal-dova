@@ -1,3 +1,23 @@
+// document.getElementById、document.getElementsByClassName省略
+const $ = function (tagObjName) {
+  const classNamePattern = '\\.+[a-zA-Z0-9]'
+  const idNamePatten = '\\#+[a-zA-Z0-9]'
+  const classNameReg = new RegExp(classNamePattern)
+  const idNameReg = new RegExp(idNamePatten)
+  let selectors
+
+  if (classNameReg.test(tagObjName)) {
+    selectors = document.querySelectorAll(tagObjName)
+  } else if (idNameReg.test(tagObjName)) {
+    selectors = document.querySelectorAll(tagObjName)[0]
+  } else {
+    return null
+  }
+  return Object.assign(selectors, Array.prototype, (type, event) => {
+    document.addEventListener(type, event)
+  })
+}
+
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
 const ua = window.navigator.userAgent
@@ -26,3 +46,42 @@ window.onload = () => {
     })
   })
 }
+
+// モーダルに削除するuuidを格納
+document.getElementsByName('deleteButton').forEach((item) => {
+  item.addEventListener('click', function (e) {
+    const uuid = item.getAttribute('uuid')
+    $('#modalDelBtn').setAttribute('uuid', uuid)
+  })
+})
+
+// Modalの削除ボタン押下
+Array.prototype.forEach.call(document.querySelectorAll('#modalDelBtn'), (item) => {
+  item.addEventListener('click', function (e) {
+    const approveRouteId = item.getAttribute('uuid')
+    const url = `/deleteApproveRoute/${approveRouteId}`
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        // 削除失敗
+        switch (response.result) {
+          case 0:
+            alert('削除失敗しました。（システムエラー）')
+            break
+          case 1:
+            // ページ更新
+            location.reload()
+            break
+          case -1:
+            alert('既に削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
+            location.reload()
+            break
+        }
+      })
+  })
+})

@@ -742,7 +742,7 @@ describe('requestApprovalのテスト', () => {
 
       // 結果確認
       // 受領請求書への仕訳情報設定へリダイレクトされ「る」
-      expect(request.flash).toBeCalledWith('noti', ['承認依頼', 'システムエラーが発生しました。'])
+      expect(request.flash).toBeCalledWith('noti', ['支払依頼', 'システムエラーが発生しました。'])
       expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
   })
@@ -1512,8 +1512,8 @@ describe('requestApprovalのテスト', () => {
       // 試験実施
       await requestApproval.cbPostApproval(request, response, next)
       // 結果確認
-      // 承認依頼ページレンダリングを呼び出し
-      expect(request.flash).toBeCalledWith('info', '承認依頼を完了しました。')
+      // 支払依頼ページレンダリングを呼び出し
+      expect(request.flash).toBeCalledWith('info', '支払依頼を完了しました。')
     })
 
     test('正常：解約申込中の場合', async () => {

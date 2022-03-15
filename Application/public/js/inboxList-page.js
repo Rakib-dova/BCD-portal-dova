@@ -12,6 +12,13 @@ if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
   if (elm) elm.parentNode.removeChild(elm)
 }
 
+window.onload = () => {
+  const constructTabActive = document.getElementById('constructTab')
+  if (constructTabActive.parentNode.classList.value === 'is-active') {
+    getWorkflow()
+  }
+}
+
 Array.prototype.forEach.call(document.querySelectorAll('.linkToApproval'), (approveStatus) => {
   approveStatus.addEventListener('click', function () {
     const target = this.dataset.target
@@ -41,6 +48,10 @@ const $ = function (tagObjName) {
 }
 
 $('#constructTab').addEventListener('click', function () {
+  getWorkflow()
+})
+
+function getWorkflow() {
   const getWorkflow = new XMLHttpRequest()
   getWorkflow.open('GET', './getWorkflow')
   getWorkflow.setRequestHeader('Contet-Type', 'application/json')
@@ -53,8 +64,6 @@ $('#constructTab').addEventListener('click', function () {
       switch (getWorkflow.status) {
         case 200: {
           const response = JSON.parse(getWorkflow.response)
-
-          console.log(response)
 
           if (response.length === 0) {
             const nothing = document.createElement('p')
@@ -98,7 +107,7 @@ $('#constructTab').addEventListener('click', function () {
 
               const workflowStatus = document.createElement('td')
               const workflowLink = document.createElement('a')
-              if (item.workflowStatus === '承認依頼中') {
+              if (item.workflowStatus === '支払依頼中') {
                 workflowLink.classList.add('a-approveStatus-WAITING')
               } else {
                 workflowLink.classList.add('a-approveStatus-APPROVING')
@@ -156,7 +165,8 @@ $('#constructTab').addEventListener('click', function () {
             })
           }
 
-          $('.tab-pane.is-active')[0].classList.remove('is-active')
+          if ($('.tab-pane.is-active')[0]) $('.tab-pane.is-active')[0].classList.remove('is-active')
+
           $(
             'body > div.max-width > div > div > div.box > div > div.tabs.is-boxed.is-medium > ul > li:nth-child(1)'
           )[0].classList.remove('is-active')
@@ -188,7 +198,7 @@ $('#constructTab').addEventListener('click', function () {
     }
   }
   getWorkflow.send()
-})
+}
 
 $('#informationTab').addEventListener('click', function () {
   $(
