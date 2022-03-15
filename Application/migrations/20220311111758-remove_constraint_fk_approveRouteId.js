@@ -1,35 +1,46 @@
 'use strict'
 /**
- * fkNameForRequestApproval : RequestApprovalテーブルに設定されている外部キーのNameを指定（「FK__RequestAp__appro__」で始まるキー）
- * fkNameForApproval : Approvalテーブルに設定されている外部キーのNameを指定（「FK__Approval__approv__」で始まるキー）
- *
- * ★★★★★★★★★★★★※「FK__Approval__approv__」で始まるキーが複数ある場合の指定方法
- *                             １．SQLServerのApprovaテーブルのキーフォルダ確認
- *                             ２．「FK__Approval__approv__」で始まるキーを右クリックし、「Script as Create」をクリック
- *                             ３．下記のSQLが表示されるキーのNameを指定。
- *                                   ALTER TABLE [dbo].[Approval]  WITH CHECK ADD FOREIGN KEY([approveRouteId]) REFERENCES [dbo].[ApproveRoute] ([approveRouteId])
+ * tableNameApproval : RequestApprovalテーブル名
+ * tableNameRequestApproval : Approvalテーブル名
+ * columnName : 削除対処カラム名
  */
-const fkNameForRequestApproval = 'FK__RequestAp__appro__37FA4C37'
-const fkNameForApproval = 'FK__Approval__approv__1E05700A'
+const tableNameRequestApproval = 'RequestApproval'
+const tableNameApproval = 'Approval'
+const columnName = 'approveRouteId'
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+    const sqlGetFKNameRequestApproval = await queryInterface.sequelize.query(
+      `select CONSTRAINT_NAME from information_schema.KEY_COLUMN_USAGE where table_name='${tableNameRequestApproval}' and COLUMN_NAME='${columnName}'`
+    )
+
+    const sqlGetFKNameApproval = await queryInterface.sequelize.query(
+      `select CONSTRAINT_NAME from information_schema.KEY_COLUMN_USAGE where table_name='${tableNameApproval}' and COLUMN_NAME='${columnName}'`
+    )
+
+    // マイグレーション時に取得したFK名を確認のためにログ表示
+    console.log(sqlGetFKNameRequestApproval[0][0].CONSTRAINT_NAME)
+    console.log(sqlGetFKNameApproval[0][0].CONSTRAINT_NAME)
+
     return [
-      await queryInterface.removeConstraint('RequestApproval', fkNameForRequestApproval),
-      await queryInterface.removeConstraint('Approval', fkNameForApproval),
-      await queryInterface.removeColumn('Approval', 'approveRouteId')
+      await queryInterface.removeConstraint(
+        tableNameRequestApproval,
+        sqlGetFKNameRequestApproval[0][0].CONSTRAINT_NAME
+      ),
+      await queryInterface.removeConstraint(tableNameApproval, sqlGetFKNameApproval[0][0].CONSTRAINT_NAME),
+      await queryInterface.removeColumn(tableNameApproval, columnName)
     ]
   },
 
   down: async (queryInterface, Sequelize) => {
     return [
-      await queryInterface.addColumn('Approval', 'approveRouteId', {
+      await queryInterface.addColumn(tableNameApproval, columnName, {
         type: Sequelize.DataTypes.UUID,
         allowNull: true
       }),
-      await queryInterface.addConstraint('RequestApproval', {
+      await queryInterface.addConstraint(tableNameRequestApproval, {
         fields: ['approveRouteId'],
         type: 'foreign key',
-        name: fkNameForRequestApproval,
         references: {
           table: 'ApproveRoute',
           field: 'approveRouteId'
@@ -37,10 +48,9 @@ module.exports = {
         onDelete: 'cascade',
         onUpdate: 'cascade'
       }),
-      await queryInterface.addConstraint('Approval', {
+      await queryInterface.addConstraint(tableNameApproval, {
         fields: ['approveRouteId'],
         type: 'foreign key',
-        name: fkNameForApproval,
         references: {
           table: 'ApproveRoute',
           field: 'approveRouteId'
