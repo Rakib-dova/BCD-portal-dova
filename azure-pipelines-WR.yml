@@ -48,40 +48,37 @@ stages:
             displayName: ${{ BROWSER_NAME }}
             condition: or( eq( '${{ parameters.browser }}', '${{ BROWSER_NAME }}' ), eq( '${{ parameters.browser }}', 'all' ))
             steps:
-              # - task: Cache@2
-              #   inputs:
-              #     key: $(DIR)/package-lock.json
-              #     path: $(DIR)/node_modules
-              #   displayName: Cache npm
+              - task: Cache@2
+                inputs:
+                  key: $(DIR)/package-lock.json
+                  path: $(DIR)/node_modules
+                displayName: Cache npm
 
-              # - task: Cache@2
-              #   inputs:
-              #     key: $(DIR)/package-lock.json
-              #     path: C:/Users/VssAdministrator/AppData/Local/ms-playwright
-              #   displayName: Cache browser
+              - task: Cache@2
+                inputs:
+                  key: $(DIR)/package-lock.json
+                  path: C:/Users/VssAdministrator/AppData/Local/ms-playwright
+                displayName: Cache browser
 
-              - script: echo ${{ BROWSER_NAME }}
-                displayName: ${{ BROWSER_NAME }}
+              - script: |
+                  npm i
+                workingDirectory: $(DIR)
+                displayName: install
 
-              # - script: |
-              #     npm i
-              #   workingDirectory: $(DIR)
-              #   displayName: install
+              - script: |
+                  npm run ${{BROWSER_NAME}}
+                workingDirectory: $(DIR)
+                displayName: test
 
-              # - script: |
-              #     npm run ${{BROWSER_NAME}}
-              #   workingDirectory: $(DIR)
-              #   displayName: test
+              - script: |
+                  npm run e2e-report
+                workingDirectory: $(DIR)
+                displayName: report
+                condition: succeededOrFailed()
 
-              # - script: |
-              #     npm run e2e-report
-              #   workingDirectory: $(DIR)
-              #   displayName: report
-              #   condition: succeededOrFailed()
-
-              # - task: PublishPipelineArtifact@1
-              #   inputs:
-              #     targetPath: $(DIR)/build/autotest-report
-              #     artifactName: report
-              #   displayName: artifact
-              #   condition: succeededOrFailed()
+              - task: PublishPipelineArtifact@1
+                inputs:
+                  targetPath: $(DIR)/build/autotest-report
+                  artifactName: report_${{ BROWSER_NAME }}
+                displayName: artifact
+                condition: succeededOrFailed()
