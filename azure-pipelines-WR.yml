@@ -63,7 +63,7 @@ stages:
             displayName: install
 
           - script: |
-              npm run $(browser) -- spec\$(scenario)
+              npm run ${{parameters.browser}} -- spec\${{parameters.scenario}}
             workingDirectory: $(DIR)
             displayName: test
 
