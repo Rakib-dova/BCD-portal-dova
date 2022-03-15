@@ -46,7 +46,7 @@ stages:
       - ${{ each BROWSER_NAME in parameters.BROWSER_NAME_LIST }}:
           - job: e2eTestJob
             displayName: ${{ BROWSER_NAME }}
-            condition: or( eq( ${{ parameters.browser }}, ${{ BROWSER_NAME }} ), eq( ${{ parameters.browser }}, 'all' ))
+            condition: or( eq( '${{ parameters.browser }}', '${{ BROWSER_NAME }}' ), eq( '${{ parameters.browser }}', 'all' ))
             steps:
               # - task: Cache@2
               #   inputs:
