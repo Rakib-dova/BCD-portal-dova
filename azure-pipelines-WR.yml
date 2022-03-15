@@ -22,11 +22,6 @@ parameters:
       - firefox
       - edge
 
-  - browsers:
-      - chrome
-      - firefox
-      - edge
-
 trigger:
   - none
 pr:
@@ -42,6 +37,10 @@ schedules:
 
 variables:
   DIR: $(Build.SourcesDirectory)/bcd-e2e-tests
+  browsers:
+    - chrome
+    - firefox
+    - edge
 
 pool:
   vmImage: windows-2019
@@ -51,7 +50,7 @@ stages:
     jobs:
       - job: e2eTestJob
         steps:
-          - ${{ each value in parameters.browsers }}:
+          - ${{ each value in browsers }}:
               - script: echo ${{ value }}."
                 displayName: script ${{ value }}
 
