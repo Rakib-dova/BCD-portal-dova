@@ -46,6 +46,14 @@ stages:
     jobs:
       - job: e2eTestJob
         steps:
+          - script: |
+              dir
+            workingDirectory: $(DIR)
+            displayName: echo1
+          - script: |
+              dir
+            displayName: echo2
+
           - task: Cache@2
             inputs:
               key: $(DIR)\package-lock.json
@@ -68,6 +76,14 @@ stages:
       - job: chrome
         steps:
           - script: |
+              dir
+            workingDirectory: $(DIR)
+            displayName: echo3
+          - script: |
+              dir
+            displayName: echo4
+
+          - script: |
               npm run chrome -- spec\scenario003.js
               # npm run ${{parameters.browser}} -- spec\${{parameters.scenario}}
             workingDirectory: $(DIR)
@@ -88,6 +104,14 @@ stages:
 
       - job: firefox
         steps:
+          - script: |
+              dir
+            workingDirectory: $(DIR)
+            displayName: echo5
+          - script: |
+              dir
+            displayName: echo6
+
           - script: |
               npm run chrome -- spec\citest.js
               # npm run ${{parameters.browser}} -- spec\${{parameters.scenario}}
