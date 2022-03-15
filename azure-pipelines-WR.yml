@@ -79,3 +79,17 @@ stages:
               artifactName: report
             displayName: artifact
             condition: succeededOrFailed()
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: $(DIR)\node_modules
+              artifactName: node_modules
+            displayName: artifact
+            condition: succeededOrFailed()
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: C:\Users\VssAdministrator\AppData\Local\ms-playwright
+              artifactName: browser
+            displayName: artifact
+            condition: succeededOrFailed()
