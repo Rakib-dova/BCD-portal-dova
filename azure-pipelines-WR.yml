@@ -45,20 +45,32 @@ stages:
     jobs:
       - job: e2eTestJob
         steps:
+          # - task: Cache@2
+          #   inputs:
+          #     key: $(DIR)\package-lock.json
+          #     path: $(DIR)\node_modules
+          #   displayName: Cache npm
+
+          # - task: Cache@2
+          #   inputs:
+          #     key: $(DIR)\package-lock.json
+          #     path: C:\Users\VssAdministrator\AppData\Local\ms-playwright
+          #   displayName: Cache browser
+
           - task: Cache@2
             inputs:
               key: $(DIR)\package-lock.json
-              path: $(DIR)\node_modules
+              path: $(Pipeline.Workspace)/.npm
             displayName: Cache npm
 
           - task: Cache@2
             inputs:
               key: $(DIR)\package-lock.json
-              path: C:\Users\VssAdministrator\AppData\Local\ms-playwright
+              path: $(Pipeline.Workspace)/.playwright
             displayName: Cache browser
 
           - script: |
-              npm i
+              npm ci
             workingDirectory: $(DIR)
             displayName: install
 
@@ -80,16 +92,16 @@ stages:
             displayName: artifact
             condition: succeededOrFailed()
 
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: $(DIR)\node_modules
-              artifactName: node_modules
-            displayName: artifact
-            condition: succeededOrFailed()
+          # - task: PublishPipelineArtifact@1
+          #   inputs:
+          #     targetPath: $(DIR)\node_modules
+          #     artifactName: node_modules
+          #   displayName: artifact
+          #   condition: succeededOrFailed()
 
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: C:\Users\VssAdministrator\AppData\Local\ms-playwright
-              artifactName: browser
-            displayName: artifact
-            condition: succeededOrFailed()
+          # - task: PublishPipelineArtifact@1
+          #   inputs:
+          #     targetPath: C:\Users\VssAdministrator\AppData\Local\ms-playwright
+          #     artifactName: browser
+          #   displayName: artifact
+          #   condition: succeededOrFailed()
