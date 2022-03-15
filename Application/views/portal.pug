@@ -21,12 +21,6 @@ block content
               .approvalNotificationCnt #{requestNoticeCnt}
               | 件あります。
             a.approvalNotificationLink(href='/inboxList/approvals') 確認
-        if Number.isInteger(approvalNoticeCnt) && approvalNoticeCnt > 0
-          .approvalNotification
-            .approvalNotificationMessage 最終承認された支払依頼が
-              .approvalNotificationCnt #{approvalNoticeCnt}
-              | 件あります。
-            a.approvalNotificationLink(href='/inboxList/approvals') 確認
         if Number.isInteger(rejectedNoticeCnt) && rejectedNoticeCnt > 0
           .approvalNotification
             .approvalNotificationMessage 差し戻しされた支払依頼が
