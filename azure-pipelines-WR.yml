@@ -42,7 +42,7 @@ pool:
   vmImage: windows-2019
 
 stages:
-  - stage: e2eTestStage
+  - stage: install
     jobs:
       - job: e2eTestJob
         steps:
@@ -63,7 +63,7 @@ stages:
             workingDirectory: $(DIR)
             displayName: install
 
-  - stage: e2eTestStage
+  - stage: test
     jobs:
       - job: chrome
         steps:
