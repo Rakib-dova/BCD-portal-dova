@@ -1,7 +1,7 @@
 # Node.js
 # Build a general Node.js project with npm.
 # Add steps that analyze code, save build artifacts, deploy, and more:
-# https:\\docs.microsoft.com\azure\devops\pipelines\languages\javascript
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
 parameters:
   - name: scenario
@@ -36,97 +36,47 @@ schedules:
     always: true
 
 variables:
-  DIR: $(Build.SourcesDirectory)\bcd-e2e-tests
+  DIR: $(Build.SourcesDirectory)/bcd-e2e-tests
 
 pool:
   vmImage: windows-2019
 
 stages:
-  - stage: install
+  - stage: e2eTestStage
     jobs:
       - job: e2eTestJob
         steps:
+          - task: Cache@2
+            inputs:
+              key: $(DIR)/package-lock.json
+              path: $(DIR)/node_modules
+            displayName: Cache npm
+
+          - task: Cache@2
+            inputs:
+              key: $(DIR)/package-lock.json
+              path: C:/Users/VssAdministrator/AppData/Local/ms-playwright
+            displayName: Cache browser
+
           - script: |
-              dir
+              npm i
             workingDirectory: $(DIR)
-            displayName: echo1
+            displayName: install
+
           - script: |
-              dir
-            displayName: echo2
-
-          # - task: Cache@2
-          #   inputs:
-          #     key: $(DIR)\package-lock.json
-          #     path: $(DIR)\node_modules
-          #   displayName: Cache npm
-
-          # - task: Cache@2
-          #   inputs:
-          #     key: $(DIR)\package-lock.json
-          #     path: C:\Users\VssAdministrator\AppData\Local\ms-playwright
-          #   displayName: Cache browser
-
-          # - script: |
-          #     npm i
-          #   workingDirectory: $(DIR)
-          #   displayName: install
-
-  - stage: test
-    jobs:
-      - job: chrome
-        steps:
-          - script: |
-              dir
+              npm run ${{parameters.browser}} -- spec/${{parameters.scenario}}
             workingDirectory: $(DIR)
-            displayName: echo3
+            displayName: test
+
           - script: |
-              dir
-            displayName: echo4
-
-          # - script: |
-          #     npm run chrome -- spec\scenario003.js
-          #     # npm run ${{parameters.browser}} -- spec\${{parameters.scenario}}
-          #   workingDirectory: $(DIR)
-          #   displayName: test
-
-          # - script: |
-          #     npm run e2e-report
-          #   workingDirectory: $(DIR)
-          #   displayName: report
-          #   condition: succeededOrFailed()
-
-          # - task: PublishPipelineArtifact@1
-          #   inputs:
-          #     targetPath: $(DIR)\build\autotest-report
-          #     artifactName: report1
-          #   displayName: artifact
-          #   condition: succeededOrFailed()
-
-      - job: firefox
-        steps:
-          - script: |
-              dir
+              npm run e2e-report
             workingDirectory: $(DIR)
-            displayName: echo5
-          - script: |
-              dir
-            displayName: echo6
+            displayName: report
+            condition: succeededOrFailed()
 
-          # - script: |
-          #     npm run chrome -- spec\citest.js
-          #     # npm run ${{parameters.browser}} -- spec\${{parameters.scenario}}
-          #   workingDirectory: $(DIR)
-          #   displayName: test
-
-          # - script: |
-          #     npm run e2e-report
-          #   workingDirectory: $(DIR)
-          #   displayName: report
-          #   condition: succeededOrFailed()
-
-          # - task: PublishPipelineArtifact@1
-          #   inputs:
-          #     targetPath: $(DIR)\build\autotest-report
-          #     artifactName: report2
-          #   displayName: artifact
-          #   condition: succeededOrFailed()
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: $(DIR)/build/autotest-report
+              artifactName: report
+            displayName: artifact
+            condition: succeededOrFailed()
