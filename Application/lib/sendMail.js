@@ -11,7 +11,15 @@ const ciphers = process.env.MAIL_CIPHERS
 const user = process.env.MAIL_USER
 const pass = process.env.MAIL_PORT
 
-const mail = async function (to, subject, text, html) {
+/**
+ * メール送信機能.
+ *
+ * @param {string} to 送信先(複数の場合、カンマ区切りの文字列)
+ * @param {string} subject 件名
+ * @param {string} text 本文
+ * @returns 正常終了：0, 送信エラー：1, システムエラー：2
+ */
+const mail = async function (to, subject, text) {
   logger.info(constantsDefine.logMessage.MAILINF000)
 
   // SMTP情報を格納
@@ -31,8 +39,7 @@ const mail = async function (to, subject, text, html) {
     from: user,
     to: to,
     subject: subject,
-    text: text,
-    html: html
+    text: text
   }
 
   // メールを送信
@@ -41,7 +48,7 @@ const mail = async function (to, subject, text, html) {
     result = await sendMail(smtpData, mailData)
   } catch (e) {
     logger.warn(constantsDefine.logMessage.MAILWAN000 + e)
-    result = 2
+    return 2
   }
   // 正常：0, 送信エラー:1, システムエラー:2
   logger.info(constantsDefine.logMessage.MAILINF001)
@@ -50,12 +57,11 @@ const mail = async function (to, subject, text, html) {
 
 // メール送信関数
 function sendMail(smtpData, mailData) {
-  // SMTPサーバの情報をまとめる
   const transporter = nodemailer.createTransport(smtpData)
 
   // メール送信
   try {
-    transporter.sendMail(mailData, function (error, info) {
+    return transporter.sendMail(mailData, function (error, info) {
       if (error) {
         // エラー処理
         logger.warn(constantsDefine.logMessage.MAILWAN000 + error)
