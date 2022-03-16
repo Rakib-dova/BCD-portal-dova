@@ -5,23 +5,43 @@ const transporter = nodemailer.createTransport({
   port: 587, // ポート
   use_authentication: true,
   auth: {
+    // 傳刀さんから借りたアカウント
     //user: 'bcdt-mailsend-test@actec2.onmicrosoft.com', // ユーザー名
     //pass: 'Vy&Rn*(/Ft5Z' // パスワード
-    //user: 'no-reply-dev1@bcdtapp.onmicrosoft.com', // ユーザー名
-    user: 'no-reply-dev1@bcdtapp.onmicrosoft.com', // ユーザー名
+    //開発1
+    user: 'no-reply-dev1@digitaltrade.jp', // ユーザー名
     pass: 'BJ+V-BmQ#p^F69i' // パスワード
-    //user: 'no-reply-stg@bcdtapp.onmicrosoft.com', // ユーザー名
-    //pass: 'Dh7DLWLxuERXr_W' // パスワード
+    //開発2
+    // user: 'no-reply-dev2@bcdtapp.onmicrosoft.com', // ユーザー名
+    // pass: '/-Zjy6Z7cjPuhyJ' // パスワード
+    //ステージング
+    // user: 'no-reply-stg@bcdtapp.onmicrosoft.com', // ユーザー名
+    // pass: 'Dh7DLWLxuERXr_W' // パスワード
+    //商用
+    //user: 'no-reply-prod@bcdtapp.onmicrosoft.com', // ユーザー名
+    //pass: 'L/fvECqY-EiqFD9' // パスワード
   }
 })
 
 const sendMailFromO365 = (sentTo, subject, text) => {
   const mailOptions = {
     //from: 'bcdt-mailsend-test@actec2.onmicrosoft.com',
+
     //from: 'no-reply-dev1@bcdtapp.onmicrosoft.com',
-    from: 'no-reply-dev1@tsdev.biz',
-    //from: 'no-reply-stg@tsdev.biz',
+    //開発1
     //from: 'no-reply-dev1@tsdev.biz',
+    from: 'no-reply-dev1@digitaltrade.jp',
+
+    //開発2
+    //from: 'no-reply-dev2@tsdev.biz',
+    //from: 'no-reply-dev2@digitaltrade.jp',
+
+    //ステージング
+    //from: 'no-reply-stg@tsdev.biz',
+    //from: 'no-reply-stg@digitaltrade.jp',
+
+    //商用
+    //from: 'no-reply@digitaltrade.jp',
     to: sentTo,
     /*
     envelope: {
