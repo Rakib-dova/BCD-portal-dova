@@ -73,15 +73,28 @@ class RequestApprovalDTO {
 
     const WaitingWorkflow = require('./VO/WaitingWorkflow')
     const waitingWorkflows = []
-    myRequestApprovals.forEach((requestApproval) => {
-      const workflow = new WaitingWorkflow()
-      workflow.convertRequestApprovalToWorkflow(requestApproval)
-      waitingWorkflows.push(workflow)
-    })
+
     waitingApprovalsMe.forEach((approval) => {
       const workflow = new WaitingWorkflow()
       workflow.convertApprovalToWorkflow(approval)
       waitingWorkflows.push(workflow)
+    })
+
+    myRequestApprovals.forEach((requestApproval) => {
+      // 支払依頼者が承認者になると重複表示を避ける。
+      let isDuplicatedRequest = false
+      for (const item of waitingWorkflows) {
+        if (item.documentId === requestApproval.invoiceId) {
+          isDuplicatedRequest = true
+        }
+      }
+
+      // 重複の請求書がない場合、取り込む。
+      if (!isDuplicatedRequest) {
+        const workflow = new WaitingWorkflow()
+        workflow.convertRequestApprovalToWorkflow(requestApproval)
+        waitingWorkflows.push(workflow)
+      }
     })
 
     for (let idx = 0; idx < waitingWorkflows.length; idx++) {
