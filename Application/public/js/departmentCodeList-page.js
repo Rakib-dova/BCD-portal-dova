@@ -69,7 +69,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.checkChangeDepartmentCo
             location.href = '/departmentCodeEdit' + '/' + checkDepartmentCode
             break
           case -1:
-            alert('既に削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
+            alert('既に削除されています。')
             location.reload()
             break
           default:
@@ -111,7 +111,7 @@ Array.prototype.forEach.call(document.querySelectorAll('#modalCodeDelBtn'), (ite
             location.reload()
             break
           case -1:
-            alert('既に削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
+            alert('既に削除されています。')
             location.reload()
             break
         }
