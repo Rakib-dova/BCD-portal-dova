@@ -46,7 +46,6 @@ const mail = async function (to, subject, text) {
   // 正常：0, エラー:1
   try {
     const result = await sendMail(smtpData, mailData)
-    logger.info('@@@@@@@' + JSON.stringify(smtpData))
 
     if (result === 0) {
       // 正常

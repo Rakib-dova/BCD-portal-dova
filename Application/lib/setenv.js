@@ -52,7 +52,7 @@ exports.config = (env) => {
   }
 
   // メール設定情報
-  const { MAIL_HOST, MAIL_PORT, MAIL_SECURE, MAIL_CIPHERS, MAIL_USER, MAIL_PATH } = JSON.parse(
+  const { MAIL_HOST, MAIL_PORT, MAIL_SECURE, MAIL_CIPHERS, MAIL_USER, MAIL_PASS } = JSON.parse(
     env.MAIL_CONNECTION.replace(/'/g, '"')
   )
   process.env.MAIL_HOST = MAIL_HOST
@@ -60,5 +60,5 @@ exports.config = (env) => {
   process.env.MAIL_SECURE = MAIL_SECURE
   process.env.MAIL_CIPHERS = MAIL_CIPHERS
   process.env.MAIL_USER = MAIL_USER
-  process.env.MAIL_PATH = MAIL_PATH
+  process.env.MAIL_PASS = MAIL_PASS
 }
