@@ -46,10 +46,10 @@ const mail = async function (to, subject, text) {
   // 正常：0, エラー:1
   try {
     const result = await sendMail(smtpData, mailData)
+    logger.info(constantsDefine.logMessage.MAILINF001)
 
     if (result === 0) {
       // 正常
-      logger.info(constantsDefine.logMessage.MAILINF001)
       return 0
     } else {
       // エラー
@@ -57,6 +57,7 @@ const mail = async function (to, subject, text) {
     }
   } catch (e) {
     logger.warn(constantsDefine.logMessage.MAILWAN000 + e)
+    logger.info(constantsDefine.logMessage.MAILINF001)
     return 1
   }
 }

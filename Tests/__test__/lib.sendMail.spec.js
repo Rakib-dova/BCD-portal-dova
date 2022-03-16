@@ -28,8 +28,8 @@ describe('sendMailのテスト', () => {
   describe('メール送信機能', () => {
     test('正常-成功', async () => {
       createTransportSpy.mockReturnValue({
-        sendMail: (_, cb) => {
-          const res = cb(null, { response: '200:OK' })
+        sendMail: (_) => {
+          const res = { response: '200:OK' }
           return res
         }
       })
@@ -45,9 +45,8 @@ describe('sendMailのテスト', () => {
       createTransportSpy.mockReturnValue(null)
 
       createTransportSpy.mockReturnValue({
-        sendMail: (_, cb) => {
-          const res = cb(new Error('送信失敗'), null)
-          return res
+        sendMail: (_) => {
+          throw new Error('送信失敗')
         }
       })
 
@@ -62,7 +61,7 @@ describe('sendMailのテスト', () => {
       createTransportSpy.mockReturnValue(null)
 
       const result = await sendMail.mail(to, subject, text)
-      expect(result).toBe(2)
+      expect(result).toBe(1)
       expect(infoSpy).toHaveBeenNthCalledWith(1, logMessageDefine.MAILINF000)
       expect(warnSpy).toHaveBeenNthCalledWith(
         1,
