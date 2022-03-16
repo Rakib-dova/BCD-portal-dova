@@ -462,11 +462,12 @@ const cbPostApproval = async (req, res, next) => {
       try {
         approvers = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
 
-        await sendMail.mail(
+        let result = await sendMail.mail(
           approvers.users[0].Username,
           constantsDefine.mailMsg.ReqAppr.subject,
           constantsDefine.mailMsg.ReqAppr.text
         )
+        logger.info('@@@@@@@@@@@@@@' + result)
       } catch (error) {
         logger.warn(constantsDefine.logMessage.MAILWAN000 + 'approverController.getApproveRoute')
         req.flash('noti', ['支払依頼', 'メール送信に失敗しました。'])

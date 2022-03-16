@@ -9,7 +9,7 @@ const port = process.env.MAIL_PORT
 const seture = process.env.MAIL_SECURE
 const ciphers = process.env.MAIL_CIPHERS
 const user = process.env.MAIL_USER
-const pass = process.env.MAIL_PORT
+const pass = process.env.MAIL_PASS
 
 /**
  * メール送信機能.
@@ -43,38 +43,37 @@ const mail = async function (to, subject, text) {
   }
 
   // メールを送信
-  let result
+  // 正常：0, エラー:1
   try {
-    result = await sendMail(smtpData, mailData)
+    const result = await sendMail(smtpData, mailData)
+    logger.info('@@@@@@@' + JSON.stringify(smtpData))
+
+    if (result === 0) {
+      // 正常
+      logger.info(constantsDefine.logMessage.MAILINF001)
+      return 0
+    } else {
+      // エラー
+      return 1
+    }
   } catch (e) {
     logger.warn(constantsDefine.logMessage.MAILWAN000 + e)
-    return 2
+    return 1
   }
-  // 正常：0, 送信エラー:1, システムエラー:2
-  logger.info(constantsDefine.logMessage.MAILINF001)
-  return result
 }
 
 // メール送信関数
-function sendMail(smtpData, mailData) {
+async function sendMail(smtpData, mailData) {
   const transporter = nodemailer.createTransport(smtpData)
 
   // メール送信
   try {
-    return transporter.sendMail(mailData, function (error, info) {
-      if (error) {
-        // エラー処理
-        logger.warn(constantsDefine.logMessage.MAILWAN000 + error)
-        return 1
-      } else {
-        // 送信完了
-        logger.info(constantsDefine.logMessage.MAILINF002 + info.response)
-        return 0
-      }
-    })
-  } catch (e) {
-    logger.warn(constantsDefine.logMessage.MAILWAN000 + e)
-    return 2
+    const result = await transporter.sendMail(mailData)
+    logger.info(constantsDefine.logMessage.MAILINF002 + result.response)
+    return 0
+  } catch (err) {
+    logger.warn(constantsDefine.logMessage.MAILWAN000 + err)
+    return 1
   }
 }
 
