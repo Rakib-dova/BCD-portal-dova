@@ -81,7 +81,7 @@ stages:
                 workingDirectory: $(DIR)
                 displayName: install
 
-              - ${{ if eq( '${{ parameters.browser }}', 'all' ) }}:
+              - ${{ if eq( ${{ parameters.scenario }}, 'all' ) }}:
                   - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && npm run ${{BROWSER_NAME}}
                     workingDirectory: $(DIR)
                     displayName: test
