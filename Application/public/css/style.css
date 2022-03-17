@@ -745,60 +745,21 @@ body > div.hero.is-small {
   border-color: #363636;
   border-style: solid;
   border-width: 1px 0px 0px 1px;
-}
-
-.is-border-top {
-  border-color: #363636;
-  border-style: solid;
-  border-width: 1px 0px 0px 0px;
-}
-
-.is-border-top-right {
-  border-color: #363636;
-  border-style: solid;
-  border-width: 1px 1px 0px 0px;
-}
-
-.is-border-left-top-right {
-  border-color: #363636;
-  border-style: solid;
-  border-width: 1px 1px 0px 1px;
-}
-
-.is-border-left {
-  border-color: #363636;
-  border-style: solid;
-  border-width: 0px 0px 0px 1px;
-}
-
-.is-border-item-between {
-  border-color: #363636;
-  border-style: solid;
-  border-width: 0px 1px 0px 1px;
+  border-collapse: collapse;
 }
 
 .is-border-right {
   border-color: #363636;
   border-style: solid;
   border-width: 0px 1px 0px 0px;
+  border-collapse: collapse;
 }
 
-.is-border-left-bottom {
+.is-border-left-top-bottom {
   border-color: #363636;
   border-style: solid;
-  border-width: 0px 0px 1px 1px;
-}
-
-.is-border-item-between-bottom {
-  border-color: #363636;
-  border-style: solid;
-  border-width: 0px 1px 1px 1px;
-}
-
-.is-border-right-bottom {
-  border-color: #363636;
-  border-style: solid;
-  border-width: 0px 1px 1px 0px;
+  border-width: 1px 0px 1px 1px;
+  border-collapse: collapse;
 }
 
 .is-color-table-header {
