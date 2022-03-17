@@ -16,6 +16,7 @@ const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
 const approverController = require('../../Application/controllers/approverController')
 const inboxController = require('../../Application/controllers/inboxController')
+const mailMsg = require('../../Application/lib/mailMsg')
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -300,6 +301,7 @@ let approverControllerGetApproveRoute,
   approverControllerCheckApproveRoute,
   approverControllerSaveApproval
 let approverControllerReadApproval, approverControllerSaveMessage, approverControllerGetApprovalFromRejected
+let mailMsgSendPaymentRequestMail
 
 describe('requestApprovalのテスト', () => {
   beforeEach(() => {
@@ -320,6 +322,7 @@ describe('requestApprovalのテスト', () => {
     approverControllerCheckApproveRoute = jest.spyOn(approverController, 'checkApproveRoute')
     approverControllerSaveApproval = jest.spyOn(approverController, 'saveApproval')
     approverControllerGetApprovalFromRejected = jest.spyOn(approverController, 'getApprovalFromRejected')
+    mailMsgSendPaymentRequestMail = jest.spyOn(mailMsg, 'sendPaymentRequestMail')
   })
   afterEach(() => {
     request.resetMocked()
@@ -339,6 +342,7 @@ describe('requestApprovalのテスト', () => {
     approverControllerCheckApproveRoute.mockRestore()
     approverControllerSaveApproval.mockRestore()
     approverControllerGetApprovalFromRejected.mockRestore()
+    mailMsgSendPaymentRequestMail.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -1485,7 +1489,7 @@ describe('requestApprovalのテスト', () => {
   })
 
   describe('コールバック:cbPostApproval', () => {
-    test('正常', async () => {
+    test('正常:次の承認者にはメールで通知成功', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -1508,12 +1512,47 @@ describe('requestApprovalのテスト', () => {
       approverControllerCheckApproveRoute.mockReturnValue(true)
       approverControllerRequestApproval.mockReturnValue(0)
       approverControllerSaveApproval.mockReturnValue(0)
+      mailMsgSendPaymentRequestMail.mockReturnValue(0)
 
       // 試験実施
       await requestApproval.cbPostApproval(request, response, next)
       // 結果確認
       // 支払依頼ページレンダリングを呼び出し
-      expect(request.flash).toBeCalledWith('info', '支払依頼を完了しました。')
+      expect(request.flash).toBeCalledWith('info', '支払依頼を完了しました。次の承認者にはメールで通知が送られます。')
+      expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
+    })
+
+    test('準正常：次の承認者にはメールで通知失敗', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        approveRouteId: 'dummyId'
+      }
+      request.params = {
+        invoiceId: '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      approverControllerCheckApproveRoute.mockReturnValue(true)
+      approverControllerRequestApproval.mockReturnValue(0)
+      approverControllerSaveApproval.mockReturnValue(0)
+      mailMsgSendPaymentRequestMail.mockReturnValue(1)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+      // 結果確認
+      // 支払依頼ページレンダリングを呼び出し
+      expect(request.flash).toBeCalledWith('info', '支払依頼を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
+      expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
 
     test('正常：解約申込中の場合', async () => {
