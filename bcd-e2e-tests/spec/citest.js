@@ -41,6 +41,9 @@ describe('CI TEST', function () {
   });
 
   it("CI TEST", async function () {
+    console.log(process.env.browser)
+    console.log(process.env.browser2)
+
     if (process.env.BROWSER == 'EDGE') {
       browser = await webdriverUtils.openEdge(chromium);
     } else if (process.env.BROWSER == 'FIREFOX') {
