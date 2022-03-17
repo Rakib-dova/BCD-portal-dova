@@ -81,14 +81,15 @@ stages:
                 workingDirectory: $(DIR)
                 displayName: install
 
-              - ${{ if eq( ${{ parameters.scenario }}, 'all' ) }}:
-                  - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && npm run ${{BROWSER_NAME}}
-                    workingDirectory: $(DIR)
-                    displayName: test
-              - ${{ else }}:
-                  - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && npm run ${{BROWSER_NAME}} -- spec\${{ parameters.scenario }}
-                    workingDirectory: $(DIR)
-                    displayName: test
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && npm run ${{BROWSER_NAME}}
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.browser }}', 'all' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && npm run ${{BROWSER_NAME}} -- spec\${{ parameters.scenario }}
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: ne( '${{ parameters.browser }}', 'all' )
 
               - script: npm run e2e-report
                 workingDirectory: $(DIR)
