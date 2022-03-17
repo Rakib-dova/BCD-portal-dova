@@ -43,6 +43,8 @@ describe('CI TEST', function () {
   it("CI TEST", async function () {
     console.log(process.env.browser)
     console.log(process.env.browser2)
+    console.log(process.env.enableScreenshot)
+    console.log(process.env.ENABLE_SCREEN_SHOT)
 
     if (process.env.BROWSER == 'EDGE') {
       browser = await webdriverUtils.openEdge(chromium);
