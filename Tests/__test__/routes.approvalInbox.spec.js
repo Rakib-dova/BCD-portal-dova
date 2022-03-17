@@ -4,6 +4,9 @@ jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
 
+jest.mock('../../Application/lib/sendMail')
+jest.mock('../../Application/DTO/TradeshiftDTO')
+
 const approvalInbox = require('../../Application/routes/approvalInbox')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
@@ -15,13 +18,15 @@ const apiManager = require('../../Application/controllers/apiManager.js')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
+const requestApprovalController = require('../../Application/controllers/requestApprovalController')
 const approvalInboxController = require('../../Application/controllers/approvalInboxController')
 const approverController = require('../../Application/controllers/approverController')
 const inboxController = require('../../Application/controllers/inboxController')
 const ApproveRoute = require('../../Application/models').ApproveRoute
 const Approver = require('../../Application/models').ApproveUser
 const logger = require('../../Application/lib/logger.js')
-const mailMsg = require('../../Application/lib/mailMsg')
+const sendMail = require('../../Application/lib/sendMail')
+const TradeshiftDTO = require('../../Application/DTO/TradeshiftDTO')
 
 let request, response, infoSpy, errorSpy
 let userControllerFindOneSpy,
@@ -38,7 +43,9 @@ let userControllerFindOneSpy,
   approvalInboxControllerInsertAndUpdateJournalizeInvoice,
   inboxControllerGetInvoiceDetail,
   approverControllerUpdateApprove,
-  mailMsgSendPaymentRequestMail
+  sendMailSpy,
+  requestApprovalControllerFindOneRequestApprovalSpy,
+  tradeshiftDTOSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -90,46 +97,70 @@ const resultInvoice = {
 const Users = require('../mockDB/Users_Table')
 const Tenants = require('../mockDB/Tenants_Table')
 const Contracts = require('../mockDB/Contracts_Table')
+const UserAccounts = require('../../Application/DTO/VO/UserAccounts')
+const findUser = require('../mockDB/TradeshiftFindUser')
 
 const expectGetRequestApproval = {
   requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
   contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
   invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
-  message: 'dummyData',
-  status: 'dummyData',
-  requester: 'dummyUserUUID',
+  message: '支払依頼します。',
+  status: '20',
   approveRoute: {
+    name: undefined,
     users: [
-      {
-        No: 1,
-        approveRouteName: 'dummyRouteName',
-        approverCount: 'dummyCount',
-        id: 'dummyUserUUID'
-      }
+      UserAccounts.setUserAccounts(findUser[0]),
+      UserAccounts.setUserAccounts(findUser[1]),
+      UserAccounts.setUserAccounts(findUser[2]),
+      UserAccounts.setUserAccounts(findUser[3]),
+      UserAccounts.setUserAccounts(findUser[4]),
+      UserAccounts.setUserAccounts(findUser[5]),
+      UserAccounts.setUserAccounts(findUser[6]),
+      UserAccounts.setUserAccounts(findUser[7]),
+      UserAccounts.setUserAccounts(findUser[8]),
+      UserAccounts.setUserAccounts(findUser[9]),
+      UserAccounts.setUserAccounts(findUser[10])
     ]
   },
-  approvals: [
-    {
-      approvalDate: null,
-      approvalId: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
-      approver: {
-        No: 1,
-        approveRouteName: 'dummyRouteName',
-        approverCount: 'dummyCount',
-        id: 'dummyUserUUID'
-      },
-      contractId: 'dummy',
-      message: null,
-      next: null,
-      prev: null,
-      request: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-      status: '10'
-    }
-  ],
+  approvals: [],
+  prevUser: { name: '管理者 10次', message: '' },
+  requester: {
+    no: '支払依頼',
+    name: '支払 依頼者',
+    status: '依頼済み',
+    requestedAt: '2022-3-17 0:59:59'
+  }
+}
 
-  prevUser: {
-    message: null,
-    name: null
+const expectGetRequestApproval2 = {
+  requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+  contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+  invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+  message: '支払依頼します。',
+  status: '00',
+  approveRoute: {
+    name: undefined,
+    users: [
+      UserAccounts.setUserAccounts(findUser[0]),
+      UserAccounts.setUserAccounts(findUser[1]),
+      UserAccounts.setUserAccounts(findUser[2]),
+      UserAccounts.setUserAccounts(findUser[3]),
+      UserAccounts.setUserAccounts(findUser[4]),
+      UserAccounts.setUserAccounts(findUser[5]),
+      UserAccounts.setUserAccounts(findUser[6]),
+      UserAccounts.setUserAccounts(findUser[7]),
+      UserAccounts.setUserAccounts(findUser[8]),
+      UserAccounts.setUserAccounts(findUser[9]),
+      UserAccounts.setUserAccounts(findUser[10])
+    ]
+  },
+  approvals: [],
+  prevUser: { name: '管理者 11次', message: '' },
+  requester: {
+    no: '支払依頼',
+    name: '支払 依頼者',
+    status: '依頼済み',
+    requestedAt: '2022-3-17 0:59:59'
   }
 }
 
@@ -164,7 +195,9 @@ describe('approvalInboxのテスト', () => {
       'insertAndUpdateJournalizeInvoice'
     )
     approverControllerUpdateApprove = jest.spyOn(approverController, 'updateApprove')
-    mailMsgSendPaymentRequestMail = jest.spyOn(mailMsg, 'sendPaymentRequestMail')
+    sendMailSpy = jest.spyOn(sendMail, 'mail')
+    requestApprovalControllerFindOneRequestApprovalSpy = jest.spyOn(requestApprovalController, 'findOneRequestApproval')
+    tradeshiftDTOSpy = jest.spyOn(TradeshiftDTO.prototype, 'findUser')
   })
   afterEach(() => {
     request.resetMocked()
@@ -186,7 +219,9 @@ describe('approvalInboxのテスト', () => {
     approvalInboxControllerHasPowerOfEditing.mockRestore()
     approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockRestore()
     approverControllerUpdateApprove.mockRestore()
-    mailMsgSendPaymentRequestMail.mockRestore()
+    sendMailSpy.mockRestore()
+    requestApprovalControllerFindOneRequestApprovalSpy.mockRestore()
+    tradeshiftDTOSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -494,7 +529,18 @@ describe('approvalInboxのテスト', () => {
         error: undefined
       })
       approverControllerUpdateApprove.mockReturnValue(true)
-      mailMsgSendPaymentRequestMail.mockReturnValue(0)
+
+      // mailContent関数の想定値
+      apiManager.accessTradeshift = jest.fn()
+      apiManager.accessTradeshift.mockReturnValue({
+        ID: {
+          value: 'UTテストコード'
+        }
+      })
+      requestApprovalControllerFindOneRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+
+      sendMailSpy.mockReturnValue(0)
 
       // 試験実施
       await approvalInbox.cbPostApprove(request, response, next)
@@ -529,7 +575,7 @@ describe('approvalInboxのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
-      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval2)
       inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
       approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
       approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockReturnValue({
@@ -540,7 +586,19 @@ describe('approvalInboxのテスト', () => {
         error: undefined
       })
       approverControllerUpdateApprove.mockReturnValue(true)
-      mailMsgSendPaymentRequestMail.mockReturnValue(1)
+
+      // mailContent関数の想定値
+      apiManager.accessTradeshift = jest.fn()
+      apiManager.accessTradeshift.mockReturnValue({
+        ID: {
+          value: 'UTテストコード'
+        }
+      })
+      requestApprovalControllerFindOneRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval2)
+      tradeshiftDTOSpy.mockImplementation(async () => {
+        return UserAccounts.setUserAccounts(findUser[16])
+      })
+      sendMailSpy.mockReturnValue(0)
 
       // 試験実施
       await approvalInbox.cbPostApprove(request, response, next)
@@ -586,7 +644,18 @@ describe('approvalInboxのテスト', () => {
         error: undefined
       })
       approverControllerUpdateApprove.mockReturnValue(true)
-      mailMsgSendPaymentRequestMail.mockReturnValue(2)
+      // mailContent関数の想定値
+      apiManager.accessTradeshift = jest.fn()
+      apiManager.accessTradeshift.mockReturnValue({
+        ID: {
+          value: 'UTテストコード'
+        }
+      })
+      requestApprovalControllerFindOneRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval2)
+      tradeshiftDTOSpy.mockImplementation(async () => {
+        return UserAccounts.setUserAccounts(findUser[16])
+      })
+      sendMailSpy.mockReturnValue(1)
 
       // 試験実施
       await approvalInbox.cbPostApprove(request, response, next)
@@ -599,7 +668,10 @@ describe('approvalInboxのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでapproveRouteListが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('error', '承認を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
+      expect(request.flash).toHaveBeenCalledWith(
+        'error',
+        '承認を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。'
+      )
       expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
 
