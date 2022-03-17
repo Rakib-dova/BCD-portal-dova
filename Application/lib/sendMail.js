@@ -39,7 +39,7 @@ const mail = async function (to, subject, text) {
     from: user,
     to: to,
     subject: subject,
-    html: text
+    text: text
   }
 
   // メールを送信
