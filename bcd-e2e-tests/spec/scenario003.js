@@ -105,5 +105,7 @@ describe('リグレッションテスト', function () {
     dataTexts = JSON.stringify(datas);
     expectedVal = '["2022/10/8","A0000125","fcde4039-8d4d-4e3e-8b5c-43fca9d6e113","2022/11/8","2022/9/8","備考あああ","銀行名あああ","支店名あああ","当座","1423123","口座名義あああ","その他特記事項あああ","1","明細１","2","個","10000","消費税","備考あああ"]'
     expect(dataTexts).to.equal(expectedVal, '取り込んだCSVのデータが正しいこと');
+
+    await page.waitForTimeout(1000);
   });
 });
