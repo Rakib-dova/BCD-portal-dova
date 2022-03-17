@@ -6,7 +6,6 @@ const helper = require('./helpers/middleware')
 const validate = require('../lib/validate')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
-
 const mailMsg = require('../lib/mailMsg')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
@@ -468,7 +467,7 @@ const cbPostApproval = async (req, res, next) => {
       if (sendMailStatus === 0) {
         req.flash('info', '支払依頼を完了しました。次の承認者にはメールで通知が送られます。')
       } else {
-        req.flash('info', '支払依頼を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
+        req.flash('error', '支払依頼を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
       }
       res.redirect('/inboxList/1')
       break
