@@ -1,5 +1,6 @@
 'use strict'
 const approvalInboxController = require('../controllers/approvalInboxController')
+const requestApprovalController = require('../controllers/requestApprovalController.js')
 const apiManager = require('../controllers/apiManager')
 const logger = require('./logger')
 const constantsDefine = require('../constants')
@@ -17,25 +18,11 @@ const sendMail = require('../lib/sendMail')
 const mailContent = async function (accessToken, refreshToken, contractId, invoiceId, tenantId) {
   logger.info(constantsDefine.logMessage.MAILINF003)
   try {
-    // 承認者情報検索
-    const requestApproval = await approvalInboxController.getRequestApproval(
-      accessToken,
-      refreshToken,
-      contractId,
-      invoiceId,
-      tenantId
-    )
+    const requestApproval = await requestApprovalController.findOneRequestApproval(contractId, invoiceId)
 
     if (requestApproval === null) {
       return 1
     }
-
-    // ユーザ情報取得
-    const activeApproverNo = requestApproval.status - 10
-
-    const prevUserMailAddress = requestApproval.approveRoute.users[activeApproverNo].email
-    const companyName = requestApproval.approveRoute.users[activeApproverNo].companyName
-    const prevUser = `${requestApproval.approveRoute.users[activeApproverNo].firstName} ${requestApproval.approveRoute.users[activeApproverNo].lastName}`
 
     // 請求書番号取得
     const invoice = await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `/documents/${invoiceId}`)
@@ -47,25 +34,95 @@ const mailContent = async function (accessToken, refreshToken, contractId, invoi
     const month = date.getMonth() + 1
     const day = date.getDate()
 
-    const subject = `BConnectionデジタルトレードお知らせ 支払依頼（${year}/${month}/${day}）`
+    // ユーザ情報取得
+    let uerMailAddress
+    let companyName
+    let userName
+    let subject
+    let text
 
-    // メール内容作成
-    const text = `${companyName}<br>
-  ${prevUser} 様<br>
-  <br>
-  新たな支払依頼が届きました。<br>
-  <br>
-  対象の請求書番号：${invoiceNumber}<br>
-  詳細はこちら<br>
-  <a href="https://bcd-portal.tsdev.biz/inboxList/approvals">承認画面に移動</a><br>
-  ※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。<br>
-  <br>
-  -----------------------------------------------------<br>
-  NTTコミュニケーションズ株式会社<br>
-  BConnectionデジタルトレード<br>`
+    if (~~requestApproval.status >= 10 && ~~requestApproval.status <= 20) {
+      // 支払依頼、一次承認から十次承認の場合
+      // 承認者情報検索
+      const approver = await approvalInboxController.getRequestApproval(
+        accessToken,
+        refreshToken,
+        contractId,
+        invoiceId,
+        tenantId
+      )
+      const activeApproverNo = approver.status - 10
+      uerMailAddress = approver.approveRoute.users[activeApproverNo].email
+      companyName = approver.approveRoute.users[activeApproverNo].companyName
+      userName = `${approver.approveRoute.users[activeApproverNo].firstName} ${approver.approveRoute.users[activeApproverNo].lastName}`
+
+      subject = `BConnectionデジタルトレードお知らせ 支払依頼（${year}/${month}/${day}）`
+
+      // メール内容作成
+      text = `${companyName}<br>
+      ${userName} 様<br>
+      <br>
+      新たな支払依頼が届きました。<br>
+      <br>
+      対象の請求書番号：${invoiceNumber}<br>
+      詳細はこちら<br>
+      <a href="https://bcd-portal.tsdev.biz/inboxList/approvals">承認画面に移動</a><br>
+      ※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。<br>
+      <br>
+      -----------------------------------------------------<br>
+      NTTコミュニケーションズ株式会社<br>
+      BConnectionデジタルトレード<br>`
+    } else {
+      const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenantId)
+      tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
+
+      const userAccounts = await tradeshiftDTO.findUser(requestApproval.requester)
+
+      uerMailAddress = userAccounts.email
+      companyName = userAccounts.companyName
+      userName = `${userAccounts.firstName} ${userAccounts.lastName}`
+
+      if (~~requestApproval.status === 0) {
+        // 最終承認の場合
+        subject = `BConnectionデジタルトレードお知らせ 支払依頼最終結果（${year}/${month}/${day}）`
+
+        // メール内容作成
+        text = `${companyName}<br>
+      ${userName} 様<br>
+      <br>
+      支払依頼が最終承認されました。<br>
+      <br>
+      対象の請求書番号：${invoiceNumber}<br>
+      詳細はこちら<br>
+      <a href="https://bcd-portal.tsdev.biz/inboxList/approvals">承認画面に移動</a><br>
+      ※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。<br>
+      <br>
+      -----------------------------------------------------<br>
+      NTTコミュニケーションズ株式会社<br>
+      BConnectionデジタルトレード<br>`
+      } else if (~~requestApproval.status === 90) {
+        // 差し戻しの場合
+        subject = `BConnectionデジタルトレードお知らせ 支払依頼差し戻し（${year}/${month}/${day}）`
+
+        // メール内容作成
+        text = `${companyName}<br>
+      ${userName} 様<br>
+      <br>
+      支払依頼が差し戻されました。<br>
+      <br>
+      対象の請求書番号：${invoiceNumber}<br>
+      詳細はこちら<br>
+      <a href="https://bcd-portal.tsdev.biz/inboxList/approvals">承認画面に移動</a><br>
+      ※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。<br>
+      <br>
+      -----------------------------------------------------<br>
+      NTTコミュニケーションズ株式会社<br>
+      BConnectionデジタルトレード<br>`
+      }
+    }
 
     logger.info(constantsDefine.logMessage.MAILINF004)
-    return { maileAddress: prevUserMailAddress, subject: subject, text: text }
+    return { maileAddress: uerMailAddress, subject: subject, text: text, status: requestApproval.status }
   } catch (error) {
     logger.warn(constantsDefine.logMessage.MAILWAN001 + error)
     return 1
@@ -79,7 +136,7 @@ const mailContent = async function (accessToken, refreshToken, contractId, invoi
  * @param {uuid} contractId デジトレの利用の契約者の識別番号
  * @param {uuid} invoiceId デジトレの請求書の識別番号
  * @param {uuid} tenantId デジトレの企業の識別番号
- * @returns 正常終了：0, システムエラー：1
+ * @returns 正常終了：0(最終承認以外）1（最終承認）, システムエラー：2
  */
 const sendPaymentRequestMail = async function (accessToken, refreshToken, contractId, invoiceId, tenantId) {
   try {
@@ -90,21 +147,21 @@ const sendPaymentRequestMail = async function (accessToken, refreshToken, contra
     // メール送信
     let sendMailStatus
     if (resultMailContent !== 1) {
-      sendMailStatus = await sendMail.mail(
-        resultMailContent.maileAddress,
-        resultMailContent.subject,
-        resultMailContent.text
-      )
+      sendMailStatus = await sendMail.mail('jikim@cseltd.co.jp', resultMailContent.subject, resultMailContent.text)
     }
 
     if (sendMailStatus === 0) {
+      // 最終承認の場合
+      if (resultMailContent.status === '00') return 1
+
+      // 最終承認以外の場合
       return 0
     } else {
-      return 1
+      return 2
     }
   } catch (error) {
     logger.warn(constantsDefine.logMessage.MAILWAN000 + 'approverController.getApproveRoute')
-    return 1
+    return 2
   }
 }
 
