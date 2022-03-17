@@ -1551,7 +1551,7 @@ describe('requestApprovalのテスト', () => {
       await requestApproval.cbPostApproval(request, response, next)
       // 結果確認
       // 支払依頼ページレンダリングを呼び出し
-      expect(request.flash).toBeCalledWith('info', '支払依頼を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
+      expect(request.flash).toBeCalledWith('error', '支払依頼を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
       expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
 
