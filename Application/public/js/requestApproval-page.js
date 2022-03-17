@@ -226,8 +226,13 @@ const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
     const noElement = document.createElement('div')
     const nameElement = document.createElement('div')
     element.classList.add('columns')
+    element.classList.add('my-0')
     noElement.classList.add('column')
+    noElement.classList.add('is-one-fifth')
+    noElement.classList.add('text-center')
     nameElement.classList.add('column')
+    nameElement.classList.add('is-one-third')
+    nameElement.classList.add('text-center')
     noElement.innerText = noText
     nameElement.innerText = name
     element.appendChild(noElement)
@@ -235,15 +240,28 @@ const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
     return element
   }
   const approverLen = approver.length
-  cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(createApproverRow('承認順', '承認者'))
+  const header = createApproverRow('承認順', '承認者')
+  header.querySelectorAll('.column')[0].classList.add('is-color-table-header')
+  header.querySelectorAll('.column')[0].classList.add('is-border-left-top')
+  header.querySelectorAll('.column')[1].classList.add('is-color-table-header')
+  header.querySelectorAll('.column')[1].classList.add('is-border-left-top-right')
+  cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(header)
   for (let idx = 0; idx < approverLen; idx++) {
     let no = null
     if (idx < approverLen - 1) {
       no = approValNo[idx]
     } else {
-      no = approValNo.slice(-1)
+      no = approValNo.slice(-1)[0]
     }
     const rowLastApprover = createApproverRow(no, `${approver[idx].FirstName} ${approver[idx].LastName}`)
+
+    if (no !== approValNo.slice(-1)[0]) {
+      rowLastApprover.querySelectorAll('.column')[0].classList.add('is-border-left')
+      rowLastApprover.querySelectorAll('.column')[1].classList.add('is-border-item-between')
+    } else {
+      rowLastApprover.querySelectorAll('.column')[0].classList.add('is-border-left-bottom')
+      rowLastApprover.querySelectorAll('.column')[1].classList.add('is-border-item-between-bottom')
+    }
     cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(rowLastApprover)
   }
   blackboard.appendChild(cloneTemplate)

@@ -740,3 +740,69 @@ body > div.hero.is-small {
 .color-link-modal-header > .modal-card-title {
   color: white;
 }
+
+.is-border-left-top {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 1px 0px 0px 1px;
+}
+
+.is-border-top {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 1px 0px 0px 0px;
+}
+
+.is-border-top-right {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 1px 1px 0px 0px;
+}
+
+.is-border-left-top-right {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 1px 1px 0px 1px;
+}
+
+.is-border-left {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 0px 0px 0px 1px;
+}
+
+.is-border-item-between {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 0px 1px 0px 1px;
+}
+
+.is-border-right {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 0px 1px 0px 0px;
+}
+
+.is-border-left-bottom {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 0px 0px 1px 1px;
+}
+
+.is-border-item-between-bottom {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 0px 1px 1px 1px;
+}
+
+.is-border-right-bottom {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 0px 1px 1px 0px;
+}
+
+.is-color-table-header {
+  color: white;
+  background-color: #3298dc;
+  font-weight: bold;
+}

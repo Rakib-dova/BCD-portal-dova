@@ -103,10 +103,22 @@ const cbGetIndex = async (req, res, next) => {
     req.session.requestApproval = { approval: requestApproval }
   }
 
+  // dummy data
+  const requestedAt = new Date()
+  const requester = {
+    no: '支払依頼',
+    name: 'ユーザー０',
+    status: '依頼済み',
+    requestedAt: `${requestedAt.getFullYear()}-${
+      requestedAt.getMonth() + 1
+    }-${requestedAt.getDate()} ${requestedAt.getHours()}:${requestedAt.getMinutes()}:${requestedAt.getSeconds()}`
+  }
+
   res.render(presentation, {
     ...result,
     title: '支払依頼',
     documentId: invoiceId,
+    requester: requester,
     approveRoute: approveRoute,
     prevUser: prevUser
   })

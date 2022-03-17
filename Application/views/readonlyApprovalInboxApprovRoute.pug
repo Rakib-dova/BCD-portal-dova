@@ -4,23 +4,30 @@
       - const approvalNo = ['一次承認', '二次承認', '三次承認', '四次承認', '五次承認', '六次承認', '七次承認', '八次承認', '九次承認', '十次承認', '最終承認']
       if approveRoute
         .columns
-          .column
+          .column.text-center.is-one-fifth
             p 承認ルート名
           .column#approveRouteName
             p #{approveRoute.name}
         .columns
           .column
         section#displayDetailApproveRouteTable
-          .columns
-            .column 承認順
-            .column 承認者
+          .columns.mb-0.is-color-table-header
+            .column.is-one-fifth.text-center.is-border-left-top 承認順
+            .column.is-one-fifth.text-center.is-border-left-top-right 担当者名
+            .column.text-center.is-border-top-right 承認状況
           - const userLen = approveRoute.users.length
-          each user, idx in approveRoute.users
+          .columns.my-0
+            .column.is-one-fifth.text-center.is-border-left #{requester.no}
+            .column.is-one-fifth.text-center.is-border-item-between #{requester.name}
+            .column.text-center.is-border-right #{requester.status} #{requester.requestedAt}
+          each user, idx in approveRoute.users  
             if idx < userLen - 1
-              .columns
-                .column #{approvalNo[idx]}
-                .column #{user.firstName} #{user.lastName}
+              .columns.my-0
+                .column.is-one-fifth.text-center.is-border-left #{approvalNo[idx]}
+                .column.is-one-third.text-center.is-border-item-between #{user.firstName} #{user.lastName}
+                .column.is-align-content-center.is-border-right 　
             else
-              .columns
-                .column #{approvalNo.slice(-1)}
-                .column #{user.firstName} #{user.lastName}
+              .columns.mt-0
+                .column.is-one-fifth.text-center.is-border-left-bottom #{approvalNo.slice(-1)}
+                .column.is-one-third.text-center.is-border-item-between-bottom #{user.firstName} #{user.lastName}
+                .column.is-align-content-center.is-border-right-bottom
