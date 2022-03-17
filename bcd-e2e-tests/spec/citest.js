@@ -3,20 +3,11 @@ const webdriverUtils = require('../utils/webdriver-utils');
 
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
-const comment = require('../utils/chai-with-reporting').comment;
 
 chai.use(chaiWithReporting);
 const expect = chai.expect;
 
 const config = require('../autotest-script-config');
-
-const fs = require('fs');
-const path = require('path');
-const { parse } = require('csv-parse/sync');
-// const { stringify } = require('csv-stringify/sync');
-
-const common = require('./common');
-const { ActionUtils } = require('../utils/action-utils');
 
 let browser;
 
@@ -49,33 +40,11 @@ describe('CI TEST', function () {
       browser = await webdriverUtils.openChrome(chromium);
     }
     const page = await browser.newPage();
-
-    const actionUtils = new ActionUtils(browser, page);
     global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, supportMenuPage, uploadInvoiceMenuPage, uploadInvoicePage, uploadFormatTopPage, uploadFormatCreatePage, uploadFormatSettingPage, uploadFormatConfirmPage }
-      = common.getPageObject(browser, page);
 
     // 指定したURLに遷移する
     await page.goto(config.baseUrl);
-
-    // ログインを行う
-    await loginPage.doLogin('hikita-toshiyuki+ci@webrage.jp', 'Hr(5ER,s#Wx%');
-    await tradeShiftTopPage.waitForLoading();
-
-    // デジタルトレードアプリをクリックする
-    await tradeShiftTopPage.clickBcdApp();
-    await topPage.waitForLoading();
-
-    // 請求書一括作成メニューを表示する
-    await topPage.openUploadInvoiceMenu();
-    await uploadInvoiceMenuPage.waitForLoading();
-
-    // 請求書アップロードフォーマット一覧ページに遷移する
-    await uploadInvoiceMenuPage.clickUploadFormat();
-    await uploadFormatTopPage.waitForLoading();
-    expect(await uploadFormatTopPage.getTitle()).to.equal('アップロードフォーマット一覧', 'アップロードフォーマット一覧ページに遷移すること');
-    expect(await uploadFormatTopPage.getTitle()).to.equal('意図的にエラー', 'アップロードフォーマット一覧ページに遷移すること');
+    expect('意図的に成功').to.equal('意図的に成功', '成功ケース');
+    expect('AAA').to.equal('意図的に失敗', '失敗ケース');
   });
 });
