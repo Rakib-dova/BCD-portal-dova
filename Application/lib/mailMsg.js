@@ -59,19 +59,20 @@ const mailContent = async function (accessToken, refreshToken, contractId, invoi
       subject = `BConnectionデジタルトレードお知らせ 支払依頼（${year}/${month}/${day}）`
 
       // メール内容作成
-      text = `${companyName}<br>
-      ${userName} 様<br>
-      <br>
-      新たな支払依頼が届きました。<br>
-      <br>
-      対象の請求書番号：${invoiceNumber}<br>
-      詳細はこちら<br>
-      <a href="https://bcd-portal.tsdev.biz/inboxList/approvals">承認画面に移動</a><br>
-      ※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。<br>
-      <br>
-      -----------------------------------------------------<br>
-      NTTコミュニケーションズ株式会社<br>
-      BConnectionデジタルトレード<br>`
+
+      text = `${companyName}
+${userName} 様
+
+新たな支払依頼が届きました。
+
+対象の請求書番号：${invoiceNumber}
+詳細はこちら
+https://bcd-portal.tsdev.biz/inboxList/approvals
+※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。
+
+-----------------------------------------------------
+NTTコミュニケーションズ株式会社
+BConnectionデジタルトレード`
     } else {
       const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenantId)
       tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
@@ -87,37 +88,37 @@ const mailContent = async function (accessToken, refreshToken, contractId, invoi
         subject = `BConnectionデジタルトレードお知らせ 支払依頼最終結果（${year}/${month}/${day}）`
 
         // メール内容作成
-        text = `${companyName}<br>
-      ${userName} 様<br>
-      <br>
-      支払依頼が最終承認されました。<br>
-      <br>
-      対象の請求書番号：${invoiceNumber}<br>
-      詳細はこちら<br>
-      <a href="https://bcd-portal.tsdev.biz/inboxList/approvals">承認画面に移動</a><br>
-      ※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。<br>
-      <br>
-      -----------------------------------------------------<br>
-      NTTコミュニケーションズ株式会社<br>
-      BConnectionデジタルトレード<br>`
+        text = `${companyName}
+${userName} 様
+
+支払依頼が最終承認されました。
+
+対象の請求書番号：${invoiceNumber}
+詳細はこちら
+https://bcd-portal.tsdev.biz/inboxList/approvals
+※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。
+
+-----------------------------------------------------
+NTTコミュニケーションズ株式会社
+BConnectionデジタルトレード`
       } else if (~~requestApproval.status === 90) {
         // 差し戻しの場合
         subject = `BConnectionデジタルトレードお知らせ 支払依頼差し戻し（${year}/${month}/${day}）`
 
         // メール内容作成
-        text = `${companyName}<br>
-      ${userName} 様<br>
-      <br>
-      支払依頼が差し戻されました。<br>
-      <br>
-      対象の請求書番号：${invoiceNumber}<br>
-      詳細はこちら<br>
-      <a href="https://bcd-portal.tsdev.biz/inboxList/approvals">承認画面に移動</a><br>
-      ※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。<br>
-      <br>
-      -----------------------------------------------------<br>
-      NTTコミュニケーションズ株式会社<br>
-      BConnectionデジタルトレード<br>`
+        text = `${companyName}
+${userName} 様
+
+支払依頼が差し戻されました。
+
+対象の請求書番号：${invoiceNumber}
+詳細はこちら
+https://bcd-portal.tsdev.biz/inboxList/approvals
+※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。
+
+-----------------------------------------------------
+NTTコミュニケーションズ株式会社
+BConnectionデジタルトレード`
       }
     }
 
