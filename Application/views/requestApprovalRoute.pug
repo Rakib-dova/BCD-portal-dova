@@ -14,18 +14,16 @@
         .columns
           .column
         section#displayDetailApproveRouteTable
-          .columns
-            .column 承認順
-            .column 承認者
+          .columns.my-0
+            .column.is-one-fifth.text-center.is-border-left-top.is-color-table-header 承認順
+            .column.is-one-third.text-center.is-border-left-top-right.is-color-table-header 承認者
           - const userLen = approveRoute.users.length
-          each user, idx in approveRoute.users
+          each user, idx in approveRoute.users            
             if idx < userLen - 1
-              .columns
-                .column #{approvalNo[idx]}
-                .column #{user.FirstName} #{user.LastName}
+              .columns.my-0
+                .column.is-one-fifth.text-center.is-border-left #{approvalNo[idx]}
+                .column.is-one-third.text-center.is-border-item-between #{user.FirstName} #{user.LastName}
             else
-              .columns
-                .column #{approvalNo.slice(-1)}
-                .column #{user.FirstName} #{user.LastName}
-
-                     
+              .columns.mt-0
+                .column.is-one-fifth.text-center.is-border-left-bottom #{approvalNo.slice(-1)}
+                .column.is-one-third.text-center.is-border-item-between-bottom #{user.FirstName} #{user.LastName}
