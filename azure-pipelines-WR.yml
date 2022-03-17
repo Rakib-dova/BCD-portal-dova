@@ -19,6 +19,7 @@ parameters:
     default: all
     values:
       - all
+      - citest.js
       - scenario001.js
       - scenario002.js
       - scenario003.js
