@@ -41,11 +41,6 @@ describe('CI TEST', function () {
   });
 
   it("CI TEST", async function () {
-    console.log(process.env.browser)
-    console.log(process.env.browser2)
-    console.log(process.env.enableScreenshot)
-    console.log(process.env.ENABLE_SCREEN_SHOT)
-
     if (process.env.BROWSER == 'EDGE') {
       browser = await webdriverUtils.openEdge(chromium);
     } else if (process.env.BROWSER == 'FIREFOX') {
@@ -64,9 +59,7 @@ describe('CI TEST', function () {
 
     // 指定したURLに遷移する
     await page.goto(config.baseUrl);
-    expect('意図的に成功').to.equal('意図的に成功', 'アップロードフォーマット一覧ページに遷移すること');
-    expect('AAA').to.equal('意図的にエラー', 'アップロードフォーマット一覧ページに遷移すること');
-/*
+
     // ログインを行う
     await loginPage.doLogin('hikita-toshiyuki+ci@webrage.jp', 'Hr(5ER,s#Wx%');
     await tradeShiftTopPage.waitForLoading();
@@ -84,6 +77,5 @@ describe('CI TEST', function () {
     await uploadFormatTopPage.waitForLoading();
     expect(await uploadFormatTopPage.getTitle()).to.equal('アップロードフォーマット一覧', 'アップロードフォーマット一覧ページに遷移すること');
     expect(await uploadFormatTopPage.getTitle()).to.equal('意図的にエラー', 'アップロードフォーマット一覧ページに遷移すること');
-*/
   });
 });
