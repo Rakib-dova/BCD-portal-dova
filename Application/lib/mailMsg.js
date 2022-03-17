@@ -147,7 +147,11 @@ const sendPaymentRequestMail = async function (accessToken, refreshToken, contra
     // メール送信
     let sendMailStatus
     if (resultMailContent !== 1) {
-      sendMailStatus = await sendMail.mail('jikim@cseltd.co.jp', resultMailContent.subject, resultMailContent.text)
+      sendMailStatus = await sendMail.mail(
+        resultMailContent.maileAddress,
+        resultMailContent.subject,
+        resultMailContent.text
+      )
     }
 
     if (sendMailStatus === 0) {
