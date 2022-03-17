@@ -88,46 +88,38 @@ const resultInvoice = {
 const Users = require('../mockDB/Users_Table')
 const Tenants = require('../mockDB/Tenants_Table')
 const Contracts = require('../mockDB/Contracts_Table')
+const findUser = require('../mockDB/TradeshiftFindUser')
+const UserAccounts = require('../../Application/DTO/VO/UserAccounts')
 
 const expectGetRequestApproval = {
   requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
   contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
   invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
-  message: 'dummyData',
-  status: 'dummyData',
-  requester: 'dummyUserUUID',
+  message: '支払依頼します。',
+  status: '20',
   approveRoute: {
+    name: undefined,
     users: [
-      {
-        No: 1,
-        approveRouteName: 'dummyRouteName',
-        approverCount: 'dummyCount',
-        id: 'dummyUserUUID'
-      }
+      UserAccounts.setUserAccounts(findUser[0]),
+      UserAccounts.setUserAccounts(findUser[1]),
+      UserAccounts.setUserAccounts(findUser[2]),
+      UserAccounts.setUserAccounts(findUser[3]),
+      UserAccounts.setUserAccounts(findUser[4]),
+      UserAccounts.setUserAccounts(findUser[5]),
+      UserAccounts.setUserAccounts(findUser[6]),
+      UserAccounts.setUserAccounts(findUser[7]),
+      UserAccounts.setUserAccounts(findUser[8]),
+      UserAccounts.setUserAccounts(findUser[9]),
+      UserAccounts.setUserAccounts(findUser[10])
     ]
   },
-  approvals: [
-    {
-      approvalDate: null,
-      approvalId: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
-      approver: {
-        No: 1,
-        approveRouteName: 'dummyRouteName',
-        approverCount: 'dummyCount',
-        id: 'dummyUserUUID'
-      },
-      contractId: 'dummy',
-      message: null,
-      next: null,
-      prev: null,
-      request: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-      status: '10'
-    }
-  ],
-
-  prevUser: {
-    message: null,
-    name: null
+  approvals: [],
+  prevUser: { name: '管理者 10次', message: '' },
+  requester: {
+    no: '支払依頼',
+    name: '支払 依頼者',
+    status: '依頼済み',
+    requestedAt: '2022-3-17 0:59:59'
   }
 }
 
@@ -234,6 +226,12 @@ describe('approvalInboxのテスト', () => {
         title: '支払依頼',
         documentId: request.params.invoiceId,
         approveRoute: expectGetRequestApproval.approveRoute,
+        requester: {
+          name: UserAccounts.setUserAccounts(findUser[16]).getName(),
+          no: '支払依頼',
+          requestedAt: '2022-3-17 0:59:59',
+          status: '依頼済み'
+        },
         prevUser: expectGetRequestApproval.prevUser
       })
     })

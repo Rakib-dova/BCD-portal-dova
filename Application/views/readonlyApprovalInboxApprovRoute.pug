@@ -3,10 +3,10 @@
     .column.p-2#displayRequestApprovaRoute
       - const approvalNo = ['一次承認', '二次承認', '三次承認', '四次承認', '五次承認', '六次承認', '七次承認', '八次承認', '九次承認', '十次承認', '最終承認']
       if approveRoute
-        .columns.px-0.mx-0
-          .column.text-left.is-one-fifth
+        .columns.px-0.mx-0.is-border-left-top-bottom
+          .column.text-left.is-one-fifth.is-color-table-header.is-border-right
             p 承認ルート名
-          .column#approveRouteName
+          .column.is-border-right#approveRouteName
             p #{approveRoute.name}
         section#displayDetailApproveRouteTable
           .columns.m-0.p-0.is-color-table-header.is-border-left-top
