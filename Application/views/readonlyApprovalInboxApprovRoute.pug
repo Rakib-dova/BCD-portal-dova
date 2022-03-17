@@ -1,33 +1,37 @@
-﻿.box
-  .column.m-0
-    .column#displayRequestApprovaRoute
+﻿.box.p-3
+  .column.m-0.p-0
+    .column.p-2#displayRequestApprovaRoute
       - const approvalNo = ['一次承認', '二次承認', '三次承認', '四次承認', '五次承認', '六次承認', '七次承認', '八次承認', '九次承認', '十次承認', '最終承認']
       if approveRoute
-        .columns
-          .column.text-center.is-one-fifth
+        .columns.px-0.mx-0
+          .column.text-left.is-one-fifth
             p 承認ルート名
           .column#approveRouteName
             p #{approveRoute.name}
-        .columns
-          .column
         section#displayDetailApproveRouteTable
-          .columns.mb-0.is-color-table-header
-            .column.is-one-fifth.text-center.is-border-left-top 承認順
-            .column.is-one-fifth.text-center.is-border-left-top-right 担当者名
-            .column.text-center.is-border-top-right 承認状況
+          .columns.m-0.p-0.is-color-table-header.is-border-left-top
+            .column.is-one-fifth.text-left.is-border-right 承認順
+            .column.is-one-third.text-left.is-border-right 担当者名
+            .column.text-left.is-border-right 承認状況
           - const userLen = approveRoute.users.length
-          .columns.my-0
-            .column.is-one-fifth.text-center.is-border-left #{requester.no}
-            .column.is-one-fifth.text-center.is-border-item-between #{requester.name}
-            .column.text-center.is-border-right #{requester.status} #{requester.requestedAt}
-          each user, idx in approveRoute.users  
+          .columns.m-0.p-0.is-border-left-top
+            .column.is-one-fifth.text-left.is-border-right #{requester.no}
+            .column.is-one-third.text-left.is-border-right #{requester.name}
+            .column.text-left.is-border-right #{requester.status} #{requester.requestedAt}
+          each user, idx in approveRoute.users            
             if idx < userLen - 1
-              .columns.my-0
-                .column.is-one-fifth.text-center.is-border-left #{approvalNo[idx]}
-                .column.is-one-third.text-center.is-border-item-between #{user.firstName} #{user.lastName}
-                .column.is-align-content-center.is-border-right 　
+              .columns.m-0.p-0.is-border-left-top
+                .column.is-one-fifth.text-left.is-border-right #{approvalNo[idx]}
+                .column.is-one-third.text-left.is-border-right #{user.firstName} #{user.lastName}
+                if user.status === '処理中'
+                  .column.is-align-content-center.is-border-right.is-family-noto-sans-bold #{user.status} #{user.approvedAt}
+                else
+                  .column.is-align-content-center.is-border-right #{user.status} #{user.approvedAt}
             else
-              .columns.mt-0
-                .column.is-one-fifth.text-center.is-border-left-bottom #{approvalNo.slice(-1)}
-                .column.is-one-third.text-center.is-border-item-between-bottom #{user.firstName} #{user.lastName}
-                .column.is-align-content-center.is-border-right-bottom
+              .columns.m-0.p-0.is-border-left-top-bottom
+                .column.is-one-fifth.text-left.is-border-right #{approvalNo.slice(-1)}
+                .column.is-one-third.text-left.is-border-right  #{user.firstName} #{user.lastName}
+                if user.status === '処理中'
+                  .column.is-align-content-center.is-border-right.is-family-noto-sans-bold #{user.status} #{user.approvedAt}
+                else
+                  .column.is-align-content-center.is-border-right #{user.status} #{user.approvedAt}
