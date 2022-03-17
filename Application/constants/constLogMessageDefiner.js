@@ -12,5 +12,8 @@ constantsDefine({
   MAILINF000: 'MIALINF000: Email send start', // メール送信処理開始
   MAILINF001: 'MIALINF001: Email send end', // メール送信終了
   MAILINF002: 'MIALINF002: Email sent - ', // メール送信完了
-  MAILWAN000: 'MAILWAN000: Email send error - ' // メール相送信エラー
+  MAILINF003: 'MIALINF000: Email Content create start', // メール送信処理開始
+  MAILINF004: 'MIALINF001: Email Content create end', // メール送信終了
+  MAILWAN000: 'MAILWAN000: Email send error - ', // メール相送信エラー
+  MAILWAN001: 'MAILWAN001: Email Content create error - ' // メール
 })

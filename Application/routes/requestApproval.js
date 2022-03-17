@@ -6,7 +6,8 @@ const helper = require('./helpers/middleware')
 const validate = require('../lib/validate')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
-const sendMail = require('../lib/sendMail')
+
+const mailMsg = require('../lib/mailMsg')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
@@ -422,6 +423,7 @@ const cbPostApproval = async (req, res, next) => {
   const approveRouteId = req.body.approveRouteId
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
+  const tenantId = req.user.tenantId
 
   // 承認ルートに誤りがある場合
   const isApproveRoute = await approverController.checkApproveRoute(contractId, approveRouteId)
@@ -454,39 +456,23 @@ const cbPostApproval = async (req, res, next) => {
   )
 
   switch (result) {
-    case 0:
-      // メール送信
-      try {
-        const approvers = await approverController.getApproveRoute(
-          accessToken,
-          refreshToken,
-          contractId,
-          approveRouteId
-        )
+    case 0: {
+      const sendMailStatus = await mailMsg.sendPaymentRequestMail(
+        accessToken,
+        refreshToken,
+        contractId,
+        invoiceId,
+        tenantId
+      )
 
-        console.log(approvers)
-
-        const sendMailStatus = await sendMail.mail(
-          'jikim@cseltd.co.jp',
-          '支払依頼メール送信テスト',
-          '支払依頼メール送信テストです。'
-        )
-
-        if (sendMailStatus === 0) {
-          req.flash('info', '支払依頼を完了しました。次の承認者にはメールで通知が送られます。')
-        } else {
-          req.flash(
-            'info',
-            '支払依頼を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。'
-          )
-        }
-      } catch (error) {
-        logger.warn(constantsDefine.logMessage.MAILWAN000 + 'approverController.getApproveRoute')
+      if (sendMailStatus === 0) {
+        req.flash('info', '支払依頼を完了しました。次の承認者にはメールで通知が送られます。')
+      } else {
         req.flash('info', '支払依頼を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
       }
-
       res.redirect('/inboxList/1')
       break
+    }
     default:
       req.flash('noti', ['支払依頼', '必ず保存してください。'])
       req.session.requestApproval = {

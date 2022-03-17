@@ -17,7 +17,7 @@ const pass = process.env.MAIL_PASS
  * @param {string} to 送信先(複数の場合、カンマ区切りの文字列)
  * @param {string} subject 件名
  * @param {string} text 本文
- * @returns 正常終了：0, 送信エラー：1, システムエラー：2
+ * @returns 正常終了：0, 送信エラー：1
  */
 const mail = async function (to, subject, text) {
   logger.info(constantsDefine.logMessage.MAILINF000)
@@ -39,7 +39,7 @@ const mail = async function (to, subject, text) {
     from: user,
     to: to,
     subject: subject,
-    text: text
+    html: text
   }
 
   // メールを送信
