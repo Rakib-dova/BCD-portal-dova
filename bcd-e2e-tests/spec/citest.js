@@ -64,6 +64,7 @@ describe('CI TEST', function () {
 
     // 指定したURLに遷移する
     await page.goto(config.baseUrl);
+    expect('意図的に成功').to.equal('意図的に成功', 'アップロードフォーマット一覧ページに遷移すること');
     expect('AAA').to.equal('意図的にエラー', 'アップロードフォーマット一覧ページに遷移すること');
 /*
     // ログインを行う
