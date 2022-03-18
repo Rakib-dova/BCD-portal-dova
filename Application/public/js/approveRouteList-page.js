@@ -78,7 +78,7 @@ Array.prototype.forEach.call(document.querySelectorAll('#modalDelBtn'), (item) =
             location.reload()
             break
           case -1:
-            alert('既に削除されています。')
+            alert('既に削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
             location.reload()
             break
         }
@@ -112,7 +112,7 @@ document.getElementsByName('confirmButton').forEach((item) => {
             location.href = '/approveRouteEdit' + '/' + uuid
             break
           case -1:
-            alert('既に削除されています。')
+            alert('既に削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
             location.reload()
             break
           default:
