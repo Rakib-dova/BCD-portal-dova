@@ -1,31 +1,27 @@
 ﻿.box
-  .column.m-0
-    .column.pl-4.pt-0
+  .column.m-0.p-0
+    .column.py-0
       a.button.is-link#btn-approveRouteInsert.show-modal(data-target='approveRoute-modal') 承認ルート選択
-    .column#displayRequestApprovaRoute
+    .column.m-0.p-0.py-4#displayRequestApprovaRoute
       - const approvalNo = ['一次承認', '二次承認', '三次承認', '四次承認', '五次承認', '六次承認', '七次承認', '八次承認', '九次承認', '十次承認', '最終承認']
       if approveRoute
-        .columns
-          .column
+        .columns.px-0.mx-0.is-border-left-top-bottom
+          .column.text-left.is-one-fifth.is-color-table-header.is-border-right
             p 承認ルート名
-          .column#approveRouteName
+          .column.is-border-right#approveRouteName
             p #{approveRoute.name}
             input(type='hidden' name='approveRouteId' value=`${approveRoute.approveRouteId}`)
-        .columns
-          .column
         section#displayDetailApproveRouteTable
-          .columns
-            .column 承認順
-            .column 承認者
+          .columns.m-0.p-0.is-color-table-header.is-border-left-top.is-max-width
+            .column.is-one-third.text-left.is-border-right 承認順
+            .column.text-left.is-border-right 担当者名
           - const userLen = approveRoute.users.length
-          each user, idx in approveRoute.users
+          each user, idx in approveRoute.users            
             if idx < userLen - 1
-              .columns
-                .column #{approvalNo[idx]}
-                .column #{user.FirstName} #{user.LastName}
+              .columns.m-0.p-0.is-border-left-top.is-max-width
+                .column.is-one-third.text-left.is-border-right #{approvalNo[idx]}
+                .column.text-left.is-border-right #{user.FirstName} #{user.LastName}
             else
-              .columns
-                .column #{approvalNo.slice(-1)}
-                .column #{user.FirstName} #{user.LastName}
-
-                     
+              .columns.m-0.p-0.is-border-left-top-bottom.is-max-width
+                .column.is-one-third.text-left.is-border-right #{approvalNo.slice(-1)}
+                .column.text-left.is-border-right  #{user.FirstName} #{user.LastName}

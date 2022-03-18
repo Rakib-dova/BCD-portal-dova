@@ -50,6 +50,24 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
             approveUser[`${keys[i]}`] = approvalData[keys[i]]
             userAccounts = await tradeshiftDTO.findUser(approvalData[keys[i]])
             userAccounts.message = approvalData[`message${no}`]
+            if (approvalData[`approvalAt${no}`] !== null) {
+              userAccounts.status = '承認済み'
+              userAccounts.approvedAt = approvalData[`approvalAt${no}`]
+            } else {
+              const status = ~~approvalData.approveStatus - 9
+              if (no === 'Last' && status === approvalData.approveUserCount) {
+                userAccounts.status = '処理中'
+                userAccounts.approvedAt = ''
+              } else {
+                if (status === ~~no) {
+                  userAccounts.status = '処理中'
+                  userAccounts.approvedAt = ' '
+                } else {
+                  userAccounts.status = ' '
+                  userAccounts.approvedAt = ' '
+                }
+              }
+            }
             userList.push(userAccounts)
             break
         }
@@ -73,6 +91,14 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
       prevUser: {
         name: null,
         message: null
+      },
+      requester: {
+        no: '支払依頼',
+        name: requester.getName(),
+        status: '依頼済み',
+        requestedAt: `${requestApproval.create.getFullYear()}-${
+          requestApproval.create.getMonth() + 1
+        }-${requestApproval.create.getDate()} ${requestApproval.create.getHours()}:${requestApproval.create.getMinutes()}:${requestApproval.create.getSeconds()}`
       }
     }
 
