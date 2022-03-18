@@ -714,4 +714,297 @@ describe('inboxListのテスト', () => {
       expect(response.send).toHaveBeenCalledWith('許可されていません。')
     })
   })
+
+  describe('コールバック:cbGetApprovals', () => {
+    test('正常', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      requestApprovalControllerSpy.mockReturnValue(null)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList', {
+        listArr: searchResult1.list,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
+        rejectedFlag: true
+      })
+    })
+
+    test('正常：承認待ちの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.session.waitingApprovalList = true
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      requestApprovalControllerSpy.mockReturnValue(null)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList', {
+        listArr: searchResult1.list,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
+        rejectedFlag: true
+      })
+    })
+
+    test('正常:請求書の支払依頼検索の結果がnullではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      requestApprovalControllerSpy.mockReturnValue(returnRequestApproval)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList', {
+        listArr: searchResult1.list,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
+        rejectedFlag: true
+      })
+    })
+
+    test('正常：解約申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[6])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('正常：500エラー:requestApprovalエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      const dbError = new Error('DB Conncetion Error')
+      requestApprovalControllerSpy.mockReturnValue(dbError)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー:不正なContractデータの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[7])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[7])
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：requestのsession,userIdがnullの場合', async () => {
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      const userDbError = new Error('User Table Error')
+      userControllerFindOneSpy.mockReturnValue(userDbError)
+
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：user.statusが0ではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[2] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[8])
+
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(404))
+    })
+
+    test('500エラー：contracts検索の時、DBエラー', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      const contractDbError = new Error('Contracts Table Error')
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+      contractControllerFindOneSpy.mockReturnValue(contractDbError)
+
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('500エラー：テナントと契約テーブル検索結果無', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      tenantControllerFindOneSpy.mockReturnValue(null)
+      contractControllerFindContractSpyon.mockReturnValue(null)
+
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+  })
 })

@@ -231,8 +231,6 @@ describe('approvalInboxControllerのテスト', () => {
         tenant
       )
 
-      console.log(result)
-
       // 期待結果
       // 想定したデータがReturnされていること
       expect(result.requestId).toEqual(expectResult.requestId)
@@ -379,8 +377,6 @@ describe('approvalInboxControllerのテスト', () => {
         tenant
       )
 
-      console.log(result)
-
       // 期待結果
       // 想定したデータがReturnされていること
       expect(result.requestId).toEqual(expectResult.requestId)
@@ -470,8 +466,6 @@ describe('approvalInboxControllerのテスト', () => {
         tenant
       )
 
-      console.log(result)
-
       // 期待結果
       // 想定したデータがReturnされていること
       expect(result).toEqual(null)
@@ -555,8 +549,6 @@ describe('approvalInboxControllerのテスト', () => {
         invoiceId,
         tenant
       )
-
-      console.log(result)
 
       // 期待結果
       // 想定したデータがReturnされていること
