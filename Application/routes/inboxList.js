@@ -227,5 +227,6 @@ router.get('/:page', helper.isAuthenticated, cbGetIndex)
 module.exports = {
   router: router,
   cbGetIndex: cbGetIndex,
-  cbGetWorkflow: cbGetWorkflow
+  cbGetWorkflow: cbGetWorkflow,
+  cbGetApprovals: cbGetApprovals
 }

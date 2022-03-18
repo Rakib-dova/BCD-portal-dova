@@ -216,8 +216,10 @@ const cbPostApprove = async (req, res, next) => {
 
     if (sendMailStatus === 0) {
       req.flash('info', '承認を完了しました。次の承認者にはメールで通知が送られます。')
+    } else if (sendMailStatus === 1) {
+      req.flash('info', '承認を完了しました。依頼者にはメールで通知が送られます。')
     } else {
-      req.flash('info', '承認を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
+      req.flash('error', '承認を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
     }
     res.redirect('/inboxList/1')
   } else {
