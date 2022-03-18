@@ -13,6 +13,7 @@ const inboxController = require('../controllers/inboxController')
 const approvalInboxController = require('../controllers/approvalInboxController')
 const notiTitle = '承認する支払依頼確認'
 const approverController = require('../controllers/approverController')
+const mailMsg = require('../lib/mailMsg')
 
 const bodyParser = require('body-parser')
 router.use(
@@ -154,6 +155,9 @@ const cbPostApprove = async (req, res, next) => {
   const invoiceId = req.params.invoiceId
   const data = req.body
   const requestId = requestApproval.requestId
+  const accessToken = req.user.accessToken
+  const refreshToken = req.user.refreshToken
+  const tenantId = req.user.tenantId
 
   // 依頼者と承認ルートの承認者のかを確認する。
   const hasNotPowerOfEditing = !(await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval))
@@ -204,7 +208,21 @@ const cbPostApprove = async (req, res, next) => {
   if (result instanceof Error === true) return next(errorHelper.create(500))
 
   if (result) {
-    req.flash('info', '承認が完了しました。')
+    const sendMailStatus = await mailMsg.sendPaymentRequestMail(
+      accessToken,
+      refreshToken,
+      contractId,
+      invoiceId,
+      tenantId
+    )
+
+    if (sendMailStatus === 0) {
+      req.flash('info', '承認を完了しました。次の承認者にはメールで通知が送られます。')
+    } else if (sendMailStatus === 1) {
+      req.flash('info', '承認を完了しました。依頼者にはメールで通知が送られます。')
+    } else {
+      req.flash('error', '承認を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
+    }
     res.redirect('/inboxList/1')
   } else {
     req.flash('noti', ['支払依頼', '承認に失敗しました。'])

@@ -546,6 +546,89 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       await browser.close()
     })
+
+    test('支払依頼時ダイアログ確認', async () => {
+      const contract = await db.Contract.findOne({
+        where: {
+          tenantId: testTenantId
+        }
+      })
+
+      const v4 = require('uuid').v4
+      const testApproveRoute = new db.ApproveRoute({
+        approveRouteId: v4(),
+        contractId: contract.contractId,
+        approveRouteName: 'integrationApproveRoute',
+        deleteFlag: 0,
+        updateFlag: 0
+      })
+      await testApproveRoute.save()
+
+      const testApproveUser = new db.ApproveUser({
+        approveUserId: v4(),
+        approveRouteId: testApproveRoute.approveRouteId,
+        approveUser: 'aa974511-8188-4022-bd86-45e251fd259e',
+        prevApproveUser: null,
+        nextApproveUser: null,
+        isLastApproveUser: 1
+      })
+      await testApproveUser.save()
+
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      // 承認ルート選択ボタン押下
+      await page.click('#btn-approveRouteInsert')
+
+      await page.waitForTimeout(1000)
+
+      // 承認ルート検索
+      await page.click('#btnSearchApproveRoute')
+
+      await page.waitForTimeout(2000)
+
+      await page.click('#displayFieldApproveRouteResultBody > tr > td.btnSelect > a')
+
+      await page.waitForTimeout(2500)
+
+      // メッセージ入力
+      await page.type('#inputMsg', 'インテグレーションテスト')
+
+      // 保存ボタン押下
+      await page.click('#form > div.grouped-button > button')
+
+      await page.waitForTimeout(7000)
+
+      // 支払依頼画面にredirectする。
+      expect(page.url()).toBe(`https://localhost:3000${redirectUrl}`)
+
+      // 確認ボタン押下
+      await page.click('#btn-confirm')
+
+      await page.waitForTimeout(1000)
+
+      // 依頼ボタン押下
+      await page.click('#btn-approval')
+
+      await page.waitForTimeout(3000)
+
+      // 一覧画面にredirectする。
+      expect(await page.url()).toBe('https://localhost:3000/inboxList/1')
+
+      // 仕訳一括設定モーダル開きをチェック
+      const checkOpenedModal = await page.evaluate(() => {
+        return document.getElementById('message-info').title
+      })
+
+      expect(checkOpenedModal).toMatch('支払依頼を完了しました。次の承認者にはメールで通知が送られます。')
+      await browser.close()
+    })
   })
 
   describe('5.契約ステータス：変更申込', () => {
@@ -567,6 +650,18 @@ describe('支払依頼画面のインテグレーションテスト', () => {
             }
           }
         )
+      }
+
+      // 支払依頼削除
+      const requestId = await db.RequestApproval.findOne({
+        where: {
+          contractId: contract.contractId
+        }
+      })
+
+      if (requestId.length !== 0) {
+        await db.Approval.destroy({ where: { requestId: requestId.requestId } })
+        await db.RequestApproval.destroy({ where: { contractId: contract.contractId } })
       }
 
       const res = await request(app)
