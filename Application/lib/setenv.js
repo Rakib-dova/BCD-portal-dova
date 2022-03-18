@@ -57,5 +57,5 @@ exports.config = (env) => {
   process.env.MAIL_SECURE = 'false'
   process.env.MAIL_CIPHERS = 'SSLv3'
   process.env.MAIL_USER = 'no-reply-dev1@digitaltrade.jp'
-  process.env.MAIL_PASS = 'BJ+V-BmQ#p^F69i'
+  process.env.MAIL_PASS = ''
 }
