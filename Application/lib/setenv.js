@@ -52,13 +52,10 @@ exports.config = (env) => {
   }
 
   // メール設定情報
-  const { MAIL_HOST, MAIL_PORT, MAIL_SECURE, MAIL_CIPHERS, MAIL_USER, MAIL_PASS } = JSON.parse(
-    env.MAIL_CONNECTION.replace(/'/g, '"')
-  )
-  process.env.MAIL_HOST = MAIL_HOST
-  process.env.MAIL_PORT = MAIL_PORT
-  process.env.MAIL_SECURE = MAIL_SECURE
-  process.env.MAIL_CIPHERS = MAIL_CIPHERS
-  process.env.MAIL_USER = MAIL_USER
-  process.env.MAIL_PASS = MAIL_PASS
+  process.env.MAIL_HOST = 'smtp.office365.com'
+  process.env.MAIL_PORT = '587'
+  process.env.MAIL_SECURE = 'false'
+  process.env.MAIL_CIPHERS = 'SSLv3'
+  process.env.MAIL_USER = 'bcdt-mailsend-test@actec2.onmicrosoft.com'
+  process.env.MAIL_PASS = 'Vy&Rn*(/Ft5Z'
 }
