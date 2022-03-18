@@ -56,6 +56,6 @@ exports.config = (env) => {
   process.env.MAIL_PORT = '587'
   process.env.MAIL_SECURE = 'false'
   process.env.MAIL_CIPHERS = 'SSLv3'
-  process.env.MAIL_USER = 'no-reply-dev1@digitaltrade.jp'
+  process.env.MAIL_USER = 'bcdt-mailsend-test@actec2.onmicrosoft.com'
   process.env.MAIL_PASS = 'Vy&Rn*(/Ft5Z'
 }
