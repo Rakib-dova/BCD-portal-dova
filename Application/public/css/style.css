@@ -740,3 +740,30 @@ body > div.hero.is-small {
 .color-link-modal-header > .modal-card-title {
   color: white;
 }
+
+.is-border-left-top {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 1px 0px 0px 1px;
+  border-collapse: collapse;
+}
+
+.is-border-right {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 0px 1px 0px 0px;
+  border-collapse: collapse;
+}
+
+.is-border-left-top-bottom {
+  border-color: #363636;
+  border-style: solid;
+  border-width: 1px 0px 1px 1px;
+  border-collapse: collapse;
+}
+
+.is-color-table-header {
+  color: white;
+  background-color: #3298dc;
+  font-weight: bold;
+}
