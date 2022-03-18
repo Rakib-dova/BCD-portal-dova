@@ -95,7 +95,7 @@ ${userName} 様
 
 対象の請求書番号：${invoiceNumber}
 詳細はこちら
-https://bcd-portal.tsdev.biz/inboxList/approvals
+https://bcd-portal.tsdev.biz/inboxList/1
 ※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。
 
 -----------------------------------------------------
@@ -113,7 +113,7 @@ ${userName} 様
 
 対象の請求書番号：${invoiceNumber}
 詳細はこちら
-https://bcd-portal.tsdev.biz/inboxList/1
+https://bcd-portal.tsdev.biz/inboxList/approvals
 ※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。
 
 -----------------------------------------------------
