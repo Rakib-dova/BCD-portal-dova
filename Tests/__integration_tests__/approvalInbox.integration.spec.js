@@ -126,14 +126,27 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       })
       await testApproveRoute.save()
 
-      const testApproveUser = new db.ApproveUser({
+      const testApproveUserId1 = v4()
+      const testApproveUserId2 = v4()
+      const testApproveUser1 = new db.ApproveUser({
+        approveUserId: testApproveUserId1,
         approveRouteId: testApproveRoute.approveRouteId,
         approveUser: 'aa974511-8188-4022-bd86-45e251fd259e',
         prevApproveUser: null,
-        nextApproveUser: null,
+        nextApproveUser: testApproveUserId2,
         isLastApproveUser: 0
       })
-      await testApproveUser.save()
+      await testApproveUser1.save()
+
+      const testApproveUser2 = new db.ApproveUser({
+        approveUserId: testApproveUserId2,
+        approveRouteId: testApproveRoute.approveRouteId,
+        approveUser: '53607702-b94b-4a94-9459-6cf3acd65603',
+        prevApproveUser: testApproveUserId1,
+        nextApproveUser: null,
+        isLastApproveUser: 1
+      })
+      await testApproveUser2.save()
 
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
@@ -212,11 +225,17 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
-      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/処理中/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 管理者/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
@@ -231,8 +250,15 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
-      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/処理中/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 管理者/i)
       expect(res.text).toMatch(/戻る/i)
       expect(res.text).toMatch(/差し戻し/i)
       expect(res.text).toMatch(/承認/i)
@@ -287,11 +313,17 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
-      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/処理中/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 管理者/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
@@ -306,8 +338,15 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
-      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/処理中/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 管理者/i)
       expect(res.text).toMatch(/戻る/i)
       expect(res.text).toMatch(/差し戻し/i)
       expect(res.text).toMatch(/承認/i)
@@ -364,11 +403,17 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
-      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/処理中/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 管理者/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
@@ -383,8 +428,15 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
-      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/処理中/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 管理者/i)
       expect(res.text).toMatch(/戻る/i)
       expect(res.text).toMatch(/差し戻し/i)
       expect(res.text).toMatch(/承認/i)
@@ -471,7 +523,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       await page.waitForTimeout(500)
 
       // 支払依頼一覧に遷移
-      expect(page.url()).toBe('https://localhost:3000/inboxList/redirected/1')
+      expect(page.url()).toBe('https://localhost:3000/inboxList/1')
 
       await browser.close()
     })
@@ -566,11 +618,17 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
-      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/処理中/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 管理者/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
@@ -585,8 +643,15 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
-      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/処理中/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 管理者/i)
       expect(res.text).toMatch(/戻る/i)
       expect(res.text).toMatch(/差し戻し/i)
       expect(res.text).toMatch(/承認/i)
@@ -641,11 +706,17 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
-      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/処理中/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 管理者/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
@@ -660,8 +731,15 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
-      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
       expect(res.text).toMatch(/インテグレーション 一般/i)
+      expect(res.text).toMatch(/処理中/i)
+      expect(res.text).toMatch(/最終承認/i)
+      expect(res.text).toMatch(/インテグレーション 管理者/i)
       expect(res.text).toMatch(/戻る/i)
       expect(res.text).toMatch(/差し戻し/i)
       expect(res.text).toMatch(/承認/i)
