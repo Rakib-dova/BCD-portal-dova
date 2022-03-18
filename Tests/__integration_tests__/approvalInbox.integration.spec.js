@@ -116,6 +116,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         }
       })
 
+      // 承認ルート登録
       const v4 = require('uuid').v4
       const testApproveRoute = new db.ApproveRoute({
         approveRouteId: v4(),
@@ -127,12 +128,14 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       await testApproveRoute.save()
 
       const testApproveUser = new db.ApproveUser({
+        approveUserId: v4(),
         approveRouteId: testApproveRoute.approveRouteId,
         approveUser: 'aa974511-8188-4022-bd86-45e251fd259e',
         prevApproveUser: null,
         nextApproveUser: null,
-        isLastApproveUser: 0
+        isLastApproveUser: 1
       })
+
       await testApproveUser.save()
 
       const puppeteer = require('puppeteer')
@@ -196,7 +199,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       // 依頼ボタン押下
       await page.click('#btn-approval')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(6000)
 
       // 一覧画面にredirectする。
       expect(await page.url()).toBe('https://localhost:3000/inboxList/1')
@@ -454,7 +457,77 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       await browser.close()
     })
 
-    test('差し戻死後、一覧遷移', async () => {
+    test('承認後、一覧遷移とダイアログ確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      await page.click('#checkApproval')
+      await page.waitForTimeout(500)
+
+      await page.click('#btn-approve')
+      await page.waitForTimeout(6000)
+
+      // 支払依頼一覧に遷移
+      expect(page.url()).toBe('https://localhost:3000/inboxList/1')
+
+      // 仕訳一括設定モーダル開きをチェック
+      const checkOpenedModal = await page.evaluate(() => {
+        return document.getElementById('message-info').title
+      })
+
+      expect(checkOpenedModal).toMatch('承認を完了しました。依頼者にはメールで通知が送られます。')
+
+      await browser.close()
+    })
+
+    test('差し戻し後、一覧遷移とダイアログ確認', async () => {
+      // 支払依頼ステータス戻し
+      const invoiceId = redirectUrl.replace('/approvalInbox/', '')
+      const requestApproval = await db.RequestApproval.findOne({
+        where: {
+          invoiceId: invoiceId
+        }
+      })
+
+      const approval = await db.Approval.findOne({
+        where: {
+          requestId: requestApproval.dataValues.requestId
+        }
+      })
+
+      if (approval.dataValues.approveStatus !== '10') {
+        await db.Approval.update(
+          {
+            approveStatus: '10'
+          },
+          {
+            where: {
+              requestId: requestApproval.dataValues.requestId
+            }
+          }
+        )
+      }
+
+      if (requestApproval.dataValues.status !== '10') {
+        await db.RequestApproval.update(
+          {
+            status: '10',
+            message: 'インテグレーションテスト'
+          },
+          {
+            where: {
+              invoiceId: invoiceId
+            }
+          }
+        )
+      }
+
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -468,10 +541,17 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       await page.waitForTimeout(500)
 
       await page.click('#btn-reject')
-      await page.waitForTimeout(500)
+      await page.waitForTimeout(6000)
 
       // 支払依頼一覧に遷移
-      expect(page.url()).toBe('https://localhost:3000/inboxList/redirected/1')
+      expect(page.url()).toBe('https://localhost:3000/inboxList/1')
+
+      // 仕訳一括設定モーダル開きをチェック
+      const checkOpenedModal = await page.evaluate(() => {
+        return document.getElementById('message-info').title
+      })
+
+      expect(checkOpenedModal).toMatch('支払依頼を差し戻しました。依頼者にはメールで通知が送られます。')
 
       await browser.close()
     })
@@ -895,8 +975,10 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         }
       })
 
-      await db.Approval.destroy({ where: { requestId: requestId.requestId } })
-      await db.RequestApproval.destroy({ where: { contractId: contract.contractId } })
+      if (requestId.length !== 0) {
+        await db.Approval.destroy({ where: { requestId: requestId.requestId } })
+        await db.RequestApproval.destroy({ where: { contractId: contract.contractId } })
+      }
       await db.User.destroy({ where: { tenantId: testTenantId } })
       await db.Tenant.destroy({ where: { tenantId: testTenantId } })
     })

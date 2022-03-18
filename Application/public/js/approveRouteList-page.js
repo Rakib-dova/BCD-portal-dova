@@ -85,3 +85,40 @@ Array.prototype.forEach.call(document.querySelectorAll('#modalDelBtn'), (item) =
       })
   })
 })
+
+// 「確認・変更」ボタン押下時の処理
+document.getElementsByName('confirmButton').forEach((item) => {
+  item.addEventListener('click', function (e) {
+    const uuid = item.getAttribute('uuid')
+    const url = `/deleteApproveRoute/${uuid}`
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((response) => response.json())
+      .catch(() => {
+        return { result: 'SYSERR' }
+      })
+      .then((response) => {
+        // 削除失敗
+        switch (response.result) {
+          case 0:
+            alert('削除失敗しました。（システムエラー）')
+            break
+          case 1:
+            // 確認ページに遷移
+            location.href = '/approveRouteEdit' + '/' + uuid
+            break
+          case -1:
+            alert('既に削除されています。\n「OK」ボタンを押下し、画面内容を最新にします。')
+            location.reload()
+            break
+          default:
+            alert('システムエラーが発生しました。')
+            break
+        }
+      })
+  })
+})
