@@ -50,4 +50,12 @@ exports.config = (env) => {
   } else {
     process.env.BCA_BC_COOKIE_SECURE = false
   }
+
+  // メール設定情報
+  process.env.MAIL_HOST = 'smtp.office365.com'
+  process.env.MAIL_PORT = '587'
+  process.env.MAIL_SECURE = 'false'
+  process.env.MAIL_CIPHERS = 'SSLv3'
+  process.env.MAIL_USER = 'no-reply-dev1@digitaltrade.jp'
+  process.env.MAIL_PASS = 'BJ+V-BmQ#p^F69i'
 }

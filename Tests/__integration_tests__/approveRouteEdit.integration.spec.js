@@ -386,7 +386,6 @@ describe('承認ルート確認・変更のインテグレーションテスト'
       expect(res.text).toMatch(/1/i)
       expect(res.text).toMatch(/確認・変更する/i)
       expect(res.text).toMatch(/削除/i)
-      expect(res.text).toMatch(/非表示/i)
       expect(res.text).toMatch(/←Homeへ戻る/i)
     })
 

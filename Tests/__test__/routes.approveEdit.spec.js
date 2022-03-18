@@ -392,40 +392,6 @@ describe('approveRouteListのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('registApproveRoute', expectRegistApproveRoute)
     })
 
-    test('正常:承認ルートデータがない場合', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.user = { ...user[0] }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
-      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
-
-      // 承認ルートDB検索結果
-      approveRoutegetApproveRouteSpy.mockReturnValueOnce([])
-
-      // 試験実施
-      await approveRouteEdit.cbGetIndex(request, response, next)
-
-      // 期待結果
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでapproveRouteListが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', [
-        '承認ルート一覧',
-        '当該承認ルートをDBから見つかりませんでした。'
-      ])
-      expect(response.redirect).toHaveBeenCalledWith('/approveRouteList')
-    })
-
     test('正常：解約申込中の場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる

@@ -35,15 +35,6 @@ module.exports = (sequelize, DataTypes) => {
       requestUserId: {
         type: DataTypes.UUID
       },
-      approveRouteId: {
-        type: DataTypes.UUID,
-        references: {
-          model: {
-            tableName: 'ApproveRoute'
-          },
-          key: 'approveRouteId'
-        }
-      },
       approveStatus: {
         type: DataTypes.STRING,
         references: {
