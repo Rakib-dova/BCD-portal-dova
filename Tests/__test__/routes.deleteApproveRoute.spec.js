@@ -10,6 +10,8 @@ const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
 const helper = require('../../Application/routes/helpers/middleware')
+const noticeHelper = require('../../Application/routes/helpers/notice')
+const errorHelper = require('../../Application/routes/helpers/error')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
@@ -24,7 +26,7 @@ if (process.env.LOCALLY_HOSTED === 'true') {
 
 let request, response
 let infoSpy, findOneSpy, findOneSypTenant, findOneSpyContracts, pathSpy
-let helpercheckContractStatusSpy, deleteApproveRouteSpy
+let helpercheckContractStatusSpy, deleteApproveRouteSpy, checkApproveRouteSpy
 
 describe('deleteApproveRouteのテスト', () => {
   beforeEach(() => {
@@ -37,6 +39,7 @@ describe('deleteApproveRouteのテスト', () => {
     pathSpy = jest.spyOn(path, 'join')
     helpercheckContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     deleteApproveRouteSpy = jest.spyOn(ApproverController, 'deleteApproveRoute')
+    checkApproveRouteSpy = jest.spyOn(ApproverController, 'checkApproveRoute')
   })
   afterEach(() => {
     request.resetMocked()
@@ -49,6 +52,7 @@ describe('deleteApproveRouteのテスト', () => {
     pathSpy.mockRestore()
     helpercheckContractStatusSpy.mockRestore()
     deleteApproveRouteSpy.mockRestore()
+    checkApproveRouteSpy.mockRestore()
   })
 
   // 404エラー定義
@@ -350,6 +354,204 @@ describe('deleteApproveRouteのテスト', () => {
       // 期待結果
       // 500エラーの場合レスポンスボディのresultで0を返す
       expect(response.body.result).toBe(0)
+    })
+  })
+
+  describe('cbGetCheckApproveRoute', () => {
+    test('正常：存在する', async () => {
+      request.session = {
+        usercontext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.params = {
+        approveRouteId: '55555555-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      findOneSpy.mockReturnValue(dataValues)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
+
+      // 削除結果（Mock）
+      checkApproveRouteSpy.mockReturnValue(true)
+
+      // 勘定科目チェック
+      await deleteApproveRoute.cbGetCheckApproveRoute(request, response, next)
+
+      // 正常の場合、レスポンスボディのresultで1を返す
+      expect(response.body.result).toBe(1)
+    })
+
+    test('準正常：解約中', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        usercontext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの正常な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractInfoDatatoBeReceiptCancel)
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptCancel.dataValues.contractStatus)
+
+      // 勘定科目チェック
+      await deleteApproveRoute.cbGetCheckApproveRoute(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(error500)
+
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('準正常:既に削除しました。', async () => {
+      request.session = {
+        usercontext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.params = {
+        approveRouteId: '55555555-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      findOneSpy.mockReturnValue(dataValues)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      helper.checkContractStatus = (req, res, nex) => {
+        return '00'
+      }
+      // 削除結果（Mock）
+      checkApproveRouteSpy.mockReturnValueOnce(false)
+
+      // 勘定科目チェック
+      await deleteApproveRoute.cbGetCheckApproveRoute(request, response, next)
+
+      // 準正常の場合（既に削除された場合）、レスポンスボディのresultで-1を返す
+      expect(response.body.result).toBe(-1)
+    })
+
+    test('準正常:DBエラー発生', async () => {
+      request.session = {
+        usercontext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      findOneSpy.mockReturnValue(dataValues)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      helper.checkContractStatus = (req, res, nex) => {
+        return '00'
+      }
+
+      // 勘定科目チェック
+      await deleteApproveRoute.cbGetCheckApproveRoute(request, response, next)
+
+      // 準正常の場合（DBエラー発生）、レスポンスボディのresultで0を返す
+      expect(response.body.result).toBe(0)
+    })
+
+    test('異常：500エラー（DBからユーザ取得エラー）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBからのユーザデータの取得ができなかった(null)場合を想定する
+      findOneSpy.mockReturnValue(null)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
+
+      // 勘定科目チェック
+      await deleteApproveRoute.cbGetCheckApproveRoute(request, response, next)
+
+      // 期待結果
+      // 500エラーの場合
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('異常：404エラーDBから取得したユーザのuserStatusが0以外の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+      // DBから取得したユーザデータのuserStatusが0以外の場合を想定する
+      findOneSpy.mockReturnValue(dataValuesStatuserr)
+      findOneSpyContracts.mockReturnValue(contractdataValues)
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
+
+      // 勘定科目チェック
+      await deleteApproveRoute.cbGetCheckApproveRoute(request, response, next)
+
+      // 期待結果
+      // 500エラーの場合
+      expect(next).toHaveBeenCalledWith(errorHelper.create(404))
+    })
+
+    test('異常：500エラー（ContractStatusが取得されない場合）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの契約情報を取得出来なかったことを想定する
+      findOneSpyContracts.mockReturnValue(null)
+
+      // 勘定科目チェック
+      await deleteApproveRoute.cbGetCheckApproveRoute(request, response, next)
+
+      // 期待結果
+      // 500エラーの場合
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('異常：500エラー（不正なContractStatus）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'LoggedIn',
+        userRole: 'dummy'
+      }
+      request.user = user
+
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue(dataValues)
+      // DBからの不正な契約情報取得を想定する
+      findOneSpyContracts.mockReturnValue(contractdataValues4)
+      // ユーザ権限チェック結果設定
+      helpercheckContractStatusSpy.mockReturnValue(999)
+
+      // 勘定科目チェック
+      await deleteApproveRoute.cbGetCheckApproveRoute(request, response, next)
+
+      // 期待結果
+      // 500エラーの場合
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })
 })

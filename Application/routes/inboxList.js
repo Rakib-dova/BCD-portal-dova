@@ -184,7 +184,7 @@ const cbGetApprovals = async (req, res, next) => {
   // ページ取得
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
-  const pageId = ~~req.params.page
+  const pageId = 1
   const tenantId = user.tenantId
   const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
 
@@ -202,12 +202,19 @@ const cbGetApprovals = async (req, res, next) => {
     }
   }
 
+  let rejectedFlag = true
+
+  if (req.session.waitingApprovalList) {
+    rejectedFlag = true
+    delete req.session.waitingApprovalList
+  }
+
   // 受領した請求書一覧レンダリング
   res.render('inboxList', {
     listArr: result.list,
     numPages: result.numPages,
     currPage: result.currPage,
-    rejectedFlag: true
+    rejectedFlag: rejectedFlag
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetApprovals')

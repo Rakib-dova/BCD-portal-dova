@@ -50,4 +50,15 @@ exports.config = (env) => {
   } else {
     process.env.BCA_BC_COOKIE_SECURE = false
   }
+
+  // メール設定情報
+  const { MAIL_HOST, MAIL_PORT, MAIL_SECURE, MAIL_CIPHERS, MAIL_USER, MAIL_PASS } = JSON.parse(
+    env.MAIL_CONNECTION.replace(/'/g, '"')
+  )
+  process.env.MAIL_HOST = MAIL_HOST
+  process.env.MAIL_PORT = MAIL_PORT
+  process.env.MAIL_SECURE = MAIL_SECURE
+  process.env.MAIL_CIPHERS = MAIL_CIPHERS
+  process.env.MAIL_USER = MAIL_USER
+  process.env.MAIL_PASS = MAIL_PASS
 }

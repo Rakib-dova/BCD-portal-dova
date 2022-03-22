@@ -393,7 +393,7 @@ describe('ルーティングのインテグレーションテスト', () => {
         .expect(200)
 
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
-      expect(res.text).toMatch(/承認依頼が/i) // 支払依頼通知が含まれていること
+      expect(res.text).toMatch(/支払依頼が/i) // 支払依頼通知が含まれていること
       expect(res.text).toMatch(/件あります。/i) // 支払依頼差し戻し通知が含まれていること
     })
 
