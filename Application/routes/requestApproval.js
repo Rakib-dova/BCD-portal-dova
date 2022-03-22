@@ -424,7 +424,6 @@ const cbPostApproval = async (req, res, next) => {
   const refreshToken = req.user.refreshToken
   const tenantId = req.user.tenantId
 
-
   // 承認ルートに誤りがある場合
   const isApproveRoute = await approverController.checkApproveRoute(contractId, approveRouteId)
   if (isApproveRoute === false) {
