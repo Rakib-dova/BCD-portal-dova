@@ -150,10 +150,12 @@ block content
               i.fas.fa-minus-circle
 
   template#template-display-detail-approveRoute
-    .columns.px-0.mx-0.is-border-left-top-bottom
-      .column.text-left.is-one-fifth.is-color-table-header.is-border-right
+    .columns
+      .column
         p 承認ルート名
-      .column.is-border-right#approveRouteName
+      .column#approveRouteName
+    .columns
+      .column
     section#displayDetailApproveRouteTable
 
   .modal#approveRoute-modal

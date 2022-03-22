@@ -226,16 +226,8 @@ const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
     const noElement = document.createElement('div')
     const nameElement = document.createElement('div')
     element.classList.add('columns')
-    element.classList.add('m-0')
-    element.classList.add('p-0')
-    element.classList.add('is-max-width')
     noElement.classList.add('column')
-    noElement.classList.add('is-one-third')
-    noElement.classList.add('text-left')
-    noElement.classList.add('is-border-right')
     nameElement.classList.add('column')
-    nameElement.classList.add('text-left')
-    nameElement.classList.add('is-border-right')
     noElement.innerText = noText
     nameElement.innerText = name
     element.appendChild(noElement)
@@ -243,27 +235,15 @@ const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
     return element
   }
   const approverLen = approver.length
-  const header = createApproverRow('承認順', '承認者')
-  header.classList.add('is-border-left-top')
-  header.querySelectorAll('.column')[0].classList.add('is-color-table-header')
-  header.querySelectorAll('.column')[1].classList.add('is-color-table-header')
-  cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(header)
+  cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(createApproverRow('承認順', '承認者'))
   for (let idx = 0; idx < approverLen; idx++) {
     let no = null
     if (idx < approverLen - 1) {
       no = approValNo[idx]
     } else {
-      no = approValNo.slice(-1)[0]
+      no = approValNo.slice(-1)
     }
     const rowLastApprover = createApproverRow(no, `${approver[idx].FirstName} ${approver[idx].LastName}`)
-
-    if (no !== approValNo.slice(-1)[0]) {
-      rowLastApprover.classList.add('is-border-left-top')
-      rowLastApprover.classList.add('is-max-width')
-    } else {
-      rowLastApprover.classList.add('is-border-left-top-bottom')
-      rowLastApprover.classList.add('is-max-width')
-    }
     cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(rowLastApprover)
   }
   blackboard.appendChild(cloneTemplate)
