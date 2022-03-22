@@ -42,6 +42,9 @@ html
     if messages.info
       #message-info(title= messages.info[0])
 
+    if messages.error
+      #message-error(title= messages.error[0])
+
     if messages.noti
       .modal.modal-fx-fadeInscale#confirmmodify-modal.is-active
               .modal-background.cancel-button(data-target="confirmmodify-modal")

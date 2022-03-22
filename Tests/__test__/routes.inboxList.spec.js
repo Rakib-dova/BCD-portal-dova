@@ -457,7 +457,7 @@ describe('inboxListのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('500エラー：user.statusが0ではない場合', async () => {
+    test('404エラー：user.statusが0ではない場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -717,7 +717,7 @@ describe('inboxListのテスト', () => {
   })
 
   describe('コールバック:cbGetApprovals', () => {
-    test('正常:承認待ちへ遷移', async () => {
+    test('正常', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -753,7 +753,44 @@ describe('inboxListのテスト', () => {
       })
     })
 
-    test('正常:支払依頼タブ表示のため、支払依頼データがある場合', async () => {
+    test('正常：承認待ちの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.session.waitingApprovalList = true
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      requestApprovalControllerSpy.mockReturnValue(null)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // 試験実施
+      await inboxList.cbGetApprovals(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList', {
+        listArr: searchResult1.list,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
+        rejectedFlag: true
+      })
+    })
+
+    test('正常:請求書の支払依頼検索の結果がnullではない場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -913,7 +950,7 @@ describe('inboxListのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('500エラー：user.statusが0ではない場合', async () => {
+    test('404エラー：user.statusが0ではない場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }

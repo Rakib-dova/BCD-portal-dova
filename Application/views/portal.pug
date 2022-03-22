@@ -17,7 +17,7 @@ block content
       .column.is-12.menu
         if Number.isInteger(requestNoticeCnt) && requestNoticeCnt > 0
           .approvalNotification
-            .approvalNotificationMessage 承認依頼が
+            .approvalNotificationMessage 支払依頼が
               .approvalNotificationCnt #{requestNoticeCnt}
               | 件あります。
             a.approvalNotificationLink(href='/inboxList/approvals') 確認
