@@ -12,10 +12,13 @@ block content
         include invoiceFooter
         include requestApprovalMessage
         include requestApprovalRoute
-        .grouped-button
-          a.button.mr-6(href=`/inbox/${documentId}`) 仕訳情報設定へ
-          button.button.mr-6.is-success(type='submit') 保存
-          a.button.is-link.show-modal#btn-confirm(data-target='check-approval-modal') 確認
+
+        .field.is-grouped.is-grouped-centered
+          .control
+            .column
+              div.button-area
+                a.button.mr-6(href=`/inbox/${documentId}`) 仕訳情報設定へ
+                a.button.is-link.show-modal#btn-confirm(data-target='check-approval-modal') 確認
 
   template#templateLineAccountCodeItem
     .columns.m-0.p-1.lineAccountcode

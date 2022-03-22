@@ -593,35 +593,31 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
     const requester = await userController.findOne(requesterId)
     const waitingWorkflowStatusCode = await approveStatusDAO.getStautsCode('支払依頼中')
 
-    const oldRequest = await requestApprovalDAO.getpreWorkflowRequestApproval(invoiceId)
-
-    if (!oldRequest) {
+    const requestApprovalFind = await requestApprovalDAO.getRequestApprovalFromInvoice(invoiceId)
+    if (!requestApprovalFind) {
       const newRequest = await requestApprovalDAO.createRequestApproval(
         requester.userId,
         invoiceId,
         approveRouteId,
+        waitingWorkflowStatusCode,
         message
       )
-
       if (newRequest instanceof Request === false) return -1
-
       await newRequest.save()
       return newRequest
     }
-
     await requestApprovalDAO.updateRequestApproval(
-      oldRequest,
+      requestApprovalFind,
       requester.userId,
       approveRouteId,
       waitingWorkflowStatusCode,
       message
     )
 
-    if ((await requestApprovalDAO.saveRequestApproval(oldRequest)) instanceof Request === false) {
+    if ((await requestApprovalDAO.saveRequestApproval(requestApprovalFind)) instanceof Request === false) {
       throw Error('request approval fail')
     }
-
-    return oldRequest
+    return requestApprovalFind
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
     logger.info(constantsDefine.logMessage.INF001 + 'requestApproval')
@@ -646,6 +642,7 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     const approveStatusDAO = require('../DAO/ApproveStatusDAO')
     const requester = await userController.findOne(requesterId)
     const waitWorkflowStatusCode = await approveStatusDAO.getStautsCode('支払依頼中')
+    const rejectStatusCode = await approveStatusDAO.getStautsCode('差し戻し')
     const approveRoute = await ApproveRoute.findOne({
       where: {
         approveRouteId: approveRouteId,
@@ -690,28 +687,48 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
       }
     }
 
-    const approvalmodel = await Approval.build({
-      requestId: request.requestId,
-      requestUserId: requester.userId,
-      approveRouteId: approveRouteId,
-      approveStatus: waitWorkflowStatusCode,
-      approveRouteName: approveRoute.approveRouteName
+    let approval
+    approval = await Approval.findOne({
+      where: {
+        requestId: request.requestId,
+        approveStatus: rejectStatusCode
+      }
     })
+
+    // ステータスが未処理の場合
+    if (!approval) {
+      approval = await Approval.build({
+        requestId: request.requestId,
+        requestUserId: requester.userId,
+        approveRouteId: approveRouteId,
+        approveStatus: waitWorkflowStatusCode,
+        approveRouteName: approveRoute.approveRouteName
+      })
+      // ステータスが差し戻しの場合
+    } else {
+      approval.requestUserId = requester.userId
+      approval.approveRouteId = approveRouteId
+      approval.approveStatus = waitWorkflowStatusCode
+      approval.approveRouteName = approveRoute.approveRouteName
+      approval.rejectedUser = null
+      approval.rejectedAt = null
+      approval.rejectedMessage = null
+    }
 
     for (let i = 0; i < 10; i++) {
       if (users[i] && i < users.length - 1) {
-        approvalmodel[`approveUser${i + 1}`] = users[i].Id
+        approval[`approveUser${i + 1}`] = users[i].Id
       } else {
-        approvalmodel[`approveUser${i + 1}`] = null
+        approval[`approveUser${i + 1}`] = null
       }
-      approvalmodel[`approvalAt${i + 1}`] = null
+      approval[`approvalAt${i + 1}`] = null
+      approval[`message${i + 1}`] = null
     }
-    approvalmodel.approveUserLast = users[users.length - 1].Id
-    approvalmodel.approvalAtLast = null
-    approvalmodel.approveUserCount = users.length
-    approvalmodel.message = message
-    await approvalmodel.save()
-
+    approval.approveUserLast = users[users.length - 1].Id
+    approval.approvalAtLast = null
+    approval.messageLast = null
+    approval.approveUserCount = users.length
+    await approval.save()
     return 0
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
@@ -720,50 +737,7 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
   }
 }
 
-// メッセージ変更
-const saveMessage = async (contractId, invoiceId, requester, message, approveRouteId) => {
-  try {
-    if (approveRouteId === undefined) {
-      approveRouteId = null
-    }
-
-    const requestApprovalDAO = new RequestApprovalDAO(contractId)
-    const approveStatusDAO = require('../DAO/ApproveStatusDAO')
-    const oldRequestApproval = await requestApprovalDAO.getpreWorkflowRequestApproval(invoiceId)
-    const preWorkflowStatusCode = await approveStatusDAO.getStautsCode('未処理')
-
-    if (!oldRequestApproval) {
-      const newRequestApproval = await requestApprovalDAO.createRequestApproval(
-        requester,
-        invoiceId,
-        approveRouteId,
-        message
-      )
-      if ((await requestApprovalDAO.saveRequestApproval(newRequestApproval)) !== newRequestApproval) {
-        throw new Error('failed save a message')
-      }
-      return 0
-    }
-
-    await requestApprovalDAO.updateRequestApproval(
-      oldRequestApproval,
-      requester,
-      approveRouteId,
-      preWorkflowStatusCode,
-      message
-    )
-    if ((await requestApprovalDAO.saveRequestApproval(oldRequestApproval)) !== oldRequestApproval) {
-      throw new Error('failed save a message')
-    }
-
-    return 0
-  } catch (error) {
-    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
-    return error
-  }
-}
-
-const readApproval = async (contractId, invoiceId, isSaved) => {
+const readApproval = async (contractId, invoiceId) => {
   try {
     const request = await Request.findOne({
       where: {
@@ -774,13 +748,8 @@ const readApproval = async (contractId, invoiceId, isSaved) => {
     })
 
     if (request === null) return null
-    else {
-      if (isSaved === false) {
-        request.isSaved = false
-        await request.save()
-      }
-      return request
-    }
+
+    return request
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
     return error
@@ -928,7 +897,6 @@ module.exports = {
   duplicateApproveRoute: duplicateApproveRoute,
   searchApproveRouteList: searchApproveRouteList,
   requestApproval: requestApproval,
-  saveMessage: saveMessage,
   readApproval: readApproval,
   checkApproveRoute: checkApproveRoute,
   saveApproval: saveApproval,

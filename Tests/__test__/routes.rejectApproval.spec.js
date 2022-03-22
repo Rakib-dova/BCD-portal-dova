@@ -60,7 +60,7 @@ let request, response
 let userControllerFindOneSpy, contractControllerFindOneSpy, checkContractStatusSpy
 let approverControllerSearchApproveRouteList, inboxControllerGetInvoiceDetail
 let approverControllerGetApproveRoute, approverControllerCheckApproveRoute, approverControllerSaveApproval
-let approverControllerReadApproval, approverControllerSaveMessage
+let approverControllerReadApproval
 let rejectApporovalControllerRejectApprove
 let mailMsgSendPaymentRequestMail
 
@@ -78,7 +78,6 @@ describe('rejectApprovalのテスト', () => {
     inboxControllerGetInvoiceDetail = jest.spyOn(inboxController, 'getInvoiceDetail')
     approverControllerGetApproveRoute = jest.spyOn(approverController, 'getApproveRoute')
     approverControllerReadApproval = jest.spyOn(approverController, 'readApproval')
-    approverControllerSaveMessage = jest.spyOn(approverController, 'saveMessage')
     approverControllerCheckApproveRoute = jest.spyOn(approverController, 'checkApproveRoute')
     approverControllerSaveApproval = jest.spyOn(approverController, 'saveApproval')
     rejectApporovalControllerRejectApprove = jest.spyOn(rejectApporovalController, 'rejectApprove')
@@ -97,7 +96,6 @@ describe('rejectApprovalのテスト', () => {
     inboxControllerGetInvoiceDetail.mockRestore()
     approverControllerGetApproveRoute.mockRestore()
     approverControllerReadApproval.mockRestore()
-    approverControllerSaveMessage.mockRestore()
     approverControllerCheckApproveRoute.mockRestore()
     approverControllerSaveApproval.mockRestore()
     rejectApporovalControllerRejectApprove.mockRestore()
@@ -144,7 +142,10 @@ describe('rejectApprovalのテスト', () => {
 
       // 結果確認
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('info', '支払依頼を差し戻しました。依頼者にはメールで通知が送られます。')
+      expect(request.flash).toHaveBeenCalledWith(
+        'info',
+        '支払依頼を差し戻しました。依頼者にはメールで通知が送られます。'
+      )
       expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
 
@@ -177,7 +178,10 @@ describe('rejectApprovalのテスト', () => {
 
       // 結果確認
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('error', '支払依頼を差し戻しました。メールの通知に失敗しましたので、依頼者に連絡をとってください。')
+      expect(request.flash).toHaveBeenCalledWith(
+        'error',
+        '支払依頼を差し戻しました。メールの通知に失敗しましたので、依頼者に連絡をとってください。'
+      )
       expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
 
@@ -209,7 +213,7 @@ describe('rejectApprovalのテスト', () => {
 
       // 結果確認
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['支払依頼', '承認に失敗しました。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['支払依頼', '差し戻しに失敗しました。'])
       expect(response.redirect).toHaveBeenCalledWith(`/approvalInbox/${request.params.invoiceId}`)
     })
 
