@@ -741,6 +741,27 @@ body > div.hero.is-small {
   color: white;
 }
 
+.approvalNotification {
+  display: flex;
+  border: solid 1px #dbdbdb;
+  border-radius: 1px;
+  margin: 5px;
+  padding: 20px 15px 14px;
+  justify-content: space-between;
+}
+
+.approvalNotificationMessage,
+.approvalNotificationLink {
+  size: 20px;
+  font-weight: bold;
+  color: #3273dc;
+}
+
+.approvalNotificationCnt {
+  display: contents;
+  color: #ff0000;
+}
+
 .is-border-left-top {
   border-color: #363636;
   border-style: solid;

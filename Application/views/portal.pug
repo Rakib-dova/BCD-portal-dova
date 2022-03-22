@@ -15,6 +15,19 @@ block content
     //-     p.title.mb-4 Apps
     columns.is-centered
       .column.is-12.menu
+        if Number.isInteger(requestNoticeCnt) && requestNoticeCnt > 0
+          .approvalNotification
+            .approvalNotificationMessage 支払依頼が
+              .approvalNotificationCnt #{requestNoticeCnt}
+              | 件あります。
+            a.approvalNotificationLink(href='/inboxList/approvals') 確認
+        if Number.isInteger(rejectedNoticeCnt) && rejectedNoticeCnt > 0
+          .approvalNotification
+            .approvalNotificationMessage 差し戻しされた支払依頼が
+              .approvalNotificationCnt #{rejectedNoticeCnt}
+              | 件あります。
+            a.approvalNotificationLink(href='/inboxList/approvals') 確認
+      .column.is-12.menu
         .box
           .media-content
             .tabs.is-centered.is-boxed.is-medium

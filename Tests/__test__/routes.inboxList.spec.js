@@ -218,6 +218,7 @@ describe('inboxListのテスト', () => {
     test('inboxListのルーティングを確認', async () => {
       expect(inboxList.router.get).toBeCalledWith('/:page', helper.isAuthenticated, inboxList.cbGetIndex)
       expect(inboxList.router.get).toBeCalledWith('/getWorkflow', inboxList.cbGetWorkflow)
+      expect(inboxList.router.get).toBeCalledWith('/approvals', helper.isAuthenticated, inboxList.cbGetApprovals)
     })
   })
 
@@ -456,7 +457,7 @@ describe('inboxListのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('500エラー：user.statusが0ではない場合', async () => {
+    test('404エラー：user.statusが0ではない場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -808,7 +809,6 @@ describe('inboxListのテスト', () => {
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
-
       // 試験実施
       await inboxList.cbGetApprovals(request, response, next)
 
@@ -950,7 +950,7 @@ describe('inboxListのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('500エラー：user.statusが0ではない場合', async () => {
+    test('404エラー：user.statusが0ではない場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }

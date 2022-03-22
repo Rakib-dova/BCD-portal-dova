@@ -184,7 +184,7 @@ const cbGetApprovals = async (req, res, next) => {
   // ページ取得
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
-  const pageId = ~~req.params.page
+  const pageId = 1
   const tenantId = user.tenantId
   const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
 
