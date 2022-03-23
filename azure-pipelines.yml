@@ -29,6 +29,11 @@ parameters:
       - demo
       - test
       - BuildandTest
+  - name: seedScriptName
+    type: string
+    displayName: 'seedScriptName (.jsを含めて、カンマ区切りで入力)'
+    default: 'default'
+
   - name: isManualOperation_prodstgOpt
     type: boolean
     default: false
@@ -101,7 +106,6 @@ stages:
               testResultsFiles: '$(System.DefaultWorkingDirectory)/Tests/coverage/junit.xml'
 
           - task: ArchiveFiles@2
-            condition: eq(variables['unittestsStatus'],'done')
             inputs:
               rootFolderOrFile: '$(System.DefaultWorkingDirectory)/Application'
               includeRootFolder: false
@@ -111,7 +115,6 @@ stages:
           
           - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
             artifact: drop
-            condition: eq(variables['unittestsStatus'],'done')
             displayName: Publush Arifacts
 
   - stage: devDeploy
@@ -200,6 +203,14 @@ stages:
                   $migrationCnt=($result|Select-String "migrated" ).Count
                   mkdir -f $(Pipeline.Workspace)/variables
                   echo $migrationCnt > $(Pipeline.Workspace)/variables/migrationCnt
+                  #seed
+                  $seeds='${{ parameters.seedScriptName }}'.Split(",")
+                  foreach ($seed in $seeds) {
+                      Write-Host $seed
+                      if($seed.trim() -like "*.js"){
+                        npx sequelize db:seed --seed $seed  --env  prodstg 
+                      }
+                  }
                 displayName: npx sequelize db:migrate
                 name: dbmigrate
             
