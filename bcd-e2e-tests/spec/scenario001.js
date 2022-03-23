@@ -17,6 +17,7 @@ const { parse } = require('csv-parse/sync');
 
 const common = require('./common');
 const { ActionUtils } = require('../utils/action-utils');
+const { SettingMenuPage } = require('../page-objects/SettingMenuPage');
 
 let browser;
 
@@ -40,7 +41,7 @@ describe('リグレッションテスト', function () {
     });
   });
 
-  it("お知らせ・サポート・請求書アップロードフォーマット一覧（NO.12-30）", async function () {
+  it("1. お知らせ・サポート・請求書アップロードフォーマット一覧・契約情報変更（NO.12-30,87）", async function () {
     if (process.env.BROWSER == 'EDGE') {
       browser = await webdriverUtils.openEdge(chromium);
     } else if (process.env.BROWSER == 'FIREFOX') {
@@ -54,7 +55,7 @@ describe('リグレッションテスト', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, supportMenuPage, uploadInvoiceMenuPage, uploadInvoicePage, uploadFormatTopPage, uploadFormatCreatePage, uploadFormatSettingPage, uploadFormatConfirmPage }
+    const { loginPage, topPage, tradeShiftTopPage, supportMenuPage, uploadInvoiceMenuPage, uploadInvoicePage, uploadFormatTopPage, uploadFormatCreatePage, uploadFormatSettingPage, uploadFormatConfirmPage, uploadFormatModPage, settingMenuPage, contractChangePage, uploadListPage, uploadListDetailPage }
       = common.getPageObject(browser, page);
 
     // 指定したURLに遷移する
@@ -178,5 +179,15 @@ describe('リグレッションテスト', function () {
     await topPage.waitForLoading();
     expect(await topPage.isConstructTabExist()).to.equal(true, 'Home画面に遷移すること');
 
+    // 設定メニューを表示する
+    await topPage.openSettingMenu();
+    await settingMenuPage.waitForLoading();
+
+    // 契約情報変更画面に遷移する
+    await settingMenuPage.clickContractChange();
+    await contractChangePage.waitForLoading();
+    expect(await contractChangePage.getTitle()).to.equal('契約情報変更', '契約情報変更画面に遷移すること');
+
+    await page.waitForTimeout(1000);
   });
 });

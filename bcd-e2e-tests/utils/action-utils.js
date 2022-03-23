@@ -21,7 +21,7 @@ class ActionUtils {
   // フレーム内の要素が表示されるまで待機する
   async waitForLoading(elemSelector, frameSelector = '[name="main-app-iframe"]') {
     let frame, elem, elems;
-    const timeout = 10000;
+    const timeout = 30000;
     const start = Date.now();
     while (true) {
       if ((Date.now() - start) >= timeout) {
@@ -50,9 +50,45 @@ class ActionUtils {
   }
 
   // テキスト入力する
+  async fill(target, selector, text) {
+    await this.commonInput(target, selector, text, true);
+  }
   async type(target, selector, text) {
+    await this.commonInput(target, selector, text, false);
+  }
+  async commonInput(target, selector, text, isFill) {
     const elem = await this.getElement(target, selector);
-    await elem.fill(text);
+    // 数値が渡されてきた場合は、文字列に変換する
+    if (Number.isFinite(text)) {
+      text = String(text);
+    }
+    if (isFill) {
+      await elem.fill(text);
+    } else {
+      await elem.type(text);
+    }
+  }
+
+  // チェックボックスにチェックを入れる、外す。
+  async check(target, selector, checked) {
+    const elem = await this.getElement(target, selector);
+    await elem.setChecked(checked);
+  }
+
+  // チェックボックスにチェックが入っているか
+  async isChecked(target, selector) {
+    const elem = await this.getElement(target, selector);
+    return await elem.isChecked();
+  }
+
+  // チェックボックスにチェックが入っているか
+  async getEachElementsIsChecked(target, selector) {
+    const elems = await this.getElements(target, selector);
+    const resultList = [];
+    for (const elem of elems) {
+      resultList.push(await elem.isChecked());
+    }
+    return resultList;
   }
 
   // ドロップダウンリストから選択する（xpathのみ対応）
@@ -67,7 +103,7 @@ class ActionUtils {
   }
 
   // ファイルをダウンロードする
-  async downloadFile(frame, selector, downloadPath) {
+  async downloadFile(frame, selector) {
     const [download] = await Promise.all([
       this.page.waitForEvent('download'),
       this.click(frame, selector),
@@ -140,9 +176,8 @@ class ActionUtils {
 
   // 要素が表示されているか
   async isDisplayed(target, selector) {
-    const elem = await this.getElement(target, selector);
-    const display = await target.evaluate(node => window.getComputedStyle(node).display, elem);
-    return display != 'none'
+    const elems = await this.getElements(target, selector);
+    return (elems.length > 0) && (await target.evaluate(node => window.getComputedStyle(node).display, elems[0]) != 'none')
   }
 
 }

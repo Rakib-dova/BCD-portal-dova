@@ -11,8 +11,8 @@ class LoginPage {
   async doLogin(id, password) {
     await this.page.waitForSelector('#proceed')
     await this.actionUtils.click(this.page, '#cookie-consent-accept-all');
-    await this.actionUtils.type(this.page, '#j_username', id);
-    await this.actionUtils.type(this.page, '#j_password', password);
+    await this.actionUtils.fill(this.page, '#j_username', id);
+    await this.actionUtils.fill(this.page, '#j_password', password);
     await this.actionUtils.click(this.page, '#proceed');
   }
 

@@ -26,7 +26,7 @@ class UploadFormatCreatePage {
 
   // 「設定名称」を設定する
   async setItemName(value) {
-    await this.actionUtils.type(this.frame, '#uploadFormatItemName', value)
+    await this.actionUtils.fill(this.frame, '#uploadFormatItemName', value)
   }
 
   // 「設定名称」を取得する
@@ -90,7 +90,7 @@ class UploadFormatCreatePage {
 
   // 項目名の行番号を設定する
   async setFormatNumber(value) {
-    await this.actionUtils.type(this.frame, '#uploadFormatNumber', value)
+    await this.actionUtils.fill(this.frame, '#uploadFormatNumber', value)
   }
 
   // 項目名の行番号を取得する
@@ -110,7 +110,7 @@ class UploadFormatCreatePage {
 
   // 「データ開始行番号」を設定する
   async setDefaultNumber(value) {
-    await this.actionUtils.type(this.frame, '#defaultNumber', value)
+    await this.actionUtils.fill(this.frame, '#defaultNumber', value)
   }
 
   // 「データ開始行番号」を取得する
@@ -125,11 +125,11 @@ class UploadFormatCreatePage {
 
   // 「明細-税 識別子」を設定する
   async setTaxs(taxs) {
-    await this.actionUtils.type(this.frame, '#keyConsumptionTax', taxs.keyConsumptionTax)
-    await this.actionUtils.type(this.frame, '#keyReducedTax', taxs.keyReducedTax)
-    await this.actionUtils.type(this.frame, '#keyFreeTax', taxs.keyFreeTax)
-    await this.actionUtils.type(this.frame, '#keyDutyFree', taxs.keyDutyFree)
-    await this.actionUtils.type(this.frame, '#keyExemptTax', taxs.keyExemptTax)
+    await this.actionUtils.fill(this.frame, '#keyConsumptionTax', taxs.keyConsumptionTax)
+    await this.actionUtils.fill(this.frame, '#keyReducedTax', taxs.keyReducedTax)
+    await this.actionUtils.fill(this.frame, '#keyFreeTax', taxs.keyFreeTax)
+    await this.actionUtils.fill(this.frame, '#keyDutyFree', taxs.keyDutyFree)
+    await this.actionUtils.fill(this.frame, '#keyExemptTax', taxs.keyExemptTax)
   }
 
   // 「明細-税 識別子」を取得する
@@ -144,44 +144,44 @@ class UploadFormatCreatePage {
 
   // 「明細-単位 識別子」を設定する
   async setUnits(units) {
-    await this.actionUtils.type(this.frame, '#keyManMonth', units.keyManMonth)
-    await this.actionUtils.type(this.frame, '#keyBottle', units.keyBottle)
-    await this.actionUtils.type(this.frame, '#keyCost', units.keyCost)
-    await this.actionUtils.type(this.frame, '#keyContainer', units.keyContainer)
-    await this.actionUtils.type(this.frame, '#keyCentilitre', units.keyCentilitre)
-    await this.actionUtils.type(this.frame, '#keySquareCentimeter', units.keySquareCentimeter)
-    await this.actionUtils.type(this.frame, '#keyCubicCentimeter', units.keyCubicCentimeter)
-    await this.actionUtils.type(this.frame, '#keyCentimeter', units.keyCentimeter)
-    await this.actionUtils.type(this.frame, '#keyCase', units.keyCase)
-    await this.actionUtils.type(this.frame, '#keyCarton', units.keyCarton)
-    await this.actionUtils.type(this.frame, '#keyDay', units.keyDay)
-    await this.actionUtils.type(this.frame, '#keyDeciliter', units.keyDeciliter)
-    await this.actionUtils.type(this.frame, '#keyDecimeter', units.keyDecimeter)
-    await this.actionUtils.type(this.frame, '#keyGrossKilogram', units.keyGrossKilogram)
-    await this.actionUtils.type(this.frame, '#keyPieces', units.keyPieces)
-    await this.actionUtils.type(this.frame, '#keyFeet', units.keyFeet)
-    await this.actionUtils.type(this.frame, '#keyGallon', units.keyGallon)
-    await this.actionUtils.type(this.frame, '#keyGram', units.keyGram)
-    await this.actionUtils.type(this.frame, '#keyGrossTonnage', units.keyGrossTonnage)
-    await this.actionUtils.type(this.frame, '#keyHour', units.keyHour)
-    await this.actionUtils.type(this.frame, '#keyKilogram', units.keyKilogram)
-    await this.actionUtils.type(this.frame, '#keyKilometers', units.keyKilometers)
-    await this.actionUtils.type(this.frame, '#keyKilowattHour', units.keyKilowattHour)
-    await this.actionUtils.type(this.frame, '#keyPound', units.keyPound)
-    await this.actionUtils.type(this.frame, '#keyLiter', units.keyLiter)
-    await this.actionUtils.type(this.frame, '#keyMilligram', units.keyMilligram)
-    await this.actionUtils.type(this.frame, '#keyMilliliter', units.keyMilliliter)
-    await this.actionUtils.type(this.frame, '#keyMillimeter', units.keyMillimeter)
-    await this.actionUtils.type(this.frame, '#keyMonth', units.keyMonth)
-    await this.actionUtils.type(this.frame, '#keySquareMeter', units.keySquareMeter)
-    await this.actionUtils.type(this.frame, '#keyCubicMeter', units.keyCubicMeter)
-    await this.actionUtils.type(this.frame, '#keyMeter', units.keyMeter)
-    await this.actionUtils.type(this.frame, '#keyNetTonnage', units.keyNetTonnage)
-    await this.actionUtils.type(this.frame, '#keyPackage', units.keyPackage)
-    await this.actionUtils.type(this.frame, '#keyRoll', units.keyRoll)
-    await this.actionUtils.type(this.frame, '#keyFormula', units.keyFormula)
-    await this.actionUtils.type(this.frame, '#keyTonnage', units.keyTonnage)
-    await this.actionUtils.type(this.frame, '#keyOthers', units.keyOthers)
+    await this.actionUtils.fill(this.frame, '#keyManMonth', units.keyManMonth)
+    await this.actionUtils.fill(this.frame, '#keyBottle', units.keyBottle)
+    await this.actionUtils.fill(this.frame, '#keyCost', units.keyCost)
+    await this.actionUtils.fill(this.frame, '#keyContainer', units.keyContainer)
+    await this.actionUtils.fill(this.frame, '#keyCentilitre', units.keyCentilitre)
+    await this.actionUtils.fill(this.frame, '#keySquareCentimeter', units.keySquareCentimeter)
+    await this.actionUtils.fill(this.frame, '#keyCubicCentimeter', units.keyCubicCentimeter)
+    await this.actionUtils.fill(this.frame, '#keyCentimeter', units.keyCentimeter)
+    await this.actionUtils.fill(this.frame, '#keyCase', units.keyCase)
+    await this.actionUtils.fill(this.frame, '#keyCarton', units.keyCarton)
+    await this.actionUtils.fill(this.frame, '#keyDay', units.keyDay)
+    await this.actionUtils.fill(this.frame, '#keyDeciliter', units.keyDeciliter)
+    await this.actionUtils.fill(this.frame, '#keyDecimeter', units.keyDecimeter)
+    await this.actionUtils.fill(this.frame, '#keyGrossKilogram', units.keyGrossKilogram)
+    await this.actionUtils.fill(this.frame, '#keyPieces', units.keyPieces)
+    await this.actionUtils.fill(this.frame, '#keyFeet', units.keyFeet)
+    await this.actionUtils.fill(this.frame, '#keyGallon', units.keyGallon)
+    await this.actionUtils.fill(this.frame, '#keyGram', units.keyGram)
+    await this.actionUtils.fill(this.frame, '#keyGrossTonnage', units.keyGrossTonnage)
+    await this.actionUtils.fill(this.frame, '#keyHour', units.keyHour)
+    await this.actionUtils.fill(this.frame, '#keyKilogram', units.keyKilogram)
+    await this.actionUtils.fill(this.frame, '#keyKilometers', units.keyKilometers)
+    await this.actionUtils.fill(this.frame, '#keyKilowattHour', units.keyKilowattHour)
+    await this.actionUtils.fill(this.frame, '#keyPound', units.keyPound)
+    await this.actionUtils.fill(this.frame, '#keyLiter', units.keyLiter)
+    await this.actionUtils.fill(this.frame, '#keyMilligram', units.keyMilligram)
+    await this.actionUtils.fill(this.frame, '#keyMilliliter', units.keyMilliliter)
+    await this.actionUtils.fill(this.frame, '#keyMillimeter', units.keyMillimeter)
+    await this.actionUtils.fill(this.frame, '#keyMonth', units.keyMonth)
+    await this.actionUtils.fill(this.frame, '#keySquareMeter', units.keySquareMeter)
+    await this.actionUtils.fill(this.frame, '#keyCubicMeter', units.keyCubicMeter)
+    await this.actionUtils.fill(this.frame, '#keyMeter', units.keyMeter)
+    await this.actionUtils.fill(this.frame, '#keyNetTonnage', units.keyNetTonnage)
+    await this.actionUtils.fill(this.frame, '#keyPackage', units.keyPackage)
+    await this.actionUtils.fill(this.frame, '#keyRoll', units.keyRoll)
+    await this.actionUtils.fill(this.frame, '#keyFormula', units.keyFormula)
+    await this.actionUtils.fill(this.frame, '#keyTonnage', units.keyTonnage)
+    await this.actionUtils.fill(this.frame, '#keyOthers', units.keyOthers)
   }
 
   // 「明細-単位 識別子」を取得する

@@ -14,6 +14,11 @@ class TopPage {
     return frame;
   }
 
+  // 「お知らせ」タブを取得する
+  async getInformationTab() {
+    return await this.actionUtils.getText(this.frame, '#informationTab');
+  }
+
   // 「お知らせ」の「もっと見る」をクリックして、リンク先URLを取得する
   async getInformationLinkUrl() {
     return await this.actionUtils.openNewTabAndGetUrl(this.frame, '//*[@id="informationTab"]//*[contains(text(),"もっと見る")]');
@@ -44,10 +49,24 @@ class TopPage {
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"請求書一括作成")]');
   }
 
+  // 「請求情報ダウンロード」ページを開く
+  async openDownloadInvoicePage() {
+    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"請求情報ダウンロード")]');
+  }
+
   // 「サポート」メニューを開く
   async openSupportMenu() {
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="サポート"]/../../..')
   }
 
+  // 「設定」メニューを開く
+  async openSettingMenu() {
+    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="設定"]')
+  }
+
+  // 「銀行振込消印」ダイアログを開く
+  async openSettlementDialog() {
+    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="銀行振込消込"]')
+  }
 }
 exports.TopPage = TopPage;

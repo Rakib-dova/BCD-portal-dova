@@ -40,7 +40,7 @@ describe('リグレッションテスト', function () {
     });
   });
 
-  it("請求書フォーマットアップロード - 行番号なし - 設定画面の確認のみ（NO.44-45）", async function () {
+  it("3. 請求書フォーマットアップロード - 行番号なし - 設定画面の確認のみ（NO.44-45）", async function () {
     if (process.env.BROWSER == 'EDGE') {
       browser = await webdriverUtils.openEdge(chromium);
     } else if (process.env.BROWSER == 'FIREFOX') {

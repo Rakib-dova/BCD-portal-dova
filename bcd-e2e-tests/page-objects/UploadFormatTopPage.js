@@ -88,7 +88,9 @@ class UploadFormatTopPage {
   // ポップアップのメッセージを取得する
   async getPopupMsg() {
     await this.actionUtils.waitForLoading('.notification');
-    return await this.actionUtils.getText(this.frame, '.notification');
+    const msg = await this.actionUtils.getText(this.frame, '.notification');
+    await this.actionUtils.click(this.frame, '.notification .delete');
+    return msg;
   }
 
   // 削除ダイアログのメッセージを取得する
@@ -96,7 +98,7 @@ class UploadFormatTopPage {
     await this.actionUtils.waitForLoading('//*[@id="modalUuid"]/..');
     return await this.actionUtils.getText(this.frame, '//*[@id="modalUuid"]/..');
   }
-  q
+
   // 削除ダイアログの「キャンセル」ボタンをクリックする
   async clickDialogCancelBtn() {
     await this.actionUtils.click(this.frame, '"キャンセル"');

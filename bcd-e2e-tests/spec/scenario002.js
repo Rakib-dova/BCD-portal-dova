@@ -40,7 +40,7 @@ describe('リグレッションテスト', function () {
     });
   });
 
-  it("請求書フォーマットアップロード - 行番号あり（NO.31-43,46-51）", async function () {
+  it("2. 請求書フォーマットアップロード - 行番号あり（NO.31-43,46-51）", async function () {
     if (process.env.BROWSER == 'EDGE') {
       browser = await webdriverUtils.openEdge(chromium);
     } else if (process.env.BROWSER == 'FIREFOX') {
@@ -300,5 +300,6 @@ describe('リグレッションテスト', function () {
     expect(await uploadFormatTopPage.getPopupMsg()).to.equal('フォーマットの登録が完了しました。', '登録完了のポップアップが表示されること');
     expect(await uploadFormatTopPage.getFormatName(1)).to.equal(itemName, '登録したフォーマットデータが一番上に表示されていること。');
 
+    await page.waitForTimeout(1000);
   });
 });

@@ -15,6 +15,7 @@ class TradeShiftTopPage {
   // デジタルトレードアプリをクリックする
   async clickBcdApp() {
     await this.actionUtils.click(this.page, '//*[contains(@data-tooltip,"デジタルトレード")]');
+    await this.page.mouse.move(0, 100); // tooltipを消す
   }
 
 }

@@ -234,7 +234,7 @@ class WrTestReporter {
             await screenshot_utils_1.makeFullScreenShot(this.page, outputPath);
         }
         else {
-            await screenshot_utils_1.makeScreenShot(this.page, outputPath);
+            await screenshot_utils_1.makeFullScreenShot(this.page, outputPath);
         }
         attachedFile.path = path.join(pngDir, filename);
         attachedFile.fileType = 'SCREENSHOT';

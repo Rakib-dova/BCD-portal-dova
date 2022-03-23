@@ -1,21 +1,7 @@
 {
   "baseUrl": "https://sandbox.tradeshift.com/",
   "company1": {
-    "companyName": "WRテスト企業_自動テスト_サプライヤー1",
-    "tennantId": "fcde4039-8d4d-4e3e-8b5c-43fca9d6e113",
     "id": "zahoti82@via.tokyo.jp",
     "password": "6UQMnLqZGk"
-  },
-  "company2": {
-    "companyName": "WRテスト企業_自動テスト_サプライヤー2_バイヤー1",
-    "tennantId": "2bc16fc8-dbbe-440d-a964-108448b5f77a",
-    "id": "pyopobe@neko2.net",
-    "password": "CsrFk22Y6k"
-  },
-  "company3": {
-    "companyName": "WRテスト企業_自動テスト_バイヤー2",
-    "tennantId": "6f294335-db75-4f9c-bc19-c732cacc2742",
-    "id": "sozakyo985@ahk.jp",
-    "password": "CsrFk22Y6k"
   }
 }
