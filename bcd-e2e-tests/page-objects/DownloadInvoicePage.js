@@ -48,49 +48,26 @@ class DownloadInvoicePage {
   }
 
   // 販売/購入の設定値を取得する
-  async getBuyAndSell() {
+  async getBuy0020AndSell() {
     return await this.actionUtils.getValue(this.frame, '#buyAndSell');
   }
 
   // 発行日を設定する ※スラッシュ区切り 例：2021/08/01
   async setIssuedate(from, to) {
-
-
-
-
-    console.log(from)
+    // 検索範囲の開始日
     const fromList = from.split('/');
-    console.log(fromList)
-    console.log((await this.getIssuedate()).from)
     await this.actionUtils.type(this.frame, '#minIssuedate', `00${fromList[0]}${fromList[1]}${fromList[2]}`); // 例：0020210801 を入力(日本仕様)
-    console.log((await this.getIssuedate()).from)
     if ((await this.getIssuedate()).from != `${fromList[0]}-${fromList[1]}-${fromList[2]}`) { // 2021-08-01 が取得できるか
+      await this.actionUtils.click(this.frame, '#minIssuedate');
       await this.actionUtils.type(this.frame, '#minIssuedate', `${fromList[1]}${fromList[2]}${fromList[0]}`); // できなければ、08012021 を入力(海外仕様)
-      console.log((await this.getIssuedate()).from)
     }
-
-
-
-
-
-
-
-
-
-
-
-    // // 検索範囲の開始日
-    // const fromList = from.split('/');
-    // await this.actionUtils.type(this.frame, '#minIssuedate', `00${fromList[0]}${fromList[1]}${fromList[2]}`); // 例：0020210801 を入力(日本仕様)
-    // if ((await this.getIssuedate()).from != `${fromList[0]}-${fromList[1]}-${fromList[2]}`) { // 2021-08-01 が取得できるか
-    //   await this.actionUtils.type(this.frame, '#minIssuedate', `${fromList[1]}${fromList[2]}${fromList[0]}`); // できなければ、08012021 を入力(海外仕様)
-    // }
-    // // 検索範囲の終了日
-    // const toList = to.split('/');
-    // await this.actionUtils.type(this.frame, '#maxIssuedate', `00${toList[0]}${toList[1]}${toList[2]}`);
-    // if ((await this.getIssuedate()).to != `${toList[0]}-${toList[1]}-${toList[2]}`) {
-    //   await this.actionUtils.type(this.frame, '#maxIssuedate', `${toList[1]}${toList[2]}${toList[0]}`);
-    // }
+    // 検索範囲の終了日
+    const toList = to.split('/');
+    await this.actionUtils.type(this.frame, '#maxIssuedate', `00${toList[0]}${toList[1]}${toList[2]}`);
+    if ((await this.getIssuedate()).to != `${toList[0]}-${toList[1]}-${toList[2]}`) {
+      await this.actionUtils.click(this.frame, '#maxIssuedate');
+      await this.actionUtils.type(this.frame, '#maxIssuedate', `${toList[1]}${toList[2]}${toList[0]}`);
+    }
   }
 
   // 発行日の設定値を取得する
