@@ -102,10 +102,9 @@ describe('リグレッションテスト', function () {
     let uploadDate = new Date(uploadResults.shift()); // アップロード日時だけ配列から取り出す
     // アップロード日時を確認する
     let currentDate = new Date(); // 現在日時
-    let before1minDate = new Date(); // 現在日時から5分前
-    before1minDate.setMinutes(before1minDate.getMinutes() - 1);
-
-    expect((uploadDate >= before1minDate) && (uploadDate <= currentDate)).to.equal(true, '取込日時が正しく表示されていること');
+    let before1dayDate = new Date(); // 現在日時から1日前
+    before1dayDate.setDate(before1dayDate.getDate - 1);
+    expect((uploadDate >= before1dayDate) && (uploadDate <= currentDate)).to.equal(true, '取込日時が正しく表示されていること');
     // アップロード日時以外を確認する
     expectedVal = '["tmp_invoice_default.csv","NG","7","3","5","1","1"]'
     expect(JSON.stringify(uploadResults)).to.equal(expectedVal, '取込結果が正しく表示されていること');
