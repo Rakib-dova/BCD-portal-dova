@@ -1,0 +1,26 @@
+﻿.box
+  .column.m-0
+    .column#displayRequestApprovaRoute
+      - const approvalNo = ['一次承認', '二次承認', '三次承認', '四次承認', '五次承認', '六次承認', '七次承認', '八次承認', '九次承認', '十次承認', '最終承認']
+      if approveRoute
+        .columns
+          .column
+            p 承認ルート名
+          .column#approveRouteName
+            p #{approveRoute.name}
+        .columns
+          .column
+        section#displayDetailApproveRouteTable
+          .columns
+            .column 承認順
+            .column 承認者
+          - const userLen = approveRoute.users.length
+          each user, idx in approveRoute.users
+            if idx < userLen - 1
+              .columns
+                .column #{approvalNo[idx]}
+                .column #{user.firstName} #{user.lastName}
+            else
+              .columns
+                .column #{approvalNo.slice(-1)}
+                .column #{user.firstName} #{user.lastName}

@@ -19,6 +19,20 @@ const $ = function (tagObjName) {
   })
 }
 
+// UserAgentで判定し
+// IE以外は動的にスクリプトをロード
+const ua = window.navigator.userAgent
+if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
+  const tag = document.createElement('script')
+  tag.type = 'module'
+  tag.src = '/js/loaded-portal-page.js'
+  document.getElementsByTagName('body')[0].appendChild(tag)
+} else {
+  // IEはクリップボードコピーが機能しないのでコピーボタンを削除
+  const elm = document.getElementById('copy-btn')
+  if (elm) elm.parentNode.removeChild(elm)
+}
+
 // ローディング画面の初期化
 window.onload = function () {
   // 計上金額のボタンの機能設定
@@ -287,6 +301,9 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
         .addEventListener('click', btnSearchDepartmentCode($('#departmentCode-modal')))
 
       target.appendChild(cloneAccountCodeItem)
+    } else {
+      $(`#error-message-${target.id}`).innerText = '仕訳情報入力の上限は１０項目までです。'
+      $(`#error-message-${target.id}`).classList.remove('invisible')
     }
   })
 })
@@ -761,6 +778,9 @@ const checkJournalList = function () {
             isFirstLineNull = true
             $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
           }
+        } else {
+          isFirstLineNull = true
+          $('#error-message-body').innerText = '仕訳情報を正しく設定してください。'
         }
       }
     }
@@ -801,7 +821,7 @@ const duplicationCheck = function () {
 
   // 重複がある明細項目づつエラーメッセージを設定する。
   koumokuInformationArray.map((item, idx) => {
-    const errMsg = document.getElementById(`duplicationErrMsg${idx + 1}`)
+    const errMsg = document.getElementById(`error-message-lineNo${idx + 1}`)
     if (item === true) {
       errMsg.innerText = '同じ仕訳情報は設定できません。'
       errMsg.classList.remove('invisible')

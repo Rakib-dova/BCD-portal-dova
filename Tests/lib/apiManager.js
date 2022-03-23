@@ -80,6 +80,10 @@ const axios = {
       .replace('&type=invoice', '')
       .replace('&', '')
 
+    if (url.search('/account/users') !== -1) {
+      return accountUsers(url)
+    }
+
     const paramateter = {}
     url.split('&').forEach((item) => {
       const keyValue = item.split('=')
@@ -327,6 +331,15 @@ const axios = {
             numPages: 1,
             pageId: 0,
             Document: [dcouments.Document[32]]
+          }
+        } else if (paramateter.minissuedate === '9999-99-98' && paramateter.maxissuedate === '9999-99-98') {
+          this.result.data = {
+            itemPerPage: 25,
+            itemCount: 0,
+            indexing: false,
+            numPages: 0,
+            pageId: 0,
+            Document: []
           }
         } else {
           this.result.data = {
@@ -959,4 +972,106 @@ const dcouments = {
       ID: 'A01034'
     }
   ]
+}
+
+const accountUsers = function (url) {
+  const params = url.replace('/account/users/', '')
+  const dummyData = [
+    {
+      Id: '53607702-b94b-4a94-9459-6cf3acd65603',
+      CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+      CompanyName: 'UTテスト会社',
+      Username: 'UTTESTER1@UTCODE.COM',
+      Language: 'ja',
+      TimeZone: 'Asia/Tokyo',
+      Memberships: [
+        {
+          UserId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        }
+      ],
+      Created: '2021-05-17T08:12:48.291Z',
+      State: 'ACTIVE',
+      Type: 'PERSON',
+      FirstName: 'UTテスト',
+      LastName: 'ユーザー',
+      Visible: true
+    },
+    {
+      Id: '3b6a13d6-cb89-414b-9597-175ba89329aa',
+      CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+      CompanyName: 'UTテスト会社',
+      Username: 'UTTESTER2@UTCODE.COM',
+      Language: 'ja',
+      TimeZone: 'Asia/Tokyo',
+      Memberships: [
+        {
+          UserId: '53607702-b94b-4a94-9459-6cf3acd65603',
+          GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+        }
+      ],
+      Created: '2021-05-24T03:24:26.537Z',
+      State: 'ACTIVE',
+      Type: 'PERSON',
+      FirstName: 'UTテスト',
+      LastName: 'ユーザー2',
+      Title: 'portal test',
+      Visible: true
+    },
+    {
+      Id: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+      CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+      CompanyName: 'UTテスト会社',
+      Username: 'UTTESTER3@UTCODE.COM',
+      Language: 'ja',
+      TimeZone: 'Asia/Tokyo',
+      Memberships: [
+        {
+          UserId: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+          GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          Role: '824b4cb4-3bd9-4dd3-a0d4-e18586b6c03d'
+        }
+      ],
+      Created: '2021-06-11T08:49:30.939Z',
+      State: 'ACTIVE',
+      Type: 'PERSON',
+      FirstName: 'UTテスト',
+      LastName: 'ユーザー3',
+      Visible: true
+    },
+    {
+      Id: 'aa974511-8188-4022-bd86-45e251fd259e',
+      CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+      CompanyName: 'UTテスト会社',
+      Username: 'UTTESTER4@UTCODE.COM',
+      Language: 'ja',
+      TimeZone: 'Asia/Tokyo',
+      Memberships: [
+        {
+          UserId: 'aa974511-8188-4022-bd86-45e251fd259e',
+          GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          Role: '8370ee3e-5f31-47bf-a139-d4218fb7689f'
+        }
+      ],
+      Created: '2021-08-03T02:06:10.626Z',
+      State: 'ACTIVE',
+      Type: 'PERSON',
+      FirstName: 'UTテスト',
+      LastName: 'ユーザー4',
+      Visible: true
+    }
+  ]
+  const result = {
+    data: null
+  }
+
+  for (let idx = 0; idx < dummyData.length; idx++) {
+    if (dummyData[idx].Id === params) {
+      result.data = dummyData[idx]
+    }
+  }
+
+  return result
 }

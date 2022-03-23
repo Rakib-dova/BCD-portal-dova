@@ -1,6 +1,14 @@
 module.exports = [
   //
   {
+    departmentCodeId: 'af29f1f9-bdd8-43b3-a120-f8364722baa2',
+    contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
+    departmentCodeName: 'テスト用部門データ3',
+    departmentCode: 'DE003',
+    createdAt: new Date('2021-11-26 04:27:28.2770000 +00:00 '),
+    updatedAt: new Date(' 2021-11-26 04:27:28.2770000 +00:00')
+  },
+  {
     departmentCodeId: 'aab2343d-9d98-4614-b68b-78929bd84fee',
     contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
     departmentCodeName: 'テスト用部門データ1',
@@ -16,14 +24,7 @@ module.exports = [
     createdAt: new Date('2021-11-25 02:52:10.0590000 +00:00'),
     updatedAt: new Date('2021-11-25 02:52:10.0590000 +00:00')
   },
-  {
-    departmentCodeId: 'af29f1f9-bdd8-43b3-a120-f8364722baa2',
-    contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
-    departmentCodeName: 'テスト用部門データ3',
-    departmentCode: 'DE003',
-    createdAt: new Date('2021-11-26 04:27:28.2770000 +00:00 '),
-    updatedAt: new Date(' 2021-11-26 04:27:28.2770000 +00:00')
-  },
+
   {
     departmentCodeId: 'a4a9717e-4ed8-4430-9109-9ab7e850bdc7',
     contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
