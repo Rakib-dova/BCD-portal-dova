@@ -19,10 +19,14 @@ parameters:
     default: all
     values:
       - all
-      - citest.js
       - scenario001.js
       - scenario002.js
       - scenario003.js
+      - scenario004.js
+      - scenario005.js
+      - scenario006.js
+      - scenario007.js
+      - scenario008.js
   - name: enableScreenshot
     displayName: "スクリーンショットを取得するタイミングを選択してください(エラー時/常に)"
     type: string
