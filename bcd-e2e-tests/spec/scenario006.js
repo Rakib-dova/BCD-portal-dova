@@ -130,7 +130,7 @@ describe('リグレッションテスト', function () {
       // アップロード日時を確認する
       let currentDate = new Date(); // 現在日時
       let before1dayDate = new Date(); // 現在日時から1日前
-      before1dayDate.setDate(before1dayDate.getDate - 1);
+      before1dayDate.setDate(before1dayDate.getDate() - 1);
       expect((uploadDate >= before1dayDate) && (uploadDate <= currentDate)).to.equal(true, '取込日時が正しく表示されていること');
       // アップロード日時以外を確認する
       if (hasHeader) {

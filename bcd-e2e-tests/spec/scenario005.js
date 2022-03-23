@@ -103,14 +103,7 @@ describe('リグレッションテスト', function () {
     // アップロード日時を確認する
     let currentDate = new Date(); // 現在日時
     let before1dayDate = new Date(); // 現在日時から1日前
-    before1dayDate.setDate(before1dayDate.getDate - 1);
-
-    console.log(uploadDate)
-    console.log(before1dayDate)
-    console.log(currentDate)
-
-
-
+    before1dayDate.setDate(before1dayDate.getDate() - 1);
     expect((uploadDate >= before1dayDate) && (uploadDate <= currentDate)).to.equal(true, '取込日時が正しく表示されていること');
     // アップロード日時以外を確認する
     expectedVal = '["tmp_invoice_default.csv","NG","7","3","5","1","1"]'
