@@ -48,7 +48,7 @@ class DownloadInvoicePage {
   }
 
   // 販売/購入の設定値を取得する
-  async getBuy0020AndSell() {
+  async getBuyAndSell() {
     return await this.actionUtils.getValue(this.frame, '#buyAndSell');
   }
 
