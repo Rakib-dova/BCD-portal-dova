@@ -128,10 +128,12 @@ describe('リグレッションテスト', function () {
       let uploadResults = await uploadListPage.getResults(1);
       let uploadDate = new Date(uploadResults.shift()); // アップロード日時だけ配列から取り出す
       // アップロード日時を確認する
-      let currentDate = new Date(); // 現在日時
-      let before1dayDate = new Date(); // 現在日時から1日前
+      let before1dayDate = new Date(); // 現在日時から-1日
       before1dayDate.setDate(before1dayDate.getDate() - 1);
-      expect((uploadDate >= before1dayDate) && (uploadDate <= currentDate)).to.equal(true, '取込日時が正しく表示されていること');
+      let after1dayDate = new Date(); // 現在日時から+1日
+      after1dayDate.setDate(after1dayDate.getDate() + 1);
+      expect((uploadDate >= before1dayDate) && (uploadDate <= after1dayDate)).to.equal(true, '取込日時が正しく表示されていること');
+
       // アップロード日時以外を確認する
       if (hasHeader) {
         expectedVal = '["tmp_invoice_header.csv","OK","1","1","1","0","0"]'
