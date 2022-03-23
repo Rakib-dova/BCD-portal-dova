@@ -56,8 +56,10 @@ class DownloadInvoicePage {
   async setIssuedate(from, to) {
     // 検索範囲の開始日
     const fromList = from.split('/');
+    await this.page.waitForTimeout(3000);
     await this.actionUtils.type(this.frame, '#minIssuedate', `00${fromList[0]}${fromList[1]}${fromList[2]}`); // 例：0020210801 を入力(日本仕様)
     if ((await this.getIssuedate()).from != `${fromList[0]}-${fromList[1]}-${fromList[2]}`) { // 2021-08-01 が取得できるか
+      await this.actionUtils.click(this.frame, '#maxIssuedate');
       await this.actionUtils.click(this.frame, '#minIssuedate');
       await this.actionUtils.type(this.frame, '#minIssuedate', `${fromList[1]}${fromList[2]}${fromList[0]}`); // できなければ、08012021 を入力(海外仕様)
     }
@@ -65,6 +67,7 @@ class DownloadInvoicePage {
     const toList = to.split('/');
     await this.actionUtils.type(this.frame, '#maxIssuedate', `00${toList[0]}${toList[1]}${toList[2]}`);
     if ((await this.getIssuedate()).to != `${toList[0]}-${toList[1]}-${toList[2]}`) {
+      await this.actionUtils.click(this.frame, '#minIssuedate');
       await this.actionUtils.click(this.frame, '#maxIssuedate');
       await this.actionUtils.type(this.frame, '#maxIssuedate', `${toList[1]}${toList[2]}${toList[0]}`);
     }
