@@ -1290,7 +1290,7 @@ describe('requestApprovalのテスト', () => {
       expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
 
-    test('正常：解約申込中の場合', async () => {
+    test('準正常：解約申込中の場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -1316,6 +1316,99 @@ describe('requestApprovalのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('準正常:支払依頼重複した場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        approveRouteId: 'dummyId'
+      }
+      request.params = {
+        invoiceId: '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      approverControllerCheckApproveRoute.mockReturnValue(true)
+      approverControllerRequestApproval.mockReturnValue(1)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      // 支払依頼ページレンダリングを呼び出し
+      expect(request.flash).toBeCalledWith('error', '支払依頼済みの請求書です。')
+      expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
+    })
+
+    test('準正常：requestApprovalがエラーの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        approveRouteId: 'dummyId'
+      }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      approverControllerCheckApproveRoute.mockReturnValue(true)
+      approverControllerRequestApproval.mockReturnValue(-1)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+      // 結果確認
+      // 前のページを呼び出し
+      expect(response.redirect).toHaveBeenCalledWith('/requestApproval/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904')
+    })
+
+    test('準正常：approverController結果が0以外', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        approveRouteId: 'dummyId'
+      }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      approverControllerCheckApproveRoute.mockReturnValue(true)
+      approverControllerRequestApproval.mockReturnValue(0)
+      approverControllerSaveApproval.mockReturnValue(-1)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+      // 結果確認
+      // 前のページを呼び出し
+      expect(response.redirect).toHaveBeenCalledWith('/requestApproval/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904')
     })
 
     test('400エラー:LoggedInではないsessionの場合', async () => {
@@ -1468,36 +1561,6 @@ describe('requestApprovalのテスト', () => {
       // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-    })
-
-    test('500エラー：approverController結果が0以外', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.user = { ...user[0] }
-      request.body = {
-        approveRouteId: 'dummyId'
-      }
-      request.params = {
-        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
-      }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
-      // ユーザ権限チェック結果設定
-      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
-
-      approverControllerCheckApproveRoute.mockReturnValue(true)
-      approverControllerRequestApproval.mockReturnValue(-1)
-
-      // 試験実施
-      await requestApproval.cbPostApproval(request, response, next)
-      // 結果確認
-      // 前のページを呼び出し
-      expect(response.redirect).toHaveBeenCalledWith('/requestApproval/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904')
     })
 
     test('500エラー：approverControllerのcheckApproveRouteがfalseの場合', async () => {
