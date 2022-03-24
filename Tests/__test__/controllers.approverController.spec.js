@@ -2038,26 +2038,25 @@ describe('approverControllerのテスト', () => {
         updatedAt: '2021-01-25T08:45:49.803Z'
       })
 
-      const testData = await RequestApproval.build({
+      const rejectTestData = await RequestApproval.build({
         requestId: requestId,
         contractId: contractId,
         approveRouteId: approveRouteId,
         invoiceId: invoiceId,
         requester: userId,
-        status: '10',
+        status: '90',
         message: message,
         create: '2021-01-25T08:45:49.803Z',
         isSaved: true
       })
-      testData.save = jest.fn()
+      rejectTestData.save = jest.fn()
 
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
-      RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(rejectTestData)
+      RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(rejectTestData)
       RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(null)
 
-      requestApprovalFindOne.mockReturnValueOnce(testData)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
 
       const result = await approverController.requestApproval(
         contractId,
@@ -2108,13 +2107,12 @@ describe('approverControllerのテスト', () => {
         create: '2021-01-25T08:45:49.803Z',
         isSaved: true
       })
+
       testData.save = jest.fn()
 
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
       RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(null)
-      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(null)
-      RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(testData)
 
       requestApprovalFindOne.mockReturnValueOnce(testData)
 
@@ -2162,6 +2160,75 @@ describe('approverControllerのテスト', () => {
         updatedAt: '2021-01-25T08:45:49.803Z'
       })
 
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '90',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      const testData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T09:45:49.803Z',
+        isSaved: true
+      })
+      testData.save = jest.fn()
+
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(rejectTestData)
+      RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
+
+      const result = await approverController.requestApproval(
+        contractId,
+        approveRouteId,
+        invoiceId,
+        requesterId,
+        message
+      )
+
+      // 結果確認
+      // 実際DBを更新しないため、getRequestApprovalFromInvoiceで取得した値が更新されない。
+      expect(result).toStrictEqual(rejectTestData)
+    })
+
+    test('エラー：すでに支払依頼データがある場合()', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
+      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const message = 'messege'
+
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
+
+      // DBのデータがある場合
+      userControllerFindOne.mockReturnValueOnce({
+        userId: userId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: 'dummyRefreshToken',
+        subRefreshToken: null,
+        userStatus: 0,
+        lastRefreshedAt: null,
+        createdAt: '2021-01-25T08:45:49.803Z',
+        updatedAt: '2021-01-25T08:45:49.803Z'
+      })
+
       const testData = await RequestApproval.build({
         requestId: requestId,
         contractId: contractId,
@@ -2175,11 +2242,10 @@ describe('approverControllerのテスト', () => {
       })
       testData.save = jest.fn()
 
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
       RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(testData)
       RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(null)
 
       requestApprovalFindOne.mockReturnValueOnce(testData)
 
@@ -2192,7 +2258,7 @@ describe('approverControllerのテスト', () => {
       )
 
       // 結果確認
-      expect(result).toBe(testData)
+      expect(result).toEqual(1)
     })
 
     test('エラー：RequestApproval作成エラー', async () => {
@@ -2234,12 +2300,9 @@ describe('approverControllerのテスト', () => {
       })
       testData.save = jest.fn()
 
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('90')
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
       RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(null)
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(null)
 
       requestApprovalFindOne.mockReturnValueOnce(testData)
 
@@ -2646,7 +2709,7 @@ describe('approverControllerのテスト', () => {
       accessTradeshift.mockReturnValueOnce(firstUserInfo)
       accessTradeshift.mockReturnValueOnce(secondUserInfo)
       accessTradeshift.mockReturnValueOnce(thirdUserInfo)
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('90')
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
 
       const dummyApproval = Approval.build({
         requestId: request.requestId,
@@ -2787,7 +2850,7 @@ describe('approverControllerのテスト', () => {
       accessTradeshift.mockReturnValueOnce(firstUserInfo)
       accessTradeshift.mockReturnValueOnce(secondUserInfo)
       accessTradeshift.mockReturnValueOnce(thirdUserInfo)
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('90')
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
 
       approvalFindOne.mockReturnValueOnce(null)
 
@@ -2979,7 +3042,7 @@ describe('approverControllerのテスト', () => {
         }
       ]
       approveGetApproveRoute.mockReturnValueOnce(approvers)
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('90')
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
 
       const dummyApproval = Approval.build({
         requestId: request.requestId,

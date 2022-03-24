@@ -591,10 +591,16 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
   try {
     const requestApprovalDAO = new RequestApprovalDAO(contractId)
     const requester = await userController.findOne(requesterId)
+    const noneWorkflowStatusCode = await approveStatusDAO.getStautsCode('未処理')
+    const rejectWorkflowStatusCode = await approveStatusDAO.getStautsCode('差し戻し')
     const waitingWorkflowStatusCode = await approveStatusDAO.getStautsCode('支払依頼中')
 
+    // 該当請求書の情報取得
     const requestApprovalFind = await requestApprovalDAO.getRequestApprovalFromInvoice(invoiceId)
+
+    // 該当請求書の情報が１つもない場合のみ
     if (!requestApprovalFind) {
+      // レコード作成（ステータス：支払依頼中）
       const newRequest = await requestApprovalDAO.createRequestApproval(
         requester.userId,
         invoiceId,
@@ -606,13 +612,22 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
       await newRequest.save()
       return newRequest
     }
-    await requestApprovalDAO.updateRequestApproval(
-      requestApprovalFind,
-      requester.userId,
-      approveRouteId,
-      waitingWorkflowStatusCode,
-      message
-    )
+
+    // 該当請求書のステータスが未処理、差し戻しの場合、更新（ステータス：支払依頼中）
+    if (
+      requestApprovalFind.status === noneWorkflowStatusCode ||
+      requestApprovalFind.status === rejectWorkflowStatusCode
+    ) {
+      await requestApprovalDAO.updateRequestApproval(
+        requestApprovalFind,
+        requester.userId,
+        approveRouteId,
+        waitingWorkflowStatusCode,
+        message
+      )
+    } else {
+      return 1
+    }
 
     if ((await requestApprovalDAO.saveRequestApproval(requestApprovalFind)) instanceof Request === false) {
       throw Error('request approval fail')
