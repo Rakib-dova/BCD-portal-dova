@@ -1,3 +1,6 @@
+const { chromium, firefox } = require('playwright');
+const webdriverUtils = require('../utils/webdriver-utils');
+const config = require('../autotest-script-config');
 const fs = require('fs');
 const path = require('path');
 const { parse } = require('csv-parse/sync');
@@ -21,6 +24,42 @@ const { UploadListDetailPage } = require('../page-objects/UploadListDetailPage')
 const { SettlementPage } = require('../page-objects/SettlementPage');
 const { RakkoToolsPage } = require('../page-objects/RakkoToolsPage');
 const { DownloadInvoicePage } = require('../page-objects/DownloadInvoicePage');
+
+// テストの準備を行う
+exports.initTest = async () => {
+  // テスト対象のブラウザを決める
+  let browserType;
+  if (process.env.BROWSER == 'EDGE') {
+    browserType = await webdriverUtils.openEdge(chromium);
+  } else if (process.env.BROWSER == 'FIREFOX') {
+    browserType = await webdriverUtils.openFirefox(firefox);
+  } else {
+    browserType = await webdriverUtils.openChrome(chromium);
+  }
+
+  // テスト対象のアカウントを決める
+  const accounts = [];
+  const ACCOUNT = process.env.ACCOUNT;
+  if (ACCOUNT != 'user') { // Manager or all or 未設定
+    accounts.push({
+      id: config.company1.mng.id,
+      password: config.company1.mng.password
+    });
+  }
+  if (ACCOUNT == 'user' || ACCOUNT == 'all') {
+    accounts.push({
+      id: config.company1.user.id,
+      password: config.company1.user.password
+    });
+  }
+
+  // テストの条件
+  const contextOption = {
+    locale: 'ja-JP',
+    timezoneId: 'Asia/Tokyo'
+  }
+  return { browserType, accounts, contextOption };
+}
 
 // ページオブジェクトのインスタンスを取得する
 exports.getPageObject = (browser, page) => {
