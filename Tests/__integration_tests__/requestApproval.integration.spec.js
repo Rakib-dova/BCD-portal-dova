@@ -122,7 +122,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(5000)
 
       redirectUrl = await page.evaluate(() => {
         return document.querySelector('#form > div.grouped-button > a.button.is-link').getAttribute('href')
@@ -150,7 +150,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(5000)
 
       await page.click('#form > div.grouped-button > a.button.is-link')
 
@@ -215,7 +215,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(5000)
 
       await page.click('#form > div.grouped-button > a.button.is-link')
 
@@ -239,7 +239,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(5000)
 
       await page.click('#form > div.grouped-button > a.button.is-link')
 
@@ -306,7 +306,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(5000)
 
       await page.click('#form > div.grouped-button > a.button.is-link')
 
@@ -330,7 +330,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(5000)
 
       await page.click('#form > div.grouped-button > a.button.is-link')
 
@@ -352,9 +352,9 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       await page.setCookie(acCookies[0])
       await page.goto(`https://localhost:3000${redirectUrl}`)
 
-      await page.click('#form > div.grouped-button > a:nth-child(1)')
+      await page.click('#form > div.field.is-grouped.is-grouped-centered > div > div > div > a.button.mr-6')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(5000)
 
       const inboxUrl = 'inbox/' + redirectUrl.split('/')[2]
 
@@ -383,7 +383,6 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       expect(res.text).toMatch(/合計 円/i)
       expect(res.text).toMatch(/メッセージ/i)
       expect(res.text).toMatch(/仕訳情報設定へ/i)
-      expect(res.text).toMatch(/保存/i)
       expect(res.text).toMatch(/確認/i)
     })
 
@@ -405,7 +404,6 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       expect(res.text).toMatch(/合計 円/i)
       expect(res.text).toMatch(/メッセージ/i)
       expect(res.text).toMatch(/仕訳情報設定へ/i)
-      expect(res.text).toMatch(/保存/i)
       expect(res.text).toMatch(/確認/i)
     })
 
@@ -591,7 +589,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       // 承認ルート検索
       await page.click('#btnSearchApproveRoute')
 
-      await page.waitForTimeout(2000)
+      await page.waitForTimeout(3000)
 
       await page.click('#displayFieldApproveRouteResultBody > tr > td.btnSelect > a')
 
@@ -599,11 +597,6 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       // メッセージ入力
       await page.type('#inputMsg', 'インテグレーションテスト')
-
-      // 保存ボタン押下
-      await page.click('#form > div.grouped-button > button')
-
-      await page.waitForTimeout(7000)
 
       // 支払依頼画面にredirectする。
       expect(page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -616,7 +609,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       // 依頼ボタン押下
       await page.click('#btn-approval')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(10000)
 
       // 一覧画面にredirectする。
       expect(await page.url()).toBe('https://localhost:3000/inboxList/1')
@@ -659,7 +652,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
         }
       })
 
-      if (requestId.length !== 0) {
+      if (requestId && requestId.length !== 0) {
         await db.Approval.destroy({ where: { requestId: requestId.requestId } })
         await db.RequestApproval.destroy({ where: { contractId: contract.contractId } })
       }
@@ -695,7 +688,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(5000)
 
       await page.click('#form > div.grouped-button > a.button.is-link')
 
@@ -719,7 +712,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(5000)
 
       await page.click('#form > div.grouped-button > a.button.is-link')
 
@@ -784,7 +777,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(5000)
 
       await page.click('#form > div.grouped-button > a.button.is-link')
 
@@ -808,7 +801,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(3000)
+      await page.waitForTimeout(5000)
 
       await page.click('#form > div.grouped-button > a.button.is-link')
 
