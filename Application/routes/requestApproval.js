@@ -377,41 +377,62 @@ const cbPostApproval = async (req, res, next) => {
     message
   )
 
-  const result = await approverController.saveApproval(
-    contractId,
-    approveRouteId,
-    requester,
-    message,
-    accessToken,
-    refreshToken,
-    requestResult
-  )
-
-  switch (result) {
-    case 0: {
-      const sendMailStatus = await mailMsg.sendPaymentRequestMail(
-        accessToken,
-        refreshToken,
-        contractId,
-        invoiceId,
-        tenantId
-      )
-
-      if (sendMailStatus === 0) {
-        req.flash('info', '支払依頼を完了しました。次の承認者にはメールで通知が送られます。')
-      } else {
-        req.flash('error', '支払依頼を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
-      }
+  switch (requestResult) {
+    case 1:
+      req.flash('error', '支払依頼済みの請求書です。')
       res.redirect('/inboxList/1')
       break
-    }
-    default:
+
+    case -1:
       req.flash('noti', ['支払依頼', '支払依頼に失敗しました。'])
       req.session.requestApproval = {
         message: message,
         approveRouteId: approveRouteId
       }
       res.redirect(`/requestApproval/${invoiceId}`)
+      break
+
+    default: {
+      const result = await approverController.saveApproval(
+        contractId,
+        approveRouteId,
+        requester,
+        message,
+        accessToken,
+        refreshToken,
+        requestResult
+      )
+
+      switch (result) {
+        case 0: {
+          const sendMailStatus = await mailMsg.sendPaymentRequestMail(
+            accessToken,
+            refreshToken,
+            contractId,
+            invoiceId,
+            tenantId
+          )
+
+          if (sendMailStatus === 0) {
+            req.flash('info', '支払依頼を完了しました。次の承認者にはメールで通知が送られます。')
+          } else {
+            req.flash(
+              'error',
+              '支払依頼を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。'
+            )
+          }
+          res.redirect('/inboxList/1')
+          break
+        }
+        default:
+          req.flash('noti', ['支払依頼', '支払依頼に失敗しました。'])
+          req.session.requestApproval = {
+            message: message,
+            approveRouteId: approveRouteId
+          }
+          res.redirect(`/requestApproval/${invoiceId}`)
+      }
+    }
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApproval')

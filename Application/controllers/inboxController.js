@@ -511,6 +511,8 @@ const getRequestApproval = async (contractId, invoiceId) => {
     for (let id = 10; id < 21; id++) {
       requestStatus.push({ status: `${id}` })
     }
+    // 最終承認済みステータス追加
+    requestStatus.push({ status: '00' })
     const requestApproval = await RequestApproval.findOne({
       where: {
         contractId: contractId,

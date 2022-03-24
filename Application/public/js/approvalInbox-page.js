@@ -498,6 +498,11 @@ $('#inputMsg').addEventListener('keyup', function () {
 })
 
 $('#checkApproval').addEventListener('click', function () {
+  const rejectModalLine = $('#reject-approval-modal').querySelector('#journal-list-reject-modal')
+  while (rejectModalLine.firstChild) {
+    rejectModalLine.removeChild(rejectModalLine.firstChild)
+  }
+
   while ($('#journal-list').firstChild) {
     $('#journal-list').removeChild($('#journal-list').firstChild)
   }
@@ -735,10 +740,6 @@ $('#rejectApproval').addEventListener('click', function () {
   if (!rejectModalLine.firstChild) {
     Array.prototype.forEach.call(invoiceList, (invoiceLine) => {
       const cloneInvoice = document.importNode(invoiceLine.parentNode, true)
-      const lineInpt = cloneInvoice.querySelectorAll('input')
-      Array.prototype.forEach.call(lineInpt, (invoiceLine) => {
-        invoiceLine.removeAttribute('name')
-      })
       rejectModalLine.appendChild(cloneInvoice)
     })
   }
