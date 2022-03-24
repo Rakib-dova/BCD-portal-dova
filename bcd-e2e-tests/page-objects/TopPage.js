@@ -9,7 +9,7 @@ class TopPage {
 
   // ページが表示されるまで待機する
   async waitForLoading() {
-    let frame = await this.actionUtils.waitForLoading('//*[contains(@class,"box")]//*[contains(text(),"請求書一括作成")]')
+    let frame = await this.actionUtils.waitForLoading('//*[contains(@class,"box")]//*[text()="請求書一括作成"]')
     this.frame = frame;
     return frame;
   }
