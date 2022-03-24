@@ -141,7 +141,7 @@ describe('リグレッションテスト', function () {
     await uploadFormatModPage.waitForLoading();
 
     // 各項目に値を設定する
-    itemName = '20220304142136MOD';
+    itemName = itemName + 'MOD';
     await uploadFormatModPage.setItemName(itemName);
     const taxsMod = {
       keyConsumptionTax: '消費税2MOD',
