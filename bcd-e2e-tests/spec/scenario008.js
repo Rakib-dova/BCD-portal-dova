@@ -1,6 +1,7 @@
 const webdriverUtils = require('../utils/webdriver-utils');
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
+const comment = require('../utils/chai-with-reporting').comment;
 const config = require('../autotest-script-config');
 const fs = require('fs');
 const { parse } = require('csv-parse/sync');
@@ -42,6 +43,13 @@ describe('リグレッションテスト', function () {
       const page = await context.newPage();
 
       global.reporter.setBrowserInfo(browser, page);
+      if (account.type == 'manager') {
+        await comment('---------- 管理者アカウント ----------')
+      } else if (account.type == 'user') {
+        await comment('---------- 一般ユーザー ----------')
+      } else {
+        await comment('---------- その他アカウント ----------')
+      }
 
       // ページオブジェクト
       const { loginPage, topPage, tradeShiftTopPage, downloadInvoicePage }

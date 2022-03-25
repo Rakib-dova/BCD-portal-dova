@@ -1,6 +1,7 @@
 const webdriverUtils = require('../utils/webdriver-utils');
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
+const comment = require('../utils/chai-with-reporting').comment;
 const config = require('../autotest-script-config');
 const fs = require('fs');
 const common = require('./common');
@@ -42,6 +43,13 @@ describe('リグレッションテスト', function () {
       const page = await context.newPage();
 
       global.reporter.setBrowserInfo(browser, page);
+      if (account.type == 'manager') {
+        await comment('---------- 管理者アカウント ----------')
+      } else if (account.type == 'user') {
+        await comment('---------- 一般ユーザー ----------')
+      } else {
+        await comment('---------- その他アカウント ----------')
+      }
 
       // ページオブジェクト
       const { loginPage, topPage, tradeShiftTopPage, supportMenuPage, uploadInvoiceMenuPage, uploadInvoicePage, uploadFormatTopPage, settingMenuPage, contractChangePage }
@@ -76,20 +84,22 @@ describe('リグレッションテスト', function () {
       await topPage.openSupportMenu();
       await supportMenuPage.waitForLoading();
 
-      // 「設定方法、ご利用方法のお問い合わせ」をクリックする
-      await supportMenuPage.clickContact();
+      // 「設定方法、ご利用方法のお問い合わせ」をクリックする(管理者のみ)
+      if (account.type == 'manager') {
+        await supportMenuPage.clickContact();
 
-      // 「設定方法、ご利用方法のお問い合わせ」画面の表示内容を確認する
-      expect(await supportMenuPage.getNumberN()).to.equal('N999999999', 'N番が表示されていること');
-      expect(await supportMenuPage.isCopyExist()).to.equal(true, 'フォーム右側に「copy」ボタンが表示されていること');
-      expect(await supportMenuPage.isContactLinkExist()).to.equal(true, 'フォーム下部に「お問い合わせページを開く」ボタンが表示されていること');
+        // 「設定方法、ご利用方法のお問い合わせ」画面の表示内容を確認する
+        expect(await supportMenuPage.getNumberN()).to.equal('N999999999', 'N番が表示されていること');
+        expect(await supportMenuPage.isCopyExist()).to.equal(true, 'フォーム右側に「copy」ボタンが表示されていること');
+        expect(await supportMenuPage.isContactLinkExist()).to.equal(true, 'フォーム下部に「お問い合わせページを開く」ボタンが表示されていること');
 
-      // 「お問い合わせページを開く」をクリックして、リンク先URLをチェックする
-      url = await supportMenuPage.getContactLinkUrl();
-      expect(url).to.equal('https://support.ntt.com/bconnection/inquiry/input/pid2200000saa', 'お問い合わせ画面が表示されること');
+        // 「お問い合わせページを開く」をクリックして、リンク先URLをチェックする
+        url = await supportMenuPage.getContactLinkUrl();
+        expect(url).to.equal('https://support.ntt.com/bconnection/inquiry/input/pid2200000saa', 'お問い合わせ画面が表示されること');
 
-      // 「設定方法、ご利用方法のお問い合わせ」を閉じる
-      await supportMenuPage.closeContact();
+        // 「設定方法、ご利用方法のお問い合わせ」を閉じる
+        await supportMenuPage.closeContact();
+      }
 
       // 「よくある質問（日本語）を参照する」をクリックして、リンク先URLをチェックする
       url = await supportMenuPage.getFaqLinkUrl();
@@ -168,14 +178,16 @@ describe('リグレッションテスト', function () {
       await topPage.waitForLoading();
       expect(await topPage.isConstructTabExist()).to.equal(true, 'Home画面に遷移すること');
 
-      // 設定メニューを表示する
-      await topPage.openSettingMenu();
-      await settingMenuPage.waitForLoading();
+      // 設定メニューを表示する(管理者のみ)
+      if (account.type == 'manager') {
+        await topPage.openSettingMenu();
+        await settingMenuPage.waitForLoading();
 
-      // 契約情報変更画面に遷移する
-      await settingMenuPage.clickContractChange();
-      await contractChangePage.waitForLoading();
-      expect(await contractChangePage.getTitle()).to.equal('契約情報変更', '契約情報変更画面に遷移すること');
+        // 契約情報変更画面に遷移する
+        await settingMenuPage.clickContractChange();
+        await contractChangePage.waitForLoading();
+        expect(await contractChangePage.getTitle()).to.equal('契約情報変更', '契約情報変更画面に遷移すること');
+      }
 
       await page.waitForTimeout(1000);
     }

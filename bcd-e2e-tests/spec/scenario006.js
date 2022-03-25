@@ -42,6 +42,13 @@ describe('リグレッションテスト', function () {
       const page = await context.newPage();
 
       global.reporter.setBrowserInfo(browser, page);
+      if (account.type == 'manager') {
+        await comment('---------- 管理者アカウント ----------')
+      } else if (account.type == 'user') {
+        await comment('---------- 一般ユーザー ----------')
+      } else {
+        await comment('---------- その他アカウント ----------')
+      }
 
       // ページオブジェクト
       const { loginPage, topPage, tradeShiftTopPage, uploadInvoiceMenuPage, uploadInvoicePage, uploadListPage }
@@ -62,7 +69,7 @@ describe('リグレッションテスト', function () {
       for (const hasHeader of testPattern) {
         let itemName;
         if (hasHeader) {
-          comment('---------- ヘッダーありの請求書作成 ----------')
+          await comment('---------- ヘッダーありの請求書作成 ----------')
           // ヘッダーありの請求書フォーマットを作成する
           // ※NG ヘッダーの上に別の行があると読み込みに失敗する。一時的にヘッダーが1行目のデータを利用
           // formatPath = path.resolve('testdata', 'upload', 'format_header.csv')
@@ -70,7 +77,7 @@ describe('リグレッションテスト', function () {
           formatPath = path.resolve('testdata', 'upload', 'format_header_tmp.csv')
           itemName = await common.uploadFormat(formatPath, true, 1, 2, 2)
         } else {
-          comment('---------- ヘッダーなしの請求書作成 ----------')
+          await comment('---------- ヘッダーなしの請求書作成 ----------')
           // ヘッダーなしの請求書フォーマットを作成する
           formatPath = path.resolve('testdata', 'upload', 'format_no_header.csv')
           itemName = await common.uploadFormat(formatPath, false, null, 1, 1)

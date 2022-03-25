@@ -40,16 +40,18 @@ exports.initTest = async () => {
   // テスト対象のアカウントを決める
   const accounts = [];
   const ACCOUNT = process.env.ACCOUNT;
-  if (ACCOUNT != 'user') { // Manager or all or 未設定
+  if (ACCOUNT != 'user') { // manager or all or 未設定
     accounts.push({
       id: config.company1.mng.id,
-      password: config.company1.mng.password
+      password: config.company1.mng.password,
+      type: 'manager'
     });
   }
   if (ACCOUNT == 'user' || ACCOUNT == 'all') {
     accounts.push({
       id: config.company1.user.id,
-      password: config.company1.user.password
+      password: config.company1.user.password,
+      type: 'user'
     });
   }
 
