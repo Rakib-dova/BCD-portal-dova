@@ -73,7 +73,6 @@ class TradeshiftDTO {
         userAccounts.push(this.UserAccounts.setUserAccounts(user))
       })
     } while (query.page < query.numPages)
-    console.log(userAccounts)
 
     return userAccounts
   }

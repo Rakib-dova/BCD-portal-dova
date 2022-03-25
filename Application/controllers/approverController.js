@@ -1,6 +1,5 @@
 'use stric'
 const apiManager = require('./apiManager')
-const qs = require('qs')
 const Approver = require('../lib/approver/Approver')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
@@ -30,7 +29,9 @@ const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
 
   // トレードシフトからユーザー情報を取得する。
   try {
-    userAccountsArr = (await tradeshiftDTO.findUserAll()).map((userAccount) => {
+    const findUserAll = await tradeshiftDTO.findUserAll()
+    if (findUserAll === -1) return -1
+    userAccountsArr = findUserAll.map((userAccount) => {
       return new Approver(userAccount)
     })
   } catch (error) {
@@ -448,11 +449,11 @@ const duplicateApproveRoute = async (approveRoute) => {
     approverUsers.push(
       new Approver({
         tenantId: null,
-        FirstName: approveRoute.userName.split(nameSep)[0],
-        LastName: approveRoute.userName.split(nameSep)[1],
-        Username: approveRoute.mailAddress,
-        Memberships: [{ GroupId: null }],
-        Id: approveRoute.uuid
+        firstName: approveRoute.userName.split(nameSep)[0],
+        lastName: approveRoute.userName.split(nameSep)[1],
+        email: approveRoute.mailAddress,
+        memberships: [{ GroupId: null }],
+        id: approveRoute.uuid
       })
     )
   } else {
@@ -461,11 +462,11 @@ const duplicateApproveRoute = async (approveRoute) => {
       approverUsers.push(
         new Approver({
           tenantId: null,
-          FirstName: approver.split(nameSep)[0],
-          LastName: approver.split(nameSep)[1],
-          Username: approveRoute.mailAddress[idx],
-          Memberships: [{ GroupId: null }],
-          Id: approveRoute.uuid[idx]
+          firstName: approver.split(nameSep)[0],
+          lastName: approver.split(nameSep)[1],
+          email: approveRoute.mailAddress[idx],
+          memberships: [{ GroupId: null }],
+          id: approveRoute.uuid[idx]
         })
       )
     })
@@ -652,7 +653,6 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     const approveRouteApprovers = await ApproveRoute.getApproveRoute(contractId, approveRouteId)
 
     // header検索
-    const query = '/account/users'
     let header = null
     let idx = 0
     while (approveRouteApprovers[idx]) {
@@ -673,9 +673,9 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     while (currUser) {
       const userId = currUser.approveUser
       next = currUser.nextApproveUser
-      users.push(
-        new Approver(await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${query}/${userId}`))
-      )
+      const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, null)
+      tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
+      users.push(new Approver(await tradeshiftDTO.getUserById(userId)))
       if (next) {
         currUser = await ApproveUser.findOne({
           where: {
