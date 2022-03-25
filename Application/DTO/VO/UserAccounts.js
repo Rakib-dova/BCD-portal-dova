@@ -9,6 +9,8 @@ class UserAccounts {
     userAccounts.email = _userAccounts.Username
     userAccounts.firstName = _userAccounts.FirstName
     userAccounts.lastName = _userAccounts.LastName
+    userAccounts.state = _userAccounts.State
+    userAccounts.memberships = _userAccounts.Memberships
 
     const keys = Object.keys(userAccounts)
     keys.forEach((property) => {

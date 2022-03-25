@@ -24,33 +24,19 @@ const RequestApprovalDAO = require('../DAO/RequestApprovalDAO')
  * @returns {Array} ユーザー情報
  */
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
-  const userAccountsArr = []
-  const queryObj = {
-    limit: 25,
-    page: 0,
-    numPages: 1
-  }
+  let userAccountsArr = []
+  const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accTk, refreshTk, tenantId)
+  tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
 
-  do {
-    // トレードシフトからユーザー情報を取得する。
-    const queryString = `/account/${tenantId}/users?${qs.stringify(queryObj)}`
-    try {
-      const findUsers = await apiManager.accessTradeshift(accTk, refreshTk, 'get', queryString)
-      if (findUsers instanceof Error) {
-        if (findUsers.response.status === 401) {
-          return -1
-        }
-      }
-      findUsers.UserAccounts.forEach((account) => {
-        userAccountsArr.push(new Approver(account))
-      })
-      queryObj.page++
-      queryObj.numPages = findUsers.numPages
-    } catch (error) {
-      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
-      return -2
-    }
-  } while (queryObj.page < queryObj.numPages)
+  // トレードシフトからユーザー情報を取得する。
+  try {
+    userAccountsArr = (await tradeshiftDTO.findUserAll()).map((userAccount) => {
+      return new Approver(userAccount)
+    })
+  } catch (error) {
+    logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+    return -2
+  }
 
   const searchUsers = []
   const keywordName = `${keyword.firstName} ${keyword.lastName}`.trim()
@@ -389,7 +375,6 @@ const getApproveRoute = async (accessToken, refreshToken, contract, approveRoute
     if (approveRouteApprovers.length === 0) {
       return -1
     }
-    const query = '/account/users'
     const approveRoute = {
       approveRouteId: approveRouteApprovers[0].approveRouteId,
       contractId: approveRouteApprovers[0].contractId,
@@ -417,9 +402,9 @@ const getApproveRoute = async (accessToken, refreshToken, contract, approveRoute
     while (currUser) {
       const userId = currUser.approveUser
       next = currUser.nextApproveUser
-      users.push(
-        new Approver(await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${query}/${userId}`))
-      )
+      const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, null)
+      tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
+      users.push(new Approver(await tradeshiftDTO.getUserById(userId)))
       if (next) {
         currUser = await ApproveUser.findOne({
           where: {
