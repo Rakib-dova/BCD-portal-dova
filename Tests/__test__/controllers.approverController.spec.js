@@ -14,8 +14,11 @@ const ApproveObj = require('../../Application/lib/approver/Approver')
 const validate = require('../../Application/lib/validate')
 const ApproveStatusDAO = require('../../Application/DAO/ApproveStatusDAO')
 const RequestApprovalDAO = require('../../Application/DAO/RequestApprovalDAO')
+const TradeshiftDTO = require('../../Application/DTO/TradeshiftDTO')
+const UserAccounts = require('../../Application/DTO/VO/UserAccounts')
 
 jest.mock('../../Application/DAO/RequestApprovalDAO')
+jest.mock('../../Application/DTO/TradeshiftDTO')
 
 let errorSpy, infoSpy, accessTradeshift
 let approveRouteFindAll,
@@ -163,6 +166,8 @@ describe('approverControllerのテスト', () => {
     approvalFindOne = jest.spyOn(Approval, 'findOne')
     approvalUpdate = jest.spyOn(Approval, 'update')
     approveStatusDAOGetStatusCode = jest.spyOn(ApproveStatusDAO, 'getStautsCode')
+    TradeshiftDTO.prototype.findUserAll = jest.fn()
+    TradeshiftDTO.prototype.getUserById = jest.fn()
   })
 
   afterEach(() => {
@@ -184,6 +189,8 @@ describe('approverControllerのテスト', () => {
     RequestApprovalUpdate.mockRestore()
     approvalUpdate.mockRestore()
     approveStatusDAOGetStatusCode.mockRestore()
+    TradeshiftDTO.prototype.findUserAll.mockRestore()
+    TradeshiftDTO.prototype.getUserById.mockRestore()
   })
 
   describe('getApprover', () => {
@@ -200,9 +207,12 @@ describe('approverControllerのテスト', () => {
       }
 
       // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const findUsers1 = findUsers.UserAccounts.map((user) => {
+        return UserAccounts.setUserAccounts(user)
+      })
+
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      TradeshiftDTO.prototype.findUserAll.mockReturnValueOnce(findUsers1)
 
       // 検索予想結果
       const expectResult = [
@@ -234,9 +244,12 @@ describe('approverControllerのテスト', () => {
       }
 
       // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const findUsers1 = findUsers.UserAccounts.map((user) => {
+        return UserAccounts.setUserAccounts(user)
+      })
+
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      TradeshiftDTO.prototype.findUserAll.mockReturnValueOnce(findUsers1)
 
       // 検索予想結果
       const expectResult = [
@@ -268,9 +281,12 @@ describe('approverControllerのテスト', () => {
       }
 
       // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const findUsers1 = findUsers.UserAccounts.map((user) => {
+        return UserAccounts.setUserAccounts(user)
+      })
+
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      TradeshiftDTO.prototype.findUserAll.mockReturnValueOnce(findUsers1)
 
       // 検索予想結果
       const expectResult = [
@@ -302,9 +318,11 @@ describe('approverControllerのテスト', () => {
       }
 
       // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const findUsers1 = findUsers.UserAccounts.map((user) => {
+        return UserAccounts.setUserAccounts(user)
+      })
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      TradeshiftDTO.prototype.findUserAll.mockReturnValueOnce(findUsers1)
 
       // 検索予想結果
       const expectResult = [
@@ -350,18 +368,9 @@ describe('approverControllerのテスト', () => {
         email: ''
       }
 
-      const error401 = new Error(
-        'Request failed with status code 401 at createError(../Application/node_modules/axios/lib/core/createError.js:16:15)'
-      )
-      error401.config = {
-        url: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/account/dummy-tennant/users?limit=1&page=0&numPages=1'
-      }
-      error401.response = {
-        status: 401
-      }
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockImplementation(() => {
-        return error401
+      TradeshiftDTO.prototype.findUserAll.mockImplementation(() => {
+        return -1
       })
 
       // 試験実施
@@ -827,7 +836,7 @@ describe('approverControllerのテスト', () => {
         return null
       })
       const expectedUser = [
-        new ApproveObj({
+        {
           Id: '53607702-b94b-4a94-9459-6cf3acd65603',
           CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
           CompanyName: 'UTテスト会社',
@@ -847,8 +856,8 @@ describe('approverControllerのテスト', () => {
           FirstName: 'UTテスト',
           LastName: 'ユーザー',
           Visible: true
-        }),
-        new ApproveObj({
+        },
+        {
           Id: '3b6a13d6-cb89-414b-9597-175ba89329aa',
           CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
           CompanyName: 'UTテスト会社',
@@ -869,8 +878,8 @@ describe('approverControllerのテスト', () => {
           LastName: 'ユーザー2',
           Title: 'portal test',
           Visible: true
-        }),
-        new ApproveObj({
+        },
+        {
           Id: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
           CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
           CompanyName: 'UTテスト会社',
@@ -890,8 +899,8 @@ describe('approverControllerのテスト', () => {
           FirstName: 'UTテスト',
           LastName: 'ユーザー3',
           Visible: true
-        }),
-        new ApproveObj({
+        },
+        {
           Id: 'aa974511-8188-4022-bd86-45e251fd259e',
           CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
           CompanyName: 'UTテスト会社',
@@ -911,106 +920,109 @@ describe('approverControllerのテスト', () => {
           FirstName: 'UTテスト',
           LastName: 'ユーザー4',
           Visible: true
-        })
+        }
       ]
+        .map((userAccount) => {
+          return UserAccounts.setUserAccounts(userAccount)
+        })
+        .map((userAccount) => {
+          return new ApproveObj(userAccount)
+        })
 
       // ユーザーをトレードシフトとの検索
-      accessTradeshift.mockImplementation((accToken, refreshToken, method, url) => {
-        const params = url.replace('/account/users/', '')
-        const dummyData = [
-          {
-            Id: '53607702-b94b-4a94-9459-6cf3acd65603',
-            CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-            CompanyName: 'UTテスト会社',
-            Username: 'UTTESTER1@UTCODE.COM',
-            Language: 'ja',
-            TimeZone: 'Asia/Tokyo',
-            Memberships: [
-              {
-                UserId: '53607702-b94b-4a94-9459-6cf3acd65603',
-                GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-                Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
-              }
-            ],
-            Created: '2021-05-17T08:12:48.291Z',
-            State: 'ACTIVE',
-            Type: 'PERSON',
-            FirstName: 'UTテスト',
-            LastName: 'ユーザー',
-            Visible: true
-          },
-          {
-            Id: '3b6a13d6-cb89-414b-9597-175ba89329aa',
-            CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-            CompanyName: 'UTテスト会社',
-            Username: 'UTTESTER2@UTCODE.COM',
-            Language: 'ja',
-            TimeZone: 'Asia/Tokyo',
-            Memberships: [
-              {
-                UserId: '53607702-b94b-4a94-9459-6cf3acd65603',
-                GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-                Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
-              }
-            ],
-            Created: '2021-05-24T03:24:26.537Z',
-            State: 'ACTIVE',
-            Type: 'PERSON',
-            FirstName: 'UTテスト',
-            LastName: 'ユーザー2',
-            Title: 'portal test',
-            Visible: true
-          },
-          {
-            Id: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
-            CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-            CompanyName: 'UTテスト会社',
-            Username: 'UTTESTER3@UTCODE.COM',
-            Language: 'ja',
-            TimeZone: 'Asia/Tokyo',
-            Memberships: [
-              {
-                UserId: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
-                GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-                Role: '824b4cb4-3bd9-4dd3-a0d4-e18586b6c03d'
-              }
-            ],
-            Created: '2021-06-11T08:49:30.939Z',
-            State: 'ACTIVE',
-            Type: 'PERSON',
-            FirstName: 'UTテスト',
-            LastName: 'ユーザー3',
-            Visible: true
-          },
-          {
-            Id: 'aa974511-8188-4022-bd86-45e251fd259e',
-            CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-            CompanyName: 'UTテスト会社',
-            Username: 'UTTESTER4@UTCODE.COM',
-            Language: 'ja',
-            TimeZone: 'Asia/Tokyo',
-            Memberships: [
-              {
-                UserId: 'aa974511-8188-4022-bd86-45e251fd259e',
-                GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-                Role: '8370ee3e-5f31-47bf-a139-d4218fb7689f'
-              }
-            ],
-            Created: '2021-08-03T02:06:10.626Z',
-            State: 'ACTIVE',
-            Type: 'PERSON',
-            FirstName: 'UTテスト',
-            LastName: 'ユーザー4',
-            Visible: true
-          }
-        ]
-        for (let idx = 0; idx < dummyData.length; idx++) {
-          if (dummyData[idx].Id === params) {
-            return dummyData[idx]
-          }
+      const dummyData = [
+        {
+          Id: '53607702-b94b-4a94-9459-6cf3acd65603',
+          CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          CompanyName: 'UTテスト会社',
+          Username: 'UTTESTER1@UTCODE.COM',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '53607702-b94b-4a94-9459-6cf3acd65603',
+              GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-05-17T08:12:48.291Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'UTテスト',
+          LastName: 'ユーザー',
+          Visible: true
+        },
+        {
+          Id: '3b6a13d6-cb89-414b-9597-175ba89329aa',
+          CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          CompanyName: 'UTテスト会社',
+          Username: 'UTTESTER2@UTCODE.COM',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '53607702-b94b-4a94-9459-6cf3acd65603',
+              GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-05-24T03:24:26.537Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'UTテスト',
+          LastName: 'ユーザー2',
+          Title: 'portal test',
+          Visible: true
+        },
+        {
+          Id: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+          CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          CompanyName: 'UTテスト会社',
+          Username: 'UTTESTER3@UTCODE.COM',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+              GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+              Role: '824b4cb4-3bd9-4dd3-a0d4-e18586b6c03d'
+            }
+          ],
+          Created: '2021-06-11T08:49:30.939Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'UTテスト',
+          LastName: 'ユーザー3',
+          Visible: true
+        },
+        {
+          Id: 'aa974511-8188-4022-bd86-45e251fd259e',
+          CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          CompanyName: 'UTテスト会社',
+          Username: 'UTTESTER4@UTCODE.COM',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: 'aa974511-8188-4022-bd86-45e251fd259e',
+              GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+              Role: '8370ee3e-5f31-47bf-a139-d4218fb7689f'
+            }
+          ],
+          Created: '2021-08-03T02:06:10.626Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'UTテスト',
+          LastName: 'ユーザー4',
+          Visible: true
         }
+      ].map((dummy) => {
+        return UserAccounts.setUserAccounts(dummy)
       })
 
+      TradeshiftDTO.prototype.getUserById.mockImplementation((userId) => {
+        return dummyData.filter((userAccount) => userAccount.id === userId)[0]
+      })
       // 試験実施
       const result = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
 
@@ -1086,12 +1098,13 @@ describe('approverControllerのテスト', () => {
 
       // approverオブジェクト作成
       const lastApprover = new ApproveObj({
-        FirstName: 'テスト',
-        LastName: 'ユーザー',
-        Username: 'dev.master.bconnection+flow3.002@gmail.com',
-        Memberships: [{ GroupId: null }],
-        Id: approveRoute.uuid
+        firstName: 'テスト',
+        lastName: 'ユーザー',
+        email: 'dev.master.bconnection+flow3.002@gmail.com',
+        memberships: [{ GroupId: null }],
+        id: approveRoute.uuid
       })
+
       const result = await approverController.duplicateApproveRoute(approveRoute)
 
       // 結果確認
@@ -1111,18 +1124,18 @@ describe('approverControllerのテスト', () => {
 
       // approverオブジェクト作成
       const approver = new ApproveObj({
-        FirstName: 'テスト',
-        LastName: 'ユーザー1',
-        Username: 'dev.master.bconnection+flow3.001@gmail.com',
-        Memberships: [{ GroupId: null }],
-        Id: approveRoute.uuid[0]
+        firstName: 'テスト',
+        lastName: 'ユーザー1',
+        email: 'dev.master.bconnection+flow3.001@gmail.com',
+        memberships: [{ GroupId: null }],
+        id: approveRoute.uuid[0]
       })
       const lastApprover = new ApproveObj({
-        FirstName: 'テスト',
-        LastName: 'ユーザー2',
-        Username: 'dev.master.bconnection+flow3.002@gmail.com',
-        Memberships: [{ GroupId: null }],
-        Id: approveRoute.uuid[1]
+        firstName: 'テスト',
+        lastName: 'ユーザー2',
+        email: 'dev.master.bconnection+flow3.002@gmail.com',
+        memberships: [{ GroupId: null }],
+        id: approveRoute.uuid[1]
       })
       const result = await approverController.duplicateApproveRoute(approveRoute)
 
@@ -2685,30 +2698,30 @@ describe('approverControllerのテスト', () => {
       approveUserFindOne.mockReturnValueOnce(secondApprover)
       approveUserFindOne.mockReturnValueOnce(thirdApprover)
 
-      const firstUserInfo = {
+      const firstUserInfo = UserAccounts.setUserAccounts({
         Memberships: [{ GroupId: tenantId }],
         FirstName: '承認者',
         LastName: '１',
         UserName: 'UTTESTCODE@TEST1',
         Id: 'approver1'
-      }
-      const secondUserInfo = {
+      })
+      const secondUserInfo = UserAccounts.setUserAccounts({
         Memberships: [{ GroupId: tenantId }],
         FirstName: '承認者',
         LastName: '２',
         UserName: 'UTTESTCODE@TEST2',
         Id: 'approver1'
-      }
-      const thirdUserInfo = {
+      })
+      const thirdUserInfo = UserAccounts.setUserAccounts({
         Memberships: [{ GroupId: tenantId }],
         FirstName: '承認者',
         LastName: '３',
         UserName: 'UTTESTCODE@TEST3',
         Id: 'approver1'
-      }
-      accessTradeshift.mockReturnValueOnce(firstUserInfo)
-      accessTradeshift.mockReturnValueOnce(secondUserInfo)
-      accessTradeshift.mockReturnValueOnce(thirdUserInfo)
+      })
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(firstUserInfo)
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(secondUserInfo)
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(thirdUserInfo)
       approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
 
       const dummyApproval = Approval.build({
@@ -2826,30 +2839,30 @@ describe('approverControllerのテスト', () => {
       approveUserFindOne.mockReturnValueOnce(secondApprover)
       approveUserFindOne.mockReturnValueOnce(thirdApprover)
 
-      const firstUserInfo = {
+      const firstUserInfo = UserAccounts.setUserAccounts({
         Memberships: [{ GroupId: tenantId }],
         FirstName: '承認者',
         LastName: '１',
         UserName: 'UTTESTCODE@TEST1',
         Id: 'approver1'
-      }
-      const secondUserInfo = {
+      })
+      const secondUserInfo = UserAccounts.setUserAccounts({
         Memberships: [{ GroupId: tenantId }],
         FirstName: '承認者',
         LastName: '２',
         UserName: 'UTTESTCODE@TEST2',
         Id: 'approver1'
-      }
-      const thirdUserInfo = {
+      })
+      const thirdUserInfo = UserAccounts.setUserAccounts({
         Memberships: [{ GroupId: tenantId }],
         FirstName: '承認者',
         LastName: '３',
         UserName: 'UTTESTCODE@TEST3',
         Id: 'approver1'
-      }
-      accessTradeshift.mockReturnValueOnce(firstUserInfo)
-      accessTradeshift.mockReturnValueOnce(secondUserInfo)
-      accessTradeshift.mockReturnValueOnce(thirdUserInfo)
+      })
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(firstUserInfo)
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(secondUserInfo)
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(thirdUserInfo)
       approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
 
       approvalFindOne.mockReturnValueOnce(null)
@@ -3307,9 +3320,12 @@ describe('approverControllerのテスト', () => {
       approvalFindOne.mockReturnValueOnce(dummyApproval)
 
       // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const findUsers1 = findUsers.UserAccounts.map((user) => {
+        return UserAccounts.setUserAccounts(user)
+      })
+
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      TradeshiftDTO.prototype.findUserAll.mockReturnValueOnce(findUsers1)
 
       // 検索予想結果
       const expectResult = {
@@ -3389,10 +3405,12 @@ describe('approverControllerのテスト', () => {
       const contractId = 'dummy-contractId'
       const requestId = '27f7188b-f6c7-4b5e-9826-96052bba495c'
 
-      // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const sequelizeConnectionError = new Error('Axios Error')
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      approvalFindOne.mockReturnValue(Approval.build({ requestId, approverStatus: '90' }))
+      TradeshiftDTO.prototype.findUserAll.mockImplementation(() => {
+        throw sequelizeConnectionError
+      })
 
       // 検索予想結果
 
@@ -3405,11 +3423,9 @@ describe('approverControllerのテスト', () => {
         requestId
       )
 
-      const sequelizeConnectionError = new Error('The "config.server" property is required and must be of type string.')
-
       // 期待結果
       // 想定したデータがReturnされていること
-      expect(result).toEqual(sequelizeConnectionError)
+      expect(result.stack).toMatch(/TypeError: users.find is not a function/)
     })
   })
 })
