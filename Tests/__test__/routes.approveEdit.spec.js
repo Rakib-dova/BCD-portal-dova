@@ -19,6 +19,7 @@ const ApproveRoute = require('../../Application/models').ApproveRoute
 const Approver = require('../../Application/models').ApproveUser
 const logger = require('../../Application/lib/logger.js')
 const ApproverObj = require('../../Application/lib/approver/Approver')
+const UserAccounts = require('../../Application/DTO/VO/UserAccounts')
 const { v4: uuidV4 } = require('uuid')
 
 let request, response, infoSpy
@@ -30,7 +31,8 @@ let userControllerFindOneSpy,
   approveRouteFindOne,
   approverFindOne,
   approveRouteFindAll,
-  approveRouteUpdate
+  approveRouteUpdate,
+  approverControllerEditApprover
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -64,6 +66,7 @@ const session = {
 const Users = require('../mockDB/Users_Table')
 const Tenants = require('../mockDB/Tenants_Table')
 const Contracts = require('../mockDB/Contracts_Table')
+const approverController = require('../../Application/controllers/approverController')
 
 const approveRouteTestData = [
   {
@@ -188,7 +191,7 @@ const approver = [
 
 // 期待ユーザー
 const expectedUser = [
-  new ApproverObj({
+  {
     Id: '53607702-b94b-4a94-9459-6cf3acd65603',
     CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
     CompanyName: 'UTテスト会社',
@@ -208,8 +211,8 @@ const expectedUser = [
     FirstName: 'UTテスト',
     LastName: 'ユーザー',
     Visible: true
-  }),
-  new ApproverObj({
+  },
+  {
     Id: '3b6a13d6-cb89-414b-9597-175ba89329aa',
     CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
     CompanyName: 'UTテスト会社',
@@ -230,8 +233,8 @@ const expectedUser = [
     LastName: 'ユーザー2',
     Title: 'portal test',
     Visible: true
-  }),
-  new ApproverObj({
+  },
+  {
     Id: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
     CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
     CompanyName: 'UTテスト会社',
@@ -251,8 +254,8 @@ const expectedUser = [
     FirstName: 'UTテスト',
     LastName: 'ユーザー3',
     Visible: true
-  }),
-  new ApproverObj({
+  },
+  {
     Id: 'aa974511-8188-4022-bd86-45e251fd259e',
     CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
     CompanyName: 'UTテスト会社',
@@ -272,8 +275,10 @@ const expectedUser = [
     FirstName: 'UTテスト',
     LastName: 'ユーザー4',
     Visible: true
-  })
-]
+  }
+].map((user) => {
+  return new ApproverObj(UserAccounts.setUserAccounts(user))
+})
 
 describe('approveRouteListのテスト', () => {
   beforeEach(() => {
@@ -297,6 +302,7 @@ describe('approveRouteListのテスト', () => {
       return Approver.build(initData)
     })
     approveRouteFindOne = jest.spyOn(ApproveRoute, 'findOne')
+    approverControllerEditApprover = jest.spyOn(approverController, 'editApprover')
   })
   afterEach(() => {
     request.resetMocked()
@@ -312,6 +318,7 @@ describe('approveRouteListのテスト', () => {
     approverFindOne.mockRestore()
     approveRouteUpdate.mockRestore()
     approveRouteFindOne.mockRestore()
+    approverControllerEditApprover.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -461,20 +468,20 @@ describe('approveRouteListのテスト', () => {
       // 承認者オブジェクト作成
       const approverUsers = [
         new ApproverObj({
-          FirstName: '管理者2',
-          LastName: '契約フロー確認用3',
-          Username: 'dev.master.bconnection+flow3.002@gmail.com',
-          Id: '81ae1ddf-0017-471c-962b-b4dac1b72117',
-          Memberships: [{ GroupId: null }]
+          firstName: '管理者2',
+          lastName: '契約フロー確認用3',
+          email: 'dev.master.bconnection+flow3.002@gmail.com',
+          id: '81ae1ddf-0017-471c-962b-b4dac1b72117',
+          memberships: [{ GroupId: null }]
         })
       ]
 
       const lastApprover = new ApproverObj({
-        FirstName: '管理者1',
-        LastName: '契約フロー確認用3',
-        Username: 'dev.master.bconnection+flow3.001@gmail.com',
-        Id: '2c15aaf5-8b75-4b85-97ef-418948ed6f9b',
-        Memberships: [{ GroupId: null }]
+        firstName: '管理者1',
+        lastName: '契約フロー確認用3',
+        email: 'dev.master.bconnection+flow3.001@gmail.com',
+        id: '2c15aaf5-8b75-4b85-97ef-418948ed6f9b',
+        memberships: [{ GroupId: null }]
       })
 
       // 試験実施
@@ -706,20 +713,7 @@ describe('approveRouteListのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
-      // 変更されていない場合
-      approveRouteFindOne.mockReturnValueOnce(null)
-
-      // 承認ルートDB検索結果
-      approveRoutegetApproveRouteSpy.mockReturnValueOnce(approveRouteTestData)
-
-      // 承認ルート重複検索結果：データがない場合
-      approveRouteFindAll.mockReturnValueOnce([approveRouteTestData2[0]])
-
-      // 登録した承認ルート検索結果
-      approveRoutegetApproveRouteSpy.mockReturnValueOnce({})
-
-      // 承認ルートのアップデート結果
-      approveRouteUpdate.mockReturnValueOnce([1, null])
+      approverControllerEditApprover.mockReturnValueOnce(0)
 
       // 試験実施
       await approveRouteEdit.cbPostEditApproveRoute(request, response, next)
