@@ -80,7 +80,7 @@ const cbPostApprove = async (req, res, next) => {
     req.session.waitingApprovalList = true
     res.redirect('/inboxList/1')
   } else {
-    req.flash('noti', ['支払依頼', '承認に失敗しました。'])
+    req.flash('noti', ['支払依頼', '差し戻しに失敗しました。'])
     res.redirect(`/approvalInbox/${invoiceId}`)
   }
 
