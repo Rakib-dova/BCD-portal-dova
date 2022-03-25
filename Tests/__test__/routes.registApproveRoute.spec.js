@@ -338,19 +338,19 @@ describe('registApproveRouteのテスト', () => {
       // 承認者オブジェクト作成
       const approverUsers = [
         new Approver({
-          FirstName: '管理者2',
-          LastName: '契約フロー確認用3',
-          Username: 'dev.master.bconnection+flow3.002@gmail.com',
-          Id: '81ae1ddf-0017-471c-962b-b4dac1b72117',
-          Memberships: [{ GroupId: null }]
+          firstName: '管理者2',
+          lastName: '契約フロー確認用3',
+          email: 'dev.master.bconnection+flow3.002@gmail.com',
+          id: '81ae1ddf-0017-471c-962b-b4dac1b72117',
+          memberships: [{ GroupId: null }]
         })
       ]
       const lastApprover = new Approver({
-        FirstName: '管理者1',
-        LastName: '契約フロー確認用3',
-        Username: 'dev.master.bconnection+flow3.001@gmail.com',
-        Id: '2c15aaf5-8b75-4b85-97ef-418948ed6f9b',
-        Memberships: [{ GroupId: null }]
+        firstName: '管理者1',
+        lastName: '契約フロー確認用3',
+        email: 'dev.master.bconnection+flow3.001@gmail.com',
+        id: '2c15aaf5-8b75-4b85-97ef-418948ed6f9b',
+        memberships: [{ GroupId: null }]
       })
 
       // 試験実施

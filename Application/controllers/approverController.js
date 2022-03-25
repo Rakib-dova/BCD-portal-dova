@@ -1,5 +1,4 @@
 'use stric'
-const apiManager = require('./apiManager')
 const Approver = require('../lib/approver/Approver')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
@@ -191,18 +190,6 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
   try {
     let duplicatedFlag = false
 
-    // 変更する承認ルートが既に変更された場合
-    const isUpdated = await ApproveRoute.findOne({
-      where: {
-        contractId: contract,
-        approveRouteId: prevApproveRouteId,
-        updateFlag: true
-      }
-    })
-    if (isUpdated) {
-      return 1
-    }
-
     // 重複の承認ルート名をチェックのため、DBから変更対象以外の承認ルートを取得
     const resultSearchRoute = await ApproveRoute.findAll({
       where: {
@@ -227,23 +214,57 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
       return 1
     }
 
-    // 重複の承認ルート名がない場合DBに保存する。（ApproveRoute）
-    const resultToInsertRoute = await ApproveRoute.create({
-      contractId: contract,
-      approveRouteName: values.setApproveRouteNameInputId,
-      prevAprroveRouteId: prevApproveRouteId
-    })
+    // 重複の承認ルート名がない場合データを更新する。（ApproveRoute）
+    const updateApproveRoute = await ApproveRoute.update(
+      {
+        approveRouteName: values.setApproveRouteNameInputId
+      },
+      {
+        where: {
+          contractId: contract,
+          approveRouteId: prevApproveRouteId
+        }
+      }
+    )
 
-    // DB保存失敗したらモデルApproveRouteインスタンスではない
-    if (resultToInsertRoute instanceof ApproveRoute === false) {
+    // 更新失敗したらモデルApproveRouteインスタンスではない
+    if (updateApproveRoute !== 1) {
       return -1
     }
+
+    // 変更した承認ルート取得
+    const searchApproveRoute = await ApproveRoute.findOne({
+      where: {
+        contractId: contract,
+        approveRouteId: prevApproveRouteId
+      }
+    })
+
+    if (searchApproveRoute instanceof ApproveRoute === false) {
+      return -1
+    }
+
+    // 変更前の承認ルートに紐づいてる承認者取得
+    const searchApproveUser = await ApproveUser.findAll({
+      where: {
+        approveRouteId: searchApproveRoute.approveRouteId
+      }
+    })
+
+    if (searchApproveUser instanceof Array === false) {
+      return -1
+    }
+
+    // 変更前の承認ルートに紐づいてる承認者削除
+    searchApproveUser.forEach((approverUser) => {
+      approverUser.destroy()
+    })
 
     // 重複の承認ルート名がない場合DBに保存する。（ApproveUser）
     // 承認者が一人の場合
     if (uuids instanceof Array === false) {
       resultToInsertUser = await ApproveUser.create({
-        approveRouteId: resultToInsertRoute.approveRouteId,
+        approveRouteId: searchApproveRoute.approveRouteId,
         approveUser: values.uuid,
         prevApproveUser: null,
         nextApproveUser: null,
@@ -261,7 +282,7 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
 
         let currentUser = null
         resultToInsertUser = await ApproveUser.create({
-          approveRouteId: resultToInsertRoute.approveRouteId,
+          approveRouteId: searchApproveRoute.approveRouteId,
           approveUser: uuids[i],
           prevApproveUser: null,
           nextApproveUser: null,
@@ -285,22 +306,6 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
 
     // DB保存失敗したらモデルApproveRouteインスタンスではない
     if (approveRouteAndApprover === -1) {
-      return -1
-    }
-
-    const prevApproveRouteSetUpdateFlag = await ApproveRoute.update(
-      {
-        updateFlag: true
-      },
-      {
-        where: {
-          approveRouteId: prevApproveRouteId
-        }
-      }
-    )
-
-    // DB保存失敗したらモデルApproveRouteインスタンスではない
-    if (!prevApproveRouteSetUpdateFlag) {
       return -1
     }
 
