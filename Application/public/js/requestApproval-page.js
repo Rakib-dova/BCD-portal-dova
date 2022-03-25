@@ -1,5 +1,6 @@
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
+const modal = document.getElementById('request-progress-modal')
 const ua = window.navigator.userAgent
 if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
   const tag = document.createElement('script')
@@ -277,6 +278,8 @@ $('#btn-confirm').addEventListener('click', function () {
   $('#check-request-approve-route').appendChild(cloneDiplay)
 })
 
-$('#btn-approval').addEventListener('click', function () {
+$('#btn-approval').addEventListener('click', (e) => {
+  e.preventDefault()
+  modal.classList.add('is-active')
   $('#approval').submit()
 })
