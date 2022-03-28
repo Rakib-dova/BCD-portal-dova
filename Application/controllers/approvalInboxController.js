@@ -131,11 +131,18 @@ const hasPowerOfEditing = async (contractId, userId, requestId) => {
     const status = requestApproval.status
     const idx = ~~status - 9
 
+    console.log('approval', approval)
+    console.log('requestApproval', requestApproval)
     if (idx === approveUserCount) {
+      console.log(`approval[${approver[10]}]`, approval[approver[10]])
+      console.log('userId', userId)
       if (approval[approver[10]] === userId) {
         return true
       }
     } else {
+      console.log(`approval[${approver[idx - 1]}]`, approval[approver[idx - 1]])
+      console.log('userId', userId)
+
       if (approval[approver[idx - 1]] === userId) {
         return true
       }
