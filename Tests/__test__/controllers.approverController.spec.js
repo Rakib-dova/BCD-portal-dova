@@ -1427,7 +1427,7 @@ describe('approverControllerのテスト', () => {
       // ApproveRoute.getApproveRoute承認ルートを検索
       approveGetApproveRoute.mockReturnValueOnce(testApproveRouteData)
 
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
       approveRouteFindOne.mockReturnValueOnce(expectApproveRoute)
       approveUserFindAll.mockReturnValueOnce([expectApproveRouteUser])
 
@@ -1572,7 +1572,7 @@ describe('approverControllerのテスト', () => {
       approveGetApproveRoute.mockReturnValueOnce(testData)
 
       // 既存承認ルートはFlagをtrueにする。
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
       approveRouteFindOne.mockReturnValueOnce(expectApproveRoute)
       approveUserFindAll.mockReturnValueOnce([expectApproveRouteUser1])
 
@@ -1634,7 +1634,7 @@ describe('approverControllerのテスト', () => {
       approveGetApproveRoute.mockReturnValueOnce({})
 
       // 既存承認ルートはFlagをtrueにする。
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
       approveRouteFindOne.mockReturnValueOnce(expectApproveRoute)
       approveUserFindAll.mockReturnValueOnce([expectApproveRouteUser])
 
@@ -1713,7 +1713,7 @@ describe('approverControllerのテスト', () => {
 
       // 承認ルート保存失敗
       approverouteCreate.mockReturnValueOnce(null)
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
       approveRouteFindOne.mockReturnValueOnce(null)
 
       // 試験実施
@@ -1768,7 +1768,7 @@ describe('approverControllerのテスト', () => {
         isLastApproveUser: false
       })
       approveUserCreate.mockReturnValueOnce(expectApproveRouteUser)
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
       approveRouteFindOne.mockReturnValueOnce(null)
 
       // getApproveRouteの結果
@@ -1924,7 +1924,7 @@ describe('approverControllerのテスト', () => {
         }
       ])
 
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
 
       // 試験実施
       const result = await approverController.editApprover(
@@ -2067,7 +2067,7 @@ describe('approverControllerのテスト', () => {
         })
       )
 
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
       approveUserFindAll.mockReturnValueOnce(null)
 
       // 試験実施
@@ -2121,7 +2121,7 @@ describe('approverControllerのテスト', () => {
       })
       approverouteCreate.mockReturnValueOnce(expectApproveRoute)
 
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
       approveUserFindAll.mockReturnValueOnce([])
       // 更新した承認ルートのユーザーを保存
       const expectApproveRouteUser = ApproveUser.build({
@@ -2185,7 +2185,7 @@ describe('approverControllerのテスト', () => {
       })
       approverouteCreate.mockReturnValueOnce(expectApproveRoute)
 
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
       approveUserFindAll.mockReturnValueOnce([])
       approveUserCreate.mockReturnValueOnce(null)
 
