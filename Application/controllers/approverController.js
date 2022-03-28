@@ -256,9 +256,9 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
     }
 
     // 変更前の承認ルートに紐づいてる承認者削除
-    searchApproveUser.forEach((approverUser) => {
-      approverUser.destroy()
-    })
+    for (const approverUser of searchApproveUser) {
+      await approverUser.destroy()
+    }
 
     // 重複の承認ルート名がない場合DBに保存する。（ApproveUser）
     // 承認者が一人の場合
