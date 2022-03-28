@@ -155,7 +155,7 @@ const cbPostApprove = async (req, res, next) => {
   const invoiceId = req.params.invoiceId
 
   if (requestApproval === null) {
-    req.flash('alertNotification', ['支払依頼', 'システムエラーが発生しました。\nもう一度操作してください'])
+    req.flash('alertNotification', ['支払依頼', 'システムエラーが発生しました。\nもう一度操作してください。'])
     return res.redirect(`/approvalInbox/${invoiceId}`)
   }
 
@@ -238,10 +238,8 @@ const cbPostApprove = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApprove')
 }
 
-// router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)
-router.get('/:invoiceId', cbGetIndex)
-router.post('/:invoiceId', cbPostApprove)
-// router.post('/:invoiceId', helper.isAuthenticated, cbPostApprove)
+router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)
+router.post('/:invoiceId', helper.isAuthenticated, cbPostApprove)
 
 module.exports = {
   router: router,

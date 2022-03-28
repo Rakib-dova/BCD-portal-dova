@@ -663,7 +663,17 @@ describe('approvalInboxControllerのテスト', () => {
         }
       }
 
-      const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval)
+      const expectApproval = {
+        requestId: requestApproval.requestId,
+        requestUserId: requestApproval.requester,
+        approveStatus: requestApproval.status,
+        approveRouteN: 'UTテスト',
+        approveUserLast: 'aa974511-8188-4022-bd86-45e251fd259e',
+        approveUserCount: 1
+      }
+      requestApprovalFindOne.mockReturnValueOnce(RequestApproval.build({ ...requestApproval }))
+      approvalFineOne.mockReturnValueOnce(Approval.build({ ...expectApproval }))
+      const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval.requestId)
 
       // 結果確認
       expect(result).toBe(true)
@@ -673,14 +683,14 @@ describe('approvalInboxControllerのテスト', () => {
       // パラメータ作成
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const userId = 'aa974511-8188-4022-bd86-45e251fd259e'
-      const requestApproval = null
-      const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval)
+      const requestId = null
+      const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestId)
 
       // 結果確認
       expect(result).toBe(-1)
     })
 
-    test('準正常：DB検索の結果がrequestApprovalのapproveRouteのusersのidがUserIdと違い場合', async () => {
+    test('準正常：支払依頼承認権限がない場合（１ユーザー）', async () => {
       // パラメータ作成
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const userId = 'aa974511-8188-4022-bd86-45e251fd259e'
@@ -725,9 +735,144 @@ describe('approvalInboxControllerのテスト', () => {
         }
       }
 
-      const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval)
+      const expectApproval = {
+        requestId: requestApproval.requestId,
+        requestUserId: requestApproval.requester,
+        approveStatus: requestApproval.status,
+        approveRouteN: 'UTテスト',
+        approveUserLast: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUserCount: 1
+      }
+      requestApprovalFindOne.mockReturnValueOnce(RequestApproval.build({ ...requestApproval }))
+      approvalFineOne.mockReturnValueOnce(Approval.build({ ...expectApproval }))
+      requestApprovalFindOne.mockReturnValueOnce(RequestApproval.build({ ...requestApproval }))
+      const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval.requestId)
       // 結果確認
       expect(result).toBe(false)
+    })
+
+    test('準正常：支払依頼承認権限がない場合（11ユーザー）', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const userId = 'aa974511-8188-4022-bd86-45e251fd259e'
+      const requestApproval = {
+        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+        requester: 'aa974511-8188-4022-bd86-45e251fd259e',
+        message: 'dummyData',
+        status: '10',
+        approveRoute: {
+          users: [
+            {
+              No: 1,
+              approveRouteName: 'dummyRouteName',
+              approverCount: 'dummyCount',
+              id: 'dummyUUID'
+            }
+          ]
+        },
+        approvals: [
+          {
+            approvalDate: null,
+            approvalId: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
+            approver: {
+              No: 1,
+              approveRouteName: 'dummyRouteName',
+              approverCount: 'dummyCount',
+              Id: 'dummyUUID'
+            },
+            contractId: 'dummy',
+            message: null,
+            next: null,
+            prev: null,
+            request: [],
+            status: '10'
+          }
+        ],
+        prevUser: {
+          message: null,
+          name: null
+        }
+      }
+
+      const expectApproval = {
+        requestId: requestApproval.requestId,
+        requestUserId: requestApproval.requester,
+        approveStatus: requestApproval.status,
+        approveRouteN: 'UTテスト',
+        approveUser1: 'a08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUser2: 'b08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUser3: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUser4: 'd08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUser5: 'e08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUser6: 'f08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUser7: 'g08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUser8: 'h08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUser9: 'i08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUser10: 'j08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUserLast: 'k08ddcbf-c305-455f-89f9-42b53614cb0e',
+        approveUserCount: 11
+      }
+      requestApprovalFindOne.mockReturnValueOnce(RequestApproval.build({ ...requestApproval }))
+      approvalFineOne.mockReturnValueOnce(Approval.build({ ...expectApproval }))
+      requestApprovalFindOne.mockReturnValueOnce(RequestApproval.build({ ...requestApproval }))
+      const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval.requestId)
+      // 結果確認
+      expect(result).toBe(false)
+    })
+
+    test('準正常：Approvalテーブルにデータがない場合', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const userId = 'aa974511-8188-4022-bd86-45e251fd259e'
+      const requestApproval = {
+        requestId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+        contractId: '343b34d1-f4db-484e-b822-8e2ce9017d14',
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603',
+        requester: 'aa974511-8188-4022-bd86-45e251fd259e',
+        message: 'dummyData',
+        status: '10',
+        approveRoute: {
+          users: [
+            {
+              No: 1,
+              approveRouteName: 'dummyRouteName',
+              approverCount: 'dummyCount',
+              id: 'dummyUUID'
+            }
+          ]
+        },
+        approvals: [
+          {
+            approvalDate: null,
+            approvalId: 'c08ddcbf-c305-455f-89f9-42b53614cb0e',
+            approver: {
+              No: 1,
+              approveRouteName: 'dummyRouteName',
+              approverCount: 'dummyCount',
+              Id: 'dummyUUID'
+            },
+            contractId: 'dummy',
+            message: null,
+            next: null,
+            prev: null,
+            request: [],
+            status: '10'
+          }
+        ],
+        prevUser: {
+          message: null,
+          name: null
+        }
+      }
+
+      requestApprovalFindOne.mockReturnValueOnce(RequestApproval.build({ ...requestApproval }))
+      approvalFineOne.mockReturnValueOnce(null)
+      requestApprovalFindOne.mockReturnValueOnce(RequestApproval.build({ ...requestApproval }))
+      const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval.requestId)
+      // 結果確認
+      expect(result).toBe(-1)
     })
 
     test('異常：DBエラーの場合', async () => {
@@ -776,7 +921,7 @@ describe('approvalInboxControllerのテスト', () => {
         }
       }
 
-      const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval)
+      const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval.requestId)
 
       // 結果確認
       expect(result).toBe(-1)

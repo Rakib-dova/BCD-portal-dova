@@ -108,11 +108,37 @@ const hasPowerOfEditing = async (contractId, userId, requestId) => {
   try {
     if (requestId === null) return -1
 
-    const requestApproval = await RequestApproval.findOne({ where: { requestId: requestId } })
+    const target = { where: { requestId: requestId } }
+    const requestApproval = await RequestApproval.findOne(target)
+    const approval = await DbApproval.findOne({ target })
+
+    if (approval === null || requestApproval === null) return -1
+
+    const approver = [
+      'approveUser1',
+      'approveUser2',
+      'approveUser3',
+      'approveUser4',
+      'approveUser5',
+      'approveUser6',
+      'approveUser7',
+      'approveUser8',
+      'approveUser9',
+      'approveUser10',
+      'approveUserLast'
+    ]
+    const approveUserCount = approval.approveUserCount
     const status = requestApproval.status
-    const idx = ~~status - 10
-    if (requestApproval.approveRoute.users[idx].id !== userId) {
-      return false
+    const idx = ~~status - 9
+
+    if (idx === approveUserCount) {
+      if (approval[approver[10]] !== userId) {
+        return false
+      }
+    } else {
+      if (approval[approver[idx]] !== userId) {
+        return false
+      }
     }
 
     return true
