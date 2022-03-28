@@ -110,7 +110,7 @@ const hasPowerOfEditing = async (contractId, userId, requestId) => {
 
     const target = { where: { requestId: requestId } }
     const requestApproval = await RequestApproval.findOne(target)
-    const approval = await DbApproval.findOne({ target })
+    const approval = await DbApproval.findOne(target)
 
     if (approval === null || requestApproval === null) return -1
 
