@@ -130,10 +130,11 @@ const getRequestApproval = async (accessToken, refreshToken, contract, invoiceId
   }
 }
 
-const hasPowerOfEditing = async (contractId, userId, requestApproval) => {
+const hasPowerOfEditing = async (contractId, userId, requestId) => {
   try {
-    if (requestApproval === null) return -1
+    if (requestId === null) return -1
 
+    const requestApproval = await RequestApproval.findOne({ where: { requestId: requestId } })
     const status = requestApproval.status
     const idx = ~~status - 10
     if (requestApproval.approveRoute.users[idx].id !== userId) {
