@@ -141,7 +141,8 @@ const cbGetIndex = async (req, res, next) => {
       workflow[i].documentId,
       user.tenantId
     )
-    const result = await approvalInboxController.hasPowerOfEditing(contract.contractId, user.userId, requestApproval)
+    const requestId = requestApproval.requestId
+    const result = await approvalInboxController.hasPowerOfEditing(contract.contractId, user.userId, requestId)
     if (result === true) {
       switch (workflow[i].workflowStatus) {
         case '支払依頼中':
