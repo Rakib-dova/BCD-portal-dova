@@ -158,16 +158,16 @@ const hasPowerOfEditing = async (contractId, userId, requestId) => {
     const idx = ~~status - 9
 
     if (idx === approveUserCount) {
-      if (approval[approver[10]] !== userId) {
-        return false
+      if (approval[approver[10]] === userId) {
+        return true
       }
     } else {
-      if (approval[approver[idx]] !== userId) {
-        return false
+      if (approval[approver[idx]] === userId) {
+        return true
       }
     }
 
-    return true
+    return false
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
     return -1
