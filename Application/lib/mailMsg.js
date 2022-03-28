@@ -34,6 +34,10 @@ const mailContent = async function (accessToken, refreshToken, contractId, invoi
     const month = date.getMonth() + 1
     const day = date.getDate()
 
+    // メール本文URL
+    const urlHost = process.env.TS_HOST
+    const urlClient = process.env.TS_CLIENT_ID
+
     // ユーザ情報取得
     let uerMailAddress
     let companyName
@@ -67,8 +71,12 @@ ${userName} 様
 
 対象の請求書番号：${invoiceNumber}
 詳細はこちら
-https://bcd-portal.tsdev.biz/inboxList/approvals
-※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。
+https://${urlHost}/#/${urlClient}
+※デジタルトレードアプリのHOME画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。
+
+(確認手順)
+1. デジタルトレードアプリのHOME画面から、仕訳情報管理＞支払依頼一覧＞承認待ちの順にクリック
+2. 承認待ち一覧にて対象の支払依頼の「依頼内容確認」ボタンをクリック
 
 -----------------------------------------------------
 NTTコミュニケーションズ株式会社
@@ -95,8 +103,13 @@ ${userName} 様
 
 対象の請求書番号：${invoiceNumber}
 詳細はこちら
-https://bcd-portal.tsdev.biz/inboxList/1
-※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。
+https://${urlHost}/#/${urlClient}
+※デジタルトレードアプリのHOME画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。
+
+(確認手順)
+1. デジタルトレードアプリのHOME画面から、仕訳情報管理＞支払依頼一覧の順にクリック
+2. 支払依頼一覧にて対象の支払依頼の「仕訳情報設定」ボタンをクリック
+3. 仕訳情報設定画面の「支払依頼へ」ボタンをクリック
 
 -----------------------------------------------------
 NTTコミュニケーションズ株式会社
@@ -113,8 +126,12 @@ ${userName} 様
 
 対象の請求書番号：${invoiceNumber}
 詳細はこちら
-https://bcd-portal.tsdev.biz/inboxList/approvals
-※承認画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。
+https://${urlHost}/#/${urlClient}
+※デジタルトレードアプリのHOME画面が表示されない場合はログイン後、再度こちらのURLにアクセスしてください。
+
+(確認手順)
+1. デジタルトレードアプリのHOME画面から、仕訳情報管理＞支払依頼一覧の順にクリック
+2. 支払依頼一覧にて対象の支払依頼の「仕訳情報設定」ボタンをクリック
 
 -----------------------------------------------------
 NTTコミュニケーションズ株式会社
