@@ -327,6 +327,15 @@ block content
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button.mr-6(data-target='check-approval-modal') キャンセル
         a.button.is-link#btn-approve 承認
+      .modal.modal-fx-fadeInscale#approve-progress-modal
+          .modal-background
+          .modal-card
+            header.modal-card-head
+              p.modal-card-title
+            section.modal-card-body
+              center
+                p.modal-card-result#modal-card-result 処理中
+            footer.modal-card-foot        
 
   .modal#reject-approval-modal
     .modal-background.cancel-button(data-target='reject-approval-modal')
@@ -345,7 +354,15 @@ block content
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button.mr-6(data-target='reject-approval-modal') キャンセル
         a.button.is-danger#btn-reject 差し戻し
-
+      .modal.modal-fx-fadeInscale#reject-progress-modal
+          .modal-background
+          .modal-card
+            header.modal-card-head
+              p.modal-card-title
+            section.modal-card-body
+              center
+                p.modal-card-result#modal-card-result 処理中
+            footer.modal-card-foot  
   include footer
 
 block append scripts
