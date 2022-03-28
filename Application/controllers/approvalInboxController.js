@@ -162,7 +162,7 @@ const hasPowerOfEditing = async (contractId, userId, requestId) => {
         return true
       }
     } else {
-      if (approval[approver[idx]] === userId) {
+      if (approval[approver[idx - 1]] === userId) {
         return true
       }
     }
