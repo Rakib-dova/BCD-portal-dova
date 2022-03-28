@@ -227,6 +227,7 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
       }
     )
 
+    logger.info('updateApproveRoute====== ', updateApproveRoute)
     // 更新失敗したらモデルApproveRouteインスタンスではない
     if (updateApproveRoute !== 1) {
       return -1
@@ -240,6 +241,7 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
       }
     })
 
+    logger.info('searchApproveRoute====== ', searchApproveRoute)
     if (searchApproveRoute instanceof ApproveRoute === false) {
       return -1
     }
@@ -250,15 +252,16 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
         approveRouteId: searchApproveRoute.approveRouteId
       }
     })
+    logger.info('searchApproveUser====== ', searchApproveUser)
 
     if (searchApproveUser instanceof Array === false) {
       return -1
     }
 
     // 変更前の承認ルートに紐づいてる承認者削除
-    for (const approverUser of searchApproveUser) {
-      await approverUser.destroy()
-    }
+    searchApproveUser.forEach((approverUser) => {
+      approverUser.destroy()
+    })
 
     // 重複の承認ルート名がない場合DBに保存する。（ApproveUser）
     // 承認者が一人の場合
