@@ -106,10 +106,12 @@ html
                   p.modal-card-title= messages.alertNotification[0]
                   button.delete(type="button" data-target="alertNotification-modal")
                 section.modal-card-body
-                  p.color-err-message !{messages.alertNotification[1]}
+                  p.color-err-message !{messages.alertNotification[1].split('\n')[0]}
+                  p.color-err-message !{messages.alertNotification[1].split('\n')[1]}
                 
                 footer.modal-card-foot
-                  button.show-modal(type="button" data-target="alertNotification-modal") 確認
+                  div.button-area
+                    a.button.cancel-button(data-target='alertNotification-modal') 確認
 
     block scripts
       script(src="/js/common-page.js")
