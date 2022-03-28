@@ -22,7 +22,10 @@
             if idx < userLen - 1
               .columns.m-0.p-0.is-border-left-top
                 .column.is-one-fifth.text-left.is-border-right #{approvalNo[idx]}
-                .column.is-one-third.text-left.is-border-right #{user.firstName} #{user.lastName}
+                if user.firstName === '未設定'
+                  .column.is-one-third.text-left.is-border-right.input-label-required #{user.firstName} #{user.lastName}
+                else
+                  .column.is-one-third.text-left.is-border-right #{user.firstName} #{user.lastName}
                 if user.status === '処理中'
                   .column.is-align-content-center.is-border-right.is-family-noto-sans-bold #{user.status} #{user.approvedAt}
                 else
