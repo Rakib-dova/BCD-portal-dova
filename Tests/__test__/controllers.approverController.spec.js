@@ -4,6 +4,7 @@ const logger = require('../../Application/lib/logger')
 const apiManager = require('../../Application/controllers/apiManager')
 const userController = require('../../Application/controllers/userController')
 const approverController = require('../../Application/controllers/approverController')
+const approvalInboxController = require('../../Application/controllers/approvalInboxController')
 const db = require('../../Application/models')
 const ApproveRoute = db.ApproveRoute
 const ApproveUser = db.ApproveUser
@@ -32,7 +33,7 @@ let approveRouteFindAll,
   RequestApprovalUpdate,
   approvalUpdate
 
-let approveUserCreate, approveUserFindOne, approveUserFindAll
+let approveUserCreate, approveUserFindOne, approveUserFindAll, hasPowerOfEditingSpy
 let validateIsUUID
 let approvalFindOne
 let approveStatusDAOGetStatusCode
@@ -171,6 +172,7 @@ describe('approverControllerのテスト', () => {
     TradeshiftDTO.prototype.getUserById = jest.fn()
     approveUserFindAll = jest.spyOn(ApproveUser, 'findAll')
     ApproveUser.destory = jest.fn()
+    hasPowerOfEditingSpy = jest.spyOn(approvalInboxController, 'hasPowerOfEditing')
   })
 
   afterEach(() => {
@@ -195,6 +197,7 @@ describe('approverControllerのテスト', () => {
     TradeshiftDTO.prototype.findUserAll.mockRestore()
     TradeshiftDTO.prototype.getUserById.mockRestore()
     approveUserFindAll.mockRestore()
+    hasPowerOfEditingSpy.mockRestore()
   })
 
   describe('getApprover', () => {
@@ -3277,6 +3280,24 @@ describe('approverControllerのテスト', () => {
         apprvoeRouteName: 'UTコード'
       })
 
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
+
       const dummyApproval = Approval.build({
         requestId: requestId,
         requestUserId: requestUserId,
@@ -3294,7 +3315,7 @@ describe('approverControllerのテスト', () => {
       approvalUpdate.mockReturnValueOnce(dummyApproval)
       RequestApprovalUpdate.mockReturnValueOnce({})
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
       expect(result).toBeTruthy()
     })
@@ -3309,6 +3330,24 @@ describe('approverControllerのテスト', () => {
         contractId: contractId,
         apprvoeRouteName: 'UTコード'
       })
+
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
       const dummyApproval = Approval.build({
         requestId: requestId,
@@ -3328,7 +3367,7 @@ describe('approverControllerのテスト', () => {
       approvalUpdate.mockReturnValueOnce(dummyApproval)
       RequestApprovalUpdate.mockReturnValueOnce({})
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
       expect(result).toBeTruthy()
     })
@@ -3343,6 +3382,23 @@ describe('approverControllerのテスト', () => {
         contractId: contractId,
         approveRouteName: 'UTコード'
       })
+
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
 
       const dummyApproval = Approval.build({
         requestId: requestId,
@@ -3359,10 +3415,11 @@ describe('approverControllerのテスト', () => {
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce(null)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
-      expect(result).toBeFalsy()
+      expect(result).toEqual(false)
     })
 
     test('準正常：支払依頼アップデート失敗②', async () => {
@@ -3375,6 +3432,23 @@ describe('approverControllerのテスト', () => {
         contractId: contractId,
         approveRouteName: 'UTコード'
       })
+
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
 
       const dummyApproval = Approval.build({
         requestId: requestId,
@@ -3392,10 +3466,11 @@ describe('approverControllerのテスト', () => {
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce({})
       RequestApprovalUpdate.mockReturnValueOnce(null)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
-      expect(result).toBeFalsy()
+      expect(result).toEqual(false)
     })
 
     test('準正常：支払依頼アップデート失敗', async () => {
@@ -3408,6 +3483,23 @@ describe('approverControllerのテスト', () => {
         contractId: contractId,
         approveRouteName: 'UTコード'
       })
+
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
 
       const dummyApproval = Approval.build({
         requestId: requestId,
@@ -3429,7 +3521,9 @@ describe('approverControllerのテスト', () => {
         throw dbError
       })
 
-      await approverController.updateApprove(contractId, approveRouteId, message)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
+
+      await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
       expect(errorSpy).toHaveBeenCalledWith({
         contractId: contractId,
@@ -3443,9 +3537,26 @@ describe('approverControllerのテスト', () => {
       const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
 
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
       approvalFindOne.mockReturnValueOnce(null)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
       expect(result).toBeFalsy()
     })
@@ -3461,6 +3572,24 @@ describe('approverControllerのテスト', () => {
         apprvoeRouteName: 'UTコード'
       })
 
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
+
       const dummyApproval = Approval.build({
         requestId: requestId,
         requestUserId: requestUserId,
@@ -3472,9 +3601,60 @@ describe('approverControllerのテスト', () => {
 
       approveStatusFindOne.mockReturnValueOnce(null)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
       expect(result).toStrictEqual(new Error('12 is not found in approveStatus table'))
+    })
+
+    test('異常系：hasPowerOfEditingがFalseの場合（ログインユーザが承認直前のステータス確認で先に承認順が変わった場合→重複承認の対応）', async () => {
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'dummy-approveRouteId'
+      const message = '承認する。'
+      const requestId = 'dummy-request'
+      const requestUserId = 'dummy-User-id'
+      const approveRoute = ApproveRoute.build({
+        contractId: contractId,
+        apprvoeRouteName: 'UTコード'
+      })
+
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
+
+      const dummyApproval = Approval.build({
+        requestId: requestId,
+        requestUserId: requestUserId,
+        approveRouteId: approveRoute.approveRouteId,
+        approveStatus: '11',
+        approveRouteName: approveRoute.approveRouteName
+      })
+      approvalFindOne.mockReturnValueOnce(dummyApproval)
+
+      const dummyStatus = ApproveStatus.build({
+        code: '10',
+        name: '支払依頼中'
+      })
+      approveStatusFindOne.mockReturnValueOnce(dummyStatus)
+      approvalUpdate.mockReturnValueOnce(dummyApproval)
+      RequestApprovalUpdate.mockReturnValueOnce({})
+      hasPowerOfEditingSpy.mockReturnValueOnce(false)
+
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
+
+      expect(result).toBeTruthy()
     })
   })
 
