@@ -6,6 +6,7 @@ const RequestApproval = db.RequestApproval
 const Approval = db.Approval
 const Status = db.ApproveStatus
 const rejectApporovalController = require('../../Application/controllers/rejectApporovalController')
+const approvalInboxController = require('../../Application/controllers/approvalInboxController')
 
 let requestApprovalFindOneSpy,
   statusFindOne,
@@ -14,7 +15,9 @@ let requestApprovalFindOneSpy,
   errorSpy,
   contractId,
   documentId,
-  rejectMessage
+  rejectMessage,
+  hasPowerOfEditingSpy
+
 describe('rejectApporovalControllerのテスト', () => {
   beforeEach(() => {
     requestApprovalFindOneSpy = jest.spyOn(RequestApproval, 'findOne')
@@ -22,6 +25,7 @@ describe('rejectApporovalControllerのテスト', () => {
     requestApprovalUpdateSpy = jest.spyOn(RequestApproval, 'update')
     approvalUpdateSpy = jest.spyOn(Approval, 'update')
     errorSpy = jest.spyOn(logger, 'error')
+    hasPowerOfEditingSpy = jest.spyOn(approvalInboxController, 'hasPowerOfEditing')
   })
   afterEach(() => {
     requestApprovalFindOneSpy.mockRestore()
@@ -29,6 +33,7 @@ describe('rejectApporovalControllerのテスト', () => {
     requestApprovalUpdateSpy.mockRestore()
     errorSpy.mockRestore()
     approvalUpdateSpy.mockRestore()
+    hasPowerOfEditingSpy.mockRestore()
   })
 
   contractId = '12345678-bdac-4195-80b9-1ea64b8cb70c'
@@ -106,6 +111,21 @@ describe('rejectApporovalControllerのテスト', () => {
         stack: dbError.stack,
         status: 0
       })
+    })
+
+    test('異常：hasPowerOfEditingがFalseの場合（ログインユーザが差し戻し直前のステータス確認で先にステータスが変わった場合→重複差し戻しの対応）', async () => {
+      statusFindOne.mockReturnValue(returnStatus)
+      requestApprovalFindOneSpy.mockReturnValue(returnRequestApproval)
+      requestApprovalUpdateSpy.mockReturnValue(true)
+      approvalUpdateSpy.mockReturnValue(true)
+      hasPowerOfEditingSpy.mockReturnValueOnce(false)
+
+      // 試験実施
+      const result = await rejectApporovalController.rejectApprove(contractId, documentId, rejectMessage)
+
+      // 期待結果
+      // 取得した結果がReturnされていること
+      expect(result).toBe(-1)
     })
   })
 })

@@ -13,6 +13,7 @@ const userController = require('./userController')
 const validate = require('../lib/validate')
 const approveStatusDAO = require('../DAO/ApproveStatusDAO')
 const RequestApprovalDAO = require('../DAO/RequestApprovalDAO')
+const approvalInboxController = require('./approvalInboxController')
 /**
  *
  * @param {string} accTk アクセストークン
@@ -784,7 +785,7 @@ const checkApproveRoute = async (contractId, approveRouteId) => {
   }
 }
 
-const updateApprove = async (contractId, requestId, message) => {
+const updateApprove = async (contractId, requestId, message, userId) => {
   try {
     let userNo
     const userData = {}
@@ -821,24 +822,30 @@ const updateApprove = async (contractId, requestId, message) => {
       userData[`message${userNo}`] = message
     }
 
-    const updateApproval = await Approval.update(userData, {
-      where: {
-        approvalId: selectApproval.approvalId
-      }
-    })
+    const hasPowerOfEditing = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestId)
 
-    if (!updateApproval) return false
-
-    const updateReqeust = await Request.update(
-      { status: status.code },
-      {
+    if (hasPowerOfEditing) {
+      const updateApproval = await Approval.update(userData, {
         where: {
-          requestId: requestId
+          approvalId: selectApproval.approvalId
         }
-      }
-    )
+      })
 
-    if (!updateReqeust) return false
+      if (!updateApproval) return false
+
+      const updateReqeust = await Request.update(
+        { status: status.code },
+        {
+          where: {
+            requestId: requestId
+          }
+        }
+      )
+
+      if (!updateReqeust) return false
+    } else {
+      return -1
+    }
 
     return true
   } catch (error) {

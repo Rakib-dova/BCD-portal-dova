@@ -162,7 +162,7 @@ const cbPostApprove = async (req, res, next) => {
   }
 
   const data = req.body
-  const requestId = req.body.requestId
+  const requestId = requestApproval.requestId
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
   const tenantId = req.user.tenantId
@@ -211,30 +211,35 @@ const cbPostApprove = async (req, res, next) => {
 
   const message = req.body.message
 
-  const result = await approverController.updateApprove(contractId, requestId, message)
+  const result = await approverController.updateApprove(contractId, requestId, message, userId)
 
   if (result instanceof Error === true) return next(errorHelper.create(500))
 
-  if (result) {
-    const sendMailStatus = await mailMsg.sendPaymentRequestMail(
-      accessToken,
-      refreshToken,
-      contractId,
-      invoiceId,
-      tenantId
-    )
-
-    if (sendMailStatus === 0) {
-      req.flash('info', '承認を完了しました。次の承認者にはメールで通知が送られます。')
-    } else if (sendMailStatus === 1) {
-      req.flash('info', '承認を完了しました。依頼者にはメールで通知が送られます。')
-    } else {
-      req.flash('error', '承認を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
-    }
+  if (result === -1) {
+    req.flash('error', '承認に失敗しました。')
     res.redirect('/inboxList/1')
   } else {
-    req.flash('noti', ['支払依頼', '承認に失敗しました。'])
-    res.redirect(`/approvalInbox/${invoiceId}`)
+    if (result) {
+      const sendMailStatus = await mailMsg.sendPaymentRequestMail(
+        accessToken,
+        refreshToken,
+        contractId,
+        invoiceId,
+        tenantId
+      )
+
+      if (sendMailStatus === 0) {
+        req.flash('info', '承認を完了しました。次の承認者にはメールで通知が送られます。')
+      } else if (sendMailStatus === 1) {
+        req.flash('info', '承認を完了しました。依頼者にはメールで通知が送られます。')
+      } else {
+        req.flash('error', '承認を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
+      }
+      res.redirect('/inboxList/1')
+    } else {
+      req.flash('noti', ['支払依頼', '承認に失敗しました。'])
+      res.redirect(`/approvalInbox/${invoiceId}`)
+    }
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApprove')

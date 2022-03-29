@@ -63,25 +63,30 @@ const cbPostApprove = async (req, res, next) => {
 
   // 差し戻し処理
   const result = await rejectApprovalController.rejectApprove(contractId, invoiceId, message, userId)
-  if (result) {
-    const sendMailStatus = await mailMsg.sendPaymentRequestMail(
-      accessToken,
-      refreshToken,
-      contractId,
-      invoiceId,
-      tenantId
-    )
-
-    if (sendMailStatus === 0) {
-      req.flash('info', '支払依頼を差し戻しました。依頼者にはメールで通知が送られます。')
-    } else {
-      req.flash('error', '支払依頼を差し戻しました。メールの通知に失敗しましたので、依頼者に連絡をとってください。')
-    }
-    req.session.waitingApprovalList = true
+  if (result === -1) {
+    req.flash('error', '差し戻しに失敗しました。')
     res.redirect('/inboxList/1')
   } else {
-    req.flash('noti', ['支払依頼', '差し戻しに失敗しました。'])
-    res.redirect(`/approvalInbox/${invoiceId}`)
+    if (result) {
+      const sendMailStatus = await mailMsg.sendPaymentRequestMail(
+        accessToken,
+        refreshToken,
+        contractId,
+        invoiceId,
+        tenantId
+      )
+
+      if (sendMailStatus === 0) {
+        req.flash('info', '支払依頼を差し戻しました。依頼者にはメールで通知が送られます。')
+      } else {
+        req.flash('error', '支払依頼を差し戻しました。メールの通知に失敗しましたので、依頼者に連絡をとってください。')
+      }
+      req.session.waitingApprovalList = true
+      res.redirect('/inboxList/1')
+    } else {
+      req.flash('noti', ['支払依頼', '差し戻しに失敗しました。'])
+      res.redirect(`/approvalInbox/${invoiceId}`)
+    }
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApprove')
