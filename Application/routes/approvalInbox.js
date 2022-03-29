@@ -227,7 +227,6 @@ const cbPostApprove = async (req, res, next) => {
         invoiceId,
         tenantId
       )
-      logger.info('cbPostApprove-sendMailStatus:', sendMailStatus)
 
       if (sendMailStatus === 0) {
         req.flash('info', '承認を完了しました。次の承認者にはメールで通知が送られます。')
