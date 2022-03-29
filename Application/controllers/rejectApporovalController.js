@@ -35,7 +35,7 @@ const rejectApprove = async (contractId, invoiceId, message, userId) => {
       rejectedRequest.requestId
     )
 
-    if (hasPowerOfEditing) {
+    if (hasPowerOfEditing === true) {
       const updateRequestApproval = await Request.update(
         {
           status: status.code
