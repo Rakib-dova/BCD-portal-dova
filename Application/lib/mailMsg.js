@@ -16,11 +16,6 @@ const sendMail = require('../lib/sendMail')
  * @returns 正常終了：{maileAddress(メールアドレス), subject（メールタイトル）, text（メール内容）}, システムエラー：1
  */
 const mailContent = async function (accessToken, refreshToken, contractId, invoiceId, tenantId) {
-  logger.info('mailContent-accessToken:', accessToken)
-  logger.info('mailContent-refreshToken:', refreshToken)
-  logger.info('mailContent-contractId:', contractId)
-  logger.info('mailContent-invoiceId:', invoiceId)
-  logger.info('mailContent-tenantId:', tenantId)
   logger.info(constantsDefine.logMessage.MAILINF003)
   try {
     const requestApproval = await requestApprovalController.findOneRequestApproval(contractId, invoiceId)
@@ -31,7 +26,6 @@ const mailContent = async function (accessToken, refreshToken, contractId, invoi
 
     // 請求書番号取得
     const invoice = await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `/documents/${invoiceId}`)
-    logger.info('mailContent-invoice:', invoice)
     const invoiceNumber = invoice.ID.value
 
     // メール送信日付
@@ -61,7 +55,6 @@ const mailContent = async function (accessToken, refreshToken, contractId, invoi
         invoiceId,
         tenantId
       )
-      logger.info('mailContent-approver:', approver)
       const activeApproverNo = approver.status - 10
       uerMailAddress = approver.approveRoute.users[activeApproverNo].email
       companyName = approver.approveRoute.users[activeApproverNo].companyName
