@@ -1,19 +1,17 @@
-'use stric'
-
 class Approver {
   constructor(userAccount) {
-    if (userAccount.Memberships.length === 0) {
+    if (userAccount.memberships.length === 0 || userAccount.state === 'LOCKED') {
       this.tenantId = userAccount.CompanyAccountId
       this.FirstName = '未設定'
       this.LastName = ''
       this.Username = ''
     } else {
-      this.tenantId = userAccount.Memberships[0].GroupId
-      this.FirstName = userAccount.FirstName
-      this.LastName = userAccount.LastName
-      this.Username = userAccount.Username
+      this.tenantId = userAccount.memberships[0].GroupId
+      this.FirstName = userAccount.firstName
+      this.LastName = userAccount.lastName
+      this.Username = userAccount.email
     }
-    this.Id = userAccount.Id
+    this.Id = userAccount.id
   }
 
   getName() {

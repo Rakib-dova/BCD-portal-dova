@@ -1,6 +1,4 @@
 'use stric'
-const apiManager = require('./apiManager')
-const qs = require('qs')
 const Approver = require('../lib/approver/Approver')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
@@ -24,33 +22,21 @@ const RequestApprovalDAO = require('../DAO/RequestApprovalDAO')
  * @returns {Array} ユーザー情報
  */
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
-  const userAccountsArr = []
-  const queryObj = {
-    limit: 25,
-    page: 0,
-    numPages: 1
-  }
+  let userAccountsArr = []
+  const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accTk, refreshTk, tenantId)
+  tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
 
-  do {
-    // トレードシフトからユーザー情報を取得する。
-    const queryString = `/account/${tenantId}/users?${qs.stringify(queryObj)}`
-    try {
-      const findUsers = await apiManager.accessTradeshift(accTk, refreshTk, 'get', queryString)
-      if (findUsers instanceof Error) {
-        if (findUsers.response.status === 401) {
-          return -1
-        }
-      }
-      findUsers.UserAccounts.forEach((account) => {
-        userAccountsArr.push(new Approver(account))
-      })
-      queryObj.page++
-      queryObj.numPages = findUsers.numPages
-    } catch (error) {
-      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
-      return -2
-    }
-  } while (queryObj.page < queryObj.numPages)
+  // トレードシフトからユーザー情報を取得する。
+  try {
+    const findUserAll = await tradeshiftDTO.findUserAll()
+    if (findUserAll === -1) return -1
+    userAccountsArr = findUserAll.map((userAccount) => {
+      return new Approver(userAccount)
+    })
+  } catch (error) {
+    logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+    return -2
+  }
 
   const searchUsers = []
   const keywordName = `${keyword.firstName} ${keyword.lastName}`.trim()
@@ -204,18 +190,6 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
   try {
     let duplicatedFlag = false
 
-    // 変更する承認ルートが既に変更された場合
-    const isUpdated = await ApproveRoute.findOne({
-      where: {
-        contractId: contract,
-        approveRouteId: prevApproveRouteId,
-        updateFlag: true
-      }
-    })
-    if (isUpdated) {
-      return 1
-    }
-
     // 重複の承認ルート名をチェックのため、DBから変更対象以外の承認ルートを取得
     const resultSearchRoute = await ApproveRoute.findAll({
       where: {
@@ -240,23 +214,57 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
       return 1
     }
 
-    // 重複の承認ルート名がない場合DBに保存する。（ApproveRoute）
-    const resultToInsertRoute = await ApproveRoute.create({
-      contractId: contract,
-      approveRouteName: values.setApproveRouteNameInputId,
-      prevAprroveRouteId: prevApproveRouteId
-    })
+    // 重複の承認ルート名がない場合データを更新する。（ApproveRoute）
+    const updateApproveRoute = await ApproveRoute.update(
+      {
+        approveRouteName: values.setApproveRouteNameInputId
+      },
+      {
+        where: {
+          contractId: contract,
+          approveRouteId: prevApproveRouteId
+        }
+      }
+    )
 
-    // DB保存失敗したらモデルApproveRouteインスタンスではない
-    if (resultToInsertRoute instanceof ApproveRoute === false) {
+    // 更新失敗したらモデルApproveRouteインスタンスではない
+    if (updateApproveRoute[0] !== 1) {
       return -1
     }
+
+    // 変更した承認ルート取得
+    const searchApproveRoute = await ApproveRoute.findOne({
+      where: {
+        contractId: contract,
+        approveRouteId: prevApproveRouteId
+      }
+    })
+
+    if (searchApproveRoute instanceof ApproveRoute === false) {
+      return -1
+    }
+
+    // 変更前の承認ルートに紐づいてる承認者取得
+    const searchApproveUser = await ApproveUser.findAll({
+      where: {
+        approveRouteId: searchApproveRoute.approveRouteId
+      }
+    })
+
+    if (searchApproveUser instanceof Array === false) {
+      return -1
+    }
+
+    // 変更前の承認ルートに紐づいてる承認者削除
+    searchApproveUser.forEach((approverUser) => {
+      approverUser.destroy()
+    })
 
     // 重複の承認ルート名がない場合DBに保存する。（ApproveUser）
     // 承認者が一人の場合
     if (uuids instanceof Array === false) {
       resultToInsertUser = await ApproveUser.create({
-        approveRouteId: resultToInsertRoute.approveRouteId,
+        approveRouteId: searchApproveRoute.approveRouteId,
         approveUser: values.uuid,
         prevApproveUser: null,
         nextApproveUser: null,
@@ -274,7 +282,7 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
 
         let currentUser = null
         resultToInsertUser = await ApproveUser.create({
-          approveRouteId: resultToInsertRoute.approveRouteId,
+          approveRouteId: searchApproveRoute.approveRouteId,
           approveUser: uuids[i],
           prevApproveUser: null,
           nextApproveUser: null,
@@ -298,22 +306,6 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
 
     // DB保存失敗したらモデルApproveRouteインスタンスではない
     if (approveRouteAndApprover === -1) {
-      return -1
-    }
-
-    const prevApproveRouteSetUpdateFlag = await ApproveRoute.update(
-      {
-        updateFlag: true
-      },
-      {
-        where: {
-          approveRouteId: prevApproveRouteId
-        }
-      }
-    )
-
-    // DB保存失敗したらモデルApproveRouteインスタンスではない
-    if (!prevApproveRouteSetUpdateFlag) {
       return -1
     }
 
@@ -389,7 +381,6 @@ const getApproveRoute = async (accessToken, refreshToken, contract, approveRoute
     if (approveRouteApprovers.length === 0) {
       return -1
     }
-    const query = '/account/users'
     const approveRoute = {
       approveRouteId: approveRouteApprovers[0].approveRouteId,
       contractId: approveRouteApprovers[0].contractId,
@@ -417,9 +408,9 @@ const getApproveRoute = async (accessToken, refreshToken, contract, approveRoute
     while (currUser) {
       const userId = currUser.approveUser
       next = currUser.nextApproveUser
-      users.push(
-        new Approver(await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${query}/${userId}`))
-      )
+      const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, null)
+      tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
+      users.push(new Approver(await tradeshiftDTO.getUserById(userId)))
       if (next) {
         currUser = await ApproveUser.findOne({
           where: {
@@ -463,11 +454,11 @@ const duplicateApproveRoute = async (approveRoute) => {
     approverUsers.push(
       new Approver({
         tenantId: null,
-        FirstName: approveRoute.userName.split(nameSep)[0],
-        LastName: approveRoute.userName.split(nameSep)[1],
-        Username: approveRoute.mailAddress,
-        Memberships: [{ GroupId: null }],
-        Id: approveRoute.uuid
+        firstName: approveRoute.userName.split(nameSep)[0],
+        lastName: approveRoute.userName.split(nameSep)[1],
+        email: approveRoute.mailAddress,
+        memberships: [{ GroupId: null }],
+        id: approveRoute.uuid
       })
     )
   } else {
@@ -476,11 +467,11 @@ const duplicateApproveRoute = async (approveRoute) => {
       approverUsers.push(
         new Approver({
           tenantId: null,
-          FirstName: approver.split(nameSep)[0],
-          LastName: approver.split(nameSep)[1],
-          Username: approveRoute.mailAddress[idx],
-          Memberships: [{ GroupId: null }],
-          Id: approveRoute.uuid[idx]
+          firstName: approver.split(nameSep)[0],
+          lastName: approver.split(nameSep)[1],
+          email: approveRoute.mailAddress[idx],
+          memberships: [{ GroupId: null }],
+          id: approveRoute.uuid[idx]
         })
       )
     })
@@ -667,7 +658,6 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     const approveRouteApprovers = await ApproveRoute.getApproveRoute(contractId, approveRouteId)
 
     // header検索
-    const query = '/account/users'
     let header = null
     let idx = 0
     while (approveRouteApprovers[idx]) {
@@ -688,9 +678,9 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     while (currUser) {
       const userId = currUser.approveUser
       next = currUser.nextApproveUser
-      users.push(
-        new Approver(await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${query}/${userId}`))
-      )
+      const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, null)
+      tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
+      users.push(new Approver(await tradeshiftDTO.getUserById(userId)))
       if (next) {
         currUser = await ApproveUser.findOne({
           where: {
