@@ -3296,6 +3296,7 @@ describe('approverControllerのテスト', () => {
         lastRefreshedAt: new Date()
       })
       userControllerFindOne.mockReturnValueOnce(userData)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
       const dummyApproval = Approval.build({
         requestId: requestId,
@@ -3346,6 +3347,7 @@ describe('approverControllerのテスト', () => {
         lastRefreshedAt: new Date()
       })
       userControllerFindOne.mockReturnValueOnce(userData)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
       const dummyApproval = Approval.build({
         requestId: requestId,
@@ -3413,10 +3415,11 @@ describe('approverControllerのテスト', () => {
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce(null)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
       const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
-      expect(result).toBeFalsy()
+      expect(result).toEqual(false)
     })
 
     test('準正常：支払依頼アップデート失敗②', async () => {
@@ -3463,10 +3466,11 @@ describe('approverControllerのテスト', () => {
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce({})
       RequestApprovalUpdate.mockReturnValueOnce(null)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
       const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
-      expect(result).toBeFalsy()
+      expect(result).toEqual(false)
     })
 
     test('準正常：支払依頼アップデート失敗', async () => {
@@ -3517,6 +3521,8 @@ describe('approverControllerのテスト', () => {
         throw dbError
       })
 
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
+
       await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
       expect(errorSpy).toHaveBeenCalledWith({
@@ -3547,7 +3553,7 @@ describe('approverControllerのテスト', () => {
         lastRefreshedAt: new Date()
       })
       userControllerFindOne.mockReturnValueOnce(userData)
-
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
       approvalFindOne.mockReturnValueOnce(null)
 
       const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
@@ -3582,6 +3588,7 @@ describe('approverControllerのテスト', () => {
         lastRefreshedAt: new Date()
       })
       userControllerFindOne.mockReturnValueOnce(userData)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
       const dummyApproval = Approval.build({
         requestId: requestId,

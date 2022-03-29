@@ -60,13 +60,13 @@ describe('rejectApporovalControllerのテスト', () => {
       statusFindOne.mockReturnValue(returnStatus)
       requestApprovalFindOneSpy.mockReturnValue(returnRequestApproval)
       requestApprovalUpdateSpy.mockReturnValue(true)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
       approvalUpdateSpy.mockReturnValue(true)
 
       // 試験実施
       const result = await rejectApporovalController.rejectApprove(contractId, documentId, rejectMessage)
 
       // 期待結果
-      // 取得した結果がReturnされていること
       expect(result).toBe(true)
     })
 
@@ -74,12 +74,12 @@ describe('rejectApporovalControllerのテスト', () => {
       statusFindOne.mockReturnValue(returnStatus)
       requestApprovalFindOneSpy.mockReturnValue(returnRequestApproval)
       requestApprovalUpdateSpy.mockReturnValue(false)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
       // 試験実施
       const result = await rejectApporovalController.rejectApprove(contractId, documentId, rejectMessage)
 
       // 期待結果
-      //  取得した結果がReturnされていること
       expect(result).toBe(false)
     })
 
@@ -87,13 +87,13 @@ describe('rejectApporovalControllerのテスト', () => {
       statusFindOne.mockReturnValue(returnStatus)
       requestApprovalFindOneSpy.mockReturnValue(returnRequestApproval)
       requestApprovalUpdateSpy.mockReturnValue(true)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
       approvalUpdateSpy.mockReturnValue(false)
 
       // 試験実施
       const result = await rejectApporovalController.rejectApprove(contractId, documentId, rejectMessage)
 
       // 期待結果
-      //  取得した結果がReturnされていること
       expect(result).toBe(false)
     })
 
@@ -102,6 +102,8 @@ describe('rejectApporovalControllerのテスト', () => {
       statusFindOne.mockImplementation(() => {
         throw dbError
       })
+
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
       // 試験実施
       await rejectApporovalController.rejectApprove(contractId, documentId, rejectMessage)

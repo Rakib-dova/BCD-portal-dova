@@ -824,7 +824,7 @@ const updateApprove = async (contractId, requestId, message, userId) => {
 
     const hasPowerOfEditing = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestId)
 
-    if (hasPowerOfEditing) {
+    if (hasPowerOfEditing === true) {
       const updateApproval = await Approval.update(userData, {
         where: {
           approvalId: selectApproval.approvalId
