@@ -4,6 +4,7 @@ block content
   .container
     div.title-box-journallzing
       h4.title-text-journallzing.text-inbox #{title}
+      input.input(type='hidden' name='requestId' value=`${requestId}`)
     .box
       form#form(method='POST')
         include approvalInboxpreApproverMessage
