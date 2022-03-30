@@ -245,6 +245,39 @@ describe('rejectApprovalのテスト', () => {
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
 
+    test('異常：hasPowerOfEditingがFalseの場合（ログインユーザが差し戻し直前のステータス確認で先にステータスが変わった場合→重複差し戻しの対応）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        ...session,
+        rejectApproval: { message: 'test', approveRouteId: '', isSaved: true },
+        isSaved: true
+      }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      rejectApporovalControllerRejectApprove.mockReturnValue(-1)
+      mailMsgSendPaymentRequestMail.mockReturnValue(0)
+
+      // 試験実施
+      await rejectApproval.cbPostApprove(request, response, next)
+
+      // 結果確認
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('error', '差し戻しに失敗しました。')
+      expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
+    })
+
     test('400エラー:LoggedInではないsessionの場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる

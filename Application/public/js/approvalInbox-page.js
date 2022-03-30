@@ -1,3 +1,5 @@
+const approveProgressModal = document.getElementById('approve-progress-modal')
+const rejectProgressModal = document.getElementById('reject-progress-modal')
 // document.getElementById、document.getElementsByClassName省略
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
@@ -63,9 +65,8 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
     if (lineAccountcodeLength < 10) {
       // 仕訳情報のidを作成：lineNo明細詳細の順番_lineAccountCode仕訳情報の順番
       const tagetIdBase = `${target.id}_lineAccountCode`
-      const targetId = `${target.id}_lineAccountCode${
-        ~~target.querySelectorAll('.lineAccountcode')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
-      }`
+      const targetId = `${target.id}_lineAccountCode${~~target.querySelectorAll('.lineAccountcode')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
+        }`
       // templateから追加仕訳情報欄作成
       const templeAccountCodeItem = $('#templateLineAccountCodeItem')
       const cloneAccountCodeItem = document.importNode(templeAccountCodeItem.content, true)
@@ -723,7 +724,9 @@ const getInvoiceLineList = function () {
   })
 }
 
-$('#btn-approve').addEventListener('click', function () {
+$('#btn-approve').addEventListener('click', function (e) {
+  e.preventDefault()
+  approveProgressModal.classList.add('is-active')
   $('#approval').submit()
 })
 
@@ -759,6 +762,8 @@ $('#rejectApproval').addEventListener('click', function () {
   $('#reject-approval-modal').classList.toggle('is-active')
 })
 
-$('#btn-reject').addEventListener('click', function () {
+$('#btn-reject').addEventListener('click', function (e) {
+  e.preventDefault()
+  rejectProgressModal.classList.add('is-active')
   $('#reject').submit()
 })
