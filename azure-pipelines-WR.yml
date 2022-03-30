@@ -96,12 +96,12 @@ stages:
               - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}}
                 workingDirectory: $(DIR)
                 displayName: test
-                condition: eq( '${{ parameters.browser }}', 'all' )
+                condition: eq( '${{ parameters.scenario }}', 'all' )
 
               - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}} -- spec\${{ parameters.scenario }}
                 workingDirectory: $(DIR)
                 displayName: test
-                condition: ne( '${{ parameters.browser }}', 'all' )
+                condition: ne( '${{ parameters.scenario }}', 'all' )
 
               - script: npm run e2e-report
                 workingDirectory: $(DIR)
