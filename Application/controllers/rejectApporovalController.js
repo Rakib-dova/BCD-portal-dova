@@ -5,6 +5,7 @@ const db = require('../models')
 const Request = db.RequestApproval
 const Approval = db.Approval
 const Status = db.ApproveStatus
+const approvalInboxController = require('./approvalInboxController')
 /**
  *
  * @param {string} invoiceId インヴォイスID
@@ -28,34 +29,44 @@ const rejectApprove = async (contractId, invoiceId, message, userId) => {
       order: [['create', 'DESC']]
     })
 
-    const updateRequestApproval = await Request.update(
-      {
-        status: status.code
-      },
-      {
+    const hasPowerOfEditing = await approvalInboxController.hasPowerOfEditing(
+      contractId,
+      userId,
+      rejectedRequest.requestId
+    )
+
+    if (hasPowerOfEditing === true) {
+      const updateRequestApproval = await Request.update(
+        {
+          status: status.code
+        },
+        {
+          where: {
+            requestId: rejectedRequest.requestId
+          }
+        }
+      )
+      if (!updateRequestApproval) return false
+
+      const userData = {}
+
+      userData.approveStatus = status.code
+      userData.rejectedUser = userId
+      userData.rejectedAt = new Date()
+
+      if (message !== '' && message !== undefined) {
+        userData.rejectedMessage = message
+      }
+
+      const updateApproval = await Approval.update(userData, {
         where: {
           requestId: rejectedRequest.requestId
         }
-      }
-    )
-    if (!updateRequestApproval) return false
-
-    const userData = {}
-
-    userData.approveStatus = status.code
-    userData.rejectedUser = userId
-    userData.rejectedAt = new Date()
-
-    if (message !== '' && message !== undefined) {
-      userData.rejectedMessage = message
+      })
+      if (!updateApproval) return false
+    } else {
+      return -1
     }
-
-    const updateApproval = await Approval.update(userData, {
-      where: {
-        requestId: rejectedRequest.requestId
-      }
-    })
-    if (!updateApproval) return false
     return true
   } catch (error) {
     logger.error({ invoiceId: invoiceId, stack: error.stack, status: 0 })
