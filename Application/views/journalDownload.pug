@@ -15,6 +15,9 @@ block content
          h2.panel-heading 条件絞り込み
          .panel-block.mr-4
           .container
+           .field.is-invisible#RequiredErrorMesageField
+             p#RequiredErrorMesage.input-label-required
+
            .field.is-horizontal
              .field-label.is-normal
                label.bulmalabel 請求書番号
@@ -52,6 +55,18 @@ block content
             .field-label.is-normal
             .field-body.level
               .container#displaySendToSearchResultField
+
+           .field.is-horizontal.mb-3
+             .field-label
+               label.bulmalabel ダウンロード対象
+             .field-body#chkFinalapproval
+               .field.has-addons
+                 label.radio
+                   input#finalapproval(type='radio' name='chkFinalapproval' checked=true value='finalapproval')
+                   label.ml-1(for='finalapproval') 最終承認済みの請求書
+                 label.radio.ml-6
+                   input#noneFinalapproval(type='radio' name='chkFinalapproval' checked=false value='noneFinalapproval')
+                   label.ml-1(for='noneFinalapproval') 仕訳済みの請求書
 
         .field.is-grouped.is-grouped-centered
           .control.mx-4
