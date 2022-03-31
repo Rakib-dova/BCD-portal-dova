@@ -46,7 +46,7 @@ block content
                                         .field
                                           .control.has-icons-right
                                             p.control.is-expanded
-                                              input.input#sendTo(type='text' maxlength="100") 
+                                              input.input#invoiceNumber(type='text' name='invoiceNumber' maxlength="100") 
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
@@ -124,7 +124,7 @@ block content
                                       .field-body
                                         .field.has-addons
                                           p.control.is-expanded
-                                            input.input#sendTo(type='text' maxlength="100")
+                                            input.input#managerAddress(type='text' name='managerAddress' maxlength="100")
                                   .column          
                                     .field.is-horizontal                                        
                                       .field-body.m-1.is-4.text-center.width-45percent
@@ -287,7 +287,7 @@ block content
                                         .field
                                           .control.has-icons-right
                                             p.control.is-expanded
-                                              input.input#sendTo(type='text' maxlength="100") 
+                                              input.input#invoiceNumber(type='text' name='invoiceNumber' maxlength="100") 
                                   .column
                                     .field.is-horizontal
                                       .field-label.is-normal
@@ -365,13 +365,13 @@ block content
                                       .field-body
                                         .field.has-addons
                                           p.control.is-expanded
-                                            input.input#sendTo(type='text' maxlength="100")
+                                            input.input#managerAddress(type='text' name='managerAddress' maxlength="100")
                                   .column          
                                     .field.is-horizontal                                        
                                       .field-body.m-1.is-4.text-center.width-45percent
                                         .field
                                           p.control
-                                            a.button.is-link.btn-search-main.BtnInboxSearch 検索
+                                            a.button.is-link.btn-search-main#BtnInboxSearch 検索
                                                           
                           template#templateAllSelectBtn
                               p.control
@@ -391,7 +391,7 @@ block content
                               .field-body
                                 p.control
                                   label.checkbox
-                                    input.m-3.p-1(type='checkbox' checked=false)                                           
+                                    input.m-3.p-1(type='checkbox' checked=false)                
                     if listArr.length !== 0
                       table.table.is-fullwidth.is-hoverable.table-fixed
                         thead
