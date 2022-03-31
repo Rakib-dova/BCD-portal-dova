@@ -1,5 +1,8 @@
 window.onload = function () {
   document.getElementById('submit').addEventListener('click', (e) => {
+    if (!checkRadioButton()) {
+      return false
+    }
     document.querySelector('#form').submit()
   })
 }
@@ -198,5 +201,20 @@ function sendToSelectBtnCreate() {
         this.textContent = '▲'
       }
     })
+  }
+}
+
+// ラジオボタンバリデーションチェック
+function checkRadioButton() {
+  if (
+    (document.getElementById('finalapproval').checked || document.getElementById('noneFinalapproval').checked) &&
+    !(document.getElementById('finalapproval').checked && document.getElementById('noneFinalapproval').checked)
+  ) {
+    document.querySelector('#RequiredErrorMesageField').classList.add('is-invisible')
+    return true
+  } else {
+    document.querySelector('#RequiredErrorMesage').innerHTML = 'ダウンロード対象を選択してください。'
+    document.querySelector('#RequiredErrorMesageField').classList.remove('is-invisible')
+    return false
   }
 }
