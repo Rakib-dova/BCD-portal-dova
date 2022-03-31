@@ -336,7 +336,9 @@ document.querySelector('#sendToSearchBtn').addEventListener('click', function (e
 
   if (document.querySelector('#searchResultBox') ?? false) {
     document.querySelector('#searchResultBox').remove()
-    document.querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)').classList.add('is-invisible')
+    document
+      .querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)')
+      .classList.add('is-invisible')
     document.querySelector('#sendToSearchBtn').classList.remove('is-loading')
   }
 
@@ -379,12 +381,14 @@ document.querySelector('#sendToSearchBtn').addEventListener('click', function (e
                 const cloneSearchResultItemTemplate = document.importNode(searchResultItemTemplate.content, true)
                 cloneSearchResultItemTemplate.querySelector('label').append(item.CompanyName)
                 cloneSearchResultItemTemplate.querySelector('input').id = `sendTo${idx}`
-                cloneSearchResultItemTemplate.querySelector('input').name = 'sentBy'
+                cloneSearchResultItemTemplate.querySelector('input').name = 'sentBy[] '
                 cloneSearchResultItemTemplate.querySelector('input').classList.add('sendToCompanies')
                 cloneSearchResultItemTemplate.querySelector('input').value = item.CompanyAccountId
                 cloneSearchResultBoxTemplate.querySelector('.box').appendChild(cloneSearchResultItemTemplate)
               })
-              document.querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)').classList.remove('is-invisible')
+              document
+                .querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)')
+                .classList.remove('is-invisible')
               displaySearchResultField.appendChild(cloneSearchResultBoxTemplate)
             }
           } else {
