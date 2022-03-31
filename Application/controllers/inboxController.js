@@ -9,15 +9,15 @@ const Op = db.Sequelize.Op
 const department = db.DepartmentCode
 const RequestApproval = db.RequestApproval
 const constantsDefine = require('../constants')
+const processStatus = {
+  PAID_CONFIRMED: 0, // 入金確認済み
+  PAID_UNCONFIRMED: 1, // 送金済み
+  ACCEPTED: 2, // 受理済み
+  DELIVERED: 3 // 受信済み
+}
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
-  const processStatus = {
-    PAID_CONFIRMED: 0, // 入金確認済み
-    PAID_UNCONFIRMED: 1, // 送金済み
-    ACCEPTED: 2, // 受理済み
-    DELIVERED: 3 // 受信済み
-  }
   const findDocuments = '/documents'
   const withouttag = ['archived', 'AP_DOCUMENT_Draft', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document']
   const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
@@ -540,6 +540,51 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO) => {
   return await requestApprovalDTO.getWaitingWorkflowisMine(userId)
 }
 
+/**
+ *
+ * @param {object} tradeshiftDTO トレードシフト
+ * @param {object} keyword
+ * @returns {Array<object>} 検索結果
+ */
+const getSearchResult = async (tradeshiftDTO, keyword) => {
+  const sentByCompanies = keyword.sentBy
+  const invoiceId = keyword.invoiceNumber
+  const issueDate = keyword.issueDate
+  const status = keyword.status
+  const contactEmail = keyword.contactEmail
+  let result = null
+
+  if (sentByCompanies.length > 0) {
+    for (const company of sentByCompanies) {
+      result = await tradeshiftDTO.getDocumentSearch(company, invoiceId, issueDate, contactEmail)
+    }
+  } else {
+    result = await tradeshiftDTO.getDocumentSearch('', invoiceId, issueDate, contactEmail)
+  }
+
+  const documentList =
+    result.map((document, idx) => {
+      const ammount = function () {
+        if (document.ItemInfos[1] === undefined) return '-'
+        return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
+      }
+      return {
+        no: idx + 1,
+        invoiceNo: document.ID,
+        status: processStatus[`${document.UnifiedState}`] ?? '-',
+        currency: document.ItemInfos[0].value ?? '-',
+        ammount: ammount(),
+        sentTo: document.SenderCompanyName ?? '-',
+        sentBy: document.ReceiverCompanyName ?? '-',
+        updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
+        expire: document.DueDate ?? '-',
+        documentId: document.DocumentId
+      }
+    }) ?? []
+
+  return documentList
+}
+
 module.exports = {
   getInbox: getInbox,
   getInvoiceDetail: getInvoiceDetail,
@@ -547,5 +592,6 @@ module.exports = {
   insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice,
   getDepartment: getDepartment,
   getRequestApproval: getRequestApproval,
-  getWorkflow: getWorkflow
+  getWorkflow: getWorkflow,
+  getSearchResult: getSearchResult
 }

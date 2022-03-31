@@ -34,7 +34,7 @@ block content
                       h2.title 支払依頼検索
                       .columns.is-centered
                         .column                        
-                          form#form(method="POST")
+                          form#form(method="POST" action=`/inboxList/${currPage}`)
                             article.panel.is-info                            
                               .panel-block.margin-right-10
                                 .container
@@ -86,35 +86,35 @@ block content
                                           .box
                                             .control.has-icons-right
                                               .is-fullwidth.is-multiple
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '80')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '80')
                                                 label.checkbox.mr-3 未処理
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '10')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '10')
                                                 label.checkbox.mr-3 支払依頼中
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '11')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '11')
                                                 label.checkbo.mr-3 一次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '12')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '12')
                                                 label.checkbox.mr-3 二次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '13')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '13')
                                                 label.checkbo.mr-3 三次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '14')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '14')
                                                 label.checkbox.mr-3 四次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '15')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '15')
                                                 label.checkbo.mr-3 五次承認済み 
                                             .control.has-icons-right
                                               .is-fullwidth.is-multiple                                                                                                                                       
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '16')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '16')
                                                 label.checkbox.mr-3 六次承認済み                                                                                       
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '17')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '17')
                                                 label.checkbo.mr-3 七次承認済み                                            
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '18')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '18')
                                                 label.checkbox.mr-3 八次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '19')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '19')
                                                 label.checkbo.mr-3 九次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '20')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '20')
                                                 label.checkbox.mr-3 十次承認済み
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '00')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '00')
                                                 label.checkbo.mr-3 最終承認済み
-                                                input.m-3.p-1(type="checkbox" name="status" checked=false value= '90')
+                                                input.m-3.p-1(type="checkbox" name="status[]" checked=false value= '90')
                                                 label.checkbox.mr-3 差し戻し
                                                                                                                                                                                                                         
                                   .column          
@@ -130,7 +130,7 @@ block content
                                       .field-body.m-1.is-4.text-center.width-45percent
                                         .field
                                           p.control
-                                            a.button.is-link.btn-search-main#BtnInboxSearch 検索
+                                            button.button.is-link.btn-search-main#BtnInboxSearch(type='submit') 検索
                                                           
                           template#templateAllSelectBtn
                               p.control

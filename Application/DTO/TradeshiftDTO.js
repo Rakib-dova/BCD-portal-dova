@@ -21,6 +21,52 @@ class TradeshiftDTO {
   }
 
   /**
+   *
+   * @param {uuid} sentByCompany 送信した企業のトレードシフトID
+   * @param {string} invoiceId 請求書番号
+   * @param {Array} issueDate 発行日の期限['yyyy-mm-dd', 'yyyy-mm-dd']
+   * @param {string} contractEmail 取引先担当者のメールアドレス
+   * @returns {Array<object>} 検索結果
+   * https://developers.tradeshift.com/docs/api#documents-documentを参照
+   */
+  async getDocumentSearch(sentByCompany, invoiceId, issueDate, contractEmail) {
+    sentByCompany = sentByCompany ?? ''
+    invoiceId = invoiceId ?? ''
+    if (issueDate instanceof Array === false) issueDate = []
+    contractEmail = contractEmail ?? ''
+
+    const get = 'get'
+    let uri = `/documents?sentTo=${this.tenantId}&type=invoice&limit=10000&_onlyIndex=true`
+    const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
+
+    if (sentByCompany.length > 0) uri = `${uri}&${this.getQuery('sentBy', sentByCompany)}`
+
+    if (invoiceId.length > 0) uri = `${uri}&${this.getQuery('businessId', invoiceId)}`
+
+    if (issueDate[0].length > 0) {
+      uri = `${uri}&${this.getQuery('minissuedate', issueDate[0])}`
+    }
+
+    if (issueDate[1].length > 0) {
+      uri = `${uri}&${this.getQuery('minissuedate', issueDate[1])}`
+    }
+
+    uri = `${uri}&${this.getQuery('onlydeleted', false)}&${this.getQuery('onlydrafts', false)}&${this.getQuery(
+      'ascending',
+      false
+    )}&${this.getQuery('state', state)}`
+
+    const response = []
+    for (const document of (await this.accessTradeshift(get, uri)).Document) {
+      if (document.TenantId === this.tenantId) {
+        response.push(document)
+      }
+    }
+
+    return response
+  }
+
+  /**
    * トレードシフトのユーザーを検索する。
    * @param {uuid} userId Usersテーブルに保存されるuserId
    * @returns {VO/UserAccounts} UserAccountsのユーザー情報
@@ -75,6 +121,21 @@ class TradeshiftDTO {
     } while (query.page < query.numPages)
 
     return userAccounts
+  }
+
+  getQuery(key, values) {
+    const qs = require('qs')
+    const queryObj = {}
+    queryObj[key] = values
+    const query = qs
+      .stringify(queryObj)
+      .replace(/%26/g, '&')
+      .replace(/%3D/g, '=')
+      .replace(/%5B0%5D/g, '')
+      .replace(/%5B1%5D/g, '')
+      .replace(/%5B2%5D/g, '')
+      .replace(/%5B3%5D/g, '')
+    return query
   }
 
   async accessTradeshift(method, uri) {
