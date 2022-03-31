@@ -1,3 +1,4 @@
+const searchProgressModal = document.getElementById('search-progress-modal')
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
 const ua = window.navigator.userAgent
@@ -428,7 +429,52 @@ document.querySelector('#sendToSearchBtn').addEventListener('click', function (e
 })
 
 // 検索ボタンクリック時、機能
-$('.BtnInboxSearch').addEventListener('click', function () {
+$('#BtnInboxSearch').addEventListener('click', function (e) {
+  e.preventDefault()
+
   // 検索処理
-  //$('#form').submit()
+  const form = document.querySelector('#form')
+  const invoiceNumber = form.invoiceNumber.value
+  const minIssuedate = form.minIssuedate.value
+  const maxIssuedate = form.maxIssuedate.value
+  let sentBy = form.sentBy
+  if (sentBy !== undefined) {
+    sentBy = Array.prototype.slice.call(sentBy)
+  } else {
+    sentBy = []
+  }
+
+  let status = form.status
+  if (status !== undefined) {
+    status = Array.prototype.slice.call(sentBy)
+  } else {
+    status = []
+  }
+
+  const managerAddress = form.managerAddress.value
+  const validationCheck = []
+  validationCheck.push(invoiceNumber)
+  validationCheck.push(minIssuedate)
+  validationCheck.push(maxIssuedate)
+  validationCheck.push(managerAddress)
+  validationCheck.push(sentBy)
+  validationCheck.push(status)
+  let checkCount = 0
+  for (let i = 0; i < validationCheck.length; i++) {
+    if (i < 4) {
+      if (validationCheck[i] === '' || validationCheck[i] === undefined) {
+        ++checkCount
+      }
+    } else {
+      if (validationCheck[i].length === 0) {
+        ++checkCount
+      }
+    }
+  }
+  if (checkCount === 6) {
+    alert('検索条件を入力してください。')
+  } else {
+    searchProgressModal.classList.add('is-active')
+    form.submit()
+  }
 })
