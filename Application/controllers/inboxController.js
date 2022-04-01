@@ -546,43 +546,78 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO) => {
  * @param {object} keyword
  * @returns {Array<object>} 検索結果
  */
-const getSearchResult = async (tradeshiftDTO, keyword) => {
-  const sentByCompanies = keyword.sentBy
-  const invoiceId = keyword.invoiceNumber
-  const issueDate = keyword.issueDate
-  const status = keyword.status
-  const contactEmail = keyword.contactEmail
-  let result = null
+const getSearchResult = async (tradeshiftDTO, keyword, contractId) => {
+  try {
+    const sentByCompanies = keyword.sentBy
+    const invoiceId = keyword.invoiceNumber
+    const issueDate = keyword.issueDate
+    const status = keyword.status
+    const contactEmail = keyword.contactEmail
+    let result = null
 
-  if (sentByCompanies.length > 0) {
-    for (const company of sentByCompanies) {
-      result = await tradeshiftDTO.getDocumentSearch(company, invoiceId, issueDate, contactEmail)
+    // 送信会社、請求書番号、発行日、取引先担当者(アドレス)で検索
+    if (sentByCompanies.length > 0) {
+      for (const company of sentByCompanies) {
+        result = await tradeshiftDTO.getDocumentSearch(company, invoiceId, issueDate, contactEmail)
+      }
+    } else {
+      result = await tradeshiftDTO.getDocumentSearch('', invoiceId, issueDate, contactEmail)
     }
-  } else {
-    result = await tradeshiftDTO.getDocumentSearch('', invoiceId, issueDate, contactEmail)
+
+    // 請求書の承認依頼検索
+    for (let i = 0; i < result.length; i++) {
+      const requestApproval = await RequestApproval.findOne({
+        where: {
+          contractId: contractId,
+          invoiceId: result[i].DocumentId
+        },
+        order: [['create', 'DESC']]
+      })
+      if (requestApproval !== null) {
+        result[i].approveStatus = requestApproval.status
+      }
+    }
+
+    // 承認ステータスで検索
+    if (status.length > 0) {
+      const statusSearchResult = []
+      for (let i = 0; i < result.length; i++) {
+        for (let j = 0; j < status.length; j++) {
+          if (status[j] === '80') {
+            if (!result[i].approveStatus || result[i].approveStatus === status[j]) statusSearchResult.push(result[i])
+          } else {
+            if (result[i].approveStatus === status[j]) statusSearchResult.push(result[i])
+          }
+        }
+      }
+      result = statusSearchResult
+    }
+
+    const documentList =
+      result.map((document, idx) => {
+        const ammount = function () {
+          if (document.ItemInfos[1] === undefined) return '-'
+          return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
+        }
+        return {
+          no: idx + 1,
+          invoiceNo: document.ID,
+          status: processStatus[`${document.UnifiedState}`] ?? '-',
+          currency: document.ItemInfos[0].value ?? '-',
+          ammount: ammount(),
+          sentTo: document.SenderCompanyName ?? '-',
+          sentBy: document.ReceiverCompanyName ?? '-',
+          updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
+          expire: document.DueDate ?? '-',
+          documentId: document.DocumentId,
+          approveStatus: document.approveStatus ?? ''
+        }
+      }) ?? []
+
+    return documentList
+  } catch (error) {
+    return error
   }
-
-  const documentList =
-    result.map((document, idx) => {
-      const ammount = function () {
-        if (document.ItemInfos[1] === undefined) return '-'
-        return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
-      }
-      return {
-        no: idx + 1,
-        invoiceNo: document.ID,
-        status: processStatus[`${document.UnifiedState}`] ?? '-',
-        currency: document.ItemInfos[0].value ?? '-',
-        ammount: ammount(),
-        sentTo: document.SenderCompanyName ?? '-',
-        sentBy: document.ReceiverCompanyName ?? '-',
-        updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
-        expire: document.DueDate ?? '-',
-        documentId: document.DocumentId
-      }
-    }) ?? []
-
-  return documentList
 }
 
 module.exports = {
