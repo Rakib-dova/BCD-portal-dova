@@ -315,5 +315,6 @@ module.exports = {
   router: router,
   cbGetIndex: cbGetIndex,
   cbGetWorkflow: cbGetWorkflow,
-  cbGetApprovals: cbGetApprovals
+  cbGetApprovals: cbGetApprovals,
+  cbSearchApprovedInvoice: cbSearchApprovedInvoice
 }

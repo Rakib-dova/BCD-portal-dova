@@ -595,26 +595,25 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId) => {
       result = statusSearchResult
     }
 
-    const documentList =
-      result.map((document, idx) => {
-        const ammount = function () {
-          if (document.ItemInfos[1] === undefined) return '-'
-          return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
-        }
-        return {
-          no: idx + 1,
-          invoiceNo: document.ID,
-          status: processStatus[`${document.UnifiedState}`] ?? '-',
-          currency: document.ItemInfos[0].value ?? '-',
-          ammount: ammount(),
-          sentTo: document.SenderCompanyName ?? '-',
-          sentBy: document.ReceiverCompanyName ?? '-',
-          updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
-          expire: document.DueDate ?? '-',
-          documentId: document.DocumentId,
-          approveStatus: document.approveStatus ?? ''
-        }
-      }) ?? []
+    const documentList = result.map((document, idx) => {
+      const ammount = function () {
+        if (document.ItemInfos[1] === undefined) return '-'
+        return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
+      }
+      return {
+        no: idx + 1,
+        invoiceNo: document.ID,
+        status: processStatus[`${document.UnifiedState}`] ?? '-',
+        currency: document.ItemInfos[0].value ?? '-',
+        ammount: ammount(),
+        sentTo: document.SenderCompanyName ?? '-',
+        sentBy: document.ReceiverCompanyName ?? '-',
+        updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
+        expire: document.DueDate ?? '-',
+        documentId: document.DocumentId,
+        approveStatus: document.approveStatus ?? ''
+      }
+    })
 
     return documentList
   } catch (error) {
