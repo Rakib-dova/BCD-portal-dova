@@ -16,8 +16,6 @@ const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
 const journalDownloadController = require('../controllers/journalDownloadController.js')
 
 const notiTitle = '請求書ダウンロード'
-const finalapproval = 'finalapproval'
-const noneFinalapproval = 'noneFinalapproval'
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
