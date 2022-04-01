@@ -41,14 +41,12 @@ class TradeshiftDTO {
 
     if (sentByCompany.length > 0) uri = `${uri}&${this.getQuery('sentBy', sentByCompany)}`
 
-    if (invoiceId.length > 0) uri = `${uri}&${this.getQuery('businessId', invoiceId)}`
-
     if (issueDate[0].length > 0) {
       uri = `${uri}&${this.getQuery('minissuedate', issueDate[0])}`
     }
 
     if (issueDate[1].length > 0) {
-      uri = `${uri}&${this.getQuery('minissuedate', issueDate[1])}`
+      uri = `${uri}&${this.getQuery('maxissuedate', issueDate[1])}`
     }
 
     uri = `${uri}&${this.getQuery('onlydeleted', false)}&${this.getQuery('onlydrafts', false)}&${this.getQuery(
@@ -56,11 +54,35 @@ class TradeshiftDTO {
       false
     )}&${this.getQuery('state', state)}`
 
-    const response = []
-    for (const document of (await this.accessTradeshift(get, uri)).Document) {
+    let response = []
+    const invoiceList = await this.accessTradeshift(get, uri)
+
+    if (invoiceList instanceof Error) return invoiceList
+
+    for (const document of invoiceList.Document) {
       if (document.TenantId === this.tenantId) {
-        response.push(document)
+        if (invoiceId.length > 0) {
+          if (document.ID.indexOf(invoiceId) !== -1) response.push(document)
+        } else {
+          response.push(document)
+        }
       }
+    }
+
+    if (contractEmail.length > 0) {
+      const contractEmailSearchResult = []
+      for (const data of response) {
+        const invoice = await this.getDocument('/' + data.DocumentId)
+
+        if (invoice instanceof Error) return invoice
+
+        if (invoice.AccountingCustomerParty.Party.Contact.ID) {
+          if (invoice.AccountingCustomerParty.Party.Contact.ID.value.indexOf(contractEmail) !== -1) {
+            contractEmailSearchResult.push(data)
+          }
+        }
+      }
+      response = contractEmailSearchResult
     }
 
     return response
