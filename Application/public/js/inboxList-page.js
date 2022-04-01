@@ -382,7 +382,7 @@ document.querySelector('#sendToSearchBtn').addEventListener('click', function (e
                 const cloneSearchResultItemTemplate = document.importNode(searchResultItemTemplate.content, true)
                 cloneSearchResultItemTemplate.querySelector('label').append(item.CompanyName)
                 cloneSearchResultItemTemplate.querySelector('input').id = `sendTo${idx}`
-                cloneSearchResultItemTemplate.querySelector('input').name = 'sentBy[] '
+                cloneSearchResultItemTemplate.querySelector('input').name = 'sentBy[]'
                 cloneSearchResultItemTemplate.querySelector('input').classList.add('sendToCompanies')
                 cloneSearchResultItemTemplate.querySelector('input').value = item.CompanyAccountId
                 cloneSearchResultBoxTemplate.querySelector('.box').appendChild(cloneSearchResultItemTemplate)
@@ -437,16 +437,24 @@ $('#BtnInboxSearch').addEventListener('click', function (e) {
   const invoiceNumber = form.invoiceNumber.value
   const minIssuedate = form.minIssuedate.value
   const maxIssuedate = form.maxIssuedate.value
-  let sentBy = form.sentBy
+  let sentBy = form['sentBy[]']
   if (sentBy !== undefined) {
     sentBy = Array.prototype.slice.call(sentBy)
+    sentBy = sentBy.filter(ele => ele.checked === true)
+    if (!sentBy) {
+      sentBy = []
+    }
   } else {
     sentBy = []
   }
 
-  let status = form.status
+  let status = form['status[]']
   if (status !== undefined) {
-    status = Array.prototype.slice.call(sentBy)
+    status = Array.prototype.slice.call(status)
+    status = status.filter(ele => ele.checked === true)
+    if (!status) {
+      status = []
+    }
   } else {
     status = []
   }
