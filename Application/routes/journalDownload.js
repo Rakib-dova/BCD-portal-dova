@@ -16,6 +16,8 @@ const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
 const journalDownloadController = require('../controllers/journalDownloadController.js')
 
 const notiTitle = '請求書ダウンロード'
+const finalapproval = 'finalapproval'
+const noneFinalapproval = 'noneFinalapproval'
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -177,6 +179,12 @@ const cbPostIndex = async (req, res, next) => {
   const company = sentTo[0]
   let sentByIdx = 0
 
+  let chkFinalapproval
+  // 請求書の最終承認済み・仕訳済み区分
+  if (req.body.chkFinalapproval || false) {
+    chkFinalapproval = req.body.chkFinalapproval
+  }
+
   do {
     const sentByCompany = sentBy[sentByIdx]
     findDocumentQuery.sentTo = sentTo[0]
@@ -193,7 +201,6 @@ const cbPostIndex = async (req, res, next) => {
       // 請求書を検索する
       let pageId = 0
       let numPages = 1
-
       do {
         resultForQuery = await apiManager.accessTradeshift(
           req.user.accessToken,
@@ -253,11 +260,13 @@ const cbPostIndex = async (req, res, next) => {
         let chkInvoice = false
         if (documentId !== '') {
           // 請求書番号（UUID）で請求書情報取得（とれシフAPI呼出）
-          invoicesForDownload = await journalDownloadController.createInvoiceDataForDownload(
+          invoicesForDownload = await journalDownloadController.createInvoiceDataForJournalDownload(
             req.user.accessToken,
             req.user.refreshToken,
             invoiceDocument,
-            contract.contractId
+            contract.contractId,
+            chkFinalapproval,
+            req.user.userId
           )
 
           // エラーを確認する
@@ -281,11 +290,13 @@ const cbPostIndex = async (req, res, next) => {
           res.redirect(303, '/journalDownload')
         }
       } else {
-        invoicesForDownload = await journalDownloadController.createInvoiceDataForDownload(
+        invoicesForDownload = await journalDownloadController.createInvoiceDataForJournalDownload(
           req.user.accessToken,
           req.user.refreshToken,
           documentsResult.Document,
-          contract.contractId
+          contract.contractId,
+          chkFinalapproval,
+          req.user.userId
         )
 
         // エラーを確認する
