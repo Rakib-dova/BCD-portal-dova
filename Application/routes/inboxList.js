@@ -273,10 +273,11 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
 
   const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenantId)
   const keyword = { invoiceNumber, issueDate: [minIssuedate, maxIssuedate], sentBy, status, contactEmail }
-  const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword)
+  const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, contract.contractId)
 
-  // console.log(resultList)
-  // // 受領した請求書一覧レンダリング
+  if (resultList instanceof Error) return next(errorHelper.create(500))
+
+  // 支払一覧画面レンダリング
   res.render('inboxList', {
     listArr: resultList,
     numPages: 1,
