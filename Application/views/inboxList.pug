@@ -36,7 +36,7 @@ block content
                         .column                        
                           form#form(method="POST" action=`/inboxList/${currPage}`)
                             article.panel.no-box-shadow.is-info                            
-                              .panel-block.margin-right-10
+                              .panel-block
                                 .container
                                   .column
                                     .field.is-horizontal
@@ -251,6 +251,9 @@ block content
                               else
                                 a.pagination-link(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
                     else
+                     if message
+                      p= message
+                     else
                       p 現在、受領した請求書一覧はありません。
 
                   .tab-pane#constructTab
@@ -277,7 +280,7 @@ block content
                         .column                        
                           form#form(method="POST" action=`/inboxList/${currPage}`)
                             article.panel.is-info                            
-                              .panel-block.margin-right-10
+                              .panel-block
                                 .container
                                   .column
                                     .field.is-horizontal

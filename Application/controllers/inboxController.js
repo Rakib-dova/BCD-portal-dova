@@ -564,6 +564,8 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId) => {
       result = await tradeshiftDTO.getDocumentSearch('', invoiceId, issueDate, contactEmail)
     }
 
+    if (result instanceof Error) return result
+
     // 請求書の承認依頼検索
     for (let i = 0; i < result.length; i++) {
       const requestApproval = await RequestApproval.findOne({

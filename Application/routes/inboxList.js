@@ -275,15 +275,34 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   const keyword = { invoiceNumber, issueDate: [minIssuedate, maxIssuedate], sentBy, status, contactEmail }
   const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, contract.contractId)
 
-  if (resultList instanceof Error) return next(errorHelper.create(500))
+  if (resultList instanceof Error) {
+    if (String(resultList.response?.status).slice(0, 1) === '4') {
+      // 400番エラーの場合
+      logger.error(resultList)
+      req.flash('noti', ['支払依頼一覧', constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
+      return res.redirect('/inboxList/1')
+    } else {
+      return next(errorHelper.create(500))
+    }
+  }
 
   // 支払一覧画面レンダリング
-  res.render('inboxList', {
-    listArr: resultList,
-    numPages: 1,
-    currPage: 1,
-    rejectedFlag: false
-  })
+  if (resultList.length !== 0) {
+    res.render('inboxList', {
+      listArr: resultList,
+      numPages: 1,
+      currPage: 1,
+      rejectedFlag: false
+    })
+  } else {
+    res.render('inboxList', {
+      listArr: resultList,
+      numPages: 1,
+      currPage: 1,
+      rejectedFlag: false,
+      message: '条件に合致する支払依頼が見つかりませんでした。'
+    })
+  }
   logger.info(constantsDefine.logMessage.INF001 + 'cbSearchApprovedInvoice')
 }
 
