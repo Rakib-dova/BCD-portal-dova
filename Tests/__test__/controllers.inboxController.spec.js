@@ -14,12 +14,17 @@ const SubAccountCode = require('../../Application/models').SubAccountCode
 const DepartmentCode = require('../../Application/models').DepartmentCode
 const JournalizeInvoice = require('../../Application/models').JournalizeInvoice
 const RequestApproval = require('../../Application/models').RequestApproval
-const ApproveStatus = require('../../Application/models').ApproveStatus
 const Approval = require('../../Application/models').Approval
 const RequestApprovalDAO = require('../../Application/DAO/RequestApprovalDAO')
 const TradeshiftDTO = require('../../Application/DTO/TradeshiftDTO')
 const ApprovalDAO = require('../../Application/DAO/ApprovalDAO')
 const timeStamp = require('../../Application/lib/utils').timestampForList
+const processStatus = {
+  PAID_CONFIRMED: 0, // 入金確認済み
+  PAID_UNCONFIRMED: 1, // 送金済み
+  ACCEPTED: 2, // 受理済み
+  DELIVERED: 3 // 受信済み
+}
 
 const modelsBuilder = function (modelName) {
   return function (values) {
@@ -673,7 +678,6 @@ let accessTradeshiftSpy,
   departmentCodeFindAllSpy,
   requestApprovalFindOneSpy,
   requestApprovalDTOgetWaitingWorkflowisMineSpy,
-  ApproveStatusFindOneSpy,
   requestApprovalDAOGetAllRequestApproval,
   tradeshiftDTOFindDocuments,
   approvalDAOGetWaitingApprovals,
@@ -698,7 +702,6 @@ describe('inboxControllerのテスト', () => {
     JournalizeInvoice.set = jest.fn(function () {})
     requestApprovalFindOneSpy = jest.spyOn(DepartmentCode, 'findOne')
     requestApprovalDTOgetWaitingWorkflowisMineSpy = jest.fn(async function () {})
-    ApproveStatusFindOneSpy = jest.spyOn(ApproveStatus, 'findOne')
     requestApprovalDAOGetAllRequestApproval = jest.spyOn(RequestApprovalDAO.prototype, 'getAllRequestApproval')
     tradeshiftDTOFindDocuments = jest.spyOn(TradeshiftDTO.prototype, 'findDocuments')
     approvalDAOGetWaitingApprovals = jest.spyOn(ApprovalDAO.prototype, 'getWaitingApprovals')
@@ -721,7 +724,6 @@ describe('inboxControllerのテスト', () => {
     departmentCodeFindAllSpy.mockRestore()
     requestApprovalFindOneSpy.mockRestore()
     requestApprovalDTOgetWaitingWorkflowisMineSpy.mockRestore()
-    ApproveStatusFindOneSpy.mockRestore()
     requestApprovalDAOGetAllRequestApproval.mockRestore()
     requestApprovalDAOGetAllRequestApproval.mockRestore()
     tradeshiftDTOFindDocuments.mockRestore()
@@ -1870,7 +1872,7 @@ describe('inboxControllerのテスト', () => {
 
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
       const keyword = {
-        invoiceNumber: 'abc',
+        invoiceNumber: 'buyer2',
         issueDate: ['2022-03-01', '2022-04-01'],
         sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
         status: ['80', '10', '11', '12'],
@@ -1963,7 +1965,7 @@ describe('inboxControllerのテスト', () => {
 
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
       const keyword = {
-        invoiceNumber: 'abc',
+        invoiceNumber: 'buyer2',
         issueDate: ['2022-03-01', '2022-04-01'],
         sentBy: [],
         status: ['80', '10', '11', '12'],
@@ -2051,7 +2053,7 @@ describe('inboxControllerのテスト', () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
       const keyword = {
-        invoiceNumber: 'abc',
+        invoiceNumber: 'buyer2',
         issueDate: ['2022-03-01', '2022-04-01'],
         sentBy: [],
         status: ['80', '10', '11', '12'],
@@ -2126,7 +2128,7 @@ describe('inboxControllerのテスト', () => {
 
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
       const keyword = {
-        invoiceNumber: 'abc',
+        invoiceNumber: 'buyer2',
         issueDate: ['2022-03-01', '2022-04-01'],
         sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
         status: ['80', '10', '11', '12'],
@@ -2243,6 +2245,93 @@ describe('inboxControllerのテスト', () => {
 
       // 結果確認
       expect(result).toEqual([])
+    })
+
+    test('正常：キーワード無の場合', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: '',
+        issueDate: ['', ''],
+        sentBy: [],
+        status: [],
+        contactEmail: ''
+      }
+
+      const tradeshiftDocumentTable = require('../mockDB/TradeshiftDocumentsTable')
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(tradeshiftDocumentTable)
+      requestApprovalFindOne.mockReturnValue(null)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+
+      const expectedResult = tradeshiftDocumentTable.map((document, idx) => {
+        const ammount = function () {
+          if (document.ItemInfos[1] === undefined) return '-'
+          return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
+        }
+        return {
+          no: idx + 1,
+          invoiceNo: document.ID,
+          status: processStatus[`${document.UnifiedState}`] ?? '-',
+          currency: document.ItemInfos[0].value ?? '-',
+          ammount: ammount(),
+          sentTo: document.SenderCompanyName ?? '-',
+          sentBy: document.ReceiverCompanyName ?? '-',
+          updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
+          expire: document.DueDate ?? '-',
+          documentId: document.DocumentId,
+          approveStatus: document.approveStatus ?? ''
+        }
+      })
+
+      // 結果確認
+      expect(result).toEqual(expectedResult)
+    })
+
+    test('正常：複数企業の検索', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: '',
+        issueDate: ['', ''],
+        sentBy: ['11367bd9-9710-4772-bdf7-10be2085976c', '9bd4923d-1b65-43b9-9b8d-34dbd1c9ac40'],
+        status: [],
+        contactEmail: ''
+      }
+
+      const tradeshiftDocumentTable = require('../mockDB/TradeshiftDocumentsTable')
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce([tradeshiftDocumentTable[0], tradeshiftDocumentTable[1]])
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce([tradeshiftDocumentTable[2]])
+      requestApprovalFindOne.mockReturnValue(null)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+
+      const expectedResult = tradeshiftDocumentTable.map((document, idx) => {
+        const ammount = function () {
+          if (document.ItemInfos[1] === undefined) return '-'
+          return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
+        }
+        return {
+          no: idx + 1,
+          invoiceNo: document.ID,
+          status: processStatus[`${document.UnifiedState}`] ?? '-',
+          currency: document.ItemInfos[0].value ?? '-',
+          ammount: ammount(),
+          sentTo: document.SenderCompanyName ?? '-',
+          sentBy: document.ReceiverCompanyName ?? '-',
+          updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
+          expire: document.DueDate ?? '-',
+          documentId: document.DocumentId,
+          approveStatus: document.approveStatus ?? ''
+        }
+      })
+
+      // 結果確認
+      expect(result).toEqual(expectedResult)
     })
 
     test('異常：検索結果がnullの場合', async () => {

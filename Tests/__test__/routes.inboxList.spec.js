@@ -1019,6 +1019,12 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: ''
+      }
 
       const searchResultData = [
         {
@@ -1071,6 +1077,12 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: ''
+      }
 
       const searchResultData = []
 
@@ -1111,6 +1123,12 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: ''
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -1136,7 +1154,7 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxListが呼ばれ「る」
+      // response.flashの関数が呼び出される。
       expect(request.flash).toHaveBeenCalledWith('noti', [
         '支払依頼一覧',
         constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR
@@ -1148,6 +1166,12 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: ''
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -1173,7 +1197,7 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxListが呼ばれ「る」
+      // response.nextの関数が呼び出されて、５００エラーをチェックする。
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -1182,6 +1206,12 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[1] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: ''
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[6])
@@ -1257,6 +1287,12 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[2] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: ''
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       const userDbError = new Error('User Table Error')
@@ -1278,6 +1314,12 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[2] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: ''
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[8])
@@ -1315,6 +1357,12 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: ''
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])

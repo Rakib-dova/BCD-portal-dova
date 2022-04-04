@@ -557,9 +557,12 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId) => {
 
     // 送信会社、請求書番号、発行日、取引先担当者(アドレス)で検索
     if (sentByCompanies.length > 0) {
+      const response = []
       for (const company of sentByCompanies) {
-        result = await tradeshiftDTO.getDocumentSearch(company, invoiceId, issueDate, contactEmail)
+        const result = await tradeshiftDTO.getDocumentSearch(company, invoiceId, issueDate, contactEmail)
+        response.push(...result)
       }
+      result = response
     } else {
       result = await tradeshiftDTO.getDocumentSearch('', invoiceId, issueDate, contactEmail)
     }
