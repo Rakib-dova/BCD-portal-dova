@@ -83,8 +83,9 @@ const cbPostIndex = async (req, res, next) => {
 
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
+  // 認証情報取得失敗した場合
   if (user instanceof Error || user === null) {
-    req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
+    req.flash('noti', [notiTitle, 'ログインユーザーではありません。'])
     return res.redirect(303, '/journalDownload')
   }
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
@@ -157,7 +158,6 @@ const cbPostIndex = async (req, res, next) => {
     req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
     return res.redirect(303, '/journalDownload')
   }
-
   // 送信企業の条件のチェック
   let sentBy
   if (Array.isArray(req.body.sentBy)) {
@@ -296,7 +296,6 @@ const cbPostIndex = async (req, res, next) => {
           chkFinalapproval,
           req.user.userId
         )
-
         // エラーを確認する
         if (invoicesForDownload instanceof Error) {
           req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
