@@ -21,6 +21,8 @@ const DOMParser = require('dom-parser')
 const notiTitle = '請求書ダウンロード'
 const journalDownloadSysError = 'システムエラーが発生しました。時間を空けてもう一度試してください。'
 const JournalizeInvoice = require('../../Application/models').JournalizeInvoice
+const requestApproval = require('../../Application/controllers/requestApprovalController')
+
 const journalizeResult = new JournalizeInvoice()
 journalizeResult.journalId = '388014b9-d667-4144-9cc4-5da420981433'
 journalizeResult.contractId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
@@ -41,7 +43,8 @@ let userControllerFindOneSpy,
   tenantControllerFindOneSpy,
   contractControllerFindContractSpyon,
   journalfindAllSpy,
-  getSentToCompanySpy
+  getSentToCompanySpy,
+  findOneRequestApprovalSpy
 
 const dbJournalTable = []
 const dbJournal100Table = []
@@ -63,6 +66,35 @@ for (let idx = 0; idx < 100; ++idx) {
   item.updatedAt = new Date('2021-11-25T04:30:00.000Z')
   item.journalNo = `lineAccountCode${idx + 1}`
   dbJournalTable.push(item)
+}
+
+const journalfindAllSpyResult = [
+  {
+    journalId: '75fd64cd-e4b5-4d0a-84cc-8af25a24f2a8',
+    contractId: 'f10b95a4-74a1-4691-880a-827c9f1a1faf',
+    invoiceId: '1f3ce3dc-4dbb-548a-a090-d39dc604a6e1',
+    lineNo: 1,
+    lineId: '1',
+    accountCode: 'accountCode1',
+    subAccountCode: 'subAccountCode1',
+    departmentCode: 'departmentCode1',
+    installmentAmount: 51223,
+    createdAt: new Date('2021-11-25T04:30:00.000Z'),
+    updatedAt: new Date('2021-11-25T04:30:00.000Z'),
+    journalNo: 'lineAccountCode14'
+  }
+]
+
+const findOneRequestApprovalResult = {
+  requestId: '2b055e3f-aa3b-4d39-9d8e-98cdaa04625b',
+  contractId: 'f10b95a4-74a1-4691-880a-827c9f1a1faf',
+  approveRouteId: '50b3aea7-c5b1-445a-952c-5ef0883d1504',
+  invoiceId: '1f3ce3dc-4dbb-548a-a090-d39dc604a6e1',
+  requester: 'e8266cfa-4732-4cbd-8442-0ebcb073013d',
+  status: '00',
+  message: '',
+  create: new Date('2021-11-25T04:30:00.000Z'),
+  isSaved: true
 }
 
 // 404エラー定義
@@ -110,6 +142,7 @@ describe('journalDownloadのテスト', () => {
     contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
     journalfindAllSpy = jest.spyOn(JournalizeInvoice, 'findAll')
     getSentToCompanySpy = jest.spyOn(journalDownloadController, 'getSentToCompany')
+    findOneRequestApprovalSpy = jest.spyOn(requestApproval, 'findOneRequestApproval')
     request.flash = jest.fn()
   })
   afterEach(() => {
@@ -123,6 +156,7 @@ describe('journalDownloadのテスト', () => {
     contractControllerFindContractSpyon.mockRestore()
     journalfindAllSpy.mockRestore()
     getSentToCompanySpy.mockRestore()
+    findOneRequestApprovalSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -185,8 +219,6 @@ describe('journalDownloadのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
 
-      journalfindAllSpy.mockReturnValue(dbJournalTable)
-
       // 試験実施
       await journalDownload.cbGetIndex(request, response, next)
 
@@ -216,8 +248,6 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[7])
-
-      journalfindAllSpy.mockReturnValue(dbJournalTable)
 
       // 試験実施
       await journalDownload.cbGetIndex(request, response, next)
@@ -323,12 +353,13 @@ describe('journalDownloadのテスト', () => {
   })
 
   describe('コールバック:cbPostIndex', () => {
-    test('正常:1件', async () => {
+    test('正常:1件（最終承認済みの請求書）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'finalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -342,6 +373,126 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(findOneRequestApprovalResult)
+
+      journalfindAllSpy.mockReturnValue(journalfindAllSpyResult)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01001')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice1')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 発行日
+      expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
+      // 請求書番号
+      expect(csvBody).toContain(`${checkingData.ID.value}`)
+      // テナントID
+      expect(csvBody).toContain(`${checkingData.AccountingCustomerParty.Party.PartyIdentification[0].ID.value}`)
+      // 支払期日
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[0]?.PaymentDueDate?.value ?? ''}`)
+      // 納品日
+      expect(csvBody).toContain(`${checkingData.Delivery[0].ActualDeliveryDate?.value}`)
+      // 備考
+      expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
+      // 銀行名
+      expect(csvBody).toContain(
+        `${
+          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+            .value ?? ''
+        }`
+      )
+      // 支店名
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.Name.value ?? ''}`
+      )
+      // 科目
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.AccountTypeCode?.value === 'General' ? '普通' : '当座'}`
+      )
+      // 口座番号
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[0].PayeeFinancialAccount?.ID?.value ?? ''}`)
+      // 口座名義
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.Name.value ?? ''}`
+      )
+      // その他特記事項
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[0].PayeeFinancialAccount?.Name?.value ?? ''}`)
+      // 明細-項目ID
+      expect(csvBody).toContain(`${checkingData.Note[0].value}`)
+      // 明細-内容
+      expect(csvBody).toContain(`${checkingData.InvoiceLine[0].Item.Description[0].value}`)
+      // 明細-数量
+      expect(csvBody).toContain(`${checkingData.InvoiceLine[0].InvoicedQuantity.value}`)
+      // 明細-単位
+      const bconCsvUnitcode = require('../../Application/lib/bconCsvUnitcode')
+      const unitCodeKeys = Object.keys(bconCsvUnitcode)
+      let resultOfUnitSearch
+      unitCodeKeys.some((item) => {
+        if (`${checkingData.InvoiceLine[0].InvoicedQuantity.unitCode}` === bconCsvUnitcode[item]) {
+          resultOfUnitSearch = item
+          return true
+        }
+        return false
+      })
+      expect(csvBody).toContain(`${resultOfUnitSearch}`)
+      // 明細-単価
+      expect(csvBody).toContain(`${checkingData.InvoiceLine[0].LineExtensionAmount.value}`)
+      // 明細-税（消費税／軽減税率／不課税／免税／非課税）
+      const taxCategory = {
+        'JP 不課税 0%': '不課税',
+        'JP 免税 0%': '免税',
+        'JP 消費税 10%': '消費税',
+        'JP 消費税(軽減税率) 8%': '軽減税率',
+        'JP 非課税 0%': '非課税'
+      }
+      expect(csvBody).toContain(
+        `${taxCategory[checkingData.InvoiceLine[0].TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.Name.value]}`
+      )
+      // 明細-備考
+      expect(csvBody).toContain(
+        `${
+          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        }`
+      )
+    })
+
+    test('正常:1件（仕訳済みの請求書）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -444,6 +595,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -482,6 +634,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01000',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -520,6 +673,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: '',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -558,6 +712,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: '',
         minIssuedate: '9999-99-98',
         maxIssuedate: '9999-99-98'
@@ -596,6 +751,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -634,6 +790,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -649,6 +806,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -751,6 +910,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01006'
       }
 
@@ -762,6 +922,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -872,6 +1034,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -885,6 +1048,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -985,6 +1150,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01014',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -998,6 +1164,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1037,6 +1205,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01013',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1054,6 +1223,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1093,6 +1264,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1110,6 +1282,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1138,6 +1312,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1155,6 +1330,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1183,6 +1360,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1228,6 +1406,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1245,6 +1424,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1273,6 +1454,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1290,6 +1472,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1318,6 +1502,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1335,6 +1520,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1363,6 +1550,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1380,6 +1568,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1408,6 +1598,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01012',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1425,6 +1616,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1456,6 +1649,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1473,6 +1667,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1505,6 +1701,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01014',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1522,6 +1719,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1561,6 +1760,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01013',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1578,6 +1778,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1617,6 +1819,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1634,6 +1837,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1662,6 +1867,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1679,6 +1885,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1707,6 +1915,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1724,6 +1933,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1752,6 +1963,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1769,6 +1981,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1797,6 +2011,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1814,6 +2029,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1842,6 +2059,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -1859,6 +2077,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1887,6 +2107,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -1900,6 +2121,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1930,6 +2153,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01012',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -1943,6 +2167,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1973,6 +2199,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01015',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -1986,6 +2213,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2079,6 +2308,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01026',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2092,6 +2322,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2185,6 +2417,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01016',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2198,6 +2431,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2228,6 +2463,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01017',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2241,6 +2477,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2446,6 +2684,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01018',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2459,6 +2698,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2487,6 +2728,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01019',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2500,6 +2742,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2527,6 +2771,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01020',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2540,6 +2785,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2567,6 +2814,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01021',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2580,6 +2828,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2607,6 +2857,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01022',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2620,6 +2871,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2647,6 +2900,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01023',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2660,6 +2914,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2687,6 +2943,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01024',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2700,6 +2957,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2727,6 +2986,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01025',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2740,6 +3000,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2767,6 +3029,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01027',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2780,6 +3043,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2817,6 +3082,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01028',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
@@ -2831,6 +3097,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2870,6 +3138,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01032',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2883,6 +3152,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2916,6 +3187,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01033',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2929,6 +3201,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -2968,6 +3242,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01029',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -2981,6 +3256,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3020,6 +3297,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01030',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -3033,6 +3311,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3072,6 +3352,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01031',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -3085,6 +3366,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3118,6 +3401,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01031',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -3154,6 +3438,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: '',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09'
@@ -3167,6 +3452,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3196,6 +3483,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01009',
         minIssuedate: '1990-01-01',
         maxIssuedate: '2021-11-09'
@@ -3211,6 +3499,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3238,6 +3528,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01009'
       }
 
@@ -3249,6 +3540,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3276,6 +3569,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01031'
       }
 
@@ -3287,6 +3581,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3317,6 +3613,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: ''
       }
 
@@ -3356,6 +3653,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01010'
       }
 
@@ -3369,6 +3667,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3396,6 +3696,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A'
       }
 
@@ -3409,6 +3710,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3436,6 +3739,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01002'
       }
 
@@ -3447,6 +3751,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3551,6 +3857,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01003'
       }
 
@@ -3562,6 +3869,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3664,6 +3973,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01000'
       }
       request.flash = jest.fn()
@@ -3676,6 +3986,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3712,6 +4024,8 @@ describe('journalDownloadのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
 
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
       // 試験実施
@@ -3743,6 +4057,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01001',
         sentTo: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
         sentBy: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
@@ -3758,6 +4073,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3854,6 +4171,38 @@ describe('journalDownloadのテスト', () => {
       )
     })
 
+    test('異常:ダウンロード対象がない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // エラー画面表示
+      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
+    })
+
     test('500エラー：user検索の時、DBエラー', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -3870,6 +4219,8 @@ describe('journalDownloadのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[1])
 
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
       // 試験実施
@@ -3882,7 +4233,7 @@ describe('journalDownloadのテスト', () => {
       // エラーが発生するとダウンロードページにリダイレクト及びエラーメッセージ表示
       expect(response.statusCode).toBe(303)
       expect(response.headers.Location).toMatch('/journalDownload')
-      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, journalDownloadSysError])
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, 'ログインユーザーではありません。'])
     })
 
     test('500エラー：user.statusが0ではない場合', async () => {
@@ -3898,6 +4249,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[1])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -3929,6 +4282,8 @@ describe('journalDownloadのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(contractDbError)
 
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
       // 試験実施
@@ -3959,6 +4314,8 @@ describe('journalDownloadのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[1])
 
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
       helper.checkContractStatus = (req, res, next) => {
@@ -3981,6 +4338,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01000'
       }
       request.flash = jest.fn()
@@ -3993,6 +4351,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -4063,6 +4423,7 @@ describe('journalDownloadのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
+        chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01000'
       }
       request.flash = jest.fn()
@@ -4075,6 +4436,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
