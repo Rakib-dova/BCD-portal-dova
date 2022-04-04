@@ -258,7 +258,7 @@ const cbPostIndex = async (req, res, next) => {
         let chkInvoice = false
         if (documentId !== '') {
           // 請求書番号（UUID）で請求書情報取得（とれシフAPI呼出）
-          invoicesForDownload = await journalDownloadController.createInvoiceDataForJournalDownload(
+          invoicesForDownload = await journalDownloadController.createInvoiceDataForDownload(
             req.user.accessToken,
             req.user.refreshToken,
             invoiceDocument,
@@ -288,7 +288,7 @@ const cbPostIndex = async (req, res, next) => {
           res.redirect(303, '/journalDownload')
         }
       } else {
-        invoicesForDownload = await journalDownloadController.createInvoiceDataForJournalDownload(
+        invoicesForDownload = await journalDownloadController.createInvoiceDataForDownload(
           req.user.accessToken,
           req.user.refreshToken,
           documentsResult.Document,
