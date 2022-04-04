@@ -51,7 +51,6 @@ function instantValidation(field) {
 // 送信企業検索ボタン機能
 document.querySelector('#sendToSearchBtn').addEventListener('click', function (e) {
   const sendTo = document.getElementById('sendTo').value
-
   // レイアウト初期化
   if (
     (document.querySelector('#allSelectSentToBtn') ?? false) ||
@@ -67,7 +66,7 @@ document.querySelector('#sendToSearchBtn').addEventListener('click', function (e
 
   if (document.querySelector('#searchResultBox') ?? false) {
     document.querySelector('#searchResultBox').remove()
-    document.querySelector('#form > article > div > div > div:nth-child(5)').classList.add('is-invisible')
+    document.querySelector('#form > article > div > div > div:nth-child(6)').classList.add('is-invisible')
     document.querySelector('#sendToSearchBtn').classList.remove('is-loading')
   }
 
@@ -115,7 +114,7 @@ document.querySelector('#sendToSearchBtn').addEventListener('click', function (e
                 cloneSearchResultItemTemplate.querySelector('input').value = item.CompanyAccountId
                 cloneSearchResultBoxTemplate.querySelector('.box').appendChild(cloneSearchResultItemTemplate)
               })
-              document.querySelector('#form > article > div > div > div:nth-child(5)').classList.remove('is-invisible')
+              document.querySelector('#form > article > div > div > div:nth-child(6)').classList.remove('is-invisible')
               displaySearchResultField.appendChild(cloneSearchResultBoxTemplate)
             }
           } else {
