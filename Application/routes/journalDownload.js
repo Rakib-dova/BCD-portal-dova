@@ -181,6 +181,8 @@ const cbPostIndex = async (req, res, next) => {
   // 請求書の最終承認済み・仕訳済み区分
   if (req.body.chkFinalapproval || false) {
     chkFinalapproval = req.body.chkFinalapproval
+  } else {
+    return next(errorHelper.create(400))
   }
 
   do {
