@@ -411,9 +411,8 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${
-          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-            .value ?? ''
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+          .value ?? ''
         }`
       )
       // 支店名
@@ -465,8 +464,7 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${
-          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -529,9 +527,8 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${
-          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-            .value ?? ''
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+          .value ?? ''
         }`
       )
       // 支店名
@@ -583,8 +580,7 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${
-          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -844,9 +840,8 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${
-          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-            .value ?? ''
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+          .value ?? ''
         }`
       )
       // 支店名
@@ -898,8 +893,7 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${
-          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -963,9 +957,8 @@ describe('journalDownloadのテスト', () => {
         expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
         // 銀行名
         expect(csvBody).toContain(
-          `${
-            checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-              .value ?? ''
+          `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+            .value ?? ''
           }`
         )
         // 支店名
@@ -974,8 +967,7 @@ describe('journalDownloadのテスト', () => {
         )
         // 科目
         expect(csvBody).toContain(
-          `${
-            checkingData.PaymentMeans[0].PayeeFinancialAccount?.AccountTypeCode?.value === 'General' ? '普通' : '当座'
+          `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.AccountTypeCode?.value === 'General' ? '普通' : '当座'
           }`
         )
         // 口座番号
@@ -1019,10 +1011,9 @@ describe('journalDownloadのテスト', () => {
         )
         // 明細-備考
         expect(csvBody).toContain(
-          `${
-            checkingData.InvoiceLine[0].DocumentReference
-              ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value
-              : ''
+          `${checkingData.InvoiceLine[0].DocumentReference
+            ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value
+            : ''
           }`
         )
       }
@@ -1084,9 +1075,8 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${
-          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-            .value ?? ''
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+          .value ?? ''
         }`
       )
       // 支店名
@@ -1138,8 +1128,7 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${
-          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -3791,9 +3780,8 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${
-          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-            .value ?? ''
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+          .value ?? ''
         }`
       )
       // 支店名
@@ -3845,8 +3833,7 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${
-          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -3909,9 +3896,8 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${
-          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-            .value ?? ''
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+          .value ?? ''
         }`
       )
       // 支店名
@@ -3961,8 +3947,7 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${taxCategory[checkingData.TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value]}`)
       // 明細-備考
       expect(csvBody).toContain(
-        `${
-          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -4044,11 +4029,14 @@ describe('journalDownloadのテスト', () => {
       await journalDownload.cbPostIndex(request, response, next)
 
       // 期待結果
-      // 500エラーがエラーハンドリング「されない」
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
-      // 404エラー画面表示
-      expect(next).toHaveBeenCalledWith(errorHelper.create(400))
-      expect(response.render).not.toHaveBeenCalledWith()
+      // 400がエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
+      // 画面表示
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '請求書ダウンロード',
+        'ログインユーザーではありません。'
+      ])
+      expect(response.redirect).toHaveBeenCalledWith(303, '/journalDownload')
     })
 
     test('正常:1つの企業の場合', async () => {
@@ -4111,9 +4099,8 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${
-          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-            .value ?? ''
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+          .value ?? ''
         }`
       )
       // 支店名
@@ -4165,8 +4152,7 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${
-          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -4227,13 +4213,13 @@ describe('journalDownloadのテスト', () => {
       await journalDownload.cbPostIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+
       // エラーが発生するとダウンロードページにリダイレクト及びエラーメッセージ表示
       expect(response.statusCode).toBe(303)
       expect(response.headers.Location).toMatch('/journalDownload')
-      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, 'ログインユーザーではありません。'])
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, journalDownloadSysError])
     })
 
     test('500エラー：user.statusが0ではない場合', async () => {
