@@ -75,7 +75,8 @@ const cbPostIndex = async (req, res, next) => {
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
-    return next(errorHelper.create(400))
+    req.flash('noti', [notiTitle, 'ログインユーザーではありません。'])
+    return res.redirect(303, '/journalDownload')
   }
 
   // DBからuserデータ取得
@@ -83,9 +84,8 @@ const cbPostIndex = async (req, res, next) => {
 
   // データベースエラーは、エラーオブジェクトが返る
   // user未登録の場合もエラーを上げる
-  // 認証情報取得失敗した場合
   if (user instanceof Error || user === null) {
-    req.flash('noti', [notiTitle, 'ログインユーザーではありません。'])
+    req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
     return res.redirect(303, '/journalDownload')
   }
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
