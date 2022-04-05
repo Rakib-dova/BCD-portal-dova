@@ -3,13 +3,22 @@ const apiManager = require('./apiManager')
 const db = require('../models')
 const logger = require('../lib/logger')
 const JournalizeInvoice = db.JournalizeInvoice
+const requestApproval = require('./requestApprovalController')
 
 // 複数の請求書を1つのCSVファイルにまとめる関数
-const createInvoiceDataForDownload = async (accessToken, refreshToken, documents, contractId) => {
+const createInvoiceDataForDownload = async (
+  accessToken,
+  refreshToken,
+  documents,
+  contractId,
+  chkFinalapproval,
+  userId
+) => {
   const dataToJson = require('../routes/journalDownload').dataToJson
   const jsonToCsv = require('../routes/journalDownload').jsonToCsv
   const invoices = []
-
+  const finalapproval = 'finalapproval'
+  const finalapprovalStatus = '00'
   // 検索した複数の請求書の文書データを取得
   for (let idx = 0; idx < documents.length; idx++) {
     const invoice = await apiManager.accessTradeshift(
@@ -38,12 +47,39 @@ const createInvoiceDataForDownload = async (accessToken, refreshToken, documents
 
           return nextJournalNo - prevJournalNo
         })
+        const journalizeInvoiceFinal = []
+
+        for (let i = 0; i < journalizeInvoice.length; ++i) {
+          const result = await requestApproval.findOneRequestApproval(
+            journalizeInvoice[i].contractId,
+            journalizeInvoice[i].invoiceId
+          )
+
+          if (result !== null) {
+            // 最終承認済みの請求書の場合
+            if (chkFinalapproval === finalapproval) {
+              if (result.status === finalapprovalStatus) {
+                journalizeInvoiceFinal.push(journalizeInvoice[i])
+              }
+            } else {
+              // 仕訳済みの請求書(最終承認済みではない)
+              if (result.status !== finalapprovalStatus) {
+                journalizeInvoiceFinal.push(journalizeInvoice[i])
+              }
+            }
+          } else {
+            // 未処理の場合
+            if (chkFinalapproval !== finalapproval) {
+              journalizeInvoiceFinal.push(journalizeInvoice[i])
+            }
+          }
+        }
 
         // エラーを確認する
         if (invoice instanceof Error) {
           return invoice
         } else {
-          if (journalizeInvoice.length !== 0) invoices.push({ invoice, journalizeInvoice })
+          if (journalizeInvoiceFinal.length !== 0) invoices.push({ invoice, journalizeInvoiceFinal })
         }
       }
     } catch (error) {
@@ -57,7 +93,7 @@ const createInvoiceDataForDownload = async (accessToken, refreshToken, documents
   // 取得した文書データをCSVファイルにまとめる
   for (let idx = 0; idx < invoices.length; idx++) {
     const invoice = await invoices[idx].invoice
-    const journalizeInvoice = await invoices[idx].journalizeInvoice
+    const journalizeInvoice = await invoices[idx].journalizeInvoiceFinal
     // 最初の請求書の場合
     if (idx === 0) {
       fileData += jsonToCsv(dataToJson(invoice, journalizeInvoice))

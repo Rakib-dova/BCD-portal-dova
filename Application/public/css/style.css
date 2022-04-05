@@ -788,3 +788,8 @@ body > div.hero.is-small {
   background-color: #3298dc;
   font-weight: bold;
 }
+
+#chkFinalapproval {
+  margin-top: auto;
+  margin-bottom: auto;
+}
