@@ -793,3 +793,7 @@ body > div.hero.is-small {
   margin-top: auto;
   margin-bottom: auto;
 }
+
+#prevUserMessageBody {
+  overflow-wrap: anywhere;
+}
