@@ -167,3 +167,37 @@ p:focus {
 .columns .rows {
   flex-flow: column;
 }
+
+.width-80 {
+  width: 80%;
+}
+
+.table-td-padding {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-top: 1.1rem !important;
+  border: none !important;
+}
+
+.table-td-button-padding {
+  padding-left: 8px !important;
+  padding-right: 0 !important;
+  padding-top: 14px !important;
+  border: none !important;
+}
+
+.btn-long {
+  height: 6rem;
+}
+
+.table-margin-left {
+  margin-left: 10px;
+}
+
+.margit-top-140 {
+  margin-top: 140px;
+}
+
+.padding-top-4 {
+  padding-top: 4px;
+}
