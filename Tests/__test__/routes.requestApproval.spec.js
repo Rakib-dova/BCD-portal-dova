@@ -1516,7 +1516,7 @@ describe('requestApprovalのテスト', () => {
 
       // 結果確認
       // 支払依頼ページレンダリングを呼び出し
-      expect(request.flash).toBeCalledWith('noti', ['支払依頼', 'メッセージの入力可能な上限値を超過しました。'])
+      expect(request.flash).toBeCalledWith('noti', ['支払依頼', 'メッセージは1500文字まで入力してください。'])
       expect(response.redirect).toHaveBeenCalledWith(`/requestApproval/${request.params.invoiceId}`)
     })
 
