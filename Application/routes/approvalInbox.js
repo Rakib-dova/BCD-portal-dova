@@ -155,6 +155,12 @@ const cbPostApprove = async (req, res, next) => {
   const userId = user.userId
   const requestApproval = req.session.requestApproval ? req.session.requestApproval.approval : null
   const invoiceId = req.params.invoiceId
+  const message = req.body.message
+
+  if (message.length > 1500) {
+    req.flash('noti', [notiTitle, 'メッセージの入力可能な上限値を超過しました。'])
+    return res.redirect(`/approvalInbox/${invoiceId}`)
+  }
 
   if (requestApproval === null) {
     req.flash('alertNotification', ['支払依頼', 'システムエラーが発生しました。\nもう一度操作してください。'])
@@ -208,8 +214,6 @@ const cbPostApprove = async (req, res, next) => {
       res.redirect(`/approvalInbox/${invoiceId}`)
       break
   }
-
-  const message = req.body.message
 
   const result = await approverController.updateApprove(contractId, requestId, message, userId)
 
