@@ -827,7 +827,7 @@ const displayNoCreditAccountCode = function () {
   cloneSearchResultCodeTemplate.querySelector('.noAccountCodeMessage').innerText =
     '該当する勘定科目が存在しませんでした。'
   displayFieldBody.appendChild(cloneSearchResultCodeTemplate)
-  $('#displayInvisible').classList.remove('is-invisible')
+  $('#displayCreditInvisible').classList.remove('is-invisible')
 }
 
 // 部門データ検索結果がない場合
