@@ -156,7 +156,7 @@ const cbPostApprove = async (req, res, next) => {
   const message = typeof req.body.message === 'string' ? req.body.message : null
 
   if (message === null || message.length > 1500) {
-    req.flash('noti', [notiTitle, 'メッセージの入力可能な上限値を超過しました。'])
+    req.flash('noti', [notiTitle, 'メッセージは1500文字まで入力してください。'])
     return res.redirect(`/approvalInbox/${invoiceId}`)
   }
 
