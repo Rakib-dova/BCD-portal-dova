@@ -45,9 +45,19 @@ window.onload = function () {
     btn.addEventListener('click', btnSearchMain())
   })
 
+  // 勘定科目・補助科目の検索ボタン機能設定(貸方)
+  Array.prototype.forEach.call($('.BtnlineCreditAccountCodeSearch'), function (btn) {
+    btn.addEventListener('click', btnSearchMainCredit())
+  })
+
   // 部門データの検索ボタン機能設定
   Array.prototype.forEach.call($('.BtnlineDepartmentCodeSearch'), function (btn) {
     btn.addEventListener('click', btnSearchDepartmentCode())
+  })
+
+  // 部門データの検索ボタン機能設定(貸方)
+  Array.prototype.forEach.call($('.BtnlineCreditDepartmentCodeSearch'), function (btn) {
+    btn.addEventListener('click', btnSearchCreditDepartmentCode())
   })
 
   Array.prototype.forEach.call($('.btn-minus-accountCode'), function (btnMinus) {
@@ -248,6 +258,10 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       const targetId = `${target.id}_lineAccountCode${
         ~~target.querySelectorAll('.lineAccountcode')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
       }`
+      // 仕訳情報のidを作成：lineNo明細詳細の順番_lineAccountCode仕訳情報の順番（貸方）
+      const targetCreditId = `${target.id}_lineCreditAccountCode${
+        ~~target.querySelectorAll('.lineAccountcode')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
+      }`
       // templateから追加仕訳情報欄作成
       const templeAccountCodeItem = $('#templateLineAccountCodeItem')
       const cloneAccountCodeItem = document.importNode(templeAccountCodeItem.content, true)
@@ -256,16 +270,37 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       // 勘定科目コードINPUT
       cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').setAttribute('name', `${targetId}_accountCode`)
       cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').id = `${targetId}_accountCode`
+      // 勘定科目コードINPUT(貸方)
+      cloneAccountCodeItem
+        .querySelector('.lineCreditAccountCode_creditAccountCode')
+        .setAttribute('name', `${targetCreditId}_creditAccountCode`)
+      cloneAccountCodeItem.querySelector(
+        '.lineCreditAccountCode_creditAccountCode'
+      ).id = `${targetCreditId}_creditAccountCode`
       // 補助科目コードINPUT
       cloneAccountCodeItem
         .querySelector('.lineAccountCode_subAccountCode')
         .setAttribute('name', `${targetId}_subAccountCode`)
       cloneAccountCodeItem.querySelector('.lineAccountCode_subAccountCode').id = `${targetId}_subAccountCode`
+      // 補助科目コードINPUT（貸方）
+      cloneAccountCodeItem
+        .querySelector('.lineCreditAccountCode_subCreditAccountCode')
+        .setAttribute('name', `${targetCreditId}_subCreditAccountCode`)
+      cloneAccountCodeItem.querySelector(
+        '.lineCreditAccountCode_subCreditAccountCode'
+      ).id = `${targetCreditId}_subCreditAccountCode`
       // 部門データINPUT
       cloneAccountCodeItem
         .querySelector('.lineAccountCode_departmentCode')
         .setAttribute('name', `${targetId}_departmentCode`)
       cloneAccountCodeItem.querySelector('.lineAccountCode_departmentCode').id = `${targetId}_departmentCode`
+      // 部門データINPUT(貸方)
+      cloneAccountCodeItem
+        .querySelector('.lineCreditAccountCode_creditDepartmentCode')
+        .setAttribute('name', `${targetCreditId}_creditDepartmentCode`)
+      cloneAccountCodeItem.querySelector(
+        '.lineCreditAccountCode_creditDepartmentCode'
+      ).id = `${targetCreditId}_creditDepartmentCode`
       // 計上金額
       cloneAccountCodeItem.querySelector('.inputInstallmentAmount').setAttribute('name', `${targetId}_input_amount`)
       cloneAccountCodeItem.querySelector('.inputInstallmentAmount').id = `${targetId}_input_amount`
@@ -293,12 +328,28 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       cloneAccountCodeItem
         .querySelector('.btn-search-main')
         .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+
+      // 勘定科目と補助科目検索ボタン（貸方）
+      cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.target = 'creditAccountCode-modal'
+      cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.info = targetCreditId
+      cloneAccountCodeItem
+        .querySelector('.btn-search-creditMain')
+        .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+
       // 部門データ検索ボタン
       cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.target = 'departmentCode-modal'
       cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.info = targetId
       cloneAccountCodeItem
         .querySelector('.btn-search-departmentCode')
         .addEventListener('click', btnSearchDepartmentCode($('#departmentCode-modal')))
+
+      // 部門データ検索ボタン(貸方)
+      cloneAccountCodeItem.querySelector('.btn-search-creditDepartmentCode').dataset.target =
+        'creditDepartmentCode-modal'
+      cloneAccountCodeItem.querySelector('.btn-search-creditDepartmentCode').dataset.info = targetCreditId
+      cloneAccountCodeItem
+        .querySelector('.btn-search-creditDepartmentCode')
+        .addEventListener('click', btnSearchCreditDepartmentCode($('#creditDepartmentCode-modal')))
 
       target.appendChild(cloneAccountCodeItem)
     } else {
@@ -319,6 +370,18 @@ const btnSearchMain = function (searchModal) {
   }
 }
 
+// 2番目以降の勘定科目・補助科目検索ボタンイベント(貸方)
+const btnSearchMainCredit = function (searchModal) {
+  return function () {
+    if (this.dataset.info !== $('#creditAccountCode-modal').dataset.info) {
+      deleteCreditDisplayModal()
+    }
+
+    if (searchModal) searchModal.classList.toggle('is-active')
+    $('#creditAccountCode-modal').dataset.info = this.dataset.info
+  }
+}
+
 // 2番目以降の部門データ検索ボタンイベント
 const btnSearchDepartmentCode = function (searchModal) {
   return function () {
@@ -328,6 +391,18 @@ const btnSearchDepartmentCode = function (searchModal) {
     }
     if (searchModal) searchModal.classList.toggle('is-active')
     $('#departmentCode-modal').dataset.info = this.dataset.info
+  }
+}
+
+// 2番目以降の部門データ検索ボタンイベント(貸方)
+const btnSearchCreditDepartmentCode = function (searchModal) {
+  return function () {
+    $('#searchCreditDepartmentModalErrMsg').innerText = ''
+    if (this.dataset.info !== $('#creditDepartmentCode-modal').dataset.info) {
+      deleteCreditDepartmentResultDisplayModal()
+    }
+    if (searchModal) searchModal.classList.toggle('is-active')
+    $('#creditDepartmentCode-modal').dataset.info = this.dataset.info
   }
 }
 
@@ -366,6 +441,55 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
         }
         default: {
           deleteDisplayModal()
+          break
+        }
+      }
+    }
+    $this.classList.remove('is-loading')
+  }
+  $this.classList.add('is-loading')
+  getAccountCode.send(
+    JSON.stringify({
+      accountCode: accountCode,
+      accountCodeName: accountCodeName,
+      subAccountCode: subAccountCode,
+      subAccountCodeName: subAccountCodeName
+    })
+  )
+})
+
+// 仕訳情報検索(貸方)
+// 勘定科目コード、補助科目検索
+$('#btnSearchCreditAccountCode').addEventListener('click', function () {
+  const accountCode = $('#searchModalCreditAccountCode').value
+  const accountCodeName = $('#searchModalCreditAccountCodeName').value
+  const subAccountCode = $('#searchModalSubCreditAccountCode').value
+  const subAccountCodeName = $('#searchModalSubCreditAccountCodeName').value
+
+  const $this = this
+  deleteCreditDisplayModal()
+  $('#searchModalCreditAccountCode').value = accountCode
+  $('#searchModalCreditAccountCodeName').value = accountCodeName
+  $('#searchModalSubCreditAccountCode').value = subAccountCode
+  $('#searchModalSubCreditAccountCodeName').value = subAccountCodeName
+
+  const getAccountCode = new XMLHttpRequest()
+  getAccountCode.open('POST', '/inbox/getCode')
+  getAccountCode.setRequestHeader('Content-Type', 'application/json')
+  getAccountCode.onreadystatechange = function () {
+    if (getAccountCode.readyState === getAccountCode.DONE) {
+      switch (getAccountCode.status) {
+        case 200: {
+          const result = JSON.parse(getAccountCode.response)
+          if (result.length !== 0) {
+            displayCreditResultForCode(result)
+          } else {
+            displayNoCreditAccountCode()
+          }
+          break
+        }
+        default: {
+          deleteCreditDisplayModal()
           break
         }
       }
@@ -462,6 +586,85 @@ $('#btnSearchDepartmentCode').addEventListener('click', function () {
   )
 })
 
+// 部門データモーダルの内の検索ボタン(貸方)
+$('#btnSearchCreditDepartmentCode').addEventListener('click', function () {
+  const inputPatternEngNumKana = '^[a-zA-Z0-9ァ-ヶー　+]*$'
+  const departmentCode = $('#searchModalCreditDepartmentCode').value
+  const departmentCodeName = $('#searchModalCreditDepartmentCodeName').value
+  const inputPatternEngNumKanaRegExp = new RegExp(inputPatternEngNumKana)
+
+  const $this = this
+  // モーダル初期化
+  deleteCreditDepartmentResultDisplayModal()
+
+  // 部門コードのバリデーションチェック
+  if (!inputPatternEngNumKanaRegExp.test(departmentCode)) {
+    $('#searchCreditDepartmentModalErrMsg').innerText = '入力値が間違いました。'
+    $('#searchModalCreditDepartmentCode').value = departmentCode
+    $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+
+  // 部門コードと部門名の桁数チェック
+  if (departmentCode.length > 10 && departmentCodeName.length > 40) {
+    $('#searchCreditDepartmentModalErrMsg').innerText =
+      '部門コードは10桁まで入力してください。 部門名は40桁まで入力してください。'
+    $('#searchModalCreditDepartmentCode').value = departmentCode
+    $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+  // 部門コードの桁数チェック
+  if (departmentCode.length > 10) {
+    $('#searchCreditDepartmentModalErrMsg').innerText = '部門コードは10桁まで入力してください。'
+    $('#searchModalCreditDepartmentCode').value = departmentCode
+    $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+  // 部門名の桁数チェック
+  if (departmentCodeName.length > 40) {
+    $('#searchCreditDepartmentModalErrMsg').innerText = '部門名は40桁まで入力してください。'
+    $('#searchModalCreditDepartmentCode').value = departmentCode
+    $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+
+  // 初期化されたキーワードを入力
+  $('#searchModalCreditDepartmentCode').value = departmentCode
+  $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
+
+  // サーバーからデータ取得
+  const getAccountCode = new XMLHttpRequest()
+  getAccountCode.open('POST', '/inbox/department')
+  getAccountCode.setRequestHeader('Content-Type', 'application/json')
+  getAccountCode.onreadystatechange = function () {
+    if (getAccountCode.readyState === getAccountCode.DONE) {
+      switch (getAccountCode.status) {
+        case 200: {
+          const result = JSON.parse(getAccountCode.response)
+          if (result.length !== 0) {
+            displayResultForCreditDepartmentCode(result)
+          } else {
+            displayNoCreditDepartmentCode()
+          }
+          break
+        }
+        default: {
+          deleteCreditDepartmentResultDisplayModal()
+          break
+        }
+      }
+    }
+    $this.classList.remove('is-loading')
+  }
+  $this.classList.add('is-loading')
+  getAccountCode.send(
+    JSON.stringify({
+      departmentCode: departmentCode,
+      departmentCodeName: departmentCodeName
+    })
+  )
+})
+
 // 勘定科目コード、補助科目検索結果を画面に表示
 const displayResultForCode = function (codeArr) {
   const displayFieldResultBody = $('#displayFieldResultBody')
@@ -498,6 +701,42 @@ const displayResultForCode = function (codeArr) {
   $('#displayInvisible').classList.remove('is-invisible')
 }
 
+// 勘定科目コード、補助科目検索結果を画面に表示（貸方）
+const displayCreditResultForCode = function (codeArr) {
+  const displayCreditFieldResultBody = $('#displayCreditFieldResultBody')
+  const searchResultCode = $('#searchResultCode')
+  codeArr.forEach((item) => {
+    const cloneSearchResultCodeTemplate = document.importNode(searchResultCode.content, true)
+    cloneSearchResultCodeTemplate.querySelector('.rowAccountCode').dataset.target = '#creditAccountCode-modal'
+    cloneSearchResultCodeTemplate.querySelector('.rowAccountCode').dataset.accountCode = item.accountCode
+    cloneSearchResultCodeTemplate.querySelector('.rowAccountCode').dataset.subAccountCode = item.subAccountCode
+    cloneSearchResultCodeTemplate.querySelector('.columnNoAccountCodeMessage').classList.add('is-invisible')
+    cloneSearchResultCodeTemplate.querySelector('.columnAccountCode').innerText = item.accountCode
+    cloneSearchResultCodeTemplate.querySelector('.columnAccountCodeName').innerText = item.accountCodeName
+    cloneSearchResultCodeTemplate.querySelector('.columnSubAccountCode').innerText = item.subAccountCode
+    cloneSearchResultCodeTemplate.querySelector('.columnSubAccountCodeName').innerText = item.subAccountCodeName
+
+    displayCreditFieldResultBody.appendChild(cloneSearchResultCodeTemplate)
+  })
+  $('.rowAccountCode').forEach((row) => {
+    row.addEventListener('click', function () {
+      $(this.dataset.target).classList.remove('is-active')
+      const inputTarget = $(this.dataset.target).dataset.info
+      $(`#${inputTarget}_creditAccountCode`).value = this.dataset.accountCode
+      $(`#${inputTarget}_subCreditAccountCode`).value = this.dataset.subAccountCode
+      $('#btn-confirm').removeAttribute('disabled')
+      deleteCreditDisplayModal()
+    })
+    row.addEventListener('mouseover', function () {
+      this.classList.add('is-selected')
+    })
+    row.addEventListener('mouseout', function () {
+      this.classList.remove('is-selected')
+    })
+  })
+  $('#displayCreditInvisible').classList.remove('is-invisible')
+}
+
 // 部門データ検索結果を画面に表示
 const displayResultForDepartmentCode = function (codeArr) {
   const displayFieldDepartmentResultBody = $('#displayFieldDepartmentResultBody')
@@ -531,6 +770,40 @@ const displayResultForDepartmentCode = function (codeArr) {
   $('#departmentResultDisplayInvisible').classList.remove('is-invisible')
 }
 
+// 部門データ検索結果を画面に表示（貸方）
+const displayResultForCreditDepartmentCode = function (codeArr) {
+  const displayCreditFieldDepartmentResultBody = $('#displayCreditFieldDepartmentResultBody')
+  const searchResultDepartmentCode = $('#searchResultDepartmentCode')
+  codeArr.forEach((item) => {
+    const cloneSearchResultDepartmentCodeTemplate = document.importNode(searchResultDepartmentCode.content, true)
+    cloneSearchResultDepartmentCodeTemplate.querySelector('.rowDepartmentCode').dataset.target =
+      '#creditDepartmentCode-modal'
+    cloneSearchResultDepartmentCodeTemplate.querySelector('.rowDepartmentCode').dataset.departmentCode = item.code
+    cloneSearchResultDepartmentCodeTemplate
+      .querySelector('.columnNoDepartmentCodeMessage')
+      .classList.add('is-invisible')
+    cloneSearchResultDepartmentCodeTemplate.querySelector('.columnDepartmentCode').innerText = item.code
+    cloneSearchResultDepartmentCodeTemplate.querySelector('.columnDepartmentCodeName').innerText = item.name
+    displayCreditFieldDepartmentResultBody.appendChild(cloneSearchResultDepartmentCodeTemplate)
+  })
+  $('.rowDepartmentCode').forEach((row) => {
+    row.addEventListener('click', function () {
+      $(this.dataset.target).classList.remove('is-active')
+      const inputTarget = $(this.dataset.target).dataset.info
+      $(`#${inputTarget}_creditDepartmentCode`).value = this.dataset.departmentCode
+      $('#btn-confirm').removeAttribute('disabled')
+      deleteDepartmentResultDisplayModal()
+    })
+    row.addEventListener('mouseover', function () {
+      this.classList.add('is-selected')
+    })
+    row.addEventListener('mouseout', function () {
+      this.classList.remove('is-selected')
+    })
+  })
+  $('#creditDepartmentResultDisplayInvisible').classList.remove('is-invisible')
+}
+
 // 勘定科目コード検索結果がない場合
 const displayNoAccountCode = function () {
   const displayFieldBody = $('#displayFieldResultBody')
@@ -542,6 +815,19 @@ const displayNoAccountCode = function () {
     '該当する勘定科目が存在しませんでした。'
   displayFieldBody.appendChild(cloneSearchResultCodeTemplate)
   $('#displayInvisible').classList.remove('is-invisible')
+}
+
+// 勘定科目コード検索結果がない場合（貸方）
+const displayNoCreditAccountCode = function () {
+  const displayFieldBody = $('#displayCreditFieldResultBody')
+  const searchResultCode = $('#searchResultCode')
+  const cloneSearchResultCodeTemplate = document.importNode(searchResultCode.content, true)
+  cloneSearchResultCodeTemplate.querySelector('.columnNoAccountCodeMessage').classList.remove('is-invisible')
+  cloneSearchResultCodeTemplate.querySelector('.columnNoAccountCodeMessage').setAttribute('colspan', '4')
+  cloneSearchResultCodeTemplate.querySelector('.noAccountCodeMessage').innerText =
+    '該当する勘定科目が存在しませんでした。'
+  displayFieldBody.appendChild(cloneSearchResultCodeTemplate)
+  $('#displayCreditInvisible').classList.remove('is-invisible')
 }
 
 // 部門データ検索結果がない場合
@@ -557,6 +843,21 @@ const displayNoDepartmentCode = function () {
     '該当する部門データが存在しませんでした。'
   displayFieldDepartmentResultBody.appendChild(cloneSearchResultDepartmentCodeTemplate)
   $('#departmentResultDisplayInvisible').classList.remove('is-invisible')
+}
+
+// 部門データ検索結果がない場合(貸方)
+const displayNoCreditDepartmentCode = function () {
+  const displayCreditFieldDepartmentResultBody = $('#displayCreditFieldDepartmentResultBody')
+  const searchResultDepartmentCode = $('#searchResultDepartmentCode')
+  const cloneSearchResultDepartmentCodeTemplate = document.importNode(searchResultDepartmentCode.content, true)
+  cloneSearchResultDepartmentCodeTemplate
+    .querySelector('.columnNoDepartmentCodeMessage')
+    .classList.remove('is-invisible')
+  cloneSearchResultDepartmentCodeTemplate.querySelector('.columnNoDepartmentCodeMessage').setAttribute('colspan', '2')
+  cloneSearchResultDepartmentCodeTemplate.querySelector('.noDepartmentCodeMessage').innerText =
+    '該当する部門データが存在しませんでした。'
+  displayCreditFieldDepartmentResultBody.appendChild(cloneSearchResultDepartmentCodeTemplate)
+  $('#creditDepartmentResultDisplayInvisible').classList.remove('is-invisible')
 }
 
 // 勘定科目コード、補助科目再検索の時、前の結果を消す
@@ -580,6 +881,27 @@ const deleteDisplayModal = function () {
   $('#displayInvisible').classList.add('is-invisible')
 }
 
+// 勘定科目コード、補助科目再検索の時、前の結果を消す(貸方)
+const deleteCreditDisplayModal = function () {
+  const displayCreditFieldResultBody = $('#displayCreditFieldResultBody')
+  if (displayCreditFieldResultBody.children.length !== 0) {
+    const chidrenItem = []
+    Array.prototype.forEach.call(displayCreditFieldResultBody.children, (item) => {
+      chidrenItem.push(item)
+    })
+    chidrenItem.forEach((item) => {
+      displayCreditFieldResultBody.removeChild(item)
+    })
+  }
+
+  $('#searchModalCreditAccountCode').value = ''
+  $('#searchModalCreditAccountCodeName').value = ''
+  $('#searchModalSubCreditAccountCode').value = ''
+  $('#searchModalSubCreditAccountCodeName').value = ''
+
+  $('#displayCreditInvisible').classList.add('is-invisible')
+}
+
 // 部門データ再検索の時、前の結果を消す
 const deleteDepartmentResultDisplayModal = function () {
   const displayFieldResultBody = $('#displayFieldDepartmentResultBody')
@@ -597,6 +919,25 @@ const deleteDepartmentResultDisplayModal = function () {
   $('#searchModalDepartmentCodeName').value = ''
 
   $('#departmentResultDisplayInvisible').classList.add('is-invisible')
+}
+
+// 部門データ再検索の時、前の結果を消す（貸方）
+const deleteCreditDepartmentResultDisplayModal = function () {
+  const displayCreditFieldDepartmentResultBody = $('#displayCreditFieldDepartmentResultBody')
+  if (displayCreditFieldDepartmentResultBody.children.length !== 0) {
+    const chidrenItem = []
+    Array.prototype.forEach.call(displayCreditFieldDepartmentResultBody.children, (item) => {
+      chidrenItem.push(item)
+    })
+    chidrenItem.forEach((item) => {
+      displayCreditFieldDepartmentResultBody.removeChild(item)
+    })
+  }
+
+  $('#searchModalCreditDepartmentCode').value = ''
+  $('#searchModalCreditDepartmentCodeName').value = ''
+
+  $('#creditDepartmentResultDisplayInvisible').classList.add('is-invisible')
 }
 
 // 仕訳情報のアイテムのマイナスボタン機能追加
