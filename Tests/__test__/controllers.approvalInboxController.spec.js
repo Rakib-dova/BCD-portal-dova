@@ -1,5 +1,9 @@
 'use strict'
 
+jest.mock('../../Application/node_modules/express', () => {
+  return require('jest-express')
+})
+
 const logger = require('../../Application/lib/logger')
 const apiManager = require('../../Application/controllers/apiManager')
 const userController = require('../../Application/controllers/userController')
@@ -15,6 +19,8 @@ const JournalizeInvoice = db.JournalizeInvoice
 const validate = require('../../Application/lib/validate')
 const TradeshiftDTO = require('../../Application/DTO/TradeshiftDTO')
 const UserAccounts = require('../../Application/DTO/VO/UserAccounts')
+jest.mock('../../Application/DTO/TradeshiftDTO')
+jest.mock('../../Application/DTO/VO/UserAccounts')
 
 // アクセストークンの用意
 const accessToken = 'dummy-access-token'
@@ -1062,6 +1068,11 @@ describe('approvalInboxControllerのテスト', () => {
           name: null
         }
       }
+
+      const dbError = new Error('SequelizeConnectionError')
+      requestApprovalFindOne.mockImplementation(() => {
+        throw dbError
+      })
 
       const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval.requestId)
 
