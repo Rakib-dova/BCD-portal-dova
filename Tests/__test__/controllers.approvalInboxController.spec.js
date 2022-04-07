@@ -19,8 +19,6 @@ const JournalizeInvoice = db.JournalizeInvoice
 const validate = require('../../Application/lib/validate')
 const TradeshiftDTO = require('../../Application/DTO/TradeshiftDTO')
 const UserAccounts = require('../../Application/DTO/VO/UserAccounts')
-jest.mock('../../Application/DTO/TradeshiftDTO')
-jest.mock('../../Application/DTO/VO/UserAccounts')
 
 // アクセストークンの用意
 const accessToken = 'dummy-access-token'
