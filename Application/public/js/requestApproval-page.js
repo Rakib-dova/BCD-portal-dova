@@ -34,33 +34,14 @@ const $ = function (tagObjName) {
 }
 
 // メッセージ文字数確認
-function messageCheck(event) {
-  // lfCnt linefeedのカウンター
-  $('#inputMsg').addEventListener(event, function () {
-    let msgLen = $('#inputMsg').value.length
-    let lfCnt = 0
+$('#inputMsg').addEventListener('keyup', function () {
+  $('#msgCount').innerText = '(' + $('#inputMsg').value.length + '/1500)'
 
-    for (const char of $('#inputMsg').value) {
-      if (encodeURI(char) === '%0A') {
-        msgLen++
-        lfCnt++
-      }
-    }
-
-    $('#msgCount').innerText = `(${msgLen}/1500)`
-
-    if (msgLen > 1500) {
-      $('#inputMsg').value = $('#inputMsg').value.substring(0, 1500 - lfCnt)
-      msgLen = $('#inputMsg').value.length
-      $('#msgCount').innerText = `(${msgLen}/1500)`
-    }
-  })
-}
-messageCheck('keyup')
-messageCheck('keydown')
-messageCheck('paste')
-messageCheck('focusin')
-messageCheck('focusout')
+  if ($('#inputMsg').value.length > 1500) {
+    $('#inputMsg').value($('#inputMsg').value.substring(0, 1500))
+    $('#msgCount').innerText = '1500/1500'
+  }
+})
 
 // 承認ルートモーダルの内の検索ボタン
 $('#btnSearchApproveRoute').addEventListener('click', function () {
