@@ -515,6 +515,81 @@ describe('approvalInboxのテスト', () => {
       request.params = {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
       }
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
+      approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(true)
+      approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockReturnValue({
+        status: 0,
+        lineId: 'lineAccountCode4',
+        accountCode: 'AB001',
+        subAccountCode: 'SU001',
+        error: undefined
+      })
+      approverControllerUpdateApprove.mockReturnValue(true)
+
+      // mailContent関数の想定値
+      apiManager.accessTradeshift = jest.fn()
+      apiManager.accessTradeshift.mockReturnValue({
+        ID: {
+          value: 'UTテストコード'
+        }
+      })
+      requestApprovalControllerFindOneRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+
+      sendMailSpy.mockReturnValue(0)
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404がエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでapproveRouteListが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('info', '承認を完了しました。次の承認者にはメールで通知が送られます。')
+      expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
+    })
+
+    test('正常:メッセージが1500文字以下の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, requestApproval: { approval: 'test' } }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -571,6 +646,15 @@ describe('approvalInboxのテスト', () => {
       request.user = { ...user[0] }
       request.params = {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -630,7 +714,15 @@ describe('approvalInboxのテスト', () => {
       request.params = {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
       }
-
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
+      }
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
@@ -726,6 +818,15 @@ describe('approvalInboxのテスト', () => {
       request.params = {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
       }
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -771,6 +872,15 @@ describe('approvalInboxのテスト', () => {
       request.params = {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
       }
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -810,6 +920,15 @@ describe('approvalInboxのテスト', () => {
       request.user = { ...user[0] }
       request.params = {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -862,6 +981,15 @@ describe('approvalInboxのテスト', () => {
       request.params = {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
       }
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -913,6 +1041,15 @@ describe('approvalInboxのテスト', () => {
       request.params = {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
       }
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -960,6 +1097,15 @@ describe('approvalInboxのテスト', () => {
       request.user = { ...user[0] }
       request.params = {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1010,6 +1156,71 @@ describe('approvalInboxのテスト', () => {
       expect(response.redirect).toHaveBeenCalledWith('/inboxList/1')
     })
 
+    test('異常:権限がないユーザーがデータを操作して承認するテスト', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session, requestApproval: { approval: 'test' } }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+      inboxControllerGetInvoiceDetail.mockReturnValue(resultInvoice)
+      approvalInboxControllerHasPowerOfEditing.mockReturnValueOnce(false)
+      approvalInboxControllerInsertAndUpdateJournalizeInvoice.mockReturnValue({
+        status: 0,
+        lineId: 'lineAccountCode4',
+        accountCode: 'AB001',
+        subAccountCode: 'SU001',
+        error: undefined
+      })
+      approverControllerUpdateApprove.mockReturnValue(-1)
+
+      // mailContent関数の想定値
+      apiManager.accessTradeshift = jest.fn()
+      apiManager.accessTradeshift.mockReturnValue({
+        ID: {
+          value: 'UTテストコード'
+        }
+      })
+      requestApprovalControllerFindOneRequestApprovalSpy.mockReturnValueOnce(expectGetRequestApproval)
+      approvalInboxControllerGetRequestApproval.mockReturnValueOnce(expectGetRequestApproval)
+
+      sendMailSpy.mockReturnValue(0)
+
+      // 試験実施
+      await approvalInbox.cbPostApprove(request, response, next)
+
+      // 期待結果
+      // 404がエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでapproveRouteListが呼ばれ「る」
+      expect(response.redirect).toHaveBeenCalledWith('/approvalInbox/53607702-b94b-4a94-9459-6cf3acd65603')
+    })
+
     test('エラー：不正な部門データの場合', async () => {
       // 準備
       const lineId = 'lineAccountCode4'
@@ -1020,6 +1231,15 @@ describe('approvalInboxのテスト', () => {
       request.user = { ...user[0] }
       request.params = {
         invoiceId: '53607702-b94b-4a94-9459-6cf3acd65603'
+      }
+      request.body = {
+        lineId: 1,
+        lineNo: 1,
+        lineNo1_lineAccountCode1_accountCode: '001',
+        lineNo1_lineAccountCode1_subAccountCode: '001',
+        lineNo1_lineAccountCode1_departmentCode: '001',
+        lineNo1_lineAccountCode1_input_amount: '99,991',
+        message: '1234567890'
       }
 
       // DBからの正常なユーザデータの取得を想定する

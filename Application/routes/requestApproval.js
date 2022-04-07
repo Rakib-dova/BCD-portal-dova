@@ -353,13 +353,13 @@ const cbPostApproval = async (req, res, next) => {
   const contractId = contract.contractId
   const invoiceId = req.params.invoiceId
   const requester = req.user.userId
-  const message = req.body.message
+  const message = typeof req.body.message === 'string' ? req.body.message : null
   const approveRouteId = req.body.approveRouteId
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
   const tenantId = req.user.tenantId
 
-  if (message.length > 1500) {
+  if (message === null || message.length > 1500) {
     req.flash('noti', [notiTitle, 'メッセージの入力可能な上限値を超過しました。'])
     return res.redirect(`/requestApproval/${invoiceId}`)
   }
