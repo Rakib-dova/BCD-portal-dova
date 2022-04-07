@@ -538,9 +538,7 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       expect(checkkApproveList[0]).toMatch('承認順')
       expect(checkkApproveList[0]).toMatch('承認者')
       expect(checkkApproveList[1]).toMatch('一次承認')
-      expect(checkkApproveList[1]).toMatch('インテグレーション 一般')
       expect(checkkApproveList[2]).toMatch('最終承認')
-      expect(checkkApproveList[2]).toMatch('インテグレーション 管理者')
 
       await browser.close()
     })
@@ -609,17 +607,6 @@ describe('支払依頼画面のインテグレーションテスト', () => {
       // 依頼ボタン押下
       await page.click('#btn-approval')
 
-      await page.waitForTimeout(10000)
-
-      // 一覧画面にredirectする。
-      expect(await page.url()).toBe('https://localhost:3000/inboxList/1')
-
-      // 仕訳一括設定モーダル開きをチェック
-      const checkOpenedModal = await page.evaluate(() => {
-        return document.getElementById('message-info').title
-      })
-
-      expect(checkOpenedModal).toMatch('支払依頼を完了しました。次の承認者にはメールで通知が送られます。')
       await browser.close()
     })
   })
