@@ -147,8 +147,8 @@ app.set('views', [path.join(__dirname, 'views'), path.join(__dirname, 'obc/views
 app.set('view engine', 'pug')
 
 // body-parser
-// 受領した請求書の仕訳情報の設定のパラメータの最大数：8400個
-app.use(bodyParser.urlencoded({ extended: true, limit: '5mb', parameterLimit: 8400 }))
+// 支払依頼の承認する時の仕訳情報とメッセージのパラメータの最大数：8401個
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb', parameterLimit: 8401 }))
 
 // uncomment after placing your favicon in /public
 // app.use(favicon(__dirname + '/public/favicon.ico'));

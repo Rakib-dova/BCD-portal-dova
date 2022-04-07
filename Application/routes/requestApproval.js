@@ -60,6 +60,7 @@ const cbGetRequestApproval = async (req, res, next) => {
   const refreshToken = req.user.refreshToken
   const invoiceId = req.params.invoiceId
   let result
+
   try {
     result = await inboxController.getInvoiceDetail(accessToken, refreshToken, invoiceId, contract.contractId)
   } catch (error) {
@@ -357,6 +358,11 @@ const cbPostApproval = async (req, res, next) => {
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
   const tenantId = req.user.tenantId
+
+  if (message.length > 1500) {
+    req.flash('noti', [notiTitle, 'メッセージの入力可能な上限値を超過しました。'])
+    return res.redirect(`/requestApproval/${invoiceId}`)
+  }
 
   // 承認ルートに誤りがある場合
   const isApproveRoute = await approverController.checkApproveRoute(contractId, approveRouteId)
