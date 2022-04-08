@@ -167,7 +167,11 @@ const getInvoiceLineList = function () {
           accountCode: node.querySelectorAll('input[type=text]')[0].value,
           subAccountCode: node.querySelectorAll('input[type=text]')[1].value,
           departmentCode: node.querySelectorAll('input[type=text]')[2].value,
-          amount: node.querySelectorAll('input[type=text]')[3].value
+          // 貸方
+          creditAccountCode: node.querySelectorAll('input[type=text]')[3].value,
+          creditSubAccountCode: node.querySelectorAll('input[type=text]')[4].value,
+          creditDepartmentCode: node.querySelectorAll('input[type=text]')[5].value,
+          amount: node.querySelectorAll('input[type=text]')[6].value
         }
       } else {
         account[idx] = {
@@ -175,6 +179,9 @@ const getInvoiceLineList = function () {
           accountCode: null,
           subAccountCode: null,
           departmentCode: null,
+          creditAccountCode: null,
+          creditSubAccountCode: null,
+          creditDepartmentCode: null,
           amount: null
         }
       }
@@ -269,14 +276,13 @@ const getLineAccountcodeList = function (invoiceLineNo) {
     let creditSubAccountCode = null
     let creditDepartmentCode = null
     if (i < 1) {
-      creditAccountCode = target[i].children[2].children[1].children[0].children[1].children[1].children[0].children[0].children[0].value
-      creditSubAccountCode = target[i].children[2].children[1].children[0].children[2].children[1].children[0].children[0].children[0].children[0].value
-      creditDepartmentCode = target[i].children[2].children[1].children[0].children[3].children[1].children[0].children[0].children[0].children[0].value
+      creditAccountCode = target[i].querySelectorAll('input[type=text]')[0].value
+      creditSubAccountCode = target[i].querySelectorAll('input[type=text]')[1].value
+      creditDepartmentCode = target[i].querySelectorAll('input[type=text]')[2].value
     } else {
-      console.log(target[i].children[2].children[0].children[0].children[1].children[1])
-      creditAccountCode = target[i].children[2].children[0].children[0].children[0].children[1].children[0].children[0].children[0].value
-      creditSubAccountCode = target[i].children[2].children[0].children[0].children[1].children[1].children[0].children[0].children[0].value
-      creditDepartmentCode = target[i].children[2].children[0].children[0].children[2].children[1].children[0].children[0].children[0].value
+      creditAccountCode = target[i].querySelectorAll('input[type=text]')[3].value
+      creditSubAccountCode = target[i].querySelectorAll('input[type=text]')[4].value
+      creditDepartmentCode = target[i].querySelectorAll('input[type=text]')[5].value
     }
 
     if (accountCode !== '' || departmentCode !== '') {
@@ -1069,7 +1075,6 @@ $('#btn-insert').addEventListener('click', function () {
 $('#btn-confirm').addEventListener('click', function () {
   // 「登録」ボタンが非活性の場合、終了する。
   if (this.getAttribute('disabled') === 'true') return
-
   const dupleResult = duplicationCheck()
   if (dupleResult.length > 0) {
     document.getElementById(dupleResult[0].id).focus({ preventScroll: false })
@@ -1100,8 +1105,6 @@ const getJournalList = function () {
             journalNo: journalNo,
             input_amount: ~~journal.querySelectorAll('input[type=text]')[2].value.replaceAll(',', '')
           }
-          // 取得確認
-          console.log(journal.querySelectorAll('input[type=text]'))
         } else {
           journalLines[idx][jdx] = {
             accountCode: journal.querySelectorAll('input[type=text]')[0].value,
@@ -1109,8 +1112,6 @@ const getJournalList = function () {
             journalNo: journalNo,
             input_amount: ~~journal.querySelectorAll('input[type=text]')[2].value.replaceAll(',', '')
           }
-          // 取得確認
-          console.log(journal.querySelectorAll('input[type=text]'))
         }
       })
       journalIdx++
@@ -1156,7 +1157,6 @@ const checkJournalList = function () {
       const checkJournalLines = journalLines[i].filter(function (item) {
         return item !== null && item !== undefined
       })
-
       // 仕訳情報が設定されていない小計チェック用
       if (checkJournalLines.length === 1) {
         total = ~~journalLines[i][j].input_amount.replaceAll(',', '')
@@ -1164,15 +1164,10 @@ const checkJournalList = function () {
       }
       // 設定した仕訳情報の計上金額をチェック用
       if (journalLines[i][j] !== undefined) {
-        if (journalLines[i][j].accountCode.length !== 0) {
-          total = total + ~~journalLines[i][j].input_amount.replaceAll(',', '')
-          if (~~journalLines[i][j].input_amount.replaceAll(',', '') === 0) {
-            isFirstLineNull = true
-            $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
-          }
-        } else {
+        total = total + ~~journalLines[i][j].input_amount.replaceAll(',', '')
+        if (~~journalLines[i][j].input_amount.replaceAll(',', '') === 0) {
           isFirstLineNull = true
-          $('#error-message-body').innerText = '仕訳情報を正しく設定してください。'
+          $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
         }
       }
     }
@@ -1190,7 +1185,7 @@ const checkJournalList = function () {
   return true
 }
 
-// 重複された仕訳情報処理(仕訳情報設定画面)
+// 重複又は空になった仕訳情報処理(仕訳情報設定画面)
 const duplicationCheck = function () {
   const duplArray = []
   // 画面に表示された項目別の仕訳情報を取得
@@ -1203,18 +1198,29 @@ const duplicationCheck = function () {
 
     // 勘定科目と補助科目を取得
     Array.prototype.forEach.call(children, (item) => {
-      const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
-      const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
-      const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
-      lineInformationArray.push([accountCode, subAccountCode, department])
+    // 借方
+    const accountCode = item.querySelectorAll('input[type=text]')[0].value // 勘定科目コード
+    const subAccountCode = item.querySelectorAll('input[type=text]')[1].value // 補助科目コード
+    const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
+
+    // 貸方
+    const creditAccountCode = item.querySelectorAll('input[type=text]')[3].value // 勘定科目コード
+    const creditSubAccountCode = item.querySelectorAll('input[type=text]')[4].value // 補助科目コード
+    const creditDepartment = item.querySelectorAll('input[type=text]')[5].value // 部門コード
+      lineInformationArray.push([accountCode, subAccountCode, department, creditAccountCode, creditSubAccountCode, creditDepartment])
     })
     koumokuInformationArray.push(duplicateCheckFunction(lineInformationArray))
   }
 
-  // 重複がある明細項目づつエラーメッセージを設定する。
+  // 空又は重複がある明細項目づつエラーメッセージを設定する。
   koumokuInformationArray.map((item, idx) => {
     const errMsg = document.getElementById(`error-message-lineNo${idx + 1}`)
-    if (item === true) {
+    if (item.nothingCheckFlag === true) {
+      errMsg.innerText = '仕訳情報を正しく設定してください。'
+      errMsg.classList.remove('invisible')
+      errMsg.focus({ preventScroll: false })
+      duplArray.push(errMsg)
+    } else if (item.duplicationFlag === true) {
       errMsg.innerText = '同じ仕訳情報は設定できません。'
       errMsg.classList.remove('invisible')
       errMsg.focus({ preventScroll: false })
@@ -1237,14 +1243,14 @@ const duplicationCheckModal = function () {
   // 勘定科目と補助科目を取得
   Array.prototype.forEach.call(children, (item) => {
     // 借方
-    const accountCode = item.children[0].children[1].children[0].children[1].children[1].children[0].children[0].children[0].value // 勘定科目コード
-    const subAccountCode = item.children[0].children[1].children[0].children[2].children[1].children[0].children[0].children[0].value // 補助科目コード
-    const department = item.children[0].children[1].children[0].children[3].children[1].children[0].children[0].children[0].value // 部門コード
+    const accountCode = item.querySelectorAll('input[type=text]')[0].value // 勘定科目コード
+    const subAccountCode = item.querySelectorAll('input[type=text]')[1].value // 補助科目コード
+    const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
 
     // 貸方
-    const creditAccountCode = item.children[2].children[1].children[0].children[1].children[1].children[0].children[0].children[0].value // 勘定科目コード
-    const creditSubAccountCode = item.children[2].children[1].children[0].children[2].children[1].children[0].children[0].children[0].value // 補助科目コード
-    const creditDepartment = item.children[2].children[1].children[0].children[3].children[1].children[0].children[0].children[0].value // 部門コード
+    const creditAccountCode = item.querySelectorAll('input[type=text]')[3].value // 勘定科目コード
+    const creditSubAccountCode = item.querySelectorAll('input[type=text]')[4].value // 補助科目コード
+    const creditDepartment = item.querySelectorAll('input[type=text]')[5].value // 部門コード
 
     koumokuInformationArray.push([accountCode, subAccountCode, department, creditAccountCode, creditSubAccountCode, creditDepartment])
   })
@@ -1252,7 +1258,10 @@ const duplicationCheckModal = function () {
 
   // 重複された場合エラーメッセージ表示
   const errMsg = $('#error-message-journal-modal')
-  if (dupleResult) {
+  if (dupleResult.nothingCheckFlag) {
+    errMsg.innerText = '仕訳情報を正しく設定してください。'
+    return true
+  } else if (dupleResult.duplicationFlag) {
     errMsg.innerText = '同じ仕訳情報は設定できません。'
     return true
   } else {
@@ -1261,16 +1270,22 @@ const duplicationCheckModal = function () {
   }
 }
 
-// 重複検索関数
+// 空及び重複検索関数
 const duplicateCheckFunction = function (array) {
   const length = array.length
+  let nothingCheckFlag = false
   let duplicationFlag = false
-  let i, j, temp
+  let i, j, temp, z
+  for (z = 0; z < length; z++) {
+    const result = array[z].filter(item => item.length > 0)
+    if (result.length < 1) {
+      nothingCheckFlag = true
+    }
+  }
   for (i = 0; i < length - 1; i++) {
     for (j = 0; j < length - 1 - i; j++) {
       if (JSON.stringify(array[j]) === JSON.stringify(array[j + 1])) {
         duplicationFlag = true
-        return duplicationFlag
       } else {
         temp = array[j]
         array[j] = array[j + 1]
@@ -1278,7 +1293,8 @@ const duplicateCheckFunction = function (array) {
       }
     }
   }
-  return duplicationFlag
+
+  return { duplicationFlag: duplicationFlag, nothingCheckFlag: nothingCheckFlag }
 }
 
 // Modal反映ボタン
