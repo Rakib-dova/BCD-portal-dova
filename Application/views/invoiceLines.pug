@@ -179,8 +179,17 @@ if invoiceLine.length !== 0
                       a.red-color.btn-minus-accountCode(id=`btn_minus_lineNo${idx + 1}_accountCode` data-target=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`)
                         i.fas.fa-minus-circle
             else
+              .columns.m-0
+              .columns.m-0
+                .column.is-one-third
+                  p.text-center.font-bold 借方
+                .column.is-0.p-1
+                .column.is-one-third
+                  p.text-center.font-bold 貸方
+                .column.is-0.p-1
+                .column.is-one-quarter
+                  p.text-center.font-bold 計上金額
               .columns.m-0.p-1.lineAccountcode(id= `lineNo${idx + 1}_lineAccountCode1`)
-                p.text-center.font-bold 借方
                 .column.is-one-third.p-0.border-div-rad-4
                   table.table.table-margin-left
                     tr
@@ -224,7 +233,6 @@ if invoiceLine.length !== 0
                               a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode1`) 検索
                 .column.is-0.p-1
                 .column.is-one-third.p-0.border-div-rad-4
-                  p.text-center.font-bold 貸方
                   table.table.table-margin-left
                     tr
                       td.table-td-padding
@@ -267,7 +275,6 @@ if invoiceLine.length !== 0
                               a.button.is-link.show-modal.btn-search-departmentCode.BtnlineCreditDepartmentCodeSearch(data-target='creditDepartmentCode-modal' data-info=`lineNo${idx + 1}_lineCreditAccountCode1`) 検索
                 .column.is-0.p-1
                 .column.is-one-quarter.p-0.border-div-rad-4
-                  p.text-center.font-bold 計上金額
                   .field-body.p-1.margit-top-7rem
                     .field.is-horizontal
                       .field-body.m-1

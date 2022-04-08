@@ -17,7 +17,7 @@ block content
           a.button.is-link(href=`/requestApproval/${documentId}`) 支払依頼へ
 
   template#templateLineAccountCodeItem
-    .columns.m-0.p-1.lineAccountcode
+    .columns.m-0.pt-1.lineAccountcode
       .column.is-one-third.p-0.border-div-rad-4
         table.table.table-margin-left
           tr(colspan=3)
@@ -664,7 +664,8 @@ block content
                     .column.is-one-quarter.p-0.border-div-rad-4
                       table.table.table-margin-left
                         tr(colspan=3)
-                          p.text-center.font-bold 貸方
+                          td
+                            p.text-center.font-bold 貸方
                         tr
                           td.table-td-padding
                             .field.is-horizontal
@@ -681,7 +682,7 @@ block content
                                   a.button.is-link.show-modal.btn-search-creditMain.BtnlineCreditAccountCodeSearch(data-target='creditAccountCode-modal' data-info='bulkInsertNo1_lineCreditAccountCode1') 検索
                         tr
                           td.table-td-padding
-                            .field.is-horizontal                       
+                            .field.is-horizontal
                               .field-label.m-0
                                 label 補助科目コード
                           td.table-td-padding
