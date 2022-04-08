@@ -261,29 +261,90 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
         }
 
         if (
-          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`] !== undefined &&
-          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_subAccountCode`] !== undefined &&
-          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_departmentCode`] !== undefined &&
-          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`] !== undefined &&
-          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`].length !== 0 &&
-          data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].length !== 0
+          (data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`] !== undefined &&
+            data[`lineNo${idx}_lineAccountCode${accountLineNumber}_subAccountCode`] !== undefined &&
+            data[`lineNo${idx}_lineAccountCode${accountLineNumber}_departmentCode`] !== undefined &&
+            data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`] !== undefined &&
+            data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`].length !== 0 &&
+            data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].length !== 0) ||
+          (data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditAccountCode`] !== undefined &&
+            data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditSubAccountCode`] !== undefined &&
+            data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditDepartmentCode`] !== undefined &&
+            data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`] !== undefined &&
+            data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditAccountCode`].length !== 0 &&
+            data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].length !== 0)
         ) {
-          lineJournals[idx - 1].push({
-            data: {
-              invoiceId: invoiceId,
-              contractId: contractId,
-              lineNo: ~~idx,
-              lineId: lineId[~~idx - 1],
-              journalNo: `lineAccountCode${accountLineNumber}`,
-              accountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`],
-              subAccountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_subAccountCode`],
-              departmentCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_departmentCode`],
-              installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(
-                /,/g,
-                ''
-              )
-            }
-          })
+          // 借方,貸方の仕訳情報設定がある場合
+          if (
+            data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`].length !== 0 &&
+            data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditAccountCode`].length !== 0
+          ) {
+            lineJournals[idx - 1].push({
+              data: {
+                invoiceId: invoiceId,
+                contractId: contractId,
+                lineNo: ~~idx,
+                lineId: lineId[~~idx - 1],
+                journalNo: `lineAccountCode${accountLineNumber}`,
+                accountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`],
+                subAccountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_subAccountCode`],
+                departmentCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_departmentCode`],
+                creditAccountCode: data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditAccountCode`],
+                creditSubAccountCode:
+                  data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditSubAccountCode`],
+                creditDepartmentCode:
+                  data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditDepartmentCode`],
+                installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(
+                  /,/g,
+                  ''
+                )
+              }
+            })
+          } else if (data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`].length !== 0) {
+            // 借方の仕訳情報設定がある場合
+            lineJournals[idx - 1].push({
+              data: {
+                invoiceId: invoiceId,
+                contractId: contractId,
+                lineNo: ~~idx,
+                lineId: lineId[~~idx - 1],
+                journalNo: `lineAccountCode${accountLineNumber}`,
+                accountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_accountCode`],
+                subAccountCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_subAccountCode`],
+                departmentCode: data[`lineNo${idx}_lineAccountCode${accountLineNumber}_departmentCode`],
+                creditAccountCode: '',
+                creditSubAccountCode: '',
+                creditDepartmentCode: '',
+                installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(
+                  /,/g,
+                  ''
+                )
+              }
+            })
+          } else if (data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditAccountCode`].length !== 0) {
+            // 貸方の仕訳情報設定がある場合
+            lineJournals[idx - 1].push({
+              data: {
+                invoiceId: invoiceId,
+                contractId: contractId,
+                lineNo: ~~idx,
+                lineId: lineId[~~idx - 1],
+                journalNo: `lineAccountCode${accountLineNumber}`,
+                accountCode: '',
+                subAccountCode: '',
+                departmentCode: '',
+                creditAccountCode: data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditAccountCode`],
+                creditSubAccountCode:
+                  data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditSubAccountCode`],
+                creditDepartmentCode:
+                  data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditDepartmentCode`],
+                installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(
+                  /,/g,
+                  ''
+                )
+              }
+            })
+          }
         } else {
           lineJournals[idx - 1].push({
             data: null
@@ -307,38 +368,61 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
     })
 
     // 登録前、勘定科目コード検証
-    let checkAccountCodeF = false
     for (let lines = 0; lines < lineJournals.length; lines++) {
       for (let idx = 0; idx < 10; idx++) {
         const item = lineJournals[lines][idx]
-        if (lineJournals[lines][idx].data !== null) {
+        if (item.data === null) continue
+        if (item.data.accountCode.length === 0 && item.data.creditAccountCode === 0) continue
+
+        result.lineId = item.data.lineId
+        // 借方の勘定科目コード検証
+        if (item.data.accountCode !== '') {
           result.accountCode = item.data.accountCode
-          result.lineId = item.data.lineId
           const accInstance = await AccountCode.findOne({
             where: {
               contractId: contractId,
               accountCode: item.data.accountCode
             }
           })
-          if (accInstance instanceof AccountCode === false) checkAccountCodeF = true
+          if (accInstance instanceof AccountCode === false) {
+            result.status = -1
+            return result
+          } else {
+            lineJournals[lines][idx].data.accountName = accInstance.accountCodeName
+          }
+        }
+
+        // 貸方の勘定科目コード検証
+        if (item.data.creditAccountCode !== '') {
+          result.accountCode = item.data.creditAccountCode
+          const accInstance = await AccountCode.findOne({
+            where: {
+              contractId: contractId,
+              accountCode: item.data.creditAccountCode
+            }
+          })
+          if (accInstance instanceof AccountCode === false) {
+            result.status = -1
+            return result
+          } else {
+            lineJournals[lines][idx].data.creditAccountName = accInstance.accountCodeName
+          }
         }
       }
     }
-    if (checkAccountCodeF) {
-      result.status = -1
-      return result
-    }
 
     // 登録前、補助科目コード検証
-    let checkSubAccountF = false
     for (let lines = 0; lines < lineJournals.length; lines++) {
       for (let idx = 0; idx < 10; idx++) {
         const item = lineJournals[lines][idx]
         if (item.data === null) continue
-        if (item.data.subAccountCode.length === 0) continue
+        if (item.data.subAccountCode.length === 0 && item.data.creditSubAccountCod === 0) continue
         let checkSubAccount = null
+        let checkCreditSubAccount = null
+        result.lineId = item.data.lineId
+
+        // 借方の補助科目コード検証
         if (item.data.accountCode.length !== 0 && item.data.subAccountCode.length !== 0) {
-          result.lineId = item.data.lineId
           result.subAccountCode = item.data.subAccountCode
           delete result.accountCode
           checkSubAccount = await AccountCode.findAll({
@@ -357,38 +441,88 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
               accountCode: item.data.accountCode
             }
           })
+
+          if (checkSubAccount.length === 0) {
+            result.status = -2
+            return result
+          } else {
+            lineJournals[lines][idx].data.subAccountName = checkSubAccount[0]['SubAccountCodes.subjectName']
+          }
         }
-        if (checkSubAccount.length === 0) checkSubAccountF = true
+
+        // 貸方の補助科目コード検証
+        if (item.data.creditAccountCode.length !== 0 && item.data.creditSubAccountCode.length !== 0) {
+          result.subAccountCode = item.data.creditSubAccountCode
+          delete result.accountCode
+          checkCreditSubAccount = await AccountCode.findAll({
+            raw: true,
+            include: [
+              {
+                model: SubAccountCode,
+                attributes: ['subAccountCodeId', 'accountCodeId', 'subjectCode', 'subjectName'],
+                where: {
+                  subjectCode: item.data.creditSubAccountCode
+                }
+              }
+            ],
+            where: {
+              contractId: contractId,
+              accountCode: item.data.creditAccountCode
+            }
+          })
+
+          if (checkCreditSubAccount.length === 0) {
+            result.status = -2
+            return result
+          } else {
+            lineJournals[lines][idx].data.creditSubAccountName = checkCreditSubAccount[0]['SubAccountCodes.subjectName']
+          }
+        }
       }
-    }
-    if (checkSubAccountF) {
-      result.status = -2
-      return result
     }
 
     // 登録前、部門データ検証
-    let checkDepartmentCodeF = false
     for (let lines = 0; lines < lineJournals.length; lines++) {
       for (let idx = 0; idx < 10; idx++) {
         const item = lineJournals[lines][idx]
         if (item.data === null) continue
-        if (item.data.departmentCode.length === 0) continue
+        if (item.data.departmentCode.length === 0 && item.data.creditDepartmentCode.length === 0) continue
+        result.lineId = item.data.lineId
+
+        // 借方の補助科目コード検証
         if (item.data.accountCode.length !== 0 && item.data.departmentCode.length !== 0) {
           result.departmentCode = item.data.departmentCode
-          result.lineId = item.data.lineId
           const departmentInstance = await DepartmentCode.findOne({
             where: {
               contractId: contractId,
               departmentCode: item.data.departmentCode
             }
           })
-          if (departmentInstance instanceof DepartmentCode === false) checkDepartmentCodeF = true
+          if (departmentInstance instanceof DepartmentCode === false) {
+            result.status = -3
+            return result
+          } else {
+            lineJournals[lines][idx].data.departmentName = departmentInstance.departmentCodeName
+          }
+        }
+
+        // 貸方の補助科目コード検証
+        if (item.data.creditAccountCode.length !== 0 && item.data.creditDepartmentCode.length !== 0) {
+          result.departmentCode = item.data.creditDepartmentCode
+          const departmentInstance = await DepartmentCode.findOne({
+            where: {
+              contractId: contractId,
+              departmentCode: item.data.creditDepartmentCode
+            }
+          })
+          if (departmentInstance instanceof DepartmentCode === false) {
+            result.status = -3
+            return result
+          } else {
+            lineJournals[lines][idx].data.creditDepartmentName = departmentInstance.departmentCodeName
+          }
         }
       }
-    }
-    if (checkDepartmentCodeF) {
-      result.status = -3
-      return result
     }
 
     // DBに保存データがない場合
