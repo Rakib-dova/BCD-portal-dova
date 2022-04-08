@@ -85,6 +85,9 @@ $('#btn-bulkInsert').addEventListener('click', function () {
   $('#bulkInsertNo1_lineAccountCode1_accountCode').value = ''
   $('#bulkInsertNo1_lineAccountCode1_subAccountCode').value = ''
   $('#bulkInsertNo1_lineAccountCode1_departmentCode').value = ''
+  $('#bulkInsertNo1_lineCreditAccountCode1_creditAccountCode').value = ''
+  $('#bulkInsertNo1_lineCreditAccountCode1_creditSubAccountCode').value = ''
+  $('#bulkInsertNo1_lineCreditAccountCode1_creditDepartmentCode').value = ''
 
   // エラーメッセージ初期化
   $('#error-message-journal-modal').innerText = ''
@@ -198,6 +201,11 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
     const targetId = `${targetName}_lineAccountCode${
       ~~target.querySelectorAll('.lineAccountcodeForBulk')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
     }`
+    // 仕訳情報のidを作成：lineNo明細詳細の順番_lineAccountCode仕訳情報の順番(貸方)
+    const creditTagetIdBase = `${targetName}_lineCreditAccountCode`
+    const creditTargetId = `${targetName}_lineCreditAccountCode${
+      ~~target.querySelectorAll('.lineAccountcodeForBulk')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
+    }`
     const cloneAccountcode = document.importNode(template.content, true)
     const idx = lineAccountcodeLength + 1
     cloneAccountcode.querySelector('.lineAccountcodeForBulk').dataset.idx = idx
@@ -205,6 +213,10 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
     cloneAccountcode.querySelector('.input-accountCode').id = `${targetId}_accountCode`
     cloneAccountcode.querySelector('.input-subAccountCode').id = `${targetId}_subAccountCode`
     cloneAccountcode.querySelector('.input-departmentCode').id = `${targetId}_departmentCode`
+    // 貸方追加
+    cloneAccountcode.querySelector('.input-creditAccountCode').id = `${creditTargetId}_creditAccountCode`
+    cloneAccountcode.querySelector('.input-creditSubAccountCode').id = `${creditTargetId}_creditSubAccountCode`
+    cloneAccountcode.querySelector('.input-creditDepartmentCode').id = `${creditTargetId}_creditDepartmentCode`
     cloneAccountcode.querySelector('.btn-minus-accountCode').id = `btn_minus_${targetId}`
     cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `${targetId}`
     cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `${targetId}`
@@ -215,12 +227,24 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
     cloneAccountcode
       .querySelector('.BtnlineAccountCodeSearch')
       .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+    // 勘定科目と補助科目検索ボタン(貸方)
+    cloneAccountcode.querySelector('.BtnlineCreditAccountCodeSearch').dataset.target = 'creditAccountCode-modal'
+    cloneAccountcode.querySelector('.BtnlineCreditAccountCodeSearch').dataset.info = `${creditTargetId}`
+    cloneAccountcode
+      .querySelector('.BtnlineCreditAccountCodeSearch')
+      .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
     // 部門データ検索ボタン
     cloneAccountcode.querySelector('.BtnlineDepartmentCodeSearch').dataset.target = 'departmentCode-modal'
     cloneAccountcode.querySelector('.BtnlineDepartmentCodeSearch').dataset.info = `${targetId}`
     cloneAccountcode
       .querySelector('.BtnlineDepartmentCodeSearch')
       .addEventListener('click', btnSearchDepartmentCode($('#departmentCode-modal')))
+    // 部門データ検索ボタン(貸方)
+    cloneAccountcode.querySelector('.BtnlineCreditDepartmentCodeSearch').dataset.target = 'creditDepartmentCode-modal'
+    cloneAccountcode.querySelector('.BtnlineCreditDepartmentCodeSearch').dataset.info = `${creditTargetId}`
+    cloneAccountcode
+      .querySelector('.BtnlineCreditDepartmentCodeSearch')
+      .addEventListener('click', btnSearchCreditDepartmentCode($('#creditDepartmentCode-modal')))
     target.appendChild(cloneAccountcode)
   } else {
     $('#error-message-journal-modal').innerText = '仕訳情報入力の上限は１０項目までです。'
@@ -284,11 +308,11 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       cloneAccountCodeItem.querySelector('.lineAccountCode_subAccountCode').id = `${targetId}_subAccountCode`
       // 補助科目コードINPUT（貸方）
       cloneAccountCodeItem
-        .querySelector('.lineCreditAccountCode_subCreditAccountCode')
-        .setAttribute('name', `${targetCreditId}_subCreditAccountCode`)
+        .querySelector('.lineCreditAccountCode_creditSubAccountCode')
+        .setAttribute('name', `${targetCreditId}_creditSubAccountCode`)
       cloneAccountCodeItem.querySelector(
-        '.lineCreditAccountCode_subCreditAccountCode'
-      ).id = `${targetCreditId}_subCreditAccountCode`
+        '.lineCreditAccountCode_creditSubAccountCode'
+      ).id = `${targetCreditId}_creditSubAccountCode`
       // 部門データINPUT
       cloneAccountCodeItem
         .querySelector('.lineAccountCode_departmentCode')
@@ -463,15 +487,15 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
 $('#btnSearchCreditAccountCode').addEventListener('click', function () {
   const accountCode = $('#searchModalCreditAccountCode').value
   const accountCodeName = $('#searchModalCreditAccountCodeName').value
-  const subAccountCode = $('#searchModalSubCreditAccountCode').value
-  const subAccountCodeName = $('#searchModalSubCreditAccountCodeName').value
+  const subAccountCode = $('#searchModalCreditSubAccountCode').value
+  const subAccountCodeName = $('#searchModalCreditSubAccountCodeName').value
 
   const $this = this
   deleteCreditDisplayModal()
   $('#searchModalCreditAccountCode').value = accountCode
   $('#searchModalCreditAccountCodeName').value = accountCodeName
-  $('#searchModalSubCreditAccountCode').value = subAccountCode
-  $('#searchModalSubCreditAccountCodeName').value = subAccountCodeName
+  $('#searchModalCreditSubAccountCode').value = subAccountCode
+  $('#searchModalCreditSubAccountCodeName').value = subAccountCodeName
 
   const getAccountCode = new XMLHttpRequest()
   getAccountCode.open('POST', '/inbox/getCode')
@@ -722,8 +746,10 @@ const displayCreditResultForCode = function (codeArr) {
     row.addEventListener('click', function () {
       $(this.dataset.target).classList.remove('is-active')
       const inputTarget = $(this.dataset.target).dataset.info
+      console.log($(this.dataset.target))
+      console.log(inputTarget, 'inputTarget')
       $(`#${inputTarget}_creditAccountCode`).value = this.dataset.accountCode
-      $(`#${inputTarget}_subCreditAccountCode`).value = this.dataset.subAccountCode
+      $(`#${inputTarget}_creditSubAccountCode`).value = this.dataset.subAccountCode
       $('#btn-confirm').removeAttribute('disabled')
       deleteCreditDisplayModal()
     })
@@ -756,6 +782,7 @@ const displayResultForDepartmentCode = function (codeArr) {
     row.addEventListener('click', function () {
       $(this.dataset.target).classList.remove('is-active')
       const inputTarget = $(this.dataset.target).dataset.info
+      console.log(inputTarget, 'inputTarget')
       $(`#${inputTarget}_departmentCode`).value = this.dataset.departmentCode
       $('#btn-confirm').removeAttribute('disabled')
       deleteDepartmentResultDisplayModal()
@@ -790,6 +817,7 @@ const displayResultForCreditDepartmentCode = function (codeArr) {
     row.addEventListener('click', function () {
       $(this.dataset.target).classList.remove('is-active')
       const inputTarget = $(this.dataset.target).dataset.info
+      console.log(inputTarget, 'inputTarget')
       $(`#${inputTarget}_creditDepartmentCode`).value = this.dataset.departmentCode
       $('#btn-confirm').removeAttribute('disabled')
       deleteDepartmentResultDisplayModal()
@@ -896,8 +924,8 @@ const deleteCreditDisplayModal = function () {
 
   $('#searchModalCreditAccountCode').value = ''
   $('#searchModalCreditAccountCodeName').value = ''
-  $('#searchModalSubCreditAccountCode').value = ''
-  $('#searchModalSubCreditAccountCodeName').value = ''
+  $('#searchModalCreditSubAccountCode').value = ''
+  $('#searchModalCreditSubAccountCodeName').value = ''
 
   $('#displayCreditInvisible').classList.add('is-invisible')
 }
@@ -1053,6 +1081,8 @@ const getJournalList = function () {
             journalNo: journalNo,
             input_amount: ~~journal.querySelectorAll('input[type=text]')[2].value.replaceAll(',', '')
           }
+          // 取得確認
+          console.log(journal.querySelectorAll('input[type=text]'))
         } else {
           journalLines[idx][jdx] = {
             accountCode: journal.querySelectorAll('input[type=text]')[0].value,
@@ -1060,6 +1090,8 @@ const getJournalList = function () {
             journalNo: journalNo,
             input_amount: ~~journal.querySelectorAll('input[type=text]')[2].value.replaceAll(',', '')
           }
+          // 取得確認
+          console.log(journal.querySelectorAll('input[type=text]'))
         }
       })
       journalIdx++
@@ -1326,22 +1358,36 @@ const addBulkList = function () {
             accountCode: bulkList[bulkIdx].accountCode,
             subAccountCode: bulkList[bulkIdx].subAccountCode,
             departmentCode: bulkList[bulkIdx].departmentCode,
+            creditAccountCode: bulkList[bulkIdx].creditAccountCode,
+            creditSubAccountCode: bulkList[bulkIdx].creditSubAccountCode,
+            creditDepartmentCode: bulkList[bulkIdx].creditDepartmentCode,
             journalNo: `lineAccountCode${journalIdx + 1}`,
             input_amount: 0,
             isNewItem: false
           }
+          // 借方
           $(`#lineNo${lineIdx + 1}_lineAccountCode${journalIdx + 1}_accountCode`).value =
             invoiceLine[journalIdx].accountCode
           $(`#lineNo${lineIdx + 1}_lineAccountCode${journalIdx + 1}_subAccountCode`).value =
             invoiceLine[journalIdx].subAccountCode
           $(`#lineNo${lineIdx + 1}_lineAccountCode${journalIdx + 1}_departmentCode`).value =
             invoiceLine[journalIdx].departmentCode
+          // 貸方
+          $(`#lineNo${lineIdx + 1}_lineCreditAccountCode${journalIdx + 1}_creditAccountCode`).value =
+            invoiceLine[journalIdx].creditAccountCode
+          $(`#lineNo${lineIdx + 1}_lineCreditAccountCode${journalIdx + 1}_creditSubAccountCode`).value =
+            invoiceLine[journalIdx].creditSubAccountCode
+          $(`#lineNo${lineIdx + 1}_lineCreditAccountCode${journalIdx + 1}_creditDepartmentCode`).value =
+            invoiceLine[journalIdx].creditDepartmentCode
         }
         if (invoiceLine[journalIdx] === undefined && bulkList[bulkIdx] !== undefined) {
           invoiceLine[journalIdx] = {
             accountCode: bulkList[bulkIdx].accountCode,
             subAccountCode: bulkList[bulkIdx].subAccountCode,
             departmentCode: bulkList[bulkIdx].departmentCode,
+            creditAccountCode: bulkList[bulkIdx].creditAccountCode,
+            creditSubAccountCode: bulkList[bulkIdx].creditSubAccountCode,
+            creditDepartmentCode: bulkList[bulkIdx].creditDepartmentCode,           
             journalNo: `lineAccountCode${journalIdx + 1}`,
             input_amount: 0,
             isNewItem: true
@@ -1359,6 +1405,8 @@ const addBulkList = function () {
         const lineNo = `lineNo${idx + 1}`
         const tagetIdBase = `${lineNo}_lineAccountCode${jdx + 1}`
         const templeAccountCodeItem = $('#templateLineAccountCodeItem')
+        // 貸方
+        const creditTagetIdBase = `${lineNo}_lineCreditAccountCode${jdx + 1}`
         const cloneAccountCodeItem = document.importNode(templeAccountCodeItem.content, true)
 
         cloneAccountCodeItem.querySelector('.lineAccountcode').id = `${tagetIdBase}`
@@ -1372,6 +1420,14 @@ const addBulkList = function () {
         cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').name = `${tagetIdBase}_accountCode`
         cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').value = journal.accountCode
 
+        // 勘定科目コードINPUT(貸方)
+        cloneAccountCodeItem
+          .querySelector('.lineCreditAccountCode_creditAccountCode')
+          .setAttribute('name', `${creditTagetIdBase}_creditAccountCode`)
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditAccountCode').id = `${creditTagetIdBase}_creditAccountCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditAccountCode').name = `${creditTagetIdBase}_creditAccountCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditAccountCode').value = journal.creditAccountCode
+
         // 補助科目コードINPUT
         cloneAccountCodeItem
           .querySelector('.lineAccountCode_subAccountCode')
@@ -1380,6 +1436,14 @@ const addBulkList = function () {
         cloneAccountCodeItem.querySelector('.lineAccountCode_subAccountCode').name = `${tagetIdBase}_subAccountCode`
         cloneAccountCodeItem.querySelector('.lineAccountCode_subAccountCode').value = journal.subAccountCode
 
+        // 補助科目コードINPUT(貸方)
+        cloneAccountCodeItem
+          .querySelector('.lineCreditAccountCode_creditSubAccountCode')
+          .setAttribute('name', `${creditTagetIdBase}_creditSubAccountCode`)
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').id = `${creditTagetIdBase}_creditSubAccountCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').name = `${creditTagetIdBase}_creditSubAccountCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').value = journal.creditSubAccountCode
+
         // 部門データINPUT
         cloneAccountCodeItem
           .querySelector('.lineAccountCode_departmentCode')
@@ -1387,6 +1451,14 @@ const addBulkList = function () {
         cloneAccountCodeItem.querySelector('.lineAccountCode_departmentCode').id = `${tagetIdBase}_departmentCode`
         cloneAccountCodeItem.querySelector('.lineAccountCode_departmentCode').name = `${tagetIdBase}_departmentCode`
         cloneAccountCodeItem.querySelector('.lineAccountCode_departmentCode').value = journal.departmentCode
+
+        // 部門データINPUT(貸方)
+        cloneAccountCodeItem
+          .querySelector('.lineCreditAccountCode_creditDepartmentCode')
+          .setAttribute('name', `${creditTagetIdBase}_creditDepartmentCode`)
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').id = `${creditTagetIdBase}_creditDepartmentCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').name = `${creditTagetIdBase}_creditDepartmentCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').value = journal.creditDepartmentCode
 
         // 計上金額
         cloneAccountCodeItem
@@ -1418,6 +1490,15 @@ const addBulkList = function () {
           .querySelector('.btn-search-main')
           .addEventListener('click', btnSearchMain($('#accountCode-modal')))
 
+        // 勘定科目と補助科目検索ボタン(貸方)
+        cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.target = 'creditAccountCode-modal'
+        cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.info = `${creditTagetIdBase}`
+        cloneAccountCodeItem
+          .querySelector('.btn-search-creditMain')
+          .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+
+        // 部門は？
+        
         // マイナスボタン追加
         cloneAccountCodeItem.querySelector('.btn-minus-accountCode').id = `btn_minus_${lineNo}_accountCode`
         cloneAccountCodeItem.querySelector('.btn-minus-accountCode').dataset.target = `${tagetIdBase}`
@@ -1439,15 +1520,21 @@ const getSelectedInvoiceLine = function () {
   return checkBoxLists
 }
 
+// 入力した仕訳情報
 const getBulkList = function () {
   const bulkLines = new Array(10)
 
   let journalIdx = 0
   do {
     bulkLines[journalIdx] = {
+      // 借方
       accountCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-accountCode').value,
       subAccountCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-subAccountCode').value,
-      departmentCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-departmentCode').value
+      departmentCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-departmentCode').value,
+      // 貸方
+      creditAccountCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-creditAccountCode').value,
+      creditSubAccountCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-creditSubAccountCode').value,
+      creditDepartmentCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-creditDepartmentCode').value
     }
     journalIdx++
   } while (journalIdx < $('.lineAccountcodeForBulk').length)
