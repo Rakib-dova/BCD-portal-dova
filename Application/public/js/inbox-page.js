@@ -69,10 +69,8 @@ window.onload = function () {
 $('#btn-bulkInsert').addEventListener('click', function () {
   // 仕訳情報一括入力モーダル初期化
   const invoiceLines = getInvoiceLineList()
-  if ($('.column-invoiceLine-journalModal').length !== 0) {
-    $('.column-invoiceLine-journalModal').forEach((el) => {
-      el.remove()
-    })
+  while ($('#field-invoiceLine').firstChild) {
+    $('#field-invoiceLine').removeChild($('#field-invoiceLine').firstChild)
   }
 
   // 勘定科目検索初期化
@@ -108,29 +106,21 @@ $('#btn-bulkInsert').addEventListener('click', function () {
 
       // 各明細の仕訳情報取得・表示
       const lineAccountcodeList = getLineAccountcodeList(invoiceLines[idx].invoiceLineNo)
-      for (let j = 0; j < lineAccountcodeList.length; j++) {
+      for (const lineAccount of lineAccountcodeList) {
         const templateLineAccountCodeItemModal = $('#templateLineAccountCodeItemModal')
         const cloneLineAccountCodeItemModalTemplate = document.importNode(
           templateLineAccountCodeItemModal.content,
           true
         )
-
-        // 1行目じゃない場合、タイトル削除
-        if (j > 0) cloneLineAccountCodeItemModalTemplate.getElementById('lineAccountCodeTitle').remove()
-        cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_accountCode').value =
-          lineAccountcodeList[j].accountCode
-        cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_subAccountCode').value =
-          lineAccountcodeList[j].subAccountCode
-        cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_departmentCode').value =
-          lineAccountcodeList[j].departmentCode
-        // 貸方
-        cloneLineAccountCodeItemModalTemplate.querySelector('.lineCreditAccountCode_creditAccountCode').value =
-          lineAccountcodeList[j].creditAccountCode
-        cloneLineAccountCodeItemModalTemplate.querySelector('.lineCreditAccountCode_creditSubAccountCode').value =
-          lineAccountcodeList[j].creditSubAccountCode
-        cloneLineAccountCodeItemModalTemplate.querySelector('.lineCreditAccountCode_creditDepartmentCode').value =
-          lineAccountcodeList[j].creditDepartmentCode
-
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[0].value = lineAccount.accountCode
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[1].value = lineAccount.subAccountCode
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[2].value = lineAccount.departmentCode
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[3].value =
+          lineAccount.creditAccountCode
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[4].value =
+          lineAccount.creditSubAccountCode
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[5].value =
+          lineAccount.creditDepartmentCode
         cloneInvoiceLineTemplate.querySelector('.box').append(cloneLineAccountCodeItemModalTemplate)
       }
 
@@ -265,34 +255,30 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
 
 // 仕訳情報取得
 const getLineAccountcodeList = function (invoiceLineNo) {
-  const target = $(`#invoiceLine${invoiceLineNo}`).parentNode.querySelectorAll('.lineAccountcode')
+  const invoiceLines = $(`#invoiceLine${invoiceLineNo}`).parentNode.querySelectorAll('.lineAccountcode')
   const lineAccountCodeList = []
-  for (let i = 0; i < target.length; i++) {
-    const accountCode = $(`#${target[i].id}_accountCode`).value
-    const subAccountCode = $(`#${target[i].id}_subAccountCode`).value
-    const departmentCode = $(`#${target[i].id}_departmentCode`).value
-    // 貸方
-    let creditAccountCode = null
-    let creditSubAccountCode = null
-    let creditDepartmentCode = null
-    if (i < 1) {
-      creditAccountCode = target[i].querySelectorAll('input[type=text]')[0].value
-      creditSubAccountCode = target[i].querySelectorAll('input[type=text]')[1].value
-      creditDepartmentCode = target[i].querySelectorAll('input[type=text]')[2].value
-    } else {
-      creditAccountCode = target[i].querySelectorAll('input[type=text]')[3].value
-      creditSubAccountCode = target[i].querySelectorAll('input[type=text]')[4].value
-      creditDepartmentCode = target[i].querySelectorAll('input[type=text]')[5].value
-    }
-
-    if (accountCode !== '' || departmentCode !== '') {
+  for (const invoiceLine of invoiceLines) {
+    const debbitAccountCode = invoiceLine.querySelectorAll('input[type=text]')[0].value
+    const debitSubAccountCode = invoiceLine.querySelectorAll('input[type=text]')[1].value
+    const debitDepartmentCode = invoiceLine.querySelectorAll('input[type=text]')[2].value
+    const creditAccountCode = invoiceLine.querySelectorAll('input[type=text]')[3].value
+    const creditSubAccountCode = invoiceLine.querySelectorAll('input[type=text]')[4].value
+    const credittDepartmentCode = invoiceLine.querySelectorAll('input[type=text]')[5].value
+    if (
+      debbitAccountCode ||
+      debitSubAccountCode ||
+      debitDepartmentCode ||
+      creditAccountCode ||
+      creditSubAccountCode ||
+      credittDepartmentCode !== ''
+    ) {
       lineAccountCodeList.push({
-        accountCode: accountCode,
-        subAccountCode: subAccountCode,
-        departmentCode: departmentCode,
+        accountCode: debbitAccountCode,
+        subAccountCode: debitSubAccountCode,
+        departmentCode: debitDepartmentCode,
         creditAccountCode: creditAccountCode,
         creditSubAccountCode: creditSubAccountCode,
-        creditDepartmentCode: creditDepartmentCode
+        creditDepartmentCode: credittDepartmentCode
       })
     }
   }
@@ -1195,19 +1181,24 @@ const duplicationCheck = function () {
   for (let i = 0; i < allInfomationline.length; ++i) {
     const children = document.getElementById(`lineNo${i + 1}`).children
     const lineInformationArray = []
+    console.log(children)
 
     // 勘定科目と補助科目を取得
     Array.prototype.forEach.call(children, (item) => {
     // 借方
-    const accountCode = item.querySelectorAll('input[type=text]')[0].value // 勘定科目コード
-    const subAccountCode = item.querySelectorAll('input[type=text]')[1].value // 補助科目コード
-    const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
-
-    // 貸方
-    const creditAccountCode = item.querySelectorAll('input[type=text]')[3].value // 勘定科目コード
-    const creditSubAccountCode = item.querySelectorAll('input[type=text]')[4].value // 補助科目コード
-    const creditDepartment = item.querySelectorAll('input[type=text]')[5].value // 部門コード
-      lineInformationArray.push([accountCode, subAccountCode, department, creditAccountCode, creditSubAccountCode, creditDepartment])
+      console.log(item.querySelectorAll('input[type=text]'))
+      // console.log(item.children[0].children[1].children[0].children[0].children[0].children[0])
+      if(item.querySelectorAll('input[type=text]').length !== 0) {
+        const accountCode = item.querySelectorAll('input[type=text]')[0].value // 勘定科目コード
+        const subAccountCode = item.querySelectorAll('input[type=text]')[1].value // 補助科目コード
+        const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
+    
+        // 貸方
+        const creditAccountCode = item.querySelectorAll('input[type=text]')[3].value // 勘定科目コード
+        const creditSubAccountCode = item.querySelectorAll('input[type=text]')[4].value // 補助科目コード
+        const creditDepartment = item.querySelectorAll('input[type=text]')[5].value // 部門コード
+          lineInformationArray.push([accountCode, subAccountCode, department, creditAccountCode, creditSubAccountCode, creditDepartment])
+      }
     })
     koumokuInformationArray.push(duplicateCheckFunction(lineInformationArray))
   }
@@ -1466,8 +1457,12 @@ const addBulkList = function () {
         cloneAccountCodeItem
           .querySelector('.lineCreditAccountCode_creditAccountCode')
           .setAttribute('name', `${creditTagetIdBase}_creditAccountCode`)
-        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditAccountCode').id = `${creditTagetIdBase}_creditAccountCode`
-        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditAccountCode').name = `${creditTagetIdBase}_creditAccountCode`
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditAccountCode'
+        ).id = `${creditTagetIdBase}_creditAccountCode`
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditAccountCode'
+        ).name = `${creditTagetIdBase}_creditAccountCode`
         cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditAccountCode').value = journal.creditAccountCode
 
         // 補助科目コードINPUT
@@ -1482,9 +1477,14 @@ const addBulkList = function () {
         cloneAccountCodeItem
           .querySelector('.lineCreditAccountCode_creditSubAccountCode')
           .setAttribute('name', `${creditTagetIdBase}_creditSubAccountCode`)
-        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').id = `${creditTagetIdBase}_creditSubAccountCode`
-        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').name = `${creditTagetIdBase}_creditSubAccountCode`
-        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').value = journal.creditSubAccountCode
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditSubAccountCode'
+        ).id = `${creditTagetIdBase}_creditSubAccountCode`
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditSubAccountCode'
+        ).name = `${creditTagetIdBase}_creditSubAccountCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').value =
+          journal.creditSubAccountCode
 
         // 部門データINPUT
         cloneAccountCodeItem
@@ -1498,9 +1498,14 @@ const addBulkList = function () {
         cloneAccountCodeItem
           .querySelector('.lineCreditAccountCode_creditDepartmentCode')
           .setAttribute('name', `${creditTagetIdBase}_creditDepartmentCode`)
-        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').id = `${creditTagetIdBase}_creditDepartmentCode`
-        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').name = `${creditTagetIdBase}_creditDepartmentCode`
-        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').value = journal.creditDepartmentCode
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditDepartmentCode'
+        ).id = `${creditTagetIdBase}_creditDepartmentCode`
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditDepartmentCode'
+        ).name = `${creditTagetIdBase}_creditDepartmentCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').value =
+          journal.creditDepartmentCode
 
         // 計上金額
         cloneAccountCodeItem

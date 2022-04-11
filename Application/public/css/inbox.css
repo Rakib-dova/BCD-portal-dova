@@ -208,3 +208,7 @@ p:focus {
 .padding-top-4 {
   padding-top: 4px;
 }
+
+.column-selectbox {
+  margin-left: 6px;
+}
