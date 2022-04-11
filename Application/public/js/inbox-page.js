@@ -566,16 +566,16 @@ $('#btnSearchDepartmentCode').addEventListener('click', function () {
   }
 
   // 部門コードと部門名の桁数チェック
-  if (departmentCode.length > 10 && departmentCodeName.length > 40) {
+  if (departmentCode.length > 6 && departmentCodeName.length > 40) {
     $('#searchDepartmentModalErrMsg').innerText =
-      '部門コードは10桁まで入力してください。 部門名は40桁まで入力してください。'
+      '部門コードは6桁まで入力してください。 部門名は40桁まで入力してください。'
     $('#searchModalDepartmentCode').value = departmentCode
     $('#searchModalDepartmentCodeName').value = departmentCodeName
     return null
   }
   // 部門コードの桁数チェック
-  if (departmentCode.length > 10) {
-    $('#searchDepartmentModalErrMsg').innerText = '部門コードは10桁まで入力してください。'
+  if (departmentCode.length > 6) {
+    $('#searchDepartmentModalErrMsg').innerText = '部門コードは6桁まで入力してください。'
     $('#searchModalDepartmentCode').value = departmentCode
     $('#searchModalDepartmentCodeName').value = departmentCodeName
     return null
@@ -645,16 +645,16 @@ $('#btnSearchCreditDepartmentCode').addEventListener('click', function () {
   }
 
   // 部門コードと部門名の桁数チェック
-  if (departmentCode.length > 10 && departmentCodeName.length > 40) {
+  if (departmentCode.length > 6 && departmentCodeName.length > 40) {
     $('#searchCreditDepartmentModalErrMsg').innerText =
-      '部門コードは10桁まで入力してください。 部門名は40桁まで入力してください。'
+      '部門コードは6桁まで入力してください。 部門名は40桁まで入力してください。'
     $('#searchModalCreditDepartmentCode').value = departmentCode
     $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
     return null
   }
   // 部門コードの桁数チェック
-  if (departmentCode.length > 10) {
-    $('#searchCreditDepartmentModalErrMsg').innerText = '部門コードは10桁まで入力してください。'
+  if (departmentCode.length > 6) {
+    $('#searchCreditDepartmentModalErrMsg').innerText = '部門コードは6桁まで入力してください。'
     $('#searchModalCreditDepartmentCode').value = departmentCode
     $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
     return null
@@ -1057,9 +1057,9 @@ $('#btn-insert').addEventListener('click', function () {
   }
 })
 
-// 「登録」ボタンクリック
+// 「保存」ボタンクリック
 $('#btn-confirm').addEventListener('click', function () {
-  // 「登録」ボタンが非活性の場合、終了する。
+  // 「保存」ボタンが非活性の場合、終了する。
   if (this.getAttribute('disabled') === 'true') return
   const dupleResult = duplicationCheck()
   if (dupleResult.length > 0) {
@@ -1181,23 +1181,27 @@ const duplicationCheck = function () {
   for (let i = 0; i < allInfomationline.length; ++i) {
     const children = document.getElementById(`lineNo${i + 1}`).children
     const lineInformationArray = []
-    console.log(children)
 
     // 勘定科目と補助科目を取得
     Array.prototype.forEach.call(children, (item) => {
-    // 借方
-      console.log(item.querySelectorAll('input[type=text]'))
-      // console.log(item.children[0].children[1].children[0].children[0].children[0].children[0])
-      if(item.querySelectorAll('input[type=text]').length !== 0) {
+      // 借方
+      if (item.querySelectorAll('input[type=text]').length !== 0) {
         const accountCode = item.querySelectorAll('input[type=text]')[0].value // 勘定科目コード
         const subAccountCode = item.querySelectorAll('input[type=text]')[1].value // 補助科目コード
         const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
-    
+
         // 貸方
         const creditAccountCode = item.querySelectorAll('input[type=text]')[3].value // 勘定科目コード
         const creditSubAccountCode = item.querySelectorAll('input[type=text]')[4].value // 補助科目コード
         const creditDepartment = item.querySelectorAll('input[type=text]')[5].value // 部門コード
-          lineInformationArray.push([accountCode, subAccountCode, department, creditAccountCode, creditSubAccountCode, creditDepartment])
+        lineInformationArray.push([
+          accountCode,
+          subAccountCode,
+          department,
+          creditAccountCode,
+          creditSubAccountCode,
+          creditDepartment
+        ])
       }
     })
     koumokuInformationArray.push(duplicateCheckFunction(lineInformationArray))
@@ -1243,7 +1247,14 @@ const duplicationCheckModal = function () {
     const creditSubAccountCode = item.querySelectorAll('input[type=text]')[4].value // 補助科目コード
     const creditDepartment = item.querySelectorAll('input[type=text]')[5].value // 部門コード
 
-    koumokuInformationArray.push([accountCode, subAccountCode, department, creditAccountCode, creditSubAccountCode, creditDepartment])
+    koumokuInformationArray.push([
+      accountCode,
+      subAccountCode,
+      department,
+      creditAccountCode,
+      creditSubAccountCode,
+      creditDepartment
+    ])
   })
   const dupleResult = duplicateCheckFunction(koumokuInformationArray)
 
@@ -1266,22 +1277,42 @@ const duplicateCheckFunction = function (array) {
   const length = array.length
   let nothingCheckFlag = false
   let duplicationFlag = false
-  let i, j, temp, z
-  for (z = 0; z < length; z++) {
-    const result = array[z].filter(item => item.length > 0)
-    if (result.length < 1) {
-      nothingCheckFlag = true
-    }
-  }
-  for (i = 0; i < length - 1; i++) {
-    for (j = 0; j < length - 1 - i; j++) {
-      if (JSON.stringify(array[j]) === JSON.stringify(array[j + 1])) {
-        duplicationFlag = true
-      } else {
-        temp = array[j]
-        array[j] = array[j + 1]
-        array[j + 1] = temp
+  let i, j, temp
+
+  if (length !== 1) {
+    for (i = 0; i < length - 1; i++) {
+      for (j = 0; j < length - 1 - i; j++) {
+        if (JSON.stringify(array[j]) === JSON.stringify(array[j + 1])) {
+          duplicationFlag = true
+          return { duplicationFlag: duplicationFlag, nothingCheckFlag: nothingCheckFlag }
+        } else {
+          temp = array[j]
+          array[j] = array[j + 1]
+          array[j + 1] = temp
+        }
+
+        // 勘定科目がなし、他の科目がある場合
+        if (
+          (array[j][0].length === 0 && array[j][1].length !== 0) ||
+          (array[j][0].length === 0 && array[j][2].length !== 0) ||
+          (array[j][3].length === 0 && array[j][4].length !== 0) ||
+          (array[j][3].length === 0 && array[j][5].length !== 0)
+        ) {
+          nothingCheckFlag = true
+          return { duplicationFlag: duplicationFlag, nothingCheckFlag: nothingCheckFlag }
+        }
       }
+    }
+  } else {
+    // 勘定科目がなし、他の科目がある場合
+    if (
+      (array[0][0].length === 0 && array[0][1].length !== 0) ||
+      (array[0][0].length === 0 && array[0][2].length !== 0) ||
+      (array[0][3].length === 0 && array[0][4].length !== 0) ||
+      (array[0][3].length === 0 && array[0][5].length !== 0)
+    ) {
+      nothingCheckFlag = true
+      return { duplicationFlag: duplicationFlag, nothingCheckFlag: nothingCheckFlag }
     }
   }
 
@@ -1340,7 +1371,13 @@ const checkBulkList = function () {
 
   bulkLines.forEach((line, idx) => {
     if (line !== undefined) {
-      if (line.accountCode.length === 0 || (line.accountCode.length === 0 && line.subAccountCode.length === 0)) {
+      if (
+        ((line.accountCode.length === 0 || (line.accountCode.length === 0 && line.subAccountCode.length === 0)) &&
+          (line.creditAccountCode.length === 0 ||
+            (line.creditAccountCode.length === 0 && line.creditSubAccountCode.length === 0))) ||
+        (line.accountCode.length === 0 && line.departmentCode.length !== 0) ||
+        (line.creditAccountCode.length === 0 && line.creditDepartmentCode.length !== 0)
+      ) {
         returnValue.bulkLines = true
       }
     }
@@ -1530,7 +1567,7 @@ const addBulkList = function () {
           .querySelector('.btn-insert-installmentAmount')
           .addEventListener('click', btnInstallmentAmount)
 
-        // 勘定科目と補助科目検索ボタン
+        // 勘定科目と補助科目検索ボタン(借方)
         cloneAccountCodeItem.querySelector('.btn-search-main').dataset.target = 'accountCode-modal'
         cloneAccountCodeItem.querySelector('.btn-search-main').dataset.info = `${tagetIdBase}`
         cloneAccountCodeItem
@@ -1544,7 +1581,20 @@ const addBulkList = function () {
           .querySelector('.btn-search-creditMain')
           .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
 
-        // 部門は？
+        // 部門データ検索ボタン(借方)
+        cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.target = 'departmentCode-modal'
+        cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.info = `${tagetIdBase}`
+        cloneAccountCodeItem
+          .querySelector('.btn-search-departmentCode')
+          .addEventListener('click', btnSearchDepartmentCode($('#departmentCode-modal')))
+
+        // 部門データ検索検索ボタン(貸方)
+        cloneAccountCodeItem.querySelector('.btn-search-creditDepartmentCode').dataset.target =
+          'creditDepartmentCode-modal'
+        cloneAccountCodeItem.querySelector('.btn-search-creditDepartmentCode').dataset.info = `${creditTagetIdBase}`
+        cloneAccountCodeItem
+          .querySelector('.btn-search-creditDepartmentCode')
+          .addEventListener('click', btnSearchCreditDepartmentCode($('#creditDepartmentCode-modal')))
 
         // マイナスボタン追加
         cloneAccountCodeItem.querySelector('.btn-minus-accountCode').id = `btn_minus_${lineNo}_accountCode`

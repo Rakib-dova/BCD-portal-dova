@@ -332,7 +332,7 @@ block content
     .modal-background.cancel-button(data-target='accountCode-modal')
     .modal-card.is-family-noto-sans
       header.modal-card-head.color-link-modal-header
-        p.modal-card-title 勘定科目選択
+        p.modal-card-title 勘定科目選択(借方)
         a.delete(data-target="accountCode-modal")
       section.modal-card-body
           .columns.is-centered.m-0
@@ -397,7 +397,7 @@ block content
     .modal-background.cancel-button(data-target='departmentCode-modal')
     .modal-card.is-family-noto-sans
       header.modal-card-head.color-link-modal-header
-        p.modal-card-title 部門データ選択
+        p.modal-card-title 部門データ選択(借方)
         a.delete(data-target="departmentCode-modal")
       section.modal-card-body
           .columns.is-centered.m-0
@@ -408,7 +408,7 @@ block content
                 .field-body
                   .field
                     p.control
-                      input.input(type="text" id= 'searchModalDepartmentCode' value maxlength=10 placeholder='英・数字・カナのみ（10桁）' pattern=inputPatternEngNumKana)
+                      input.input(type="text" id= 'searchModalDepartmentCode' value maxlength=6 placeholder='英・数字・カナのみ（6桁）' pattern=inputPatternEngNumKana)
           .columns.is-centered.m-0
             .column.p-1
               .field.is-horizontal
@@ -522,7 +522,7 @@ block content
                 .field-body
                   .field
                     p.control
-                      input.input(type="text" id= 'searchModalCreditDepartmentCode' value maxlength=10 placeholder='英・数字・カナのみ（10桁）' pattern=inputPatternEngNumKana)
+                      input.input(type="text" id= 'searchModalCreditDepartmentCode' value maxlength=6 placeholder='英・数字・カナのみ（6桁）' pattern=inputPatternEngNumKana)
           .columns.is-centered.m-0
             .column.p-1
               .field.is-horizontal
