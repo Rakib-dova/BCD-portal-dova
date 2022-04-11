@@ -122,17 +122,13 @@ describe('受領した請求書詳細画面のインテグレーションテス�
 
       redirectUrl = await page.evaluate(() => {
         return document
-          .querySelector(
-            'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-          )
+          .querySelector('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
           .getAttribute('href')
       })
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       // 受領した請求書詳細画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -150,16 +146,72 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       // 受領した請求書詳細画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
       browser.close()
+    })
+
+    test('管理者、画面確認（契約ステータス：登録申込）', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/宛先/i)
+      expect(res.text).toMatch(/差出人/i)
+      expect(res.text).toMatch(/仕訳情報一括入力/i)
+      expect(res.text).toMatch(/項目ID/i)
+      expect(res.text).toMatch(/内容/i)
+      expect(res.text).toMatch(/数量/i)
+      expect(res.text).toMatch(/単位/i)
+      expect(res.text).toMatch(/税/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/計上金額/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/支払依頼へ/i)
+    })
+
+    test('一般ユーザ、画面確認（契約ステータス：登録申込）', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/宛先/i)
+      expect(res.text).toMatch(/差出人/i)
+      expect(res.text).toMatch(/仕訳情報一括入力/i)
+      expect(res.text).toMatch(/項目ID/i)
+      expect(res.text).toMatch(/内容/i)
+      expect(res.text).toMatch(/数量/i)
+      expect(res.text).toMatch(/単位/i)
+      expect(res.text).toMatch(/税/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/計上金額/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/支払依頼へ/i)
     })
   })
 
@@ -213,11 +265,9 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       // 受領した請求書詳細画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -235,16 +285,72 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       // 受領した請求書詳細画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
       browser.close()
+    })
+
+    test('管理者、画面確認（契約ステータス：登録受付）', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/宛先/i)
+      expect(res.text).toMatch(/差出人/i)
+      expect(res.text).toMatch(/仕訳情報一括入力/i)
+      expect(res.text).toMatch(/項目ID/i)
+      expect(res.text).toMatch(/内容/i)
+      expect(res.text).toMatch(/数量/i)
+      expect(res.text).toMatch(/単位/i)
+      expect(res.text).toMatch(/税/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/計上金額/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/支払依頼へ/i)
+    })
+
+    test('一般ユーザ、画面確認（契約ステータス：登録受付）', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/宛先/i)
+      expect(res.text).toMatch(/差出人/i)
+      expect(res.text).toMatch(/仕訳情報一括入力/i)
+      expect(res.text).toMatch(/項目ID/i)
+      expect(res.text).toMatch(/内容/i)
+      expect(res.text).toMatch(/数量/i)
+      expect(res.text).toMatch(/単位/i)
+      expect(res.text).toMatch(/税/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/計上金額/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/支払依頼へ/i)
     })
   })
 
@@ -340,11 +446,9 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       // 受領した請求書詳細画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -362,16 +466,72 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       // 受領した請求書詳細画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
       browser.close()
+    })
+
+    test('管理者、画面確認（契約ステータス：契約中）', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/宛先/i)
+      expect(res.text).toMatch(/差出人/i)
+      expect(res.text).toMatch(/仕訳情報一括入力/i)
+      expect(res.text).toMatch(/項目ID/i)
+      expect(res.text).toMatch(/内容/i)
+      expect(res.text).toMatch(/数量/i)
+      expect(res.text).toMatch(/単位/i)
+      expect(res.text).toMatch(/税/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/計上金額/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/支払依頼へ/i)
+    })
+
+    test('一般ユーザ、画面確認（契約ステータス：契約中）', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/宛先/i)
+      expect(res.text).toMatch(/差出人/i)
+      expect(res.text).toMatch(/仕訳情報一括入力/i)
+      expect(res.text).toMatch(/項目ID/i)
+      expect(res.text).toMatch(/内容/i)
+      expect(res.text).toMatch(/数量/i)
+      expect(res.text).toMatch(/単位/i)
+      expect(res.text).toMatch(/税/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/計上金額/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/支払依頼へ/i)
     })
 
     test('「戻る」ボタン遷移確認（受領した請求書一覧画面に遷移）', async () => {
@@ -386,7 +546,7 @@ describe('受領した請求書詳細画面のインテグレーションテス�
 
       await page.click('body > div.container > div.box > form > div.grouped-button > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       // 受領した請求書一覧画面に遷移確認
       expect(await page.url()).toBe('https://localhost:3000/inboxList/1')
@@ -394,79 +554,120 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await browser.close()
     })
 
-    // 受領した請求書詳細画面内容確認
-    test('管理者、受領した請求書詳細画面内容確認', async () => {
-      const res = await request(app)
-        .get('/inbox/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
+    test('勘定科目コード、補助科目コード検索モーダル確認（借方）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
 
-      // 画面内容確認
-      expect(res.text).toMatch(/請求書番号/i)
-      expect(res.text).toMatch(/A01002/i)
-      expect(res.text).toMatch(/宛先/i)
-      expect(res.text).toMatch(/114-0003/i)
-      expect(res.text).toMatch(/東京都/i)
-      expect(res.text).toMatch(/豊島5丁目/i)
-      expect(res.text).toMatch(/日本/i)
-      expect(res.text).toMatch(/差出人/i)
-      expect(res.text).toMatch(/150-0002/i)
-      expect(res.text).toMatch(/渋谷区渋谷/i)
-      expect(res.text).toMatch(/請求日/i)
-      expect(res.text).toMatch(/2021-08-23/i)
-      expect(res.text).toMatch(/通貨/i)
-      expect(res.text).toMatch(/円/i)
-      expect(res.text).toMatch(/項目ID/i)
-      expect(res.text).toMatch(/内容/i)
-      expect(res.text).toMatch(/数量/i)
-      expect(res.text).toMatch(/単位/i)
-      expect(res.text).toMatch(/単価/i)
-      expect(res.text).toMatch(/税/i)
-      expect(res.text).toMatch(/小計（税抜）/i)
-      expect(res.text).toMatch(/テスト/i)
-      expect(res.text).toMatch(/100/i)
-      expect(res.text).toMatch(/個/i)
-      expect(res.text).toMatch(/100のJP 不課税 0%/i)
-      expect(res.text).toMatch(/合計 円/i)
-      expect(res.text).toMatch(/請求日/i)
-      expect(res.text).toMatch(/通貨/i)
+      await page.click(
+        '#lineNo1_lineAccountCode1 > div:nth-child(1) > table > tbody > tr:nth-child(2) > td.table-td-upbutton-padding > div > div > p > a'
+      )
+
+      await page.waitForTimeout(500)
+
+      // 仕訳一括設定モーダル開きをチェック
+      const checkOpenedModal = await page.evaluate(() => {
+        return Array.prototype.find.call(document.querySelector('#accountCode-modal').classList, (item) => {
+          if (item === 'is-active') return true
+          return false
+        })
+      })
+
+      expect(checkOpenedModal).toBe('is-active')
+
+      await browser.close()
     })
 
-    test('一般ユーザ、受領した請求書詳細画面内容確認', async () => {
-      const res = await request(app)
-        .get('/inbox/1f3ce3dc-4dbb-548a-a090-d39dc604a6e1')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
+    test('部門コード検索モーダル確認（借方）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
 
-      // 画面内容確認
-      expect(res.text).toMatch(/請求書番号/i)
-      expect(res.text).toMatch(/A01002/i)
-      expect(res.text).toMatch(/宛先/i)
-      expect(res.text).toMatch(/114-0003/i)
-      expect(res.text).toMatch(/東京都/i)
-      expect(res.text).toMatch(/豊島5丁目/i)
-      expect(res.text).toMatch(/日本/i)
-      expect(res.text).toMatch(/差出人/i)
-      expect(res.text).toMatch(/150-0002/i)
-      expect(res.text).toMatch(/渋谷区渋谷/i)
-      expect(res.text).toMatch(/請求日/i)
-      expect(res.text).toMatch(/2021-08-23/i)
-      expect(res.text).toMatch(/通貨/i)
-      expect(res.text).toMatch(/円/i)
-      expect(res.text).toMatch(/項目ID/i)
-      expect(res.text).toMatch(/内容/i)
-      expect(res.text).toMatch(/数量/i)
-      expect(res.text).toMatch(/単位/i)
-      expect(res.text).toMatch(/単価/i)
-      expect(res.text).toMatch(/税/i)
-      expect(res.text).toMatch(/小計（税抜）/i)
-      expect(res.text).toMatch(/テスト/i)
-      expect(res.text).toMatch(/100/i)
-      expect(res.text).toMatch(/個/i)
-      expect(res.text).toMatch(/100のJP 不課税 0%/i)
-      expect(res.text).toMatch(/合計 円/i)
-      expect(res.text).toMatch(/請求日/i)
-      expect(res.text).toMatch(/通貨/i)
+      await page.click(
+        '#lineNo1_lineAccountCode1 > div:nth-child(1) > table > tbody > tr:nth-child(4) > td.table-td-button-padding > div > div > p > a'
+      )
+
+      await page.waitForTimeout(500)
+
+      // 仕訳一括設定モーダル開きをチェック
+      const checkOpenedModal = await page.evaluate(() => {
+        return Array.prototype.find.call(document.querySelector('#departmentCode-modal').classList, (item) => {
+          if (item === 'is-active') return true
+          return false
+        })
+      })
+
+      expect(checkOpenedModal).toBe('is-active')
+
+      await browser.close()
+    })
+
+    test('勘定科目コード、補助科目コード検索モーダル確認（貸方）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      await page.click(
+        '#lineNo1_lineAccountCode1 > div:nth-child(3) > table > tbody > tr:nth-child(2) > td.table-td-upbutton-padding > div > div > p > a'
+      )
+
+      await page.waitForTimeout(500)
+
+      // 仕訳一括設定モーダル開きをチェック
+      const checkOpenedModal = await page.evaluate(() => {
+        return Array.prototype.find.call(document.querySelector('#creditAccountCode-modal').classList, (item) => {
+          if (item === 'is-active') return true
+          return false
+        })
+      })
+
+      expect(checkOpenedModal).toBe('is-active')
+
+      await browser.close()
+    })
+
+    test('部門コード検索モーダル確認（貸方）', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      await page.click(
+        '#lineNo1_lineAccountCode1 > div:nth-child(3) > table > tbody > tr:nth-child(4) > td.table-td-button-padding > div > div > p > a'
+      )
+
+      await page.waitForTimeout(500)
+
+      // 仕訳一括設定モーダル開きをチェック
+      const checkOpenedModal = await page.evaluate(() => {
+        return Array.prototype.find.call(document.querySelector('#creditDepartmentCode-modal').classList, (item) => {
+          if (item === 'is-active') return true
+          return false
+        })
+      })
+
+      expect(checkOpenedModal).toBe('is-active')
+
+      await browser.close()
     })
 
     test('仕訳一括設定モーダル確認', async () => {
@@ -581,9 +782,10 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       // １番目の明細を選択
       await page.evaluate(() => {
         document.querySelector('#bulkInsertNo1_lineAccountCode1_accountCode').value = 'A001'
-        document.querySelector('#bulkInsertNo1_lineAccountCode2_accountCode').value = 'A002'
         document.querySelector('#bulkInsertNo1_lineAccountCode1_departmentCode').value = 'TEST1'
-        document.querySelector('#bulkInsertNo1_lineAccountCode2_departmentCode').value = 'TEST2'
+        document.querySelector('#bulkInsertNo1_lineCreditAccountCode1_creditAccountCode').value = 'A001'
+        document.querySelector('#bulkInsertNo1_lineCreditAccountCode1_creditDepartmentCode').value = 'TEST1'
+
         document
           .querySelector(
             '#field-invoiceLine > div:nth-child(1) > div > div.columns.m-0.invoiceLine-journalModal > div.column-header.is-2-header > div:nth-child(2) > div > input'
@@ -616,12 +818,12 @@ describe('受領した請求書詳細画面のインテグレーションテス�
         })
       })
 
-      expect(newJournalList.length).toBe(journalList.length + 1)
+      expect(newJournalList.length).toBe(journalList.length)
 
       await browser.close()
     })
 
-    test('仕訳一括設定で200個を入力', async () => {
+    test('仕訳一括設定で10個を入力', async () => {
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
         headless: true,
@@ -635,16 +837,10 @@ describe('受領した請求書詳細画面のインテグレーションテス�
 
       // 仕訳情報の個数を数える
       const journalList = await page.evaluate(() => {
-        const journaList = []
-        for (let lineNo = 1; lineNo < 201; lineNo++) {
-          const lineAccountcode = document.querySelector(`#lineNo${lineNo}`).querySelectorAll('.lineAccountcode')
-          journaList.push(
-            Array.prototype.map.call(lineAccountcode, (item) => {
-              return item.id
-            })
-          )
-        }
-        return journaList
+        const lineAccountcode = document.querySelector('#lineNo1').querySelectorAll('.lineAccountcode')
+        return Array.prototype.map.call(lineAccountcode, (item) => {
+          return item.id
+        })
       })
 
       // 仕訳情報一括入力ボタンクリック
@@ -680,13 +876,12 @@ describe('受領した請求書詳細画面のインテグレーションテス�
         document.querySelector('#bulkInsertNo1_lineAccountCode8_departmentCode').value = 'TEST8'
         document.querySelector('#bulkInsertNo1_lineAccountCode9_departmentCode').value = 'TEST9'
         document.querySelector('#bulkInsertNo1_lineAccountCode10_departmentCode').value = 'TEST10'
-        for (let id = 1; id < 201; id++) {
-          document
-            .querySelector(
-              `#field-invoiceLine > div:nth-child(${id}) > div > div.columns.m-0.invoiceLine-journalModal > div.column-header.is-2-header > div:nth-child(2) > div > input`
-            )
-            .click()
-        }
+
+        document
+          .querySelector(
+            '#field-invoiceLine > div:nth-child(1) > div > div.columns.m-0.invoiceLine-journalModal > div.column-header.is-2-header > div:nth-child(2) > div > input'
+          )
+          .click()
       })
 
       // 「反映」ボタンをクリック
@@ -702,21 +897,13 @@ describe('受領した請求書詳細画面のインテグレーションテス�
 
       // 仕訳情報の個数を数える
       const newJournalList = await page.evaluate(() => {
-        const lineAccount = []
-        for (let lineNo = 1; lineNo < 201; lineNo++) {
-          const lineAccountcode = document.querySelector(`#lineNo${lineNo}`).querySelectorAll('.lineAccountcode')
-          lineAccount.push(
-            Array.prototype.map.call(lineAccountcode, (item) => {
-              return item.id
-            })
-          )
-        }
-        return lineAccount
+        const lineAccountcode = document.querySelector('#lineNo1').querySelectorAll('.lineAccountcode')
+        return Array.prototype.map.call(lineAccountcode, (item) => {
+          return item.id
+        })
       })
 
-      for (let lineNo = 0; lineNo < 200; lineNo++) {
-        expect(newJournalList[lineNo].length).toBe(journalList[lineNo].length + 9)
-      }
+      expect(newJournalList.length).toBe(journalList.length + 9)
 
       await browser.close()
     })
@@ -771,7 +958,7 @@ describe('受領した請求書詳細画面のインテグレーションテス�
 
       // 仕訳情報1目の検索実施
       await page.click(
-        '#bulkInsertNo1_lineAccountCode1 > div.column.is-two-fifths.p-0.border-div-rad-4 > div.field.is-horizontal.p-1 > div.field-body.m-1.is-1.none-flex-grow > div > p > a'
+        '#bulkInsertNo1_lineAccountCode1 > div:nth-child(1) > table > tbody > tr:nth-child(2) > td.table-td-upbutton-padding > div > div > p > a'
       )
 
       // 検索モーダルでA001入力
@@ -781,12 +968,12 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.click('#btnSearchAccountCode')
 
       // 検索結果を待ち
-      await page.waitForTimeout(1000)
+      await page.waitForTimeout(2000)
 
       // 最初の行を選択
       await page.click('#displayFieldResultBody > tr:nth-child(1)')
 
-      // 検索結果を待ち
+      // 検索結果適応待ち
       await page.waitForTimeout(1000)
 
       // 「登録」ボタンをクリック
@@ -895,11 +1082,9 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       // 受領した請求書詳細画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -917,16 +1102,72 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       // 受領した請求書詳細画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
       browser.close()
+    })
+
+    test('管理者、画面確認（契約ステータス：変更申込）', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/宛先/i)
+      expect(res.text).toMatch(/差出人/i)
+      expect(res.text).toMatch(/仕訳情報一括入力/i)
+      expect(res.text).toMatch(/項目ID/i)
+      expect(res.text).toMatch(/内容/i)
+      expect(res.text).toMatch(/数量/i)
+      expect(res.text).toMatch(/単位/i)
+      expect(res.text).toMatch(/税/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/計上金額/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/支払依頼へ/i)
+    })
+
+    test('一般ユーザ、画面確認（契約ステータス：変更申込）', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/宛先/i)
+      expect(res.text).toMatch(/差出人/i)
+      expect(res.text).toMatch(/仕訳情報一括入力/i)
+      expect(res.text).toMatch(/項目ID/i)
+      expect(res.text).toMatch(/内容/i)
+      expect(res.text).toMatch(/数量/i)
+      expect(res.text).toMatch(/単位/i)
+      expect(res.text).toMatch(/税/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/計上金額/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/支払依頼へ/i)
     })
   })
 
@@ -980,11 +1221,9 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       // 受領した請求書詳細画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
@@ -1002,16 +1241,72 @@ describe('受領した請求書詳細画面のインテグレーションテス�
       await page.setCookie(acCookies[0])
       await page.goto('https://localhost:3000/inboxList/1')
 
-      await page.click(
-        'body > div.max-width > div > div > div.box > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a'
-      )
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
 
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(2000)
 
       // 受領した請求書詳細画面にredirectする。
       expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
 
       browser.close()
+    })
+
+    test('管理者、画面確認（契約ステータス：変更受付）', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/宛先/i)
+      expect(res.text).toMatch(/差出人/i)
+      expect(res.text).toMatch(/仕訳情報一括入力/i)
+      expect(res.text).toMatch(/項目ID/i)
+      expect(res.text).toMatch(/内容/i)
+      expect(res.text).toMatch(/数量/i)
+      expect(res.text).toMatch(/単位/i)
+      expect(res.text).toMatch(/税/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/計上金額/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/支払依頼へ/i)
+    })
+
+    test('一般ユーザ、画面確認（契約ステータス：変更受付）', async () => {
+      const res = await request(app)
+        .get(redirectUrl)
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      // 画面内容確認
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/宛先/i)
+      expect(res.text).toMatch(/差出人/i)
+      expect(res.text).toMatch(/仕訳情報一括入力/i)
+      expect(res.text).toMatch(/項目ID/i)
+      expect(res.text).toMatch(/内容/i)
+      expect(res.text).toMatch(/数量/i)
+      expect(res.text).toMatch(/単位/i)
+      expect(res.text).toMatch(/税/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/計上金額/i)
+      expect(res.text).toMatch(/勘定科目コード/i)
+      expect(res.text).toMatch(/補助科目コード/i)
+      expect(res.text).toMatch(/部門コード/i)
+      expect(res.text).toMatch(/合計 円/i)
+      expect(res.text).toMatch(/請求日/i)
+      expect(res.text).toMatch(/戻る/i)
+      expect(res.text).toMatch(/保存/i)
+      expect(res.text).toMatch(/支払依頼へ/i)
     })
   })
 
