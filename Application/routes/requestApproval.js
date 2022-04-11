@@ -60,6 +60,7 @@ const cbGetRequestApproval = async (req, res, next) => {
   const refreshToken = req.user.refreshToken
   const invoiceId = req.params.invoiceId
   let result
+
   try {
     result = await inboxController.getInvoiceDetail(accessToken, refreshToken, invoiceId, contract.contractId)
   } catch (error) {
@@ -352,11 +353,16 @@ const cbPostApproval = async (req, res, next) => {
   const contractId = contract.contractId
   const invoiceId = req.params.invoiceId
   const requester = req.user.userId
-  const message = req.body.message
+  const message = typeof req.body.message === 'string' ? req.body.message : null
   const approveRouteId = req.body.approveRouteId
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
   const tenantId = req.user.tenantId
+
+  if (message === null || message.length > 1500) {
+    req.flash('noti', [notiTitle, 'メッセージは1500文字まで入力してください。'])
+    return res.redirect(`/requestApproval/${invoiceId}`)
+  }
 
   // 承認ルートに誤りがある場合
   const isApproveRoute = await approverController.checkApproveRoute(contractId, approveRouteId)

@@ -65,8 +65,9 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
     if (lineAccountcodeLength < 10) {
       // 仕訳情報のidを作成：lineNo明細詳細の順番_lineAccountCode仕訳情報の順番
       const tagetIdBase = `${target.id}_lineAccountCode`
-      const targetId = `${target.id}_lineAccountCode${~~target.querySelectorAll('.lineAccountcode')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
-        }`
+      const targetId = `${target.id}_lineAccountCode${
+        ~~target.querySelectorAll('.lineAccountcode')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
+      }`
       // templateから追加仕訳情報欄作成
       const templeAccountCodeItem = $('#templateLineAccountCodeItem')
       const cloneAccountCodeItem = document.importNode(templeAccountCodeItem.content, true)
@@ -489,14 +490,38 @@ $('#btn-insert').addEventListener('click', function () {
 })
 
 // メッセージ文字数確認
-$('#inputMsg').addEventListener('keyup', function () {
-  $('#msgCount').innerText = '(' + $('#inputMsg').value.length + '/1500)'
+function messageCheck(event) {
+  // lfCnt linefeedのカウンター
+  $('#inputMsg').addEventListener(event, function () {
+    let msgLen = $('#inputMsg').value.length
+    let lfCnt = 0
 
-  if ($('#inputMsg').value.length > 1500) {
-    $('#inputMsg').value($('#inputMsg').value.substring(0, 1500))
-    $('#msgCount').innerText = '1500/1500'
-  }
-})
+    for (const char of $('#inputMsg').value) {
+      if (encodeURI(char) === '%0A') {
+        msgLen++
+        lfCnt++
+      }
+    }
+
+    $('#msgCount').innerText = `(${msgLen}/1500)`
+
+    if (msgLen > 1500) {
+      $('#inputMsg').value = $('#inputMsg').value.substring(0, 1500 - lfCnt)
+      msgLen = $('#inputMsg').value.length
+      for (const char of $('#inputMsg').value) {
+        if (encodeURI(char) === '%0A') {
+          msgLen++
+        }
+      }
+      $('#msgCount').innerText = `(${msgLen}/1500)`
+    }
+  })
+}
+messageCheck('keyup')
+messageCheck('keydown')
+messageCheck('paste')
+messageCheck('focusin')
+messageCheck('focusout')
 
 $('#checkApproval').addEventListener('click', function () {
   const rejectModalLine = $('#reject-approval-modal').querySelector('#journal-list-reject-modal')

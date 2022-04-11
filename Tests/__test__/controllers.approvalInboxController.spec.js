@@ -1,5 +1,9 @@
 'use strict'
 
+jest.mock('../../Application/node_modules/express', () => {
+  return require('jest-express')
+})
+
 const logger = require('../../Application/lib/logger')
 const apiManager = require('../../Application/controllers/apiManager')
 const userController = require('../../Application/controllers/userController')
@@ -1062,6 +1066,11 @@ describe('approvalInboxControllerのテスト', () => {
           name: null
         }
       }
+
+      const dbError = new Error('SequelizeConnectionError')
+      requestApprovalFindOne.mockImplementation(() => {
+        throw dbError
+      })
 
       const result = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval.requestId)
 
