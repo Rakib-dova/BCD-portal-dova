@@ -700,7 +700,7 @@ describe('inboxControllerのテスト', () => {
     JournalizeInvoice.save = jest.fn(async function () {})
     JournalizeInvoice.destory = jest.fn(async function () {})
     JournalizeInvoice.set = jest.fn(function () {})
-    requestApprovalFindOneSpy = jest.spyOn(DepartmentCode, 'findOne')
+    requestApprovalFindOneSpy = jest.spyOn(RequestApproval, 'findOne')
     requestApprovalDTOgetWaitingWorkflowisMineSpy = jest.fn(async function () {})
     requestApprovalDAOGetAllRequestApproval = jest.spyOn(RequestApprovalDAO.prototype, 'getAllRequestApproval')
     tradeshiftDTOFindDocuments = jest.spyOn(TradeshiftDTO.prototype, 'findDocuments')
@@ -1083,6 +1083,9 @@ describe('inboxControllerのテスト', () => {
       lineNo1_lineAccountCode1_accountCode: '',
       lineNo1_lineAccountCode1_subAccountCode: '',
       lineNo1_lineAccountCode1_departmentCode: '',
+      lineNo1_lineCreditAccountCode1_creditAccountCode: '',
+      lineNo1_lineCreditAccountCode1_creditSubAccountCode: '',
+      lineNo1_lineCreditAccountCode1_creditDepartmentCode: '',
       lineNo1_lineAccountCode1_input_amount: '1000'
     }
     test('正常：明細が１個の時、何も操作なく「登録」ボタンを押す', async () => {
@@ -1101,7 +1104,7 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す', async () => {
+    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
@@ -1119,9 +1122,9 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す、勘定科目がない場合', async () => {
+    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す、勘定科目がない場合（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
-      data.lineNo = ['1', '2']
+      data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       accountCodeFindOneSpy.mockReturnValueOnce(null)
       journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
@@ -1129,11 +1132,11 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(-1)
     })
 
-    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、補助科目ない場合', async () => {
+    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す（貸方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
-      data.lineNo1_lineAccountCode1_accountCode = 'AB001'
-      data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
       ab001.contractId = accountCodeMock[0].contractId
@@ -1145,36 +1148,28 @@ describe('inboxControllerのテスト', () => {
       accountCodeFindAllSpy.mockReturnValueOnce([])
       journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
       const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
-      expect(result.status).toBe(-2)
+      expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目と部門データ操作し「登録」ボタンを押す、部門データない場合', async () => {
+    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す、勘定科目がない場合（貸方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
-      data.lineNo1_lineAccountCode1_accountCode = 'AB001'
-      data.lineNo1_lineAccountCode1_subAccountCode = ''
-      data.lineNo1_lineAccountCode1_departmentCode = 'DE001'
-      const ab001 = new AccountCode()
-      ab001.accountCodeId = accountCodeMock[0].accountCodeId
-      ab001.contractId = accountCodeMock[0].contractId
-      ab001.accountCodeName = accountCodeMock[0].accountCodeName
-      ab001.accountCode = accountCodeMock[0].accountCode
-      ab001.createdAt = accountCodeMock[0].createdAt
-      ab001.updatedAt = accountCodeMock[0].updatedAt
-      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
-      accountCodeFindAllSpy.mockReturnValueOnce([])
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      accountCodeFindOneSpy.mockReturnValueOnce(null)
       journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
-      departmentCodeFindOneSpy.mockReturnValueOnce([])
       const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
-      expect(result.status).toBe(-3)
+      expect(result.status).toBe(-1)
     })
 
-    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、DBにはデータがない場合', async () => {
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
       data.lineNo1_lineAccountCode1_departmentCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = ''
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
       ab001.contractId = accountCodeMock[0].contractId
@@ -1197,11 +1192,193 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ変更', async () => {
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = 'AB001001'
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = ''
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const suut = new SubAccountCode()
+      suut.subAccountCodeId = subAccountCodeMock[0].subAccountCodeId
+      suut.accountCodeId = subAccountCodeMock[0].accountCodeId
+      suut.subjectName = subAccountCodeMock[0].subjectName
+      suut.subjectCode = subAccountCodeMock[0].subjectCode
+      suut.createdAt = subAccountCodeMock[0].createdAt
+      suut.updatedAt = subAccountCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([suut])
+      accountCodeFindAllSpy.mockReturnValueOnce([suut])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、補助科目ない場合（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = ''
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(-2)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、補助科目ない場合（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = 'AB001001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(-2)
+    })
+
+    test('正常：明細が１個の時、勘定科目と部門データ操作し「登録」ボタンを押す（借方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = 'AB001'
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = 'DE001'
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = ''
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const de001 = new DepartmentCode()
+      de001.departmentCodeId = departmentCodeMock[0].departmentCodeId
+      de001.contractId = departmentCodeMock[0].contractId
+      de001.departmentCodeName = departmentCodeMock[0].departmentCodeName
+      de001.departmentCode = departmentCodeMock[0].departmentCode
+      de001.createdAt = departmentCodeMock[0].createdAt
+      de001.updatedAt = departmentCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      departmentCodeFindOneSpy.mockReturnValueOnce(de001)
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が１個の時、勘定科目と部門データ操作し「登録」ボタンを押す、部門データない場合（借方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = 'AB001'
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = 'DE001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      departmentCodeFindOneSpy.mockReturnValueOnce([])
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(-3)
+    })
+
+    test('正常：明細が１個の時、勘定科目と部門データ操作し「登録」ボタンを押す（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = 'DE001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const de001 = new DepartmentCode()
+      de001.departmentCodeId = departmentCodeMock[0].departmentCodeId
+      de001.contractId = departmentCodeMock[0].contractId
+      de001.departmentCodeName = departmentCodeMock[0].departmentCodeName
+      de001.departmentCode = departmentCodeMock[0].departmentCode
+      de001.createdAt = departmentCodeMock[0].createdAt
+      de001.updatedAt = departmentCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      departmentCodeFindOneSpy.mockReturnValueOnce(de001)
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が１個の時、勘定科目と部門データ操作し「登録」ボタンを押す、部門データない場合（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = 'DE001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      departmentCodeFindOneSpy.mockReturnValueOnce([])
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(-3)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ変更（借方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = 'AB001'
+      data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = ''
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
       ab001.contractId = accountCodeMock[0].contractId
@@ -1238,11 +1415,56 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ削除', async () => {
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ変更（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = 'AB001001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const suut = new SubAccountCode()
+      suut.subAccountCodeId = subAccountCodeMock[0].subAccountCodeId
+      suut.accountCodeId = subAccountCodeMock[0].accountCodeId
+      suut.subjectName = subAccountCodeMock[0].subjectName
+      suut.subjectCode = subAccountCodeMock[0].subjectCode
+      suut.createdAt = subAccountCodeMock[0].createdAt
+      suut.updatedAt = subAccountCodeMock[0].updatedAt
+      const date = new Date()
+      const dbJournal = JournalizeInvoice.build({
+        journalId: '7a7cb163-421e-4c6a-affb-88a481b335fe',
+        contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
+        invoiceId: invoiceId,
+        lineNo: 1,
+        journalNo: 'lineAccountCode1',
+        accountCode: ab001.accountCode,
+        subAccountCode: suut.subjectCode,
+        departmentCode: null,
+        installmentAmount: 1000000.0,
+        createdAt: date,
+        updatedAt: date
+      })
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([dbJournal])
+      accountCodeFindAllSpy.mockReturnValueOnce([suut])
+
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ削除（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
       ab001.contractId = accountCodeMock[0].contractId
@@ -1279,11 +1501,168 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、DBエラー', async () => {
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ削除（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = 'AB001001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const suut = new SubAccountCode()
+      suut.subAccountCodeId = subAccountCodeMock[0].subAccountCodeId
+      suut.accountCodeId = subAccountCodeMock[0].accountCodeId
+      suut.subjectName = subAccountCodeMock[0].subjectName
+      suut.subjectCode = subAccountCodeMock[0].subjectCode
+      suut.createdAt = subAccountCodeMock[0].createdAt
+      suut.updatedAt = subAccountCodeMock[0].updatedAt
+      const date = new Date()
+      const dbJournal = JournalizeInvoice.build({
+        journalId: '7a7cb163-421e-4c6a-affb-88a481b335fe',
+        contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
+        invoiceId: invoiceId,
+        lineNo: 1,
+        journalNo: 'lineAccountCode2',
+        accountCode: ab001.accountCode,
+        subAccountCode: suut.subjectCode,
+        departmentCode: null,
+        installmentAmount: 1000000.0,
+        createdAt: date,
+        updatedAt: date
+      })
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([dbJournal])
+      accountCodeFindAllSpy.mockReturnValueOnce([suut])
+
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が２００個の時、１明細あたり仕訳情報1１０個を設定し「登録」ボタンを押す', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      const invoiceLines = Array(200)
+        .fill()
+        .map((v, i) => i + 1)
+
+      const param = { lineNo: invoiceLines, lineId: invoiceLines }
+
+      for (let lines = 1; lines < 201; lines++) {
+        for (let idx = 1; idx < 11; idx++) {
+          param[`lineNo${lines}_lineAccountCode${idx}_accountCode`] = `A${lines}${idx}`
+          param[`lineNo${lines}_lineAccountCode${idx}_subAccountCode`] = `S${lines}${idx}`
+          param[`lineNo${lines}_lineAccountCode${idx}_departmentCode`] = `D${lines}${idx}`
+          param[`lineNo${lines}_lineCreditAccountCode${idx}_creditAccountCode`] = `CA${lines}${idx}`
+          param[`lineNo${lines}_lineCreditAccountCode${idx}_creditSubAccountCode`] = `CS${lines}${idx}`
+          param[`lineNo${lines}_lineCreditAccountCode${idx}_creditDepartmentCode`] = `CD${lines}${idx}`
+          param[`lineNo${lines}_lineAccountCode${idx}_input_amount`] = '1,000'
+        }
+      }
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+
+      const suut = new SubAccountCode()
+      suut.subAccountCodeId = subAccountCodeMock[0].subAccountCodeId
+      suut.accountCodeId = subAccountCodeMock[0].accountCodeId
+      suut.subjectName = subAccountCodeMock[0].subjectName
+      suut.subjectCode = subAccountCodeMock[0].subjectCode
+      suut.createdAt = subAccountCodeMock[0].createdAt
+      suut.updatedAt = subAccountCodeMock[0].updatedAt
+
+      const de001 = new DepartmentCode()
+      de001.departmentCodeId = departmentCodeMock[0].departmentCodeId
+      de001.contractId = departmentCodeMock[0].contractId
+      de001.departmentCodeName = departmentCodeMock[0].departmentCodeName
+      de001.departmentCode = departmentCodeMock[0].departmentCode
+      de001.createdAt = departmentCodeMock[0].createdAt
+      de001.updatedAt = departmentCodeMock[0].updatedAt
+
+      accountCodeFindOneSpy.mockImplementation((option) => {
+        if (option.where.accountCode !== undefined) {
+          return ab001
+        }
+        if (option.where.departmentCode !== undefined) {
+          return de001
+        }
+        return null
+      })
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      departmentCodeFindOneSpy.mockImplementation((option) => {
+        if (option.where.departmentCode !== undefined) {
+          return de001
+        }
+        if (option.where.accountCode !== undefined) {
+          return ab001
+        }
+        return null
+      })
+      accountCodeFindAllSpy.mockReturnValue([suut])
+
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, param)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、DBエラー（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const suut = new SubAccountCode()
+      suut.subAccountCodeId = subAccountCodeMock[0].subAccountCodeId
+      suut.accountCodeId = subAccountCodeMock[0].accountCodeId
+      suut.subjectName = subAccountCodeMock[0].subjectName
+      suut.subjectCode = subAccountCodeMock[0].subjectCode
+      suut.createdAt = subAccountCodeMock[0].createdAt
+      suut.updatedAt = subAccountCodeMock[0].updatedAt
+      const date = new Date()
+      const dbJournal = JournalizeInvoice.build({
+        journalId: '7a7cb163-421e-4c6a-affb-88a481b335fe',
+        contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
+        invoiceId: invoiceId,
+        lineNo: 1,
+        journalNo: 'lineAccountCode2',
+        accountCode: ab001.accountCode,
+        subAccountCode: suut.subjectCode,
+        departmentCode: null,
+        installmentAmount: 1000000.0,
+        createdAt: date,
+        updatedAt: date
+      })
+      const dbError = new Error('DB Conncetion Error')
+      accountCodeFindOneSpy.mockImplementation(() => {
+        throw dbError
+      })
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([dbJournal])
+      accountCodeFindAllSpy.mockReturnValueOnce([suut])
+
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.error).toBe(dbError)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、DBエラー（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = 'AB001001'
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
       ab001.contractId = accountCodeMock[0].contractId

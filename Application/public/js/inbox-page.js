@@ -45,9 +45,19 @@ window.onload = function () {
     btn.addEventListener('click', btnSearchMain())
   })
 
+  // 勘定科目・補助科目の検索ボタン機能設定(貸方)
+  Array.prototype.forEach.call($('.BtnlineCreditAccountCodeSearch'), function (btn) {
+    btn.addEventListener('click', btnSearchMainCredit())
+  })
+
   // 部門データの検索ボタン機能設定
   Array.prototype.forEach.call($('.BtnlineDepartmentCodeSearch'), function (btn) {
     btn.addEventListener('click', btnSearchDepartmentCode())
+  })
+
+  // 部門データの検索ボタン機能設定(貸方)
+  Array.prototype.forEach.call($('.BtnlineCreditDepartmentCodeSearch'), function (btn) {
+    btn.addEventListener('click', btnSearchCreditDepartmentCode())
   })
 
   Array.prototype.forEach.call($('.btn-minus-accountCode'), function (btnMinus) {
@@ -59,10 +69,8 @@ window.onload = function () {
 $('#btn-bulkInsert').addEventListener('click', function () {
   // 仕訳情報一括入力モーダル初期化
   const invoiceLines = getInvoiceLineList()
-  if ($('.column-invoiceLine-journalModal').length !== 0) {
-    $('.column-invoiceLine-journalModal').forEach((el) => {
-      el.remove()
-    })
+  while ($('#field-invoiceLine').firstChild) {
+    $('#field-invoiceLine').removeChild($('#field-invoiceLine').firstChild)
   }
 
   // 勘定科目検索初期化
@@ -75,6 +83,9 @@ $('#btn-bulkInsert').addEventListener('click', function () {
   $('#bulkInsertNo1_lineAccountCode1_accountCode').value = ''
   $('#bulkInsertNo1_lineAccountCode1_subAccountCode').value = ''
   $('#bulkInsertNo1_lineAccountCode1_departmentCode').value = ''
+  $('#bulkInsertNo1_lineCreditAccountCode1_creditAccountCode').value = ''
+  $('#bulkInsertNo1_lineCreditAccountCode1_creditSubAccountCode').value = ''
+  $('#bulkInsertNo1_lineCreditAccountCode1_creditDepartmentCode').value = ''
 
   // エラーメッセージ初期化
   $('#error-message-journal-modal').innerText = ''
@@ -95,23 +106,21 @@ $('#btn-bulkInsert').addEventListener('click', function () {
 
       // 各明細の仕訳情報取得・表示
       const lineAccountcodeList = getLineAccountcodeList(invoiceLines[idx].invoiceLineNo)
-      for (let j = 0; j < lineAccountcodeList.length; j++) {
+      for (const lineAccount of lineAccountcodeList) {
         const templateLineAccountCodeItemModal = $('#templateLineAccountCodeItemModal')
         const cloneLineAccountCodeItemModalTemplate = document.importNode(
           templateLineAccountCodeItemModal.content,
           true
         )
-
-        // 1行目じゃない場合、タイトル削除
-        if (j > 0) cloneLineAccountCodeItemModalTemplate.getElementById('lineAccountCodeTitle').remove()
-
-        cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_accountCode').value =
-          lineAccountcodeList[j].accountCode
-        cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_subAccountCode').value =
-          lineAccountcodeList[j].subAccountCode
-        cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_departmentCode').value =
-          lineAccountcodeList[j].departmentCode
-
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[0].value = lineAccount.accountCode
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[1].value = lineAccount.subAccountCode
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[2].value = lineAccount.departmentCode
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[3].value =
+          lineAccount.creditAccountCode
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[4].value =
+          lineAccount.creditSubAccountCode
+        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[5].value =
+          lineAccount.creditDepartmentCode
         cloneInvoiceLineTemplate.querySelector('.box').append(cloneLineAccountCodeItemModalTemplate)
       }
 
@@ -148,7 +157,11 @@ const getInvoiceLineList = function () {
           accountCode: node.querySelectorAll('input[type=text]')[0].value,
           subAccountCode: node.querySelectorAll('input[type=text]')[1].value,
           departmentCode: node.querySelectorAll('input[type=text]')[2].value,
-          amount: node.querySelectorAll('input[type=text]')[3].value
+          // 貸方
+          creditAccountCode: node.querySelectorAll('input[type=text]')[3].value,
+          creditSubAccountCode: node.querySelectorAll('input[type=text]')[4].value,
+          creditDepartmentCode: node.querySelectorAll('input[type=text]')[5].value,
+          amount: node.querySelectorAll('input[type=text]')[6].value
         }
       } else {
         account[idx] = {
@@ -156,6 +169,9 @@ const getInvoiceLineList = function () {
           accountCode: null,
           subAccountCode: null,
           departmentCode: null,
+          creditAccountCode: null,
+          creditSubAccountCode: null,
+          creditDepartmentCode: null,
           amount: null
         }
       }
@@ -188,6 +204,10 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
     const targetId = `${targetName}_lineAccountCode${
       ~~target.querySelectorAll('.lineAccountcodeForBulk')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
     }`
+    // 仕訳情報のidを作成：lineNo明細詳細の順番_lineAccountCode仕訳情報の順番(貸方)
+    const creditTargetId = `${targetName}_lineCreditAccountCode${
+      ~~target.querySelectorAll('.lineAccountcodeForBulk')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
+    }`
     const cloneAccountcode = document.importNode(template.content, true)
     const idx = lineAccountcodeLength + 1
     cloneAccountcode.querySelector('.lineAccountcodeForBulk').dataset.idx = idx
@@ -195,6 +215,10 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
     cloneAccountcode.querySelector('.input-accountCode').id = `${targetId}_accountCode`
     cloneAccountcode.querySelector('.input-subAccountCode').id = `${targetId}_subAccountCode`
     cloneAccountcode.querySelector('.input-departmentCode').id = `${targetId}_departmentCode`
+    // 貸方追加
+    cloneAccountcode.querySelector('.input-creditAccountCode').id = `${creditTargetId}_creditAccountCode`
+    cloneAccountcode.querySelector('.input-creditSubAccountCode').id = `${creditTargetId}_creditSubAccountCode`
+    cloneAccountcode.querySelector('.input-creditDepartmentCode').id = `${creditTargetId}_creditDepartmentCode`
     cloneAccountcode.querySelector('.btn-minus-accountCode').id = `btn_minus_${targetId}`
     cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `${targetId}`
     cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `${targetId}`
@@ -205,12 +229,24 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
     cloneAccountcode
       .querySelector('.BtnlineAccountCodeSearch')
       .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+    // 勘定科目と補助科目検索ボタン(貸方)
+    cloneAccountcode.querySelector('.BtnlineCreditAccountCodeSearch').dataset.target = 'creditAccountCode-modal'
+    cloneAccountcode.querySelector('.BtnlineCreditAccountCodeSearch').dataset.info = `${creditTargetId}`
+    cloneAccountcode
+      .querySelector('.BtnlineCreditAccountCodeSearch')
+      .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
     // 部門データ検索ボタン
     cloneAccountcode.querySelector('.BtnlineDepartmentCodeSearch').dataset.target = 'departmentCode-modal'
     cloneAccountcode.querySelector('.BtnlineDepartmentCodeSearch').dataset.info = `${targetId}`
     cloneAccountcode
       .querySelector('.BtnlineDepartmentCodeSearch')
       .addEventListener('click', btnSearchDepartmentCode($('#departmentCode-modal')))
+    // 部門データ検索ボタン(貸方)
+    cloneAccountcode.querySelector('.BtnlineCreditDepartmentCodeSearch').dataset.target = 'creditDepartmentCode-modal'
+    cloneAccountcode.querySelector('.BtnlineCreditDepartmentCodeSearch').dataset.info = `${creditTargetId}`
+    cloneAccountcode
+      .querySelector('.BtnlineCreditDepartmentCodeSearch')
+      .addEventListener('click', btnSearchCreditDepartmentCode($('#creditDepartmentCode-modal')))
     target.appendChild(cloneAccountcode)
   } else {
     $('#error-message-journal-modal').innerText = '仕訳情報入力の上限は１０項目までです。'
@@ -219,17 +255,30 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
 
 // 仕訳情報取得
 const getLineAccountcodeList = function (invoiceLineNo) {
-  const target = $(`#invoiceLine${invoiceLineNo}`).parentNode.querySelectorAll('.lineAccountcode')
+  const invoiceLines = $(`#invoiceLine${invoiceLineNo}`).parentNode.querySelectorAll('.lineAccountcode')
   const lineAccountCodeList = []
-  for (let i = 0; i < target.length; i++) {
-    const accountCode = $(`#${target[i].id}_accountCode`).value
-    const subAccountCode = $(`#${target[i].id}_subAccountCode`).value
-    const departmentCode = $(`#${target[i].id}_departmentCode`).value
-    if (accountCode !== '' || departmentCode !== '') {
+  for (const invoiceLine of invoiceLines) {
+    const debbitAccountCode = invoiceLine.querySelectorAll('input[type=text]')[0].value
+    const debitSubAccountCode = invoiceLine.querySelectorAll('input[type=text]')[1].value
+    const debitDepartmentCode = invoiceLine.querySelectorAll('input[type=text]')[2].value
+    const creditAccountCode = invoiceLine.querySelectorAll('input[type=text]')[3].value
+    const creditSubAccountCode = invoiceLine.querySelectorAll('input[type=text]')[4].value
+    const credittDepartmentCode = invoiceLine.querySelectorAll('input[type=text]')[5].value
+    if (
+      debbitAccountCode ||
+      debitSubAccountCode ||
+      debitDepartmentCode ||
+      creditAccountCode ||
+      creditSubAccountCode ||
+      credittDepartmentCode !== ''
+    ) {
       lineAccountCodeList.push({
-        accountCode: accountCode,
-        subAccountCode: subAccountCode,
-        departmentCode: departmentCode
+        accountCode: debbitAccountCode,
+        subAccountCode: debitSubAccountCode,
+        departmentCode: debitDepartmentCode,
+        creditAccountCode: creditAccountCode,
+        creditSubAccountCode: creditSubAccountCode,
+        creditDepartmentCode: credittDepartmentCode
       })
     }
   }
@@ -248,6 +297,10 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       const targetId = `${target.id}_lineAccountCode${
         ~~target.querySelectorAll('.lineAccountcode')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
       }`
+      // 仕訳情報のidを作成：lineNo明細詳細の順番_lineAccountCode仕訳情報の順番（貸方）
+      const targetCreditId = `${target.id}_lineCreditAccountCode${
+        ~~target.querySelectorAll('.lineAccountcode')[lineAccountcodeLength - 1].id.replaceAll(tagetIdBase, '') + 1
+      }`
       // templateから追加仕訳情報欄作成
       const templeAccountCodeItem = $('#templateLineAccountCodeItem')
       const cloneAccountCodeItem = document.importNode(templeAccountCodeItem.content, true)
@@ -256,16 +309,37 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       // 勘定科目コードINPUT
       cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').setAttribute('name', `${targetId}_accountCode`)
       cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').id = `${targetId}_accountCode`
+      // 勘定科目コードINPUT(貸方)
+      cloneAccountCodeItem
+        .querySelector('.lineCreditAccountCode_creditAccountCode')
+        .setAttribute('name', `${targetCreditId}_creditAccountCode`)
+      cloneAccountCodeItem.querySelector(
+        '.lineCreditAccountCode_creditAccountCode'
+      ).id = `${targetCreditId}_creditAccountCode`
       // 補助科目コードINPUT
       cloneAccountCodeItem
         .querySelector('.lineAccountCode_subAccountCode')
         .setAttribute('name', `${targetId}_subAccountCode`)
       cloneAccountCodeItem.querySelector('.lineAccountCode_subAccountCode').id = `${targetId}_subAccountCode`
+      // 補助科目コードINPUT（貸方）
+      cloneAccountCodeItem
+        .querySelector('.lineCreditAccountCode_creditSubAccountCode')
+        .setAttribute('name', `${targetCreditId}_creditSubAccountCode`)
+      cloneAccountCodeItem.querySelector(
+        '.lineCreditAccountCode_creditSubAccountCode'
+      ).id = `${targetCreditId}_creditSubAccountCode`
       // 部門データINPUT
       cloneAccountCodeItem
         .querySelector('.lineAccountCode_departmentCode')
         .setAttribute('name', `${targetId}_departmentCode`)
       cloneAccountCodeItem.querySelector('.lineAccountCode_departmentCode').id = `${targetId}_departmentCode`
+      // 部門データINPUT(貸方)
+      cloneAccountCodeItem
+        .querySelector('.lineCreditAccountCode_creditDepartmentCode')
+        .setAttribute('name', `${targetCreditId}_creditDepartmentCode`)
+      cloneAccountCodeItem.querySelector(
+        '.lineCreditAccountCode_creditDepartmentCode'
+      ).id = `${targetCreditId}_creditDepartmentCode`
       // 計上金額
       cloneAccountCodeItem.querySelector('.inputInstallmentAmount').setAttribute('name', `${targetId}_input_amount`)
       cloneAccountCodeItem.querySelector('.inputInstallmentAmount').id = `${targetId}_input_amount`
@@ -293,12 +367,28 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       cloneAccountCodeItem
         .querySelector('.btn-search-main')
         .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+
+      // 勘定科目と補助科目検索ボタン（貸方）
+      cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.target = 'creditAccountCode-modal'
+      cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.info = targetCreditId
+      cloneAccountCodeItem
+        .querySelector('.btn-search-creditMain')
+        .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+
       // 部門データ検索ボタン
       cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.target = 'departmentCode-modal'
       cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.info = targetId
       cloneAccountCodeItem
         .querySelector('.btn-search-departmentCode')
         .addEventListener('click', btnSearchDepartmentCode($('#departmentCode-modal')))
+
+      // 部門データ検索ボタン(貸方)
+      cloneAccountCodeItem.querySelector('.btn-search-creditDepartmentCode').dataset.target =
+        'creditDepartmentCode-modal'
+      cloneAccountCodeItem.querySelector('.btn-search-creditDepartmentCode').dataset.info = targetCreditId
+      cloneAccountCodeItem
+        .querySelector('.btn-search-creditDepartmentCode')
+        .addEventListener('click', btnSearchCreditDepartmentCode($('#creditDepartmentCode-modal')))
 
       target.appendChild(cloneAccountCodeItem)
     } else {
@@ -319,6 +409,18 @@ const btnSearchMain = function (searchModal) {
   }
 }
 
+// 2番目以降の勘定科目・補助科目検索ボタンイベント(貸方)
+const btnSearchMainCredit = function (searchModal) {
+  return function () {
+    if (this.dataset.info !== $('#creditAccountCode-modal').dataset.info) {
+      deleteCreditDisplayModal()
+    }
+
+    if (searchModal) searchModal.classList.toggle('is-active')
+    $('#creditAccountCode-modal').dataset.info = this.dataset.info
+  }
+}
+
 // 2番目以降の部門データ検索ボタンイベント
 const btnSearchDepartmentCode = function (searchModal) {
   return function () {
@@ -328,6 +430,18 @@ const btnSearchDepartmentCode = function (searchModal) {
     }
     if (searchModal) searchModal.classList.toggle('is-active')
     $('#departmentCode-modal').dataset.info = this.dataset.info
+  }
+}
+
+// 2番目以降の部門データ検索ボタンイベント(貸方)
+const btnSearchCreditDepartmentCode = function (searchModal) {
+  return function () {
+    $('#searchCreditDepartmentModalErrMsg').innerText = ''
+    if (this.dataset.info !== $('#creditDepartmentCode-modal').dataset.info) {
+      deleteCreditDepartmentResultDisplayModal()
+    }
+    if (searchModal) searchModal.classList.toggle('is-active')
+    $('#creditDepartmentCode-modal').dataset.info = this.dataset.info
   }
 }
 
@@ -383,6 +497,55 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
   )
 })
 
+// 仕訳情報検索(貸方)
+// 勘定科目コード、補助科目検索
+$('#btnSearchCreditAccountCode').addEventListener('click', function () {
+  const accountCode = $('#searchModalCreditAccountCode').value
+  const accountCodeName = $('#searchModalCreditAccountCodeName').value
+  const subAccountCode = $('#searchModalCreditSubAccountCode').value
+  const subAccountCodeName = $('#searchModalCreditSubAccountCodeName').value
+
+  const $this = this
+  deleteCreditDisplayModal()
+  $('#searchModalCreditAccountCode').value = accountCode
+  $('#searchModalCreditAccountCodeName').value = accountCodeName
+  $('#searchModalCreditSubAccountCode').value = subAccountCode
+  $('#searchModalCreditSubAccountCodeName').value = subAccountCodeName
+
+  const getAccountCode = new XMLHttpRequest()
+  getAccountCode.open('POST', '/inbox/getCode')
+  getAccountCode.setRequestHeader('Content-Type', 'application/json')
+  getAccountCode.onreadystatechange = function () {
+    if (getAccountCode.readyState === getAccountCode.DONE) {
+      switch (getAccountCode.status) {
+        case 200: {
+          const result = JSON.parse(getAccountCode.response)
+          if (result.length !== 0) {
+            displayCreditResultForCode(result)
+          } else {
+            displayNoCreditAccountCode()
+          }
+          break
+        }
+        default: {
+          deleteCreditDisplayModal()
+          break
+        }
+      }
+    }
+    $this.classList.remove('is-loading')
+  }
+  $this.classList.add('is-loading')
+  getAccountCode.send(
+    JSON.stringify({
+      accountCode: accountCode,
+      accountCodeName: accountCodeName,
+      subAccountCode: subAccountCode,
+      subAccountCodeName: subAccountCodeName
+    })
+  )
+})
+
 // 部門データモーダルの内の検索ボタン
 $('#btnSearchDepartmentCode').addEventListener('click', function () {
   const inputPatternEngNumKana = '^[a-zA-Z0-9ァ-ヶー　+]*$'
@@ -403,16 +566,16 @@ $('#btnSearchDepartmentCode').addEventListener('click', function () {
   }
 
   // 部門コードと部門名の桁数チェック
-  if (departmentCode.length > 10 && departmentCodeName.length > 40) {
+  if (departmentCode.length > 6 && departmentCodeName.length > 40) {
     $('#searchDepartmentModalErrMsg').innerText =
-      '部門コードは10桁まで入力してください。 部門名は40桁まで入力してください。'
+      '部門コードは6桁まで入力してください。 部門名は40桁まで入力してください。'
     $('#searchModalDepartmentCode').value = departmentCode
     $('#searchModalDepartmentCodeName').value = departmentCodeName
     return null
   }
   // 部門コードの桁数チェック
-  if (departmentCode.length > 10) {
-    $('#searchDepartmentModalErrMsg').innerText = '部門コードは10桁まで入力してください。'
+  if (departmentCode.length > 6) {
+    $('#searchDepartmentModalErrMsg').innerText = '部門コードは6桁まで入力してください。'
     $('#searchModalDepartmentCode').value = departmentCode
     $('#searchModalDepartmentCodeName').value = departmentCodeName
     return null
@@ -447,6 +610,85 @@ $('#btnSearchDepartmentCode').addEventListener('click', function () {
         }
         default: {
           deleteDepartmentResultDisplayModal()
+          break
+        }
+      }
+    }
+    $this.classList.remove('is-loading')
+  }
+  $this.classList.add('is-loading')
+  getAccountCode.send(
+    JSON.stringify({
+      departmentCode: departmentCode,
+      departmentCodeName: departmentCodeName
+    })
+  )
+})
+
+// 部門データモーダルの内の検索ボタン(貸方)
+$('#btnSearchCreditDepartmentCode').addEventListener('click', function () {
+  const inputPatternEngNumKana = '^[a-zA-Z0-9ァ-ヶー　+]*$'
+  const departmentCode = $('#searchModalCreditDepartmentCode').value
+  const departmentCodeName = $('#searchModalCreditDepartmentCodeName').value
+  const inputPatternEngNumKanaRegExp = new RegExp(inputPatternEngNumKana)
+
+  const $this = this
+  // モーダル初期化
+  deleteCreditDepartmentResultDisplayModal()
+
+  // 部門コードのバリデーションチェック
+  if (!inputPatternEngNumKanaRegExp.test(departmentCode)) {
+    $('#searchCreditDepartmentModalErrMsg').innerText = '入力値が間違いました。'
+    $('#searchModalCreditDepartmentCode').value = departmentCode
+    $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+
+  // 部門コードと部門名の桁数チェック
+  if (departmentCode.length > 6 && departmentCodeName.length > 40) {
+    $('#searchCreditDepartmentModalErrMsg').innerText =
+      '部門コードは6桁まで入力してください。 部門名は40桁まで入力してください。'
+    $('#searchModalCreditDepartmentCode').value = departmentCode
+    $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+  // 部門コードの桁数チェック
+  if (departmentCode.length > 6) {
+    $('#searchCreditDepartmentModalErrMsg').innerText = '部門コードは6桁まで入力してください。'
+    $('#searchModalCreditDepartmentCode').value = departmentCode
+    $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+  // 部門名の桁数チェック
+  if (departmentCodeName.length > 40) {
+    $('#searchCreditDepartmentModalErrMsg').innerText = '部門名は40桁まで入力してください。'
+    $('#searchModalCreditDepartmentCode').value = departmentCode
+    $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
+    return null
+  }
+
+  // 初期化されたキーワードを入力
+  $('#searchModalCreditDepartmentCode').value = departmentCode
+  $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
+
+  // サーバーからデータ取得
+  const getAccountCode = new XMLHttpRequest()
+  getAccountCode.open('POST', '/inbox/department')
+  getAccountCode.setRequestHeader('Content-Type', 'application/json')
+  getAccountCode.onreadystatechange = function () {
+    if (getAccountCode.readyState === getAccountCode.DONE) {
+      switch (getAccountCode.status) {
+        case 200: {
+          const result = JSON.parse(getAccountCode.response)
+          if (result.length !== 0) {
+            displayResultForCreditDepartmentCode(result)
+          } else {
+            displayNoCreditDepartmentCode()
+          }
+          break
+        }
+        default: {
+          deleteCreditDepartmentResultDisplayModal()
           break
         }
       }
@@ -498,6 +740,42 @@ const displayResultForCode = function (codeArr) {
   $('#displayInvisible').classList.remove('is-invisible')
 }
 
+// 勘定科目コード、補助科目検索結果を画面に表示（貸方）
+const displayCreditResultForCode = function (codeArr) {
+  const displayCreditFieldResultBody = $('#displayCreditFieldResultBody')
+  const searchResultCode = $('#searchResultCode')
+  codeArr.forEach((item) => {
+    const cloneSearchResultCodeTemplate = document.importNode(searchResultCode.content, true)
+    cloneSearchResultCodeTemplate.querySelector('.rowAccountCode').dataset.target = '#creditAccountCode-modal'
+    cloneSearchResultCodeTemplate.querySelector('.rowAccountCode').dataset.accountCode = item.accountCode
+    cloneSearchResultCodeTemplate.querySelector('.rowAccountCode').dataset.subAccountCode = item.subAccountCode
+    cloneSearchResultCodeTemplate.querySelector('.columnNoAccountCodeMessage').classList.add('is-invisible')
+    cloneSearchResultCodeTemplate.querySelector('.columnAccountCode').innerText = item.accountCode
+    cloneSearchResultCodeTemplate.querySelector('.columnAccountCodeName').innerText = item.accountCodeName
+    cloneSearchResultCodeTemplate.querySelector('.columnSubAccountCode').innerText = item.subAccountCode
+    cloneSearchResultCodeTemplate.querySelector('.columnSubAccountCodeName').innerText = item.subAccountCodeName
+
+    displayCreditFieldResultBody.appendChild(cloneSearchResultCodeTemplate)
+  })
+  $('.rowAccountCode').forEach((row) => {
+    row.addEventListener('click', function () {
+      $(this.dataset.target).classList.remove('is-active')
+      const inputTarget = $(this.dataset.target).dataset.info
+      $(`#${inputTarget}_creditAccountCode`).value = this.dataset.accountCode
+      $(`#${inputTarget}_creditSubAccountCode`).value = this.dataset.subAccountCode
+      $('#btn-confirm').removeAttribute('disabled')
+      deleteCreditDisplayModal()
+    })
+    row.addEventListener('mouseover', function () {
+      this.classList.add('is-selected')
+    })
+    row.addEventListener('mouseout', function () {
+      this.classList.remove('is-selected')
+    })
+  })
+  $('#displayCreditInvisible').classList.remove('is-invisible')
+}
+
 // 部門データ検索結果を画面に表示
 const displayResultForDepartmentCode = function (codeArr) {
   const displayFieldDepartmentResultBody = $('#displayFieldDepartmentResultBody')
@@ -531,6 +809,40 @@ const displayResultForDepartmentCode = function (codeArr) {
   $('#departmentResultDisplayInvisible').classList.remove('is-invisible')
 }
 
+// 部門データ検索結果を画面に表示（貸方）
+const displayResultForCreditDepartmentCode = function (codeArr) {
+  const displayCreditFieldDepartmentResultBody = $('#displayCreditFieldDepartmentResultBody')
+  const searchResultDepartmentCode = $('#searchResultDepartmentCode')
+  codeArr.forEach((item) => {
+    const cloneSearchResultDepartmentCodeTemplate = document.importNode(searchResultDepartmentCode.content, true)
+    cloneSearchResultDepartmentCodeTemplate.querySelector('.rowDepartmentCode').dataset.target =
+      '#creditDepartmentCode-modal'
+    cloneSearchResultDepartmentCodeTemplate.querySelector('.rowDepartmentCode').dataset.departmentCode = item.code
+    cloneSearchResultDepartmentCodeTemplate
+      .querySelector('.columnNoDepartmentCodeMessage')
+      .classList.add('is-invisible')
+    cloneSearchResultDepartmentCodeTemplate.querySelector('.columnDepartmentCode').innerText = item.code
+    cloneSearchResultDepartmentCodeTemplate.querySelector('.columnDepartmentCodeName').innerText = item.name
+    displayCreditFieldDepartmentResultBody.appendChild(cloneSearchResultDepartmentCodeTemplate)
+  })
+  $('.rowDepartmentCode').forEach((row) => {
+    row.addEventListener('click', function () {
+      $(this.dataset.target).classList.remove('is-active')
+      const inputTarget = $(this.dataset.target).dataset.info
+      $(`#${inputTarget}_creditDepartmentCode`).value = this.dataset.departmentCode
+      $('#btn-confirm').removeAttribute('disabled')
+      deleteDepartmentResultDisplayModal()
+    })
+    row.addEventListener('mouseover', function () {
+      this.classList.add('is-selected')
+    })
+    row.addEventListener('mouseout', function () {
+      this.classList.remove('is-selected')
+    })
+  })
+  $('#creditDepartmentResultDisplayInvisible').classList.remove('is-invisible')
+}
+
 // 勘定科目コード検索結果がない場合
 const displayNoAccountCode = function () {
   const displayFieldBody = $('#displayFieldResultBody')
@@ -542,6 +854,19 @@ const displayNoAccountCode = function () {
     '該当する勘定科目が存在しませんでした。'
   displayFieldBody.appendChild(cloneSearchResultCodeTemplate)
   $('#displayInvisible').classList.remove('is-invisible')
+}
+
+// 勘定科目コード検索結果がない場合（貸方）
+const displayNoCreditAccountCode = function () {
+  const displayFieldBody = $('#displayCreditFieldResultBody')
+  const searchResultCode = $('#searchResultCode')
+  const cloneSearchResultCodeTemplate = document.importNode(searchResultCode.content, true)
+  cloneSearchResultCodeTemplate.querySelector('.columnNoAccountCodeMessage').classList.remove('is-invisible')
+  cloneSearchResultCodeTemplate.querySelector('.columnNoAccountCodeMessage').setAttribute('colspan', '4')
+  cloneSearchResultCodeTemplate.querySelector('.noAccountCodeMessage').innerText =
+    '該当する勘定科目が存在しませんでした。'
+  displayFieldBody.appendChild(cloneSearchResultCodeTemplate)
+  $('#displayCreditInvisible').classList.remove('is-invisible')
 }
 
 // 部門データ検索結果がない場合
@@ -557,6 +882,21 @@ const displayNoDepartmentCode = function () {
     '該当する部門データが存在しませんでした。'
   displayFieldDepartmentResultBody.appendChild(cloneSearchResultDepartmentCodeTemplate)
   $('#departmentResultDisplayInvisible').classList.remove('is-invisible')
+}
+
+// 部門データ検索結果がない場合(貸方)
+const displayNoCreditDepartmentCode = function () {
+  const displayCreditFieldDepartmentResultBody = $('#displayCreditFieldDepartmentResultBody')
+  const searchResultDepartmentCode = $('#searchResultDepartmentCode')
+  const cloneSearchResultDepartmentCodeTemplate = document.importNode(searchResultDepartmentCode.content, true)
+  cloneSearchResultDepartmentCodeTemplate
+    .querySelector('.columnNoDepartmentCodeMessage')
+    .classList.remove('is-invisible')
+  cloneSearchResultDepartmentCodeTemplate.querySelector('.columnNoDepartmentCodeMessage').setAttribute('colspan', '2')
+  cloneSearchResultDepartmentCodeTemplate.querySelector('.noDepartmentCodeMessage').innerText =
+    '該当する部門データが存在しませんでした。'
+  displayCreditFieldDepartmentResultBody.appendChild(cloneSearchResultDepartmentCodeTemplate)
+  $('#creditDepartmentResultDisplayInvisible').classList.remove('is-invisible')
 }
 
 // 勘定科目コード、補助科目再検索の時、前の結果を消す
@@ -580,6 +920,27 @@ const deleteDisplayModal = function () {
   $('#displayInvisible').classList.add('is-invisible')
 }
 
+// 勘定科目コード、補助科目再検索の時、前の結果を消す(貸方)
+const deleteCreditDisplayModal = function () {
+  const displayCreditFieldResultBody = $('#displayCreditFieldResultBody')
+  if (displayCreditFieldResultBody.children.length !== 0) {
+    const chidrenItem = []
+    Array.prototype.forEach.call(displayCreditFieldResultBody.children, (item) => {
+      chidrenItem.push(item)
+    })
+    chidrenItem.forEach((item) => {
+      displayCreditFieldResultBody.removeChild(item)
+    })
+  }
+
+  $('#searchModalCreditAccountCode').value = ''
+  $('#searchModalCreditAccountCodeName').value = ''
+  $('#searchModalCreditSubAccountCode').value = ''
+  $('#searchModalCreditSubAccountCodeName').value = ''
+
+  $('#displayCreditInvisible').classList.add('is-invisible')
+}
+
 // 部門データ再検索の時、前の結果を消す
 const deleteDepartmentResultDisplayModal = function () {
   const displayFieldResultBody = $('#displayFieldDepartmentResultBody')
@@ -597,6 +958,25 @@ const deleteDepartmentResultDisplayModal = function () {
   $('#searchModalDepartmentCodeName').value = ''
 
   $('#departmentResultDisplayInvisible').classList.add('is-invisible')
+}
+
+// 部門データ再検索の時、前の結果を消す（貸方）
+const deleteCreditDepartmentResultDisplayModal = function () {
+  const displayCreditFieldDepartmentResultBody = $('#displayCreditFieldDepartmentResultBody')
+  if (displayCreditFieldDepartmentResultBody.children.length !== 0) {
+    const chidrenItem = []
+    Array.prototype.forEach.call(displayCreditFieldDepartmentResultBody.children, (item) => {
+      chidrenItem.push(item)
+    })
+    chidrenItem.forEach((item) => {
+      displayCreditFieldDepartmentResultBody.removeChild(item)
+    })
+  }
+
+  $('#searchModalCreditDepartmentCode').value = ''
+  $('#searchModalCreditDepartmentCodeName').value = ''
+
+  $('#creditDepartmentResultDisplayInvisible').classList.add('is-invisible')
 }
 
 // 仕訳情報のアイテムのマイナスボタン機能追加
@@ -677,11 +1057,10 @@ $('#btn-insert').addEventListener('click', function () {
   }
 })
 
-// 「登録」ボタンクリック
+// 「保存」ボタンクリック
 $('#btn-confirm').addEventListener('click', function () {
-  // 「登録」ボタンが非活性の場合、終了する。
+  // 「保存」ボタンが非活性の場合、終了する。
   if (this.getAttribute('disabled') === 'true') return
-
   const dupleResult = duplicationCheck()
   if (dupleResult.length > 0) {
     document.getElementById(dupleResult[0].id).focus({ preventScroll: false })
@@ -764,7 +1143,6 @@ const checkJournalList = function () {
       const checkJournalLines = journalLines[i].filter(function (item) {
         return item !== null && item !== undefined
       })
-
       // 仕訳情報が設定されていない小計チェック用
       if (checkJournalLines.length === 1) {
         total = ~~journalLines[i][j].input_amount.replaceAll(',', '')
@@ -772,15 +1150,10 @@ const checkJournalList = function () {
       }
       // 設定した仕訳情報の計上金額をチェック用
       if (journalLines[i][j] !== undefined) {
-        if (journalLines[i][j].accountCode.length !== 0) {
-          total = total + ~~journalLines[i][j].input_amount.replaceAll(',', '')
-          if (~~journalLines[i][j].input_amount.replaceAll(',', '') === 0) {
-            isFirstLineNull = true
-            $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
-          }
-        } else {
+        total = total + ~~journalLines[i][j].input_amount.replaceAll(',', '')
+        if (~~journalLines[i][j].input_amount.replaceAll(',', '') === 0) {
           isFirstLineNull = true
-          $('#error-message-body').innerText = '仕訳情報を正しく設定してください。'
+          $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
         }
       }
     }
@@ -798,7 +1171,7 @@ const checkJournalList = function () {
   return true
 }
 
-// 重複された仕訳情報処理(仕訳情報設定画面)
+// 重複又は空になった仕訳情報処理(仕訳情報設定画面)
 const duplicationCheck = function () {
   const duplArray = []
   // 画面に表示された項目別の仕訳情報を取得
@@ -811,18 +1184,38 @@ const duplicationCheck = function () {
 
     // 勘定科目と補助科目を取得
     Array.prototype.forEach.call(children, (item) => {
-      const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
-      const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
-      const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
-      lineInformationArray.push([accountCode, subAccountCode, department])
+      // 借方
+      if (item.querySelectorAll('input[type=text]').length !== 0) {
+        const accountCode = item.querySelectorAll('input[type=text]')[0].value // 勘定科目コード
+        const subAccountCode = item.querySelectorAll('input[type=text]')[1].value // 補助科目コード
+        const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
+
+        // 貸方
+        const creditAccountCode = item.querySelectorAll('input[type=text]')[3].value // 勘定科目コード
+        const creditSubAccountCode = item.querySelectorAll('input[type=text]')[4].value // 補助科目コード
+        const creditDepartment = item.querySelectorAll('input[type=text]')[5].value // 部門コード
+        lineInformationArray.push([
+          accountCode,
+          subAccountCode,
+          department,
+          creditAccountCode,
+          creditSubAccountCode,
+          creditDepartment
+        ])
+      }
     })
     koumokuInformationArray.push(duplicateCheckFunction(lineInformationArray))
   }
 
-  // 重複がある明細項目づつエラーメッセージを設定する。
+  // 空又は重複がある明細項目づつエラーメッセージを設定する。
   koumokuInformationArray.map((item, idx) => {
     const errMsg = document.getElementById(`error-message-lineNo${idx + 1}`)
-    if (item === true) {
+    if (item.nothingCheckFlag === true) {
+      errMsg.innerText = '仕訳情報を正しく設定してください。'
+      errMsg.classList.remove('invisible')
+      errMsg.focus({ preventScroll: false })
+      duplArray.push(errMsg)
+    } else if (item.duplicationFlag === true) {
       errMsg.innerText = '同じ仕訳情報は設定できません。'
       errMsg.classList.remove('invisible')
       errMsg.focus({ preventScroll: false })
@@ -844,16 +1237,33 @@ const duplicationCheckModal = function () {
 
   // 勘定科目と補助科目を取得
   Array.prototype.forEach.call(children, (item) => {
-    const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
-    const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
+    // 借方
+    const accountCode = item.querySelectorAll('input[type=text]')[0].value // 勘定科目コード
+    const subAccountCode = item.querySelectorAll('input[type=text]')[1].value // 補助科目コード
     const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
-    koumokuInformationArray.push([accountCode, subAccountCode, department])
+
+    // 貸方
+    const creditAccountCode = item.querySelectorAll('input[type=text]')[3].value // 勘定科目コード
+    const creditSubAccountCode = item.querySelectorAll('input[type=text]')[4].value // 補助科目コード
+    const creditDepartment = item.querySelectorAll('input[type=text]')[5].value // 部門コード
+
+    koumokuInformationArray.push([
+      accountCode,
+      subAccountCode,
+      department,
+      creditAccountCode,
+      creditSubAccountCode,
+      creditDepartment
+    ])
   })
   const dupleResult = duplicateCheckFunction(koumokuInformationArray)
 
   // 重複された場合エラーメッセージ表示
   const errMsg = $('#error-message-journal-modal')
-  if (dupleResult) {
+  if (dupleResult.nothingCheckFlag) {
+    errMsg.innerText = '仕訳情報を正しく設定してください。'
+    return true
+  } else if (dupleResult.duplicationFlag) {
     errMsg.innerText = '同じ仕訳情報は設定できません。'
     return true
   } else {
@@ -862,24 +1272,51 @@ const duplicationCheckModal = function () {
   }
 }
 
-// 重複検索関数
+// 空及び重複検索関数
 const duplicateCheckFunction = function (array) {
   const length = array.length
+  let nothingCheckFlag = false
   let duplicationFlag = false
   let i, j, temp
-  for (i = 0; i < length - 1; i++) {
-    for (j = 0; j < length - 1 - i; j++) {
-      if (JSON.stringify(array[j]) === JSON.stringify(array[j + 1])) {
-        duplicationFlag = true
-        return duplicationFlag
-      } else {
-        temp = array[j]
-        array[j] = array[j + 1]
-        array[j + 1] = temp
+
+  if (length !== 1) {
+    for (i = 0; i < length - 1; i++) {
+      for (j = 0; j < length - 1 - i; j++) {
+        if (JSON.stringify(array[j]) === JSON.stringify(array[j + 1])) {
+          duplicationFlag = true
+          return { duplicationFlag: duplicationFlag, nothingCheckFlag: nothingCheckFlag }
+        } else {
+          temp = array[j]
+          array[j] = array[j + 1]
+          array[j + 1] = temp
+        }
+
+        // 勘定科目がなし、他の科目がある場合
+        if (
+          (array[j][0].length === 0 && array[j][1].length !== 0) ||
+          (array[j][0].length === 0 && array[j][2].length !== 0) ||
+          (array[j][3].length === 0 && array[j][4].length !== 0) ||
+          (array[j][3].length === 0 && array[j][5].length !== 0)
+        ) {
+          nothingCheckFlag = true
+          return { duplicationFlag: duplicationFlag, nothingCheckFlag: nothingCheckFlag }
+        }
       }
     }
+  } else {
+    // 勘定科目がなし、他の科目がある場合
+    if (
+      (array[0][0].length === 0 && array[0][1].length !== 0) ||
+      (array[0][0].length === 0 && array[0][2].length !== 0) ||
+      (array[0][3].length === 0 && array[0][4].length !== 0) ||
+      (array[0][3].length === 0 && array[0][5].length !== 0)
+    ) {
+      nothingCheckFlag = true
+      return { duplicationFlag: duplicationFlag, nothingCheckFlag: nothingCheckFlag }
+    }
   }
-  return duplicationFlag
+
+  return { duplicationFlag: duplicationFlag, nothingCheckFlag: nothingCheckFlag }
 }
 
 // Modal反映ボタン
@@ -934,7 +1371,13 @@ const checkBulkList = function () {
 
   bulkLines.forEach((line, idx) => {
     if (line !== undefined) {
-      if (line.accountCode.length === 0 || (line.accountCode.length === 0 && line.subAccountCode.length === 0)) {
+      if (
+        ((line.accountCode.length === 0 || (line.accountCode.length === 0 && line.subAccountCode.length === 0)) &&
+          (line.creditAccountCode.length === 0 ||
+            (line.creditAccountCode.length === 0 && line.creditSubAccountCode.length === 0))) ||
+        (line.accountCode.length === 0 && line.departmentCode.length !== 0) ||
+        (line.creditAccountCode.length === 0 && line.creditDepartmentCode.length !== 0)
+      ) {
         returnValue.bulkLines = true
       }
     }
@@ -985,22 +1428,36 @@ const addBulkList = function () {
             accountCode: bulkList[bulkIdx].accountCode,
             subAccountCode: bulkList[bulkIdx].subAccountCode,
             departmentCode: bulkList[bulkIdx].departmentCode,
+            creditAccountCode: bulkList[bulkIdx].creditAccountCode,
+            creditSubAccountCode: bulkList[bulkIdx].creditSubAccountCode,
+            creditDepartmentCode: bulkList[bulkIdx].creditDepartmentCode,
             journalNo: `lineAccountCode${journalIdx + 1}`,
             input_amount: 0,
             isNewItem: false
           }
+          // 借方
           $(`#lineNo${lineIdx + 1}_lineAccountCode${journalIdx + 1}_accountCode`).value =
             invoiceLine[journalIdx].accountCode
           $(`#lineNo${lineIdx + 1}_lineAccountCode${journalIdx + 1}_subAccountCode`).value =
             invoiceLine[journalIdx].subAccountCode
           $(`#lineNo${lineIdx + 1}_lineAccountCode${journalIdx + 1}_departmentCode`).value =
             invoiceLine[journalIdx].departmentCode
+          // 貸方
+          $(`#lineNo${lineIdx + 1}_lineCreditAccountCode${journalIdx + 1}_creditAccountCode`).value =
+            invoiceLine[journalIdx].creditAccountCode
+          $(`#lineNo${lineIdx + 1}_lineCreditAccountCode${journalIdx + 1}_creditSubAccountCode`).value =
+            invoiceLine[journalIdx].creditSubAccountCode
+          $(`#lineNo${lineIdx + 1}_lineCreditAccountCode${journalIdx + 1}_creditDepartmentCode`).value =
+            invoiceLine[journalIdx].creditDepartmentCode
         }
         if (invoiceLine[journalIdx] === undefined && bulkList[bulkIdx] !== undefined) {
           invoiceLine[journalIdx] = {
             accountCode: bulkList[bulkIdx].accountCode,
             subAccountCode: bulkList[bulkIdx].subAccountCode,
             departmentCode: bulkList[bulkIdx].departmentCode,
+            creditAccountCode: bulkList[bulkIdx].creditAccountCode,
+            creditSubAccountCode: bulkList[bulkIdx].creditSubAccountCode,
+            creditDepartmentCode: bulkList[bulkIdx].creditDepartmentCode,
             journalNo: `lineAccountCode${journalIdx + 1}`,
             input_amount: 0,
             isNewItem: true
@@ -1017,6 +1474,8 @@ const addBulkList = function () {
       if (journal.isNewItem) {
         const lineNo = `lineNo${idx + 1}`
         const tagetIdBase = `${lineNo}_lineAccountCode${jdx + 1}`
+        // 貸方
+        const creditTagetIdBase = `${lineNo}_lineCreditAccountCode${jdx + 1}`
         const templeAccountCodeItem = $('#templateLineAccountCodeItem')
         const cloneAccountCodeItem = document.importNode(templeAccountCodeItem.content, true)
 
@@ -1031,6 +1490,18 @@ const addBulkList = function () {
         cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').name = `${tagetIdBase}_accountCode`
         cloneAccountCodeItem.querySelector('.lineAccountCode_accountCode').value = journal.accountCode
 
+        // 勘定科目コードINPUT(貸方)
+        cloneAccountCodeItem
+          .querySelector('.lineCreditAccountCode_creditAccountCode')
+          .setAttribute('name', `${creditTagetIdBase}_creditAccountCode`)
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditAccountCode'
+        ).id = `${creditTagetIdBase}_creditAccountCode`
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditAccountCode'
+        ).name = `${creditTagetIdBase}_creditAccountCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditAccountCode').value = journal.creditAccountCode
+
         // 補助科目コードINPUT
         cloneAccountCodeItem
           .querySelector('.lineAccountCode_subAccountCode')
@@ -1039,6 +1510,19 @@ const addBulkList = function () {
         cloneAccountCodeItem.querySelector('.lineAccountCode_subAccountCode').name = `${tagetIdBase}_subAccountCode`
         cloneAccountCodeItem.querySelector('.lineAccountCode_subAccountCode').value = journal.subAccountCode
 
+        // 補助科目コードINPUT(貸方)
+        cloneAccountCodeItem
+          .querySelector('.lineCreditAccountCode_creditSubAccountCode')
+          .setAttribute('name', `${creditTagetIdBase}_creditSubAccountCode`)
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditSubAccountCode'
+        ).id = `${creditTagetIdBase}_creditSubAccountCode`
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditSubAccountCode'
+        ).name = `${creditTagetIdBase}_creditSubAccountCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').value =
+          journal.creditSubAccountCode
+
         // 部門データINPUT
         cloneAccountCodeItem
           .querySelector('.lineAccountCode_departmentCode')
@@ -1046,6 +1530,19 @@ const addBulkList = function () {
         cloneAccountCodeItem.querySelector('.lineAccountCode_departmentCode').id = `${tagetIdBase}_departmentCode`
         cloneAccountCodeItem.querySelector('.lineAccountCode_departmentCode').name = `${tagetIdBase}_departmentCode`
         cloneAccountCodeItem.querySelector('.lineAccountCode_departmentCode').value = journal.departmentCode
+
+        // 部門データINPUT(貸方)
+        cloneAccountCodeItem
+          .querySelector('.lineCreditAccountCode_creditDepartmentCode')
+          .setAttribute('name', `${creditTagetIdBase}_creditDepartmentCode`)
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditDepartmentCode'
+        ).id = `${creditTagetIdBase}_creditDepartmentCode`
+        cloneAccountCodeItem.querySelector(
+          '.lineCreditAccountCode_creditDepartmentCode'
+        ).name = `${creditTagetIdBase}_creditDepartmentCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').value =
+          journal.creditDepartmentCode
 
         // 計上金額
         cloneAccountCodeItem
@@ -1070,12 +1567,34 @@ const addBulkList = function () {
           .querySelector('.btn-insert-installmentAmount')
           .addEventListener('click', btnInstallmentAmount)
 
-        // 勘定科目と補助科目検索ボタン
+        // 勘定科目と補助科目検索ボタン(借方)
         cloneAccountCodeItem.querySelector('.btn-search-main').dataset.target = 'accountCode-modal'
         cloneAccountCodeItem.querySelector('.btn-search-main').dataset.info = `${tagetIdBase}`
         cloneAccountCodeItem
           .querySelector('.btn-search-main')
           .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+
+        // 勘定科目と補助科目検索ボタン(貸方)
+        cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.target = 'creditAccountCode-modal'
+        cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.info = `${creditTagetIdBase}`
+        cloneAccountCodeItem
+          .querySelector('.btn-search-creditMain')
+          .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+
+        // 部門データ検索ボタン(借方)
+        cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.target = 'departmentCode-modal'
+        cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.info = `${tagetIdBase}`
+        cloneAccountCodeItem
+          .querySelector('.btn-search-departmentCode')
+          .addEventListener('click', btnSearchDepartmentCode($('#departmentCode-modal')))
+
+        // 部門データ検索検索ボタン(貸方)
+        cloneAccountCodeItem.querySelector('.btn-search-creditDepartmentCode').dataset.target =
+          'creditDepartmentCode-modal'
+        cloneAccountCodeItem.querySelector('.btn-search-creditDepartmentCode').dataset.info = `${creditTagetIdBase}`
+        cloneAccountCodeItem
+          .querySelector('.btn-search-creditDepartmentCode')
+          .addEventListener('click', btnSearchCreditDepartmentCode($('#creditDepartmentCode-modal')))
 
         // マイナスボタン追加
         cloneAccountCodeItem.querySelector('.btn-minus-accountCode').id = `btn_minus_${lineNo}_accountCode`
@@ -1098,15 +1617,21 @@ const getSelectedInvoiceLine = function () {
   return checkBoxLists
 }
 
+// 入力した仕訳情報
 const getBulkList = function () {
   const bulkLines = new Array(10)
 
   let journalIdx = 0
   do {
     bulkLines[journalIdx] = {
+      // 借方
       accountCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-accountCode').value,
       subAccountCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-subAccountCode').value,
-      departmentCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-departmentCode').value
+      departmentCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-departmentCode').value,
+      // 貸方
+      creditAccountCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-creditAccountCode').value,
+      creditSubAccountCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-creditSubAccountCode').value,
+      creditDepartmentCode: $('.lineAccountcodeForBulk')[journalIdx].querySelector('.input-creditDepartmentCode').value
     }
     journalIdx++
   } while (journalIdx < $('.lineAccountcodeForBulk').length)

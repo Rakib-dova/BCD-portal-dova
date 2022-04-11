@@ -17,52 +17,94 @@ block content
           a.button.is-link(href=`/requestApproval/${documentId}`) 支払依頼へ
 
   template#templateLineAccountCodeItem
-    .columns.m-0.p-1.lineAccountcode
+    .columns.m-0.pt-1.lineAccountcode
       .column.is-one-third.p-0.border-div-rad-4
-        .field.is-horizontal.m-1.has-addons-centered
-          .field-label.is-normal.m-0.text-center
-            label 勘定科目コード
-          .field-label.is-normal.m-0.text-center
-            label 補助科目コード
-          .field-label.is-normal.m-0.is-1.fixed-void-66
-            label 　
-        .field.is-horizontal.p-1
-          .field-body.m-1
-            .field
-              p.control
-                input.input.lineAccountCode_accountCode(type='text' name=`` readonly)
-          .field-body.m-1
-            .field
-              p.control
-                input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
-          .field-body.m-1.is-1.none-flex-grow
-            .field
-              p.control
-                a.button.is-link.show-modal.btn-search-main(data-target='accountCode-modal') 検索
+        table.table.table-margin-left
+          tr
+            td.table-td-padding
+              .field.is-horizontal
+                .field-label.m-0           
+                  label 勘定科目コード
+            td.table-td-padding
+              .field-body.m-0
+                .field            
+                  input.input.lineAccountCode_accountCode(type='text' name=`` readonly)
+            td(rowspan=2).table-td-upbutton-padding
+              .field-body.m-1.is-1.none-flex-grow.padding-top-4 
+                .field
+                  p.control
+                    a.button.is-link.show-modal.btn-search-main(data-target='accountCode-modal') 検索
+          tr
+            td.table-td-padding
+              .field.is-horizontal                       
+                .field-label.m-0
+                  label 補助科目コード
+            td.table-td-padding
+              .field-body.m-0
+                .field
+                  p.control
+                    input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly) 
+          tr
+            td.table-td-padding
+              .field.is-horizontal  
+                .field-label.m-0
+                  label 部門コード 
+            td.table-td-padding
+              .field-body.m-0
+                .field
+                  p.control
+                    input.input.lineAccountCode_departmentCode(type='text' name=`` readonly)
+            td.table-td-button-padding
+              .field-body.m-1.is-1.none-flex-grow
+                .field
+                  p.control
+                    a.button.is-link.show-modal.show-modal.btn-search-departmentCode(data-target='departmentCode-modal') 検索                                                 
       .column.is-0.p-1
-      .column.is-one-fifth.p-0.border-div-rad-4
-        .field.is-horizontal.m-1.has-addons-centered
-          .field-label.is-normal.m-0.text-center
-            label 部門コード
-          .field-label.is-normal.m-0.is-1.fixed-void-66
-            label 　
-        .field.is-horizontal.p-1
-          .field-body.m-1
-            .field
-              p.control
-                input.input.lineAccountCode_departmentCode(type='text' name=`` readonly)
-          .field-body.m-1.is-1.none-flex-grow
-            .field
-              p.control
-                a.button.is-link.show-modal.show-modal.btn-search-departmentCode(data-target='departmentCode-modal') 検索
+      .column.is-one-third.p-0.border-div-rad-4
+        table.table.table-margin-left
+          tr
+            td.table-td-padding
+              .field.is-horizontal
+                .field-label.m-0           
+                  label 勘定科目コード
+            td.table-td-padding
+              .field-body.m-0
+                .field            
+                  input.input.lineCreditAccountCode_creditAccountCode(type='text' name=`` readonly)
+            td(rowspan=2).table-td-upbutton-padding 
+              .field-body.m-1.is-1.none-flex-grow.padding-top-4 
+                .field
+                  p.control
+                    a.button.is-link.show-modal.btn-search-creditMain(data-target='creditAccountCode-modal') 検索
+          tr
+            td.table-td-padding
+              .field.is-horizontal                       
+                .field-label.m-0
+                  label 補助科目コード
+            td.table-td-padding
+              .field-body.m-0
+                .field
+                  p.control
+                    input.input.lineCreditAccountCode_creditSubAccountCode(type='text' name=`` readonly) 
+          tr
+            td.table-td-padding
+              .field.is-horizontal  
+                .field-label.m-0
+                  label 部門コード 
+            td.table-td-padding
+              .field-body.m-0
+                .field
+                  p.control
+                    input.input.lineCreditAccountCode_creditDepartmentCode(type='text' name=`` readonly)
+            td.table-td-button-padding
+              .field-body.m-1.is-1.none-flex-grow
+                .field
+                  p.control
+                    a.button.is-link.show-modal.show-modal.btn-search-creditDepartmentCode(data-target='creditDepartmentCode-modal') 検索   
+
       .column.is-0.p-1
       .column.is-one-quarter.p-0.border-div-rad-4
-        .field.is-horizontal.m-1.has-addons-centered
-          .field-label.is-normal.m-0.text-center
-            label 計上金額
-          .field-label.is-normal.m-0.is-1.fixed-void-66
-            label 　
-        .field-body.p-1
+        .field-body.p-1.margit-top-7rem
           .field.is-horizontal
             .field-body.m-1
               .field
@@ -129,79 +171,159 @@ block content
 
   template#templateLineAccountCodeItemModal
    .columns.m-0#lineAccountCodeTitle
-     .column.is-2-header
-       .column-header.text-inbox.text-inbox-subtitle.text-inbox-common
-         | 仕訳情報
-   .columns.m-0.p-1.lineAccountcode
-     .column.is-two-fifths.p-0.border-div-rad-4
-       .field.is-horizontal.m-1.has-addons-centered
-         .field-label.is-normal.m-0.text-center
-           label 勘定科目コード
-         .field-label.is-normal.m-0.text-center
-           label 補助科目コード
-       .field.is-horizontal.p-1
-         .field-body.m-1
-           .field
-             p.control
-               input.input.lineAccountCode_accountCode(type='text' name=`` readonly)
-         .field-body.m-1
-           .field
-             p.control
-               input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
-     .column.is-0.p-1
-     .column.is-one-fifth.p-0.border-div-rad-4
-      .field.is-horizontal.m-1.has-addons-centered
-        .field-label.is-normal.m-0.text-center
-          label 部門コード
-      .field.is-horizontal.p-1
-        .field-body.m-1
-          .field
-            p.control
-              input.input.lineAccountCode_departmentCode(type='text' name=`` value readonly)
+      .column.is-one-quarter.p-0.border-div-rad-4
+        table.table.table-margin-left
+          tr(colspan=2)
+            td.table-td-padding
+              .field.is-horizontal
+                .field-label.m-0           
+                  label 勘定科目コード
+            td.table-td-padding
+              .field-body.m-0
+                .field            
+                  input.input.lineAccountCode_accountCode(type='text' name=`` readonly)
+          tr
+            td.table-td-padding
+              .field.is-horizontal                       
+                .field-label.m-0
+                  label 補助科目コード
+            td.table-td-padding
+              .field-body.m-0
+                .field
+                  p.control
+                    input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
+          tr
+            td.table-td-padding
+              .field.is-horizontal  
+                .field-label.m-0
+                  label 部門コード 
+            td.table-td-padding
+              .field-body.m-0
+                .field
+                  p.control
+                    input.input.lineAccountCode_departmentCode(type='text' name=`` value readonly)
+      .column.is-0.p-1
+      .column.is-one-quarter.p-0.border-div-rad-4
+        table.table.table-margin-left
+          tr(colspan=2)
+            td.table-td-padding
+              .field.is-horizontal
+                .field-label.m-0           
+                  label 勘定科目コード
+            td.table-td-padding
+              .field-body.m-0
+                .field            
+                  input.input.lineCreditAccountCode_creditAccountCode.input-creditAccountCode(type='text' value readonly)
+          tr
+            td.table-td-padding
+              .field.is-horizontal                       
+                .field-label.m-0
+                  label 補助科目コード
+            td.table-td-padding
+              .field-body.m-0
+                .field
+                  p.control
+                    input.input.lineCreditAccountCode_creditSubAccountCode.input-creditSubAccountCode(type='text'  value readonly)
+          tr
+            td.table-td-padding
+              .field.is-horizontal  
+                .field-label.m-0
+                  label 部門コード 
+            td.table-td-padding
+              .field-body.m-0
+                .field
+                  p.control
+                    input.input.lineCreditAccountCode_creditDepartmentCode.input-creditDepartmentCode(type='text'  value readonly)
+
 
   template#template-journal-accountCode
     .columns.m-0.base-bulkInsert-journal
       .column.p-0.lineAccountCodeForBulk(id='bulkInsertNo1')
-        .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1')
-          .column.is-two-fifths.p-0.border-div-rad-4
-            .field.is-horizontal.m-1.has-addons-centered
-              .field-label.is-normal.m-0.text-center
-                label 勘定科目コード
-              .field-label.is-normal.m-0.text-center
-                label 補助科目コード
-              .field-label.is-normal.m-0.is-1.fixed-void-66
-                label 　
-            .field.is-horizontal.p-1
-              .field-body.m-1
-                .field
-                  p.control
-                    input.input.input-accountCode(type='text' value readonly)
-              .field-body.m-1
-                .field
-                  p.control
-                    input.input.input-subAccountCode(type='text'  value readonly)
-              .field-body.m-1.is-1.none-flex-grow
-                .field
-                  p.control
-                    a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
+        .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1')          
+          .column.is-one-quarter.p-0.border-div-rad-4
+            table.table.table-margin-left
+              tr
+                td.table-td-padding
+                  .field.is-horizontal
+                    .field-label.m-0           
+                      label 勘定科目コード
+                td.table-td-padding
+                  .field-body.m-0
+                    .field            
+                      input.input.input-accountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_accountCode` value readonly)
+                td(rowspan=2).table-td-upbutton-padding 
+                  .field-body.m-1.is-1.none-flex-grow.padding-top-4 
+                    .field
+                      p.control
+                        a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
+              tr
+                td.table-td-padding
+                  .field.is-horizontal                       
+                    .field-label.m-0
+                      label 補助科目コード
+                td.table-td-padding
+                  .field-body.m-0
+                    .field
+                      p.control
+                        input.input.input-subAccountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_subAccountCode` value readonly)
+              tr
+                td.table-td-padding
+                  .field.is-horizontal  
+                    .field-label.m-0
+                      label 部門コード 
+                td.table-td-padding
+                  .field-body.m-0
+                    .field
+                      p.control
+                        input.input.input-departmentCode(type='text' id=`bulkInsertNo1_lineAccountCode1_departmentCode` value readonly)
+                td.table-td-button-padding
+                  .field-body.m-1.is-1.none-flex-grow
+                    .field
+                      p.control
+                        a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索  
+                                  
           .column.is-0.p-1
-          .column.is-one-fifth.p-0.border-div-rad-4
-           .field.is-horizontal.m-1.has-addons-centered
-             .field-label.is-normal.m-0.text-center
-               label 部門コード
-             .field-label.is-normal.m-0.is-1.fixed-void-66
-               label 　
-           .field.is-horizontal.p-1
-             .field-body.m-1
-               .field
-                 p.control
-                   input.input.input-departmentCode(type='text'  value readonly)
-             .field-body.m-1.is-1.none-flex-grow
-               .field
-                 p.control
-                   a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
-          .column.is-0.p-1
-          .column.is-0.p-0.column-department
+          .column.is-one-quarter.p-0.border-div-rad-4
+            table.table.table-margin-left
+              tr
+                td.table-td-padding
+                  .field.is-horizontal
+                    .field-label.m-0           
+                      label 勘定科目コード
+                td.table-td-padding
+                  .field-body.m-0
+                    .field            
+                      input.input.input-creditAccountCode(type='text' value readonly)
+                td(rowspan=2).table-td-upbutton-padding 
+                  .field-body.m-1.is-1.none-flex-grow.padding-top-4 
+                    .field
+                      p.control
+                        a.button.is-link.show-modal.btn-search-creditMain.BtnlineCreditAccountCodeSearch(data-target='creditAccountCode-modal' data-info='bulkInsertNo1_lineCreditAccountCode1') 検索
+              tr
+                td.table-td-padding
+                  .field.is-horizontal                       
+                    .field-label.m-0
+                      label 補助科目コード
+                td.table-td-padding
+                  .field-body.m-0
+                    .field
+                      p.control
+                        input.input.input-creditSubAccountCode(type='text'  value readonly)
+              tr
+                td.table-td-padding
+                  .field.is-horizontal  
+                    .field-label.m-0
+                      label 部門コード 
+                td.table-td-padding
+                  .field-body.m-0
+                    .field
+                      p.control
+                        input.input.input-creditDepartmentCode(type='text'  value readonly)
+                td.table-td-button-padding
+                  .field-body.m-1.is-1.none-flex-grow
+                    .field
+                      p.control
+                        a.button.is-link.show-modal.btn-search-creditDepartmentCode.BtnlineCreditDepartmentCodeSearch(data-target='creditDepartmentCode-modal' data-info='bulkInsertNo1_lineCreditAccountCode1') 検索
           .column.is-0.p-1.column-minus-btn
             a.red-color.btn-minus-accountCode(id=`btn_minus_bulkInsertNo1_lineAccountCode1` data-target=`bulkInsertNo1_lineAccountCode`)
               i.fas.fa-minus-circle
@@ -210,7 +332,7 @@ block content
     .modal-background.cancel-button(data-target='accountCode-modal')
     .modal-card.is-family-noto-sans
       header.modal-card-head.color-link-modal-header
-        p.modal-card-title 勘定科目選択
+        p.modal-card-title 勘定科目選択(借方)
         a.delete(data-target="accountCode-modal")
       section.modal-card-body
           .columns.is-centered.m-0
@@ -258,10 +380,10 @@ block content
 
           .columns.is-fullwidth.m-0
             .column.is-fullwidth.p-0
-              .field.is-horizontal.is-invisible#displayInvisible
-                .box.is-fullwidth.px-2
+              .field.is-invisible#displayInvisible
+                .box.px-2
                   .subtitle.m-3 検索結果 
-                  table.table
+                  table.table.is-fullwidth
                     thead
                       td 勘定科目コード
                       td 勘定科目名
@@ -275,7 +397,7 @@ block content
     .modal-background.cancel-button(data-target='departmentCode-modal')
     .modal-card.is-family-noto-sans
       header.modal-card-head.color-link-modal-header
-        p.modal-card-title 部門データ選択
+        p.modal-card-title 部門データ選択(借方)
         a.delete(data-target="departmentCode-modal")
       section.modal-card-body
           .columns.is-centered.m-0
@@ -286,7 +408,7 @@ block content
                 .field-body
                   .field
                     p.control
-                      input.input(type="text" id= 'searchModalDepartmentCode' value maxlength=10 placeholder='英・数字・カナのみ（10桁）' pattern=inputPatternEngNumKana)
+                      input.input(type="text" id= 'searchModalDepartmentCode' value maxlength=6 placeholder='英・数字・カナのみ（6桁）' pattern=inputPatternEngNumKana)
           .columns.is-centered.m-0
             .column.p-1
               .field.is-horizontal
@@ -319,6 +441,120 @@ block content
                     tbody#displayFieldDepartmentResultBody
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button#CloseSearchDepartmentCode(data-target='departmentCode-modal') 閉じる
+
+  .modal#creditAccountCode-modal.z-index-modal
+    .modal-background.cancel-button(data-target='creditAccountCode-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 勘定科目選択(貸方)
+        a.delete(data-target="creditAccountCode-modal")
+      section.modal-card-body
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 勘定科目コード
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalCreditAccountCode' value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum)
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 勘定科目名
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalCreditAccountCodeName' value maxlength=40 placeholder='文字列（40桁）')
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 補助科目コード
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalCreditSubAccountCode' value maxlength=10 placeholder='英・数字のみ（10桁）' pattern=inputPatternEngNum)
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 補助科目名
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalCreditSubAccountCodeName' value maxlength=40 placeholder='文字列（40桁）')
+              .control
+                .field.is-grouped.is-grouped-centered
+                  .columns.m-0
+                    .column.p-0
+                      div.button-area
+                        .button.is-link#btnSearchCreditAccountCode(type="button") 検索
+
+          .columns.is-fullwidth.m-0
+            .column.is-fullwidth.p-0
+              .field.is-invisible#displayCreditInvisible
+                .box.px-2
+                  .subtitle.m-3 検索結果 
+                  table.table.is-fullwidth
+                    thead
+                      td 勘定科目コード
+                      td 勘定科目名
+                      td 補助科目コード
+                      td 補助科目名
+                    tbody#displayCreditFieldResultBody
+      footer.modal-card-foot.center-modal-footer-item
+        a.button.cancel-button#CloseSearchAccountCode(data-target='creditAccountCode-modal') 閉じる
+
+  .modal#creditDepartmentCode-modal.z-index-modal
+    .modal-background.cancel-button(data-target='creditDepartmentCode-modal')
+    .modal-card.is-family-noto-sans
+      header.modal-card-head.color-link-modal-header
+        p.modal-card-title 部門データ選択(貸方)
+        a.delete(data-target="creditDepartmentCode-modal")
+      section.modal-card-body
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 部門コード
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalCreditDepartmentCode' value maxlength=6 placeholder='英・数字・カナのみ（6桁）' pattern=inputPatternEngNumKana)
+          .columns.is-centered.m-0
+            .column.p-1
+              .field.is-horizontal
+                .field-label.is-normal.item-title-modal-accountCode
+                  label 部門名
+                .field-body
+                  .field
+                    p.control
+                      input.input(type="text" id= 'searchModalCreditDepartmentCodeName' value maxlength=40 placeholder='文字列（40桁）')
+              .control
+                .field.is-grouped.is-grouped-centered
+                  .columns.m-0
+                    .column.p-3
+                      div.button-area
+                        .button.is-link#btnSearchCreditDepartmentCode(type="button") 検索
+
+          .columns.is-centered.m-0
+            .column.is-fullwidth.p-0
+              p.text-center.input-label-required#searchCreditDepartmentModalErrMsg
+
+          .columns.is-fullwidth.m-0
+            .column.is-fullwidth.p-0
+              .field.is-invisible#creditDepartmentResultDisplayInvisible
+                .box.px-2
+                  .subtitle.m-3 検索結果 
+                  table.table.is-fullwidth
+                    thead
+                      td 部門コード
+                      td 部門名
+                    tbody#displayCreditFieldDepartmentResultBody
+      footer.modal-card-foot.center-modal-footer-item
+        a.button.cancel-button#CloseSearchDepartmentCode(data-target='creditDepartmentCode-modal') 閉じる
 
   .modal#insert-installmentAmount-modal
     .modal-background.cancel-button(data-target='insert-installmentAmount-modal')
@@ -375,45 +611,97 @@ block content
                   p#error-message-journal-modal.red-color(tabIndex=0)  　
               .columns.m-0.p-1.base-bulkInsert-journal
                 .column.p-0.lineAccountCodeForBulk(id='bulkInsertNo1')
-                  .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1' data-idx='1')
-                    .column.is-two-fifths.p-0.border-div-rad-4
-                      .field.is-horizontal.m-1.has-addons-centered
-                        .field-label.is-normal.m-0.text-center
-                          label 勘定科目コード
-                        .field-label.is-normal.m-0.text-center
-                          label 補助科目コード
-                        .field-label.is-normal.m-0.is-1.fixed-void-66
-                          label 　
-                      .field.is-horizontal.p-1
-                        .field-body.m-1
-                          .field
-                            p.control
-                              input.input.input-accountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_accountCode` value readonly)
-                        .field-body.m-1
-                          .field
-                            p.control
-                              input.input.input-subAccountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_subAccountCode` value readonly)
-                        .field-body.m-1.is-1.none-flex-grow
-                          .field
-                            p.control
-                              a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
+                  .columns.m-0
+                    .column.is-one-quarter
+                      p.text-center.font-bold 借方
                     .column.is-0.p-1
-                    .column.is-one-fifth.p-0.border-div-rad-4
-                      .field.is-horizontal.m-1.has-addons-centered
-                        .field-label.is-normal.m-0.text-center
-                          label 部門コード
-                        .field-label.is-normal.m-0.is-1.fixed-void-66
-                          label 　
-                      .field.is-horizontal.p-1
-                        .field-body.m-1
-                          .field
-                            p.control
-                              input.input.input-departmentCode(type='text' id=`bulkInsertNo1_lineAccountCode1_departmentCode` value readonly)
-                        .field-body.m-1.is-1.none-flex-grow
-                          .field
-                            p.control
-                              a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
-
+                    .column.is-one-quarter
+                      p.text-center.font-bold 貸方                
+                  .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1' data-idx='1')
+                    .column.is-one-quarter.p-0.border-div-rad-4
+                      table.table.table-margin-left
+                        tr
+                          td.table-td-padding
+                            .field.is-horizontal
+                              .field-label.m-0           
+                                label 勘定科目コード
+                          td.table-td-padding
+                            .field-body.m-0
+                              .field            
+                                input.input.input-accountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_accountCode` value readonly)
+                          td(rowspan=2).table-td-upbutton-padding 
+                            .field-body.m-1.is-1.none-flex-grow.padding-top-4 
+                              .field
+                                p.control
+                                  a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索
+                        tr
+                          td.table-td-padding
+                            .field.is-horizontal                       
+                              .field-label.m-0
+                                label 補助科目コード
+                          td.table-td-padding
+                            .field-body.m-0
+                              .field
+                                p.control
+                                  input.input.input-subAccountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_subAccountCode` value readonly)
+                        tr
+                          td.table-td-padding
+                            .field.is-horizontal  
+                              .field-label.m-0
+                                label 部門コード 
+                          td.table-td-padding
+                            .field-body.m-0
+                              .field
+                                p.control
+                                  input.input.input-departmentCode(type='text' id=`bulkInsertNo1_lineAccountCode1_departmentCode` value readonly)
+                          td.table-td-button-padding
+                            .field-body.m-1.is-1.none-flex-grow
+                              .field
+                                p.control
+                                  a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索  
+                                           
+                    .column.is-0.p-1
+                    .column.is-one-quarter.p-0.border-div-rad-4
+                      table.table.table-margin-left
+                        tr
+                          td.table-td-padding
+                            .field.is-horizontal
+                              .field-label.m-0           
+                                label 勘定科目コード
+                          td.table-td-padding
+                            .field-body.m-0
+                              .field            
+                                input.input.input-creditAccountCode(type='text' id=`bulkInsertNo1_lineCreditAccountCode1_creditAccountCode` value readonly)
+                          td(rowspan=2).table-td-upbutton-padding 
+                            .field-body.m-1.is-1.none-flex-grow.padding-top-4 
+                              .field
+                                p.control
+                                  a.button.is-link.show-modal.btn-search-creditMain.BtnlineCreditAccountCodeSearch(data-target='creditAccountCode-modal' data-info='bulkInsertNo1_lineCreditAccountCode1') 検索
+                        tr
+                          td.table-td-padding
+                            .field.is-horizontal
+                              .field-label.m-0
+                                label 補助科目コード
+                          td.table-td-padding
+                            .field-body.m-0
+                              .field
+                                p.control
+                                  input.input.input-creditSubAccountCode(type='text' id=`bulkInsertNo1_lineCreditAccountCode1_creditSubAccountCode` value readonly)
+                        tr
+                          td.table-td-padding
+                            .field.is-horizontal  
+                              .field-label.m-0
+                                label 部門コード 
+                          td.table-td-padding
+                            .field-body.m-0
+                              .field
+                                p.control
+                                  input.input.input-creditDepartmentCode(type='text' id=`bulkInsertNo1_lineCreditAccountCode1_creditDepartmentCode` value readonly)
+                          td.table-td-button-padding
+                            .field-body.m-1.is-1.none-flex-grow
+                              .field
+                                p.control
+                                  a.button.is-link.show-modal.btn-search-creditDepartmentCode.BtnlineCreditDepartmentCodeSearch(data-target='creditDepartmentCode-modal' data-info='bulkInsertNo1_lineCreditAccountCode1') 検索 
         .columns#field-invoiceLine
       footer.modal-card-foot.center-modal-footer-item
         a.button.cancel-button(data-target='bulkInsert-journal-modal') 戻る

@@ -61,6 +61,42 @@ module.exports = (sequelize, DataTypes) => {
       journalNo: {
         type: DataTypes.STRING,
         allowNull: false
+      },
+      accountName: {
+        type: DataTypes.STRING(40),
+        allowNull: true
+      },
+      subAccountName: {
+        type: DataTypes.STRING(40),
+        allowNull: true
+      },
+      departmentName: {
+        type: DataTypes.STRING(40),
+        allowNull: true
+      },
+      creditAccountName: {
+        type: DataTypes.STRING(40),
+        allowNull: true
+      },
+      creditAccountCode: {
+        type: DataTypes.STRING(10),
+        allowNull: true
+      },
+      creditSubAccountName: {
+        type: DataTypes.STRING(40),
+        allowNull: true
+      },
+      creditSubAccountCode: {
+        type: DataTypes.STRING(10),
+        allowNull: true
+      },
+      creditDepartmentName: {
+        type: DataTypes.STRING(40),
+        allowNull: true
+      },
+      creditDepartmentCode: {
+        type: DataTypes.STRING(10),
+        allowNull: true
       }
     },
     {
