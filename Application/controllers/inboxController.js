@@ -372,6 +372,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
       for (let idx = 0; idx < 10; idx++) {
         const item = lineJournals[lines][idx]
         if (item.data === null) continue
+        if (item.data.accountCode.length === 0 && item.data.creditAccountCode === 0) continue
 
         result.lineId = item.data.lineId
         // 借方の勘定科目コード検証
@@ -383,7 +384,6 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
               accountCode: item.data.accountCode
             }
           })
-
           if (accInstance instanceof AccountCode === false) {
             result.status = -1
             return result
@@ -415,9 +415,8 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
     for (let lines = 0; lines < lineJournals.length; lines++) {
       for (let idx = 0; idx < 10; idx++) {
         const item = lineJournals[lines][idx]
-        delete result.accountCode
         if (item.data === null) continue
-        if (item.data.subAccountCode.length === 0 && item.data.creditSubAccountCode.length === 0) continue
+        if (item.data.subAccountCode.length === 0 && item.data.creditSubAccountCod === 0) continue
         let checkSubAccount = null
         let checkCreditSubAccount = null
         result.lineId = item.data.lineId
@@ -425,6 +424,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
         // 借方の補助科目コード検証
         if (item.data.accountCode.length !== 0 && item.data.subAccountCode.length !== 0) {
           result.subAccountCode = item.data.subAccountCode
+          delete result.accountCode
           checkSubAccount = await AccountCode.findAll({
             raw: true,
             include: [
@@ -453,6 +453,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
         // 貸方の補助科目コード検証
         if (item.data.creditAccountCode.length !== 0 && item.data.creditSubAccountCode.length !== 0) {
           result.subAccountCode = item.data.creditSubAccountCode
+          delete result.accountCode
           checkCreditSubAccount = await AccountCode.findAll({
             raw: true,
             include: [
@@ -484,7 +485,6 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
     for (let lines = 0; lines < lineJournals.length; lines++) {
       for (let idx = 0; idx < 10; idx++) {
         const item = lineJournals[lines][idx]
-        delete result.subAccountCode
         if (item.data === null) continue
         if (item.data.departmentCode.length === 0 && item.data.creditDepartmentCode.length === 0) continue
         result.lineId = item.data.lineId
@@ -524,7 +524,6 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
         }
       }
     }
-    delete result.departmentCode
 
     // DBに保存データがない場合
     if (resultSearchJournals.length === 0) {

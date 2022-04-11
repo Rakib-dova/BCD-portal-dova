@@ -69,8 +69,10 @@ window.onload = function () {
 $('#btn-bulkInsert').addEventListener('click', function () {
   // 仕訳情報一括入力モーダル初期化
   const invoiceLines = getInvoiceLineList()
-  while ($('#field-invoiceLine').firstChild) {
-    $('#field-invoiceLine').removeChild($('#field-invoiceLine').firstChild)
+  if ($('.column-invoiceLine-journalModal').length !== 0) {
+    $('.column-invoiceLine-journalModal').forEach((el) => {
+      el.remove()
+    })
   }
 
   // 勘定科目検索初期化
@@ -106,21 +108,29 @@ $('#btn-bulkInsert').addEventListener('click', function () {
 
       // 各明細の仕訳情報取得・表示
       const lineAccountcodeList = getLineAccountcodeList(invoiceLines[idx].invoiceLineNo)
-      for (const lineAccount of lineAccountcodeList) {
+      for (let j = 0; j < lineAccountcodeList.length; j++) {
         const templateLineAccountCodeItemModal = $('#templateLineAccountCodeItemModal')
         const cloneLineAccountCodeItemModalTemplate = document.importNode(
           templateLineAccountCodeItemModal.content,
           true
         )
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[0].value = lineAccount.accountCode
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[1].value = lineAccount.subAccountCode
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[2].value = lineAccount.departmentCode
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[3].value =
-          lineAccount.creditAccountCode
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[4].value =
-          lineAccount.creditSubAccountCode
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[5].value =
-          lineAccount.creditDepartmentCode
+
+        // 1行目じゃない場合、タイトル削除
+        if (j > 0) cloneLineAccountCodeItemModalTemplate.getElementById('lineAccountCodeTitle').remove()
+        cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_accountCode').value =
+          lineAccountcodeList[j].accountCode
+        cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_subAccountCode').value =
+          lineAccountcodeList[j].subAccountCode
+        cloneLineAccountCodeItemModalTemplate.querySelector('.lineAccountCode_departmentCode').value =
+          lineAccountcodeList[j].departmentCode
+        // 貸方
+        cloneLineAccountCodeItemModalTemplate.querySelector('.lineCreditAccountCode_creditAccountCode').value =
+          lineAccountcodeList[j].creditAccountCode
+        cloneLineAccountCodeItemModalTemplate.querySelector('.lineCreditAccountCode_creditSubAccountCode').value =
+          lineAccountcodeList[j].creditSubAccountCode
+        cloneLineAccountCodeItemModalTemplate.querySelector('.lineCreditAccountCode_creditDepartmentCode').value =
+          lineAccountcodeList[j].creditDepartmentCode
+
         cloneInvoiceLineTemplate.querySelector('.box').append(cloneLineAccountCodeItemModalTemplate)
       }
 
@@ -157,7 +167,11 @@ const getInvoiceLineList = function () {
           accountCode: node.querySelectorAll('input[type=text]')[0].value,
           subAccountCode: node.querySelectorAll('input[type=text]')[1].value,
           departmentCode: node.querySelectorAll('input[type=text]')[2].value,
-          amount: node.querySelectorAll('input[type=text]')[3].value
+          // 貸方
+          creditAccountCode: node.querySelectorAll('input[type=text]')[3].value,
+          creditSubAccountCode: node.querySelectorAll('input[type=text]')[4].value,
+          creditDepartmentCode: node.querySelectorAll('input[type=text]')[5].value,
+          amount: node.querySelectorAll('input[type=text]')[6].value
         }
       } else {
         account[idx] = {
@@ -165,6 +179,9 @@ const getInvoiceLineList = function () {
           accountCode: null,
           subAccountCode: null,
           departmentCode: null,
+          creditAccountCode: null,
+          creditSubAccountCode: null,
+          creditDepartmentCode: null,
           amount: null
         }
       }
@@ -248,33 +265,38 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
 
 // 仕訳情報取得
 const getLineAccountcodeList = function (invoiceLineNo) {
-  const invoiceLines = $(`#invoiceLine${invoiceLineNo}`).parentNode.querySelectorAll('.lineAccountcode')
+  const target = $(`#invoiceLine${invoiceLineNo}`).parentNode.querySelectorAll('.lineAccountcode')
   const lineAccountCodeList = []
-  for (const invoiceLine of invoiceLines) {
-    const debbitAccountCode = invoiceLine.querySelectorAll('input[type=text]')[0].value
-    const debitSubAccountCode = invoiceLine.querySelectorAll('input[type=text]')[1].value
-    const debitDepartmentCode = invoiceLine.querySelectorAll('input[type=text]')[2].value
-    const creditAccountCode = invoiceLine.querySelectorAll('input[type=text]')[3].value
-    const creditSubAccountCode = invoiceLine.querySelectorAll('input[type=text]')[4].value
-    const credittDepartmentCode = invoiceLine.querySelectorAll('input[type=text]')[5].value
-    if (
-      debbitAccountCode ||
-      debitSubAccountCode ||
-      debitDepartmentCode ||
-      creditAccountCode ||
-      creditSubAccountCode ||
-      credittDepartmentCode !== ''
-    ) {
+  for (let i = 0; i < target.length; i++) {
+    const accountCode = $(`#${target[i].id}_accountCode`).value
+    const subAccountCode = $(`#${target[i].id}_subAccountCode`).value
+    const departmentCode = $(`#${target[i].id}_departmentCode`).value
+    // 貸方
+    let creditAccountCode = null
+    let creditSubAccountCode = null
+    let creditDepartmentCode = null
+    if (i < 1) {
+      creditAccountCode = target[i].querySelectorAll('input[type=text]')[0].value
+      creditSubAccountCode = target[i].querySelectorAll('input[type=text]')[1].value
+      creditDepartmentCode = target[i].querySelectorAll('input[type=text]')[2].value
+    } else {
+      creditAccountCode = target[i].querySelectorAll('input[type=text]')[3].value
+      creditSubAccountCode = target[i].querySelectorAll('input[type=text]')[4].value
+      creditDepartmentCode = target[i].querySelectorAll('input[type=text]')[5].value
+    }
+
+    if (accountCode !== '' || departmentCode !== '') {
       lineAccountCodeList.push({
-        accountCode: debbitAccountCode,
-        subAccountCode: debitSubAccountCode,
-        departmentCode: debitDepartmentCode,
+        accountCode: accountCode,
+        subAccountCode: subAccountCode,
+        departmentCode: departmentCode,
         creditAccountCode: creditAccountCode,
         creditSubAccountCode: creditSubAccountCode,
-        creditDepartmentCode: credittDepartmentCode
+        creditDepartmentCode: creditDepartmentCode
       })
     }
   }
+
   return lineAccountCodeList
 }
 
@@ -1053,7 +1075,6 @@ $('#btn-insert').addEventListener('click', function () {
 $('#btn-confirm').addEventListener('click', function () {
   // 「登録」ボタンが非活性の場合、終了する。
   if (this.getAttribute('disabled') === 'true') return
-
   const dupleResult = duplicationCheck()
   if (dupleResult.length > 0) {
     document.getElementById(dupleResult[0].id).focus({ preventScroll: false })
@@ -1084,8 +1105,6 @@ const getJournalList = function () {
             journalNo: journalNo,
             input_amount: ~~journal.querySelectorAll('input[type=text]')[2].value.replaceAll(',', '')
           }
-          // 取得確認
-          console.log(journal.querySelectorAll('input[type=text]'))
         } else {
           journalLines[idx][jdx] = {
             accountCode: journal.querySelectorAll('input[type=text]')[0].value,
@@ -1093,8 +1112,6 @@ const getJournalList = function () {
             journalNo: journalNo,
             input_amount: ~~journal.querySelectorAll('input[type=text]')[2].value.replaceAll(',', '')
           }
-          // 取得確認
-          console.log(journal.querySelectorAll('input[type=text]'))
         }
       })
       journalIdx++
@@ -1140,7 +1157,6 @@ const checkJournalList = function () {
       const checkJournalLines = journalLines[i].filter(function (item) {
         return item !== null && item !== undefined
       })
-
       // 仕訳情報が設定されていない小計チェック用
       if (checkJournalLines.length === 1) {
         total = ~~journalLines[i][j].input_amount.replaceAll(',', '')
@@ -1148,15 +1164,10 @@ const checkJournalList = function () {
       }
       // 設定した仕訳情報の計上金額をチェック用
       if (journalLines[i][j] !== undefined) {
-        if (journalLines[i][j].accountCode.length !== 0) {
-          total = total + ~~journalLines[i][j].input_amount.replaceAll(',', '')
-          if (~~journalLines[i][j].input_amount.replaceAll(',', '') === 0) {
-            isFirstLineNull = true
-            $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
-          }
-        } else {
+        total = total + ~~journalLines[i][j].input_amount.replaceAll(',', '')
+        if (~~journalLines[i][j].input_amount.replaceAll(',', '') === 0) {
           isFirstLineNull = true
-          $('#error-message-body').innerText = '仕訳情報を正しく設定してください。'
+          $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
         }
       }
     }
@@ -1174,7 +1185,7 @@ const checkJournalList = function () {
   return true
 }
 
-// 重複された仕訳情報処理(仕訳情報設定画面)
+// 重複又は空になった仕訳情報処理(仕訳情報設定画面)
 const duplicationCheck = function () {
   const duplArray = []
   // 画面に表示された項目別の仕訳情報を取得
@@ -1186,22 +1197,30 @@ const duplicationCheck = function () {
     const lineInformationArray = []
 
     // 勘定科目と補助科目を取得
-    for (const child of children) {
-      console.log(child)
-    }
     Array.prototype.forEach.call(children, (item) => {
-      const accountCode = item.children[0].children[1].children[0].children[0].children[0].children[0].value // 勘定科目コード
-      const subAccountCode = item.children[0].children[1].children[1].children[0].children[0].children[0].value // 補助科目コード
-      const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
-      lineInformationArray.push([accountCode, subAccountCode, department])
+    // 借方
+    const accountCode = item.querySelectorAll('input[type=text]')[0].value // 勘定科目コード
+    const subAccountCode = item.querySelectorAll('input[type=text]')[1].value // 補助科目コード
+    const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
+
+    // 貸方
+    const creditAccountCode = item.querySelectorAll('input[type=text]')[3].value // 勘定科目コード
+    const creditSubAccountCode = item.querySelectorAll('input[type=text]')[4].value // 補助科目コード
+    const creditDepartment = item.querySelectorAll('input[type=text]')[5].value // 部門コード
+      lineInformationArray.push([accountCode, subAccountCode, department, creditAccountCode, creditSubAccountCode, creditDepartment])
     })
     koumokuInformationArray.push(duplicateCheckFunction(lineInformationArray))
   }
 
-  // 重複がある明細項目づつエラーメッセージを設定する。
+  // 空又は重複がある明細項目づつエラーメッセージを設定する。
   koumokuInformationArray.map((item, idx) => {
     const errMsg = document.getElementById(`error-message-lineNo${idx + 1}`)
-    if (item === true) {
+    if (item.nothingCheckFlag === true) {
+      errMsg.innerText = '仕訳情報を正しく設定してください。'
+      errMsg.classList.remove('invisible')
+      errMsg.focus({ preventScroll: false })
+      duplArray.push(errMsg)
+    } else if (item.duplicationFlag === true) {
       errMsg.innerText = '同じ仕訳情報は設定できません。'
       errMsg.classList.remove('invisible')
       errMsg.focus({ preventScroll: false })
@@ -1224,35 +1243,25 @@ const duplicationCheckModal = function () {
   // 勘定科目と補助科目を取得
   Array.prototype.forEach.call(children, (item) => {
     // 借方
-    const accountCode =
-      item.children[0].children[1].children[0].children[1].children[1].children[0].children[0].children[0].value // 勘定科目コード
-    const subAccountCode =
-      item.children[0].children[1].children[0].children[2].children[1].children[0].children[0].children[0].value // 補助科目コード
-    const department =
-      item.children[0].children[1].children[0].children[3].children[1].children[0].children[0].children[0].value // 部門コード
+    const accountCode = item.querySelectorAll('input[type=text]')[0].value // 勘定科目コード
+    const subAccountCode = item.querySelectorAll('input[type=text]')[1].value // 補助科目コード
+    const department = item.querySelectorAll('input[type=text]')[2].value // 部門コード
 
     // 貸方
-    const creditAccountCode =
-      item.children[2].children[1].children[0].children[1].children[1].children[0].children[0].children[0].value // 勘定科目コード
-    const creditSubAccountCode =
-      item.children[2].children[1].children[0].children[2].children[1].children[0].children[0].children[0].value // 補助科目コード
-    const creditDepartment =
-      item.children[2].children[1].children[0].children[3].children[1].children[0].children[0].children[0].value // 部門コード
+    const creditAccountCode = item.querySelectorAll('input[type=text]')[3].value // 勘定科目コード
+    const creditSubAccountCode = item.querySelectorAll('input[type=text]')[4].value // 補助科目コード
+    const creditDepartment = item.querySelectorAll('input[type=text]')[5].value // 部門コード
 
-    koumokuInformationArray.push([
-      accountCode,
-      subAccountCode,
-      department,
-      creditAccountCode,
-      creditSubAccountCode,
-      creditDepartment
-    ])
+    koumokuInformationArray.push([accountCode, subAccountCode, department, creditAccountCode, creditSubAccountCode, creditDepartment])
   })
   const dupleResult = duplicateCheckFunction(koumokuInformationArray)
 
   // 重複された場合エラーメッセージ表示
   const errMsg = $('#error-message-journal-modal')
-  if (dupleResult) {
+  if (dupleResult.nothingCheckFlag) {
+    errMsg.innerText = '仕訳情報を正しく設定してください。'
+    return true
+  } else if (dupleResult.duplicationFlag) {
     errMsg.innerText = '同じ仕訳情報は設定できません。'
     return true
   } else {
@@ -1261,16 +1270,22 @@ const duplicationCheckModal = function () {
   }
 }
 
-// 重複検索関数
+// 空及び重複検索関数
 const duplicateCheckFunction = function (array) {
   const length = array.length
+  let nothingCheckFlag = false
   let duplicationFlag = false
-  let i, j, temp
+  let i, j, temp, z
+  for (z = 0; z < length; z++) {
+    const result = array[z].filter(item => item.length > 0)
+    if (result.length < 1) {
+      nothingCheckFlag = true
+    }
+  }
   for (i = 0; i < length - 1; i++) {
     for (j = 0; j < length - 1 - i; j++) {
       if (JSON.stringify(array[j]) === JSON.stringify(array[j + 1])) {
         duplicationFlag = true
-        return duplicationFlag
       } else {
         temp = array[j]
         array[j] = array[j + 1]
@@ -1278,7 +1293,8 @@ const duplicateCheckFunction = function (array) {
       }
     }
   }
-  return duplicationFlag
+
+  return { duplicationFlag: duplicationFlag, nothingCheckFlag: nothingCheckFlag }
 }
 
 // Modal反映ボタン
@@ -1450,12 +1466,8 @@ const addBulkList = function () {
         cloneAccountCodeItem
           .querySelector('.lineCreditAccountCode_creditAccountCode')
           .setAttribute('name', `${creditTagetIdBase}_creditAccountCode`)
-        cloneAccountCodeItem.querySelector(
-          '.lineCreditAccountCode_creditAccountCode'
-        ).id = `${creditTagetIdBase}_creditAccountCode`
-        cloneAccountCodeItem.querySelector(
-          '.lineCreditAccountCode_creditAccountCode'
-        ).name = `${creditTagetIdBase}_creditAccountCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditAccountCode').id = `${creditTagetIdBase}_creditAccountCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditAccountCode').name = `${creditTagetIdBase}_creditAccountCode`
         cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditAccountCode').value = journal.creditAccountCode
 
         // 補助科目コードINPUT
@@ -1470,14 +1482,9 @@ const addBulkList = function () {
         cloneAccountCodeItem
           .querySelector('.lineCreditAccountCode_creditSubAccountCode')
           .setAttribute('name', `${creditTagetIdBase}_creditSubAccountCode`)
-        cloneAccountCodeItem.querySelector(
-          '.lineCreditAccountCode_creditSubAccountCode'
-        ).id = `${creditTagetIdBase}_creditSubAccountCode`
-        cloneAccountCodeItem.querySelector(
-          '.lineCreditAccountCode_creditSubAccountCode'
-        ).name = `${creditTagetIdBase}_creditSubAccountCode`
-        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').value =
-          journal.creditSubAccountCode
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').id = `${creditTagetIdBase}_creditSubAccountCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').name = `${creditTagetIdBase}_creditSubAccountCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditSubAccountCode').value = journal.creditSubAccountCode
 
         // 部門データINPUT
         cloneAccountCodeItem
@@ -1491,14 +1498,9 @@ const addBulkList = function () {
         cloneAccountCodeItem
           .querySelector('.lineCreditAccountCode_creditDepartmentCode')
           .setAttribute('name', `${creditTagetIdBase}_creditDepartmentCode`)
-        cloneAccountCodeItem.querySelector(
-          '.lineCreditAccountCode_creditDepartmentCode'
-        ).id = `${creditTagetIdBase}_creditDepartmentCode`
-        cloneAccountCodeItem.querySelector(
-          '.lineCreditAccountCode_creditDepartmentCode'
-        ).name = `${creditTagetIdBase}_creditDepartmentCode`
-        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').value =
-          journal.creditDepartmentCode
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').id = `${creditTagetIdBase}_creditDepartmentCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').name = `${creditTagetIdBase}_creditDepartmentCode`
+        cloneAccountCodeItem.querySelector('.lineCreditAccountCode_creditDepartmentCode').value = journal.creditDepartmentCode
 
         // 計上金額
         cloneAccountCodeItem
