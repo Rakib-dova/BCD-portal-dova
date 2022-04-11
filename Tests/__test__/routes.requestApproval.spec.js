@@ -1227,7 +1227,8 @@ describe('requestApprovalのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        approveRouteId: 'dummyId'
+        approveRouteId: 'dummyId',
+        message: '承認お願いいたします。'
       }
       request.params = {
         invoiceId: '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -1260,7 +1261,8 @@ describe('requestApprovalのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        approveRouteId: 'dummyId'
+        approveRouteId: 'dummyId',
+        message: '承認お願いいたします。'
       }
       request.params = {
         invoiceId: '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -1295,6 +1297,13 @@ describe('requestApprovalのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[1] }
+      request.body = {
+        approveRouteId: 'dummyId',
+        message: '承認お願いいたします。'
+      }
+      request.params = {
+        invoiceId: '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      }
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[1])
@@ -1324,7 +1333,8 @@ describe('requestApprovalのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        approveRouteId: 'dummyId'
+        approveRouteId: 'dummyId',
+        message: '承認お願いいたします。'
       }
       request.params = {
         invoiceId: '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -1356,7 +1366,8 @@ describe('requestApprovalのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        approveRouteId: 'dummyId'
+        approveRouteId: 'dummyId',
+        message: '承認お願いいたします。'
       }
       request.params = {
         invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
@@ -1386,7 +1397,8 @@ describe('requestApprovalのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        approveRouteId: 'dummyId'
+        approveRouteId: 'dummyId',
+        message: '承認お願いいたします。'
       }
       request.params = {
         invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
@@ -1409,6 +1421,103 @@ describe('requestApprovalのテスト', () => {
       // 結果確認
       // 前のページを呼び出し
       expect(response.redirect).toHaveBeenCalledWith('/requestApproval/bfc26e3a-f2e8-5a05-9f8d-1e8f41196904')
+    })
+
+    test('準正常:依頼済みの請求書', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        approveRouteId: 'dummyId',
+        message: ''
+      }
+      request.params = {
+        invoiceId: '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      approverControllerCheckApproveRoute.mockReturnValue(false)
+      approverControllerRequestApproval.mockReturnValue(1)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      // 支払依頼ページレンダリングを呼び出し
+      expect(request.flash).toBeCalledWith('noti', ['支払い依頼', '承認ルートを指定してください。'])
+      expect(response.redirect).toHaveBeenCalledWith(`/requestApproval/${request.params.invoiceId}`)
+    })
+
+    test('準正常:メッセージの文字数が１５００以上の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        approveRouteId: 'dummyId',
+        message: `このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。
+          このメッセージは１５００文字超過したものです。このメッセージは１５００文字超過したものです。`
+      }
+      request.params = {
+        invoiceId: '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+
+      approverControllerCheckApproveRoute.mockReturnValue(true)
+      approverControllerRequestApproval.mockReturnValue(1)
+
+      // 試験実施
+      await requestApproval.cbPostApproval(request, response, next)
+
+      // 結果確認
+      // 支払依頼ページレンダリングを呼び出し
+      expect(request.flash).toBeCalledWith('noti', ['支払依頼', 'メッセージは1500文字まで入力してください。'])
+      expect(response.redirect).toHaveBeenCalledWith(`/requestApproval/${request.params.invoiceId}`)
     })
 
     test('400エラー:LoggedInではないsessionの場合', async () => {
