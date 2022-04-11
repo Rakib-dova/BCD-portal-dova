@@ -17,10 +17,10 @@ block content
           a.button.is-link(href=`/requestApproval/${documentId}`) 支払依頼へ
 
   template#templateLineAccountCodeItem
-    .columns.m-0.p-1.lineAccountcode
+    .columns.m-0.pt-1.lineAccountcode
       .column.is-one-third.p-0.border-div-rad-4
         table.table.table-margin-left
-          tr(colspan=3)
+          tr
             td.table-td-padding
               .field.is-horizontal
                 .field-label.m-0           
@@ -62,7 +62,7 @@ block content
       .column.is-0.p-1
       .column.is-one-third.p-0.border-div-rad-4
         table.table.table-margin-left
-          tr(colspan=3)
+          tr
             td.table-td-padding
               .field.is-horizontal
                 .field-label.m-0           
@@ -242,8 +242,6 @@ block content
         .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1')          
           .column.is-one-quarter.p-0.border-div-rad-4
             table.table.table-margin-left
-              tr(colspan=3)
-                p.text-center.font-bold 借方（一括）
               tr
                 td.table-td-padding
                   .field.is-horizontal
@@ -287,8 +285,6 @@ block content
           .column.is-0.p-1
           .column.is-one-quarter.p-0.border-div-rad-4
             table.table.table-margin-left
-              tr(colspan=3)
-                p.text-center.font-bold 貸方
               tr
                 td.table-td-padding
                   .field.is-horizontal
@@ -615,11 +611,15 @@ block content
                   p#error-message-journal-modal.red-color(tabIndex=0)  　
               .columns.m-0.p-1.base-bulkInsert-journal
                 .column.p-0.lineAccountCodeForBulk(id='bulkInsertNo1')
+                  .columns.m-0
+                    .column.is-one-quarter
+                      p.text-center.font-bold 借方
+                    .column.is-0.p-1
+                    .column.is-one-quarter
+                      p.text-center.font-bold 貸方                
                   .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1' data-idx='1')
                     .column.is-one-quarter.p-0.border-div-rad-4
                       table.table.table-margin-left
-                        tr(colspan=3)
-                          p.text-center.font-bold 借方（一括）
                         tr
                           td.table-td-padding
                             .field.is-horizontal
@@ -663,8 +663,6 @@ block content
                     .column.is-0.p-1
                     .column.is-one-quarter.p-0.border-div-rad-4
                       table.table.table-margin-left
-                        tr(colspan=3)
-                          p.text-center.font-bold 貸方
                         tr
                           td.table-td-padding
                             .field.is-horizontal
@@ -681,7 +679,7 @@ block content
                                   a.button.is-link.show-modal.btn-search-creditMain.BtnlineCreditAccountCodeSearch(data-target='creditAccountCode-modal' data-info='bulkInsertNo1_lineCreditAccountCode1') 検索
                         tr
                           td.table-td-padding
-                            .field.is-horizontal                       
+                            .field.is-horizontal
                               .field-label.m-0
                                 label 補助科目コード
                           td.table-td-padding
