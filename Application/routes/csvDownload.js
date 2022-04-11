@@ -14,6 +14,7 @@ const apiManager = require('../controllers/apiManager')
 const functionName = 'cbPostIndex'
 const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
 const csvDownloadController = require('../controllers/csvDownloadController.js')
+const { generatePDF } = require("../lib/pdfGenerator");
 
 const notiTitle = '請求書ダウンロード'
 
@@ -81,6 +82,331 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+// const cbPostIndex = async (req, res, next) => {
+//   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+//   const qs = require('qs')
+
+//   // 認証情報取得処理
+//   if (!req.session || !req.user?.userId) {
+//     return next(errorHelper.create(400))
+//   }
+
+//   // DBからuserデータ取得
+//   const user = await userController.findOne(req.user.userId)
+
+//   // データベースエラーは、エラーオブジェクトが返る
+//   // user未登録の場合もエラーを上げる
+//   if (user instanceof Error || user === null) {
+//     req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
+//     return res.redirect(303, '/csvDownload')
+//   }
+//   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+//   if (user.dataValues?.userStatus !== 0) {
+//     return next(errorHelper.create(404))
+//   }
+
+//   // DBから契約情報取得
+//   const contract = await contractController.findOne(req.user.tenantId)
+//   // データベースエラーは、エラーオブジェクトが返る
+//   // 契約情報未登録の場合もエラーを上げる
+//   if (contract instanceof Error || contract === null) {
+//     req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
+//     return res.redirect(303, '/csvDownload')
+//   }
+
+//   const deleteFlag = contract.dataValues.deleteFlag
+//   const contractStatus = contract.dataValues.contractStatus
+
+//   const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+//   if (checkContractStatus === null || checkContractStatus === 999) {
+//     return next(errorHelper.create(400))
+//   }
+
+//   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+//     return next(noticeHelper.create('cancelprocedure'))
+//   }
+
+//   req.session.userContext = 'LoggedIn'
+//   req.session.userRole = user.dataValues?.userRole
+
+//   // 絞り込みの条件データチェック
+//   const findDocumentQuery = {
+//     withouttag: ['archived', 'AP_DOCUMENT_DRAFT', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document'],
+//     _onlyIndex: true,
+//     ascending: false,
+//     onlydeleted: false,
+//     onlydrafts: false,
+//     stag: ['sales', 'purchases', 'draft'],
+//     state: [],
+//     type: 'invoice'
+//   }
+
+//   // 絞り込みの条件に請求書番号追加
+//   if (req.body.invoiceNumber || false) {
+//     findDocumentQuery.businessId = req.body.invoiceNumber
+//   }
+
+//   const states = [
+//     'DELIVERED', // 送信済み・受信済み
+//     'ACCEPTED', // 受理済み
+//     'PAID_UNCONFIRMED', // 送金済み
+//     'PAID_CONFIRMED' // 入金確認済み
+//   ]
+
+//   // 絞り込みの条件に購入/販売追加
+//   switch (req.body.buyAndSell) {
+//     case 'すべて': {
+//       break
+//     }
+//     case '販売': {
+//       findDocumentQuery.sales = true
+//       break
+//     }
+//     case '購入': {
+//       findDocumentQuery.sales = false
+//       break
+//     }
+//   }
+
+//   // 絞り込みの条件にステータス追加
+//   switch (Array.isArray(req.body.status)) {
+//     case false: {
+//       switch (req.body.status) {
+//         case '送信済み/受信済み': {
+//           findDocumentQuery.state = `${states[0]}`
+//           break
+//         }
+//         default: {
+//           switch (req.body.status) {
+//             case '受理済み': {
+//               findDocumentQuery.state = `${states[1]}`
+//               break
+//             }
+//             case '送金済み': {
+//               findDocumentQuery.state = `${states[2]}`
+//               break
+//             }
+//             case '入金確認済み': {
+//               findDocumentQuery.state = `${states[3]}`
+//               break
+//             }
+//           }
+//           break
+//         }
+//       }
+//       break
+//     }
+//     case true: {
+//       req.body.status.forEach((item, idx) => {
+//         switch (item) {
+//           case '送信済み/受信済み':
+//             findDocumentQuery.state.push(`${states[0]}`)
+//             break
+
+//           case '受理済み': {
+//             findDocumentQuery.state.push(`${states[1]}`)
+//             break
+//           }
+
+//           case '送金済み': {
+//             findDocumentQuery.state.push(`${states[2]}`)
+//             break
+//           }
+
+//           case '入金確認済み': {
+//             findDocumentQuery.state.push(`${states[3]}`)
+//             break
+//           }
+//         }
+//       })
+//       break
+//     }
+//   }
+
+//   if (findDocumentQuery.state.length === 0) {
+//     req.flash('noti', [notiTitle, 'ステータスをいずれかのの１つ選択してください。'])
+//     logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+//     return res.redirect(303, '/csvDownload')
+//   }
+
+//   // 絞り込みの条件に発行日の開始日追加
+//   if (req.body.minIssuedate || false) {
+//     findDocumentQuery.minissuedate = req.body.minIssuedate
+//   }
+
+//   // 絞り込みの条件に発行日の終了日追加
+//   if (req.body.maxIssuedate || false) {
+//     findDocumentQuery.maxissuedate = req.body.maxIssuedate
+//   }
+
+//   const invoiceNumber = req.body.invoiceNumber
+//   const findDocuments = '/documents'
+
+//   // 企業情報がない場合、検索できるようにするための変数
+//   const noCompany = ['nocompany1', 'nocompany2']
+
+//   // 受信企業の条件のチェック
+//   let sentTo
+//   if (Array.isArray(req.body.sentTo)) {
+//     sentTo = req.body.sentTo
+//   } else {
+//     if (validate.isString(req.body.sentTo)) {
+//       sentTo = [req.body.sentTo]
+//     } else {
+//       // 企業情報がない場合、検索できるようにする。
+//       sentTo = [noCompany[0]]
+//     }
+//   }
+
+//   // 送信企業の条件のチェック
+//   let sentBy
+//   if (Array.isArray(req.body.sentBy)) {
+//     sentBy = req.body.sentBy
+//   } else {
+//     if (validate.isString(req.body.sentBy)) {
+//       sentBy = [req.body.sentBy]
+//     } else {
+//       // 企業情報がない場合、検索できるようにする。
+//       sentBy = [noCompany[1]]
+//     }
+//   }
+
+//   // 送信企業X受信企業ごとに検索
+//   let sentToIdx = 0
+//   let documentsResult
+//   let resultForQuery
+//   do {
+//     const company = sentTo[sentToIdx]
+//     let sentByIdx = 0
+//     if (company !== noCompany[0]) findDocumentQuery.sentTo = company
+//     do {
+//       const sentByCompany = sentBy[sentByIdx]
+//       if (sentByCompany !== noCompany[1]) findDocumentQuery.sentBy = sentByCompany
+//       if (company !== sentByCompany) {
+//         const sendQuery = qs
+//           .stringify(findDocumentQuery)
+//           .replace(/%26/g, '&')
+//           .replace(/%3D/g, '=')
+//           .replace(/%5B0%5D/g, '')
+//           .replace(/%5B1%5D/g, '')
+//           .replace(/%5B2%5D/g, '')
+//           .replace(/%5B3%5D/g, '')
+//         // 請求書を検索する
+//         let pageId = 0
+//         let numPages = 1
+
+//         do {
+//           resultForQuery = await apiManager.accessTradeshift(
+//             req.user.accessToken,
+//             req.user.refreshToken,
+//             'get',
+//             `${findDocuments}?${sendQuery}&limit=100&page=${pageId}`
+//           )
+//           numPages = resultForQuery.numPages ?? 1
+//           // 最初検索の場合結果オブジェクト作成
+//           if (pageId === 0 && !(documentsResult?.Document ?? false)) {
+//             documentsResult = {
+//               ...resultForQuery
+//             }
+//           } else {
+//             // 検索結果がある場合結果リストに追加
+//             resultForQuery.Document.forEach((item) => {
+//               // 結果リストの数をを増加
+//               documentsResult.itemCount++
+//               documentsResult.Document.push(item)
+//             })
+//           }
+//           pageId++
+//         } while (pageId < numPages)
+//       }
+//       sentByIdx++
+//     } while (sentByIdx < sentBy.length)
+//     sentToIdx++
+//   } while (sentToIdx < sentTo.length)
+
+//   let filename = ''
+//   let downloadFile = ''
+//   // resultForQuery（API呼出）エラー検査
+//   if (resultForQuery instanceof Error) {
+//     errorHandle(resultForQuery, res, req)
+//   } else {
+//     // documentsResultのデータ有無確認
+//     if (!documentsResult) {
+//       req.flash('noti', [
+//         notiTitle,
+//         '請求書ダウンロードに失敗しました。<br>（送信企業と受信企業で同じ企業を選択している場合はどちらか一方をチェックしてください。）'
+//       ])
+//       res.redirect(303, '/csvDownload')
+//     } else if (documentsResult.itemCount === 0) {
+//       // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
+//       // 条件に合わせるデータがない場合、お知らせを表示する。
+//       req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+//       res.redirect(303, '/csvDownload')
+//     } else {
+//       const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
+//       if (req.body.invoiceNumber || false) {
+//         // documentIdの初期化
+//         let documentId = ''
+//         // 請求書番号で検索した結果の配列を取得
+//         const documents = documentsResult.Document
+
+//         // 取得した配列から請求書番号（UUID）を取得
+//         documents.map((doc) => {
+//           if (doc.ID === invoiceNumber) {
+//             documentId = doc.DocumentId
+//           }
+//           return 0
+//         })
+//         // 請求書番号（UUID）を取得した場合
+//         if (documentId !== '') {
+//           // 請求書番号（UUID）で請求書情報取得（とれシフAPI呼出）
+//           const resultForDocumentId = await apiManager.accessTradeshift(
+//             req.user.accessToken,
+//             req.user.refreshToken,
+//             'get',
+//             `/documents/${documentId}`
+//           )
+
+//           // resultエラー検査
+//           if (resultForDocumentId instanceof Error) {
+//             errorHandle(resultForDocumentId, res, req)
+//           } else {
+//             // 取得した請求書をJSONに作成する
+//             const jsondata = dataToJson(resultForDocumentId)
+//             // JSONファイルをCSVに変更
+//             downloadFile = jsonToCsv(jsondata)
+//             // ファイル名：今日の日付_ユーザID.csv
+
+//             filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
+//             res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+//             res.status(200).send(`${String.fromCharCode(0xfeff)}${downloadFile}`)
+//           }
+//         } else {
+//           // 条件に合わせるデータがない場合、お知らせを表示する。
+//           req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+//           res.redirect(303, '/csvDownload')
+//         }
+//       } else {
+//         const invoicesForDownload = await csvDownloadController.createInvoiceDataForDownload(
+//           req.user.accessToken,
+//           req.user.refreshToken,
+//           documentsResult.Document
+//         )
+
+//         // エラーを確認する
+//         if (invoicesForDownload instanceof Error) {
+//           errorHandle(invoicesForDownload, res, req)
+//         }
+
+//         filename = encodeURIComponent(`${today}_請求書.csv`)
+//         res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+//         res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
+//       }
+//     }
+//   }
+//   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+// }
+
 const cbPostIndex = async (req, res, next) => {
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
   const qs = require('qs')
@@ -128,282 +454,18 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
-  // 絞り込みの条件データチェック
-  const findDocumentQuery = {
-    withouttag: ['archived', 'AP_DOCUMENT_DRAFT', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document'],
-    _onlyIndex: true,
-    ascending: false,
-    onlydeleted: false,
-    onlydrafts: false,
-    stag: ['sales', 'purchases', 'draft'],
-    state: [],
-    type: 'invoice'
-  }
+ 
 
-  // 絞り込みの条件に請求書番号追加
-  if (req.body.invoiceNumber || false) {
-    findDocumentQuery.businessId = req.body.invoiceNumber
-  }
-
-  const states = [
-    'DELIVERED', // 送信済み・受信済み
-    'ACCEPTED', // 受理済み
-    'PAID_UNCONFIRMED', // 送金済み
-    'PAID_CONFIRMED' // 入金確認済み
-  ]
-
-  // 絞り込みの条件に購入/販売追加
-  switch (req.body.buyAndSell) {
-    case 'すべて': {
-      break
-    }
-    case '販売': {
-      findDocumentQuery.sales = true
-      break
-    }
-    case '購入': {
-      findDocumentQuery.sales = false
-      break
-    }
-  }
-
-  // 絞り込みの条件にステータス追加
-  switch (Array.isArray(req.body.status)) {
-    case false: {
-      switch (req.body.status) {
-        case '送信済み/受信済み': {
-          findDocumentQuery.state = `${states[0]}`
-          break
-        }
-        default: {
-          switch (req.body.status) {
-            case '受理済み': {
-              findDocumentQuery.state = `${states[1]}`
-              break
-            }
-            case '送金済み': {
-              findDocumentQuery.state = `${states[2]}`
-              break
-            }
-            case '入金確認済み': {
-              findDocumentQuery.state = `${states[3]}`
-              break
-            }
-          }
-          break
-        }
-      }
-      break
-    }
-    case true: {
-      req.body.status.forEach((item, idx) => {
-        switch (item) {
-          case '送信済み/受信済み':
-            findDocumentQuery.state.push(`${states[0]}`)
-            break
-
-          case '受理済み': {
-            findDocumentQuery.state.push(`${states[1]}`)
-            break
-          }
-
-          case '送金済み': {
-            findDocumentQuery.state.push(`${states[2]}`)
-            break
-          }
-
-          case '入金確認済み': {
-            findDocumentQuery.state.push(`${states[3]}`)
-            break
-          }
-        }
-      })
-      break
-    }
-  }
-
-  if (findDocumentQuery.state.length === 0) {
-    req.flash('noti', [notiTitle, 'ステータスをいずれかのの１つ選択してください。'])
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
-    return res.redirect(303, '/csvDownload')
-  }
-
-  // 絞り込みの条件に発行日の開始日追加
-  if (req.body.minIssuedate || false) {
-    findDocumentQuery.minissuedate = req.body.minIssuedate
-  }
-
-  // 絞り込みの条件に発行日の終了日追加
-  if (req.body.maxIssuedate || false) {
-    findDocumentQuery.maxissuedate = req.body.maxIssuedate
-  }
-
-  const invoiceNumber = req.body.invoiceNumber
-  const findDocuments = '/documents'
-
-  // 企業情報がない場合、検索できるようにするための変数
-  const noCompany = ['nocompany1', 'nocompany2']
-
-  // 受信企業の条件のチェック
-  let sentTo
-  if (Array.isArray(req.body.sentTo)) {
-    sentTo = req.body.sentTo
-  } else {
-    if (validate.isString(req.body.sentTo)) {
-      sentTo = [req.body.sentTo]
-    } else {
-      // 企業情報がない場合、検索できるようにする。
-      sentTo = [noCompany[0]]
-    }
-  }
-
-  // 送信企業の条件のチェック
-  let sentBy
-  if (Array.isArray(req.body.sentBy)) {
-    sentBy = req.body.sentBy
-  } else {
-    if (validate.isString(req.body.sentBy)) {
-      sentBy = [req.body.sentBy]
-    } else {
-      // 企業情報がない場合、検索できるようにする。
-      sentBy = [noCompany[1]]
-    }
-  }
-
-  // 送信企業X受信企業ごとに検索
-  let sentToIdx = 0
-  let documentsResult
-  let resultForQuery
-  do {
-    const company = sentTo[sentToIdx]
-    let sentByIdx = 0
-    if (company !== noCompany[0]) findDocumentQuery.sentTo = company
-    do {
-      const sentByCompany = sentBy[sentByIdx]
-      if (sentByCompany !== noCompany[1]) findDocumentQuery.sentBy = sentByCompany
-      if (company !== sentByCompany) {
-        const sendQuery = qs
-          .stringify(findDocumentQuery)
-          .replace(/%26/g, '&')
-          .replace(/%3D/g, '=')
-          .replace(/%5B0%5D/g, '')
-          .replace(/%5B1%5D/g, '')
-          .replace(/%5B2%5D/g, '')
-          .replace(/%5B3%5D/g, '')
-        // 請求書を検索する
-        let pageId = 0
-        let numPages = 1
-
-        do {
-          resultForQuery = await apiManager.accessTradeshift(
-            req.user.accessToken,
-            req.user.refreshToken,
-            'get',
-            `${findDocuments}?${sendQuery}&limit=100&page=${pageId}`
-          )
-          numPages = resultForQuery.numPages ?? 1
-          // 最初検索の場合結果オブジェクト作成
-          if (pageId === 0 && !(documentsResult?.Document ?? false)) {
-            documentsResult = {
-              ...resultForQuery
-            }
-          } else {
-            // 検索結果がある場合結果リストに追加
-            resultForQuery.Document.forEach((item) => {
-              // 結果リストの数をを増加
-              documentsResult.itemCount++
-              documentsResult.Document.push(item)
-            })
-          }
-          pageId++
-        } while (pageId < numPages)
-      }
-      sentByIdx++
-    } while (sentByIdx < sentBy.length)
-    sentToIdx++
-  } while (sentToIdx < sentTo.length)
-
-  let filename = ''
-  let downloadFile = ''
-  // resultForQuery（API呼出）エラー検査
-  if (resultForQuery instanceof Error) {
-    errorHandle(resultForQuery, res, req)
-  } else {
-    // documentsResultのデータ有無確認
-    if (!documentsResult) {
-      req.flash('noti', [
-        notiTitle,
-        '請求書ダウンロードに失敗しました。<br>（送信企業と受信企業で同じ企業を選択している場合はどちらか一方をチェックしてください。）'
-      ])
-      res.redirect(303, '/csvDownload')
-    } else if (documentsResult.itemCount === 0) {
-      // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
-      // 条件に合わせるデータがない場合、お知らせを表示する。
-      req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
-      res.redirect(303, '/csvDownload')
-    } else {
-      const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
-      if (req.body.invoiceNumber || false) {
-        // documentIdの初期化
-        let documentId = ''
-        // 請求書番号で検索した結果の配列を取得
-        const documents = documentsResult.Document
-
-        // 取得した配列から請求書番号（UUID）を取得
-        documents.map((doc) => {
-          if (doc.ID === invoiceNumber) {
-            documentId = doc.DocumentId
-          }
-          return 0
-        })
-        // 請求書番号（UUID）を取得した場合
-        if (documentId !== '') {
-          // 請求書番号（UUID）で請求書情報取得（とれシフAPI呼出）
-          const resultForDocumentId = await apiManager.accessTradeshift(
-            req.user.accessToken,
-            req.user.refreshToken,
-            'get',
-            `/documents/${documentId}`
-          )
-
-          // resultエラー検査
-          if (resultForDocumentId instanceof Error) {
-            errorHandle(resultForDocumentId, res, req)
-          } else {
-            // 取得した請求書をJSONに作成する
-            const jsondata = dataToJson(resultForDocumentId)
-            // JSONファイルをCSVに変更
-            downloadFile = jsonToCsv(jsondata)
-            // ファイル名：今日の日付_ユーザID.csv
-
-            filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
-            res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-            res.status(200).send(`${String.fromCharCode(0xfeff)}${downloadFile}`)
-          }
-        } else {
-          // 条件に合わせるデータがない場合、お知らせを表示する。
-          req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
-          res.redirect(303, '/csvDownload')
-        }
-      } else {
-        const invoicesForDownload = await csvDownloadController.createInvoiceDataForDownload(
-          req.user.accessToken,
-          req.user.refreshToken,
-          documentsResult.Document
-        )
-
-        // エラーを確認する
-        if (invoicesForDownload instanceof Error) {
-          errorHandle(invoicesForDownload, res, req)
-        }
-
-        filename = encodeURIComponent(`${today}_請求書.csv`)
-        res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-        res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
-      }
-    }
-  }
-  logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
+  generatePDF({
+    title: 'テスト請求書タイトル',
+    body: 'テスト請求書本文'
+  },
+  (buffer) => {
+    console.log('@@@@ PDF生成完了')
+    // const filename = generateFilename(req.body.networkStatus)
+    res.set({ 'Content-Disposition': `attachment; filename=pdfInvoice.pdf` })
+    res.status(200).send(buffer)
+  })
 }
 
 const errorHandle = (documentsResult, _res, _req) => {
