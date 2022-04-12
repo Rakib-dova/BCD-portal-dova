@@ -224,17 +224,20 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
     cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `${targetId}`
     cloneAccountcode.querySelector('.btn-minus-accountCode').addEventListener('click', btnMinusAccount)
     // 勘定科目と補助科目検索ボタン
-    cloneAccountcode.querySelector('.BtnlineAccountCodeSearch').dataset.target = 'accountCode-modal'
-    cloneAccountcode.querySelector('.BtnlineAccountCodeSearch').dataset.info = `${targetId}`
-    cloneAccountcode
-      .querySelector('.BtnlineAccountCodeSearch')
-      .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+    const btnlineAccountCodeSearch = cloneAccountcode.querySelectorAll('.BtnlineAccountCodeSearch')
+    Array.prototype.forEach.call(btnlineAccountCodeSearch, item => {
+      item.dataset.target = 'accountCode-modal'
+      item.dataset.info = `${targetId}`
+      item.addEventListener('click', btnSearchMain($('#accountCode-modal')))
+    })
     // 勘定科目と補助科目検索ボタン(貸方)
-    cloneAccountcode.querySelector('.BtnlineCreditAccountCodeSearch').dataset.target = 'creditAccountCode-modal'
-    cloneAccountcode.querySelector('.BtnlineCreditAccountCodeSearch').dataset.info = `${creditTargetId}`
-    cloneAccountcode
-      .querySelector('.BtnlineCreditAccountCodeSearch')
-      .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+    const btnlineCreditAccountCodeSearch = cloneAccountcode.querySelectorAll('.BtnlineCreditAccountCodeSearch')
+    Array.prototype.forEach.call(btnlineCreditAccountCodeSearch, item => {
+      item.dataset.target = 'creditAccountCode-modal'
+      item.dataset.info = `${creditTargetId}`
+      item.addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+    })
+
     // 部門データ検索ボタン
     cloneAccountcode.querySelector('.BtnlineDepartmentCodeSearch').dataset.target = 'departmentCode-modal'
     cloneAccountcode.querySelector('.BtnlineDepartmentCodeSearch').dataset.info = `${targetId}`
@@ -280,6 +283,12 @@ const getLineAccountcodeList = function (invoiceLineNo) {
         creditSubAccountCode: creditSubAccountCode,
         creditDepartmentCode: credittDepartmentCode
       })
+    } else {
+      if (invoiceLines.length !== 1) {
+        if (invoiceLine.id.substr(-1, 1) !== '1') {
+          invoiceLine.querySelector('.btn-minus-accountCode').click()
+        }
+      }
     }
   }
 
@@ -362,18 +371,20 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       cloneAccountCodeItem.querySelector('.btn-minus-accountCode').addEventListener('click', btnMinusAccount)
 
       // 勘定科目と補助科目検索ボタン
-      cloneAccountCodeItem.querySelector('.btn-search-main').dataset.target = 'accountCode-modal'
-      cloneAccountCodeItem.querySelector('.btn-search-main').dataset.info = targetId
-      cloneAccountCodeItem
-        .querySelector('.btn-search-main')
-        .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+      const btnSearchMainArray = cloneAccountCodeItem.querySelectorAll('.btn-search-main')
+      Array.prototype.forEach.call(btnSearchMainArray, item => {
+        item.dataset.target = 'accountCode-modal'
+        item.dataset.info = targetId
+        item.addEventListener('click', btnSearchMain($('#accountCode-modal')))
+      })
 
       // 勘定科目と補助科目検索ボタン（貸方）
-      cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.target = 'creditAccountCode-modal'
-      cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.info = targetCreditId
-      cloneAccountCodeItem
-        .querySelector('.btn-search-creditMain')
-        .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+      const btnSearchCreditMain = cloneAccountCodeItem.querySelectorAll('.btn-search-creditMain')
+      Array.prototype.forEach.call(btnSearchCreditMain, item => {
+        item.dataset.target = 'creditAccountCode-modal'
+        item.dataset.info = targetCreditId
+        item.addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+      })
 
       // 部門データ検索ボタン
       cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.target = 'departmentCode-modal'
@@ -1035,10 +1046,7 @@ $('#btn-insert').addEventListener('click', function () {
   const valueInput = $('#inputInstallmentAmount')
   const totalAmmout = ~~$(`#${inputTarget.split('_')[0]}Total`).value.replaceAll(',', '')
   if (~~valueInput.value !== 0) {
-    if (totalAmmout - valueInput.value < 0) {
-      $('#installmentAmountErrMsg').innerText = '計上金額の合計が小計金額を超えています。'
-      return null
-    } else if (totalAmmout - valueInput.value === 0) {
+    if (totalAmmout - valueInput.value <= 0) {
       $('#installmentAmountErrMsg').innerText = '計上金額の合計が小計金額を超えています。'
       return null
     }
@@ -1050,8 +1058,13 @@ $('#btn-insert').addEventListener('click', function () {
         checkTotalAmount -= ~~item.value.replaceAll(',', '')
       }
     })
-    $(`.${inputTarget.split('_')[0]}_input_amount`)[0].value = checkTotalAmount.toLocaleString('ja-JP')
-    $('#insert-installmentAmount-modal').classList.toggle('is-active')
+    if (checkTotalAmount <= 0) {
+      $('#installmentAmountErrMsg').innerText = '計上金額の合計が小計金額を超えています。'
+      return null
+    } else {
+      $(`.${inputTarget.split('_')[0]}_input_amount`)[0].value = checkTotalAmount.toLocaleString('ja-JP')
+      $('#insert-installmentAmount-modal').classList.toggle('is-active')
+    }
   } else {
     $('#installmentAmountErrMsg').innerText = '金額は1円以上を入力してください。'
   }
@@ -1083,20 +1096,25 @@ const getJournalList = function () {
     do {
       const journalLine = line.querySelectorAll('.lineAccountcode')
       journalLine.forEach((journal, jdx) => {
+        console.log(journal.querySelectorAll('input[type=text]'))
         const journalNo = journal.id.split('_')[1]
         if (journalNo === 'lineAccountCode1') {
           journalLines[idx][0] = {
             accountCode: journal.querySelectorAll('input[type=text]')[0].value,
             subAccountCode: journal.querySelectorAll('input[type=text]')[1].value,
+            creditAccountCode: journal.querySelectorAll('input[type=text]')[3].value,
+            creditSubAccountCode: journal.querySelectorAll('input[type=text]')[4].value,
             journalNo: journalNo,
-            input_amount: ~~journal.querySelectorAll('input[type=text]')[2].value.replaceAll(',', '')
+            input_amount: ~~journal.querySelectorAll('input[type=text]')[6].value.replaceAll(',', '')
           }
         } else {
           journalLines[idx][jdx] = {
             accountCode: journal.querySelectorAll('input[type=text]')[0].value,
             subAccountCode: journal.querySelectorAll('input[type=text]')[1].value,
+            creditAccountCode: journal.querySelectorAll('input[type=text]')[3].value,
+            creditSubAccountCode: journal.querySelectorAll('input[type=text]')[4].value,
             journalNo: journalNo,
-            input_amount: ~~journal.querySelectorAll('input[type=text]')[2].value.replaceAll(',', '')
+            input_amount: ~~journal.querySelectorAll('input[type=text]')[6].value.replaceAll(',', '')
           }
         }
       })
@@ -1114,6 +1132,8 @@ const checkJournalList = function () {
         line[idx] = {
           accountCode: account.accountCode,
           subAccountCode: account.subAccountCode,
+          creditAccountCode: account.creditAccountCode,
+          creditSubAccountCode: account.creditSubAccountCode,
           input_amount: account.amount,
           journalNo: `lineAccountCode${idx + 1}`
         }
@@ -1126,7 +1146,11 @@ const checkJournalList = function () {
   journalLines.forEach((lines, lineNo) => {
     lines.forEach((journal, journalNo) => {
       if (journalNo !== 0 && journal !== null) {
-        if (journalLines[lineNo][0].accountCode.length === 0 || journalLines[lineNo][0].input_amount === 0) {
+        if (
+          (journalLines[lineNo][0].accountCode.length === 0 &&
+            journalLines[lineNo][0].creditAccountCode.length === 0) ||
+          journalLines[lineNo][0].input_amount === 0
+        ) {
           if (lines.length !== 1) {
             isFirstLineNull = true
             $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
@@ -1413,7 +1437,7 @@ const addBulkList = function () {
   invoiceLines.forEach((invoiceLine, lineIdx) => {
     let cnt = 0
     invoiceLine.forEach((journal) => {
-      if (journal.accountCode.length !== 0) {
+      if (journal.accountCode.length !== 0 || journal.creditAccountCode.length !== 0) {
         cnt++
       }
     })
@@ -1568,18 +1592,20 @@ const addBulkList = function () {
           .addEventListener('click', btnInstallmentAmount)
 
         // 勘定科目と補助科目検索ボタン(借方)
-        cloneAccountCodeItem.querySelector('.btn-search-main').dataset.target = 'accountCode-modal'
-        cloneAccountCodeItem.querySelector('.btn-search-main').dataset.info = `${tagetIdBase}`
-        cloneAccountCodeItem
-          .querySelector('.btn-search-main')
-          .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+        const btnSearchMainArray = cloneAccountCodeItem.querySelectorAll('.btn-search-main')
+        Array.prototype.forEach.call(btnSearchMainArray, item => {
+          item.dataset.target = 'accountCode-modal'
+          item.dataset.info = `${tagetIdBase}`
+          item.addEventListener('click', btnSearchMain($('#accountCode-modal')))
+        })
 
         // 勘定科目と補助科目検索ボタン(貸方)
-        cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.target = 'creditAccountCode-modal'
-        cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.info = `${creditTagetIdBase}`
-        cloneAccountCodeItem
-          .querySelector('.btn-search-creditMain')
-          .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+        const btnSearchCreditMain = cloneAccountCodeItem.querySelectorAll('.btn-search-creditMain')
+        Array.prototype.forEach.call(btnSearchCreditMain, item => {
+          item.dataset.target = 'creditAccountCode-modal'
+          item.dataset.info = `${creditTagetIdBase}`
+          item.addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+        })
 
         // 部門データ検索ボタン(借方)
         cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.target = 'departmentCode-modal'
