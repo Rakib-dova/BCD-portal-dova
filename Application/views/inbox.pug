@@ -27,9 +27,9 @@ block content
                   label 勘定科目コード
             td.table-td-padding
               .field-body.m-0
-                .field            
+                .field.margin-left-7px            
                   input.input.lineAccountCode_accountCode(type='text' name=`` readonly)
-            td(rowspan=2).table-td-upbutton-padding
+            td.table-td-upbutton-padding
               .field-body.m-1.is-1.none-flex-grow.padding-top-4 
                 .field
                   p.control
@@ -41,9 +41,14 @@ block content
                   label 補助科目コード
             td.table-td-padding
               .field-body.m-0
+                .field.margin-left-7px
+                  p.control
+                    input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
+            td.table-td-upbutton-padding
+              .field-body.m-1.is-1.none-flex-grow.padding-top-4 
                 .field
                   p.control
-                    input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly) 
+                    a.button.is-link.show-modal.btn-search-main(data-target='accountCode-modal') 検索                     
           tr
             td.table-td-padding
               .field.is-horizontal  
@@ -51,7 +56,7 @@ block content
                   label 部門コード 
             td.table-td-padding
               .field-body.m-0
-                .field
+                .field.margin-left-7px
                   p.control
                     input.input.lineAccountCode_departmentCode(type='text' name=`` readonly)
             td.table-td-button-padding
@@ -69,9 +74,9 @@ block content
                   label 勘定科目コード
             td.table-td-padding
               .field-body.m-0
-                .field            
+                .field.margin-left-7px            
                   input.input.lineCreditAccountCode_creditAccountCode(type='text' name=`` readonly)
-            td(rowspan=2).table-td-upbutton-padding 
+            td.table-td-upbutton-padding 
               .field-body.m-1.is-1.none-flex-grow.padding-top-4 
                 .field
                   p.control
@@ -83,9 +88,14 @@ block content
                   label 補助科目コード
             td.table-td-padding
               .field-body.m-0
+                .field.margin-left-7px
+                  p.control
+                    input.input.lineCreditAccountCode_creditSubAccountCode(type='text' name=`` readonly)
+            td.table-td-upbutton-padding 
+              .field-body.m-1.is-1.none-flex-grow.padding-top-4 
                 .field
                   p.control
-                    input.input.lineCreditAccountCode_creditSubAccountCode(type='text' name=`` readonly) 
+                    a.button.is-link.show-modal.btn-search-creditMain(data-target='creditAccountCode-modal') 検索                     
           tr
             td.table-td-padding
               .field.is-horizontal  
@@ -93,7 +103,7 @@ block content
                   label 部門コード 
             td.table-td-padding
               .field-body.m-0
-                .field
+                .field.margin-left-7px
                   p.control
                     input.input.lineCreditAccountCode_creditDepartmentCode(type='text' name=`` readonly)
             td.table-td-button-padding
@@ -104,7 +114,7 @@ block content
 
       .column.is-0.p-1
       .column.is-one-quarter.p-0.border-div-rad-4
-        .field-body.p-1.margit-top-7rem
+        .field-body.p-1.margit-top-119px
           .field.is-horizontal
             .field-body.m-1
               .field
@@ -148,7 +158,7 @@ block content
                 p.text-left-lines.font-bold 項目ID
                 p.text-left-lines.mb-1.itemId.text-overflow
             .columns.m-0
-              .column.p-0.column-selectbox
+              .column.p-0.column-selectbox.margin-bottom-10px
                 input.isCheckedForInvoiceLine(type='checkbox')
           .column-header.is-5-header.itemName
             p.font-bold  内容
@@ -170,17 +180,17 @@ block content
             p.text-right-lines.mb-1.total.text-overflow
 
   template#templateLineAccountCodeItemModal
-   .columns.m-0#lineAccountCodeTitle
-      .column.is-one-quarter.p-0.border-div-rad-4
+   .columns.m-0.table-margin-bottom#lineAccountCodeTitle
+      .column.is-one-fifth.p-0.border-div-rad-4
         table.table.table-margin-left
-          tr(colspan=2)
+          tr
             td.table-td-padding
               .field.is-horizontal
                 .field-label.m-0           
                   label 勘定科目コード
             td.table-td-padding
               .field-body.m-0
-                .field            
+                .field.margin-left-7px
                   input.input.lineAccountCode_accountCode(type='text' name=`` readonly)
           tr
             td.table-td-padding
@@ -189,7 +199,7 @@ block content
                   label 補助科目コード
             td.table-td-padding
               .field-body.m-0
-                .field
+                .field.margin-left-7px
                   p.control
                     input.input.lineAccountCode_subAccountCode(type='text' name=`` readonly)
           tr
@@ -199,20 +209,20 @@ block content
                   label 部門コード 
             td.table-td-padding
               .field-body.m-0
-                .field
+                .field.margin-left-7px
                   p.control
                     input.input.lineAccountCode_departmentCode(type='text' name=`` value readonly)
       .column.is-0.p-1
-      .column.is-one-quarter.p-0.border-div-rad-4
+      .column.is-one-fifth.p-0.border-div-rad-4
         table.table.table-margin-left
-          tr(colspan=2)
+          tr
             td.table-td-padding
               .field.is-horizontal
                 .field-label.m-0           
                   label 勘定科目コード
             td.table-td-padding
               .field-body.m-0
-                .field            
+                .field.margin-left-7px            
                   input.input.lineCreditAccountCode_creditAccountCode.input-creditAccountCode(type='text' value readonly)
           tr
             td.table-td-padding
@@ -221,7 +231,7 @@ block content
                   label 補助科目コード
             td.table-td-padding
               .field-body.m-0
-                .field
+                .field.margin-left-7px
                   p.control
                     input.input.lineCreditAccountCode_creditSubAccountCode.input-creditSubAccountCode(type='text'  value readonly)
           tr
@@ -231,7 +241,7 @@ block content
                   label 部門コード 
             td.table-td-padding
               .field-body.m-0
-                .field
+                .field.margin-left-7px
                   p.control
                     input.input.lineCreditAccountCode_creditDepartmentCode.input-creditDepartmentCode(type='text'  value readonly)
 
@@ -239,7 +249,7 @@ block content
   template#template-journal-accountCode
     .columns.m-0.base-bulkInsert-journal
       .column.p-0.lineAccountCodeForBulk(id='bulkInsertNo1')
-        .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1')          
+        .columns.m-0.pt-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1')          
           .column.is-one-quarter.p-0.border-div-rad-4
             table.table.table-margin-left
               tr
@@ -249,9 +259,9 @@ block content
                       label 勘定科目コード
                 td.table-td-padding
                   .field-body.m-0
-                    .field            
+                    .field.margin-left-7px            
                       input.input.input-accountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_accountCode` value readonly)
-                td(rowspan=2).table-td-upbutton-padding 
+                td.table-td-upbutton-padding 
                   .field-body.m-1.is-1.none-flex-grow.padding-top-4 
                     .field
                       p.control
@@ -263,9 +273,14 @@ block content
                       label 補助科目コード
                 td.table-td-padding
                   .field-body.m-0
-                    .field
+                    .field.margin-left-7px 
                       p.control
                         input.input.input-subAccountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_subAccountCode` value readonly)
+                td.table-td-upbutton-padding 
+                  .field-body.m-1.is-1.none-flex-grow.padding-top-4 
+                    .field
+                      p.control
+                        a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索                        
               tr
                 td.table-td-padding
                   .field.is-horizontal  
@@ -273,7 +288,7 @@ block content
                       label 部門コード 
                 td.table-td-padding
                   .field-body.m-0
-                    .field
+                    .field.margin-left-7px 
                       p.control
                         input.input.input-departmentCode(type='text' id=`bulkInsertNo1_lineAccountCode1_departmentCode` value readonly)
                 td.table-td-button-padding
@@ -292,9 +307,9 @@ block content
                       label 勘定科目コード
                 td.table-td-padding
                   .field-body.m-0
-                    .field            
+                    .field.margin-left-7px            
                       input.input.input-creditAccountCode(type='text' value readonly)
-                td(rowspan=2).table-td-upbutton-padding 
+                td.table-td-upbutton-padding 
                   .field-body.m-1.is-1.none-flex-grow.padding-top-4 
                     .field
                       p.control
@@ -306,9 +321,14 @@ block content
                       label 補助科目コード
                 td.table-td-padding
                   .field-body.m-0
-                    .field
+                    .field.margin-left-7px
                       p.control
                         input.input.input-creditSubAccountCode(type='text'  value readonly)
+                td.table-td-upbutton-padding 
+                  .field-body.m-1.is-1.none-flex-grow.padding-top-4 
+                    .field
+                      p.control
+                        a.button.is-link.show-modal.btn-search-creditMain.BtnlineCreditAccountCodeSearch(data-target='creditAccountCode-modal' data-info='bulkInsertNo1_lineCreditAccountCode1') 検索                        
               tr
                 td.table-td-padding
                   .field.is-horizontal  
@@ -316,7 +336,7 @@ block content
                       label 部門コード 
                 td.table-td-padding
                   .field-body.m-0
-                    .field
+                    .field.margin-left-7px
                       p.control
                         input.input.input-creditDepartmentCode(type='text'  value readonly)
                 td.table-td-button-padding
@@ -612,12 +632,12 @@ block content
               .columns.m-0.p-1.base-bulkInsert-journal
                 .column.p-0.lineAccountCodeForBulk(id='bulkInsertNo1')
                   .columns.m-0
-                    .column.is-one-quarter
+                    .column.is-one-quarter.border-bottom-2px-solid
                       p.text-center.font-bold 借方
-                    .column.is-0.p-1
-                    .column.is-one-quarter
+                    .column.is-0.p-1.border-bottom-2px-solid
+                    .column.is-one-quarter.border-bottom-2px-solid
                       p.text-center.font-bold 貸方                
-                  .columns.m-0.p-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1' data-idx='1')
+                  .columns.m-0.pt-1.lineAccountcodeForBulk(id='bulkInsertNo1_lineAccountCode1' data-idx='1')
                     .column.is-one-quarter.p-0.border-div-rad-4
                       table.table.table-margin-left
                         tr
@@ -627,9 +647,9 @@ block content
                                 label 勘定科目コード
                           td.table-td-padding
                             .field-body.m-0
-                              .field            
+                              .field.margin-left-7px            
                                 input.input.input-accountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_accountCode` value readonly)
-                          td(rowspan=2).table-td-upbutton-padding 
+                          td.table-td-upbutton-padding 
                             .field-body.m-1.is-1.none-flex-grow.padding-top-4 
                               .field
                                 p.control
@@ -641,9 +661,14 @@ block content
                                 label 補助科目コード
                           td.table-td-padding
                             .field-body.m-0
-                              .field
+                              .field.margin-left-7px 
                                 p.control
                                   input.input.input-subAccountCode(type='text' id=`bulkInsertNo1_lineAccountCode1_subAccountCode` value readonly)
+                          td.table-td-upbutton-padding 
+                            .field-body.m-1.is-1.none-flex-grow.padding-top-4 
+                              .field
+                                p.control
+                                  a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info='bulkInsertNo1_lineAccountCode1') 検索                                  
                         tr
                           td.table-td-padding
                             .field.is-horizontal  
@@ -651,7 +676,7 @@ block content
                                 label 部門コード 
                           td.table-td-padding
                             .field-body.m-0
-                              .field
+                              .field.margin-left-7px
                                 p.control
                                   input.input.input-departmentCode(type='text' id=`bulkInsertNo1_lineAccountCode1_departmentCode` value readonly)
                           td.table-td-button-padding
@@ -670,9 +695,9 @@ block content
                                 label 勘定科目コード
                           td.table-td-padding
                             .field-body.m-0
-                              .field            
+                              .field.margin-left-7px             
                                 input.input.input-creditAccountCode(type='text' id=`bulkInsertNo1_lineCreditAccountCode1_creditAccountCode` value readonly)
-                          td(rowspan=2).table-td-upbutton-padding 
+                          td.table-td-upbutton-padding 
                             .field-body.m-1.is-1.none-flex-grow.padding-top-4 
                               .field
                                 p.control
@@ -684,9 +709,14 @@ block content
                                 label 補助科目コード
                           td.table-td-padding
                             .field-body.m-0
-                              .field
+                              .field.margin-left-7px 
                                 p.control
                                   input.input.input-creditSubAccountCode(type='text' id=`bulkInsertNo1_lineCreditAccountCode1_creditSubAccountCode` value readonly)
+                          td.table-td-upbutton-padding 
+                            .field-body.m-1.is-1.none-flex-grow.padding-top-4 
+                              .field
+                                p.control
+                                  a.button.is-link.show-modal.btn-search-creditMain.BtnlineCreditAccountCodeSearch(data-target='creditAccountCode-modal' data-info='bulkInsertNo1_lineCreditAccountCode1') 検索                                  
                         tr
                           td.table-td-padding
                             .field.is-horizontal  
@@ -694,7 +724,7 @@ block content
                                 label 部門コード 
                           td.table-td-padding
                             .field-body.m-0
-                              .field
+                              .field.margin-left-7px 
                                 p.control
                                   input.input.input-creditDepartmentCode(type='text' id=`bulkInsertNo1_lineCreditAccountCode1_creditDepartmentCode` value readonly)
                           td.table-td-button-padding
