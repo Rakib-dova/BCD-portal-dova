@@ -224,17 +224,20 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
     cloneAccountcode.querySelector('.btn-minus-accountCode').dataset.target = `${targetId}`
     cloneAccountcode.querySelector('.btn-minus-accountCode').addEventListener('click', btnMinusAccount)
     // 勘定科目と補助科目検索ボタン
-    cloneAccountcode.querySelector('.BtnlineAccountCodeSearch').dataset.target = 'accountCode-modal'
-    cloneAccountcode.querySelector('.BtnlineAccountCodeSearch').dataset.info = `${targetId}`
-    cloneAccountcode
-      .querySelector('.BtnlineAccountCodeSearch')
-      .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+    const btnlineAccountCodeSearch = cloneAccountcode.querySelectorAll('.BtnlineAccountCodeSearch')
+    Array.prototype.forEach.call(btnlineAccountCodeSearch, item => {
+      item.dataset.target = 'accountCode-modal'
+      item.dataset.info = `${targetId}`
+      item.addEventListener('click', btnSearchMain($('#accountCode-modal')))
+    })
     // 勘定科目と補助科目検索ボタン(貸方)
-    cloneAccountcode.querySelector('.BtnlineCreditAccountCodeSearch').dataset.target = 'creditAccountCode-modal'
-    cloneAccountcode.querySelector('.BtnlineCreditAccountCodeSearch').dataset.info = `${creditTargetId}`
-    cloneAccountcode
-      .querySelector('.BtnlineCreditAccountCodeSearch')
-      .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+    const btnlineCreditAccountCodeSearch = cloneAccountcode.querySelectorAll('.BtnlineCreditAccountCodeSearch')
+    Array.prototype.forEach.call(btnlineCreditAccountCodeSearch, item => {
+      item.dataset.target = 'creditAccountCode-modal'
+      item.dataset.info = `${creditTargetId}`
+      item.addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+    })
+
     // 部門データ検索ボタン
     cloneAccountcode.querySelector('.BtnlineDepartmentCodeSearch').dataset.target = 'departmentCode-modal'
     cloneAccountcode.querySelector('.BtnlineDepartmentCodeSearch').dataset.info = `${targetId}`
@@ -368,18 +371,20 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
       cloneAccountCodeItem.querySelector('.btn-minus-accountCode').addEventListener('click', btnMinusAccount)
 
       // 勘定科目と補助科目検索ボタン
-      cloneAccountCodeItem.querySelector('.btn-search-main').dataset.target = 'accountCode-modal'
-      cloneAccountCodeItem.querySelector('.btn-search-main').dataset.info = targetId
-      cloneAccountCodeItem
-        .querySelector('.btn-search-main')
-        .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+      const btnSearchMainArray = cloneAccountCodeItem.querySelectorAll('.btn-search-main')
+      Array.prototype.forEach.call(btnSearchMainArray, item => {
+        item.dataset.target = 'accountCode-modal'
+        item.dataset.info = targetId
+        item.addEventListener('click', btnSearchMain($('#accountCode-modal')))
+      })
 
       // 勘定科目と補助科目検索ボタン（貸方）
-      cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.target = 'creditAccountCode-modal'
-      cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.info = targetCreditId
-      cloneAccountCodeItem
-        .querySelector('.btn-search-creditMain')
-        .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+      const btnSearchCreditMain = cloneAccountCodeItem.querySelectorAll('.btn-search-creditMain')
+      Array.prototype.forEach.call(btnSearchCreditMain, item => {
+        item.dataset.target = 'creditAccountCode-modal'
+        item.dataset.info = targetCreditId
+        item.addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+      })
 
       // 部門データ検索ボタン
       cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.target = 'departmentCode-modal'
@@ -1587,18 +1592,20 @@ const addBulkList = function () {
           .addEventListener('click', btnInstallmentAmount)
 
         // 勘定科目と補助科目検索ボタン(借方)
-        cloneAccountCodeItem.querySelector('.btn-search-main').dataset.target = 'accountCode-modal'
-        cloneAccountCodeItem.querySelector('.btn-search-main').dataset.info = `${tagetIdBase}`
-        cloneAccountCodeItem
-          .querySelector('.btn-search-main')
-          .addEventListener('click', btnSearchMain($('#accountCode-modal')))
+        const btnSearchMainArray = cloneAccountCodeItem.querySelectorAll('.btn-search-main')
+        Array.prototype.forEach.call(btnSearchMainArray, item => {
+          item.dataset.target = 'accountCode-modal'
+          item.dataset.info = `${tagetIdBase}`
+          item.addEventListener('click', btnSearchMain($('#accountCode-modal')))
+        })
 
         // 勘定科目と補助科目検索ボタン(貸方)
-        cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.target = 'creditAccountCode-modal'
-        cloneAccountCodeItem.querySelector('.btn-search-creditMain').dataset.info = `${creditTagetIdBase}`
-        cloneAccountCodeItem
-          .querySelector('.btn-search-creditMain')
-          .addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+        const btnSearchCreditMain = cloneAccountCodeItem.querySelectorAll('.btn-search-creditMain')
+        Array.prototype.forEach.call(btnSearchCreditMain, item => {
+          item.dataset.target = 'creditAccountCode-modal'
+          item.dataset.info = `${creditTagetIdBase}`
+          item.addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
+        })
 
         // 部門データ検索ボタン(借方)
         cloneAccountCodeItem.querySelector('.btn-search-departmentCode').dataset.target = 'departmentCode-modal'
