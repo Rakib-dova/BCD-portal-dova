@@ -1,10 +1,4 @@
-﻿.box
-  .column.m-0
-    .column.px-0
-      p.text-inbox.text-inbox-subtitle.text-inbox-common.text-left-lines 仕訳情報一括入力
-    .column.pl-4.pt-0
-      a.button.is-link#btn-bulkInsert.show-modal(data-target='bulkInsert-journal-modal') 一括入力
-if invoiceLine.length !== 0
+﻿if invoiceLine.length !== 0
   each item, idx in invoiceLine
     if '明細-項目ID' in item
       .box
@@ -177,7 +171,7 @@ if invoiceLine.length !== 0
                                 a.button.is-link.show-modal.btn-search-departmentCode.BtnlineCreditDepartmentCodeSearch(data-target='creditDepartmentCode-modal' data-info=`lineNo${idx + 1}_lineCreditAccountCode${jdx + 1}`) 検索
                   .column.is-0.p-1
                   .column.is-one-quarter.p-0.border-div-rad-4
-                    .field-body.p-1.margit-top-101px
+                    .field-body.p-1.margin-top-101px
                       .field.is-horizontal
                         .field-body.m-1
                           .field
@@ -299,7 +293,7 @@ if invoiceLine.length !== 0
                               a.button.is-link.show-modal.btn-search-departmentCode.BtnlineCreditDepartmentCodeSearch(data-target='creditDepartmentCode-modal' data-info=`lineNo${idx + 1}_lineCreditAccountCode1`) 検索
                 .column.is-0.p-1
                 .column.is-one-quarter.p-0.border-div-rad-4
-                  .field-body.p-1.margit-top-101px
+                  .field-body.p-1.margin-top-101px
                     .field.is-horizontal
                       .field-body.m-1
                         .field

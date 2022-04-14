@@ -67,70 +67,6 @@ window.onload = function () {
   })
 }
 
-// 仕訳情報一括入力ボタンの機能
-$('#btn-bulkInsert').addEventListener('click', function () {
-  // 仕訳情報一括入力モーダル初期化
-  const invoiceLines = getInvoiceLineList()
-  while ($('#field-invoiceLine').firstChild) {
-    $('#field-invoiceLine').removeChild($('#field-invoiceLine').firstChild)
-  }
-
-  // 勘定科目検索初期化
-  const lineAccountCodeForBulkCount = $('.lineAccountCodeForBulk').length
-  if (lineAccountCodeForBulkCount !== 1) {
-    for (let i = 0; i < lineAccountCodeForBulkCount - 1; i++) {
-      $('.lineAccountCodeForBulk')[1].remove()
-    }
-  }
-  $('#bulkInsertNo1_lineAccountCode1_accountCode').value = ''
-  $('#bulkInsertNo1_lineAccountCode1_subAccountCode').value = ''
-  $('#bulkInsertNo1_lineAccountCode1_departmentCode').value = ''
-  $('#bulkInsertNo1_lineCreditAccountCode1_creditAccountCode').value = ''
-  $('#bulkInsertNo1_lineCreditAccountCode1_creditSubAccountCode').value = ''
-  $('#bulkInsertNo1_lineCreditAccountCode1_creditDepartmentCode').value = ''
-
-  // エラーメッセージ初期化
-  $('#error-message-journal-modal').innerText = ''
-
-  if ($('.column-invoiceLine-journalModal').length < invoiceLines.length) {
-    for (let idx = 0; idx < invoiceLines.length; idx++) {
-      const templateInvoiceLine = $('#template-invoiceLine')
-      const cloneInvoiceLineTemplate = document.importNode(templateInvoiceLine.content, true)
-      cloneInvoiceLineTemplate.querySelector('.itemId').innerText = invoiceLines[idx].invoiceLineId
-      Array.prototype.forEach.call(invoiceLines[idx].itemName, (itemName) => {
-        cloneInvoiceLineTemplate.querySelector('.itemName').appendChild(itemName.cloneNode(true))
-      })
-      cloneInvoiceLineTemplate.querySelector('.invoicedQuantity').innerText = invoiceLines[idx].invoicedQuantity
-      cloneInvoiceLineTemplate.querySelector('.unitcode').innerText = invoiceLines[idx].unitcode
-      cloneInvoiceLineTemplate.querySelector('.priceAmount').innerText = invoiceLines[idx].priceAmount
-      cloneInvoiceLineTemplate.querySelector('.tax').innerText = invoiceLines[idx].tax
-      cloneInvoiceLineTemplate.querySelector('.total').innerText = invoiceLines[idx].total
-
-      // 各明細の仕訳情報取得・表示
-      const lineAccountcodeList = getLineAccountcodeList(invoiceLines[idx].invoiceLineNo)
-      for (const lineAccount of lineAccountcodeList) {
-        const templateLineAccountCodeItemModal = $('#templateLineAccountCodeItemModal')
-        const cloneLineAccountCodeItemModalTemplate = document.importNode(
-          templateLineAccountCodeItemModal.content,
-          true
-        )
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[0].value = lineAccount.accountCode
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[1].value = lineAccount.subAccountCode
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[2].value = lineAccount.departmentCode
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[3].value =
-          lineAccount.creditAccountCode
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[4].value =
-          lineAccount.creditSubAccountCode
-        cloneLineAccountCodeItemModalTemplate.querySelectorAll('input[type=text]')[5].value =
-          lineAccount.creditDepartmentCode
-        cloneInvoiceLineTemplate.querySelector('.box').append(cloneLineAccountCodeItemModalTemplate)
-      }
-
-      $('#field-invoiceLine').appendChild(cloneInvoiceLineTemplate)
-    }
-  }
-})
-
 // 明細リスト取得
 const getInvoiceLineList = function () {
   return Array.prototype.map.call($('.invoiceLine'), (invoiceLine) => {
@@ -1674,6 +1610,8 @@ $('#checkApproval').addEventListener('click', function () {
   if (!$('#journal-list').firstChild) {
     Array.prototype.forEach.call(invoiceList, (invoiceLine) => {
       const cloneInvoice = document.importNode(invoiceLine.parentNode, true)
+      // モーダル表示時の全ボタン非表示
+      removeButtonsForModal(cloneInvoice)
       $('#journal-list').appendChild(cloneInvoice)
     })
   }
@@ -1699,6 +1637,7 @@ $('#btn-approve').addEventListener('click', function (e) {
   $('#approval').submit()
 })
 
+// 差し戻しモーダルの表示
 $('#rejectApproval').addEventListener('click', function () {
   // 明細初期化
   const rejectModalLine = $('#reject-approval-modal').querySelector('#journal-list-reject-modal')
@@ -1708,10 +1647,12 @@ $('#rejectApproval').addEventListener('click', function () {
 
   // 明細取得
   const invoiceList = $('.invoiceLine')
-  if (!rejectModalLine.firstChild) {
+  if (!$('#journal-list-reject-modal').firstChild) {
     Array.prototype.forEach.call(invoiceList, (invoiceLine) => {
       const cloneInvoice = document.importNode(invoiceLine.parentNode, true)
-      rejectModalLine.appendChild(cloneInvoice)
+      // モーダル表示時の全ボタン非表示
+      removeButtonsForModal(cloneInvoice)
+      $('#journal-list-reject-modal').appendChild(cloneInvoice)
     })
   }
 
@@ -1764,6 +1705,25 @@ function messageCheck(event) {
     }
   })
 }
+
+function removeButtonsForModal(cloneInvoice) {
+  Array.prototype.forEach.call(cloneInvoice.querySelectorAll('.table-td-upbutton-padding'), (input) => {
+    input.parentNode.removeChild(input)
+  })
+  Array.prototype.forEach.call(cloneInvoice.querySelectorAll('.table-td-button-padding'), (input) => {
+    input.parentNode.removeChild(input)
+  })
+  Array.prototype.forEach.call(cloneInvoice.querySelectorAll('.btn-insert-installmentAmount'), (input) => {
+    input.parentNode.removeChild(input)
+  })
+  Array.prototype.forEach.call(cloneInvoice.querySelectorAll('.btn-minus-accountCode'), (input) => {
+    input.parentNode.removeChild(input)
+  })
+  Array.prototype.forEach.call(cloneInvoice.querySelectorAll('.btn-plus-accountCode'), (input) => {
+    input.parentNode.removeChild(input)
+  })
+}
+
 messageCheck('keyup')
 messageCheck('keydown')
 messageCheck('paste')
