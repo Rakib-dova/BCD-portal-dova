@@ -160,13 +160,6 @@ p:focus {
   outline: none;
 }
 
-.input-comment-size {
-  margin-top: 0.75rem;
-  width: 100%;
-  resize: none;
-  font-size: 16px;
-}
-
 #search-modal-card {
   width: 1000px !important;
 }
