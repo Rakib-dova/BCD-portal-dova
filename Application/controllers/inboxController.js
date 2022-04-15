@@ -363,8 +363,6 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
       accountLines = 1
     })
 
-    console.log(lineJournals)
-
     // DBから仕訳情報設定確認
     const resultSearchJournals = await JournalizeInvoice.findAll({
       where: {
