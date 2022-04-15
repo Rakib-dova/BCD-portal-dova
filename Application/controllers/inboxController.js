@@ -345,6 +345,14 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
               }
             })
           }
+
+          // 仕訳情報名初期化
+          lineJournals[idx - 1][accountLines - 1].data.accountName = ''
+          lineJournals[idx - 1][accountLines - 1].data.subAccountName = ''
+          lineJournals[idx - 1][accountLines - 1].data.departmentName = ''
+          lineJournals[idx - 1][accountLines - 1].data.creditAccountName = ''
+          lineJournals[idx - 1][accountLines - 1].data.creditSubAccountName = ''
+          lineJournals[idx - 1][accountLines - 1].data.creditDepartmentName = ''
         } else {
           lineJournals[idx - 1].push({
             data: null
@@ -354,6 +362,8 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
       }
       accountLines = 1
     })
+
+    console.log(lineJournals)
 
     // DBから仕訳情報設定確認
     const resultSearchJournals = await JournalizeInvoice.findAll({

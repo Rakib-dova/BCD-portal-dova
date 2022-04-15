@@ -225,14 +225,14 @@ $('#btn-plus-accountCode-bulkInsert-modal').addEventListener('click', function (
     cloneAccountcode.querySelector('.btn-minus-accountCode').addEventListener('click', btnMinusAccount)
     // 勘定科目と補助科目検索ボタン
     const btnlineAccountCodeSearch = cloneAccountcode.querySelectorAll('.BtnlineAccountCodeSearch')
-    Array.prototype.forEach.call(btnlineAccountCodeSearch, item => {
+    Array.prototype.forEach.call(btnlineAccountCodeSearch, (item) => {
       item.dataset.target = 'accountCode-modal'
       item.dataset.info = `${targetId}`
       item.addEventListener('click', btnSearchMain($('#accountCode-modal')))
     })
     // 勘定科目と補助科目検索ボタン(貸方)
     const btnlineCreditAccountCodeSearch = cloneAccountcode.querySelectorAll('.BtnlineCreditAccountCodeSearch')
-    Array.prototype.forEach.call(btnlineCreditAccountCodeSearch, item => {
+    Array.prototype.forEach.call(btnlineCreditAccountCodeSearch, (item) => {
       item.dataset.target = 'creditAccountCode-modal'
       item.dataset.info = `${creditTargetId}`
       item.addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
@@ -372,7 +372,7 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
 
       // 勘定科目と補助科目検索ボタン
       const btnSearchMainArray = cloneAccountCodeItem.querySelectorAll('.btn-search-main')
-      Array.prototype.forEach.call(btnSearchMainArray, item => {
+      Array.prototype.forEach.call(btnSearchMainArray, (item) => {
         item.dataset.target = 'accountCode-modal'
         item.dataset.info = targetId
         item.addEventListener('click', btnSearchMain($('#accountCode-modal')))
@@ -380,7 +380,7 @@ Array.prototype.forEach.call($('.btn-plus-accountCode'), (btnPlusAccount) => {
 
       // 勘定科目と補助科目検索ボタン（貸方）
       const btnSearchCreditMain = cloneAccountCodeItem.querySelectorAll('.btn-search-creditMain')
-      Array.prototype.forEach.call(btnSearchCreditMain, item => {
+      Array.prototype.forEach.call(btnSearchCreditMain, (item) => {
         item.dataset.target = 'creditAccountCode-modal'
         item.dataset.info = targetCreditId
         item.addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
@@ -1096,7 +1096,6 @@ const getJournalList = function () {
     do {
       const journalLine = line.querySelectorAll('.lineAccountcode')
       journalLine.forEach((journal, jdx) => {
-        console.log(journal.querySelectorAll('input[type=text]'))
         const journalNo = journal.id.split('_')[1]
         if (journalNo === 'lineAccountCode1') {
           journalLines[idx][0] = {
@@ -1593,7 +1592,7 @@ const addBulkList = function () {
 
         // 勘定科目と補助科目検索ボタン(借方)
         const btnSearchMainArray = cloneAccountCodeItem.querySelectorAll('.btn-search-main')
-        Array.prototype.forEach.call(btnSearchMainArray, item => {
+        Array.prototype.forEach.call(btnSearchMainArray, (item) => {
           item.dataset.target = 'accountCode-modal'
           item.dataset.info = `${tagetIdBase}`
           item.addEventListener('click', btnSearchMain($('#accountCode-modal')))
@@ -1601,7 +1600,7 @@ const addBulkList = function () {
 
         // 勘定科目と補助科目検索ボタン(貸方)
         const btnSearchCreditMain = cloneAccountCodeItem.querySelectorAll('.btn-search-creditMain')
-        Array.prototype.forEach.call(btnSearchCreditMain, item => {
+        Array.prototype.forEach.call(btnSearchCreditMain, (item) => {
           item.dataset.target = 'creditAccountCode-modal'
           item.dataset.info = `${creditTagetIdBase}`
           item.addEventListener('click', btnSearchMainCredit($('#creditAccountCode-modal')))
