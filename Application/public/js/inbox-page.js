@@ -1314,6 +1314,19 @@ const duplicateCheckFunction = function (array) {
           array[j + 1] = temp
         }
 
+        // 全項目が空の場合
+        if (
+          array[j][0].length === 0 &&
+          array[j][1].length === 0 &&
+          array[j][2].length === 0 &&
+          array[j][3].length === 0 &&
+          array[j][4].length === 0 &&
+          array[j][5].length === 0
+        ) {
+          nothingCheckFlag = true
+          return { duplicationFlag: duplicationFlag, nothingCheckFlag: nothingCheckFlag }
+        }
+
         // 勘定科目がなし、他の科目がある場合
         if (
           (array[j][0].length === 0 && array[j][1].length !== 0) ||
@@ -1327,6 +1340,19 @@ const duplicateCheckFunction = function (array) {
       }
     }
   } else {
+    // 全項目が空の場合
+    if (
+      array[0][0].length === 0 &&
+      array[0][1].length === 0 &&
+      array[0][2].length === 0 &&
+      array[0][3].length === 0 &&
+      array[0][4].length === 0 &&
+      array[0][5].length === 0
+    ) {
+      nothingCheckFlag = true
+      return { duplicationFlag: duplicationFlag, nothingCheckFlag: nothingCheckFlag }
+    }
+
     // 勘定科目がなし、他の科目がある場合
     if (
       (array[0][0].length === 0 && array[0][1].length !== 0) ||

@@ -14,6 +14,10 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
   let acCookies
   let userCookies
   let testTenantId
+  let acStatus11
+  let userStatus11
+  let acStatus40
+  let userStatus40
 
   describe('0.前準備', () => {
     test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
@@ -29,8 +33,6 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       userCookies = await getCookies(app, request, getTenantId, userId, userSecret)
       // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
       // DBクリア
-      await db.User.destroy({ where: { tenantId: getTenantId.id } })
-      await db.Tenant.destroy({ where: { tenantId: getTenantId.id } })
     })
   })
 
@@ -253,80 +255,67 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
   })
 
   describe('3.契約ステータス：登録受付', () => {
-    // テナントステータスが「登録受付」、パラメータがない場合
-    test('管理者、契約ステータス：登録受付、パラメータがない場合-利用不可', async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-      if (contract.dataValues.contractStatus !== '11') {
-        await db.Contract.update(
-          {
-            contractStatus: '11'
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-      }
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus11 = await getCookies(app, request, getTenantId, 'inte.test.user+11@gmail.com', '1q2w3e4r5t')
+      userStatus11 = await getCookies(app, request, getTenantId, 'inte.test.user+11user@gmail.com', '1q2w3e4r5t')
+    })
 
-      const res = await request(app)
-        .get('/approvalInbox')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+    test('管理者、契約ステータス：登録受付、承認者ではない場合、契約ステータス：登録受付、パラメータがない場合-利用不可', async () => {
+      const cookie11Admin = `${acStatus11[0].name}=${acStatus11[0].value}`
+      const res = await request(app).get('/approvalInbox').set('Cookie', cookie11Admin).expect(400)
 
       // 画面内容確認
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
     test('一般ユーザ、契約ステータス：登録受付、パラメータがない場合-利用不可', async () => {
-      const res = await request(app)
-        .get('/approvalInbox')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
+      const cookie11user = `${userStatus11[0].name}=${userStatus11[0].value}`
+      const res = await request(app).get('/approvalInbox').set('Cookie', cookie11user).expect(400)
 
       // 画面内容確認
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
     test('管理者、契約ステータス：登録受付、承認者ではない場合', async () => {
+      const cookie11Admin = `${acStatus11[0].name}=${acStatus11[0].value}`
       const res = await request(app)
-        .get(redirectUrl)
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .get('/approvalInbox/8fab4365-eaa9-51f3-ad8f-2027764c4732')
+        .set('Cookie', cookie11Admin)
         .expect(200)
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).toMatch(/承認ルート名/i)
-      expect(res.text).toMatch(/integrationApproveRoute/i)
       expect(res.text).toMatch(/承認順/i)
       expect(res.text).toMatch(/担当者名/i)
       expect(res.text).toMatch(/承認状況/i)
       expect(res.text).toMatch(/依頼済み/i)
-      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/承認順/i)
       expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
     test('一般ユーザ、契約ステータス：登録受付、承認者の場合', async () => {
+      const cookie11user = `${userStatus11[0].name}=${userStatus11[0].value}`
       const res = await request(app)
-        .get(redirectUrl)
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .get('/approvalInbox/8fab4365-eaa9-51f3-ad8f-2027764c4732')
+        .set('Cookie', cookie11user)
         .expect(200)
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).toMatch(/承認ルート名/i)
-      expect(res.text).toMatch(/integrationApproveRoute/i)
       expect(res.text).toMatch(/承認順/i)
       expect(res.text).toMatch(/担当者名/i)
       expect(res.text).toMatch(/承認状況/i)
       expect(res.text).toMatch(/依頼済み/i)
-      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/承認順/i)
       expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
       expect(res.text).toMatch(/戻る/i)
@@ -431,122 +420,67 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
   })
 
   describe('5.契約ステータス：変更申込', () => {
-    // テナントステータスが「変更申込」、パラメータがない場合
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus40 = await getCookies(app, request, getTenantId, 'inte.test.user+40@gmail.com', '1q2w3e4r5t')
+      userStatus40 = await getCookies(app, request, getTenantId, 'inte.test.user+40user@gmail.com', '1q2w3e4r5t')
+    })
+
     test('管理者、契約ステータス：変更申込、パラメータがない場合-利用不可', async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-      if (contract.dataValues.contractStatus !== '40') {
-        await db.Contract.update(
-          {
-            contractStatus: '40'
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-      }
-
-      // 支払依頼ステータス戻し
-      const invoiceId = redirectUrl.replace('/approvalInbox/', '')
-      const requestApproval = await db.RequestApproval.findOne({
-        where: {
-          invoiceId: invoiceId
-        }
-      })
-
-      const approval = await db.Approval.findOne({
-        where: {
-          requestId: requestApproval.dataValues.requestId
-        }
-      })
-
-      if (approval.dataValues.approveStatus !== '10') {
-        await db.Approval.update(
-          {
-            approveStatus: '10',
-            approvalAt1: null
-          },
-          {
-            where: {
-              requestId: requestApproval.dataValues.requestId
-            }
-          }
-        )
-      }
-
-      if (requestApproval.dataValues.status !== '10') {
-        await db.RequestApproval.update(
-          {
-            status: '10',
-            message: 'インテグレーションテスト'
-          },
-          {
-            where: {
-              invoiceId: invoiceId
-            }
-          }
-        )
-      }
-
-      const res = await request(app)
-        .get('/approvalInbox')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+      const cookie40Admin = `${acStatus40[0].name}=${acStatus40[0].value}`
+      const res = await request(app).get('/approvalInbox').set('Cookie', cookie40Admin).expect(400)
 
       // 画面内容確認
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
     test('一般ユーザ、契約ステータス：変更申込、パラメータがない場合-利用不可', async () => {
-      const res = await request(app)
-        .get('/approvalInbox')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
+      const cookie40user = `${userStatus40[0].name}=${userStatus40[0].value}`
+      const res = await request(app).get('/approvalInbox').set('Cookie', cookie40user).expect(400)
 
       // 画面内容確認
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
     test('管理者、契約ステータス：変更申込、承認者ではない場合', async () => {
+      const cookie40Admin = `${acStatus40[0].name}=${acStatus40[0].value}`
       const res = await request(app)
-        .get(redirectUrl)
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .get('/approvalInbox/1b35d673-cf9c-5a0d-a06b-a3add6113fe2')
+        .set('Cookie', cookie40Admin)
         .expect(200)
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).toMatch(/承認ルート名/i)
-      expect(res.text).toMatch(/integrationApproveRoute/i)
       expect(res.text).toMatch(/承認順/i)
       expect(res.text).toMatch(/担当者名/i)
       expect(res.text).toMatch(/承認状況/i)
       expect(res.text).toMatch(/依頼済み/i)
-      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
       expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
     test('一般ユーザ、契約ステータス：変更申込、承認者の場合', async () => {
+      const cookie40user = `${userStatus40[0].name}=${userStatus40[0].value}`
       const res = await request(app)
-        .get(redirectUrl)
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .get('/approvalInbox/1b35d673-cf9c-5a0d-a06b-a3add6113fe2')
+        .set('Cookie', cookie40user)
         .expect(200)
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
       expect(res.text).toMatch(/承認ルート名/i)
-      expect(res.text).toMatch(/integrationApproveRoute/i)
       expect(res.text).toMatch(/承認順/i)
       expect(res.text).toMatch(/担当者名/i)
       expect(res.text).toMatch(/承認状況/i)
       expect(res.text).toMatch(/依頼済み/i)
-      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
       expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
       expect(res.text).toMatch(/戻る/i)
