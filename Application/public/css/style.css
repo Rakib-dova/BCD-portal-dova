@@ -677,6 +677,10 @@ body > div.hero.is-small {
   margin-left: 1.5rem;
 }
 
+.content-coution-font-size{
+ font-size: 0.65rem;
+}
+
 .color-err-message {
   color: #f00;
 }

@@ -1,0 +1,41 @@
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans #{title}
+        .subtitle.is-family-noto-sans #{engTitle}
+
+    .columns.is-centered
+      .column.is-11
+        a.button.is-link.mb-4(href="/registDepartmentCode") #{btnNameForRegister}
+        
+        .box
+          if listArr.length === 0
+            p #{messageForNotItem}
+          else
+            table.table.is-fullwidth.is-hoverable.table-fixed
+              thead
+                tr
+                  th.width-5.text-center #{listNo}
+                  th.width-13.text-center #{invoiceNumber}
+                  th.width-13.text-center #{invoiceDestinationCompanyName}
+                  th.width-10.text-center #{totalAmmout}
+                  th.width-10.text-center #{updatedAt}
+                  th.width-10.text-center #{paymentDate}
+                  th.width-10.text-center #{invoiceState}
+                  th.width-10.text-center 
+              tbody
+                - var list = listArr
+                each item in list
+                  tr
+                    th.text-center.td-overflow= item.no
+                    td.text-center.td-overflow= item.invoiceNumber
+                    td.text-center.td-overflow= item.invoiceDestinationCompanyName
+                    td.text-center.td-overflow= item.totalAmmout  
+                    td.text-center.td-overflow= item.updatedAt
+                    td.text-center.td-overflow= item.paymentDate
+                    td.text-center.td-overflow= item.invoiceState           
+                    td.text-center 
+                      a.button.is-success(class= setClassChangeBtn uuid= item.departmentCodeId) 編集・出力
+                      
+    include footer
