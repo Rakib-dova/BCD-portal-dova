@@ -6,7 +6,7 @@ const db = require('../../Application/models')
 const getTenantId = {}
 let redirectUrl
 
-jest.setTimeout(80000) // jestのタイムアウトを60秒とする
+jest.setTimeout(80000) // jestのタイムアウトを80秒とする
 
 const getCookies = require('./getCookies')
 
@@ -14,10 +14,8 @@ describe('支払依頼画面のインテグレーションテスト', () => {
   let acCookies
   let userCookies
   let testTenantId
-  // let acStatus10
   let acStatus11
   let userStatus11
-  // let acStatus30
   let acStatus40
   let userStatus40
 
@@ -36,8 +34,6 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
       // DBクリア
-      // await db.User.destroy({ where: { tenantId: getTenantId.id } })
-      // await db.Tenant.destroy({ where: { tenantId: getTenantId.id } })
     })
   })
 
