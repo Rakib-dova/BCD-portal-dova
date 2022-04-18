@@ -9,6 +9,7 @@
   left: 50%;
   transform: translateY(-50px);
 }
+
 .loading > li {
   content: '';
   width: 30px;
@@ -61,6 +62,7 @@
   height: 35px;
   pointer-events: none;
 }
+
 .a-status-ACCEPTED {
   background-color: #0065a3;
   border-color: transparent;
@@ -81,8 +83,104 @@
   height: 35px;
   pointer-events: none;
 }
+
 .a-status-DELIVERED {
   background-color: #85c06d;
+  border-color: transparent;
+  color: #fff;
+  border-width: 1px;
+  justify-content: center;
+  padding-bottom: 7px;
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-top: calc(0.5em - 1px);
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 4px;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.a-approveStatus-UNTREATED {
+  background-color: #ffa800;
+  border-color: transparent;
+  color: #fff;
+  border-width: 1px;
+  justify-content: center;
+  padding-bottom: calc(0.5em - 1px);
+  padding-left: 2.5em;
+  padding-right: 2.5em;
+  padding-top: calc(0.5em - 1px);
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 4px;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.a-approveStatus-WAITING {
+  background-color: #85c06d;
+  border-color: transparent;
+  color: #fff;
+  border-width: 1px;
+  justify-content: center;
+  padding-bottom: 7px;
+  padding-left: 1.5em;
+  padding-right: 1.5em;
+  padding-top: calc(0.5em - 1px);
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 4px;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.a-approveStatus-APPROVING {
+  background-color: #287f06;
+  border-color: transparent;
+  color: #fff;
+  border-width: 1px;
+  justify-content: center;
+  padding-bottom: 7px;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: calc(0.5em - 1px);
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 4px;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.a-approveStatus-APPROVED {
+  background-color: #3273dc;
+  border-color: transparent;
+  color: #fff;
+  border-width: 1px;
+  justify-content: center;
+  padding-bottom: 7px;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: calc(0.5em - 1px);
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 4px;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.a-approveStatus-RETURNED {
+  background-color: #eb250b;
   border-color: transparent;
   color: #fff;
   border-width: 1px;
@@ -114,4 +212,8 @@
   padding-right: 0.75em;
   white-space: nowrap;
   order: 3;
+}
+
+.linkToApproval:hover {
+  cursor: pointer;
 }

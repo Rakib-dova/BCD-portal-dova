@@ -5,20 +5,23 @@ jest.mock('../../Application/lib/logger')
 const contractController = require('../../Application/controllers/contractController')
 const constantsDefine = require('../../Application/constants')
 
-let findOneSpy, errorSpy, tenantId, findContractSpy
+let findOneSpy, errorSpy, tenantId, findContractSpy, updateSpy
 describe('contractControllerのテスト', () => {
   beforeEach(() => {
     const Contract = require('../../Application/models').Contract
     const Contractcontroller = require('../../Application/controllers/contractController')
     const logger = require('../../Application/lib/logger')
     findOneSpy = jest.spyOn(Contract, 'findOne')
+    updateSpy = jest.spyOn(Contract, 'update')
     findContractSpy = jest.spyOn(Contractcontroller, 'findContract')
+
     errorSpy = jest.spyOn(logger, 'error')
   })
   afterEach(() => {
     findOneSpy.mockRestore()
     findContractSpy.mockRestore()
     errorSpy.mockRestore()
+    updateSpy.mockRestore()
   })
   tenantId = '12345678-bdac-4195-80b9-1ea64b8cb70c'
 
@@ -39,6 +42,16 @@ describe('contractControllerのテスト', () => {
     tenantId: tenantId,
     numberN: '1234567890',
     contractStatus: constantsDefine.statusConstants.contractStatusNewContractReceive,
+    deleteFlag: false,
+    createdAt: '2021-07-09T04:30:00.000Z',
+    updatedAt: '2021-07-09T04:30:00.000Z'
+  }
+
+  const contractInfoDataUpdated = {
+    contractId: '87654321-fbe6-4864-a866-7a3ce9aa517e',
+    tenantId: tenantId,
+    numberN: '1234567890',
+    contractStatus: constantsDefine.statusConstants.contractStatusCancellationOrder,
     deleteFlag: false,
     createdAt: '2021-07-09T04:30:00.000Z',
     updatedAt: '2021-07-09T04:30:00.000Z'
@@ -162,10 +175,50 @@ describe('contractControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await contractController.findOne({ tenantId: 'tenantId', deleteFlag: false }, 'createdAt DESC')
+      const result = await contractController.findContract({ tenantId: 'tenantId', deleteFlag: false }, 'createdAt DESC')
       // 期待結果
       // DBErrorが返されること
       expect(result).toEqual(new Error('DB error mock'))
+    })
+  })
+
+  describe('updateStatus', () => {
+    test('正常：正常にupdateできる', async () => {
+      // 準備
+      const contractId = '87654321-fbe6-4864-a866-7a3ce9aa517e'
+      const orderType = constantsDefine.statusConstants.contractStatusCancellationOrder
+      // DBからの正常契約情報の取得を想定する
+      updateSpy.mockReturnValueOnce(contractInfoDataUpdated)
+
+      // 試験実施
+      const result = await contractController.updateStatus(
+        contractId,
+        orderType
+      )
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(contractInfoDataUpdated)
+    })
+
+    test('status 0のErrorログ: DBエラー時', async () => {
+      // 準備
+      const contractId = '87654321-fbe6-4864-a866-7a3ce9aa517e'
+      const orderType = constantsDefine.statusConstants.contractStatusCancellationOrder
+      // 1回目のアクセストークンによるアクセスは401エラーを想定する
+      const dbError = new Error('DB error mock')
+      updateSpy.mockImplementation(() => {
+        throw dbError
+      })
+
+      // 試験実施
+      const result = await contractController.updateStatus(
+        contractId,
+        orderType
+      )
+      // 期待結果
+      // DBErrorが返されること
+      expect(result).toEqual(dbError)
     })
   })
 })
