@@ -6,7 +6,7 @@ const db = require('../../Application/models')
 const getTenantId = {}
 let redirectUrl
 
-jest.setTimeout(60000) // jestのタイムアウトを60秒とする
+jest.setTimeout(80000) // jestのタイムアウトを60秒とする
 
 const getCookies = require('./getCookies')
 
@@ -14,6 +14,11 @@ describe('支払依頼画面のインテグレーションテスト', () => {
   let acCookies
   let userCookies
   let testTenantId
+  // let acStatus10
+  let acStatus11
+  let userStatus11
+  // let acStatus30
+  // let acStatus40
 
   describe('0.前準備', () => {
     test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
@@ -30,8 +35,8 @@ describe('支払依頼画面のインテグレーションテスト', () => {
 
       // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
       // DBクリア
-      await db.User.destroy({ where: { tenantId: getTenantId.id } })
-      await db.Tenant.destroy({ where: { tenantId: getTenantId.id } })
+      // await db.User.destroy({ where: { tenantId: getTenantId.id } })
+      // await db.Tenant.destroy({ where: { tenantId: getTenantId.id } })
     })
   })
 
@@ -111,144 +116,83 @@ describe('支払依頼画面のインテグレーションテスト', () => {
     })
 
     test('管理者、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+      const coookie = `${acCookies[0].name}=${acCookies[0].value}`
+      const res = await request(app).get('/inboxList/1').set('Cookie', coookie).expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(5000)
-
-      redirectUrl = await page.evaluate(() => {
-        return document.querySelector('#form > div.grouped-button > a.button.is-link').getAttribute('href')
-      })
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/支払依頼一覧/i)
     })
 
     test('一般ユーザ、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+      const coookie = `${userCookies[0].name}=${userCookies[0].value}`
+      const res = await request(app).get('/inboxList/1').set('Cookie', coookie).expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(5000)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/支払依頼一覧/i)
     })
   })
 
   describe('3.契約ステータス：登録受付', () => {
-    // テナントステータスが「登録受付」、支払依頼画面直接接続-利用不可
-    test('管理者、契約ステータス：登録受付、支払依頼画面直接接続-利用不可', async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-      if (contract.dataValues.contractStatus !== '11') {
-        await db.Contract.update(
-          {
-            contractStatus: '11'
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-      }
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus11 = await getCookies(app, request, getTenantId, 'inte.test.user+11@gmail.com', '1q2w3e4r5t')
+      userStatus11 = await getCookies(app, request, getTenantId, 'inte.test.user+11user@gmail.com', '1q2w3e4r5t')
+    })
 
-      const res = await request(app)
-        .get('/requestApproval')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+    test('管理者、契約ステータス：登録受付、支払依頼画面直接接続-利用不可', async () => {
+      const cookie11 = `${acStatus11[0].name}=${acStatus11[0].value}`
+      const res = await request(app).get('/requestApproval').set('Cookie', cookie11).expect(400)
 
       // 画面内容確認
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
     test('一般ユーザ、契約ステータス：登録受付、支払依頼画面直接接続-利用不可', async () => {
-      const res = await request(app)
-        .get('/requestApproval')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
+      const cookie11user = `${userStatus11[0].name}=${userStatus11[0].value}`
+      const res = await request(app).get('/requestApproval').set('Cookie', cookie11user).expect(400)
 
       // 画面内容確認
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
     test('管理者、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+      const cookie11 = `${acStatus11[0].name}=${acStatus11[0].value}`
+      let res = await request(app).get('/inboxList/1').set('Cookie', cookie11).expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
+      // 支払依頼画面へテスト対象請求書番号確認
+      const uuidIndex = res.text.search(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/)
+      const uuid = res.text.substring(uuidIndex, uuidIndex + 36)
+      const inboxUrl = `/inbox/${uuid}`
 
-      await page.waitForTimeout(5000)
+      // 仕訳情報画面へ遷移できること確認
+      res = await request(app).get(inboxUrl).set('Cookie', cookie11).expect(200)
 
-      await page.click('#form > div.grouped-button > a.button.is-link')
+      // 支払依頼へ遷移できること確認
+      const requestUrl = `/requestApproval/${uuid}`
+      res = await request(app).get(requestUrl).set('Cookie', cookie11).expect(200)
 
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      expect(res.text).toMatch(/借方/)
+      expect(res.text).toMatch(/貸方/)
     })
 
     test('一般ユーザ、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+      const cookie11user = `${userStatus11[0].name}=${userStatus11[0].value}`
+      let res = await request(app).get('/inboxList/1').set('Cookie', cookie11user).expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
+      // 支払依頼画面へテスト対象請求書番号確認
+      const uuidIndex = res.text.search(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/)
+      const uuid = res.text.substring(uuidIndex, uuidIndex + 36)
+      const inboxUrl = `/inbox/${uuid}`
 
-      await page.waitForTimeout(5000)
+      // 仕訳情報画面へ遷移できること確認
+      res = await request(app).get(inboxUrl).set('Cookie', cookie11user).expect(200)
 
-      await page.click('#form > div.grouped-button > a.button.is-link')
+      // 支払依頼へ遷移できること確認
+      const requestUrl = `/requestApproval/${uuid}`
+      res = await request(app).get(requestUrl).set('Cookie', cookie11user).expect(200)
 
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      expect(res.text).toMatch(/借方/)
+      expect(res.text).toMatch(/貸方/)
     })
   })
 
