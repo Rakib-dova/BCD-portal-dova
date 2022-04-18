@@ -1096,7 +1096,6 @@ const getJournalList = function () {
     do {
       const journalLine = line.querySelectorAll('.lineAccountcode')
       journalLine.forEach((journal, jdx) => {
-        console.log(journal.querySelectorAll('input[type=text]'))
         const journalNo = journal.id.split('_')[1]
         if (journalNo === 'lineAccountCode1') {
           journalLines[idx][0] = {
@@ -1315,7 +1314,7 @@ const duplicateCheckFunction = function (array) {
           array[j + 1] = temp
         }
 
-        // 全項目からの場合
+        // 全項目が空の場合
         if (
           array[j][0].length === 0 &&
           array[j][1].length === 0 &&
@@ -1341,7 +1340,7 @@ const duplicateCheckFunction = function (array) {
       }
     }
   } else {
-    // 全項目からの場合
+    // 全項目が空の場合
     if (
       array[0][0].length === 0 &&
       array[0][1].length === 0 &&
