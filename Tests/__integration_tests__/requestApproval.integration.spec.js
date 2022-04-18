@@ -18,7 +18,8 @@ describe('支払依頼画面のインテグレーションテスト', () => {
   let acStatus11
   let userStatus11
   // let acStatus30
-  // let acStatus40
+  let acStatus40
+  let userStatus40
 
   describe('0.前準備', () => {
     test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
@@ -556,103 +557,64 @@ describe('支払依頼画面のインテグレーションテスト', () => {
   })
 
   describe('5.契約ステータス：変更申込', () => {
-    // テナントステータスが「変更申込」、支払依頼画面直接接続-利用不可
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus40 = await getCookies(app, request, getTenantId, 'inte.test.user+40@gmail.com', '1q2w3e4r5t')
+      userStatus40 = await getCookies(app, request, getTenantId, 'inte.test.user+40user@gmail.com', '1q2w3e4r5t')
+    })
+
     test('管理者、契約ステータス：変更申込、支払依頼画面直接接続-利用不可', async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-      if (contract.dataValues.contractStatus !== '40') {
-        await db.Contract.update(
-          {
-            contractStatus: '40'
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-      }
-
-      // 支払依頼削除
-      const requestId = await db.RequestApproval.findOne({
-        where: {
-          contractId: contract.contractId
-        }
-      })
-
-      if (requestId && requestId.length !== 0) {
-        await db.Approval.destroy({ where: { requestId: requestId.requestId } })
-        await db.RequestApproval.destroy({ where: { contractId: contract.contractId } })
-      }
-
-      const res = await request(app)
-        .get('/requestApproval')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(400)
+      const cookie40Admin = `${acStatus40[0].name}=${acStatus40[0].value}`
+      const res = await request(app).get('/requestApproval').set('Cookie', cookie40Admin).expect(400)
 
       // 画面内容確認
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
     test('一般ユーザ、契約ステータス：変更申込、支払依頼画面直接接続-利用不可', async () => {
-      const res = await request(app)
-        .get('/requestApproval')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(400)
+      const cookie40user = `${userStatus40[0].name}=${userStatus40[0].value}`
+      const res = await request(app).get('/requestApproval').set('Cookie', cookie40user).expect(400)
 
       // 画面内容確認
       expect(res.text).toMatch(/不正なページからアクセスされたか、セッションタイムアウトが発生しました。/i)
     })
 
     test('管理者、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+      const cookie40Admin = `${acStatus40[0].name}=${acStatus40[0].value}`
+      const res = await request(app)
+        .get('/requestApproval/169f03cd-589b-52a3-9207-89d01b041505')
+        .set('Cookie', cookie40Admin)
+        .expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(5000)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/SP006/i)
+      expect(res.text).toMatch(/メッセージ/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/承認ルート選択/i)
+      expect(res.text).toMatch(/仕訳情報設定へ/i)
+      expect(res.text).toMatch(/確認/i)
     })
 
     test('一般ユーザ、支払依頼画面へアクセス、利用可能', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/inboxList/1')
+      const cookie40user = `${userStatus40[0].name}=${userStatus40[0].value}`
+      const res = await request(app)
+        .get('/requestApproval/169f03cd-589b-52a3-9207-89d01b041505')
+        .set('Cookie', cookie40user)
+        .expect(200)
 
-      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
-
-      await page.waitForTimeout(5000)
-
-      await page.click('#form > div.grouped-button > a.button.is-link')
-
-      await page.waitForTimeout(1000)
-
-      // 支払依頼画面にredirectする。
-      expect(await page.url()).toBe(`https://localhost:3000${redirectUrl}`)
-
-      browser.close()
+      // 画面内容確認
+      expect(res.text).toMatch(/支払依頼/i)
+      expect(res.text).toMatch(/請求書番号/i)
+      expect(res.text).toMatch(/SP006/i)
+      expect(res.text).toMatch(/メッセージ/i)
+      expect(res.text).toMatch(/借方/i)
+      expect(res.text).toMatch(/貸方/i)
+      expect(res.text).toMatch(/承認ルート選択/i)
+      expect(res.text).toMatch(/仕訳情報設定へ/i)
+      expect(res.text).toMatch(/確認/i)
     })
   })
 
