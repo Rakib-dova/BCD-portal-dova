@@ -1096,7 +1096,6 @@ const getJournalList = function () {
     do {
       const journalLine = line.querySelectorAll('.lineAccountcode')
       journalLine.forEach((journal, jdx) => {
-        console.log(journal.querySelectorAll('input[type=text]'))
         const journalNo = journal.id.split('_')[1]
         if (journalNo === 'lineAccountCode1') {
           journalLines[idx][0] = {
