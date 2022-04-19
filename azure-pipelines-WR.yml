@@ -55,13 +55,13 @@ trigger:
 pr:
   - none
 
-# schedules:
-#   - cron: "0 8 * * *"
-#     displayName: run schedule for 17:00(8)
-#     branches:
-#       include:
-#         - release_step5_WR
-#     always: true
+schedules:
+  - cron: "0 8 * * *"
+    displayName: run schedule for 17:00(8)
+    branches:
+      include:
+        - snake_case
+    always: true
 
 variables:
   DIR: $(Build.SourcesDirectory)/bcd-e2e-tests
