@@ -210,7 +210,7 @@ stages:
                   foreach ($seed in $seeds) {
                       Write-Host $seed
                       if($seed.trim() -like "*.js"){
-                        npx sequelize db:seed --seed $seed  --env  prodstg 
+                        npx sequelize db:seed --seed $seed  --env  ${{ parameters.Environment }} 
                       }
                   }
                 displayName: npx sequelize db:migrate
