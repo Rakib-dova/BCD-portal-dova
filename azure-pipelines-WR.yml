@@ -55,13 +55,13 @@ trigger:
 pr:
   - none
 
-schedules:
-  - cron: "0 8 * * *"
-    displayName: run schedule for 8:00
-    branches:
-      include:
-        - WR_merged_snake_case
-    always: true
+#schedules:
+#  - cron: "0 8 * * *"
+#    displayName: run schedule for 8:00
+#    branches:
+#      include:
+#        - WR_merged_snake_case
+#    always: true
 
 variables:
   DIR: $(Build.SourcesDirectory)/bcd-e2e-tests
