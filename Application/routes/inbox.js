@@ -243,6 +243,11 @@ const cbPostGetCode = async (req, res, next) => {
     targetSubAccountCodeName
   )
 
+  if (searchResult instanceof Error) {
+    req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
+    return res.redirect(303, '/inboxList/1')
+  }
+
   const codeLists = searchResult.map((item) => {
     return {
       accountCode: item.accountCode,
