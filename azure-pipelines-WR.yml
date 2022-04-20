@@ -56,8 +56,8 @@ pr:
   - none
 
 schedules:
-  - cron: "0 8 * * 2"
-    displayName: run schedule for 17:00(8)
+  - cron: "0 0 * * 2"
+    displayName: run schedule for 9:00(0)
     branches:
       include:
         - snake_case
