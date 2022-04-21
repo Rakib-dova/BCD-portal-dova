@@ -138,9 +138,7 @@ stages:
                   resourceGroupName: $(portalRg)
                   runtimeStack: NODE|14-lts
                   package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-                  startUpCommand: |
-                    npx playwright install --with-deps chromium
-                    npm run start
+                  startUpCommand: npm run start
 
   - stage: Deploy
     pool:

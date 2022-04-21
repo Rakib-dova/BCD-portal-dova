@@ -32,6 +32,7 @@
     "passport": "^0.4.1",
     "passport-oauth2": "^1.5.0",
     "playwright": "^1.21.1",
+    "playwright-chromium": "^1.21.1",
     "pug": "^3.0.0",
     "qs": "^6.9.4",
     "redis": "^3.0.2",
