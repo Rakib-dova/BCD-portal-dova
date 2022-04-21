@@ -72,6 +72,11 @@ stages:
               cwd: Application
               arguments: "--force"
 
+          - bash: |
+              cd ./Application
+              npx playwright install --with-deps chromium
+            displayName: install headless browser dependencies
+
           - task: Npm@0
             displayName: "Install test dependencies"
             inputs:
