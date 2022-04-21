@@ -17,14 +17,14 @@ block content
           .container
            .field.is-invisible#RequiredErrorMesageField
              p#RequiredErrorMesage.input-label-required
-           .field.is-horizontal
+           .field.is-horizontal.mt-4
              .field-label.is-normal
                label.bulmalabel 請求書番号
              .field-body
                .field
                  .control.has-icons-right
                    input.input#invoiceNumber.itemForSearch(type="text" name="invoiceNumber" maxlength="100" pattern="^.{0,100}$")
-           .field.is-horizontal
+           .field.is-horizontal.my-5
              .field-label.is-normal
                label.bulmalabel 発行日
              .field-body
@@ -36,7 +36,7 @@ block content
                  .control.is-expanded
                    input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" value= maxissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
 
-           .field.is-horizontal
+           .field.is-horizontal.mt-5
              .field-label.is-normal
                label.bulmalabel 送信企業
              .field-body
@@ -55,7 +55,7 @@ block content
             .field-body.level
               .container#displaySendToSearchResultField
 
-           .field.is-horizontal.mb-3
+           .field.is-horizontal.my-3
              .field-label
                label.bulmalabel ダウンロード対象
              .field-body#chkFinalapproval
@@ -66,6 +66,16 @@ block content
                  label.radio.ml-6
                    input#noneFinalapproval(type='radio' name='chkFinalapproval' checked=false value='noneFinalapproval')
                    label.ml-1(for='noneFinalapproval') 仕訳済みの請求書
+           
+           .field.is-horizontal.my-4
+            .field-label
+              label.bulmalabel 出力フォーマット
+            .field-body
+              .select.is-fullwidth
+                select(name='serviceDataFormat')
+                  option(value=0) デフォルト
+                  option(value=1) 弥生会計（05以降）
+            
 
         .field.is-grouped.is-grouped-centered
           .control.mx-4
