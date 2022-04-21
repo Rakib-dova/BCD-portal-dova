@@ -1,5 +1,6 @@
 // const puppeteer = require('puppeteer')
-const { chromium } = require('playwright');
+// const { chromium } = require('playwright');
+const { chromium } = require("playwright-chromium")
 
 const defaultOptions = {
   format: 'A4'
@@ -25,10 +26,11 @@ const generatePdf = async (html, options = defaultOptions) => {
   ]
 
   console.log('== ブラウザ起動 ==================')
-  const browser = await chromium.launch({
-    ignoreHTTPSErrors: true,
-    args: args
-  })
+  const browser = await chromium.launch()
+  // const browser = await chromium.launch({
+  //   ignoreHTTPSErrors: true,
+  //   args: args
+  // })
 
   console.log('== ページ表示開始 ==================')
   const page = await browser.newPage()
