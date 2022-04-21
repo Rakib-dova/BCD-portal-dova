@@ -15,6 +15,12 @@ const functionName = 'cbPostIndex'
 const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
 const csvDownloadController = require('../controllers/csvDownloadController.js')
 const { generatePDF } = require("../lib/pdfGenerator");
+const fs = require('fs')
+const path = require('path')
+const {
+  generatePdf,
+  renderInvoiceHTML
+} = require('../lib/pdfGenerator')  // 呼び出す場所で適宜変えてください
 
 const notiTitle = '請求書ダウンロード'
 
@@ -454,18 +460,20 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
- 
-
-  generatePDF({
-    title: 'テスト請求書タイトル',
+  // =================================================================
+  const imageBuffer = fs.readFileSync(path.resolve(__dirname, '../lib/pdfGenerator/images/sample.jpg'))
+  const html = renderInvoiceHTML({
+    title: 'テスト請求書',
     body: 'テスト請求書本文'
-  },
-  (buffer) => {
-    console.log('@@@@ PDF生成完了')
-    // const filename = generateFilename(req.body.networkStatus)
-    res.set({ 'Content-Disposition': `attachment; filename=pdfInvoice.pdf` })
-    res.status(200).send(buffer)
-  })
+  }, imageBuffer)
+
+  console.log('@@@@@ 生成されたHTML:\n', html)
+
+  const pdfBuffer = await generatePdf(html)
+  console.log('== PDF生成完了 ====================')
+
+  res.set({ 'Content-Disposition': `attachment; filename=pdfInvoice.pdf` })
+  res.status(200).send(pdfBuffer)
 }
 
 const errorHandle = (documentsResult, _res, _req) => {
