@@ -144,6 +144,45 @@ const cbPostIndex = async (req, res, next) => {
     findDocumentQuery.maxissuedate = req.body.maxIssuedate
   }
 
+  if (!Number(req.body.serviceDataFormat)) {
+    req.body.serviceDataFormat = 0
+  } else {
+    req.body.serviceDataFormat = Number(req.body.serviceDataFormat)
+  }
+
+  switch (req.body.serviceDataFormat) {
+    case 1:
+      req.body.sentBy = req.body.sentBy ?? []
+      if (typeof req.body.sentBy === 'string') {
+        req.body.sentBy = [req.body.sentBy]
+      }
+      if (req.body.sentBy instanceof Array === false) {
+        req.body.sentBy = []
+      }
+
+      {
+        const isCloedApproval = req.body.chkFinalapproval === 'finalapproval'
+        const result = await journalDownloadController.downloadYayoi(
+          req.user,
+          contract,
+          req.body.invoiceNumber,
+          req.body.minIssuedate,
+          req.body.maxIssuedate,
+          req.body.sentBy,
+          isCloedApproval
+        )
+
+        if (result === null) {
+          // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
+          // 条件に合わせるデータがない場合、お知らせを表示する。
+          req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+          return res.redirect(303, '/journalDownload')
+        } else {
+          return res.status(200).send(JSON.stringify(result))
+        }
+      }
+  }
+
   const invoiceNumber = req.body.invoiceNumber
   const findDocuments = '/documents'
 
