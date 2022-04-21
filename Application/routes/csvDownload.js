@@ -469,7 +469,14 @@ const cbPostIndex = async (req, res, next) => {
 
   console.log('@@@@@ 生成されたHTML:\n', html)
 
-  const pdfBuffer = await generatePdf(html)
+  let pdfBuffer
+  try {
+    pdfBuffer = await generatePdf(html)
+  } catch (error) {
+    console.log('== PDF生成 ERROR ====================\n', error)
+    req.flash('noti', ['PDF生成に失敗しました。', ''])
+    return res.redirect(303, '/csvDownload')
+  }
   console.log('== PDF生成完了 ====================')
 
   res.set({ 'Content-Disposition': `attachment; filename=pdfInvoice.pdf` })
