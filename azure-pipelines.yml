@@ -72,11 +72,6 @@ stages:
               cwd: Application
               arguments: "--force"
 
-          - bash: |
-              cd ./Application
-              npx playwright install --with-deps chromium
-            displayName: install headless browser dependencies
-
           - task: Npm@0
             displayName: "Install test dependencies"
             inputs:
@@ -143,7 +138,9 @@ stages:
                   resourceGroupName: $(portalRg)
                   runtimeStack: NODE|14-lts
                   package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-                  startUpCommand: npm run start
+                  startUpCommand: |
+                    npx playwright install --with-deps chromium
+                    npm run start
 
   - stage: Deploy
     pool:
