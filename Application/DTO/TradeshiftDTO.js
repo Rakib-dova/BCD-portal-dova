@@ -79,7 +79,7 @@ class TradeshiftDTO {
     maxissuedate = maxissuedate ?? ''
     if (state instanceof Array === false) state = []
     if (query instanceof Array === false) query = []
-    sales = sales ?? ''
+    if (typeof sales !== 'boolean') sales = sales ?? ''
 
     const get = 'get'
     let uri = `/documents?&_onlyIndex=true&${this.getQuery('page', page)}&${this.getQuery('limit', limit)}`
@@ -103,6 +103,8 @@ class TradeshiftDTO {
     if (maxissuedate.length > 0 && maxissuedate.match(/\d{1,4}-\d{1,2}-\d{1,2}/)) {
       uri = `${uri}&${this.getQuery('maxissuedate', maxissuedate)}`
     }
+
+    if (typeof sales === 'boolean') uri = `${uri}&${this.getQuery('sales', sales)}`
 
     uri = `${uri}&${this.getQuery('onlydeleted', false)}`
     uri = `${uri}&${this.getQuery('onlydrafts', false)}`
