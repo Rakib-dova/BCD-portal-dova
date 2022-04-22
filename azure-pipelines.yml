@@ -10,9 +10,11 @@ trigger:
 
   paths:
     include:
-      - "*"
+      - Application
     exclude:
-      - "*.yml"
+      - Documents
+      - Tests
+      - '*.yml'
 
 parameters:
   - name: Environment
@@ -20,6 +22,8 @@ parameters:
     default: dev
     values:
       - dev
+      - dev2
+      - docomoIDF
       - prodstg
       - prod
       - demo
@@ -29,6 +33,7 @@ parameters:
     type: string
     displayName: 'seedScriptName (.jsを含めて、カンマ区切りで入力)'
     default: 'default'
+
   - name: isManualOperation_prodstgOpt
     type: boolean
     default: false
@@ -39,9 +44,9 @@ parameters:
 variables:
   - group: ${{ parameters.Environment }}
   - name: devDeploy #開発環境デプロイフラグ
-    value: ${{ eq(parameters.Environment,'dev')}}
-  - name: Deploy #prod, proddtg環境デプロイフラグ
-    value: ${{ or(eq(parameters.Environment,'prodstg'), eq(parameters.Environment,'prod'),eq(parameters.Environment,'test'))}}
+    value: ${{ or(eq(parameters.Environment,'dev'), eq(parameters.Environment,'dev2'), eq(parameters.Environment,'docomoIDF'))}}
+  - name: Deploy #prod, proddtg, demo環境デプロイフラグ
+    value: ${{ or(eq(parameters.Environment,'prodstg'), eq(parameters.Environment,'prod'),eq(parameters.Environment,'demo'),eq(parameters.Environment,'test'))}}
   - name: japanwest #西日本デプロイフラグ
     value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
   - name: vmPipeline #パイプライン起動停止フラグ
@@ -84,14 +89,14 @@ stages:
               echo "##vso[task.setvariable variable=unittestsStatus]done"
             displayName: "Run unit tests"
             name: "UnitTests"
-
+            
           - task: PublishCodeCoverageResults@1
             condition: eq(variables['unittestsStatus'],'done')
             displayName: 'Publish code coverage'
             inputs:
               codeCoverageTool: Cobertura
               summaryFileLocation: $(System.DefaultWorkingDirectory)/Tests/coverage/cobertura-coverage.xml
-
+          
           - task: PublishTestResults@2
             condition: eq(variables['unittestsStatus'],'done')
             displayName: 'Publish test results'
@@ -99,41 +104,17 @@ stages:
               testRunTitle: '${{ parameters.Environment }}'
               testResultsFormat: 'JUnit'
               testResultsFiles: '$(System.DefaultWorkingDirectory)/Tests/coverage/junit.xml'
-          
-          - bash: |
-              cd ./Tests
-              npm run test:integrationCi
-              echo "##vso[task.setvariable variable=integrationTestsStatus]done"
-            displayName: "Run integration tests"
-            name: "IntegrationTests"
-
-          - task: PublishCodeCoverageResults@1
-            condition: eq(variables['integrationTestsStatus'],'done')
-            displayName: "Publish integration code coverage"
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: $(System.DefaultWorkingDirectory)/Tests/coverage/cobertura-coverage-integration.xml
-
-          - task: PublishTestResults@2
-            condition: eq(variables['integrationTestsStatus'],'done')
-            displayName: "Publish integration test results"
-            inputs:
-              testRunTitle: "${{ parameters.Environment }}"
-              testResultsFormat: "JUnit"
-              testResultsFiles: "$(System.DefaultWorkingDirectory)/Tests/coverage/junit-integration.xml"
 
           - task: ArchiveFiles@2
-            condition: eq(variables['unittestsStatus'],'done')
             inputs:
               rootFolderOrFile: '$(System.DefaultWorkingDirectory)/Application'
               includeRootFolder: false
               archiveType: 'zip'
               archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
               replaceExistingArchive: true
-
+          
           - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
             artifact: drop
-            condition: eq(variables['unittestsStatus'],'done')
             displayName: Publush Arifacts
 
   - stage: devDeploy
@@ -148,16 +129,16 @@ stages:
           runOnce:
             deploy:
               steps:
-                - task: AzureWebApp@1
-                  displayName: 'Azure Web App Deploy'
-                  inputs:
-                    azureSubscription: $(azureSubscription)
-                    appType: webAppLinux
-                    appName: $(appserviceName)
-                    resourceGroupName: $(billingappRg)
-                    runtimeStack: NODE|14-lts
-                    package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-                    startUpCommand: npm run start
+              - task: AzureWebApp@1
+                displayName: 'Azure Web App Deploy'
+                inputs:
+                  azureSubscription: $(azureSubscription)
+                  appType: webAppLinux
+                  appName: $(appserviceName)
+                  resourceGroupName: $(portalRg)
+                  runtimeStack: NODE|14-lts
+                  package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+                  startUpCommand: npm run start
 
   - stage: Deploy
     pool:
@@ -227,7 +208,7 @@ stages:
                   foreach ($seed in $seeds) {
                       Write-Host $seed
                       if($seed.trim() -like "*.js"){
-                        npx sequelize db:seed --seed $seed  --env  ${{ parameters.Environment }} 
+                        npx sequelize db:seed --seed $seed  --env  prodstg 
                       }
                   }
                 displayName: npx sequelize db:migrate
@@ -244,7 +225,7 @@ stages:
                         npx sequelize  db:migrate:undo --env ${{ parameters.Environment }}
                       }
                     displayName: npx sequelize  db:migrate:undo
-
+                    
       - job: DeployStagingSlots
         dependsOn: DBSchema
         steps:
@@ -257,7 +238,7 @@ stages:
               azureSubscription: $(azureSubscription)
               appType: webAppLinux
               appName: $(appServiceName)
-              resourceGroupName: $(billingappRg)
+              resourceGroupName: $(portalRg)
               runtimeStack: NODE|14-lts
               slotName: staging
               package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
@@ -270,11 +251,12 @@ stages:
               azureSubscription: $(azureSubscription)
               appType: webAppLinux
               appName: $(appServiceSecName)
-              resourceGroupName: $(billingappSecRg)
+              resourceGroupName: $(portalSecRg)
               runtimeStack: NODE|14-lts
               slotName: staging
               package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
               startUpCommand: npm run start
+              
 
       - job: preManualOperation
         dependsOn: DeployStagingSlots
@@ -283,7 +265,7 @@ stages:
         steps:
           - task: ManualValidation@0
             condition: eq(variables.ManualOperation,'True')
-            displayName: "本番スロットスワップ前手動正常性確認①"
+            displayName: "本番スロットスワップ前手動正常性確認②"
             inputs:
               notifyUsers: |
                 dendo@actec2.onmicrosoft.com
@@ -308,7 +290,7 @@ stages:
                     scriptLocation: 'inlineScript'
                     inlineScript: |
                       az webapp deployment slot swap --slot 'staging' --action 'swap' `
-                      --name $(appServiceSecName) -g $(billingappSecRg)
+                      --name $(appServiceSecName) -g $(portalSecRg)
                       Write-Host "##vso[task.setvariable variable=swapSlots1Status]Success"
 
             on:
@@ -337,13 +319,15 @@ stages:
                 nakamura@actec2.onmicrosoft.com
               instructions: |
                 ・西App Serviceの正常性確認
+                  ・踏み台サーバー（BCD-ACS-01-sec-xxx）でデジトレアプリにアクセスし、正常性確認を実施
+
       - deployment: SwapSlots2
         dependsOn: postManualOperation1
         environment: ${{ parameters.Environment }}
         strategy:
           runOnce:            
             deploy:
-              steps:
+              steps: 
                 - task: AzureCLI@2
                   displayName: Swap slots on japaneast App Service
                   name: swapSlots2
@@ -353,7 +337,7 @@ stages:
                     scriptLocation: 'inlineScript'
                     inlineScript: |
                       az webapp deployment slot swap --slot 'staging' --action 'swap' `
-                      --name $(appserviceName) -g $(billingappRg)
+                      --name $(appserviceName) -g $(portalRg)
                       Write-Host "##vso[task.setvariable variable=swapSlots2Status]Success"
                       Write-Host 'swapSlots2Status'
                       Write-Host '$(swapSlots2Status)'
@@ -369,7 +353,7 @@ stages:
                     scriptLocation: 'inlineScript'
                     inlineScript: |
                       az webapp deployment slot swap --slot 'staging' --action 'swap' `
-                      --name $(appServiceSecName) -g $(billingappSecRg)
+                      --name $(appServiceSecName) -g $(portalSecRg)
 
                 - powershell: |
                     #undo
@@ -387,18 +371,18 @@ stages:
         steps:
           - task: ManualValidation@0
             condition: eq(variables.ManualOperation,'True')
-            displayName: "本番スロットスワップ後手動正常性確認①"
+            displayName: "本番スロットスワップ後手動正常性確認②"
             inputs:
               notifyUsers: |
                 dendo@actec2.onmicrosoft.com
                 nakamura@actec2.onmicrosoft.com
               instructions: |
-                ・西App Serviceの正常性確認
-
+                ・東App Serviceの正常性確認
+                  ・踏み台サーバー（BCD-ACS-01-xxx）でデジトレアプリにアクセスし、正常性確認を実施
 
       - job: vmdeallocate
         displayName: Deallocate VM for Pipeline
-        dependsOn: postManualOperation2
+        dependsOn: postManualOperation2      
         pool: 
           vmImage: ubuntu-latest
         steps:
