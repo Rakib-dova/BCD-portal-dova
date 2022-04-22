@@ -1,10 +1,12 @@
+const Invoice = require('./')
+
 class InvoiceFactory {
   constructor(passport, contract) {
     this.accessToken = passport.accessToken
     this.refreshToken = passport.refreshToken
     this.tenantId = passport.tenantId
     this.contract = contract
-    this.tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(this.accessToken, this.refreshToken, this.tenantId)
+    this.tradeshiftDTO = new (require('../../TradeshiftDTO'))(this.accessToken, this.refreshToken, this.tenantId)
   }
 
   async findDocuments(sentBy, businessId, minIssuedate, maxIssuedate) {
@@ -67,40 +69,6 @@ class InvoiceFactory {
   async getCoding(isCloedApproval, documentId) {
     const coding = await this.contract.getCoding(isCloedApproval, documentId)
     return coding
-  }
-}
-
-// ダミークラス
-const Coding = require('../DTO/VO/Invoice/Coding')
-// ダミークラス
-class Invoice {
-  constructor(document, coding) {
-    this.documentId = document.documentId
-    this.id = document.ID.value
-    this.issueDate = document.IssueDate.value
-    this.invoiceLine = []
-    for (const invoiceLine of document.InvoiceLine) {
-      this.invoiceLine.push(new InvoiceLine(invoiceLine, coding))
-    }
-  }
-}
-
-class InvoiceLine {
-  constructor(invoiceLine, coding) {
-    this.id = invoiceLine.ID.value
-    this.invoicedQuantity = invoiceLine.InvoicedQuantity.value
-    this.unitCode = invoiceLine.InvoicedQuantity.unitCode
-    this.lineExtensionAmount = invoiceLine.LineExtensionAmount.value
-    this.setCoding(coding)
-  }
-
-  setCoding(codings) {
-    this.coding = []
-    for (const coding of codings) {
-      if (coding.lineNo === Number(this.id)) {
-        this.coding.push(new Coding(coding))
-      }
-    }
   }
 }
 

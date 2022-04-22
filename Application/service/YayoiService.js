@@ -22,25 +22,43 @@ class YayoiService {
     for (const invoice of invoices) {
       const invoiceLine = invoice.invoiceLine
       for (let idx = 0; idx < invoiceLine.length; idx++) {
-        if (invoiceLine.length === 1 && invoiceLine[idx].coding.length === 1) {
-          for (const coding of invoiceLine[idx].coding) {
-            yayois.push(new Yayoi('2111', invoiceLine[idx], coding))
-          }
-        } else {
-          for (const coding of invoiceLine[idx].coding) {
-            if (idx === 0 && coding.id === 1) {
-              yayois.push(new Yayoi('2110', invoiceLine[idx], coding))
-            } else if (idx === invoiceLine.length && coding.id === invoiceLine[idx].coding.length) {
-              yayois.push(new Yayoi('2100', invoiceLine[idx], coding))
-            } else {
-              yayois.push(new Yayoi('2101', invoiceLine[idx], coding))
-            }
-          }
+        for (const coding of invoiceLine[idx].coding) {
+          yayois.push(new Yayoi('2000', coding))
         }
       }
     }
 
-    return await yayois
+    let yayoiFormat = ''
+    for (const yayoi of yayois) {
+      yayoiFormat = `${yayoiFormat}${JSON.stringify([
+        yayoi.header,
+        yayoi.voucherNo,
+        yayoi.isClosing,
+        yayoi.actualDeliveryDate,
+        yayoi.debitAccountName,
+        yayoi.debitSubAccountName,
+        yayoi.debitDepartMent,
+        yayoi.debitTax,
+        `${yayoi.debitAmount}`,
+        `${yayoi.debitTaxAmount}`,
+        yayoi.creditAccountName,
+        yayoi.creditSubAccountName,
+        yayoi.creditDepartMent,
+        yayoi.creditTax,
+        `${yayoi.creditAmount}`,
+        `${yayoi.creditTaxAmount}`,
+        yayoi.scrip,
+        yayoi.checkNo,
+        yayoi.paymentDueDate,
+        yayoi.type,
+        yayoi.resource,
+        yayoi.codingMemo,
+        yayoi.note1,
+        yayoi.note2,
+        yayoi.coordinate
+      ])}\r\n`
+    }
+    return yayoiFormat.replace(/\[|\]/g, '')
   }
 }
 
