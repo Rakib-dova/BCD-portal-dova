@@ -117,6 +117,7 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
+  const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
   // 絞り込みの条件データチェック
   const findDocumentQuery = {
     withouttag: ['archived', 'AP_DOCUMENT_DRAFT', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document'],
@@ -178,7 +179,9 @@ const cbPostIndex = async (req, res, next) => {
           req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
           return res.redirect(303, '/journalDownload')
         } else {
-          return res.status(200).send(JSON.stringify(result))
+          const filename = encodeURIComponent(`${today}_請求書_弥生会計（05以降）.csv`)
+          res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+          return res.status(200).send(`${result}`)
         }
       }
   }
@@ -279,7 +282,7 @@ const cbPostIndex = async (req, res, next) => {
       res.redirect(303, '/journalDownload')
     } else {
       let invoicesForDownload = []
-      const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
+
       if (req.body.invoiceNumber || false) {
         // documentIdの初期化
         let documentId = ''

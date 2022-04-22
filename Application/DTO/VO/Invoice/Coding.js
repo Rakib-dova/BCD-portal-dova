@@ -1,18 +1,28 @@
 class Coding {
-  constructor(jouranlInvoice) {
-    this.id = Number(jouranlInvoice.journalNo.replace(/[^\d]/g, ''))
-    this.accountName = jouranlInvoice.accountName
-    this.accountCode = jouranlInvoice.accountCode
-    this.subAccountName = jouranlInvoice.subAccountName
-    this.subAccountCode = jouranlInvoice.subAccountCode
-    this.departmentName = jouranlInvoice.departmentName
-    this.departmentCode = jouranlInvoice.departmentCode
-    this.creditAccountName = jouranlInvoice.creditAccountName
-    this.creditAccountCode = jouranlInvoice.creditAccountCode
-    this.creditSubAccountName = jouranlInvoice.creditSubAccountName
-    this.creditSubAccountCode = jouranlInvoice.creditSubAccountCode
-    this.creditDepartmentName = jouranlInvoice.creditDepartmentName
-    this.creditDepartmentCode = jouranlInvoice.creditDepartmentCode
+  constructor(journalInvoice, invoiceLIne) {
+    this.id = Number(journalInvoice.journalNo.replace(/[^\d]/g, ''))
+    this.debitAccountName = journalInvoice.accountName
+    this.debitAccountCode = journalInvoice.accountCode
+    this.debitSubAccountName = journalInvoice.subAccountName
+    this.debitSubAccountCode = journalInvoice.subAccountCode
+    this.debitDepartmentName = journalInvoice.departmentName
+    this.debitDepartmentCode = journalInvoice.departmentCode
+    this.debitTaxCategory = invoiceLIne.taxTotal[0].taxSubtotal[0].taxCategory.name
+    this.debitAmount = journalInvoice.installmentAmount
+    this.debitTaxAmount = Math.ceil(
+      journalInvoice.installmentAmount * (invoiceLIne.taxTotal[0].taxSubtotal[0].taxCategory.percent / 100)
+    )
+    this.creditAccountName = journalInvoice.creditAccountName
+    this.creditAccountCode = journalInvoice.creditAccountCode
+    this.creditSubAccountName = journalInvoice.creditSubAccountName
+    this.creditSubAccountCode = journalInvoice.creditSubAccountCode
+    this.creditDepartmentName = journalInvoice.creditDepartmentName
+    this.creditDepartmentCode = journalInvoice.creditDepartmentCode
+    this.creditTaxCategory = invoiceLIne.taxTotal[0].taxSubtotal[0].taxCategory.name
+    this.creditAmount = journalInvoice.installmentAmount
+    this.creditTaxAmount = Math.ceil(
+      journalInvoice.installmentAmount * (invoiceLIne.taxTotal[0].taxSubtotal[0].taxCategory.percent / 100)
+    )
   }
 }
 
