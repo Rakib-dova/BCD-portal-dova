@@ -16,12 +16,8 @@ webdriverUtils.setReporter();
 
 describe('仕訳情報設定_仕訳情報ダウンロード', function () {
   beforeAll(async function () {
-    // テストの初期化を実施
+    // テストのタイムアウト時間を設定する（1時間）
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 3600000;
-    const browserInfo = await common.initTest();
-    browser = browserInfo.browserType;
-    accounts = browserInfo.accounts;
-    contextOption = browserInfo.contextOption;
   });
 
   beforeEach(async function () {
@@ -36,7 +32,20 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     });
   });
 
+  // テストを初期化する
+  async function initBrowser() {
+    if (browser == null) {
+      const browserInfo = await common.initTest();
+      browser = browserInfo.browserType;
+      accounts = browserInfo.accounts;
+      contextOption = browserInfo.contextOption;
+    }
+  };
+
   it("129. データ有", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);

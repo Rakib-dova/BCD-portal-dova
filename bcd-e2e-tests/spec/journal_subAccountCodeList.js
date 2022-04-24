@@ -16,12 +16,8 @@ webdriverUtils.setReporter();
 
 describe('仕訳情報設定_補助科目一覧', function () {
   beforeAll(async function () {
-    // テストの初期化を実施
+    // テストのタイムアウト時間を設定する（1時間）
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 3600000;
-    const browserInfo = await common.initTest();
-    browser = browserInfo.browserType;
-    accounts = browserInfo.accounts;
-    contextOption = browserInfo.contextOption;
   });
 
   beforeEach(async function () {
@@ -36,7 +32,20 @@ describe('仕訳情報設定_補助科目一覧', function () {
     });
   });
 
+  // テストを初期化する
+  async function initBrowser() {
+    if (browser == null) {
+      const browserInfo = await common.initTest();
+      browser = browserInfo.browserType;
+      accounts = browserInfo.accounts;
+      contextOption = browserInfo.contextOption;
+    }
+  };
+
   it("3. 補助科目設定（勘定科目なし）", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -98,6 +107,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
   });
 
   async function uploadAccount(csvPath) {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -182,6 +194,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
   });
 
   it("39. 新規登録", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -256,6 +271,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
   });
   
   it("40. 新規登録_勘定科目選択クリア", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -324,6 +342,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
   });
 
   it("44. 確認", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -391,6 +412,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
   });
   
   it("47. 変更", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -470,6 +494,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
   });
   
   it("52. 削除", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -536,6 +563,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
   });
   
   it("53. 補助科目一括作成フォーマットファイルダウンロード", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -601,6 +631,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
   });
   
   async function uploadSubAccount(csvPath) {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -689,6 +722,8 @@ describe('仕訳情報設定_補助科目一覧', function () {
   });
 
   it("後片付け（勘定科目、補助科目全削除）", async function() {
+    // テストの初期化を実施
+    await initBrowser();
 
     // 各アカウントごとにテストを実施
     for (const account of accounts) {

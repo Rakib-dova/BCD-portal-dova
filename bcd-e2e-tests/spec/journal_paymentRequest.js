@@ -14,12 +14,8 @@ webdriverUtils.setReporter();
 
 describe('仕訳情報設定_支払依頼一覧', function () {
   beforeAll(async function () {
-    // テストの初期化を実施
+    // テストのタイムアウト時間を設定する（1時間）
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 3600000;
-    const browserInfo = await common.initTest();
-    browser = browserInfo.browserType;
-    accounts = browserInfo.accounts;
-    contextOption = browserInfo.contextOption;
   });
 
   beforeEach(async function () {
@@ -39,7 +35,20 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     return parseInt(cost.replaceAll(/,/g, ''));
   }
 
+  // テストを初期化する
+  async function initBrowser() {
+    if (browser == null) {
+      const browserInfo = await common.initTest();
+      browser = browserInfo.browserType;
+      accounts = browserInfo.accounts;
+      contextOption = browserInfo.contextOption;
+    }
+  };
+
   it("準備（勘定科目、補助科目、部門データ作成）", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -151,6 +160,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
   });
   
   it("109. 受領請求書への仕訳情報設定", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -219,6 +231,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
   });
 
   it("110. 受領請求書への仕訳情報設定_仕訳情報追加", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -287,6 +302,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
   });
   
   it("117. 受領請求書への仕訳情報設定_仕訳情報削除", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -368,6 +386,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
   });
   
   it("119. 受領請求書への仕訳情報設定_勘定科目検索", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -440,6 +461,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
   });
   
   it("121. 受領請求書への仕訳情報設定_部門データ検索", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -511,6 +535,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
   });
 
   it("124. 受領請求書への仕訳情報設定_仕訳情報一括入力", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
       const context = await browser.newContext(contextOption);
@@ -632,6 +659,8 @@ describe('仕訳情報設定_支払依頼一覧', function () {
   });
 
   it("後片付け（勘定科目、補助科目、部門データ全削除）", async function() {
+    // テストの初期化を実施
+    await initBrowser();
 
     // 各アカウントごとにテストを実施
     for (const account of accounts) {
