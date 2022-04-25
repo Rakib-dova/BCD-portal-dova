@@ -1,3 +1,3 @@
 class Delivery {}
 
-module.export = Delivery
+module.exports = Delivery

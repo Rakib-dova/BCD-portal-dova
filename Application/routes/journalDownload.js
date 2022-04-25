@@ -14,6 +14,7 @@ const apiManager = require('../controllers/apiManager')
 const functionName = 'cbPostIndex'
 const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
 const journalDownloadController = require('../controllers/journalDownloadController.js')
+const iconv = require('iconv-lite')
 
 const notiTitle = '請求書ダウンロード'
 
@@ -163,25 +164,30 @@ const cbPostIndex = async (req, res, next) => {
 
       {
         const isCloedApproval = req.body.chkFinalapproval === 'finalapproval'
-        const result = await journalDownloadController.downloadYayoi(
-          req.user,
-          contract,
-          req.body.invoiceNumber,
-          req.body.minIssuedate,
-          req.body.maxIssuedate,
-          req.body.sentBy,
-          isCloedApproval
-        )
 
-        if (result === null) {
-          // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
-          // 条件に合わせるデータがない場合、お知らせを表示する。
-          req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
-          return res.redirect(303, '/journalDownload')
-        } else {
-          const filename = encodeURIComponent(`${today}_請求書_弥生会計（05以降）.csv`)
-          res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-          return res.status(200).send(`${result}`)
+        try {
+          const result = await journalDownloadController.downloadYayoi(
+            req.user,
+            contract,
+            req.body.invoiceNumber,
+            req.body.minIssuedate,
+            req.body.maxIssuedate,
+            req.body.sentBy,
+            isCloedApproval
+          )
+
+          if (result[0] === null) {
+            // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
+            // 条件に合わせるデータがない場合、お知らせを表示する。
+            req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+            return res.redirect(303, '/journalDownload')
+          } else {
+            const filename = encodeURIComponent(`${today}_請求書_弥生会計（05以降）.csv`)
+            res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+            return res.status(200).send(iconv.encode(`${result}`, 'Shift_JIS'))
+          }
+        } catch (e) {
+          return errorHandle(e, res, req)
         }
       }
   }
@@ -273,7 +279,7 @@ const cbPostIndex = async (req, res, next) => {
   let filename = ''
   // resultForQuery（API呼出）エラー検査
   if (resultForQuery instanceof Error) {
-    errorHandle(resultForQuery, res, req)
+    return errorHandle(resultForQuery, res, req)
   } else {
     if (documentsResult.itemCount === 0) {
       // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
@@ -313,7 +319,7 @@ const cbPostIndex = async (req, res, next) => {
 
           // エラーを確認する
           if (invoicesForDownload instanceof Error) {
-            errorHandle(invoicesForDownload, res, req)
+            return errorHandle(invoicesForDownload, res, req)
           }
 
           if (invoicesForDownload.length !== 0) {
@@ -343,7 +349,7 @@ const cbPostIndex = async (req, res, next) => {
 
         // エラーを確認する
         if (invoicesForDownload instanceof Error) {
-          errorHandle(invoicesForDownload, res, req)
+          return errorHandle(invoicesForDownload, res, req)
         }
 
         if (invoicesForDownload.length === 0) {

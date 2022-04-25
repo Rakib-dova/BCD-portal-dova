@@ -47,8 +47,8 @@ class Yayoi {
         categoryNumber = 2
     }
 
-    const debitTaxCategory = ['課税売上10%', '課税売上8%(軽)', '対象外']
-    const creditTaxCategory = ['課対仕入10%', '課対仕入8%(軽)', '対象外']
+    const debitTaxCategory = ['課税売上込10%', '課税売上込軽減8%', '対象外']
+    const creditTaxCategory = ['課対仕入込10%', '課対仕入込軽減8%', '対象外']
 
     if (isCredit) {
       return creditTaxCategory[categoryNumber]

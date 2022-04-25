@@ -14,7 +14,7 @@ class SupplierParty extends Party {
       const contact = supplierParty.Party.Contact
       this.contact.id = contact.ID.value
       this.contact.name = contact.Name.value
-      this.contact.telephone = contact.Telephone.value
+      this.contact.telephone = contact.Telephone?.value ?? ''
       this.contact.electronicMail = contact.ElectronicMail.value
     } else {
       this.contact = null
