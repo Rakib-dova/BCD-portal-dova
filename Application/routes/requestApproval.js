@@ -350,6 +350,12 @@ const cbPostApproval = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
+  // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
+  let jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'requestApproval-start' })
+  // console.log('==  支払依頼リクエスト  開始  =================================\n', jsonLog)
+  console.log('==  支払依頼リクエスト  開始  =================================')
+  logger.info(jsonLog)
+
   const contractId = contract.contractId
   const invoiceId = req.params.invoiceId
   const requester = req.user.userId
@@ -411,6 +417,22 @@ const cbPostApproval = async (req, res, next) => {
 
       switch (result) {
         case 0: {
+          // console.log('==  invoiceId  =================================\n', invoiceId)
+          // console.log('==  requester  =================================\n', requester)
+          // console.log('==  requestResult  =================================\n', requestResult)
+          // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
+          jsonLog = JSON.stringify({
+            tenantId: req.user.tenantId,
+            action: 'requestApprovalInfo',
+            requestId: requestResult?.requestId,
+            invoiceId: invoiceId,
+            requesterId: requester,
+            approveRouteId: approveRouteId,
+            status: requestResult?.status
+          })
+          console.log('==  支払依頼  =================================\n', jsonLog)
+          logger.info(jsonLog)
+
           const sendMailStatus = await mailMsg.sendPaymentRequestMail(
             accessToken,
             refreshToken,
@@ -441,6 +463,11 @@ const cbPostApproval = async (req, res, next) => {
     }
   }
 
+  // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
+  jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'requestApproval-end' })
+  // console.log('==  支払依頼リクエスト  終了  =================================\n', jsonLog)
+  console.log('==  支払依頼リクエスト  終了  =================================')
+  logger.info(jsonLog)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApproval')
 }
 

@@ -117,6 +117,12 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
+  // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
+  let jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'journalDownload-start' })
+  // console.log('==  仕分ダウンロードリクエスト  開始  =================================\n', jsonLog)
+  console.log('==  仕分ダウンロードリクエスト  開始  =================================')
+  logger.info(jsonLog)
+
   // 絞り込みの条件データチェック
   const findDocumentQuery = {
     withouttag: ['archived', 'AP_DOCUMENT_DRAFT', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document'],
@@ -275,6 +281,19 @@ const cbPostIndex = async (req, res, next) => {
           }
 
           if (invoicesForDownload.length !== 0) {
+            // console.log('=============================\n invoicesForDownload', invoicesForDownload)
+            // console.log('=============================\n documentsResult', documentsResult)
+            // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
+            jsonLog = JSON.stringify({
+              tenantId: req.user.tenantId,
+              action: 'journalInfo',
+              invoiceCount: 1,
+              finalApproved: chkFinalapproval
+            })
+            // console.log('==  ダウンロードした仕分情報  =================================\n', jsonLog)
+            console.log('==  ダウンロードした仕分情報  =================================')
+            logger.info(jsonLog)
+
             filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
             res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
             res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
@@ -301,15 +320,50 @@ const cbPostIndex = async (req, res, next) => {
         // エラーを確認する
         if (invoicesForDownload instanceof Error) {
           req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
+          // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
+          jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'journalDownload-end' })
+          // console.log('==  仕分ダウンロードリクエスト 終了  =================================\n', jsonLog)
+          console.log('==  仕分ダウンロードリクエスト 終了  =================================')
+          logger.info(jsonLog)
           logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
           return res.redirect(303, '/journalDownload')
         }
 
         if (invoicesForDownload.length === 0) {
           req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+          // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
+          jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'journalDownload-end' })
+          // console.log('==  仕分ダウンロードリクエスト 終了  =================================\n', jsonLog)
+          console.log('==  仕分ダウンロードリクエスト 終了  =================================')
+          logger.info(jsonLog)
           logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
           return res.redirect(303, '/journalDownload')
         }
+
+        // console.log('=============================\n invoicesForDownload', invoicesForDownload)
+        // console.log('=============================\n Array.isArray', Array.isArray(invoicesForDownload))
+        // console.log('=============================\n documentsResult', documentsResult)
+        // console.log('=============================\n documentsResult.Document', documentsResult.Document)
+        // console.log('=============================\n documentsResult.Document.ItemInfos', documentsResult.Document[0].ItemInfos)
+
+        // const docStr = invoicesForDownload.join(',')
+        // const docStr = invoicesForDownload.join(',')
+        // const docStr = invoicesForDownload.join(',')
+        // console.log('=============================\n docStr', docStr)
+        // console.log('=============================\n docArray.length', docArray.length)
+        // console.log('=============================\n docArray', docArray)
+
+        // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
+        const invoiceArray = invoicesForDownload.split(/\r?\n|\r/)
+        jsonLog = JSON.stringify({
+          tenantId: req.user.tenantId,
+          action: 'journalInfo',
+          invoiceCount: (invoiceArray.length - 2) > 0 ? (invoiceArray.length - 2) : undefined,
+          finalApproved: chkFinalapproval
+        })
+        // console.log('==  ダウンロードした仕分情報  =================================\n', jsonLog)
+        console.log('==  ダウンロードした仕分情報  =================================')
+        logger.info(jsonLog)
 
         filename = encodeURIComponent(`${today}_請求書.csv`)
         res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
@@ -317,6 +371,12 @@ const cbPostIndex = async (req, res, next) => {
       }
     }
   }
+
+  // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
+  jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'journalDownload-end' })
+  // console.log('==  仕分ダウンロードリクエスト 終了  =================================\n', jsonLog)
+  console.log('==  仕分ダウンロードリクエスト 終了  =================================')
+  logger.info(jsonLog)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
