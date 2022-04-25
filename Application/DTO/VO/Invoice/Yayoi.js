@@ -1,5 +1,8 @@
 class Yayoi {
-  constructor(mainBodyPartsFlag, coding) {
+  constructor(mainBodyPartsFlag, coding, convertDebitTaxCategory, convertCreditTaxCategory) {
+    console.log(coding)
+    this.convertDebitTaxCategory = convertDebitTaxCategory
+    this.convertCreditTaxCategory = convertCreditTaxCategory
     this.header = mainBodyPartsFlag
     this.voucherNo = ''
     this.isClosing = ''
@@ -34,26 +37,10 @@ class Yayoi {
   }
 
   getTaxCategory(accountName, taxCategory, isCredit) {
-    let categoryNumber = 2
-
-    switch (taxCategory) {
-      case 'JP 消費税 10%':
-        categoryNumber = 0
-        break
-      case 'JP 消費税(軽減税率) 8%':
-        categoryNumber = 1
-        break
-      default:
-        categoryNumber = 2
-    }
-
-    const debitTaxCategory = ['課税売上込10%', '課税売上込軽減8%', '対象外']
-    const creditTaxCategory = ['課対仕入込10%', '課対仕入込軽減8%', '対象外']
-
     if (isCredit) {
-      return creditTaxCategory[categoryNumber]
+      return this.convertCreditTaxCategory(taxCategory)
     } else {
-      return debitTaxCategory[categoryNumber]
+      return this.convertDebitTaxCategory(taxCategory)
     }
   }
 }

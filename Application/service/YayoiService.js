@@ -19,11 +19,13 @@ class YayoiService {
 
     if (invoices === null) return null
 
+    console.log(this.convertDebitTaxCategory)
+
     for (const invoice of invoices) {
       const invoiceLine = invoice.invoiceLine
       for (let idx = 0; idx < invoiceLine.length; idx++) {
         for (const coding of invoiceLine[idx].coding) {
-          yayois.push(new Yayoi('2000', coding))
+          yayois.push(new Yayoi('2000', coding, this.convertDebitTaxCategory, this.convertCreditTaxCategory))
         }
       }
     }
@@ -59,6 +61,40 @@ class YayoiService {
       ])}\r\n`
     }
     return yayoiFormat.replace(/\[|\]/g, '')
+  }
+
+  convertDebitTaxCategory(_taxCategory) {
+    let debitCategory
+
+    switch (_taxCategory) {
+      case 'JP 消費税 10%':
+        debitCategory = '課税売上込10%'
+        break
+      case 'JP 消費税(軽減税率) 8%':
+        debitCategory = '課税売上込軽減8%'
+        break
+      default:
+        debitCategory = '対象外'
+    }
+
+    return debitCategory
+  }
+
+  convertCreditTaxCategory(_taxCategory) {
+    let creditCategory
+
+    switch (_taxCategory) {
+      case 'JP 消費税 10%':
+        creditCategory = '課対仕入込10%'
+        break
+      case 'JP 消費税(軽減税率) 8%':
+        creditCategory = '課対仕入込軽減8%'
+        break
+      default:
+        creditCategory = '対象外'
+    }
+
+    return creditCategory
   }
 }
 
