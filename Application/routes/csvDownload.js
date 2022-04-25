@@ -129,7 +129,7 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
 
   // アプリ効果測定用ログ出力
-  let jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'invoiceDownload-start' })
+  let jsonLog = { tenantId: req.user.tenantId, action: 'invoiceDownload-start' }
   // console.log('==  CSVダウンロード 開始  =================================\n', jsonLog)
   console.log('==  CSVダウンロード 開始  =================================')
   logger.info(jsonLog)
@@ -231,7 +231,7 @@ const cbPostIndex = async (req, res, next) => {
   if (findDocumentQuery.state.length === 0) {
     req.flash('noti', [notiTitle, 'ステータスをいずれかのの１つ選択してください。'])
     // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-    jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'invoiceDownload-end' })
+    jsonLog = { tenantId: req.user.tenantId, action: 'invoiceDownload-end' }
     // console.log('==  CSVダウンロード 終了  =================================\n', jsonLog)
     console.log('==  CSVダウンロード 終了  =================================')
     logger.info(jsonLog)
@@ -413,11 +413,11 @@ const cbPostIndex = async (req, res, next) => {
         }
 
         // アプリ効果測定用ログ出力
-        jsonLog = JSON.stringify({
+        jsonLog = {
           tenantId: req.user.tenantId,
           action: 'downloadedInvoiceInfo',
           invoiceCount: documentsResult.itemCount
-        })
+        }
         // console.log('==  ダウンロードした請求情報のレコード挿入  =================================\n', jsonLog)
         console.log('==  ダウンロードした請求情報のレコード挿入  =================================')
         logger.info(jsonLog)
@@ -430,7 +430,7 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // アプリ効果測定用ログ出力
-  jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'invoiceDownload-end' })
+  jsonLog = { tenantId: req.user.tenantId, action: 'invoiceDownload-end' }
   // console.log('==  CSVダウンロード 終了  =================================\n', jsonLog)
   console.log('==  CSVダウンロード 終了  =================================')
   logger.info(jsonLog)

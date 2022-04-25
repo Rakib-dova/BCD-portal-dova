@@ -122,7 +122,7 @@ const cbPostUpload = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
-  let jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'invoiceUpload-start' })
+  let jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUpload-start' }
   // console.log('==  CSVアップロード 開始  =================================\n')
   console.log('==  CSVアップロード 開始  =================================')
   logger.info(jsonLog)
@@ -198,7 +198,7 @@ const cbPostUpload = async (req, res, next) => {
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
 
-  jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'invoiceUpload-end' })
+  jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUpload-end' }
   // console.log('==  CSVアップロード 終了  =================================\n')
   console.log('==  CSVアップロード 終了  =================================')
   logger.info(jsonLog)
@@ -648,19 +648,19 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   let jsonLog
   // 最後にログ出力する
   if (headerErrorFlag === 0) {
-    jsonLog = JSON.stringify({
+    jsonLog = {
       tenantId: _req.user.tenantId,
       action: 'uploadedInvoiceInfo',
       invoiceCount: invoices.length,
       invoices: invoices
-    })
+    }
   } else {
-    jsonLog = JSON.stringify({
+    jsonLog = {
       tenantId: _req.user.tenantId,
       action: 'uploadedInvoiceInfo',
       invoiceCount: 0,
       invoices: []
-    })
+    }
   }
 
   // console.log('==  CSVアップロードレコード  =================================\n')

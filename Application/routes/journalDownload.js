@@ -118,7 +118,7 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
 
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  let jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'journalDownload-start' })
+  let jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-start' }
   // console.log('==  仕分ダウンロードリクエスト  開始  =================================\n', jsonLog)
   console.log('==  仕分ダウンロードリクエスト  開始  =================================')
   logger.info(jsonLog)
@@ -284,12 +284,12 @@ const cbPostIndex = async (req, res, next) => {
             // console.log('=============================\n invoicesForDownload', invoicesForDownload)
             // console.log('=============================\n documentsResult', documentsResult)
             // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-            jsonLog = JSON.stringify({
+            jsonLog = {
               tenantId: req.user.tenantId,
               action: 'journalInfo',
               invoiceCount: 1,
               finalApproved: chkFinalapproval
-            })
+            }
             // console.log('==  ダウンロードした仕分情報  =================================\n', jsonLog)
             console.log('==  ダウンロードした仕分情報  =================================')
             logger.info(jsonLog)
@@ -321,7 +321,7 @@ const cbPostIndex = async (req, res, next) => {
         if (invoicesForDownload instanceof Error) {
           req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
           // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-          jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'journalDownload-end' })
+          jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-end' }
           // console.log('==  仕分ダウンロードリクエスト 終了  =================================\n', jsonLog)
           console.log('==  仕分ダウンロードリクエスト 終了  =================================')
           logger.info(jsonLog)
@@ -332,7 +332,7 @@ const cbPostIndex = async (req, res, next) => {
         if (invoicesForDownload.length === 0) {
           req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
           // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-          jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'journalDownload-end' })
+          jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-end' }
           // console.log('==  仕分ダウンロードリクエスト 終了  =================================\n', jsonLog)
           console.log('==  仕分ダウンロードリクエスト 終了  =================================')
           logger.info(jsonLog)
@@ -355,12 +355,12 @@ const cbPostIndex = async (req, res, next) => {
 
         // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
         const invoiceArray = invoicesForDownload.split(/\r?\n|\r/)
-        jsonLog = JSON.stringify({
+        jsonLog = {
           tenantId: req.user.tenantId,
           action: 'journalInfo',
           invoiceCount: (invoiceArray.length - 2) > 0 ? (invoiceArray.length - 2) : undefined,
           finalApproved: chkFinalapproval
-        })
+        }
         // console.log('==  ダウンロードした仕分情報  =================================\n', jsonLog)
         console.log('==  ダウンロードした仕分情報  =================================')
         logger.info(jsonLog)
@@ -373,7 +373,7 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'journalDownload-end' })
+  jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-end' }
   // console.log('==  仕分ダウンロードリクエスト 終了  =================================\n', jsonLog)
   console.log('==  仕分ダウンロードリクエスト 終了  =================================')
   logger.info(jsonLog)

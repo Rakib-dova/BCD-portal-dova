@@ -258,7 +258,7 @@ const cbPostGetCode = async (req, res, next) => {
 
 const cbPostIndex = async (req, res, next) => {
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  let jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'setupJournal-start' })
+  let jsonLog = { tenantId: req.user.tenantId, action: 'setupJournal-start' }
   // console.log('==  仕分情報設定リクエスト  開始  =================================\n', jsonLog)
   console.log('==  仕分情報設定リクエスト  開始  =================================')
   logger.info(jsonLog)
@@ -340,20 +340,20 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  jsonLog = JSON.stringify({
+  jsonLog = {
     tenantId: req.user.tenantId,
     action: 'journalInfo',
     accountCode: accountCode,
     subAccountCode: subAccountCode,
     departmentCode: departmentCode,
     status: status
-  })
+  }
   // console.log('==  仕分情報設定  =================================\n', jsonLog)
   console.log('==  仕分情報設定  =================================')
   logger.info(jsonLog)
 
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  jsonLog = JSON.stringify({ tenantId: req.user.tenantId, action: 'setupJournal-end' })
+  jsonLog = { tenantId: req.user.tenantId, action: 'setupJournal-end' }
   // console.log('==  仕分情報設定リクエスト  終了  =================================\n', jsonLog)
   console.log('==  仕分情報設定リクエスト  終了  =================================')
   logger.info(jsonLog)
