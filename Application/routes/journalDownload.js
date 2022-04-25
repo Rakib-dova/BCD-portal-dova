@@ -146,13 +146,16 @@ const cbPostIndex = async (req, res, next) => {
     findDocumentQuery.maxissuedate = req.body.maxIssuedate
   }
 
-  if (!Number(req.body.serviceDataFormat)) {
-    req.body.serviceDataFormat = 0
+  if (isNaN(Number(req.body.serviceDataFormat))) {
+    req.flash('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+    return res.redirect(303, '/journalDownload')
   } else {
     req.body.serviceDataFormat = Number(req.body.serviceDataFormat)
   }
 
   switch (req.body.serviceDataFormat) {
+    case 0:
+      break
     case 1:
       req.body.sentBy = req.body.sentBy ?? []
       if (typeof req.body.sentBy === 'string') {
@@ -176,7 +179,7 @@ const cbPostIndex = async (req, res, next) => {
             isCloedApproval
           )
 
-          if (result[0] === null) {
+          if (result === null) {
             // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
             // 条件に合わせるデータがない場合、お知らせを表示する。
             req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
@@ -190,6 +193,9 @@ const cbPostIndex = async (req, res, next) => {
           return errorHandle(e, res, req)
         }
       }
+    default:
+      req.flash('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+      return res.redirect(303, '/journalDownload')
   }
 
   const invoiceNumber = req.body.invoiceNumber

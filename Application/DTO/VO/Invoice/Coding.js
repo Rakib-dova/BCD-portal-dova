@@ -9,9 +9,7 @@ class Coding {
     this.debitDepartmentCode = journalInvoice.departmentCode
     this.debitTaxCategory = invoiceLIne.taxTotal[0].taxSubtotal[0].taxCategory.name
     this.debitAmount = journalInvoice.installmentAmount
-    this.debitTaxAmount = Math.ceil(
-      journalInvoice.installmentAmount * (invoiceLIne.taxTotal[0].taxSubtotal[0].taxCategory.percent / 100)
-    )
+    this.debitTaxAmount = 0
     this.creditAccountName = journalInvoice.creditAccountName
     this.creditAccountCode = journalInvoice.creditAccountCode
     this.creditSubAccountName = journalInvoice.creditSubAccountName
@@ -20,9 +18,7 @@ class Coding {
     this.creditDepartmentCode = journalInvoice.creditDepartmentCode
     this.creditTaxCategory = invoiceLIne.taxTotal[0].taxSubtotal[0].taxCategory.name
     this.creditAmount = journalInvoice.installmentAmount
-    this.creditTaxAmount = Math.ceil(
-      journalInvoice.installmentAmount * (invoiceLIne.taxTotal[0].taxSubtotal[0].taxCategory.percent / 100)
-    )
+    this.creditTaxAmount = 0
   }
 }
 

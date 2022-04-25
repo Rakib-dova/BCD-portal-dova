@@ -126,14 +126,27 @@ const downloadYayoi = async (passport, contract, businessId, minIssuedate, maxIs
   const yayoiService = new YayoiService(passport, contract)
   const result = []
   if (sentBy.length === 0) {
-    result.push(await yayoiService.convertToYayoi(null, businessId, minIssuedate, maxIssuedate, isCloedApproval))
+    const yayoi = await yayoiService.convertToYayoi(null, businessId, minIssuedate, maxIssuedate, isCloedApproval)
+    if (yayoi) {
+      result.push(yayoi)
+    }
   } else {
     for (const sentByCompany of sentBy) {
-      result.push(
-        await yayoiService.convertToYayoi(sentByCompany, businessId, minIssuedate, maxIssuedate, isCloedApproval)
+      const yayoi = await yayoiService.convertToYayoi(
+        sentByCompany,
+        businessId,
+        minIssuedate,
+        maxIssuedate,
+        isCloedApproval
       )
+      if (yayoi) {
+        result.push(yayoi)
+      }
     }
   }
+
+  if (result.length === 0) return null
+
   return result
 }
 

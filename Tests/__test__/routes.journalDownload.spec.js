@@ -44,7 +44,8 @@ let userControllerFindOneSpy,
   contractControllerFindContractSpyon,
   journalfindAllSpy,
   getSentToCompanySpy,
-  findOneRequestApprovalSpy
+  findOneRequestApprovalSpy,
+  downloadYayoiSpy
 
 const dbJournalTable = []
 const dbJournal100Table = []
@@ -163,6 +164,7 @@ describe('journalDownloadのテスト', () => {
     getSentToCompanySpy = jest.spyOn(journalDownloadController, 'getSentToCompany')
     findOneRequestApprovalSpy = jest.spyOn(requestApproval, 'findOneRequestApproval')
     request.flash = jest.fn()
+    downloadYayoiSpy = jest.spyOn(journalDownloadController, 'downloadYayoi')
   })
   afterEach(() => {
     request.resetMocked()
@@ -381,7 +383,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'finalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -499,7 +502,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -617,7 +621,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -656,7 +661,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01000',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -695,7 +701,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: '',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -734,7 +741,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: '',
         minIssuedate: '9999-99-98',
-        maxIssuedate: '9999-99-98'
+        maxIssuedate: '9999-99-98',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -773,7 +781,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -814,7 +823,8 @@ describe('journalDownloadのテスト', () => {
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
         sentTo: ['f783be0e-e716-4eab-a7ec-5ce36b3c7b31'],
-        sentBy: ['221559d0-53aa-44a2-ab29-0c4a6cb02bde']
+        sentBy: ['221559d0-53aa-44a2-ab29-0c4a6cb02bde'],
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -930,7 +940,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'finalapproval',
-        invoiceNumber: 'A01006'
+        invoiceNumber: 'A01006',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1053,7 +1064,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01006'
+        invoiceNumber: 'A01006',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1178,7 +1190,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1294,7 +1307,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01014',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1353,7 +1367,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1412,7 +1427,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1460,7 +1476,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1508,7 +1525,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1519,6 +1537,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1554,7 +1574,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1602,7 +1623,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1650,7 +1672,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1698,7 +1721,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1746,7 +1770,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1797,7 +1822,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1849,7 +1875,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1908,7 +1935,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1967,7 +1995,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2015,7 +2044,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2063,7 +2093,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2111,7 +2142,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2159,7 +2191,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2207,7 +2240,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2251,7 +2285,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2297,7 +2332,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01012',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2343,7 +2379,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01015',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2452,7 +2489,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01026',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2561,7 +2599,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01016',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2607,7 +2646,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01017',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2828,7 +2868,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01018',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2872,7 +2913,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01019',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2915,7 +2957,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01020',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2958,7 +3001,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01021',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3001,7 +3045,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01022',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3044,7 +3089,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01023',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3087,7 +3133,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01024',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3130,7 +3177,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01025',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3173,7 +3221,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01027',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3227,7 +3276,8 @@ describe('journalDownloadのテスト', () => {
         invoiceNumber: 'A01028',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
-        minDueDate: ''
+        minDueDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3282,7 +3332,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01032',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3331,7 +3382,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01033',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3386,7 +3438,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01029',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3441,7 +3494,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01030',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3496,7 +3550,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01031',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3545,7 +3600,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01031',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3582,7 +3638,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: '',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3627,7 +3684,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01009',
         minIssuedate: '1990-01-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       request.flash = jest.fn()
@@ -3670,7 +3728,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01009'
+        invoiceNumber: 'A01009',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3711,7 +3770,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01031'
+        invoiceNumber: 'A01031',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3755,7 +3815,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: ''
+        invoiceNumber: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3768,7 +3829,9 @@ describe('journalDownloadのテスト', () => {
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       const dbError = new Error('DB ERROR')
-      journalfindAllSpy.mockReturnValue(dbError)
+      journalfindAllSpy.mockImplementation(() => {
+        throw dbError
+      })
 
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
@@ -3795,7 +3858,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01010'
+        invoiceNumber: 'A01010',
+        serviceDataFormat: '0'
       }
 
       request.flash = jest.fn()
@@ -3838,7 +3902,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A'
+        invoiceNumber: 'A',
+        serviceDataFormat: '0'
       }
 
       request.flash = jest.fn()
@@ -3881,7 +3946,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01002'
+        invoiceNumber: 'A01002',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3999,7 +4065,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01003'
+        invoiceNumber: 'A01003',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -4115,7 +4182,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01000'
+        invoiceNumber: 'A01000',
+        serviceDataFormat: '0'
       }
       request.flash = jest.fn()
 
@@ -4203,7 +4271,8 @@ describe('journalDownloadのテスト', () => {
         sentTo: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
         sentBy: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -4320,7 +4389,8 @@ describe('journalDownloadのテスト', () => {
       request.body = {
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -4480,7 +4550,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01000'
+        invoiceNumber: 'A01000',
+        serviceDataFormat: '0'
       }
       request.flash = jest.fn()
 
@@ -4565,7 +4636,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01000'
+        invoiceNumber: 'A01000',
+        serviceDataFormat: '0'
       }
       request.flash = jest.fn()
 
@@ -4641,6 +4713,451 @@ describe('journalDownloadのテスト', () => {
       // ポータルにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/journalDownload')
       expect(response.getHeader('Location')).toEqual('/journalDownload')
+    })
+  })
+
+  describe('コールバック：cbPostIndex②', () => {
+    let checkContractStatus
+    const helper = require('../../Application/routes/helpers/middleware')
+    beforeEach(() => {
+      userControllerFindOneSpy = jest.spyOn(userController, 'findOne')
+      contractControllerFindOneSpy = jest.spyOn(contractController, 'findOne')
+      tenantControllerFindOneSpy = jest.spyOn(tenantController, 'findOne')
+      findOneRequestApprovalSpy = jest.spyOn(requestApproval, 'findOneRequestApproval')
+      contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
+      journalfindAllSpy = jest.spyOn(JournalizeInvoice, 'findAll')
+      downloadYayoiSpy = jest.spyOn(journalDownloadController, 'downloadYayoi')
+      checkContractStatus = jest.spyOn(helper, 'checkContractStatus')
+    })
+
+    afterEach(() => {
+      userControllerFindOneSpy.mockReset()
+      contractControllerFindOneSpy.mockReset()
+      tenantControllerFindOneSpy.mockReset()
+      findOneRequestApprovalSpy.mockReset()
+      contractControllerFindContractSpyon.mockReset()
+      journalfindAllSpy.mockReset()
+      journalfindAllSpy.mockReset()
+      checkContractStatus.mockRestore()
+    })
+
+    // 弥生会計フォーマットダウンロード
+    test('正常:1件（最終承認済みの請求書）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'finalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1'
+      }
+      const expectedYayoiFormat =
+        '"2000","","","","仕掛品","","","課税売上8%(軽)","24200","1936","現金","","","課対仕入8%(軽)","24200","1936","","","","0","","","","","no"'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(findOneRequestApprovalResult)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(journalfindAllSpyResult)
+
+      downloadYayoiSpy.mockImplementation(() => {
+        return expectedYayoiFormat
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      const filename = encodeURIComponent('請求書_弥生会計（05以降）.csv')
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      expect(response.statusCode).toBe(200)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${filename}`)
+    })
+
+    test('正常:1件（仕訳済みの請求書）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1',
+        sentBy: '5778c070-5dd3-42db-aaa8-848424fb80f9'
+      }
+
+      const expectedYayoiFormat =
+        '"2000","","","","仕掛品","","","課税売上8%(軽)","24200","1936","現金","","","課対仕入8%(軽)","24200","1936","","","","0","","","","","no"'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      downloadYayoiSpy.mockImplementation(() => {
+        return expectedYayoiFormat
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      const filename = encodeURIComponent('請求書_弥生会計（05以降）.csv')
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      expect(response.statusCode).toBe(200)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${filename}`)
+    })
+
+    test('準正常:ダウンロード対象検証（データがなしの時の検証）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+    })
+
+    test('準正常:ダウンロード対象検証（選択肢の以外の場合）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '99'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+    })
+
+    test('準正常:ダウンロード対象検証（選択肢の以外の場合②）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: 'テスト'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+    })
+
+    test('準正常:ダウンロード対象結果がない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      downloadYayoiSpy.mockImplementation(() => {
+        return null
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+    })
+
+    test('準正常:ダウンロード対象結果がない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      downloadYayoiSpy.mockImplementation(() => {
+        return null
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+    })
+
+    test('準正常:コントローラエラー発生', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      const error = new Error('500 system error')
+      downloadYayoiSpy.mockImplementation(() => {
+        throw error
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        notiTitle,
+        'システムエラーが発生しました。時間を空けてもう一度試してください。'
+      ])
+    })
+
+    test('準正常:形式以外の送信企業情報', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1',
+        sentBy: 1
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      const error = new Error('500 system error')
+      downloadYayoiSpy.mockImplementation(() => {
+        throw error
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        notiTitle,
+        'システムエラーが発生しました。時間を空けてもう一度試してください。'
+      ])
     })
   })
 })
