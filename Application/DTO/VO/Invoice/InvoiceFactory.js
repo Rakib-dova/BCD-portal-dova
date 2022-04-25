@@ -31,6 +31,9 @@ class InvoiceFactory {
         businessId,
         false
       )
+
+      if (documents instanceof Error) throw documents
+
       numPages = page.numPages
       page++
       response.push(...documents.Document)
@@ -53,21 +56,30 @@ class InvoiceFactory {
     for (const document of isSearchedDocument) {
       const documentId = document.DocumentId
       const response = await this.tradeshiftDTO.getDocument(documentId)
+
+      if (response instanceof Error) throw response
+
       documents.push({ ...response, documentId })
     }
 
     for (const invoice of documents) {
       const coding = await this.getCoding(isCloedApproval, invoice.documentId)
+
       if (coding) {
         result.push(new Invoice(invoice, coding))
       }
     }
+
+    if (result.length === 0) return null
 
     return result
   }
 
   async getCoding(isCloedApproval, documentId) {
     const coding = await this.contract.getCoding(isCloedApproval, documentId)
+
+    if (coding instanceof Error) throw coding
+
     return coding
   }
 }
