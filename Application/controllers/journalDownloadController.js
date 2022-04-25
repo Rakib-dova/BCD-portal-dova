@@ -4,6 +4,7 @@ const db = require('../models')
 const logger = require('../lib/logger')
 const JournalizeInvoice = db.JournalizeInvoice
 const requestApproval = require('./requestApprovalController')
+const YayoiService = require('../service/YayoiService')
 
 // 複数の請求書を1つのCSVファイルにまとめる関数
 const createInvoiceDataForDownload = async (
@@ -121,7 +122,36 @@ const getSentToCompany = async (accessToken, refreshToken) => {
   return [result.CompanyAccountId]
 }
 
+const downloadYayoi = async (passport, contract, businessId, minIssuedate, maxIssuedate, sentBy, isCloedApproval) => {
+  const yayoiService = new YayoiService(passport, contract)
+  const result = []
+  if (sentBy.length === 0) {
+    const yayoi = await yayoiService.convertToYayoi(null, businessId, minIssuedate, maxIssuedate, isCloedApproval)
+    if (yayoi) {
+      result.push(yayoi)
+    }
+  } else {
+    for (const sentByCompany of sentBy) {
+      const yayoi = await yayoiService.convertToYayoi(
+        sentByCompany,
+        businessId,
+        minIssuedate,
+        maxIssuedate,
+        isCloedApproval
+      )
+      if (yayoi) {
+        result.push(yayoi)
+      }
+    }
+  }
+
+  if (result.length === 0) return null
+
+  return result
+}
+
 module.exports = {
   createInvoiceDataForDownload: createInvoiceDataForDownload,
-  getSentToCompany: getSentToCompany
+  getSentToCompany: getSentToCompany,
+  downloadYayoi: downloadYayoi
 }
