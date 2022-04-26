@@ -1,14 +1,4 @@
-const $ = (_selector) => {
-  const selectorDelimeter = _selector.substr(0, 1)
-  const selector = _selector.substr(1, _selector.length)
-
-  switch (selectorDelimeter) {
-    case '#':
-      return document.getElementById(selector)
-    case '.':
-      return document.getElementsByClassName(selector)
-  }
-}
+import { $ } from '../module/selector.js'
 
 Array.prototype.forEach.call($('.btnDetail'), function (ele) {
   ele.onclick = function () {
