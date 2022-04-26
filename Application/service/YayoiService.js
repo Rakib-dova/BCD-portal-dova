@@ -22,8 +22,36 @@ class YayoiService {
     for (const invoice of invoices) {
       const invoiceLine = invoice.invoiceLine
       for (let idx = 0; idx < invoiceLine.length; idx++) {
-        for (const coding of invoiceLine[idx].coding) {
-          yayois.push(new Yayoi('2000', coding, this.convertDebitTaxCategory, this.convertCreditTaxCategory))
+        for (let j = 0; j < invoiceLine[idx].coding.length; j++) {
+          if (idx === 0 && j === 0) {
+            if (invoiceLine.length === 1 && invoiceLine[idx].coding.length === 1) {
+              yayois.push(
+                new Yayoi(
+                  '2111',
+                  invoiceLine[idx].coding[j],
+                  this.convertDebitTaxCategory,
+                  this.convertCreditTaxCategory
+                )
+              )
+            } else {
+              yayois.push(
+                new Yayoi(
+                  '2110',
+                  invoiceLine[idx].coding[j],
+                  this.convertDebitTaxCategory,
+                  this.convertCreditTaxCategory
+                )
+              )
+            }
+          } else if (idx === invoiceLine.length - 1 && j === invoiceLine[idx].coding.length - 1) {
+            yayois.push(
+              new Yayoi('2101', invoiceLine[idx].coding[j], this.convertDebitTaxCategory, this.convertCreditTaxCategory)
+            )
+          } else {
+            yayois.push(
+              new Yayoi('2100', invoiceLine[idx].coding[j], this.convertDebitTaxCategory, this.convertCreditTaxCategory)
+            )
+          }
         }
       }
     }
