@@ -33,6 +33,11 @@ function messageCheck(event) {
     if (msgLen > 1500) {
       $('#inputMsg').value = $('#inputMsg').value.substring(0, 1500 - lfCnt)
       msgLen = $('#inputMsg').value.length
+      for (const char of $('#inputMsg').value) {
+        if (encodeURI(char) === '%0A') {
+          msgLen++
+        }
+      }
       $('#msgCount').innerText = `(${msgLen}/1500)`
     }
   })

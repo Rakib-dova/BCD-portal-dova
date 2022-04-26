@@ -6,10 +6,21 @@ class TradeshiftDTO {
     this.apiManager = require('../controllers/apiManager').accessTradeshift
   }
 
-  async getDocument(documentId) {
+  /**
+   *
+   * @param {uuid} documentId 請求書のトレードシフトID
+   * @param {boolean} includeDraftAttachments 請求書がドラフトの状態で添付ファイルがある場合、添付ファイルを表示するか
+   * @returns {document} トレードシフトのドキュメント
+   */
+  async getDocument(documentId, includeDraftAttachments) {
     documentId = documentId ?? ''
+    if (typeof includeDraftAttachments !== 'boolean') includeDraftAttachments = false
+
     const get = 'get'
-    const uri = `/documents${documentId}`
+    let uri = `/documents/${documentId}`
+
+    if (includeDraftAttachments) uri = `${uri}?${this.getQuery('includeDraftAttachments', includeDraftAttachments)}`
+
     return await this.accessTradeshift(get, uri)
   }
 
@@ -18,6 +29,90 @@ class TradeshiftDTO {
     const get = 'get'
     const uri = `/documents?id=${documentId}&sentTo${this.tenantId}&type=invoice&_onlyIndex=true`
     return (await this.accessTradeshift(get, uri)).Document[0]
+  }
+
+  /**
+   *
+   * @param {Array} tag タグを持っているドキュメントを検索して、結果にドキュメントを含む。カスタムタグがある場合、使用する
+   * @param {Array} withouttag タグを持っているドキュメントを検索して、結果にドキュメントを外す
+   * @param {Array} type ドキュメントの種類、指定しない場合invoiceに指定される。
+   * @param {int} page ページ番号
+   * @param {int} limit 1ページあたり表示するドキュメントの数、指定ない場合10000に設定される。
+   * @param {uuid} id ドキュメントのトレードシフトID
+   * @param {string} businessId 請求書番号
+   * @param {string} sentBy 送信企業（取引先）
+   * @param {string} sentTo 受信企業（宛先）
+   * @param {string} minissueDate 検索する発行日の最初日
+   * @param {string} maxissuedate 検索する発行日の最終日
+   * @param {Array} state ドキュメントの状況：受信済み、送信済み、
+   * @returns {Array<object>} 検索結果
+   * https://developers.tradeshift.com/docs/api#documents-documentを参照
+   */
+  async getDocuments(
+    tag,
+    withouttag,
+    type,
+    page,
+    limit,
+    id,
+    businessId,
+    sentBy,
+    sentTo,
+    minissueDate,
+    maxissuedate,
+    state,
+    query,
+    sales
+  ) {
+    if (tag instanceof Array === false) tag = []
+    if (withouttag instanceof Array === false) {
+      withouttag = ['archived', 'AP_DOCUMENT=DRAFT', 'PARTNER=DOCUMENT_DRAFT', 'tsgo-document']
+    }
+    if (type instanceof Array === false) type = ['invoice']
+    page = page ?? 0
+    limit = limit ?? 10000
+    id = id ?? ''
+    businessId = businessId ?? ''
+    sentBy = sentBy ?? ''
+    sentTo = sentTo ?? ''
+    minissueDate = minissueDate ?? ''
+    maxissuedate = maxissuedate ?? ''
+    if (state instanceof Array === false) state = []
+    if (query instanceof Array === false) query = []
+    if (typeof sales !== 'boolean') sales = sales ?? ''
+
+    const get = 'get'
+    let uri = `/documents?&_onlyIndex=true&${this.getQuery('page', page)}&${this.getQuery('limit', limit)}`
+
+    if (tag.length > 0) uri = `${uri}&${this.getQuery('tag', tag)}`
+
+    if (withouttag.length > 0) uri = `${uri}&${this.getQuery('withouttag', withouttag)}`
+
+    if (id.length > 0) uri = `${uri}&${this.getQuery('id', id)}`
+
+    if (businessId.length > 0) uri = `${uri}&${this.getQuery('businessId', id)}`
+
+    if (sentBy.length > 0) uri = `${uri}&${this.getQuery('sentBy', sentBy)}`
+
+    if (sentTo.length > 0) uri = `${uri}&${this.getQuery('sentTo', sentBy)}`
+
+    if (minissueDate.length > 0 && minissueDate.match(/\d{1,4}-\d{1,2}-\d{1,2}/)) {
+      uri = `${uri}&${this.getQuery('minissuedate', minissueDate)}`
+    }
+
+    if (maxissuedate.length > 0 && maxissuedate.match(/\d{1,4}-\d{1,2}-\d{1,2}/)) {
+      uri = `${uri}&${this.getQuery('maxissuedate', maxissuedate)}`
+    }
+
+    if (typeof sales === 'boolean') uri = `${uri}&${this.getQuery('sales', sales)}`
+
+    uri = `${uri}&${this.getQuery('onlydeleted', false)}`
+    uri = `${uri}&${this.getQuery('onlydrafts', false)}`
+    uri = `${uri}&${this.getQuery('ascending', false)}`
+
+    const response = await this.accessTradeshift(get, uri)
+
+    return response
   }
 
   /**
@@ -72,7 +167,7 @@ class TradeshiftDTO {
     if (contractEmail.length > 0) {
       const contractEmailSearchResult = []
       for (const data of response) {
-        const invoice = await this.getDocument('/' + data.DocumentId)
+        const invoice = await this.getDocument(data.DocumentId)
 
         if (invoice instanceof Error) return invoice
 

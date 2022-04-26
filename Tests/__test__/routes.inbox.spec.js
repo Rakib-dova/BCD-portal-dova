@@ -599,6 +599,42 @@ describe('inboxのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(400))
     })
 
+    test('異常：DBエラーの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...loggedInSession }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      const dbError = new Error('dbError')
+      getCodeSpy.mockReturnValue(dbError)
+
+      // 試験実施
+      await inbox.cbPostGetCode(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '仕分け情報設定',
+        'APIエラーが発生しました。時間を空けてもう一度試してください。'
+      ])
+      // ポータルにリダイレクト「される」
+      expect(response.redirect).toHaveBeenCalledWith(303, '/inboxList/1')
+      expect(response.getHeader('Location')).toEqual('/inboxList/1')
+    })
+
     test('500エラー:不正なContractデータの場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -726,9 +762,13 @@ describe('inboxのテスト', () => {
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        lineId: 'UT001',
+        lineId: '1',
         lineNo1_lineAccountCode1_accountCode: 'AB001',
         lineNo1_lineAccountCode1_subAccountCode: 'SU001',
+        lineNo1_lineAccountCode1_departmentCode: 'DE002',
+        lineNo1_lineCreditAccountCode1_creditAccountCode: 'AB002',
+        lineNo1_lineCreditAccountCode1_creditSubAccountCode: 'SU002',
+        lineNo1_lineCreditAccountCode1_creditDepartmentCode: 'DE002',
         lineNo1_lineAccountCode1_input_amount: '30,000'
       }
       request.params = {
@@ -746,9 +786,13 @@ describe('inboxのテスト', () => {
 
       insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
         status: 0,
-        lineId: 'lineAccountCode4',
+        lineId: '1',
         accountCode: 'AB001',
         subAccountCode: 'SU001',
+        departmentCode: 'DE001',
+        creditAccountCode: 'AB002',
+        creditSubAccountCode: 'SU002',
+        creditDepartmentCode: 'DE002',
         error: undefined
       })
 
@@ -795,18 +839,22 @@ describe('inboxのテスト', () => {
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
 
-    test('正常：未登録勘定科目の場合', async () => {
+    test('正常：未登録勘定科目の場合（借方）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
-      const lineId = 'lineAccountCode4'
+      const lineId = '1'
       const accountCode = 'AB111'
 
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        lineId: 'UT001',
+        lineId: '1',
         lineNo1_lineAccountCode1_accountCode: 'AB111',
         lineNo1_lineAccountCode1_subAccountCode: 'SU001',
+        lineNo1_lineAccountCode1_departmentCode: '',
+        lineNo1_lineCreditAccountCode1_creditAccountCode: '',
+        lineNo1_lineCreditAccountCode1_creditSubAccountCode: '',
+        lineNo1_lineCreditAccountCode1_creditDepartmentCode: '',
         lineNo1_lineAccountCode1_input_amount: '30,000'
       }
       request.params = {
@@ -826,7 +874,6 @@ describe('inboxのテスト', () => {
         status: -1,
         lineId: lineId,
         accountCode: accountCode,
-        subAccountCode: 'SU001',
         error: undefined
       })
 
@@ -845,18 +892,75 @@ describe('inboxのテスト', () => {
       ])
     })
 
-    test('正常：未登録補助科目の場合', async () => {
+    test('正常：未登録勘定科目の場合（貸方）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
-      const lineId = 'lineAccountCode4'
+      const lineId = '1'
+      const creditAccountCode = 'AB112'
+
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        lineId: '1',
+        lineNo1_lineAccountCode1_accountCode: '',
+        lineNo1_lineAccountCode1_subAccountCode: '',
+        lineNo1_lineAccountCode1_departmentCode: '',
+        lineNo1_lineCreditAccountCode1_creditAccountCode: 'AB112',
+        lineNo1_lineCreditAccountCode1_creditSubAccountCode: 'SU002',
+        lineNo1_lineCreditAccountCode1_creditDepartmentCode: '',
+        lineNo1_lineAccountCode1_input_amount: '30,000'
+      }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
+        status: -1,
+        lineId: lineId,
+        accountCode: creditAccountCode,
+        error: undefined
+      })
+
+      // 試験実施
+      await inbox.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '仕訳情報設定',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の勘定科目「${creditAccountCode}」は未登録勘定科目です。`,
+        'SYSERR'
+      ])
+    })
+
+    test('正常：未登録補助科目の場合（借方）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const lineId = '1'
       const subAccountCode = 'SU111'
 
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        lineId: 'UT001',
+        lineId: '1',
         lineNo1_lineAccountCode1_accountCode: 'AB001',
         lineNo1_lineAccountCode1_subAccountCode: 'SU111',
+        lineNo1_lineAccountCode1_departmentCode: '',
+        lineNo1_lineCreditAccountCode1_creditAccountCode: '',
+        lineNo1_lineCreditAccountCode1_creditSubAccountCode: '',
+        lineNo1_lineCreditAccountCode1_creditDepartmentCode: '',
         lineNo1_lineAccountCode1_input_amount: '30,000'
       }
       request.params = {
@@ -895,19 +999,76 @@ describe('inboxのテスト', () => {
       ])
     })
 
-    test('正常：未登録部門コードの場合', async () => {
+    test('正常：未登録補助科目の場合（貸方）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
-      const lineId = 'lineAccountCode4'
+      const lineId = '1'
+      const creditSubAccountCode = 'SU111'
+
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        lineId: '1',
+        lineNo1_lineAccountCode1_accountCode: '',
+        lineNo1_lineAccountCode1_subAccountCode: '',
+        lineNo1_lineAccountCode1_departmentCode: '',
+        lineNo1_lineCreditAccountCode1_creditAccountCode: 'AB112',
+        lineNo1_lineCreditAccountCode1_creditSubAccountCode: 'SU112',
+        lineNo1_lineCreditAccountCode1_creditDepartmentCode: '',
+        lineNo1_lineAccountCode1_input_amount: '30,000'
+      }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
+        status: -2,
+        lineId: lineId,
+        accountCode: 'AB112',
+        subAccountCode: creditSubAccountCode,
+        error: undefined
+      })
+
+      // 試験実施
+      await inbox.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '仕訳情報設定',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の補助科目「${creditSubAccountCode}」は未登録補助科目です。`,
+        'SYSERR'
+      ])
+    })
+
+    test('正常：未登録部門コードの場合（借方）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const lineId = '1'
       const departmentCode = 'DE001'
 
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        lineId: 'UT001',
+        lineId: '1',
         lineNo1_lineAccountCode1_accountCode: 'AB001',
         lineNo1_lineAccountCode1_subAccountCode: 'SU111',
         lineNo1_lineAccountCode1_departmentCode: 'DE001',
+        lineNo1_lineCreditAccountCode1_creditAccountCode: '',
+        lineNo1_lineCreditAccountCode1_creditSubAccountCode: '',
+        lineNo1_lineCreditAccountCode1_creditDepartmentCode: '',
         lineNo1_lineAccountCode1_input_amount: '30,000'
       }
       request.params = {
@@ -926,7 +1087,8 @@ describe('inboxのテスト', () => {
       insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
         status: -3,
         lineId: lineId,
-        accountCode: 'DE001',
+        accountCode: 'AB001',
+        subAccountCode: 'SU111',
         departmentCode: departmentCode,
         error: undefined
       })
@@ -942,6 +1104,61 @@ describe('inboxのテスト', () => {
       expect(request.flash).toHaveBeenCalledWith('noti', [
         '仕訳情報設定',
         `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の部門データ「${departmentCode}」は未登録部門データです。`,
+        'SYSERR'
+      ])
+    })
+
+    test('正常：未登録部門コードの場合（貸方）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      const lineId = '1'
+      const creditDepartmentCode = 'DE112'
+
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        lineId: '1',
+        lineNo1_lineAccountCode1_accountCode: '',
+        lineNo1_lineAccountCode1_subAccountCode: '',
+        lineNo1_lineAccountCode1_departmentCode: '',
+        lineNo1_lineCreditAccountCode1_creditAccountCode: 'AB112',
+        lineNo1_lineCreditAccountCode1_creditSubAccountCode: 'SU112',
+        lineNo1_lineCreditAccountCode1_creditDepartmentCode: 'DE112',
+        lineNo1_lineAccountCode1_input_amount: '30,000'
+      }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      insertAndUpdateJournalizeInvoiceSpy.mockReturnValue({
+        status: -3,
+        lineId: lineId,
+        accountCode: 'AB001',
+        subAccountCode: 'SU111',
+        departmentCode: creditDepartmentCode,
+        error: undefined
+      })
+
+      // 試験実施
+      await inbox.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // request.flashが呼ばれ「る」
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '仕訳情報設定',
+        `仕訳情報設定が完了できませんでした。<BR>※明細ID「${lineId}」の部門データ「${creditDepartmentCode}」は未登録部門データです。`,
         'SYSERR'
       ])
     })

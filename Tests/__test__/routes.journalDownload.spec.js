@@ -44,7 +44,8 @@ let userControllerFindOneSpy,
   contractControllerFindContractSpyon,
   journalfindAllSpy,
   getSentToCompanySpy,
-  findOneRequestApprovalSpy
+  findOneRequestApprovalSpy,
+  downloadYayoiSpy
 
 const dbJournalTable = []
 const dbJournal100Table = []
@@ -58,9 +59,18 @@ for (let idx = 0; idx < 100; ++idx) {
   item.invoiceId = '3b3ff8ac-f544-4eee-a4b0-0ca7a0edacjs'
   item.lineNo = idx + 1
   item.lineId = `${idx + 1}`
-  item.accountCode = `accountCode${idx + 1}`
-  item.subAccountCode = `subAccountCode${idx + 1}`
-  item.departmentCode = `departmentCode${idx + 1}`
+  item.accountCode = `acc${idx + 1}`
+  item.subAccountCode = `subAcc${idx + 1}`
+  item.departmentCode = `de${idx + 1}`
+  item.creditAccountCode = `cAcc${idx + 1}`
+  item.creditSubAccountCode = `cSubAcc${idx + 1}`
+  item.creditDepartmentCode = `cDe${idx + 1}`
+  item.accountName = `accName${idx + 1}`
+  item.subAccountName = `subAccName${idx + 1}`
+  item.departmentName = `deName${idx + 1}`
+  item.creditAccountName = `cAccName${idx + 1}`
+  item.creditSubAccountName = `cSubAccName${idx + 1}`
+  item.creditDepartmentName = `cDeName${idx + 1}`
   item.installmentAmount = 51222 + 1
   item.createdAt = new Date('2021-11-25T04:30:00.000Z')
   item.updatedAt = new Date('2021-11-25T04:30:00.000Z')
@@ -75,9 +85,19 @@ const journalfindAllSpyResult = [
     invoiceId: '1f3ce3dc-4dbb-548a-a090-d39dc604a6e1',
     lineNo: 1,
     lineId: '1',
-    accountCode: 'accountCode1',
-    subAccountCode: 'subAccountCode1',
-    departmentCode: 'departmentCode1',
+    accountCode: 'acc1',
+    subAccountCode: 'subAcc1',
+    departmentCode: 'de1',
+    creditAccountCode: 'cAcc1',
+    creditSubAccountCode: 'cSubAcc1',
+    creditDepartmentCode: 'cDe1',
+    accountName: 'accName1',
+    subAccountName: 'subAccName1',
+    departmentName: 'deName1',
+    creditAccountName: 'cAccName1',
+    creditSubAccountName: 'cSubAccName1',
+    creditDepartmentName: 'cDeName1',
+
     installmentAmount: 51223,
     createdAt: new Date('2021-11-25T04:30:00.000Z'),
     updatedAt: new Date('2021-11-25T04:30:00.000Z'),
@@ -122,8 +142,8 @@ const session = {
 }
 
 const headers =
-  '請求書番号,発行日,宛先-テナントID,宛先-会社名,宛先-国/地域,宛先-私書箱,宛先-郵便番号,宛先-都道府県,宛先-市区町村・番地,宛先-ビル、マンション名,宛先-登録番号,宛先-GLN,宛先-法人番号,差出人-テナントID,差出人-会社名,差出人-国/地域,差出人-私書箱,差出人-郵便番号,差出人-都道府県,差出人-市区町村・番地,差出人-ビル、マンション名,差出人-登録番号,差出人-GLN,差出人-法人番号,支払期日,納品日,納品開始日,納品終了日,備考,注文書番号,注文書発行日,参考情報,契約書番号,部門,取引先担当者（アドレス）,輸送情報,Tradeshiftクリアランス,通関識別情報,ID,課税日,販売者の手数料番号,DUNSナンバー,暫定時間,予約番号,為替レート,為替レート-通貨,為替レート-日付,為替レート換算後の税金総額,為替レート-Convertd Document Total(incl taxes),支払方法,支払い条件-割引率,支払い条件-割増率,支払い条件-決済開始日,支払い条件-決済終了日,支払い条件-ペナルティ開始日,支払い条件-ペナルティ終了日,支払い条件-説明,銀行口座-銀行名,銀行口座-支店名,銀行口座-口座番号,銀行口座-科目,銀行口座-口座名義,銀行口座-番地,銀行口座-ビル名 / フロア等,銀行口座-家屋番号,銀行口座-市区町村,銀行口座-都道府県,銀行口座-郵便番号,銀行口座-所在地,銀行口座-国,DirectDebit-銀行名,DirectDebit-支店名,DirectDebit-口座番号,DirectDebit-科目,DirectDebit-口座名義,DirectDebit-番地,DirectDebit-ビル名 / フロア等,DirectDebit-家屋番号,DirectDebit-市区町村,DirectDebit-都道府県,DirectDebit-郵便番号,DirectDebit-所在地,DirectDebit-国,IBAN払い-銀行識別コード / SWIFTコード,IBAN払い-IBAN,IBAN払い-説明,国際電信送金-ABAナンバー,国際電信送金-SWIFTコード,国際電信送金-IBAN,国際電信送金-口座名義,国際電信送金-番地,国際電信送金-ビル名 / フロア等,国際電信送金-家屋番号,国際電信送金-市区町村,国際電信送金-都道府県,国際電信送金-郵便番号,国際電信送金 - 所在地,国際電信送金-国,国際電信送金-説明,支払方法-予備,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-小計 (税抜),明細-割引1-内容,明細-割引1-値,明細-割引1-単位,明細-割引1-単価,明細-割引2-内容,明細-割引2-値,明細-割引2-単位,明細-割引2-単価,明細-割引3-内容,明細-割引3-値,明細-割引3-単位,明細-割引3-単価,明細-割引4以降,明細-追加料金1-内容,明細-追加料金1-値,明細-追加料金1-単位,明細-追加料金1-単価,明細-追加料金2-内容,明細-追加料金2-値,明細-追加料金2-単位,明細-追加料金2-単価,明細-追加料金3-内容,明細-追加料金3-値,明細-追加料金3-単位,明細-追加料金3-単価,明細-追加料金4以降,明細-輸送情報,明細-備考,明細-シリアルナンバー,明細-商品分類コード: ECCN,明細-発注者品番,明細-注文明細番号,明細-EAN/GTIN,明細-ロケーションID,明細-貨物注文番号,明細-納品日,明細-HSN/SAC区分,明細-HSN/SACの値,明細-非課税/免税の理由,明細-注文書番号,明細-詳細,明細-メーカー名,明細-原産国,明細-納期,明細-配送先-私書箱,明細-配送先-市区町村番地,明細-配送先-マンション名,明細-配送先-都道府県,明細-配送先-郵便番号,明細-配送先-国,割引1-項目ID,割引1-内容,割引1-数量,割引1-単位,割引1-税（消費税／軽減税率／不課税／免税／非課税）,割引1-小計（税抜）,割引2-項目ID,割引2-内容,割引2-数量,割引2-単位,割引2-税（消費税／軽減税率／不課税／免税／非課税）,割引2-小計（税抜）,割引3-項目ID,割引3-内容,割引3-数量,割引3-単位,割引3-税（消費税／軽減税率／不課税／免税／非課税）,割引3-小計（税抜）,割引4以降,追加料金1-項目ID,追加料金1-内容,追加料金1-数量,追加料金1-単位,追加料金1-税（消費税／軽減税率／不課税／免税／非課税）,追加料金1-小計（税抜）,追加料金2-項目ID,追加料金2-内容,追加料金2-数量,追加料金2-単位,追加料金2-税（消費税／軽減税率／不課税／免税／非課税）,追加料金2-小計（税抜）,追加料金3-項目ID,追加料金3-内容,追加料金3-数量,追加料金3-単位,追加料金3-税（消費税／軽減税率／不課税／免税／非課税）,追加料金3-小計（税抜）,追加料金4以降,固定税-項目ID,固定税-税,仕訳情報1-勘定科目コード,仕訳情報1-補助科目コード' +
-  ',仕訳情報1-部門コード,仕訳情報1-計上金額,仕訳情報2-勘定科目コード,仕訳情報2-補助科目コード,仕訳情報2-部門コード,仕訳情報2-計上金額,仕訳情報3-勘定科目コード,仕訳情報3-補助科目コード,仕訳情報3-部門コード,仕訳情報3-計上金額,仕訳情報4-勘定科目コード,仕訳情報4-補助科目コード,仕訳情報4-部門コード,仕訳情報4-計上金額,仕訳情報5-勘定科目コード,仕訳情報5-補助科目コード,仕訳情報5-部門コード,仕訳情報5-計上金額,仕訳情報6-勘定科目コード,仕訳情報6-補助科目コード,仕訳情報6-部門コード,仕訳情報6-計上金額,仕訳情報7-勘定科目コード,仕訳情報7-補助科目コード,仕訳情報7-部門コード,仕訳情報7-計上金額,仕訳情報8-勘定科目コード,仕訳情報8-補助科目コード,仕訳情報8-部門コード,仕訳情報8-計上金額,仕訳情報9-勘定科目コード,仕訳情報9-補助科目コード,仕訳情報9-部門コード,仕訳情報9-計上金額,仕訳情報10-勘定科目コード,仕訳情報10-補助科目コード,仕訳情報10-部門コード,仕訳情報10-計上金額'
+  '請求書番号,発行日,宛先-テナントID,宛先-会社名,宛先-国/地域,宛先-私書箱,宛先-郵便番号,宛先-都道府県,宛先-市区町村・番地,宛先-ビル、マンション名,宛先-登録番号,宛先-GLN,宛先-法人番号,差出人-テナントID,差出人-会社名,差出人-国/地域,差出人-私書箱,差出人-郵便番号,差出人-都道府県,差出人-市区町村・番地,差出人-ビル、マンション名,差出人-登録番号,差出人-GLN,差出人-法人番号,支払期日,納品日,納品開始日,納品終了日,備考,注文書番号,注文書発行日,参考情報,契約書番号,部門,取引先担当者（アドレス）,輸送情報,Tradeshiftクリアランス,通関識別情報,ID,課税日,販売者の手数料番号,DUNSナンバー,暫定時間,予約番号,為替レート,為替レート-通貨,為替レート-日付,為替レート換算後の税金総額,為替レート-Convertd Document Total(incl taxes),支払方法,支払い条件-割引率,支払い条件-割増率,支払い条件-決済開始日,支払い条件-決済終了日,支払い条件-ペナルティ開始日,支払い条件-ペナルティ終了日,支払い条件-説明,銀行口座-銀行名,銀行口座-支店名,銀行口座-口座番号,銀行口座-科目,銀行口座-口座名義,銀行口座-番地,銀行口座-ビル名 / フロア等,銀行口座-家屋番号,銀行口座-市区町村,銀行口座-都道府県,銀行口座-郵便番号,銀行口座-所在地,銀行口座-国,DirectDebit-銀行名,DirectDebit-支店名,DirectDebit-口座番号,DirectDebit-科目,DirectDebit-口座名義,DirectDebit-番地,DirectDebit-ビル名 / フロア等,DirectDebit-家屋番号,DirectDebit-市区町村,DirectDebit-都道府県,DirectDebit-郵便番号,DirectDebit-所在地,DirectDebit-国,IBAN払い-銀行識別コード / SWIFTコード,IBAN払い-IBAN,IBAN払い-説明,国際電信送金-ABAナンバー,国際電信送金-SWIFTコード,国際電信送金-IBAN,国際電信送金-口座名義,国際電信送金-番地,国際電信送金-ビル名 / フロア等,国際電信送金-家屋番号,国際電信送金-市区町村,国際電信送金-都道府県,国際電信送金-郵便番号,国際電信送金 - 所在地,国際電信送金-国,国際電信送金-説明,支払方法-予備,その他特記事項,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-小計 (税抜),明細-割引1-内容,明細-割引1-値,明細-割引1-単位,明細-割引1-単価,明細-割引2-内容,明細-割引2-値,明細-割引2-単位,明細-割引2-単価,明細-割引3-内容,明細-割引3-値,明細-割引3-単位,明細-割引3-単価,明細-割引4以降,明細-追加料金1-内容,明細-追加料金1-値,明細-追加料金1-単位,明細-追加料金1-単価,明細-追加料金2-内容,明細-追加料金2-値,明細-追加料金2-単位,明細-追加料金2-単価,明細-追加料金3-内容,明細-追加料金3-値,明細-追加料金3-単位,明細-追加料金3-単価,明細-追加料金4以降,明細-輸送情報,明細-備考,明細-シリアルナンバー,明細-商品分類コード: ECCN,明細-発注者品番,明細-注文明細番号,明細-EAN/GTIN,明細-ロケーションID,明細-貨物注文番号,明細-納品日,明細-HSN/SAC区分,明細-HSN/SACの値,明細-非課税/免税の理由,明細-注文書番号,明細-詳細,明細-メーカー名,明細-原産国,明細-納期,明細-配送先-私書箱,明細-配送先-市区町村番地,明細-配送先-マンション名,明細-配送先-都道府県,明細-配送先-郵便番号,明細-配送先-国,割引1-項目ID,割引1-内容,割引1-数量,割引1-単位,割引1-税（消費税／軽減税率／不課税／免税／非課税）,割引1-小計（税抜）,割引2-項目ID,割引2-内容,割引2-数量,割引2-単位,割引2-税（消費税／軽減税率／不課税／免税／非課税）,割引2-小計（税抜）,割引3-項目ID,割引3-内容,割引3-数量,割引3-単位,割引3-税（消費税／軽減税率／不課税／免税／非課税）,割引3-小計（税抜）,割引4以降,追加料金1-項目ID,追加料金1-内容,追加料金1-数量,追加料金1-単位,追加料金1-税（消費税／軽減税率／不課税／免税／非課税）,追加料金1-小計（税抜）,追加料金2-項目ID,追加料金2-内容,追加料金2-数量,追加料金2-単位,追加料金2-税（消費税／軽減税率／不課税／免税／非課税）,追加料金2-小計（税抜）,追加料金3-項目ID,追加料金3-内容,追加料金3-数量,追加料金3-単位,追加料金3-税（消費税／軽減税率／不課税／免税／非課税）,追加料金3-小計（税抜）,追加料金4以降,固定税-項目ID,固定税-税' +
+  ',仕訳情報1-借方勘定科目名,仕訳情報1-借方勘定科目コード,仕訳情報1-借方補助科目名,仕訳情報1-借方補助科目コード,仕訳情報1-借方部門名,仕訳情報1-借方部門コード,仕訳情報1-貸方勘定科目名,仕訳情報1-貸方勘定科目コード,仕訳情報1-貸方補助科目名,仕訳情報1-貸方補助科目コード,仕訳情報1-貸方部門名,仕訳情報1-貸方部門コード,仕訳情報1-計上金額,仕訳情報2-借方勘定科目名,仕訳情報2-借方勘定科目コード,仕訳情報2-借方補助科目名,仕訳情報2-借方補助科目コード,仕訳情報2-借方部門名,仕訳情報2-借方部門コード,仕訳情報2-貸方勘定科目名,仕訳情報2-貸方勘定科目コード,仕訳情報2-貸方補助科目名,仕訳情報2-貸方補助科目コード,仕訳情報2-貸方部門名,仕訳情報2-貸方部門コード,仕訳情報2-計上金額,仕訳情報3-借方勘定科目名,仕訳情報3-借方勘定科目コード,仕訳情報3-借方補助科目名,仕訳情報3-借方補助科目コード,仕訳情報3-借方部門名,仕訳情報3-借方部門コード,仕訳情報3-貸方勘定科目名,仕訳情報3-貸方勘定科目コード,仕訳情報3-貸方補助科目名,仕訳情報3-貸方補助科目コード,仕訳情報3-貸方部門名,仕訳情報3-貸方部門コード,仕訳情報3-計上金額,仕訳情報4-借方勘定科目名,仕訳情報4-借方勘定科目コード,仕訳情報4-借方補助科目名,仕訳情報4-借方補助科目コード,仕訳情報4-借方部門名,仕訳情報4-借方部門コード,仕訳情報4-貸方勘定科目名,仕訳情報4-貸方勘定科目コード,仕訳情報4-貸方補助科目名,仕訳情報4-貸方補助科目コード,仕訳情報4-貸方部門名,仕訳情報4-貸方部門コード,仕訳情報4-計上金額,仕訳情報5-借方勘定科目名,仕訳情報5-借方勘定科目コード,仕訳情報5-借方補助科目名,仕訳情報5-借方補助科目コード,仕訳情報5-借方部門名,仕訳情報5-借方部門コード,仕訳情報5-貸方勘定科目名,仕訳情報5-貸方勘定科目コード,仕訳情報5-貸方補助科目名,仕訳情報5-貸方補助科目コード,仕訳情報5-貸方部門名,仕訳情報5-貸方部門コード,仕訳情報5-計上金額,仕訳情報6-借方勘定科目名,仕訳情報6-借方勘定科目コード,仕訳情報6-借方補助科目名,仕訳情報6-借方補助科目コード,仕訳情報6-借方部門名,仕訳情報6-借方部門コード,仕訳情報6-貸方勘定科目名,仕訳情報6-貸方勘定科目コード,仕訳情報6-貸方補助科目名,仕訳情報6-貸方補助科目コード,仕訳情報6-貸方部門名,仕訳情報6-貸方部門コード,仕訳情報6-計上金額,仕訳情報7-借方勘定科目名,仕訳情報7-借方勘定科目コード,仕訳情報7-借方補助科目名,仕訳情報7-借方補助科目コード,仕訳情報7-借方部門名,仕訳情報7-借方部門コード,仕訳情報7-貸方勘定科目名,仕訳情報7-貸方勘定科目コード,仕訳情報7-貸方補助科目名,仕訳情報7-貸方補助科目コード,仕訳情報7-貸方部門名,仕訳情報7-貸方部門コード,仕訳情報7-計上金額,仕訳情報8-借方勘定科目名,仕訳情報8-借方勘定科目コード,仕訳情報8-借方補助科目名,仕訳情報8-借方補助科目コード,仕訳情報8-借方部門名,仕訳情報8-借方部門コード,仕訳情報8-貸方勘定科目名,仕訳情報8-貸方勘定科目コード,仕訳情報8-貸方補助科目名,仕訳情報8-貸方補助科目コード,仕訳情報8-貸方部門名,仕訳情報8-貸方部門コード,仕訳情報8-計上金額,仕訳情報9-借方勘定科目名,仕訳情報9-借方勘定科目コード,仕訳情報9-借方補助科目名,仕訳情報9-借方補助科目コード,仕訳情報9-借方部門名,仕訳情報9-借方部門コード,仕訳情報9-貸方勘定科目名,仕訳情報9-貸方勘定科目コード,仕訳情報9-貸方補助科目名,仕訳情報9-貸方補助科目コード,仕訳情報9-貸方部門名,仕訳情報9-貸方部門コード,仕訳情報9-計上金額,仕訳情報10-借方勘定科目名,仕訳情報10-借方勘定科目コード,仕訳情報10-借方補助科目名,仕訳情報10-借方補助科目コード,仕訳情報10-借方部門名,仕訳情報10-借方部門コード,仕訳情報10-貸方勘定科目名,仕訳情報10-貸方勘定科目コード,仕訳情報10-貸方補助科目名,仕訳情報10-貸方補助科目コード,仕訳情報10-貸方部門名,仕訳情報10-貸方部門コード,仕訳情報10-計上金額'
 
 // モックテーブル定義
 const Users = require('../mockDB/Users_Table')
@@ -144,6 +164,7 @@ describe('journalDownloadのテスト', () => {
     getSentToCompanySpy = jest.spyOn(journalDownloadController, 'getSentToCompany')
     findOneRequestApprovalSpy = jest.spyOn(requestApproval, 'findOneRequestApproval')
     request.flash = jest.fn()
+    downloadYayoiSpy = jest.spyOn(journalDownloadController, 'downloadYayoi')
   })
   afterEach(() => {
     request.resetMocked()
@@ -362,7 +383,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'finalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -411,8 +433,9 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-          .value ?? ''
+        `${
+          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+            .value ?? ''
         }`
       )
       // 支店名
@@ -464,7 +487,8 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${
+          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -478,7 +502,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -527,8 +552,9 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-          .value ?? ''
+        `${
+          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+            .value ?? ''
         }`
       )
       // 支店名
@@ -580,7 +606,8 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${
+          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -594,7 +621,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -633,7 +661,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01000',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -672,7 +701,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: '',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -711,7 +741,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: '',
         minIssuedate: '9999-99-98',
-        maxIssuedate: '9999-99-98'
+        maxIssuedate: '9999-99-98',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -750,7 +781,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -791,7 +823,8 @@ describe('journalDownloadのテスト', () => {
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
         sentTo: ['f783be0e-e716-4eab-a7ec-5ce36b3c7b31'],
-        sentBy: ['221559d0-53aa-44a2-ab29-0c4a6cb02bde']
+        sentBy: ['221559d0-53aa-44a2-ab29-0c4a6cb02bde'],
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -840,8 +873,9 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-          .value ?? ''
+        `${
+          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+            .value ?? ''
         }`
       )
       // 支店名
@@ -893,19 +927,21 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${
+          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
 
-    test('正常:検索結果201件', async () => {
+    test('正常:検索結果201件（最終承認済みの請求書）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
       request.body = {
-        chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01006'
+        chkFinalapproval: 'finalapproval',
+        invoiceNumber: 'A01006',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -917,9 +953,9 @@ describe('journalDownloadのテスト', () => {
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
-      findOneRequestApprovalSpy.mockReturnValue(null)
+      findOneRequestApprovalSpy.mockReturnValue(findOneRequestApprovalResult)
 
-      journalfindAllSpy.mockReturnValue(dbJournalTable)
+      journalfindAllSpy.mockReturnValue(journalfindAllSpyResult)
 
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
@@ -930,7 +966,6 @@ describe('journalDownloadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // responseのヘッダ
-
       const today = new Date().toISOString().split('T')[0]
       expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
       expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
@@ -957,8 +992,9 @@ describe('journalDownloadのテスト', () => {
         expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
         // 銀行名
         expect(csvBody).toContain(
-          `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-            .value ?? ''
+          `${
+            checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+              .value ?? ''
           }`
         )
         // 支店名
@@ -967,7 +1003,8 @@ describe('journalDownloadのテスト', () => {
         )
         // 科目
         expect(csvBody).toContain(
-          `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.AccountTypeCode?.value === 'General' ? '普通' : '当座'
+          `${
+            checkingData.PaymentMeans[0].PayeeFinancialAccount?.AccountTypeCode?.value === 'General' ? '普通' : '当座'
           }`
         )
         // 口座番号
@@ -1011,9 +1048,134 @@ describe('journalDownloadのテスト', () => {
         )
         // 明細-備考
         expect(csvBody).toContain(
-          `${checkingData.InvoiceLine[0].DocumentReference
-            ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value
-            : ''
+          `${
+            checkingData.InvoiceLine[0].DocumentReference
+              ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value
+              : ''
+          }`
+        )
+      }
+    })
+
+    test('正常:検索結果201件（仕訳済みの請求書）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01006',
+        serviceDataFormat: '0'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01006')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+
+      const checkingData = require('../mockInvoice/invoice6')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      for (let idx = 0; idx < 201; idx++) {
+        const csvBody = response.setHeader().body.split('\r\n')[idx + 1]
+        // 発行日
+        expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
+        // 請求書番号
+        expect(csvBody).toContain(`${checkingData.ID.value}`)
+        // テナントID
+        expect(csvBody).toContain(`${checkingData.AccountingCustomerParty.Party.PartyIdentification[0].ID.value}`)
+        // 支払期日
+        expect(csvBody).toContain(`${checkingData.PaymentMeans[0].PaymentDueDate?.value ?? ''}`)
+        // 納品日
+        expect(csvBody).toContain(`${checkingData.Delivery[0].ActualDeliveryDate?.value ?? ''}`)
+        // 備考
+        expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
+        // 銀行名
+        expect(csvBody).toContain(
+          `${
+            checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+              .value ?? ''
+          }`
+        )
+        // 支店名
+        expect(csvBody).toContain(
+          `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.Name.value ?? ''}`
+        )
+        // 科目
+        expect(csvBody).toContain(
+          `${
+            checkingData.PaymentMeans[0].PayeeFinancialAccount?.AccountTypeCode?.value === 'General' ? '普通' : '当座'
+          }`
+        )
+        // 口座番号
+        expect(csvBody).toContain(`${checkingData.PaymentMeans[0].PayeeFinancialAccount?.ID?.value ?? ''}`)
+        // 口座名義
+        expect(csvBody).toContain(
+          `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.Name.value ?? ''}`
+        )
+        // その他特記事項
+        expect(csvBody).toContain(`${checkingData.PaymentMeans[0].PayeeFinancialAccount?.Name?.value ?? ''}`)
+        // 明細-項目ID
+        expect(csvBody).toContain(`${checkingData.Note[0].value}`)
+        // 明細-内容
+        expect(csvBody).toContain(`${checkingData.InvoiceLine[0].Item.Description[0].value}`)
+        // 明細-数量
+        expect(csvBody).toContain(`${checkingData.InvoiceLine[0].InvoicedQuantity.value}`)
+        // 明細-単位
+        const bconCsvUnitcode = require('../../Application/lib/bconCsvUnitcode')
+        const unitCodeKeys = Object.keys(bconCsvUnitcode)
+        let resultOfUnitSearch
+        unitCodeKeys.some((item) => {
+          if (`${checkingData.InvoiceLine[0].InvoicedQuantity.unitCode}` === bconCsvUnitcode[item]) {
+            resultOfUnitSearch = item
+            return true
+          }
+          return false
+        })
+        expect(csvBody).toContain(`${resultOfUnitSearch}`)
+        // 明細-単価
+        expect(csvBody).toContain(`${checkingData.InvoiceLine[0].LineExtensionAmount.value}`)
+        // 明細-税（消費税／軽減税率／不課税／免税／非課税）
+        const taxCategory = {
+          'JP 不課税 0%': '不課税',
+          'JP 免税 0%': '免税',
+          'JP 消費税 10%': '消費税',
+          'JP 消費税(軽減税率) 8%': '軽減税率',
+          'JP 非課税 0%': '非課税'
+        }
+        expect(csvBody).toContain(
+          `${taxCategory[checkingData.InvoiceLine[idx].TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.Name.value]}`
+        )
+        // 明細-備考
+        expect(csvBody).toContain(
+          `${
+            checkingData.InvoiceLine[0].DocumentReference
+              ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value
+              : ''
           }`
         )
       }
@@ -1028,7 +1190,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1075,8 +1238,9 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-          .value ?? ''
+        `${
+          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+            .value ?? ''
         }`
       )
       // 支店名
@@ -1128,7 +1292,8 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${
+          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -1142,7 +1307,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01014',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1201,7 +1367,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1260,7 +1427,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1308,7 +1476,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1356,7 +1525,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1367,6 +1537,8 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
@@ -1402,7 +1574,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1450,7 +1623,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1498,7 +1672,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1546,7 +1721,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1594,7 +1770,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1645,7 +1822,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1697,7 +1875,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1756,7 +1935,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1815,7 +1995,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1863,7 +2044,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1911,7 +2093,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1959,7 +2142,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2007,7 +2191,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2055,7 +2240,8 @@ describe('journalDownloadのテスト', () => {
         minDueDate: '',
         maxDueDate: '',
         minDeliveryDate: '',
-        maxDeliveryDate: ''
+        maxDeliveryDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2099,7 +2285,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01011',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2145,7 +2332,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01012',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2191,7 +2379,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01015',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2300,7 +2489,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01026',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2409,7 +2599,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01016',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2455,7 +2646,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01017',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2676,7 +2868,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01018',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2720,7 +2913,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01019',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2763,7 +2957,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01020',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2806,7 +3001,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01021',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2849,7 +3045,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01022',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2892,7 +3089,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01023',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2935,7 +3133,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01024',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -2978,7 +3177,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01025',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3021,7 +3221,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01027',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3075,7 +3276,8 @@ describe('journalDownloadのテスト', () => {
         invoiceNumber: 'A01028',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
-        minDueDate: ''
+        minDueDate: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3130,7 +3332,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01032',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3179,7 +3382,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01033',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3234,7 +3438,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01029',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3289,7 +3494,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01030',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3344,7 +3550,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01031',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3393,7 +3600,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01031',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3430,7 +3638,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: '',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3475,7 +3684,8 @@ describe('journalDownloadのテスト', () => {
         chkFinalapproval: 'noneFinalapproval',
         invoiceNumber: 'A01009',
         minIssuedate: '1990-01-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       request.flash = jest.fn()
@@ -3518,7 +3728,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01009'
+        invoiceNumber: 'A01009',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3559,7 +3770,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01031'
+        invoiceNumber: 'A01031',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3603,7 +3815,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: ''
+        invoiceNumber: '',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3616,7 +3829,9 @@ describe('journalDownloadのテスト', () => {
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       const dbError = new Error('DB ERROR')
-      journalfindAllSpy.mockReturnValue(dbError)
+      journalfindAllSpy.mockImplementation(() => {
+        throw dbError
+      })
 
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
@@ -3643,7 +3858,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01010'
+        invoiceNumber: 'A01010',
+        serviceDataFormat: '0'
       }
 
       request.flash = jest.fn()
@@ -3686,7 +3902,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A'
+        invoiceNumber: 'A',
+        serviceDataFormat: '0'
       }
 
       request.flash = jest.fn()
@@ -3729,7 +3946,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01002'
+        invoiceNumber: 'A01002',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3780,8 +3998,9 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-          .value ?? ''
+        `${
+          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+            .value ?? ''
         }`
       )
       // 支店名
@@ -3833,7 +4052,8 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${
+          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -3845,7 +4065,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01003'
+        invoiceNumber: 'A01003',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -3896,8 +4117,9 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-          .value ?? ''
+        `${
+          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+            .value ?? ''
         }`
       )
       // 支店名
@@ -3947,7 +4169,8 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${taxCategory[checkingData.TaxTotal[0].TaxSubtotal[0].TaxCategory.ID.value]}`)
       // 明細-備考
       expect(csvBody).toContain(
-        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${
+          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -3959,7 +4182,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01000'
+        invoiceNumber: 'A01000',
+        serviceDataFormat: '0'
       }
       request.flash = jest.fn()
 
@@ -4032,10 +4256,7 @@ describe('journalDownloadのテスト', () => {
       // 400がエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(400))
       // 画面表示
-      expect(request.flash).toHaveBeenCalledWith('noti', [
-        '請求書ダウンロード',
-        'ログインユーザーではありません。'
-      ])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['請求書ダウンロード', 'ログインユーザーではありません。'])
       expect(response.redirect).toHaveBeenCalledWith(303, '/journalDownload')
     })
 
@@ -4050,7 +4271,8 @@ describe('journalDownloadのテスト', () => {
         sentTo: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
         sentBy: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -4099,8 +4321,9 @@ describe('journalDownloadのテスト', () => {
       expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
       // 銀行名
       expect(csvBody).toContain(
-        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
-          .value ?? ''
+        `${
+          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+            .value ?? ''
         }`
       )
       // 支店名
@@ -4152,7 +4375,8 @@ describe('journalDownloadのテスト', () => {
       )
       // 明細-備考
       expect(csvBody).toContain(
-        `${checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        `${
+          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
     })
@@ -4165,7 +4389,8 @@ describe('journalDownloadのテスト', () => {
       request.body = {
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09'
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -4325,7 +4550,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01000'
+        invoiceNumber: 'A01000',
+        serviceDataFormat: '0'
       }
       request.flash = jest.fn()
 
@@ -4410,7 +4636,8 @@ describe('journalDownloadのテスト', () => {
       request.user = { ...user[0] }
       request.body = {
         chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: 'A01000'
+        invoiceNumber: 'A01000',
+        serviceDataFormat: '0'
       }
       request.flash = jest.fn()
 
@@ -4486,6 +4713,451 @@ describe('journalDownloadのテスト', () => {
       // ポータルにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/journalDownload')
       expect(response.getHeader('Location')).toEqual('/journalDownload')
+    })
+  })
+
+  describe('コールバック：cbPostIndex②', () => {
+    let checkContractStatus
+    const helper = require('../../Application/routes/helpers/middleware')
+    beforeEach(() => {
+      userControllerFindOneSpy = jest.spyOn(userController, 'findOne')
+      contractControllerFindOneSpy = jest.spyOn(contractController, 'findOne')
+      tenantControllerFindOneSpy = jest.spyOn(tenantController, 'findOne')
+      findOneRequestApprovalSpy = jest.spyOn(requestApproval, 'findOneRequestApproval')
+      contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
+      journalfindAllSpy = jest.spyOn(JournalizeInvoice, 'findAll')
+      downloadYayoiSpy = jest.spyOn(journalDownloadController, 'downloadYayoi')
+      checkContractStatus = jest.spyOn(helper, 'checkContractStatus')
+    })
+
+    afterEach(() => {
+      userControllerFindOneSpy.mockReset()
+      contractControllerFindOneSpy.mockReset()
+      tenantControllerFindOneSpy.mockReset()
+      findOneRequestApprovalSpy.mockReset()
+      contractControllerFindContractSpyon.mockReset()
+      journalfindAllSpy.mockReset()
+      journalfindAllSpy.mockReset()
+      checkContractStatus.mockRestore()
+    })
+
+    // 弥生会計フォーマットダウンロード
+    test('正常:1件（最終承認済みの請求書）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'finalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1'
+      }
+      const expectedYayoiFormat =
+        '"2000","","","","仕掛品","","","課税売上8%(軽)","24200","1936","現金","","","課対仕入8%(軽)","24200","1936","","","","0","","","","","no"'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(findOneRequestApprovalResult)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(journalfindAllSpyResult)
+
+      downloadYayoiSpy.mockImplementation(() => {
+        return expectedYayoiFormat
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      const filename = encodeURIComponent('請求書_弥生会計（05以降）.csv')
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      expect(response.statusCode).toBe(200)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${filename}`)
+    })
+
+    test('正常:1件（仕訳済みの請求書）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1',
+        sentBy: '5778c070-5dd3-42db-aaa8-848424fb80f9'
+      }
+
+      const expectedYayoiFormat =
+        '"2000","","","","仕掛品","","","課税売上8%(軽)","24200","1936","現金","","","課対仕入8%(軽)","24200","1936","","","","0","","","","","no"'
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      downloadYayoiSpy.mockImplementation(() => {
+        return expectedYayoiFormat
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      const filename = encodeURIComponent('請求書_弥生会計（05以降）.csv')
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      expect(response.statusCode).toBe(200)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${filename}`)
+    })
+
+    test('準正常:ダウンロード対象検証（データがなしの時の検証）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+    })
+
+    test('準正常:ダウンロード対象検証（選択肢の以外の場合）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '99'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+    })
+
+    test('準正常:ダウンロード対象検証（選択肢の以外の場合②）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: 'テスト'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+    })
+
+    test('準正常:ダウンロード対象結果がない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      downloadYayoiSpy.mockImplementation(() => {
+        return null
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+    })
+
+    test('準正常:ダウンロード対象結果がない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      downloadYayoiSpy.mockImplementation(() => {
+        return null
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+    })
+
+    test('準正常:コントローラエラー発生', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      const error = new Error('500 system error')
+      downloadYayoiSpy.mockImplementation(() => {
+        throw error
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        notiTitle,
+        'システムエラーが発生しました。時間を空けてもう一度試してください。'
+      ])
+    })
+
+    test('準正常:形式以外の送信企業情報', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '1',
+        sentBy: 1
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockImplementation(() => {
+        return Contracts[0]
+      })
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      const error = new Error('500 system error')
+      downloadYayoiSpy.mockImplementation(() => {
+        throw error
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        notiTitle,
+        'システムエラーが発生しました。時間を空けてもう一度試してください。'
+      ])
     })
   })
 })

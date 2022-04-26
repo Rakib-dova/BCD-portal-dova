@@ -33,8 +33,8 @@ document.getElementById('btnCheck').addEventListener('click', function (e) {
   }
 
   // 部門コードが10桁以上の場合
-  if (document.querySelector('#setDepartmentCodeInputId').value.length > 10) {
-    document.querySelector('#RequiredErrorMesageForCode').innerHTML = '部門コードは10桁まで入力してください。'
+  if (document.querySelector('#setDepartmentCodeInputId').value.length > 6) {
+    document.querySelector('#RequiredErrorMesageForCode').innerHTML = '部門コードは6桁まで入力してください。'
     document.querySelector('#RequiredErrorMesageForCode').classList.remove('is-invisible')
     errorFlag = true
   }

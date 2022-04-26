@@ -71,7 +71,8 @@ document.getElementById('next-btn').addEventListener('click', function (e) {
       }
     } else if (
       checkTarget.getAttribute('name') === 'tatemono1' ||
-      checkTarget.getAttribute('name') === 'campaignCode'
+      checkTarget.getAttribute('name') === 'campaignCode' ||
+      checkTarget.getAttribute('name') === 'salesPersonName'
     ) {
       if (
         checkTarget.parentNode.parentNode.childNodes[1] !== undefined &&
@@ -129,7 +130,8 @@ document.getElementById('next-btn').addEventListener('click', function (e) {
           )
         } else if (
           invalidCheckTarget[idx].getAttribute('name') === 'tatemono1' ||
-          invalidCheckTarget[idx].getAttribute('name') === 'campaignCode'
+          invalidCheckTarget[idx].getAttribute('name') === 'campaignCode' ||
+          invalidCheckTarget[idx].getAttribute('name') === 'salesPersonName'
         ) {
           if (cautionRequired.innerText !== '') {
             invalidCheckTarget[idx].parentNode.parentNode.appendChild(cautionRequired)

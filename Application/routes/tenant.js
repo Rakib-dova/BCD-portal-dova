@@ -134,6 +134,7 @@ const cbPostRegister = async (req, res, next) => {
   contractInformationnewOrder.contractBasicInfo.tradeshiftId = req.user.tenantId
   contractInformationnewOrder.contractBasicInfo.orderType = constantsDefine.statusConstants.orderTypeNewOrder
   contractInformationnewOrder.contractBasicInfo.campaignCode = req.body.campaignCode
+  contractInformationnewOrder.contractBasicInfo.salesPersonName = req.body.salesPersonName.replace(/\s+/g, '')
   contractInformationnewOrder.contractBasicInfo.kaianPassword = req.body.password
 
   // contractorName

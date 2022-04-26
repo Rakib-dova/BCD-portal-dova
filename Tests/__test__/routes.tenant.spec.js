@@ -1069,7 +1069,8 @@ describe('tenantのテスト', () => {
         contactPersonName: 'トレド',
         contactPhoneNumber: '080-1234-5678',
         contactMail: 'example@example.com',
-        campaignCode: 'A1b2C3d4E5'
+        campaignCode: 'A1b2C3d4E5',
+        salesPersonName: ''
       }
       // request.userに正常値を想定する
       request.user = {
@@ -2274,7 +2275,8 @@ describe('tenantのテスト', () => {
         contactPersonName: 'トレド',
         contactPhoneNumber: '080-1234-5678',
         contactMail: 'example@example.com',
-        campaignCode: 'A1b2C3d4E5'
+        campaignCode: 'A1b2C3d4E5',
+        salesPersonName: ''
       }
       // request.userに正常値を想定する
       request.user = {
@@ -2341,7 +2343,8 @@ describe('tenantのテスト', () => {
         contactPersonName: 'トレド',
         contactPhoneNumber: '080-1234-5678',
         contactMail: 'example@example.com',
-        campaignCode: 'A1b2C3d4E5'
+        campaignCode: 'A1b2C3d4E5',
+        salesPersonName: ''
       }
       // request.userに正常値を想定する
       request.user = {
@@ -2408,7 +2411,8 @@ describe('tenantのテスト', () => {
         contactPersonName: 'トレド',
         contactPhoneNumber: '080-1234-5678',
         contactMail: 'example@example.com',
-        campaignCode: 'A1b2C3d4E5'
+        campaignCode: 'A1b2C3d4E5',
+        salesPersonName: ''
       }
       // request.userに正常値を想定する
       request.user = {
@@ -2482,7 +2486,8 @@ describe('tenantのテスト', () => {
         contactPersonName: 'トレド',
         contactPhoneNumber: '080-1234-5678',
         contactMail: 'example@example.com',
-        campaignCode: 'A1b2C3d4E5'
+        campaignCode: 'A1b2C3d4E5',
+        salesPersonName: ''
       }
       // request.userに正常値を想定する
       request.user = {

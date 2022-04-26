@@ -14,6 +14,52 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'cascade',
         onUpdate: 'cascade'
       })
+
+      Contract.hasMany(models.RequestApproval, {
+        foreignKey: 'contractId'
+      })
+
+      Contract.hasMany(models.JournalizeInvoice, {
+        foreignKey: 'contractId'
+      })
+    }
+
+    async getCoding(isCloedApproval, documentId) {
+      const contractId = this.contractId
+      const closedStatus = (
+        await sequelize.models.ApproveStatus.findOne({
+          where: {
+            name: '最終承認済み'
+          }
+        })
+      ).code
+
+      if (isCloedApproval) {
+        const resultOfClosedApproval = await sequelize.models.RequestApproval.findOne({
+          where: {
+            status: closedStatus,
+            invoiceId: documentId,
+            contractId: contractId
+          }
+        })
+
+        if (!resultOfClosedApproval) {
+          return null
+        }
+      }
+
+      const codings = await sequelize.models.JournalizeInvoice.findAll({
+        where: {
+          contractId: contractId,
+          invoiceId: documentId
+        },
+        order: [
+          ['lineNo', 'ASC'],
+          ['journalNo', 'ASC']
+        ]
+      })
+
+      return codings.length !== 0 ? codings : null
     }
   }
   Contract.init(
