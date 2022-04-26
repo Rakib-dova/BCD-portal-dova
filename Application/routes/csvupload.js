@@ -122,9 +122,9 @@ const cbPostUpload = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
-  let jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUpload-start' }
+  const jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUpload-request' }
   // console.log('==  CSVアップロード 開始  =================================\n')
-  console.log('==  CSVアップロード 開始  =================================')
+  console.log('==  請求書一括アップロード リクエスト  =================================')
   logger.info(jsonLog)
   // console.log(jsonLog)
 
@@ -198,10 +198,10 @@ const cbPostUpload = async (req, res, next) => {
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
 
-  jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUpload-end' }
+  // jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUpload-end' }
   // console.log('==  CSVアップロード 終了  =================================\n')
-  console.log('==  CSVアップロード 終了  =================================')
-  logger.info(jsonLog)
+  console.log('==  請求書一括アップロード 終了  =================================')
+  // logger.info(jsonLog)
   // console.log(jsonLog)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
 
@@ -654,17 +654,18 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       invoiceCount: invoices.length,
       invoices: invoices
     }
-  } else {
-    jsonLog = {
-      tenantId: _req.user.tenantId,
-      action: 'uploadedInvoiceInfo',
-      invoiceCount: 0,
-      invoices: []
-    }
   }
+  // else {
+  //   jsonLog = {
+  //     tenantId: _req.user.tenantId,
+  //     action: 'uploadedInvoiceInfo',
+  //     invoiceCount: 0,
+  //     invoices: []
+  //   }
+  // }
 
   // console.log('==  CSVアップロードレコード  =================================\n')
-  console.log('==  CSVアップロードレコード  =================================')
+  console.log('==  請求書一括アップロード情報  =================================')
   logger.info(jsonLog)
   // console.log('invoices\n', invoices)
   // console.log(jsonLog)

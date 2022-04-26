@@ -258,9 +258,9 @@ const cbPostGetCode = async (req, res, next) => {
 
 const cbPostIndex = async (req, res, next) => {
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  let jsonLog = { tenantId: req.user.tenantId, action: 'setupJournal-start' }
+  let jsonLog = { tenantId: req.user.tenantId, action: 'setupJournal-request' }
   // console.log('==  仕分情報設定リクエスト  開始  =================================\n', jsonLog)
-  console.log('==  仕分情報設定リクエスト  開始  =================================')
+  console.log('==  仕分情報設定 リクエスト  =================================')
   logger.info(jsonLog)
 
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
@@ -353,10 +353,10 @@ const cbPostIndex = async (req, res, next) => {
   logger.info(jsonLog)
 
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  jsonLog = { tenantId: req.user.tenantId, action: 'setupJournal-end' }
+  // jsonLog = { tenantId: req.user.tenantId, action: 'setupJournal-end' }
   // console.log('==  仕分情報設定リクエスト  終了  =================================\n', jsonLog)
-  console.log('==  仕分情報設定リクエスト  終了  =================================')
-  logger.info(jsonLog)
+  console.log('==  仕分情報設定 終了  =================================')
+  // logger.info(jsonLog)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
   req.flash('info', '仕訳情報設定を保存しました。')
   res.redirect(`/inbox/${invoiceId}`)

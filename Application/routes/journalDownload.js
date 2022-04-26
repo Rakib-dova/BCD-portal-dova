@@ -118,9 +118,9 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
 
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  let jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-start' }
+  let jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-request' }
   // console.log('==  仕分ダウンロードリクエスト  開始  =================================\n', jsonLog)
-  console.log('==  仕分ダウンロードリクエスト  開始  =================================')
+  console.log('==  仕分ダウンロード リクエスト  =================================')
   logger.info(jsonLog)
 
   // 絞り込みの条件データチェック
@@ -321,10 +321,10 @@ const cbPostIndex = async (req, res, next) => {
         if (invoicesForDownload instanceof Error) {
           req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
           // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-          jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-end' }
+          // jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-end' }
           // console.log('==  仕分ダウンロードリクエスト 終了  =================================\n', jsonLog)
-          console.log('==  仕分ダウンロードリクエスト 終了  =================================')
-          logger.info(jsonLog)
+          console.log('==  仕分ダウンロード 終了  =================================')
+          // logger.info(jsonLog)
           logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
           return res.redirect(303, '/journalDownload')
         }
@@ -332,10 +332,10 @@ const cbPostIndex = async (req, res, next) => {
         if (invoicesForDownload.length === 0) {
           req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
           // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-          jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-end' }
+          // jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-end' }
           // console.log('==  仕分ダウンロードリクエスト 終了  =================================\n', jsonLog)
-          console.log('==  仕分ダウンロードリクエスト 終了  =================================')
-          logger.info(jsonLog)
+          console.log('==  仕分ダウンロード 終了  =================================')
+          // logger.info(jsonLog)
           logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
           return res.redirect(303, '/journalDownload')
         }
@@ -357,7 +357,7 @@ const cbPostIndex = async (req, res, next) => {
         const invoiceArray = invoicesForDownload.split(/\r?\n|\r/)
         jsonLog = {
           tenantId: req.user.tenantId,
-          action: 'journalInfo',
+          action: 'downloadedJournalInfo',
           invoiceCount: (invoiceArray.length - 2) > 0 ? (invoiceArray.length - 2) : undefined,
           finalApproved: chkFinalapproval
         }
@@ -373,10 +373,10 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-end' }
+  // jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-end' }
   // console.log('==  仕分ダウンロードリクエスト 終了  =================================\n', jsonLog)
-  console.log('==  仕分ダウンロードリクエスト 終了  =================================')
-  logger.info(jsonLog)
+  console.log('==  仕分ダウンロード 終了  =================================')
+  // logger.info(jsonLog)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 

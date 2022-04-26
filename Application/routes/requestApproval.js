@@ -351,9 +351,9 @@ const cbPostApproval = async (req, res, next) => {
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  let jsonLog = { tenantId: req.user.tenantId, action: 'requestApproval-start' }
+  let jsonLog = { tenantId: req.user.tenantId, action: 'requestApproval-request' }
   // console.log('==  支払依頼リクエスト  開始  =================================\n', jsonLog)
-  console.log('==  支払依頼リクエスト  開始  =================================')
+  console.log('==  支払依頼 リクエスト  =================================')
   logger.info(jsonLog)
 
   const contractId = contract.contractId
@@ -430,7 +430,7 @@ const cbPostApproval = async (req, res, next) => {
             approveRouteId: approveRouteId,
             status: requestResult?.status
           }
-          console.log('==  支払依頼  =================================\n', jsonLog)
+          console.log('==  支払依頼情報  =================================\n', jsonLog)
           logger.info(jsonLog)
 
           const sendMailStatus = await mailMsg.sendPaymentRequestMail(
@@ -464,10 +464,10 @@ const cbPostApproval = async (req, res, next) => {
   }
 
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  jsonLog = { tenantId: req.user.tenantId, action: 'requestApproval-end' }
+  // jsonLog = { tenantId: req.user.tenantId, action: 'requestApproval-end' }
   // console.log('==  支払依頼リクエスト  終了  =================================\n', jsonLog)
-  console.log('==  支払依頼リクエスト  終了  =================================')
-  logger.info(jsonLog)
+  console.log('==  支払依頼 終了  =================================')
+  // logger.info(jsonLog)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApproval')
 }
 
