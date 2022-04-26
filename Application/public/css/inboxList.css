@@ -217,3 +217,24 @@
 .linkToApproval:hover {
   cursor: pointer;
 }
+
+.field-label-noTextAlign {
+  flex-basis: 0;
+  flex-grow: 1;
+  flex-shrink: 0;
+}
+
+.margin-right-10 {
+  margin-right: 8rem;
+}
+
+.no-box-shadow {
+  box-shadow: none;
+}
+.margin-right29 {
+  margin-right: 2.9rem !important;
+}
+
+.margin-right13 {
+  margin-right: 1.3rem !important;
+}

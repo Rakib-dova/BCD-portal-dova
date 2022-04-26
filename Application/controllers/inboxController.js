@@ -9,15 +9,15 @@ const Op = db.Sequelize.Op
 const department = db.DepartmentCode
 const RequestApproval = db.RequestApproval
 const constantsDefine = require('../constants')
+const processStatus = {
+  PAID_CONFIRMED: 0, // 入金確認済み
+  PAID_UNCONFIRMED: 1, // 送金済み
+  ACCEPTED: 2, // 受理済み
+  DELIVERED: 3 // 受信済み
+}
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
   const qs = require('qs')
-  const processStatus = {
-    PAID_CONFIRMED: 0, // 入金確認済み
-    PAID_UNCONFIRMED: 1, // 送金済み
-    ACCEPTED: 2, // 受理済み
-    DELIVERED: 3 // 受信済み
-  }
   const findDocuments = '/documents'
   const withouttag = ['archived', 'AP_DOCUMENT_Draft', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document']
   const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
@@ -511,6 +511,8 @@ const getRequestApproval = async (contractId, invoiceId) => {
     for (let id = 10; id < 21; id++) {
       requestStatus.push({ status: `${id}` })
     }
+    // 最終承認済みステータス追加
+    requestStatus.push({ status: '00' })
     const requestApproval = await RequestApproval.findOne({
       where: {
         contractId: contractId,
@@ -525,11 +527,110 @@ const getRequestApproval = async (contractId, invoiceId) => {
   }
 }
 
+/**
+ * 承認待ちのリストを取得
+ * @param {uuid} userId ユーザーの識別番号
+ * @param {uuid} contractId コントラクター識別番号
+ * @param {object} tradeshiftDTO トレードシフトのdata transfer
+ * @returns {array<WaitingWorkflow>} 承認待ちのリスト
+ */
+const getWorkflow = async (userId, contractId, tradeshiftDTO) => {
+  const requestApprovalDTO = new (require('../DTO/RequestApprovalDTO'))(contractId)
+  requestApprovalDTO.setTradeshiftDTO(tradeshiftDTO)
+  return await requestApprovalDTO.getWaitingWorkflowisMine(userId)
+}
+
+/**
+ *
+ * @param {object} tradeshiftDTO トレードシフト
+ * @param {object} keyword
+ * @returns {Array<object>} 検索結果
+ */
+const getSearchResult = async (tradeshiftDTO, keyword, contractId) => {
+  try {
+    const sentByCompanies = keyword.sentBy
+    const invoiceId = keyword.invoiceNumber
+    const issueDate = keyword.issueDate
+    const status = keyword.status
+    const contactEmail = keyword.contactEmail
+    let result = null
+
+    // 送信会社、請求書番号、発行日、取引先担当者(アドレス)で検索
+    if (sentByCompanies.length > 0) {
+      const response = []
+      for (const company of sentByCompanies) {
+        const result = await tradeshiftDTO.getDocumentSearch(company, invoiceId, issueDate, contactEmail)
+        response.push(...result)
+      }
+      result = response
+    } else {
+      result = await tradeshiftDTO.getDocumentSearch('', invoiceId, issueDate, contactEmail)
+    }
+
+    if (result instanceof Error) return result
+
+    // 請求書の承認依頼検索
+    for (let i = 0; i < result.length; i++) {
+      const requestApproval = await RequestApproval.findOne({
+        where: {
+          contractId: contractId,
+          invoiceId: result[i].DocumentId
+        },
+        order: [['create', 'DESC']]
+      })
+      if (requestApproval !== null) {
+        result[i].approveStatus = requestApproval.status
+      }
+    }
+
+    // 承認ステータスで検索
+    if (status.length > 0) {
+      const statusSearchResult = []
+      for (let i = 0; i < result.length; i++) {
+        for (let j = 0; j < status.length; j++) {
+          if (status[j] === '80') {
+            if (!result[i].approveStatus || result[i].approveStatus === status[j]) statusSearchResult.push(result[i])
+          } else {
+            if (result[i].approveStatus === status[j]) statusSearchResult.push(result[i])
+          }
+        }
+      }
+      result = statusSearchResult
+    }
+
+    const documentList = result.map((document, idx) => {
+      const ammount = function () {
+        if (document.ItemInfos[1] === undefined) return '-'
+        return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
+      }
+      return {
+        no: idx + 1,
+        invoiceNo: document.ID,
+        status: processStatus[`${document.UnifiedState}`] ?? '-',
+        currency: document.ItemInfos[0].value ?? '-',
+        ammount: ammount(),
+        sentTo: document.SenderCompanyName ?? '-',
+        sentBy: document.ReceiverCompanyName ?? '-',
+        updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
+        expire: document.DueDate ?? '-',
+        documentId: document.DocumentId,
+        approveStatus: document.approveStatus ?? ''
+      }
+    })
+
+    return documentList
+  } catch (error) {
+    return error
+  }
+}
+
 module.exports = {
   getInbox: getInbox,
   getInvoiceDetail: getInvoiceDetail,
   getCode: getCode,
   insertAndUpdateJournalizeInvoice: insertAndUpdateJournalizeInvoice,
   getDepartment: getDepartment,
-  getRequestApproval: getRequestApproval
+  getRequestApproval: getRequestApproval,
+  getWorkflow: getWorkflow,
+  getSearchResult: getSearchResult
 }

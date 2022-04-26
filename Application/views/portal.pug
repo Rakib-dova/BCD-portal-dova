@@ -15,6 +15,19 @@ block content
     //-     p.title.mb-4 Apps
     columns.is-centered
       .column.is-12.menu
+        if Number.isInteger(requestNoticeCnt) && requestNoticeCnt > 0
+          .approvalNotification
+            .approvalNotificationMessage 支払依頼が
+              .approvalNotificationCnt #{requestNoticeCnt}
+              | 件あります。
+            a.approvalNotificationLink(href='/inboxList/approvals') 確認
+        if Number.isInteger(rejectedNoticeCnt) && rejectedNoticeCnt > 0
+          .approvalNotification
+            .approvalNotificationMessage 差し戻しされた支払依頼が
+              .approvalNotificationCnt #{rejectedNoticeCnt}
+              | 件あります。
+            a.approvalNotificationLink(href='/inboxList/approvals') 確認
+      .column.is-12.menu
         .box
           .media-content
             .tabs.is-centered.is-boxed.is-medium
@@ -227,7 +240,7 @@ block content
             a.panel-block(href='/inboxList/1')
               span.panel-icon
                 i.fas.fa-file
-              p 受領請求書への仕訳情報設定
+              p 支払依頼一覧
             a.panel-block(href='/journalDownload')
              span.panel-icon
                i.fas.fa-file
@@ -324,7 +337,7 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 利用開始
-            a.panel-block(download href="../html/【Bconnectionデジタルトレードアプリ】操作マニュアル_請求書一括作成.pdf")
+            a.panel-block(download href="../html/【Bconnectionデジタルトレードアプリ】操作マニュアル_商奉行クラウド連携機能.pdf")
               span.panel-icon
                 i.fas.fa-file
               p 操作マニュアルダウンロード

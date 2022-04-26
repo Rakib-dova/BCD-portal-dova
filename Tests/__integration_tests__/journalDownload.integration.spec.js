@@ -120,6 +120,9 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：登録申込、利用可能', async () => {
@@ -132,6 +135,9 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
     })
   })
 
@@ -164,6 +170,9 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：登録受付、利用可能', async () => {
@@ -176,6 +185,9 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
     })
   })
 
@@ -210,6 +222,9 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：契約中、利用可能', async () => {
@@ -222,6 +237,9 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
     })
 
     // 送信企業ボタン確認
@@ -239,7 +257,7 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       if (page.url() === 'https://localhost:3000/journalDownload') {
         await page.click('#sendToSearchBtn')
 
-        await page.waitForTimeout(2000)
+        await page.waitForTimeout(3000)
 
         // 全選択ボタン確認
         const checkAllSelectSentToBtn = await page.evaluate(() => {
@@ -296,6 +314,9 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：変更申込、利用可能', async () => {
@@ -308,6 +329,9 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
     })
   })
 
@@ -340,6 +364,9 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：変更受付、利用可能', async () => {
@@ -352,6 +379,9 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
     })
   })
 

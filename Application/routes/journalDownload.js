@@ -75,7 +75,8 @@ const cbPostIndex = async (req, res, next) => {
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
-    return next(errorHelper.create(400))
+    req.flash('noti', [notiTitle, 'ログインユーザーではありません。'])
+    return res.redirect(303, '/journalDownload')
   }
 
   // DBからuserデータ取得
@@ -157,7 +158,6 @@ const cbPostIndex = async (req, res, next) => {
     req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
     return res.redirect(303, '/journalDownload')
   }
-
   // 送信企業の条件のチェック
   let sentBy
   if (Array.isArray(req.body.sentBy)) {
@@ -177,6 +177,14 @@ const cbPostIndex = async (req, res, next) => {
   const company = sentTo[0]
   let sentByIdx = 0
 
+  let chkFinalapproval
+  // 請求書の最終承認済み・仕訳済み区分
+  if (req.body.chkFinalapproval || false) {
+    chkFinalapproval = req.body.chkFinalapproval
+  } else {
+    return next(errorHelper.create(400))
+  }
+
   do {
     const sentByCompany = sentBy[sentByIdx]
     findDocumentQuery.sentTo = sentTo[0]
@@ -193,7 +201,6 @@ const cbPostIndex = async (req, res, next) => {
       // 請求書を検索する
       let pageId = 0
       let numPages = 1
-
       do {
         resultForQuery = await apiManager.accessTradeshift(
           req.user.accessToken,
@@ -257,7 +264,9 @@ const cbPostIndex = async (req, res, next) => {
             req.user.accessToken,
             req.user.refreshToken,
             invoiceDocument,
-            contract.contractId
+            contract.contractId,
+            chkFinalapproval,
+            req.user.userId
           )
 
           // エラーを確認する
@@ -285,9 +294,10 @@ const cbPostIndex = async (req, res, next) => {
           req.user.accessToken,
           req.user.refreshToken,
           documentsResult.Document,
-          contract.contractId
+          contract.contractId,
+          chkFinalapproval,
+          req.user.userId
         )
-
         // エラーを確認する
         if (invoicesForDownload instanceof Error) {
           req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])

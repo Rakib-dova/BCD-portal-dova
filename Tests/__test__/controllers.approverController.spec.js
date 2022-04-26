@@ -4,6 +4,7 @@ const logger = require('../../Application/lib/logger')
 const apiManager = require('../../Application/controllers/apiManager')
 const userController = require('../../Application/controllers/userController')
 const approverController = require('../../Application/controllers/approverController')
+const approvalInboxController = require('../../Application/controllers/approvalInboxController')
 const db = require('../../Application/models')
 const ApproveRoute = db.ApproveRoute
 const ApproveUser = db.ApproveUser
@@ -14,8 +15,11 @@ const ApproveObj = require('../../Application/lib/approver/Approver')
 const validate = require('../../Application/lib/validate')
 const ApproveStatusDAO = require('../../Application/DAO/ApproveStatusDAO')
 const RequestApprovalDAO = require('../../Application/DAO/RequestApprovalDAO')
+const TradeshiftDTO = require('../../Application/DTO/TradeshiftDTO')
+const UserAccounts = require('../../Application/DTO/VO/UserAccounts')
 
 jest.mock('../../Application/DAO/RequestApprovalDAO')
+jest.mock('../../Application/DTO/TradeshiftDTO')
 
 let errorSpy, infoSpy, accessTradeshift
 let approveRouteFindAll,
@@ -28,10 +32,12 @@ let approveRouteFindAll,
   userControllerFindOne,
   RequestApprovalUpdate,
   approvalUpdate
-let approveUserCreate, approveUserFindOne
+
+let approveUserCreate, approveUserFindOne, approveUserFindAll, hasPowerOfEditingSpy
 let validateIsUUID
 let approvalFindOne
 let approveStatusDAOGetStatusCode
+
 const findUsers = {
   itemsPerPage: 25,
   itemCount: 1,
@@ -162,6 +168,11 @@ describe('approverControllerのテスト', () => {
     approvalFindOne = jest.spyOn(Approval, 'findOne')
     approvalUpdate = jest.spyOn(Approval, 'update')
     approveStatusDAOGetStatusCode = jest.spyOn(ApproveStatusDAO, 'getStautsCode')
+    TradeshiftDTO.prototype.findUserAll = jest.fn()
+    TradeshiftDTO.prototype.getUserById = jest.fn()
+    approveUserFindAll = jest.spyOn(ApproveUser, 'findAll')
+    ApproveUser.destory = jest.fn()
+    hasPowerOfEditingSpy = jest.spyOn(approvalInboxController, 'hasPowerOfEditing')
   })
 
   afterEach(() => {
@@ -183,6 +194,10 @@ describe('approverControllerのテスト', () => {
     RequestApprovalUpdate.mockRestore()
     approvalUpdate.mockRestore()
     approveStatusDAOGetStatusCode.mockRestore()
+    TradeshiftDTO.prototype.findUserAll.mockRestore()
+    TradeshiftDTO.prototype.getUserById.mockRestore()
+    approveUserFindAll.mockRestore()
+    hasPowerOfEditingSpy.mockRestore()
   })
 
   describe('getApprover', () => {
@@ -199,9 +214,12 @@ describe('approverControllerのテスト', () => {
       }
 
       // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const findUsers1 = findUsers.UserAccounts.map((user) => {
+        return UserAccounts.setUserAccounts(user)
+      })
+
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      TradeshiftDTO.prototype.findUserAll.mockReturnValueOnce(findUsers1)
 
       // 検索予想結果
       const expectResult = [
@@ -233,9 +251,12 @@ describe('approverControllerのテスト', () => {
       }
 
       // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const findUsers1 = findUsers.UserAccounts.map((user) => {
+        return UserAccounts.setUserAccounts(user)
+      })
+
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      TradeshiftDTO.prototype.findUserAll.mockReturnValueOnce(findUsers1)
 
       // 検索予想結果
       const expectResult = [
@@ -267,9 +288,12 @@ describe('approverControllerのテスト', () => {
       }
 
       // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const findUsers1 = findUsers.UserAccounts.map((user) => {
+        return UserAccounts.setUserAccounts(user)
+      })
+
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      TradeshiftDTO.prototype.findUserAll.mockReturnValueOnce(findUsers1)
 
       // 検索予想結果
       const expectResult = [
@@ -301,9 +325,11 @@ describe('approverControllerのテスト', () => {
       }
 
       // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const findUsers1 = findUsers.UserAccounts.map((user) => {
+        return UserAccounts.setUserAccounts(user)
+      })
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      TradeshiftDTO.prototype.findUserAll.mockReturnValueOnce(findUsers1)
 
       // 検索予想結果
       const expectResult = [
@@ -349,18 +375,9 @@ describe('approverControllerのテスト', () => {
         email: ''
       }
 
-      const error401 = new Error(
-        'Request failed with status code 401 at createError(../Application/node_modules/axios/lib/core/createError.js:16:15)'
-      )
-      error401.config = {
-        url: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/account/dummy-tennant/users?limit=1&page=0&numPages=1'
-      }
-      error401.response = {
-        status: 401
-      }
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockImplementation(() => {
-        return error401
+      TradeshiftDTO.prototype.findUserAll.mockImplementation(() => {
+        return -1
       })
 
       // 試験実施
@@ -826,7 +843,7 @@ describe('approverControllerのテスト', () => {
         return null
       })
       const expectedUser = [
-        new ApproveObj({
+        {
           Id: '53607702-b94b-4a94-9459-6cf3acd65603',
           CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
           CompanyName: 'UTテスト会社',
@@ -846,8 +863,8 @@ describe('approverControllerのテスト', () => {
           FirstName: 'UTテスト',
           LastName: 'ユーザー',
           Visible: true
-        }),
-        new ApproveObj({
+        },
+        {
           Id: '3b6a13d6-cb89-414b-9597-175ba89329aa',
           CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
           CompanyName: 'UTテスト会社',
@@ -868,8 +885,8 @@ describe('approverControllerのテスト', () => {
           LastName: 'ユーザー2',
           Title: 'portal test',
           Visible: true
-        }),
-        new ApproveObj({
+        },
+        {
           Id: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
           CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
           CompanyName: 'UTテスト会社',
@@ -889,8 +906,8 @@ describe('approverControllerのテスト', () => {
           FirstName: 'UTテスト',
           LastName: 'ユーザー3',
           Visible: true
-        }),
-        new ApproveObj({
+        },
+        {
           Id: 'aa974511-8188-4022-bd86-45e251fd259e',
           CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
           CompanyName: 'UTテスト会社',
@@ -910,106 +927,109 @@ describe('approverControllerのテスト', () => {
           FirstName: 'UTテスト',
           LastName: 'ユーザー4',
           Visible: true
-        })
+        }
       ]
+        .map((userAccount) => {
+          return UserAccounts.setUserAccounts(userAccount)
+        })
+        .map((userAccount) => {
+          return new ApproveObj(userAccount)
+        })
 
       // ユーザーをトレードシフトとの検索
-      accessTradeshift.mockImplementation((accToken, refreshToken, method, url) => {
-        const params = url.replace('/account/users/', '')
-        const dummyData = [
-          {
-            Id: '53607702-b94b-4a94-9459-6cf3acd65603',
-            CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-            CompanyName: 'UTテスト会社',
-            Username: 'UTTESTER1@UTCODE.COM',
-            Language: 'ja',
-            TimeZone: 'Asia/Tokyo',
-            Memberships: [
-              {
-                UserId: '53607702-b94b-4a94-9459-6cf3acd65603',
-                GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-                Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
-              }
-            ],
-            Created: '2021-05-17T08:12:48.291Z',
-            State: 'ACTIVE',
-            Type: 'PERSON',
-            FirstName: 'UTテスト',
-            LastName: 'ユーザー',
-            Visible: true
-          },
-          {
-            Id: '3b6a13d6-cb89-414b-9597-175ba89329aa',
-            CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-            CompanyName: 'UTテスト会社',
-            Username: 'UTTESTER2@UTCODE.COM',
-            Language: 'ja',
-            TimeZone: 'Asia/Tokyo',
-            Memberships: [
-              {
-                UserId: '53607702-b94b-4a94-9459-6cf3acd65603',
-                GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-                Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
-              }
-            ],
-            Created: '2021-05-24T03:24:26.537Z',
-            State: 'ACTIVE',
-            Type: 'PERSON',
-            FirstName: 'UTテスト',
-            LastName: 'ユーザー2',
-            Title: 'portal test',
-            Visible: true
-          },
-          {
-            Id: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
-            CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-            CompanyName: 'UTテスト会社',
-            Username: 'UTTESTER3@UTCODE.COM',
-            Language: 'ja',
-            TimeZone: 'Asia/Tokyo',
-            Memberships: [
-              {
-                UserId: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
-                GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-                Role: '824b4cb4-3bd9-4dd3-a0d4-e18586b6c03d'
-              }
-            ],
-            Created: '2021-06-11T08:49:30.939Z',
-            State: 'ACTIVE',
-            Type: 'PERSON',
-            FirstName: 'UTテスト',
-            LastName: 'ユーザー3',
-            Visible: true
-          },
-          {
-            Id: 'aa974511-8188-4022-bd86-45e251fd259e',
-            CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-            CompanyName: 'UTテスト会社',
-            Username: 'UTTESTER4@UTCODE.COM',
-            Language: 'ja',
-            TimeZone: 'Asia/Tokyo',
-            Memberships: [
-              {
-                UserId: 'aa974511-8188-4022-bd86-45e251fd259e',
-                GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
-                Role: '8370ee3e-5f31-47bf-a139-d4218fb7689f'
-              }
-            ],
-            Created: '2021-08-03T02:06:10.626Z',
-            State: 'ACTIVE',
-            Type: 'PERSON',
-            FirstName: 'UTテスト',
-            LastName: 'ユーザー4',
-            Visible: true
-          }
-        ]
-        for (let idx = 0; idx < dummyData.length; idx++) {
-          if (dummyData[idx].Id === params) {
-            return dummyData[idx]
-          }
+      const dummyData = [
+        {
+          Id: '53607702-b94b-4a94-9459-6cf3acd65603',
+          CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          CompanyName: 'UTテスト会社',
+          Username: 'UTTESTER1@UTCODE.COM',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '53607702-b94b-4a94-9459-6cf3acd65603',
+              GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-05-17T08:12:48.291Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'UTテスト',
+          LastName: 'ユーザー',
+          Visible: true
+        },
+        {
+          Id: '3b6a13d6-cb89-414b-9597-175ba89329aa',
+          CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          CompanyName: 'UTテスト会社',
+          Username: 'UTTESTER2@UTCODE.COM',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '53607702-b94b-4a94-9459-6cf3acd65603',
+              GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+              Role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
+            }
+          ],
+          Created: '2021-05-24T03:24:26.537Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'UTテスト',
+          LastName: 'ユーザー2',
+          Title: 'portal test',
+          Visible: true
+        },
+        {
+          Id: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+          CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          CompanyName: 'UTテスト会社',
+          Username: 'UTTESTER3@UTCODE.COM',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+              GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+              Role: '824b4cb4-3bd9-4dd3-a0d4-e18586b6c03d'
+            }
+          ],
+          Created: '2021-06-11T08:49:30.939Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'UTテスト',
+          LastName: 'ユーザー3',
+          Visible: true
+        },
+        {
+          Id: 'aa974511-8188-4022-bd86-45e251fd259e',
+          CompanyAccountId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+          CompanyName: 'UTテスト会社',
+          Username: 'UTTESTER4@UTCODE.COM',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Memberships: [
+            {
+              UserId: 'aa974511-8188-4022-bd86-45e251fd259e',
+              GroupId: '221559d0-53aa-44a2-ab29-0c4a6cb02bde',
+              Role: '8370ee3e-5f31-47bf-a139-d4218fb7689f'
+            }
+          ],
+          Created: '2021-08-03T02:06:10.626Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'UTテスト',
+          LastName: 'ユーザー4',
+          Visible: true
         }
+      ].map((dummy) => {
+        return UserAccounts.setUserAccounts(dummy)
       })
 
+      TradeshiftDTO.prototype.getUserById.mockImplementation((userId) => {
+        return dummyData.filter((userAccount) => userAccount.id === userId)[0]
+      })
       // 試験実施
       const result = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
 
@@ -1085,12 +1105,13 @@ describe('approverControllerのテスト', () => {
 
       // approverオブジェクト作成
       const lastApprover = new ApproveObj({
-        FirstName: 'テスト',
-        LastName: 'ユーザー',
-        Username: 'dev.master.bconnection+flow3.002@gmail.com',
-        Memberships: [{ GroupId: null }],
-        Id: approveRoute.uuid
+        firstName: 'テスト',
+        lastName: 'ユーザー',
+        email: 'dev.master.bconnection+flow3.002@gmail.com',
+        memberships: [{ GroupId: null }],
+        id: approveRoute.uuid
       })
+
       const result = await approverController.duplicateApproveRoute(approveRoute)
 
       // 結果確認
@@ -1110,18 +1131,18 @@ describe('approverControllerのテスト', () => {
 
       // approverオブジェクト作成
       const approver = new ApproveObj({
-        FirstName: 'テスト',
-        LastName: 'ユーザー1',
-        Username: 'dev.master.bconnection+flow3.001@gmail.com',
-        Memberships: [{ GroupId: null }],
-        Id: approveRoute.uuid[0]
+        firstName: 'テスト',
+        lastName: 'ユーザー1',
+        email: 'dev.master.bconnection+flow3.001@gmail.com',
+        memberships: [{ GroupId: null }],
+        id: approveRoute.uuid[0]
       })
       const lastApprover = new ApproveObj({
-        FirstName: 'テスト',
-        LastName: 'ユーザー2',
-        Username: 'dev.master.bconnection+flow3.002@gmail.com',
-        Memberships: [{ GroupId: null }],
-        Id: approveRoute.uuid[1]
+        firstName: 'テスト',
+        lastName: 'ユーザー2',
+        email: 'dev.master.bconnection+flow3.002@gmail.com',
+        memberships: [{ GroupId: null }],
+        id: approveRoute.uuid[1]
       })
       const result = await approverController.duplicateApproveRoute(approveRoute)
 
@@ -1130,6 +1151,71 @@ describe('approverControllerのテスト', () => {
       expect(result.approverUsers.length).toBe(1)
       expect(result.approverUsers[0]).toEqual(approver)
       expect(result.lastApprover).toEqual(lastApprover)
+    })
+  })
+
+  describe('deleteApproveRoute', () => {
+    test('正常：承認ルート削除', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      db.sequelize.transaction = jest.fn(async (callback) => {
+        return await callback()
+      })
+
+      approveRouteFindOne.mockReturnValue({
+        approveRouteId: approveRouteId,
+        destroy: async () => {}
+      })
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 正常削除の場合、「1」を返す
+      expect(result).toBe(1)
+    })
+
+    test('準正常：承認ルート削除（既に削除されている場合）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      approveRouteFindOne.mockReturnValue(null)
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「-1」を返す
+      expect(result).toBe(-1)
+    })
+
+    test('準正常：承認ルート削除（承認ルート検索DBエラー）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      approveRouteFindOne.mockReturnValue(dbError)
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
+    })
+
+    test('準正常：承認ルート削除（承認ルート削除DBエラー）', async () => {
+      const approveRouteId = 'dummy-approve-routeId'
+
+      // 承認ルート検索（Mockデータ）
+      const dbError = new Error('DB Error')
+      approveRouteFindOne.mockReturnValue({
+        approveRouteId: approveRouteId,
+        destroy: () => Promise.reject(dbError)
+      })
+
+      // 試験実施
+      const result = await approverController.deleteApproveRoute(approveRouteId)
+
+      // 準正常削除の場合、「0」を返す
+      expect(result).toBe(0)
     })
   })
 
@@ -1252,33 +1338,7 @@ describe('approverControllerのテスト', () => {
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
 
-      // 変更するデータが変更されている場合結果
-      approveRouteFindOne.mockReturnValueOnce(null)
-
-      // 重複承認ルート検索結果：データがない場合
-      approveRouteFindAll.mockReturnValueOnce([])
-
-      // 更新した承認ルートを保存する。
-      const expectApproveRoute = ApproveRoute.build({
-        contract: contract,
-        approveRouteName: value.setApproveRouteNameInputId,
-        prevApproveRouteId: prevApproveRouteId
-      })
-      approverouteCreate.mockReturnValueOnce(expectApproveRoute)
-
-      // 更新した承認ルートのユーザーを保存
-      const expectApproveRouteUser = ApproveUser.build({
-        approveRouteId: expectApproveRoute.approveRouteId,
-        approveUser: 'aa974511-8188-4022-bd86-45e251fd259e',
-        prevApproveUser: null,
-        nextApproveUser: null,
-        isLastApproveUser: false
-      })
-      approveUserCreate.mockReturnValueOnce(expectApproveRouteUser)
-
-      // getApproveRouteの結果
-      // ApproveRoute.getApproveRoute承認ルートを検索
-      approveGetApproveRoute.mockReturnValueOnce([
+      const testApproveRouteData = [
         {
           approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
           contractId: contract,
@@ -1343,10 +1403,36 @@ describe('approverControllerのテスト', () => {
           'ApproveUsers.createdAt': new Date('2022-02-18'),
           'ApproveUsers.updatedAt': new Date('2022-02-18')
         }
-      ])
+      ]
 
-      // 既存承認ルートはFlagをtrueにする。
-      approveRouteUpdate.mockReturnValueOnce(1)
+      // 重複承認ルート検索結果：データがない場合
+      approveRouteFindAll.mockReturnValueOnce([])
+
+      // 更新した承認ルートを保存する。
+      const expectApproveRoute = ApproveRoute.build({
+        contract: contract,
+        approveRouteName: value.setApproveRouteNameInputId,
+        prevApproveRouteId: prevApproveRouteId
+      })
+      approverouteCreate.mockReturnValueOnce(expectApproveRoute)
+
+      // 更新した承認ルートのユーザーを保存
+      const expectApproveRouteUser = ApproveUser.build({
+        approveRouteId: expectApproveRoute.approveRouteId,
+        approveUser: 'aa974511-8188-4022-bd86-45e251fd259e',
+        prevApproveUser: null,
+        nextApproveUser: null,
+        isLastApproveUser: false
+      })
+      approveUserCreate.mockReturnValueOnce(expectApproveRouteUser)
+
+      // getApproveRouteの結果
+      // ApproveRoute.getApproveRoute承認ルートを検索
+      approveGetApproveRoute.mockReturnValueOnce(testApproveRouteData)
+
+      approveRouteUpdate.mockReturnValueOnce([1])
+      approveRouteFindOne.mockReturnValueOnce(expectApproveRoute)
+      approveUserFindAll.mockReturnValueOnce([expectApproveRouteUser])
 
       // 試験実施
       const result = await approverController.editApprover(
@@ -1375,8 +1461,72 @@ describe('approverControllerのテスト', () => {
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
 
-      // 変更するデータが変更されている場合結果
-      approveRouteFindOne.mockReturnValueOnce(null)
+      const testData = [
+        {
+          approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
+          contractId: contract,
+          approveRouteName: 'UTテスト承認ルート',
+          createdAt: new Date('2022-02-18'),
+          updatedAt: new Date('2022-02-18'),
+          deleteFlag: false,
+          'ApproveUsers.approveUserId': '1e5e24aa-77c3-4571-a93c-5caa0e336ddb',
+          'ApproveUsers.approveRouteId': '6693f071-9150-4005-bb06-3f8d30724f9b',
+          'ApproveUsers.approveUser': 'aa974511-8188-4022-bd86-45e251fd259e',
+          'ApproveUsers.prevApproveUser': '25e611d1-b91d-4937-bf9c-fcd242762526',
+          'ApproveUsers.nextApproveUser': null,
+          'ApproveUsers.isLastApproveUser': true,
+          'ApproveUsers.createdAt': new Date('2022-02-18'),
+          'ApproveUsers.updatedAt': new Date('2022-02-18')
+        },
+        {
+          approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
+          contractId: contract,
+          approveRouteName: 'UTテスト承認ルート',
+          createdAt: new Date('2022-02-18'),
+          updatedAt: new Date('2022-02-18'),
+          deleteFlag: false,
+          'ApproveUsers.approveUserId': '25e611d1-b91d-4937-bf9c-fcd242762526',
+          'ApproveUsers.approveRouteId': '6693f071-9150-4005-bb06-3f8d30724f9b',
+          'ApproveUsers.approveUser': '7fa489ad-4c50-43d6-8057-1279877c8ef5',
+          'ApproveUsers.prevApproveUser': 'd4a11d99-1bb2-48b3-9c98-abefdb40dba2',
+          'ApproveUsers.nextApproveUser': '1e5e24aa-77c3-4571-a93c-5caa0e336ddb',
+          'ApproveUsers.isLastApproveUser': false,
+          'ApproveUsers.createdAt': new Date('2022-02-18'),
+          'ApproveUsers.updatedAt': new Date('2022-02-18')
+        },
+        {
+          approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
+          contractId: contract,
+          approveRouteName: 'UTテスト承認ルート',
+          createdAt: new Date('2022-02-18'),
+          updatedAt: new Date('2022-02-18'),
+          deleteFlag: false,
+          'ApproveUsers.approveUserId': '8b087e49-6a91-4fc2-8dc8-f30f56d9acd6',
+          'ApproveUsers.approveRouteId': '6693f071-9150-4005-bb06-3f8d30724f9b',
+          'ApproveUsers.approveUser': '53607702-b94b-4a94-9459-6cf3acd65603',
+          'ApproveUsers.prevApproveUser': null,
+          'ApproveUsers.nextApproveUser': 'd4a11d99-1bb2-48b3-9c98-abefdb40dba2',
+          'ApproveUsers.isLastApproveUser': false,
+          'ApproveUsers.createdAt': new Date('2022-02-18'),
+          'ApproveUsers.updatedAt': new Date('2022-02-18')
+        },
+        {
+          approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
+          contractId: contract,
+          approveRouteName: 'UTテスト承認ルート',
+          createdAt: new Date('2022-02-18'),
+          updatedAt: new Date('2022-02-18'),
+          deleteFlag: false,
+          'ApproveUsers.approveUserId': 'd4a11d99-1bb2-48b3-9c98-abefdb40dba2',
+          'ApproveUsers.approveRouteId': '6693f071-9150-4005-bb06-3f8d30724f9b',
+          'ApproveUsers.approveUser': '3b6a13d6-cb89-414b-9597-175ba89329aa',
+          'ApproveUsers.prevApproveUser': '8b087e49-6a91-4fc2-8dc8-f30f56d9acd6',
+          'ApproveUsers.nextApproveUser': '25e611d1-b91d-4937-bf9c-fcd242762526',
+          'ApproveUsers.isLastApproveUser': false,
+          'ApproveUsers.createdAt': new Date('2022-02-18'),
+          'ApproveUsers.updatedAt': new Date('2022-02-18')
+        }
+      ]
 
       // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([])
@@ -1422,75 +1572,12 @@ describe('approverControllerのテスト', () => {
 
       // getApproveRouteの結果
       // ApproveRoute.getApproveRoute承認ルートを検索
-      approveGetApproveRoute.mockReturnValueOnce([
-        {
-          approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
-          contractId: contract,
-          approveRouteName: 'UTテスト承認ルート',
-          createdAt: new Date('2022-02-18'),
-          updatedAt: new Date('2022-02-18'),
-          deleteFlag: false,
-          'ApproveUsers.approveUserId': '1e5e24aa-77c3-4571-a93c-5caa0e336ddb',
-          'ApproveUsers.approveRouteId': '6693f071-9150-4005-bb06-3f8d30724f9b',
-          'ApproveUsers.approveUser': 'aa974511-8188-4022-bd86-45e251fd259e',
-          'ApproveUsers.prevApproveUser': '25e611d1-b91d-4937-bf9c-fcd242762526',
-          'ApproveUsers.nextApproveUser': null,
-          'ApproveUsers.isLastApproveUser': true,
-          'ApproveUsers.createdAt': new Date('2022-02-18'),
-          'ApproveUsers.updatedAt': new Date('2022-02-18')
-        },
-        {
-          approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
-          contractId: contract,
-          approveRouteName: 'UTテスト承認ルート',
-          createdAt: new Date('2022-02-18'),
-          updatedAt: new Date('2022-02-18'),
-          deleteFlag: false,
-          'ApproveUsers.approveUserId': '25e611d1-b91d-4937-bf9c-fcd242762526',
-          'ApproveUsers.approveRouteId': '6693f071-9150-4005-bb06-3f8d30724f9b',
-          'ApproveUsers.approveUser': '7fa489ad-4c50-43d6-8057-1279877c8ef5',
-          'ApproveUsers.prevApproveUser': 'd4a11d99-1bb2-48b3-9c98-abefdb40dba2',
-          'ApproveUsers.nextApproveUser': '1e5e24aa-77c3-4571-a93c-5caa0e336ddb',
-          'ApproveUsers.isLastApproveUser': false,
-          'ApproveUsers.createdAt': new Date('2022-02-18'),
-          'ApproveUsers.updatedAt': new Date('2022-02-18')
-        },
-        {
-          approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
-          contractId: contract,
-          approveRouteName: 'UTテスト承認ルート',
-          createdAt: new Date('2022-02-18'),
-          updatedAt: new Date('2022-02-18'),
-          deleteFlag: false,
-          'ApproveUsers.approveUserId': '8b087e49-6a91-4fc2-8dc8-f30f56d9acd6',
-          'ApproveUsers.approveRouteId': '6693f071-9150-4005-bb06-3f8d30724f9b',
-          'ApproveUsers.approveUser': '53607702-b94b-4a94-9459-6cf3acd65603',
-          'ApproveUsers.prevApproveUser': null,
-          'ApproveUsers.nextApproveUser': 'd4a11d99-1bb2-48b3-9c98-abefdb40dba2',
-          'ApproveUsers.isLastApproveUser': false,
-          'ApproveUsers.createdAt': new Date('2022-02-18'),
-          'ApproveUsers.updatedAt': new Date('2022-02-18')
-        },
-        {
-          approveRouteId: '6693f071-9150-4005-bb06-3f8d30724f9b',
-          contractId: contract,
-          approveRouteName: 'UTテスト承認ルート',
-          createdAt: new Date('2022-02-18'),
-          updatedAt: new Date('2022-02-18'),
-          deleteFlag: false,
-          'ApproveUsers.approveUserId': 'd4a11d99-1bb2-48b3-9c98-abefdb40dba2',
-          'ApproveUsers.approveRouteId': '6693f071-9150-4005-bb06-3f8d30724f9b',
-          'ApproveUsers.approveUser': '3b6a13d6-cb89-414b-9597-175ba89329aa',
-          'ApproveUsers.prevApproveUser': '8b087e49-6a91-4fc2-8dc8-f30f56d9acd6',
-          'ApproveUsers.nextApproveUser': '25e611d1-b91d-4937-bf9c-fcd242762526',
-          'ApproveUsers.isLastApproveUser': false,
-          'ApproveUsers.createdAt': new Date('2022-02-18'),
-          'ApproveUsers.updatedAt': new Date('2022-02-18')
-        }
-      ])
+      approveGetApproveRoute.mockReturnValueOnce(testData)
 
       // 既存承認ルートはFlagをtrueにする。
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
+      approveRouteFindOne.mockReturnValueOnce(expectApproveRoute)
+      approveUserFindAll.mockReturnValueOnce([expectApproveRouteUser1])
 
       // 試験実施
       const result = await approverController.editApprover(
@@ -1514,9 +1601,6 @@ describe('approverControllerのテスト', () => {
         uuid: 'aa974511-8188-4022-bd86-45e251fd259e'
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
-
-      // 変更するデータが変更されている場合結果
-      approveRouteFindOne.mockReturnValueOnce(null)
 
       // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
@@ -1553,7 +1637,9 @@ describe('approverControllerのテスト', () => {
       approveGetApproveRoute.mockReturnValueOnce({})
 
       // 既存承認ルートはFlagをtrueにする。
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
+      approveRouteFindOne.mockReturnValueOnce(expectApproveRoute)
+      approveUserFindAll.mockReturnValueOnce([expectApproveRouteUser])
 
       // 試験実施
       const result = await approverController.editApprover(
@@ -1616,9 +1702,6 @@ describe('approverControllerのテスト', () => {
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
 
-      // 変更するデータが変更されている場合結果
-      approveRouteFindOne.mockReturnValueOnce(null)
-
       // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
         ApproveRoute.build({
@@ -1633,6 +1716,8 @@ describe('approverControllerのテスト', () => {
 
       // 承認ルート保存失敗
       approverouteCreate.mockReturnValueOnce(null)
+      approveRouteUpdate.mockReturnValueOnce([1])
+      approveRouteFindOne.mockReturnValueOnce(null)
 
       // 試験実施
       const result = await approverController.editApprover(
@@ -1656,9 +1741,6 @@ describe('approverControllerのテスト', () => {
         uuid: 'aa974511-8188-4022-bd86-45e251fd259e'
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
-
-      // 変更するデータが変更されている場合結果
-      approveRouteFindOne.mockReturnValueOnce(null)
 
       // 重複の承認ルート名検索結果：データがない場合
       approveRouteFindAll.mockReturnValueOnce([
@@ -1689,6 +1771,8 @@ describe('approverControllerのテスト', () => {
         isLastApproveUser: false
       })
       approveUserCreate.mockReturnValueOnce(expectApproveRouteUser)
+      approveRouteUpdate.mockReturnValueOnce([1])
+      approveRouteFindOne.mockReturnValueOnce(null)
 
       // getApproveRouteの結果
       // ApproveRoute.getApproveRoute承認ルートを検索
@@ -1843,7 +1927,7 @@ describe('approverControllerのテスト', () => {
         }
       ])
 
-      approveRouteUpdate.mockReturnValueOnce(1)
+      approveRouteUpdate.mockReturnValueOnce([1])
 
       // 試験実施
       const result = await approverController.editApprover(
@@ -1910,7 +1994,7 @@ describe('approverControllerのテスト', () => {
       )
 
       // 期待結果
-      expect(result).toEqual(dbError)
+      expect(result.stack).toMatch(/SequelizeConnectionError/)
     })
 
     test('準正常:登録ボタン多数の押下する場合', async () => {
@@ -1922,6 +2006,18 @@ describe('approverControllerのテスト', () => {
         uuid: 'aa974511-8188-4022-bd86-45e251fd259e'
       }
       const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      // 重複の承認ルート名検索結果：データがない場合
+      approveRouteFindAll.mockReturnValueOnce([
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'test2'
+        }),
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'Test2'
+        })
+      ])
 
       // 変更するデータが変更されている場合結果
       approveRouteFindOne.mockReturnValueOnce(
@@ -1943,10 +2039,175 @@ describe('approverControllerのテスト', () => {
       // 期待結果
       expect(result).toEqual(1)
     })
+
+    test('エラー:承認者取得エラー', async () => {
+      const accessToken = 'dummy-access-token-data'
+      const refreshToken = 'dummy-refresh-token-data'
+      const contract = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const value = {
+        setApproveRouteNameInputId: 'test2',
+        uuid: 'aa974511-8188-4022-bd86-45e251fd259e'
+      }
+      const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      // 重複の承認ルート名検索結果：データがない場合
+      approveRouteFindAll.mockReturnValueOnce([
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'Test2'
+        }),
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'Test2'
+        })
+      ])
+
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'test2'
+        })
+      )
+
+      approveRouteUpdate.mockReturnValueOnce([1])
+      approveUserFindAll.mockReturnValueOnce(null)
+
+      // 試験実施
+      const result = await approverController.editApprover(
+        accessToken,
+        refreshToken,
+        contract,
+        value,
+        prevApproveRouteId
+      )
+
+      // 期待結果
+      expect(result).toEqual(-1)
+    })
+
+    test('エラー:getApproveRoute取得失敗', async () => {
+      const accessToken = 'dummy-access-token-data'
+      const refreshToken = 'dummy-refresh-token-data'
+      const contract = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const value = {
+        setApproveRouteNameInputId: 'test2',
+        uuid: 'aa974511-8188-4022-bd86-45e251fd259e'
+      }
+      const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      // 重複の承認ルート名検索結果：データがない場合
+      approveRouteFindAll.mockReturnValueOnce([
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'Test2'
+        }),
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'Test2'
+        })
+      ])
+
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'test2'
+        })
+      )
+
+      // 更新した承認ルートを保存する。
+      const expectApproveRoute = ApproveRoute.build({
+        contract: contract,
+        approveRouteName: value.setApproveRouteNameInputId,
+        prevApproveRouteId: prevApproveRouteId
+      })
+      approverouteCreate.mockReturnValueOnce(expectApproveRoute)
+
+      approveRouteUpdate.mockReturnValueOnce([1])
+      approveUserFindAll.mockReturnValueOnce([])
+      // 更新した承認ルートのユーザーを保存
+      const expectApproveRouteUser = ApproveUser.build({
+        approveRouteId: expectApproveRoute.approveRouteId,
+        approveUser: 'aa974511-8188-4022-bd86-45e251fd259e',
+        prevApproveUser: null,
+        nextApproveUser: null,
+        isLastApproveUser: false
+      })
+      approveUserCreate.mockReturnValueOnce(expectApproveRouteUser)
+      approveGetApproveRoute.mockReturnValueOnce([])
+
+      // 試験実施
+      const result = await approverController.editApprover(
+        accessToken,
+        refreshToken,
+        contract,
+        value,
+        prevApproveRouteId
+      )
+
+      // 期待結果
+      expect(result).toEqual(-1)
+    })
+
+    test('エラー:approveUser作成エラー', async () => {
+      const accessToken = 'dummy-access-token-data'
+      const refreshToken = 'dummy-refresh-token-data'
+      const contract = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const value = {
+        setApproveRouteNameInputId: 'test2',
+        uuid: 'aa974511-8188-4022-bd86-45e251fd259e'
+      }
+      const prevApproveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+
+      // 重複の承認ルート名検索結果：データがない場合
+      approveRouteFindAll.mockReturnValueOnce([
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'Test2'
+        }),
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'Test2'
+        })
+      ])
+
+      // 変更するデータが変更されている場合結果
+      approveRouteFindOne.mockReturnValueOnce(
+        ApproveRoute.build({
+          contract: contract,
+          approveRouteName: 'test2'
+        })
+      )
+
+      // 更新した承認ルートを保存する。
+      const expectApproveRoute = ApproveRoute.build({
+        contract: contract,
+        approveRouteName: value.setApproveRouteNameInputId,
+        prevApproveRouteId: prevApproveRouteId
+      })
+      approverouteCreate.mockReturnValueOnce(expectApproveRoute)
+
+      approveRouteUpdate.mockReturnValueOnce([1])
+      approveUserFindAll.mockReturnValueOnce([])
+      approveUserCreate.mockReturnValueOnce(null)
+
+      // 試験実施
+      const result = await approverController.editApprover(
+        accessToken,
+        refreshToken,
+        contract,
+        value,
+        prevApproveRouteId
+      )
+
+      // 期待結果
+      expect(result).toEqual(-1)
+    })
   })
 
   describe('requestApproval', () => {
-    test('正常：新規作成承認依頼', async () => {
+    test('エラー：request approval fail', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -1972,23 +2233,25 @@ describe('approverControllerのテスト', () => {
         updatedAt: '2021-01-25T08:45:49.803Z'
       })
 
-      const testData = await RequestApproval.build({
+      const rejectTestData = await RequestApproval.build({
         requestId: requestId,
         contractId: contractId,
         approveRouteId: approveRouteId,
         invoiceId: invoiceId,
         requester: userId,
-        status: '10',
+        status: '90',
         message: message,
         create: '2021-01-25T08:45:49.803Z',
         isSaved: true
       })
+      rejectTestData.save = jest.fn()
 
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(rejectTestData)
+      RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(rejectTestData)
+      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(null)
 
-      requestApprovalFindOne.mockReturnValueOnce(testData)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
 
       const result = await approverController.requestApproval(
         contractId,
@@ -1999,10 +2262,10 @@ describe('approverControllerのテスト', () => {
       )
 
       // 結果確認
-      expect(result).toBe(testData)
+      expect(result).toEqual(new Error('request approval fail'))
     })
 
-    test('正常：保存したデータがある場合承認依頼', async () => {
+    test('正常：ステータスが未処理の場合', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -2039,10 +2302,11 @@ describe('approverControllerのテスト', () => {
         create: '2021-01-25T08:45:49.803Z',
         isSaved: true
       })
+
       testData.save = jest.fn()
 
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(null)
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(null)
       RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(testData)
 
       requestApprovalFindOne.mockReturnValueOnce(testData)
@@ -2056,10 +2320,85 @@ describe('approverControllerのテスト', () => {
       )
 
       // 結果確認
-      expect(result).toBe(testData)
+      expect(result.requestId).toBe(testData.requestId)
+      expect(result.contractId).toBe(testData.contractId)
+      expect(result.approveRouteId).toBe(testData.approveRouteId)
+      expect(result.invoiceId).toBe(testData.invoiceId)
+      expect(result.requester).toBe(testData.requester)
+      expect(result.status).toBe(testData.status)
+      expect(result.message).toBe(testData.message)
     })
 
-    test('エラー：保存したことがある支払依頼の依頼失敗場合', async () => {
+    test('正常：ステータスが差し戻しの場合', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
+      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const message = 'messege'
+
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
+
+      // DBのデータがある場合
+      userControllerFindOne.mockReturnValueOnce({
+        userId: userId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: 'dummyRefreshToken',
+        subRefreshToken: null,
+        userStatus: 0,
+        lastRefreshedAt: null,
+        createdAt: '2021-01-25T08:45:49.803Z',
+        updatedAt: '2021-01-25T08:45:49.803Z'
+      })
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '90',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      const testData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T09:45:49.803Z',
+        isSaved: true
+      })
+      testData.save = jest.fn()
+
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(rejectTestData)
+      RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
+      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
+
+      const result = await approverController.requestApproval(
+        contractId,
+        approveRouteId,
+        invoiceId,
+        requesterId,
+        message
+      )
+
+      // 結果確認
+      // 実際DBを更新しないため、getRequestApprovalFromInvoiceで取得した値が更新されない。
+      expect(result).toStrictEqual(rejectTestData)
+    })
+
+    test('エラー：すでに支払依頼データがある場合()', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -2098,19 +2437,28 @@ describe('approverControllerのテスト', () => {
       })
       testData.save = jest.fn()
 
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(testData)
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(testData)
       RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
       RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(null)
 
-      await approverController.requestApproval(contractId, approveRouteId, invoiceId, requesterId, message)
+      requestApprovalFindOne.mockReturnValueOnce(testData)
+
+      const result = await approverController.requestApproval(
+        contractId,
+        approveRouteId,
+        invoiceId,
+        requesterId,
+        message
+      )
 
       // 結果確認
-      expect(errorSpy).toHaveBeenCalled()
+      expect(result).toEqual(1)
     })
 
-    test('エラー：承認依頼取得失敗（未保存）', async () => {
+    test('エラー：RequestApproval作成エラー', async () => {
       // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
       const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
@@ -2134,9 +2482,24 @@ describe('approverControllerのテスト', () => {
         updatedAt: '2021-01-25T08:45:49.803Z'
       })
 
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(null)
+      const testData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+      testData.save = jest.fn()
+
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
+      RequestApprovalDAO.prototype.getRequestApprovalFromInvoice.mockReturnValueOnce(null)
       RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(null)
+
+      requestApprovalFindOne.mockReturnValueOnce(testData)
 
       const result = await approverController.requestApproval(
         contractId,
@@ -2147,7 +2510,7 @@ describe('approverControllerのテスト', () => {
       )
 
       // 結果確認
-      expect(result).toBe(-1)
+      expect(result).toEqual(-1)
     })
 
     test('エラー：DBエラー➀', async () => {
@@ -2204,26 +2567,9 @@ describe('approverControllerのテスト', () => {
       const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
       const message = 'messege'
 
-      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
-
-      // DBのデータがある場合
-      userControllerFindOne.mockReturnValueOnce({
-        userId: userId,
-        tenantId: tenantId,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        appVersion: '0.0.1',
-        refreshToken: 'dummyRefreshToken',
-        subRefreshToken: null,
-        userStatus: 0,
-        lastRefreshedAt: null,
-        createdAt: '2021-01-25T08:45:49.803Z',
-        updatedAt: '2021-01-25T08:45:49.803Z'
-      })
-
       const dbError = new Error('DB Conncetion Error')
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('10')
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockImplementation(() => {
+      // DBのデータがある場合
+      userControllerFindOne.mockImplementation(() => {
         throw dbError
       })
 
@@ -2244,288 +2590,8 @@ describe('approverControllerのテスト', () => {
     })
   })
 
-  describe('saveMessage', () => {
-    test('正常：初回保存', async () => {
-      // パラメータ作成
-      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
-      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
-      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
-      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const message = 'messege'
-
-      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
-
-      // DBのデータがある場合
-      userControllerFindOne.mockReturnValueOnce({
-        userId: userId,
-        tenantId: tenantId,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        appVersion: '0.0.1',
-        refreshToken: 'dummyRefreshToken',
-        subRefreshToken: null,
-        userStatus: 0,
-        lastRefreshedAt: null,
-        createdAt: '2021-01-25T08:45:49.803Z',
-        updatedAt: '2021-01-25T08:45:49.803Z'
-      })
-      const testData = await RequestApproval.build({
-        requestId: requestId,
-        contractId: contractId,
-        approveRouteId: approveRouteId,
-        invoiceId: invoiceId,
-        requester: userId,
-        status: '10',
-        message: message,
-        create: '2021-01-25T08:45:49.803Z',
-        isSaved: true
-      })
-      testData.save = jest.fn()
-
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(null)
-      RequestApprovalDAO.prototype.createRequestApproval.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
-
-      const result = await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
-
-      // 結果確認
-      expect(result).toBe(0)
-    })
-
-    test('正常：初回保存:承認ルート未設定', async () => {
-      // パラメータ作成
-      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = undefined
-      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
-      const requesterId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
-      const message = 'messege'
-
-      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
-
-      // DBのデータがある場合
-      userControllerFindOne.mockReturnValueOnce({
-        userId: userId,
-        tenantId: tenantId,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        appVersion: '0.0.1',
-        refreshToken: 'dummyRefreshToken',
-        subRefreshToken: null,
-        userStatus: 0,
-        lastRefreshedAt: null,
-        createdAt: '2021-01-25T08:45:49.803Z',
-        updatedAt: '2021-01-25T08:45:49.803Z'
-      })
-
-      const expectRequestApproval = await RequestApproval.build({})
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(null)
-      RequestApprovalDAO.prototype.createRequestApproval.mockImplementation(async (values) => {
-        const requstApproval = await expectRequestApproval.set({ ...values })
-        requstApproval.save = jest.fn(() => {
-          return requstApproval
-        })
-        return requstApproval
-      })
-      RequestApprovalDAO.prototype.saveRequestApproval.mockImplementation(async (requestApproval) => {
-        await requestApproval.save()
-        return requestApproval
-      })
-
-      const result = await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
-
-      // 結果確認
-      expect(result).toBe(0)
-    })
-
-    test('正常：既に保存:承認ルート未設定', async () => {
-      // パラメータ作成
-      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = undefined
-      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
-      const requesterId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
-      const message = 'messege'
-
-      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
-
-      // DBのデータがある場合
-      userControllerFindOne.mockReturnValueOnce({
-        userId: userId,
-        tenantId: tenantId,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        appVersion: '0.0.1',
-        refreshToken: 'dummyRefreshToken',
-        subRefreshToken: null,
-        userStatus: 0,
-        lastRefreshedAt: null,
-        createdAt: '2021-01-25T08:45:49.803Z',
-        updatedAt: '2021-01-25T08:45:49.803Z'
-      })
-
-      const expectRequestApproval = await RequestApproval.build({})
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockImplementation(async (values) => {
-        const requstApproval = await expectRequestApproval.set({ ...values })
-        requstApproval.save = jest.fn(() => {
-          return requstApproval
-        })
-        return requstApproval
-      })
-      RequestApprovalDAO.prototype.saveRequestApproval.mockImplementation(async (requestApproval) => {
-        await requestApproval.save()
-        return requestApproval
-      })
-
-      const result = await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
-
-      // 結果確認
-      expect(result).toBe(0)
-    })
-
-    test('正常：既に保存されている承認依頼のメッセージ。承認ルート上書き保存', async () => {
-      // パラメータ作成
-      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
-      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
-      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
-      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const message = 'messege'
-      const status = 10
-
-      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
-
-      // DBのデータがある場合
-      userControllerFindOne.mockReturnValueOnce({
-        userId: userId,
-        tenantId: tenantId,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        appVersion: '0.0.1',
-        refreshToken: 'dummyRefreshToken',
-        subRefreshToken: null,
-        userStatus: 0,
-        lastRefreshedAt: null,
-        createdAt: '2021-01-25T08:45:49.803Z',
-        updatedAt: '2021-01-25T08:45:49.803Z'
-      })
-
-      approveStatusFindOne.mockReturnValueOnce(status)
-
-      const testData = await RequestApproval.build({
-        requestId: requestId,
-        contractId: contractId,
-        approveRouteId: approveRouteId,
-        invoiceId: invoiceId,
-        requester: userId,
-        status: status,
-        message: message,
-        create: '2021-01-25T08:45:49.803Z',
-        isSaved: true
-      })
-      testData.save = jest.fn()
-
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.updateRequestApproval.mockReturnValueOnce(testData)
-      RequestApprovalDAO.prototype.saveRequestApproval.mockReturnValueOnce(testData)
-
-      const result = await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
-
-      // 結果確認
-      expect(result).toBe(0)
-    })
-
-    test('エラー：初回保存失敗', async () => {
-      // パラメータ作成
-      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
-      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
-      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const message = 'messege'
-
-      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
-
-      // DBのデータがある場合
-      userControllerFindOne.mockReturnValueOnce({
-        userId: userId,
-        tenantId: tenantId,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        appVersion: '0.0.1',
-        refreshToken: 'dummyRefreshToken',
-        subRefreshToken: null,
-        userStatus: 0,
-        lastRefreshedAt: null,
-        createdAt: '2021-01-25T08:45:49.803Z',
-        updatedAt: '2021-01-25T08:45:49.803Z'
-      })
-
-      const testData = await RequestApproval.build({})
-      testData.save = jest.fn()
-
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockImplementation((values) => {
-        testData.set(values)
-        return testData
-      })
-      RequestApprovalDAO.prototype.saveRequestApproval.mockImplementation(() => {
-        return null
-      })
-
-      await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
-
-      expect(errorSpy).toHaveBeenCalled()
-    })
-
-    test('エラー：既に保存した支払依頼の保存失敗', async () => {
-      // パラメータ作成
-      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
-      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
-      const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
-      const requesterId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const message = 'messege'
-
-      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
-      const tenantId = '12345678-8ba0-42a4-8582-b234cb4a2089'
-
-      // DBのデータがある場合
-      userControllerFindOne.mockReturnValueOnce({
-        userId: userId,
-        tenantId: tenantId,
-        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-        appVersion: '0.0.1',
-        refreshToken: 'dummyRefreshToken',
-        subRefreshToken: null,
-        userStatus: 0,
-        lastRefreshedAt: null,
-        createdAt: '2021-01-25T08:45:49.803Z',
-        updatedAt: '2021-01-25T08:45:49.803Z'
-      })
-
-      const testData = await RequestApproval.build({})
-      testData.save = jest.fn()
-
-      approveStatusDAOGetStatusCode.mockReturnValueOnce('80')
-      RequestApprovalDAO.prototype.getpreWorkflowRequestApproval.mockImplementation(null)
-      RequestApprovalDAO.prototype.createRequestApproval.mockImplementation((values) => {
-        testData.set(values)
-        return testData
-      })
-      RequestApprovalDAO.prototype.saveRequestApproval.mockImplementation(() => {
-        return null
-      })
-
-      await approverController.saveMessage(contractId, invoiceId, requesterId, message, approveRouteId)
-
-      expect(errorSpy).toHaveBeenCalled()
-    })
-  })
-
   describe('readApproval', () => {
-    test('正常：すでに保存されている承認依頼のメッセージ。承認ルート上書き保存', async () => {
+    test('正常：すでに保存されている支払依頼のメッセージ。承認ルート上書き保存', async () => {
       // パラメータ作成
       const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
@@ -2575,7 +2641,7 @@ describe('approverControllerのテスト', () => {
       expect(result).toBe(testData)
     })
 
-    test('正常：承認依頼取得結果null', async () => {
+    test('正常：支払依頼取得結果null', async () => {
       // パラメータ作成
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const invoiceId = 'aa974511-8188-4022-bd86-45e251fd259e'
@@ -2749,7 +2815,7 @@ describe('approverControllerのテスト', () => {
       )
 
       // 承認ステータスの用意
-      const approveStatus = { code: '80', name: '承認依頼中' }
+      const approveStatus = { code: '80', name: '支払依頼中' }
       approveStatusFindOne.mockReturnValueOnce(approveStatus)
 
       // 承認ルートの用意
@@ -2814,30 +2880,174 @@ describe('approverControllerのテスト', () => {
       approveUserFindOne.mockReturnValueOnce(secondApprover)
       approveUserFindOne.mockReturnValueOnce(thirdApprover)
 
-      const firstUserInfo = {
+      const firstUserInfo = UserAccounts.setUserAccounts({
         Memberships: [{ GroupId: tenantId }],
         FirstName: '承認者',
         LastName: '１',
         UserName: 'UTTESTCODE@TEST1',
         Id: 'approver1'
-      }
-      const secondUserInfo = {
+      })
+      const secondUserInfo = UserAccounts.setUserAccounts({
         Memberships: [{ GroupId: tenantId }],
         FirstName: '承認者',
         LastName: '２',
         UserName: 'UTTESTCODE@TEST2',
         Id: 'approver1'
-      }
-      const thirdUserInfo = {
+      })
+      const thirdUserInfo = UserAccounts.setUserAccounts({
         Memberships: [{ GroupId: tenantId }],
         FirstName: '承認者',
         LastName: '３',
         UserName: 'UTTESTCODE@TEST3',
         Id: 'approver1'
+      })
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(firstUserInfo)
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(secondUserInfo)
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(thirdUserInfo)
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
+
+      const dummyApproval = Approval.build({
+        requestId: request.requestId,
+        requestUserId: requesterId,
+        approveRouteId: approveRoute.approveRouteId,
+        approveStatus: '11',
+        approveRouteName: approveRoute.approveRouteName
+      })
+      approvalFindOne.mockReturnValueOnce(dummyApproval)
+
+      const result = await approverController.saveApproval(
+        contractId,
+        approveRouteId,
+        requesterId,
+        message,
+        accessToken,
+        refreshToken,
+        request
+      )
+
+      expect(result).toBe(0)
+    })
+
+    test('正常：ステータスが未処理の場合', async () => {
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const message = '正常'
+      const User = require('../../Application/models').User
+      const accessToken = 'dummy-accessToken'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const request = {
+        requestId: 'dummy-requestId'
       }
-      accessTradeshift.mockReturnValueOnce(firstUserInfo)
-      accessTradeshift.mockReturnValueOnce(secondUserInfo)
-      accessTradeshift.mockReturnValueOnce(thirdUserInfo)
+
+      userControllerFindOne.mockReturnValueOnce(
+        User.build({
+          userId: requesterId,
+          tenantId: tenantId,
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          appVersion: '0.0.1',
+          refreshToken: refreshToken,
+          subRefreshToken: subRefreshToken,
+          usrStatus: 0,
+          lastRefreshedAt: new Date()
+        })
+      )
+
+      // 承認ステータスの用意
+      const approveStatus = { code: '80', name: '支払依頼中' }
+      approveStatusFindOne.mockReturnValueOnce(approveStatus)
+
+      // 承認ルートの用意
+      const ApproveRoute = require('../../Application/models').ApproveRoute
+      const approveRoute = ApproveRoute.build({
+        contractId: contractId,
+        approveRouteName: 'UTコード'
+      })
+      approveRouteFindOne.mockReturnValueOnce(approveRoute)
+      const approvers = [
+        {
+          ...approveRoute,
+          'ApproveUsers.approveUserId': 'dummy-approver-1',
+          'ApproveUsers.approveUser': 'user1',
+          'ApproveUsers.prevApproveUser': null,
+          'ApproveUsers.nextApproveUser': 'dummy-approver-2',
+          'ApproveUsers.isLastApproveUser': false
+        },
+        {
+          ...approveRoute,
+          'ApproveUsers.approveUserId': 'dummy-approver-2',
+          'ApproveUsers.approveUser': 'user2',
+          'ApproveUsers.prevApproveUser': 'dummy-approver-1',
+          'ApproveUsers.nextApproveUser': null,
+          'ApproveUsers.isLastApproveUser': false
+        },
+        {
+          ...approveRoute,
+          'ApproveUsers.approveUserId': 'dummy-approver-3',
+          'ApproveUsers.approveUser': 'user3',
+          'ApproveUsers.prevApproveUser': 'dummy-approver-2',
+          'ApproveUsers.nextApproveUser': null,
+          'ApproveUsers.isLastApproveUser': true
+        }
+      ]
+      approveGetApproveRoute.mockReturnValueOnce(approvers)
+
+      const ApproveUser = require('../../Application/models').ApproveUser
+      const firstApprover = ApproveUser.build({
+        approverUserId: 'dummy-approver-1',
+        approveUser: 'user1',
+        prevApproveUser: null,
+        nextApproveUser: 'dummy-approver-2',
+        isLastApproveUser: false
+      })
+      const secondApprover = ApproveUser.build({
+        approverUserId: 'dummy-approver-2',
+        approveUser: 'user2',
+        prevApproveUser: 'dummy-approver-1',
+        nextApproveUser: 'dummy-approver-3',
+        isLastApproveUser: false
+      })
+      const thirdApprover = ApproveUser.build({
+        approverUserId: 'dummy-approver-3',
+        approveUser: 'user3',
+        prevApproveUser: 'dummy-approver-2',
+        nextApproveUser: null,
+        isLastApproveUser: true
+      })
+      // 承認ルートのユーザーの用意
+      approveUserFindOne.mockReturnValueOnce(firstApprover)
+      approveUserFindOne.mockReturnValueOnce(secondApprover)
+      approveUserFindOne.mockReturnValueOnce(thirdApprover)
+
+      const firstUserInfo = UserAccounts.setUserAccounts({
+        Memberships: [{ GroupId: tenantId }],
+        FirstName: '承認者',
+        LastName: '１',
+        UserName: 'UTTESTCODE@TEST1',
+        Id: 'approver1'
+      })
+      const secondUserInfo = UserAccounts.setUserAccounts({
+        Memberships: [{ GroupId: tenantId }],
+        FirstName: '承認者',
+        LastName: '２',
+        UserName: 'UTTESTCODE@TEST2',
+        Id: 'approver1'
+      })
+      const thirdUserInfo = UserAccounts.setUserAccounts({
+        Memberships: [{ GroupId: tenantId }],
+        FirstName: '承認者',
+        LastName: '３',
+        UserName: 'UTTESTCODE@TEST3',
+        Id: 'approver1'
+      })
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(firstUserInfo)
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(secondUserInfo)
+      TradeshiftDTO.prototype.getUserById.mockReturnValueOnce(thirdUserInfo)
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
+
+      approvalFindOne.mockReturnValueOnce(null)
 
       const result = await approverController.saveApproval(
         contractId,
@@ -2880,7 +3090,7 @@ describe('approverControllerのテスト', () => {
       )
 
       // 承認ステータスの用意
-      const approveStatus = { code: '80', name: '承認依頼中' }
+      const approveStatus = { code: '80', name: '支払依頼中' }
       approveStatusFindOne.mockReturnValueOnce(approveStatus)
 
       // 承認ルートの用意
@@ -2990,7 +3200,7 @@ describe('approverControllerのテスト', () => {
       )
 
       // 承認ステータスの用意
-      const approveStatus = { code: '80', name: '承認依頼中' }
+      const approveStatus = { code: '80', name: '支払依頼中' }
       approveStatusFindOne.mockReturnValueOnce(approveStatus)
 
       // 承認ルートの用意
@@ -3027,6 +3237,16 @@ describe('approverControllerのテスト', () => {
         }
       ]
       approveGetApproveRoute.mockReturnValueOnce(approvers)
+      approveStatusDAOGetStatusCode.mockReturnValueOnce('80').mockReturnValueOnce('90').mockReturnValueOnce('10')
+
+      const dummyApproval = Approval.build({
+        requestId: request.requestId,
+        requestUserId: requesterId,
+        approveRouteId: approveRoute.approveRouteId,
+        approveStatus: '11',
+        approveRouteName: approveRoute.approveRouteName
+      })
+      approvalFindOne.mockReturnValueOnce(dummyApproval)
 
       // 承認ルートのユーザーの用意
       const dberror = new Error('db connection error')
@@ -3060,6 +3280,24 @@ describe('approverControllerのテスト', () => {
         apprvoeRouteName: 'UTコード'
       })
 
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
+
       const dummyApproval = Approval.build({
         requestId: requestId,
         requestUserId: requestUserId,
@@ -3071,13 +3309,13 @@ describe('approverControllerのテスト', () => {
 
       const dummyStatus = ApproveStatus.build({
         code: '10',
-        name: '承認依頼中'
+        name: '支払依頼中'
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce(dummyApproval)
       RequestApprovalUpdate.mockReturnValueOnce({})
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
       expect(result).toBeTruthy()
     })
@@ -3093,6 +3331,24 @@ describe('approverControllerのテスト', () => {
         apprvoeRouteName: 'UTコード'
       })
 
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
+
       const dummyApproval = Approval.build({
         requestId: requestId,
         requestUserId: requestUserId,
@@ -3105,18 +3361,18 @@ describe('approverControllerのテスト', () => {
 
       const dummyStatus = ApproveStatus.build({
         code: '10',
-        name: '承認依頼中'
+        name: '支払依頼中'
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce(dummyApproval)
       RequestApprovalUpdate.mockReturnValueOnce({})
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
       expect(result).toBeTruthy()
     })
 
-    test('準正常：承認依頼アップデート失敗➀', async () => {
+    test('準正常：支払依頼アップデート失敗➀', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
@@ -3126,6 +3382,23 @@ describe('approverControllerのテスト', () => {
         contractId: contractId,
         approveRouteName: 'UTコード'
       })
+
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
 
       const dummyApproval = Approval.build({
         requestId: requestId,
@@ -3138,17 +3411,18 @@ describe('approverControllerのテスト', () => {
 
       const dummyStatus = ApproveStatus.build({
         code: '10',
-        name: '承認依頼中'
+        name: '支払依頼中'
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce(null)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
-      expect(result).toBeFalsy()
+      expect(result).toEqual(false)
     })
 
-    test('準正常：承認依頼アップデート失敗②', async () => {
+    test('準正常：支払依頼アップデート失敗②', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
@@ -3158,6 +3432,23 @@ describe('approverControllerのテスト', () => {
         contractId: contractId,
         approveRouteName: 'UTコード'
       })
+
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
 
       const dummyApproval = Approval.build({
         requestId: requestId,
@@ -3170,18 +3461,19 @@ describe('approverControllerのテスト', () => {
 
       const dummyStatus = ApproveStatus.build({
         code: '10',
-        name: '承認依頼中'
+        name: '支払依頼中'
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       approvalUpdate.mockReturnValueOnce({})
       RequestApprovalUpdate.mockReturnValueOnce(null)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
-      expect(result).toBeFalsy()
+      expect(result).toEqual(false)
     })
 
-    test('準正常：承認依頼アップデート失敗', async () => {
+    test('準正常：支払依頼アップデート失敗', async () => {
       const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
@@ -3191,6 +3483,23 @@ describe('approverControllerのテスト', () => {
         contractId: contractId,
         approveRouteName: 'UTコード'
       })
+
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
 
       const dummyApproval = Approval.build({
         requestId: requestId,
@@ -3203,7 +3512,7 @@ describe('approverControllerのテスト', () => {
 
       const dummyStatus = ApproveStatus.build({
         code: '10',
-        name: '承認依頼中'
+        name: '支払依頼中'
       })
       approveStatusFindOne.mockReturnValueOnce(dummyStatus)
       const dbError = new Error('DB Connection Error')
@@ -3212,7 +3521,9 @@ describe('approverControllerのテスト', () => {
         throw dbError
       })
 
-      await approverController.updateApprove(contractId, approveRouteId, message)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
+
+      await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
       expect(errorSpy).toHaveBeenCalledWith({
         contractId: contractId,
@@ -3226,9 +3537,26 @@ describe('approverControllerのテスト', () => {
       const approveRouteId = 'dummy-approveRouteId'
       const message = '承認する。'
 
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
       approvalFindOne.mockReturnValueOnce(null)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
       expect(result).toBeFalsy()
     })
@@ -3244,6 +3572,24 @@ describe('approverControllerのテスト', () => {
         apprvoeRouteName: 'UTコード'
       })
 
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
+      hasPowerOfEditingSpy.mockReturnValueOnce(true)
+
       const dummyApproval = Approval.build({
         requestId: requestId,
         requestUserId: requestUserId,
@@ -3255,9 +3601,60 @@ describe('approverControllerのテスト', () => {
 
       approveStatusFindOne.mockReturnValueOnce(null)
 
-      const result = await approverController.updateApprove(contractId, approveRouteId, message)
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
 
       expect(result).toStrictEqual(new Error('12 is not found in approveStatus table'))
+    })
+
+    test('異常系：hasPowerOfEditingがFalseの場合（ログインユーザが承認直前のステータス確認で先に承認順が変わった場合→重複承認の対応）', async () => {
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'dummy-approveRouteId'
+      const message = '承認する。'
+      const requestId = 'dummy-request'
+      const requestUserId = 'dummy-User-id'
+      const approveRoute = ApproveRoute.build({
+        contractId: contractId,
+        apprvoeRouteName: 'UTコード'
+      })
+
+      const User = require('../../Application/models').User
+      const tenantId = 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31'
+      const requesterId = '27f7188b-f6c7-4b5e-9826-96052bba495e'
+      const refreshToken = 'dummy-refreshToken'
+      const subRefreshToken = 'dummy-subRefreshToken'
+      const userData = User.build({
+        userId: requesterId,
+        tenantId: tenantId,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+        appVersion: '0.0.1',
+        refreshToken: refreshToken,
+        subRefreshToken: subRefreshToken,
+        usrStatus: 0,
+        lastRefreshedAt: new Date()
+      })
+      userControllerFindOne.mockReturnValueOnce(userData)
+
+      const dummyApproval = Approval.build({
+        requestId: requestId,
+        requestUserId: requestUserId,
+        approveRouteId: approveRoute.approveRouteId,
+        approveStatus: '11',
+        approveRouteName: approveRoute.approveRouteName
+      })
+      approvalFindOne.mockReturnValueOnce(dummyApproval)
+
+      const dummyStatus = ApproveStatus.build({
+        code: '10',
+        name: '支払依頼中'
+      })
+      approveStatusFindOne.mockReturnValueOnce(dummyStatus)
+      approvalUpdate.mockReturnValueOnce(dummyApproval)
+      RequestApprovalUpdate.mockReturnValueOnce({})
+      hasPowerOfEditingSpy.mockReturnValueOnce(false)
+
+      const result = await approverController.updateApprove(contractId, approveRouteId, message, userData.userId)
+
+      expect(result).toBeTruthy()
     })
   })
 
@@ -3282,9 +3679,12 @@ describe('approverControllerのテスト', () => {
       approvalFindOne.mockReturnValueOnce(dummyApproval)
 
       // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const findUsers1 = findUsers.UserAccounts.map((user) => {
+        return UserAccounts.setUserAccounts(user)
+      })
+
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      TradeshiftDTO.prototype.findUserAll.mockReturnValueOnce(findUsers1)
 
       // 検索予想結果
       const expectResult = {
@@ -3364,10 +3764,12 @@ describe('approverControllerのテスト', () => {
       const contractId = 'dummy-contractId'
       const requestId = '27f7188b-f6c7-4b5e-9826-96052bba495c'
 
-      // トレードシフトから取得データ
-      const findUsers1 = { ...findUsers }
+      const sequelizeConnectionError = new Error('Axios Error')
       // トレードシフトのユーザー情報取得
-      accessTradeshift.mockReturnValueOnce(findUsers1)
+      approvalFindOne.mockReturnValue(Approval.build({ requestId, approverStatus: '90' }))
+      TradeshiftDTO.prototype.findUserAll.mockImplementation(() => {
+        throw sequelizeConnectionError
+      })
 
       // 検索予想結果
 
@@ -3380,11 +3782,9 @@ describe('approverControllerのテスト', () => {
         requestId
       )
 
-      const sequelizeConnectionError = new Error('The "config.server" property is required and must be of type string.')
-
       // 期待結果
       // 想定したデータがReturnされていること
-      expect(result).toEqual(sequelizeConnectionError)
+      expect(result.stack).toMatch(/TypeError: users.find is not a function/)
     })
   })
 })

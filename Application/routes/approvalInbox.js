@@ -13,6 +13,7 @@ const inboxController = require('../controllers/inboxController')
 const approvalInboxController = require('../controllers/approvalInboxController')
 const notiTitle = '承認する支払依頼確認'
 const approverController = require('../controllers/approverController')
+const mailMsg = require('../lib/mailMsg')
 
 const bodyParser = require('body-parser')
 router.use(
@@ -95,7 +96,8 @@ const cbGetIndex = async (req, res, next) => {
   const prevUser = requestApproval.prevUser
 
   // 依頼者と承認ルートの承認者のかを確認する。
-  const hasPowerOfEditing = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval)
+  const requestId = requestApproval.requestId
+  const hasPowerOfEditing = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestId)
 
   let presentation = 'readonlyApprovalInbox'
   if (hasPowerOfEditing) {
@@ -103,12 +105,15 @@ const cbGetIndex = async (req, res, next) => {
     req.session.requestApproval = { approval: requestApproval }
   }
 
+  const requester = requestApproval.requester
   res.render(presentation, {
     ...result,
     title: '支払依頼',
     documentId: invoiceId,
+    requester: requester,
     approveRoute: approveRoute,
-    prevUser: prevUser
+    prevUser: prevUser,
+    requestId: requestId
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -148,13 +153,28 @@ const cbPostApprove = async (req, res, next) => {
 
   const contractId = contract.contractId
   const userId = user.userId
-  const requestApproval = req.session.requestApproval.approval
+  const requestApproval = req.session.requestApproval ? req.session.requestApproval.approval : null
   const invoiceId = req.params.invoiceId
+  const message = typeof req.body.message === 'string' ? req.body.message : null
+
+  if (message === null || message.length > 1500) {
+    req.flash('noti', [notiTitle, 'メッセージは1500文字まで入力してください。'])
+    return res.redirect(`/approvalInbox/${invoiceId}`)
+  }
+
+  if (requestApproval === null) {
+    req.flash('alertNotification', ['支払依頼', 'システムエラーが発生しました。\nもう一度操作してください。'])
+    return res.redirect(`/approvalInbox/${invoiceId}`)
+  }
+
   const data = req.body
   const requestId = requestApproval.requestId
+  const accessToken = req.user.accessToken
+  const refreshToken = req.user.refreshToken
+  const tenantId = req.user.tenantId
 
   // 依頼者と承認ルートの承認者のかを確認する。
-  const hasNotPowerOfEditing = !(await approvalInboxController.hasPowerOfEditing(contractId, userId, requestApproval))
+  const hasNotPowerOfEditing = !(await approvalInboxController.hasPowerOfEditing(contractId, userId, requestId))
   if (hasNotPowerOfEditing) {
     logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
     return res.redirect(`/approvalInbox/${invoiceId}`)
@@ -195,18 +215,35 @@ const cbPostApprove = async (req, res, next) => {
       break
   }
 
-  const message = req.body.message
-
-  const result = await approverController.updateApprove(contractId, requestId, message)
+  const result = await approverController.updateApprove(contractId, requestId, message, userId)
 
   if (result instanceof Error === true) return next(errorHelper.create(500))
 
-  if (result) {
-    req.flash('info', '承認が完了しました。')
+  if (result === -1) {
+    req.flash('error', '承認に失敗しました。')
     res.redirect('/inboxList/1')
   } else {
-    req.flash('noti', ['支払依頼', '承認に失敗しました。'])
-    res.redirect(`/approvalInbox/${invoiceId}`)
+    if (result) {
+      const sendMailStatus = await mailMsg.sendPaymentRequestMail(
+        accessToken,
+        refreshToken,
+        contractId,
+        invoiceId,
+        tenantId
+      )
+
+      if (sendMailStatus === 0) {
+        req.flash('info', '承認を完了しました。次の承認者にはメールで通知が送られます。')
+      } else if (sendMailStatus === 1) {
+        req.flash('info', '承認を完了しました。依頼者にはメールで通知が送られます。')
+      } else {
+        req.flash('error', '承認を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。')
+      }
+      res.redirect('/inboxList/1')
+    } else {
+      req.flash('noti', ['支払依頼', '承認に失敗しました。'])
+      res.redirect(`/approvalInbox/${invoiceId}`)
+    }
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApprove')

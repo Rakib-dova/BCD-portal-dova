@@ -116,6 +116,7 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         }
       })
 
+      // 承認ルート登録
       const v4 = require('uuid').v4
       const testApproveRoute = new db.ApproveRoute({
         approveRouteId: v4(),
@@ -126,14 +127,27 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       })
       await testApproveRoute.save()
 
-      const testApproveUser = new db.ApproveUser({
+      const testApproveUserId1 = v4()
+      const testApproveUserId2 = v4()
+      const testApproveUser1 = new db.ApproveUser({
+        approveUserId: testApproveUserId1,
         approveRouteId: testApproveRoute.approveRouteId,
         approveUser: 'aa974511-8188-4022-bd86-45e251fd259e',
         prevApproveUser: null,
-        nextApproveUser: null,
+        nextApproveUser: testApproveUserId2,
         isLastApproveUser: 0
       })
-      await testApproveUser.save()
+      await testApproveUser1.save()
+
+      const testApproveUser2 = new db.ApproveUser({
+        approveUserId: testApproveUserId2,
+        approveRouteId: testApproveRoute.approveRouteId,
+        approveUser: '53607702-b94b-4a94-9459-6cf3acd65603',
+        prevApproveUser: testApproveUserId1,
+        nextApproveUser: null,
+        isLastApproveUser: 1
+      })
+      await testApproveUser2.save()
 
       const puppeteer = require('puppeteer')
       const browser = await puppeteer.launch({
@@ -180,9 +194,6 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       // メッセージ入力
       await page.type('#inputMsg', 'インテグレーションテスト')
 
-      // 保存ボタン押下
-      await page.click('#form > div.grouped-button > button')
-
       await page.waitForTimeout(7000)
 
       // 支払依頼画面にredirectする。
@@ -196,11 +207,6 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       // 依頼ボタン押下
       await page.click('#btn-approval')
 
-      await page.waitForTimeout(3000)
-
-      // 一覧画面にredirectする。
-      expect(await page.url()).toBe('https://localhost:3000/inboxList/1')
-
       browser.close()
     })
 
@@ -212,11 +218,15 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
-      expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
@@ -228,14 +238,17 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).toMatch(/インテグレーションテスト/i)
+
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
-      expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
-      expect(res.text).toMatch(/差し戻し/i)
-      expect(res.text).toMatch(/承認/i)
     })
   })
 
@@ -287,11 +300,15 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
-      expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
@@ -303,14 +320,16 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
-      expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
-      expect(res.text).toMatch(/差し戻し/i)
-      expect(res.text).toMatch(/承認/i)
     })
   })
 
@@ -364,11 +383,15 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
-      expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
@@ -380,14 +403,17 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).toMatch(/インテグレーションテスト/i)
+
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
-      expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
-      expect(res.text).toMatch(/差し戻し/i)
-      expect(res.text).toMatch(/承認/i)
     })
 
     test('「戻る」ボタン遷移確認（受領請求書への仕訳情報設定画面に遷移）', async () => {
@@ -399,79 +425,6 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       const page = await browser.newPage()
       await page.setCookie(userCookies[0])
       await page.goto(`https://localhost:3000${redirectUrl}`)
-
-      await page.click('#form > div.grouped-button > a.button.mr-6')
-      await page.waitForTimeout(1500)
-
-      // 受領請求書への仕訳情報設定画面に遷移確認
-      expect(page.url()).toBe('https://localhost:3000/inboxList/1')
-      await browser.close()
-    })
-
-    test('支払依頼確認モーダル表示確認', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(userCookies[0])
-      await page.goto(`https://localhost:3000${redirectUrl}`)
-
-      await page.click('#checkApproval')
-      await page.waitForTimeout(500)
-
-      // 支払依頼確認モーダル表示確認
-      const checkModal = await page.evaluate(() => {
-        return document.querySelector('#check-approval-modal').getAttribute('class')
-      })
-
-      expect(checkModal).toBe('modal is-active')
-      await browser.close()
-    })
-
-    test('メッセージ入力文字数確認（1,500文字まで）', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(userCookies[0])
-      await page.goto(`https://localhost:3000${redirectUrl}`)
-      await page.type(
-        '#inputMsg',
-        'あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefg'
-      )
-      await page.waitForTimeout(500)
-      const msg = await page.evaluate(() => {
-        return document.querySelector('#inputMsg').value
-      })
-      // 受領した請求書一覧画面に遷移確認
-      expect(msg).toBe(
-        'あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcdefghijk1234567890あいうえおかきくけこさしすせそらりるれろabcd'
-      )
-      await browser.close()
-    })
-
-    test('差し戻死後、一覧遷移', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-      const page = await browser.newPage()
-      await page.setCookie(userCookies[0])
-      await page.goto(`https://localhost:3000${redirectUrl}`)
-
-      await page.click('#rejectApproval')
-      await page.waitForTimeout(500)
-
-      await page.click('#btn-reject')
-      await page.waitForTimeout(500)
-
-      // 支払依頼一覧に遷移
-      expect(page.url()).toBe('https://localhost:3000/inboxList/redirected/1')
 
       await browser.close()
     })
@@ -515,7 +468,8 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
       if (approval.dataValues.approveStatus !== '10') {
         await db.Approval.update(
           {
-            approveStatus: '10'
+            approveStatus: '10',
+            approvalAt1: null
           },
           {
             where: {
@@ -566,11 +520,15 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
-      expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
@@ -582,14 +540,16 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
-      expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
-      expect(res.text).toMatch(/差し戻し/i)
-      expect(res.text).toMatch(/承認/i)
     })
   })
 
@@ -641,11 +601,15 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).not.toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
-      expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
     })
 
@@ -657,14 +621,16 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
 
       // 画面内容確認
       expect(res.text).toMatch(/支払依頼/i)
-      expect(res.text).toMatch(/インテグレーションテスト/i)
       expect(res.text).toMatch(/承認ルート名/i)
       expect(res.text).toMatch(/integrationApproveRoute/i)
+      expect(res.text).toMatch(/承認順/i)
+      expect(res.text).toMatch(/担当者名/i)
+      expect(res.text).toMatch(/承認状況/i)
+      expect(res.text).toMatch(/依頼済み/i)
+      expect(res.text).toMatch(/一次承認/i)
+      expect(res.text).toMatch(/処理中/i)
       expect(res.text).toMatch(/最終承認/i)
-      expect(res.text).toMatch(/インテグレーション 一般/i)
       expect(res.text).toMatch(/戻る/i)
-      expect(res.text).toMatch(/差し戻し/i)
-      expect(res.text).toMatch(/承認/i)
     })
   })
 
@@ -895,8 +861,10 @@ describe('承認者が支払い依頼の内容を確認できる', () => {
         }
       })
 
-      await db.Approval.destroy({ where: { requestId: requestId.requestId } })
-      await db.RequestApproval.destroy({ where: { contractId: contract.contractId } })
+      if (requestId.length !== 0) {
+        await db.Approval.destroy({ where: { requestId: requestId.requestId } })
+        await db.RequestApproval.destroy({ where: { contractId: contract.contractId } })
+      }
       await db.User.destroy({ where: { tenantId: testTenantId } })
       await db.Tenant.destroy({ where: { tenantId: testTenantId } })
     })

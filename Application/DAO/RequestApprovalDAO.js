@@ -10,6 +10,7 @@ class RequestApprovalDAO extends DAO {
     this.DTO = this.DTO.RequestApproval
   }
 
+  // StatusCodeあり。
   async getRequestApproval(invoiceId, statusCode) {
     const requestApproval = await this.DTO.findOne({
       where: {
@@ -22,21 +23,40 @@ class RequestApprovalDAO extends DAO {
     return requestApproval
   }
 
+  // StatusCodeなし。
+  async getRequestApprovalFromInvoice(invoiceId) {
+    const requestApproval = await this.DTO.findOne({
+      where: {
+        contractId: this.contractId,
+        invoiceId: invoiceId
+      },
+      order: [['create', 'DESC']]
+    })
+    return requestApproval
+  }
+
+  async getAllRequestApproval() {
+    const allRequestApproval = await this.DTO.findAll({
+      order: [['create', 'DESC']]
+    })
+    return allRequestApproval
+  }
+
   async getpreWorkflowRequestApproval(invoiceId) {
     const preWorkflowStatusCode = await this.getWorkflowStatusCode('未処理')
     const requstApproval = await this.getRequestApproval(invoiceId, preWorkflowStatusCode)
     return requstApproval
   }
 
-  async createRequestApproval(requester, invoiceId, approveRouteId, message) {
-    const preWorkflowStatusCode = await this.getWorkflowStatusCode('未処理')
+  async createRequestApproval(requester, invoiceId, approveRouteId, status, message) {
     const createRequestApproval = this.DTO.build({
       contractId: this.contractId,
       requester,
       invoiceId,
       approveRouteId,
-      status: preWorkflowStatusCode,
-      message
+      status: status,
+      message,
+      isSaved: true
     })
     return createRequestApproval
   }

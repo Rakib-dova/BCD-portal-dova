@@ -1,4 +1,7 @@
 import { $ } from '../module/getElements.js'
+const approveProgressModal = document.getElementById('approve-progress-modal')
+const rejectProgressModal = document.getElementById('reject-progress-modal')
+
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
 const ua = window.navigator.userAgent
@@ -468,16 +471,40 @@ $('#btn-insert').addEventListener('click', function () {
 })
 
 // メッセージ文字数確認
-$('#inputMsg').addEventListener('keyup', function () {
-  $('#msgCount').innerText = '(' + $('#inputMsg').value.length + '/1500)'
+function messageCheck(event) {
+  // lfCnt linefeedのカウンター
+  $('#inputMsg').addEventListener(event, function () {
+    let msgLen = $('#inputMsg').value.length
+    let lfCnt = 0
 
-  if ($('#inputMsg').value.length > 1500) {
-    $('#inputMsg').value($('#inputMsg').value.substring(0, 1500))
-    $('#msgCount').innerText = '1500/1500'
-  }
-})
+    for (const char of $('#inputMsg').value) {
+      if (encodeURI(char) === '%0A') {
+        msgLen++
+        lfCnt++
+      }
+    }
+
+    $('#msgCount').innerText = `(${msgLen}/1500)`
+
+    if (msgLen > 1500) {
+      $('#inputMsg').value = $('#inputMsg').value.substring(0, 1500 - lfCnt)
+      msgLen = $('#inputMsg').value.length
+      $('#msgCount').innerText = `(${msgLen}/1500)`
+    }
+  })
+}
+messageCheck('keyup')
+messageCheck('keydown')
+messageCheck('paste')
+messageCheck('focusin')
+messageCheck('focusout')
 
 $('#checkApproval').addEventListener('click', function () {
+  const rejectModalLine = $('#reject-approval-modal').querySelector('#journal-list-reject-modal')
+  while (rejectModalLine.firstChild) {
+    rejectModalLine.removeChild(rejectModalLine.firstChild)
+  }
+
   while ($('#journal-list').firstChild) {
     $('#journal-list').removeChild($('#journal-list').firstChild)
   }
@@ -698,7 +725,9 @@ const getInvoiceLineList = function () {
   })
 }
 
-$('#btn-approve').addEventListener('click', function () {
+$('#btn-approve').addEventListener('click', function (e) {
+  e.preventDefault()
+  approveProgressModal.classList.add('is-active')
   $('#approval').submit()
 })
 
@@ -715,10 +744,6 @@ $('#rejectApproval').addEventListener('click', function () {
   if (!rejectModalLine.firstChild) {
     Array.prototype.forEach.call(invoiceList, (invoiceLine) => {
       const cloneInvoice = document.importNode(invoiceLine.parentNode, true)
-      const lineInpt = cloneInvoice.querySelectorAll('input')
-      Array.prototype.forEach.call(lineInpt, (invoiceLine) => {
-        invoiceLine.removeAttribute('name')
-      })
       rejectModalLine.appendChild(cloneInvoice)
     })
   }
@@ -738,6 +763,8 @@ $('#rejectApproval').addEventListener('click', function () {
   $('#reject-approval-modal').classList.toggle('is-active')
 })
 
-$('#btn-reject').addEventListener('click', function () {
+$('#btn-reject').addEventListener('click', function (e) {
+  e.preventDefault()
+  rejectProgressModal.classList.add('is-active')
   $('#reject').submit()
 })

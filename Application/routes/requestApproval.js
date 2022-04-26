@@ -6,12 +6,13 @@ const helper = require('./helpers/middleware')
 const validate = require('../lib/validate')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
+const mailMsg = require('../lib/mailMsg')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
-const notiTitle = '承認依頼'
+const notiTitle = '支払依頼'
 
 const bodyParser = require('body-parser')
 const approverController = require('../controllers/approverController')
@@ -59,6 +60,7 @@ const cbGetRequestApproval = async (req, res, next) => {
   const refreshToken = req.user.refreshToken
   const invoiceId = req.params.invoiceId
   let result
+
   try {
     result = await inboxController.getInvoiceDetail(accessToken, refreshToken, invoiceId, contract.contractId)
   } catch (error) {
@@ -170,14 +172,12 @@ const cbGetRequestApproval = async (req, res, next) => {
   let approveRouteId = null
   let message = null
   let approveRoute = null
-  let isSaved = false
   let rejectedUser = null
   if (req.session.requestApproval) {
     message = req.session.requestApproval.message
     approveRouteId = req.session.requestApproval.approveRouteId
-    isSaved = req.session.requestApproval.isSaved
   }
-  const approval = await approverController.readApproval(contractId, invoiceId, isSaved)
+  const approval = await approverController.readApproval(contractId, invoiceId)
   if (approval && approval.status === '80') {
     approveRouteId = approval.approveRouteId
     message = approval.message
@@ -197,7 +197,7 @@ const cbGetRequestApproval = async (req, res, next) => {
     approveRoute = await approverController.getApproveRoute(accessToken, refreshToken, contractId, approveRouteId)
   }
 
-  // 承認依頼画面render
+  // 支払依頼画面render
   res.render('requestApproval', {
     ...result,
     optionLine1: optionLine1,
@@ -215,70 +215,6 @@ const cbGetRequestApproval = async (req, res, next) => {
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRequestApproval')
-}
-
-const cbPostSave = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbPostSave')
-
-  // 認証情報取得処理
-  if (!req.session || !req.user?.userId) return next(errorHelper.create(500))
-
-  // DBからuserデータ取得
-  const user = await userController.findOne(req.user.userId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // user未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
-
-  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
-  if (req.session?.userContext !== 'LoggedIn') return next(errorHelper.create(400))
-
-  // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
-
-  // ユーザ権限を取得
-  req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
-
-  if (checkContractStatus === null || checkContractStatus === 999) return next(errorHelper.create(500))
-
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
-
-  // invoiceId取得及び確認
-  const invoiceId = req.params.invoiceId
-  if (!validate.isUUID(invoiceId)) {
-    logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
-    return res.status(400).send('400 Bad Request')
-  }
-
-  const contractId = contract.contractId
-  const message = req.body.message
-  const requester = req.user.userId
-  const approveRouteId = req.body.approveRouteId
-  const result = await approverController.saveMessage(contractId, invoiceId, requester, message, approveRouteId)
-
-  switch (result) {
-    case 0:
-      req.flash('info', 'メッセージを保存しました。')
-      req.session.requestApproval = {
-        isSaved: true,
-        message: message,
-        approveRouteId: approveRouteId
-      }
-      res.redirect(`/requestApproval/${invoiceId}`)
-      break
-    default:
-      req.flash('noti', ['支払依頼', '保存失敗しました。'])
-      res.redirect(`/requestApproval/${invoiceId}`)
-      break
-  }
-
-  logger.info(constantsDefine.logMessage.INF001 + 'cbPostSave')
 }
 
 const cbPostGetDetailApproveRoute = async (req, res, next) => {
@@ -417,18 +353,23 @@ const cbPostApproval = async (req, res, next) => {
   const contractId = contract.contractId
   const invoiceId = req.params.invoiceId
   const requester = req.user.userId
-  const message = req.body.message
+  const message = typeof req.body.message === 'string' ? req.body.message : null
   const approveRouteId = req.body.approveRouteId
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
+  const tenantId = req.user.tenantId
+
+  if (message === null || message.length > 1500) {
+    req.flash('noti', [notiTitle, 'メッセージは1500文字まで入力してください。'])
+    return res.redirect(`/requestApproval/${invoiceId}`)
+  }
 
   // 承認ルートに誤りがある場合
   const isApproveRoute = await approverController.checkApproveRoute(contractId, approveRouteId)
   if (isApproveRoute === false) {
     req.flash('noti', ['支払い依頼', '承認ルートを指定してください。'])
     req.session.requestApproval = {
-      message: message,
-      isSaved: false
+      message: message
     }
     logger.info(constantsDefine.logMessage.INF001 + 'cbPostApproval')
     return res.redirect(`/requestApproval/${invoiceId}`)
@@ -441,28 +382,63 @@ const cbPostApproval = async (req, res, next) => {
     requester,
     message
   )
-  const result = await approverController.saveApproval(
-    contractId,
-    approveRouteId,
-    requester,
-    message,
-    accessToken,
-    refreshToken,
-    requestResult
-  )
-  switch (result) {
-    case 0:
-      req.flash('info', '承認依頼を完了しました。')
+
+  switch (requestResult) {
+    case 1:
+      req.flash('error', '支払依頼済みの請求書です。')
       res.redirect('/inboxList/1')
       break
-    default:
-      req.flash('noti', ['支払依頼', '必ず保存してください。'])
+
+    case -1:
+      req.flash('noti', ['支払依頼', '支払依頼に失敗しました。'])
       req.session.requestApproval = {
         message: message,
-        approveRouteId: approveRouteId,
-        isSaved: false
+        approveRouteId: approveRouteId
       }
       res.redirect(`/requestApproval/${invoiceId}`)
+      break
+
+    default: {
+      const result = await approverController.saveApproval(
+        contractId,
+        approveRouteId,
+        requester,
+        message,
+        accessToken,
+        refreshToken,
+        requestResult
+      )
+
+      switch (result) {
+        case 0: {
+          const sendMailStatus = await mailMsg.sendPaymentRequestMail(
+            accessToken,
+            refreshToken,
+            contractId,
+            invoiceId,
+            tenantId
+          )
+
+          if (sendMailStatus === 0) {
+            req.flash('info', '支払依頼を完了しました。次の承認者にはメールで通知が送られます。')
+          } else {
+            req.flash(
+              'error',
+              '支払依頼を完了しました。メールの通知に失敗しましたので、次の承認者に連絡をとってください。'
+            )
+          }
+          res.redirect('/inboxList/1')
+          break
+        }
+        default:
+          req.flash('noti', ['支払依頼', '支払依頼に失敗しました。'])
+          req.session.requestApproval = {
+            message: message,
+            approveRouteId: approveRouteId
+          }
+          res.redirect(`/requestApproval/${invoiceId}`)
+      }
+    }
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApproval')
@@ -472,13 +448,11 @@ router.get('/:invoiceId', helper.isAuthenticated, cbGetRequestApproval)
 router.post('/approveRoute', helper.isAuthenticated, cbPostGetApproveRoute)
 router.post('/detailApproveRoute', helper.isAuthenticated, cbPostGetDetailApproveRoute)
 router.post('/:invoiceId', helper.isAuthenticated, cbPostApproval)
-router.post('/save/:invoiceId', helper.isAuthenticated, cbPostSave)
 
 module.exports = {
   router: router,
   cbGetRequestApproval: cbGetRequestApproval,
   cbPostGetApproveRoute: cbPostGetApproveRoute,
-  cbPostSave: cbPostSave,
   cbPostGetDetailApproveRoute: cbPostGetDetailApproveRoute,
   cbPostApproval: cbPostApproval
 }

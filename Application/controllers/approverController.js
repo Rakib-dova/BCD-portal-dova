@@ -1,6 +1,4 @@
 'use stric'
-const apiManager = require('./apiManager')
-const qs = require('qs')
 const Approver = require('../lib/approver/Approver')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
@@ -15,6 +13,7 @@ const userController = require('./userController')
 const validate = require('../lib/validate')
 const approveStatusDAO = require('../DAO/ApproveStatusDAO')
 const RequestApprovalDAO = require('../DAO/RequestApprovalDAO')
+const approvalInboxController = require('./approvalInboxController')
 /**
  *
  * @param {string} accTk アクセストークン
@@ -24,33 +23,21 @@ const RequestApprovalDAO = require('../DAO/RequestApprovalDAO')
  * @returns {Array} ユーザー情報
  */
 const getApprover = async (accTk, refreshTk, tenantId, keyword) => {
-  const userAccountsArr = []
-  const queryObj = {
-    limit: 25,
-    page: 0,
-    numPages: 1
-  }
+  let userAccountsArr = []
+  const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accTk, refreshTk, tenantId)
+  tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
 
-  do {
-    // トレードシフトからユーザー情報を取得する。
-    const queryString = `/account/${tenantId}/users?${qs.stringify(queryObj)}`
-    try {
-      const findUsers = await apiManager.accessTradeshift(accTk, refreshTk, 'get', queryString)
-      if (findUsers instanceof Error) {
-        if (findUsers.response.status === 401) {
-          return -1
-        }
-      }
-      findUsers.UserAccounts.forEach((account) => {
-        userAccountsArr.push(new Approver(account))
-      })
-      queryObj.page++
-      queryObj.numPages = findUsers.numPages
-    } catch (error) {
-      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
-      return -2
-    }
-  } while (queryObj.page < queryObj.numPages)
+  // トレードシフトからユーザー情報を取得する。
+  try {
+    const findUserAll = await tradeshiftDTO.findUserAll()
+    if (findUserAll === -1) return -1
+    userAccountsArr = findUserAll.map((userAccount) => {
+      return new Approver(userAccount)
+    })
+  } catch (error) {
+    logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+    return -2
+  }
 
   const searchUsers = []
   const keywordName = `${keyword.firstName} ${keyword.lastName}`.trim()
@@ -204,18 +191,6 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
   try {
     let duplicatedFlag = false
 
-    // 変更する承認ルートが既に変更された場合
-    const isUpdated = await ApproveRoute.findOne({
-      where: {
-        contractId: contract,
-        approveRouteId: prevApproveRouteId,
-        updateFlag: true
-      }
-    })
-    if (isUpdated) {
-      return 1
-    }
-
     // 重複の承認ルート名をチェックのため、DBから変更対象以外の承認ルートを取得
     const resultSearchRoute = await ApproveRoute.findAll({
       where: {
@@ -240,23 +215,57 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
       return 1
     }
 
-    // 重複の承認ルート名がない場合DBに保存する。（ApproveRoute）
-    const resultToInsertRoute = await ApproveRoute.create({
-      contractId: contract,
-      approveRouteName: values.setApproveRouteNameInputId,
-      prevAprroveRouteId: prevApproveRouteId
-    })
+    // 重複の承認ルート名がない場合データを更新する。（ApproveRoute）
+    const updateApproveRoute = await ApproveRoute.update(
+      {
+        approveRouteName: values.setApproveRouteNameInputId
+      },
+      {
+        where: {
+          contractId: contract,
+          approveRouteId: prevApproveRouteId
+        }
+      }
+    )
 
-    // DB保存失敗したらモデルApproveRouteインスタンスではない
-    if (resultToInsertRoute instanceof ApproveRoute === false) {
+    // 更新失敗したらモデルApproveRouteインスタンスではない
+    if (updateApproveRoute[0] !== 1) {
       return -1
     }
+
+    // 変更した承認ルート取得
+    const searchApproveRoute = await ApproveRoute.findOne({
+      where: {
+        contractId: contract,
+        approveRouteId: prevApproveRouteId
+      }
+    })
+
+    if (searchApproveRoute instanceof ApproveRoute === false) {
+      return -1
+    }
+
+    // 変更前の承認ルートに紐づいてる承認者取得
+    const searchApproveUser = await ApproveUser.findAll({
+      where: {
+        approveRouteId: searchApproveRoute.approveRouteId
+      }
+    })
+
+    if (searchApproveUser instanceof Array === false) {
+      return -1
+    }
+
+    // 変更前の承認ルートに紐づいてる承認者削除
+    searchApproveUser.forEach((approverUser) => {
+      approverUser.destroy()
+    })
 
     // 重複の承認ルート名がない場合DBに保存する。（ApproveUser）
     // 承認者が一人の場合
     if (uuids instanceof Array === false) {
       resultToInsertUser = await ApproveUser.create({
-        approveRouteId: resultToInsertRoute.approveRouteId,
+        approveRouteId: searchApproveRoute.approveRouteId,
         approveUser: values.uuid,
         prevApproveUser: null,
         nextApproveUser: null,
@@ -274,7 +283,7 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
 
         let currentUser = null
         resultToInsertUser = await ApproveUser.create({
-          approveRouteId: resultToInsertRoute.approveRouteId,
+          approveRouteId: searchApproveRoute.approveRouteId,
           approveUser: uuids[i],
           prevApproveUser: null,
           nextApproveUser: null,
@@ -298,22 +307,6 @@ const editApprover = async (accTk, refreshTk, contract, values, prevApproveRoute
 
     // DB保存失敗したらモデルApproveRouteインスタンスではない
     if (approveRouteAndApprover === -1) {
-      return -1
-    }
-
-    const prevApproveRouteSetUpdateFlag = await ApproveRoute.update(
-      {
-        updateFlag: true
-      },
-      {
-        where: {
-          approveRouteId: prevApproveRouteId
-        }
-      }
-    )
-
-    // DB保存失敗したらモデルApproveRouteインスタンスではない
-    if (!prevApproveRouteSetUpdateFlag) {
       return -1
     }
 
@@ -389,7 +382,6 @@ const getApproveRoute = async (accessToken, refreshToken, contract, approveRoute
     if (approveRouteApprovers.length === 0) {
       return -1
     }
-    const query = '/account/users'
     const approveRoute = {
       approveRouteId: approveRouteApprovers[0].approveRouteId,
       contractId: approveRouteApprovers[0].contractId,
@@ -417,9 +409,9 @@ const getApproveRoute = async (accessToken, refreshToken, contract, approveRoute
     while (currUser) {
       const userId = currUser.approveUser
       next = currUser.nextApproveUser
-      users.push(
-        new Approver(await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${query}/${userId}`))
-      )
+      const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, null)
+      tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
+      users.push(new Approver(await tradeshiftDTO.getUserById(userId)))
       if (next) {
         currUser = await ApproveUser.findOne({
           where: {
@@ -463,11 +455,11 @@ const duplicateApproveRoute = async (approveRoute) => {
     approverUsers.push(
       new Approver({
         tenantId: null,
-        FirstName: approveRoute.userName.split(nameSep)[0],
-        LastName: approveRoute.userName.split(nameSep)[1],
-        Username: approveRoute.mailAddress,
-        Memberships: [{ GroupId: null }],
-        Id: approveRoute.uuid
+        firstName: approveRoute.userName.split(nameSep)[0],
+        lastName: approveRoute.userName.split(nameSep)[1],
+        email: approveRoute.mailAddress,
+        memberships: [{ GroupId: null }],
+        id: approveRoute.uuid
       })
     )
   } else {
@@ -476,11 +468,11 @@ const duplicateApproveRoute = async (approveRoute) => {
       approverUsers.push(
         new Approver({
           tenantId: null,
-          FirstName: approver.split(nameSep)[0],
-          LastName: approver.split(nameSep)[1],
-          Username: approveRoute.mailAddress[idx],
-          Memberships: [{ GroupId: null }],
-          Id: approveRoute.uuid[idx]
+          firstName: approver.split(nameSep)[0],
+          lastName: approver.split(nameSep)[1],
+          email: approveRoute.mailAddress[idx],
+          memberships: [{ GroupId: null }],
+          id: approveRoute.uuid[idx]
         })
       )
     })
@@ -488,6 +480,39 @@ const duplicateApproveRoute = async (approveRoute) => {
   lastApprover = approverUsers.pop()
 
   return { approveRouteName, approverUsers, lastApprover }
+}
+
+/**
+ * 承認ルートと紐づいているレコードを削除する。
+ * @param {uuid} approveRouteId デジトレの利用の契約者の識別番号
+ * @returns {int} 1：正常_削除成功, -1：削除対象のがない場合, 0：エラー
+ */
+const deleteApproveRoute = async (approveRouteId) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'approverController.deleteApproveRoute')
+
+  try {
+    // 承認ルートを検索
+    const deleteTargetApproveRoute = await ApproveRoute.findOne({
+      where: {
+        approveRouteId: approveRouteId
+      }
+    })
+
+    // null：既に削除されたレコード
+    if (deleteTargetApproveRoute === null) return -1
+
+    // 承認ルート削除
+    logger.info(`${deleteTargetApproveRoute.approveRouteId}の承認ルートの削除処理を開始します。`)
+    await deleteTargetApproveRoute.destroy()
+    logger.info(`${deleteTargetApproveRoute.approveRouteId}の承認ルートの削除処理を終了します。`)
+
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.deleteApproveRoute')
+    return 1
+  } catch (error) {
+    logger.error(error)
+    logger.info(constantsDefine.logMessage.INF001 + 'approverController.deleteApproveRoute')
+    return 0
+  }
 }
 
 /**
@@ -558,37 +583,48 @@ const requestApproval = async (contractId, approveRouteId, invoiceId, requesterI
   try {
     const requestApprovalDAO = new RequestApprovalDAO(contractId)
     const requester = await userController.findOne(requesterId)
-    const waitingWorkflowStatusCode = await approveStatusDAO.getStautsCode('承認依頼中')
+    const noneWorkflowStatusCode = await approveStatusDAO.getStautsCode('未処理')
+    const rejectWorkflowStatusCode = await approveStatusDAO.getStautsCode('差し戻し')
+    const waitingWorkflowStatusCode = await approveStatusDAO.getStautsCode('支払依頼中')
 
-    const oldRequest = await requestApprovalDAO.getpreWorkflowRequestApproval(invoiceId)
+    // 該当請求書の情報取得
+    const requestApprovalFind = await requestApprovalDAO.getRequestApprovalFromInvoice(invoiceId)
 
-    if (!oldRequest) {
+    // 該当請求書の情報が１つもない場合のみ
+    if (!requestApprovalFind) {
+      // レコード作成（ステータス：支払依頼中）
       const newRequest = await requestApprovalDAO.createRequestApproval(
         requester.userId,
         invoiceId,
         approveRouteId,
+        waitingWorkflowStatusCode,
         message
       )
-
       if (newRequest instanceof Request === false) return -1
-
       await newRequest.save()
       return newRequest
     }
 
-    await requestApprovalDAO.updateRequestApproval(
-      oldRequest,
-      requester.userId,
-      approveRouteId,
-      waitingWorkflowStatusCode,
-      message
-    )
-
-    if ((await requestApprovalDAO.saveRequestApproval(oldRequest)) instanceof Request === false) {
-      throw Error('request approval fail')
+    // 該当請求書のステータスが未処理、差し戻しの場合、更新（ステータス：支払依頼中）
+    if (
+      requestApprovalFind.status === noneWorkflowStatusCode ||
+      requestApprovalFind.status === rejectWorkflowStatusCode
+    ) {
+      await requestApprovalDAO.updateRequestApproval(
+        requestApprovalFind,
+        requester.userId,
+        approveRouteId,
+        waitingWorkflowStatusCode,
+        message
+      )
+    } else {
+      return 1
     }
 
-    return oldRequest
+    if ((await requestApprovalDAO.saveRequestApproval(requestApprovalFind)) instanceof Request === false) {
+      throw Error('request approval fail')
+    }
+    return requestApprovalFind
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
     logger.info(constantsDefine.logMessage.INF001 + 'requestApproval')
@@ -612,7 +648,8 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     // approvalテーブルに承認者情報を保存
     const approveStatusDAO = require('../DAO/ApproveStatusDAO')
     const requester = await userController.findOne(requesterId)
-    const waitWorkflowStatusCode = await approveStatusDAO.getStautsCode('承認依頼中')
+    const waitWorkflowStatusCode = await approveStatusDAO.getStautsCode('支払依頼中')
+    const rejectStatusCode = await approveStatusDAO.getStautsCode('差し戻し')
     const approveRoute = await ApproveRoute.findOne({
       where: {
         approveRouteId: approveRouteId,
@@ -622,7 +659,6 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     const approveRouteApprovers = await ApproveRoute.getApproveRoute(contractId, approveRouteId)
 
     // header検索
-    const query = '/account/users'
     let header = null
     let idx = 0
     while (approveRouteApprovers[idx]) {
@@ -643,9 +679,9 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
     while (currUser) {
       const userId = currUser.approveUser
       next = currUser.nextApproveUser
-      users.push(
-        new Approver(await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${query}/${userId}`))
-      )
+      const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, null)
+      tradeshiftDTO.setUserAccounts(require('../DTO/VO/UserAccounts'))
+      users.push(new Approver(await tradeshiftDTO.getUserById(userId)))
       if (next) {
         currUser = await ApproveUser.findOne({
           where: {
@@ -657,28 +693,48 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
       }
     }
 
-    const approvalmodel = await Approval.build({
-      requestId: request.requestId,
-      requestUserId: requester.userId,
-      approveRouteId: approveRouteId,
-      approveStatus: waitWorkflowStatusCode,
-      approveRouteName: approveRoute.approveRouteName
+    let approval
+    approval = await Approval.findOne({
+      where: {
+        requestId: request.requestId,
+        approveStatus: rejectStatusCode
+      }
     })
+
+    // ステータスが未処理の場合
+    if (!approval) {
+      approval = await Approval.build({
+        requestId: request.requestId,
+        requestUserId: requester.userId,
+        approveRouteId: approveRouteId,
+        approveStatus: waitWorkflowStatusCode,
+        approveRouteName: approveRoute.approveRouteName
+      })
+      // ステータスが差し戻しの場合
+    } else {
+      approval.requestUserId = requester.userId
+      approval.approveRouteId = approveRouteId
+      approval.approveStatus = waitWorkflowStatusCode
+      approval.approveRouteName = approveRoute.approveRouteName
+      approval.rejectedUser = null
+      approval.rejectedAt = null
+      approval.rejectedMessage = null
+    }
 
     for (let i = 0; i < 10; i++) {
       if (users[i] && i < users.length - 1) {
-        approvalmodel[`approveUser${i + 1}`] = users[i].Id
+        approval[`approveUser${i + 1}`] = users[i].Id
       } else {
-        approvalmodel[`approveUser${i + 1}`] = null
+        approval[`approveUser${i + 1}`] = null
       }
-      approvalmodel[`approvalAt${i + 1}`] = null
+      approval[`approvalAt${i + 1}`] = null
+      approval[`message${i + 1}`] = null
     }
-    approvalmodel.approveUserLast = users[users.length - 1].Id
-    approvalmodel.approvalAtLast = null
-    approvalmodel.approveUserCount = users.length
-    approvalmodel.message = message
-    await approvalmodel.save()
-
+    approval.approveUserLast = users[users.length - 1].Id
+    approval.approvalAtLast = null
+    approval.messageLast = null
+    approval.approveUserCount = users.length
+    await approval.save()
     return 0
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
@@ -687,50 +743,7 @@ const saveApproval = async (contractId, approveRouteId, requesterId, message, ac
   }
 }
 
-// メッセージ変更
-const saveMessage = async (contractId, invoiceId, requester, message, approveRouteId) => {
-  try {
-    if (approveRouteId === undefined) {
-      approveRouteId = null
-    }
-
-    const requestApprovalDAO = new RequestApprovalDAO(contractId)
-    const approveStatusDAO = require('../DAO/ApproveStatusDAO')
-    const oldRequestApproval = await requestApprovalDAO.getpreWorkflowRequestApproval(invoiceId)
-    const preWorkflowStatusCode = await approveStatusDAO.getStautsCode('未処理')
-
-    if (!oldRequestApproval) {
-      const newRequestApproval = await requestApprovalDAO.createRequestApproval(
-        requester,
-        invoiceId,
-        approveRouteId,
-        message
-      )
-      if ((await requestApprovalDAO.saveRequestApproval(newRequestApproval)) !== newRequestApproval) {
-        throw new Error('failed save a message')
-      }
-      return 0
-    }
-
-    await requestApprovalDAO.updateRequestApproval(
-      oldRequestApproval,
-      requester,
-      approveRouteId,
-      preWorkflowStatusCode,
-      message
-    )
-    if ((await requestApprovalDAO.saveRequestApproval(oldRequestApproval)) !== oldRequestApproval) {
-      throw new Error('failed save a message')
-    }
-
-    return 0
-  } catch (error) {
-    logger.error({ contractId: contractId, stack: error.stack, status: 0 })
-    return error
-  }
-}
-
-const readApproval = async (contractId, invoiceId, isSaved) => {
+const readApproval = async (contractId, invoiceId) => {
   try {
     const request = await Request.findOne({
       where: {
@@ -741,13 +754,8 @@ const readApproval = async (contractId, invoiceId, isSaved) => {
     })
 
     if (request === null) return null
-    else {
-      if (isSaved === false) {
-        request.isSaved = false
-        await request.save()
-      }
-      return request
-    }
+
+    return request
   } catch (error) {
     logger.error({ contractId: contractId, stack: error.stack, status: 0 })
     return error
@@ -777,7 +785,7 @@ const checkApproveRoute = async (contractId, approveRouteId) => {
   }
 }
 
-const updateApprove = async (contractId, requestId, message) => {
+const updateApprove = async (contractId, requestId, message, userId) => {
   try {
     let userNo
     const userData = {}
@@ -814,24 +822,30 @@ const updateApprove = async (contractId, requestId, message) => {
       userData[`message${userNo}`] = message
     }
 
-    const updateApproval = await Approval.update(userData, {
-      where: {
-        approvalId: selectApproval.approvalId
-      }
-    })
+    const hasPowerOfEditing = await approvalInboxController.hasPowerOfEditing(contractId, userId, requestId)
 
-    if (!updateApproval) return false
-
-    const updateReqeust = await Request.update(
-      { status: status.code },
-      {
+    if (hasPowerOfEditing === true) {
+      const updateApproval = await Approval.update(userData, {
         where: {
-          requestId: requestId
+          approvalId: selectApproval.approvalId
         }
-      }
-    )
+      })
 
-    if (!updateReqeust) return false
+      if (!updateApproval) return false
+
+      const updateReqeust = await Request.update(
+        { status: status.code },
+        {
+          where: {
+            requestId: requestId
+          }
+        }
+      )
+
+      if (!updateReqeust) return false
+    } else {
+      return -1
+    }
 
     return true
   } catch (error) {
@@ -891,10 +905,10 @@ module.exports = {
   editApprover: editApprover,
   getApproveRouteList: getApproveRouteList,
   getApproveRoute: getApproveRoute,
+  deleteApproveRoute: deleteApproveRoute,
   duplicateApproveRoute: duplicateApproveRoute,
   searchApproveRouteList: searchApproveRouteList,
   requestApproval: requestApproval,
-  saveMessage: saveMessage,
   readApproval: readApproval,
   checkApproveRoute: checkApproveRoute,
   saveApproval: saveApproval,

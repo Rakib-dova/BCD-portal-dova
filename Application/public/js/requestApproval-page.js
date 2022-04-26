@@ -1,6 +1,7 @@
 import { $ } from '../module/getElements.js'
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
+const modal = document.getElementById('request-progress-modal')
 const ua = window.navigator.userAgent
 if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
   const tag = document.createElement('script')
@@ -14,14 +15,33 @@ if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
 }
 
 // メッセージ文字数確認
-$('#inputMsg').addEventListener('keyup', function () {
-  $('#msgCount').innerText = '(' + $('#inputMsg').value.length + '/1500)'
+function messageCheck(event) {
+  // lfCnt linefeedのカウンター
+  $('#inputMsg').addEventListener(event, function () {
+    let msgLen = $('#inputMsg').value.length
+    let lfCnt = 0
 
-  if ($('#inputMsg').value.length > 1500) {
-    $('#inputMsg').value($('#inputMsg').value.substring(0, 1500))
-    $('#msgCount').innerText = '1500/1500'
-  }
-})
+    for (const char of $('#inputMsg').value) {
+      if (encodeURI(char) === '%0A') {
+        msgLen++
+        lfCnt++
+      }
+    }
+
+    $('#msgCount').innerText = `(${msgLen}/1500)`
+
+    if (msgLen > 1500) {
+      $('#inputMsg').value = $('#inputMsg').value.substring(0, 1500 - lfCnt)
+      msgLen = $('#inputMsg').value.length
+      $('#msgCount').innerText = `(${msgLen}/1500)`
+    }
+  })
+}
+messageCheck('keyup')
+messageCheck('keydown')
+messageCheck('paste')
+messageCheck('focusin')
+messageCheck('focusout')
 
 // 承認ルートモーダルの内の検索ボタン
 $('#btnSearchApproveRoute').addEventListener('click', function () {
@@ -207,8 +227,16 @@ const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
     const noElement = document.createElement('div')
     const nameElement = document.createElement('div')
     element.classList.add('columns')
+    element.classList.add('m-0')
+    element.classList.add('p-0')
+    element.classList.add('is-max-width')
     noElement.classList.add('column')
+    noElement.classList.add('is-one-third')
+    noElement.classList.add('text-left')
+    noElement.classList.add('is-border-right')
     nameElement.classList.add('column')
+    nameElement.classList.add('text-left')
+    nameElement.classList.add('is-border-right')
     noElement.innerText = noText
     nameElement.innerText = name
     element.appendChild(noElement)
@@ -216,15 +244,27 @@ const displayDetailApproveRoute = function (detailApproveRoute, blackboard) {
     return element
   }
   const approverLen = approver.length
-  cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(createApproverRow('承認順', '承認者'))
+  const header = createApproverRow('承認順', '承認者')
+  header.classList.add('is-border-left-top')
+  header.querySelectorAll('.column')[0].classList.add('is-color-table-header')
+  header.querySelectorAll('.column')[1].classList.add('is-color-table-header')
+  cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(header)
   for (let idx = 0; idx < approverLen; idx++) {
     let no = null
     if (idx < approverLen - 1) {
       no = approValNo[idx]
     } else {
-      no = approValNo.slice(-1)
+      no = approValNo.slice(-1)[0]
     }
     const rowLastApprover = createApproverRow(no, `${approver[idx].FirstName} ${approver[idx].LastName}`)
+
+    if (no !== approValNo.slice(-1)[0]) {
+      rowLastApprover.classList.add('is-border-left-top')
+      rowLastApprover.classList.add('is-max-width')
+    } else {
+      rowLastApprover.classList.add('is-border-left-top-bottom')
+      rowLastApprover.classList.add('is-max-width')
+    }
     cloneTemplate.querySelector('#displayDetailApproveRouteTable').appendChild(rowLastApprover)
   }
   blackboard.appendChild(cloneTemplate)
@@ -258,6 +298,8 @@ $('#btn-confirm').addEventListener('click', function () {
   $('#check-request-approve-route').appendChild(cloneDiplay)
 })
 
-$('#btn-approval').addEventListener('click', function () {
+$('#btn-approval').addEventListener('click', (e) => {
+  e.preventDefault()
+  modal.classList.add('is-active')
   $('#approval').submit()
 })
