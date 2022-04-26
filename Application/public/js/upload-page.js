@@ -1,19 +1,8 @@
+import { $ } from '../module/selector.js'
 const modal = document.getElementById('upload-progress-modal')
 const uploader = document.getElementsByClassName('uploader').item(0)
 let fileReader = null
 let targetFile = null
-
-const $ = (_selector) => {
-  const selectorDelimeter = _selector.substr(0, 1)
-  const selector = _selector.substr(1, _selector.length)
-
-  switch (selectorDelimeter) {
-    case '#':
-      return document.getElementById(selector)
-    case '.':
-      return document.getElementsByClassName(selector)
-  }
-}
 
 // 「アップロード開始」ボタンの活性化のスイッチ
 $('#file-upload').addEventListener('change', function (e) {
