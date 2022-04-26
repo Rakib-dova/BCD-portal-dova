@@ -1,6 +1,5 @@
 class Yayoi {
   constructor(mainBodyPartsFlag, coding, convertDebitTaxCategory, convertCreditTaxCategory) {
-    console.log(coding)
     this.convertDebitTaxCategory = convertDebitTaxCategory
     this.convertCreditTaxCategory = convertCreditTaxCategory
     this.header = mainBodyPartsFlag
