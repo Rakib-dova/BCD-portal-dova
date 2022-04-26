@@ -294,9 +294,8 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
                   data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditSubAccountCode`],
                 creditDepartmentCode:
                   data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditDepartmentCode`],
-                installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(
-                  /,/g,
-                  ''
+                installmentAmount: BigInt(
+                  data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(/,/g, '')
                 )
               }
             })
@@ -315,9 +314,8 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
                 creditAccountCode: '',
                 creditSubAccountCode: '',
                 creditDepartmentCode: '',
-                installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(
-                  /,/g,
-                  ''
+                installmentAmount: BigInt(
+                  data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(/,/g, '')
                 )
               }
             })
@@ -338,9 +336,8 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
                   data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditSubAccountCode`],
                 creditDepartmentCode:
                   data[`lineNo${idx}_lineCreditAccountCode${accountLineNumber}_creditDepartmentCode`],
-                installmentAmount: ~~data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(
-                  /,/g,
-                  ''
+                installmentAmount: BigInt(
+                  data[`lineNo${idx}_lineAccountCode${accountLineNumber}_input_amount`].replace(/,/g, '')
                 )
               }
             })

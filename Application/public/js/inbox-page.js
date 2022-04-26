@@ -997,7 +997,7 @@ const btnMinusAccount = function () {
     const thisLineInput = $(`#${deleteTarget}_input_amount`)
     const lineNoFirstInput = $(`#${deleteTarget.split('_')[0]}_lineAccountCode1_input_amount`)
     lineNoFirstInput.value = (
-      ~~lineNoFirstInput.value.replaceAll(',', '') + ~~thisLineInput.value.replaceAll(',', '')
+      BigInt(lineNoFirstInput.value.replaceAll(',', '')) + BigInt(thisLineInput.value.replaceAll(',', ''))
     ).toLocaleString('ja-JP')
   }
   $(`#${deleteTarget}`).remove()
@@ -1009,7 +1009,7 @@ const btnMinusAccount = function () {
 function btnInstallmentAmount() {
   const showModalTarget = $(`#${this.dataset.target}`)
   const inputTarget = this.dataset.input
-  $('#inputInstallmentAmount').value = ~~$(`#${inputTarget}`).value.replaceAll(',', '')
+  $('#inputInstallmentAmount').value = BigInt($(`#${inputTarget}`).value.replaceAll(',', ''))
   showModalTarget.classList.toggle('is-active')
   showModalTarget.querySelector('#btn-insert').dataset.target = inputTarget
   showModalTarget.querySelector('#installmentAmountErrMsg').innerText = '　'
@@ -1035,7 +1035,7 @@ $('#inputInstallmentAmount').addEventListener('blur', function () {
   }
 })
 $('#inputInstallmentAmount').addEventListener('focus', function () {
-  if (~~this.value === 0) {
+  if (BigInt(this.value) === 0) {
     this.value = ''
   }
 })
@@ -1044,18 +1044,19 @@ $('#inputInstallmentAmount').addEventListener('focus', function () {
 $('#btn-insert').addEventListener('click', function () {
   const inputTarget = this.dataset.target
   const valueInput = $('#inputInstallmentAmount')
-  const totalAmmout = ~~$(`#${inputTarget.split('_')[0]}Total`).value.replaceAll(',', '')
-  if (~~valueInput.value !== 0) {
-    if (totalAmmout - valueInput.value <= 0) {
+  const totalAmmout = BigInt($(`#${inputTarget.split('_')[0]}Total`).value.replaceAll(',', ''))
+
+  if (BigInt(valueInput.value) !== 0n) {
+    if (totalAmmout - BigInt(valueInput.value) <= 0) {
       $('#installmentAmountErrMsg').innerText = '計上金額の合計が小計金額を超えています。'
       return null
     }
 
-    $(`#${inputTarget}`).value = (~~valueInput.value).toLocaleString('ja-JP')
+    $(`#${inputTarget}`).value = BigInt(valueInput.value).toLocaleString('ja-JP')
     let checkTotalAmount = totalAmmout
     Array.prototype.forEach.call($(`.${inputTarget.split('_')[0]}_input_amount`), (item, idx) => {
       if (idx !== 0) {
-        checkTotalAmount -= ~~item.value.replaceAll(',', '')
+        checkTotalAmount -= BigInt(item.value.replaceAll(',', ''))
       }
     })
     if (checkTotalAmount <= 0) {
@@ -1104,7 +1105,7 @@ const getJournalList = function () {
             creditAccountCode: journal.querySelectorAll('input[type=text]')[3].value,
             creditSubAccountCode: journal.querySelectorAll('input[type=text]')[4].value,
             journalNo: journalNo,
-            input_amount: ~~journal.querySelectorAll('input[type=text]')[6].value.replaceAll(',', '')
+            input_amount: BigInt(journal.querySelectorAll('input[type=text]')[6].value.replaceAll(',', ''))
           }
         } else {
           journalLines[idx][jdx] = {
@@ -1113,7 +1114,7 @@ const getJournalList = function () {
             creditAccountCode: journal.querySelectorAll('input[type=text]')[3].value,
             creditSubAccountCode: journal.querySelectorAll('input[type=text]')[4].value,
             journalNo: journalNo,
-            input_amount: ~~journal.querySelectorAll('input[type=text]')[6].value.replaceAll(',', '')
+            input_amount: BigInt(journal.querySelectorAll('input[type=text]')[6].value.replaceAll(',', ''))
           }
         }
       })
@@ -1158,7 +1159,7 @@ const checkJournalList = function () {
       }
     })
   })
-  //
+
   for (let i = 0; i < journalLines.length; i++) {
     let total = 0
     for (let j = 0; j < journalLines[i].length; j++) {
@@ -1168,20 +1169,20 @@ const checkJournalList = function () {
       })
       // 仕訳情報が設定されていない小計チェック用
       if (checkJournalLines.length === 1) {
-        total = ~~journalLines[i][j].input_amount.replaceAll(',', '')
+        total = BigInt(journalLines[i][j].input_amount.replaceAll(',', ''))
         break
       }
       // 設定した仕訳情報の計上金額をチェック用
       if (journalLines[i][j] !== undefined) {
-        total = total + ~~journalLines[i][j].input_amount.replaceAll(',', '')
-        if (~~journalLines[i][j].input_amount.replaceAll(',', '') === 0) {
+        total = BigInt(total) + BigInt(journalLines[i][j].input_amount.replaceAll(',', ''))
+        if (BigInt(journalLines[i][j].input_amount.replaceAll(',', '')) === 0n) {
           isFirstLineNull = true
           $('#error-message-body').innerText = '計上金額は1円以上を入力して下さい。'
         }
       }
     }
     // 金額が誤りがある場合
-    if (total !== ~~$(`#lineNo${i + 1}Total`).value.replaceAll(',', '')) {
+    if (total !== BigInt($(`#lineNo${i + 1}Total`).value.replaceAll(',', ''))) {
       isFirstLineNull = true
       $('#error-message-body').innerText = '仕訳情報を正しく設定してください。'
     }

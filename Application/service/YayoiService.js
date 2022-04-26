@@ -19,8 +19,6 @@ class YayoiService {
 
     if (invoices === null) return null
 
-    console.log(this.convertDebitTaxCategory)
-
     for (const invoice of invoices) {
       const invoiceLine = invoice.invoiceLine
       for (let idx = 0; idx < invoiceLine.length; idx++) {
