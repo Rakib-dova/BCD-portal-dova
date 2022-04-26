@@ -9,6 +9,10 @@ module.exports = (DataTypes, Sequelize) => {
      */
     static associate(models) {
       // define association here
+      pdfInfoDetail.belongsTo(models.pdfInfo, {
+        foreignKey: 'invoiceId',
+        targetKey: 'invoiceId'
+      })
     }
   }
   pdfInfoDetail.init(
@@ -17,9 +21,16 @@ module.exports = (DataTypes, Sequelize) => {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
+        references: {
+          model: {
+            tableName: 'pdfInfo'
+          },
+          key: 'invoiceId'
+        },
         type: DataTypes.STRING
       },
       no: {
+        primaryKey: true,
         type: DataTypes.STRING
       },
       contents: {
@@ -29,13 +40,13 @@ module.exports = (DataTypes, Sequelize) => {
         type: DataTypes.STRING
       },
       unitPrice: {
-        type: DataTypes.FLOAT
+        type: DataTypes.INTEGER
       },
       taxRate: {
         type: DataTypes.INTEGER
       },
       subtotal: {
-        type: DataTypes.FLOAT
+        type: DataTypes.INTEGER
       }
     },
     {

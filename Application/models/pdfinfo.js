@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       invoicesId: {
         type: DataTypes.UUID,
-        foreignKey: true,
+        primaryKey: true,
         allowNull: false
       },
       tmpFlg: {
@@ -67,13 +67,16 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING
       },
       subtotal: {
-        type: DataTypes.FLOAT
+        type: DataTypes.INTEGER
+      },
+      taxTotal: {
+        type: DataTypes.INTEGER
       },
       total: {
-        type: DataTypes.FLOAT
+        type: DataTypes.INTEGER
       },
       bankName: {
-        type: DataTypes.FLOAT
+        type: DataTypes.STRING
       },
       bankBranch: {
         type: DataTypes.STRING
@@ -88,6 +91,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING
       },
       note: {
+        type: DataTypes.STRING
+      },
+      imprintPath: {
         type: DataTypes.STRING
       }
     },

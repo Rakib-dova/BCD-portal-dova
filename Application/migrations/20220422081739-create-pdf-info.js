@@ -6,7 +6,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.STRING(50)
+        type: Sequelize.DataTypes.UUID
       },
       tmpFlg: {
         type: Sequelize.BOOLEAN,
@@ -58,13 +58,16 @@ module.exports = {
         type: Sequelize.STRING(50)
       },
       subtotal: {
-        type: Sequelize.FLOAT(14)
+        type: Sequelize.INTEGER(14)
+      },
+      taxTotal: {
+        type: Sequelize.INTEGER(14)
       },
       total: {
-        type: Sequelize.FLOAT(14)
+        type: Sequelize.INTEGER(14)
       },
       bankName: {
-        type: Sequelize.FLOAT(14)
+        type: Sequelize.STRING(50)
       },
       bankBranch: {
         type: Sequelize.STRING(30)
@@ -80,6 +83,9 @@ module.exports = {
       },
       note: {
         type: Sequelize.STRING(150)
+      },
+      imprintPath: {
+        type: Sequelize.STRING(255)
       }
     })
   },

@@ -6,25 +6,35 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.String(50)
+        references: {
+          model: {
+            tableName: 'pdfInfo'
+          },
+          key: 'invoiceId'
+        },
+        type: Sequelize.DataTypes.UUID
       },
       no: {
+        primaryKey: true,
         type: Sequelize.STRING(2)
       },
       contents: {
         type: Sequelize.STRING(60)
       },
+      quantity: {
+        type: Sequelize.INTEGER(14)
+      },
       unit: {
         type: Sequelize.STRING(10)
       },
       unitPrice: {
-        type: Sequelize.FLOAT(14)
+        type: Sequelize.INTEGER(14)
       },
       taxRate: {
         type: Sequelize.INTEGER(2)
       },
       subtotal: {
-        type: Sequelize.FLOAT(14)
+        type: Sequelize.INTEGER(14)
       }
     })
   },
