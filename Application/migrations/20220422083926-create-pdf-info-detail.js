@@ -1,18 +1,18 @@
 'use strict'
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('pdfInfoDetails', {
+    await queryInterface.createTable('PdfInfoDetails', {
       invoiceId: {
-        allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
         references: {
           model: {
-            tableName: 'pdfInfo'
+            tableName: 'PdfInfos'
           },
-          key: 'invoiceId'
+          key: 'invoiceId',
+          onUpdate: 'cascacde',
+          onDelete: 'cascacde'
         },
-        type: Sequelize.DataTypes.UUID
+        type: Sequelize.UUID
       },
       no: {
         primaryKey: true,
@@ -22,23 +22,23 @@ module.exports = {
         type: Sequelize.STRING(60)
       },
       quantity: {
-        type: Sequelize.INTEGER(14)
+        type: Sequelize.INTEGER
       },
       unit: {
         type: Sequelize.STRING(10)
       },
       unitPrice: {
-        type: Sequelize.INTEGER(14)
+        type: Sequelize.INTEGER
       },
       taxRate: {
-        type: Sequelize.INTEGER(2)
+        type: Sequelize.INTEGER
       },
       subtotal: {
-        type: Sequelize.INTEGER(14)
+        type: Sequelize.INTEGER
       }
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('pdfInfoDetails')
+    await queryInterface.dropTable('PdfInfoDetails')
   }
 }

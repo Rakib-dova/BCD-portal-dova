@@ -1,12 +1,11 @@
 'use strict'
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('pdfInfos', {
+    await queryInterface.createTable('PdfInfos', {
       invoiceId: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.DataTypes.UUID
+        type: Sequelize.UUID
       },
       tmpFlg: {
         type: Sequelize.BOOLEAN,
@@ -58,13 +57,13 @@ module.exports = {
         type: Sequelize.STRING(50)
       },
       subtotal: {
-        type: Sequelize.INTEGER(14)
+        type: Sequelize.INTEGER
       },
       taxTotal: {
-        type: Sequelize.INTEGER(14)
+        type: Sequelize.INTEGER
       },
       total: {
-        type: Sequelize.INTEGER(14)
+        type: Sequelize.INTEGER
       },
       bankName: {
         type: Sequelize.STRING(50)
@@ -90,6 +89,6 @@ module.exports = {
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('pdfInfos')
+    await queryInterface.dropTable('PdfInfos')
   }
 }
