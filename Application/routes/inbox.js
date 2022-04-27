@@ -258,7 +258,7 @@ const cbPostGetCode = async (req, res, next) => {
 
 const cbPostIndex = async (req, res, next) => {
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  let jsonLog = { tenantId: req.user.tenantId, action: 'setupJournal-request' }
+  let jsonLog = { tenantId: req.user.tenantId, action: 'journalSetupRequest' }
   // console.log('==  仕分情報設定リクエスト  開始  =================================\n', jsonLog)
   console.log('==  仕分情報設定 リクエスト  =================================')
   logger.info(jsonLog)
@@ -342,7 +342,7 @@ const cbPostIndex = async (req, res, next) => {
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
   jsonLog = {
     tenantId: req.user.tenantId,
-    action: 'journalInfo',
+    action: 'setupJournalInfo',
     accountCode: accountCode,
     subAccountCode: subAccountCode,
     departmentCode: departmentCode,

@@ -122,7 +122,7 @@ const cbPostUpload = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
-  const jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUpload-request' }
+  const jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUploadRequest' }
   // console.log('==  CSVアップロード 開始  =================================\n')
   console.log('==  請求書一括アップロード リクエスト  =================================')
   logger.info(jsonLog)
@@ -651,7 +651,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     jsonLog = {
       tenantId: _req.user.tenantId,
       action: 'uploadedInvoiceInfo',
-      invoiceCount: invoices.length,
+      uploadedInvoiceCount: invoices.length,
       invoices: invoices
     }
   }

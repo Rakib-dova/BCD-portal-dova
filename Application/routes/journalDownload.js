@@ -118,7 +118,7 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
 
   // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  let jsonLog = { tenantId: req.user.tenantId, action: 'journalDownload-request' }
+  let jsonLog = { tenantId: req.user.tenantId, action: 'journalDownloadRequest' }
   // console.log('==  仕分ダウンロードリクエスト  開始  =================================\n', jsonLog)
   console.log('==  仕分ダウンロード リクエスト  =================================')
   logger.info(jsonLog)
@@ -286,8 +286,8 @@ const cbPostIndex = async (req, res, next) => {
             // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
             jsonLog = {
               tenantId: req.user.tenantId,
-              action: 'journalInfo',
-              invoiceCount: 1,
+              action: 'downloadedJournalInfo',
+              downloadedJournalCount: 1,
               finalApproved: chkFinalapproval
             }
             // console.log('==  ダウンロードした仕分情報  =================================\n', jsonLog)
@@ -358,7 +358,7 @@ const cbPostIndex = async (req, res, next) => {
         jsonLog = {
           tenantId: req.user.tenantId,
           action: 'downloadedJournalInfo',
-          invoiceCount: (invoiceArray.length - 2) > 0 ? (invoiceArray.length - 2) : undefined,
+          downloadedJournalCount: (invoiceArray.length - 2) > 0 ? (invoiceArray.length - 2) : undefined,
           finalApproved: chkFinalapproval
         }
         // console.log('==  ダウンロードした仕分情報  =================================\n', jsonLog)

@@ -129,7 +129,7 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
 
   // アプリ効果測定用ログ出力
-  let jsonLog = { tenantId: req.user.tenantId, action: 'invoiceDownload-request' }
+  let jsonLog = { tenantId: req.user.tenantId, action: 'invoiceDownloadRequest' }
   // console.log('==  CSVダウンロード 開始  =================================\n', jsonLog)
   console.log('==  請求書ダウンロード リクエスト  =================================')
   logger.info(jsonLog)
@@ -385,7 +385,7 @@ const cbPostIndex = async (req, res, next) => {
             jsonLog = {
               tenantId: req.user.tenantId,
               action: 'downloadedInvoiceInfo',
-              invoiceCount: 1
+              downloadedInvoiceCount: 1
             }
             // console.log('==  ダウンロードした請求情報のレコード挿入  =================================\n', jsonLog)
             console.log('==  ダウンロードした請求情報  =================================')
@@ -426,7 +426,7 @@ const cbPostIndex = async (req, res, next) => {
         jsonLog = {
           tenantId: req.user.tenantId,
           action: 'downloadedInvoiceInfo',
-          invoiceCount: documentsResult.itemCount
+          downloadedInvoiceCount: documentsResult.itemCount
         }
         // console.log('==  ダウンロードした請求情報のレコード挿入  =================================\n', jsonLog)
         console.log('==  ダウンロードした請求情報  =================================')
