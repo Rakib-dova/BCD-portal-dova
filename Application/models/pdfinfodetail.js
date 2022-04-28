@@ -1,7 +1,7 @@
 'use strict'
 const { Model } = require('DataTypes')
 module.exports = (DataTypes, Sequelize) => {
-  class pdfInfoDetail extends Model {
+  class pdfInvoiceDetail extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of DataTypes lifecycle.
@@ -9,13 +9,13 @@ module.exports = (DataTypes, Sequelize) => {
      */
     static associate(models) {
       // define association here
-      pdfInfoDetail.belongsTo(models.pdfInfo, {
+      pdfInvoiceDetail.belongsTo(models.pdfInvoice, {
         foreignKey: 'invoiceId',
         targetKey: 'invoiceId'
       })
     }
   }
-  pdfInfoDetail.init(
+  pdfInvoiceDetail.init(
     {
       invoiceId: {
         allowNull: false,
@@ -23,7 +23,7 @@ module.exports = (DataTypes, Sequelize) => {
         primaryKey: true,
         references: {
           model: {
-            tableName: 'pdfInfo'
+            tableName: 'pdfInvoice'
           },
           key: 'invoiceId'
         },
@@ -51,8 +51,8 @@ module.exports = (DataTypes, Sequelize) => {
     },
     {
       DataTypes,
-      modelName: 'pdfInfoDetail'
+      modelName: 'pdfInvoiceDetail'
     }
   )
-  return pdfInfoDetail
+  return pdfInvoiceDetail
 }

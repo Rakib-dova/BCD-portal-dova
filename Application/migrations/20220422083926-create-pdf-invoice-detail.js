@@ -1,12 +1,12 @@
 'use strict'
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('PdfInfoDetails', {
+    await queryInterface.createTable('PdfInvoiceDetails', {
       invoiceId: {
         primaryKey: true,
         references: {
           model: {
-            tableName: 'PdfInfos'
+            tableName: 'PdfInvoices'
           },
           key: 'invoiceId',
           onUpdate: 'cascacde',
@@ -39,6 +39,6 @@ module.exports = {
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('PdfInfoDetails')
+    await queryInterface.dropTable('PdfInvoiceDetails')
   }
 }

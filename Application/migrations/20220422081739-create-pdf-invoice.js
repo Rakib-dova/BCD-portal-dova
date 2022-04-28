@@ -1,7 +1,7 @@
 'use strict'
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('PdfInfos', {
+    await queryInterface.createTable('PdfInvoices', {
       invoiceId: {
         allowNull: false,
         primaryKey: true,
@@ -40,6 +40,9 @@ module.exports = {
       },
       destAddr3: {
         type: Sequelize.STRING(50)
+      },
+      sendTenantId: {
+        type: Sequelize.UUID
       },
       sendCompany: {
         type: Sequelize.STRING(30)
@@ -89,6 +92,6 @@ module.exports = {
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('PdfInfos')
+    await queryInterface.dropTable('PdfInvoices')
   }
 }

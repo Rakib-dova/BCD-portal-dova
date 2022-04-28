@@ -1,5 +1,5 @@
-const PdfInfo = require('../models').PdfInfo
-const PdfInfoDetail = require('../models').PdfInfoDetail
+const PdfInvoice = require('../models').PdfInvoice
+const PdfInvoiceDetail = require('../models').PdfInvoiceDetail
 
 const db = require('../models')
 const logger = require('../lib/logger')
@@ -7,7 +7,7 @@ const logger = require('../lib/logger')
 module.exports = {
   findOne: async (incoiceId) => {
     try {
-      return await PdfInfo.findOne({
+      return await PdfInvoice.findOne({
         where: {
           incoiceId: incoiceId
         }
@@ -20,7 +20,7 @@ module.exports = {
   },
   findAll: async () => {
     try {
-      return await PdfInfo.findAll({})
+      return await PdfInvoice.findAll({})
     } catch (error) {
       // status 0はDBエラー
       logger.error({ stack: error.stack, status: 0 }, error.name)
@@ -28,20 +28,20 @@ module.exports = {
     }
   },
 
-  create: async (pdfInfo, pdfInfoDetails) => {
+  create: async (PdfInvoice, PdfInvoiceDetails) => {
     // データベース接続回りはtry-catch
     try {
       /* トランザクション */
       const created = await db.sequelize.transaction(async (t) => {
-        // PdfInfoテーブル
-        const result = await PdfInfo.findOrCreate(pdfInfo, {
-          where: { incoiceId: pdfInfo.incoiceId },
+        // PdfInvoiceテーブル
+        const result = await PdfInvoice.findOrCreate(PdfInvoice, {
+          where: { incoiceId: PdfInvoice.incoiceId },
           transaction: t
         })
 
-        // PdfInfoDetailテーブル
-        for (const detail in pdfInfoDetails) {
-          await PdfInfo.findOrCreate(detail, {
+        // PdfInvoiceDetailテーブル
+        for (const detail in PdfInvoiceDetails) {
+          await PdfInvoice.findOrCreate(detail, {
             where: { incoiceId: detail.incoiceId },
             transaction: t
           })
@@ -51,14 +51,14 @@ module.exports = {
       return created
     } catch (error) {
       // status 0はDBエラー
-      logger.error({ incoiceId: pdfInfo.incoiceId, stack: error.stack, status: 0 }, error.name)
+      logger.error({ incoiceId: PdfInvoice.incoiceId, stack: error.stack, status: 0 }, error.name)
       return error
     }
   },
 
   update: async (values) => {
     try {
-      return await PdfInfo.update(values, {
+      return await PdfInvoice.update(values, {
         where: {
           incoiceId: values.incoiceId
         }
@@ -73,11 +73,11 @@ module.exports = {
     // データベース接続回りはtry-catch
     try {
       const deleted = await db.sequelize.transaction(async (t) => {
-        await PdfInfoDetail.destroy({
+        await PdfInvoiceDetail.destroy({
           where: { incoiceId: incoiceId }
         })
 
-        const destroy = await PdfInfo.destroy({
+        const destroy = await PdfInvoice.destroy({
           where: { incoiceId: incoiceId }
         })
 
