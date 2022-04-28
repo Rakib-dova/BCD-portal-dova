@@ -7,7 +7,7 @@ class YayoiService {
     this.contract = contract
   }
 
-  async convertToYayoi(sentBy, businessId, minIssuedate, maxIssuedate, isCloedApproval) {
+  async convertToKaikei(sentBy, businessId, minIssuedate, maxIssuedate, isCloedApproval) {
     const invoices = await this.invoiceFactory.getInvoices(
       sentBy,
       businessId,
