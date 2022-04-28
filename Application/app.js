@@ -332,6 +332,10 @@ app.use('/change', require('./routes/change').router)
 // 請求書ダウンロード
 app.use('/csvDownload', require('./routes/csvDownload').router)
 
+/* PoC PDF出力機能 */
+app.use('/pdfInvoiceRegister', require('./routes/pdfInvoiceRegister').router)
+app.use('/pdfInvoiceList', require('./routes/pdfInvoiceList').router)
+
 /**  会員サイト開発 20220228 */
 // アプリ一覧からの遷移受付けエンドポイント
 app.use('/memberCooperation', require('./memberSite/routes/memberCooperationRouter').router)

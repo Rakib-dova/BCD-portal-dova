@@ -1,0 +1,33 @@
+.columns.m-0
+  .column.is-two-thirds
+    p.title.is-10 請求書
+  .column
+    .media.media-center 
+        figure.image 
+          img(src = imprintSrc)
+  .column
+    .media.media-center 
+        figure.image 
+          img(src = logoSrc) 
+
+p エラー表示場所
+
+.columns.m-0 
+  .column
+    p.font-bold 宛先
+    input(name='content' type='text' placeholder='宛先企業名').width-220px
+    input(name='content' type='text' placeholder='郵便番号').width-220px
+    input(name='content' type='text' placeholder='都道府県').width-220px
+    input(name='content' type='text' placeholder='住所').width-220px
+    input(name='content' type='text' placeholder='ビル名/フロア等').width-220px
+  .column
+    p.font-bold 差出人
+    p 差出人企業
+    p xxx-xxxx 
+    p 東京都
+    p 渋谷区渋谷
+    p ビル名フロア
+  .column 
+    p.font-bold 請求書番号
+    input(name='content' type='text').width-220px
+    

@@ -1,0 +1,35 @@
+div.margin-top-20p
+  table.table.is-fullwidth.is-hoverable.table-fixed
+    thead
+      tr
+        th.width-2.text-center No.
+        th.width-5.text-left 項目ID
+        th.width-13.text-left 内容
+        th.width-10.text-left 数量
+        th.width-5.text-left 単位
+        th.width-10.text-left 単価
+        th.width-10.text-left 税
+        th.width-10.text-center 小計（税抜）
+        th.width-5.text-center 
+    tbody
+        tr
+          th.width-2.text-center 1
+          td.text-center
+            input(name='ID' type='text').width-80px
+          td.text-center
+            input(name='content' type='text').width-220px
+          td.text-center
+            input(name='quantity' type='text') 
+          td.text-center
+            input(name='unit' type='text').width-80px
+          td.text-center
+            input(name='unitPrice' type='text')
+          td.text-center
+            select(name='taxType')
+              option(value='freeTax') 不課税
+              option(value='dutyFree') 免税
+              option(value='tax10p') 消費税 10%
+              option(value='tax8p') 消費税(軽減税率) 8%
+              option(value='otherTax') その他消費税      
+          td.text-right 1,111,111,111
+          td.text-center 

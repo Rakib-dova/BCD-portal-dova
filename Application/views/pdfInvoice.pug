@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans #{title}
+        .subtitle.is-family-noto-sans #{engTitle}
+
+  .container
+    div.title-box-journallzing
+      h4.title-text-journallzing.text-inbox 出力内容登録
+    .box
+      form#form(method='POST')
+        .box
+          include invoicePDFHeader
+          include invoicePDFBasicInfo
+          //- include invoicePDFLines
+          //- include invoicePDFFooter
+        .grouped-button
+          a.button.mr-6(href='/pdfInvoiceList/1')  戻る
+          a.button.mr-6.is-success#btn-confirm 一時保存
+          a.button.is-link(href=`/requestApproval/${documentId}`) 出力
+  
+  include footer 
+
+
+block append scripts
+  //- script(src="/js/inbox-page.js")
+  link(rel='stylesheet', type='text/css', href='/css/inbox.css')
