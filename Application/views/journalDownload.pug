@@ -72,10 +72,11 @@ block content
               label.bulmalabel 出力フォーマット
             .field-body
               .select.is-fullwidth
-                select(name='serviceDataFormat')
+                select(name='serviceDataFormat' id='serviceDataFormat')
                   option(value=0) デフォルト
                   option(value=1) 弥生会計（05以降）
                   option(value=2) 勘定奉行
+                input(type="hidden" name='serviceDataFormatName' id='serviceDataFormatName' value= 'デフォルト')
             
 
         .field.is-grouped.is-grouped-centered
@@ -85,7 +86,7 @@ block content
                 p.border-journaldownload ※ダウンロードされる請求書数は100件以内となるように設定してください。
               .column
                 div.button-area
-                  a.button.is-info#submit(type="submit")  CSVダウンロード
+                  a.button.is-info#submit CSVダウンロード
             
     template#templateAllSelectBtn
         p.control

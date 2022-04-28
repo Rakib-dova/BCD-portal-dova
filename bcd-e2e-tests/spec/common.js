@@ -24,6 +24,20 @@ const { UploadListDetailPage } = require('../page-objects/UploadListDetailPage')
 const { SettlementPage } = require('../page-objects/SettlementPage');
 const { RakkoToolsPage } = require('../page-objects/RakkoToolsPage');
 const { DownloadInvoicePage } = require('../page-objects/DownloadInvoicePage');
+const { JournalMenuPage } = require('../page-objects/JournalMenuPage');
+const { AccountCodeListPage } = require('../page-objects/AccountCodeListPage');
+const { RegistAccountCodePage } = require('../page-objects/RegistAccountCodePage');
+const { ApproveRouteListPage } = require('../page-objects/ApproveRouteListPage');
+const { DepartmentListPage } = require('../page-objects/DepartmentListPage');
+const { RegistDepartmentPage } = require('../page-objects/RegistDepartmentPage');
+const { PaymentRequestListPage } = require('../page-objects/PaymentRequestListPage');
+const { JournalDetailPage } = require('../page-objects/JournalDetailPage');
+const { SubAccountCodeListPage } = require('../page-objects/SubAccountCodeListPage');
+const { RegistSubAccountCodePage } = require('../page-objects/RegistSubAccountCodePage');
+const { UploadAccountCodePage } = require('../page-objects/UploadAccountCodePage');
+const { UploadSubAccountCodePage } = require('../page-objects/UploadSubAccountCodePage');
+const { UploadDepartmentPage } = require('../page-objects/UploadDepartmentPage');
+const { JournalDownloadPage } = require('../page-objects/JournalDownloadPage');
 
 // テストの準備を行う
 exports.initTest = async () => {
@@ -84,6 +98,20 @@ exports.getPageObject = (browser, page) => {
   pages.settlementPage = new SettlementPage(browser, page);
   pages.rakkoToolsPage = new RakkoToolsPage(browser, page);
   pages.downloadInvoicePage = new DownloadInvoicePage(browser, page);
+  pages.journalMenuPage = new JournalMenuPage(browser, page);
+  pages.accountCodeListPage = new AccountCodeListPage(browser, page);
+  pages.registAccountCodePage = new RegistAccountCodePage(browser, page);
+  pages.approveRouteListPage = new ApproveRouteListPage(browser, page);
+  pages.departmentListPage = new DepartmentListPage(browser, page);
+  pages.paymentRequestListPage = new PaymentRequestListPage(browser, page);
+  pages.journalDetailPage = new JournalDetailPage(browser, page);
+  pages.subAccountCodeListPage = new SubAccountCodeListPage(browser, page);
+  pages.registSubAccountCodePage = new RegistSubAccountCodePage(browser, page);
+  pages.registDepartmentPage = new RegistDepartmentPage(browser, page);
+  pages.uploadAccountCodePage = new UploadAccountCodePage(browser, page);
+  pages.uploadSubAccountCodePage = new UploadSubAccountCodePage(browser, page);
+  pages.uploadDepartmentPage = new UploadDepartmentPage(browser, page);
+  pages.journalDownloadPage = new JournalDownloadPage(browser, page);
   this.pages = pages;
   return pages;
 }

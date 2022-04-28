@@ -4,6 +4,7 @@ const db = require('../models')
 const logger = require('../lib/logger')
 const JournalizeInvoice = db.JournalizeInvoice
 const requestApproval = require('./requestApprovalController')
+const YayoiService = require('../service/YayoiService')
 
 // 複数の請求書を1つのCSVファイルにまとめる関数
 const createInvoiceDataForDownload = async (
@@ -121,7 +122,62 @@ const getSentToCompany = async (accessToken, refreshToken) => {
   return [result.CompanyAccountId]
 }
 
+/**
+ *
+ * @param {object} passport トレードシフトのAPIアクセス用データ
+ * @param {object} contract 契約情報
+ * @param {string} businessId 請求書番号
+ * @param {string} minIssuedate 発行日（最小）
+ * @param {string} maxIssuedate 発行日（最大）
+ * @param {uuid} sentBy 送信企業
+ * @param {string} isCloedApproval 差し戻しメッセージ
+ * @param {int} serviceDataFormat 出力フォーマット（0:デフォルト,1:弥生会計,2:勘定奉行）
+ * @returns {string} ダウンロードデータ
+ */
+
+const dowonloadKaikei = async (
+  passport,
+  contract,
+  businessId,
+  minIssuedate,
+  maxIssuedate,
+  sentBy,
+  isCloedApproval,
+  serviceDataFormat
+) => {
+  const result = []
+
+  // 弥生会計の場合
+  if (serviceDataFormat === 1) {
+    const yayoiService = new YayoiService(passport, contract)
+    if (sentBy.length === 0) {
+      const yayoi = await yayoiService.convertToYayoi(null, businessId, minIssuedate, maxIssuedate, isCloedApproval)
+      if (yayoi) {
+        result.push(yayoi)
+      }
+    } else {
+      for (const sentByCompany of sentBy) {
+        const yayoi = await yayoiService.convertToYayoi(
+          sentByCompany,
+          businessId,
+          minIssuedate,
+          maxIssuedate,
+          isCloedApproval
+        )
+        if (yayoi) {
+          result.push(yayoi)
+        }
+      }
+    }
+  }
+
+  if (result.length === 0) return null
+
+  return result
+}
+
 module.exports = {
   createInvoiceDataForDownload: createInvoiceDataForDownload,
-  getSentToCompany: getSentToCompany
+  getSentToCompany: getSentToCompany,
+  dowonloadKaikei: dowonloadKaikei
 }

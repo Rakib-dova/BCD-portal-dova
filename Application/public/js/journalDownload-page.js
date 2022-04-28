@@ -1,8 +1,14 @@
 window.onload = function () {
   document.getElementById('submit').addEventListener('click', (e) => {
+    document.querySelector('#RequiredErrorMesageField').classList.add('is-invisible')
     if (!checkRadioButton()) {
       return false
     }
+
+    if (!serviceDataFormatCheck()) {
+      return false
+    }
+
     document.querySelector('#form').submit()
   })
 }
@@ -213,6 +219,25 @@ function checkRadioButton() {
     return true
   } else {
     document.querySelector('#RequiredErrorMesage').innerHTML = 'ダウンロード対象を選択してください。'
+    document.querySelector('#RequiredErrorMesageField').classList.remove('is-invisible')
+    return false
+  }
+}
+
+// 選択した出力フォーマット名設定
+document.getElementById('serviceDataFormat').addEventListener('change', function (e) {
+  const target = this.options
+  document.getElementById('serviceDataFormatName').value = target[target.selectedIndex].text
+})
+
+// 選択した出力フォーマット名と値を確認
+const serviceDataFormatCheck = function () {
+  const target = document.getElementById('serviceDataFormat').options
+
+  if (document.getElementById('serviceDataFormatName').value === target[target.selectedIndex].text) {
+    return true
+  } else {
+    document.querySelector('#RequiredErrorMesage').innerHTML = '選択したダウンロード対象には誤りがあります。'
     document.querySelector('#RequiredErrorMesageField').classList.remove('is-invisible')
     return false
   }
