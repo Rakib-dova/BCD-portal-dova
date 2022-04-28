@@ -14,6 +14,7 @@ const apiManager = require('../controllers/apiManager')
 const functionName = 'cbPostIndex'
 const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
 const journalDownloadController = require('../controllers/journalDownloadController.js')
+const iconv = require('iconv-lite')
 
 const notiTitle = '請求書ダウンロード'
 
@@ -117,6 +118,7 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
+  const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
   // 絞り込みの条件データチェック
   const findDocumentQuery = {
     withouttag: ['archived', 'AP_DOCUMENT_DRAFT', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document'],
@@ -142,6 +144,58 @@ const cbPostIndex = async (req, res, next) => {
   // 絞り込みの条件に発行日の終了日追加
   if (req.body.maxIssuedate || false) {
     findDocumentQuery.maxissuedate = req.body.maxIssuedate
+  }
+
+  if (isNaN(Number(req.body.serviceDataFormat))) {
+    req.flash('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+    return res.redirect(303, '/journalDownload')
+  } else {
+    req.body.serviceDataFormat = Number(req.body.serviceDataFormat)
+  }
+
+  switch (req.body.serviceDataFormat) {
+    case 0:
+      break
+    case 1:
+      req.body.sentBy = req.body.sentBy ?? []
+      if (typeof req.body.sentBy === 'string') {
+        req.body.sentBy = [req.body.sentBy]
+      }
+      if (req.body.sentBy instanceof Array === false) {
+        req.body.sentBy = []
+      }
+
+      {
+        const isCloedApproval = req.body.chkFinalapproval === 'finalapproval'
+
+        try {
+          const result = await journalDownloadController.downloadYayoi(
+            req.user,
+            contract,
+            req.body.invoiceNumber,
+            req.body.minIssuedate,
+            req.body.maxIssuedate,
+            req.body.sentBy,
+            isCloedApproval
+          )
+
+          if (result === null) {
+            // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
+            // 条件に合わせるデータがない場合、お知らせを表示する。
+            req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+            return res.redirect(303, '/journalDownload')
+          } else {
+            const filename = encodeURIComponent(`${today}_請求書_弥生会計（05以降）.csv`)
+            res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+            return res.status(200).send(iconv.encode(`${result}`, 'Shift_JIS'))
+          }
+        } catch (e) {
+          return errorHandle(e, res, req)
+        }
+      }
+    default:
+      req.flash('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+      return res.redirect(303, '/journalDownload')
   }
 
   const invoiceNumber = req.body.invoiceNumber
@@ -231,7 +285,7 @@ const cbPostIndex = async (req, res, next) => {
   let filename = ''
   // resultForQuery（API呼出）エラー検査
   if (resultForQuery instanceof Error) {
-    errorHandle(resultForQuery, res, req)
+    return errorHandle(resultForQuery, res, req)
   } else {
     if (documentsResult.itemCount === 0) {
       // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
@@ -240,7 +294,7 @@ const cbPostIndex = async (req, res, next) => {
       res.redirect(303, '/journalDownload')
     } else {
       let invoicesForDownload = []
-      const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
+
       if (req.body.invoiceNumber || false) {
         // documentIdの初期化
         let documentId = ''
@@ -271,7 +325,7 @@ const cbPostIndex = async (req, res, next) => {
 
           // エラーを確認する
           if (invoicesForDownload instanceof Error) {
-            errorHandle(invoicesForDownload, res, req)
+            return errorHandle(invoicesForDownload, res, req)
           }
 
           if (invoicesForDownload.length !== 0) {
@@ -301,7 +355,7 @@ const cbPostIndex = async (req, res, next) => {
 
         // エラーを確認する
         if (invoicesForDownload instanceof Error) {
-          errorHandle(invoicesForDownload, res, req)
+          return errorHandle(invoicesForDownload, res, req)
         }
 
         if (invoicesForDownload.length === 0) {
