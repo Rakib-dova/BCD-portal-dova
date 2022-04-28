@@ -156,7 +156,8 @@ const cbPostIndex = async (req, res, next) => {
   switch (req.body.serviceDataFormat) {
     case 0:
       break
-    case (1, 2):
+    case 1:
+    case 2:
       req.body.sentBy = req.body.sentBy ?? []
       if (typeof req.body.sentBy === 'string') {
         req.body.sentBy = [req.body.sentBy]

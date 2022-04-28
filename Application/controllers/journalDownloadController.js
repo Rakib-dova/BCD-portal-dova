@@ -5,6 +5,7 @@ const logger = require('../lib/logger')
 const JournalizeInvoice = db.JournalizeInvoice
 const requestApproval = require('./requestApprovalController')
 const YayoiService = require('../service/YayoiService')
+const ObcService = require('../service/ObcService')
 
 // 複数の請求書を1つのCSVファイルにまとめる関数
 const createInvoiceDataForDownload = async (
@@ -148,25 +149,34 @@ const dowonloadKaikei = async (
   const result = []
 
   // 弥生会計の場合
-  if (serviceDataFormat === 1) {
-    const yayoiService = new YayoiService(passport, contract)
-    if (sentBy.length === 0) {
-      const yayoi = await yayoiService.convertToYayoi(null, businessId, minIssuedate, maxIssuedate, isCloedApproval)
-      if (yayoi) {
-        result.push(yayoi)
-      }
-    } else {
-      for (const sentByCompany of sentBy) {
-        const yayoi = await yayoiService.convertToYayoi(
-          sentByCompany,
-          businessId,
-          minIssuedate,
-          maxIssuedate,
-          isCloedApproval
-        )
-        if (yayoi) {
-          result.push(yayoi)
-        }
+  let service = null
+  switch (serviceDataFormat) {
+    case 1:
+      service = new YayoiService(passport, contract)
+      break
+    case 2:
+      service = new ObcService(passport, contract)
+      break
+    default:
+      return null
+  }
+
+  if (sentBy.length === 0) {
+    const kaikei = await service.convertToKaikei(null, businessId, minIssuedate, maxIssuedate, isCloedApproval)
+    if (kaikei) {
+      result.push(kaikei)
+    }
+  } else {
+    for (const sentByCompany of sentBy) {
+      const kaikei = await service.convertToKaikei(
+        sentByCompany,
+        businessId,
+        minIssuedate,
+        maxIssuedate,
+        isCloedApproval
+      )
+      if (kaikei) {
+        result.push(kaikei)
       }
     }
   }

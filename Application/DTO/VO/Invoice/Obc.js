@@ -17,26 +17,28 @@ class Obc {
     this.voucherDeparment = ''
     this.voucherInputType = '0'
     // 明細情報・借方
-    this.debitDepartMentCode = coding.debitDepartmentCode
+    this.debitDepartmentCode = coding.debitDepartmentCode
     this.debitAccountCode = coding.debitAccountCode
     this.debitSubAccountCode = coding.debitSubAccountCode
     this.debitTaxCode = this.debitTax[0]
     this.debitTaxPercent = this.debitTax[1]
     this.debitTaxPercentType = this.debitTax[2]
     this.debitIndustrialClass = ''
-    this.debitRouting = ''
+    this.debitTaxAutomaticCalc = '1'
+    this.debitRouding = ''
     this.debitContact = ''
     this.debitAmount = coding.debitAmount
     this.debitTaxAmount = coding.debitTaxAmount
     // 明細情報・貸方
-    this.creditDepartMentCode = coding.creditDepartmentCode
+    this.creditDepartmentCode = coding.creditDepartmentCode
     this.creditAccountCode = coding.creditAccountCode
     this.creditSubAccountCode = coding.creditSubAccountCode
     this.creditTaxCode = this.creditTax[0]
     this.creditTaxPercent = this.creditTax[1]
     this.creditTaxPercentType = this.creditTax[2]
     this.creditIndustrialClass = ''
-    this.creditRouting = ''
+    this.creditTaxAutomaticCalc = '1'
+    this.creditRouding = ''
     this.creditContact = ''
     this.creditAmount = coding.creditAmount
     this.creditTaxAmount = coding.creditTaxAmount
