@@ -45,7 +45,7 @@ let userControllerFindOneSpy,
   journalfindAllSpy,
   getSentToCompanySpy,
   findOneRequestApprovalSpy,
-  downloadYayoiSpy
+  dowonloadKaikeiSpy
 
 const dbJournalTable = []
 const dbJournal100Table = []
@@ -164,7 +164,7 @@ describe('journalDownloadのテスト', () => {
     getSentToCompanySpy = jest.spyOn(journalDownloadController, 'getSentToCompany')
     findOneRequestApprovalSpy = jest.spyOn(requestApproval, 'findOneRequestApproval')
     request.flash = jest.fn()
-    downloadYayoiSpy = jest.spyOn(journalDownloadController, 'downloadYayoi')
+    dowonloadKaikeiSpy = jest.spyOn(journalDownloadController, 'dowonloadKaikei')
   })
   afterEach(() => {
     request.resetMocked()
@@ -4726,7 +4726,7 @@ describe('journalDownloadのテスト', () => {
       findOneRequestApprovalSpy = jest.spyOn(requestApproval, 'findOneRequestApproval')
       contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
       journalfindAllSpy = jest.spyOn(JournalizeInvoice, 'findAll')
-      downloadYayoiSpy = jest.spyOn(journalDownloadController, 'downloadYayoi')
+      dowonloadKaikeiSpy = jest.spyOn(journalDownloadController, 'dowonloadKaikei')
       checkContractStatus = jest.spyOn(helper, 'checkContractStatus')
     })
 
@@ -4772,7 +4772,7 @@ describe('journalDownloadのテスト', () => {
 
       journalfindAllSpy.mockReturnValue(journalfindAllSpyResult)
 
-      downloadYayoiSpy.mockImplementation(() => {
+      dowonloadKaikeiSpy.mockImplementation(() => {
         return expectedYayoiFormat
       })
 
@@ -4823,7 +4823,7 @@ describe('journalDownloadのテスト', () => {
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
-      downloadYayoiSpy.mockImplementation(() => {
+      dowonloadKaikeiSpy.mockImplementation(() => {
         return expectedYayoiFormat
       })
 
@@ -4997,7 +4997,7 @@ describe('journalDownloadのテスト', () => {
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
-      downloadYayoiSpy.mockImplementation(() => {
+      dowonloadKaikeiSpy.mockImplementation(() => {
         return null
       })
 
@@ -5043,7 +5043,7 @@ describe('journalDownloadのテスト', () => {
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
-      downloadYayoiSpy.mockImplementation(() => {
+      dowonloadKaikeiSpy.mockImplementation(() => {
         return null
       })
 
@@ -5090,7 +5090,7 @@ describe('journalDownloadのテスト', () => {
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
       const error = new Error('500 system error')
-      downloadYayoiSpy.mockImplementation(() => {
+      dowonloadKaikeiSpy.mockImplementation(() => {
         throw error
       })
 
@@ -5141,7 +5141,7 @@ describe('journalDownloadのテスト', () => {
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
       const error = new Error('500 system error')
-      downloadYayoiSpy.mockImplementation(() => {
+      dowonloadKaikeiSpy.mockImplementation(() => {
         throw error
       })
 

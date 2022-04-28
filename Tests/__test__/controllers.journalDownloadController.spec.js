@@ -716,7 +716,7 @@ describe('journalDownloadControllerのテスト', () => {
     })
   })
 
-  describe('downloadYayoi', () => {
+  describe('dowonloadKaikei', () => {
     const passport = {
       accessToken: accessToken,
       refreshToken: refreshToken,
@@ -734,7 +734,7 @@ describe('journalDownloadControllerのテスト', () => {
       yayoiServiceSpy.mockReturnValue(yayoiServiceResult)
 
       // 試験実施
-      const result = await journalDownloadController.downloadYayoi(
+      const result = await journalDownloadController.dowonloadKaikei(
         passport,
         Contracts[0],
         invoiceNumber,
@@ -760,7 +760,7 @@ describe('journalDownloadControllerのテスト', () => {
       yayoiServiceSpy.mockReturnValue(yayoiServiceResult)
 
       // 試験実施
-      const result = await journalDownloadController.downloadYayoi(
+      const result = await journalDownloadController.dowonloadKaikei(
         passport,
         Contracts[0],
         invoiceNumber,
@@ -786,7 +786,7 @@ describe('journalDownloadControllerのテスト', () => {
       yayoiServiceSpy.mockReturnValue(null)
 
       // 試験実施
-      const result = await journalDownloadController.downloadYayoi(
+      const result = await journalDownloadController.dowonloadKaikei(
         passport,
         Contracts[0],
         invoiceNumber,

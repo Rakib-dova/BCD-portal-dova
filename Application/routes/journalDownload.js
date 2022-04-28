@@ -156,7 +156,7 @@ const cbPostIndex = async (req, res, next) => {
   switch (req.body.serviceDataFormat) {
     case 0:
       break
-    case 1:
+    case (1, 2):
       req.body.sentBy = req.body.sentBy ?? []
       if (typeof req.body.sentBy === 'string') {
         req.body.sentBy = [req.body.sentBy]
@@ -169,14 +169,15 @@ const cbPostIndex = async (req, res, next) => {
         const isCloedApproval = req.body.chkFinalapproval === 'finalapproval'
 
         try {
-          const result = await journalDownloadController.downloadYayoi(
+          const result = await journalDownloadController.dowonloadKaikei(
             req.user,
             contract,
             req.body.invoiceNumber,
             req.body.minIssuedate,
             req.body.maxIssuedate,
             req.body.sentBy,
-            isCloedApproval
+            isCloedApproval,
+            req.body.serviceDataFormat
           )
 
           if (result === null) {
@@ -185,7 +186,7 @@ const cbPostIndex = async (req, res, next) => {
             req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
             return res.redirect(303, '/journalDownload')
           } else {
-            const filename = encodeURIComponent(`${today}_請求書_弥生会計（05以降）.csv`)
+            const filename = encodeURIComponent(`${today}_請求書_${req.body.serviceDataFormatName}.csv`)
             res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
             return res.status(200).send(iconv.encode(`${result}`, 'Shift_JIS'))
           }
