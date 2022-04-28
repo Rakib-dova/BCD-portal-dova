@@ -10,24 +10,44 @@
         figure.image 
           img(src = logoSrc) 
 
-p エラー表示場所
+div.margin-top-20
+  p エラー表示場所
 
-.columns.m-0 
-  .column
-    p.font-bold 宛先
-    input(name='content' type='text' placeholder='宛先企業名').width-220px
-    input(name='content' type='text' placeholder='郵便番号').width-220px
-    input(name='content' type='text' placeholder='都道府県').width-220px
-    input(name='content' type='text' placeholder='住所').width-220px
-    input(name='content' type='text' placeholder='ビル名/フロア等').width-220px
-  .column
-    p.font-bold 差出人
-    p 差出人企業
-    p xxx-xxxx 
-    p 東京都
-    p 渋谷区渋谷
-    p ビル名フロア
-  .column 
-    p.font-bold 請求書番号
-    input(name='content' type='text').width-220px
-    
+  .columns.m-0 
+    .column
+      p.font-bold 宛先
+      input(name='dstcompany' type='text' placeholder='宛先企業名').width-220px
+      input(name='postcode' type='text' placeholder='郵便番号').width-220px
+      input(name='prefacture' type='text' placeholder='都道府県').width-220px
+      input(name='address' type='text' placeholder='住所').width-220px
+      input(name='billdingname' type='text' placeholder='ビル名/フロア等').width-220px
+    .column
+      p.font-bold 差出人
+      p 差出人企業
+      p xxx-xxxx 
+      p 東京都
+      p 渋谷区渋谷
+      p ビル名フロア
+    .column 
+      p.font-bold 請求書番号
+      input(name='invoiceNo' type='text').width-220px
+      .columns.m-0.p-0
+        .column.m-0.p-0
+          p.font-bold 請求日
+          input(name='billingDate' type='text')
+        .column 
+        .column.m-0.p-0
+          p.font-bold 通貨
+          input(name='bill' type="text")
+        .column
+      .columns.m-0.p-0
+        .column.m-0.p-0
+          p.font-bold 支払期日
+          input(name='billingDate' type='text')
+        .column 
+        .column.m-0.p-0
+          p.font-bold 納品日
+          input(name='bill' type="text")
+        .column
+
+      
