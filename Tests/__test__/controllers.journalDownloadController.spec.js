@@ -9,8 +9,9 @@ const JournalizeInvoice = require('../../Application/models').JournalizeInvoice
 const Contract = require('../../Application/models').Contract
 const requestApprovalController = require('../../Application/controllers/requestApprovalController')
 const YayoiService = require('../../Application/service/YayoiService')
+const ObcService = require('../../Application/service/ObcService')
 
-let findOneRequestApprovalSpy, journalfindAllSpy, errorSpy, getCodingSpy, yayoiServiceSpy
+let findOneRequestApprovalSpy, journalfindAllSpy, errorSpy, getCodingSpy, yayoiServiceSpy, obcServiceSpy
 
 describe('journalDownloadControllerのテスト', () => {
   beforeEach(() => {
@@ -18,7 +19,8 @@ describe('journalDownloadControllerのテスト', () => {
     journalfindAllSpy = jest.spyOn(JournalizeInvoice, 'findAll')
     getCodingSpy = jest.spyOn(Contract, 'findAll')
     findOneRequestApprovalSpy = jest.spyOn(requestApprovalController, 'findOneRequestApproval')
-    yayoiServiceSpy = jest.spyOn(YayoiService.prototype, 'convertToYayoi')
+    yayoiServiceSpy = jest.spyOn(YayoiService.prototype, 'convertToKaikei')
+    obcServiceSpy = jest.spyOn(ObcService.prototype, 'convertToKaikei')
     errorSpy = jest.spyOn(logger, 'error')
   })
   afterEach(() => {
@@ -26,6 +28,7 @@ describe('journalDownloadControllerのテスト', () => {
     getCodingSpy.mockRestore()
     findOneRequestApprovalSpy.mockRestore()
     yayoiServiceSpy.mockRestore()
+    obcServiceSpy.mockRestore()
     errorSpy.mockRestore()
   })
 
@@ -36,6 +39,14 @@ describe('journalDownloadControllerのテスト', () => {
 
   const yayoiServiceResult =
     '"2111","","","","acc1","subAcc1","de1","課税売上込10%","299900","0","cAcc1","cSubAcc1","cDe1","課対仕入込10%","299900","0","","","","3","","","","","no"'
+
+  const obcServiceResult =
+    '"GL0010000","GL0010001","GL0010002","GL0010003","GL0010007","GL0010008","GL0010005","GL0010006","GL0010004","GL0012001","GL0012002","GL0012003","GL0012004","GL0012015","GL0012005","GL0012006","GL0012007","GL0012008","GL0012009","GL0012101","GL0012102","GL0013001","GL0013002","GL0013003","GL0013004","GL0013015","GL0013005","GL0013006","GL0013007","GL0013008","GL0013009","GL0013101","GL0013102","GL0011001","GL0011002","GL0011003"\r\n' +
+    '"*","","","","","","1","","0","","202204152","","0010","10","","1","","",299900,0,"DE3763","Acc10","","0060","10","","1","","",299900,0,"","",""\r\n' +
+    '"","","","","","","1","","0","","Acc1","subAcc1","0010","10","","1","","",100,0,"","Acc10","","0060","10","","1","","",100,0,"","",""\r\n'
+
+  const obcServiceHeader =
+    '"GL0010000","GL0010001","GL0010002","GL0010003","GL0010007","GL0010008","GL0010005","GL0010006","GL0010004","GL0012001","GL0012002","GL0012003","GL0012004","GL0012015","GL0012005","GL0012006","GL0012007","GL0012008","GL0012009","GL0012101","GL0012102","GL0013001","GL0013002","GL0013003","GL0013004","GL0013015","GL0013005","GL0013006","GL0013007","GL0013008","GL0013009","GL0013101","GL0013102","GL0011001","GL0011002","GL0011003"'
 
   // DBデータ設定
   const Contracts = require('../mockDB/Contracts_Table')
@@ -723,13 +734,14 @@ describe('journalDownloadControllerのテスト', () => {
       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
     }
 
-    test('正常:企業条件がない場合', async () => {
+    test('正常:企業条件がない場合（弥生会計）', async () => {
       // 準備
       const invoiceNumber = ''
       const minIssuedate = '2021-10-01'
       const maxIssuedate = '2022-04-25'
       const chkFinalapproval = 'finalapproval'
       const sentBy = []
+      const serviceDataFormat = 1
 
       yayoiServiceSpy.mockReturnValue(yayoiServiceResult)
 
@@ -741,7 +753,8 @@ describe('journalDownloadControllerのテスト', () => {
         minIssuedate,
         maxIssuedate,
         sentBy,
-        chkFinalapproval
+        chkFinalapproval,
+        serviceDataFormat
       )
 
       // 期待結果
@@ -749,13 +762,14 @@ describe('journalDownloadControllerのテスト', () => {
       expect(result).toEqual([yayoiServiceResult])
     })
 
-    test('正常:企業条件がある場合', async () => {
+    test('正常:企業条件がある場合（弥生会計）', async () => {
       // 準備
       const invoiceNumber = ''
       const minIssuedate = '2021-10-01'
       const maxIssuedate = '2022-04-25'
       const chkFinalapproval = 'finalapproval'
       const sentBy = ['221559d0-53aa-44a2-ab29-0c4a6cb02bd1']
+      const serviceDataFormat = 1
 
       yayoiServiceSpy.mockReturnValue(yayoiServiceResult)
 
@@ -767,7 +781,8 @@ describe('journalDownloadControllerのテスト', () => {
         minIssuedate,
         maxIssuedate,
         sentBy,
-        chkFinalapproval
+        chkFinalapproval,
+        serviceDataFormat
       )
 
       // 期待結果
@@ -775,13 +790,14 @@ describe('journalDownloadControllerのテスト', () => {
       expect(result).toEqual([yayoiServiceResult])
     })
 
-    test('正常:データがない場合', async () => {
+    test('正常:データがない場合（弥生会計）', async () => {
       // 準備
       const invoiceNumber = ''
       const minIssuedate = '2021-10-01'
       const maxIssuedate = '2022-04-25'
       const chkFinalapproval = 'finalapproval'
       const sentBy = []
+      const serviceDataFormat = 1
 
       yayoiServiceSpy.mockReturnValue(null)
 
@@ -793,7 +809,126 @@ describe('journalDownloadControllerのテスト', () => {
         minIssuedate,
         maxIssuedate,
         sentBy,
-        chkFinalapproval
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(null)
+    })
+
+    test('正常:企業条件がない場合（勘定奉行（OBC））', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 2
+
+      obcServiceSpy.mockReturnValue(obcServiceResult)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      // ヘッダ確認
+      const dataHeader = result[0].split('\r\n')[0]
+      // データ確認
+      expect(dataHeader).toEqual(obcServiceHeader)
+      expect(result).toEqual([obcServiceResult])
+    })
+
+    test('正常:企業条件がある場合（勘定奉行（OBC））', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = ['221559d0-53aa-44a2-ab29-0c4a6cb02bd1']
+      const serviceDataFormat = 2
+
+      obcServiceSpy.mockReturnValue(obcServiceResult)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      // ヘッダ確認
+      const dataHeader = result[0].split('\r\n')[0]
+      // データ確認
+      expect(dataHeader).toEqual(obcServiceHeader)
+      expect(result).toEqual([obcServiceResult])
+    })
+
+    test('正常:データがない場合（勘定奉行（OBC））', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 2
+
+      obcServiceSpy.mockReturnValue(null)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(null)
+    })
+
+    test('異常系:serviceDataFormatが正しくない場合', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 6
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
       )
 
       // 期待結果
