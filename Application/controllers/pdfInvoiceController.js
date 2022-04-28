@@ -5,6 +5,19 @@ const db = require('../models')
 const logger = require('../lib/logger')
 
 module.exports = {
+  getpdfInvoiceList: async (tenantId) => {
+    try {
+      return await PdfInvoice.findAll({
+        where: {
+          sendTenantId: tenantId
+        }
+      })
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ tenantId: tenantId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
+  },
   findOne: async (incoiceId) => {
     try {
       return await PdfInvoice.findOne({
