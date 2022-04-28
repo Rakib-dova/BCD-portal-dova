@@ -54,6 +54,15 @@ input[readonly] {
   cursor: not-allowed;
 }
 
+input.width-80px{
+  width:80px
+}
+
+input.width-220px{
+  width:220px
+}
+
+
 .appdesc {
   color: hsl(0, 0%, 21%);
 }
@@ -284,6 +293,10 @@ img.logo-ncom {
   white-space: nowrap;
 }
 
+.width-2 {
+  width: 2%;
+}
+
 .width-5 {
   width: 5%;
 }
@@ -425,6 +438,10 @@ img.logo-ncom {
 
 .margin-top-10p {
   margin-top: 10px;
+}
+
+.margin-top-20p {
+  margin-top: 20px;
 }
 
 .div-border {
