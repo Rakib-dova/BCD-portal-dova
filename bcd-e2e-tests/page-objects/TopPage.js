@@ -54,6 +54,11 @@ class TopPage {
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"請求情報ダウンロード")]');
   }
 
+  // 「仕訳情報管理」メニューを開く
+  async openJournalMenu() {
+    await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[contains(text(),"仕訳情報管理")]');
+  }
+
   // 「サポート」メニューを開く
   async openSupportMenu() {
     await this.actionUtils.click(this.frame, '//*[contains(@class,"box")]//*[text()="サポート"]/../../..')

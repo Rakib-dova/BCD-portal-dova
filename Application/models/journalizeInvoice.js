@@ -48,7 +48,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true
       },
       installmentAmount: {
-        type: DataTypes.DECIMAL(13, 4)
+        type: DataTypes.DECIMAL(13, 0)
       },
       createdAt: {
         type: DataTypes.DATE,
