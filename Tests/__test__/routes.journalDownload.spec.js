@@ -218,10 +218,12 @@ describe('journalDownloadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでjournalDownloadが呼ばれ「る」
+      const serviceDataFormatName = ['デフォルト', '弥生会計（05以降）', '勘定奉行']
       expect(response.render).toHaveBeenCalledWith('journalDownload', {
         title: '仕訳情報ダウンロード',
         minissuedate: minissuedate,
-        maxissuedate: maxissuedate
+        maxissuedate: maxissuedate,
+        serviceDataFormatName: serviceDataFormatName
       })
     })
 
@@ -4752,8 +4754,7 @@ describe('journalDownloadのテスト', () => {
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
-        serviceDataFormat: '1',
-        serviceDataFormatName: '弥生会計（05以降）'
+        serviceDataFormat: '1'
       }
       const expectedYayoiFormat =
         '"2000","","","","仕掛品","","","課税売上8%(軽)","24200","1936","現金","","","課対仕入8%(軽)","24200","1936","","","","0","","","","","no"'
@@ -4803,8 +4804,7 @@ describe('journalDownloadのテスト', () => {
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
         serviceDataFormat: '1',
-        sentBy: '5778c070-5dd3-42db-aaa8-848424fb80f9',
-        serviceDataFormatName: '弥生会計（05以降）'
+        sentBy: '5778c070-5dd3-42db-aaa8-848424fb80f9'
       }
 
       const expectedYayoiFormat =
@@ -4855,8 +4855,7 @@ describe('journalDownloadのテスト', () => {
         invoiceNumber: 'A01001',
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
-        serviceDataFormat: '2',
-        serviceDataFormatName: '勘定奉行'
+        serviceDataFormat: '2'
       }
       const expectedObcFormat = [
         '"GL0010000","GL0010001","GL0010002","GL0010003","GL0010007","GL0010008","GL0010005","GL0010006","GL0010004","GL0012001","GL0012002","GL0012003","GL0012004","GL0012015","GL0012005","GL0012006","GL0012007","GL0012008","GL0012009","GL0012101","GL0012102","GL0013001","GL0013002","GL0013003","GL0013004","GL0013015","GL0013005","GL0013006","GL0013007","GL0013008","GL0013009","GL0013101","GL0013102","GL0011001","GL0011002","GL0011003"\r\n' +
@@ -4910,8 +4909,7 @@ describe('journalDownloadのテスト', () => {
         minIssuedate: '2021-08-01',
         maxIssuedate: '2021-11-09',
         sentBy: '5778c070-5dd3-42db-aaa8-848424fb80f9',
-        serviceDataFormat: '2',
-        serviceDataFormatName: '勘定奉行'
+        serviceDataFormat: '2'
       }
 
       const expectedObcFormat = [
