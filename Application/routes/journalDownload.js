@@ -17,6 +17,7 @@ const journalDownloadController = require('../controllers/journalDownloadControl
 const iconv = require('iconv-lite')
 
 const notiTitle = '請求書ダウンロード'
+const serviceDataFormatName = ['デフォルト', '弥生会計（05以降）', '勘定奉行']
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -61,11 +62,12 @@ const cbGetIndex = async (req, res, next) => {
   const minissuedate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0]
   const maxissuedate = today.toISOString().split('T')[0]
 
-  // 請求書ダウンロード画面表示
+  // 仕訳情報ダウンロード画面表示
   res.render('journalDownload', {
     title: '仕訳情報ダウンロード',
     minissuedate: minissuedate,
-    maxissuedate: maxissuedate // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
+    maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
+    serviceDataFormatName: serviceDataFormatName
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -157,6 +159,7 @@ const cbPostIndex = async (req, res, next) => {
     case 0:
       break
     case 1:
+    case 2:
       req.body.sentBy = req.body.sentBy ?? []
       if (typeof req.body.sentBy === 'string') {
         req.body.sentBy = [req.body.sentBy]
@@ -169,14 +172,15 @@ const cbPostIndex = async (req, res, next) => {
         const isCloedApproval = req.body.chkFinalapproval === 'finalapproval'
 
         try {
-          const result = await journalDownloadController.downloadYayoi(
+          const result = await journalDownloadController.dowonloadKaikei(
             req.user,
             contract,
             req.body.invoiceNumber,
             req.body.minIssuedate,
             req.body.maxIssuedate,
             req.body.sentBy,
-            isCloedApproval
+            isCloedApproval,
+            req.body.serviceDataFormat
           )
 
           if (result === null) {
@@ -185,7 +189,9 @@ const cbPostIndex = async (req, res, next) => {
             req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
             return res.redirect(303, '/journalDownload')
           } else {
-            const filename = encodeURIComponent(`${today}_請求書_弥生会計（05以降）.csv`)
+            const filename = encodeURIComponent(
+              `${today}_請求書_${serviceDataFormatName[req.body.serviceDataFormat]}.csv`
+            )
             res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
             return res.status(200).send(iconv.encode(`${result}`, 'Shift_JIS'))
           }

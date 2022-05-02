@@ -73,10 +73,10 @@ block content
             .field-body
               .select.is-fullwidth
                 select(name='serviceDataFormat')
-                  option(value=0) デフォルト
-                  option(value=1) 弥生会計（05以降）
+                  option(value=0)=serviceDataFormatName[0]
+                  option(value=1)=serviceDataFormatName[1]
+                  option(value=2)=serviceDataFormatName[2]
             
-
         .field.is-grouped.is-grouped-centered
           .control.mx-4
             .mt-5.has-text-centered
@@ -84,7 +84,7 @@ block content
                 p.border-journaldownload ※ダウンロードされる請求書数は100件以内となるように設定してください。
               .column
                 div.button-area
-                  a.button.is-info#submit(type="submit")  CSVダウンロード
+                  a.button.is-info#submit(type="submit") CSVダウンロード
             
     template#templateAllSelectBtn
         p.control

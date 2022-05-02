@@ -5,6 +5,7 @@ const logger = require('../lib/logger')
 const JournalizeInvoice = db.JournalizeInvoice
 const requestApproval = require('./requestApprovalController')
 const YayoiService = require('../service/YayoiService')
+const ObcService = require('../service/ObcService')
 
 // 複数の請求書を1つのCSVファイルにまとめる関数
 const createInvoiceDataForDownload = async (
@@ -122,25 +123,60 @@ const getSentToCompany = async (accessToken, refreshToken) => {
   return [result.CompanyAccountId]
 }
 
-const downloadYayoi = async (passport, contract, businessId, minIssuedate, maxIssuedate, sentBy, isCloedApproval) => {
-  const yayoiService = new YayoiService(passport, contract)
+/**
+ *
+ * @param {object} passport トレードシフトのAPIアクセス用データ
+ * @param {object} contract 契約情報
+ * @param {string} businessId 請求書番号
+ * @param {string} minIssuedate 発行日（最小）
+ * @param {string} maxIssuedate 発行日（最大）
+ * @param {uuid} sentBy 送信企業
+ * @param {string} isCloedApproval 差し戻しメッセージ
+ * @param {int} serviceDataFormat 出力フォーマット（0:デフォルト,1:弥生会計,2:勘定奉行）
+ * @returns {string} ダウンロードデータ
+ */
+
+const dowonloadKaikei = async (
+  passport,
+  contract,
+  businessId,
+  minIssuedate,
+  maxIssuedate,
+  sentBy,
+  isCloedApproval,
+  serviceDataFormat
+) => {
   const result = []
+
+  // 弥生会計の場合
+  let service = null
+  switch (serviceDataFormat) {
+    case 1:
+      service = new YayoiService(passport, contract)
+      break
+    case 2:
+      service = new ObcService(passport, contract)
+      break
+    default:
+      return null
+  }
+
   if (sentBy.length === 0) {
-    const yayoi = await yayoiService.convertToYayoi(null, businessId, minIssuedate, maxIssuedate, isCloedApproval)
-    if (yayoi) {
-      result.push(yayoi)
+    const kaikei = await service.convertToKaikei(null, businessId, minIssuedate, maxIssuedate, isCloedApproval)
+    if (kaikei) {
+      result.push(kaikei)
     }
   } else {
     for (const sentByCompany of sentBy) {
-      const yayoi = await yayoiService.convertToYayoi(
+      const kaikei = await service.convertToKaikei(
         sentByCompany,
         businessId,
         minIssuedate,
         maxIssuedate,
         isCloedApproval
       )
-      if (yayoi) {
-        result.push(yayoi)
+      if (kaikei) {
+        result.push(kaikei)
       }
     }
   }
@@ -153,5 +189,5 @@ const downloadYayoi = async (passport, contract, businessId, minIssuedate, maxIs
 module.exports = {
   createInvoiceDataForDownload: createInvoiceDataForDownload,
   getSentToCompany: getSentToCompany,
-  downloadYayoi: downloadYayoi
+  dowonloadKaikei: dowonloadKaikei
 }
