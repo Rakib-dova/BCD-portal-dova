@@ -25,7 +25,7 @@ class Pca {
     this.creditTaxCode = this.creditTax[0]
     this.creditTaxAutomaticCalc = '1'
     this.creditAmount = coding.creditAmount
-    this.creditTaxAmount = this.creditTax[0]
+    this.creditTaxAmount = this.creditTax[1]
     // Etc
     this.inputProgType = '1'
   }
