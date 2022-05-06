@@ -14,9 +14,8 @@ block content
       form#form(method='POST')
         .box
           include invoicePDFHeader
-          include invoicePDFBasicInfo
-          //- include invoicePDFLines
-          //- include invoicePDFFooter
+          include invoicePDFLines
+          include invoicePDFFooter
         .grouped-button
           a.button.mr-6(href='/pdfInvoiceList/1')  戻る
           a.button.mr-6.is-success#btn-confirm 一時保存
@@ -26,5 +25,5 @@ block content
 
 
 block append scripts
-  //- script(src="/js/inbox-page.js")
+  script(src="/js/pdfInvoice-page.js")
   link(rel='stylesheet', type='text/css', href='/css/inbox.css')
