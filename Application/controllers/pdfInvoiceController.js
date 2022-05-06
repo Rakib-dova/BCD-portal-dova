@@ -1,107 +1,97 @@
 const PdfInvoice = require('../models').PdfInvoice
-const PdfInvoiceDetail = require('../models').PdfInvoiceDetail
-
+const PdfInvoiceLine = require('../models').PdfInvoiceLine
 const db = require('../models')
 const logger = require('../lib/logger')
 
 module.exports = {
-  getpdfInvoiceList: async (tenantId) => {
-    try {
-      return await PdfInvoice.findAll({
-        where: {
-          sendTenantId: tenantId
-        }
-      })
-    } catch (error) {
-      // status 0はDBエラー
-      logger.error({ tenantId: tenantId, stack: error.stack, status: 0 }, error.name)
-      return error
-    }
-  },
-  findOne: async (incoiceId) => {
+  findInvoice: async (invoiceId) => {
     try {
       return await PdfInvoice.findOne({
-        where: {
-          incoiceId: incoiceId
-        }
+        include: 'PdfInvoiceLines',
+        where: { invoiceId: invoiceId }
       })
     } catch (error) {
-      // status 0はDBエラー
-      logger.error({ incoiceId: incoiceId, stack: error.stack, status: 0 }, error.name)
-      return error
+      logger.error({ invoiceId: invoiceId, stack: error.stack, status: 0 }, error.name)
+      throw error
     }
   },
-  findAll: async () => {
+  findAllInvoices: async () => {
     try {
-      return await PdfInvoice.findAll({})
+      return await PdfInvoice.findAll({ raw: true })
     } catch (error) {
-      // status 0はDBエラー
       logger.error({ stack: error.stack, status: 0 }, error.name)
-      return error
+      throw error
     }
   },
-
-  create: async (PdfInvoice, PdfInvoiceDetails) => {
-    // データベース接続回りはtry-catch
+  createInvoice: async (invoice, lines) => {
     try {
-      /* トランザクション */
-      const created = await db.sequelize.transaction(async (t) => {
-        // PdfInvoiceテーブル
-        const result = await PdfInvoice.findOrCreate(PdfInvoice, {
-          where: { incoiceId: PdfInvoice.incoiceId },
-          transaction: t
-        })
+      // 重複コード検索
+      const foundInvoices = await PdfInvoice.findAll({
+        where: { invoiceId: invoice.invoiceId }
+      })
 
-        // PdfInvoiceDetailテーブル
-        for (const detail in PdfInvoiceDetails) {
-          await PdfInvoice.findOrCreate(detail, {
-            where: { incoiceId: detail.incoiceId },
-            transaction: t
+      if (foundInvoices.length !== 0) return null
+
+      const created = await db.sequelize.transaction(async (t) => {
+        // PdfInvoiceテーブルにレコード挿入
+        const result = await PdfInvoice.create(invoice, { transaction: t })
+
+        // PdfInvoiceLineテーブルにレコード挿入
+        await Promise.all(
+          lines.map(async (line) => {
+            return await PdfInvoiceLine.create(line, { transaction: t })
           })
-        }
+        )
+
         return result
       })
       return created
     } catch (error) {
-      // status 0はDBエラー
-      logger.error({ incoiceId: PdfInvoice.incoiceId, stack: error.stack, status: 0 }, error.name)
-      return error
+      logger.error({ invoiceId: invoice.invoiceId, stack: error.stack, status: 0 }, error.name)
+
+      throw error
     }
   },
-
-  update: async (values) => {
+  updateInvoice: async (invoiceId, invoice, lines) => {
     try {
-      return await PdfInvoice.update(values, {
-        where: {
-          incoiceId: values.incoiceId
-        }
+      const updated = await db.sequelize.transaction(async (t) => {
+        if (invoice.invoiceId) delete invoice.invoiceId
+
+        // PdfInvoiceテーブルのレコード更新
+        const result = await PdfInvoice.update(invoice, { where: { invoiceId } }, { transaction: t })
+
+        // 明細全削除
+        await PdfInvoiceLine.destroy({
+          where: { invoiceId: invoiceId },
+          transaction: t
+        })
+
+        // 明細を新規作成
+        await Promise.all(
+          lines.map(async (line) => {
+            return await PdfInvoiceLine.create(line, { transaction: t })
+          })
+        )
+
+        return result
       })
+      return updated
     } catch (error) {
-      logger.error({ incoiceId: values.incoiceId, stack: error.stack, status: 0 }, error.name)
-      return error
+      logger.error({ invoiceId: invoice.invoiceId, stack: error.stack, status: 0 }, error.name)
+
+      throw error
     }
   },
-
-  delete: async (incoiceId) => {
-    // データベース接続回りはtry-catch
+  deleteInvoice: async (invoiceId) => {
     try {
-      const deleted = await db.sequelize.transaction(async (t) => {
-        await PdfInvoiceDetail.destroy({
-          where: { incoiceId: incoiceId }
-        })
-
-        const destroy = await PdfInvoice.destroy({
-          where: { incoiceId: incoiceId }
-        })
-
-        return destroy
+      // 削除に成功すると 1、既に削除済みだと 0 が返ってくる
+      return await PdfInvoice.destroy({
+        where: { invoiceId: invoiceId }
       })
-
-      return deleted
     } catch (error) {
-      // status 0はDBエラー
-      logger.error({ incoiceId: incoiceId, stack: error.stack, status: 0 }, error.name)
-      return error
+      logger.error({ invoiceId: invoiceId, stack: error.stack, status: 0 }, error.name)
+
+      throw error
     }
   }
 }
