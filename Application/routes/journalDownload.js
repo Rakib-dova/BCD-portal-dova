@@ -17,7 +17,7 @@ const journalDownloadController = require('../controllers/journalDownloadControl
 const iconv = require('iconv-lite')
 
 const notiTitle = '請求書ダウンロード'
-const serviceDataFormatName = ['デフォルト', '弥生会計（05以降）', '勘定奉行']
+const serviceDataFormatName = ['デフォルト', '弥生会計（05以降）', '勘定奉行', 'PCA（version７）']
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
