@@ -157,6 +157,9 @@ const dowonloadKaikei = async (
     case 2:
       service = new ObcService(passport, contract)
       break
+    case 3:
+      service = new PcaService(passport, contract)
+      break
     default:
       return null
   }
