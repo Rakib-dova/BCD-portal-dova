@@ -1,9 +1,11 @@
 'use strict'
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('PdfImprints', {
+    await queryInterface.createTable('PdfSealImps', {
       invoiceId: {
         primaryKey: true,
+        allowNull: false,
+        type: Sequelize.UUID,
         references: {
           model: {
             tableName: 'PdfInvoices'
@@ -11,15 +13,14 @@ module.exports = {
           key: 'invoiceId',
           onUpdate: 'cascacde',
           onDelete: 'cascacde'
-        },
-        type: Sequelize.UUID
+        }
       },
-      imprint: {
-        type: Sequelize.STRING(512)
+      image: {
+        type: Sequelize.BLOB
       }
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('PdfImprints')
+    await queryInterface.dropTable('PdfSealImps')
   }
 }

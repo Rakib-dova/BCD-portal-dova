@@ -1,25 +1,29 @@
 'use strict'
 const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class pdfInvoice extends Model {
+  class PdfInvoice extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      PdfInvoice.hasMany(models.PdfInvoiceLine, {
+        foreignKey: 'invoiceId',
+        sourceKey: 'invoiceId'
+      })
     }
   }
-  pdfInvoice.init(
+  PdfInvoice.init(
     {
-      invoicesId: {
+      invoiceId: {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false
       },
       tmpFlg: {
-        type: DataTypes.BOOLEAN
+        type: DataTypes.BOOLEAN,
+        defaultValue: 'false'
       },
       outputDate: {
         type: DataTypes.DATE
@@ -36,20 +40,23 @@ module.exports = (sequelize, DataTypes) => {
       deliveryDate: {
         type: DataTypes.DATE
       },
-      destCompany: {
+      recCompany: {
         type: DataTypes.STRING
       },
-      destPost: {
+      recPost: {
         type: DataTypes.STRING
       },
-      destAddr1: {
+      recAddr1: {
         type: DataTypes.STRING
       },
-      destAddr2: {
+      recAddr2: {
         type: DataTypes.STRING
       },
-      destAddr3: {
+      recAddr3: {
         type: DataTypes.STRING
+      },
+      sendTenantId: {
+        type: DataTypes.UUID
       },
       sendCompany: {
         type: DataTypes.STRING
@@ -66,41 +73,39 @@ module.exports = (sequelize, DataTypes) => {
       sendAddr3: {
         type: DataTypes.STRING
       },
-      subtotal: {
-        type: DataTypes.INTEGER
-      },
-      taxTotal: {
-        type: DataTypes.INTEGER
-      },
-      total: {
-        type: DataTypes.INTEGER
-      },
       bankName: {
         type: DataTypes.STRING
       },
-      bankBranch: {
+      branchName: {
         type: DataTypes.STRING
       },
-      bnakSubject: {
+      accountType: {
         type: DataTypes.STRING
       },
-      bankAccount: {
+      accountName: {
         type: DataTypes.STRING
       },
-      bankNo: {
+      accountNumber: {
         type: DataTypes.STRING
       },
       note: {
         type: DataTypes.STRING
       },
-      imprintPath: {
-        type: DataTypes.STRING
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        timestamps: true
+      },
+      updatedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        timestamps: true
       }
     },
     {
       sequelize,
-      modelName: 'pdfInvoice'
+      modelName: 'PdfInvoice'
     }
   )
-  return pdfInvoice
+  return PdfInvoice
 }

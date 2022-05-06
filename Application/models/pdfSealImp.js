@@ -1,7 +1,7 @@
 'use strict'
-const { Model } = require('DataTypes')
+const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class pdfImprint extends Model {
+  class PdfSealImp extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of DataTypes lifecycle.
@@ -9,34 +9,34 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      pdfImprint.belongsTo(models.PdfInvoice, {
+      PdfSealImp.belongsTo(models.PdfInvoice, {
         foreignKey: 'invoiceId',
-        targetKey: 'invoiceId'
+        targetKey: 'invoiceId',
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
       })
     }
   }
-  pdfImprint.init(
+  PdfSealImp.init(
     {
       invoiceId: {
-        allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
+        allowNull: false,
+        type: DataTypes.UUID,
         references: {
-          model: {
-            tableName: 'PdfInvoice'
-          },
+          model: { tableName: 'PdfInvoices' },
           key: 'invoiceId'
-        },
-        type: DataTypes.STRING
+        }
       },
-      imprint: {
-        type: DataTypes.STRING
+      image: {
+        type: DataTypes.BLOB
       }
     },
     {
-      DataTypes,
-      modelName: 'pdfImprint'
+      sequelize,
+      modelName: 'PdfSealImp',
+      timestamps: false
     }
   )
-  return pdfImprint
+  return PdfSealImp
 }

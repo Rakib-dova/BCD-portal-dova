@@ -3,9 +3,9 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('PdfInvoices', {
       invoiceId: {
-        allowNull: false,
+        type: Sequelize.UUID,
         primaryKey: true,
-        type: Sequelize.UUID
+        allowNull: false
       },
       tmpFlg: {
         type: Sequelize.BOOLEAN,
@@ -26,19 +26,19 @@ module.exports = {
       deliveryDate: {
         type: Sequelize.DATE
       },
-      destCompany: {
+      recCompany: {
         type: Sequelize.STRING(30)
       },
-      destPost: {
+      recPost: {
         type: Sequelize.STRING(8)
       },
-      destAddr1: {
+      recAddr1: {
         type: Sequelize.STRING(50)
       },
-      destAddr2: {
+      recAddr2: {
         type: Sequelize.STRING(50)
       },
-      destAddr3: {
+      recAddr3: {
         type: Sequelize.STRING(50)
       },
       sendTenantId: {
@@ -59,35 +59,35 @@ module.exports = {
       sendAddr3: {
         type: Sequelize.STRING(50)
       },
-      subtotal: {
-        type: Sequelize.INTEGER
-      },
-      taxTotal: {
-        type: Sequelize.INTEGER
-      },
-      total: {
-        type: Sequelize.INTEGER
-      },
       bankName: {
         type: Sequelize.STRING(50)
       },
-      bankBranch: {
+      branchName: {
         type: Sequelize.STRING(30)
       },
-      bnakSubject: {
+      accountType: {
         type: Sequelize.STRING(30)
       },
-      bankAccount: {
+      accountName: {
         type: Sequelize.STRING(30)
       },
-      bankNo: {
+      accountNumber: {
         type: Sequelize.STRING(30)
       },
       note: {
         type: Sequelize.STRING(150)
       },
-      imprintPath: {
-        type: Sequelize.STRING(255)
+      sealImpressionPath: {
+        type: Sequelize.STRING(255),
+        defaultValue: ''
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE
       }
     })
   },
