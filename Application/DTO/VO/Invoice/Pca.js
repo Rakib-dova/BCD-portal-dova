@@ -5,10 +5,8 @@ class Pca {
     this.debitTax = this.getTax(coding.creditTaxCategory, coding.debitAmount, 0)
     this.creditTax = this.getTax(coding.creditTaxCategory, coding.creditAmount, 1)
 
-    // 区切
-    this.header = mainBodyPartsFlag
     // ヘッダー情報
-    this.date = ''
+    this.date = mainBodyPartsFlag + ''
     this.no = '00001'
     this.voucherType = '21'
     this.codingType = '0'
