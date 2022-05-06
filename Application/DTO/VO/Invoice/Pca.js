@@ -28,6 +28,7 @@ class Pca {
     this.creditTaxAmount = this.creditTax[1]
     // Etc
     this.inputProgType = '1'
+    this.none = ''
   }
 
   getTax(taxCategory, amount, isCredit) {
