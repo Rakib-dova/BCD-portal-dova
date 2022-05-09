@@ -186,8 +186,8 @@ class PcaService {
     return mappedUkeirikigouToDatalist
   }
 
-  getMappingObcobjectToHeader() {
-    const mappedObctoHeader = {
+  getMappingPcaobjectToHeader() {
+    const mappedPcatoHeader = {
       // ヘッダー情報
       伝票日付: 'date',
       伝票番号: 'no',
@@ -274,7 +274,7 @@ class PcaService {
       配賦元セグメント３コード: 'none',
       配賦元セグメント３名: 'none'
     }
-    return mappedObctoHeader
+    return mappedPcatoHeader
   }
 
   convertDebitTaxCategory(_taxCategory, amount) {
