@@ -17,7 +17,7 @@ const journalDownloadController = require('../controllers/journalDownloadControl
 const iconv = require('iconv-lite')
 
 const notiTitle = '請求書ダウンロード'
-const serviceDataFormatName = ['デフォルト', '弥生会計（05以降）', '勘定奉行']
+const serviceDataFormatName = ['デフォルト', '弥生会計（05以降）', '勘定奉行', 'PCA（version 7）']
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -160,6 +160,7 @@ const cbPostIndex = async (req, res, next) => {
       break
     case 1:
     case 2:
+    case 3:
       req.body.sentBy = req.body.sentBy ?? []
       if (typeof req.body.sentBy === 'string') {
         req.body.sentBy = [req.body.sentBy]

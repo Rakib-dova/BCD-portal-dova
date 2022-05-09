@@ -6,6 +6,7 @@ const JournalizeInvoice = db.JournalizeInvoice
 const requestApproval = require('./requestApprovalController')
 const YayoiService = require('../service/YayoiService')
 const ObcService = require('../service/ObcService')
+const PcaService = require('../service/PcaService')
 
 // 複数の請求書を1つのCSVファイルにまとめる関数
 const createInvoiceDataForDownload = async (
@@ -156,6 +157,9 @@ const dowonloadKaikei = async (
       break
     case 2:
       service = new ObcService(passport, contract)
+      break
+    case 3:
+      service = new PcaService(passport, contract)
       break
     default:
       return null
