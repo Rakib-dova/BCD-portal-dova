@@ -82,10 +82,10 @@ class PcaService {
     const header = this.getHeader()
     const dataList = new Array(17).fill('')
     const mappedUkeirikigouToDatalist = this.getMappingUkeirikigouToDatalist()
-    const mappedObcobjectToHeader = this.getMappingObcobjectToHeader()
+    const mappedPcaobjectToHeader = this.getMappingPcaobjectToHeader()
 
     for (const column of header) {
-      dataList[mappedUkeirikigouToDatalist[column]] = pca[mappedObcobjectToHeader[column]]
+      dataList[mappedUkeirikigouToDatalist[column]] = pca[mappedPcaobjectToHeader[column]]
     }
 
     return this.arrayToString(dataList)
