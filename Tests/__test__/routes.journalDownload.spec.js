@@ -218,7 +218,7 @@ describe('journalDownloadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでjournalDownloadが呼ばれ「る」
-      const serviceDataFormatName = ['デフォルト', '弥生会計（05以降）', '勘定奉行']
+      const serviceDataFormatName = ['デフォルト', '弥生会計（05以降）', '勘定奉行', 'PCA（version 7）']
       expect(response.render).toHaveBeenCalledWith('journalDownload', {
         title: '仕訳情報ダウンロード',
         minissuedate: minissuedate,
