@@ -1,7 +1,11 @@
+html
+  head
+    link(rel='stylesheet', type='text/css', href='/css/invoicePDF.css')
+
 .columns.m-0
   .column.is-half
     p.title.is-10 請求書
-  .column
+  .column.pdf-image-size
     div 印影選択
       input(data-prop='' id='file-sealImp' type='file')
     .media.media-center
@@ -10,40 +14,48 @@
           img#sealImp(src = `data:image/png;base64,${sealImp}`)
         else
           img#sealImp(src = logoSrc)
-  .column
+  .column.pdf-image-size
     .media.media-center 
         figure.image 
           img(src = logoSrc)
 
-
 div.margin-top-20
-  p エラー表示場所
-
+  // エラーメッセージ表示場所                            
+  p#headerErrorMesage.input-label-required.is-invisible
+    
 .columns.m-0 
   .column
     p.font-bold 宛先
-    input(data-prop='recCompany' id='invoice-recCompany' type='text' placeholder='宛先企業名').width-220px
-    input(data-prop='recPost' id='invoice-recPost' type='text' placeholder='郵便番号').width-220px
-    input(data-prop='recAddr1' id='invoice-recAddr1' type='text' placeholder='都道府県').width-220px
-    input(data-prop='recAddr2' id='invoice-recAddr2' type='text' placeholder='住所').width-220px
-    input(data-prop='recAddr3' id='invoice-recAddr3' type='text' placeholder='ビル名/フロア等').width-220px
+    input.input.width-330px.font-bold(data-prop='recCompany' id='invoice-recCompany' type='text' placeholder='宛先企業名')
+    input.input.width-330px(data-prop='recPost' id='invoice-recPost' type='text' placeholder='郵便番号')
+    input.input.width-330px(data-prop='recAddr1' id='invoice-recAddr1' type='text' placeholder='都道府県')
+    input.input.width-330px(data-prop='recAdd2' id='invoice-recAddr2' type='text' placeholder='住所')
+    input.input.width-330px(data-prop='recAddr3' id='invoice-recAddr3' type='text' placeholder='ビル名/フロア等')
   .column
       p.font-bold 差出人
-      p#invoice-sendCompany
-      p#invoice-sendPost
-      p#invoice-sendAddr1
-      p#invoice-sendAddr2
-      p#invoice-sendAddr3
+      p.p.width-250pxfont-bold#invoice-sendCompany
+      p.p.width-250px#invoice-sendPost
+      p.p.width-250px#invoice-sendAddr1
+      p.p.width-250px#invoice-sendAddr2
+      p.p.width-250px#invoice-sendAddr3
   .column 
     p.font-bold 請求書番号
-    input(data-prop='invoiceNo' id='invoice-invoiceNo' type='text').width-220px
+    input.input.width-330px(data-prop='invoiceNo' id='invoice-invoiceNo' type='text' placeholder='請求書番号')
     div
-      label(for="invoice-billingDate") 請求日
-      input(data-prop='billingDate' id='invoice-billingDate' type='date' placeholder='宛先企業名').width-100px
-      label(for="invoice-currency") 通貨
-      input(data-prop='currency' id='invoice-currency' type='text' placeholder='通貨').width-100px
+      div.float-left.mr-r-10px
+        label(for="invoice-billingDate") 請求日
+        br
+        input.input.width-120px(data-prop='billingDate' id='invoice-billingDate' type='date' placeholder='宛先企業名')
+      div
+        label(for="invoice-currency") 通貨
+        br
+        input.input.width-120px(data-prop='currency' id='invoice-currency' type='text' placeholder='通貨')
     div
-      label(for="invoice-paymentDate") 支払期日
-      input(data-prop='paymentDate' id='invoice-paymentDate' type='date' placeholder='宛先企業名').width-100px
-      label(for="invoice-deliveryDate") 納品日
-      input(data-prop='deliveryDate' id='invoice-deliveryDate' type='date' placeholder='宛先企業名').width-100px
+      div.float-left.mr-r-10px  
+        label(for="invoice-paymentDate") 支払期日
+        br
+        input.input.width-120px(data-prop='paymentDate' id='invoice-paymentDate' type='date' placeholder='宛先企業名')
+      div
+        label(for="invoice-deliveryDate") 納品日
+        br
+        input.input.width-120px(data-prop='deliveryDate' id='invoice-deliveryDate' type='date' placeholder='宛先企業名')

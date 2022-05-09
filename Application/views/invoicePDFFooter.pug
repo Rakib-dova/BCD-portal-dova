@@ -1,44 +1,21 @@
+html
+  head
+    link(rel='stylesheet', type='text/css', href='/css/invoicePDF.css')
+
 div.margin-top-40p
-  .columns.m-0.p-0
-    .column.m-0.p-0
-      h3.subtitle.font-bold 支払い条件と手段
+  .columns
+    h3.subtitle.font-bold 支払い条件と手段
+    br
+  .columns
+    .column.width-50.float-left
       p.font-bold 銀行口座情報
-      .columns.m-0.p-0
-        .column.m-0.p-0
-          | 銀行名
-        .column.m-0.p-0.text-right
-          input(data-prop='bankName' id='invoice-bankName' type='text' placeholder='銀行名').width-150px
-        .column.m-0.p-0
-        .column.m-0.p-0
-      .columns.m-0.p-0
-        .column.m-0.p-0
-          | 支店名
-        .column.m-0.p-0.text-right
-          input(data-prop='branchName' id='invoice-branchName' type='text' placeholder='銀行名').width-150px
-        .column.m-0.p-0
-        .column.m-0.p-0
-      .columns.m-0.p-0
-        .column.m-0.p-0
-          | 科目
-        .column.m-0.p-0.text-right
-          input(data-prop='accountType' id='invoice-accountType' type='text' placeholder='銀行名').width-150px
-        .column.m-0.p-0
-        .column.m-0.p-0
-      .columns.m-0.p-0
-        .column.m-0.p-0
-          | 口座番号
-        .column.m-0.p-0.text-right
-          input(data-prop='accountName' id='invoice-accountName' type='text' placeholder='銀行名').width-150px
-        .column.m-0.p-0
-        .column.m-0.p-0
-      .columns.m-0.p-0
-        .column.m-0.p-0
-          | 口座名義
-        .column.m-0.p-0.text-right
-          input(data-prop='accountNumber' id='invoice-accountNumber' type='text' placeholder='銀行名').width-150px
-        .column.m-0.p-0
-        .column.m-0.p-0
-    .column.m-0.p-0
+      input.input.width-330px(data-prop='bankName' id='invoice-bankName' type='text' placeholder='銀行名')
+      input.input.width-330px(data-prop='branchName' id='invoice-branchName' type='text' placeholder='支店名')
+      input.input.width-330px(data-prop='accountType' id='invoice-accountType' type='text' placeholder='科目')
+      input.input.width-330px(data-prop='accountName' id='invoice-accountName' type='text' placeholder='口座番号')
+      input.input.width-330px(data-prop='accountNumber' id='invoice-accountNumber' type='text' placeholder='口座名義')
+  
+    .column.width-50
       p.font-bold 備考
-      textarea.input-comment-size(data-prop='note' id='invoice-note' rows='10' maxlength='1500' placeholder='1,500文字まで' name='remark')
+      textarea.input.input-comment-size(data-prop='note' id='invoice-note' rows='10' maxlength='1500' placeholder='1,500文字まで' name='remark')
       div(id='msgCount') (0/1500)

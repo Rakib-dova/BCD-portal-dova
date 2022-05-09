@@ -14,7 +14,7 @@ block content
       include invoicePDFHeader
       include invoicePDFLines
       include invoicePDFFooter
-      .grouped-button
+      .grouped-button.margin-top-40p
         a.button.mr-6(href='/pdfInvoices/list')  戻る
         if title === 'PDF請求書作成'
           a.button.mr-6.is-success#save-btn 一時保存

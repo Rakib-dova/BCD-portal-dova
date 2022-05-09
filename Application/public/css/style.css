@@ -54,18 +54,17 @@ input[readonly] {
   cursor: not-allowed;
 }
 
-input.width-80px{
-  width:80px
+input.width-80px {
+  width: 80px;
 }
 
-input.width-220px{
-  width:320px
+input.width-220px {
+  width: 320px;
 }
 
-input.width-320px{
-  width:320px
+input.width-320px {
+  width: 320px;
 }
-
 
 .appdesc {
   color: hsl(0, 0%, 21%);
@@ -702,8 +701,8 @@ body > div.hero.is-small {
   margin-left: 1.5rem;
 }
 
-.content-coution-font-size{
- font-size: 0.65rem;
+.content-coution-font-size {
+  font-size: 0.65rem;
 }
 
 .color-err-message {
