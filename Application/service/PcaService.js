@@ -279,20 +279,17 @@ class PcaService {
 
   convertDebitTaxCategory(_taxCategory, amount) {
     let debitCategory
-    const calcTax = (amount, percent) => {
-      return (Number(amount) * percent).toFixed(0)
-    }
 
     switch (_taxCategory) {
       case 'JP 消費税 10%':
         {
-          const taxAmount = calcTax(amount, 0.1)
+          const taxAmount = ''
           debitCategory = ['Q5', `${taxAmount}`]
         }
         break
       case 'JP 消費税(軽減税率) 8%':
         {
-          const taxAmount = calcTax(amount, 0.08)
+          const taxAmount = ''
           debitCategory = ['Q6', `${taxAmount}`]
         }
         break
@@ -312,20 +309,17 @@ class PcaService {
 
   convertCreditTaxCategory(_taxCategory, amount) {
     let creditCategory
-    const calcTax = (amount, percent) => {
-      return (Number(amount) * percent).toFixed(0)
-    }
 
     switch (_taxCategory) {
       case 'JP 消費税 10%':
         {
-          const taxAmount = calcTax(amount, 0.1)
+          const taxAmount = ''
           creditCategory = ['B5', `${taxAmount}`]
         }
         break
       case 'JP 消費税(軽減税率) 8%':
         {
-          const taxAmount = calcTax(amount, 0.08)
+          const taxAmount = ''
           creditCategory = ['B6', `${taxAmount}`]
         }
         break

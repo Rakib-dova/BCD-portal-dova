@@ -7,23 +7,23 @@ class Pca {
 
     // ヘッダー情報
     this.date = mainBodyPartsFlag + ''
-    this.no = '00001'
+    this.no = ''
     this.voucherType = '21'
     this.codingType = '0'
     // 明細情報・借方
-    this.debitDepartmentCode = coding.debitDepartmentCode
+    this.debitDepartmentCode = coding.debitDepartmentCode.substr(0, 6)
     this.debitAccountCode = coding.debitAccountCode
     this.debitSubAccountCode = coding.debitSubAccountCode
     this.debitTaxCode = this.debitTax[0]
-    this.debitTaxAutomaticCalc = '1'
+    this.debitTaxAutomaticCalc = '0'
     this.debitAmount = coding.debitAmount
     this.debitTaxAmount = this.debitTax[1]
     // 明細情報・貸方
-    this.creditDepartmentCode = coding.creditDepartmentCode
+    this.creditDepartmentCode = coding.creditDepartmentCode.substr(0, 6)
     this.creditAccountCode = coding.creditAccountCode
     this.creditSubAccountCode = coding.creditSubAccountCode
     this.creditTaxCode = this.creditTax[0]
-    this.creditTaxAutomaticCalc = '1'
+    this.creditTaxAutomaticCalc = '0'
     this.creditAmount = coding.creditAmount
     this.creditTaxAmount = this.creditTax[1]
     // Etc
