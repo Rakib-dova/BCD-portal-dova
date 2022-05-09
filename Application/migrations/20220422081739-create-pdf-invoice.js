@@ -7,6 +7,9 @@ module.exports = {
         primaryKey: true,
         allowNull: false
       },
+      invoiceNo: {
+        type: Sequelize.STRING(30)
+      },
       tmpFlg: {
         type: Sequelize.BOOLEAN,
         defaultValue: 'false'

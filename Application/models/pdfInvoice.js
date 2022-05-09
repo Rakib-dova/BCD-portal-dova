@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'invoiceId',
         sourceKey: 'invoiceId'
       })
+      PdfInvoice.hasOne(models.PdfSealImp, {
+        foreignKey: 'invoiceId',
+        sourceKey: 'invoiceId'
+      })
     }
   }
   PdfInvoice.init(
@@ -20,6 +24,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false
+      },
+      invoiceNo: {
+        type: DataTypes.STRING
       },
       tmpFlg: {
         type: DataTypes.BOOLEAN,

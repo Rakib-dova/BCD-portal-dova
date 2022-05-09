@@ -47,8 +47,8 @@ module.exports = (sequelize, DataTypes) => {
       quantity: {
         type: DataTypes.INTEGER
       },
-      taxRate: {
-        type: DataTypes.INTEGER
+      taxType: {
+        type: DataTypes.STRING
       }
     },
     {

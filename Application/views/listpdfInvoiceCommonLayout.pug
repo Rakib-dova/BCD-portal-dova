@@ -7,7 +7,7 @@ block content
 
     .columns.is-centered
       .column.is-11
-        a.button.is-link.mb-4(href="/pdfInvoiceRegister") #{btnNameForRegister}
+        a.button.is-link.mb-4(href="/pdfInvoices/register") 新規作成
         
         .box
           if listArr.length === 0
@@ -16,26 +16,26 @@ block content
             table.table.is-fullwidth.is-hoverable.table-fixed
               thead
                 tr
-                  th.width-5.text-center #{listNo}
-                  th.width-13.text-center #{invoiceNumber}
-                  th.width-13.text-center #{invoiceDestinationCompanyName}
-                  th.width-10.text-center #{totalAmmout}
-                  th.width-10.text-center #{updatedAt}
-                  th.width-10.text-center #{paymentDate}
-                  th.width-10.text-center #{invoiceState}
+                  th.width-5.text-center No
+                  th.width-13.text-center 請求書番号
+                  th.width-13.text-center 宛先
+                  th.width-10.text-center 金額
+                  th.width-10.text-center 更新日
+                  th.width-10.text-center 期限日
+                  th.width-10.text-center ステータス
                   th.width-10.text-center 
               tbody
                 - var list = listArr
-                each item in list
-                  tr
-                    th.text-center.td-overflow= item.no
-                    td.text-center.td-overflow= item.invoiceNumber
-                    td.text-center.td-overflow= item.invoiceDestinationCompanyName
-                    td.text-center.td-overflow= item.totalAmmout  
+                each item, index in list
+                  tr(id= item.invoiceId)
+                    th.text-center.td-overflow= index + 1
+                    td.text-center.td-overflow= item.invoiceNo
+                    td.text-center.td-overflow= item.recCompany
+                    td.text-center.td-overflow= item.total
                     td.text-center.td-overflow= item.updatedAt
                     td.text-center.td-overflow= item.paymentDate
-                    td.text-center.td-overflow= item.invoiceState           
+                    td.text-center.td-overflow= item.tmpFlg ? '出力済み' : 'ドラフト'
                     td.text-center 
-                      a.button.is-success(class= setClassChangeBtn uuid= item.departmentCodeId) 編集・出力
+                      a.button.is-success(href=`/pdfInvoices/edit/${item.invoiceId}`) 編集・出力
                       
     include footer

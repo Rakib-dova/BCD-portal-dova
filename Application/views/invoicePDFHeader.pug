@@ -1,14 +1,18 @@
 .columns.m-0
-  .column.is-two-thirds
+  .column.is-half
     p.title.is-10 請求書
   .column
-    .media.media-center 
-        figure.image 
-          img(src = imprintSrc)
+    div 印影選択
+      input(data-prop='' id='file-sealImp' type='file')
+    if sealImp
+      .media.media-center
+        figure.image
+          img#sealImp(src = `data:image/png;base64,${sealImp}`)
   .column
     .media.media-center 
         figure.image 
-          img(src = logoSrc) 
+          img(src = logoSrc)
+
 
 div.margin-top-20
   p エラー表示場所
@@ -16,20 +20,28 @@ div.margin-top-20
 .columns.m-0 
   .column
     p.font-bold 宛先
-    input(name='content' type='text' placeholder='宛先企業名').width-220px
-    input(name='content' type='text' placeholder='郵便番号').width-220px
-    input(name='content' type='text' placeholder='都道府県').width-220px
-    input(name='content' type='text' placeholder='住所').width-220px
-    input(name='content' type='text' placeholder='ビル名/フロア等').width-220px
+    input(data-prop='recCompany' id='invoice-recCompany' type='text' placeholder='宛先企業名').width-220px
+    input(data-prop='recPost' id='invoice-recPost' type='text' placeholder='郵便番号').width-220px
+    input(data-prop='recAddr1' id='invoice-recAddr1' type='text' placeholder='都道府県').width-220px
+    input(data-prop='recAddr2' id='invoice-recAddr2' type='text' placeholder='住所').width-220px
+    input(data-prop='recAddr3' id='invoice-recAddr3' type='text' placeholder='ビル名/フロア等').width-220px
   .column
-    template
       p.font-bold 差出人
-      p=sender.sendCompany
-      p=sender.sendPost
-      p=sender.sendAddr1
-      p=sender.sendAddr2
-      p=sender.sendAddr3
+      p#invoice-sendCompany
+      p#invoice-sendPost
+      p#invoice-sendAddr1
+      p#invoice-sendAddr2
+      p#invoice-sendAddr3
   .column 
     p.font-bold 請求書番号
-    input(name='content' type='text').width-220px
-    
+    input(data-prop='invoiceNo' id='invoice-invoiceNo' type='text').width-220px
+    div
+      label(for="invoice-billingDate") 請求日
+      input(data-prop='billingDate' id='invoice-billingDate' type='date' placeholder='宛先企業名').width-100px
+      label(for="invoice-currency") 通貨
+      input(data-prop='currency' id='invoice-currency' type='text' placeholder='通貨').width-100px
+    div
+      label(for="invoice-paymentDate") 支払期日
+      input(data-prop='paymentDate' id='invoice-paymentDate' type='date' placeholder='宛先企業名').width-100px
+      label(for="invoice-deliveryDate") 納品日
+      input(data-prop='deliveryDate' id='invoice-deliveryDate' type='date' placeholder='宛先企業名').width-100px

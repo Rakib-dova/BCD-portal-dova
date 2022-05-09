@@ -7,38 +7,38 @@ div.margin-top-40p
         .column.m-0.p-0
           | 銀行名
         .column.m-0.p-0.text-right
-          | XX銀行
+          input(data-prop='bankName' id='invoice-bankName' type='text' placeholder='銀行名').width-150px
         .column.m-0.p-0
         .column.m-0.p-0
       .columns.m-0.p-0
         .column.m-0.p-0
           | 支店名
         .column.m-0.p-0.text-right
-          | XX支店
+          input(data-prop='branchName' id='invoice-branchName' type='text' placeholder='銀行名').width-150px
         .column.m-0.p-0
         .column.m-0.p-0
       .columns.m-0.p-0
         .column.m-0.p-0
           | 科目
         .column.m-0.p-0.text-right
-          | 普通
+          input(data-prop='accountType' id='invoice-accountType' type='text' placeholder='銀行名').width-150px
         .column.m-0.p-0
         .column.m-0.p-0
       .columns.m-0.p-0
         .column.m-0.p-0
           | 口座番号
         .column.m-0.p-0.text-right
-          | 12345678
+          input(data-prop='accountName' id='invoice-accountName' type='text' placeholder='銀行名').width-150px
         .column.m-0.p-0
         .column.m-0.p-0
       .columns.m-0.p-0
         .column.m-0.p-0
           | 口座名義
         .column.m-0.p-0.text-right
-          | ｺｳｻﾞﾒｲｷﾞ
+          input(data-prop='accountNumber' id='invoice-accountNumber' type='text' placeholder='銀行名').width-150px
         .column.m-0.p-0
         .column.m-0.p-0
     .column.m-0.p-0
       p.font-bold 備考
-      textarea.input-comment-size(id='inputMsg' rows='10' maxlength='1500' placeholder='1,500文字まで' name='remark')
+      textarea.input-comment-size(data-prop='note' id='invoice-note' rows='10' maxlength='1500' placeholder='1,500文字まで' name='remark')
       div(id='msgCount') (0/1500)

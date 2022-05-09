@@ -11,19 +11,23 @@ block content
     div.title-box-journallzing
       h4.title-text-journallzing.text-inbox 出力内容登録
     .box
-      form#form(method='POST')
-        .box
-          include invoicePDFHeader
-          include invoicePDFLines
-          include invoicePDFFooter
-        .grouped-button
-          a.button.mr-6(href='/pdfInvoiceList/1')  戻る
-          a.button.mr-6.is-success#btn-confirm 一時保存
-          a.button.is-link(href=`/requestApproval/${documentId}`) 出力
+      include invoicePDFHeader
+      include invoicePDFLines
+      include invoicePDFFooter
+      .grouped-button
+        a.button.mr-6(href='/pdfInvoices/list')  戻る
+        if title === 'PDF請求書作成'
+          a.button.mr-6.is-success#save-btn 一時保存
+        else 
+          a.button.mr-6.is-success#update-btn 一時保存
+        a.button.is-link(href=`/requestApproval/${documentId}`) 出力
   
-  include footer 
+  include footer
 
+  div#invoice-json(hidden="true") #{invoice}
+  div#lines-json(hidden="true") #{lines}
 
 block append scripts
+  script(src="/js/lib/utils.js")
   script(src="/js/pdfInvoice-page.js")
   link(rel='stylesheet', type='text/css', href='/css/inbox.css')
