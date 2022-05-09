@@ -4,10 +4,12 @@
   .column
     div 印影選択
       input(data-prop='' id='file-sealImp' type='file')
-    if sealImp
-      .media.media-center
-        figure.image
+    .media.media-center
+      figure.image
+        if sealImp
           img#sealImp(src = `data:image/png;base64,${sealImp}`)
+        else
+          img#sealImp(src = logoSrc)
   .column
     .media.media-center 
         figure.image 
