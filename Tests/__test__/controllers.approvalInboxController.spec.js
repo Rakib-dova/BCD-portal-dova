@@ -1,9 +1,5 @@
 'use strict'
 
-jest.mock('../../Application/node_modules/express', () => {
-  return require('jest-express')
-})
-
 const logger = require('../../Application/lib/logger')
 const apiManager = require('../../Application/controllers/apiManager')
 const userController = require('../../Application/controllers/userController')
