@@ -9,8 +9,10 @@ const JournalizeInvoice = require('../../Application/models').JournalizeInvoice
 const Contract = require('../../Application/models').Contract
 const requestApprovalController = require('../../Application/controllers/requestApprovalController')
 const YayoiService = require('../../Application/service/YayoiService')
+const ObcService = require('../../Application/service/ObcService')
+const PcaService = require('../../Application/service/PcaService')
 
-let findOneRequestApprovalSpy, journalfindAllSpy, errorSpy, getCodingSpy, yayoiServiceSpy
+let findOneRequestApprovalSpy, journalfindAllSpy, errorSpy, getCodingSpy, yayoiServiceSpy, obcServiceSpy, pcaServiceSpy
 
 describe('journalDownloadControllerのテスト', () => {
   beforeEach(() => {
@@ -18,7 +20,9 @@ describe('journalDownloadControllerのテスト', () => {
     journalfindAllSpy = jest.spyOn(JournalizeInvoice, 'findAll')
     getCodingSpy = jest.spyOn(Contract, 'findAll')
     findOneRequestApprovalSpy = jest.spyOn(requestApprovalController, 'findOneRequestApproval')
-    yayoiServiceSpy = jest.spyOn(YayoiService.prototype, 'convertToYayoi')
+    yayoiServiceSpy = jest.spyOn(YayoiService.prototype, 'convertToKaikei')
+    obcServiceSpy = jest.spyOn(ObcService.prototype, 'convertToKaikei')
+    pcaServiceSpy = jest.spyOn(PcaService.prototype, 'convertToKaikei')
     errorSpy = jest.spyOn(logger, 'error')
   })
   afterEach(() => {
@@ -26,6 +30,8 @@ describe('journalDownloadControllerのテスト', () => {
     getCodingSpy.mockRestore()
     findOneRequestApprovalSpy.mockRestore()
     yayoiServiceSpy.mockRestore()
+    obcServiceSpy.mockRestore()
+    pcaServiceSpy.mockRestore()
     errorSpy.mockRestore()
   })
 
@@ -35,7 +41,24 @@ describe('journalDownloadControllerのテスト', () => {
     ',仕訳情報1-借方勘定科目名,仕訳情報1-借方勘定科目コード,仕訳情報1-借方補助科目名,仕訳情報1-借方補助科目コード,仕訳情報1-借方部門名,仕訳情報1-借方部門コード,仕訳情報1-貸方勘定科目名,仕訳情報1-貸方勘定科目コード,仕訳情報1-貸方補助科目名,仕訳情報1-貸方補助科目コード,仕訳情報1-貸方部門名,仕訳情報1-貸方部門コード,仕訳情報1-計上金額,仕訳情報2-借方勘定科目名,仕訳情報2-借方勘定科目コード,仕訳情報2-借方補助科目名,仕訳情報2-借方補助科目コード,仕訳情報2-借方部門名,仕訳情報2-借方部門コード,仕訳情報2-貸方勘定科目名,仕訳情報2-貸方勘定科目コード,仕訳情報2-貸方補助科目名,仕訳情報2-貸方補助科目コード,仕訳情報2-貸方部門名,仕訳情報2-貸方部門コード,仕訳情報2-計上金額,仕訳情報3-借方勘定科目名,仕訳情報3-借方勘定科目コード,仕訳情報3-借方補助科目名,仕訳情報3-借方補助科目コード,仕訳情報3-借方部門名,仕訳情報3-借方部門コード,仕訳情報3-貸方勘定科目名,仕訳情報3-貸方勘定科目コード,仕訳情報3-貸方補助科目名,仕訳情報3-貸方補助科目コード,仕訳情報3-貸方部門名,仕訳情報3-貸方部門コード,仕訳情報3-計上金額,仕訳情報4-借方勘定科目名,仕訳情報4-借方勘定科目コード,仕訳情報4-借方補助科目名,仕訳情報4-借方補助科目コード,仕訳情報4-借方部門名,仕訳情報4-借方部門コード,仕訳情報4-貸方勘定科目名,仕訳情報4-貸方勘定科目コード,仕訳情報4-貸方補助科目名,仕訳情報4-貸方補助科目コード,仕訳情報4-貸方部門名,仕訳情報4-貸方部門コード,仕訳情報4-計上金額,仕訳情報5-借方勘定科目名,仕訳情報5-借方勘定科目コード,仕訳情報5-借方補助科目名,仕訳情報5-借方補助科目コード,仕訳情報5-借方部門名,仕訳情報5-借方部門コード,仕訳情報5-貸方勘定科目名,仕訳情報5-貸方勘定科目コード,仕訳情報5-貸方補助科目名,仕訳情報5-貸方補助科目コード,仕訳情報5-貸方部門名,仕訳情報5-貸方部門コード,仕訳情報5-計上金額,仕訳情報6-借方勘定科目名,仕訳情報6-借方勘定科目コード,仕訳情報6-借方補助科目名,仕訳情報6-借方補助科目コード,仕訳情報6-借方部門名,仕訳情報6-借方部門コード,仕訳情報6-貸方勘定科目名,仕訳情報6-貸方勘定科目コード,仕訳情報6-貸方補助科目名,仕訳情報6-貸方補助科目コード,仕訳情報6-貸方部門名,仕訳情報6-貸方部門コード,仕訳情報6-計上金額,仕訳情報7-借方勘定科目名,仕訳情報7-借方勘定科目コード,仕訳情報7-借方補助科目名,仕訳情報7-借方補助科目コード,仕訳情報7-借方部門名,仕訳情報7-借方部門コード,仕訳情報7-貸方勘定科目名,仕訳情報7-貸方勘定科目コード,仕訳情報7-貸方補助科目名,仕訳情報7-貸方補助科目コード,仕訳情報7-貸方部門名,仕訳情報7-貸方部門コード,仕訳情報7-計上金額,仕訳情報8-借方勘定科目名,仕訳情報8-借方勘定科目コード,仕訳情報8-借方補助科目名,仕訳情報8-借方補助科目コード,仕訳情報8-借方部門名,仕訳情報8-借方部門コード,仕訳情報8-貸方勘定科目名,仕訳情報8-貸方勘定科目コード,仕訳情報8-貸方補助科目名,仕訳情報8-貸方補助科目コード,仕訳情報8-貸方部門名,仕訳情報8-貸方部門コード,仕訳情報8-計上金額,仕訳情報9-借方勘定科目名,仕訳情報9-借方勘定科目コード,仕訳情報9-借方補助科目名,仕訳情報9-借方補助科目コード,仕訳情報9-借方部門名,仕訳情報9-借方部門コード,仕訳情報9-貸方勘定科目名,仕訳情報9-貸方勘定科目コード,仕訳情報9-貸方補助科目名,仕訳情報9-貸方補助科目コード,仕訳情報9-貸方部門名,仕訳情報9-貸方部門コード,仕訳情報9-計上金額,仕訳情報10-借方勘定科目名,仕訳情報10-借方勘定科目コード,仕訳情報10-借方補助科目名,仕訳情報10-借方補助科目コード,仕訳情報10-借方部門名,仕訳情報10-借方部門コード,仕訳情報10-貸方勘定科目名,仕訳情報10-貸方勘定科目コード,仕訳情報10-貸方補助科目名,仕訳情報10-貸方補助科目コード,仕訳情報10-貸方部門名,仕訳情報10-貸方部門コード,仕訳情報10-計上金額'
 
   const yayoiServiceResult =
-    '"2000","","","","acc1","subAcc1","de1","課税売上込10%","299900","0","cAcc1","cSubAcc1","cDe1","課対仕入込10%","299900","0","","","","0","","","","","no"'
+    '"2111","","","","acc1","subAcc1","de1","課税売上込10%","299900","0","cAcc1","cSubAcc1","cDe1","課対仕入込10%","299900","0","","","","3","","","","","no"'
+
+  const obcServiceResult =
+    '"GL0010000","GL0010001","GL0010002","GL0010003","GL0010007","GL0010008","GL0010005","GL0010006","GL0010004","GL0012001","GL0012002","GL0012003","GL0012004","GL0012015","GL0012005","GL0012006","GL0012007","GL0012008","GL0012009","GL0012101","GL0012102","GL0013001","GL0013002","GL0013003","GL0013004","GL0013015","GL0013005","GL0013006","GL0013007","GL0013008","GL0013009","GL0013101","GL0013102","GL0011001","GL0011002","GL0011003"\r\n' +
+    '"*","","","","","","1","","0","","202204152","","0010","10","","1","","",299900,0,"DE3763","Acc10","","0060","10","","1","","",299900,0,"","",""\r\n' +
+    '"","","","","","","1","","0","","Acc1","subAcc1","0010","10","","1","","",100,0,"","Acc10","","0060","10","","1","","",100,0,"","",""\r\n'
+
+  const obcServiceHeader =
+    '"GL0010000","GL0010001","GL0010002","GL0010003","GL0010007","GL0010008","GL0010005","GL0010006","GL0010004","GL0012001","GL0012002","GL0012003","GL0012004","GL0012015","GL0012005","GL0012006","GL0012007","GL0012008","GL0012009","GL0012101","GL0012102","GL0013001","GL0013002","GL0013003","GL0013004","GL0013015","GL0013005","GL0013006","GL0013007","GL0013008","GL0013009","GL0013101","GL0013102","GL0011001","GL0011002","GL0011003"'
+
+  const pcaServiceHeader =
+    '"伝票日付","伝票番号","仕訳区分","管理仕訳区分","借方税計算モード","借方部門コード","借方部門名","借方科目コード","借方科目名","借方補助コード","借方補助名","借方税区分コード","借方税区分名","借方金額","借方消費税額","貸方税計算モード","貸方部門コード","貸方部門名","貸方科目コード","貸方科目名","貸方補助コード","貸方補助名","貸方税区分コード","貸方税区分名","貸方金額","貸方消費税額","摘要文","数字１","数字２","入力プログラム区分","配賦元税計算","配賦元集計方法","配賦元集計開始日付","配賦元集計終了日付","配賦元管理仕訳区分","配賦元部門コード","配賦元部門名","配賦元科目コード","配賦元科目名","配賦元補助コード","配賦元補助名","配賦元金額","数字３","数字４","数字５","金額１","金額２","金額３","金額４","金額５","文字列１","文字列２","文字列３","文字列４","文字列５","入力日付時間","借方取引先コード","借方取引先名","借方セグメント１コード","借方セグメント１名","借方セグメント２コード","借方セグメント２名","借方セグメント３コード","借方セグメント３名","貸方取引先コード","貸方取引先名","貸方セグメント１コード","貸方セグメント１名","貸方セグメント２コード","貸方セグメント２名","貸方セグメント３コード","貸方セグメント３名","配賦選択","配賦元取引先コード","配賦元取引先名","配賦元セグメント１コード","配賦元セグメント１名","配賦元セグメント２コード","配賦元セグメント２名","配賦元セグメント３コード","配賦元セグメント３名"'
+
+  const pcaServiceResult =
+    '"伝票日付","伝票番号","仕訳区分","管理仕訳区分","借方税計算モード","借方部門コード","借方部門名","借方科目コード","借方科目名","借方補助コード","借方補助名","借方税区分コード","借方税区分名","借方金額","借方消費税額","貸方税計算モード","貸方部門コード","貸方部門名","貸方科目コード","貸方科目名","貸方補助コード","貸方補助名","貸方税区分コード","貸方税区分名","貸方金額","貸方消費税額","摘要文","数字１","数字２","入力プログラム区分","配賦元税計算","配賦元集計方法","配賦元集計開始日付","配賦元集計終了日付","配賦元管理仕訳区分","配賦元部門コード","配賦元部門名","配賦元科目コード","配賦元科目名","配賦元補助コード","配賦元補助名","配賦元金額","数字３","数字４","数字５","金額１","金額２","金額３","金額４","金額５","文字列１","文字列２","文字列３","文字列４","文字列５","入力日付時間","借方取引先コード","借方取引先名","借方セグメント１コード","借方セグメント１名","借方セグメント２コード","借方セグメント２名","借方セグメント３コード","借方セグメント３名","貸方取引先コード","貸方取引先名","貸方セグメント１コード","貸方セグメント１名","貸方セグメント２コード","貸方セグメント２名","貸方セグメント３コード","貸方セグメント３名","配賦選択","配賦元取引先コード","配賦元取引先名","配賦元セグメント１コード","配賦元セグメント１名","配賦元セグメント２コード","配賦元セグメント２名","配賦元セグメント３コード","配賦元セグメント３名"\r\n' +
+    '"*20220505","00001","21","0","1","000","","0000001710","","","","Q6","",24200,"1936","1","000","","0000001110","","","","00","",24200,"0","","","","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n' +
+    '"20220505","00001","21","0","1","000","","0000001710","","","","Q6","",24200,"1936","1","000","","0000001110","","","","00","",24200,"0","","","","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n' +
+    '"20220505","00001","21","0","1","000","","0000001710","","","","Q6","",29340,"2347","1","000","","0000001110","","","","00","",29340,"0","","","","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n'
 
   // DBデータ設定
   const Contracts = require('../mockDB/Contracts_Table')
@@ -716,32 +739,34 @@ describe('journalDownloadControllerのテスト', () => {
     })
   })
 
-  describe('downloadYayoi', () => {
+  describe('dowonloadKaikei', () => {
     const passport = {
       accessToken: accessToken,
       refreshToken: refreshToken,
       tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
     }
 
-    test('正常:企業条件がない場合', async () => {
+    test('正常:企業条件がない場合（弥生会計）', async () => {
       // 準備
       const invoiceNumber = ''
       const minIssuedate = '2021-10-01'
       const maxIssuedate = '2022-04-25'
       const chkFinalapproval = 'finalapproval'
       const sentBy = []
+      const serviceDataFormat = 1
 
       yayoiServiceSpy.mockReturnValue(yayoiServiceResult)
 
       // 試験実施
-      const result = await journalDownloadController.downloadYayoi(
+      const result = await journalDownloadController.dowonloadKaikei(
         passport,
         Contracts[0],
         invoiceNumber,
         minIssuedate,
         maxIssuedate,
         sentBy,
-        chkFinalapproval
+        chkFinalapproval,
+        serviceDataFormat
       )
 
       // 期待結果
@@ -749,25 +774,27 @@ describe('journalDownloadControllerのテスト', () => {
       expect(result).toEqual([yayoiServiceResult])
     })
 
-    test('正常:企業条件がある場合', async () => {
+    test('正常:企業条件がある場合（弥生会計）', async () => {
       // 準備
       const invoiceNumber = ''
       const minIssuedate = '2021-10-01'
       const maxIssuedate = '2022-04-25'
       const chkFinalapproval = 'finalapproval'
       const sentBy = ['221559d0-53aa-44a2-ab29-0c4a6cb02bd1']
+      const serviceDataFormat = 1
 
       yayoiServiceSpy.mockReturnValue(yayoiServiceResult)
 
       // 試験実施
-      const result = await journalDownloadController.downloadYayoi(
+      const result = await journalDownloadController.dowonloadKaikei(
         passport,
         Contracts[0],
         invoiceNumber,
         minIssuedate,
         maxIssuedate,
         sentBy,
-        chkFinalapproval
+        chkFinalapproval,
+        serviceDataFormat
       )
 
       // 期待結果
@@ -775,25 +802,237 @@ describe('journalDownloadControllerのテスト', () => {
       expect(result).toEqual([yayoiServiceResult])
     })
 
-    test('正常:データがない場合', async () => {
+    test('正常:データがない場合（弥生会計）', async () => {
       // 準備
       const invoiceNumber = ''
       const minIssuedate = '2021-10-01'
       const maxIssuedate = '2022-04-25'
       const chkFinalapproval = 'finalapproval'
       const sentBy = []
+      const serviceDataFormat = 1
 
       yayoiServiceSpy.mockReturnValue(null)
 
       // 試験実施
-      const result = await journalDownloadController.downloadYayoi(
+      const result = await journalDownloadController.dowonloadKaikei(
         passport,
         Contracts[0],
         invoiceNumber,
         minIssuedate,
         maxIssuedate,
         sentBy,
-        chkFinalapproval
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(null)
+    })
+
+    test('正常:企業条件がない場合（勘定奉行（OBC））', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 2
+
+      obcServiceSpy.mockReturnValue(obcServiceResult)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      // ヘッダ確認
+      const dataHeader = result[0].split('\r\n')[0]
+      // データ確認
+      expect(dataHeader).toEqual(obcServiceHeader)
+      expect(result).toEqual([obcServiceResult])
+    })
+
+    test('正常:企業条件がある場合（勘定奉行（OBC））', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = ['221559d0-53aa-44a2-ab29-0c4a6cb02bd1']
+      const serviceDataFormat = 2
+
+      obcServiceSpy.mockReturnValue(obcServiceResult)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      // ヘッダ確認
+      const dataHeader = result[0].split('\r\n')[0]
+      // データ確認
+      expect(dataHeader).toEqual(obcServiceHeader)
+      expect(result).toEqual([obcServiceResult])
+    })
+
+    test('正常:データがない場合（勘定奉行（OBC））', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 2
+
+      obcServiceSpy.mockReturnValue(null)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(null)
+    })
+
+    test('正常:企業条件がない場合（PCA（version 7））', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 3
+
+      pcaServiceSpy.mockReturnValue(pcaServiceResult)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      // ヘッダ確認
+      const dataHeader = result[0].split('\r\n')[0]
+      // データ確認
+      expect(dataHeader).toEqual(pcaServiceHeader)
+      expect(result).toEqual([pcaServiceResult])
+    })
+
+    test('正常:企業条件がある場合（PCA（version 7））', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = ['221559d0-53aa-44a2-ab29-0c4a6cb02bd1']
+      const serviceDataFormat = 3
+
+      pcaServiceSpy.mockReturnValue(pcaServiceResult)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      // ヘッダ確認
+      const dataHeader = result[0].split('\r\n')[0]
+      // データ確認
+      expect(dataHeader).toEqual(pcaServiceHeader)
+      expect(result).toEqual([pcaServiceResult])
+    })
+
+    test('正常:データがない場合（PCA（version 7））', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 3
+
+      pcaServiceSpy.mockReturnValue(null)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(null)
+    })
+
+    test('異常系:serviceDataFormatが正しくない場合', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 6
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
       )
 
       // 期待結果

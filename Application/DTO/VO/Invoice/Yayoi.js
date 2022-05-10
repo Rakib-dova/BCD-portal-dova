@@ -27,7 +27,7 @@ class Yayoi {
     this.scrip = ''
     this.checkNo = ''
     this.paymentDueDate = ''
-    this.type = '0'
+    this.type = '3'
     this.resource = ''
     this.codingMemo = ''
     this.note1 = ''

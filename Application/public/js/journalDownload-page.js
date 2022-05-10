@@ -1,8 +1,10 @@
 window.onload = function () {
   document.getElementById('submit').addEventListener('click', (e) => {
+    document.querySelector('#RequiredErrorMesageField').classList.add('is-invisible')
     if (!checkRadioButton()) {
       return false
     }
+
     document.querySelector('#form').submit()
   })
 }
