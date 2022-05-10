@@ -12,201 +12,36 @@ const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
-const inboxController = require('../../Application/controllers/inboxController')
 const approvalInboxController = require('../../Application/controllers/approvalInboxController')
 const db = require('../../Application/models')
 const requestApprovalModel = db.RequestApproval
 const logger = require('../../Application/lib/logger.js')
-const constants = require('../../Application/constants')
 const Parser = require('../../Application/node_modules/rss-parser')
-const parser = new Parser({
-  headers: {
-    Accept: 'text/html'
-  }
-})
+
 const MemberSiteSessionDto = require('../../Application/memberSite/dtos/memberSiteSessionDto')
-const workflow = [
-  {
-    documentId: 'c04da83f-d059-5d9a-8d43-56e281c3901f',
-    invoiceid: 'PBI3580TEST1',
-    status: 3,
-    workflowStatus: '支払依頼中',
-    currency: 'JPY',
-    amount: '1100',
-    sendBy: 'サプライヤー1',
-    sendTo: 'バイヤー1',
-    updatedAt: '2022/03/01',
-    expire: '2022/03/31',
-    createdAt: '2022-03-15T06:09:48.968Z',
-    processStatus: ''
-  },
-  {
-    documentId: '9b0e980a-0de9-5ae4-874e-64e5ce904981',
-    invoiceid: 'PBI2173No2',
-    status: 3,
-    workflowStatus: '支払依頼中',
-    currency: 'JPY',
-    amount: '16437600',
-    sendBy: 'サプライヤー1',
-    sendTo: 'バイヤー1',
-    updatedAt: '2022/01/06',
-    expire: '-',
-    createdAt: '2022-03-15T06:05:28.202Z',
-    processStatus: ''
-  },
-  {
-    documentId: 'cba9c4b3-1dca-5ddd-bc3e-f50816be9bc6',
-    invoiceid: 'PBI3580TEST1_Edge',
-    status: 3,
-    workflowStatus: '支払依頼中',
-    currency: 'JPY',
-    amount: '1100',
-    sendBy: 'サプライヤー1',
-    sendTo: 'バイヤー1',
-    updatedAt: '2022/03/01',
-    expire: '2022/03/30',
-    createdAt: '2022-03-15T05:58:58.648Z',
-    processStatus: ''
-  },
-  {
-    documentId: '6a820ae1-6c8d-5136-bf4a-bfcf6e97626a',
-    invoiceid: 'PBI3580TEST2_Edge',
-    status: 3,
-    workflowStatus: '支払依頼中',
-    currency: 'JPY',
-    amount: '4400',
-    sendBy: 'サプライヤー1',
-    sendTo: 'バイヤー1',
-    updatedAt: '2022/03/01',
-    expire: '2022/03/31',
-    createdAt: '2022-03-15T05:22:37.754Z',
-    processStatus: ''
-  },
-  {
-    documentId: '3940d3b8-b46c-56ae-ad84-859714542ca1',
-    invoiceid: 'invoiceForLocalTest1',
-    status: 3,
-    workflowStatus: '支払依頼中',
-    currency: 'JPY',
-    amount: '1100',
-    sendBy: 'サプライヤー1',
-    sendTo: 'バイヤー1',
-    updatedAt: '2022/03/15',
-    expire: '2022/03/31',
-    createdAt: '2022-03-15T04:59:18.436Z',
-    processStatus: ''
-  },
-  {
-    documentId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
-    invoiceid: 'PB2171No5',
-    status: 3,
-    workflowStatus: '支払依頼中',
-    currency: 'JPY',
-    amount: '10800',
-    sendBy: 'サプライヤー1',
-    sendTo: 'バイヤー1',
-    updatedAt: '2022/02/03',
-    expire: '-',
-    createdAt: '2022-03-15T04:59:18.436Z',
-    processStatus: ''
-  },
-  {
-    documentId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
-    invoiceid: 'PB2171No5',
-    status: 3,
-    workflowStatus: '支払依頼中',
-    currency: 'JPY',
-    amount: '10800',
-    sendBy: 'サプライヤー1',
-    sendTo: 'バイヤー1',
-    updatedAt: '2022/02/03',
-    expire: '-',
-    createdAt: '2022-03-15T04:59:18.436Z',
-    processStatus: ''
-  }
-]
-
-const noWorkFlow = []
-
-const requestApproval = {
-  requestId: 'fd991128-9d2d-40a1-8396-de078f3daf8b',
-  contractId: '198851fe-f220-4c7a-9aca-a08f744e45ae',
-  invoiceId: '608eb8aa-50c7-5136-b225-f138a02a7717',
-  message: 'ｄｒつ',
-  status: '10',
-  approveRoute: { name: 'バイヤー1', users: [] },
-  approvals: [],
-  prevUser: { name: '利用者1 バイヤー1', message: 'ｄｒつ' }
-}
-
-const noRequestApproval = {}
 
 const resultofRequestApprovals = [
   {
-    dataValues: {
-      requestId: '0e11ba9a-bd33-46f0-87db-cca918e2bb87',
-      contractId: '198851fe-f220-4c7a-9aca-a08f744e45ae',
-      approveRouteId: 'bdaea953-79f3-4560-8209-8d0e1710a224',
-      invoiceId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
-      requester: 'c7dc9c91-41ec-4209-8c11-b68e4f84c1de',
-      status: '10',
-      message: 'test1234',
-      create: '2022-03-15T04:59:18.436Z',
-      isSaved: false
-    },
-    _previousDataValues: {
-      requestId: '0e11ba9a-bd33-46f0-87db-cca918e2bb87',
-      contractId: '198851fe-f220-4c7a-9aca-a08f744e45ae',
-      approveRouteId: 'bdaea953-79f3-4560-8209-8d0e1710a224',
-      invoiceId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
-      requester: 'c7dc9c91-41ec-4209-8c11-b68e4f84c1de',
-      status: '10',
-      message: 'test1234',
-      create: '2022-03-15T04:59:18.436Z',
-      isSaved: false
-    },
-    _changed: {},
-    _options: {
-      isNewRecord: false,
-      _schema: null,
-      _schemaDelimiter: '',
-      raw: true,
-      attributes: []
-    },
-    isNewRecord: false
+    requestId: '0e11ba9a-bd33-46f0-87db-cca918e2bb87',
+    contractId: '198851fe-f220-4c7a-9aca-a08f744e45ae',
+    approveRouteId: 'bdaea953-79f3-4560-8209-8d0e1710a224',
+    invoiceId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
+    requester: 'c7dc9c91-41ec-4209-8c11-b68e4f84c1de',
+    status: '10',
+    message: 'test1234',
+    create: '2022-03-15T04:59:18.436Z',
+    isSaved: false
   },
   {
-    dataValues: {
-      requestId: '14c82982-1562-4cfb-b13a-a83578db0f39',
-      contractId: '198851fe-f220-4c7a-9aca-a08f744e45ae',
-      approveRouteId: 'bdaea953-79f3-4560-8209-8d0e1710a224',
-      invoiceId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
-      requester: '12345678-cb0b-48ad-857d-4b42a44ede13',
-      status: '90',
-      message: 'test1234',
-      create: '2022-03-15T04:59:18.436Z',
-      isSaved: false
-    },
-    _previousDataValues: {
-      requestId: '14c82982-1562-4cfb-b13a-a83578db0f39',
-      contractId: '198851fe-f220-4c7a-9aca-a08f744e45ae',
-      approveRouteId: 'bdaea953-79f3-4560-8209-8d0e1710a224',
-      invoiceId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
-      requester: '12345678-cb0b-48ad-857d-4b42a44ede13',
-      status: '90',
-      message: 'test1234',
-      create: '2022-03-15T04:59:18.436Z',
-      isSaved: false
-    },
-    _changed: {},
-    _options: {
-      isNewRecord: false,
-      _schema: null,
-      _schemaDelimiter: '',
-      raw: true,
-      attributes: []
-    },
-    isNewRecord: false
+    requestId: '14c82982-1562-4cfb-b13a-a83578db0f39',
+    contractId: '198851fe-f220-4c7a-9aca-a08f744e45ae',
+    approveRouteId: 'bdaea953-79f3-4560-8209-8d0e1710a224',
+    invoiceId: 'd58ce0d1-87fb-5ea3-8abe-03549b981939',
+    requester: '12345678-cb0b-48ad-857d-4b42a44ede13',
+    status: '90',
+    message: 'test1234',
+    create: '2022-03-15T04:59:18.436Z',
+    isSaved: false
   }
 ]
 
@@ -216,7 +51,9 @@ if (process.env.LOCALLY_HOSTED === 'true') {
 }
 
 let request, response, infoSpy, findOneSpy, findOneSpyContracts, parseUrlSpy
-let approvalInboxControllerGetRequestApprovalSpy, approvalInboxControllerHasPowerOfEditingSpy, inboxControllerSpy, requestApprovalModelFindAllSpy
+let approvalInboxControllerGetRequestApprovalSpy,
+  approvalInboxControllerHasPowerOfEditingSpy,
+  requestApprovalModelFindAllSpy
 describe('portalのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -225,7 +62,6 @@ describe('portalのテスト', () => {
     findOneSpy = jest.spyOn(userController, 'findOne')
     findOneSpyContracts = jest.spyOn(contractController, 'findOne')
     parseUrlSpy = jest.spyOn(Parser.prototype, 'parseURL')
-    inboxControllerSpy = jest.spyOn(inboxController, 'getWorkflow')
     approvalInboxControllerGetRequestApprovalSpy = jest.spyOn(approvalInboxController, 'getRequestApproval')
     approvalInboxControllerHasPowerOfEditingSpy = jest.spyOn(approvalInboxController, 'hasPowerOfEditing')
     requestApprovalModelFindAllSpy = jest.spyOn(requestApprovalModel, 'findAll')
@@ -238,7 +74,6 @@ describe('portalのテスト', () => {
     findOneSpy.mockRestore()
     findOneSpyContracts.mockRestore()
     parseUrlSpy.mockRestore()
-    inboxControllerSpy.mockRestore()
     approvalInboxControllerGetRequestApprovalSpy.mockRestore()
     approvalInboxControllerHasPowerOfEditingSpy.mockRestore()
     requestApprovalModelFindAllSpy.mockRestore()
@@ -330,10 +165,9 @@ describe('portalのテスト', () => {
         return dummyTokne
       })
 
-      inboxControllerSpy.mockReturnValue(workflow)
-      approvalInboxControllerGetRequestApprovalSpy.mockReturnValue(requestApproval)
-      approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(true)
       requestApprovalModelFindAllSpy.mockReturnValueOnce(resultofRequestApprovals)
+      approvalInboxControllerHasPowerOfEditingSpy.mockReturnValueOnce(true).mockReturnValueOnce(false)
+
       // 試験実施
       await portal.cbGetIndex(request, response, next)
 
@@ -359,7 +193,7 @@ describe('portalのテスト', () => {
         memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
         csrfToken: dummyTokne /* 会員サイト開発により追加 */,
         rejectedNoticeCnt: 1,
-        requestNoticeCnt: 7
+        requestNoticeCnt: 1
       })
     })
 
@@ -451,10 +285,9 @@ describe('portalのテスト', () => {
         return dummyTokne
       })
 
-      inboxControllerSpy.mockReturnValue(noWorkFlow)
-      approvalInboxControllerGetRequestApprovalSpy.mockReturnValue(noRequestApproval)
-      approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(false)
       requestApprovalModelFindAllSpy.mockReturnValueOnce(resultofRequestApprovals)
+      approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(false)
+
       // 試験実施
       await portal.cbGetIndex(request, response, next)
 
@@ -582,10 +415,8 @@ describe('portalのテスト', () => {
         return dummyTokne
       })
 
-      inboxControllerSpy.mockReturnValue(noWorkFlow)
-      approvalInboxControllerGetRequestApprovalSpy.mockReturnValue(noRequestApproval)
-      approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(false)
       requestApprovalModelFindAllSpy.mockReturnValueOnce([])
+      approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(false)
 
       // 試験実施
       await portal.cbGetIndex(request, response, next)
@@ -1009,10 +840,8 @@ describe('portalのテスト', () => {
         return dummyTokne
       })
 
-      inboxControllerSpy.mockReturnValue(noWorkFlow)
-      approvalInboxControllerGetRequestApprovalSpy.mockReturnValue(noRequestApproval)
-      approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(false)
       requestApprovalModelFindAllSpy.mockReturnValueOnce(resultofRequestApprovals)
+      approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(false)
 
       // 試験実施
       await portal.cbGetIndex(request, response, next)

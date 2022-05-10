@@ -2,15 +2,12 @@
 const express = require('express')
 const router = express.Router()
 const helper = require('./helpers/middleware')
-
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
-
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const validate = require('../lib/validate')
 const constants = require('../constants')
-const inboxController = require('../controllers/inboxController')
 const approvalInboxController = require('../controllers/approvalInboxController')
 const db = require('../models')
 const requestApproval = db.RequestApproval
@@ -126,48 +123,26 @@ const cbGetIndex = async (req, res, next) => {
       })
     })
 
-  // 通知件数取得処理(支払依頼件数)
+  // 請求書の承認依頼検索
   let requestNoticeCnt = 0
-  const accessToken = req.user.accessToken
-  const refreshToken = req.user.refreshToken
-  const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, user.tenantId)
+  let rejectedNoticeCnt = 0
+  const requestApprovals = await requestApproval.findAll({
+    where: {
+      contractId: contract.contractId
+    }
+  })
 
-  const workflow = await inboxController.getWorkflow(user.userId, contract.contractId, tradeshiftDTO)
-  for (let i = 0; i < workflow.length; i++) {
-    const requestApproval = await approvalInboxController.getRequestApproval(
-      accessToken,
-      refreshToken,
-      contract.contractId,
-      workflow[i].documentId,
-      user.tenantId
-    )
-    const requestId = requestApproval.requestId
+  for (let i = 0; i < requestApprovals.length; i++) {
+    // 支払依頼件数
+    const requestId = requestApprovals[i].requestId
     const result = await approvalInboxController.hasPowerOfEditing(contract.contractId, user.userId, requestId)
     if (result === true) {
-      switch (workflow[i].workflowStatus) {
-        case '支払依頼中':
-        case '一次承認済み':
-        case '二次承認済み':
-        case '三次承認済み':
-        case '四次承認済み':
-        case '五次承認済み':
-        case '六次承認済み':
-        case '七次承認済み':
-        case '八次承認済み':
-        case '九次承認済み':
-        case '十次承認済み':
-          ++requestNoticeCnt
-          break
-      }
+      ++requestNoticeCnt
     }
-  }
 
-  // 請求書の承認依頼検索(差し戻し件数)
-  let rejectedNoticeCnt = 0
-  const requestApprovals = await requestApproval.findAll()
-  for (let i = 0; i < requestApprovals.length; i++) {
-    if (requestApprovals[i].dataValues.requester === user.userId) {
-      if (requestApprovals[i].dataValues.status === '90') {
+    // 差し戻し件数
+    if (requestApprovals[i].requester === user.userId) {
+      if (requestApprovals[i].status === '90') {
         ++rejectedNoticeCnt
       }
     }
