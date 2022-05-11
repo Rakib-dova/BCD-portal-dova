@@ -7,28 +7,28 @@ div.margin-top-40p
   table#table-invoice-details.table.is-fullwidth.is-hoverable.table-fixed
     thead
       tr
-        th.width-5.text-center 項目ID
-        th.width-20.text-left 内容
+        th.width-10.text-center 項目ID
+        th.width-18.text-left 内容
         th.width-10.text-left 数量
-        th.width-5.text-left 単位
+        th.width-8.text-left 単位
         th.width-10.text-left 単価
         th.width-10.text-left 税
-        th.width-10.text-center 小計（税抜）
+        th.width-8.text-center 小計（税抜）
         th.width-2.text-center 
     tbody#lines
 
     template#line-template
       tr
         td.text-center
-          input.input(data-prop='lineId' class='line-lineId' type='text' placeholder='半角英数字- 5文字')
+          input.input(data-prop='lineId' class='line-lineId' type='text' placeholder='半角英数字 5文字')
         td.text-center
           input.input(data-prop='lineDiscription' class='line-lineDiscription' type='text' placeholder='半角全角 100文字')
         td.text-center
-          input.input(data-prop='quantity' class='line-quantity' type='text' placeholder='半角全角 1  0文字') 
+          input.input(data-prop='quantity' class='line-quantity' type='text' placeholder='0～1000000000000') 
         td.text-center
-          input.input(data-prop='unit' class='line-unit' type='text' placeholder='数字 0～1000000000000')
+          input.input(data-prop='unit' class='line-unit' type='text' placeholder='半角全角 10文字')
         td.text-center
-          input.input(data-prop='unitPrice' class='line-unitPrice' type='text' placeholder='数字 0～1000000000000' value='')
+          input.input(data-prop='unitPrice' class='line-unitPrice' type='text' placeholder='0～1000000000000')
         td.text-center
           select.select(data-prop='taxType' class='line-taxType')
             option(value='freeTax') 不課税
