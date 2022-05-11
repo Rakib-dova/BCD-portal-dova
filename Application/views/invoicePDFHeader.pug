@@ -26,11 +26,11 @@ div.margin-top-20
 .columns.m-0 
   .column
     p.font-bold 宛先
-    input.input.width-330px.font-bold(data-prop='recCompany' id='invoice-recCompany' type='text' placeholder='宛先企業名')
-    input.input.width-330px(data-prop='recPost' id='invoice-recPost' type='text' placeholder='郵便番号')
-    input.input.width-330px(data-prop='recAddr1' id='invoice-recAddr1' type='text' placeholder='都道府県')
-    input.input.width-330px(data-prop='recAdd2' id='invoice-recAddr2' type='text' placeholder='住所')
-    input.input.width-330px(data-prop='recAddr3' id='invoice-recAddr3' type='text' placeholder='ビル名/フロア等')
+    input.input.width-330px.font-bold(data-prop='recCompany' id='invoice-recCompany' type='text' placeholder='宛先企業名(半角全角 200文字)')
+    input.input.width-330px(data-prop='recPost' id='invoice-recPost' type='text' placeholder='郵便番号(数字7桁(000-0000))')
+    input.input.width-330px(data-prop='recAddr1' id='invoice-recAddr1' type='text' placeholder='都道府県(半角全角 10文字)')
+    input.input.width-330px(data-prop='recAdd2' id='invoice-recAddr2' type='text' placeholder='住所(半角全角 50文字)')
+    input.input.width-330px(data-prop='recAddr3' id='invoice-recAddr3' type='text' placeholder='ビル名/フロア等(半角全角 50文字)')
   .column
       p.font-bold 差出人
       p.p.width-250pxfont-bold#invoice-sendCompany
@@ -40,22 +40,22 @@ div.margin-top-20
       p.p.width-250px#invoice-sendAddr3
   .column 
     p.font-bold 請求書番号
-    input.input.width-330px(data-prop='invoiceNo' id='invoice-invoiceNo' type='text' placeholder='請求書番号')
+    input.input.width-330px(data-prop='invoiceNo' id='invoice-invoiceNo' type='text' placeholder='請求書番号(半角英数 50文字)')
     div
       div.float-left.mr-r-10px
         label(for="invoice-billingDate") 請求日
         br
-        input.input.width-120px(data-prop='billingDate' id='invoice-billingDate' type='date' placeholder='宛先企業名')
+        input.input.width-120px(data-prop='billingDate' id='invoice-billingDate' type='date')
       div
         label(for="invoice-currency") 通貨
         br
-        input.input.width-120px(data-prop='currency' id='invoice-currency' type='text' placeholder='通貨')
+        input.input.width-120px(data-prop='currency' id='invoice-currency' type='text' placeholder='通貨(10文字)' value='円')
     div
       div.float-left.mr-r-10px  
         label(for="invoice-paymentDate") 支払期日
         br
-        input.input.width-120px(data-prop='paymentDate' id='invoice-paymentDate' type='date' placeholder='宛先企業名')
+        input.input.width-120px(data-prop='paymentDate' id='invoice-paymentDate' type='date')
       div
         label(for="invoice-deliveryDate") 納品日
         br
-        input.input.width-120px(data-prop='deliveryDate' id='invoice-deliveryDate' type='date' placeholder='宛先企業名')
+        input.input.width-120px(data-prop='deliveryDate' id='invoice-deliveryDate' type='date')

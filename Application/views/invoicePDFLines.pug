@@ -20,17 +20,17 @@ div.margin-top-40p
     template#line-template
       tr
         td.text-center
-          input.input(data-prop='lineId' class='line-lineId' type='text')
+          input.input(data-prop='lineId' class='line-lineId' type='text' placeholder='半角英数字- 5文字')
         td.text-center
-          input.input(data-prop='lineDiscription' class='line-lineDiscription' type='text')
+          input.input(data-prop='lineDiscription' class='line-lineDiscription' type='text' placeholder='半角全角 100文字')
         td.text-center
-          input.input(data-prop='quantity' class='line-quantity' type='text') 
+          input.input(data-prop='quantity' class='line-quantity' type='text' placeholder='半角全角 1  0文字') 
         td.text-center
-          input.input(data-prop='unit' class='line-unit' type='text')
+          input.input(data-prop='unit' class='line-unit' type='text' placeholder='数字 0～1000000000000')
         td.text-center
-          input.input(data-prop='unitPrice' class='line-unitPrice' type='text')
+          input.input(data-prop='unitPrice' class='line-unitPrice' type='text' placeholder='数字 0～1000000000000' value='')
         td.text-center
-          select.input(data-prop='taxType' class='line-taxType')
+          select.select(data-prop='taxType' class='line-taxType')
             option(value='freeTax') 不課税
             option(value='dutyFree') 免税
             option(value='tax10p' selected) 消費税 10%
