@@ -70,7 +70,7 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      'img-src': ["'self'", "data:"],  // eslint-disable-line
+      'img-src': ["'self'", "https: data:"],  // eslint-disable-line
       'form-action': ["'self'"], // form-actionは自己ドメインに制限
       // bulma-toast、fontawasom、googlefontsを使うためstyle-srcを一部許可
       // prettier-ignore

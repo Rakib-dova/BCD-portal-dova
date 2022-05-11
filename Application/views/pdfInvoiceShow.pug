@@ -16,10 +16,11 @@ block content
       include invoicePDFFooter
       .grouped-button.margin-top-40p
         a.button.mr-6(href='/pdfInvoices/list')  戻る
-        if editing
+        if title === 'PDF請求書作成' && editing
           a.button.mr-6.is-success#save-btn 一時保存
+        else if title === 'PDF請求書編集' && editing
+          a.button.mr-6.is-success#update-btn 一時保存
         a.button.is-link#output-btn 出力
-        //- a.button.is-link#delete-btn 削除(デバック要)
   
   include footer
 

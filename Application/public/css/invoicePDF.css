@@ -16,6 +16,11 @@
 input.width-120px {
   width: 140px;
 }
+
+.tax-type {
+  font-size: 14px;
+}
+
 .width-250px {
   width: 250px;
 }
@@ -29,4 +34,12 @@ input.width-330px {
 .input-comment-size {
   height: 15rem;
   margin-top: 0 !important;
+}
+
+#file-sealImp {
+    display:none;
+}
+
+#sealImp {
+    cursor:pointer;
 }

@@ -35,7 +35,10 @@ block content
                     td.text-center.td-overflow= item.updatedAt
                     td.text-center.td-overflow= item.paymentDate
                     td.text-center.td-overflow= item.tmpFlg ? '出力済み' : 'ドラフト'
-                    td.text-center 
-                      a.button.is-success(href=`/pdfInvoices/edit/${item.invoiceId}`) 編集・出力
+                    td.text-center
+                      if item.tmpFlg
+                        a.button.is-success(href=`/pdfInvoices/show/${item.invoiceId}`) 確認・出力
+                      else
+                        a.button.is-success(href=`/pdfInvoices/edit/${item.invoiceId}`) 編集・出力
                       
     include footer

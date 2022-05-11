@@ -105,10 +105,19 @@ module.exports = {
   },
   deleteInvoice: async (invoiceId) => {
     try {
-      // 削除に成功すると 1、既に削除済みだと 0 が返ってくる
-      return await PdfInvoice.destroy({
-        where: { invoiceId: invoiceId }
+      const deleted = await db.sequelize.transaction(async (t) => {
+        await PdfSealImp.destroy({
+          where: { invoiceId: invoiceId },
+          transaction: t
+        })
+        // 削除に成功すると 1、既に削除済みだと 0 が返ってくる
+        return await PdfInvoice.destroy({
+          where: { invoiceId: invoiceId },
+          transaction: t
+        })
       })
+
+      return deleted
     } catch (error) {
       logger.error({ invoiceId: invoiceId, stack: error.stack, status: 0 }, error.name)
 

@@ -1,12 +1,17 @@
-/* global $, addEvent */
+/* global
+
+ taxDatabase, $, addEvent, validate, getSubTotal, getTaxGroups, getTaxTotal,
+ savePdfInvoice, outputPdfInvoice, formatDate
+
+*/
 let invoice = {}
 let lines = []
 let invoiceId
+let subTotal
+let taxGroups
+let taxTotal
+let imageFile
 const linesTbody = document.getElementById('lines')
-const taxDatabase = [
-  { type: 'tax10p', taxRate: 0.1 },
-  { type: 'tax8p', taxRate: 0.08 }
-]
 
 // 初期化
 function init() {
@@ -15,7 +20,7 @@ function init() {
   const linesJson = $('#lines-json')
   invoice = JSON.parse(invoiceJson.textContent)
   for (const key of Object.keys(invoice)) {
-    if (key.match(/Date/)) {
+    if (key.match(/Date/) && !location.pathname.match(/show/)) {
       invoice[key] = new Date(invoice[key])
     }
 
@@ -29,19 +34,82 @@ function init() {
   lines = JSON.parse(linesJson.textContent)
   console.log('==== lines ====\n', lines)
 
-  $('#invoice-sendCompany').innerHTML = invoice.sendCompany
-  $('#invoice-sendPost').innerHTML = invoice.sendPost
-  $('#invoice-sendAddr1').innerHTML = invoice.sendAddr1
-  $('#invoice-sendAddr2').innerHTML = invoice.sendAddr2
-  $('#invoice-sendAddr3').innerHTML = invoice.sendAddr3
+  setStaticProp(invoice, lines)
 
-  renderInvoice()
-  renderLines()
-  renderTotals()
+  if (location.pathname.match(/register/)) {
+    addLine()
+  } else if (location.pathname.match(/edit/)) {
+    renderLines()
+    renderInvoice()
+    renderTotals()
+  } else {
+    renderTotals()
+  }
+
   invoiceJson.textContent = ''
   linesJson.textContent = ''
 }
 init()
+
+// 固定値要素のレンダリング
+function setStaticProp(invoice, lines) {
+  $('#invoice-sendCompany').textContent = invoice.sendCompany
+  $('#invoice-sendPost').textContent = invoice.sendPost
+  $('#invoice-sendAddr1').textContent = invoice.sendAddr1
+  $('#invoice-sendAddr2').textContent = invoice.sendAddr2
+  $('#invoice-sendAddr3').textContent = invoice.sendAddr3
+
+  if (location.pathname.match(/show/)) {
+    $('#invoice-recCompany').textContent = invoice.recCompany
+    $('#invoice-recPost').textContent = invoice.recPost
+    $('#invoice-recAddr1').textContent = invoice.recAddr1
+    $('#invoice-recAddr2').textContent = invoice.recAddr2
+    $('#invoice-recAddr3').textContent = invoice.recAddr3
+
+    $('#invoice-invoiceNo').textContent = invoice.invoiceNo
+    $('#invoice-billingDate').textContent = formatDate(new Date(invoice.billingDate), 'YYYY年MM月DD日')
+    $('#invoice-currency').textContent = invoice.currency
+    $('#invoice-paymentDate').textContent = formatDate(new Date(invoice.paymentDate), 'YYYY年MM月DD日')
+    $('#invoice-deliveryDate').textContent = formatDate(new Date(invoice.deliveryDate), 'YYYY年MM月DD日')
+
+    $('#invoice-bankName').textContent = invoice.bankName
+    $('#invoice-branchName').textContent = invoice.branchName
+    $('#invoice-accountType').textContent = invoice.accountType
+    $('#invoice-accountNumber').textContent = invoice.accountNumber
+    $('#invoice-accountName').textContent = invoice.accountName
+
+    lines.forEach((line) => {
+      // テンプレートの複製
+      const template = document.getElementById('line-template')
+      const clone = template.content.cloneNode(true)
+      // IDの設定
+      const tr = clone.querySelector('tr')
+      // 項目ID設定
+      const lineId = clone.querySelector('.line-lineId')
+      lineId.textContent = line.lineId
+      // 内容設定
+      const lineDescription = clone.querySelector('.line-lineDiscription')
+      lineDescription.textContent = line.lineDiscription
+      // 数量設定
+      const quantity = clone.querySelector('.line-quantity')
+      quantity.textContent = line.quantity
+      // 単位設定
+      const unit = clone.querySelector('.line-unit')
+      unit.textContent = line.unit
+      // 単価設定
+      const unitPrice = clone.querySelector('.line-unitPrice')
+      unitPrice.textContent = line.unitPrice
+      // 税設定
+      const taxType = clone.querySelector('.line-taxType')
+      taxType.textContent = getTaxTypeIndex(line.taxType)
+      // 小計設定
+      const subtotal = clone.querySelector('.line-subtotal')
+      subtotal.textContent = Math.floor(line.unitPrice * line.quantity)
+
+      linesTbody.appendChild(tr)
+    })
+  }
+}
 
 // 入力があった時の処理
 addEvent(document, 'change', (e, target) => {
@@ -64,7 +132,14 @@ addEvent(document, 'change', (e, target) => {
     fr.onload = function() {
       $('#sealImp').setAttribute('src', fr.result)
     }
-    fr.readAsDataURL(e.target.files[0])
+
+    console.log('==== e.target.files[0] ====\n', e.target.files[0])
+
+    if (e.target.files[0]) {
+      imageFile = e.target.files[0]
+      console.log('==== キャッシュ保存 ====')
+      fr.readAsDataURL(e.target.files[0])
+    }
   }
 })
 
@@ -118,39 +193,30 @@ function renderLines() {
     // テンプレートの複製
     const template = document.getElementById('line-template')
     const clone = template.content.cloneNode(true)
-
     // IDの設定
     const tr = clone.querySelector('tr')
     tr.setAttribute('id', line.lineIndex)
-
     // 項目ID設定
     const lineIdInput = clone.querySelector('.line-lineId')
     lineIdInput.value = line.lineId
-
     // 内容設定
     const lineDescriptionInput = clone.querySelector('.line-lineDiscription')
     lineDescriptionInput.value = line.lineDiscription
-
     // 数量設定
     const quantityInput = clone.querySelector('.line-quantity')
     quantityInput.value = line.quantity
-
     // 単位設定
     const unitInput = clone.querySelector('.line-unit')
     unitInput.value = line.unit
-
     // 単価設定
     const unitPriceInput = clone.querySelector('.line-unitPrice')
     unitPriceInput.value = line.unitPrice
-
     // 税設定
     const taxTypeSelect = clone.querySelector('.line-taxType')
     taxTypeSelect.selectedIndex = getTaxTypeIndex(line.taxType)
-
     // 小計設定
     const subtotalTd = clone.querySelector('.line-subtotal')
     subtotalTd.textContent = Math.floor(line.unitPrice * line.quantity)
-
     // 削除ボタンの作成&追加
     const actionTd = clone.querySelector('.line-action')
     const deleteBtn = document.createElement('a')
@@ -183,15 +249,14 @@ function renderLines() {
 
 // 合計関連のレンダリング
 function renderTotals() {
-  const subTotal = getSubTotal(lines)
-  const taxGroups = getTaxGroups(lines, taxDatabase)
-  const taxTotal = getTaxTotal(taxGroups)
+  subTotal = getSubTotal(lines)
+  taxGroups = getTaxGroups(lines, taxDatabase)
+  taxTotal = getTaxTotal(taxGroups)
 
   // 小計 (税抜)
   const subTotalDiv = $('#subTotal')
   subTotalDiv.textContent = subTotal
 
-  // 税区分ごとの合計
   // 税区分を全部削除
   const totalParentDiv = $('#total').parentNode
   const taxGroupDivs = $('.taxGroup')
@@ -230,8 +295,8 @@ function addLine(){  // eslint-disable-line
     lineId: '',
     lineDiscription: '',
     unit: '',
-    unitPrice: 0,
-    quantity: 0,
+    unitPrice: '',
+    quantity: '',
     taxType: ''
   })
   renderLines()
@@ -239,61 +304,22 @@ function addLine(){  // eslint-disable-line
 }
 
 $('#save-btn')?.addEventListener('click', async () => {
-  const uploadfiles = $('#file-sealImp')
-  const formData = new FormData()
-  formData.append('sealImp', uploadfiles.files[0])
-  formData.append('invoice', JSON.stringify(invoice))
-  formData.append('lines', JSON.stringify(lines))
+  if (!validate(invoice, lines)) return alert('入力項目に不備があります。')
 
-  const url = `https://${location.host}/pdfInvoices`
-  const options = {
-    method: 'POST',
-    headers: { credentials: 'include' },
-    body: formData
-  }
-
-  try {
-    const response = await fetch(url, options)
-
-    if (response.ok) {
-      const res = await response.json()
-      console.log('成功しました response.json:\n', res)
-      location.href = `https://${location.host}/pdfInvoices/list`
-    } else {
-      console.log('失敗しました response:\n', response)
-    }
-  } catch (err) {
-    console.error('失敗しました ERR:\n', err)
-  }
+  const response = await savePdfInvoice(invoice, lines, imageFile, invoiceId)
+  const res = await response?.json()
+  console.log('成功しました response.json:\n', res)
+  invoiceId = res.invoice?.invoiceId
 })
 
-$('#update-btn')?.addEventListener('click', async () => {
-  const uploadfiles = $('#file-sealImp')
-  const formData = new FormData()
-  formData.append('sealImp', uploadfiles.files[0])
-  formData.append('invoice', JSON.stringify(invoice))
-  formData.append('lines', JSON.stringify(lines))
+$('#output-btn')?.addEventListener('click', async () => {
+  if (!validate(invoice, lines)) return alert('入力項目に不備があります。')
 
-  const url = `https://${location.host}/pdfInvoices/${invoiceId}`
-  const options = {
-    method: 'PUT',
-    headers: { credentials: 'include' },
-    body: formData
-  }
-
-  try {
-    const response = await fetch(url, options)
-
-    if (response.ok) {
-      const res = await response.json()
-      console.log('成功しました response.json:\n', res)
-      location.href = `https://${location.host}/pdfInvoices/list`
-    } else {
-      console.log('失敗しました response:\n', response)
-    }
-  } catch (err) {
-    console.error('失敗しました ERR:\n', err)
-  }
+  invoice.subTotal = subTotal
+  invoice.taxGroups = taxGroups
+  invoice.taxTotal = taxTotal
+  invoice.total = subTotal + taxTotal
+  await outputPdfInvoice(invoice, lines, imageFile, invoiceId)
 })
 
 function getTaxTypeIndex(taxType) {
@@ -311,33 +337,24 @@ function getTaxTypeIndex(taxType) {
   }
 }
 
-function getSubTotal(lines) {
-  let total = 0
-  lines.forEach((line) => total += (line.unitPrice * line.quantity)) // eslint-disable-line
-  return total
-}
+// $('#delete-btn')?.addEventListener('click', async () => {
+//   const url = `https://${location.host}/pdfInvoices/${invoiceId}`
+//   const options = {
+//     method: 'DELETE',
+//     headers: { credentials: 'include' },
+//   }
 
-function getTaxGroups(lines, taxDatabase) {
-  const taxGroups = []
+//   try {
+//     const response = await fetch(url, options)
 
-  taxDatabase.forEach((tax) => {
-    const taxGroup = { type: tax.type, subTotal: 0, taxGroupTotal: 0 }
-
-    lines.forEach((line) => {
-      if (line.taxType === tax.type) {
-        taxGroup.subTotal += Math.floor(line.unitPrice * line.quantity)
-        taxGroup.taxGroupTotal += Math.floor(line.unitPrice * line.quantity * tax.taxRate)
-      }
-    })
-
-    taxGroups.push(taxGroup)
-  })
-
-  return taxGroups
-}
-
-function getTaxTotal(taxGroups) {
-  let taxTotal = 0
-  taxGroups.forEach((taxGroup) => taxTotal += taxGroup.taxGroupTotal) // eslint-disable-line
-  return taxTotal
-}
+//     if (response.ok) {
+//       const res = await response.json()
+//       console.log('成功しました response.json:\n', res)
+//       location.href = `https://${location.host}/pdfInvoices/list`
+//     } else {
+//       console.log('失敗しました response:\n', response)
+//     }
+//   } catch (err) {
+//     console.error('失敗しました ERR:\n', err)
+//   }
+// })

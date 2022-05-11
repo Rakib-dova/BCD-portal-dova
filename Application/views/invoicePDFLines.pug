@@ -3,16 +3,17 @@ html
     link(rel='stylesheet', type='text/css', href='/css/invoicePDF.css')
 
 div.margin-top-40p
-  p エラー表示場所
+  #lines-error
+
   table#table-invoice-details.table.is-fullwidth.is-hoverable.table-fixed
     thead
       tr
         th.width-5.text-center 項目ID
-        th.width-20.text-left 内容
-        th.width-10.text-left 数量
-        th.width-5.text-left 単位
-        th.width-10.text-left 単価
-        th.width-10.text-left 税
+        th.width-20.text-center 内容
+        th.width-10.text-center 数量
+        th.width-5.text-center 単位
+        th.width-10.text-center 単価
+        th.width-10.text-center 税
         th.width-10.text-center 小計（税抜）
         th.width-2.text-center 
     tbody#lines
@@ -20,22 +21,40 @@ div.margin-top-40p
     template#line-template
       tr
         td.text-center
-          input.input(data-prop='lineId' class='line-lineId' type='text')
+          if editing
+            input.input(data-prop='lineId' class='line-lineId' type='text')
+          eles
+            p.line-lineId
         td.text-center
-          input.input(data-prop='lineDiscription' class='line-lineDiscription' type='text')
+          if editing
+            input.input(data-prop='lineDiscription' class='line-lineDiscription' type='text')
+          eles
+            p.line-lineDiscription
         td.text-center
-          input.input(data-prop='quantity' class='line-quantity' type='text') 
+          if editing
+            input.input(data-prop='quantity' class='line-quantity' type='text') 
+          eles
+            p.line-quantity
         td.text-center
-          input.input(data-prop='unit' class='line-unit' type='text')
+          if editing
+            input.input(data-prop='unit' class='line-unit' type='text')
+          eles
+            p.line-unit
         td.text-center
-          input.input(data-prop='unitPrice' class='line-unitPrice' type='text')
+          if editing
+            input.input(data-prop='unitPrice' class='line-unitPrice' type='text')
+          eles
+            p.line-unitPrice
         td.text-center
-          select.input(data-prop='taxType' class='line-taxType')
-            option(value='freeTax') 不課税
-            option(value='dutyFree') 免税
-            option(value='tax10p' selected) 消費税 10%
-            option(value='tax8p') 消費税(軽減税率) 8%
-            option(value='otherTax') その他消費税
+          if editing
+            select.input.tax-type(data-prop='taxType' class='line-taxType')
+              option(value='freeTax') 不課税
+              option(value='dutyFree') 免税
+              option(value='tax10p' selected) 消費税 10%
+              option(value='tax8p') 消費税(軽減税率) 8%
+              option(value='otherTax') その他消費税
+          eles
+            p.line-taxType
         td.text-right.line-subtotal
         td.text-center.line-action
 
