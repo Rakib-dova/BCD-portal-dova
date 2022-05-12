@@ -62,7 +62,8 @@ class TradeshiftDTO {
     maxissuedate,
     state,
     query,
-    sales
+    sales,
+    stag
   ) {
     if (tag instanceof Array === false) tag = []
     if (withouttag instanceof Array === false) {
@@ -80,6 +81,7 @@ class TradeshiftDTO {
     if (state instanceof Array === false) state = []
     if (query instanceof Array === false) query = []
     if (typeof sales !== 'boolean') sales = sales ?? ''
+    if (stag instanceof Array === false) stag = ['sales', 'purchases', 'draft']
 
     const get = 'get'
     let uri = `/documents?&_onlyIndex=true&${this.getQuery('page', page)}&${this.getQuery('limit', limit)}`
@@ -107,6 +109,8 @@ class TradeshiftDTO {
     if (state.length > 0) uri = `${uri}&${this.getQuery('state', state)}`
 
     if (typeof sales === 'boolean') uri = `${uri}&${this.getQuery('sales', sales)}`
+
+    if (stag.length > 0) uri = `${uri}&${this.getQuery('stag', stag)}`
 
     uri = `${uri}&${this.getQuery('onlydeleted', false)}`
     uri = `${uri}&${this.getQuery('onlydrafts', false)}`
