@@ -14,10 +14,12 @@ block content
       include invoicePDFHeader
       include invoicePDFLines
       include invoicePDFFooter
-      .grouped-button.margin-top-40p        
-        a.button.mr-6.show-modal(name = 'backButton' data-target = "back-modal") 戻る
+      .grouped-button.margin-top-40p
         if editing
+          a.button.mr-6.show-modal(name = 'backButton' data-target = "back-modal") 戻る
           a.button.mr-6.is-success#save-btn 一時保存
+        else
+          a.button.mr-6(href='/pdfInvoices/list') 戻る
         //- a.button.is-link#output-btn 出力
         a.button.is-link.show-modal#output-modal-btn 出力
         //- a.button.is-link#delete-btn 削除(デバック要)
