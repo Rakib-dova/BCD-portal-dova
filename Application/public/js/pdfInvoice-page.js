@@ -222,7 +222,7 @@ function renderLines() {
     const deleteBtn = document.createElement('a')
     deleteBtn.className = 'delete-btn'
     const deleteBtnIcon = document.createElement('i')
-    deleteBtnIcon.className = 'fas fa-minus-circle'
+    deleteBtnIcon.className = 'fas fa-minus-circle red-color'
     deleteBtn.appendChild(deleteBtnIcon)
     deleteBtn.addEventListener('click', () => {
       lines = lines.filter((_line) => parseInt(_line.lineIndex) !== parseInt(line.lineIndex))
@@ -239,12 +239,14 @@ function renderLines() {
     linesTbody.appendChild(tr)
   })
 
-  const template = document.getElementById('line-add-btn')
-  const clone = template.content.cloneNode(true)
-  const addBtn = clone.querySelector('a')
-  addBtn.onclick = addLine
-  const tr = clone.querySelector('tr')
-  linesTbody.appendChild(tr)
+  if (lines.length < 20) {
+    const template = document.getElementById('line-add-btn')
+    const clone = template.content.cloneNode(true)
+    const addBtn = clone.querySelector('a')
+    addBtn.onclick = addLine
+    const tr = clone.querySelector('tr')
+    linesTbody.appendChild(tr)
+  }
 }
 
 // 合計関連のレンダリング
@@ -290,6 +292,8 @@ function renderTotals() {
 
 // 明細行追加
 function addLine(){  // eslint-disable-line
+  if (lines.length >= 20) return
+
   lines.push({
     lineIndex: lines.length,
     lineId: '',
@@ -303,6 +307,12 @@ function addLine(){  // eslint-disable-line
   renderTotals()
 }
 
+$('#output-modal-btn')?.addEventListener('click', async () => {
+  if (!validate(invoice, lines)) return alert('入力項目に不備があります。')
+
+  $('#output-modal').className = 'modal is-active'
+})
+
 $('#save-btn')?.addEventListener('click', async () => {
   if (!validate(invoice, lines)) return alert('入力項目に不備があります。')
 
@@ -313,7 +323,7 @@ $('#save-btn')?.addEventListener('click', async () => {
 })
 
 $('#output-btn')?.addEventListener('click', async () => {
-  if (!validate(invoice, lines)) return alert('入力項目に不備があります。')
+  // if (!validate(invoice, lines)) return alert('入力項目に不備があります。')
 
   invoice.subTotal = subTotal
   invoice.taxGroups = taxGroups

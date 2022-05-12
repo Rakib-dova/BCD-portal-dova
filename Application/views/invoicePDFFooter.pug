@@ -12,11 +12,21 @@ div.margin-top-40p
     .column.width-50.float-left
       p.font-bold 銀行口座情報
       if editing
-        input.input.width-330px(data-prop='bankName' id='invoice-bankName' type='text' placeholder='銀行名')
-        input.input.width-330px(data-prop='branchName' id='invoice-branchName' type='text' placeholder='支店名')
-        input.input.width-330px(data-prop='accountType' id='invoice-accountType' type='text' placeholder='科目')
-        input.input.width-330px(data-prop='accountNumber' id='invoice-accountNumber' type='text' placeholder='口座番号')
-        input.input.width-330px(data-prop='accountName' id='invoice-accountName' type='text' placeholder='口座名義')
+        div.items 
+          p.item 銀行名 
+          input.input.width-330px(data-prop='bankName' id='invoice-bankName' type='text' placeholder='銀行名(半角全角 50文字)')
+        div.items
+          P.item 支店名
+          input.input.width-330px(data-prop='branchName' id='invoice-branchName' type='text' placeholder='支店名(半角全角 50文字)')
+        div.items
+          p.item 科目
+          input.input.width-330px(data-prop='accountType' id='invoice-accountType' type='text' placeholder='科目("当座"または"普通")')
+        div.items
+          p.item 口座番号
+          input.input.width-330px(data-prop='accountNumber' id='invoice-accountNumber' type='text' placeholder='口座番号(数字 7桁)')
+        div.items
+          p.item 口座名義
+          input.input.width-330px(data-prop='accountName' id='invoice-accountName' type='text' placeholder='口座名義(半角全角 50文字)')
       else
         p.width-330px#invoice-bankName
         p.width-330px#invoice-branchName

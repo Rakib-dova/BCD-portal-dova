@@ -8,13 +8,13 @@ div.margin-top-40p
   table#table-invoice-details.table.is-fullwidth.is-hoverable.table-fixed
     thead
       tr
-        th.width-5.text-center 項目ID
-        th.width-20.text-center 内容
-        th.width-10.text-center 数量
-        th.width-5.text-center 単位
-        th.width-10.text-center 単価
-        th.width-10.text-center 税
-        th.width-10.text-center 小計（税抜）
+        th.width-10.text-center 項目ID
+        th.width-18.text-left 内容
+        th.width-10.text-left 数量
+        th.width-8.text-left 単位
+        th.width-10.text-left 単価
+        th.width-10.text-left 税
+        th.width-8.text-center 小計（税抜）
         th.width-2.text-center 
     tbody#lines
 
@@ -22,32 +22,32 @@ div.margin-top-40p
       tr
         td.text-center
           if editing
-            input.input(data-prop='lineId' class='line-lineId' type='text')
+            input.input(data-prop='lineId' class='line-lineId' type='text' placeholder='半角英数字 5文字')
           eles
             p.line-lineId
         td.text-center
           if editing
-            input.input(data-prop='lineDiscription' class='line-lineDiscription' type='text')
+            input.input(data-prop='lineDiscription' class='line-lineDiscription' type='text' placeholder='半角全角 100文字')
           eles
             p.line-lineDiscription
         td.text-center
           if editing
-            input.input(data-prop='quantity' class='line-quantity' type='text') 
+            input.input(data-prop='quantity' class='line-quantity' type='text' placeholder='0～1000000000000') 
           eles
             p.line-quantity
         td.text-center
           if editing
-            input.input(data-prop='unit' class='line-unit' type='text')
+            input.input(data-prop='unit' class='line-unit' type='text' placeholder='半角全角 10文字')
           eles
             p.line-unit
         td.text-center
           if editing
-            input.input(data-prop='unitPrice' class='line-unitPrice' type='text')
+            input.input(data-prop='unitPrice' class='line-unitPrice' type='text' placeholder='0～1000000000000')
           eles
             p.line-unitPrice
         td.text-center
           if editing
-            select.input.tax-type(data-prop='taxType' class='line-taxType')
+            select.tax-type.select(data-prop='taxType' class='line-taxType')
               option(value='freeTax') 不課税
               option(value='dutyFree') 免税
               option(value='tax10p' selected) 消費税 10%
