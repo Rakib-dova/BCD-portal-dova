@@ -506,7 +506,9 @@ function managerAddressValidationCheck(managerAddress) {
       regExpResult = false
     } else if (addressArray.length === 2) {
       // 例："test test"@test.com
-      if (addressArray[0].indexOf('"') === 0 && addressArray[1].indexOf('"') === (addressArray[1].length - 1)) {
+      const firstCheck = (addressArray[0].indexOf('"') === 0) && (addressArray[0].indexOf('"') === addressArray[0].lastIndexOf('"'))
+      const secondCheck = (addressArray[1].indexOf('"') === (addressArray[1].length - 1)) && (addressArray[1].indexOf('"') === addressArray[1].lastIndexOf('"'))
+      if (firstCheck && secondCheck) {
         regExpResult = true
       } else {
         regExpResult = false
