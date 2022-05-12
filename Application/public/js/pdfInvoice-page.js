@@ -129,7 +129,7 @@ addEvent(document, 'change', (e, target) => {
   // 画像が設定されたらプレビュに反映させる処理
   if (e.target.id === 'file-sealImp') {
     const fr = new FileReader()
-    fr.onload = function() {
+    fr.onload = function () {
       $('#sealImp').setAttribute('src', fr.result)
     }
 
@@ -291,7 +291,8 @@ function renderTotals() {
 }
 
 // 明細行追加
-function addLine(){  // eslint-disable-line
+function addLine() {
+  // eslint-disable-line
   if (lines.length >= 20) return
 
   lines.push({
@@ -346,6 +347,14 @@ function getTaxTypeIndex(taxType) {
       return 4
   }
 }
+
+$('#output-btn').addEventListener('click', (e) => {
+  e.preventDefault()
+
+  const modal = document.getElementById('request-progress-modal')
+  modal.classList.add('is-active')
+  $('#approval').submit()
+})
 
 // $('#delete-btn')?.addEventListener('click', async () => {
 //   const url = `https://${location.host}/pdfInvoices/${invoiceId}`

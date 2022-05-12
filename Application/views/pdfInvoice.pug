@@ -54,6 +54,16 @@ block content
         div.button-area
           a.button#cancel-btn.cancel-button(data-target='output-modal') キャンセル
           a.button.is-link.mr-6#output-btn 確定 
+      
+      .modal.modal-fx-fadeInscale#request-progress-modal
+        .modal-background
+        .modal-card
+          header.modal-card-head
+            p.modal-card-title
+          section.modal-card-body
+            center
+              p.modal-card-result#modal-card-result 処理中
+          footer.modal-card-foot
 
 block append scripts
   script(src="/js/lib/utils.js")
