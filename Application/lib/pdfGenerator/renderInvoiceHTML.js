@@ -31,14 +31,15 @@ const requiredProps = [
 ]
 
 /**
- * 請求書HTML生成処理
+ * 請求書HTML生成
  *
- * @param {object} inputs 請求書に埋め込む変数リスト
- * @param {Buffer | null} imageBuffer 画像データのバッファー
+ * @param {object} input 請求書に埋め込む変数リスト
+ * @param {object} sealImp  印影画像オブジェクト
+ * @param {object} logo  企業ロゴ画像オブジェクト
  * @returns {string} 請求書HTML
  */
-const renderInvoiceHTML = (inputs, sealImp = null, logo = null) => {
-  if (!validateInvoiceInputs(inputs)) return console.log('PDF生成バリデーションの失敗')
+const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
+  if (!validateInvoiceInput(input)) return console.log('PDF生成バリデーションの失敗')
 
   console.log('== レンダリング開始 ============================')
 
@@ -49,7 +50,7 @@ const renderInvoiceHTML = (inputs, sealImp = null, logo = null) => {
   <style type="text/css">
     body {
       width: 775px;
-      border: solid 1px #333;
+      border: solid 1px 333;
     }
     .image {
       margin-left: 10px;
@@ -75,7 +76,7 @@ const renderInvoiceHTML = (inputs, sealImp = null, logo = null) => {
       padding: 1.25rem;
     }
     .columns {
-      margin: 0.75rem;
+      margin: 2rem 0.75rem;
       height: auto;
       display: flex;
     }
@@ -185,6 +186,12 @@ const renderInvoiceHTML = (inputs, sealImp = null, logo = null) => {
       margin-bottom: 20px;
       table-layout: fixed;
     }
+    table td, table th {
+      border: 1px solid #dbdbdb;
+      border-width: 0 0 1px;
+      padding: 0.25em;
+      vertical-align: top;
+    }
 
     input,
     button,
@@ -224,23 +231,23 @@ const renderInvoiceHTML = (inputs, sealImp = null, logo = null) => {
         <div>
           <div class="flex">
             <p class="width-30">請求書番号</p>
-            <p id="invoice-invoiceNo">${inputs.invoiceNo}</p>
+            <p id="invoice-invoiceNo">${input.invoiceNo}</p>
           </div>
           <div class="flex">
             <p class="width-30">通貨</p>
-            <p id="invoice-currency">${inputs.currency}</p>
+            <p id="invoice-currency">${input.currency}</p>
           </div>
           <div class="flex">
             <p class="width-30">請求日</p>
-            <p id="invoice-billingDate">${inputs.billingDate}</p>
+            <p id="invoice-billingDate">${input.billingDate}</p>
           </div>
           <div class="flex">
             <p class="width-30">支払期日</p>
-            <p id="invoice-paymentDate">${inputs.paymentDate}</p>
+            <p id="invoice-paymentDate">${input.paymentDate}</p>
           </div>
           <div class="flex">
             <p class="width-30">納品日</p>
-            <p id="invoice-deliveryDate">${inputs.deliveryDate}</p>
+            <p id="invoice-deliveryDate">${input.deliveryDate}</p>
           </div>
         </div>
       </div>
@@ -252,19 +259,19 @@ const renderInvoiceHTML = (inputs, sealImp = null, logo = null) => {
     <div class="columns">
       <div class="column float-l width-50">
         <p class="font-bold">宛先</p>
-        <p class="p width-250pxfont-bold" id="invoice-recCompany">${inputs.recCompany}</p>
-        <p class="p width-250px" id="invoice-recPost">${inputs.recPost}</p>
-        <p class="p width-250px" id="invoice-recAddr1">${inputs.recAddr1}</p>
-        <p class="p width-250px" id="invoice-recAddr2">${inputs.recAddr2}</p>
-        <p class="p width-250px" id="invoice-recAddr3">${inputs.recAddr3}</p>
+        <p class="p width-250pxfont-bold" id="invoice-recCompany">${input.recCompany}</p>
+        <p class="p width-250px" id="invoice-recPost">${input.recPost}</p>
+        <p class="p width-250px" id="invoice-recAddr1">${input.recAddr1}</p>
+        <p class="p width-250px" id="invoice-recAddr2">${input.recAddr2}</p>
+        <p class="p width-250px" id="invoice-recAddr3">${input.recAddr3}</p>
       </div>
       <div class="column float-r width-50">
         <p class="font-bold">差出人</p>
-        <p class="p width-250pxfont-bold" id="invoice-sendCompany">${inputs.sendCompany}</p>
-        <p class="p width-250px" id="invoice-sendPost">${inputs.sendPost}</p>
-        <p class="p width-250px" id="invoice-sendAddr1">${inputs.sendAddr1}</p>
-        <p class="p width-250px" id="invoice-sendAddr2">${inputs.sendAddr2}</p>
-        <p class="p width-250px" id="invoice-sendAddr3">${inputs.sendAddr3}</p>
+        <p class="p width-250pxfont-bold" id="invoice-sendCompany">${input.sendCompany}</p>
+        <p class="p width-250px" id="invoice-sendPost">${input.sendPost}</p>
+        <p class="p width-250px" id="invoice-sendAddr1">${input.sendAddr1}</p>
+        <p class="p width-250px" id="invoice-sendAddr2">${input.sendAddr2}</p>
+        <p class="p width-250px" id="invoice-sendAddr3">${input.sendAddr3}</p>
       </div>
     </div>
     <div class="columns">
@@ -281,7 +288,7 @@ const renderInvoiceHTML = (inputs, sealImp = null, logo = null) => {
           </tr>
         </thead>
         <tbody id="lines">
-          ${setLines(inputs.lines)}
+          ${setLines(input.lines)}
         </tbody>
       </table>
     </div>
@@ -290,16 +297,16 @@ const renderInvoiceHTML = (inputs, sealImp = null, logo = null) => {
       <div class="column width-50">
         <div class="flex">
           <p class="text-l width-50">小計（税抜）</p>
-          <p class="text-r width-50" id="subTotal">${inputs.taxTotal}</p>
+          <p class="text-r width-50" id="subTotal">${input.taxTotal}</p>
         </div>
-        ${setTaxGroup(inputs.taxGroups)}
+        ${setTaxGroup(input.taxGroups)}
         <div class="flex">
           <p class="text-l width-50 font-bold">合計 ￥</p>
-          <p class="text-r width-50 font-bold" id="total">${inputs.total}</p>
+          <p class="text-r width-50 font-bold" id="total">${input.total}</p>
         </div>
         <div class="flex">
           <p class="text-l">税額合計 ￥</p>
-          <p class="text-l" id="taxTotal">${inputs.taxTotal}</p>
+          <p class="text-l" id="taxTotal">${input.taxTotal}</p>
         </div>
       </div>
     </div>
@@ -307,15 +314,32 @@ const renderInvoiceHTML = (inputs, sealImp = null, logo = null) => {
     <div class="columns">
       <div class="column text-l width-50">
         <p class="font-bold">銀行口座情報</p>
-        <p class="p width-250pxfont-bold" id="invoice-bankName">銀行名: ${inputs.bankName}</p>
-        <p class="p width-250px" id="invoice-branchName">支店名: ${inputs.branchName}</p>
-        <p class="p width-250px" id="invoice-accountType">科目: ${inputs.accountType}</p>
-        <p class="p width-250px" id="invoice-accountName">口座番号: ${inputs.accountNumber}</p>
-        <p class="p width-250px" id="invoice-accountNumber">口座名義: ${inputs.accountName}</p>
+        <div>
+          <div class="flex">
+            <p class="width-30">銀行名</p>
+            <p id="invoice-bankName">${input.bankName}</p>
+          </div>
+          <div class="flex">
+            <p class="width-30">支店名</p>
+            <p id="invoice-branchName">${input.branchName}</p>
+          </div>
+          <div class="flex">
+            <p class="width-30">科目</p>
+            <p id="invoice-accountType">${input.accountType}</p>
+          </div>
+          <div class="flex">
+            <p class="width-30">口座番号</p>
+            <p id="invoice-accountNumber">${input.accountNumber}</p>
+          </div>
+          <div class="flex">
+            <p class="width-30">口座名義</p>
+            <p id="invoice-accountName">${input.accountName}</p>
+          </div>
+        </div>
       </div>
       <div class="column width-50">
         <p class="font-bold">備考</p>
-        <pre id="invoice-note">${inputs.note}</pre>
+        <pre id="invoice-note">${input.note}</pre>
       </div>
     </div>
   </div>
@@ -324,12 +348,12 @@ const renderInvoiceHTML = (inputs, sealImp = null, logo = null) => {
 }
 
 /**
- * 請求書HTML生成のバリデーション処理
+ * 請求書HTML生成のバリデーション
  *
  * @param {object} input 請求書に埋め込む変数リスト
  * @returns {boolean}
  */
-const validateInvoiceInputs = (input) => {
+const validateInvoiceInput = (input) => {
   if (!input || !(Object.prototype.toString.call(input) === '[object Object]')) return false
 
   requiredProps.forEach((key) => {
@@ -340,6 +364,12 @@ const validateInvoiceInputs = (input) => {
   return true
 }
 
+/**
+ * 明細タグ生成
+ *
+ * @param {object[]} lines 明細オブジェクト
+ * @returns {string} 明細タグ
+ */
 const setLines = (lines) => {
   let tags = ''
   lines.forEach((line) => {
@@ -355,13 +385,19 @@ const setLines = (lines) => {
         <td class="text-center"><p class="line-quantity" data-prop="quantity">${line.quantity}</p></td>
         <td class="text-center"><p class="line-unit" data-prop="unit">${line.unit}</p></td>
         <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">${line.unitPrice}</p></td>
-        <td class="text-center"><p class="line-taxType" data-prop="taxType">${ getTaxTypeName(line.taxType)}</p></td>
+        <td class="text-center"><p class="line-taxType" data-prop="taxType">${getTaxTypeName(line.taxType)}</p></td>
         <td class="text-right line-subtotal"><p class="line-subtotal" data-prop="subtotal">${subTotal}</p></td>
       </tr>`
   })
   return tags
 }
 
+/**
+ * 消費税区分グループタグ生成
+ *
+ * @param {object[]} taxGroups 消費税区分グループオブジェクト
+ * @returns {string} 消費税区分グループタグ
+ */
 const setTaxGroup = (taxGroups) => {
   let tags = ''
 
@@ -377,7 +413,7 @@ const setTaxGroup = (taxGroups) => {
 }
 
 /**
- * 動的<img>タグ生成処理
+ * 動的<img>タグ生成
  *
  * @param {Buffer} imageBuffer 画像データのバッファー
  * @param {string} type 画像ファイルタイプ
@@ -392,6 +428,12 @@ const setImageTag = (imageBuffer, type, size = 120) => {
   }" width="${size}" height="${size}" class="image" />`
 }
 
+/**
+ * 消費税区名分取得
+ *
+ * @param {string} taxType 消費税区分文字列
+ * @returns {string} 消費税区名 (日本語)
+ */
 const getTaxTypeName = (taxType) => {
   switch (taxType) {
     case 'freeTax':
