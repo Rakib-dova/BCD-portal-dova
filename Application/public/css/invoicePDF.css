@@ -37,11 +37,11 @@ input.width-330px {
 }
 
 #file-sealImp {
-    display:none;
+  display: none;
 }
 
 #sealImp {
-    cursor:pointer;
+  cursor: pointer;
 }
 
 .items {
@@ -51,6 +51,9 @@ input.width-330px {
 .item {
   width: 100px;
   margin: auto 0;
+}
+.align-middle {
+  vertical-align: middle !important;
 }
 
 .select {
@@ -69,10 +72,10 @@ input.width-330px {
   padding: 0.25em !important;
 }
 
-::placeholder {
+.placeholder-min::placeholder {
   font-size: 0.7em;
 }
 
 .red-color {
-    color: red !important;
+  color: red !important;
 }
