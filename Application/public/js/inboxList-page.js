@@ -482,7 +482,38 @@ $('#BtnInboxSearch').addEventListener('click', function (e) {
   if (checkCount === 6) {
     alert('検索条件を入力してください。')
   } else {
-    searchProgressModal.classList.add('is-active')
-    form.submit()
+    const result = managerAddressValidationCheck(managerAddress)
+    if (!result) {
+      alert('正しいメールアドレスを入力してください。')
+    } else {
+      searchProgressModal.classList.add('is-active')
+      form.submit()
+    }
   }
 })
+
+// 検索文字に半角スペースが含まれていて先頭文字が 「"」以外の文字で始まる場合、検索不可。
+function managerAddressValidationCheck(managerAddress) {
+  const inputPattarnMailAddress = '^[" a-zA-Z0-9-._+]+@[a-zA-Z0-9-._+]+$' // メールアドレス（緩めの条件）
+  const regExp = new RegExp(inputPattarnMailAddress)
+  managerAddress = managerAddress.trim()
+  let regExpResult = regExp.test(managerAddress)
+  if (regExpResult) {
+    const mailAddressArray = managerAddress.split('@')
+    const addressArray = mailAddressArray[0].split(' ')
+    // 半角スペースが二つ以上入って要る場合 例："test test test"@test.com , "test  test"@test.com
+    if (addressArray.length > 2) {
+      regExpResult = false
+    } else if (addressArray.length === 2) {
+      // 例："test test"@test.com
+      if (addressArray[0].indexOf('"') === 0 && addressArray[1].indexOf('"') === (addressArray[1].length - 1)) {
+        regExpResult = true
+      } else {
+        regExpResult = false
+      }
+    } else {
+      regExpResult = true
+    }
+  }
+  return regExpResult
+}
