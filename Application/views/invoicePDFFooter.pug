@@ -28,11 +28,21 @@ div.margin-top-40p
           p.item 口座名義
           input.input.width-330px(data-prop='accountName' id='invoice-accountName' type='text' placeholder='口座名義(半角全角 50文字)')
       else
-        p.width-330px#invoice-bankName
-        p.width-330px#invoice-branchName
-        p.width-330px#invoice-accountType
-        p.width-330px#invoice-accountNumber
-        p.width-330px#invoice-accountName
+        div.items 
+          p.item 銀行名 
+          p.width-330px#invoice-bankName
+        div.items
+          P.item 支店名
+          p.width-330px#invoice-branchName
+        div.items
+          p.item 科目
+          p.width-330px#invoice-accountType
+        div.items
+          p.item 口座番号
+          p.width-330px#invoice-accountNumber
+        div.items
+          p.item 口座名義
+          p.width-330px#invoice-accountName
   
     .column.width-50
       p.font-bold 備考
