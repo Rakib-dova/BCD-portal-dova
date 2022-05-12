@@ -94,7 +94,7 @@ class TradeshiftDTO {
 
     if (sentBy.length > 0) uri = `${uri}&${this.getQuery('sentBy', sentBy)}`
 
-    if (sentTo.length > 0) uri = `${uri}&${this.getQuery('sentTo', sentBy)}`
+    if (sentTo.length > 0) uri = `${uri}&${this.getQuery('sentTo', sentTo)}`
 
     if (minissueDate.length > 0 && minissueDate.match(/\d{1,4}-\d{1,2}-\d{1,2}/)) {
       uri = `${uri}&${this.getQuery('minissuedate', minissueDate)}`
@@ -103,6 +103,8 @@ class TradeshiftDTO {
     if (maxissuedate.length > 0 && maxissuedate.match(/\d{1,4}-\d{1,2}-\d{1,2}/)) {
       uri = `${uri}&${this.getQuery('maxissuedate', maxissuedate)}`
     }
+
+    if (state.length > 0) uri = `${uri}&${this.getQuery('state', state)}`
 
     if (typeof sales === 'boolean') uri = `${uri}&${this.getQuery('sales', sales)}`
 
@@ -238,6 +240,19 @@ class TradeshiftDTO {
     } while (query.page < query.numPages)
 
     return userAccounts
+  }
+
+  /**
+   * トレードシフトの請求書にタグを付ける。
+   * @param {uuid} documentId 請求書のトレードシフトID
+   * @param {string} tag 付けるタグの内容
+   * @returns {tagsResult} タグ作成結果
+   */
+  async createTags(documentId, tag) {
+    const put = 'put'
+    const uri = `/documents/${documentId}/tags/${tag}`
+    const tagsResult = await this.accessTradeshift(put, uri)
+    return tagsResult
   }
 
   getQuery(key, values) {

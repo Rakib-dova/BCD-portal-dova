@@ -273,7 +273,7 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
 
   const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenantId)
   const keyword = { invoiceNumber, issueDate: [minIssuedate, maxIssuedate], sentBy, status, contactEmail }
-  const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, contract.contractId)
+  const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, contract.contractId, tenantId)
 
   if (resultList instanceof Error) {
     if (String(resultList.response?.status).slice(0, 1) === '4') {

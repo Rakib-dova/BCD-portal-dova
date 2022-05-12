@@ -686,7 +686,7 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO) => {
  * @param {object} keyword
  * @returns {Array<object>} 検索結果
  */
-const getSearchResult = async (tradeshiftDTO, keyword, contractId) => {
+const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => {
   try {
     const sentByCompanies = keyword.sentBy
     const invoiceId = keyword.invoiceNumber
@@ -736,6 +736,49 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId) => {
         }
       }
       result = statusSearchResult
+    }
+
+    // 請求書のタグ付け有無確認
+    const checkTagDocumentList = []
+    const invoiceList = await tradeshiftDTO.getDocuments(
+      '',
+      ['tag_checked'],
+      '',
+      0,
+      10000,
+      '',
+      '',
+      '',
+      tenantId,
+      '',
+      '',
+      ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED', 'PURCHASES'],
+      '',
+      ''
+    )
+
+    if (checkTagDocumentList instanceof Error) return result
+
+    for (const document of invoiceList.Document) {
+      if (document.TenantId === tenantId) {
+        checkTagDocumentList.push(document)
+      }
+    }
+
+    if (checkTagDocumentList.length !== 0) {
+      for (const data of checkTagDocumentList) {
+        const invoice = await tradeshiftDTO.getDocument(data.DocumentId)
+
+        if (invoice instanceof Error) return invoice
+
+        // 担当者メールアドレス確認、ある場合はタグ追加
+        if (invoice.AccountingCustomerParty.Party.Contact.ID) {
+          await tradeshiftDTO.createTags(data.DocumentId, invoice.AccountingCustomerParty.Party.Contact.ID.value)
+        }
+
+        // 確認請求書にタグを追加
+        await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked')
+      }
     }
 
     const documentList = result.map((document, idx) => {
