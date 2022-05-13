@@ -769,10 +769,9 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
         // 担当者メールアドレス確認、ある場合はタグ追加
         if (invoice.AccountingCustomerParty.Party.Contact.ID) {
           await tradeshiftDTO.createTags(data.DocumentId, invoice.AccountingCustomerParty.Party.Contact.ID.value)
-        } else {
-          // 確認請求書にタグを追加
-          await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked')
         }
+        // 確認請求書にタグを追加
+        await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked')
       }
     }
 

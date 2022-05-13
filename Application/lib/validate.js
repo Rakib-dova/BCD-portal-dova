@@ -458,7 +458,7 @@ const isName = function (name, prefix) {
 const isContactEmail = function (contactEmail) {
   const contactEmailType = typeof contactEmail
 
-  if (contactEmailType === 'undefined') return 0
+  if (contactEmailType === 'undefined' || contactEmail.length === 0) return 0
 
   const contactEmailMaxSize = 128
   let quoteCnt = 0

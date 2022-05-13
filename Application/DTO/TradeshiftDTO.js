@@ -150,8 +150,7 @@ class TradeshiftDTO {
       uri = `${uri}&${this.getQuery('maxissuedate', issueDate[1])}`
     }
 
-    if (contractEmail.length > 0) uri = `${uri}&${this.getQuery('tag', contractEmail)}`
-    // if (contractEmail.length > 0) uri = `${uri}&tag=${contractEmail}`
+    if (contractEmail.length > 0) uri = `${uri}&tag=${contractEmail}`
 
     uri = `${uri}&${this.getQuery('onlydeleted', false)}&${this.getQuery('onlydrafts', false)}&${this.getQuery(
       'ascending',
@@ -241,18 +240,6 @@ class TradeshiftDTO {
     const uri = `/documents/${documentId}/tags/${tag}`
     const tagsResult = await this.accessTradeshift(put, uri)
     return tagsResult
-  }
-
-  /**
-   * トレードシフトのタグが付いた請求書をダウンロードする
-   * @param {string} tag 付けるタグの内容
-   * @returns {tagsResult} タグ作成結果
-   */
-  async getTags(tag) {
-    const get = 'get'
-    const uri = `/tradeshift/rest/external/documents?withouttag=${tag}`
-    const getTagsResult = await this.accessTradeshift(get, uri)
-    return getTagsResult
   }
 
   getQuery(key, values) {
