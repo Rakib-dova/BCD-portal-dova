@@ -150,14 +150,14 @@ class TradeshiftDTO {
       uri = `${uri}&${this.getQuery('maxissuedate', issueDate[1])}`
     }
 
+    if (contractEmail.length > 0) uri = `${uri}&tag=${contractEmail}`
+
     uri = `${uri}&${this.getQuery('onlydeleted', false)}&${this.getQuery('onlydrafts', false)}&${this.getQuery(
       'ascending',
       false
     )}&${this.getQuery('state', state)}`
-
-    let response = []
+    const response = []
     const invoiceList = await this.accessTradeshift(get, uri)
-
     if (invoiceList instanceof Error) return invoiceList
 
     for (const document of invoiceList.Document) {
@@ -169,23 +169,6 @@ class TradeshiftDTO {
         }
       }
     }
-
-    if (contractEmail.length > 0) {
-      const contractEmailSearchResult = []
-      for (const data of response) {
-        const invoice = await this.getDocument(data.DocumentId)
-
-        if (invoice instanceof Error) return invoice
-
-        if (invoice.AccountingCustomerParty.Party.Contact.ID) {
-          if (invoice.AccountingCustomerParty.Party.Contact.ID.value.indexOf(contractEmail) !== -1) {
-            contractEmailSearchResult.push(data)
-          }
-        }
-      }
-      response = contractEmailSearchResult
-    }
-
     return response
   }
 
