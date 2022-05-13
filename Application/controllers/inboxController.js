@@ -17,41 +17,32 @@ const processStatus = {
 }
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
-  const qs = require('qs')
-  const findDocuments = '/documents'
   const withouttag = ['archived', 'AP_DOCUMENT_Draft', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document']
   const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
-  const type = 'invoice'
-  const _onlyIndex = true
-  const ascending = false
-  const onlydeleted = false
-  const onlydrafts = false
+  const type = ['invoice']
   const sentTo = tenantId
-  const stag = ['sales', 'purchases', 'draft']
+  const stag = ['purchases']
   const onePagePerItemCount = 20 // １ページあたり表示する項目の数
   const page = pageId - 1 // 現在ページ
-  const query = qs
-    .stringify({
-      withouttag: withouttag,
-      state: state,
-      type: type,
-      _onlyIndex: _onlyIndex,
-      ascending: ascending,
-      onlydeleted: onlydeleted,
-      onlydrafts: onlydrafts,
-      sentTo: sentTo,
-      stag: stag,
-      limit: onePagePerItemCount,
-      page: page
-    })
-    .replace(/%26/g, '&')
-    .replace(/%3D/g, '=')
-    .replace(/%5B0%5D/g, '')
-    .replace(/%5B1%5D/g, '')
-    .replace(/%5B2%5D/g, '')
-    .replace(/%5B3%5D/g, '')
 
-  const documents = await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${findDocuments}?${query}`)
+  const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenantId)
+  const documents = await tradeshiftDTO.getDocuments(
+    '',
+    withouttag,
+    type,
+    page,
+    onePagePerItemCount,
+    '',
+    '',
+    '',
+    sentTo,
+    '',
+    '',
+    state,
+    '',
+    '',
+    stag
+  )
 
   // アクセストークンの有効期限が終わるの場合
   if (documents.Document === undefined) {
@@ -740,10 +731,14 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
 
     // 請求書のタグ付け有無確認
     const checkTagDocumentList = []
+    const withouttag = ['tag_checked']
+    const type = ['invoice']
+    const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
+    const stag = ['purchases']
     const invoiceList = await tradeshiftDTO.getDocuments(
       '',
-      ['tag_checked'],
-      '',
+      withouttag,
+      type,
       0,
       10000,
       '',
@@ -752,9 +747,10 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
       tenantId,
       '',
       '',
-      ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED', 'PURCHASES'],
+      state,
       '',
-      ''
+      '',
+      stag
     )
 
     if (checkTagDocumentList instanceof Error) return result
