@@ -686,6 +686,59 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     const contactEmail = keyword.contactEmail
     let result = null
 
+    // 請求書のタグ付け有無確認
+    const checkTagDocumentList = []
+    const withouttag = ['tag_checked']
+    const type = ['invoice']
+    const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
+    const stag = ['purchases']
+    const invoiceList = await tradeshiftDTO.getDocuments(
+      '',
+      withouttag,
+      type,
+      0,
+      10000,
+      '',
+      '',
+      '',
+      tenantId,
+      '',
+      '',
+      state,
+      '',
+      '',
+      stag
+    )
+
+    if (invoiceList instanceof Error) return invoiceList
+
+    for (const document of invoiceList.Document) {
+      if (document.TenantId === tenantId) {
+        checkTagDocumentList.push(document)
+      }
+    }
+
+    if (checkTagDocumentList.length !== 0) {
+      for (const data of checkTagDocumentList) {
+        const invoice = await tradeshiftDTO.getDocument(data.DocumentId)
+        if (invoice instanceof Error) return invoice
+
+        // 担当者メールアドレス確認、ある場合はタグ追加
+        if (invoice.AccountingCustomerParty.Party.Contact.ID) {
+          const validate = require('../lib/validate')
+          if (validate.isContactEmail(invoice.AccountingCustomerParty.Party.Contact.ID.value) !== 0) {
+            logger.warn(
+              `contractId:${contractId}, DocumentId:${data.DocumentId}, msg: ${constantsDefine.statusConstants.FAILED_TO_CREATE_TAG}(${constantsDefine.statusConstants.INVOICE_CONTACT_EMAIL_NOT_VERIFY})`
+            )
+          } else {
+            await tradeshiftDTO.createTags(data.DocumentId, invoice.AccountingCustomerParty.Party.Contact.ID.value)
+          }
+        }
+        // 確認請求書にタグを追加
+        await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked')
+      }
+    }
+
     // 送信会社、請求書番号、発行日、取引先担当者(アドレス)で検索
     if (sentByCompanies.length > 0) {
       const response = []
@@ -727,52 +780,6 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
         }
       }
       result = statusSearchResult
-    }
-
-    // 請求書のタグ付け有無確認
-    const checkTagDocumentList = []
-    const withouttag = ['tag_checked']
-    const type = ['invoice']
-    const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
-    const stag = ['purchases']
-    const invoiceList = await tradeshiftDTO.getDocuments(
-      '',
-      withouttag,
-      type,
-      0,
-      10000,
-      '',
-      '',
-      '',
-      tenantId,
-      '',
-      '',
-      state,
-      '',
-      '',
-      stag
-    )
-
-    if (invoiceList instanceof Error) return invoiceList
-
-    for (const document of invoiceList.Document) {
-      if (document.TenantId === tenantId) {
-        checkTagDocumentList.push(document)
-      }
-    }
-
-    if (checkTagDocumentList.length !== 0) {
-      for (const data of checkTagDocumentList) {
-        const invoice = await tradeshiftDTO.getDocument(data.DocumentId)
-        if (invoice instanceof Error) return invoice
-
-        // 担当者メールアドレス確認、ある場合はタグ追加
-        if (invoice.AccountingCustomerParty.Party.Contact.ID) {
-          await tradeshiftDTO.createTags(data.DocumentId, invoice.AccountingCustomerParty.Party.Contact.ID.value)
-        }
-        // 確認請求書にタグを追加
-        await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked')
-      }
     }
 
     const documentList = result.map((document, idx) => {
