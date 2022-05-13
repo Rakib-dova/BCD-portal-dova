@@ -182,7 +182,7 @@ module.exports = {
           }
         }
       },
-      Contact: {}
+      Contact: { ID: { value: 'abc@test.co.jp' } }
     }
   },
   Delivery: [

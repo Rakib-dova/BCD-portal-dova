@@ -17,41 +17,32 @@ const processStatus = {
 }
 
 const getInbox = async function (accessToken, refreshToken, pageId, tenantId) {
-  const qs = require('qs')
-  const findDocuments = '/documents'
   const withouttag = ['archived', 'AP_DOCUMENT_Draft', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document']
   const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
-  const type = 'invoice'
-  const _onlyIndex = true
-  const ascending = false
-  const onlydeleted = false
-  const onlydrafts = false
+  const type = ['invoice']
   const sentTo = tenantId
-  const stag = ['sales', 'purchases', 'draft']
+  const stag = ['purchases']
   const onePagePerItemCount = 20 // １ページあたり表示する項目の数
   const page = pageId - 1 // 現在ページ
-  const query = qs
-    .stringify({
-      withouttag: withouttag,
-      state: state,
-      type: type,
-      _onlyIndex: _onlyIndex,
-      ascending: ascending,
-      onlydeleted: onlydeleted,
-      onlydrafts: onlydrafts,
-      sentTo: sentTo,
-      stag: stag,
-      limit: onePagePerItemCount,
-      page: page
-    })
-    .replace(/%26/g, '&')
-    .replace(/%3D/g, '=')
-    .replace(/%5B0%5D/g, '')
-    .replace(/%5B1%5D/g, '')
-    .replace(/%5B2%5D/g, '')
-    .replace(/%5B3%5D/g, '')
 
-  const documents = await apiManager.accessTradeshift(accessToken, refreshToken, 'get', `${findDocuments}?${query}`)
+  const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenantId)
+  const documents = await tradeshiftDTO.getDocuments(
+    '',
+    withouttag,
+    type,
+    page,
+    onePagePerItemCount,
+    '',
+    '',
+    '',
+    sentTo,
+    '',
+    '',
+    state,
+    '',
+    '',
+    stag
+  )
 
   // アクセストークンの有効期限が終わるの場合
   if (documents.Document === undefined) {
@@ -686,7 +677,7 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO) => {
  * @param {object} keyword
  * @returns {Array<object>} 検索結果
  */
-const getSearchResult = async (tradeshiftDTO, keyword, contractId) => {
+const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => {
   try {
     const sentByCompanies = keyword.sentBy
     const invoiceId = keyword.invoiceNumber
@@ -694,6 +685,59 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId) => {
     const status = keyword.status
     const contactEmail = keyword.contactEmail
     let result = null
+
+    // 請求書のタグ付け有無確認
+    const checkTagDocumentList = []
+    const withouttag = ['tag_checked']
+    const type = ['invoice']
+    const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
+    const stag = ['purchases']
+    const invoiceList = await tradeshiftDTO.getDocuments(
+      '',
+      withouttag,
+      type,
+      0,
+      10000,
+      '',
+      '',
+      '',
+      tenantId,
+      '',
+      '',
+      state,
+      '',
+      '',
+      stag
+    )
+
+    if (invoiceList instanceof Error) return invoiceList
+
+    for (const document of invoiceList.Document) {
+      if (document.TenantId === tenantId) {
+        checkTagDocumentList.push(document)
+      }
+    }
+
+    if (checkTagDocumentList.length !== 0) {
+      for (const data of checkTagDocumentList) {
+        const invoice = await tradeshiftDTO.getDocument(data.DocumentId)
+        if (invoice instanceof Error) return invoice
+
+        // 担当者メールアドレス確認、ある場合はタグ追加
+        if (invoice.AccountingCustomerParty.Party.Contact.ID) {
+          const validate = require('../lib/validate')
+          if (validate.isContactEmail(invoice.AccountingCustomerParty.Party.Contact.ID.value) !== 0) {
+            logger.warn(
+              `contractId:${contractId}, DocumentId:${data.DocumentId}, msg: ${constantsDefine.statusConstants.FAILED_TO_CREATE_TAG}(${constantsDefine.statusConstants.INVOICE_CONTACT_EMAIL_NOT_VERIFY})`
+            )
+          } else {
+            await tradeshiftDTO.createTags(data.DocumentId, invoice.AccountingCustomerParty.Party.Contact.ID.value)
+          }
+        }
+        // 確認請求書にタグを追加
+        await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked')
+      }
+    }
 
     // 送信会社、請求書番号、発行日、取引先担当者(アドレス)で検索
     if (sentByCompanies.length > 0) {

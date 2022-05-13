@@ -1118,6 +1118,233 @@ describe('inboxListのテスト', () => {
       })
     })
 
+    test('正常：メールアドレスに「"」中に半角スペースがある場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: '"test test"@test.com'
+      }
+
+      const searchResultData = [
+        {
+          ammount: '3,080,000',
+          currency: 'JPY',
+          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          expire: '2021-11-10',
+          invoiceNo: 'PB1649meisai001',
+          no: 1,
+          sentBy: 'バイヤー1',
+          sentTo: 'サプライヤー1',
+          status: 0,
+          updated: '2021-12-27'
+        }
+      ]
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      getSearchResultSpy.mockReturnValueOnce(searchResultData)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList', {
+        listArr: searchResultData,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
+        rejectedFlag: false
+      })
+    })
+
+    test('準正常：メールアドレスの形式が合わない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: 'test'
+      }
+
+      const searchResultData = [
+        {
+          ammount: '3,080,000',
+          currency: 'JPY',
+          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          expire: '2021-11-10',
+          invoiceNo: 'PB1649meisai001',
+          no: 1,
+          sentBy: 'バイヤー1',
+          sentTo: 'サプライヤー1',
+          status: 0,
+          updated: '2021-12-27'
+        }
+      ]
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      getSearchResultSpy.mockReturnValueOnce(searchResultData)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.flashの関数が呼び出される。
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '支払依頼一覧',
+        constantsDefine.statusConstants.INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_TYPE
+      ])
+    })
+
+    test('準正常：メールアドレスの「"」なくて、半角スペースがある場合」', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: 'test test@test.com'
+      }
+
+      const searchResultData = [
+        {
+          ammount: '3,080,000',
+          currency: 'JPY',
+          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          expire: '2021-11-10',
+          invoiceNo: 'PB1649meisai001',
+          no: 1,
+          sentBy: 'バイヤー1',
+          sentTo: 'サプライヤー1',
+          status: 0,
+          updated: '2021-12-27'
+        }
+      ]
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      getSearchResultSpy.mockReturnValueOnce(searchResultData)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.flashの関数が呼び出される。
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '支払依頼一覧',
+        constantsDefine.statusConstants.INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_SPACE
+      ])
+    })
+
+    test('準正常：メールアドレスが128文字超過した場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress:
+          'test.testtest.test.test.testtest.testtest.testtest.testtest.test@testestestestesttesttestestestestesttesttestestestestesttest.com'
+      }
+
+      const searchResultData = [
+        {
+          ammount: '3,080,000',
+          currency: 'JPY',
+          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          expire: '2021-11-10',
+          invoiceNo: 'PB1649meisai001',
+          no: 1,
+          sentBy: 'バイヤー1',
+          sentTo: 'サプライヤー1',
+          status: 0,
+          updated: '2021-12-27'
+        }
+      ]
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      getSearchResultSpy.mockReturnValueOnce(searchResultData)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.flashの関数が呼び出される。
+      expect(request.flash).toHaveBeenCalledWith('noti', [
+        '支払依頼一覧',
+        constantsDefine.statusConstants.INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_TYPE
+      ])
+    })
+
     test('異常：検索でエラーが発生した場合（APIエラー）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる

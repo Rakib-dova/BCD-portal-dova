@@ -455,6 +455,67 @@ const isName = function (name, prefix) {
   }
 }
 
+const isContactEmail = function (contactEmail) {
+  const contactEmailType = typeof contactEmail
+
+  if (contactEmailType === 'undefined' || contactEmail.length === 0) return 0
+
+  let quoteCnt = 0
+  let spaceCnt = 0
+
+  const getCharCode = function (character) {
+    return character.charCodeAt()
+  }
+
+  // 取引担当者メールアドレスが配列形式で受け取った場合
+  if (contactEmailType !== 'string') return -1
+
+  const local = contactEmail.split('@')[0]
+  const domain = contactEmail.split('@')[1]
+
+  // 取引担当者メールアドレスがメール形式ではない場合
+  if (typeof domain === 'undefined') return -1
+
+  // 取引担当者メールアドレスが128超過の場合
+  if (contactEmail.length >= 128) return -1
+
+  // 取引担当者メールアドレスのローカル部のサイズが超えた場合
+  if (local.length > 64) return -1
+
+  // 取引担当者メールアドレスのローカル部チェック
+  for (const character of local) {
+    const code = getCharCode(character)
+    // 半角英数字以外場合エラー発生
+    if (code > 127) {
+      return -1
+    }
+
+    // 「"」のチェック
+    if (code === 34) {
+      quoteCnt++
+    }
+
+    // 引用符号の外に半角スペースがあるかをチェック
+    if (code === 32) {
+      if (quoteCnt === 0) return -2
+      if (quoteCnt > 0 && quoteCnt % 2 === 0) return -2
+      spaceCnt++
+    }
+  }
+
+  if (spaceCnt > 0 && quoteCnt > 0) {
+    if (quoteCnt % 2 === 1) return -2
+  }
+
+  // 取引担当者メールアドレスのドメイン部チェック
+  const doaminPattern = '^(?!://)(?=.{1,255}$)((.{1,63}.){1,127}(?![0-9]*$)[a-z0-9-]+.?)$'
+  const domainReg = new RegExp(doaminPattern)
+  if (!domainReg.test(domain)) return -1
+  if (domain[0] === '-') return -1
+
+  return 0
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -492,5 +553,6 @@ module.exports = {
   isNumberRegular: isNumberRegular,
   isCode: isCode,
   isName: isName,
-  isDepartmentCode: isDepartmentCode
+  isDepartmentCode: isDepartmentCode,
+  isContactEmail: isContactEmail
 }

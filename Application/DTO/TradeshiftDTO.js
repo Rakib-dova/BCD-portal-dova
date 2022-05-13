@@ -62,7 +62,8 @@ class TradeshiftDTO {
     maxissuedate,
     state,
     query,
-    sales
+    sales,
+    stag
   ) {
     if (tag instanceof Array === false) tag = []
     if (withouttag instanceof Array === false) {
@@ -80,6 +81,7 @@ class TradeshiftDTO {
     if (state instanceof Array === false) state = []
     if (query instanceof Array === false) query = []
     if (typeof sales !== 'boolean') sales = sales ?? ''
+    if (stag instanceof Array === false) stag = ['sales', 'purchases', 'draft']
 
     const get = 'get'
     let uri = `/documents?&_onlyIndex=true&${this.getQuery('page', page)}&${this.getQuery('limit', limit)}`
@@ -94,7 +96,7 @@ class TradeshiftDTO {
 
     if (sentBy.length > 0) uri = `${uri}&${this.getQuery('sentBy', sentBy)}`
 
-    if (sentTo.length > 0) uri = `${uri}&${this.getQuery('sentTo', sentBy)}`
+    if (sentTo.length > 0) uri = `${uri}&${this.getQuery('sentTo', sentTo)}`
 
     if (minissueDate.length > 0 && minissueDate.match(/\d{1,4}-\d{1,2}-\d{1,2}/)) {
       uri = `${uri}&${this.getQuery('minissuedate', minissueDate)}`
@@ -104,7 +106,11 @@ class TradeshiftDTO {
       uri = `${uri}&${this.getQuery('maxissuedate', maxissuedate)}`
     }
 
+    if (state.length > 0) uri = `${uri}&${this.getQuery('state', state)}`
+
     if (typeof sales === 'boolean') uri = `${uri}&${this.getQuery('sales', sales)}`
+
+    if (stag.length > 0) uri = `${uri}&${this.getQuery('stag', stag)}`
 
     uri = `${uri}&${this.getQuery('onlydeleted', false)}`
     uri = `${uri}&${this.getQuery('onlydrafts', false)}`
@@ -133,6 +139,7 @@ class TradeshiftDTO {
     const get = 'get'
     let uri = `/documents?sentTo=${this.tenantId}&type=invoice&limit=10000&_onlyIndex=true`
     const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
+    const stag = ['purchases']
 
     if (sentByCompany.length > 0) uri = `${uri}&${this.getQuery('sentBy', sentByCompany)}`
 
@@ -144,14 +151,14 @@ class TradeshiftDTO {
       uri = `${uri}&${this.getQuery('maxissuedate', issueDate[1])}`
     }
 
+    if (contractEmail.length > 0) uri = `${uri}&tag=${contractEmail}`
+
     uri = `${uri}&${this.getQuery('onlydeleted', false)}&${this.getQuery('onlydrafts', false)}&${this.getQuery(
       'ascending',
       false
-    )}&${this.getQuery('state', state)}`
-
-    let response = []
+    )}&${this.getQuery('state', state)}&${this.getQuery('stag', stag)}`
+    const response = []
     const invoiceList = await this.accessTradeshift(get, uri)
-
     if (invoiceList instanceof Error) return invoiceList
 
     for (const document of invoiceList.Document) {
@@ -163,23 +170,6 @@ class TradeshiftDTO {
         }
       }
     }
-
-    if (contractEmail.length > 0) {
-      const contractEmailSearchResult = []
-      for (const data of response) {
-        const invoice = await this.getDocument(data.DocumentId)
-
-        if (invoice instanceof Error) return invoice
-
-        if (invoice.AccountingCustomerParty.Party.Contact.ID) {
-          if (invoice.AccountingCustomerParty.Party.Contact.ID.value.indexOf(contractEmail) !== -1) {
-            contractEmailSearchResult.push(data)
-          }
-        }
-      }
-      response = contractEmailSearchResult
-    }
-
     return response
   }
 
@@ -238,6 +228,19 @@ class TradeshiftDTO {
     } while (query.page < query.numPages)
 
     return userAccounts
+  }
+
+  /**
+   * トレードシフトの請求書にタグを付ける。
+   * @param {uuid} documentId 請求書のトレードシフトID
+   * @param {string} tag 付けるタグの内容
+   * @returns {tagsResult} タグ作成結果
+   */
+  async createTags(documentId, tag) {
+    const put = 'put'
+    const uri = `/documents/${documentId}/tags/${tag}`
+    const tagsResult = await this.accessTradeshift(put, uri)
+    return tagsResult
   }
 
   getQuery(key, values) {

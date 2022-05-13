@@ -271,9 +271,27 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   const status = req.body.status || []
   const contactEmail = req.body.managerAddress
 
+  switch (validate.isContactEmail(contactEmail)) {
+    case -1:
+      logger.info(
+        `contractId:${contract.contractId}, msg: ${constantsDefine.statusConstants.INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_TYPE}`
+      )
+      req.flash('noti', ['支払依頼一覧', constantsDefine.statusConstants.INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_TYPE])
+      return res.redirect('/inboxList/1')
+    case -2:
+      logger.info(
+        `contractId:${contract.contractId}, msg: ${constantsDefine.statusConstants.INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_SPACE}`
+      )
+      req.flash('noti', ['支払依頼一覧', constantsDefine.statusConstants.INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_SPACE])
+      return res.redirect('/inboxList/1')
+    default:
+      // 成功の場合
+      break
+  }
+
   const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenantId)
   const keyword = { invoiceNumber, issueDate: [minIssuedate, maxIssuedate], sentBy, status, contactEmail }
-  const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, contract.contractId)
+  const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, contract.contractId, tenantId)
 
   if (resultList instanceof Error) {
     if (String(resultList.response?.status).slice(0, 1) === '4') {
