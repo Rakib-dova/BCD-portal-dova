@@ -139,6 +139,7 @@ class TradeshiftDTO {
     const get = 'get'
     let uri = `/documents?sentTo=${this.tenantId}&type=invoice&limit=10000&_onlyIndex=true`
     const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
+    const stag = ['purchases']
 
     if (sentByCompany.length > 0) uri = `${uri}&${this.getQuery('sentBy', sentByCompany)}`
 
@@ -155,7 +156,7 @@ class TradeshiftDTO {
     uri = `${uri}&${this.getQuery('onlydeleted', false)}&${this.getQuery('onlydrafts', false)}&${this.getQuery(
       'ascending',
       false
-    )}&${this.getQuery('state', state)}`
+    )}&${this.getQuery('state', state)}&${this.getQuery('stag', stag)}`
     const response = []
     const invoiceList = await this.accessTradeshift(get, uri)
     if (invoiceList instanceof Error) return invoiceList

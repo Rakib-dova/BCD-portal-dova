@@ -37,5 +37,7 @@ constantsDefine({
 
   // 支払依頼一覧のエラーメッセージの集合所
   INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_TYPE: '入力したメールアドレスに誤りがあります。',
-  INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_SPACE: '半角スペースは引用符号（"）の内のみ許可されています。'
+  INBOXLIST_CONTACT_EMAIL_NOT_VERIFY_SPACE: '半角スペースは引用符号（"）の内のみ許可されています。',
+  INVOICE_CONTACT_EMAIL_NOT_VERIFY: '担当者メールアドレスに誤りがあります。',
+  FAILED_TO_CREATE_TAG: 'タグ作成に失敗しました。'
 })
