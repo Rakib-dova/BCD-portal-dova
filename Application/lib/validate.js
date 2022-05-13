@@ -460,7 +460,6 @@ const isContactEmail = function (contactEmail) {
 
   if (contactEmailType === 'undefined' || contactEmail.length === 0) return 0
 
-  const contactEmailMaxSize = 128
   let quoteCnt = 0
   let spaceCnt = 0
 
@@ -478,10 +477,10 @@ const isContactEmail = function (contactEmail) {
   if (typeof domain === 'undefined') return -1
 
   // 取引担当者メールアドレスが128超過の場合
-  if (contactEmail.length <= 128) contactEmail = contactEmail.slice(0, contactEmailMaxSize)
+  if (contactEmail.length >= 128) return -1
 
   // 取引担当者メールアドレスのローカル部のサイズが超えた場合
-  if (local.length > 65) return -1
+  if (local.length > 64) return -1
 
   // 取引担当者メールアドレスのローカル部チェック
   for (const character of local) {

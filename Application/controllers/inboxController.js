@@ -753,7 +753,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
       stag
     )
 
-    if (checkTagDocumentList instanceof Error) return result
+    if (invoiceList instanceof Error) return invoiceList
 
     for (const document of invoiceList.Document) {
       if (document.TenantId === tenantId) {
