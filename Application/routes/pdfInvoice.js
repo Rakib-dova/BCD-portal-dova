@@ -36,7 +36,7 @@ const pdfInvoiceList = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 
-  // console.log('==  invoiceRecords  ===================\n', invoiceRecords)
+  console.log('==  invoiceRecords  ===================\n', invoiceRecords)
 
   const invoices = invoiceRecords.map((record) => record.dataValues)
   invoices.forEach((invoice) => {
@@ -45,12 +45,13 @@ const pdfInvoiceList = async (req, res, next) => {
     invoice.paymentDate = formatDate(invoice.paymentDate, 'YYYY年MM月DD日')
   })
 
-  // console.log('==  加工後 invoices  ===================\n', invoices)
+  console.log('==  加工後 invoices  ===================\n', invoices)
 
   res.render('pdfInvoiceList', {
     title: 'PDF請求書',
     engTitle: 'PDF INVOICING',
-    listArr: invoices
+    itemCount: invoices.length,
+    invoices: JSON.stringify(invoices)
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceList')
@@ -71,7 +72,7 @@ const pdfInvoiceRegister = async (req, res, next) => {
     engTitle: 'REGISTER PDF INVOICE',
     invoice: JSON.stringify(senderInfo),
     lines: JSON.stringify([]),
-    sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_invoices-seal.svg',
+    sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
     logoSrc,
     editing: true
   })
@@ -97,7 +98,7 @@ const pdfInvoiceEdit = async (req, res, next) => {
   // 印影設定
   const sealImpSrc = sealImpRecord.dataValues.image
     ? `data:image/png;base64,${sealImpRecord.dataValues.image.toString('base64')}`
-    : '/image/ts-app-digitaltrade-func-icon-pdf_invoices-seal.svg'
+    : '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg'
   // 企業ロゴ設定
   const logoSrc = accountInfo.BackgroundURL ? accountInfo.BackgroundURL : null
 
@@ -129,7 +130,7 @@ const pdfInvoiceShow = async (req, res, next) => {
   // 印影設定
   const sealImpSrc = sealImpRecord.dataValues.image
     ? `data:image/png;base64,${sealImpRecord.dataValues.image.toString('base64')}`
-    : '/image/ts-app-digitaltrade-func-icon-pdf_invoices-seal.svg'
+    : '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg'
   // 企業ロゴ設定
   const logoSrc = accountInfo.BackgroundURL ? accountInfo.BackgroundURL : null
 
@@ -202,12 +203,11 @@ const updatePdfInvoice = async (req, res, next) => {
 }
 
 const createAndOutputPdfInvoice = async (req, res, next) => {
-  if (!req.body.invoice || !req.body.lines || !req.file) return next(errorHelper.create(400))
+  if (!req.body.invoice || !req.body.lines) return next(errorHelper.create(400))
   const invoice = JSON.parse(req.body.invoice)
   const lines = JSON.parse(req.body.lines)
   console.log('==  req.file  ===================\n', req.file)
   if (!Array.isArray(lines)) return next(errorHelper.create(400))
-  if (req.file.mimetype !== 'image/png' && req.file.mimetype !== 'image/jpeg') return next(errorHelper.create(400))
 
   // アカウント情報取得
   const { accountInfo, senderInfo } = await getAccountAndSenderInfo(req)
@@ -233,6 +233,8 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
   // 印影取得
   let sealImp
   if (req.file) {
+    if (req.file.mimetype !== 'image/png' && req.file.mimetype !== 'image/jpeg') return next(errorHelper.create(400))
+
     sealImp = {
       buffer: req.file.buffer,
       type: req.file.mimetype.replace('image/', '')
@@ -314,7 +316,6 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
 
   let sealImp
   if (req.file) {
-    console.log('==  PDF出力 画像が添付されている場合  ===================')
     if (req.file.mimetype !== 'image/png' && req.file.mimetype !== 'image/jpeg') return next(errorHelper.create(400))
 
     sealImp = {
@@ -322,7 +323,6 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
       type: req.file.mimetype.replace('image/', '')
     }
   } else {
-    console.log('==  PDF出力 添付なし  ===================')
     if (invoiceRecord.PdfSealImp.dataValues.image) {
       const fileType = await filetype.fileTypeFromBuffer(invoiceRecord.PdfSealImp.dataValues.image)
       console.log('==  fileType  ===================: ', fileType)

@@ -1,7 +1,7 @@
 /* global
 
  taxDatabase, $, addEvent, validate, getSubTotal, getTaxGroups, getTaxTotal,
- savePdfInvoice, outputPdfInvoice, formatDate
+ savePdfInvoice, outputPdfInvoice, formatDate, isNumberString
 
 */
 let invoice = {}
@@ -43,6 +43,9 @@ function init() {
     renderInvoice()
     renderTotals()
   } else {
+    // 印影画像クリックでファイル選択を無効化
+    $('#file-sealImp-label').setAttribute('for', '')
+    $('#sealImp').style.cursor = 'default'
     renderTotals()
   }
 
@@ -157,7 +160,8 @@ function updateLineValues(e, target) {
   const updatedLine = lines.find((line) => parseInt(line.lineIndex) === parseInt(id))
   if (updatedLine) {
     if (prop === 'quantity' || prop === 'unitPrice') {
-      updatedLine[prop] = parseInt(target.value)
+      if (isNumberString(target.value)) updatedLine[prop] = target.value
+      else updatedLine[prop] = ''
     } else {
       updatedLine[prop] = target.value
     }
@@ -330,6 +334,16 @@ $('#output-btn')?.addEventListener('click', async () => {
   invoice.taxTotal = taxTotal
   invoice.total = subTotal + taxTotal
   await outputPdfInvoice(invoice, lines, imageFile, invoiceId)
+})
+
+// メッセージ文字数確認
+$('#invoice-note').addEventListener('keyup', function () {
+  $('#msgCount').innerText = '(' + $('#invoice-note').value.length + '/1500)'
+
+  if ($('#invoice-note').value.length > 1500) {
+    $('#invoice-note').value($('#invoice-note').value.substring(0, 1500))
+    $('#msgCount').innerText = '1500/1500'
+  }
 })
 
 function getTaxTypeIndex(taxType) {

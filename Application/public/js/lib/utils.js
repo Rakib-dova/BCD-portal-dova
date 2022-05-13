@@ -1,4 +1,10 @@
 // eslint-disable-next-line no-unused-vars
+const taxDatabase = [
+  { type: 'tax10p', taxRate: 0.1 },
+  { type: 'tax8p', taxRate: 0.08 }
+]
+
+// eslint-disable-next-line no-unused-vars
 const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
   const idNamePatten = '\\#+[a-zA-Z0-9]'
@@ -72,15 +78,12 @@ function getTaxTotal(taxGroups) {
 }
 
 // eslint-disable-next-line no-unused-vars
-const taxDatabase = [
-  { type: 'tax10p', taxRate: 0.1 },
-  { type: 'tax8p', taxRate: 0.08 }
-]
-
-// eslint-disable-next-line no-unused-vars
 const formatDate = (date, format) => {
   format = format.replace(/YYYY/, date.getFullYear())
   format = format.replace(/MM/, date.getMonth() + 1)
   format = format.replace(/DD/, date.getDate())
   return format
 }
+
+// eslint-disable-next-line no-unused-vars
+const isNumberString = n => typeof n === 'string' && n !== '' && !isNaN(n)
