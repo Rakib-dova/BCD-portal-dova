@@ -482,9 +482,14 @@ $('#BtnInboxSearch').addEventListener('click', function (e) {
   if (checkCount === 6) {
     alert('検索条件を入力してください。')
   } else {
-    const result = managerAddressValidationCheck(managerAddress)
-    if (!result) {
-      alert('正しいメールアドレスを入力してください。')
+    if (managerAddress.length > 0) {
+      const result = managerAddressValidationCheck(managerAddress)
+      if (!result) {
+        alert('正しいメールアドレスを入力してください。')
+      } else {
+        searchProgressModal.classList.add('is-active')
+        form.submit()
+      }
     } else {
       searchProgressModal.classList.add('is-active')
       form.submit()
