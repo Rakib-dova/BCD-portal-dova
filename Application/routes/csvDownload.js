@@ -130,8 +130,6 @@ const cbPostIndex = async (req, res, next) => {
 
   // アプリ効果測定用ログ出力
   let jsonLog = { tenantId: req.user.tenantId, action: 'invoiceDownloadRequest' }
-  // console.log('==  CSVダウンロード 開始  =================================\n', jsonLog)
-  console.log('==  請求書ダウンロード リクエスト  =================================')
   logger.info(jsonLog)
 
   // 絞り込みの条件データチェック
@@ -230,11 +228,6 @@ const cbPostIndex = async (req, res, next) => {
 
   if (findDocumentQuery.state.length === 0) {
     req.flash('noti', [notiTitle, 'ステータスをいずれかのの１つ選択してください。'])
-    // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-    // jsonLog = { tenantId: req.user.tenantId, action: 'invoiceDownload-end' }
-    // console.log('==  CSVダウンロード 終了  =================================\n', jsonLog)
-    console.log('==  請求書ダウンロード 終了  =================================')
-    // logger.info(jsonLog)
     logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
     return res.redirect(303, '/csvDownload')
   }
@@ -387,8 +380,6 @@ const cbPostIndex = async (req, res, next) => {
               action: 'downloadedInvoiceInfo',
               downloadedInvoiceCount: 1
             }
-            // console.log('==  ダウンロードした請求情報のレコード挿入  =================================\n', jsonLog)
-            console.log('==  ダウンロードした請求情報  =================================')
             logger.info(jsonLog)
 
             // 取得した請求書をJSONに作成する
@@ -413,10 +404,6 @@ const cbPostIndex = async (req, res, next) => {
           documentsResult.Document
         )
 
-        // console.log('=============================\n documentsResult', documentsResult)
-        // console.log('=============================\n documentsResult.Document', documentsResult.Document)
-        // console.log('=============================\n documentsResult.Document.ItemInfos', documentsResult.Document[0].ItemInfos)
-
         // エラーを確認する
         if (invoicesForDownload instanceof Error) {
           errorHandle(invoicesForDownload, res, req)
@@ -428,8 +415,6 @@ const cbPostIndex = async (req, res, next) => {
           action: 'downloadedInvoiceInfo',
           downloadedInvoiceCount: documentsResult.itemCount
         }
-        // console.log('==  ダウンロードした請求情報のレコード挿入  =================================\n', jsonLog)
-        console.log('==  ダウンロードした請求情報  =================================')
         logger.info(jsonLog)
 
         filename = encodeURIComponent(`${today}_請求書.csv`)
@@ -439,11 +424,6 @@ const cbPostIndex = async (req, res, next) => {
     }
   }
 
-  // アプリ効果測定用ログ出力
-  // jsonLog = { tenantId: req.user.tenantId, action: 'invoiceDownload-end' }
-  // console.log('==  CSVダウンロード 終了  =================================\n', jsonLog)
-  console.log('==  請求書ダウンロード 終了  =================================')
-  // logger.info(jsonLog)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 

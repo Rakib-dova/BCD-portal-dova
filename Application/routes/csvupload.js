@@ -123,10 +123,7 @@ const cbPostUpload = async (req, res, next) => {
   req.session.userRole = user.dataValues?.userRole
 
   const jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUploadRequest' }
-  // console.log('==  CSVアップロード 開始  =================================\n')
-  console.log('==  請求書一括アップロード リクエスト  =================================')
   logger.info(jsonLog)
-  // console.log(jsonLog)
 
   // CSVfile 読み込む
   const filename = req.user.tenantId + '_' + req.user.email + '_' + getTimeStamp() + '.csv'
@@ -198,11 +195,6 @@ const cbPostUpload = async (req, res, next) => {
     return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
   }
 
-  // jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUpload-end' }
-  // console.log('==  CSVアップロード 終了  =================================\n')
-  console.log('==  請求書一括アップロード 終了  =================================')
-  // logger.info(jsonLog)
-  // console.log(jsonLog)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
 
   return res.status(200).send(errorText)
@@ -645,30 +637,16 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
     })
   }
 
-  let jsonLog
-  // 最後にログ出力する
+  // アプリ効果測定
   if (headerErrorFlag === 0) {
-    jsonLog = {
+    const jsonLog = {
       tenantId: _req.user.tenantId,
       action: 'uploadedInvoiceInfo',
       uploadedInvoiceCount: invoices.length,
       invoices: invoices
     }
+    logger.info(jsonLog)
   }
-  // else {
-  //   jsonLog = {
-  //     tenantId: _req.user.tenantId,
-  //     action: 'uploadedInvoiceInfo',
-  //     invoiceCount: 0,
-  //     invoices: []
-  //   }
-  // }
-
-  // console.log('==  CSVアップロードレコード  =================================\n')
-  console.log('==  請求書一括アップロード情報  =================================')
-  logger.info(jsonLog)
-  // console.log('invoices\n', invoices)
-  // console.log(jsonLog)
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
 

@@ -350,10 +350,8 @@ const cbPostApproval = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
-  // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
+  // アプリ効果測定用ログ出力
   let jsonLog = { tenantId: req.user.tenantId, action: 'requestApprovalRequest' }
-  // console.log('==  支払依頼リクエスト  開始  =================================\n', jsonLog)
-  console.log('==  支払依頼 リクエスト  =================================')
   logger.info(jsonLog)
 
   const contractId = contract.contractId
@@ -417,10 +415,7 @@ const cbPostApproval = async (req, res, next) => {
 
       switch (result) {
         case 0: {
-          // console.log('==  invoiceId  =================================\n', invoiceId)
-          // console.log('==  requester  =================================\n', requester)
-          // console.log('==  requestResult  =================================\n', requestResult)
-          // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
+          // アプリ効果測定用ログ出力
           jsonLog = {
             tenantId: req.user.tenantId,
             action: 'requestedApprovalInfo',
@@ -430,7 +425,6 @@ const cbPostApproval = async (req, res, next) => {
             approveRouteId: approveRouteId,
             status: requestResult?.status
           }
-          console.log('==  支払依頼情報  =================================\n', jsonLog)
           logger.info(jsonLog)
 
           const sendMailStatus = await mailMsg.sendPaymentRequestMail(
@@ -463,11 +457,6 @@ const cbPostApproval = async (req, res, next) => {
     }
   }
 
-  // 〓〓  アプリ効果測定用ログ出力  〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓〓
-  // jsonLog = { tenantId: req.user.tenantId, action: 'requestApproval-end' }
-  // console.log('==  支払依頼リクエスト  終了  =================================\n', jsonLog)
-  console.log('==  支払依頼 終了  =================================')
-  // logger.info(jsonLog)
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApproval')
 }
 
