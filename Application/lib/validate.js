@@ -477,7 +477,7 @@ const isContactEmail = function (contactEmail) {
   if (typeof domain === 'undefined') return -1
 
   // 取引担当者メールアドレスが128超過の場合
-  if (contactEmail.length >= 128) return -1
+  if (contactEmail.length > 128) return -1
 
   // 取引担当者メールアドレスのローカル部のサイズが超えた場合
   if (local.length > 64) return -1
