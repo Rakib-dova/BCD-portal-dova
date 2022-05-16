@@ -7,9 +7,10 @@ html
     p.title.is-10 請求書
   .column.is-half
     .column.text-right
-      input(type='file' id='file-sealImp')
-      label(id="file-sealImp-label" for="file-sealImp") 
-        img#sealImp(src = sealImpSrc width='256' height='256')
+      if sealImpSrc
+        input(type='file' id='file-sealImp')
+        label(id="file-sealImp-label" for="file-sealImp") 
+            img#sealImp(src = sealImpSrc width='256' height='256')
       if logoSrc
         img.ml-5(src = logoSrc width='256' height='256')
 
@@ -25,18 +26,18 @@ div.margin-top-20#header-error
       input.input.width-330px(data-prop='recAddr2' id='invoice-recAddr2' type='text' placeholder='住所(半角全角 50文字)')
       input.input.width-330px(data-prop='recAddr3' id='invoice-recAddr3' type='text' placeholder='ビル名/フロア等(半角全角 50文字)')
     else
-      p.p.width-250pxfont-bold#invoice-recCompany
-      p.p.width-250px#invoice-recPost
-      p.p.width-250px#invoice-recAddr1
-      p.p.width-250px#invoice-recAddr2
-      p.p.width-250px#invoice-recAddr3
+      p.width-250pxfont-bold#invoice-recCompany
+      p.width-250px#invoice-recPost
+      p.width-250px#invoice-recAddr1
+      p.width-250px#invoice-recAddr2
+      p.width-250px#invoice-recAddr3
   .column
       p.font-bold 差出人
-      p.p.width-250pxfont-bold#invoice-sendCompany
-      p.p.width-250px#invoice-sendPost
-      p.p.width-250px#invoice-sendAddr1
-      p.p.width-250px#invoice-sendAddr2
-      p.p.width-250px#invoice-sendAddr3
+      p.width-250pxfont-bold#invoice-sendCompany
+      p.width-250px#invoice-sendPost
+      p.width-250px#invoice-sendAddr1
+      p.width-250px#invoice-sendAddr2
+      p.width-250px#invoice-sendAddr3
   .column 
     p.font-bold 請求書番号
     if editing
@@ -45,7 +46,7 @@ div.margin-top-20#header-error
       p.width-330px#invoice-invoiceNo
     div
       div.float-left.mr-r-10px
-        label(for="invoice-billingDate") 請求日
+        label(for="invoic-billingDate") 請求日
         br
         if editing
           input.input.width-120px(data-prop='billingDate' id='invoice-billingDate' type='date')
@@ -55,7 +56,7 @@ div.margin-top-20#header-error
         label(for="invoice-currency") 通貨
         br
         if editing
-          input.input.width-120px(data-prop='currency' id='invoice-currency' type='text' placeholder='通貨(10文字)')
+          input.input.width-120px(data-prop='currency' id='invoice-currency' type='text' value='JPY' readonly='true')
         else
           p.width-120px#invoice-currency
     div

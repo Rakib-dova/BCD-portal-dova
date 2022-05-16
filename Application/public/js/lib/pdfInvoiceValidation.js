@@ -5,7 +5,7 @@ const linesErrorDiv = $('#lines-error')
 const footerErrorDiv = $('#footer-error')
 
 // eslint-disable-next-line no-unused-vars
-const rules = [
+const saveRules = [
   {
     target: 'invoice',
     displayLocation: 'header',
@@ -18,12 +18,43 @@ const rules = [
   {
     target: 'invoice',
     displayLocation: 'header',
-    prop: 'currency',
-    regexp: /^.{1,10}$/,
-    message: '通貨は10文字以内で入力して下さい。',
-    emptyMessage: '通貨が空欄のため、請求情報が不完全です。入力して下さい。',
+    prop: 'recCompany',
+    regexp: /^.{1,200}$/,
+    message: '宛先企業は200文字以内で入力して下さい。',
+    emptyMessage: '宛先企業が空欄のため、宛先情報が不完全です。入力して下さい。',
+    required: true
+  }
+  // {
+  //   target: 'invoice',
+  //   displayLocation: 'header',
+  //   prop: 'paymentDate',
+  //   regexp: '',
+  //   message: '',
+  //   emptyMessage: '支払期限が空欄のため、請求情報が不完全です。入力して下さい。',
+  //   required: true
+  // }
+]
+
+// eslint-disable-next-line no-unused-vars
+const outputRules = [
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'invoiceNo',
+    regexp: /^([a-zA-Z0-9]{1,50})$/,
+    message: '請求書番号は半角英数字50文字以内で入力して下さい。',
+    emptyMessage: '請求書番号が空欄のため、請求情報が不完全です。入力して下さい。',
     required: true
   },
+  // {
+  //   target: 'invoice',
+  //   displayLocation: 'header',
+  //   prop: 'currency',
+  //   regexp: /^.{1,10}$/,
+  //   message: '通貨は10文字以内で入力して下さい。',
+  //   emptyMessage: '通貨が空欄のため、請求情報が不完全です。入力して下さい。',
+  //   required: true
+  // },
   {
     target: 'invoice',
     displayLocation: 'header',
@@ -102,7 +133,7 @@ const rules = [
     prop: 'bankName',
     regexp: /^.{0,50}$/,
     message: '銀行名は50文字以内で入力して下さい。',
-    // emptyMessage: '銀行名が空欄のため、支払い情報が不完全です。入力して下さい。',
+    emptyMessage: '銀行名が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
   },
   {
@@ -111,7 +142,7 @@ const rules = [
     prop: 'branchName',
     regexp: /^.{0,50}$/,
     message: '支店名は50文字以内で入力して下さい。',
-    // emptyMessage: '支店名が空欄のため、支払い情報が不完全です。入力して下さい。',
+    emptyMessage: '支店名が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
   },
   {
@@ -120,7 +151,7 @@ const rules = [
     prop: 'accountType',
     regexp: /普通|当座/,
     message: '科目は「当座」または「普通」で入力して下さい。',
-    // emptyMessage: '科目が空欄のため、支払い情報が不完全です。入力して下さい。',
+    emptyMessage: '科目が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
   },
   {
@@ -129,7 +160,7 @@ const rules = [
     prop: 'accountName',
     regexp: /^.{0,50}$/,
     message: '口座名義は50文字以内で入力して下さい。',
-    // emptyMessage: '口座名義が空欄のため、支払い情報が不完全です。入力して下さい。',
+    emptyMessage: '口座名義が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
   },
   {
@@ -138,9 +169,17 @@ const rules = [
     prop: 'accountNumber',
     regexp: /^([0-9]{7})$/,
     message: '口座番号は数字7桁で入力して下さい。',
-    // emptyMessage: '口座番号が空欄のため、支払い情報が不完全です。入力して下さい。',
+    emptyMessage: '口座番号が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
   },
+  // {
+  //   target: 'invoice',
+  //   displayLocation: 'footer',
+  //   prop: 'note',
+  //   regexp: /^.{0,1500}$/,
+  //   message: '備考は1500文字以内で入力して下さい。',
+  //   required: false
+  // },
 
   {
     target: 'lines',
@@ -148,8 +187,8 @@ const rules = [
     prop: 'lineId',
     regexp: /^([a-zA-Z0-9-]{0,5})$/,
     message: '項目IDは半角英数字半角ハイフン5文字以内で入力してください。',
-    // emptyMessage: '項目IDが空欄のため、明細情報が不完全です。入力して下さい。',
-    required: false
+    emptyMessage: '項目IDが空欄のため、明細情報が不完全です。入力して下さい。',
+    required: true
   },
   {
     target: 'lines',
@@ -157,17 +196,18 @@ const rules = [
     prop: 'lineDiscription',
     regexp: /^.{0,100}$/,
     message: '内容は100文字以内で入力してください。',
-    // emptyMessage: '内容が空欄のため、明細情報が不完全です。入力して下さい。',
-    required: false
+    emptyMessage: '内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: true
   },
   {
     target: 'lines',
     displayLocation: 'lines',
     prop: 'quantity',
-    regexp: /^[0-9]{0,12}$/,
-    message: '数量は数字 0 ～ 999999999999 の範囲で入力してください。',
-    // emptyMessage: '数量が空欄のため、明細情報が不完全です。入力して下さい。',
-    required: false
+    customValidator: (value) => value > 0 && value <= 1000000000000,
+    regexp: '',
+    message: '数量は整数or少数 0 ～ 1000000000000 の範囲で入力してください。',
+    emptyMessage: '数量が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: true
   },
   {
     target: 'lines',
@@ -175,17 +215,17 @@ const rules = [
     prop: 'unit',
     regexp: /^.{0,10}$/,
     message: '単位は10文字以内で入力してください。',
-    // emptyMessage: '単位が空欄のため、明細情報が不完全です。入力して下さい。',
-    required: false
+    emptyMessage: '単位が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: true
   },
   {
     target: 'lines',
     displayLocation: 'lines',
     prop: 'unitPrice',
     regexp: /^[0-9]{0,12}$/,
-    message: '単価は数字 0 ～ 999999999999 の範囲で入力してください。',
-    // emptyMessage: '単価が空欄のため、明細情報が不完全です。入力して下さい。',
-    required: false
+    message: '単価は整数 0 ～ 999999999999 の範囲で入力してください。',
+    emptyMessage: '単価が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: true
   },
   {
     target: 'lines',
@@ -193,12 +233,32 @@ const rules = [
     prop: 'taxType',
     regexp: '',
     message: '',
+    emptyMessage: '税が選択されていないので、明細情報が不完全です。選択して下さい。',
+    required: true
+  },
+
+  {
+    target: 'option',
+    displayLocation: 'lines',
+    prop: 'lineLength',
+    customValidator: (value) => value > 0,
+    regexp: '',
+    message: '明細は１件以上必要です。',
+    required: false
+  },
+  {
+    target: 'option',
+    displayLocation: 'header',
+    prop: 'fileSize',
+    customValidator: (value) => value && value <= 1048576,
+    regexp: '',
+    message: '印影ファイルのサイズは1MB以下にしてください。',
     required: false
   }
 ]
 
 // eslint-disable-next-line no-unused-vars
-function validate(invoice, lines) {
+function validate(invoice, lines, rules, option = null) {
   let result = true
 
   while (headerErrorDiv.firstChild) headerErrorDiv.removeChild(headerErrorDiv.firstChild)
@@ -212,11 +272,24 @@ function validate(invoice, lines) {
       setValidationMessage(rule.emptyMessage, rule.displayLocation)
       result = false
     } else if (!invoice[rule.prop]) return // eslint-disable-line
-    else if (rule.regexp && !rule.regexp.test(invoice[rule.prop])) {
+    else if (rule.customValidator && !rule.customValidator(invoice[rule.prop])) {
+      setValidationMessage(rule.message, rule.displayLocation)
+      result = false
+    } else if (rule.regexp && !rule.regexp.test(invoice[rule.prop])) {
       setValidationMessage(rule.message, rule.displayLocation)
       result = false
     }
   })
+
+  // if (imageFileSize && imageFileSize > 1048576) {
+  //   setValidationMessage('印影ファイルのサイズは1MB以下にしてください。', 'header')
+  //   result = false
+  // }
+
+  // if (lines.length < 1) {
+  //   setValidationMessage('明細は１件以上必要です。', 'lines')
+  //   result = false
+  // }
 
   lines.forEach((line, i) => {
     rules.forEach((rule) => {
@@ -226,7 +299,10 @@ function validate(invoice, lines) {
         setValidationMessage(`${i + 1}番目の${rule.emptyMessage}`, rule.displayLocation)
         result = false
       } else if (!line[rule.prop]) return // eslint-disable-line
-      else if (rule.regexp && !rule.regexp.test(line[rule.prop])) {
+      else if (rule.customValidator && !rule.customValidator(line[rule.prop])) {
+        setValidationMessage(rule.message, rule.displayLocation)
+        result = false
+      } else if (rule.regexp && !rule.regexp.test(line[rule.prop])) {
         // console.log('=====  バリデーション失敗  ====== ')
         setValidationMessage(`${i + 1}番目の` + rule.message, rule.displayLocation)
         result = false
@@ -234,10 +310,22 @@ function validate(invoice, lines) {
     })
   })
 
-  if (lines.length < 1) {
-    setValidationMessage('明細は１件以上必要です。', 'lines')
-    result = false
-  }
+  rules.forEach((rule) => {
+    console.log('===== op バリデーションの結果: ')
+    if (rule.target !== 'option') return
+
+    if (!option[rule.prop] && rule.required) {
+      setValidationMessage(rule.emptyMessage, rule.displayLocation)
+      result = false
+    } else if (!option[rule.prop]) return // eslint-disable-line
+    else if (rule.customValidator && !rule.customValidator(option[rule.prop])) {
+      setValidationMessage(rule.message, rule.displayLocation)
+      result = false
+    } else if (rule.regexp && !rule.regexp.test(option[rule.prop])) {
+      setValidationMessage(rule.message, rule.displayLocation)
+      result = false
+    }
+  })
 
   console.log('=====  バリデーションの結果: ', result)
   return result
@@ -251,4 +339,21 @@ function setValidationMessage(message, displayLocation) {
   if (displayLocation === 'header') return headerErrorDiv.appendChild(messageP)
   else if (displayLocation === 'lines') return linesErrorDiv.appendChild(messageP)
   else if (displayLocation === 'footer') return footerErrorDiv.appendChild(messageP)
+}
+
+// eslint-disable-next-line no-unused-vars
+function setPaymentRequired(invoice, outputRules) {
+  let required = false
+  const paymentKeys = ['bankName', 'branchName', 'accountType', 'accountName', 'accountNumber']
+
+  for (const key of Object.keys(invoice)) {
+    if (paymentKeys.includes(key) && invoice[key]) {
+      required = true
+      break
+    }
+  }
+
+  outputRules.forEach((rule) => {
+    if (paymentKeys.includes(rule.prop)) rule.required = required
+  })
 }

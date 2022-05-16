@@ -2,32 +2,41 @@
  * 必須入力パラメーター設定
 */
 const requiredProps = [
-  'invoiceNo',
-  'currency',
-  'accountName',
-  'accountNumber',
-  'accountType',
-  'bankName',
-  'branchName',
-  'billingDate',
-  'deliveryDate',
-  'paymentDate',
-  'note',
-  'recAddr1',
-  'recAddr2',
-  'recAddr3',
   'recCompany',
   'recPost',
+  'recAddr1',
+  'recAddr2',
+
+  'sendCompany',
+  'sendPost',
   'sendAddr1',
   'sendAddr2',
   'sendAddr3',
-  'sendCompany',
-  'sendPost',
+
+  'invoiceNo',
+  'currency',
+  'billingDate',
+  'deliveryDate',
+  'paymentDate',
+
   'subTotal',
   'taxGroups',
   'taxTotal',
   'total',
   'lines'
+]
+
+const optionProps = [
+  'recAddr3',
+  'sendAddr3',
+
+  'bankName',
+  'branchName',
+  'accountName',
+  'accountNumber',
+  'accountType',
+
+  'note'
 ]
 
 /**
@@ -40,6 +49,7 @@ const requiredProps = [
  */
 const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
   if (!validateInvoiceInput(input)) return console.log('PDF生成バリデーションの失敗')
+  padOptionProps(input)
 
   console.log('== レンダリング開始 ============================')
 
@@ -356,12 +366,19 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
 const validateInvoiceInput = (input) => {
   if (!input || !(Object.prototype.toString.call(input) === '[object Object]')) return false
 
-  requiredProps.forEach((key) => {
-    if (!(key in input)) return false
-    if (!input[key] && key !== 'sendAddr3' && key !== 'recAddr3') return false
-  })
+  for (let i = 0; i < requiredProps.length; i++) {
+    if (!input.hasOwnProperty(requiredProps[i])) return false // eslint-disable-line
+  }
 
   return true
+}
+
+const padOptionProps = (input) => {
+  for (let i = 0; i < optionProps.length; i++) {
+    if (!input.hasOwnProperty(optionProps[i]) || !input[optionProps[i]]) { // eslint-disable-line
+      input[optionProps[i]] = ''
+    }
+  }
 }
 
 /**

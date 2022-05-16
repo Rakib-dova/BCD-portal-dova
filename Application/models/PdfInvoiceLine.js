@@ -42,10 +42,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING
       },
       unitPrice: {
-        type: DataTypes.FLOAT
+        type: DataTypes.INTEGER
       },
       quantity: {
-        type: DataTypes.INTEGER
+        type: DataTypes.FLOAT
       },
       taxType: {
         type: DataTypes.STRING

@@ -18,7 +18,7 @@ function getDisplayItems(curPageIndex) {
 
 function renderItems(curPageIndex) {
   // アイテムを全削除
-  while (itemListTable.firstChild) {
+  while (itemListTable?.firstChild) {
     itemListTable.removeChild(itemListTable.firstChild)
   }
 

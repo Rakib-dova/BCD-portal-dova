@@ -1,7 +1,7 @@
 /* global
 
  taxDatabase, $, addEvent, validate, getSubTotal, getTaxGroups, getTaxTotal,
- savePdfInvoice, outputPdfInvoice, formatDate, isNumberString
+ savePdfInvoice, outputPdfInvoice, formatDate, isNumberString, saveRules, outputRules, sealImpRules, setPaymentRequired
 
 */
 let invoice = {}
@@ -11,6 +11,7 @@ let subTotal
 let taxGroups
 let taxTotal
 let imageFile
+let saved = false
 const linesTbody = document.getElementById('lines')
 
 // 初期化
@@ -18,10 +19,13 @@ function init() {
   console.log('==== 初期化 ====')
   const invoiceJson = $('#invoice-json')
   const linesJson = $('#lines-json')
+  // console.log('==== invoiceJson ====\n', invoiceJson.textContent)
   invoice = JSON.parse(invoiceJson.textContent)
+  // console.log('==== 加工前 invoice ====\n', invoice)
   for (const key of Object.keys(invoice)) {
     if (key.match(/Date/) && !location.pathname.match(/show/)) {
-      invoice[key] = new Date(invoice[key])
+      console.log('==== invoice[key] ====', key, ': ', invoice[key])
+      invoice[key] = invoice[key] ? new Date(invoice[key]) : null
     }
 
     if (key === 'invoiceId') {
@@ -29,8 +33,9 @@ function init() {
       delete invoice.invoiceId
     }
   }
+  invoice.currency = 'JPY'
   console.log('==== invoiceId ====: ', invoiceId)
-  console.log('==== invoice ====\n', invoice)
+  console.log('==== 加工後 invoice ====\n', invoice)
   lines = JSON.parse(linesJson.textContent)
   console.log('==== lines ====\n', lines)
 
@@ -44,8 +49,8 @@ function init() {
     renderTotals()
   } else {
     // 印影画像クリックでファイル選択を無効化
-    $('#file-sealImp-label').setAttribute('for', '')
-    $('#sealImp').style.cursor = 'default'
+    $('#file-sealImp-label')?.setAttribute('for', '')
+    if ($('#sealImp')) $('#sealImp').style.cursor = 'default'
     renderTotals()
   }
 
@@ -80,6 +85,8 @@ function setStaticProp(invoice, lines) {
     $('#invoice-accountType').textContent = invoice.accountType
     $('#invoice-accountNumber').textContent = invoice.accountNumber
     $('#invoice-accountName').textContent = invoice.accountName
+
+    $('#invoice-note').textContent = invoice.note
 
     lines.forEach((line) => {
       // テンプレートの複製
@@ -119,7 +126,7 @@ addEvent(document, 'change', (e, target) => {
   // 請求書関連の 値更新 & レンダリング
   if (e.target.id.match(/invoice/)) {
     updateInvoiceValues(e, target)
-    renderInvoice()
+    renderInvoice(target)
   }
 
   // 明細関連の 値更新 & レンダリング
@@ -132,16 +139,20 @@ addEvent(document, 'change', (e, target) => {
   // 画像が設定されたらプレビュに反映させる処理
   if (e.target.id === 'file-sealImp') {
     const fr = new FileReader()
-    fr.onload = function() {
+    fr.onload = function () {
       $('#sealImp').setAttribute('src', fr.result)
     }
 
     console.log('==== e.target.files[0] ====\n', e.target.files[0])
 
-    if (e.target.files[0]) {
+    const file = e.target.files[0]
+
+    if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
       imageFile = e.target.files[0]
-      console.log('==== キャッシュ保存 ====')
       fr.readAsDataURL(e.target.files[0])
+    } else if (file) {
+      alert('印影に使えるファイル形式は png か jpeg だけです。')
+      e.target.files[0] = null
     }
   }
 })
@@ -149,7 +160,14 @@ addEvent(document, 'change', (e, target) => {
 // 請求書の値更新
 function updateInvoiceValues(e, target) {
   const prop = target.getAttribute('data-prop')
-  invoice[prop] = target.value
+
+  if (prop === 'note' && target.value.length > 1500) {
+    invoice.note = target.value.substring(0, 1500)
+  } else if (prop === 'note') {
+    invoice.note = target.value
+  } else if (prop === 'recPost') invoice[prop] = target.value.replace('-', '')
+  else invoice[prop] = target.value
+
   console.log('==== 値更新後の invoice ====\n', invoice)
 }
 
@@ -170,14 +188,20 @@ function updateLineValues(e, target) {
 }
 
 // 請求書のレンダリング
-function renderInvoice() {
+function renderInvoice(target) {
   console.log('==== 請求書レンダリング ====')
   for (const key of Object.keys(invoice)) {
     const element = $(`#invoice-${key}`)
 
     if (element?.tagName === 'INPUT' || element?.tagName === 'TEXTAREA') {
-      if (element.type === 'date') element.valueAsDate = new Date(invoice[key])
+      if (element.type === 'date') element.valueAsDate = invoice[key] ? new Date(invoice[key]) : null
       else element.value = invoice[key]
+    }
+
+    if (key === 'note' && element.value.length > 1500) {
+      $('#msgCount').innerText = '1500/1500'
+    } else if (key === 'note') {
+      $('#msgCount').innerText = '(' + element.value.length + '/1500)'
     }
   }
 }
@@ -295,7 +319,7 @@ function renderTotals() {
 }
 
 // 明細行追加
-function addLine(){  // eslint-disable-line
+function addLine() {
   if (lines.length >= 20) return
 
   lines.push({
@@ -312,23 +336,35 @@ function addLine(){  // eslint-disable-line
 }
 
 $('#output-modal-btn')?.addEventListener('click', async () => {
-  if (!validate(invoice, lines)) return alert('入力項目に不備があります。')
+  setPaymentRequired(invoice, outputRules)
+  if (!location.pathname.match(/show/) && !validate(
+    invoice,
+    lines,
+    outputRules,
+    { lineLength: String(lines.length), fileSize: imageFile?.size }
+  )) return alert('入力項目に不備があります。')
 
-  $('#output-modal').className = 'modal is-active'
+  $('#output-modal').classList.add('is-active')
 })
 
 $('#save-btn')?.addEventListener('click', async () => {
-  if (!validate(invoice, lines)) return alert('入力項目に不備があります。')
+  if (!location.pathname.match(/show/) && !validate(invoice, lines, saveRules)) return alert('入力項目に不備があります。')
 
+  const modal = document.getElementById('request-progress-modal')
+  modal.classList.add('is-active')
   const response = await savePdfInvoice(invoice, lines, imageFile, invoiceId)
-  const res = await response?.json()
-  console.log('成功しました response.json:\n', res)
-  invoiceId = res.invoice?.invoiceId
+  modal.classList.remove('is-active')
+  if (response.ok) {
+    const res = await response?.json()
+    saved = true
+    console.log('成功しました response.json:\n', res)
+    if (!invoiceId) invoiceId = res.invoice?.invoiceId
+  }
 })
 
 $('#output-btn')?.addEventListener('click', async () => {
-  // if (!validate(invoice, lines)) return alert('入力項目に不備があります。')
-
+  const modal = document.getElementById('request-progress-modal')
+  modal.classList.add('is-active')
   invoice.subTotal = subTotal
   invoice.taxGroups = taxGroups
   invoice.taxTotal = taxTotal
@@ -336,28 +372,25 @@ $('#output-btn')?.addEventListener('click', async () => {
   await outputPdfInvoice(invoice, lines, imageFile, invoiceId)
 })
 
-// メッセージ文字数確認
-$('#invoice-note').addEventListener('keyup', function () {
-  $('#msgCount').innerText = '(' + $('#invoice-note').value.length + '/1500)'
-
-  if ($('#invoice-note').value.length > 1500) {
-    $('#invoice-note').value($('#invoice-note').value.substring(0, 1500))
-    $('#msgCount').innerText = '1500/1500'
-  }
+$('#backButton')?.addEventListener('click', async () => {
+  if (!saved) $('#back-modal').classList.add('is-active')
+  else location.href = `https://${location.host}/pdfInvoices/list`
 })
 
 function getTaxTypeIndex(taxType) {
   switch (taxType) {
-    case 'freeTax':
+    case '':
       return 0
-    case 'dutyFree':
+    case 'freeTax':
       return 1
-    case 'tax10p':
+    case 'dutyFree':
       return 2
-    case 'tax8p':
+    case 'tax10p':
       return 3
-    case 'otherTax':
+    case 'tax8p':
       return 4
+    case 'otherTax':
+      return 5
   }
 }
 

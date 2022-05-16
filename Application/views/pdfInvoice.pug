@@ -14,11 +14,12 @@ block content
       include invoicePDFHeader
       include invoicePDFLines
       include invoicePDFFooter
-      .grouped-button.margin-top-40p        
-        a.button.mr-6.show-modal(name = 'backButton' data-target = "back-modal") 戻る
+      .grouped-button.margin-top-40p
         if editing
+          a.button.mr-6.show-modal(id = 'backButton') 戻る
           a.button.mr-6.is-success#save-btn 一時保存
-        //- a.button.is-link#output-btn 出力
+        else
+          a.button.mr-6(href='/pdfInvoices/list') 戻る
         a.button.is-link.show-modal#output-modal-btn 出力
         //- a.button.is-link#delete-btn 削除(デバック要)
   
@@ -54,6 +55,16 @@ block content
         div.button-area
           a.button#cancel-btn.cancel-button(data-target='output-modal') キャンセル
           a.button.is-link.mr-6#output-btn 確定 
+      
+      .modal.modal-fx-fadeInscale#request-progress-modal
+        .modal-background
+        .modal-card
+          header.modal-card-head
+            p.modal-card-title
+          section.modal-card-body
+            center
+              p.modal-card-result#modal-card-result 処理中
+          footer.modal-card-foot
 
 block append scripts
   script(src="/js/lib/utils.js")

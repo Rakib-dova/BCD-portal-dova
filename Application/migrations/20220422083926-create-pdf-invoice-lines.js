@@ -17,19 +17,19 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       lineId: {
-        type: Sequelize.STRING(8)
+        type: Sequelize.STRING(5)
       },
       lineDiscription: {
-        type: Sequelize.STRING(60)
+        type: Sequelize.STRING(100)
       },
       unit: {
         type: Sequelize.STRING(10)
       },
       unitPrice: {
-        type: Sequelize.FLOAT
+        type: Sequelize.INTEGER
       },
       quantity: {
-        type: Sequelize.INTEGER
+        type: Sequelize.FLOAT
       },
       taxType: {
         type: Sequelize.STRING(8)

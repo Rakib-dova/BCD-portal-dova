@@ -15,10 +15,7 @@ const {
   generatePdf,
   renderInvoiceHTML
 } = require('../lib/pdfGenerator')
-let filetype
-(async () => {
-  filetype = await import('file-type')
-})()
+const FileType = require('file-type')
 
 const taxDatabase = [
   { type: 'tax10p', taxRate: 0.1 },
@@ -26,13 +23,14 @@ const taxDatabase = [
 ]
 
 const pdfInvoiceList = async (req, res, next) => {
+  if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
   logger.info(constantsDefine.logMessage.INF000 + 'pdfInvoiceList')
 
   let invoiceRecords
   try {
     invoiceRecords = await pdfInvoiceController.findAllInvoices(req.user.tenantId)
-  } catch (err) {
-    console.error('err:\n', err)
+  } catch (error) {
+    console.log('error:\n', error)
     return next(errorHelper.create(500))
   }
 
@@ -42,7 +40,7 @@ const pdfInvoiceList = async (req, res, next) => {
   invoices.forEach((invoice) => {
     invoice.total = getTotal(invoice.PdfInvoiceLines, taxDatabase)
     invoice.updatedAt = formatDate(invoice.updatedAt, 'YYYY年MM月DD日')
-    invoice.paymentDate = formatDate(invoice.paymentDate, 'YYYY年MM月DD日')
+    invoice.paymentDate = invoice.paymentDate ? formatDate(invoice.paymentDate, 'YYYY年MM月DD日') : ''
   })
 
   console.log('==  加工後 invoices  ===================\n', invoices)
@@ -50,14 +48,15 @@ const pdfInvoiceList = async (req, res, next) => {
   res.render('pdfInvoiceList', {
     title: 'PDF請求書',
     engTitle: 'PDF INVOICING',
-    itemCount: invoices.length,
-    invoices: JSON.stringify(invoices)
+    itemCount: invoices.length, // ページネーションで必要な情報
+    invoices: JSON.stringify(invoices) // フロントエンドにデータを渡す為
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceList')
 }
 
 const pdfInvoiceRegister = async (req, res, next) => {
+  if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
   logger.info(constantsDefine.logMessage.INF000 + 'pdfInvoiceRegister')
 
   // アカウント情報取得
@@ -83,6 +82,7 @@ const pdfInvoiceRegister = async (req, res, next) => {
 const pdfInvoiceEdit = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'pdfInvoiceEdit')
   if (!req.params.invoiceId) return next(errorHelper.create(400))
+  console.log('=== req.params.invoiceId =========: ', req.params.invoiceId)
 
   // アカウント情報取得
   const { accountInfo, senderInfo } = await getAccountAndSenderInfo(req)
@@ -92,8 +92,9 @@ const pdfInvoiceEdit = async (req, res, next) => {
   const { invoice, lines, sealImpRecord } = await getInvoiceInfo(req, senderInfo)
   if (!invoice || !lines || !sealImpRecord) return next(errorHelper.create(500))
 
-  console.log('=== invoice =========\n', invoice)
-  console.log('=== lines =========\n', lines)
+  // console.log('=== sealImpRecord =========\n', sealImpRecord)
+  // console.log('=== invoice =========\n', invoice)
+  // console.log('=== lines =========\n', lines)
 
   // 印影設定
   const sealImpSrc = sealImpRecord.dataValues.image
@@ -130,7 +131,7 @@ const pdfInvoiceShow = async (req, res, next) => {
   // 印影設定
   const sealImpSrc = sealImpRecord.dataValues.image
     ? `data:image/png;base64,${sealImpRecord.dataValues.image.toString('base64')}`
-    : '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg'
+    : null
   // 企業ロゴ設定
   const logoSrc = accountInfo.BackgroundURL ? accountInfo.BackgroundURL : null
 
@@ -167,7 +168,7 @@ const createPdfInvoice = async (req, res, next) => {
       req.file ? req.file.buffer : null
     )
   } catch (error) {
-    console.error(error)
+    console.log(error)
     return next(errorHelper.create(500))
   }
   console.log('==  createdInvoice  ===================\n', createdInvoice)
@@ -181,13 +182,27 @@ const updatePdfInvoice = async (req, res, next) => {
   const lines = JSON.parse(req.body.lines)
   if (!Array.isArray(lines)) return next(errorHelper.create(400))
 
+  // 請求書情報の取得
+  let invoiceRecord
+  try {
+    invoiceRecord = await pdfInvoiceController.findInvoice(req.params.invoiceId)
+    console.log('==  invoiceRecord  ===================\n', invoiceRecord)
+  } catch (error) {
+    console.log(error)
+    return next(errorHelper.create(500))
+  }
+
+  // 既に出力済みの場合は 400 を返す (不正リクエスト対策)
+  if (invoiceRecord.dataValues.tmpFlg) return next(errorHelper.create(400))
+
   lines.forEach((line, index) => {
     line.invoiceId = req.params.invoiceId
     line.lineIndex = index
   })
 
+  let updatedInvoice
   try {
-    const updatedInvoice = await pdfInvoiceController.updateInvoice(
+    updatedInvoice = await pdfInvoiceController.updateInvoice(
       req.params.invoiceId,
       invoice,
       lines,
@@ -195,11 +210,11 @@ const updatePdfInvoice = async (req, res, next) => {
     )
     console.log('==  updatedInvoice  ===================\n', updatedInvoice) // [ 1 ]
   } catch (error) {
-    console.error(error)
+    console.log(error)
     return next(errorHelper.create(500))
   }
 
-  return res.status(201).send({ result: 1 })
+  return res.status(200).send({ result: updatedInvoice[0] })
 }
 
 const createAndOutputPdfInvoice = async (req, res, next) => {
@@ -245,7 +260,7 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
   if (accountInfo.BackgroundURL) {
     const response = await axios.get(accountInfo.BackgroundURL, { responseType: 'arraybuffer' })
     const buffer = Buffer.from(response.data, 'utf-8')
-    const fileType = await filetype.fileTypeFromBuffer(buffer)
+    const fileType = await FileType.fromBuffer(buffer)
     console.log('==  fileType  ===================: ', fileType)
     logo = {
       buffer,
@@ -257,7 +272,7 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
   console.log('==  lines  ===================\n', lines)
 
   const html = renderInvoiceHTML(invoice, sealImp, logo)
-  console.log('=====  生成されたHTML  =====\n', html)
+  // console.log('=====  生成されたHTML  =====\n', html)
   if (!html) return next(errorHelper.create(500))
 
   let pdfBuffer
@@ -266,6 +281,7 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
   } catch (error) {
     console.log('== PDF生成 ERROR ====================\n', error)
     req.flash('noti', ['PDF生成に失敗しました。', ''])
+    return next(errorHelper.create(500))
   }
   console.log('== PDF生成完了 ====================')
 
@@ -281,7 +297,7 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
     )
     console.log('==  createdInvoice  ===================\n', createdInvoice)
   } catch (error) {
-    console.error(error)
+    console.log(error)
     return next(errorHelper.create(500))
   }
   console.log('== PDF請求書レコード挿入 成功 ====================')
@@ -306,7 +322,7 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
     invoiceRecord = await pdfInvoiceController.findInvoice(req.params.invoiceId)
     console.log('==  invoiceRecord  ===================\n', invoiceRecord)
   } catch (error) {
-    console.error(error)
+    console.log(error)
     return next(errorHelper.create(500))
   }
 
@@ -324,7 +340,7 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
     }
   } else {
     if (invoiceRecord.PdfSealImp.dataValues.image) {
-      const fileType = await filetype.fileTypeFromBuffer(invoiceRecord.PdfSealImp.dataValues.image)
+      const fileType = await FileType.fromBuffer(invoiceRecord.PdfSealImp.dataValues.image)
       console.log('==  fileType  ===================: ', fileType)
       sealImp = {
         buffer: invoiceRecord.PdfSealImp.dataValues.image,
@@ -338,7 +354,7 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
   if (accountInfo.BackgroundURL) {
     const response = await axios.get(accountInfo.BackgroundURL, { responseType: 'arraybuffer' })
     const buffer = Buffer.from(response.data, 'utf-8')
-    const fileType = await filetype.fileTypeFromBuffer(buffer)
+    const fileType = await FileType.fromBuffer(buffer)
     console.log('==  fileType  ===================: ', fileType)
     logo = {
       buffer,
@@ -389,7 +405,7 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
       )
       console.log('==  updatedInvoice  ===================\n', updatedInvoice)
     } catch (error) {
-      console.error(error)
+      console.log(error)
       return next(errorHelper.create(500))
     }
     console.log('== PDF請求書レコード更新 成功 ====================')
@@ -422,16 +438,17 @@ const getAccountAndSenderInfo = async (req) => {
   try {
     accountInfo = await apiManager.accessTradeshift(req.user.accessToken, req.user.refreshToken, 'get', '/account')
     console.log('====  accountInfo  ====\n', accountInfo)
-    if (accountInfo instanceof Error) return null
+    if (accountInfo instanceof Error) return { accountInfo: null, senderInfo: null }
   } catch (error) {
     console.error(error)
-    return null
+    return { accountInfo: null, senderInfo: null }
   }
+
   const senderInfo = {
     sendCompany: accountInfo.CompanyName,
-    sendPost: accountInfo.AddressLines.find((item) => item.scheme === 'zip').value,
-    sendAddr1: accountInfo.AddressLines.find((item) => item.scheme === 'city').value,
-    sendAddr2: accountInfo.AddressLines.find((item) => item.scheme === 'street').value,
+    sendPost: accountInfo.AddressLines.find((item) => item.scheme === 'zip')?.value || '',
+    sendAddr1: accountInfo.AddressLines.find((item) => item.scheme === 'city')?.value || '',
+    sendAddr2: accountInfo.AddressLines.find((item) => item.scheme === 'street')?.value || '',
     sendAddr3: accountInfo.AddressLines.find((item) => item.scheme === 'locality')?.value || ''
   }
   console.log('====  sender  ====\n', senderInfo)
@@ -443,17 +460,17 @@ const getInvoiceInfo = async (req, senderInfo) => {
   let invoiceRecord
   try {
     invoiceRecord = await pdfInvoiceController.findInvoice(req.params.invoiceId)
-    console.log('==  invoiceRecord  ===================\n', invoiceRecord)
-    if (invoiceRecord instanceof Error) return null
+    // console.log('==  invoiceRecord  ===================\n', invoiceRecord)
+    if (invoiceRecord instanceof Error) return { invoice: null, lines: null, sealImpRecord: null }
   } catch (error) {
-    console.error(error)
-    return null
+    console.log(error)
+    return { invoice: null, lines: null, sealImpRecord: null }
   }
 
   const invoice = { ...invoiceRecord.dataValues, ...senderInfo }
-  console.log('=== invoice =========\n', invoice)
+  // console.log('=== invoice =========\n', invoice)
   const lines = invoiceRecord.PdfInvoiceLines.map((line) => line.dataValues)
-  console.log('=== lines =========\n', lines)
+  // console.log('=== lines =========\n', lines)
   const sealImpRecord = invoiceRecord.dataValues.PdfSealImp
   delete invoice.PdfInvoiceLines
   delete invoice.PdfSealImp
@@ -493,5 +510,15 @@ router.post('/updateAndOutput/:invoiceId', helper.bcdAuthenticate, upload.single
 // router.delete('/:invoiceId', helper.bcdAuthenticate, deletePdfInvoice)
 
 module.exports = {
-  router: router
+  router,
+  pdfInvoiceList,
+  pdfInvoiceRegister,
+  pdfInvoiceEdit,
+  pdfInvoiceShow,
+  createPdfInvoice,
+  updatePdfInvoice,
+  createAndOutputPdfInvoice,
+  updateAndOutputPdfInvoice,
+  getAccountAndSenderInfo,
+  getInvoiceInfo
 }

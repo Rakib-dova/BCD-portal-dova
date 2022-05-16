@@ -8,12 +8,12 @@ div.margin-top-40p
   table#table-invoice-details.table.is-fullwidth.is-hoverable.table-fixed
     thead
       tr
-        th.width-10.text-center 項目ID
-        th.width-18.text-left 内容
-        th.width-10.text-left 数量
-        th.width-8.text-left 単位
-        th.width-10.text-left 単価
-        th.width-10.text-left 税
+        th.width-8.text-center 項目ID
+        th.width-18.text-center 内容
+        th.width-10.text-center 数量
+        th.width-8.text-center 単位
+        th.width-10.text-center 単価
+        th.width-10.text-center 税
         th.width-8.text-center 小計（税抜）
         th.width-2.text-center 
     tbody#lines
@@ -22,7 +22,7 @@ div.margin-top-40p
       tr
         td.text-center
           if editing
-            input.input(data-prop='lineId' class='line-lineId' type='text' placeholder='半角英数字 5文字')
+            input.input.placeholder-min(data-prop='lineId' class='line-lineId' type='text' placeholder='半角英数字 5文字')
           eles
             p.line-lineId
         td.text-center
@@ -37,7 +37,7 @@ div.margin-top-40p
             p.line-quantity
         td.text-center
           if editing
-            input.input(data-prop='unit' class='line-unit' type='text' placeholder='半角全角 10文字')
+            input.input.placeholder-min(data-prop='unit' class='line-unit' type='text' placeholder='半角全角 10文字')
           eles
             p.line-unit
         td.text-center
@@ -48,15 +48,16 @@ div.margin-top-40p
         td.text-center
           if editing
             select.tax-type.select(data-prop='taxType' class='line-taxType')
+              option(value='') 
               option(value='freeTax') 不課税
               option(value='dutyFree') 免税
-              option(value='tax10p' selected) 消費税 10%
+              option(value='tax10p') 消費税 10%
               option(value='tax8p') 消費税(軽減税率) 8%
               option(value='otherTax') その他消費税
           eles
             p.line-taxType
-        td.text-right.line-subtotal
-        td.text-center.line-action
+        td.text-right.line-subtotal.align-middle
+        td.text-center.line-action.align-middle
 
     template#line-add-btn
       tr
@@ -67,8 +68,8 @@ div.margin-top-40p
         td
         td
         td
-        td.text-center
-          a#btn-plus-invoice-detail
+        td.text-center.align-middle
+          a#btn-plus-invoice-detail.mr-auto
             i.fas.fa-plus-circle
 
 div.margin-top-20p
