@@ -70,7 +70,7 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      'img-src': ["'self'", "https: data:"],  // eslint-disable-line
+      'img-src': ["'self'", 'https: data:'], // eslint-disable-line
       'form-action': ["'self'"], // form-actionは自己ドメインに制限
       // bulma-toast、fontawasom、googlefontsを使うためstyle-srcを一部許可
       // prettier-ignore
@@ -336,6 +336,9 @@ app.use('/csvDownload', require('./routes/csvDownload').router)
 app.use('/pdfInvoiceRegister', require('./routes/pdfInvoice').router)
 app.use('/pdfInvoiceList', require('./routes/pdfInvoice').router)
 app.use('/pdfInvoices', require('./routes/pdfInvoice').router)
+
+/* PoC PDF請求書ドラフト一括作成 */
+app.use('/pdfInvoiceCsvUpload', require('./routes/pdfInvoiceCsvUpload').router)
 
 /**  会員サイト開発 20220228 */
 // アプリ一覧からの遷移受付けエンドポイント
