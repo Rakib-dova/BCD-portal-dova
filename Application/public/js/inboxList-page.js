@@ -485,7 +485,7 @@ $('#BtnInboxSearch').addEventListener('click', function (e) {
     if (managerAddress.length > 0) {
       const result = managerAddressValidationCheck(managerAddress)
       if (!result) {
-        alert('正しいメールアドレスを入力してください。')
+        alert('入力したメールアドレスに誤りがあります。')
       } else {
         searchProgressModal.classList.add('is-active')
         form.submit()
@@ -499,7 +499,7 @@ $('#BtnInboxSearch').addEventListener('click', function (e) {
 
 // 検索文字に半角スペースが含まれていて先頭文字が 「"」以外の文字で始まる場合、検索不可。
 function managerAddressValidationCheck(managerAddress) {
-  const inputPattarnMailAddress = '^[" a-zA-Z0-9-._+]+@[a-zA-Z0-9-._+]+$' // メールアドレス（緩めの条件）
+  const inputPattarnMailAddress = '^[<>{}!"$&\'()-=~:+*,._ a-zA-Z0-9-._+]+@[a-zA-Z0-9-._+]+$' // メールアドレス（緩めの条件）
   const regExp = new RegExp(inputPattarnMailAddress)
   managerAddress = managerAddress.trim()
   let regExpResult = regExp.test(managerAddress)

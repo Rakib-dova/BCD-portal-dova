@@ -1267,6 +1267,8 @@ describe('inboxのテスト', () => {
     })
 
     test('500エラー：requestのsession,userIdがnullの場合', async () => {
+      // error.renderの49行目と競合が発生。
+      request.user = {}
       // 試験実施
       await inbox.cbPostIndex(request, response, next)
 
