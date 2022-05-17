@@ -81,8 +81,8 @@ const pdfInvoiceRegister = async (req, res, next) => {
 
 const pdfInvoiceEdit = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'pdfInvoiceEdit')
-  if (!req.params.invoiceId) return next(errorHelper.create(400))
   console.log('=== req.params.invoiceId =========: ', req.params.invoiceId)
+  if (!req.params.invoiceId) return next(errorHelper.create(400))
 
   // アカウント情報取得
   const { accountInfo, senderInfo } = await getAccountAndSenderInfo(req)
@@ -93,8 +93,9 @@ const pdfInvoiceEdit = async (req, res, next) => {
   if (!invoice || !lines || !sealImpRecord) return next(errorHelper.create(500))
 
   // console.log('=== sealImpRecord =========\n', sealImpRecord)
-  // console.log('=== invoice =========\n', invoice)
-  // console.log('=== lines =========\n', lines)
+  console.log('=== invoice =========\n', invoice)
+  console.log('=== lines =========\n', lines)
+  console.log('=== sealImpRecord =========\n', sealImpRecord)
 
   // 印影設定
   const sealImpSrc = sealImpRecord.dataValues.image
@@ -480,6 +481,7 @@ const getInvoiceInfo = async (req, senderInfo) => {
 
 const getTotal = (lines, taxDatabase) => {
   let total = 0
+  console.log('====  getTotal  =======', lines, taxDatabase)
 
   lines.forEach((line) => {
     let taxRate = 0

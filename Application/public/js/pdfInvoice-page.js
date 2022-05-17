@@ -12,6 +12,7 @@ let taxGroups
 let taxTotal
 let imageFile
 let saved = false
+const reqTimeout = 30000
 const linesTbody = document.getElementById('lines')
 
 // 初期化
@@ -352,6 +353,10 @@ $('#save-btn')?.addEventListener('click', async () => {
 
   const modal = document.getElementById('request-progress-modal')
   modal.classList.add('is-active')
+  setTimeout(() => {
+    alert('システムエラーが発生しました、時間を空けて再度実行をお願いいたします。')
+    modal.classList.remove('is-active')
+  }, reqTimeout)
   const response = await savePdfInvoice(invoice, lines, imageFile, invoiceId)
   modal.classList.remove('is-active')
   if (response.ok) {
@@ -369,6 +374,11 @@ $('#output-btn')?.addEventListener('click', async () => {
   invoice.taxGroups = taxGroups
   invoice.taxTotal = taxTotal
   invoice.total = subTotal + taxTotal
+  setTimeout(() => {
+    alert('システムエラーが発生しました、時間を空けて再度実行をお願いいたします。')
+    modal.classList.remove('is-active')
+    $('#output-modal').classList.remove('is-active')
+  }, reqTimeout)
   await outputPdfInvoice(invoice, lines, imageFile, invoiceId)
 })
 
