@@ -350,6 +350,10 @@ const cbPostApproval = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) return next(noticeHelper.create('cancelprocedure'))
 
+  // アプリ効果測定用ログ出力
+  let jsonLog = { tenantId: req.user.tenantId, action: 'requestApprovalRequest' }
+  logger.info(jsonLog)
+
   const contractId = contract.contractId
   const invoiceId = req.params.invoiceId
   const requester = req.user.userId
@@ -411,6 +415,18 @@ const cbPostApproval = async (req, res, next) => {
 
       switch (result) {
         case 0: {
+          // アプリ効果測定用ログ出力
+          jsonLog = {
+            tenantId: req.user.tenantId,
+            action: 'requestedApprovalInfo',
+            requestId: requestResult?.requestId,
+            invoiceId: invoiceId,
+            requesterId: requester,
+            approveRouteId: approveRouteId,
+            status: requestResult?.status
+          }
+          logger.info(jsonLog)
+
           const sendMailStatus = await mailMsg.sendPaymentRequestMail(
             accessToken,
             refreshToken,

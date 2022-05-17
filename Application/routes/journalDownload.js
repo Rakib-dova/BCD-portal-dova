@@ -120,7 +120,12 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
+  // アプリ効果測定用ログ出力
+  let jsonLog = { tenantId: req.user.tenantId, action: 'journalDownloadRequest' }
+  logger.info(jsonLog)
+
   const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
+
   // 絞り込みの条件データチェック
   const findDocumentQuery = {
     withouttag: ['archived', 'AP_DOCUMENT_DRAFT', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document'],
@@ -336,6 +341,14 @@ const cbPostIndex = async (req, res, next) => {
           }
 
           if (invoicesForDownload.length !== 0) {
+            jsonLog = {
+              tenantId: req.user.tenantId,
+              action: 'downloadedJournalInfo',
+              downloadedJournalCount: 1,
+              finalApproved: chkFinalapproval
+            }
+            logger.info(jsonLog)
+
             filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
             res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
             res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
@@ -371,12 +384,23 @@ const cbPostIndex = async (req, res, next) => {
           return res.redirect(303, '/journalDownload')
         }
 
+        // アプリ効果測定用ログ出力
+        const invoiceArray = invoicesForDownload.split(/\r?\n|\r/)
+        jsonLog = {
+          tenantId: req.user.tenantId,
+          action: 'downloadedJournalInfo',
+          downloadedJournalCount: (invoiceArray.length - 2) > 0 ? (invoiceArray.length - 2) : undefined,
+          finalApproved: chkFinalapproval
+        }
+        logger.info(jsonLog)
+
         filename = encodeURIComponent(`${today}_請求書.csv`)
         res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
         res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
       }
     }
   }
+
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 

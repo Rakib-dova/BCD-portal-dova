@@ -128,6 +128,10 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
+  // アプリ効果測定用ログ出力
+  let jsonLog = { tenantId: req.user.tenantId, action: 'invoiceDownloadRequest' }
+  logger.info(jsonLog)
+
   // 絞り込みの条件データチェック
   const findDocumentQuery = {
     withouttag: ['archived', 'AP_DOCUMENT_DRAFT', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document'],
@@ -370,6 +374,14 @@ const cbPostIndex = async (req, res, next) => {
           if (resultForDocumentId instanceof Error) {
             errorHandle(resultForDocumentId, res, req)
           } else {
+            // アプリ効果測定用ログ出力
+            jsonLog = {
+              tenantId: req.user.tenantId,
+              action: 'downloadedInvoiceInfo',
+              downloadedInvoiceCount: 1
+            }
+            logger.info(jsonLog)
+
             // 取得した請求書をJSONに作成する
             const jsondata = dataToJson(resultForDocumentId)
             // JSONファイルをCSVに変更
@@ -397,12 +409,21 @@ const cbPostIndex = async (req, res, next) => {
           errorHandle(invoicesForDownload, res, req)
         }
 
+        // アプリ効果測定用ログ出力
+        jsonLog = {
+          tenantId: req.user.tenantId,
+          action: 'downloadedInvoiceInfo',
+          downloadedInvoiceCount: documentsResult.itemCount
+        }
+        logger.info(jsonLog)
+
         filename = encodeURIComponent(`${today}_請求書.csv`)
         res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
         res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
       }
     }
   }
+
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 

@@ -122,6 +122,9 @@ const cbPostUpload = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
+  const jsonLog = { tenantId: req.user.tenantId, action: 'invoiceUploadRequest' }
+  logger.info(jsonLog)
+
   // CSVfile 読み込む
   const filename = req.user.tenantId + '_' + req.user.email + '_' + getTimeStamp() + '.csv'
   const uploadCsvData = Buffer.from(decodeURIComponent(req.body.fileData), 'base64').toString('utf8')
@@ -396,6 +399,10 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
   let uploadInvoiceCnt = 0
   let headerErrorFlag = 0
 
+  // let totalInvoiceCount = 0
+  // let totalDetailCount = 0
+  const invoices = []
+
   while (invoiceList[idx]) {
     // 明細check
     const meisaiLength = invoiceList[idx].INVOICE.getDocument().InvoiceLine.length
@@ -453,6 +460,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
           if (!(apiResult instanceof Error)) {
             successCount += invoiceList[idx].successCount
             uploadInvoiceCnt++
+            // totalDetailCount += meisaiLength
           } else {
             // apiエラーの場合、すべて失敗にカウントする
             meisaiFlag = 4
@@ -512,6 +520,8 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
           failCount += invoiceList[idx].failCount
           break
       }
+
+      // == TS にアップロード済み ========================================
 
       const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
       const invoiceId = invoiceList[idx].invoiceId
@@ -585,6 +595,28 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
         })
       }
     }
+
+    const getStatusString = (status) => {
+      switch (status) {
+        case 0:
+          return 'success'
+        case 1:
+          return 'skip'
+        case -1:
+          return 'failure'
+        default:
+          return ''
+      }
+    }
+
+    if (getStatusString(invoiceList[idx].status) === 'success') {
+      invoices.push({
+        invoiceId: invoiceList[idx].invoiceId,
+        status: getStatusString(invoiceList[idx].status),
+        detailCount: meisaiLength
+      })
+    }
+
     idx++
   }
   if (headerErrorFlag === 1) {
@@ -603,6 +635,17 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       skipCount: skipCount,
       invoiceCount: uploadInvoiceCnt
     })
+  }
+
+  // アプリ効果測定
+  if (headerErrorFlag === 0) {
+    const jsonLog = {
+      tenantId: _req.user.tenantId,
+      action: 'uploadedInvoiceInfo',
+      uploadedInvoiceCount: invoices.length,
+      invoices: invoices
+    }
+    logger.info(jsonLog)
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbExtractInvoice')
