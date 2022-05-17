@@ -262,15 +262,15 @@ const cbPostGetCode = async (req, res, next) => {
 }
 
 const cbPostIndex = async (req, res, next) => {
-  // アプリ効果測定用ログ出力
-  let jsonLog = { tenantId: req.user.tenantId, action: 'journalSetupRequest' }
-  logger.info(jsonLog)
-
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
+
+  // アプリ効果測定用ログ出力
+  let jsonLog = { tenantId: req.user.tenantId, action: 'journalSetupRequest' }
+  logger.info(jsonLog)
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
