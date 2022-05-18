@@ -127,7 +127,7 @@ const accountInfoTestData = {
       { scheme: 'street', value: '大手町' },
       { scheme: 'zip', value: '100-8019' }
     ],
-    BackgroundURL: null,
+    LogoURL: null,
     PublicProfile: false,
     NonuserInvoicing: false,
     AutoAcceptConnections: false,
@@ -149,7 +149,7 @@ const accountInfoTestData = {
       { scheme: 'street', value: '大手町' },
       { scheme: 'zip', value: '100-8019' }
     ],
-    BackgroundURL: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
+    LogoURL: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
     PublicProfile: false,
     NonuserInvoicing: false,
     AutoAcceptConnections: false,

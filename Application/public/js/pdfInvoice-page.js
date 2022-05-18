@@ -103,19 +103,19 @@ function setStaticProp(invoice, lines) {
       lineDescription.textContent = line.lineDiscription
       // 数量設定
       const quantity = clone.querySelector('.line-quantity')
-      quantity.textContent = line.quantity
+      quantity.textContent = parseFloat(line.quantity).toLocaleString()
       // 単位設定
       const unit = clone.querySelector('.line-unit')
       unit.textContent = line.unit
       // 単価設定
       const unitPrice = clone.querySelector('.line-unitPrice')
-      unitPrice.textContent = line.unitPrice
+      unitPrice.textContent = parseInt(line.unitPrice).toLocaleString()
       // 税設定
       const taxType = clone.querySelector('.line-taxType')
       taxType.textContent = getTaxTypeIndex(line.taxType)
       // 小計設定
       const subtotal = clone.querySelector('.line-subtotal')
-      subtotal.textContent = Math.floor(line.unitPrice * line.quantity)
+      subtotal.textContent = Math.floor(line.unitPrice * line.quantity).toLocaleString()
 
       linesTbody.appendChild(tr)
     })
@@ -181,6 +181,8 @@ function updateLineValues(e, target) {
     if (prop === 'quantity' || prop === 'unitPrice') {
       if (isNumberString(target.value)) updatedLine[prop] = target.value
       else updatedLine[prop] = ''
+    } else if (prop === 'lineDiscription') {
+      updatedLine[prop] = target.value.replace(/\r\n|\r|\n| /g, '')
     } else {
       updatedLine[prop] = target.value
     }
@@ -245,7 +247,7 @@ function renderLines() {
     taxTypeSelect.selectedIndex = getTaxTypeIndex(line.taxType)
     // 小計設定
     const subtotalTd = clone.querySelector('.line-subtotal')
-    subtotalTd.textContent = Math.floor(line.unitPrice * line.quantity)
+    subtotalTd.textContent = Math.floor(line.unitPrice * line.quantity).toLocaleString()
     // 削除ボタンの作成&追加
     const actionTd = clone.querySelector('.line-action')
     const deleteBtn = document.createElement('a')
@@ -286,7 +288,7 @@ function renderTotals() {
 
   // 小計 (税抜)
   const subTotalDiv = $('#subTotal')
-  subTotalDiv.textContent = subTotal
+  subTotalDiv.textContent = subTotal.toLocaleString()
 
   // 税区分を全部削除
   const totalParentDiv = $('#total').parentNode
@@ -301,22 +303,22 @@ function renderTotals() {
 
     const taxGroupLabel = clone.querySelector('.taxGroupLabel')
     const taxRate = taxGroup.type.replace('tax', '').replace('p', '')
-    taxGroupLabel.textContent = `${taxGroup.subTotal}円のJP 消費税 ${taxRate}%`
+    taxGroupLabel.textContent = `${taxGroup.subTotal.toLocaleString()}円のJP 消費税 ${taxRate}%`
     taxGroupDiv.appendChild(taxGroupLabel)
 
     const taxGroupValue = clone.querySelector('.taxGroupValue')
-    taxGroupValue.textContent = taxGroup.taxGroupTotal
+    taxGroupValue.textContent = taxGroup.taxGroupTotal.toLocaleString()
     taxGroupDiv.appendChild(taxGroupValue)
     totalParentDiv.before(taxGroupDiv)
   })
 
   // 合計
   const totalDiv = $('#total')
-  totalDiv.textContent = subTotal + taxTotal
+  totalDiv.textContent = (subTotal + taxTotal).toLocaleString()
 
   // 税額合計
   const taxTotalDiv = $('#taxTotal')
-  taxTotalDiv.textContent = `税額合計 ${taxTotal} 円`
+  taxTotalDiv.textContent = `税額合計 ${taxTotal.toLocaleString()} 円`
 }
 
 // 明細行追加
@@ -353,12 +355,13 @@ $('#save-btn')?.addEventListener('click', async () => {
 
   const modal = document.getElementById('request-progress-modal')
   modal.classList.add('is-active')
-  setTimeout(() => {
+  const timerId = setTimeout(() => {
     alert('システムエラーが発生しました、時間を空けて再度実行をお願いいたします。')
     modal.classList.remove('is-active')
   }, reqTimeout)
   const response = await savePdfInvoice(invoice, lines, imageFile, invoiceId)
   modal.classList.remove('is-active')
+  clearTimeout(timerId)
   if (response.ok) {
     const res = await response?.json()
     saved = true
@@ -374,12 +377,12 @@ $('#output-btn')?.addEventListener('click', async () => {
   invoice.taxGroups = taxGroups
   invoice.taxTotal = taxTotal
   invoice.total = subTotal + taxTotal
-  setTimeout(() => {
+  const timerId = setTimeout(() => {
     alert('システムエラーが発生しました、時間を空けて再度実行をお願いいたします。')
     modal.classList.remove('is-active')
     $('#output-modal').classList.remove('is-active')
   }, reqTimeout)
-  await outputPdfInvoice(invoice, lines, imageFile, invoiceId)
+  await outputPdfInvoice(invoice, lines, imageFile, invoiceId, timerId)
 })
 
 $('#backButton')?.addEventListener('click', async () => {

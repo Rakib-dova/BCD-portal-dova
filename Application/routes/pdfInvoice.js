@@ -64,7 +64,7 @@ const pdfInvoiceRegister = async (req, res, next) => {
   if (!accountInfo || !senderInfo) return next(errorHelper.create(500))
 
   // 企業ロゴ設定
-  const logoSrc = accountInfo.BackgroundURL ? accountInfo.BackgroundURL : null
+  const logoSrc = accountInfo.LogoURL ? accountInfo.LogoURL : null
 
   res.render('pdfInvoice', {
     title: 'PDF請求書作成',
@@ -102,7 +102,7 @@ const pdfInvoiceEdit = async (req, res, next) => {
     ? `data:image/png;base64,${sealImpRecord.dataValues.image.toString('base64')}`
     : '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg'
   // 企業ロゴ設定
-  const logoSrc = accountInfo.BackgroundURL ? accountInfo.BackgroundURL : null
+  const logoSrc = accountInfo.LogoURL ? accountInfo.LogoURL : null
 
   res.render('pdfInvoice', {
     title: 'PDF請求書編集',
@@ -134,7 +134,7 @@ const pdfInvoiceShow = async (req, res, next) => {
     ? `data:image/png;base64,${sealImpRecord.dataValues.image.toString('base64')}`
     : null
   // 企業ロゴ設定
-  const logoSrc = accountInfo.BackgroundURL ? accountInfo.BackgroundURL : null
+  const logoSrc = accountInfo.LogoURL ? accountInfo.LogoURL : null
 
   res.render('pdfInvoice', {
     title: 'PDF請求書',
@@ -258,8 +258,8 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
   }
   // 企業ロゴ取得
   let logo
-  if (accountInfo.BackgroundURL) {
-    const response = await axios.get(accountInfo.BackgroundURL, { responseType: 'arraybuffer' })
+  if (accountInfo.LogoURL) {
+    const response = await axios.get(accountInfo.LogoURL, { responseType: 'arraybuffer' })
     const buffer = Buffer.from(response.data, 'utf-8')
     const fileType = await FileType.fromBuffer(buffer)
     console.log('==  fileType  ===================: ', fileType)
@@ -352,8 +352,8 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
 
   // 企業ロゴ取得
   let logo
-  if (accountInfo.BackgroundURL) {
-    const response = await axios.get(accountInfo.BackgroundURL, { responseType: 'arraybuffer' })
+  if (accountInfo.LogoURL) {
+    const response = await axios.get(accountInfo.LogoURL, { responseType: 'arraybuffer' })
     const buffer = Buffer.from(response.data, 'utf-8')
     const fileType = await FileType.fromBuffer(buffer)
     console.log('==  fileType  ===================: ', fileType)

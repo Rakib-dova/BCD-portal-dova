@@ -231,6 +231,10 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
     .line-subtotal {
       text-align: right;
     }
+
+    pre {
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -307,46 +311,24 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
       <div class="column width-50">
         <div class="flex">
           <p class="text-l width-50">小計（税抜）</p>
-          <p class="text-r width-50" id="subTotal">${input.taxTotal}</p>
+          <p class="text-r width-50" id="subTotal">${input.subTotal.toLocaleString()}</p>
         </div>
         ${setTaxGroup(input.taxGroups)}
         <div class="flex">
           <p class="text-l width-50 font-bold">合計 ￥</p>
-          <p class="text-r width-50 font-bold" id="total">${input.total}</p>
+          <p class="text-r width-50 font-bold" id="total">${input.total.toLocaleString()}</p>
         </div>
         <div class="flex">
           <p class="text-l">税額合計 ￥</p>
-          <p class="text-l" id="taxTotal">${input.taxTotal}</p>
+          <p class="text-l" id="taxTotal">${input.taxTotal.toLocaleString()}</p>
         </div>
       </div>
     </div>
-    <p class="font-bold width-100 mr-075">支払い条件と手段</p>
+    ${(input.bankName && input.bankName && input.bankName && input.bankName && input.bankName) ? '<p class="font-bold width-100 mr-075">支払い条件と手段</p>' :  ''}
     <div class="columns">
       <div class="column text-l width-50">
-        <p class="font-bold">銀行口座情報</p>
-        <div>
-          <div class="flex">
-            <p class="width-30">銀行名</p>
-            <p id="invoice-bankName">${input.bankName}</p>
-          </div>
-          <div class="flex">
-            <p class="width-30">支店名</p>
-            <p id="invoice-branchName">${input.branchName}</p>
-          </div>
-          <div class="flex">
-            <p class="width-30">科目</p>
-            <p id="invoice-accountType">${input.accountType}</p>
-          </div>
-          <div class="flex">
-            <p class="width-30">口座番号</p>
-            <p id="invoice-accountNumber">${input.accountNumber}</p>
-          </div>
-          <div class="flex">
-            <p class="width-30">口座名義</p>
-            <p id="invoice-accountName">${input.accountName}</p>
-          </div>
-        </div>
-      </div>
+        ${setPayment(input)}
+      </div> 
       <div class="column width-50">
         <p class="font-bold">備考</p>
         <pre id="invoice-note">${input.note}</pre>
@@ -381,6 +363,35 @@ const padOptionProps = (input) => {
   }
 }
 
+const setPayment = (input) => {
+  if (!input.bankName || !input.bankName || !input.bankName || !input.bankName || !input.bankName) return ''
+
+  return `
+    <p class="font-bold">銀行口座情報</p>
+    <div>
+      <div class="flex">
+        <p class="width-30">銀行名</p>
+        <p id="invoice-bankName">${input.bankName}</p>
+      </div>
+      <div class="flex">
+        <p class="width-30">支店名</p>
+        <p id="invoice-branchName">${input.branchName}</p>
+      </div>
+      <div class="flex">
+        <p class="width-30">科目</p>
+        <p id="invoice-accountType">${input.accountType}</p>
+      </div>
+      <div class="flex">
+        <p class="width-30">口座番号</p>
+        <p id="invoice-accountNumber">${input.accountNumber}</p>
+      </div>
+      <div class="flex">
+        <p class="width-30">口座名義</p>
+        <p id="invoice-accountName">${input.accountName}</p>
+      </div>
+    </div>`
+}
+
 /**
  * 明細タグ生成
  *
@@ -399,11 +410,11 @@ const setLines = (lines) => {
         <td class="text-center">
           <p class="line-lineDiscription" data-prop="lineDiscription">${line.lineDiscription}</p>
         </td>
-        <td class="text-center"><p class="line-quantity" data-prop="quantity">${line.quantity}</p></td>
+        <td class="text-center"><p class="line-quantity" data-prop="quantity">${parseFloat(line.quantity).toLocaleString()}</p></td>
         <td class="text-center"><p class="line-unit" data-prop="unit">${line.unit}</p></td>
-        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">${line.unitPrice}</p></td>
+        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">${parseInt(line.unitPrice).toLocaleString()}</p></td>
         <td class="text-center"><p class="line-taxType" data-prop="taxType">${getTaxTypeName(line.taxType)}</p></td>
-        <td class="text-right line-subtotal"><p class="line-subtotal" data-prop="subtotal">${subTotal}</p></td>
+        <td class="text-right line-subtotal"><p class="line-subtotal" data-prop="subtotal">${subTotal.toLocaleString()}</p></td>
       </tr>`
   })
   return tags
@@ -421,8 +432,8 @@ const setTaxGroup = (taxGroups) => {
   taxGroups.forEach((group) => {
     const taxRate = group.type.replace('tax', '').replace('p', '')
     tags += `<div class="flex">
-               <p class="text-l width-50 taxGroupLabel">${group.subTotal}円のJP 消費税 ${taxRate}%</p>
-               <p class="text-r width-50 taxGroupValue">${group.taxGroupTotal}</p>
+               <p class="text-l width-50 taxGroupLabel">${group.subTotal.toLocaleString()}円のJP 消費税 ${taxRate}%</p>
+               <p class="text-r width-50 taxGroupValue">${group.taxGroupTotal.toLocaleString()}</p>
             </div>`
   })
 

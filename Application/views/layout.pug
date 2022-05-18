@@ -23,7 +23,10 @@ html
               span.fas.fa-home
                 | Home
           .navbar-item.right
-            img.ncom-logo(src='../image/ts-app-digitaltrade-ncom-logo.svg')
+            if title && (title === 'PDF請求書編集' || title === 'PDF請求書')
+              img.ncom-logo(src='../../image/ts-app-digitaltrade-ncom-logo.svg')
+            else
+              img.ncom-logo(src='../image/ts-app-digitaltrade-ncom-logo.svg')
     
     block vars
       - var inputPattarnZenkakuHiragana = '^[^ -~｡-ﾟ\t]+$' // 全角ひらがな
