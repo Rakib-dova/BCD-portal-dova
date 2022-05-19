@@ -1095,8 +1095,8 @@ class InvoiceDetail {
           discountObject['割引-数量'] = item.MultiplierFactorNumeric.value * 100
           discountObject['割引-単位'] = '%'
         } else {
-          discountObject['割引-数量'] = 1
-          discountObject['割引-単位'] = 1
+          discountObject['割引-数量'] = ' '
+          discountObject['割引-単位'] = ' '
         }
         discountObject['割引-税（消費税／軽減税率／不課税／免税／非課税）'] = `${item.TaxCategory[0].Percent.value}%`
         discountObject['割引-小計（税抜）'] = '-' + item.Amount.value.toLocaleString('ja-JP')
@@ -1107,11 +1107,13 @@ class InvoiceDetail {
         chargeObject['割引-項目ID'] = '追加料金'
         chargeObject['割引-内容'] = item.AllowanceChargeReason.value
         if (item.MultiplierFactorNumeric.value !== 1) {
+          console.log(item)
           chargeObject['割引-数量'] = item.MultiplierFactorNumeric.value * 100
           chargeObject['割引-単位'] = '%'
         } else {
-          chargeObject['割引-数量'] = 1
-          chargeObject['割引-単位'] = 1
+          console.log(item)
+          chargeObject['割引-数量'] = ' '
+          chargeObject['割引-単位'] = ' '
         }
         chargeObject['割引-税（消費税／軽減税率／不課税／免税／非課税）'] = `${item.TaxCategory[0].Percent.value}%`
         chargeObject['割引-小計（税抜）'] = item.Amount.value.toLocaleString('ja-JP')
