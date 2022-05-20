@@ -682,7 +682,7 @@ class InvoiceDetail {
           } else {
             meisaiDetailObject.item = '割引'
           }
-          meisaiDetailObject.value = ac.AllowanceChargeReason.value
+          meisaiDetailObject.value = ac.AllowanceChargeReason?.value ?? ''
           meisaiDetail.push(meisaiDetailObject)
         })
       }
@@ -1020,7 +1020,7 @@ class InvoiceDetail {
             costArr.push('-' + ac.Amount.value.toLocaleString('ja-JP'))
           }
           meisai.allowanceCharge.push({
-            allowanceChargeReason: ac.AllowanceChargeReason.value,
+            allowanceChargeReason: ac.AllowanceChargeReason?.value ?? '',
             multiplierFactorNumeric: `${ac.MultiplierFactorNumeric.value * 100}%`,
             sequenceNumeric: ac.SequenceNumeric,
             amount: (~~`${ac.ChargeIndicator.value ? 1 : -1}` * ac.Amount.value).toLocaleString('ja-JP'),
@@ -1142,7 +1142,7 @@ class InvoiceDetail {
           case 'Z':
             this.allowanceCharge.push({
               allowanceChargeIndicator: item.ChargeIndicator.value,
-              allowanceChargeReason: item.AllowanceChargeReason.value,
+              allowanceChargeReason: item.AllowanceChargeReason?.value ?? '',
               multiplierFactorNumeric: `${item.MultiplierFactorNumeric.value * 100}%`,
               percent: `${item.TaxCategory[0].Percent.value}%`,
               amount: (~~`${item.ChargeIndicator.value ? 1 : -1}` * item.Amount.value).toLocaleString('ja-JP'),
@@ -1155,7 +1155,7 @@ class InvoiceDetail {
           default:
             this.allowanceCharge.push({
               allowanceChargeIndicator: item.ChargeIndicator.value,
-              allowanceChargeReason: item.AllowanceChargeReason.value,
+              allowanceChargeReason: item.AllowanceChargeReason?.value ?? '',
               multiplierFactorNumeric: `${item.MultiplierFactorNumeric.value * 100}%`,
               percent: `${item.TaxCategory[0].Percent.value}%`,
               amount: (~~`${item.ChargeIndicator.value ? 1 : -1}` * item.Amount.value).toLocaleString('ja-JP'),
