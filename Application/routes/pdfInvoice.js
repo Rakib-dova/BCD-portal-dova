@@ -5,6 +5,7 @@ const axios = require('axios')
 const multer = require('multer')
 const upload = multer({ storage: multer.memoryStorage() })
 const { v4: uuidV4 } = require('uuid')
+const FileType = require('file-type')
 const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const logger = require('../lib/logger')
@@ -15,7 +16,7 @@ const {
   generatePdf,
   renderInvoiceHTML
 } = require('../lib/pdfGenerator')
-const FileType = require('file-type')
+const { formatDate } = require('../lib/utils')
 
 const taxDatabase = [
   { type: 'tax10p', taxRate: 0.1 },
@@ -491,13 +492,6 @@ const getTotal = (lines, taxDatabase) => {
   })
 
   return total
-}
-
-const formatDate = (date, format) => {
-  format = format.replace(/YYYY/, date.getFullYear())
-  format = format.replace(/MM/, date.getMonth() + 1)
-  format = format.replace(/DD/, date.getDate())
-  return format
 }
 
 router.get('/list', helper.bcdAuthenticate, pdfInvoiceList)

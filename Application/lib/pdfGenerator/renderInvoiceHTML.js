@@ -221,11 +221,12 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
     #invoice-note {
       border: 1px solid;
       display: flex;
+      padding: 4px;
 
       height: 15rem;
       width: 100%;
       resize: none;
-      font-size: 16px;
+      font-size: 12px;
     }
 
     .line-subtotal {
@@ -464,16 +465,20 @@ const setImageTag = (imageBuffer, type, size = 120) => {
  */
 const getTaxTypeName = (taxType) => {
   switch (taxType) {
-    case 'freeTax':
-      return '不課税'
-    case 'dutyFree':
-      return '免税'
     case 'tax10p':
       return '消費税 10%'
     case 'tax8p':
       return '消費税 8%'
+    case 'nonTaxable':
+      return '非課税'
+    case 'untaxable':
+      return '不課税'
+    case 'taxExemption':
+      return '免税'
     case 'otherTax':
       return 'その他の消費税'
+    default:
+      return ''
   }
 }
 

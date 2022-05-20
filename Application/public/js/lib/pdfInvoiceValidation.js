@@ -95,8 +95,8 @@ const outputRules = [
     target: 'invoice',
     displayLocation: 'header',
     prop: 'recPost',
-    regexp: /[0-9]{7}/,
-    message: '宛先郵便番号は数字7桁で入力して下さい。',
+    regexp: /^[0-9]{3}-[0-9]{4}$/,
+    message: '宛先郵便番号は 数字3桁 - 数字4桁 で入力して下さい。',
     emptyMessage: '宛先郵便番号が空欄のため、宛先情報が不完全です。入力して下さい。',
     required: true
   },
@@ -172,14 +172,14 @@ const outputRules = [
     emptyMessage: '口座番号が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
   },
-  // {
-  //   target: 'invoice',
-  //   displayLocation: 'footer',
-  //   prop: 'note',
-  //   regexp: /^.{0,1500}$/,
-  //   message: '備考は1500文字以内で入力して下さい。',
-  //   required: false
-  // },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'note',
+    regexp: /^\s|\S{0,400}$/,
+    message: '備考は400文字以内で入力して下さい。',
+    required: false
+  },
 
   {
     target: 'lines',

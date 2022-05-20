@@ -1,7 +1,7 @@
 /* global
 
  taxDatabase, $, addEvent, validate, getSubTotal, getTaxGroups, getTaxTotal,
- savePdfInvoice, outputPdfInvoice, formatDate, isNumberString, saveRules, outputRules, sealImpRules, setPaymentRequired
+ savePdfInvoice, outputPdfInvoice, formatDate, isNumberString, saveRules, outputRules, getTaxTypeName, setPaymentRequired
 
 */
 let invoice = {}
@@ -112,7 +112,7 @@ function setStaticProp(invoice, lines) {
       unitPrice.textContent = parseInt(line.unitPrice).toLocaleString()
       // 税設定
       const taxType = clone.querySelector('.line-taxType')
-      taxType.textContent = getTaxTypeIndex(line.taxType)
+      taxType.textContent = getTaxTypeName(line.taxType)
       // 小計設定
       const subtotal = clone.querySelector('.line-subtotal')
       subtotal.textContent = Math.floor(line.unitPrice * line.quantity).toLocaleString()
@@ -162,12 +162,11 @@ addEvent(document, 'change', (e, target) => {
 function updateInvoiceValues(e, target) {
   const prop = target.getAttribute('data-prop')
 
-  if (prop === 'note' && target.value.length > 1500) {
-    invoice.note = target.value.substring(0, 1500)
+  if (prop === 'note' && target.value.length > 400) {
+    invoice.note = target.value.substring(0, 400)
   } else if (prop === 'note') {
     invoice.note = target.value
-  } else if (prop === 'recPost') invoice[prop] = target.value.replace('-', '')
-  else invoice[prop] = target.value
+  } else invoice[prop] = target.value
 
   console.log('==== 値更新後の invoice ====\n', invoice)
 }
@@ -201,10 +200,10 @@ function renderInvoice(target) {
       else element.value = invoice[key]
     }
 
-    if (key === 'note' && element.value.length > 1500) {
-      $('#msgCount').innerText = '1500/1500'
+    if (key === 'note' && element.value.length > 400) {
+      $('#msgCount').innerText = '400/400'
     } else if (key === 'note') {
-      $('#msgCount').innerText = '(' + element.value.length + '/1500)'
+      $('#msgCount').innerText = '(' + element.value.length + '/400)'
     }
   }
 }
@@ -394,16 +393,18 @@ function getTaxTypeIndex(taxType) {
   switch (taxType) {
     case '':
       return 0
-    case 'freeTax':
-      return 1
-    case 'dutyFree':
-      return 2
     case 'tax10p':
-      return 3
+      return 1
     case 'tax8p':
+      return 2
+    case 'nonTaxable':
+      return 3
+    case 'untaxable':
       return 4
-    case 'otherTax':
+    case 'taxExemption':
       return 5
+    case 'otherTax':
+      return 6
   }
 }
 

@@ -41,6 +41,32 @@ function addEvent(node, type, callback) {
   }
 }
 
+/**
+ * 消費税区名分取得
+ *
+ * @param {string} taxType 消費税区分文字列
+ * @returns {string} 消費税区名 (日本語)
+ */
+// eslint-disable-next-line no-unused-vars
+function getTaxTypeName(taxType) {
+  switch (taxType) {
+    case 'tax10p':
+      return '消費税 10%'
+    case 'tax8p':
+      return '消費税 8%'
+    case 'nonTaxable':
+      return '非課税'
+    case 'untaxable':
+      return '不課税'
+    case 'taxExemption':
+      return '免税'
+    case 'otherTax':
+      return 'その他の消費税'
+    default:
+      return ''
+  }
+}
+
 // eslint-disable-next-line no-unused-vars
 function getSubTotal(lines) {
   let total = 0
