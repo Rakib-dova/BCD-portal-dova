@@ -1,6 +1,9 @@
 'use strict'
 const express = require('express')
 const router = express.Router()
+const fs = require('fs')
+const path = require('path')
+
 const axios = require('axios')
 const multer = require('multer')
 const upload = multer({ storage: multer.memoryStorage() })
@@ -8,13 +11,19 @@ const { v4: uuidV4 } = require('uuid')
 const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const logger = require('../lib/logger')
+const validation = require('../lib/pdfInvoiceCsvUpdateValidation')
 const constantsDefine = require('../constants')
 const csvupload = require('../routes/csvupload')
 
 const apiManager = require('../controllers/apiManager')
-const pdfInvoiceController = require('../controllers/pdfInvoiceController.js')
+const csvUploadController = require('../controllers/pdfInvoiceCsvUploadController.js')
 const { generatePdf, renderInvoiceHTML } = require('../lib/pdfGenerator')
 const FileType = require('file-type')
+
+const filePath = process.env.INVOICE_UPLOAD_PATH
+const { v4: uuidv4 } = require('uuid')
+const { TRUE } = require('node-sass')
+const { join } = require('path')
 
 const pdfInvoiceCsvUploadIndex = async (req, res, next) => {
   if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
@@ -29,82 +38,95 @@ const pdfInvoiceCsvUploadIndex = async (req, res, next) => {
 }
 
 const pdfInvoiceCsvUpload = async (req, res, next) => {
+  const functionName = 'pdfInvoiceCsvUpload'
   if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
-  logger.info(constantsDefine.logMessage.INF000 + 'pdfInvoiceCsvUpload')
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
 
-  // CSVfile 読み込む
-  const filename = req.user.tenantId + '_' + req.user.email + '_' + csvupload.getTimeStamp() + '.csv'
-  const uploadCsvData = Buffer.from(decodeURIComponent(req.body.fileData), 'base64').toString('utf8')
+  // csvファイル
+  const uploadFileData = req.file.buffer.toString('UTF-8')
   const userToken = {
     accessToken: req.user.accessToken,
     refreshToken: req.user.refreshToken
   }
 
-  // エラーメッセージを格納
-  let errorText = constantsDefine.statusConstants.SUCCESS
-  // ネットワークテナントID取得時エラー確認
-  let getNetworkErrFlag = false
+  // メッセージを格納
+  let message = constantsDefine.statusConstants.SUCCESS
+  let isErr = false
 
-  // csvアップロード
-  if (cbUploadCsv(filePath, filename, uploadCsvData) === false) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
-  }
+  // DB登録
+  // const resultInvoice = await csvUploadController.insert({
+  //   invoicesId: uuidv4(),
+  //   tenantId: req.user.tenantId,
+  //   csvFileName: req.body.filename,
+  //   successCount: '-',
+  //   failCount: '-',
+  //   skipCount: '-'
+  // })
 
-  const resultInvoice = await invoiceController.insert({
-    invoicesId: uuidv4(),
-    tenantId: req.user.tenantId,
-    csvFileName: req.body.filename,
-    successCount: '-',
-    failCount: '-',
-    skipCount: '-'
-  })
+  // if (!resultInvoice?.dataValues) {
+  //   logger.info(`${constantsDefine.logMessage.DBINF001}${functionName}`)
+  // }
 
-  if (!resultInvoice?.dataValues) {
-    logger.info(`${constantsDefine.logMessage.DBINF001}${functionName}`)
-  }
-
-  // ネットワークが紐づいているテナントid検索
-  BconCsv.prototype.companyNetworkConnectionList = await getNetwork(req)
-
-  // ネットワークが紐づいているテナントid確認
-  if (validate.isUndefined(BconCsv.prototype.companyNetworkConnectionList)) {
-    getNetworkErrFlag = false
-    errorText = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
-  } else {
-    getNetworkErrFlag = true
-    // ヘッダがない場合
-    BconCsvNoHeader.prototype.companyNetworkConnectionList = BconCsv.prototype.companyNetworkConnectionList
-  }
-
-  if (getNetworkErrFlag) {
-    // csvからデータ抽出
-    switch (await cbExtractInvoice(filePath, filename, userToken, resultInvoice?.dataValues, req, res)) {
-      case 101:
-        errorText = constantsDefine.statusConstants.INVOICE_FAILED
-        break
-      case 102:
-        errorText = constantsDefine.statusConstants.OVER_SPECIFICATION
-        break
-      case 103:
-        errorText = constantsDefine.statusConstants.OVERLAPPED_INVOICE
-        break
-      case 104:
-        errorText = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
-        break
-      default:
-        break
-    }
-  }
-  // csv削除
-  if (cbRemoveCsv(filePath, filename) === false) {
-    setErrorLog(req, 500)
-    return res.status(500).send(constantsDefine.statusConstants.SYSTEMERRORMESSAGE)
+  switch (await uploadPDFInvoice(uploadFileData, userToken, req, res)) {
+    case 101:
+      isErr = true
+      message = constantsDefine.statusConstants.INVOICE_FAILED
+      break
+    case 102:
+      isErr = true
+      message = constantsDefine.statusConstants.OVER_SPECIFICATION
+      break
+    case 103:
+      isErr = true
+      message = constantsDefine.statusConstants.OVERLAPPED_INVOICE
+      break
+    case 104:
+      isErr = true
+      message = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
+      break
+    default:
+      break
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
 
-  return res.status(200).send(errorText)
+  if (isErr) {
+    // 結果一覧画面に遷移
+    // return res.redirect('pdfInvoiceCsvUpload/resultList', message)
+  } else {
+    // ドラフト一覧画面に遷移
+    return res.redirect('pdfInvoices/list', message)
+  }
+}
+
+const uploadPDFInvoice = async (uploadFileData, _user, _req, _res) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'uploadPDFInvoice')
+
+  let uploadData = null
+  let defaultCsvData = null
+
+  // ファイルから請求書一括作成の時エラー例外
+  try {
+    // テンプレートファイル
+    const defaultCsvPath = path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv')
+    defaultCsvData = fs.readFileSync(defaultCsvPath, 'utf8')
+
+    const uploadList = uploadFileData.split(/ \n|\r/)
+    logger.info(uploadList)
+
+    const result = validation.validate(uploadList, defaultCsvData)
+
+    logger.info('==================')
+    logger.info(result)
+
+    // アップロードデータの配列
+    // uploadList = setRows(uploadData)
+  } catch (error) {
+    logger.error({ stack: error.stack }, error.name)
+    return 104
+  }
+
+  return 100
 }
 
 const pdfInvoiceCsvUploadResult = async (req, res, next) => {
@@ -163,8 +185,8 @@ const pdfInvoiceCsvUploadResult = async (req, res, next) => {
 }
 
 router.get('/', helper.bcdAuthenticate, pdfInvoiceCsvUploadIndex)
-router.get('/upload', helper.bcdAuthenticate, pdfInvoiceCsvUpload)
-router.get('/result', helper.bcdAuthenticate, pdfInvoiceCsvUploadResult)
+router.post('/upload', helper.bcdAuthenticate, upload.single('csvFile'), pdfInvoiceCsvUpload)
+router.get('/resultList', helper.bcdAuthenticate, pdfInvoiceCsvUploadResult)
 
 module.exports = {
   router,

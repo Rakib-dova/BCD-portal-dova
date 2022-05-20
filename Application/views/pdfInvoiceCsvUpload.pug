@@ -36,7 +36,7 @@ block content
                 p 4.「アップロード開始」ボタンをクリック
         .mt-1.space-between
           a.button.is-link.is-light.has-text-left(href='/pdfInvoices/list') ← ドラフト一覧 
-          a.button.is-link.is-light.has-text-right(href='/pdfInvoiceCsvUpload/result') 取込結果一覧 →
+          a.button.is-link.is-light.has-text-right(href='/pdfInvoiceCsvUpload/resultList') 取込結果一覧 →
 
       .modal.modal-fx-fadeInscale#upload-progress-modal
           .modal-background
@@ -53,5 +53,5 @@ block content
 block append scripts
   script(src="/js/portal-page.js")
   // End of DigitalTrade Portal Page
-  script(src="/js/upload-page.js") 
+  script(src="/js/pdf-csv-upload-page.js") 
   // CSV アップロード
