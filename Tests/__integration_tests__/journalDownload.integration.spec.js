@@ -69,8 +69,8 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
-      expect(res.text).toMatch(/デフォルト/i) // デフォルトのドロップボックスがあること
-      expect(res.text).toMatch(/弥生会計（05以降）/i) // 弥生会計（05以降）ドロップボックスがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：登録申込、利用可能', async () => {
@@ -85,8 +85,8 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
-      expect(res.text).toMatch(/デフォルト/i) // デフォルトのドロップボックスがあること
-      expect(res.text).toMatch(/弥生会計（05以降）/i) // 弥生会計（05以降）ドロップボックスがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
   })
 
@@ -109,8 +109,8 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
-      expect(res.text).toMatch(/デフォルト/i) // デフォルトのドロップボックスがあること
-      expect(res.text).toMatch(/弥生会計（05以降）/i) // 弥生会計（05以降）ドロップボックスがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：登録受付、利用可能', async () => {
@@ -125,8 +125,8 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
-      expect(res.text).toMatch(/デフォルト/i) // デフォルトのドロップボックスがあること
-      expect(res.text).toMatch(/弥生会計（05以降）/i) // 弥生会計（05以降）ドロップボックスがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
   })
 
@@ -149,8 +149,8 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
-      expect(res.text).toMatch(/デフォルト/i) // デフォルトのドロップボックスがあること
-      expect(res.text).toMatch(/弥生会計（05以降）/i) // 弥生会計（05以降）ドロップボックスがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：契約中、利用可能', async () => {
@@ -165,8 +165,8 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
-      expect(res.text).toMatch(/デフォルト/i) // デフォルトのドロップボックスがあること
-      expect(res.text).toMatch(/弥生会計（05以降）/i) // 弥生会計（05以降）ドロップボックスがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
   })
 
@@ -189,8 +189,8 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
-      expect(res.text).toMatch(/デフォルト/i) // デフォルトのドロップボックスがあること
-      expect(res.text).toMatch(/弥生会計（05以降）/i) // 弥生会計（05以降）ドロップボックスがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：変更申込、利用可能', async () => {
@@ -205,8 +205,8 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
-      expect(res.text).toMatch(/デフォルト/i) // デフォルトのドロップボックスがあること
-      expect(res.text).toMatch(/弥生会計（05以降）/i) // 弥生会計（05以降）ドロップボックスがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
   })
 
@@ -229,8 +229,8 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
-      expect(res.text).toMatch(/デフォルト/i) // デフォルトのドロップボックスがあること
-      expect(res.text).toMatch(/弥生会計（05以降）/i) // 弥生会計（05以降）ドロップボックスがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：変更受付、利用可能', async () => {
@@ -245,8 +245,8 @@ describe('仕訳情報ダウンロードのインテグレーションテスト'
       expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
       expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
-      expect(res.text).toMatch(/デフォルト/i) // デフォルトのドロップボックスがあること
-      expect(res.text).toMatch(/弥生会計（05以降）/i) // 弥生会計（05以降）ドロップボックスがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
   })
 
