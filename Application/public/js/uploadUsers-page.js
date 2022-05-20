@@ -14,7 +14,7 @@ const $ = (_selector) => {
 }
 
 // 「アップロード開始」ボタンの活性化のスイッチ
-document.getElementsByName('bulkSubAccountCode')[0].addEventListener('change', function (e) {
+document.getElementsByName('userNameFileUpload')[0].addEventListener('change', function (e) {
   targetFile = this.files.item(0)
   if (targetFile !== null) {
     fileReader = new FileReader()

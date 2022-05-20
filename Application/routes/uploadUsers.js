@@ -57,7 +57,7 @@ const cbGetIndex = async (req, res, next) => {
     procedureComment2Children: [
       'A列：メールアドレス',
       'B列：ロール(数字)',
-      '※1ファイルで作成できるユーザーデータの数は００まで',
+      '※1ファイルで作成できるユーザーデータの数は19769件まで',
       '※文字コードはUTF-8 BOM付で作成してください'
     ],
     procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
@@ -72,7 +72,7 @@ const cbGetIndex = async (req, res, next) => {
     cautionForSelectedFile: 'ファイルを選択してください。',
     accountCodeUpload: '/uploadUsers',
     procedureContents: procedureContents,
-    formatFileLocation: '../html/ユーザー括作成フォーマット.csv',
+    formatFileLocation: '../html/ユーザー一括作成フォーマット.csv',
     formatFileLinkText: 'アップロード用CSVファイルダウンロード'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -136,7 +136,7 @@ const cbPostIndex = async (req, res, next) => {
     switch (status) {
       // 正常
       case 0:
-        resultMessage = '勘定科目取込が完了しました。'
+        resultMessage = 'ユーザー一括登録に成功しました。'
         flashParams = ['info', resultMessage]
         break
       // ヘッダー不一致
@@ -146,6 +146,7 @@ const cbPostIndex = async (req, res, next) => {
         break
     }
   }
+
   logger.info(constantsDefine.logMessage.INF001 + 'uploadUsers.cbPostIndex')
   req.flash(flashParams[0], flashParams[1])
   res.redirect('/uploadUsers')
