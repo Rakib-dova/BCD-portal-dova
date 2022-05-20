@@ -33,7 +33,7 @@ const upload = (passport, contract, nominalList) => {
 
 const readNominalList = (pwdFile) => {
   const formatBaseCamp = './public/html'
-  const formatName = 'ユーザー括作成フォーマット.csv'
+  const formatName = 'ユーザー一括作成フォーマット.csv'
   const basecamp = path.resolve(formatBaseCamp, formatName)
   const result = {
     status: 1,
