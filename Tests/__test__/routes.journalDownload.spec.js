@@ -218,7 +218,12 @@ describe('journalDownloadのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでjournalDownloadが呼ばれ「る」
-      const serviceDataFormatName = ['デフォルト', '弥生会計（05以降）', '勘定奉行', 'PCA（version 7）']
+      const serviceDataFormatName = [
+        '既定フォーマット（デジタルトレードフォーマット）',
+        '弥生会計',
+        '勘定奉行クラウド',
+        'PCA hyper'
+      ]
       expect(response.render).toHaveBeenCalledWith('journalDownload', {
         title: '仕訳情報ダウンロード',
         minissuedate: minissuedate,
@@ -4781,7 +4786,7 @@ describe('journalDownloadのテスト', () => {
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
 
-      const filename = encodeURIComponent('請求書_弥生会計（05以降）.csv')
+      const filename = encodeURIComponent('請求書_弥生会計.csv')
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -4832,7 +4837,7 @@ describe('journalDownloadのテスト', () => {
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
 
-      const filename = encodeURIComponent('請求書_弥生会計（05以降）.csv')
+      const filename = encodeURIComponent('請求書_弥生会計.csv')
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -4886,7 +4891,7 @@ describe('journalDownloadのテスト', () => {
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
 
-      const filename = encodeURIComponent('請求書_勘定奉行.csv')
+      const filename = encodeURIComponent('請求書_勘定奉行クラウド.csv')
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -4941,7 +4946,7 @@ describe('journalDownloadのテスト', () => {
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
 
-      const filename = encodeURIComponent('請求書_勘定奉行.csv')
+      const filename = encodeURIComponent('請求書_勘定奉行クラウド.csv')
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -4995,7 +5000,7 @@ describe('journalDownloadのテスト', () => {
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
 
-      const filename = encodeURIComponent('請求書_PCA（version 7）.csv')
+      const filename = encodeURIComponent('請求書_PCA hyper.csv')
 
       // 期待結果
       // userContextがLoggedInになっている
@@ -5050,7 +5055,7 @@ describe('journalDownloadのテスト', () => {
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
 
-      const filename = encodeURIComponent('請求書_PCA（version 7）.csv')
+      const filename = encodeURIComponent('請求書_PCA hyper.csv')
 
       // 期待結果
       // userContextがLoggedInになっている
