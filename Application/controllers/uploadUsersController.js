@@ -50,7 +50,8 @@ const readNominalList = (pwdFile) => {
 
   if (header === fomatFile) {
     result.status = 0
-    result.data = data
+    result.data = data.split(/\r?\n|\r/)
+    result.data.shift()
   } else {
     result.status = -1
   }
