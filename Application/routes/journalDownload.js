@@ -17,7 +17,12 @@ const journalDownloadController = require('../controllers/journalDownloadControl
 const iconv = require('iconv-lite')
 
 const notiTitle = '請求書ダウンロード'
-const serviceDataFormatName = ['デフォルト', '弥生会計（05以降）', '勘定奉行', 'PCA（version 7）']
+const serviceDataFormatName = [
+  '既定フォーマット（デジタルトレードフォーマット）',
+  '弥生会計',
+  '勘定奉行クラウド',
+  'PCA hyper'
+]
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -389,7 +394,7 @@ const cbPostIndex = async (req, res, next) => {
         jsonLog = {
           tenantId: req.user.tenantId,
           action: 'downloadedJournalInfo',
-          downloadedJournalCount: (invoiceArray.length - 2) > 0 ? (invoiceArray.length - 2) : undefined,
+          downloadedJournalCount: invoiceArray.length - 2 > 0 ? invoiceArray.length - 2 : undefined,
           finalApproved: chkFinalapproval
         }
         logger.info(jsonLog)
