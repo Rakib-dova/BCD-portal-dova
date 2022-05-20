@@ -155,6 +155,190 @@ describe('inboxのテスト', () => {
       })
     })
 
+    test('正常：割引がある場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // inboxControllerのgetInvoiceDetail実施結果設定
+      const dummyDocument = require('../mockInvoice/invoice42')
+      const dummyData = new InvoiceDetail(dummyDocument, [])
+      inboxControllerSpy.mockReturnValue(dummyData)
+
+      // 試験実施
+      await inbox.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('readonlyInbox', {
+        ...dummyData,
+        optionLine1: createOptions(1, dummyData.options),
+        optionLine2: createOptions(2, dummyData.options),
+        optionLine3: createOptions(3, dummyData.options),
+        optionLine4: createOptions(4, dummyData.options),
+        optionLine5: createOptions(5, dummyData.options),
+        optionLine6: createOptions(6, dummyData.options),
+        optionLine7: {},
+        optionLine8: {},
+        documentId: request.params.invoiceId
+      })
+    })
+
+    test('正常：追加料金がある場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // inboxControllerのgetInvoiceDetail実施結果設定
+      const dummyDocument = require('../mockInvoice/invoice43')
+      const dummyData = new InvoiceDetail(dummyDocument, [])
+      inboxControllerSpy.mockReturnValue(dummyData)
+
+      // 試験実施
+      await inbox.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('readonlyInbox', {
+        ...dummyData,
+        optionLine1: createOptions(1, dummyData.options),
+        optionLine2: createOptions(2, dummyData.options),
+        optionLine3: createOptions(3, dummyData.options),
+        optionLine4: createOptions(4, dummyData.options),
+        optionLine5: createOptions(5, dummyData.options),
+        optionLine6: createOptions(6, dummyData.options),
+        optionLine7: {},
+        optionLine8: {},
+        documentId: request.params.invoiceId
+      })
+    })
+
+    test('正常：割引・追加料金がある場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // inboxControllerのgetInvoiceDetail実施結果設定
+      const dummyDocument = require('../mockInvoice/invoice44')
+      const dummyData = new InvoiceDetail(dummyDocument, [])
+      inboxControllerSpy.mockReturnValue(dummyData)
+
+      // 試験実施
+      await inbox.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('readonlyInbox', {
+        ...dummyData,
+        optionLine1: createOptions(1, dummyData.options),
+        optionLine2: createOptions(2, dummyData.options),
+        optionLine3: createOptions(3, dummyData.options),
+        optionLine4: createOptions(4, dummyData.options),
+        optionLine5: createOptions(5, dummyData.options),
+        optionLine6: createOptions(6, dummyData.options),
+        optionLine7: {},
+        optionLine8: {},
+        documentId: request.params.invoiceId
+      })
+    })
+
+    test('正常：割引・追加料金に内容・税がない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.params = {
+        invoiceId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      // inboxControllerのgetInvoiceDetail実施結果設定
+      const dummyDocument = require('../mockInvoice/invoice45')
+      const dummyData = new InvoiceDetail(dummyDocument, [])
+      inboxControllerSpy.mockReturnValue(dummyData)
+
+      // 試験実施
+      await inbox.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('readonlyInbox', {
+        ...dummyData,
+        optionLine1: createOptions(1, dummyData.options),
+        optionLine2: createOptions(2, dummyData.options),
+        optionLine3: createOptions(3, dummyData.options),
+        optionLine4: createOptions(4, dummyData.options),
+        optionLine5: createOptions(5, dummyData.options),
+        optionLine6: createOptions(6, dummyData.options),
+        optionLine7: {},
+        optionLine8: {},
+        documentId: request.params.invoiceId
+      })
+    })
+
     test('正常：解約申込中の場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
