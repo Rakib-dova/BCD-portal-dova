@@ -176,7 +176,7 @@ const readNominalList = (pwdFile) => {
     result.status = -1
   }
 
-  if (result.data[result.data.length - 1].length === 0) {
+  if (result.data !== null && result.data[result.data.length - 1].length === 0) {
     result.data.pop()
   }
 
