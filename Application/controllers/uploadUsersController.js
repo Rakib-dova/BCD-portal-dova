@@ -4,8 +4,11 @@ const fs = require('fs')
 const path = require('path')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
+const TradeshiftDTO = require('../DTO/TradeshiftDTO')
+const UploadUsersDTO = require('../DTO/UploadUsersDTO')
 
-const upload = (passport, contract, nominalList) => {
+const upload = async (passport, contract, nominalList) => {
+  const tradeshiftDTO = new TradeshiftDTO(passport.accessToken, passport.refreshToken, contract.tenantId)
   const destination = nominalList.destination
   const fileName = nominalList.filename
   const pwdFile = path.resolve(destination, fileName)
@@ -19,6 +22,80 @@ const upload = (passport, contract, nominalList) => {
     return error
   }
 
+  const product = UploadUsersDTO.factory(contract, result.data)
+  const resultCreatedUser = []
+  for (const register of product) {
+    // ユーザー検索
+    // const response = await tradeshiftDTO.getUserInformationByEmail(username)
+    const response = await tradeshiftDTO.getUserInformationByEmail(register.Username)
+
+    if (response instanceof Error) {
+      resultCreatedUser.push({
+        username: register.Username,
+        role: register.RoleId,
+        status: 'Error',
+        stack: response.stack
+      })
+      logger.error({ contractId: contract.contractId, stack: response.stack, status: 0 })
+      continue
+    }
+
+    // ユーザー新規作成
+    if (response === register.Username) {
+      const registerResponse = await tradeshiftDTO.registUser(register)
+      resultCreatedUser.push({
+        username: registerResponse.Username,
+        role: registerResponse.RoleId,
+        status: registerResponse.State,
+        stack: null
+      })
+      continue
+    }
+
+    // 既存ユーザーがあって、重複された場合
+    if (response.CompanyAccountId === register.CompanyAccountId) {
+      resultCreatedUser.push({
+        username: register.Username,
+        role: register.RoleId,
+        status: 'Duplicated',
+        stack: null
+      })
+      continue
+    } else {
+      register.Id = response.Id
+      register.CompanyAccountId = response.CompanyAccountId
+      const invitedResponse = await tradeshiftDTO.inviteUser(register)
+
+      if (invitedResponse instanceof Error) {
+        resultCreatedUser.push({
+          username: register.Username,
+          role: register.RoleId,
+          status: 'Invited Api Error',
+          stack: response.stack
+        })
+        continue
+      }
+
+      if (invitedResponse === register.RoleId) {
+        resultCreatedUser.push({
+          username: register.Username,
+          role: register.RoleId,
+          status: 'Invited',
+          stack: null
+        })
+        continue
+      } else {
+        resultCreatedUser.push({
+          username: register.Username,
+          role: register.RoleId,
+          status: 'Invited Error',
+          stack: null
+        })
+        continue
+      }
+    }
+  }
+
   // 読み込んだファイル削除
   const deleteResult = removeFile(pwdFile)
   if (deleteResult instanceof Error) {
@@ -28,7 +105,7 @@ const upload = (passport, contract, nominalList) => {
     return error
   }
 
-  return result.status
+  return [result.status, resultCreatedUser]
 }
 
 const readNominalList = (pwdFile) => {

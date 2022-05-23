@@ -4,6 +4,20 @@ class TradeshiftDTO {
     this.refreshToken = refreshToken
     this.tenantId = tenantId
     this.apiManager = require('../controllers/apiManager').accessTradeshift
+    this.init()
+  }
+
+  init() {
+    this.method = 'get'
+    this.uri = ''
+    this.body = {}
+    this.config = {
+      headers: {
+        'Content-Type': 'x-www-form-urlencoded',
+        Accept: 'application/json',
+        Authorization: `Bearer ${this.accessToken}`
+      }
+    }
   }
 
   /**
@@ -243,6 +257,68 @@ class TradeshiftDTO {
     return tagsResult
   }
 
+  async getUserInformationByEmail(email) {
+    this.method = 'post'
+    this.uri = `/users?username=${encodeURIComponent(email)}`
+
+    const response = await this.run()
+
+    if (response instanceof Error) {
+      if (response.response.status === 404) {
+        return email
+      } else {
+        return response
+      }
+    }
+
+    return response
+  }
+
+  /**
+   *
+   * @param {object} userAccount
+   * @returns
+   */
+  async registUser(userAccount) {
+    this.method = 'put'
+    this.uri = `/account/users/${userAccount.Id}`
+    this.config.headers['Content-Type'] = 'application/json'
+    this.body = userAccount
+
+    const response = await this.run()
+
+    if (response instanceof Error) {
+      if (response.response.status === 403) {
+        return response.response.data
+      } else {
+        return response
+      }
+    }
+
+    return response
+  }
+
+  async inviteUser(userAccount) {
+    this.method = 'put'
+    this.uri = `/account/users/${userAccount.Id}/role`
+    // this.body[userAccount.RoleId] = ''
+
+    // this.config.data = {}
+    this.body[userAccount.RoleId] = ''
+
+    const response = await this.run()
+
+    if (response instanceof Error) {
+      if (response.response.status === 403) {
+        return response.response.data
+      } else {
+        return response
+      }
+    }
+
+    return response
+  }
+
   getQuery(key, values) {
     const qs = require('qs')
     const queryObj = {}
@@ -258,7 +334,20 @@ class TradeshiftDTO {
     return query
   }
 
-  async accessTradeshift(method, uri) {
+  async run() {
+    const result = await this.apiManager(
+      this.accessToken,
+      this.refreshToken,
+      this.method,
+      this.uri,
+      this.body,
+      this.config
+    )
+    this.init()
+    return result
+  }
+
+  async accessTradeshift(method, uri, data) {
     return await this.apiManager(this.accessToken, this.refreshToken, method, uri)
   }
 
