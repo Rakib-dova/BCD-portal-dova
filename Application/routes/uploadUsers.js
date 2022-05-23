@@ -118,7 +118,7 @@ const cbPostIndex = async (req, res, next) => {
 
   // req.file.userId設定
   req.file.userId = req.user.userId
-  const status = await uploadUsersController.upload(req.user, contract, req.file)
+  const [status, createdResult] = await uploadUsersController.upload(req.user, contract, req.file)
 
   if (status instanceof Error) {
     req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.SYSERR000, 'SYSERR'])
