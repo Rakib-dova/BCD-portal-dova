@@ -57,7 +57,7 @@ const cbGetIndex = async (req, res, next) => {
     procedureComment2Children: [
       'A列：メールアドレス',
       'B列：ロール(数字)',
-      '※1ファイルで作成できるユーザーデータの数は19769件まで',
+      '※1ファイルで作成できるユーザーデータの数は200件まで',
       '※文字コードはUTF-8 BOM付で作成してください'
     ],
     procedureComment3: '3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択',
@@ -128,59 +128,54 @@ const cbPostIndex = async (req, res, next) => {
 
   let resultMessage = null
   let flashParams = null
-  // エラーメッセージが有無確認
-  if (validate.isArray(status)) {
-    resultMessage = '下記表に記載されている内容を修正して、再アップロードして下さい。'
-    flashParams = ['errnoti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
-  } else {
-    switch (status) {
-      // 正常
-      case 0:
-        resultMessage = ''
-        for (const created of createdResult) {
-          switch (created.status) {
-            case 'Created':
-              resultMessage += `${created.username}を登録しました。<br>`
-              break
-            case 'Invited':
-              resultMessage += `${created.username}を招待しました。<br>`
-              break
-            case 'Duplicated':
-              resultMessage += `${created.username}を重複で、スキップしました。<br>`
-              break
-            case 'Invited Api Error':
-              resultMessage += `${created.username}を招待メール送信APIでエラーが発生しました。スキップしました。<br>`
-              break
-            case 'Invited Error':
-              resultMessage += `${created.username}を招待メール送信失敗しました。スキップしました。<br>`
-              break
-            case 'Error':
-              resultMessage += `${created.username}を検索APIでエラー発生しました。スキップしました。<br>`
-              break
-            case 'Email Type Error':
-              resultMessage += `${created.username}をメール形式ではありません。スキップしました。<br>`
-              break
-            case 'Role Type Error':
-              resultMessage += `${created.username}をロールの形式ではありません。スキップしました。<br>`
-              break
-          }
+
+  switch (status) {
+    // 正常
+    case 0:
+      resultMessage = ''
+      for (const created of createdResult) {
+        switch (created.status) {
+          case 'Created':
+            resultMessage += `${created.username}を登録しました。<br>`
+            break
+          case 'Invited':
+            resultMessage += `${created.username}を招待しました。<br>`
+            break
+          case 'Duplicated':
+            resultMessage += `${created.username}を重複で、スキップしました。<br>`
+            break
+          case 'Invited Api Error':
+            resultMessage += `${created.username}を招待メール送信APIでエラーが発生しました。スキップしました。<br>`
+            break
+          case 'Invited Error':
+            resultMessage += `${created.username}を招待メール送信失敗しました。スキップしました。<br>`
+            break
+          case 'Error':
+            resultMessage += `${created.username}を検索APIでエラー発生しました。スキップしました。<br>`
+            break
+          case 'Email Type Error':
+            resultMessage += `${created.username}をメール形式ではありません。スキップしました。<br>`
+            break
+          case 'Role Type Error':
+            resultMessage += `${created.username}をロールの形式ではありません。スキップしました。<br>`
+            break
         }
-        flashParams = ['noti', ['ユーザー一括登録に成功しました。', resultMessage, '']]
-        break
-      // ヘッダー不一致
-      case -1:
-        resultMessage = constantsDefine.codeErrMsg.CODEHEADERERR000
-        flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
-        break
-      case -2:
-        resultMessage = constantsDefine.codeErrMsg.CODEDATAERR000
-        flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
-        break
-      case -3:
-        resultMessage = constantsDefine.codeErrMsg.UPLOADUSERCOUNTER000
-        flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
-        break
-    }
+      }
+      flashParams = ['noti', ['ユーザー一括登録に成功しました。', resultMessage, '']]
+      break
+    // ヘッダー不一致
+    case -1:
+      resultMessage = constantsDefine.codeErrMsg.CODEHEADERERR000
+      flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
+      break
+    case -2:
+      resultMessage = constantsDefine.codeErrMsg.CODEDATAERR000
+      flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
+      break
+    case -3:
+      resultMessage = constantsDefine.codeErrMsg.UPLOADUSERCOUNTER000
+      flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
+      break
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'uploadUsers.cbPostIndex')
