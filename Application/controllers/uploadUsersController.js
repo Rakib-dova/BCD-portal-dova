@@ -6,6 +6,7 @@ const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const TradeshiftDTO = require('../DTO/TradeshiftDTO')
 const UploadUsersDTO = require('../DTO/UploadUsersDTO')
+const validate = require('../lib/validate')
 
 const upload = async (passport, contract, nominalList) => {
   const tradeshiftDTO = new TradeshiftDTO(passport.accessToken, passport.refreshToken, contract.tenantId)
@@ -22,16 +23,52 @@ const upload = async (passport, contract, nominalList) => {
     return error
   }
 
+  if (result.status === -1) {
+    logger.error({ contractId: contract.contractId, stack: 'ヘッダーが指定のものと異なります。', status: 0 })
+    return [-1, null]
+  }
+
+  if (result.data.length > 200) {
+    logger.error({ contractId: contract.contractId, stack: '一括登録ユーザーが200件を超えています。', status: 0 })
+    return [-3, null]
+  }
+
   const product = UploadUsersDTO.factory(contract, result.data)
+
+  if (product === -1) {
+    logger.error({ contractId: contract.contractId, stack: '項目数が異なります。', status: 0 })
+    return [-2, null]
+  }
+
   const resultCreatedUser = []
   for (const register of product) {
-    // ユーザー検索
-    // const response = await tradeshiftDTO.getUserInformationByEmail(username)
-    const response = await tradeshiftDTO.getUserInformationByEmail(register.Username)
+    if (validate.isValidEmail(register.Username) === false) {
+      resultCreatedUser.push({
+        username: register.Username,
+        roleNo: register.RoleNo,
+        role: register.RoleId,
+        status: 'Email Type Error',
+        stack: null
+      })
+      continue
+    }
 
+    if (typeof register.RoleId === 'undefined') {
+      resultCreatedUser.push({
+        username: register.Username,
+        roleNo: register.RoleNo,
+        role: register.RoleId,
+        status: 'Role Type Error',
+        stack: null
+      })
+      continue
+    }
+    // ユーザー検索
+    const response = await tradeshiftDTO.getUserInformationByEmail(register.Username)
     if (response instanceof Error) {
       resultCreatedUser.push({
         username: register.Username,
+        roleNo: register.RoleNo,
         role: register.RoleId,
         status: 'Error',
         stack: response.stack
@@ -45,8 +82,9 @@ const upload = async (passport, contract, nominalList) => {
       const registerResponse = await tradeshiftDTO.registUser(register)
       resultCreatedUser.push({
         username: registerResponse.Username,
+        roleNo: register.RoleNo,
         role: registerResponse.RoleId,
-        status: registerResponse.State,
+        status: 'Created',
         stack: null
       })
       continue
@@ -56,6 +94,7 @@ const upload = async (passport, contract, nominalList) => {
     if (response.CompanyAccountId === register.CompanyAccountId) {
       resultCreatedUser.push({
         username: register.Username,
+        roleNo: register.RoleNo,
         role: register.RoleId,
         status: 'Duplicated',
         stack: null
@@ -64,11 +103,13 @@ const upload = async (passport, contract, nominalList) => {
     } else {
       register.Id = response.Id
       register.CompanyAccountId = response.CompanyAccountId
-      const invitedResponse = await tradeshiftDTO.inviteUser(register)
+      // const invitedResponse = await tradeshiftDTO.inviteUser(register)
+      const invitedResponse = register.RoleId
 
       if (invitedResponse instanceof Error) {
         resultCreatedUser.push({
           username: register.Username,
+          roleNo: register.RoleNo,
           role: register.RoleId,
           status: 'Invited Api Error',
           stack: response.stack
@@ -79,6 +120,7 @@ const upload = async (passport, contract, nominalList) => {
       if (invitedResponse === register.RoleId) {
         resultCreatedUser.push({
           username: register.Username,
+          roleNo: register.RoleNo,
           role: register.RoleId,
           status: 'Invited',
           stack: null
@@ -87,6 +129,7 @@ const upload = async (passport, contract, nominalList) => {
       } else {
         resultCreatedUser.push({
           username: register.Username,
+          roleNo: register.RoleNo,
           role: register.RoleId,
           status: 'Invited Error',
           stack: null
@@ -131,6 +174,10 @@ const readNominalList = (pwdFile) => {
     result.data.shift()
   } else {
     result.status = -1
+  }
+
+  if (result.data[result.data.length - 1].length === 0) {
+    result.data.pop()
   }
 
   return result

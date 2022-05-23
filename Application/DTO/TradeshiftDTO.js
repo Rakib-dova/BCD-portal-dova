@@ -301,10 +301,7 @@ class TradeshiftDTO {
   async inviteUser(userAccount) {
     this.method = 'put'
     this.uri = `/account/users/${userAccount.Id}/role`
-    // this.body[userAccount.RoleId] = ''
-
-    // this.config.data = {}
-    this.body[userAccount.RoleId] = ''
+    this.body = userAccount.RoleId
 
     const response = await this.run()
 
