@@ -373,7 +373,7 @@ describe('uploadFormatControllerのテスト', () => {
       TradeshiftDTO.prototype.getUserInformationByEmail.mockReturnValueOnce(returnGetUserInformationByEmailValue404)
       TradeshiftDTO.prototype.inviteUser.mockReturnValueOnce(returnInviteUser)
       fsExistsSyncSpy.mockReturnValueOnce(true)
-      const fileError = new Error('削除対象を見つかれませんでした。')
+      const fileError = new Error('file unlink error')
       fsUnlinkSyncSpy.mockImplementationOnce(() => {
         throw fileError
       })

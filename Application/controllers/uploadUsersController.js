@@ -202,7 +202,7 @@ const removeFile = async (fullPath) => {
       return true
     } catch (error) {
       logger.info(constantsDefine.logMessage.INF001 + 'uploadUserController.remove')
-      throw error
+      return error
     }
   } else {
     // 削除対象がない場合、サーバーエラー画面表示
