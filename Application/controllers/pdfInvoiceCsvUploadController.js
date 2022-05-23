@@ -1,127 +1,40 @@
-const PdfInvoice = require('../models').PdfInvoice
+const PdfInvoiceUpload = require('../models').PdfInvoiceUpload
 const PdfInvoiceLine = require('../models').PdfInvoiceLine
 const PdfSealImp = require('../models').PdfSealImp
 const db = require('../models')
 const logger = require('../lib/logger')
 
 module.exports = {
-  findInvoice: async (invoiceId) => {
+  insert: async (values) => {
     try {
-      return await PdfInvoice.findOne({
-        include: [
-          { model: PdfInvoiceLine },
-          { model: PdfSealImp }
-        ],
-        where: { invoiceId: invoiceId }
+      const result = await PdfInvoiceUpload.create({
+        ...values
       })
+      return result
     } catch (error) {
-      logger.error({ invoiceId: invoiceId, stack: error.stack, status: 0 }, error.name)
-      throw error
+      logger.error({ tenantId: values.tenantId, stack: error.stack, status: 0 })
+      return error
     }
   },
-  findAllInvoices: async (tenantId) => {
+  updateCount: async ({ invoiceUploadId, successCount, failCount, skipCount, invoiceCount }) => {
     try {
-      return await PdfInvoice.findAll({
-        where: { sendTenantId: tenantId },
-        include: 'PdfInvoiceLines',
-        order: [['updatedAt', 'DESC']]
-      })
-    } catch (error) {
-      logger.error({ stack: error.stack, status: 0 }, error.name)
-      throw error
-    }
-  },
-  createInvoice: async (invoice, lines, image) => {
-    try {
-      // 重複コード検索
-      const foundInvoices = await PdfInvoice.findAll({
-        where: { invoiceId: invoice.invoiceId }
-      })
-
-      if (foundInvoices.length !== 0) return null
-
-      const created = await db.sequelize.transaction(async (t) => {
-        // PdfInvoiceテーブルにレコード挿入
-        const result = await PdfInvoice.create(invoice, { transaction: t })
-
-        await PdfSealImp.create(
-          image ? { invoiceId: invoice.invoiceId, image } : { invoiceId: invoice.invoiceId },
-          { transaction: t }
-        )
-
-        // PdfInvoiceLineテーブルにレコード挿入
-        await Promise.all(lines.map(async (line) => {
-          return await PdfInvoiceLine.create(line, { transaction: t })
-        }))
-
-        return result
-      })
-      return created
-    } catch (error) {
-      logger.error({ stack: error.stack, status: 0 }, error.name)
-      throw error
-    }
-  },
-  updateInvoice: async (invoiceId, invoice, lines, image) => {
-    try {
-      const updated = await db.sequelize.transaction(async (t) => {
-        if (invoice.invoiceId) delete invoice.invoiceId
-
-        // PdfInvoiceテーブルのレコード更新
-        const result = await PdfInvoice.update(invoice, { where: { invoiceId } }, { transaction: t })
-
-        // 明細全削除
-        await PdfInvoiceLine.destroy({
-          where: { invoiceId: invoiceId },
-          transaction: t
-        })
-
-        // 明細を新規作成
-        await Promise.all(
-          lines.map(async (line) => {
-            return await PdfInvoiceLine.create(line, { transaction: t })
-          })
-        )
-
-        if (image) {
-          // 印影を更新
-          await PdfSealImp.update(
-            { image },
-            { where: { invoiceId } },
-            { transaction: t }
-          )
-        } else {
-          console.log('====  印影の更新はなし  ==========')
+      const result = await PdfInvoiceUpload.update(
+        {
+          successCount: successCount,
+          failCount: failCount,
+          skipCount: skipCount,
+          invoiceCount: invoiceCount
+        },
+        {
+          where: {
+            invoiceUploadId: invoiceUploadId
+          }
         }
-
-        return result
-      })
-      return updated
+      )
+      return result
     } catch (error) {
-      logger.error({ invoiceId: invoice.invoiceId, stack: error.stack, status: 0 }, error.name)
-
-      throw error
-    }
-  },
-  deleteInvoice: async (invoiceId) => {
-    try {
-      const deleted = await db.sequelize.transaction(async (t) => {
-        await PdfSealImp.destroy({
-          where: { invoiceId: invoiceId },
-          transaction: t
-        })
-        // 削除に成功すると 1、既に削除済みだと 0 が返ってくる
-        return await PdfInvoice.destroy({
-          where: { invoiceId: invoiceId },
-          transaction: t
-        })
-      })
-
-      return deleted
-    } catch (error) {
-      logger.error({ invoiceId: invoiceId, stack: error.stack, status: 0 }, error.name)
-
-      throw error
+      logger.error({ invoiceUploadId: invoiceUploadId, stack: error.stack, status: 0 })
+      return error
     }
   }
 }

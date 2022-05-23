@@ -16,7 +16,7 @@ const constantsDefine = require('../constants')
 const csvupload = require('../routes/csvupload')
 
 const apiManager = require('../controllers/apiManager')
-const csvUploadController = require('../controllers/pdfInvoiceCsvUploadController.js')
+const pdfInvoiceCsvUploadController = require('../controllers/pdfInvoiceCsvUploadController.js')
 const { generatePdf, renderInvoiceHTML } = require('../lib/pdfGenerator')
 const FileType = require('file-type')
 
@@ -54,19 +54,35 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   let isErr = false
 
   // DB登録
-  // const resultInvoice = await csvUploadController.insert({
-  //   invoicesId: uuidv4(),
-  //   tenantId: req.user.tenantId,
-  //   csvFileName: req.body.filename,
-  //   successCount: '-',
-  //   failCount: '-',
-  //   skipCount: '-'
-  // })
+  const resultInvoice = await pdfInvoiceCsvUploadController.insert({
+    invoicesId: uuidv4(),
+    tenantId: req.user.tenantId,
+    csvFileName: req.body.filename,
+    successCount: '-',
+    failCount: '-',
+    skipCount: '-'
+  })
 
-  // if (!resultInvoice?.dataValues) {
-  //   logger.info(`${constantsDefine.logMessage.DBINF001}${functionName}`)
-  // }
+  if (!resultInvoice?.dataValues) {
+    logger.info(`${constantsDefine.logMessage.DBINF001}${functionName}`)
+  }
 
+  // validateチェック
+  const valResult = await validate(uploadFileData)
+  if (valResult.err.length !== 0) {
+    if (valResult.err[0] === 104) {
+      isErr = true
+      message = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
+
+      // 結果一覧画面に遷移
+      return res.redirect('pdfInvoiceCsvUpload/resultList', message)
+    }
+
+    // validate結果登録
+    await validateResultInsert(valResult, resultInvoice.invoicesId, userToken, req, res)
+  }
+
+  //
   switch (await uploadPDFInvoice(uploadFileData, userToken, req, res)) {
     case 101:
       isErr = true
@@ -92,41 +108,59 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
 
   if (isErr) {
     // 結果一覧画面に遷移
-    // return res.redirect('pdfInvoiceCsvUpload/resultList', message)
+    return res.redirect('pdfInvoiceCsvUpload/resultList', message)
   } else {
     // ドラフト一覧画面に遷移
     return res.redirect('pdfInvoices/list', message)
   }
 }
 
-const uploadPDFInvoice = async (uploadFileData, _user, _req, _res) => {
+const validate = async (uploadFileData) => {
   logger.info(constantsDefine.logMessage.INF000 + 'uploadPDFInvoice')
 
-  let uploadData = null
+  let result = null
   let defaultCsvData = null
 
   // ファイルから請求書一括作成の時エラー例外
   try {
     // テンプレートファイル
     const defaultCsvPath = path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv')
-    defaultCsvData = fs.readFileSync(defaultCsvPath, 'utf8')
-
-    const uploadList = uploadFileData.split(/ \n|\r/)
-    logger.info(uploadList)
-
-    const result = validation.validate(uploadList, defaultCsvData)
-
-    logger.info('==================')
-    logger.info(result)
-
-    // アップロードデータの配列
-    // uploadList = setRows(uploadData)
+    defaultCsvData = fs
+      .readFileSync(defaultCsvPath, 'utf8')
+      .split(/\r?\n|\r/)[0]
+      .replace(/^\ufeff/, '')
+    const uploadList = uploadFileData.split(/\r?\n|\r/)
+    // バリデーションチェック
+    result = await validation.validate(uploadList, defaultCsvData)
   } catch (error) {
     logger.error({ stack: error.stack }, error.name)
-    return 104
+    return { err: [104] }
   }
 
-  return 100
+  return result
+}
+
+const validateResultInsert = async (valResult, invoicesId, req, res, next) => {
+  const functionName = 'validateResultInsert'
+  if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+
+  // DB登録
+  await pdfInvoiceCsvUploadController.updateInvoice({
+    invoiceUploadId: invoicesId,
+    successCount: '-',
+    failCount: valResult.errCnt,
+    skipCount: '-'
+  })
+
+  // 詳細登録
+
+  await pdfInvoiceCsvUploadController.updateInvoice({
+    invoiceUploadId: invoicesId,
+    successCount: '-',
+    failCount: valResult.errCnt,
+    skipCount: '-'
+  })
 }
 
 const pdfInvoiceCsvUploadResult = async (req, res, next) => {
