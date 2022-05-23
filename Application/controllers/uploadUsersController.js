@@ -20,7 +20,7 @@ const upload = async (passport, contract, nominalList) => {
     const error = result
     logger.error({ contractId: contract.contractId, stack: error.stack, status: 0 })
     logger.info(constantsDefine.logMessage.INF001 + 'userUploadController.upload')
-    return error
+    return [error, null]
   }
 
   if (result.status === -1) {
@@ -103,8 +103,7 @@ const upload = async (passport, contract, nominalList) => {
     } else {
       register.Id = response.Id
       register.CompanyAccountId = response.CompanyAccountId
-      // const invitedResponse = await tradeshiftDTO.inviteUser(register)
-      const invitedResponse = register.RoleId
+      const invitedResponse = await tradeshiftDTO.inviteUser(register)
 
       if (invitedResponse instanceof Error) {
         resultCreatedUser.push({
@@ -140,12 +139,12 @@ const upload = async (passport, contract, nominalList) => {
   }
 
   // 読み込んだファイル削除
-  const deleteResult = removeFile(pwdFile)
+  const deleteResult = await removeFile(pwdFile)
   if (deleteResult instanceof Error) {
     const error = deleteResult
     logger.error({ contractId: contract.contractId, stack: error.stack, status: 0 })
     logger.info(constantsDefine.logMessage.INF001 + 'userUploadController.upload')
-    return error
+    return [error, null]
   }
 
   return [result.status, resultCreatedUser]
@@ -161,8 +160,9 @@ const readNominalList = (pwdFile) => {
   }
   const data = getReadCsvData(pwdFile)
 
-  if (data instanceof Error) {
-    return data
+  if (data.code === 'ENOENT') {
+    const fileError = new Error(data.Error)
+    return fileError
   }
 
   const header = data.split(/\r?\n|\r/)[0]
@@ -208,7 +208,7 @@ const removeFile = async (fullPath) => {
     // 削除対象がない場合、サーバーエラー画面表示
     logger.info(constantsDefine.logMessage.INF001 + 'uploadUserController.remove')
     const deleteError = new Error('削除対象を見つかれませんでした。')
-    throw deleteError
+    return deleteError
   }
 }
 
