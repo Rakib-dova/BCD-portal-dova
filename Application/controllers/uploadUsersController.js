@@ -64,7 +64,6 @@ const upload = async (passport, contract, nominalList) => {
     }
     // ユーザー検索
     const response = await tradeshiftDTO.getUserInformationByEmail(register.Username)
-    console.log('getUserInformationByEmail=== ', response)
     if (response instanceof Error) {
       resultCreatedUser.push({
         username: register.Username,
@@ -79,10 +78,18 @@ const upload = async (passport, contract, nominalList) => {
     // ユーザー新規登録
     if (response === register.Username) {
       const registerResponse = await tradeshiftDTO.registUser(register)
-      console.log('registUser=== ', registerResponse)
+      if (registerResponse instanceof Error) {
+        resultCreatedUser.push({
+          username: register.Username,
+          role: register.RoleId,
+          status: 'Invited Api Error',
+          stack: response.stack
+        })
+        continue
+      }
       resultCreatedUser.push({
-        username: registerResponse.Username,
-        role: registerResponse.RoleId,
+        username: register.Username,
+        role: register.RoleId,
         status: 'Created',
         stack: null
       })

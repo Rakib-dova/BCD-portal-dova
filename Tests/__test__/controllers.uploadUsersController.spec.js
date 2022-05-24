@@ -130,8 +130,32 @@ describe('uploadUsersControllerのテスト', () => {
       // 期待結果
       expect(status).toBe(0)
       expect(JSON.stringify(createdUser)).toMatch(
-        JSON.stringify([{ username: 'test@test.com', role: undefined, status: 'Created', stack: null }])
+        JSON.stringify([
+          { username: 'test@test.com', role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d', status: 'Created', stack: null }
+        ])
       )
+    })
+
+    test('準正常:新規登録時、APIエラー発生(401)', async () => {
+      // 準備
+      const testNominal = { ...nominalListTemplate }
+      testNominal.filename = 'usersUpload_test9.csv'
+
+      TradeshiftDTO.prototype.getUserInformationByEmail.mockReturnValueOnce('test@test.com')
+      TradeshiftDTO.prototype.registUser.mockReturnValueOnce(returnInviteUserValue401)
+
+      const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
+
+      // 期待結果
+      expect(status).toEqual(0)
+      expect(createdUser).toEqual([
+        {
+          username: 'test@test.com',
+          role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          status: 'Invited Api Error',
+          stack: undefined
+        }
+      ])
     })
 
     test('準正常：readNominalListのファイルオープンエラー', async () => {
