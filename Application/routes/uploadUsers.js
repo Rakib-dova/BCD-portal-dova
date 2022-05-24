@@ -166,22 +166,22 @@ const cbPostIndex = async (req, res, next) => {
             resultMessage += `${created.username}を招待しました。<br>`
             break
           case 'Duplicated':
-            resultMessage += `${created.username}を重複で、スキップしました。<br>`
+            resultMessage += `${created.username}は既に登録済みのメールアドレスです。（スキップ）<br>`
             break
           case 'Invited Api Error':
-            resultMessage += `${created.username}を招待メール送信APIでエラーが発生しました。スキップしました。<br>`
+            resultMessage += `${created.username}への招待メールはAPIエラーが発生しました。（スキップ）<br>`
             break
           case 'Invited Error':
-            resultMessage += `${created.username}を招待メール送信失敗しました。スキップしました。<br>`
+            resultMessage += `${created.username}への招待メール送信が失敗しました。（スキップ）<br>`
             break
           case 'Error':
-            resultMessage += `${created.username}を検索APIでエラー発生しました。スキップしました。<br>`
+            resultMessage += `${created.username}の検索はAPIでエラー発生しました。（スキップ）<br>`
             break
           case 'Email Type Error':
-            resultMessage += `${created.username}をメール形式ではありません。スキップしました。<br>`
+            resultMessage += `${created.username}はメール形式ではありません。（スキップ）<br>`
             break
           case 'Role Type Error':
-            resultMessage += `${created.username}をロールの形式ではありません。スキップしました。<br>`
+            resultMessage += `${created.username}のロールは正しい形式ではありません。（スキップ）<br>`
             break
         }
       }

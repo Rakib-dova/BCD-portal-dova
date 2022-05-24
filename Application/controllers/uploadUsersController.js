@@ -64,6 +64,7 @@ const upload = async (passport, contract, nominalList) => {
     }
     // ユーザー検索
     const response = await tradeshiftDTO.getUserInformationByEmail(register.Username)
+    console.log('getUserInformationByEmail=== ', response)
     if (response instanceof Error) {
       resultCreatedUser.push({
         username: register.Username,
@@ -78,6 +79,7 @@ const upload = async (passport, contract, nominalList) => {
     // ユーザー新規登録
     if (response === register.Username) {
       const registerResponse = await tradeshiftDTO.registUser(register)
+      console.log('registUser=== ', registerResponse)
       resultCreatedUser.push({
         username: registerResponse.Username,
         role: registerResponse.RoleId,

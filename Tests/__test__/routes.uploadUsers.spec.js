@@ -483,22 +483,22 @@ describe('uploadUsersのテスト', () => {
             resultMsg += `${resgistUser[idx].username}を招待しました。<br>`
             break
           case 'Duplicated':
-            resultMsg += `${resgistUser[idx].username}を重複で、スキップしました。<br>`
+            resultMsg += `${resgistUser[idx].username}は既に登録済みのメールアドレスです。（スキップ）<br>`
             break
           case 'Invited Api Error':
-            resultMsg += `${resgistUser[idx].username}を招待メール送信APIでエラーが発生しました。スキップしました。<br>`
+            resultMsg += `${resgistUser[idx].username}への招待メールはAPIエラーが発生しました。（スキップ）<br>`
             break
           case 'Invited Error':
-            resultMsg += `${resgistUser[idx].username}を招待メール送信失敗しました。スキップしました。<br>`
+            resultMsg += `${resgistUser[idx].username}への招待メール送信が失敗しました。（スキップ）<br>`
             break
           case 'Error':
-            resultMsg += `${resgistUser[idx].username}を検索APIでエラー発生しました。スキップしました。<br>`
+            resultMsg += `${resgistUser[idx].username}の検索はAPIでエラー発生しました。（スキップ）<br>`
             break
           case 'Email Type Error':
-            resultMsg += `${resgistUser[idx].username}をメール形式ではありません。スキップしました。<br>`
+            resultMsg += `${resgistUser[idx].username}はメール形式ではありません。（スキップ）<br>`
             break
           case 'Role Type Error':
-            resultMsg += `${resgistUser[idx].username}をロールの形式ではありません。スキップしました。<br>`
+            resultMsg += `${resgistUser[idx].username}のロールは正しい形式ではありません。（スキップ）<br>`
             break
         }
       }
