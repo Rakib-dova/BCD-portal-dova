@@ -13,7 +13,6 @@ const errorHelper = require('../../Application/routes/helpers/error')
 const noticeHelper = require('../../Application/routes/helpers/notice')
 const userController = require('../../Application/controllers/userController.js')
 const contractController = require('../../Application/controllers/contractController.js')
-const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
 const uploadUsers = require('../../Application/routes/uploadUsers')
 const uploadController = require('../../Application/controllers/uploadUsersController')
@@ -21,7 +20,6 @@ const uploadController = require('../../Application/controllers/uploadUsersContr
 let request, response, infoSpy
 let userControllerFindOneSpy,
   contractControllerFindOneSpy,
-  tenatnsFindOneSpy,
   userControllerFindAndUpdate,
   contractControllerFindContractSpy,
   checkContractStatusSpy,
@@ -41,9 +39,8 @@ const session = {
 // モックテーブル定義
 const Users = require('../mockDB/Users_Table')
 const Contracts = require('../mockDB/Contracts_Table')
-const Tenants = require('../mockDB/Tenants_Table')
 
-describe('accountCodeUploadのテスト', () => {
+describe('uploadUsersのテスト', () => {
   beforeEach(() => {
     request = new Request()
     request.body = {}
@@ -53,7 +50,6 @@ describe('accountCodeUploadのテスト', () => {
     userControllerFindAndUpdate = jest.spyOn(userController, 'findAndUpdate')
     contractControllerFindOneSpy = jest.spyOn(contractController, 'findOne')
     contractControllerFindContractSpy = jest.spyOn(contractController, 'findContract')
-    tenatnsFindOneSpy = jest.spyOn(tenantController, 'findOne')
     request.flash = jest.fn()
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     uploadControllerSpy = jest.spyOn(uploadController, 'upload')
@@ -67,13 +63,12 @@ describe('accountCodeUploadのテスト', () => {
     contractControllerFindOneSpy.mockRestore()
     contractControllerFindContractSpy.mockRestore()
     userControllerFindAndUpdate.mockRestore()
-    tenatnsFindOneSpy.mockRestore()
     checkContractStatusSpy.mockRestore()
     uploadControllerSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
-    test('accountCodeのルーティングを確認', async () => {
+    test('uploadUsersのルーティングを確認', async () => {
       expect(uploadUsers.router.get).toBeCalledWith('/', helper.isAuthenticated, uploadUsers.cbGetIndex)
 
       expect(uploadUsers.router.post).toBeCalledWith(
@@ -96,8 +91,6 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
 
@@ -109,13 +102,13 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでaccountUploadが呼ばれ「る」
+      // response.renderでuploadUsersが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadUsers', {
         uploadCommonLayoutTitle: 'ユーザー一括作成',
         uploadCommonLayoutEngTitle: 'BULK UPLOAD USERS',
         fileInputName: 'userNameFileUpload',
         cautionForSelectedFile: 'ファイルを選択してください。',
-        formatFileLocation: '../html/ユーザー一括作成フォーマット.csv',
+        formatFileLocation: '../html/ユーザー一括登録フォーマット.csv',
         formatFileLinkText: 'アップロード用CSVファイルダウンロード',
         accountCodeUpload: '/uploadUsers',
         procedureContents: {
@@ -144,8 +137,6 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[6])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[5])
-      // DBからの正常な勘定科目情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[5])
       // ユーザ権限チェック結果設定
       checkContractStatusSpy.mockReturnValue('30')
 
@@ -163,6 +154,33 @@ describe('accountCodeUploadのテスト', () => {
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
 
+    test('正常：一般ユーザーの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[5] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[5])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue('00')
+
+      // 試験実施
+      await uploadUsers.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('fe888fbb-172f-467c-b9ad-efe0720fecf9')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
+    })
+
     test('500エラー:不正なContractデータの場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -173,8 +191,6 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[9])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[7])
-      // DBからの正常な勘定科目情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[8])
 
       // 試験実施
       await uploadUsers.cbGetIndex(request, response, next)
@@ -186,7 +202,7 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // 解約手続き中画面が表示「される」
+      // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
@@ -267,8 +283,6 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[9])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[7])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[8])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[7])
 
@@ -294,8 +308,6 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[8])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[8])
 
@@ -327,8 +339,6 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // uploadController.uploadモック
@@ -349,11 +359,11 @@ describe('accountCodeUploadのテスト', () => {
         `${resgistUser.username}を登録しました。<br>`,
         ''
       ])
-      // 勘定科目一覧へリダイレクトされ「る」
+      // ユーザー一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
 
-    test('正常：ユーザー一括登録する。(1名)', async () => {
+    test('正常：ユーザー一括登録する。(正常2件、スキップ6件)', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -368,8 +378,6 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
       // uploadController.uploadモック
@@ -426,7 +434,7 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['ユーザー一括登録に成功しました。', resultMsg, ''])
-      // 勘定科目一覧へリダイレクトされ「る」
+      // ユーザー一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
 
@@ -445,11 +453,9 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // uploadUsersController.uploadのモックバリュー
       uploadControllerSpy.mockReturnValue([new Error(), null])
 
       // 試験実施
@@ -466,7 +472,7 @@ describe('accountCodeUploadのテスト', () => {
         'システムエラーです。<BR>（後程、接続してください。）',
         'SYSERR'
       ])
-      // 勘定科目一覧へリダイレクトされ「る」
+      // ユーザー一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
 
@@ -485,11 +491,9 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // uploadUsersController.uploadのモックバリュー
       uploadControllerSpy.mockReturnValue([-1, null])
 
       // 試験実施
@@ -506,7 +510,7 @@ describe('accountCodeUploadのテスト', () => {
         'ヘッダーが指定のものと異なります。',
         'SYSERR'
       ])
-      // 勘定科目一覧へリダイレクトされ「る」
+      // ユーザー一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
 
@@ -525,11 +529,9 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // uploadUsersController.uploadのモックバリュー
       uploadControllerSpy.mockReturnValue([-2, null])
 
       // 試験実施
@@ -542,11 +544,11 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
-      // 勘定科目一覧へリダイレクトされ「る」
+      // ユーザー一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
 
-    test('準正常：ユーザー一括登録（一度に取り込める勘定科目は200件以上）', async () => {
+    test('準正常：ユーザー一括登録（一度に取り込めるユーザーが200件以上）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -561,11 +563,9 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // uploadUsersController.uploadのモックバリュー
       uploadControllerSpy.mockReturnValue([-3, null])
 
       // 試験実施
@@ -581,7 +581,7 @@ describe('accountCodeUploadのテスト', () => {
       const msg200Over = constantsCodeErrMsg.UPLOADUSERCOUNTER000
 
       expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', msg200Over, 'SYSERR'])
-      // 勘定科目一覧へリダイレクトされ「る」
+      // ユーザー一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
 
@@ -600,11 +600,9 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[0])
-      // accountUploadController.uploadのモックバリュー
+      // uploadUsersController.uploadのモックバリュー
       uploadControllerSpy.mockReturnValue([-2, null])
 
       // 試験実施
@@ -617,7 +615,7 @@ describe('accountCodeUploadのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
-      // 勘定科目一覧へリダイレクトされ「る」
+      // ユーザー一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
 
@@ -667,8 +665,6 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[9])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[7])
-      // DBからの正常な勘定科目情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[8])
       // 契約不正の場合
       contractControllerFindContractSpy.mockReturnValue(Contracts[7])
 
@@ -763,8 +759,6 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[9])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[7])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[8])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[7])
 
@@ -790,8 +784,6 @@ describe('accountCodeUploadのテスト', () => {
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
       contractControllerFindOneSpy.mockReturnValue(Contracts[8])
-      // DBからの正常なテナント情報取得を想定する
-      tenatnsFindOneSpy.mockReturnValue(Tenants[0])
       // DBからの正常なコントラクター情報取得を想定する
       contractControllerFindContractSpy.mockReturnValue(Contracts[8])
 
