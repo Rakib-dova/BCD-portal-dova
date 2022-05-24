@@ -358,29 +358,6 @@ describe('uploadUsersControllerのテスト', () => {
       ])
     })
 
-    test('準正常:他社のユーザーの時、APIエラー発生(403)', async () => {
-      // 準備
-      const testNominal = { ...nominalListTemplate }
-      testNominal.filename = 'usersUpload_test1.csv'
-      returnGetUserInformationByEmailDuplicate.CompanyAccountId = '11367bd9-9710-4772-bdf7-10be2085976a'
-      TradeshiftDTO.prototype.getUserInformationByEmail.mockReturnValueOnce(returnGetUserInformationByEmailDuplicate)
-      TradeshiftDTO.prototype.inviteUser.mockReturnValueOnce(returnInviteUserValue403.response.data)
-
-      // 試験実施
-      const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
-
-      // 期待結果
-      expect(status).toEqual(0)
-      expect(createdUser).toEqual([
-        {
-          username: 'test1@test.com',
-          role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-          status: 'Invited Error',
-          stack: null
-        }
-      ])
-    })
-
     test('準正常:ファイル削除の時、ファイルがない場合', async () => {
       // 準備
       const testNominal = { ...nominalListTemplate }
