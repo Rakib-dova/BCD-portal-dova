@@ -31,7 +31,7 @@ const contract = Contract.build({
 
 const nominalListTemplate = {
   fieldname: 'userNameFileUpload',
-  originalname: 'ユーザー一括作成フォーマット.csv',
+  originalname: 'ユーザー一括登録フォーマット.csv',
   encoding: '7bit',
   mimetype: 'text/csv',
   destination: './testData',
@@ -92,7 +92,7 @@ returnInviteUserValue403.response = {
 }
 let errorSpy, infoSpy, fsUnlinkSyncSpy, fsExistsSyncSpy
 
-describe('uploadFormatControllerのテスト', () => {
+describe('uploadUsersControllerのテスト', () => {
   beforeEach(() => {
     errorSpy = jest.spyOn(logger, 'error')
     infoSpy = jest.spyOn(logger, 'info')
@@ -122,15 +122,15 @@ describe('uploadFormatControllerのテスト', () => {
       TradeshiftDTO.prototype.getUserInformationByEmail.mockReturnValueOnce('test@test.com')
       TradeshiftDTO.prototype.registUser.mockReturnValueOnce({
         Username: 'test@test.com',
-        roleNo: '01',
         role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
 
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
+      // 期待結果
       expect(status).toBe(0)
       expect(JSON.stringify(createdUser)).toMatch(
-        JSON.stringify([{ username: 'test@test.com', roleNo: '01', role: undefined, status: 'Created', stack: null }])
+        JSON.stringify([{ username: 'test@test.com', role: undefined, status: 'Created', stack: null }])
       )
     })
 
@@ -143,8 +143,8 @@ describe('uploadFormatControllerのテスト', () => {
       const [result, created] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(result instanceof Error).toEqual(true)
+      expect(created).toEqual(null)
     })
 
     test('準正常：readNominalListのUTF-8bom付きでは無の場合', async () => {
@@ -156,7 +156,6 @@ describe('uploadFormatControllerのテスト', () => {
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(status).toEqual(-1)
       expect(logger.error).toHaveBeenCalledWith({
         contractId: contract.contractId,
@@ -175,7 +174,6 @@ describe('uploadFormatControllerのテスト', () => {
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(status).toEqual(-3)
       expect(logger.error).toHaveBeenCalledWith({
         contractId: contract.contractId,
@@ -194,7 +192,6 @@ describe('uploadFormatControllerのテスト', () => {
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(status).toEqual(-2)
       expect(logger.error).toHaveBeenCalledWith({
         contractId: contract.contractId,
@@ -213,14 +210,11 @@ describe('uploadFormatControllerのテスト', () => {
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(status).toEqual(0)
       expect(JSON.stringify(createdUser)).toEqual(
         JSON.stringify([
           {
             username: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@test.com',
-            roleNo: '02',
-            role: '29827a1a-4ba6-46e1-a720-52d227653c2d',
             status: 'Email Type Error',
             stack: null
           }
@@ -243,7 +237,6 @@ describe('uploadFormatControllerのテスト', () => {
         JSON.stringify([
           {
             username: 'noRole@test.com',
-            roleNo: '1',
             role: undefined,
             status: 'Role Type Error',
             stack: null
@@ -262,9 +255,16 @@ describe('uploadFormatControllerのテスト', () => {
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(status).toEqual(0)
       expect(errorSpy).toHaveBeenCalledWith({ contractId: contract.contractId, stack: expect.anything(), status: 0 })
+      expect(createdUser).toEqual([
+        {
+          username: 'test1@test.com',
+          role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          status: 'Error',
+          stack: returnGetUserInformationByEmailValue401.stack
+        }
+      ])
     })
 
     test('準正常:重複ユーザー', async () => {
@@ -275,7 +275,6 @@ describe('uploadFormatControllerのテスト', () => {
       TradeshiftDTO.prototype.getUserInformationByEmail.mockReturnValueOnce(returnGetUserInformationByEmailDuplicate)
       const duplicatedUser = {
         username: 'test1@test.com',
-        roleNo: '01',
         role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
         status: 'Duplicated',
         stack: null
@@ -285,7 +284,6 @@ describe('uploadFormatControllerのテスト', () => {
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(status).toEqual(0)
       expect(JSON.stringify(createdUser)).toBe(JSON.stringify([duplicatedUser]))
     })
@@ -299,7 +297,6 @@ describe('uploadFormatControllerのテスト', () => {
       TradeshiftDTO.prototype.inviteUser.mockReturnValueOnce('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       const invitedUser = {
         username: 'test1@test.com',
-        roleNo: '01',
         role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
         status: 'Invited',
         stack: null
@@ -309,7 +306,6 @@ describe('uploadFormatControllerのテスト', () => {
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(status).toEqual(0)
       expect(JSON.stringify(createdUser)).toBe(JSON.stringify([invitedUser]))
     })
@@ -326,8 +322,15 @@ describe('uploadFormatControllerのテスト', () => {
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(status).toEqual(0)
+      expect(createdUser).toEqual([
+        {
+          username: 'test1@test.com',
+          role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          status: 'Invited Api Error',
+          stack: undefined
+        }
+      ])
     })
 
     test('準正常:他社のユーザーの時、APIエラー発生(403)', async () => {
@@ -342,8 +345,15 @@ describe('uploadFormatControllerのテスト', () => {
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(status).toEqual(0)
+      expect(createdUser).toEqual([
+        {
+          username: 'test1@test.com',
+          role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          status: 'Invited Error',
+          stack: null
+        }
+      ])
     })
 
     test('準正常:ファイル削除の時、ファイルがない場合', async () => {
@@ -360,7 +370,6 @@ describe('uploadFormatControllerのテスト', () => {
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(status).toMatchObject(deleteError)
       expect(createdUser).toEqual(null)
     })
@@ -382,7 +391,6 @@ describe('uploadFormatControllerのテスト', () => {
       const [status, createdUser] = await uploadUserController.upload(passport, contract, testNominal)
 
       // 期待結果
-      // undefinedが返されること
       expect(status).toMatchObject(fileError)
       expect(createdUser).toEqual(null)
     })
