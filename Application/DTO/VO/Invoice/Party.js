@@ -3,6 +3,23 @@ class Party {
     this.id = party.Party.PartyIdentification[0].ID.value
     this.partyName = party.Party.PartyName[0].Name.value
 
+    if (party.Party.PhysicalLocation) {
+      this.physicalLocation = party.Party.PhysicalLocation[0].ID.value
+    } else {
+      this.physicalLocation = null
+    }
+
+    if (party.Party.Contact) {
+      this.contact = {}
+      const contact = party.Party.Contact
+      this.contact.id = contact.ID?.value ?? ''
+      this.contact.name = contact.Name?.value ?? ''
+      this.contact.telephone = contact.Telephone?.value ?? ''
+      this.contact.electronicMail = contact.ElectronicMail?.value ?? ''
+    } else {
+      this.contact = null
+    }
+
     if (party.Party.PostalAddress) {
       const postalAddress = party.Party.PostalAddress
       this.postbox = postalAddress.Postbox ?? ''

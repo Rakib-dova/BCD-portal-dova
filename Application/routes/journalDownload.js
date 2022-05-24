@@ -2121,13 +2121,21 @@ const dataToJson = (invoiceData, journalData) => {
           invoice[`仕訳情報${no + 1}-借方補助科目名`] = lineJournaData[no].subAccountName
           invoice[`仕訳情報${no + 1}-借方補助科目コード`] = lineJournaData[no].subAccountCode
           invoice[`仕訳情報${no + 1}-借方部門名`] = lineJournaData[no].departmentName
-          invoice[`仕訳情報${no + 1}-借方部門コード`] = lineJournaData[no].departmentCode.substr(0, 6)
+          if (lineJournaData[no].departmentCode) {
+            invoice[`仕訳情報${no + 1}-借方部門コード`] = lineJournaData[no].departmentCode.substr(0, 6)
+          } else {
+            invoice[`仕訳情報${no + 1}-借方部門コード`] = lineJournaData[no].departmentCode
+          }
           invoice[`仕訳情報${no + 1}-貸方勘定科目名`] = lineJournaData[no].creditAccountName
           invoice[`仕訳情報${no + 1}-貸方勘定科目コード`] = lineJournaData[no].creditAccountCode
           invoice[`仕訳情報${no + 1}-貸方補助科目名`] = lineJournaData[no].creditSubAccountName
           invoice[`仕訳情報${no + 1}-貸方補助科目コード`] = lineJournaData[no].creditSubAccountCode
           invoice[`仕訳情報${no + 1}-貸方部門名`] = lineJournaData[no].creditDepartmentName
-          invoice[`仕訳情報${no + 1}-貸方部門コード`] = lineJournaData[no].creditDepartmentCode.substr(0, 6)
+          if (lineJournaData[no].creditDepartmentCode) {
+            invoice[`仕訳情報${no + 1}-貸方部門コード`] = lineJournaData[no].creditDepartmentCode.substr(0, 6)
+          } else {
+            invoice[`仕訳情報${no + 1}-貸方部門コード`] = lineJournaData[no].creditDepartmentCode
+          }
           invoice[`仕訳情報${no + 1}-計上金額`] = lineJournaData[no].installmentAmount
         }
       }

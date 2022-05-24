@@ -45,7 +45,8 @@ let userControllerFindOneSpy,
   journalfindAllSpy,
   getSentToCompanySpy,
   findOneRequestApprovalSpy,
-  dowonloadKaikeiSpy
+  dowonloadKaikeiSpy,
+  journalDownloadControllerCreateInvoiceDataForDownloadSpy
 
 const dbJournalTable = []
 const dbJournal100Table = []
@@ -91,6 +92,33 @@ const journalfindAllSpyResult = [
     creditAccountCode: 'cAcc1',
     creditSubAccountCode: 'cSubAcc1',
     creditDepartmentCode: 'cDe1',
+    accountName: 'accName1',
+    subAccountName: 'subAccName1',
+    departmentName: 'deName1',
+    creditAccountName: 'cAccName1',
+    creditSubAccountName: 'cSubAccName1',
+    creditDepartmentName: 'cDeName1',
+
+    installmentAmount: 51223,
+    createdAt: new Date('2021-11-25T04:30:00.000Z'),
+    updatedAt: new Date('2021-11-25T04:30:00.000Z'),
+    journalNo: 'lineAccountCode14'
+  }
+]
+
+const journalfindAllSpyResultNotDepartmentCode = [
+  {
+    journalId: '75fd64cd-e4b5-4d0a-84cc-8af25a24f2a8',
+    contractId: 'f10b95a4-74a1-4691-880a-827c9f1a1faf',
+    invoiceId: '1f3ce3dc-4dbb-548a-a090-d39dc604a6e1',
+    lineNo: 1,
+    lineId: '1',
+    accountCode: 'acc1',
+    subAccountCode: 'subAcc1',
+    departmentCode: '',
+    creditAccountCode: 'cAcc1',
+    creditSubAccountCode: 'cSubAcc1',
+    creditDepartmentCode: '',
     accountName: 'accName1',
     subAccountName: 'subAccName1',
     departmentName: 'deName1',
@@ -165,6 +193,10 @@ describe('journalDownloadのテスト', () => {
     findOneRequestApprovalSpy = jest.spyOn(requestApproval, 'findOneRequestApproval')
     request.flash = jest.fn()
     dowonloadKaikeiSpy = jest.spyOn(journalDownloadController, 'dowonloadKaikei')
+    journalDownloadControllerCreateInvoiceDataForDownloadSpy = jest.spyOn(
+      journalDownloadController,
+      'createInvoiceDataForDownload'
+    )
   })
   afterEach(() => {
     request.resetMocked()
@@ -178,6 +210,7 @@ describe('journalDownloadのテスト', () => {
     journalfindAllSpy.mockRestore()
     getSentToCompanySpy.mockRestore()
     findOneRequestApprovalSpy.mockRestore()
+    journalDownloadControllerCreateInvoiceDataForDownloadSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -406,6 +439,125 @@ describe('journalDownloadのテスト', () => {
       findOneRequestApprovalSpy.mockReturnValue(findOneRequestApprovalResult)
 
       journalfindAllSpy.mockReturnValue(journalfindAllSpyResult)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('A01001')
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+      const csvBody = response.setHeader().body.split('\r\n')[1]
+      const checkingData = require('../mockInvoice/invoice1')
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+      // 発行日
+      expect(csvBody).toContain(`${checkingData.IssueDate.value}`)
+      // 請求書番号
+      expect(csvBody).toContain(`${checkingData.ID.value}`)
+      // テナントID
+      expect(csvBody).toContain(`${checkingData.AccountingCustomerParty.Party.PartyIdentification[0].ID.value}`)
+      // 支払期日
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[0]?.PaymentDueDate?.value ?? ''}`)
+      // 納品日
+      expect(csvBody).toContain(`${checkingData.Delivery[0].ActualDeliveryDate?.value}`)
+      // 備考
+      expect(csvBody).toContain(`${checkingData.AdditionalDocumentReference[0].ID.value}`)
+      // 銀行名
+      expect(csvBody).toContain(
+        `${
+          checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.FinancialInstitution?.Name
+            .value ?? ''
+        }`
+      )
+      // 支店名
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.Name.value ?? ''}`
+      )
+      // 科目
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.AccountTypeCode?.value === 'General' ? '普通' : '当座'}`
+      )
+      // 口座番号
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[0].PayeeFinancialAccount?.ID?.value ?? ''}`)
+      // 口座名義
+      expect(csvBody).toContain(
+        `${checkingData.PaymentMeans[0].PayeeFinancialAccount?.FinancialInstitutionBranch?.Name.value ?? ''}`
+      )
+      // その他特記事項
+      expect(csvBody).toContain(`${checkingData.PaymentMeans[0].PayeeFinancialAccount?.Name?.value ?? ''}`)
+      // 明細-項目ID
+      expect(csvBody).toContain(`${checkingData.Note[0].value}`)
+      // 明細-内容
+      expect(csvBody).toContain(`${checkingData.InvoiceLine[0].Item.Description[0].value}`)
+      // 明細-数量
+      expect(csvBody).toContain(`${checkingData.InvoiceLine[0].InvoicedQuantity.value}`)
+      // 明細-単位
+      const bconCsvUnitcode = require('../../Application/lib/bconCsvUnitcode')
+      const unitCodeKeys = Object.keys(bconCsvUnitcode)
+      let resultOfUnitSearch
+      unitCodeKeys.some((item) => {
+        if (`${checkingData.InvoiceLine[0].InvoicedQuantity.unitCode}` === bconCsvUnitcode[item]) {
+          resultOfUnitSearch = item
+          return true
+        }
+        return false
+      })
+      expect(csvBody).toContain(`${resultOfUnitSearch}`)
+      // 明細-単価
+      expect(csvBody).toContain(`${checkingData.InvoiceLine[0].LineExtensionAmount.value}`)
+      // 明細-税（消費税／軽減税率／不課税／免税／非課税）
+      const taxCategory = {
+        'JP 不課税 0%': '不課税',
+        'JP 免税 0%': '免税',
+        'JP 消費税 10%': '消費税',
+        'JP 消費税(軽減税率) 8%': '軽減税率',
+        'JP 非課税 0%': '非課税'
+      }
+      expect(csvBody).toContain(
+        `${taxCategory[checkingData.InvoiceLine[0].TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.Name.value]}`
+      )
+      // 明細-備考
+      expect(csvBody).toContain(
+        `${
+          checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
+        }`
+      )
+    })
+
+    test('正常:1件（最終承認済みの請求書）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'finalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(findOneRequestApprovalResult)
+
+      journalfindAllSpy.mockReturnValue(journalfindAllSpyResultNotDepartmentCode)
 
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
@@ -3661,6 +3813,54 @@ describe('journalDownloadのテスト', () => {
       findOneRequestApprovalSpy.mockReturnValue(null)
 
       journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // responseのヘッダ
+      const today = new Date().toISOString().split('T')[0]
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
+      expect(response.setHeader().headers['Content-Disposition']).toContain(encodeURIComponent('請求書.csv'))
+
+      // responseのcsvファイル
+      const csvHeader = response.setHeader().body.split('\r\n')[0]
+
+      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
+    })
+
+    test('正常:請求書複数の場合（ヘッダーのみ）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: '',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '0'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      journalDownloadControllerCreateInvoiceDataForDownloadSpy.mockReturnValue(headers)
 
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
