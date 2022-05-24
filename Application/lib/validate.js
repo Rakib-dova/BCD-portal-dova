@@ -531,7 +531,9 @@ const isValidEmail = function (emailAddress) {
   // 取引担当者メールアドレスが配列形式で受け取った場合
   if (emailType !== 'string') return false
 
+  if (emailAddress.match(/@/g) === null || emailAddress.match(/@/g).length !== 1) return false
   const emailParty = emailAddress.split('@')
+
   let local = null
   let domain = null
 
@@ -559,7 +561,9 @@ const isValidEmail = function (emailAddress) {
   for (const character of local) {
     const code = getCharCode(character)
     // 半角英数字以外場合エラー発生
-    if (code > 127) {
+    // 利用不可の特殊文字コード設定("<>():,@;)
+    const disabledCharacterCode = [34, 60, 62, 40, 41, 58, 44, 59]
+    if (code > 127 || disabledCharacterCode.indexOf(code) > -1) {
       return false
     }
 
@@ -585,7 +589,7 @@ const isValidEmail = function (emailAddress) {
     if (domainPart[idx].length === 0) {
       return false
     } else {
-      const pattern = /^[A-Za-z0-9+]{1,63}$/
+      const pattern = /^[A-Za-z0-9.-]{1,63}$/
       if (!pattern.test(domainPart[idx])) return false
     }
   }
