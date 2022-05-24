@@ -122,7 +122,6 @@ describe('uploadUsersControllerのテスト', () => {
       TradeshiftDTO.prototype.getUserInformationByEmail.mockReturnValueOnce('test@test.com')
       TradeshiftDTO.prototype.registUser.mockReturnValueOnce({
         Username: 'test@test.com',
-        roleNo: '01',
         role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
 
@@ -131,7 +130,7 @@ describe('uploadUsersControllerのテスト', () => {
       // 期待結果
       expect(status).toBe(0)
       expect(JSON.stringify(createdUser)).toMatch(
-        JSON.stringify([{ username: 'test@test.com', roleNo: '01', role: undefined, status: 'Created', stack: null }])
+        JSON.stringify([{ username: 'test@test.com', role: undefined, status: 'Created', stack: null }])
       )
     })
 
@@ -216,8 +215,6 @@ describe('uploadUsersControllerのテスト', () => {
         JSON.stringify([
           {
             username: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@test.com',
-            roleNo: '02',
-            role: '29827a1a-4ba6-46e1-a720-52d227653c2d',
             status: 'Email Type Error',
             stack: null
           }
@@ -240,7 +237,6 @@ describe('uploadUsersControllerのテスト', () => {
         JSON.stringify([
           {
             username: 'noRole@test.com',
-            roleNo: '1',
             role: undefined,
             status: 'Role Type Error',
             stack: null
@@ -264,7 +260,6 @@ describe('uploadUsersControllerのテスト', () => {
       expect(createdUser).toEqual([
         {
           username: 'test1@test.com',
-          roleNo: '01',
           role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
           status: 'Error',
           stack: returnGetUserInformationByEmailValue401.stack
@@ -280,7 +275,6 @@ describe('uploadUsersControllerのテスト', () => {
       TradeshiftDTO.prototype.getUserInformationByEmail.mockReturnValueOnce(returnGetUserInformationByEmailDuplicate)
       const duplicatedUser = {
         username: 'test1@test.com',
-        roleNo: '01',
         role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
         status: 'Duplicated',
         stack: null
@@ -303,7 +297,6 @@ describe('uploadUsersControllerのテスト', () => {
       TradeshiftDTO.prototype.inviteUser.mockReturnValueOnce('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       const invitedUser = {
         username: 'test1@test.com',
-        roleNo: '01',
         role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
         status: 'Invited',
         stack: null
@@ -333,7 +326,6 @@ describe('uploadUsersControllerのテスト', () => {
       expect(createdUser).toEqual([
         {
           username: 'test1@test.com',
-          roleNo: '01',
           role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
           status: 'Invited Api Error',
           stack: undefined
@@ -357,7 +349,6 @@ describe('uploadUsersControllerのテスト', () => {
       expect(createdUser).toEqual([
         {
           username: 'test1@test.com',
-          roleNo: '01',
           role: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
           status: 'Invited Error',
           stack: null

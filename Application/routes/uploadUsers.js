@@ -128,6 +128,18 @@ const cbPostIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
+    return next(noticeHelper.create('generaluser'))
+  }
+
+  if (!validate.isStatusForRegister(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('registerprocedure'))
+  }
+
+  if (!validate.isStatusForSimpleChange(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('changeprocedure'))
+  }
+
   // req.file.userId設定
   req.file.userId = req.user.userId
   const [status, createdResult] = await uploadUsersController.upload(req.user, contract, req.file)

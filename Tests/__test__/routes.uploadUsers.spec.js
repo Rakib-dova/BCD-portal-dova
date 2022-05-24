@@ -104,13 +104,13 @@ describe('uploadUsersのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでuploadUsersが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadUsers', {
-        uploadCommonLayoutTitle: 'ユーザー一括作成',
+        uploadCommonLayoutTitle: 'ユーザー一括登録',
         uploadCommonLayoutEngTitle: 'BULK UPLOAD USERS',
         fileInputName: 'userNameFileUpload',
         cautionForSelectedFile: 'ファイルを選択してください。',
         formatFileLocation: '../html/ユーザー一括登録フォーマット.csv',
         formatFileLinkText: 'アップロード用CSVファイルダウンロード',
-        accountCodeUpload: '/uploadUsers',
+        usersUpload: '/uploadUsers',
         procedureContents: {
           procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
           procedureComment2: '2. CSVファイルにユーザーデータを記入',
@@ -125,6 +125,33 @@ describe('uploadUsersのテスト', () => {
           procedureTitle: '(手順)'
         }
       })
+    })
+
+    test('正常：解約申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[6] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[6])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue('30')
+
+      // 試験実施
+      await uploadUsers.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 解約手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
     })
 
     test('正常：解約申込中の場合', async () => {
@@ -177,8 +204,62 @@ describe('uploadUsersのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('fe888fbb-172f-467c-b9ad-efe0720fecf9')
-      // 解約手続き中画面が表示「される」
+      // 利用不可画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
+    })
+
+    test('正常：登録申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue('30')
+
+      // 試験実施
+      await uploadUsers.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 利用登録手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
+    })
+
+    test('正常：変更申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[3] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[3])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[3])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue('30')
+
+      // 試験実施
+      await uploadUsers.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 契約情報変更手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('changeprocedure'))
     })
 
     test('500エラー:不正なContractデータの場合', async () => {
@@ -648,6 +729,87 @@ describe('uploadUsersのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // 解約手続き中画面が表示「される」
       expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+    })
+
+    test('正常：一般ユーザーの場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[5] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[5])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue('00')
+
+      // 試験実施
+      await uploadUsers.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('fe888fbb-172f-467c-b9ad-efe0720fecf9')
+      // 利用不可画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
+    })
+
+    test('正常：登録申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[1])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[1])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue('30')
+
+      // 試験実施
+      await uploadUsers.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 利用登録手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
+    })
+
+    test('正常：変更申込中の場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...Users[3] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[3])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[3])
+      // ユーザ権限チェック結果設定
+      checkContractStatusSpy.mockReturnValue('30')
+
+      // 試験実施
+      await uploadUsers.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 契約情報変更手続き中画面が表示「される」
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('changeprocedure'))
     })
 
     test('500エラー:不正なContractデータの場合', async () => {
