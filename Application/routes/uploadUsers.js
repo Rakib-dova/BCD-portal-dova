@@ -50,6 +50,18 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
+    return next(noticeHelper.create('generaluser'))
+  }
+
+  if (!validate.isStatusForRegister(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('registerprocedure'))
+  }
+
+  if (!validate.isStatusForSimpleChange(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('changeprocedure'))
+  }
+
   const procedureContents = {
     procedureTitle: '(手順)',
     procedureComment1: '1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード',
@@ -66,13 +78,13 @@ const cbGetIndex = async (req, res, next) => {
 
   // アップロードフォーマットデータを画面に渡す。
   res.render('uploadUsers', {
-    uploadCommonLayoutTitle: 'ユーザー一括作成',
+    uploadCommonLayoutTitle: 'ユーザー一括登録',
     uploadCommonLayoutEngTitle: 'BULK UPLOAD USERS',
     fileInputName: 'userNameFileUpload',
     cautionForSelectedFile: 'ファイルを選択してください。',
-    accountCodeUpload: '/uploadUsers',
+    usersUpload: '/uploadUsers',
     procedureContents: procedureContents,
-    formatFileLocation: '../html/ユーザー一括作成フォーマット.csv',
+    formatFileLocation: '../html/ユーザー一括登録フォーマット.csv',
     formatFileLinkText: 'アップロード用CSVファイルダウンロード'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')

@@ -329,7 +329,7 @@ app.use('/cancellation', require('./routes/cancellation').router)
 // 契約者情報の修正
 app.use('/change', require('./routes/change').router)
 
-// ユーザー一括作成
+// ユーザー一括登録
 app.use('/uploadUsers', require('./routes/uploadUsers').router)
 
 // 請求書ダウンロード
