@@ -4,26 +4,18 @@ const router = express.Router()
 const fs = require('fs')
 const path = require('path')
 
-const axios = require('axios')
 const multer = require('multer')
 const upload = multer({ storage: multer.memoryStorage() })
-const { v4: uuidV4 } = require('uuid')
 const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const logger = require('../lib/logger')
 const validation = require('../lib/pdfInvoiceCsvUpdateValidation')
 const constantsDefine = require('../constants')
-const csvupload = require('../routes/csvupload')
 
-const apiManager = require('../controllers/apiManager')
-const pdfInvoiceCsvUploadController = require('../controllers/pdfInvoiceCsvUploadController.js')
-const { generatePdf, renderInvoiceHTML } = require('../lib/pdfGenerator')
-const FileType = require('file-type')
+const uploadController = require('../controllers/pdfInvoiceUploadController.js')
+const uploadDetailController = require('../controllers/pdfInvoiceUploadDetailController.js')
 
-const filePath = process.env.INVOICE_UPLOAD_PATH
 const { v4: uuidv4 } = require('uuid')
-const { TRUE } = require('node-sass')
-const { join } = require('path')
 
 const pdfInvoiceCsvUploadIndex = async (req, res, next) => {
   if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
@@ -54,10 +46,10 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   let isErr = false
 
   // DB登録
-  const resultInvoice = await pdfInvoiceCsvUploadController.insert({
-    invoicesId: uuidv4(),
+  const resultInvoice = await uploadController.insert({
+    invoiceUploadId: uuidv4(),
     tenantId: req.user.tenantId,
-    csvFileName: req.body.filename,
+    csvFileName: req.file.originalname,
     successCount: '-',
     failCount: '-',
     skipCount: '-'
@@ -69,39 +61,20 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
 
   // validateチェック
   const valResult = await validate(uploadFileData)
-  if (valResult.err.length !== 0) {
-    if (valResult.err[0] === 104) {
-      isErr = true
+
+  if (valResult.size !== 0) {
+    if (valResult[0] === 104) {
       message = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
 
       // 結果一覧画面に遷移
-      return res.redirect('pdfInvoiceCsvUpload/resultList', message)
+      return res.redirect('/pdfInvoiceCsvUpload', message)
     }
 
     // validate結果登録
-    await validateResultInsert(valResult, resultInvoice.invoicesId, userToken, req, res)
-  }
-
-  //
-  switch (await uploadPDFInvoice(uploadFileData, userToken, req, res)) {
-    case 101:
+    const failCnt = await validateResultInsert(valResult, resultInvoice.invoiceUploadId, userToken, req, res)
+    if (failCnt > 0) {
       isErr = true
-      message = constantsDefine.statusConstants.INVOICE_FAILED
-      break
-    case 102:
-      isErr = true
-      message = constantsDefine.statusConstants.OVER_SPECIFICATION
-      break
-    case 103:
-      isErr = true
-      message = constantsDefine.statusConstants.OVERLAPPED_INVOICE
-      break
-    case 104:
-      isErr = true
-      message = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
-      break
-    default:
-      break
+    }
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
@@ -111,15 +84,15 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     return res.redirect('pdfInvoiceCsvUpload/resultList', message)
   } else {
     // ドラフト一覧画面に遷移
-    return res.redirect('pdfInvoices/list', message)
+    return res.redirect(200, 'pdfInvoices/list', message)
   }
 }
 
 const validate = async (uploadFileData) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'uploadPDFInvoice')
+  logger.info(constantsDefine.logMessage.INF000 + 'validate')
 
-  let result = null
   let defaultCsvData = null
+  let uploadList = []
 
   // ファイルから請求書一括作成の時エラー例外
   try {
@@ -129,37 +102,84 @@ const validate = async (uploadFileData) => {
       .readFileSync(defaultCsvPath, 'utf8')
       .split(/\r?\n|\r/)[0]
       .replace(/^\ufeff/, '')
-    const uploadList = uploadFileData.split(/\r?\n|\r/)
-    // バリデーションチェック
-    result = await validation.validate(uploadList, defaultCsvData)
+    uploadList = uploadFileData.split(/\r?\n|\r/)
+
+    // ヘッダチェック
+    if (uploadList[0] !== defaultCsvData) {
+      return { line: 0, invoiceId: '-', status: -1, errorData: 'ヘッダーが指定のものと異なります。' }
+    }
+
+    logger.info(uploadList)
   } catch (error) {
     logger.error({ stack: error.stack }, error.name)
-    return { err: [104] }
+    return [104]
   }
 
-  return result
+  // 請求書ごとにまとめる
+  let targetNo = ''
+  const uploadData = {}
+  const tmps = []
+
+  for (let i = 1; i < uploadList.length; i++) {
+    const line = uploadList[i].split(',')
+    if (line[0] !== targetNo) {
+      targetNo = line[0]
+    }
+    tmps.push(line)
+
+    // 次の請求書番号が異なる場合
+    if (i + 1 === uploadList.length || line[0] !== uploadList[i + 1].split(',')[0]) {
+      uploadData[targetNo] = tmps
+    }
+  }
+  logger.info(constantsDefine.logMessage.INF000 + 'validate')
+  return await validation.validate(uploadData, defaultCsvData)
 }
 
 const validateResultInsert = async (valResult, invoicesId, req, res, next) => {
   const functionName = 'validateResultInsert'
-  if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
 
-  // DB登録
-  await pdfInvoiceCsvUploadController.updateInvoice({
+  let successCount = 0
+  let failCount = 0
+  let skipCount = 0
+  await valResult.forEach((result, i) => {
+    if (result.status === 0) {
+      successCount++
+    } else if (result.status === 1) {
+      skipCount++
+    } else {
+      failCount++
+    }
+  })
+
+  // カウント登録
+  await uploadController.updateCount({
     invoiceUploadId: invoicesId,
-    successCount: '-',
-    failCount: valResult.errCnt,
-    skipCount: '-'
+    successCount: successCount,
+    failCount: failCount,
+    skipCount: skipCount,
+    invoiceCount: successCount + failCount + skipCount
   })
 
   // 詳細登録
+  await detailInsert(valResult, invoicesId)
+  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
 
-  await pdfInvoiceCsvUploadController.updateInvoice({
-    invoiceUploadId: invoicesId,
-    successCount: '-',
-    failCount: valResult.errCnt,
-    skipCount: '-'
+  return failCount
+}
+
+const detailInsert = async (valResult, invoicesId) => {
+  // 詳細登録
+  await valResult.forEach((line, i) => {
+    uploadDetailController.insert({
+      invoiceUploadDetailId: uuidv4(),
+      invoiceUploadId: invoicesId,
+      lines: line.line,
+      invoiceId: line.invoiceId,
+      status: line.status,
+      errorData: line.errorData
+    })
   })
 }
 

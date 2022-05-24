@@ -1,4 +1,4 @@
-const logger = require('./logger')
+const pdfInvoiceController = require('../controllers/pdfInvoiceController.js')
 
 const saveRules = [
   {
@@ -135,56 +135,74 @@ const saveRules = [
   }
 ]
 
-function validate(lines, defaultCsvData) {
-  const err = []
+function validate(uploadData, defaultCsvData) {
+  const results = []
   let targetId = ''
   let errFlg = false
-  let errCnt = 0
 
-  lines.forEach((line, i) => {
-    if (targetId !== line[0]) {
-      targetId = line[0]
-      errFlg = false
-    }
-    if (i === 0) {
-      // ヘッダーチェック
-      if (line !== defaultCsvData) {
-        err.push = { line: i, invoiceId: '-', message: 'ヘッダーが不正です。' }
+  Object.keys(uploadData).forEach(function (key) {
+    const lines = uploadData[key]
+    let lineCnt = 1
+
+    // 請求書番号 重複チェック
+
+    // DB登録
+    const result = pdfInvoiceController.findInvoice({
+      invoiceId: key
+    })
+    if (result) {
+      // スキップ
+      for (let i = lineCnt; i < lineCnt + lines.length; i++) {
+        results.push({
+          line: i + 1,
+          invoiceId: key,
+          status: 1,
+          errorData: '取込済みのため、処理をスキップしました。'
+        })
       }
-    } else if (errFlg && targetId === line[0]) {
-      // 同一請求書番号ですでにエラーがある場合、スキップ
-      err.push({ line: i, invoiceId: line[0], message: '同一請求書でエラーがあります。' })
-    } else {
-      const items = line.split(',')
+      return
+    }
 
+    for (let i = lineCnt; i < lineCnt + lines.length; i++) {
+      const items = lines[i].split(',')
+
+      if (errFlg && targetId === items[0]) {
+        // 同一請求書番号ですでにエラーがある場合、スキップ
+        results.push({ line: i + 1, invoiceId: items[0], status: -1, errorData: '同一請求書でエラーがあります。' })
+        continue
+      }
+      if (targetId !== items[0]) {
+        targetId = items[0]
+        errFlg = false
+      }
+
+      let msg = ''
       saveRules.forEach((rule) => {
         if (!items[rule.index] && rule.required) {
           // 必須エラー
-          if (errFlg === false) {
-            errCnt = errCnt + 1
-            errFlg = true
-          }
-          err.push({ line: i, invoiceId: line[0], message: rule.emptyMessage })
+          errFlg = true
+          msg = msg + rule.message + '\r\n'
         } else if (!items[rule.index]) {
           // 空の場合、スキップ
         } else if (rule.customValidator && !rule.customValidator(items[rule.index])) {
-          // customValidatorエラー
-          if (errFlg === false) {
-            errCnt = errCnt + 1
-            errFlg = true
-          }
-          err.push({ line: i, invoiceId: line[0], message: rule.message })
+          errFlg = true
+          msg = msg + rule.message + '\r\n'
         } else if (rule.regexp && !rule.regexp.test(items[rule.index])) {
-          if (errFlg === false) {
-            errCnt = errCnt + 1
-            errFlg = true
-          }
-          err.push({ line: i, invoiceId: line[0], message: rule.message })
+          errFlg = true
+          msg = msg + rule.message + '\r\n'
         }
       })
+
+      if (errFlg) {
+        results.push({ line: i + 1, invoiceId: items[0], status: -1, errorData: msg })
+      } else {
+        results.push({ line: i + 1, invoiceId: items[0], status: 0, errorData: '' })
+      }
     }
+    lineCnt = lineCnt + lines.length
   })
-  return { resulet: err, errCnt: errCnt }
+
+  return results
 }
 
 module.exports = { validate: validate }
