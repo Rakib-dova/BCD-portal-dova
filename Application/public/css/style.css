@@ -498,7 +498,7 @@ img.logo-ncom {
   padding: 5px 5px 5px 5px;
   position: absolute;
   z-index: 1;
-  top: -600px;
+  top: -300px;
   left: 150%;
   white-space: pre-line;
 }

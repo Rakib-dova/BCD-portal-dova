@@ -215,6 +215,7 @@ describe('uploadUsersControllerのテスト', () => {
         JSON.stringify([
           {
             username: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@test.com',
+            role: 'fe888fbb-172f-467c-b9ad-efe0720fecf9',
             status: 'Email Type Error',
             stack: null
           }
