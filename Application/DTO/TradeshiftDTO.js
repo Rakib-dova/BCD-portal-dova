@@ -13,7 +13,6 @@ class TradeshiftDTO {
     this.body = {}
     this.config = {
       headers: {
-        'Content-Type': 'x-www-form-urlencoded',
         Accept: 'application/json',
         Authorization: `Bearer ${this.accessToken}`
       }
@@ -257,15 +256,16 @@ class TradeshiftDTO {
     return tagsResult
   }
 
-  async getUserInformationByEmail(email) {
+  async getUserInformationByEmail(username) {
     this.method = 'post'
-    this.uri = `/users?username=${encodeURIComponent(email)}`
+    this.uri = `/users?username=${encodeURIComponent(username)}`
+    this.config.headers['Content-Type'] = 'application/json'
 
     const response = await this.run()
 
     if (response instanceof Error) {
       if (response.response.status === 404) {
-        return email
+        return username
       } else {
         return response
       }
@@ -301,6 +301,7 @@ class TradeshiftDTO {
   async inviteUser(userAccount) {
     this.method = 'put'
     this.uri = `/account/users/${userAccount.Id}/role`
+    this.config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
     this.body = userAccount.RoleId
 
     const response = await this.run()

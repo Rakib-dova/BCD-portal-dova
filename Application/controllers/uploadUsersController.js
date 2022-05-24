@@ -9,6 +9,7 @@ const UploadUsersDTO = require('../DTO/UploadUsersDTO')
 const validate = require('../lib/validate')
 
 const upload = async (passport, contract, nominalList) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'userUploadController.upload')
   const tradeshiftDTO = new TradeshiftDTO(passport.accessToken, passport.refreshToken, contract.tenantId)
   const destination = nominalList.destination
   const fileName = nominalList.filename
@@ -45,7 +46,6 @@ const upload = async (passport, contract, nominalList) => {
     if (validate.isValidEmail(register.Username) === false) {
       resultCreatedUser.push({
         username: register.Username,
-        roleNo: register.RoleNo,
         role: register.RoleId,
         status: 'Email Type Error',
         stack: null
@@ -56,7 +56,6 @@ const upload = async (passport, contract, nominalList) => {
     if (typeof register.RoleId === 'undefined') {
       resultCreatedUser.push({
         username: register.Username,
-        roleNo: register.RoleNo,
         role: register.RoleId,
         status: 'Role Type Error',
         stack: null
@@ -68,7 +67,6 @@ const upload = async (passport, contract, nominalList) => {
     if (response instanceof Error) {
       resultCreatedUser.push({
         username: register.Username,
-        roleNo: register.RoleNo,
         role: register.RoleId,
         status: 'Error',
         stack: response.stack
@@ -77,12 +75,11 @@ const upload = async (passport, contract, nominalList) => {
       continue
     }
 
-    // ユーザー新規作成
+    // ユーザー新規登録
     if (response === register.Username) {
       const registerResponse = await tradeshiftDTO.registUser(register)
       resultCreatedUser.push({
         username: registerResponse.Username,
-        roleNo: register.RoleNo,
         role: registerResponse.RoleId,
         status: 'Created',
         stack: null
@@ -94,7 +91,6 @@ const upload = async (passport, contract, nominalList) => {
     if (response.CompanyAccountId === register.CompanyAccountId) {
       resultCreatedUser.push({
         username: register.Username,
-        roleNo: register.RoleNo,
         role: register.RoleId,
         status: 'Duplicated',
         stack: null
@@ -108,7 +104,6 @@ const upload = async (passport, contract, nominalList) => {
       if (invitedResponse instanceof Error) {
         resultCreatedUser.push({
           username: register.Username,
-          roleNo: register.RoleNo,
           role: register.RoleId,
           status: 'Invited Api Error',
           stack: response.stack
@@ -119,7 +114,6 @@ const upload = async (passport, contract, nominalList) => {
       if (invitedResponse === register.RoleId) {
         resultCreatedUser.push({
           username: register.Username,
-          roleNo: register.RoleNo,
           role: register.RoleId,
           status: 'Invited',
           stack: null
@@ -128,7 +122,6 @@ const upload = async (passport, contract, nominalList) => {
       } else {
         resultCreatedUser.push({
           username: register.Username,
-          roleNo: register.RoleNo,
           role: register.RoleId,
           status: 'Invited Error',
           stack: null
@@ -147,12 +140,13 @@ const upload = async (passport, contract, nominalList) => {
     return [error, null]
   }
 
+  logger.info(constantsDefine.logMessage.INF001 + 'userUploadController.upload')
   return [result.status, resultCreatedUser]
 }
 
 const readNominalList = (pwdFile) => {
   const formatBaseCamp = './public/html'
-  const formatName = 'ユーザー一括作成フォーマット.csv'
+  const formatName = 'ユーザー一括登録フォーマット.csv'
   const basecamp = path.resolve(formatBaseCamp, formatName)
   const result = {
     status: 1,
@@ -174,6 +168,7 @@ const readNominalList = (pwdFile) => {
     result.data.shift()
   } else {
     result.status = -1
+    return result
   }
 
   if (result.data !== null && result.data[result.data.length - 1].length === 0) {
