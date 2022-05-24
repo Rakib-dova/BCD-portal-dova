@@ -516,6 +516,87 @@ const isContactEmail = function (contactEmail) {
   return 0
 }
 
+const isValidEmail = function (emailAddress) {
+  const emailType = typeof emailAddress
+
+  if (emailType === 'undefined' || emailAddress.length === 0) return false
+
+  let quoteCnt = 0
+  let spaceCnt = 0
+
+  const getCharCode = function (character) {
+    return character.charCodeAt()
+  }
+
+  // 取引担当者メールアドレスが配列形式で受け取った場合
+  if (emailType !== 'string') return false
+
+  if (emailAddress.match(/@/g) === null || emailAddress.match(/@/g).length !== 1) return false
+  const emailParty = emailAddress.split('@')
+
+  let local = null
+  let domain = null
+
+  if (emailParty.length === 1) return false
+
+  if (emailParty.length === 2) {
+    local = emailParty[0]
+    domain = emailParty[1]
+  } else {
+    local = ''
+    for (let idx = emailParty.length - 1; idx >= 0; idx--) {
+      if ((idx = emailParty.length - 1)) {
+        domain = emailParty[idx]
+      } else {
+        if (emailParty[idx].length === 0) return false
+        local += emailParty[idx]
+      }
+    }
+  }
+
+  if (typeof domain === 'undefined') return false
+
+  if (local.length > 64) return false
+
+  for (const character of local) {
+    const code = getCharCode(character)
+    // 半角英数字以外場合エラー発生
+    // 利用不可の特殊文字コード設定("<>():,@;)
+    const disabledCharacterCode = [34, 60, 62, 40, 41, 58, 44, 59]
+    if (code > 127 || disabledCharacterCode.indexOf(code) > -1) {
+      return false
+    }
+
+    // 「"」のチェック
+    if (code === 34) {
+      quoteCnt++
+    }
+
+    // 引用符号の外に半角スペースがあるかをチェック
+    if (code === 32) {
+      if (quoteCnt === 0) return -2
+      if (quoteCnt > 0 && quoteCnt % 2 === 0) return false
+      spaceCnt++
+    }
+  }
+
+  if (spaceCnt > 0 && quoteCnt > 0) {
+    if (quoteCnt % 2 === 1) return false
+  }
+
+  const domainPart = domain.split('.')
+  for (let idx = domainPart.length - 1; idx >= 0; idx--) {
+    if (domainPart[idx].length === 0) {
+      return false
+    } else {
+      const pattern = /^[A-Za-z0-9.-]{1,63}$/
+      if (!pattern.test(domainPart[idx])) return false
+    }
+  }
+
+  return true
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -554,5 +635,6 @@ module.exports = {
   isCode: isCode,
   isName: isName,
   isDepartmentCode: isDepartmentCode,
-  isContactEmail: isContactEmail
+  isContactEmail: isContactEmail,
+  isValidEmail: isValidEmail
 }
