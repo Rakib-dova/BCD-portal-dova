@@ -171,9 +171,6 @@ const cbPostIndex = async (req, res, next) => {
           case 'Invited Api Error':
             resultMessage += `${created.username}への招待メールはAPIエラーが発生しました。（スキップ）<br>`
             break
-          case 'Invited Error':
-            resultMessage += `${created.username}への招待メール送信が失敗しました。（スキップ）<br>`
-            break
           case 'Error':
             resultMessage += `${created.username}の検索はAPIでエラー発生しました。（スキップ）<br>`
             break
@@ -185,20 +182,20 @@ const cbPostIndex = async (req, res, next) => {
             break
         }
       }
-      flashParams = ['noti', ['ユーザー一括登録に成功しました。', resultMessage, '']]
+      flashParams = ['noti', ['ユーザー一括登録', resultMessage, '']]
       break
     // ヘッダー不一致
     case -1:
       resultMessage = constantsDefine.codeErrMsg.CODEHEADERERR000
-      flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
+      flashParams = ['noti', ['ユーザー一括登録', resultMessage, 'SYSERR']]
       break
     case -2:
       resultMessage = constantsDefine.codeErrMsg.CODEDATAERR000
-      flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
+      flashParams = ['noti', ['ユーザー一括登録', resultMessage, 'SYSERR']]
       break
     case -3:
       resultMessage = constantsDefine.codeErrMsg.UPLOADUSERCOUNTER000
-      flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
+      flashParams = ['noti', ['ユーザー一括登録', resultMessage, 'SYSERR']]
       break
   }
 

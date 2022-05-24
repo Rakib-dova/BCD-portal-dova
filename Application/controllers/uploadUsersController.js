@@ -119,24 +119,13 @@ const upload = async (passport, contract, nominalList) => {
         })
         continue
       }
-
-      if (invitedResponse === register.RoleId) {
-        resultCreatedUser.push({
-          username: register.Username,
-          role: register.RoleId,
-          status: 'Invited',
-          stack: null
-        })
-        continue
-      } else {
-        resultCreatedUser.push({
-          username: register.Username,
-          role: register.RoleId,
-          status: 'Invited Error',
-          stack: null
-        })
-        continue
-      }
+      resultCreatedUser.push({
+        username: register.Username,
+        role: register.RoleId,
+        status: 'Invited',
+        stack: null
+      })
+      continue
     }
   }
 

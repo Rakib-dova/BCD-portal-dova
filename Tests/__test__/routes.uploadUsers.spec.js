@@ -436,7 +436,7 @@ describe('uploadUsersのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', [
-        'ユーザー一括登録に成功しました。',
+        'ユーザー一括登録',
         `${resgistUser.username}を登録しました。<br>`,
         ''
       ])
@@ -444,7 +444,7 @@ describe('uploadUsersのテスト', () => {
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
 
-    test('正常：ユーザー一括登録する。(正常2件、スキップ6件)', async () => {
+    test('正常：ユーザー一括登録する。(正常2件、スキップ5件)', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -467,7 +467,6 @@ describe('uploadUsersのテスト', () => {
         { username: 'test@test.com', status: 'Invited' },
         { username: 'test@test.com', status: 'Duplicated' },
         { username: 'test@test.com', status: 'Invited Api Error' },
-        { username: 'test@test.com', status: 'Invited Error' },
         { username: 'test@test.com', status: 'Error' },
         { username: 'test@', status: 'Email Type Error' },
         { username: 'test@', status: 'Role Type Error' }
@@ -487,9 +486,6 @@ describe('uploadUsersのテスト', () => {
             break
           case 'Invited Api Error':
             resultMsg += `${resgistUser[idx].username}への招待メールはAPIエラーが発生しました。（スキップ）<br>`
-            break
-          case 'Invited Error':
-            resultMsg += `${resgistUser[idx].username}への招待メール送信が失敗しました。（スキップ）<br>`
             break
           case 'Error':
             resultMsg += `${resgistUser[idx].username}の検索はAPIでエラー発生しました。（スキップ）<br>`
@@ -514,7 +510,7 @@ describe('uploadUsersのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['ユーザー一括登録に成功しました。', resultMsg, ''])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['ユーザー一括登録', resultMsg, ''])
       // ユーザー一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
@@ -587,7 +583,7 @@ describe('uploadUsersのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', [
-        '取込に失敗しました。',
+        'ユーザー一括登録',
         'ヘッダーが指定のものと異なります。',
         'SYSERR'
       ])
@@ -624,7 +620,7 @@ describe('uploadUsersのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['ユーザー一括登録', '項目数が異なります。', 'SYSERR'])
       // ユーザー一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
@@ -661,7 +657,7 @@ describe('uploadUsersのテスト', () => {
       const constantsCodeErrMsg = require('../../Application/constants/codeErrMsg')
       const msg200Over = constantsCodeErrMsg.UPLOADUSERCOUNTER000
 
-      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', msg200Over, 'SYSERR'])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['ユーザー一括登録', msg200Over, 'SYSERR'])
       // ユーザー一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
@@ -695,7 +691,7 @@ describe('uploadUsersのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
-      expect(request.flash).toHaveBeenCalledWith('noti', ['取込に失敗しました。', '項目数が異なります。', 'SYSERR'])
+      expect(request.flash).toHaveBeenCalledWith('noti', ['ユーザー一括登録', '項目数が異なります。', 'SYSERR'])
       // ユーザー一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadUsers')
     })
