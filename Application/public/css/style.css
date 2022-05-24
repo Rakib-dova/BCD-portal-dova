@@ -625,12 +625,14 @@ img.logo-ncom {
   text-overflow: ellipsis;
 }
 
-#accountCodeUpload > div > label > span.file-cta > span.file-label {
+#accountCodeUpload > div > label > span.file-cta > span.file-label,
+#usersUpload > div > label > span.file-cta > span.file-label {
   overflow: hidden;
   width: 100%;
 }
 
-#accountCodeUpload > div > label > span.file-name {
+#accountCodeUpload > div > label > span.file-name,
+#usersUpload > div > label > span.file-name {
   max-width: 100% !important;
   border: unset;
 }
@@ -644,12 +646,14 @@ img.logo-ncom {
   background-color: #454cad;
 }
 
-#accountCodeUpload > div > label > input {
+#accountCodeUpload > div > label > input,
+#usersUpload > div > label > input {
   max-width: 100%;
   box-sizing: border-box;
 }
 
-#accountCodeUpload > div > label > span.file-cta {
+#accountCodeUpload > div > label > span.file-cta,
+#usersUpload > div > label > span.file-cta {
   border: #eee solid 3px !important;
   border-radius: 7px 7px 0px 0px !important;
   max-width: 100%;
@@ -657,7 +661,8 @@ img.logo-ncom {
   box-sizing: content-box;
 }
 
-#accountCodeUpload > div > label > span.file-cta > span:nth-child(3) > a {
+#accountCodeUpload > div > label > span.file-cta > span:nth-child(3) > a,
+#usersUpload > div > label > span.file-cta > span:nth-child(3) > a {
   line-height: 36px;
   background-color: #454cad;
   border: #454cad;
@@ -667,11 +672,13 @@ img.logo-ncom {
   margin-top: 8px;
 }
 
-#accountCodeUpload > div > label {
+#accountCodeUpload > div > label,
+#usersUpload > div > label {
   min-width: 100%;
 }
 
-#accountCodeUpload > div > label > span.file-name {
+#accountCodeUpload > div > label > span.file-name,
+#usersUpload > div > label > span.file-name {
   border: #eee solid 3px !important;
   border-radius: 0px 0px 7px 7px;
   margin-top: -3px;
@@ -911,17 +918,17 @@ body > div.hero.is-small {
 }
 
 .rectangle {
-    position: relative;
+  position: relative;
 }
 
 .rectangle::before {
-    position: absolute;
-    content: "";
-    width: 7px;
-	height: 30px;
-	background-color: #044484;
-    top: -1px;
-    left: -11px;    
+  position: absolute;
+  content: '';
+  width: 7px;
+  height: 30px;
+  background-color: #044484;
+  top: -1px;
+  left: -11px;
 }
 
 .input-label-pl10 {
