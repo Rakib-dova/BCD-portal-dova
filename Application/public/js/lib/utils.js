@@ -70,7 +70,7 @@ function getTaxTypeName(taxType) {
 // eslint-disable-next-line no-unused-vars
 function getSubTotal(lines) {
   let total = 0
-  lines.forEach((line) => total += (line.unitPrice * line.quantity)) // eslint-disable-line
+  lines.forEach((line) => total += Math.floor(line.unitPrice * line.quantity)) // eslint-disable-line
   return total
 }
 

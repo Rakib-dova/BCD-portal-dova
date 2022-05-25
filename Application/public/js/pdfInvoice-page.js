@@ -350,7 +350,12 @@ $('#output-modal-btn')?.addEventListener('click', async () => {
 })
 
 $('#save-btn')?.addEventListener('click', async () => {
-  if (!location.pathname.match(/show/) && !validate(invoice, lines, saveRules)) return alert('入力項目に不備があります。')
+  if (!location.pathname.match(/show/) && !validate(
+    invoice,
+    lines,
+    saveRules,
+    { fileSize: imageFile?.size }
+  )) return alert('入力項目に不備があります。')
 
   const modal = document.getElementById('request-progress-modal')
   modal.classList.add('is-active')

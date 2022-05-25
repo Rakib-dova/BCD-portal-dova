@@ -35,7 +35,7 @@ const pdfInvoiceList = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 
-  console.log('==  invoiceRecords  ===================\n', invoiceRecords)
+  // console.log('==  invoiceRecords  ===================\n', invoiceRecords)
 
   const invoices = invoiceRecords.map((record) => record.dataValues)
   invoices.forEach((invoice) => {
@@ -158,6 +158,8 @@ const createPdfInvoice = async (req, res, next) => {
   invoice.sendTenantId = req.user.tenantId
   invoice.invoiceId = invoiceId
   lines.forEach((line, index) => {
+    line.unitPrice = line.unitPrice ? line.unitPrice : null
+    line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
     line.invoiceId = invoiceId
     line.lineIndex = index
   })
@@ -198,9 +200,13 @@ const updatePdfInvoice = async (req, res, next) => {
   if (invoiceRecord.dataValues.tmpFlg) return next(errorHelper.create(400))
 
   lines.forEach((line, index) => {
+    line.unitPrice = line.unitPrice ? line.unitPrice : null
+    line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
     line.invoiceId = req.params.invoiceId
     line.lineIndex = index
   })
+
+  console.log('==  lines  ===================\n', lines)
 
   let updatedInvoice
   try {
@@ -236,6 +242,8 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
   invoice.tmpFlg = true
   invoice.outputDate = new Date()
   lines.forEach((line, index) => {
+    line.unitPrice = line.unitPrice ? line.unitPrice : null
+    line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
     line.invoiceId = invoiceId
     line.lineIndex = index
   })
@@ -322,7 +330,7 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
   let invoiceRecord
   try {
     invoiceRecord = await pdfInvoiceController.findInvoice(req.params.invoiceId)
-    console.log('==  invoiceRecord  ===================\n', invoiceRecord)
+    // console.log('==  invoiceRecord  ===================\n', invoiceRecord)
   } catch (error) {
     console.log(error)
     return next(errorHelper.create(500))
@@ -365,6 +373,8 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
   }
 
   lines.forEach((line, index) => {
+    line.unitPrice = line.unitPrice ? line.unitPrice : null
+    line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
     line.invoiceId = req.params.invoiceId
     line.lineIndex = index
   })
