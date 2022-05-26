@@ -27,7 +27,7 @@ module.exports = {
       },
       status: {
         allowNull: false,
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
       errorData: {
         type: Sequelize.STRING(4000)

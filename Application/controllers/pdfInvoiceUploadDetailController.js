@@ -1,6 +1,6 @@
-const db = require('../models')
+const pdfInvoiceUploadDetail = require('../models').PdfInvoiceUploadDetail
+const constantsDefine = require('../constants')
 const logger = require('../lib/logger')
-const pdfInvoiceUploadDetail = db.pdfInvoiceUploadDetail
 
 module.exports = {
   // パラメータ値
@@ -10,30 +10,48 @@ module.exports = {
   //   lines,
   //   invoiceId,
   //   status,
-  //   errorData,
-  //   createdAt,
-  //   updatedAt
+  //   errorData
   // }
-
-  create: async (values) => {
-    let resultToInsertInvoiceDetail
-
+  findInvoiceDetail: async (invoiceUploadId) => {
+    const functionName = 'invoiceDetailController.findInvoiceDetail'
+    logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+    let result
     try {
-      resultToInsertInvoiceDetail = await pdfInvoiceUploadDetail.create({
+      result = await pdfInvoiceUploadDetail.findAll({
+        where: {
+          invoiceUploadId: invoiceUploadId
+        },
+        order: [
+          ['invoiceId', 'ASC'],
+          ['lines', 'ASC']
+        ]
+      })
+    } catch (error) {
+      logger.error({ invoiceUploadId: invoiceUploadId, stack: error.stack, status: 0 })
+      result = error
+    }
+    logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+    return result
+  },
+  create: async (values) => {
+    const functionName = 'pdfInvoiceUploadDetailController.insert'
+    logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+    let result
+    try {
+      result = await pdfInvoiceUploadDetail.create({
         ...values
       })
     } catch (error) {
-      logger.error(
-        {
-          values: {
-            ...values
-          },
-          stack: error.stack,
-          status: 0
+      logger.error({
+        values: {
+          ...values
         },
-        error.name
-      )
+        stack: error.stack,
+        status: 0
+      })
+      result = error
     }
-    return resultToInsertInvoiceDetail
+    logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+    return result
   }
 }

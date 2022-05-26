@@ -16,6 +16,7 @@ const uploadController = require('../controllers/pdfInvoiceUploadController.js')
 const uploadDetailController = require('../controllers/pdfInvoiceUploadDetailController.js')
 
 const { v4: uuidv4 } = require('uuid')
+const pdfInvoiceUploadDetailController = require('../controllers/pdfInvoiceUploadDetailController.js')
 
 const pdfInvoiceCsvUploadIndex = async (req, res, next) => {
   if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
@@ -43,10 +44,10 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
 
   // メッセージを格納
   let message = constantsDefine.statusConstants.SUCCESS
-  let isErr = false
+  let failCnt = 0
 
   // DB登録
-  const resultInvoice = await uploadController.insert({
+  const resultInvoice = await uploadController.create({
     invoiceUploadId: uuidv4(),
     tenantId: req.user.tenantId,
     csvFileName: req.file.originalname,
@@ -64,27 +65,22 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
 
   if (valResult.size !== 0) {
     if (valResult[0] === 104) {
-      message = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
-
+      // message = constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED
       // 結果一覧画面に遷移
-      return res.redirect('/pdfInvoiceCsvUpload', message)
+      return res.redirect('/pdfInvoiceCsvUpload')
     }
-
     // validate結果登録
-    const failCnt = await validateResultInsert(valResult, resultInvoice.invoiceUploadId, userToken, req, res)
-    if (failCnt > 0) {
-      isErr = true
-    }
+    failCnt = await validateResultInsert(valResult, resultInvoice.invoiceUploadId, userToken, req, res)
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostUpload')
 
-  if (isErr) {
+  if (failCnt > 0) {
     // 結果一覧画面に遷移
-    return res.redirect('pdfInvoiceCsvUpload/resultList', message)
+    return res.redirect('/pdfInvoiceCsvUpload/resultList')
   } else {
     // ドラフト一覧画面に遷移
-    return res.redirect(200, 'pdfInvoices/list', message)
+    return res.redirect('/pdfInvoices/list')
   }
 }
 
@@ -108,8 +104,6 @@ const validate = async (uploadFileData) => {
     if (uploadList[0] !== defaultCsvData) {
       return { line: 0, invoiceId: '-', status: -1, errorData: 'ヘッダーが指定のものと異なります。' }
     }
-
-    logger.info(uploadList)
   } catch (error) {
     logger.error({ stack: error.stack }, error.name)
     return [104]
@@ -118,7 +112,7 @@ const validate = async (uploadFileData) => {
   // 請求書ごとにまとめる
   let targetNo = ''
   const uploadData = {}
-  const tmps = []
+  let tmps = []
 
   for (let i = 1; i < uploadList.length; i++) {
     const line = uploadList[i].split(',')
@@ -130,20 +124,22 @@ const validate = async (uploadFileData) => {
     // 次の請求書番号が異なる場合
     if (i + 1 === uploadList.length || line[0] !== uploadList[i + 1].split(',')[0]) {
       uploadData[targetNo] = tmps
+      tmps = []
     }
   }
+  const result = await validation.validate(uploadData, defaultCsvData)
   logger.info(constantsDefine.logMessage.INF000 + 'validate')
-  return await validation.validate(uploadData, defaultCsvData)
+  return result
 }
 
-const validateResultInsert = async (valResult, invoicesId, req, res, next) => {
+const validateResultInsert = async (valResults, invoicesId, req, res, next) => {
   const functionName = 'validateResultInsert'
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
 
   let successCount = 0
   let failCount = 0
   let skipCount = 0
-  await valResult.forEach((result, i) => {
+  await valResults.forEach((result, i) => {
     if (result.status === 0) {
       successCount++
     } else if (result.status === 1) {
@@ -163,84 +159,137 @@ const validateResultInsert = async (valResult, invoicesId, req, res, next) => {
   })
 
   // 詳細登録
-  await detailInsert(valResult, invoicesId)
-  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
-
-  return failCount
-}
-
-const detailInsert = async (valResult, invoicesId) => {
-  // 詳細登録
-  await valResult.forEach((line, i) => {
-    uploadDetailController.insert({
+  await valResults.forEach((result, i) => {
+    uploadDetailController.create({
       invoiceUploadDetailId: uuidv4(),
       invoiceUploadId: invoicesId,
-      lines: line.line,
-      invoiceId: line.invoiceId,
-      status: line.status,
-      errorData: line.errorData
+      lines: result.line,
+      invoiceId: result.invoiceId,
+      status: result.status,
+      errorData: result.errorData
     })
   })
+
+  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+  return failCount
 }
 
 const pdfInvoiceCsvUploadResult = async (req, res, next) => {
   if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
-  logger.info(constantsDefine.logMessage.INF000 + 'pdfInvoiceCsvUploadResult')
+  const functionName = 'pdfInvoiceCsvUploadResult'
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
 
-  const csvuploadResultArr = []
-  // const result = await invoiceController.findforTenant(req.user.tenantId)
+  const resultArr = []
+  const result = await uploadController.findforTenant(req.user.tenantId)
 
   try {
-    // const timeStamp = (date) => {
-    //   const now = new Date(date)
-    //   const year = now.getFullYear()
-    //   const month = now.getMonth() + 1 < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1
-    //   const day = now.getDate() < 10 ? '0' + now.getDate() : now.getDate()
-    //   const hour = now.getHours() < 10 ? '0' + now.getHours() : now.getHours()
-    //   const min = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()
-    //   const sec = now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()
-    //   const stamp = `${year}/${month}/${day} ${hour}:${min}:${sec}`
-    //   return stamp
-    // }
-    // result.map((currVal, index) => {
-    //   const invoice = currVal
-    //   const invoiceAll =
-    //     ~~invoice.dataValues.successCount + ~~invoice.dataValues.skipCount + ~~invoice.dataValues.failCount
-    //   let status = false
-    //   if (~~invoice.dataValues.failCount === 0 && invoice.dataValues.failCount !== '-' && invoiceAll !== 0) {
-    //     status = true
-    //   }
-    //   csvuploadResultArr.push({
-    //     index: index + 1,
-    //     date: timeStamp(invoice.dataValues.updatedAt),
-    //     filename: invoice.dataValues.csvFileName,
-    //     invoicesAll: invoiceAll,
-    //     invoicesCount: invoice.dataValues.invoiceCount,
-    //     invoicesSuccess: invoice.dataValues.successCount,
-    //     invoicesSkip: invoice.dataValues.skipCount,
-    //     invoicesFail: invoice.dataValues.failCount,
-    //     status: status,
-    //     invoiceId: invoice.dataValues.invoicesId
-    //   })
-    //   return ''
-    // })
+    const timeStamp = (date) => {
+      const now = new Date(date)
+      const year = now.getFullYear()
+      const month = now.getMonth() + 1 < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1
+      const day = now.getDate() < 10 ? '0' + now.getDate() : now.getDate()
+      const hour = now.getHours() < 10 ? '0' + now.getHours() : now.getHours()
+      const min = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes()
+      const sec = now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()
+      const stamp = `${year}/${month}/${day} ${hour}:${min}:${sec}`
+      return stamp
+    }
+    result.map((currVal, index) => {
+      const invoice = currVal
+      const invoiceAll =
+        ~~invoice.dataValues.successCount + ~~invoice.dataValues.skipCount + ~~invoice.dataValues.failCount
+      let status = false
+      if (~~invoice.dataValues.failCount === 0 && invoice.dataValues.failCount !== '-' && invoiceAll !== 0) {
+        status = true
+      }
+      resultArr.push({
+        index: index + 1,
+        date: timeStamp(invoice.dataValues.updatedAt),
+        filename: invoice.dataValues.csvFileName,
+        invoicesAll: invoiceAll,
+        invoicesCount: invoice.dataValues.invoiceCount,
+        invoicesSuccess: invoice.dataValues.successCount,
+        invoicesSkip: invoice.dataValues.skipCount,
+        invoicesFail: invoice.dataValues.failCount,
+        status: status,
+        invoiceUploadId: invoice.dataValues.invoiceUploadId
+      })
+      return ''
+    })
+
+    logger.info(resultArr)
   } catch (error) {
-    logger.error({ page: 'csvuploadResult', msg: '請求書を取得失敗しました。' })
+    logger.error({ page: functionName, msg: '請求書を取得失敗しました。' })
     logger.error(error)
   }
 
   res.render('pdfInvoiceCsvUploadResult', {
     title: '取込結果一覧',
     engTitle: 'Result LIST',
-    csvuploadResultArr: csvuploadResultArr
+    resultArr: resultArr
   })
+  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+}
 
-  logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceCsvUpload')
+const pdfInvoiceCsvUploadResultDetail = async (req, res, next) => {
+  const functionName = 'pdfInvoiceCsvUploadResultDetail'
+  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
+
+  let resultStatusCode
+  let invoiceUploadId
+
+  if (req.params.invoiceUploadId === undefined) {
+    resultStatusCode = 400
+    return res.status(resultStatusCode).send()
+  } else {
+    invoiceUploadId = req.params.invoiceUploadId
+  }
+
+  const resultDetailArr = []
+
+  try {
+    const result = await pdfInvoiceUploadDetailController.findInvoiceDetail(invoiceUploadId)
+    resultStatusCode = 200
+
+    result.map((currVal) => {
+      const invoiceDetail = currVal
+      let status = ''
+
+      switch (invoiceDetail.dataValues.status) {
+        case '1':
+          status = 'スキップ'
+          break
+        case '0':
+          status = '成功'
+          break
+        default:
+          status = '失敗'
+          break
+      }
+
+      resultDetailArr.push({
+        lines: invoiceDetail.dataValues.lines,
+        invoiceId: invoiceDetail.dataValues.invoiceId,
+        status: status,
+        errorData: invoiceDetail.dataValues.errorData
+      })
+      return ''
+    })
+  } catch (error) {
+    resultStatusCode = 500
+    logger.error({ page: 'csvuploadResult', msg: '請求書の取得に失敗しました。' })
+    logger.error(error)
+  }
+
+  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
+  // データ送信
+  return res.status(resultStatusCode).send(JSON.stringify(resultDetailArr))
 }
 
 router.get('/', helper.bcdAuthenticate, pdfInvoiceCsvUploadIndex)
 router.post('/upload', helper.bcdAuthenticate, upload.single('csvFile'), pdfInvoiceCsvUpload)
 router.get('/resultList', helper.bcdAuthenticate, pdfInvoiceCsvUploadResult)
+router.get('/resultList/detail/:invoiceUploadId', helper.bcdAuthenticate, pdfInvoiceCsvUploadResultDetail)
 
 module.exports = {
   router,

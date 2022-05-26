@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false
       },
-      status: DataTypes.STRING,
+      status: DataTypes.INTEGER,
       errorData: {
         type: DataTypes.STRING(4000),
         allowNull: true
@@ -52,8 +52,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'PdfInvoiceUploadDetail',
-      tableName: 'PdfInvoiceUploadDetail'
+      modelName: 'PdfInvoiceUploadDetail'
     }
   )
   return PdfInvoiceUploadDetail

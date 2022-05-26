@@ -1,4 +1,5 @@
 const pdfInvoiceController = require('../controllers/pdfInvoiceController.js')
+const logger = require('../lib/logger')
 
 const saveRules = [
   {
@@ -139,18 +140,17 @@ function validate(uploadData, defaultCsvData) {
   const results = []
   let targetId = ''
   let errFlg = false
+  let lineCnt = 1
 
   Object.keys(uploadData).forEach(function (key) {
     const lines = uploadData[key]
-    let lineCnt = 1
 
     // 請求書番号 重複チェック
-
-    // DB登録
-    const result = pdfInvoiceController.findInvoice({
+    const duplicateResult = pdfInvoiceController.findInvoice({
       invoiceId: key
     })
-    if (result) {
+
+    if (!duplicateResult) {
       // スキップ
       for (let i = lineCnt; i < lineCnt + lines.length; i++) {
         results.push({
@@ -160,11 +160,12 @@ function validate(uploadData, defaultCsvData) {
           errorData: '取込済みのため、処理をスキップしました。'
         })
       }
+      lineCnt = lineCnt + lines.length
       return
     }
 
-    for (let i = lineCnt; i < lineCnt + lines.length; i++) {
-      const items = lines[i].split(',')
+    for (let i = 0; i < lines.length; i++) {
+      const items = lines[i]
 
       if (errFlg && targetId === items[0]) {
         // 同一請求書番号ですでにエラーがある場合、スキップ

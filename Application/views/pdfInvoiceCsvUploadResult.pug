@@ -23,7 +23,7 @@ block content
                 th.width-10.text-center スキップ
                 th.width-10.text-center 作成失敗
             tbody
-              - var list = csvuploadResultArr
+              - var list = resultArr
               each item in list
                 tr
                   th.text-center= item.index
@@ -39,10 +39,10 @@ block content
                   td.text-center= item.invoicesSuccess
                   td.text-center= item.invoicesSkip
                   td.text-center= item.invoicesFail
-                  input(type="hidden" value= item.invoiceId)
+                  input(type="hidden" value= item.invoiceUploadId)
 
         .mt-1.has-text-left
-          a.button.is-link.is-light(href="pdfInvoiceCsvUpload") ← 請求書一括作成
+          a.button.is-link.is-light(href="/pdfInvoiceCsvUpload") ← 請求書一括作成
 
     .modal#csvuploadDetails-modal
       .modal-background.cancel-button(data-target='csvuploadDetails-modal')
@@ -91,5 +91,5 @@ block content
 block append scripts
   script(src="/js/portal-page.js")
   // End of DigitalTrade Portal Page
-  script(src="/js/csvuploadResultDetail.js")
+  script(src="/js/pdfInvoiceUploadResultDetail-page.js")
   // ResultDetail
