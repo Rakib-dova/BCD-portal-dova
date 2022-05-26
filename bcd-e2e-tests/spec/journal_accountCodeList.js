@@ -15,6 +15,13 @@ let browser, accounts, contextOption, page;
 webdriverUtils.setReporter();
 
 describe('仕訳情報設定_勘定科目一覧', function () {
+
+  // テストデータ
+  const accountSets = [
+    {code:'TAccount01', name:'テスト用勘定科目名１ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー'}, // 新規登録用
+    {code:'TAccount02', name:'テスト用勘定科目名２ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー'} // 変更用
+  ];
+
   beforeAll(async function () {
     // テストのタイムアウト時間を設定する（1時間）
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 3600000;
@@ -42,7 +49,34 @@ describe('仕訳情報設定_勘定科目一覧', function () {
     }
   };
 
-  it("4. 新規登録", async function () {
+  // 勘定科目一覧ページまで遷移する
+  async function gotoAccountCodeList(baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage) {
+    // 指定したURLに遷移する
+    await comment('Tradeshiftログインページへ移動する');
+    await page.goto(baseUrl);
+
+    // ログインを行う
+    await comment('ユーザ"' + account.id + '"でログインする');
+    await loginPage.doLogin(account.id, account.password);
+    await tradeShiftTopPage.waitForLoading();
+
+    // デジタルトレードアプリをクリックする
+    await comment('デジタルトレードアプリのアイコンをクリックする');
+    await tradeShiftTopPage.clickBcdApp();
+    await topPage.waitForLoading();
+
+    // 仕訳情報管理メニューを開く
+    await comment('「仕訳情報管理」をクリックする');
+    await topPage.openJournalMenu();
+    await journalMenuPage.waitForLoading();
+
+    // 勘定科目一覧ページへ遷移する
+    await comment('「勘定科目設定」をクリックする');
+    await journalMenuPage.clickAccount();
+    await accountCodeListPage.waitForLoading();
+  };
+
+  it("STEP5_No.4. 新規登録", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -71,29 +105,8 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage, registAccountCodePage }
         = common.getPageObject(browser, page);
 
-      // 指定したURLに遷移する
-      await comment('Tradeshiftログインページへ移動する');
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await comment('ユーザ"' + account.id + '"でログインする');
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      await comment('デジタルトレードアプリのアイコンをクリックする');
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-
       // 勘定科目一覧ページへ遷移する
-      await comment('「勘定科目設定」をクリックする');
-      await journalMenuPage.clickAccount();
-      await accountCodeListPage.waitForLoading();
+      await gotoAccountCodeList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
 
       // 勘定科目登録ページへ遷移する
       await comment('「新規登録」をクリックする');
@@ -101,21 +114,19 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       await registAccountCodePage.waitForLoading();
 
       // 勘定科目を登録する
-      let accountCode = 'TAccount01';
-      let accountName = 'テスト用勘定科目名１ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー';
-      await comment('コード"' + accountCode + '"、科目名"' + accountName + '"で登録する');
-      await registAccountCodePage.regist(accountCode, accountName);
+      await comment('コード"' + accountSets[0].code + '"、科目名"' + accountSets[0].name + '"で登録する');
+      await registAccountCodePage.regist(accountSets[0].code, accountSets[0].name);
       await registAccountCodePage.clickPopupOK();
       await accountCodeListPage.waitForLoading();
 
       // 登録後、勘定科目一覧画面に戻って「勘定科目を登録しました」のポップアップメッセージ表示される
       expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目を登録しました。', '登録後、勘定科目一覧画面に戻って「勘定科目を登録しました」のポップアップメッセージ表示される');
-      expect(await accountCodeListPage.hasRow(accountCode, accountName)).to.equal(true, '登録した勘定科目コード、勘定科目名、最新更新日が正しいこと');
+      expect(await accountCodeListPage.hasRow(accountSets[0].code, accountSets[0].name)).to.equal(true, '登録した勘定科目コード、勘定科目名、最新更新日が正しいこと');
       await page.waitForTimeout(1000);
     }
   });
   
-  it("9. 確認・変更", async function () {
+  it("STEP5_No.9. 確認・変更", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -144,52 +155,29 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage, registAccountCodePage }
         = common.getPageObject(browser, page);
 
-      // 指定したURLに遷移する
-      await comment('Tradeshiftログインページへ移動する');
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await comment('ユーザ"' + account.id + '"でログインする');
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      await comment('デジタルトレードアプリのアイコンをクリックする');
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-
       // 勘定科目一覧ページへ遷移する
-      await comment('「勘定科目設定」をクリックする');
-      await journalMenuPage.clickAccount();
-      await accountCodeListPage.waitForLoading();
+      await gotoAccountCodeList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
 
       // 勘定科目確認・変更ページへ遷移する
-      let accountCode = 'TAccount01';
-      let accountName = 'テスト用勘定科目名１ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー';
-      await comment('勘定科目コード"' + accountCode + '"の「確認・変更する」をクリックする');
-      await accountCodeListPage.clickEdit(accountCode);
+      await comment('勘定科目コード"' + accountSets[0].code + '"の「確認・変更する」をクリックする');
+      await accountCodeListPage.clickEdit(accountSets[0].code);
       await registAccountCodePage.waitForLoading();
       
       // 勘定科目を変更する
       accountCode = 'TAccount02';
       accountName = 'テスト用勘定科目名２ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー';
-      await comment('コード"' + accountCode + '"、科目名"' + accountName + '"で登録する');
-      await registAccountCodePage.regist(accountCode, accountName);
+      await comment('コード"' + accountSets[1].code + '"、科目名"' + accountSets[1].name + '"で登録する');
+      await registAccountCodePage.regist(accountSets[1].code, accountSets[1].name);
       await registAccountCodePage.clickPopupOK();
       await accountCodeListPage.waitForLoading();
 
       // 変更が反映されること
-      expect(await accountCodeListPage.hasRow(accountCode, accountName)).to.equal(true, '変更が反映されること');
+      expect(await accountCodeListPage.hasRow(accountSets[1].code, accountSets[1].name)).to.equal(true, '変更が反映されること');
       await page.waitForTimeout(1000);
     }
   });
   
-  it("13. 削除", async function () {
+  it("STEP5_No.13. 削除", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -218,45 +206,22 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage }
         = common.getPageObject(browser, page);
 
-      // 指定したURLに遷移する
-      await comment('Tradeshiftログインページへ移動する');
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await comment('ユーザ"' + account.id + '"でログインする');
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      await comment('デジタルトレードアプリのアイコンをクリックする');
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-
       // 勘定科目一覧ページへ遷移する
-      await comment('「勘定科目設定」をクリックする');
-      await journalMenuPage.clickAccount();
-      await accountCodeListPage.waitForLoading();
+      await gotoAccountCodeList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
 
       // 勘定科目を削除する
-      let accountCode = 'TAccount02';
-      let accountName = 'テスト用勘定科目名２ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー';
-      await comment('勘定科目コード"' + accountCode + '"を削除する');
-      await accountCodeListPage.delete(accountCode);
+      await comment('勘定科目コード"' + accountSets[1].code + '"を削除する');
+      await accountCodeListPage.delete(accountSets[1].code);
       await page.waitForTimeout(3000);
 
       // 「勘定科目を削除しました」のメッセージが表示され、一覧から削除されていること
       expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目を削除しました。', '「勘定科目を削除しました」のメッセージが表示される');
-      expect(await accountCodeListPage.hasRow(accountCode, accountName)).to.equal(false, '一覧から削除されていること');
+      expect(await accountCodeListPage.hasRow(accountSets[1].code, accountSets[1].name)).to.equal(false, '一覧から削除されていること');
       await page.waitForTimeout(1000);
     }
   });
   
-  it("15. 勘定科目一括作成フォーマットファイルダウンロード", async function () {
+  it("STEP5_No.15. 勘定科目一括作成フォーマットファイルダウンロード", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -285,29 +250,8 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage, uploadAccountCodePage }
         = common.getPageObject(browser, page);
 
-      // 指定したURLに遷移する
-      await comment('Tradeshiftログインページへ移動する');
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await comment('ユーザ"' + account.id + '"でログインする');
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      await comment('デジタルトレードアプリのアイコンをクリックする');
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-
       // 勘定科目一覧ページへ遷移する
-      await comment('「勘定科目設定」をクリックする');
-      await journalMenuPage.clickAccount();
-      await accountCodeListPage.waitForLoading();
+      await gotoAccountCodeList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
 
       // 勘定科目一括作成ページへ遷移する
       await comment('「勘定科目一括作成」をクリックする');
@@ -324,7 +268,7 @@ describe('仕訳情報設定_勘定科目一覧', function () {
     }
   });
   
-  it("16. 勘定科目一括作成", async function () {
+  it("STEP5_No.16. 勘定科目一括作成", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -353,29 +297,8 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage, uploadAccountCodePage }
         = common.getPageObject(browser, page);
 
-      // 指定したURLに遷移する
-      await comment('Tradeshiftログインページへ移動する');
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await comment('ユーザ"' + account.id + '"でログインする');
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      await comment('デジタルトレードアプリのアイコンをクリックする');
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-
       // 勘定科目一覧ページへ遷移する
-      await comment('「勘定科目設定」をクリックする');
-      await journalMenuPage.clickAccount();
-      await accountCodeListPage.waitForLoading();
+      await gotoAccountCodeList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
 
       // 勘定科目一括作成ページへ遷移する
       await comment('「勘定科目一括作成」をクリックする');
@@ -429,29 +352,8 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage }
         = common.getPageObject(browser, page);
 
-      // 指定したURLに遷移する
-      await comment('Tradeshiftログインページへ移動する');
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await comment('ユーザ"' + account.id + '"でログインする');
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      await comment('デジタルトレードアプリのアイコンをクリックする');
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-
       // 勘定科目一覧ページへ遷移する
-      await comment('「勘定科目設定」をクリックする');
-      await journalMenuPage.clickAccount();
-      await accountCodeListPage.waitForLoading();
+      await gotoAccountCodeList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
 
       // 勘定科目をすべて削除する
       await accountCodeListPage.deleteAll();

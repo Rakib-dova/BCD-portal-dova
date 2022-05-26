@@ -12,7 +12,7 @@ let browser, contextOption, page;
 
 webdriverUtils.setReporter();
 
-describe('仕訳情報設定_支払依頼（一次承認まで）', function () {
+describe('仕訳情報設定_支払依頼（十次承認まで）', function () {
 
   // 支払依頼に使用する請求書の番号
   const invoiceNo = 'fcde40392';
@@ -205,39 +205,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await page.waitForTimeout(1000);
   });
 
-  it("STEP6_No.220. 支払依頼ページ_未処理（申請者）", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage }
-      = common.getPageObject(browser, page);
-
-    // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
-    // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
-
-    // ステータスが「未処理」となっていること
-    expect(await paymentRequestListPage.getApproveStatus('fcde40393')).to.equal('未処理', 'ステータスが「未処理」となっていること');
-    await page.waitForTimeout(1000);
-  });
-
-  it("STEP6_No.45,46,48. 支払依頼ページ表示", async function () {
+  it("STEP6_No.126,127,143. 支払依頼ページ_依頼", async function () {
     // テストの初期化を実施
     await initBrowser();
     const context = await browser.newContext(contextOption);
@@ -265,104 +233,8 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await journalMenuPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
 
-    // 仕訳情報設定ページへ遷移する
-    await comment('「仕訳情報設定」をクリックする');
-    let cost = await paymentRequestListPage.getCost(invoiceNo);
-    let sender = await paymentRequestListPage.getSender(invoiceNo);
-    let receiver = await paymentRequestListPage.getReceiver(invoiceNo);
-    await paymentRequestListPage.clickDetail(invoiceNo);
-    await journalDetailPage.waitForLoading();
-
-    // 支払い依頼ページへ遷移する
-    await comment('「支払依頼へ」をクリックする');
-    await journalDetailPage.clickPaymentRequest();
-    await paymentRequestPage.waitForLoading();
-
-    // 請求書番号、宛先、差出人が確認できること
-    expect(await paymentRequestPage.getNo()).to.equal(invoiceNo, '請求書番号が"' + invoiceNo + '"であること');
-    expect(await paymentRequestPage.getReceiver()).to.equal(receiver, '宛先が"' + receiver + '"であること');
-    expect(await paymentRequestPage.getSender()).to.equal(sender, '差出人が"' + sender + '"であること');
-
-    // 合計欄を確認できること
-    expect(await paymentRequestPage.getCost()).to.equal(cost, '合計価格が"' + cost + '"であること');
-    await page.waitForTimeout(1000);
-  });
-
-  it("STEP6_No.49,52. 支払依頼ページ_メッセージ入力", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage,
-      journalDetailPage, paymentRequestPage }
-      = common.getPageObject(browser, page);
-
-    // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
-    // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
-
-    // 仕訳情報設定ページへ遷移する
-    await comment('「仕訳情報設定」をクリックする');
-    await paymentRequestListPage.clickDetail(invoiceNo);
-    await journalDetailPage.waitForLoading();
-
-    // 支払い依頼ページへ遷移する
-    await comment('「支払依頼へ」をクリックする');
-    await journalDetailPage.clickPaymentRequest();
-    await paymentRequestPage.waitForLoading();
-
-    // メッセージを入力する
-    let message = 'メッセージテスト123456789abcdefghijklmnopqrstuvwxyz';
-    await comment('メッセージへ"' + message + '"と入力する');
-    await paymentRequestPage.setMessage(message);
-
-    // 入力したデータが正しく反映されること
-    expect(await paymentRequestPage.getMessage()).to.equal(message, '入力したデータが正しく反映されること');
-    await page.waitForTimeout(1000);
-  });
-
-  it("STEP6_No.53,54,56,57,58. 支払依頼ページ_承認ルート選択", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage,
-      journalDetailPage, paymentRequestPage }
-      = common.getPageObject(browser, page);
-
-    // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
-    // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
+    // ステータスが「差し戻し」となっていること
+    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('差し戻し', 'ステータスが「差し戻し」となっていること');
 
     // 仕訳情報設定ページへ遷移する
     await comment('「仕訳情報設定」をクリックする');
@@ -381,125 +253,33 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     // 承認ルートを検索する
     await comment('承認ルート"' + approveRoute.name + '"を検索する');
     await paymentRequestPage.searchRoute(approveRoute.name);
-
-    // 検索モーダルにて検索した承認ルートが表示されること
-    expect(await paymentRequestPage.hasRouteRow(approveRoute.name)).to.equal(true, '検索モーダルにて検索した承認ルートが表示されること');
-
-    // 当該承認ルートの詳細画面に遷移されること
-    await comment('承認ルート"' + approveRoute.name + '"の「承認ルート確認」をクリックする');
-    await paymentRequestPage.confirmRoute(approveRoute.name);
-    expect(await paymentRequestPage.getRouteNameOnConfirm()).to.equal(approveRoute.name, '該当承認ルートの詳細画面に遷移されること');
-
-    // 承認リストが表示されていること
-    let users = await paymentRequestPage.getAuthorizersOnConfirm();
-    for (i = 0; i < approveRoute.authorizers.length; i++) {
-      let nameMessage = (i < approveRoute.authorizers.length - 1 ? (i + 1) + '次' : '最終')
-        + '承認者が"' + approveRoute.authorizers[i].family + ' ' + approveRoute.authorizers[i].first + '"であること';
-      expect(users[i]).to.equal(approveRoute.authorizers[i].first + ' ' + approveRoute.authorizers[i].family, nameMessage);
-    }
-
-    // 承認ルート確認ポップアップを閉じる
-    await paymentRequestPage.closeConfirm();
-
-    // 承認ルートを設定できること
-    await comment('承認ルート"' + approveRoute.name + '"を選択する');
     await paymentRequestPage.selectRoute(approveRoute.name);
-    expect(await paymentRequestPage.getRouteName()).to.equal(approveRoute.name, '承認ルートを設定できること');
-    await page.waitForTimeout(1000);
-  });
 
-  it("STEP6_No.65,78. 支払依頼ページ_依頼", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage,
-      journalDetailPage, paymentRequestPage }
-      = common.getPageObject(browser, page);
-
-    // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
-    // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
-
-    // 仕訳情報設定ページへ遷移する
-    await comment('「仕訳情報設定」をクリックする');
-    await paymentRequestListPage.clickDetail(invoiceNo);
-    await journalDetailPage.waitForLoading();
-
-    // 仕訳情報にて、勘定科目・補助科目・部門データを選択する
-    let i = 0;
-    let accountCodeCount = await journalDetailPage.getAccountCodeCount();
-    await comment('仕訳情報入力数：' + accountCodeCount);
-    for (i = 0; i < accountCodeCount; i++) {
-      await comment('借方の勘定科目"' + accountCodes[0].name + '"・補助科目"' + accountCodes[0].subName + '"を選択する');
-      await journalDetailPage.selectAccountCode(i + 1, accountCodes[0].code, accountCodes[0].subCode);
-      await comment('借方の部門データ"' + departments[0].name + '"を選択する');
-      await journalDetailPage.selectDepartment(i + 1, departments[0].code);
-      await comment('貸方の勘定科目"' + accountCodes[1].name + '"・補助科目"' + accountCodes[1].subName + '"を選択する');
-      await journalDetailPage.selectCreditAccountCode(i + 1, accountCodes[1].code, accountCodes[1].subCode);
-      await comment('貸方の部門データ"' + departments[1].name + '"を選択する');
-      await journalDetailPage.selectCreditDepartment(i + 1, departments[1].code);
-    }
-
-    // 保存する
-    await comment('「保存」をクリックする');
-    await journalDetailPage.save();
-    await page.waitForTimeout(5000);
-
-    // 支払い依頼ページへ遷移する
-    await comment('「支払依頼へ」をクリックする');
-    await journalDetailPage.clickPaymentRequest();
-    await paymentRequestPage.waitForLoading();
-
-    // メッセージを入力する
-    let message = 'メッセージ65';
-    await comment('メッセージへ"' + message + '"と入力する');
-    await paymentRequestPage.setMessage(message);
-
-    // 承認ルート選択ダイアログを表示する
-    await comment('「承認ルート選択」をクリックする');
-    await paymentRequestPage.clickRouteSearch();
-
-    // 承認ルートを検索する
-    await comment('承認ルート"' + approveRoute.name + '"を検索する');
-    await paymentRequestPage.searchRoute(approveRoute.name);
-    await paymentRequestPage.selectRoute(approveRoute.name);
+    // 承認ルートを再度選択できること
+    expect(await paymentRequestPage.getRouteName()).to.equal(approveRoute.name, '承認ルートを再度選択できること');
 
     // 支払依頼を行う
     await comment('支払依頼を行う');
     await paymentRequestPage.submit();
     await paymentRequestListPage.waitForLoading();
 
-    // 依頼がされること
-    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('支払依頼中', '依頼がされること');
+    // 再度申請ができること
+    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('支払依頼中', 'ステータスが「承認依頼中」となっていること');
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');
     await paymentRequestListPage.clickConstruct();
 
-    // 支払依頼の請求書があること
-    expect(await paymentRequestListPage.hasConstructRow(invoiceNo)).to.equal(true, '支払依頼の請求書があること');
+    // 再度依頼ができること
+    expect(await paymentRequestListPage.hasConstructRow(invoiceNo)).to.equal(true, '再度依頼ができること');
     await page.waitForTimeout(1000);
   });
 
-  it("STEP6_No.79,80,81,140,144,222. 支払依頼ページ_依頼中（申請者）", async function () {
+  // 承認
+  async function approve(no, status) {
     // テストの初期化を実施
     await initBrowser();
+
     const context = await browser.newContext(contextOption);
     if (page != null) {
       page.close();
@@ -510,71 +290,9 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     // ページオブジェクト
     const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage, paymentRequestPage }
       = common.getPageObject(browser, page);
-
-    // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
-    // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
-
-    // ステータスが「支払依頼中」となっていること
-    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('支払依頼中', 'ステータスが「支払依頼中」となっていること');
-
-    // 承認待ちタブを開く
-    await comment('「承認待ち」タブを開く');
-    await paymentRequestListPage.clickConstruct();
-
-    // 承認状況に「支払依頼中」と表示されていること
-    expect(await paymentRequestListPage.getConstructStatus(invoiceNo)).to.equal('支払依頼中', '承認状況に「支払依頼中」と表示されていること');
-
-    // 支払依頼ページへ遷移する
-    await comment(invoiceNo + 'の「依頼内容確認」をクリックする');
-    await paymentRequestListPage.clickConstructDetail(invoiceNo);
-    await paymentRequestPage.waitForLoading();
-
-    // 詳細画面に遷移すること
-    expect(await paymentRequestPage.getNo()).to.equal(invoiceNo, '詳細画面に遷移すること');
-
-    // 仕訳情報が表示されること
-    let lineAccountCode = await paymentRequestPage.getLineAccountCode(1);
-    expect (lineAccountCode.accountCode).to.equal(accountCodes[0].code, '勘定科目が表示されること');
-    expect (lineAccountCode.subAccountCode).to.equal(accountCodes[0].subCode, '補助科目が表示されること');
-    expect (lineAccountCode.departmentCode).to.equal(departments[0].code, '部門データが表示されること');
-
-    // 依頼者名目が自分のユーザー名となっていること
-    let actual = await paymentRequestPage.getRequestingRow(1);
-    expect(actual.asignee).to.equal(requester.first + ' ' + requester.family, '依頼者名目が自分のユーザー名となっていること');
-
-    // 承認状況に「依頼済み」と表示されていること
-    expect(actual.status).to.contains('依頼済み', '承認状況に「依頼済み」と表示されていること');
-    await page.waitForTimeout(1000);
-  });
-
-  it("STEP6_No.94,95,96. 支払依頼ページ_承認（1次申請）", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage,
-      paymentRequestPage, journalDetailPage }
-      = common.getPageObject(browser, page);
   
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, approveRoute.authorizers[0], loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(config.baseUrl, approveRoute.authorizers[no], loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -594,25 +312,6 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await comment(invoiceNo + 'の「依頼内容確認」をクリックする');
     await paymentRequestListPage.clickConstructDetail(invoiceNo);
     await paymentRequestPage.waitForLoading();
-
-    // 仕訳情報にて、勘定科目・補助科目・部門データを選択する
-    await comment('借方の勘定科目"' + accountCodes[1].name + '"・補助科目"' + accountCodes[1].subName + '"を選択する');
-    await paymentRequestPage.selectAccountCode(1, accountCodes[1].code, accountCodes[1].subCode);
-    await comment('借方の部門データ"' + departments[1].name + '"を選択する');
-    await paymentRequestPage.selectDepartment(1, departments[1].code);
-    await comment('貸方の勘定科目"' + accountCodes[0].name + '"・補助科目"' + accountCodes[0].subName + '"を選択する');
-    await paymentRequestPage.selectCreditAccountCode(1, accountCodes[0].code, accountCodes[0].subCode);
-    await comment('貸方の部門データ"' + departments[0].name + '"を選択する');
-    await paymentRequestPage.selectCreditDepartment(1, departments[0].code);
-    let lineAccountCode = await paymentRequestPage.getLineAccountCode(1);
-    expect (lineAccountCode.accountCode).to.equal(accountCodes[1].code, '勘定科目を編集できること');
-    expect (lineAccountCode.subAccountCode).to.equal(accountCodes[1].subCode, '補助科目を編集できること');
-    expect (lineAccountCode.departmentCode).to.equal(departments[1].code, '部門データを編集できること');
-
-    // メッセージを編集する
-    let message = '1次承認者からのメッセージ';
-    await paymentRequestPage.setMessage(message);
-    expect (await paymentRequestPage.getMessage()).to.equal(message, 'メッセージを編集できること');
 
     // 承認する
     await paymentRequestPage.approve();
@@ -622,19 +321,51 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     expect(await paymentRequestListPage.getPopupMessage()).to.contains('承認を完了しました。', '「承認を完了しました。」のメッセージが表示されていること');
 
     // 請求書一覧画面にて承認ステータスに変更されていること
-    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('一次承認済み', '請求書一覧画面にて承認ステータスに変更されていること');
-    
-    // 仕訳情報設定ページへ遷移する
-    await comment('「仕訳情報設定」をクリックする');
-    await paymentRequestListPage.clickDetail(invoiceNo);
-    await journalDetailPage.waitForLoading();
-
-    // 編集ができないこと
-    expect(await journalDetailPage.isSearchVisible()).to.equal(false, '編集ができないこと');
+    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal(status, '請求書一覧画面にて承認ステータスに変更されていること');
     await page.waitForTimeout(1000);
+  }
+
+  it("STEP6_No.94,95,96. 支払依頼ページ_承認（1次申請）", async function () {
+    await approve(0, '一次承認済み');
   });
 
-  it("STEP6_No.146,147,224,349,350. 支払依頼ページ_1次承認済み（申請者）", async function () {
+  it("STEP6_No.226. 支払依頼ページ_承認（2次申請）", async function () {
+    await approve(1, '二次承認済み');
+  });
+
+  it("STEP6_No.228. 支払依頼ページ_承認（3次申請）", async function () {
+    await approve(2, '三次承認済み');
+  });
+
+  it("STEP6_No.230. 支払依頼ページ_承認（4次申請）", async function () {
+    await approve(3, '四次承認済み');
+  });
+
+  it("STEP6_No.232. 支払依頼ページ_承認（5次申請）", async function () {
+    await approve(4, '五次承認済み');
+  });
+
+  it("STEP6_No.234. 支払依頼ページ_承認（6次申請）", async function () {
+    await approve(5, '六次承認済み');
+  });
+
+  it("STEP6_No.236. 支払依頼ページ_承認（7次申請）", async function () {
+    await approve(6, '七次承認済み');
+  });
+
+  it("STEP6_No.238. 支払依頼ページ_承認（8次申請）", async function () {
+    await approve(7, '八次承認済み');
+  });
+
+  it("STEP6_No.240. 支払依頼ページ_承認（9次申請）", async function () {
+    await approve(8, '九次承認済み');
+  });
+
+  it("STEP6_No.242. 支払依頼ページ_承認（10次申請）", async function () {
+    await approve(9, '十次承認済み');
+  });
+
+  it("STEP6_No.351,352. 支払依頼ページ_10次承認済み（申請者）", async function () {
     // テストの初期化を実施
     await initBrowser();
     const context = await browser.newContext(contextOption);
@@ -661,8 +392,8 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await journalMenuPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
 
-    // ステータスが「一次承認済み」となっていること
-    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('一次承認済み', 'ステータスが「一次承認済み」となっていること');
+    // ステータスが「十次承認済み」となっていること
+    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('十次承認済み', 'ステータスが「十次承認済み」となっていること');
     
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');
@@ -673,19 +404,20 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await paymentRequestListPage.clickConstructDetail(invoiceNo);
     await paymentRequestPage.waitForLoading();
 
-    // 担当者名が自分のユーザー名となっていること
-    let actual = await paymentRequestPage.getRequestingRow(1);
-    expect(actual.asignee).to.equal(requester.first + ' ' + requester.family, '担当者名が自分のユーザー名となっていること');
-
-    // 承認状況に「依頼済み」と表示されていること
-    expect(actual.status).to.contains('依頼済み', '承認状況に「依頼済み」と表示されていること');
-
-    // 一次承認にて担当者名に誤りがないこと
-    actual = await paymentRequestPage.getRequestingRow(2);
-    expect(actual.asignee).to.equal(approveRoute.authorizers[0].first + ' ' + approveRoute.authorizers[0].family, '一次承認にて担当者名に誤りがないこと');
-
-    // 承認された日時が表示されること
-    expect(actual.status).to.contains('承認済み', '承認された日時が表示されること');
+    let i = 1;
+    for (i = 1; i < approveRoute.authorizers.length; i++) {
+      // 一次承認にて担当者名に誤りがないこと
+      let actual = await paymentRequestPage.getRequestingRow(i + 2);
+      let message = i < approveRoute.authorizers.length - 1 ? (i + 1) + '次' : '最終';
+      expect(actual.asignee).to.equal(approveRoute.authorizers[i].first + ' ' + approveRoute.authorizers[i].family, message + '承認にて担当者名に誤りがないこと');
+  
+      // 承認された日時が表示されること（最終承認以外）
+      if (i < approveRoute.authorizers.length - 1) {
+        expect(actual.status).to.contains('承認済み', '承認された日時が表示されること');
+      } else {
+        expect(actual.status).to.equal('処理中', '最終承認の承認状況が「処理中」となっていること');
+      }
+    }
     await page.waitForTimeout(1000);
   });
 
@@ -704,7 +436,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, approveRoute.authorizers[1], loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(config.baseUrl, approveRoute.authorizers[approveRoute.authorizers.length - 1], loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');

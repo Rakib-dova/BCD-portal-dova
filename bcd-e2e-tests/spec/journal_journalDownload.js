@@ -42,7 +42,7 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     }
   };
 
-  it("129. データ有", async function () {
+  it("STEP5_No.129. データ有", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -115,16 +115,18 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
       await journalDownloadPage.waitForLoading();
 
       // 条件を入力する
-      await journalDownloadPage.inputConditions(invoiceNo, '2021-04-01', '2023-03-31', sender);
+      await comment('条件を入力する');
+      await journalDownloadPage.inputConditions(invoiceNo, '2021-04-01', '2023-03-31', sender, false);
+      await comment('「CSVダウンロード」をクリックする');
       let csvPath = await journalDownloadPage.download();
 
       // CSVデータがダウンロードされ、GQ列～ID列に設定した仕訳情報が入力されていること
       expect(await fs.existsSync(csvPath)).to.equal(true, 'CSVデータがダウンロードされること');
       let actual = await getCsvData(csvPath);
       for (i = 0; i < expected.length; i++) {
-        expect(actual[0]['仕訳情報' + (i + 1) + '-勘定科目コード']).to.equal(expected[i].accountCode, '仕訳情報' + (i + 1) + '-勘定科目コードが出力されていること');
-        expect(actual[0]['仕訳情報' + (i + 1) + '-補助科目コード']).to.equal(expected[i].subAccountCode, '仕訳情報' + (i + 1) + '-補助科目コードが出力されていること');
-        expect(actual[0]['仕訳情報' + (i + 1) + '-部門コード']).to.equal(expected[i].departmentCode, '仕訳情報' + (i + 1) + '-部門コードが出力されていること');
+        expect(actual[0]['仕訳情報' + (i + 1) + '-借方勘定科目コード']).to.equal(expected[i].accountCode, '仕訳情報' + (i + 1) + '-勘定科目コードが出力されていること');
+        expect(actual[0]['仕訳情報' + (i + 1) + '-借方補助科目コード']).to.equal(expected[i].subAccountCode, '仕訳情報' + (i + 1) + '-補助科目コードが出力されていること');
+        expect(actual[0]['仕訳情報' + (i + 1) + '-借方部門コード']).to.equal(expected[i].departmentCode, '仕訳情報' + (i + 1) + '-部門コードが出力されていること');
         expect(actual[0]['仕訳情報' + (i + 1) + '-計上金額']).to.equal(expected[i].cost.replaceAll(/,/g, ''), '仕訳情報' + (i + 1) + '-計上金額が出力されていること');
       }
       await page.waitForTimeout(1000);

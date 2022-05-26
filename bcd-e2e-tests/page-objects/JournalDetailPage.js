@@ -1,6 +1,6 @@
 const { ActionUtils } = require('../utils/action-utils');
 
-// 支払依頼一覧
+// 仕訳情報設定
 class JournalDetailPage {
 
   // コンストラクタ
@@ -50,13 +50,13 @@ class JournalDetailPage {
 
   // 仕訳情報の「-」をクリックする
   async clickDelBreakdown(no) {
-    await this.actionUtils.click(this.frame, '//div[@id="lineNo1"]/div[' + no + ']//a[@class="red-color btn-minus-accountCode"]');
+    await this.actionUtils.click(this.frame, '//div[@id="lineNo1_lineAccountCode' + no + '"]//a[@class="red-color btn-minus-accountCode"]');
     await this.frame.waitForTimeout(1000);
   }
 
   // 仕訳情報入力フォームの行数を取得する
   async getBreakdownCount() {
-    return (await this.actionUtils.getElements(this.frame, '//div[@id="lineNo1"]/div')).length;
+    return (await this.actionUtils.getElements(this.frame, '//div[@id="lineNo1"]/div[contains(@class, "lineAccountcode")]')).length;
   }
 
   // 仕訳情報入力フォームにて、指定の勘定科目、補助科目、部門コードが入力されているものを検索する
@@ -85,6 +85,11 @@ class JournalDetailPage {
     return result;
   }
 
+  // 仕訳情報内の検索ボタンの有無を確認する
+  async isSearchVisible() {
+    return await this.actionUtils.isExist(this.frame, '//a[@data-target="accountCode-modal"]');
+  }
+
   // 先頭の仕訳情報入力フォームにて、勘定科目の検索ポップアップを表示する
   async clickAccountCodeSearch() {
     await this.actionUtils.click(this.frame, '//div[@id="lineNo1"]//a[@data-target="accountCode-modal"]');
@@ -109,6 +114,58 @@ class JournalDetailPage {
   // 勘定科目、補助科目の検索結果をクリックする
   async clickAccountRow(accountCode, subAccountCode) {
     await this.actionUtils.click(this.frame, '//div[@id="displayInvisible"]//td[contains(text(), "' + accountCode + '")]/../td[contains(text(), "' + subAccountCode + '")]');
+    await this.frame.waitForTimeout(1000);
+  }
+
+  // 仕訳情報内、借方の勘定科目数を取得する
+  async getAccountCodeCount() {
+    let elements = await this.actionUtils.getElements(this.frame, '//div[@class="column p-0 lineAccountCode"]');
+    return elements.length;
+  }
+
+  // 仕訳情報にて、借方の勘定科目・補助科目を選択する
+  async selectAccountCode(no, code, subCode) {
+    await this.actionUtils.click(this.frame, '//div[@id="lineNo' + no + '"]//a[contains(@data-target, "accountCode-modal")]');
+    await this.actionUtils.waitForLoading('#accountCode-modal');
+    await this.actionUtils.fill(this.frame, '#searchModalAccountCode', code);
+    await this.actionUtils.fill(this.frame, '#searchModalSubAccountCode', subCode);
+    await this.actionUtils.click(this.frame, '#btnSearchAccountCode');
+    await this.actionUtils.waitForLoading('#displayFieldResultBody');
+    await this.actionUtils.click(this.frame, '//tbody[@id="displayFieldResultBody"]/tr');
+    await this.frame.waitForTimeout(1000);
+  }
+
+  // 仕訳情報にて、借方の部門データを選択する
+  async selectDepartment(no, code) {
+    await this.actionUtils.click(this.frame, '//div[@id="lineNo' + no + '"]//a[contains(@data-target, "departmentCode-modal")]');
+    await this.actionUtils.waitForLoading('#departmentCode-modal');
+    await this.actionUtils.fill(this.frame, '#searchModalDepartmentCode', code);
+    await this.actionUtils.click(this.frame, '#btnSearchDepartmentCode');
+    await this.actionUtils.waitForLoading('#displayFieldDepartmentResultBody');
+    await this.actionUtils.click(this.frame, '//tbody[@id="displayFieldDepartmentResultBody"]/tr');
+    await this.frame.waitForTimeout(1000);
+  }
+
+  // 仕訳情報にて、貸方の勘定科目・補助科目を選択する
+  async selectCreditAccountCode(no, code, subCode) {
+    await this.actionUtils.click(this.frame, '//div[@id="lineNo' + no + '"]//a[contains(@data-target, "creditAccountCode-modal")]');
+    await this.actionUtils.waitForLoading('#creditAccountCode-modal');
+    await this.actionUtils.fill(this.frame, '#searchModalCreditAccountCode', code);
+    await this.actionUtils.fill(this.frame, '#searchModalCreditSubAccountCode', subCode);
+    await this.actionUtils.click(this.frame, '#btnSearchCreditAccountCode');
+    await this.actionUtils.waitForLoading('#displayCreditFieldResultBody');
+    await this.actionUtils.click(this.frame, '//tbody[@id="displayCreditFieldResultBody"]/tr');
+    await this.frame.waitForTimeout(1000);
+  }
+
+  // 仕訳情報にて、貸方の部門データを選択する
+  async selectCreditDepartment(no, code) {
+    await this.actionUtils.click(this.frame, '//div[@id="lineNo' + no + '"]//a[contains(@data-target, "creditDepartmentCode-modal")]');
+    await this.actionUtils.waitForLoading('#creditDepartmentCode-modal');
+    await this.actionUtils.fill(this.frame, '#searchModalCreditDepartmentCode', code);
+    await this.actionUtils.click(this.frame, '#btnSearchCreditDepartmentCode');
+    await this.actionUtils.waitForLoading('#displayCreditFieldDepartmentResultBody');
+    await this.actionUtils.click(this.frame, '//tbody[@id="displayCreditFieldDepartmentResultBody"]/tr');
     await this.frame.waitForTimeout(1000);
   }
 
@@ -176,6 +233,16 @@ class JournalDetailPage {
   async clickBulkOK() {
     await this.actionUtils.click(this.frame, '#btn-bulk-insert');
     await this.frame.waitForTimeout(1000);
+  }
+
+  // 入力内容を保存する
+  async save() {
+    await this.actionUtils.click(this.frame, '//a[contains(text(), "保存")]');
+  }
+
+  // 支払い依頼ページへ遷移する
+  async clickPaymentRequest() {
+    await this.actionUtils.click(this.frame, '//a[contains(text(), "支払依頼へ")]');
   }
 }
 exports.JournalDetailPage = JournalDetailPage;
