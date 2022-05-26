@@ -140,6 +140,15 @@ block content
                     p 請求書（売掛金）を買い取らせていただくことで素早く簡単に現金化ができるサービスです。
           .column.hvr-float
             .box.iconBox.textOverflow
+              a.show-modal(data-target='law-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ben.svg')
+                  .media-content
+                    p.title.is-5.margin-bottom-02rem 法律・会計税務のサポート
+                    p 企業の法律や会計税務に関する悩みについて、専門家に相談することから、最適な方をご紹介することまで可能。                     
+          .column.hvr-float
+            .box.iconBox.textOverflow
               a.show-modal(data-target='settlement-modal')
                 .media.appdesc
                   .media-left
@@ -147,7 +156,6 @@ block content
                   .media-content
                     p.title.is-5 銀行振込消込
                     p 専用の振込口座をご利用いただくことで振込名義人によらず請求先を特定できるサービスです。
-          .column.hvr-float
 
     .modal#support-modal
       .modal-background.cancel-button(data-target='support-modal')
@@ -284,7 +292,67 @@ block content
                 i.fas.fa-file
               p ユーザー一括登録
         footer.modal-card-foot
-    
+
+    .modal#law-modal
+      .modal-background.cancel-button(data-target='law-modal')
+      .modal-card#olta-modal-card
+        header.modal-card-head
+          p.modal-card-title 法律・税務サポート
+          p.modal-card-subTitle 弁護士ドットコムの提供するサービスとなります
+          button.delete(data-target='law-modal')
+        section.modal-card-body
+          .media
+            .media-left
+              img.app-icon(src='../image/ben.svg')  
+            div      
+              p.modal-card-body-media-p みんなの法律相談
+          br
+          p  弁護士が法律トラブルの相談について回答してくれるQAサービス。
+          p  自分にあった弁護士を検索することも可能。
+          br
+          p  『みんなの法律相談』で公開されている、
+          p  同じような法律トラブルにあった他者が投稿した相談に対する。
+          p  弁護士の有益な回答内容を閲覧することもできます。
+          br
+          a.olta-link-underline(href='https://www.bengo4.com/bbs/?utm_source=alliance&utm_medium=link&utm_campaign=nc202110' target='_blank') みんなの法律相談：相談の投稿と投稿した質問への弁護士回答内容の閲覧は無料
+          br
+          br
+          a.olta-link-underline(href='https://www.bengo4.com/search/?utm_source=alliance&utm_medium=link&utm_campaign=nc202109' target='_blank') 弁護士の検索　　：無料
+          br
+          br
+          .media
+            .media-left
+              img.app-icon(src='../image/zei.svg')        
+            p.modal-card-body-media-p 税理士紹介
+          br
+          p ご要望にあった最適な税理士を経験豊富なコーディネーターがご紹介します。
+          p ご利用手数料は一切いただきません。
+          br
+          p 全国6000名以上の日本最大級のネットワークから、適切な税理士をご紹介します。
+          p 面談設定や価格交渉、依頼の可否連絡など全てコーディネーターが行います。
+          p 初めての顧問税理士探しから、顧問税理士の変更検討、決算申告や相続税申告などの単発でのご依頼など、
+          p どのような業務依頼でも適した税理士をご紹介します。
+          br
+          a.olta-link-underline(href='https://www.zeiri4.com/shoukai/promotion/external-cooperation/503/' target='_blank') 税理士紹介　　　：無料
+          br
+          br
+          .media
+            .media-left
+              img.app-icon(src='../image/cloudzei.svg')        
+            p.modal-card-body-media-p クラウド税務相談
+          br
+          p オンライン上かつ『非公開』な環境で、会計・経理・税務についての
+          p 相談すれば、税理士が回答してくれます。
+          br
+          p 自分で税理士を探す手間や予定調整は一切不要で、24時間お好きなタイミングで
+          p 相談を投稿できます。対面だと1万円以上が相場ですが、
+          p 1相談3000円（税抜）の超低価格で利用可能です。※料金は2022/5時点
+          p そのまま業務依頼したい場合は回答した税理士に連絡が取れますし、
+          p 会計・経理・税務など多岐に渡る経営相談や最新の税制改正についての知見など
+          p どのようなお悩みにでも対応してくれます。
+          br
+          a.olta-link-underline(href='https://httpslink.com/nttcom-cloud-tax' target='_blank') クラウド税務相談：3,000円／1相談成立（税抜）
+
     .modal#factoring-modal
       .modal-background.cancel-button(data-target='factoring-modal')
       .modal-card#olta-modal-card
