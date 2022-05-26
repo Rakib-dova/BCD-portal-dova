@@ -71,12 +71,18 @@ block content
             .field-label
               label.bulmalabel 出力フォーマット
             .field-body
-              .select.is-fullwidth
-                select(name='serviceDataFormat')
-                  option(value=0)=serviceDataFormatName[0]
-                  option(value=1)=serviceDataFormatName[1]
-                  option(value=2)=serviceDataFormatName[2]
-                  option(value=3)=serviceDataFormatName[3]
+              .control
+                .select.is-fullwidth
+                  select(name='serviceDataFormat')
+                    option(value=0)=serviceDataFormatName[0]
+                    option(value=1)=serviceDataFormatName[1]
+                    option(value=2)=serviceDataFormatName[2]
+                    option(value=3)=serviceDataFormatName[3]
+                .mt-3
+                  div
+                    p ※「既定フォーマット（デジタルトレードフォーマット）」以外の出力フォーマットのダウンロードは、今後有料化を予定しております。
+                  div
+                    p 　有料化の時期については決まり次第「お知らせ」に掲載させていただきます。
             
         .field.is-grouped.is-grouped-centered
           .control.mx-4
