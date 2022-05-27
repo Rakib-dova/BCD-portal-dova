@@ -136,7 +136,7 @@ const saveRules = [
   }
 ]
 
-function validate(uploadData, defaultCsvData) {
+function validate(uploadData) {
   const results = []
   let targetId = ''
   let errFlg = false
@@ -206,4 +206,13 @@ function validate(uploadData, defaultCsvData) {
   return results
 }
 
-module.exports = { validate: validate }
+function createInvoiceObj(line) {
+  const invoiceObj = {}
+  saveRules.forEach((rule) => {
+    invoiceObj[rule.prop] = line[[rule.index]]
+  })
+
+  return invoiceObj
+}
+
+module.exports = { validate: validate, createInvoiceObj: createInvoiceObj }

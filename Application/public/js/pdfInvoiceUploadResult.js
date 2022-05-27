@@ -34,7 +34,6 @@ $('#start-upload-btn')?.addEventListener('click', async () => {
   const modal = document.getElementById('upload-progress-modal')
   modal.classList.add('is-active')
 
-  console.log($('#file-upload').files[0])
   const csvFile = $('#file-upload').files[0]
   await sendSever(csvFile)
 })
@@ -45,18 +44,12 @@ const sendSever = async (file) => {
   if (file) formData.append('csvFile', file)
 
   apiController(`https://${location.host}/pdfInvoiceCsvUpload/upload`, 'POST', formData, async (response) => {
-    const blob = await response.blob()
-    const url = URL.createObjectURL(blob)
+    const url = response.url
     const a = document.createElement('a')
     document.body.appendChild(a)
-    a.download = 'pdfInvoice.pdf'
     a.href = url
     a.click()
     a.remove()
-    setTimeout(() => {
-      URL.revokeObjectURL(url)
-    }, 1000)
-    location.href = `https://${location.host}/pdfInvoices/list`
   })
 }
 
