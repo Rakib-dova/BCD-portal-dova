@@ -190,6 +190,12 @@ const idAssociation = async (mSiteSessionDto) => {
         if (insertResult instanceof Error) {
           return insertResult
         }
+
+        console.log('==  mSiteSessionDto  =========================================================\n', mSiteSessionDto)
+        console.log('==  アプリ効果測定 開始  =========================================================')
+        // アプリ効果測定用ログ出力
+        const jsonLog = { tenantId: mSiteSessionDto?.tradeshiftTenantId, action: 'relatedBCD' }
+        logger.info(jsonLog)
       } else {
         logger.info('INF-MB106 ServiceLinkageId exists')
         // 紐づけ情報がある場合、トレシフID情報に変更があるかを確認

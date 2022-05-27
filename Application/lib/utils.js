@@ -9,6 +9,23 @@ const timestampForList = (timeObject) => {
   }
 }
 
+const getBrowser = (ua) => {
+  if (/^(?=.*AppleWebKit)(?=.*Safari)(?=.*Chrome).*$/.test(ua)) {
+    return 'chrome'
+  } else if (/^(?=.*Chromium)(?=.*Edge).*$/.test(ua)) {
+    return 'edge'
+  } else if (/^(?=.*Gecko)(?=.*Firefox).*$/.test(ua)) {
+    return 'firefox'
+  } else if (/^(?=.*Opera).*$/.test(ua)) {
+    return 'opera'
+  } else if (/^(?=.*Mac)(?=.*Safari).*$/.test(ua)) {
+    return 'safari'
+  } else {
+    return 'others'
+  }
+}
+
 module.exports = {
-  timestampForList: timestampForList
+  timestampForList: timestampForList,
+  getBrowser
 }

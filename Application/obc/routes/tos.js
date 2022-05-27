@@ -6,6 +6,7 @@ const {
 } = require('../models')
 const { handler, currentTenantId } = require('./helpers/util')
 const express = require('express')
+const logger = require('../../lib/logger')
 
 // CSRF対策
 const csrf = require('csurf')
@@ -42,6 +43,13 @@ const agree = async (req, res, next) => {
       where: { uuid: currentTenantId(req) }
     }
   )
+
+  // アプリ効果測定用ログ出力
+  if (req.user?.tenantId) {
+    const jsonLog = { tenantId: req.user.tenantId, action: 'relatedObc' }
+    logger.info(jsonLog)
+  }
+
   await res.redirect('/bugyo/menu')
 }
 
