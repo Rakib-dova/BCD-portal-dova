@@ -27,7 +27,6 @@ parameters:
       - scenario006.js
       - scenario007.js
       - scenario008.js
-      - journal_*.js
       - journal_accountCodeList.js
       - journal_subAccountCodeList.js
       - journal_departmentList.js
