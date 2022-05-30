@@ -18,6 +18,19 @@ module.exports = (sequelize, DataTypes) => {
   }
   PdfInvoiceUploadDetail.init(
     {
+      // historyId: {
+      //   type: DataTypes.UUID,
+      //   primaryKey: true,
+      //   allowNull: false,
+      //   references: {
+      //     model: { tableName: 'PdfInvoices' },
+      //     key: 'invoiceId'
+      //   }
+      // },
+      // rowIndex: {
+      //   type: DataTypes.INTEGER,
+      //   primaryKey: true
+      // },
       invoiceUploadDetailId: {
         type: DataTypes.UUID,
         primaryKey: true,
@@ -30,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       },
       lines: DataTypes.INTEGER,
-      invoiceId: {
+      invoiceNo: {
         type: DataTypes.STRING,
         allowNull: false
       },

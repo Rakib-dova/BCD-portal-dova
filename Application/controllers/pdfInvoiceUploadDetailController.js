@@ -22,8 +22,8 @@ module.exports = {
           invoiceUploadId: invoiceUploadId
         },
         order: [
-          ['invoiceId', 'ASC'],
-          ['lines', 'ASC']
+          ['lines', 'ASC'],
+          ['invoiceNo', 'ASC']
         ]
       })
     } catch (error) {

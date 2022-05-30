@@ -90,14 +90,14 @@ const pdfInvoiceEdit = async (req, res, next) => {
 
   // PDF請求書情報取得
   const { invoice, lines, sealImpRecord } = await getInvoiceInfo(req, senderInfo)
-  if (!invoice || !lines || !sealImpRecord) return next(errorHelper.create(500))
+  if (!invoice || !lines) return next(errorHelper.create(500))
 
   // console.log('=== sealImpRecord =========\n', sealImpRecord)
   // console.log('=== invoice =========\n', invoice)
   // console.log('=== lines =========\n', lines)
 
   // 印影設定
-  const sealImpSrc = sealImpRecord.dataValues.image
+  const sealImpSrc = sealImpRecord?.dataValues.image
     ? `data:image/png;base64,${sealImpRecord.dataValues.image.toString('base64')}`
     : '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg'
   // 企業ロゴ設定

@@ -1,218 +1,338 @@
 const pdfInvoiceController = require('../controllers/pdfInvoiceController.js')
 const logger = require('../lib/logger')
+const tax = require('../lib/tax')
+const { convertCsvStringToMultiArray } = require('../lib/csv')
+const { v4: uuidv4 } = require('uuid')
 
-const saveRules = [
+// PDF請求書バリデーション
+const invoiceRules = [
   {
     prop: 'invoiceNo',
     regexp: /^([a-zA-Z0-9]{1,50})$/,
     message: '請求書番号は半角英数字50文字以内で入力して下さい。',
-    emptyMessage: '請求書番号を入力して下さい。',
-    required: true,
-    index: 0
+    // emptyMessage: '請求書番号を入力して下さい。',
+    colName: '請求書番号',
+    required: true
   },
   {
     prop: 'paymentDate',
     customValidator: (value) => !isNaN(new Date(value).getDate()),
     regexp: '',
     message: '支払期日が不正な日付です。',
-    index: 1
+    colName: '支払期日',
+    required: true
   },
   {
     prop: 'billingDate',
     customValidator: (value) => !isNaN(new Date(value).getDate()),
     regexp: '',
     message: '請求日が不正な日付です。',
-    index: 2
+    colName: '請求日',
+    required: true
   },
   {
     prop: 'deliveryDate',
     regexp: '',
     message: '納品日が不正な日付です。',
-    index: 3
+    colName: '納品日',
+    required: true
   },
   {
     prop: 'recCompany',
     regexp: /^.{1,200}$/,
     message: '宛先企業は200文字以内で入力して下さい。',
-    index: 4
+    colName: '宛先企業',
+    required: true
   },
   {
     prop: 'recPost',
     regexp: /[0-9]{7}/,
     message: '宛先郵便番号は数字7桁で入力して下さい。',
-    index: 5
+    colName: '宛先郵便番号',
+    required: true
   },
   {
     prop: 'recAddr1',
     regexp: /^.{1,7}$/,
     message: '宛先都道府県は10文字以内で入力して下さい。',
-    index: 6
+    colName: '宛先都道府県',
+    required: true
   },
   {
     prop: 'recAddr2',
     regexp: /^.{1,50}$/,
     message: '宛先住所は50文字以内で入力して下さい。',
-    index: 7
+    colName: '宛先住所',
+    required: true
   },
   {
     prop: 'recAddr3',
     regexp: /^.{0,50}$/,
     message: '宛先ビル名/フロア等は50文字以内で入力して下さい。',
-    index: 8
+    colName: '宛先ビル名/フロア等'
   },
   {
     prop: 'bankName',
     regexp: /^.{0,50}$/,
     message: '銀行名は50文字以内で入力して下さい。',
-    index: 9
+    colName: '銀行名'
   },
   {
     prop: 'branchName',
     regexp: /^.{0,50}$/,
     message: '支店名は50文字以内で入力して下さい。',
-    index: 10
+    colName: '支店名'
   },
   {
     prop: 'accountType',
     regexp: /普通|当座/,
     message: '科目は「当座」または「普通」で入力して下さい。',
-    index: 11
+    colName: '科目'
   },
   {
     prop: 'accountNumber',
     regexp: /^([0-9]{7})$/,
     message: '口座番号は数字7桁で入力して下さい。',
-    index: 12
+    colName: '口座番号'
   },
   {
     prop: 'accountName',
     regexp: /^.{0,50}$/,
     message: '口座名義は50文字以内で入力して下さい。',
-    index: 13
+    colName: '口座名義'
   },
   {
     prop: 'note',
-    regexp: /^.{0,1500}$/,
-    message: '備考は1500文字以内で入力して下さい。',
-    required: false,
-    index: 14
-  },
+    regexp: /^.{0,400}$/,
+    message: '備考は400文字以内で入力して下さい。'
+  }
+]
+
+// PDF請求書明細バリデーション
+const lineRules = [
   {
     prop: 'lineId',
     regexp: /^([a-zA-Z0-9-]{0,5})$/,
     message: '明細-項目IDは半角英数字半角ハイフン5文字以内で入力してください。',
-    index: 15
+    colName: '明細-項目ID',
+    required: true
   },
   {
     prop: 'lineDiscription',
     regexp: /^.{0,100}$/,
     message: '明細-内容は100文字以内で入力してください。',
-    index: 16
+    colName: '明細-内容',
+    required: true
   },
   {
     prop: 'quantity',
     customValidator: (value) => value > 0 && value <= 1000000000000,
     regexp: '',
     message: '明細-数量は整数or少数 0 ～ 1000000000000 の範囲で入力してください。',
-    index: 17
+    colName: '明細-数量',
+    required: true
   },
   {
     prop: 'unit',
     regexp: /^.{0,10}$/,
     message: '明細-単位は10文字以内で入力してください。',
-    index: 18
+    colName: '明細-単位',
+    required: true
   },
   {
     prop: 'unitPrice',
     regexp: /^[0-9]{0,12}$/,
     message: '明細-単価は整数 0 ～ 999999999999 の範囲で入力してください。',
-    index: 19
+    colName: '明細-単価',
+    required: true
   },
   {
     prop: 'taxType',
     regexp: /消費税|軽減税率|不課税|免税|非課税/,
     message: '明細-税は消費税／軽減税率／不課税／免税／非課税で入力して下さい。',
-    index: 20
+    colName: '明細-税',
+    required: true
   }
 ]
 
-function validate(uploadData) {
-  const results = []
-  let targetId = ''
-  let errFlg = false
-  let lineCnt = 1
+/**
+ * CSVファイル情報を確認し、最終的にDBに保存するデータを出力する
+ * @param {*} invoices
+ * @param {*} lines
+ * @param {*} tenantId
+ * @param {*} fileName
+ * @returns
+ */
+const validate = async (invoices, lines, tenantId, fileName) => {
+  const validInvoices = [] // バリデーションをパスした請求書obj格納用配列 (最終的にこれを返してDBに保存)
+  let validLines = [] // バリデーションをパスした請求書明細obj格納用配列 (最終的にこれを返してDBに保存)
+  const csvRows = [] // CSV行obj格納用配列 (最終的にこれを返してDBに保存)
+  const doneList = [] // バリデーションが完了した行情報
+  const uploadedInvoices = await pdfInvoiceController.findAllRawInvoices(tenantId)
+  const uploadedList = uploadedInvoices.map((invoice) => invoice.invoiceNo) // アップロード済み(DB保存済み)PDF請求書情報
+  const historyId = uuidv4() // アップロード履歴ID生成
+  const uploadHistory = { // アップロード履歴objの初期化 (最終的にこれを返してDBに保存)
+    invoiceUploadId: historyId,
+    tenantId,
+    csvFileName: fileName,
+    successCount: 0, // バリデーションをパスしたCSV行数
+    failCount: 0, // バリデーションに失敗したCSV行数
+    skipCount: 0, // 重複かアップロード済みなCSV行数
+    invoiceCount: 0 // 新規にDBに保存した請求書数
+  }
 
-  Object.keys(uploadData).forEach(function (key) {
-    const lines = uploadData[key]
+  invoices.forEach((invoice) => {
+    let invoiceIsValid = true // 請求書がバリデーションをパスできたかフラグ
 
-    // 請求書番号 重複チェック
-    const duplicateResult = pdfInvoiceController.findInvoice({
-      invoiceId: key
+    const filteredLines = lines.filter((line) => line.invoiceNo === invoice.invoiceNo)
+    filteredLines.forEach((line, index) => {
+      const csvRow = {
+        invoiceUploadDetailId: uuidv4(),
+        invoiceUploadId: historyId,
+        lines: lines.indexOf(line) + 1,
+        invoiceNo: line.invoiceNo,
+        status: 0,
+        errorData: ''
+      }
+
+      // 重複 & アップロード済み のバリデーション
+      invoiceIsValid = validateDuplicationAndUpload(invoice, doneList, uploadedList, uploadHistory, csvRow)
+      console.log('==  validateDuplicationAndUpload  ======================: ', invoiceIsValid)
+      if (!invoiceIsValid) return csvRows.push(csvRow)
+
+      // 請求書のバリデーション
+      invoiceIsValid = validateInvoice(invoice, uploadHistory, csvRow)
+      console.log('==  validateInvoice  ======================: ', invoiceIsValid)
+      // 請求書明細のバリデーション
+      invoiceIsValid = validateLine(line, uploadHistory, csvRow)
+      console.log('==  validateLine  ======================: ', invoiceIsValid)
+      if (invoiceIsValid) uploadHistory.successCount++
+      csvRows.push(csvRow)
     })
 
-    if (!duplicateResult) {
-      // スキップ
-      for (let i = lineCnt; i < lineCnt + lines.length; i++) {
-        results.push({
-          line: i + 1,
-          invoiceId: key,
-          status: 1,
-          errorData: '取込済みのため、処理をスキップしました。'
-        })
-      }
-      lineCnt = lineCnt + lines.length
-      return
+    doneList.push(invoice)
+    if (invoiceIsValid) { // バリデーションに全部パスした場合
+      uploadHistory.invoiceCount++
+      validInvoices.push(invoice) // DB保存用配列に追加
+      validLines = validLines.concat(filteredLines) // DB保存用配列に追加
     }
-
-    for (let i = 0; i < lines.length; i++) {
-      const items = lines[i]
-
-      if (errFlg && targetId === items[0]) {
-        // 同一請求書番号ですでにエラーがある場合、スキップ
-        results.push({ line: i + 1, invoiceId: items[0], status: -1, errorData: '同一請求書でエラーがあります。' })
-        continue
-      }
-      if (targetId !== items[0]) {
-        targetId = items[0]
-        errFlg = false
-      }
-
-      let msg = ''
-      saveRules.forEach((rule) => {
-        if (!items[rule.index] && rule.required) {
-          // 必須エラー
-          errFlg = true
-          msg = msg + rule.message + '\r\n'
-        } else if (!items[rule.index]) {
-          // 空の場合、スキップ
-        } else if (rule.customValidator && !rule.customValidator(items[rule.index])) {
-          errFlg = true
-          msg = msg + rule.message + '\r\n'
-        } else if (rule.regexp && !rule.regexp.test(items[rule.index])) {
-          errFlg = true
-          msg = msg + rule.message + '\r\n'
-        }
-      })
-
-      if (errFlg) {
-        results.push({ line: i + 1, invoiceId: items[0], status: -1, errorData: msg })
-      } else {
-        results.push({ line: i + 1, invoiceId: items[0], status: 0, errorData: '' })
-      }
-    }
-    lineCnt = lineCnt + lines.length
   })
 
-  return results
-}
-
-function createInvoiceObj(line) {
-  const invoiceObj = {}
-  saveRules.forEach((rule) => {
-    invoiceObj[rule.prop] = line[[rule.index]]
+  // 請求書明細データオブジェクトをDBに保存できるように修正
+  validLines.forEach((line) => {
+    line.taxType = tax.getTaxTypeByName(line.taxType)
+    delete line.invoiceNo // 一時的に設けた不要なプロパティを削除
   })
 
-  return invoiceObj
+  return { validInvoices, validLines, uploadHistory, csvRows }
 }
 
-module.exports = { validate: validate, createInvoiceObj: createInvoiceObj }
+/**
+ * 重複 & アップロード済み を確認する
+ * @param {*} invoice
+ * @param {*} doneList
+ * @param {*} uploadedList
+ * @param {*} history
+ * @param {*} csvRow
+ * @returns
+ */
+const validateDuplicationAndUpload = (invoice, doneList, uploadedList, history, csvRow) => {
+  let duplicated = false
+  let uploaded = false
+  if (doneList.includes(invoice.invoiceNo)) duplicated = true // 重複確認
+  if (uploadedList.includes(invoice.invoiceNo)) uploaded = true // アップロード済み確認
+
+  if (duplicated && uploaded) {
+    csvRow.errorData = '重複且つ取込済みのため、処理をスキップしました。'
+  } else if (duplicated) {
+    csvRow.errorData = '重複のため、処理をスキップしました。'
+  } else if (uploaded) {
+    csvRow.errorData = '取込済みのため、処理をスキップしました。'
+  }
+
+  if (duplicated || uploaded) {
+    history.skipCount++
+    csvRow.status = 1
+    return false
+  } else return true
+}
+
+/**
+ * 請求書情報を確認する
+ * @param {*} invoice
+ * @param {*} history
+ * @param {*} csvRow
+ * @returns
+ */
+const validateInvoice = (invoice, history, csvRow) => {
+  let message = ''
+
+  invoiceRules.forEach((rule) => {
+    if (!invoice[rule.prop] && rule.required) {
+      message = message + `${rule.colName}は必須です。\r\n`
+    } else if (!invoice[rule.prop]) return // eslint-disable-line
+    else if (rule.customValidator && !rule.customValidator(invoice[rule.prop])) {
+      message = message + `${rule.message}\r\n`
+    } else if (rule.regexp && !rule.regexp.test(invoice[rule.prop])) {
+      message = message + `${rule.message}\r\n`
+    }
+  })
+
+  if (message) {
+    history.failCount++
+    csvRow.status = 2
+    csvRow.errorData = message
+    return false
+  } else return true
+}
+
+/**
+ * 請求書明細情報を確認する
+ * @param {*} line
+ * @param {*} history
+ * @param {*} csvRow
+ * @returns
+ */
+const validateLine = (line, history, csvRow) => {
+  let message = csvRow.errorData
+
+  lineRules.forEach((rule) => {
+    if (!line[rule.prop] && rule.required) {
+      message = message + `${rule.colName}は必須です。\r\n`
+    } else if (!line[rule.prop]) return // eslint-disable-line
+    else if (rule.customValidator && !rule.customValidator(line[rule.prop])) {
+      message = message + `${rule.message}\r\n`
+    } else if (rule.regexp && !rule.regexp.test(line[rule.prop])) {
+      message = message + `${rule.message}\r\n`
+    }
+  })
+
+  if (message !== csvRow.errorData) {
+    history.failCount++
+    csvRow.status = 2
+    csvRow.errorData = message
+    return false
+  } else return true
+}
+
+/**
+ * CSVファイルのヘッダーを確認するバリデーション
+ * @param {*} uploadedCsvString
+ * @param {*} defaultCsvString
+ * @returns
+ */
+const validateHeader = (uploadedCsvString, defaultCsvString) => {
+  const uploadedCsvArray = convertCsvStringToMultiArray(uploadedCsvString)
+  const defaultCsvArray = convertCsvStringToMultiArray(defaultCsvString)
+
+  for (let i = 0; i < defaultCsvArray[0].length; i++) {
+    if (!uploadedCsvArray[0][i] || defaultCsvArray[0][i] !== uploadedCsvArray[0][i]) return false
+  }
+
+  return true
+}
+
+module.exports = {
+  validate,
+  validateHeader
+}

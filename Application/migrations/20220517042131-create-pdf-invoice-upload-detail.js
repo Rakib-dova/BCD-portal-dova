@@ -21,7 +21,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.INTEGER
       },
-      invoiceId: {
+      invoiceNo: {
         allowNull: false,
         type: Sequelize.STRING
       },

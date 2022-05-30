@@ -31,6 +31,14 @@ module.exports = {
       throw error
     }
   },
+  findAllRawInvoices: async (tenantId) => {
+    try {
+      return await PdfInvoice.findAll({ raw: true })
+    } catch (error) {
+      logger.error({ stack: error.stack, status: 0 }, error.name)
+      throw error
+    }
+  },
   createInvoice: async (invoice, lines, image) => {
     try {
       // 重複コード検索
@@ -59,6 +67,30 @@ module.exports = {
       return created
     } catch (error) {
       logger.error({ stack: error.stack, status: 0 }, error.name)
+      throw error
+    }
+  },
+  createInvoicesAndLines: async (invoices, lines, image = null, transaction = null) => {
+    if (!Array.isArray(invoices) || !Array.isArray(lines)) return null
+
+    try {
+      // PdfInvoiceテーブルにレコード挿入
+      await Promise.all(invoices.map(async (invoice) => {
+        if (transaction) return await PdfInvoice.create(invoice, { transaction })
+        else return await PdfInvoice.create(invoice)
+      }))
+      // if (transaction) createdInvoice = await PdfInvoice.create(invoice, { transaction })
+      // else createdInvoice = await PdfInvoice.create(invoice)
+
+      // PdfInvoiceLineテーブルにレコード挿入
+      await Promise.all(lines.map(async (line) => {
+        if (transaction) return await PdfInvoiceLine.create(line, { transaction })
+        else return await PdfInvoiceLine.create(line)
+      }))
+
+      return true
+    } catch (error) {
+      logger.info(error)
       throw error
     }
   },

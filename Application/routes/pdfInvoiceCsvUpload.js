@@ -4,17 +4,23 @@ const router = express.Router()
 const fs = require('fs')
 const path = require('path')
 
+const db = require('../models')
 const multer = require('multer')
 const upload = multer({ storage: multer.memoryStorage() })
 const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const logger = require('../lib/logger')
 const validation = require('../lib/pdfInvoiceCsvUpdateValidation')
+const {
+  convertCsvStringToMultiArray,
+  convertToDataObject,
+  pdfInvoiceMapper,
+  invoiceHeaderArray
+} = require('../lib/csv')
 const constantsDefine = require('../constants')
 
-const uploadController = require('../controllers/pdfInvoiceUploadController.js')
-const uploadDetailController = require('../controllers/pdfInvoiceUploadDetailController.js')
 const pdfInvoiceController = require('../controllers/pdfInvoiceController.js')
+const uploadController = require('../controllers/pdfInvoiceUploadController.js')
 const pdfInvoiceUploadDetailController = require('../controllers/pdfInvoiceUploadDetailController.js')
 const pdfInvoice = require('../routes/pdfInvoice.js')
 
@@ -38,205 +44,64 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
 
   // csvファイル
-  const uploadFileData = req.file.buffer.toString('UTF-8')
-  const uploadLines = uploadFileData.split(/\r?\n|\r/)
+  const uploadFileData = req.file.buffer.toString('UTF-8') // CSV文字列データ
+  const defaultCsvData = fs.readFileSync(path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv'), 'utf8') // アップロードフォーマット文字列データ
+  const csvMultiArray = convertCsvStringToMultiArray(uploadFileData) // CSV文字列データをCSV多次元配列データに変換
 
-  // 空データの登録
-  const resultInvoice = await uploadController.create({
-    invoiceUploadId: uuidv4(),
-    tenantId: req.user.tenantId,
-    csvFileName: req.file.originalname,
-    successCount: '-',
-    failCount: '-',
-    skipCount: '-'
+  // console.log('==  csvMultiArray  ======================\n', csvMultiArray)
+
+  // ヘッダーバリデーション
+  if (!validation.validateHeader(uploadFileData, defaultCsvData)) return next(errorHelper.create(500))
+
+  const csvRowObjects = [] // CSVファイル行情報をデータオブジェクト(アップロードファイル行データ)に変換し、配列化させたもの
+  csvMultiArray.forEach((row, index) => {
+    console.log('==  row  ======================\n', row)
+    if (index === 0) return
+
+    csvRowObjects.push(convertToDataObject(row, invoiceHeaderArray, pdfInvoiceMapper))
   })
 
-  if (!resultInvoice?.dataValues) {
-    logger.info(`${constantsDefine.logMessage.DBINF001}${functionName}`)
-  }
+  console.log('==  csvRowObjects  ======================\n', csvRowObjects)
 
-  // ヘッダーチェック
-  const headerResult = await validateHeader(uploadLines)
-  if (headerResult.size !== 0) {
-    if (headerResult[0] === 104) {
-      return res.redirect('/pdfInvoiceCsvUpload')
-    } else {
-      return res.redirect('/pdfInvoiceCsvUpload')
-    }
-  }
-  // アップロードデータ作成
-  const uploadData = await createUploadData(uploadLines)
+  // アカウント情報取得 (CSVデータ多次元配列をデータオブジェクトに変換するのに必要)
+  const { senderInfo } = await pdfInvoice.getAccountAndSenderInfo(req)
+  if (!senderInfo) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に返る
 
-  // バリデーションチェック
-  const valResults = validation.validate(uploadData)
-  // 請求書情報カウント
-  let successCount = 0
-  let failCount = 0
-  let skipCount = 0
-  await valResults.forEach((result, i) => {
-    if (result.status === 0) {
-      successCount++
-    } else if (result.status === 1) {
-      skipCount++
-    } else {
-      failCount++
-    }
-  })
+  // DB保存&バリデーションするために、CSVデータ多次元配列をデータオブジェクトに変換
+  const { pdfInvoices, pdfInvoiceLines } = convertCsvMultiArrayToPdfInvoiceObjects(csvRowObjects, senderInfo, req.user.tenantId)
 
-  // バリデーションチェック結果登録
-  const failCnt = await validateResultInsert(
-    valResults,
-    resultInvoice.invoiceUploadId,
-    successCount,
-    skipCount,
-    failCount
-  )
-  if (failCnt > 0) {
-    logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
-    // バリデーションエラー：結果一覧画面に遷移
+  console.log('==  pdfInvoices  ======================\n', pdfInvoices)
+  console.log('==  pdfInvoiceLines  ======================\n', pdfInvoiceLines)
 
-    return res.redirect('/pdfInvoiceCsvUpload/resultList')
-  }
+  // バリデーション
+  const {
+    validInvoices,
+    validLines,
+    uploadHistory,
+    csvRows
+  } = await validation.validate(pdfInvoices, pdfInvoiceLines, req.user.tenantId, req.file.originalname)
 
-  // 明細書作成
-  const isErr = await createInvoice(uploadData, req, next)
+  console.log('==  validInvoices  ======================\n', validInvoices)
+  console.log('==  validLines  ======================\n', validLines)
+  console.log('==  uploadHistory  ======================\n', uploadHistory)
+  console.log('==  csvRows  ======================\n', csvRows)
 
-  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
-  if (isErr) {
-    // エラー：リダイレクト
-    return res.status(200).send(constantsDefine.statusConstants.INVOICE_VALIDATE_FAILED)
-  }
-  // ドラフト一覧画面に遷移
-  return res.status(200).send(constantsDefine.statusConstants.SUCCESS)
-}
-
-const createInvoice = async (uploadData, req, next) => {
-  const functionName = 'createInvoice'
-  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
-  let errFlg = false
-
-  // アカウント情報取得
-  const { accountInfo, senderInfo } = await pdfInvoice.getAccountAndSenderInfo(req)
-
-  if (!accountInfo || !senderInfo) return next(errorHelper.create(500))
-
-  for (const key in uploadData) {
-    const uploadLines = uploadData[key]
-
-    const invoiceId = uuidv4()
-
-    // 請求書情報
-    const invoice = await validation.createInvoiceObj(uploadLines[0])
-    invoice.invoiceId = invoiceId
-    invoice.sendTenantId = req.user.tenantId
-    invoice.sendCompany = senderInfo.sendCompany
-    invoice.sendPost = senderInfo.sendPost
-    invoice.sendAddr1 = senderInfo.sendAddr1
-    invoice.sendAddr2 = senderInfo.sendAddr2
-    invoice.sendAddr3 = senderInfo.sendAddr3
-    invoice.currency = 'JPY'
-
-    // 明細情報
-    const lines = []
-    uploadLines.forEach((uploadline, i) => {
-      const line = validation.createInvoiceObj(uploadline)
-      line.invoiceId = invoiceId
-      line.lineIndex = i
-      lines.push(line)
-    })
-
-    try {
-      const createdInvoice = await pdfInvoiceController.createInvoice(invoice, lines, null)
-      if (!createdInvoice || createdInvoice < 1) {
-        errFlg = true
-      }
-    } catch (error) {
-      logger.error({ stack: error.stack }, error.name)
-      errFlg = true
-    }
-  }
-  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
-  return errFlg
-}
-
-const validateHeader = async (uploadLines) => {
-  const functionName = 'validateHeader'
-  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
-
-  // ファイルから請求書一括作成の時エラー例外
+  // DB保存
   try {
-    // テンプレートファイル
-    const defaultCsvPath = path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv')
-    const defaultCsvData = fs
-      .readFileSync(defaultCsvPath, 'utf8')
-      .split(/\r?\n|\r/)[0]
-      .replace(/^\ufeff/, '')
-
-    // ヘッダチェック
-    if (uploadLines[0] !== defaultCsvData) {
-      return [{ line: 0, invoiceId: '-', status: -1, errorData: 'ヘッダーが指定のものと異なります。' }]
-    }
-  } catch (error) {
-    logger.error({ stack: error.stack }, error.name)
-    return [104]
-  }
-  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
-  return null
-}
-
-const createUploadData = async (uploadLines) => {
-  const functionName = 'createUploadData'
-  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
-
-  // 請求書ごとにまとめる
-  let targetNo = ''
-  const uploadData = {}
-  let tmps = []
-
-  for (let i = 1; i < uploadLines.length; i++) {
-    const line = uploadLines[i].split(',')
-    if (line[0] !== targetNo) {
-      targetNo = line[0]
-    }
-    tmps.push(line)
-
-    // 次の請求書番号が異なる場合
-    if (i + 1 === uploadLines.length || line[0] !== uploadLines[i + 1].split(',')[0]) {
-      uploadData[targetNo] = tmps
-      tmps = []
-    }
-  }
-  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
-  return uploadData
-}
-
-const validateResultInsert = async (valResults, invoicesId, successCount, skipCount, failCount) => {
-  const functionName = 'validateResultInsert'
-  logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
-
-  // カウント登録
-  await uploadController.updateCount({
-    invoiceUploadId: invoicesId,
-    successCount: successCount,
-    failCount: failCount,
-    skipCount: skipCount,
-    invoiceCount: successCount
-  })
-
-  // 詳細登録
-  await valResults.forEach((result, i) => {
-    uploadDetailController.create({
-      invoiceUploadDetailId: uuidv4(),
-      invoiceUploadId: invoicesId,
-      lines: result.line,
-      invoiceId: result.invoiceId,
-      status: result.status,
-      errorData: result.errorData
+    await db.sequelize.transaction(async (t) => {
+      await uploadController.createUploadHistoryAndRows(uploadHistory, csvRows, t) // アップロード履歴 & CSV行 レコード挿入
+      await pdfInvoiceController.createInvoicesAndLines(validInvoices, validLines, t) // 請求書 & 明細 レコード挿入
     })
-  })
+  } catch (error) {
+    logger.info(error)
+    return res.redirect('/pdfInvoiceCsvUpload')
+  }
 
-  logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
-  return failCount
+  if (uploadHistory.failCount > 0 || (uploadHistory.skipCount > 0 && uploadHistory.successCount === 0)) {
+    return res.redirect('/pdfInvoiceCsvUpload/resultList')
+  } else {
+    return res.redirect('/pdfInvoices/list')
+  }
 }
 
 const pdfInvoiceCsvUploadResult = async (req, res, next) => {
@@ -259,7 +124,7 @@ const pdfInvoiceCsvUploadResult = async (req, res, next) => {
       const stamp = `${year}/${month}/${day} ${hour}:${min}:${sec}`
       return stamp
     }
-    result.map((currVal, index) => {
+    result.forEach((currVal, index) => {
       const invoice = currVal
       const invoiceAll =
         ~~invoice.dataValues.successCount + ~~invoice.dataValues.skipCount + ~~invoice.dataValues.failCount
@@ -279,10 +144,9 @@ const pdfInvoiceCsvUploadResult = async (req, res, next) => {
         status: status,
         invoiceUploadId: invoice.dataValues.invoiceUploadId
       })
-      return ''
     })
 
-    logger.info(resultArr)
+    console.log('==  resultArr  ======================\n', resultArr)
   } catch (error) {
     logger.error({ page: functionName, msg: '請求書を取得失敗しました。' })
     logger.error(error)
@@ -334,7 +198,7 @@ const pdfInvoiceCsvUploadResultDetail = async (req, res, next) => {
 
       resultDetailArr.push({
         lines: invoiceDetail.dataValues.lines,
-        invoiceId: invoiceDetail.dataValues.invoiceId,
+        invoiceNo: invoiceDetail.dataValues.invoiceNo,
         status: status,
         errorData: invoiceDetail.dataValues.errorData
       })
@@ -349,6 +213,70 @@ const pdfInvoiceCsvUploadResultDetail = async (req, res, next) => {
   logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
   // データ送信
   return res.status(resultStatusCode).send(JSON.stringify(resultDetailArr))
+}
+
+const convertCsvMultiArrayToPdfInvoiceObjects = (csvArray, senderInfo, tenantId) => {
+  const pdfInvoices = []
+  const pdfInvoiceLines = []
+  let curInvoiceIdx = 0
+
+  csvArray.forEach((row) => {
+    let pdfInvoice = pdfInvoices.find((invoice) => invoice.invoiceNo === row.invoiceNo)
+    if (!pdfInvoice || (pdfInvoice && pdfInvoice.index !== curInvoiceIdx)) {
+      pdfInvoice = {
+        index: curInvoiceIdx, // 連続する請求書番号だけで同じ請求書扱いする為に一時的にプロパティを設ける
+        sendTenantId: tenantId,
+        invoiceId: uuidv4(),
+        invoiceNo: row.invoiceNo,
+        billingDate: new Date(row.billingDate),
+        paymentDate: new Date(row.paymentDate),
+        deliveryDate: new Date(row.deliveryDate),
+        currency: 'JPY',
+        recCompany: row.recCompany,
+        recPost: row.recPost,
+        recAddr1: row.recAddr1,
+        recAddr2: row.recAddr2,
+        recAddr3: row.recAddr3,
+        sendCompany: senderInfo.sendCompany,
+        sendPost: senderInfo.sendPost,
+        sendAddr1: senderInfo.sendAddr1,
+        sendAddr2: senderInfo.sendAddr2,
+        sendAddr3: senderInfo.sendAddr3,
+        bankName: row.bankName,
+        branchName: row.branchName,
+        accountType: row.accountType,
+        accountName: row.accountName,
+        accountNumber: row.accountNumber,
+        note: row.note
+      }
+
+      curInvoiceIdx++
+      pdfInvoices.push(pdfInvoice)
+    }
+    const invoiceId = pdfInvoice.invoiceId
+    const lineIndex = pdfInvoiceLines.filter((line) => line.invoiceId === invoiceId).length
+
+    const line = {
+      invoiceId,
+      lineIndex,
+      lineId: row.lineId,
+      lineDiscription: row.lineDiscription,
+      unit: row.unit,
+      unitPrice: row.unitPrice,
+      quantity: row.quantity,
+      taxType: row.taxType,
+      invoiceNo: row.invoiceNo // CSV行テーブルレコード作成の為、一時的に設けるプロパティ
+    }
+
+    // 不要なプロパティを削除
+    pdfInvoices.forEach((invoice) => {
+      delete invoice.index
+    })
+
+    pdfInvoiceLines.push(line)
+  })
+
+  return { pdfInvoices, pdfInvoiceLines }
 }
 
 router.get('/', helper.bcdAuthenticate, pdfInvoiceCsvUploadIndex)

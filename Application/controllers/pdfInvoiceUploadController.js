@@ -1,4 +1,7 @@
 const pdfInvoiceUpload = require('../models').PdfInvoiceUpload
+const pdfInvoiceUploadDetail = require('../models').PdfInvoiceUploadDetail
+const PdfInvoice = require('../models').PdfInvoice
+const PdfInvoiceLine = require('../models').PdfInvoiceLine
 const constantsDefine = require('../constants')
 const logger = require('../lib/logger')
 const { Op } = require('sequelize')
@@ -14,6 +17,27 @@ module.exports = {
   //   skipCount,
   //   invoiceCount
   // }
+  createUploadHistoryAndRows: async (history, rows, transaction = null) => {
+    if (Object.keys(history).length === 0) return null
+
+    try {
+      // pdfInvoiceUpload テーブルにレコード挿入
+      let createdHistory
+      if (transaction) createdHistory = await pdfInvoiceUpload.create(history, { transaction })
+      else createdHistory = await pdfInvoiceUpload.create(history)
+
+      // pdfInvoiceUploadDetail テーブルにレコード挿入
+      await Promise.all(rows.map(async (row) => {
+        if (transaction) return await pdfInvoiceUploadDetail.create(row, { transaction })
+        else return await PdfInvoiceLine.create(row)
+      }))
+
+      return createdHistory
+    } catch (error) {
+      logger.info(error)
+      throw error
+    }
+  },
   create: async (values) => {
     const functionName = 'pdfInvoiceUploadController.insert'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
