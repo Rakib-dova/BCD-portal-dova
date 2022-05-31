@@ -955,3 +955,9 @@ body > div.hero.is-small {
 .margin-bottom-02rem {
   margin-bottom: 0.2rem !important;
 }
+
+.title-law {
+  color: #363636;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
