@@ -45,7 +45,10 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
 
   // csvファイル
   const uploadFileData = req.file.buffer.toString('UTF-8') // CSV文字列データ
-  const defaultCsvData = fs.readFileSync(path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv'), 'utf8') // アップロードフォーマット文字列データ
+  const defaultCsvData = fs.readFileSync(
+    path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv'),
+    'utf8'
+  ) // アップロードフォーマット文字列データ
   const csvMultiArray = convertCsvStringToMultiArray(uploadFileData) // CSV文字列データをCSV多次元配列データに変換
 
   // console.log('==  csvMultiArray  ======================\n', csvMultiArray)
@@ -68,18 +71,22 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   if (!senderInfo) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に返る
 
   // DB保存&バリデーションするために、CSVデータ多次元配列をデータオブジェクトに変換
-  const { pdfInvoices, pdfInvoiceLines } = convertCsvMultiArrayToPdfInvoiceObjects(csvRowObjects, senderInfo, req.user.tenantId)
+  const { pdfInvoices, pdfInvoiceLines } = convertCsvMultiArrayToPdfInvoiceObjects(
+    csvRowObjects,
+    senderInfo,
+    req.user.tenantId
+  )
 
   console.log('==  pdfInvoices  ======================\n', pdfInvoices)
   console.log('==  pdfInvoiceLines  ======================\n', pdfInvoiceLines)
 
   // バリデーション
-  const {
-    validInvoices,
-    validLines,
-    uploadHistory,
-    csvRows
-  } = await validation.validate(pdfInvoices, pdfInvoiceLines, req.user.tenantId, req.file.originalname)
+  const { validInvoices, validLines, uploadHistory, csvRows } = await validation.validate(
+    pdfInvoices,
+    pdfInvoiceLines,
+    req.user.tenantId,
+    req.file.originalname
+  )
 
   console.log('==  validInvoices  ======================\n', validInvoices)
   console.log('==  validLines  ======================\n', validLines)
@@ -288,5 +295,6 @@ module.exports = {
   router,
   pdfInvoiceCsvUploadIndex,
   pdfInvoiceCsvUpload,
-  pdfInvoiceCsvUploadResult
+  pdfInvoiceCsvUploadResult,
+  pdfInvoiceCsvUploadResultDetail
 }
