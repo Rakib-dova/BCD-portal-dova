@@ -333,8 +333,6 @@ app.use('/change', require('./routes/change').router)
 app.use('/csvDownload', require('./routes/csvDownload').router)
 
 /* PoC PDF出力機能 */
-app.use('/pdfInvoiceRegister', require('./routes/pdfInvoice').router)
-app.use('/pdfInvoiceList', require('./routes/pdfInvoice').router)
 app.use('/pdfInvoices', require('./routes/pdfInvoice').router)
 
 /* PoC PDF請求書ドラフト一括作成 */

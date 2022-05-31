@@ -5,6 +5,7 @@ const axios = require('axios')
 const multer = require('multer')
 const upload = multer({ storage: multer.memoryStorage() })
 const { v4: uuidV4 } = require('uuid')
+const FileType = require('file-type')
 const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const logger = require('../lib/logger')
@@ -15,7 +16,7 @@ const {
   generatePdf,
   renderInvoiceHTML
 } = require('../lib/pdfGenerator')
-const FileType = require('file-type')
+const { formatDate } = require('../lib/utils')
 
 const taxDatabase = [
   { type: 'tax10p', taxRate: 0.1 },
@@ -34,7 +35,7 @@ const pdfInvoiceList = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 
-  console.log('==  invoiceRecords  ===================\n', invoiceRecords)
+  // console.log('==  invoiceRecords  ===================\n', invoiceRecords)
 
   const invoices = invoiceRecords.map((record) => record.dataValues)
   invoices.forEach((invoice) => {
@@ -64,7 +65,7 @@ const pdfInvoiceRegister = async (req, res, next) => {
   if (!accountInfo || !senderInfo) return next(errorHelper.create(500))
 
   // 企業ロゴ設定
-  const logoSrc = accountInfo.BackgroundURL ? accountInfo.BackgroundURL : null
+  const logoSrc = accountInfo.LogoURL ? accountInfo.LogoURL : null
 
   res.render('pdfInvoice', {
     title: 'PDF請求書作成',
@@ -81,8 +82,8 @@ const pdfInvoiceRegister = async (req, res, next) => {
 
 const pdfInvoiceEdit = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'pdfInvoiceEdit')
-  if (!req.params.invoiceId) return next(errorHelper.create(400))
   console.log('=== req.params.invoiceId =========: ', req.params.invoiceId)
+  if (!req.params.invoiceId) return next(errorHelper.create(400))
 
   // アカウント情報取得
   const { accountInfo, senderInfo } = await getAccountAndSenderInfo(req)
@@ -93,15 +94,16 @@ const pdfInvoiceEdit = async (req, res, next) => {
   if (!invoice || !lines) return next(errorHelper.create(500))
 
   // console.log('=== sealImpRecord =========\n', sealImpRecord)
-  // console.log('=== invoice =========\n', invoice)
-  // console.log('=== lines =========\n', lines)
+  console.log('=== invoice =========\n', invoice)
+  console.log('=== lines =========\n', lines)
+  console.log('=== sealImpRecord =========\n', sealImpRecord)
 
   // 印影設定
   const sealImpSrc = sealImpRecord?.dataValues.image
-    ? `data:image/png;base64,${sealImpRecord.dataValues.image.toString('base64')}`
+    ? `data:image/png;base64,${sealImpRecord?.dataValues.image.toString('base64')}`
     : '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg'
   // 企業ロゴ設定
-  const logoSrc = accountInfo.BackgroundURL ? accountInfo.BackgroundURL : null
+  const logoSrc = accountInfo.LogoURL ? accountInfo.LogoURL : null
 
   res.render('pdfInvoice', {
     title: 'PDF請求書編集',
@@ -133,7 +135,7 @@ const pdfInvoiceShow = async (req, res, next) => {
     ? `data:image/png;base64,${sealImpRecord.dataValues.image.toString('base64')}`
     : null
   // 企業ロゴ設定
-  const logoSrc = accountInfo.BackgroundURL ? accountInfo.BackgroundURL : null
+  const logoSrc = accountInfo.LogoURL ? accountInfo.LogoURL : null
 
   res.render('pdfInvoice', {
     title: 'PDF請求書',
@@ -156,6 +158,8 @@ const createPdfInvoice = async (req, res, next) => {
   invoice.sendTenantId = req.user.tenantId
   invoice.invoiceId = invoiceId
   lines.forEach((line, index) => {
+    line.unitPrice = line.unitPrice ? line.unitPrice : null
+    line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
     line.invoiceId = invoiceId
     line.lineIndex = index
   })
@@ -196,9 +200,14 @@ const updatePdfInvoice = async (req, res, next) => {
   if (invoiceRecord.dataValues.tmpFlg) return next(errorHelper.create(400))
 
   lines.forEach((line, index) => {
+    line.unitPrice = line.unitPrice ? line.unitPrice : null
+    line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
     line.invoiceId = req.params.invoiceId
     line.lineIndex = index
   })
+
+  console.log('==  lines  ===================\n', lines)
+  console.log('==  req.file  ===================\n', req.file)
 
   let updatedInvoice
   try {
@@ -234,6 +243,8 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
   invoice.tmpFlg = true
   invoice.outputDate = new Date()
   lines.forEach((line, index) => {
+    line.unitPrice = line.unitPrice ? line.unitPrice : null
+    line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
     line.invoiceId = invoiceId
     line.lineIndex = index
   })
@@ -257,8 +268,8 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
   }
   // 企業ロゴ取得
   let logo
-  if (accountInfo.BackgroundURL) {
-    const response = await axios.get(accountInfo.BackgroundURL, { responseType: 'arraybuffer' })
+  if (accountInfo.LogoURL) {
+    const response = await axios.get(accountInfo.LogoURL, { responseType: 'arraybuffer' })
     const buffer = Buffer.from(response.data, 'utf-8')
     const fileType = await FileType.fromBuffer(buffer)
     console.log('==  fileType  ===================: ', fileType)
@@ -320,7 +331,7 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
   let invoiceRecord
   try {
     invoiceRecord = await pdfInvoiceController.findInvoice(req.params.invoiceId)
-    console.log('==  invoiceRecord  ===================\n', invoiceRecord)
+    // console.log('==  invoiceRecord  ===================\n', invoiceRecord)
   } catch (error) {
     console.log(error)
     return next(errorHelper.create(500))
@@ -351,8 +362,8 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
 
   // 企業ロゴ取得
   let logo
-  if (accountInfo.BackgroundURL) {
-    const response = await axios.get(accountInfo.BackgroundURL, { responseType: 'arraybuffer' })
+  if (accountInfo.LogoURL) {
+    const response = await axios.get(accountInfo.LogoURL, { responseType: 'arraybuffer' })
     const buffer = Buffer.from(response.data, 'utf-8')
     const fileType = await FileType.fromBuffer(buffer)
     console.log('==  fileType  ===================: ', fileType)
@@ -363,6 +374,8 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
   }
 
   lines.forEach((line, index) => {
+    line.unitPrice = line.unitPrice ? line.unitPrice : null
+    line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
     line.invoiceId = req.params.invoiceId
     line.lineIndex = index
   })
@@ -480,6 +493,7 @@ const getInvoiceInfo = async (req, senderInfo) => {
 
 const getTotal = (lines, taxDatabase) => {
   let total = 0
+  console.log('====  getTotal  =======', lines, taxDatabase)
 
   lines.forEach((line) => {
     let taxRate = 0
@@ -489,13 +503,6 @@ const getTotal = (lines, taxDatabase) => {
   })
 
   return total
-}
-
-const formatDate = (date, format) => {
-  format = format.replace(/YYYY/, date.getFullYear())
-  format = format.replace(/MM/, date.getMonth() + 1)
-  format = format.replace(/DD/, date.getDate())
-  return format
 }
 
 router.get('/list', helper.bcdAuthenticate, pdfInvoiceList)

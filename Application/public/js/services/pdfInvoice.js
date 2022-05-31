@@ -19,7 +19,7 @@ const savePdfInvoice = async (invoice, lines, file, invoiceId = null) => {
 }
 
 // eslint-disable-next-line no-unused-vars
-const outputPdfInvoice = async (invoice, lines, file, invoiceId = null) => {
+const outputPdfInvoice = async (invoice, lines, file, invoiceId = null, timerId = null) => {
   const formData = new FormData()
   formData.append('invoice', JSON.stringify(invoice))
   formData.append('lines', JSON.stringify(lines))
@@ -36,6 +36,10 @@ const outputPdfInvoice = async (invoice, lines, file, invoiceId = null) => {
     'POST',
     formData,
     async (response) => {
+      if (timerId) {
+        console.log('====  タイマークリア  ====')
+        clearTimeout(timerId)
+      }
       const blob = await response.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')

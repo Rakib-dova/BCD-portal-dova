@@ -1,7 +1,3 @@
-html
-  head
-    link(rel='stylesheet', type='text/css', href='/css/invoicePDF.css')
-
 div.margin-top-40p
   #lines-error
 
@@ -49,10 +45,11 @@ div.margin-top-40p
           if editing
             select.tax-type.select(data-prop='taxType' class='line-taxType')
               option(value='') 
-              option(value='freeTax') 不課税
-              option(value='dutyFree') 免税
               option(value='tax10p') 消費税 10%
               option(value='tax8p') 消費税(軽減税率) 8%
+              option(value='nonTaxable') 非課税
+              option(value='untaxable') 不課税
+              option(value='taxExemption') 免税
               option(value='otherTax') その他消費税
           eles
             p.line-taxType

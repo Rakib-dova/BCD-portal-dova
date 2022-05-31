@@ -1,4 +1,4 @@
-/* global $ */
+/* global $, getSubTotal */
 
 const headerErrorDiv = $('#header-error')
 const linesErrorDiv = $('#lines-error')
@@ -18,21 +18,194 @@ const saveRules = [
   {
     target: 'invoice',
     displayLocation: 'header',
+    prop: 'billingDate',
+    regexp: '',
+    message: '',
+    emptyMessage: '請求日が空欄のため、請求情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'deliveryDate',
+    regexp: '',
+    message: '',
+    emptyMessage: '納品日が空欄のため、請求情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'paymentDate',
+    regexp: '',
+    message: '',
+    emptyMessage: '支払期限が空欄のため、請求情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
     prop: 'recCompany',
     regexp: /^.{1,200}$/,
     message: '宛先企業は200文字以内で入力して下さい。',
     emptyMessage: '宛先企業が空欄のため、宛先情報が不完全です。入力して下さい。',
     required: true
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'recPost',
+    regexp: /^[0-9]{3}-[0-9]{4}$/,
+    message: '宛先郵便番号は 数字3桁 - 数字4桁 で入力して下さい。',
+    emptyMessage: '宛先郵便番号が空欄のため、宛先情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'recAddr1',
+    regexp: /^.{1,10}$/,
+    message: '都道府県は10文字以内で入力して下さい。',
+    emptyMessage: '都道府県が空欄のため、宛先情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'recAddr2',
+    regexp: /^.{1,50}$/,
+    message: '住所は50文字以内で入力して下さい。',
+    emptyMessage: '住所が空欄のため、宛先情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'header',
+    prop: 'recAddr3',
+    regexp: /^.{0,50}$/,
+    message: 'ビル名/フロア等は50文字以内で入力して下さい。',
+    emptyMessage: '',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'bankName',
+    regexp: /^.{0,50}$/,
+    message: '銀行名は50文字以内で入力して下さい。',
+    emptyMessage: '銀行名が空欄のため、支払い情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'branchName',
+    regexp: /^.{0,50}$/,
+    message: '支店名は50文字以内で入力して下さい。',
+    emptyMessage: '支店名が空欄のため、支払い情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'accountType',
+    regexp: /普通|当座/,
+    message: '科目は「当座」または「普通」で入力して下さい。',
+    emptyMessage: '科目が空欄のため、支払い情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'accountName',
+    regexp: /^.{0,50}$/,
+    message: '口座名義は50文字以内で入力して下さい。',
+    emptyMessage: '口座名義が空欄のため、支払い情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'accountNumber',
+    regexp: /^([0-9]{7})$/,
+    message: '口座番号は数字7桁で入力して下さい。',
+    emptyMessage: '口座番号が空欄のため、支払い情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'note',
+    regexp: /^\s|\S{0,400}$/,
+    message: '備考は400文字以内で入力して下さい。',
+    required: false
+  },
+
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'lineId',
+    regexp: /^([a-zA-Z0-9-]{0,5})$/,
+    message: '項目IDは半角英数字半角ハイフン5文字以内で入力してください。',
+    emptyMessage: '項目IDが空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'lineDiscription',
+    regexp: /^.{0,100}$/,
+    message: '内容は100文字以内で入力してください。',
+    emptyMessage: '内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'quantity',
+    customValidator: (value) => value > 0 && value <= 999999999999.999,
+    regexp: '',
+    message: '数量は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。',
+    emptyMessage: '数量が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'unit',
+    regexp: /^.{0,10}$/,
+    message: '単位は10文字以内で入力してください。',
+    emptyMessage: '単位が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'unitPrice',
+    regexp: /^[0-9]{0,12}$/,
+    message: '単価は整数 0 ～ 999999999999 の範囲で入力してください。',
+    emptyMessage: '単価が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'taxType',
+    regexp: '',
+    message: '',
+    emptyMessage: '税が選択されていないので、明細情報が不完全です。選択して下さい。',
+    required: false
+  },
+
+  {
+    target: 'option',
+    displayLocation: 'header',
+    prop: 'fileSize',
+    customValidator: (value) => value && value <= 1048576,
+    regexp: '',
+    message: '印影ファイルのサイズは1MB以下にしてください。',
+    required: false
   }
-  // {
-  //   target: 'invoice',
-  //   displayLocation: 'header',
-  //   prop: 'paymentDate',
-  //   regexp: '',
-  //   message: '',
-  //   emptyMessage: '支払期限が空欄のため、請求情報が不完全です。入力して下さい。',
-  //   required: true
-  // }
 ]
 
 // eslint-disable-next-line no-unused-vars
@@ -95,8 +268,8 @@ const outputRules = [
     target: 'invoice',
     displayLocation: 'header',
     prop: 'recPost',
-    regexp: /[0-9]{7}/,
-    message: '宛先郵便番号は数字7桁で入力して下さい。',
+    regexp: /^[0-9]{3}-[0-9]{4}$/,
+    message: '宛先郵便番号は 数字3桁 - 数字4桁 で入力して下さい。',
     emptyMessage: '宛先郵便番号が空欄のため、宛先情報が不完全です。入力して下さい。',
     required: true
   },
@@ -104,7 +277,7 @@ const outputRules = [
     target: 'invoice',
     displayLocation: 'header',
     prop: 'recAddr1',
-    regexp: /^.{1,7}$/,
+    regexp: /^.{1,10}$/,
     message: '都道府県は10文字以内で入力して下さい。',
     emptyMessage: '都道府県が空欄のため、宛先情報が不完全です。入力して下さい。',
     required: true
@@ -172,14 +345,14 @@ const outputRules = [
     emptyMessage: '口座番号が空欄のため、支払い情報が不完全です。入力して下さい。',
     required: false
   },
-  // {
-  //   target: 'invoice',
-  //   displayLocation: 'footer',
-  //   prop: 'note',
-  //   regexp: /^.{0,1500}$/,
-  //   message: '備考は1500文字以内で入力して下さい。',
-  //   required: false
-  // },
+  {
+    target: 'invoice',
+    displayLocation: 'footer',
+    prop: 'note',
+    regexp: /^\s|\S{0,400}$/,
+    message: '備考は400文字以内で入力して下さい。',
+    required: false
+  },
 
   {
     target: 'lines',
@@ -203,9 +376,9 @@ const outputRules = [
     target: 'lines',
     displayLocation: 'lines',
     prop: 'quantity',
-    customValidator: (value) => value > 0 && value <= 1000000000000,
+    customValidator: (value) => value > 0 && value <= 999999999999.999,
     regexp: '',
-    message: '数量は整数or少数 0 ～ 1000000000000 の範囲で入力してください。',
+    message: '数量は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。',
     emptyMessage: '数量が空欄のため、明細情報が不完全です。入力して下さい。',
     required: true
   },
@@ -258,7 +431,7 @@ const outputRules = [
 ]
 
 // eslint-disable-next-line no-unused-vars
-function validate(invoice, lines, rules, option = null) {
+function validate(invoice, lines, rules, option = {}) {
   let result = true
 
   while (headerErrorDiv.firstChild) headerErrorDiv.removeChild(headerErrorDiv.firstChild)
@@ -303,15 +476,23 @@ function validate(invoice, lines, rules, option = null) {
         setValidationMessage(rule.message, rule.displayLocation)
         result = false
       } else if (rule.regexp && !rule.regexp.test(line[rule.prop])) {
-        // console.log('=====  バリデーション失敗  ====== ')
         setValidationMessage(`${i + 1}番目の` + rule.message, rule.displayLocation)
         result = false
       }
     })
+
+    if (line['unitPrice'] && line['quantity'] && line['unitPrice'] * line['quantity'] > 9000000000000000) { // eslint-disable-line
+      setValidationMessage(`${i + 1}番目の` + '小計が扱うことができる最大値を超えました。9,000,000,000,000,000 以下となるように入力して下さい。', 'lines')
+      result = false
+    }
   })
 
+  if (getSubTotal(lines) > 9000000000000000) {
+    setValidationMessage('小計の合計が扱うことができる最大値を超えました。9,000,000,000,000,000 以下となるように入力して下さい。', 'lines')
+    result = false
+  }
+
   rules.forEach((rule) => {
-    console.log('===== op バリデーションの結果: ')
     if (rule.target !== 'option') return
 
     if (!option[rule.prop] && rule.required) {

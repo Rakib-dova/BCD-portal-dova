@@ -117,11 +117,15 @@ module.exports = {
 
         if (image) {
           // 印影を更新
-          await PdfSealImp.update(
-            { image },
-            { where: { invoiceId } },
-            { transaction: t }
-          )
+          const [sealImpRecord, created] = await PdfSealImp.findOrCreate({
+            where: { invoiceId },
+            defaults: { image },
+            transaction: t
+          })
+          if (!created) {
+            sealImpRecord.image = image
+            sealImpRecord.save()
+          }
         } else {
           console.log('====  印影の更新はなし  ==========')
         }

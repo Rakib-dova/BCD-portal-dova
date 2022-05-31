@@ -26,13 +26,13 @@ module.exports = {
         type: Sequelize.STRING(10)
       },
       unitPrice: {
-        type: Sequelize.INTEGER
+        type: Sequelize.DECIMAL(12, 0)
       },
       quantity: {
-        type: Sequelize.FLOAT
+        type: Sequelize.DECIMAL(15, 3)
       },
       taxType: {
-        type: Sequelize.STRING(8)
+        type: Sequelize.STRING(12)
       }
     })
   },

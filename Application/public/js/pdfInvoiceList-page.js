@@ -40,7 +40,7 @@ function renderItems(curPageIndex) {
     recCompanyTd.textContent = item.recCompany
     // 金額設定
     const totalTd = clone.querySelector('.total')
-    totalTd.textContent = item.total
+    totalTd.textContent = item.total ? parseInt(item.total).toLocaleString() : null
     // 更新設定
     const updatedAtTd = clone.querySelector('.updatedAt')
     updatedAtTd.textContent = item.updatedAt

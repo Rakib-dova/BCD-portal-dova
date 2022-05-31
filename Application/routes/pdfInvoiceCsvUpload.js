@@ -96,8 +96,10 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   // DB保存
   try {
     await db.sequelize.transaction(async (t) => {
-      await uploadController.createUploadHistoryAndRows(uploadHistory, csvRows, t) // アップロード履歴 & CSV行 レコード挿入
-      await pdfInvoiceController.createInvoicesAndLines(validInvoices, validLines, t) // 請求書 & 明細 レコード挿入
+      await Promise.all([
+        uploadController.createUploadHistoryAndRows(uploadHistory, csvRows, t), // アップロード履歴 & CSV行 レコード挿入
+        pdfInvoiceController.createInvoicesAndLines(validInvoices, validLines, t) // 請求書 & 明細 レコード挿入
+      ])
     })
   } catch (error) {
     logger.info(error)

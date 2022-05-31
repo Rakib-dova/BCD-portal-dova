@@ -46,8 +46,8 @@ const invoiceRules = [
   },
   {
     prop: 'recPost',
-    regexp: /[0-9]{7}/,
-    message: '宛先郵便番号は数字7桁で入力して下さい。',
+    regexp: /^[0-9]{3}-[0-9]{4}$/,
+    message: '宛先郵便番号は 数字3桁 - 数字4桁 で入力して下さい。',
     colName: '宛先郵便番号',
     required: true
   },

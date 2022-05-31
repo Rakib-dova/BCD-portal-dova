@@ -18,7 +18,7 @@ input.width-120px {
 }
 
 .tax-type {
-  font-size: 14px;
+  font-size: 15px !important;
 }
 
 .width-250px {
@@ -78,4 +78,8 @@ input.width-330px {
 
 .red-color {
   color: red !important;
+}
+
+pre {
+  white-space: pre-wrap;
 }
