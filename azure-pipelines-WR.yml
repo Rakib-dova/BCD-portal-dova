@@ -16,9 +16,9 @@ parameters:
   - name: scenario
     displayName: "実行したいシナリオを選択してください"
     type: string
-    default: all
+    default: scenario*.js
     values:
-      - all
+      - scenario*.js
       - scenario001.js
       - scenario002.js
       - scenario003.js
@@ -101,15 +101,9 @@ stages:
                 workingDirectory: $(DIR)
                 displayName: install
 
-              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}}
-                workingDirectory: $(DIR)
-                displayName: test
-                condition: eq( '${{ parameters.scenario }}', 'all' )
-
               - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}} -- spec\${{ parameters.scenario }}
                 workingDirectory: $(DIR)
                 displayName: test
-                condition: ne( '${{ parameters.scenario }}', 'all' )
 
               - script: npm run e2e-report
                 workingDirectory: $(DIR)
