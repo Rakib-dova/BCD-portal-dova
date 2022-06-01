@@ -17,6 +17,7 @@ const {
   pdfInvoiceMapper,
   invoiceHeaderArray
 } = require('../lib/csv')
+const { getType } = require('../lib/utils')
 const constantsDefine = require('../constants')
 
 const pdfInvoiceController = require('../controllers/pdfInvoiceController.js')
@@ -44,41 +45,51 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
 
   // csvファイル
-  const uploadFileData = req.file.buffer.toString('UTF-8') // CSV文字列データ
-  const defaultCsvData = fs.readFileSync(
-    path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv'),
-    'utf8'
-  ) // アップロードフォーマット文字列データ
+  let uploadFileData
+  let defaultCsvData
+  try {
+    uploadFileData = req.file.buffer.toString('UTF-8') // CSV文字列データ
+    defaultCsvData = fs.readFileSync(
+      path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv'),
+      'utf8'
+    ) // アップロードフォーマット文字列データ
+  } catch (error) {
+    logger.info(error)
+    return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
+  }
   const csvMultiArray = convertCsvStringToMultiArray(uploadFileData) // CSV文字列データをCSV多次元配列データに変換
-
-  // console.log('==  csvMultiArray  ======================\n', csvMultiArray)
+  if (!csvMultiArray) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
+  console.log('==  csvMultiArray  ======================\n', csvMultiArray)
 
   // ヘッダーバリデーション
-  if (!validation.validateHeader(uploadFileData, defaultCsvData)) return next(errorHelper.create(500))
+  if (!validation.validateHeader(uploadFileData, defaultCsvData)) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
+
+  console.log('==  validateHeader pass  ======================')
 
   const csvRowObjects = [] // CSVファイル行情報をデータオブジェクト(アップロードファイル行データ)に変換し、配列化させたもの
   csvMultiArray.forEach((row, index) => {
-    console.log('==  row  ======================\n', row)
+    // console.log('==  row  ======================\n', row)
     if (index === 0) return
 
     csvRowObjects.push(convertToDataObject(row, invoiceHeaderArray, pdfInvoiceMapper))
   })
-
   console.log('==  csvRowObjects  ======================\n', csvRowObjects)
+  // CSV行データオブジェクトに空情報(null)が含まれている場合
+  if (csvRowObjects.filter((row) => row === null).length) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
 
   // アカウント情報取得 (CSVデータ多次元配列をデータオブジェクトに変換するのに必要)
   const { senderInfo } = await pdfInvoice.getAccountAndSenderInfo(req)
-  if (!senderInfo) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に返る
+  if (!senderInfo) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
 
-  // DB保存&バリデーションするために、CSVデータ多次元配列をデータオブジェクトに変換
-  const { pdfInvoices, pdfInvoiceLines } = convertCsvMultiArrayToPdfInvoiceObjects(
+  // DB保存&バリデーションするために、CSV行データオブジェクト配列をDBモデルに変換
+  const { pdfInvoices, pdfInvoiceLines } = convertCsvDataArrayToPdfInvoiceModels(
     csvRowObjects,
     senderInfo,
     req.user.tenantId
   )
-
   console.log('==  pdfInvoices  ======================\n', pdfInvoices)
   console.log('==  pdfInvoiceLines  ======================\n', pdfInvoiceLines)
+  if (!pdfInvoices || !pdfInvoiceLines) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
 
   // バリデーション
   const { validInvoices, validLines, uploadHistory, csvRows } = await validation.validate(
@@ -87,11 +98,12 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     req.user.tenantId,
     req.file.originalname
   )
-
   console.log('==  validInvoices  ======================\n', validInvoices)
   console.log('==  validLines  ======================\n', validLines)
   console.log('==  uploadHistory  ======================\n', uploadHistory)
   console.log('==  csvRows  ======================\n', csvRows)
+
+  if (!validInvoices || !validLines || !uploadHistory || !csvRows) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
 
   // DB保存
   try {
@@ -103,10 +115,11 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     })
   } catch (error) {
     logger.info(error)
-    return res.redirect('/pdfInvoiceCsvUpload')
+    return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
+    // return res.redirect('/pdfInvoiceCsvUpload')
   }
 
-  if (uploadHistory.failCount > 0 || (uploadHistory.skipCount > 0 && uploadHistory.successCount === 0)) {
+  if (uploadHistory?.failCount > 0 || (uploadHistory?.skipCount > 0 && uploadHistory?.successCount === 0)) {
     return res.redirect('/pdfInvoiceCsvUpload/resultList')
   } else {
     return res.redirect('/pdfInvoices/list')
@@ -224,14 +237,17 @@ const pdfInvoiceCsvUploadResultDetail = async (req, res, next) => {
   return res.status(resultStatusCode).send(JSON.stringify(resultDetailArr))
 }
 
-const convertCsvMultiArrayToPdfInvoiceObjects = (csvArray, senderInfo, tenantId) => {
-  const pdfInvoices = []
+const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) => {
+  if (!Array.isArray(csvArray) || getType(senderInfo) !== 'Object' || typeof tenantId !== 'string') return { pdfInvoices: null, pdfInvoiceLines: null }
+
+  const pdfInvoices = [] // 変換済み請求書
   const pdfInvoiceLines = []
   let curInvoiceIdx = 0
 
   csvArray.forEach((row) => {
-    let pdfInvoice = pdfInvoices.find((invoice) => invoice.invoiceNo === row.invoiceNo)
-    if (!pdfInvoice || (pdfInvoice && pdfInvoice.index !== curInvoiceIdx)) {
+    const foundInvoices = pdfInvoices.filter((invoice) => invoice.invoiceNo === row.invoiceNo)
+    let pdfInvoice = foundInvoices.length ? foundInvoices[foundInvoices.length - 1] : null
+    if (!pdfInvoice || (pdfInvoice && pdfInvoice.index !== curInvoiceIdx - 1)) {
       pdfInvoice = {
         index: curInvoiceIdx, // 連続する請求書番号だけで同じ請求書扱いする為に一時的にプロパティを設ける
         sendTenantId: tenantId,
@@ -277,12 +293,12 @@ const convertCsvMultiArrayToPdfInvoiceObjects = (csvArray, senderInfo, tenantId)
       invoiceNo: row.invoiceNo // CSV行テーブルレコード作成の為、一時的に設けるプロパティ
     }
 
-    // 不要なプロパティを削除
-    pdfInvoices.forEach((invoice) => {
-      delete invoice.index
-    })
-
     pdfInvoiceLines.push(line)
+  })
+
+  // 不要なプロパティを削除
+  pdfInvoices.forEach((invoice) => {
+    delete invoice.index
   })
 
   return { pdfInvoices, pdfInvoiceLines }

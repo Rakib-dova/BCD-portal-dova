@@ -16,7 +16,12 @@ const formatDate = (date, format) => {
   return format
 }
 
+const getType = (val) => {
+  return Object.prototype.toString.call(val).replace(/\[|\]|object /g, '')
+}
+
 module.exports = {
   timestampForList: timestampForList,
-  formatDate: formatDate
+  formatDate: formatDate,
+  getType
 }

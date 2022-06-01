@@ -55,7 +55,7 @@ const pdfInvoiceMapper = [
  * @return {array[] | []} 多次元配列データ
  */
 const convertCsvStringToMultiArray = (csvString) => {
-  if (typeof csvString !== 'string') return []
+  if (typeof csvString !== 'string') return null
 
   let rowArray = csvString.split(/\r?\n|\r/)
 
@@ -86,9 +86,10 @@ const convertToDataObject = (csvStringArray, headerArray, stringMapper) => {
     stringMapper.forEach((mapper) => {
       if (col === mapper.col) {
         if (mapper.modifier) {
-          dataObject[mapper.prop] = mapper.modifier(csvStringArray[index], csvStringArray)
+          const modifiedValue = mapper.modifier(csvStringArray[index], csvStringArray)
+          dataObject[mapper.prop] = typeof modifiedValue === 'string' ? modifiedValue.trim() : modifiedValue
         } else {
-          dataObject[mapper.prop] = csvStringArray[index]
+          dataObject[mapper.prop] = csvStringArray[index].trim()
         }
       }
     })

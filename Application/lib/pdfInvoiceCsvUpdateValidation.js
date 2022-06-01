@@ -164,12 +164,18 @@ const lineRules = [
  * @returns
  */
 const validate = async (invoices, lines, tenantId, fileName) => {
+  let uploadedInvoices
+  try {
+    uploadedInvoices = await pdfInvoiceController.findAllRawInvoices(tenantId)
+  } catch (error) {
+    return { validInvoices: null, validLines: null, uploadHistory: null, csvRows: null }
+  }
+
   const validInvoices = [] // バリデーションをパスした請求書obj格納用配列 (最終的にこれを返してDBに保存)
   let validLines = [] // バリデーションをパスした請求書明細obj格納用配列 (最終的にこれを返してDBに保存)
   const csvRows = [] // CSV行obj格納用配列 (最終的にこれを返してDBに保存)
-  const doneList = [] // バリデーションが完了した行情報
-  const uploadedInvoices = await pdfInvoiceController.findAllRawInvoices(tenantId)
-  const uploadedList = uploadedInvoices.map((invoice) => invoice.invoiceNo) // アップロード済み(DB保存済み)PDF請求書情報
+  const doneList = [] // バリデーションが完了した請求書Noの配列
+  const uploadedList = uploadedInvoices.map((invoice) => invoice.invoiceNo) // アップロード済み(DB保存済み)PDF請求書Noの配列
   const historyId = uuidv4() // アップロード履歴ID生成
   const uploadHistory = { // アップロード履歴objの初期化 (最終的にこれを返してDBに保存)
     invoiceUploadId: historyId,
@@ -184,7 +190,7 @@ const validate = async (invoices, lines, tenantId, fileName) => {
   invoices.forEach((invoice) => {
     let invoiceIsValid = true // 請求書がバリデーションをパスできたかフラグ
 
-    const filteredLines = lines.filter((line) => line.invoiceNo === invoice.invoiceNo)
+    const filteredLines = lines.filter((line) => line.invoiceId === invoice.invoiceId)
     filteredLines.forEach((line, index) => {
       const csvRow = {
         invoiceUploadDetailId: uuidv4(),
@@ -204,13 +210,16 @@ const validate = async (invoices, lines, tenantId, fileName) => {
       invoiceIsValid = validateInvoice(invoice, uploadHistory, csvRow)
       console.log('==  validateInvoice  ======================: ', invoiceIsValid)
       // 請求書明細のバリデーション
-      invoiceIsValid = validateLine(line, uploadHistory, csvRow)
-      console.log('==  validateLine  ======================: ', invoiceIsValid)
+      const lineIsValid = validateLine(line, uploadHistory, csvRow)
+      console.log('==  validateLine  ======================: ', lineIsValid)
+      // 請求書項目バリデーションまでパス & 明細バリデーション失敗 の場合のみバリデーションフラグを false にする
+      // この条件を指定しないと、請求書項目バリデーションが失敗しても明細バリデーションが成功すると全体のバリデーションがパスしてしまう
+      if (invoiceIsValid && !lineIsValid) invoiceIsValid = true
       if (invoiceIsValid) uploadHistory.successCount++
       csvRows.push(csvRow)
     })
 
-    doneList.push(invoice)
+    doneList.push(invoice.invoiceNo)
     if (invoiceIsValid) { // バリデーションに全部パスした場合
       uploadHistory.invoiceCount++
       validInvoices.push(invoice) // DB保存用配列に追加
@@ -322,9 +331,16 @@ const validateLine = (line, history, csvRow) => {
  * @returns
  */
 const validateHeader = (uploadedCsvString, defaultCsvString) => {
+  if (!uploadedCsvString || !defaultCsvString || typeof uploadedCsvString !== 'string' || typeof defaultCsvString !== 'string') return false
+
   const uploadedCsvArray = convertCsvStringToMultiArray(uploadedCsvString)
   const defaultCsvArray = convertCsvStringToMultiArray(defaultCsvString)
+  if (!uploadedCsvArray || !defaultCsvArray) return false
 
+  // ヘッダーのカラム数が一致するか確認
+  if (uploadedCsvArray[0].length !== defaultCsvArray[0].length) return false
+
+  // ヘッダーのカラム名が一致するか確認
   for (let i = 0; i < defaultCsvArray[0].length; i++) {
     if (!uploadedCsvArray[0][i] || defaultCsvArray[0][i] !== uploadedCsvArray[0][i]) return false
   }
