@@ -18,7 +18,7 @@ class JournalDownloadPage {
   }
 
   // 条件絞り込みへ条件を入力する
-  async inputConditions(invoiceNo, minIssuedate, maxIssuedate, sendTo) {
+  async inputConditions(invoiceNo, minIssuedate, maxIssuedate, sendTo, wasApproved) {
     if (invoiceNo) {
       await this.actionUtils.fill(this.frame, '#invoiceNumber', invoiceNo);
     }
@@ -29,6 +29,9 @@ class JournalDownloadPage {
       await this.actionUtils.click(this.frame, '#sendToSearchBtn');
       await this.actionUtils.waitForLoading('//div[@id="searchResultBox"]//input');
       await this.actionUtils.click(this.frame, '#allSelectSentToBtn');
+    }
+    if(!wasApproved) {
+      await this.actionUtils.click(this.frame, '#noneFinalapproval');
     }
   }
 

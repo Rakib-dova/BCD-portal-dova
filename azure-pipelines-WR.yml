@@ -27,11 +27,13 @@ parameters:
       - scenario006.js
       - scenario007.js
       - scenario008.js
-      - journal_*.js
       - journal_accountCodeList.js
       - journal_subAccountCodeList.js
       - journal_departmentList.js
+      - journal_approveRouteList.js
+      - journal_paymentRequestList.js
       - journal_paymentRequest.js
+      - journal_paymentRequest_long.js
       - journal_journalDownload.js
   - name: account
     displayName: "実行したいアカウントを選択してください"

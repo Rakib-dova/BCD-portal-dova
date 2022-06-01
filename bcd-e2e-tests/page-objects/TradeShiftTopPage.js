@@ -14,8 +14,14 @@ class TradeShiftTopPage {
 
   // デジタルトレードアプリをクリックする
   async clickBcdApp() {
-    await this.actionUtils.click(this.page, '//*[contains(@data-tooltip,"デジタルトレード")]');
-    await this.page.mouse.move(0, 100); // tooltipを消す
+    if(await this.actionUtils.isExist(this.page, '//*[contains(@data-tooltip,"デジタルトレード")]')) {
+      await this.actionUtils.click(this.page, '//*[contains(@data-tooltip,"デジタルトレード")]');
+      await this.page.mouse.move(0, 100); // tooltipを消す
+    } else {
+      await this.actionUtils.click(this.page, '//*[contains(@data-tooltip,"すべてのアプリ")]');
+      await this.actionUtils.waitForLoading('//span[contains(text(), "デジタルトレード (prodstg)")]');
+      await this.actionUtils.click(this.page, '//span[contains(text(), "デジタルトレード (prodstg)")]');
+    }
   }
 
 }

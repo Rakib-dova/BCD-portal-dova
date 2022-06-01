@@ -15,6 +15,13 @@ let browser, accounts, contextOption, page;
 webdriverUtils.setReporter();
 
 describe('仕訳情報設定_部門データ一覧', function () {
+
+  // テストデータ
+  const departments = [
+    {code:'TDept1', name:'テスト用部門コード名１ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミ'}, // 新規登録用
+    {code:'TDept2', name:'テスト用部門コード名２ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミ'} // 変更用
+  ];
+
   beforeAll(async function () {
     // テストのタイムアウト時間を設定する（1時間）
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 3600000;
@@ -42,7 +49,34 @@ describe('仕訳情報設定_部門データ一覧', function () {
     }
   };
 
-  it("79. 新規作成・確認", async function () {
+  // 部門データ一覧ページまで遷移する
+  async function gotoDepartmentList(baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage) {
+    // 指定したURLに遷移する
+    await comment('Tradeshiftログインページへ移動する');
+    await page.goto(baseUrl);
+
+    // ログインを行う
+    await comment('ユーザ"' + account.id + '"でログインする');
+    await loginPage.doLogin(account.id, account.password);
+    await tradeShiftTopPage.waitForLoading();
+
+    // デジタルトレードアプリをクリックする
+    await comment('デジタルトレードアプリのアイコンをクリックする');
+    await tradeShiftTopPage.clickBcdApp();
+    await topPage.waitForLoading();
+
+    // 仕訳情報管理メニューを開く
+    await comment('「仕訳情報管理」をクリックする');
+    await topPage.openJournalMenu();
+    await journalMenuPage.waitForLoading();
+
+    // 部門データ一覧ページへ遷移する
+    await comment('「部門データ設定」をクリックする');
+    await journalMenuPage.clickDepartment();
+    await departmentListPage.waitForLoading();
+  };
+
+  it("STEP5_No.79. 新規作成・確認", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -71,29 +105,8 @@ describe('仕訳情報設定_部門データ一覧', function () {
       const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, departmentListPage, registDepartmentPage }
         = common.getPageObject(browser, page);
   
-      // 指定したURLに遷移する
-      await comment('Tradeshiftログインページへ移動する');
-      await page.goto(config.baseUrl);
-  
-      // ログインを行う
-      await comment('ユーザ"' + account.id + '"でログインする');
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-  
-      // デジタルトレードアプリをクリックする
-      await comment('デジタルトレードアプリのアイコンをクリックする');
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
-  
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-  
       // 部門データ一覧ページへ遷移する
-      await comment('「部門データ設定」をクリックする');
-      await journalMenuPage.clickDepartment();
-      await departmentListPage.waitForLoading();
+      await gotoDepartmentList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
 
       // 新規登録ページへ遷移する
       await comment('「新規登録する」をクリックする');
@@ -101,24 +114,22 @@ describe('仕訳情報設定_部門データ一覧', function () {
       await registDepartmentPage.waitForLoading();
 
       // 部門データを登録する
-      let departmentCode = 'TDepart1';
-      let departmentName = 'テスト用部門コード名１ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミ';
-      await registDepartmentPage.regist(departmentCode, departmentName);
+      await registDepartmentPage.regist(departments[0].code, departments[0].name);
       await registDepartmentPage.clickPopupOK();
       await departmentListPage.waitForLoading();
 
       // 部門データ確認・変更ページへ遷移する
-      await departmentListPage.clickEdit(departmentCode);
+      await departmentListPage.clickEdit(departments[0].code);
       await registDepartmentPage.waitForLoading();
   
       // 詳細が表示されること
-      expect(await registDepartmentPage.getCode()).to.equal(departmentCode, '部門コードが表示されること');
-      expect(await registDepartmentPage.getName()).to.equal(departmentName, '部門名が表示されること');
+      expect(await registDepartmentPage.getCode()).to.equal(departments[0].code, '部門コードが表示されること');
+      expect(await registDepartmentPage.getName()).to.equal(departments[0].name, '部門名が表示されること');
       await page.waitForTimeout(1000);
     }
   });
   
-  it("80. 変更", async function () {
+  it("STEP5_No.80. 変更", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -147,48 +158,23 @@ describe('仕訳情報設定_部門データ一覧', function () {
       const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, departmentListPage, registDepartmentPage }
         = common.getPageObject(browser, page);
   
-      // 指定したURLに遷移する
-      await comment('Tradeshiftログインページへ移動する');
-      await page.goto(config.baseUrl);
-  
-      // ログインを行う
-      await comment('ユーザ"' + account.id + '"でログインする');
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-  
-      // デジタルトレードアプリをクリックする
-      await comment('デジタルトレードアプリのアイコンをクリックする');
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
-  
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-  
       // 部門データ一覧ページへ遷移する
-      await comment('「部門データ設定」をクリックする');
-      await journalMenuPage.clickDepartment();
-      await departmentListPage.waitForLoading();
+      await gotoDepartmentList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
 
       // 部門データ確認・変更ページへ遷移する
-      let departmentCode = 'TDepart1';
-      let departmentName = 'テスト用部門名１ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー';
-      await comment('部門コード"' + departmentCode + '"の「確認・変更する」をクリックする');
-      await departmentListPage.clickEdit(departmentCode);
+      await comment('部門コード"' + departments[0].code + '"の「確認・変更する」をクリックする');
+      await departmentListPage.clickEdit(departments[0].code);
       await registDepartmentPage.waitForLoading();
 
       // 部門データを変更する
-      departmentCode = 'TDepart2';
-      departmentName = 'テスト用部門名２ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー';
-      await comment('コード"' + departmentCode + '"、部門名"' + departmentName + '"で登録する');
-      await registDepartmentPage.regist(departmentCode, departmentName);
+      await comment('コード"' + departments[1].code + '"、部門名"' + departments[1].name + '"で登録する');
+      await registDepartmentPage.regist(departments[1].code, departments[1].name);
       await page.waitForTimeout(1000);
       await registDepartmentPage.clickPopupOK();
       await departmentListPage.waitForLoading();
   
       // 変更が反映されること
-      expect(await departmentListPage.hasRow(departmentCode, departmentName)).to.equal(true, '変更が反映されること');
+      expect(await departmentListPage.hasRow(departments[1].code, departments[1].name)).to.equal(true, '変更が反映されること');
       await page.waitForTimeout(1000);
     }
   });
@@ -223,29 +209,8 @@ describe('仕訳情報設定_部門データ一覧', function () {
       const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, departmentListPage, uploadDepartmentPage }
         = common.getPageObject(browser, page);
   
-      // 指定したURLに遷移する
-      await comment('Tradeshiftログインページへ移動する');
-      await page.goto(config.baseUrl);
-  
-      // ログインを行う
-      await comment('ユーザ"' + account.id + '"でログインする');
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-  
-      // デジタルトレードアプリをクリックする
-      await comment('デジタルトレードアプリのアイコンをクリックする');
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
-  
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-  
       // 部門データ一覧ページへ遷移する
-      await comment('「部門データ設定」をクリックする');
-      await journalMenuPage.clickDepartment();
-      await departmentListPage.waitForLoading();
+      await gotoDepartmentList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
 
       // 部門データ一括作成ページへ遷移する
       await comment('「部門データ一括作成」をクリックする');
@@ -269,15 +234,15 @@ describe('仕訳情報設定_部門データ一覧', function () {
     }
   };
   
-  it("88. 部門データ一括作成", async function () {
+  it("STEP5_No.88. 部門データ一括作成", async function () {
     await uploadDepartment('testdata/upload/TESTCSV41.csv');
   });
 
-  it("94. 部門データ一括作成", async function () {
+  it("STEP5_No.94. 部門データ一括作成", async function () {
     await uploadDepartment('testdata/upload/TESTCSV47.csv');
   });
 
-  it("95. 部門データ一括作成", async function () {
+  it("STEP5_No.95. 部門データ一括作成", async function () {
     await uploadDepartment('testdata/upload/TESTCSV48.csv');
   });
   
@@ -310,29 +275,8 @@ describe('仕訳情報設定_部門データ一覧', function () {
       const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, departmentListPage }
         = common.getPageObject(browser, page);
   
-      // 指定したURLに遷移する
-      await comment('Tradeshiftログインページへ移動する');
-      await page.goto(config.baseUrl);
-  
-      // ログインを行う
-      await comment('ユーザ"' + account.id + '"でログインする');
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-  
-      // デジタルトレードアプリをクリックする
-      await comment('デジタルトレードアプリのアイコンをクリックする');
-      await tradeShiftTopPage.clickBcdApp();
-      await topPage.waitForLoading();
-  
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-  
-      // 補助科目一覧ページへ遷移する
-      await comment('「部門データ設定」をクリックする');
-      await journalMenuPage.clickDepartment();
-      await departmentListPage.waitForLoading();
+      // 部門データ一覧ページへ遷移する
+      await gotoDepartmentList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
 
       // 部門データをすべて削除する
       await comment('部門データをすべて削除する');

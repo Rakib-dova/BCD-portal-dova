@@ -17,9 +17,19 @@ class PaymentRequestListPage {
     return frame;
   }
 
+  // ホームへ遷移する
+  async clickHome() {
+    await this.actionUtils.click(this.frame, '//*[contains(text(), "Home")]');
+  }
+
   // 仕訳情報設定ページへ遷移する
   async clickDetail(invoiceNo) {
     await this.actionUtils.click(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/..//a[contains(text(), "仕訳情報設定")]');
+  }
+
+  // 承認ステータスを取得する
+  async getApproveStatus(invoiceNo) {
+    return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[3]/a');
   }
 
   // 金額を取得する
@@ -35,6 +45,32 @@ class PaymentRequestListPage {
   // 宛先を取得する
   async getReceiver(invoiceNo) {
     return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[7]');
+  }
+
+  // 承認待ちタブを表示する
+  async clickConstruct() {
+    await this.actionUtils.click(this.frame, '#constructTab');
+    await this.actionUtils.waitForLoading('#constructTab');
+  }
+
+  // 承認待ちリストに、任意の請求書が表示されているか確認する
+  async hasConstructRow(invoiceNo) {
+    return await this.actionUtils.isExist(this.frame, '//div[@id="constructTab"]//td[contains(text(), "' + invoiceNo + '")]');
+  }
+
+  // 承認待ちリスト内のステータスを取得する
+  async getConstructStatus(invoiceNo) {
+    return await this.actionUtils.getText(this.frame, '//div[@id="constructTab"]//td[contains(text(), "' + invoiceNo + '")]/..//a[contains(@class, "approveStatus")]');
+  }
+
+  // 承認待ちリスト内、任意の請求書の支払依頼ページへ遷移する
+  async clickConstructDetail(invoiceNo) {
+    await this.actionUtils.click(this.frame, '//div[@id="constructTab"]//td[contains(text(), "' + invoiceNo + '")]/..//a[contains(text(), "依頼内容確認")]');
+  }
+
+  // ポップアップメッセージを取得する
+  async getPopupMessage() {
+    return await this.actionUtils.getText(this.frame, '//*[@class="notification is-info animate__animated animate__faster"]');
   }
 }
 exports.PaymentRequestListPage = PaymentRequestListPage;
