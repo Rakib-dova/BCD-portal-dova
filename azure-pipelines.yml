@@ -3,19 +3,6 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
-trigger:
-  branches:
-    include:
-      - refs/heads/snake_case
-
-  paths:
-    include:
-      - Application
-    exclude:
-      - Documents
-      - Tests
-      - '*.yml'
-
 parameters:
   - name: Environment
     type: string
@@ -52,7 +39,7 @@ variables:
   - name: vmPipeline #パイプライン起動停止フラグ
     value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
   - name: ManualOperation #正常性確認実施フラグ
-    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.isManualOperation_prodstgOpt,true)) }}
+    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'demo'),eq(parameters.isManualOperation_prodstgOpt,true)) }}
 
 stages:
   - stage: BuildandTest
