@@ -1197,6 +1197,7 @@ const checkJournalList = function () {
 
 // 重複又は空になった仕訳情報処理(仕訳情報設定画面)
 const duplicationCheck = function () {
+  checkApproveModalInit()
   const duplArray = []
   // 画面に表示された項目別の仕訳情報を取得
   const allInfomationline = document.querySelectorAll('.invoiceLine')
@@ -1688,4 +1689,257 @@ const getBulkList = function () {
     journalIdx++
   } while (journalIdx < $('.lineAccountcodeForBulk').length)
   return bulkLines
+}
+
+// 支払依頼確認モーダル
+$('#btn-check-approval').addEventListener('click', function () {
+  // ---------------------------------- 初期化 START ----------------------------------
+  checkApproveModalInit()
+  // ---------------------------------- 初期化 END ----------------------------------
+
+  const invoiceNumber = $('#InvoiceNumber').innerText
+  $('#check-invoiceId').innerText = invoiceNumber
+
+  // 宛先
+  const invoiceRecipients = $('#invoiceRecipient').querySelectorAll('.columns.m-0.p-0')
+  for (const invoiceRecipient of invoiceRecipients) {
+    const cloneRecipient = document.importNode(invoiceRecipient, true)
+    $('#check-recipient').append(cloneRecipient)
+  }
+
+  // 差出人
+  const invoiceSenders = $('#invoiceSender').querySelectorAll('.columns.m-0.p-0')
+  for (const invoiceSender of invoiceSenders) {
+    const cloneSender = document.importNode(invoiceSender, true)
+    $('#check-sender').append(cloneSender)
+  }
+
+  // 明細
+  const invoiceLineInBoxes = $('.invoiceLineInBox')
+  if (invoiceLineInBoxes.length > 0) {
+    for (let idx = 0; idx < invoiceLineInBoxes.length; idx++) {
+      const box = invoiceLineInBoxes[idx]
+      const invoiceLine = box.querySelectorAll('.invoiceLine')
+      const codings = box.querySelectorAll('.lineAccountcode')
+
+      if (invoiceLine.length > 0) {
+        // 明細部分
+        const newInvoiceLineColumn = document.createElement('div')
+        newInvoiceLineColumn.classList.add('column', 'invoiceLineColumn', 'p-0')
+
+        const newInvoiceLineColumns = document.createElement('div')
+        newInvoiceLineColumns.classList.add('columns', 'invoiceLineColumns', 'm-0')
+        newInvoiceLineColumns.append(newInvoiceLineColumn)
+
+        const codingObjs = getCoding(codings, idx)
+        const newCodingSubLabel = document.createElement('div')
+        newCodingSubLabel.classList.add('column', 'invoiceCodingColumnSbuLabel', 'p-0', 'border-div-rad-1')
+        newCodingSubLabel.innerText = '　'
+
+        const newCodingColumnDebitLabel = document.createElement('div')
+        newCodingColumnDebitLabel.classList.add('column', 'invoiceCodingColumn', 'p-0', 'border-div-rad-1')
+        newCodingColumnDebitLabel.innerText = '借方'
+
+        const newCodingColumnCreditLabel = document.createElement('div')
+        newCodingColumnCreditLabel.classList.add('column', 'invoiceCodingColumn', 'p-0', 'border-div-rad-1')
+        newCodingColumnCreditLabel.innerText = '貸方'
+
+        const newCodingColumnAmountLabel = document.createElement('div')
+        newCodingColumnAmountLabel.classList.add('column', 'invoiceCodingColumn', 'p-0', 'border-div-rad-1')
+        newCodingColumnAmountLabel.innerText = '計上'
+
+        // 借方部分
+        const newCodingDebitColumn = document.createElement('div')
+        newCodingDebitColumn.classList.add('column', 'invoiceCodingDebitColumn', 'p-0')
+        newCodingDebitColumn.append(newCodingColumnDebitLabel)
+
+        // 貸方部分
+        const newCodingCreditColumn = document.createElement('div')
+        newCodingCreditColumn.classList.add('column', 'invoiceCodingCreditColumn', 'p-0')
+        newCodingCreditColumn.append(newCodingColumnCreditLabel)
+
+        // 計上部分
+        const newCodingAmountColumn = document.createElement('div')
+        newCodingAmountColumn.classList.add('column', 'invoiceCodingAmountColumn', 'p-0')
+        newCodingAmountColumn.append(newCodingColumnAmountLabel)
+
+        const newCodingColumns = document.createElement('div')
+        newCodingColumns.classList.add('columns', 'invoiceCodingColumns', 'm-0', 'mb-6')
+        newCodingColumns.append(newCodingSubLabel)
+        newCodingColumns.append(newCodingDebitColumn)
+        newCodingColumns.append(newCodingCreditColumn)
+        newCodingColumns.append(newCodingAmountColumn)
+
+        for (const coding of codingObjs) {
+          const newCodingAccountLabel = document.createElement('div')
+          newCodingAccountLabel.classList.add('column', 'invoiceCodingColumnSbuLabel', 'p-0', 'border-div-rad-1')
+          newCodingAccountLabel.innerText = '勘定科目'
+          const newCodingSubAccountLabel = document.createElement('div')
+          newCodingSubAccountLabel.classList.add('column', 'invoiceCodingColumnSbuLabel', 'p-0', 'border-div-rad-1')
+          newCodingSubAccountLabel.innerText = '補助科目'
+          const newCodingDepLabel = document.createElement('div')
+          newCodingDepLabel.classList.add('column', 'invoiceCodingColumnSbuLabel', 'p-0', 'border-div-rad-1')
+          newCodingDepLabel.innerText = '部門データ'
+          newCodingSubLabel.append(newCodingAccountLabel)
+          newCodingSubLabel.append(newCodingSubAccountLabel)
+          newCodingSubLabel.append(newCodingDepLabel)
+
+          const debitAccount = document.createElement('div')
+          const debitSubAccount = document.createElement('div')
+          const debitDepartment = document.createElement('div')
+
+          const creditAccount = document.createElement('div')
+          const creditSubAccount = document.createElement('div')
+          const creditDepartment = document.createElement('div')
+
+          const spaceColumn = document.createElement('div')
+          const cloneSpaceColumn = document.importNode(spaceColumn, true)
+          const amountColumn = document.createElement('div')
+
+          debitAccount.classList.add('column', 'p-0', 'border-div-rad-1')
+          debitSubAccount.classList.add('column', 'p-0', 'border-div-rad-1')
+          debitDepartment.classList.add('column', 'p-0', 'border-div-rad-1')
+
+          creditAccount.classList.add('column', 'p-0', 'border-div-rad-1')
+          creditSubAccount.classList.add('column', 'p-0', 'border-div-rad-1')
+          creditDepartment.classList.add('column', 'p-0', 'border-div-rad-1')
+
+          spaceColumn.classList.add('column', 'p-0', 'border-div-rad-1')
+          cloneSpaceColumn.classList.add('column', 'p-0', 'border-div-rad-1')
+          amountColumn.classList.add('column', 'p-0', 'border-div-rad-1')
+
+          debitAccount.innerText = coding.debitAccountCode || '　'
+          debitSubAccount.innerText = coding.debitSubAccountCode || '　'
+          debitDepartment.innerText = coding.debitDepartmentCode || '　'
+
+          creditAccount.innerText = coding.creditAccountCode || '　'
+          creditSubAccount.innerText = coding.creditSubAccountCode || '　'
+          creditDepartment.innerText = coding.creditDepartment || '　'
+
+          spaceColumn.innerText = '　'
+          cloneSpaceColumn.innerText = '　'
+          amountColumn.innerText = coding.amount || '　'
+
+          newCodingDebitColumn.append(debitAccount)
+          newCodingDebitColumn.append(debitSubAccount)
+          newCodingDebitColumn.append(debitDepartment)
+
+          newCodingCreditColumn.append(creditAccount)
+          newCodingCreditColumn.append(creditSubAccount)
+          newCodingCreditColumn.append(creditDepartment)
+
+          newCodingAmountColumn.append(spaceColumn)
+          newCodingAmountColumn.append(cloneSpaceColumn)
+          newCodingAmountColumn.append(amountColumn)
+        }
+
+        for (const line of invoiceLine) {
+          const cloneLine = document.importNode(line, true)
+          newInvoiceLineColumn.append(cloneLine)
+        }
+        $('#check-invoiceLine').append(newInvoiceLineColumns)
+        $('#check-invoiceLine').append(newCodingColumns)
+      }
+    }
+  }
+
+  const invoiceCharge = $('#invoiceCharge') !== null ? $('#invoiceCharge').querySelectorAll('.paymentmean') : []
+  if (invoiceCharge.length > 0) {
+    for (const charge of invoiceCharge) {
+      const cloneCharge = document.importNode(charge, true)
+      $('#check-charge').append(cloneCharge)
+    }
+  } else {
+    $('#check-charge').classList.add('is-invisible')
+  }
+
+  // 合計
+  const invoiceTotal = $('#invoiceTotal').querySelector('.columns.m-0.p-0')
+  if (invoiceTotal) {
+    const cloneTotal = document.importNode(invoiceTotal, true)
+    $('#check-total').append(cloneTotal)
+  } else {
+    $('#check-total').classList.add('is-invisible')
+  }
+
+  // オプション
+  const invoiceOptions = $('#invoiceOptions').querySelector('table')
+  if (invoiceOptions) {
+    const cloneOptions = document.importNode(invoiceOptions, true)
+    $('#check-option').append(cloneOptions)
+  } else {
+    $('#check-option').classList.add('is-invisible')
+  }
+
+  // 支払手段
+  const invoicePaymentMethod = $('#invoicePaymentMethod').querySelector('div')
+  if (invoicePaymentMethod) {
+    const clonePaymentMethod = document.importNode(invoicePaymentMethod, true)
+    $('#check-paymentMethod').append(clonePaymentMethod)
+  } else {
+    $('#check-paymentMethod').classList.add('is-invisible')
+  }
+
+  $(`#${this.dataset.target}`).classList.toggle('is-active')
+})
+
+function checkApproveModalInit() {
+  const invoiceRecipients = $('#check-recipient').querySelectorAll('.columns.m-0.p-0')
+  if (invoiceRecipients.length > 0) {
+    for (const invoiceRecipient of invoiceRecipients) {
+      $('#check-recipient').removeChild(invoiceRecipient)
+    }
+  }
+
+  const invoiceSenders = $('#check-sender').querySelectorAll('.columns.m-0.p-0')
+  if (invoiceSenders.length > 0) {
+    for (const invoiceSender of invoiceSenders) {
+      $('#check-sender').removeChild(invoiceSender)
+    }
+  }
+
+  const invoiceLine = $('#check-invoiceLine').querySelectorAll('.invoiceLineColumns')
+  if (invoiceLine.length > 0) {
+    for (const line of invoiceLine) {
+      $('#check-invoiceLine').removeChild(line)
+    }
+  }
+  const invoiceCoding = $('#check-invoiceLine').querySelectorAll('.invoiceCodingColumns')
+  if (invoiceCoding.length > 0) {
+    for (const coding of invoiceCoding) {
+      $('#check-invoiceLine').removeChild(coding)
+    }
+  }
+
+  const invoiceTotal = $('#check-total').querySelector('.columns.m-0.p-0')
+  if (invoiceTotal) {
+    $('#check-total').removeChild(invoiceTotal)
+  }
+
+  const invoiceOption = $('#check-option').querySelector('table')
+  if (invoiceOption) {
+    $('#check-option').removeChild(invoiceOption)
+  }
+
+  const invoicePaymentMethod = $('#check-paymentMethod').querySelector('div')
+  if (invoicePaymentMethod) {
+    $('#check-paymentMethod').removeChild(invoicePaymentMethod)
+  }
+}
+
+function getCoding(codingNodes, idx) {
+  const objs = []
+  for (const node of codingNodes) {
+    const input = node.querySelectorAll('input')
+    objs.push({
+      debitAccountCode: input[0].value,
+      debitSubAccountCode: input[1].value,
+      debitDepartmentCode: input[2].value,
+      creditAccountCode: input[3].value,
+      creditSubAccountCode: input[4].value,
+      creditDepartment: input[5].value,
+      amount: input[6].value
+    })
+  }
+  return objs
 }
