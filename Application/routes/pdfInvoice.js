@@ -4,6 +4,8 @@ const router = express.Router()
 const axios = require('axios')
 const multer = require('multer')
 const upload = multer({ storage: multer.memoryStorage() })
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 const { v4: uuidV4 } = require('uuid')
 const FileType = require('file-type')
 const helper = require('./helpers/middleware')
@@ -50,7 +52,8 @@ const pdfInvoiceList = async (req, res, next) => {
     title: 'PDF請求書',
     engTitle: 'PDF INVOICING',
     itemCount: invoices.length, // ページネーションで必要な情報
-    invoices: JSON.stringify(invoices) // フロントエンドにデータを渡す為
+    invoices: JSON.stringify(invoices), // フロントエンドにデータを渡す為
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceList')
@@ -74,7 +77,8 @@ const pdfInvoiceRegister = async (req, res, next) => {
     lines: JSON.stringify([]),
     sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
     logoSrc,
-    editing: true
+    editing: true,
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceRegister')
@@ -112,7 +116,8 @@ const pdfInvoiceEdit = async (req, res, next) => {
     lines: JSON.stringify(lines),
     sealImpSrc,
     logoSrc,
-    editing: true
+    editing: true,
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceEdit')
@@ -143,7 +148,8 @@ const pdfInvoiceShow = async (req, res, next) => {
     invoice: JSON.stringify(invoice),
     lines: JSON.stringify(lines),
     sealImpSrc,
-    logoSrc
+    logoSrc,
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceShow')
 }
@@ -505,15 +511,15 @@ const getTotal = (lines, taxDatabase) => {
   return total
 }
 
-router.get('/list', helper.bcdAuthenticate, pdfInvoiceList)
-router.get('/register', helper.bcdAuthenticate, pdfInvoiceRegister)
-router.get('/edit/:invoiceId', helper.bcdAuthenticate, pdfInvoiceEdit)
-router.get('/show/:invoiceId', helper.bcdAuthenticate, pdfInvoiceShow)
+router.get('/list', csrfProtection, helper.bcdAuthenticate, pdfInvoiceList)
+router.get('/register', csrfProtection, helper.bcdAuthenticate, pdfInvoiceRegister)
+router.get('/edit/:invoiceId', csrfProtection, helper.bcdAuthenticate, pdfInvoiceEdit)
+router.get('/show/:invoiceId', csrfProtection, helper.bcdAuthenticate, pdfInvoiceShow)
 
-router.post('/', helper.bcdAuthenticate, upload.single('sealImp'), createPdfInvoice)
-router.put('/:invoiceId', helper.bcdAuthenticate, upload.single('sealImp'), updatePdfInvoice)
-router.post('/createAndOutput', helper.bcdAuthenticate, upload.single('sealImp'), createAndOutputPdfInvoice)
-router.post('/updateAndOutput/:invoiceId', helper.bcdAuthenticate, upload.single('sealImp'), updateAndOutputPdfInvoice)
+router.post('/', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), createPdfInvoice)
+router.put('/:invoiceId', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), updatePdfInvoice)
+router.post('/createAndOutput', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), createAndOutputPdfInvoice)
+router.post('/updateAndOutput/:invoiceId', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), updateAndOutputPdfInvoice)
 // router.delete('/:invoiceId', helper.bcdAuthenticate, deletePdfInvoice)
 
 module.exports = {

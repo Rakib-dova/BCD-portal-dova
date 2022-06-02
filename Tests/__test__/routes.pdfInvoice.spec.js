@@ -214,7 +214,7 @@ const pdfInvoiceTestData = {
           taxType: 'tax8p'
         }
       }
-    ],
+    ]
   },
   hasPdfSealImp: {
     dataValues: {
@@ -478,7 +478,8 @@ const exprectedShowData = {
       }
     ]),
     sealImpSrc: null,
-    logoSrc: null
+    logoSrc: null,
+    csrfToken: 'dummyCsrfToken'
   },
   hasSealImpNoLogo: {
     title: 'PDF請求書',
@@ -535,7 +536,8 @@ const exprectedShowData = {
       }
     ]),
     sealImpSrc: 'data:image/png;base64,dummyBuffer',
-    logoSrc: null
+    logoSrc: null,
+    csrfToken: 'dummyCsrfToken'
   },
   noSealImpHasLogo: {
     title: 'PDF請求書',
@@ -592,7 +594,8 @@ const exprectedShowData = {
       }
     ]),
     sealImpSrc: null,
-    logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png'
+    logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
+    csrfToken: 'dummyCsrfToken'
   },
   hasSealImpHasLogo: {
     title: 'PDF請求書',
@@ -649,7 +652,8 @@ const exprectedShowData = {
       }
     ]),
     sealImpSrc: 'data:image/png;base64,dummyBuffer',
-    logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png'
+    logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
+    csrfToken: 'dummyCsrfToken'
   }
 }
 
@@ -710,7 +714,8 @@ const exprectedEditData = {
     ]),
     sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
     logoSrc: null,
-    editing: true
+    editing: true,
+    csrfToken: 'dummyCsrfToken'
   },
   hasSealImpNoLogo: {
     title: 'PDF請求書編集',
@@ -768,7 +773,8 @@ const exprectedEditData = {
     ]),
     sealImpSrc: 'data:image/png;base64,dummyBuffer',
     logoSrc: null,
-    editing: true
+    editing: true,
+    csrfToken: 'dummyCsrfToken'
   },
   noSealImpHasLogo: {
     title: 'PDF請求書編集',
@@ -826,7 +832,8 @@ const exprectedEditData = {
     ]),
     sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
     logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
-    editing: true
+    editing: true,
+    csrfToken: 'dummyCsrfToken'
   },
   hasSealImpHasLogo: {
     title: 'PDF請求書編集',
@@ -884,7 +891,8 @@ const exprectedEditData = {
     ]),
     sealImpSrc: 'data:image/png;base64,dummyBuffer',
     logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
-    editing: true
+    editing: true,
+    csrfToken: 'dummyCsrfToken'
   }
 }
 
@@ -976,6 +984,7 @@ describe('pdfInvoiceのテスト', () => {
   beforeEach(() => {
     request = new Request()
     request.user = user[0]
+    request.csrfToken = () => 'dummyCsrfToken'
     response = new Response()
     infoSpy = jest.spyOn(logger, 'info')
     errorSpy = jest.spyOn(logger, 'error')
@@ -1065,7 +1074,8 @@ describe('pdfInvoiceのテスト', () => {
             },
             total: 6480
           }
-        ])
+        ]),
+        csrfToken: 'dummyCsrfToken'
       })
     })
 
@@ -1097,7 +1107,8 @@ describe('pdfInvoiceのテスト', () => {
         lines: JSON.stringify([]),
         sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
         logoSrc: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
-        editing: true
+        editing: true,
+        csrfToken: 'dummyCsrfToken'
       })
     })
     test('正常: ロゴなし', async () => {
@@ -1121,7 +1132,8 @@ describe('pdfInvoiceのテスト', () => {
         lines: JSON.stringify([]),
         sealImpSrc: '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg',
         logoSrc: null,
-        editing: true
+        editing: true,
+        csrfToken: 'dummyCsrfToken'
       })
     })
     test('準正常: ユーザ情報取得APIエラー', async () => {
