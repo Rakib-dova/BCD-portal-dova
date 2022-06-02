@@ -32,6 +32,7 @@ jest.mock('../../Application/routes/helpers/middleware', () => {
       req.params = defaultParams
       req.body = defaultBody
       req.file = defaultFile
+      req.csrfToken = () => 'dummyCsrfToken'
       return next()
     }
   }
@@ -46,9 +47,7 @@ jest.mock('../../Application/node_modules/multer', () => {
   multer.memoryStorage = () => {}
   return multer
 })
-jest.mock('../../Application/node_modules/csurf', () => {
-  return () => () => (req, res, next) => next()
-})
+jest.mock('../../Application/node_modules/csurf', () => () => (req, res, next) => next())
 
 let apiManagerSpy
 let findAllInvoicesSpy, findInvoiceSpy, createInvoiceSpy, updateInvoiceSpy

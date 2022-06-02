@@ -59,7 +59,10 @@ const outputPdfInvoice = async (invoice, lines, file, invoiceId = null, timerId 
 const apiController = async (url, method, body = null, callback = null) => {
   const options = {
     method,
-    headers: { credentials: 'include' },
+    headers: {
+      credentials: 'include',
+      'CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    },
     body
   }
 
