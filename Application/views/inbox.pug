@@ -1,6 +1,7 @@
 ﻿extends layout
 
 block content
+  meta(name="referrer" content="origin-when-cross-origin")
   .container
     div.title-box-journallzing
       h4.title-text-journallzing.text-inbox 仕訳情報設定
@@ -745,7 +746,7 @@ block content
       .modal-background.cancel-button(data-target='check-approval-modal')
       .modal-card.is-family-noto-sans
         header.modal-card-head.color-link-modal-header
-          p.modal-card-title 支払依頼確認
+          p.modal-card-title 仕訳情報設定確認
           a.delete(data-target='check-approval-modal')
         section.modal-card-body
           .box
