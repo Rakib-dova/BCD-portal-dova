@@ -14,7 +14,11 @@ block content
         .grouped-button
           a.button.mr-6(href='/inboxList/1')  戻る
           a.button.mr-6.is-success#btn-confirm 保存
-          a.button.is-link(href=`/requestApproval/${documentId}`) 支払依頼へ
+          if invoiceLine.length !== 0
+            if invoiceLine[0]['journalize']
+              a.button.is-link(href=`/requestApproval/${documentId}`) 支払依頼へ
+            else 
+              a.button(disabled).is-link(href=`/requestApproval/${documentId}`) 支払依頼へ
 
   template#templateLineAccountCodeItem
     .columns.m-0.pt-1.lineAccountcode
