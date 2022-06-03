@@ -334,7 +334,7 @@ const cbPostIndex = async (req, res, next) => {
           invoicesForDownload = await journalDownloadController.createInvoiceDataForDownload(
             req.user.accessToken,
             req.user.refreshToken,
-            invoiceDocument,
+            invoiceDocument[0],
             contract.contractId,
             chkFinalapproval,
             req.user.userId
@@ -354,43 +354,96 @@ const cbPostIndex = async (req, res, next) => {
             }
             logger.info(jsonLog)
 
+            // CSVファイルをまとめる変数
+            let fileData = ''
+            // 取得した文書データをCSVファイルにまとめる
+            const invoice = invoicesForDownload[0]
+            const journalizeInvoice = invoicesForDownload[0]
+            // 最初の請求書の場合
+            if (invoice.length !== 0) {
+              fileData += jsonToCsv(dataToJson(invoice.invoice, journalizeInvoice.journalizeInvoiceFinal))
+              fileData += String.fromCharCode(0x0d) + String.fromCharCode(0x0a) // 改行の追加
+            }
+
             filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
             res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-            res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
+            res.status(200).send(`${String.fromCharCode(0xfeff)}${fileData}`)
           } else {
             chkInvoice = true
           }
         } else {
           chkInvoice = true
         }
+
         // 条件に合わせるデータがない場合、お知らせを表示する。
         if (chkInvoice) {
           req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
           res.redirect(303, '/journalDownload')
         }
       } else {
-        invoicesForDownload = await journalDownloadController.createInvoiceDataForDownload(
-          req.user.accessToken,
-          req.user.refreshToken,
-          documentsResult.Document,
-          contract.contractId,
-          chkFinalapproval,
-          req.user.userId
-        )
+        let invoicesForDownload
+        await Promise.all(
+          documentsResult.Document.map(async (key) => {
+            return journalDownloadController.createInvoiceDataForDownload(
+              req.user.accessToken,
+              req.user.refreshToken,
+              key,
+              contract.contractId,
+              chkFinalapproval,
+              req.user.userId
+            )
+          })
+        ).then(function (result) {
+          invoicesForDownload = result
+        })
 
         // エラーを確認する
         if (invoicesForDownload instanceof Error) {
           return errorHandle(invoicesForDownload, res, req)
         }
 
-        if (invoicesForDownload.length === 0) {
+        const arrDownload = []
+        invoicesForDownload.forEach((item) => {
+          if (item.length !== 0) {
+            arrDownload.push(item)
+          }
+        })
+
+        // CSVファイルをまとめる変数
+        let fileData = ''
+        // 取得した文書データをCSVファイルにまとめる
+        for (let idx = 0; idx < arrDownload.length; idx++) {
+          const invoice = arrDownload[idx]
+          const journalizeInvoice = arrDownload[idx]
+          // 最初の請求書の場合
+          if (invoice.length !== 0) {
+            if (idx === 0) {
+              fileData += jsonToCsv(dataToJson(invoice[0].invoice, journalizeInvoice[0].journalizeInvoiceFinal))
+              fileData += String.fromCharCode(0x0d) + String.fromCharCode(0x0a) // 改行の追加
+              // 最初以外の請求書の場合
+            } else {
+              const rows = jsonToCsv(dataToJson(invoice[0].invoice, journalizeInvoice[0].journalizeInvoiceFinal)).split(
+                /\r?\n|\r/
+              )
+              for (let row = 0; row < rows.length; row++) {
+                // ヘッダ除外したもののみ追加
+                if (row !== 0) {
+                  fileData += rows[row]
+                  fileData += String.fromCharCode(0x0d) + String.fromCharCode(0x0a) // 改行の追加
+                }
+              }
+            }
+          }
+        }
+
+        if (fileData.length === 0) {
           req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
           logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
           return res.redirect(303, '/journalDownload')
         }
 
         // アプリ効果測定用ログ出力
-        const invoiceArray = invoicesForDownload.split(/\r?\n|\r/)
+        const invoiceArray = fileData.split(/\r?\n|\r/)
         jsonLog = {
           tenantId: req.user.tenantId,
           action: 'downloadedJournalInfo',
@@ -401,7 +454,7 @@ const cbPostIndex = async (req, res, next) => {
 
         filename = encodeURIComponent(`${today}_請求書.csv`)
         res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-        res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
+        res.status(200).send(`${String.fromCharCode(0xfeff)}${fileData}`)
       }
     }
   }
