@@ -398,15 +398,40 @@ const cbPostIndex = async (req, res, next) => {
           res.redirect(303, '/csvDownload')
         }
       } else {
-        const invoicesForDownload = await csvDownloadController.createInvoiceDataForDownload(
-          req.user.accessToken,
-          req.user.refreshToken,
-          documentsResult.Document
-        )
+        let invoicesForDownload
+        await Promise.all(
+          documentsResult.Document.map(async (key) => {
+            return csvDownloadController.createInvoiceDataForDownload(req.user.accessToken, req.user.refreshToken, key)
+          })
+        ).then(function (result) {
+          invoicesForDownload = result
+        })
 
         // エラーを確認する
         if (invoicesForDownload instanceof Error) {
           errorHandle(invoicesForDownload, res, req)
+        }
+
+        // CSVファイルをまとめる変数
+        let fileData = ''
+        // 取得した文書データをCSVファイルにまとめる
+        for (let idx = 0; idx < invoicesForDownload.length; idx++) {
+          const invoice = await invoicesForDownload[idx]
+          // 最初の請求書の場合
+          if (idx === 0) {
+            fileData += jsonToCsv(dataToJson(invoice[0]))
+            fileData += String.fromCharCode(0x0a) // 改行の追加
+            // 最初以外の請求書の場合
+          } else {
+            const rows = jsonToCsv(dataToJson(invoice[0])).split(/\r?\n|\r/)
+            for (let row = 0; row < rows.length; row++) {
+              // ヘッダ除外したもののみ追加
+              if (row !== 0) {
+                fileData += rows[row]
+                fileData += String.fromCharCode(0x0a) // 改行の追加
+              }
+            }
+          }
         }
 
         // アプリ効果測定用ログ出力
@@ -419,7 +444,7 @@ const cbPostIndex = async (req, res, next) => {
 
         filename = encodeURIComponent(`${today}_請求書.csv`)
         res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-        res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
+        res.status(200).send(`${String.fromCharCode(0xfeff)}${fileData}`)
       }
     }
   }
