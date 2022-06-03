@@ -7,7 +7,7 @@ parameters:
   - name: browser
     displayName: "実行したいブラウザを選択してください"
     type: string
-    default: all
+    default: chrome
     values:
       - all
       - chrome
@@ -16,25 +16,25 @@ parameters:
   - name: scenario
     displayName: "実行したいシナリオを選択してください"
     type: string
-    default: scenario*.js
+    default: all
     values:
-      - scenario*.js
-      - scenario001.js
-      - scenario002.js
-      - scenario003.js
-      - scenario004.js
-      - scenario005.js
-      - scenario006.js
-      - scenario007.js
-      - scenario008.js
-      - journal_accountCodeList.js
-      - journal_subAccountCodeList.js
-      - journal_departmentList.js
-      - journal_approveRouteList.js
-      - journal_paymentRequestList.js
-      - journal_paymentRequest.js
-      - journal_paymentRequest_long.js
-      - journal_journalDownload.js
+      - all
+      - scenario001
+      - scenario002
+      - scenario003
+      - scenario004
+      - scenario005
+      - scenario006
+      - scenario007
+      - scenario008
+      - journal_accountCodeList
+      - journal_subAccountCodeList
+      - journal_departmentList
+      - journal_approveRouteList
+      - journal_paymentRequestList
+      - journal_paymentRequest
+      - journal_paymentRequest_long
+      - journal_journalDownload
   - name: account
     displayName: "実行したいアカウントを選択してください"
     type: string
@@ -82,6 +82,7 @@ stages:
     jobs:
       - ${{ each BROWSER_NAME in parameters.BROWSER_NAME_LIST }}:
           - job: ${{ BROWSER_NAME }}
+            timeoutInMinutes: 180
             displayName: ${{ BROWSER_NAME }}
             condition: or( eq( '${{ parameters.browser }}', '${{ BROWSER_NAME }}' ), eq( '${{ parameters.browser }}', 'all' ))
             steps:
@@ -101,9 +102,15 @@ stages:
                 workingDirectory: $(DIR)
                 displayName: install
 
-              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}} -- spec\${{ parameters.scenario }}
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}} -- spec\*.js
                 workingDirectory: $(DIR)
                 displayName: test
+                condition: eq( '${{ parameters.scenario }}', 'all' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}} -- spec\${{ parameters.scenario }}.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: ne( '${{ parameters.scenario }}', 'all' )
 
               - script: npm run e2e-report
                 workingDirectory: $(DIR)
