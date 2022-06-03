@@ -1,6 +1,7 @@
 ﻿extends layout
 
 block content
+  meta(name="referrer" content="origin-when-cross-origin")
   .container
     div.title-box-journallzing
       h4.title-text-journallzing.text-inbox 仕訳情報設定
@@ -14,7 +15,11 @@ block content
         .grouped-button
           a.button.mr-6(href='/inboxList/1')  戻る
           a.button.mr-6.is-success#btn-confirm 保存
-          a.button.is-link(href=`/requestApproval/${documentId}`) 支払依頼へ
+          if invoiceLine.length !== 0
+            if invoiceLine[0]['journalize']
+              a.button.is-link.show-modal(data-target='check-journalize-modal') 支払依頼へ
+            else 
+              a.button.is-link(disabled) 支払依頼へ
 
   template#templateLineAccountCodeItem
     .columns.m-0.pt-1.lineAccountcode
@@ -737,52 +742,18 @@ block content
         a.button.cancel-button(data-target='bulkInsert-journal-modal') 戻る
         a.button.is-link#btn-bulk-insert(data-target='bulkInsert-journal-modal') 反映
 
-  .modal#check-approval-modal
-    .modal-background.cancel-button(data-target='check-approval-modal')
-    .modal-card.is-family-noto-sans
-      header.modal-card-head.color-link-modal-header
-        p.modal-card-title 支払依頼確認
-        a.delete(data-target='check-approval-modal')
-      section.modal-card-body
-        .columns.header
-          .column.is-one-fifth 請求書番号
-          .column.text-inbox-common.check-modal-invoiceId #{invoiceId}
-        .columns.senderAndreviever
-          .column
-            .columns.rows
-              .column.text-inbox-common 宛先
-              .column.p-0
-                p.text-overflow #{customer.name}
-              if customer.address.postalNumber.length !== 0
-                .column.p-0
-                  | #{customer.address.postbox} #{customer.address.postalNumber}
-              if customer.address.streetName.length !== 0
-                .column.p-0
-                  | #{customer.address.streetName}
-              if customer.address.additionalStreetName.length !== 0
-                .column.p-0
-                  | #{customer.address.additionalStreetName}
-              if customer.address.country.length !== 0
-                .column.p-0
-                  | #{customer.address.country}
-              each id in customer.id
-                if id.schemeId === 'TS:REGNO'
-                  .column.p-0
-                    | 登録番号：#{id.value}
-                if id.schemeId === 'GLN'
-                  .column.p-0
-                    | GLN：#{id.value}
-                if id.schemeId === 'JP:CT'
-                  .column.p-0
-                    | 法人番号：#{id.value}
-          .column
-            .columns
-              .column 差出人
-
-
-      footer.modal-card-foot.center-modal-footer-item
-        a.button.cancel-button(data-target='check-approval-modal') 閉じる
-        a.button.is-link(href=`/requestApproval/${documentId}`) 依頼
+  .modal#check-journalize-modal
+      .modal-background.cancel-button(data-target='check-journalize-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head.color-link-modal-header
+          p.modal-card-title 仕訳情報設定確認
+          a.delete(data-target='check-journalize-modal')
+        section.modal-card-body
+          p 保存していない仕訳情報はクリアされます。
+        footer.modal-card-foot
+          div.button-area
+            a.button.mr-6.cancel-button(data-target='check-journalize-modal') キャンセル
+            a.button.is-link(href=`/requestApproval/${documentId}`) OK
         
 
 
