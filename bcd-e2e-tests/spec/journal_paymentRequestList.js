@@ -126,6 +126,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
         await registAccountCodePage.regist(accountCodes[i].code, accountCodes[i].name);
         await registAccountCodePage.clickPopupOK();
         await accountCodeListPage.waitForLoading();
+        await accountCodeListPage.waitPopup();
+        await comment('ポップアップメッセージを閉じる');
+        await accountCodeListPage.closePopup();
       }
 
       // 補助科目を登録する
@@ -148,6 +151,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
         await registSubAccountCodePage.regist(accountCodes[i].subCode, accountCodes[i].subName);
         await registSubAccountCodePage.clickPopupOK();
         await subAccountCodeListPage.waitForLoading();
+        await subAccountCodeListPage.waitPopup();
+        await comment('ポップアップメッセージを閉じる');
+        await subAccountCodeListPage.closePopup();
       }
 
       // 部門データを登録する
@@ -168,12 +174,18 @@ describe('仕訳情報設定_支払依頼一覧', function () {
         await registDepartmentPage.regist(departments[i].code, departments[i].name);
         await registDepartmentPage.clickPopupOK();
         await departmentListPage.waitForLoading();
+        await departmentListPage.waitPopup();
+        await comment('ポップアップメッセージを閉じる');
+        await departmentListPage.closePopup();
       }
       await page.waitForTimeout(1000);
     }
   });
 
-  it("STEP5_No.109. 受領請求書への仕訳情報設定", async function () {
+  /**
+   * STEP5_No.109
+   */
+  it("受領請求書への仕訳情報設定", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -232,66 +244,10 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     }
   });
 
-  it("STEP5_No.110. 受領請求書への仕訳情報設定_仕訳情報追加", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage, journalDetailPage }
-        = common.getPageObject(browser, page);
-
-      // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage);
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-
-      // 支払依頼一覧ページへ遷移する
-      await comment('「支払依頼一覧」をクリックする');
-      await journalMenuPage.clickPaymentRequest();
-      await paymentRequestListPage.waitForLoading();
-
-      // 仕訳情報設定ページへ遷移する
-      await comment('「仕訳情報設定」をクリックする');
-      await paymentRequestListPage.clickDetail(invoiceNo);
-      await journalDetailPage.waitForLoading();
-
-      // 仕訳情報の「+」を10回クリックする
-      await comment('「仕訳情報」の「+」を10回クリックする');
-      for (i = 0; i < 10; i++) {
-        await journalDetailPage.clickAddBreakdown();
-      }
-
-      // 各項目につき、10個仕訳情報入力フォームが表示されること(11個以上は表示されないこと)
-      expect(await journalDetailPage.getBreakdownCount()).to.equal(10, '各項目につき、10個仕訳情報入力フォームが表示されること');
-      await page.waitForTimeout(1000);
-    }
-  });
-
-  it("STEP5_No.117. 受領請求書への仕訳情報設定_仕訳情報削除", async function () {
+  /**
+   * STEP5_No.110,117
+   */
+  it("受領請求書への仕訳情報設定_仕訳情報追加・削除", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -346,6 +302,12 @@ describe('仕訳情報設定_支払依頼一覧', function () {
         await journalDetailPage.inputBreakdownCost(i + 2, costs[i]);
       }
 
+      // 「+」をクリックする（上限）
+      await comment('「仕訳情報」の「+」をクリックする');
+
+      // 各項目につき、10個仕訳情報入力フォームが表示されること(11個以上は表示されないこと)
+      expect(await journalDetailPage.getBreakdownCount()).to.equal(10, '各項目につき、10個仕訳情報入力フォームが表示されること');
+
       // 仕訳情報内、先頭行の計上価格を取得する
       let firstCostBefore = parseCostInt(await journalDetailPage.getBreakdownCost(1));
 
@@ -362,7 +324,10 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     }
   });
 
-  it("STEP5_No.119. 受領請求書への仕訳情報設定_勘定科目検索", async function () {
+  /**
+   * STEP5_No.119
+   */
+  it("受領請求書への仕訳情報設定_勘定科目検索", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -424,7 +389,10 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     }
   });
   
-  it("STEP5_No.121. 受領請求書への仕訳情報設定_部門データ検索", async function () {
+  /**
+   * STEP5_No.121
+   */
+  it("受領請求書への仕訳情報設定_部門データ検索", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -485,7 +453,10 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     }
   });
 
-  it("STEP5_No.124. 受領請求書への仕訳情報設定_仕訳情報一括入力", async function () {
+  /**
+   * STEP5_No.124
+   */
+  it("受領請求書への仕訳情報設定_仕訳情報一括入力", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -631,7 +602,6 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       await subAccountCodeListPage.waitForLoading();
       await comment('補助科目をすべて削除する');
       await subAccountCodeListPage.deleteAll();
-      await page.waitForTimeout(1000);
 
       // 勘定科目をすべて削除する
       await comment('「Home」をクリックする');

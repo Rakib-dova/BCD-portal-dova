@@ -69,12 +69,24 @@ class ApproveRouteListPage {
   // 削除確認ポップアップの「削除」をクリックする
   async deleteOnConfirm() {
     await this.actionUtils.click(this.frame, '#modalDelBtn');
+    await this.waitPopup();
+  }
+
+  // ポップアップが表示されるまで待機する
+  async waitPopup() {
     await this.actionUtils.waitForLoading('//*[@class="notification is-info animate__animated animate__faster"]');
+    await this.frame.waitForTimeout(500);
   }
 
   // ポップアップメッセージを取得する
   async getPopupMessage() {
     return await this.actionUtils.getText(this.frame, '//*[@class="notification is-info animate__animated animate__faster"]');
+  }
+
+  // ポップアップを閉じる
+  async closePopup() {
+    await this.actionUtils.click(this.frame, '//*[@class="notification is-info animate__animated animate__faster"]/button');
+    await this.frame.waitForTimeout(500);
   }
 }
 exports.ApproveRouteListPage = ApproveRouteListPage;

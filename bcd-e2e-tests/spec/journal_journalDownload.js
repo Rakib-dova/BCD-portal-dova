@@ -42,7 +42,10 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     }
   };
 
-  it("STEP5_No.129. データ有", async function () {
+  /**
+   * STEP5_No.129
+   */
+  it("データ有", async function () {
     // テストの初期化を実施
     await initBrowser();
 

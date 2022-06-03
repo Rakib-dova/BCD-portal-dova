@@ -76,7 +76,10 @@ describe('仕訳情報設定_勘定科目一覧', function () {
     await accountCodeListPage.waitForLoading();
   };
 
-  it("STEP5_No.4. 新規登録", async function () {
+  /**
+   * STEP5 No.4,9,13
+   */
+  it("新規登録・変更・削除", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -118,45 +121,15 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       await registAccountCodePage.regist(accountSets[0].code, accountSets[0].name);
       await registAccountCodePage.clickPopupOK();
       await accountCodeListPage.waitForLoading();
+      await accountCodeListPage.waitPopup();
 
       // 登録後、勘定科目一覧画面に戻って「勘定科目を登録しました」のポップアップメッセージ表示される
       expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目を登録しました。', '登録後、勘定科目一覧画面に戻って「勘定科目を登録しました」のポップアップメッセージ表示される');
       expect(await accountCodeListPage.hasRow(accountSets[0].code, accountSets[0].name)).to.equal(true, '登録した勘定科目コード、勘定科目名、最新更新日が正しいこと');
-      await page.waitForTimeout(1000);
-    }
-  });
-  
-  it("STEP5_No.9. 確認・変更", async function () {
-    // テストの初期化を実施
-    await initBrowser();
 
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage, registAccountCodePage }
-        = common.getPageObject(browser, page);
-
-      // 勘定科目一覧ページへ遷移する
-      await gotoAccountCodeList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
+      // ポップアップメッセージを閉じる
+      await comment('ポップアップメッセージを閉じる');
+      await accountCodeListPage.closePopup();
 
       // 勘定科目確認・変更ページへ遷移する
       await comment('勘定科目コード"' + accountSets[0].code + '"の「確認・変更する」をクリックする');
@@ -170,49 +143,18 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       await registAccountCodePage.regist(accountSets[1].code, accountSets[1].name);
       await registAccountCodePage.clickPopupOK();
       await accountCodeListPage.waitForLoading();
+      await accountCodeListPage.waitPopup();
+      
+      // ポップアップメッセージを閉じる
+      await comment('ポップアップメッセージを閉じる');
+      await accountCodeListPage.closePopup();
 
       // 変更が反映されること
       expect(await accountCodeListPage.hasRow(accountSets[1].code, accountSets[1].name)).to.equal(true, '変更が反映されること');
-      await page.waitForTimeout(1000);
-    }
-  });
-  
-  it("STEP5_No.13. 削除", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage }
-        = common.getPageObject(browser, page);
-
-      // 勘定科目一覧ページへ遷移する
-      await gotoAccountCodeList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
 
       // 勘定科目を削除する
       await comment('勘定科目コード"' + accountSets[1].code + '"を削除する');
       await accountCodeListPage.delete(accountSets[1].code);
-      await page.waitForTimeout(3000);
 
       // 「勘定科目を削除しました」のメッセージが表示され、一覧から削除されていること
       expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目を削除しました。', '「勘定科目を削除しました」のメッセージが表示される');
@@ -221,7 +163,10 @@ describe('仕訳情報設定_勘定科目一覧', function () {
     }
   });
   
-  it("STEP5_No.15. 勘定科目一括作成フォーマットファイルダウンロード", async function () {
+  /**
+   * STEP5 No.15
+   */
+  it("勘定科目一括作成フォーマットファイルダウンロード", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -268,7 +213,10 @@ describe('仕訳情報設定_勘定科目一覧', function () {
     }
   });
   
-  it("STEP5_No.16. 勘定科目一括作成", async function () {
+  /**
+   * STEP5 No.16
+   */
+  it("勘定科目一括作成", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -310,6 +258,7 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       await comment('CSVファイル"' + csvPath + '"をアップロードする');
       await uploadAccountCodePage.uploadCsv(csvPath);
       await accountCodeListPage.waitForLoading();
+      await accountCodeListPage.waitPopup();
 
       // 正しくすべてのデータが一覧に反映されること
       expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目取込が完了しました。', '「勘定科目取込が完了しました」のメッセージが表示されること');
