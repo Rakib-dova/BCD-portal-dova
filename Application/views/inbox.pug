@@ -1,5 +1,6 @@
 ﻿extends layout
 
+
 block content
   meta(name="referrer" content="origin-when-cross-origin")
   .container
@@ -17,9 +18,9 @@ block content
           a.button.mr-6.is-success#btn-confirm 保存
           if invoiceLine.length !== 0
             if invoiceLine[0]['journalize']
-              a.button.is-link#btn-check-approval(data-target='check-approval-modal') 支払依頼へ
+              a.button.is-link.show-modal(data-target='check-journalize-modal') 支払依頼へ
             else 
-              a.button(disabled).is-link(data-target='check-approval-modal') 支払依頼へ
+              a.button.is-link(disabled) 支払依頼へ
 
   template#templateLineAccountCodeItem
     .columns.m-0.pt-1.lineAccountcode
@@ -742,37 +743,18 @@ block content
         a.button.cancel-button(data-target='bulkInsert-journal-modal') 戻る
         a.button.is-link#btn-bulk-insert(data-target='bulkInsert-journal-modal') 反映
 
-  .modal#check-approval-modal
-      .modal-background.cancel-button(data-target='check-approval-modal')
+  .modal#check-journalize-modal
+      .modal-background.cancel-button(data-target='check-journalize-modal')
       .modal-card.is-family-noto-sans
         header.modal-card-head.color-link-modal-header
           p.modal-card-title 仕訳情報設定確認
-          a.delete(data-target='check-approval-modal')
+          a.delete(data-target='check-journalize-modal')
         section.modal-card-body
-          .box
-            .columns.m-0
-              .column-header.is-2-header.text-inbox.text-inbox-subtitle.text-inbox-common
-                | 請求書番号
-              .column-header.text-inbox-common#check-invoiceId
-            .columns.m-0
-              .column
-            .columns.m-0.wraper-columns
-              .column-header#check-recipient
-                p.text-inbox.text-inbox-subtitle.text-inbox-common 宛先
-              .columns.m-0.p-0
-                .column.p-0
-                  |　
-              .column-header#check-sender
-                p.text-inbox.text-inbox-subtitle.text-inbox-common 差出人
-              .columns.m-0.p-0
-          .box#check-invoiceLine
-          .box#check-charge
-          .box#check-total
-          .box#check-option
-          .box#check-paymentMethod
-        footer.modal-card-foot.center-modal-footer-item
-          a.button.cancel-button(data-target='check-approval-modal') キャンセル
-          a.button.is-link(href=`/requestApproval/${documentId}`) OK
+          p 保存していない仕訳情報はクリアされます。
+        footer.modal-card-foot
+          div.button-area
+            a.button.mr-6.cancel-button(data-target='check-journalize-modal') キャンセル
+            a.button.is-link(href=`/requestApproval/${documentId}`) OK
         
 
 
