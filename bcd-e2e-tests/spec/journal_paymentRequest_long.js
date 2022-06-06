@@ -327,13 +327,13 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
     // 承認する
     await paymentRequestPage.approve();
-    await paymentRequestListPage.waitForLoading();
     await paymentRequestListPage.waitPopup();
 
     // 「承認を完了しました。」のメッセージが表示されていること
     expect(await paymentRequestListPage.getPopupMessage()).to.contains('承認を完了しました。', '「承認を完了しました。」のメッセージが表示されていること');
 
     // 請求書一覧画面にて承認ステータスに変更されていること
+    await paymentRequestListPage.waitForLoading();
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal(status, '請求書一覧画面にて承認ステータスに変更されていること');
     await page.waitForTimeout(1000);
   }
