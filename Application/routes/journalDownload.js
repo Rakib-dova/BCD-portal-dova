@@ -398,8 +398,10 @@ const cbPostIndex = async (req, res, next) => {
         })
 
         // エラーを確認する
-        if (invoicesForDownload instanceof Error) {
-          return errorHandle(invoicesForDownload, res, req)
+        for (let i = 0; invoicesForDownload.length > i; i++) {
+          if (invoicesForDownload[i] instanceof Error) {
+            return errorHandle(invoicesForDownload[i], res, req)
+          }
         }
 
         const arrDownload = []
@@ -453,6 +455,7 @@ const cbPostIndex = async (req, res, next) => {
 
         // アプリ効果測定用ログ出力
         const invoiceArray = fileData.split(/\r?\n|\r/)
+
         jsonLog = {
           tenantId: req.user.tenantId,
           action: 'downloadedJournalInfo',

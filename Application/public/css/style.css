@@ -961,8 +961,3 @@ body > div.hero.is-small {
   font-size: 1.25rem;
   font-weight: 600;
 }
-
-.border-div-rad-1 {
-  border: 1px solid #363636;
-  border-radius: 1px;
-}
