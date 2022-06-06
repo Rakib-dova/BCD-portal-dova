@@ -64,7 +64,7 @@ pr:
   - none
 
 schedules:
-  - cron: "22 0 * * 1"
+  - cron: "0 22 * * 1"
     displayName: run schedule for 7:00(22)
     branches:
       include:
