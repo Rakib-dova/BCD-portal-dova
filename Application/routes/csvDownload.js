@@ -331,7 +331,7 @@ const cbPostIndex = async (req, res, next) => {
   let downloadFile = ''
   // resultForQuery（API呼出）エラー検査
   if (resultForQuery instanceof Error) {
-    errorHandle(resultForQuery, res, req)
+    return errorHandle(resultForQuery, res, req)
   } else {
     // documentsResultのデータ有無確認
     if (!documentsResult) {
@@ -379,7 +379,7 @@ const cbPostIndex = async (req, res, next) => {
 
           // resultエラー検査
           if (resultForDocumentId instanceof Error) {
-            errorHandle(resultForDocumentId, res, req)
+            return errorHandle(resultForDocumentId, res, req)
           } else {
             // アプリ効果測定用ログ出力
             jsonLog = {
@@ -415,8 +415,10 @@ const cbPostIndex = async (req, res, next) => {
         })
 
         // エラーを確認する
-        if (invoicesForDownload instanceof Error) {
-          errorHandle(invoicesForDownload, res, req)
+        for (let i = 0; invoicesForDownload.length > i; i++) {
+          if (invoicesForDownload[i] instanceof Error) {
+            return errorHandle(invoicesForDownload[i], res, req)
+          }
         }
 
         // CSVファイルをまとめる変数
