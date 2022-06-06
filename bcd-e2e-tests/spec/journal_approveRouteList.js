@@ -478,7 +478,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       await registApproveRoutePage.clickConfirm();
       await comment('「登録」をクリックする');
       await registApproveRoutePage.submit();
-      await approveRouteListPage.waitForLoading();
       await approveRouteListPage.waitPopup();
 
       // 「承認ルートを登録しました。」と表示されていること
@@ -487,6 +486,7 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       // ポップアップを閉じる
       await comment('ポップアップメッセージを閉じる');
       await approveRouteListPage.closePopup();
+      await approveRouteListPage.waitForLoading();
 
       // 「No.、承認ルート名、登録されている承認者数、確認・変更ボタン、削除ボタン」が表示されていること
       let row = await approveRouteListPage.getRow(routeName);

@@ -120,12 +120,12 @@ describe('仕訳情報設定_部門データ一覧', function () {
       await comment('コード"' + departments[0].code + '"、部門名"' + departments[0].name + '"で登録する');
       await registDepartmentPage.regist(departments[0].code, departments[0].name);
       await registDepartmentPage.clickPopupOK();
-      await departmentListPage.waitForLoading();
       await departmentListPage.waitPopup();
 
       // ポップアップを閉じる
       await comment('ポップアップメッセージを閉じる');
       await departmentListPage.closePopup();
+      await departmentListPage.waitForLoading();
 
       // 部門データ確認・変更ページへ遷移する
       await comment('部門コード"' + departments[0].code + '"の「確認・変更する」をクリックする');
@@ -201,13 +201,13 @@ describe('仕訳情報設定_部門データ一覧', function () {
         // CSVファイルをアップロードする
         await comment('CSVファイル"' + files[i] + '"をアップロードする');
         await uploadDepartmentPage.uploadCsv(files[i]);
-        await departmentListPage.waitForLoading();
         await departmentListPage.waitPopup();
         expect(await departmentListPage.getPopupMessage()).to.equal('部門データ取込が完了しました。', '「部門データ取込が完了しました」のメッセージが表示されること');
 
         // ポップアップを閉じる
         await comment('ポップアップメッセージを閉じる');
         await departmentListPage.closePopup();
+        await departmentListPage.waitForLoading();
 
         // 正しくすべてのデータが一覧に反映されること
         let csvData = await getCsvData(files[i]);

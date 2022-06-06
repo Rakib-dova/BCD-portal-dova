@@ -126,10 +126,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       await comment('コード"' + accountCodes[i].code + '"、科目名"' + accountCodes[i].name + '"を登録する');
       await registAccountCodePage.regist(accountCodes[i].code, accountCodes[i].name);
       await registAccountCodePage.clickPopupOK();
-      await accountCodeListPage.waitForLoading();
       await accountCodeListPage.waitPopup();
       await comment('ポップアップメッセージを閉じる');
       await accountCodeListPage.closePopup();
+      await accountCodeListPage.waitForLoading();
     }
 
     // 補助科目を登録する
@@ -151,10 +151,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       await comment('補助科目コード"' + accountCodes[i].subCode + '"、補助科目名"' + accountCodes[i].subName + '"を登録する');
       await registSubAccountCodePage.regist(accountCodes[i].subCode, accountCodes[i].subName);
       await registSubAccountCodePage.clickPopupOK();
-      await subAccountCodeListPage.waitForLoading();
       await subAccountCodeListPage.waitPopup();
       await comment('ポップアップメッセージを閉じる');
       await subAccountCodeListPage.closePopup();
+      await subAccountCodeListPage.waitForLoading();
     }
 
     // 部門データを登録する
@@ -174,10 +174,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       await comment('部門コード"' + departments[i].code + '"、部門名"' + departments[i].name + '"を登録する');
       await registDepartmentPage.regist(departments[i].code, departments[i].name);
       await registDepartmentPage.clickPopupOK();
-      await departmentListPage.waitForLoading();
       await departmentListPage.waitPopup();
       await comment('ポップアップメッセージを閉じる');
       await departmentListPage.closePopup();
+      await departmentListPage.waitForLoading();
     }
 
     // 承認ルートを登録する
@@ -507,12 +507,12 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     // 支払依頼を行う
     await comment('支払依頼を行う');
     await paymentRequestPage.submit();
-    await paymentRequestListPage.waitForLoading();
     await paymentRequestListPage.waitPopup();
 
     // ポップアップを閉じる
     await comment('ポップアップメッセージを閉じる');
     await paymentRequestListPage.closePopup();
+    await paymentRequestListPage.waitForLoading();
 
     // 依頼がされること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('支払依頼中', '依頼がされること');
@@ -609,7 +609,6 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 承認する
     await paymentRequestPage.approve();
-    await paymentRequestListPage.waitForLoading();
     await paymentRequestListPage.waitPopup();
 
     // 「承認を完了しました。」のメッセージが表示されていること
@@ -618,6 +617,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     // ポップアップを閉じる
     await comment('ポップアップメッセージを閉じる');
     await paymentRequestListPage.closePopup();
+    await paymentRequestListPage.waitForLoading();
 
     // 請求書一覧画面にて承認ステータスに変更されていること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('一次承認済み', '請求書一覧画面にて承認ステータスに変更されていること');
@@ -732,7 +732,6 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     // 差し戻す
     await comment('差し戻す');
     await paymentRequestPage.reject();
-    await paymentRequestListPage.waitForLoading();
     await paymentRequestListPage.waitPopup();
 
     // 「支払依頼を差し戻しました。」と表示されること
@@ -741,6 +740,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     // ポップアップを閉じる
     await comment('ポップアップメッセージを閉じる');
     await paymentRequestListPage.closePopup();
+    await paymentRequestListPage.waitForLoading();
 
     // 差し戻しができること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('差し戻し', '差し戻しができること');

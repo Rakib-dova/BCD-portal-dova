@@ -193,13 +193,13 @@ describe('仕訳情報設定_補助科目一覧', function () {
         // CSVファイルをアップロードする
         await comment('CSVファイル"' + files[i] + '"をアップロードする');
         await uploadAccountCodePage.uploadCsv(files[i]);
-        await accountCodeListPage.waitForLoading();
         await accountCodeListPage.waitPopup();
         expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目取込が完了しました。', '「勘定科目取込が完了しました」のメッセージが表示されること');
 
         // ポップアップを閉じる
         await comment('ポップアップメッセージを閉じる');
         await accountCodeListPage.closePopup();
+        await accountCodeListPage.waitForLoading();
 
         // 正しくすべてのデータが一覧に反映されること
         let csvData = await getCsvData(files[i]);
@@ -278,13 +278,13 @@ describe('仕訳情報設定_補助科目一覧', function () {
       await comment('コード"' + subAccountSets[0].subCode + '"、科目名"' + subAccountSets[0].subName + '"で登録する');
       await registSubAccountCodePage.regist(subAccountSets[0].subCode, subAccountSets[0].subName);
       await registSubAccountCodePage.clickPopupOK();
-      await subAccountCodeListPage.waitForLoading();
       await subAccountCodeListPage.waitPopup();
       expect(await subAccountCodeListPage.getPopupMessage()).to.equal('補助科目を登録しました。', '登録後、補助科目一覧画面に戻って「補助科目を登録しました」のポップアップメッセージ表示される');
 
       // ポップアップを閉じる
       await comment('ポップアップメッセージを閉じる');
       await subAccountCodeListPage.closePopup();
+      await subAccountCodeListPage.waitForLoading();
   
       // 登録した勘定科目名、補助科目コード、補助科目名、最新更新日が正しいこと
       expect(await subAccountCodeListPage.hasRowWithAccount(subAccountSets[0].subCode, subAccountSets[0].subName, subAccountSets[0].name)).to.equal(true, '登録した勘定科目名、補助科目コード、補助科目名、最新更新日が正しいこと');
@@ -308,12 +308,12 @@ describe('仕訳情報設定_補助科目一覧', function () {
       await comment('補助科目コード"' + subAccountSets[1].subCode + '"、補助科目コード"' + subAccountSets[1].subName + '"へ変更する');
       await registSubAccountCodePage.regist(subAccountSets[1].subCode, subAccountSets[1].subName);
       await registSubAccountCodePage.clickPopupOK();
-      await subAccountCodeListPage.waitForLoading();
       await subAccountCodeListPage.waitPopup();
 
       // ポップアップを閉じる
       await comment('ポップアップメッセージを閉じる');
       await subAccountCodeListPage.closePopup();
+      await subAccountCodeListPage.waitForLoading();
   
       // 変更が反映されること
       expect(await subAccountCodeListPage.hasRowWithAccount(subAccountSets[1].subCode, subAccountSets[1].subName, subAccountSets[1].name)).to.equal(true, '変更が反映されること');
@@ -451,13 +451,13 @@ describe('仕訳情報設定_補助科目一覧', function () {
         // CSVファイルをアップロードする
         await comment('CSVファイル"' + files[i] + '"をアップロードする');
         await uploadSubAccountCodePage.uploadCsv(files[i]);
-        await subAccountCodeListPage.waitForLoading();
         await subAccountCodeListPage.waitPopup();
         expect(await subAccountCodeListPage.getPopupMessage()).to.equal('補助科目取込が完了しました。', '「補助科目取込が完了しました」のメッセージが表示されること');
 
         // ポップアップを閉じる
         await comment('ポップアップメッセージを閉じる');
         await subAccountCodeListPage.closePopup();
+        await subAccountCodeListPage.waitForLoading();
 
         // 正しくすべてのデータが一覧に反映されること
         let csvData = await getCsvData(files[i]);

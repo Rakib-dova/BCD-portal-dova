@@ -125,10 +125,10 @@ describe('仕訳情報設定_支払依頼一覧', function () {
         await comment('コード"' + accountCodes[i].code + '"、科目名"' + accountCodes[i].name + '"を登録する');
         await registAccountCodePage.regist(accountCodes[i].code, accountCodes[i].name);
         await registAccountCodePage.clickPopupOK();
-        await accountCodeListPage.waitForLoading();
         await accountCodeListPage.waitPopup();
         await comment('ポップアップメッセージを閉じる');
         await accountCodeListPage.closePopup();
+        await accountCodeListPage.waitForLoading();
       }
 
       // 補助科目を登録する
@@ -150,10 +150,10 @@ describe('仕訳情報設定_支払依頼一覧', function () {
         await comment('補助科目コード"' + accountCodes[i].subCode + '"、補助科目名"' + accountCodes[i].subName + '"を登録する');
         await registSubAccountCodePage.regist(accountCodes[i].subCode, accountCodes[i].subName);
         await registSubAccountCodePage.clickPopupOK();
-        await subAccountCodeListPage.waitForLoading();
         await subAccountCodeListPage.waitPopup();
         await comment('ポップアップメッセージを閉じる');
         await subAccountCodeListPage.closePopup();
+        await subAccountCodeListPage.waitForLoading();
       }
 
       // 部門データを登録する
@@ -173,10 +173,10 @@ describe('仕訳情報設定_支払依頼一覧', function () {
         await comment('部門コード"' + departments[i].code + '"、部門名"' + departments[i].name + '"を登録する');
         await registDepartmentPage.regist(departments[i].code, departments[i].name);
         await registDepartmentPage.clickPopupOK();
-        await departmentListPage.waitForLoading();
         await departmentListPage.waitPopup();
         await comment('ポップアップメッセージを閉じる');
         await departmentListPage.closePopup();
+        await departmentListPage.waitForLoading();
       }
       await page.waitForTimeout(1000);
     }

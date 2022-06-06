@@ -120,16 +120,16 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       await comment('コード"' + accountSets[0].code + '"、科目名"' + accountSets[0].name + '"で登録する');
       await registAccountCodePage.regist(accountSets[0].code, accountSets[0].name);
       await registAccountCodePage.clickPopupOK();
-      await accountCodeListPage.waitForLoading();
       await accountCodeListPage.waitPopup();
 
       // 登録後、勘定科目一覧画面に戻って「勘定科目を登録しました」のポップアップメッセージ表示される
       expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目を登録しました。', '登録後、勘定科目一覧画面に戻って「勘定科目を登録しました」のポップアップメッセージ表示される');
-      expect(await accountCodeListPage.hasRow(accountSets[0].code, accountSets[0].name)).to.equal(true, '登録した勘定科目コード、勘定科目名、最新更新日が正しいこと');
-
+      
       // ポップアップメッセージを閉じる
       await comment('ポップアップメッセージを閉じる');
       await accountCodeListPage.closePopup();
+      await accountCodeListPage.waitForLoading();
+      expect(await accountCodeListPage.hasRow(accountSets[0].code, accountSets[0].name)).to.equal(true, '登録した勘定科目コード、勘定科目名、最新更新日が正しいこと');
 
       // 勘定科目確認・変更ページへ遷移する
       await comment('勘定科目コード"' + accountSets[0].code + '"の「確認・変更する」をクリックする');
@@ -142,12 +142,12 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       await comment('コード"' + accountSets[1].code + '"、科目名"' + accountSets[1].name + '"で登録する');
       await registAccountCodePage.regist(accountSets[1].code, accountSets[1].name);
       await registAccountCodePage.clickPopupOK();
-      await accountCodeListPage.waitForLoading();
       await accountCodeListPage.waitPopup();
       
       // ポップアップメッセージを閉じる
       await comment('ポップアップメッセージを閉じる');
       await accountCodeListPage.closePopup();
+      await accountCodeListPage.waitForLoading();
 
       // 変更が反映されること
       expect(await accountCodeListPage.hasRow(accountSets[1].code, accountSets[1].name)).to.equal(true, '変更が反映されること');
@@ -257,11 +257,11 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       const csvPath = 'testdata/upload/勘定科目一括アップロード試験１.csv';
       await comment('CSVファイル"' + csvPath + '"をアップロードする');
       await uploadAccountCodePage.uploadCsv(csvPath);
-      await accountCodeListPage.waitForLoading();
       await accountCodeListPage.waitPopup();
 
       // 正しくすべてのデータが一覧に反映されること
       expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目取込が完了しました。', '「勘定科目取込が完了しました」のメッセージが表示されること');
+      await accountCodeListPage.waitForLoading();
       let csvData = await getCsvData(csvPath);
       let i = 2;
       for (row of csvData) {
