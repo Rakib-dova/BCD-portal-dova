@@ -340,6 +340,13 @@ const cbPostIndex = async (req, res, next) => {
         '請求書ダウンロードに失敗しました。<br>（送信企業と受信企業で同じ企業を選択している場合はどちらか一方をチェックしてください。）'
       ])
       res.redirect(303, '/csvDownload')
+    } else if (documentsResult.itemCount > 100) {
+      // 請求書検索結果、100件以上の場合ポップを表示
+      req.flash('noti', [
+        notiTitle,
+        `ダウンロード対象の請求書が100件を超えています。（ダウンロード対象：${documentsResult.itemCount}件）<br>検索条件を絞り込んでください。`
+      ])
+      res.redirect(303, '/csvDownload')
     } else if (documentsResult.itemCount === 0) {
       // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
       // 条件に合わせるデータがない場合、お知らせを表示する。

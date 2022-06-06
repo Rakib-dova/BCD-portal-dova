@@ -409,6 +409,15 @@ const cbPostIndex = async (req, res, next) => {
           }
         })
 
+        if (arrDownload.length > 100) {
+          // 請求書検索結果、100件以上の場合ポップを表示
+          req.flash('noti', [
+            notiTitle,
+            `ダウンロード対象の請求書が100件を超えています。（ダウンロード対象：${arrDownload.length}件）<br>検索条件を絞り込んでください。`
+          ])
+          res.redirect(303, '/journalDownload')
+        }
+
         // CSVファイルをまとめる変数
         let fileData = ''
         // 取得した文書データをCSVファイルにまとめる
