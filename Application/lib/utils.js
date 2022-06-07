@@ -10,16 +10,12 @@ const timestampForList = (timeObject) => {
 }
 
 const getBrowser = (ua) => {
-  if (/^(?=.*AppleWebKit)(?=.*Safari)(?=.*Chrome).*$/.test(ua)) {
+  if (/^(?=.*AppleWebKit)(?=.*Safari)(?=.*Chrome)(?!.*Firefox)(?!.*Edg)(?!.*Mac)(?!.*OPR)/.test(ua)) {
     return 'chrome'
-  } else if (/^(?=.*Chromium)(?=.*Edge).*$/.test(ua)) {
+  } else if (/^(?=.*Chrome)(?=.*Edg)(?!.*Firefox)/.test(ua)) {
     return 'edge'
-  } else if (/^(?=.*Gecko)(?=.*Firefox).*$/.test(ua)) {
+  } else if (/^(?=.*Firefox)(?!.*AppleWebKit)/.test(ua)) {
     return 'firefox'
-  } else if (/^(?=.*Opera).*$/.test(ua)) {
-    return 'opera'
-  } else if (/^(?=.*Mac)(?=.*Safari).*$/.test(ua)) {
-    return 'safari'
   } else {
     return 'others'
   }

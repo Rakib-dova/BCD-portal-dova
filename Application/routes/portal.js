@@ -62,11 +62,11 @@ const cbGetIndex = async (req, res, next) => {
 
   // アプリ効果測定用ログ出力
   const browser = getBrowser(req.headers['user-agent'])
-  console.log('======= broeser ==========: ', browser)
+  console.log('======= browser ==========: ', browser)
   let jsonLog
   // 1つ目のブラウザ検知
-  if (!req.session.browserInfo || !req.session?.browserInfo.checked) {
-    req.session.browserInfo = { checked: true, browsers: [browser] }
+  if (!req.session.browserInfo) {
+    req.session.browserInfo = { browsers: [browser] }
     jsonLog = {
       tenantId: req.user.tenantId,
       action: 'detectedBrowser',
@@ -74,7 +74,7 @@ const cbGetIndex = async (req, res, next) => {
     }
     logger.info(jsonLog)
   // 2つ目以降のブラウザ検知
-  } else if (req.session.browserInfo && req.session.browserInfo.checked && !req.session.browserInfo.browsers.includes(browser)) {
+  } else if (req.session.browserInfo && !req.session.browserInfo.browsers.includes(browser)) {
     req.session.browserInfo.browsers.push(browser)
     jsonLog = {
       tenantId: req.user.tenantId,

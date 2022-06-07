@@ -521,8 +521,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
           break
       }
 
-      // == TS にアップロード済み ========================================
-
       const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
       const invoiceId = invoiceList[idx].invoiceId
       const status = invoiceList[idx].status

@@ -340,6 +340,7 @@ const cbPostIndex = async (req, res, next) => {
             return errorHandle(invoicesForDownload, res, req)
           }
 
+          // アプリ効果測定用ログ出力
           if (invoicesForDownload.length !== 0) {
             jsonLog = {
               tenantId: req.user.tenantId,

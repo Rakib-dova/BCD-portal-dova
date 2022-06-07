@@ -46,7 +46,7 @@ const agree = async (req, res, next) => {
 
   // アプリ効果測定用ログ出力
   if (req.user?.tenantId) {
-    const jsonLog = { tenantId: req.user.tenantId, action: 'relatedObc' }
+    const jsonLog = { tenantId: req.user.tenantId, action: 'relatedOBC' }
     logger.info(jsonLog)
   }
 
@@ -56,5 +56,6 @@ const agree = async (req, res, next) => {
 const router = express.Router()
 router.get('/', ...middleware, csrfProtection, handler(display))
 router.post('/', ...middleware, csrfProtection, handler(agree))
+router.agree = agree
 
 module.exports = router
