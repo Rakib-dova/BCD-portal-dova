@@ -129,6 +129,9 @@ block content
                               else
                                 a.pagination-link(aria-label= `${page}ページへ移動` href= `/inboxList/${page}`)= page++
                     else
+                     if message
+                      p= message
+                     else
                       p 現在、受領した請求書一覧はありません。
 
                   .tab-pane#constructTab
@@ -268,6 +271,27 @@ block content
                       tbody.display-row
         .mt-1.has-text-left
           a.button.is-link.is-light(href='/portal') ←Homeへ戻る
+
+    .modal.modal-fx-fadeInscale#checkStatus-modal
+     .modal-background.cancel-button(data-target="checkStatus-modal")
+     .modal-card
+       header.modal-card-head
+         p.modal-card-title ステータス
+         button.delete(type="button" data-target="checkStatus-modal")
+       section.modal-card-body
+         p.modal-card-result#modal-card-checkStatus
+       footer.modal-card-foot
+         div.button-area
+          a.button.cancel-button(data-target="checkStatus-modal") 確認
+    .modal.modal-fx-fadeInscale#search-progress-modal
+        .modal-background
+        .modal-card
+          header.modal-card-head
+            p.modal-card-title
+          section.modal-card-body
+            center
+              p.modal-card-result#modal-card-result 処理中
+          footer.modal-card-foot          
 
   include footer
 

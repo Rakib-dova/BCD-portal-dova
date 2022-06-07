@@ -1,0 +1,122 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+parameters:
+  - name: browser
+    displayName: "実行したいブラウザを選択してください"
+    type: string
+    default: all
+    values:
+      - all
+      - chrome
+      - firefox
+      - edge
+  - name: scenario
+    displayName: "実行したいシナリオを選択してください"
+    type: string
+    default: all
+    values:
+      - all
+      - scenario001.js
+      - scenario002.js
+      - scenario003.js
+      - scenario004.js
+      - scenario005.js
+      - scenario006.js
+      - scenario007.js
+      - scenario008.js
+      - journal_*.js
+      - journal_accountCodeList.js
+      - journal_subAccountCodeList.js
+      - journal_departmentList.js
+      - journal_paymentRequest.js
+      - journal_journalDownload.js
+  - name: account
+    displayName: "実行したいアカウントを選択してください"
+    type: string
+    default: all
+    values:
+      - all
+      - manager
+      - user
+  - name: enableScreenshot
+    displayName: "スクリーンショットを取得するタイミングを選択してください(エラー時/常に)"
+    type: string
+    default: ERROR_ONLY
+    values:
+      - ERROR_ONLY
+      - ALWAYS
+  - name: BROWSER_NAME_LIST
+    displayName: "※ 内部で利用するため変更しないでください！ ※"
+    type: object
+    default:
+      - chrome
+      - firefox
+      - edge
+
+trigger:
+  - none
+pr:
+  - none
+
+schedules:
+  - cron: "0 0 * * 2"
+    displayName: run schedule for 9:00(0)
+    branches:
+      include:
+        - snake_case
+    always: true
+
+variables:
+  DIR: $(Build.SourcesDirectory)/bcd-e2e-tests
+
+pool:
+  vmImage: windows-2019
+
+stages:
+  - stage: e2eTestStage
+    jobs:
+      - ${{ each BROWSER_NAME in parameters.BROWSER_NAME_LIST }}:
+          - job: ${{ BROWSER_NAME }}
+            displayName: ${{ BROWSER_NAME }}
+            condition: or( eq( '${{ parameters.browser }}', '${{ BROWSER_NAME }}' ), eq( '${{ parameters.browser }}', 'all' ))
+            steps:
+              - task: Cache@2
+                inputs:
+                  key: $(DIR)/package-lock.json
+                  path: $(DIR)/node_modules
+                displayName: Cache npm
+
+              - task: Cache@2
+                inputs:
+                  key: $(DIR)/package-lock.json
+                  path: C:/Users/VssAdministrator/AppData/Local/ms-playwright
+                displayName: Cache browser
+
+              - script: npm i
+                workingDirectory: $(DIR)
+                displayName: install
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}}
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', 'all' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}} -- spec\${{ parameters.scenario }}
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: ne( '${{ parameters.scenario }}', 'all' )
+
+              - script: npm run e2e-report
+                workingDirectory: $(DIR)
+                displayName: report
+                condition: succeededOrFailed()
+
+              - task: PublishPipelineArtifact@1
+                inputs:
+                  targetPath: $(DIR)/build/autotest-report
+                  artifactName: report_${{ BROWSER_NAME }}
+                displayName: artifact
+                condition: succeededOrFailed()

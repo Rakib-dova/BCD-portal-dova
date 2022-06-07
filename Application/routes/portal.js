@@ -10,7 +10,10 @@ const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const validate = require('../lib/validate')
 const constants = require('../constants')
-
+const inboxController = require('../controllers/inboxController')
+const approvalInboxController = require('../controllers/approvalInboxController')
+const db = require('../models')
+const requestApproval = db.RequestApproval
 const Parser = require('rss-parser')
 const parser = new Parser({
   headers: {
@@ -122,6 +125,54 @@ const cbGetIndex = async (req, res, next) => {
         message: constants.portalMsg.NEWS_CONN_ERR
       })
     })
+
+  // 通知件数取得処理(支払依頼件数)
+  let requestNoticeCnt = 0
+  const accessToken = req.user.accessToken
+  const refreshToken = req.user.refreshToken
+  const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, user.tenantId)
+
+  const workflow = await inboxController.getWorkflow(user.userId, contract.contractId, tradeshiftDTO)
+  for (let i = 0; i < workflow.length; i++) {
+    const requestApproval = await approvalInboxController.getRequestApproval(
+      accessToken,
+      refreshToken,
+      contract.contractId,
+      workflow[i].documentId,
+      user.tenantId
+    )
+    const requestId = requestApproval.requestId
+    const result = await approvalInboxController.hasPowerOfEditing(contract.contractId, user.userId, requestId)
+    if (result === true) {
+      switch (workflow[i].workflowStatus) {
+        case '支払依頼中':
+        case '一次承認済み':
+        case '二次承認済み':
+        case '三次承認済み':
+        case '四次承認済み':
+        case '五次承認済み':
+        case '六次承認済み':
+        case '七次承認済み':
+        case '八次承認済み':
+        case '九次承認済み':
+        case '十次承認済み':
+          ++requestNoticeCnt
+          break
+      }
+    }
+  }
+
+  // 請求書の承認依頼検索(差し戻し件数)
+  let rejectedNoticeCnt = 0
+  const requestApprovals = await requestApproval.findAll()
+  for (let i = 0; i < requestApprovals.length; i++) {
+    if (requestApprovals[i].dataValues.requester === user.userId) {
+      if (requestApprovals[i].dataValues.status === '90') {
+        ++rejectedNoticeCnt
+      }
+    }
+  }
+
   // ユーザ権限も画面に送る
   res.render('portal', {
     title: 'ポータル',
@@ -133,10 +184,10 @@ const cbGetIndex = async (req, res, next) => {
     newsDataArrSize: newsDataArrSize,
     constructDataArr: constructDataArr,
     constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0,
-    /* 会員サイト開発により追加 */
-    memberSiteFlg: req.session.memberSiteCoopSession.memberSiteFlg,
-    csrfToken: req.csrfToken()
-    /* 会員サイト開発により追加 */
+    memberSiteFlg: req.session.memberSiteCoopSession.memberSiteFlg /* 会員サイト開発により追加 */,
+    csrfToken: req.csrfToken() /* 会員サイト開発により追加 */,
+    rejectedNoticeCnt: rejectedNoticeCnt,
+    requestNoticeCnt: requestNoticeCnt
   })
 }
 

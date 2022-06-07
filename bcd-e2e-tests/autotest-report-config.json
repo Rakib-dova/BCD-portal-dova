@@ -1,0 +1,8 @@
+{
+  "reportDirectory": "./build/autotest-report",
+  "projectName": "PROJECT_NAME",
+  "screenshotWait": 0,
+  "enableFullPageScreenshot": true,
+  "enableScreenshot": "ERROR_ONLY",
+  "enablePageInformation": "ALWAYS"
+}

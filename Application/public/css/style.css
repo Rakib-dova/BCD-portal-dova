@@ -797,3 +797,125 @@ body > div.hero.is-small {
 #prevUserMessageBody {
   overflow-wrap: anywhere;
 }
+
+.input-comment-size {
+  margin-top: 0.75rem;
+  width: 100%;
+  resize: none;
+  font-size: 16px;
+}
+
+.border-bottom-2px-solid {
+  border-bottom: 2px solid;
+  margin-bottom: 5px;
+  padding-bottom: 0px;
+  padding-top: 18px;
+}
+
+.margin-top-101px {
+  margin-top: 101px;
+}
+
+.table-td-padding {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border: none !important;
+}
+
+.table-td-upbutton-padding {
+  padding-left: 8px !important;
+  padding-right: 0px !important;
+  padding-top: 0px !important;
+  border: none !important;
+}
+
+.table-td-button-padding {
+  padding-left: 8px !important;
+  padding-right: 0 !important;
+  padding-top: 3px !important;
+  border: none !important;
+}
+
+.table-margin-left {
+  margin-left: 10px;
+}
+
+.margit-top-96px {
+  margin-top: 96px;
+}
+
+.padding-top-7 {
+  padding-top: 7px !important;
+}
+
+.column-selectbox {
+  margin-left: 6px;
+}
+
+.margin-left-7px {
+  margin-left: 7px;
+}
+
+.margin-bottom-10px {
+  margin-bottom: 10px;
+}
+
+.table-margin-bottom {
+  margin-bottom: 10px !important;
+}
+
+.padding-top-halfRem {
+  padding-top: 0.5rem;
+}
+
+.padding-top-0 {
+  padding-top: 0 !important;
+}
+
+.margin-top-0 {
+  margin-top: 0 !important;
+}
+
+#text-requester-message {
+  width: 100%;
+}
+
+.rectangle {
+  position: relative;
+}
+
+.rectangle::before {
+  position: absolute;
+  content: '';
+  width: 7px;
+  height: 30px;
+  background-color: #044484;
+  top: -1px;
+  left: -11px;
+}
+
+.modal-card-subTitle {
+  color: #363636;
+  flex-grow: 1;
+  flex-shrink: 0;
+}
+
+.modal-card-body-media-p {
+  font-size: 1.5rem;
+  background-color: whitesmoke;
+  margin-top: 0.7rem;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-weight: bold;
+  width: 255px;
+}
+
+.margin-bottom-02rem {
+  margin-bottom: 0.2rem !important;
+}
+
+.title-law {
+  color: #363636;
+  font-size: 1.25rem;
+  font-weight: 600;
+}

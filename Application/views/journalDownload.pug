@@ -15,14 +15,16 @@ block content
          h2.panel-heading 条件絞り込み
          .panel-block.mr-4
           .container
-           .field.is-horizontal
+           .field.is-invisible#RequiredErrorMesageField
+             p#RequiredErrorMesage.input-label-required
+           .field.is-horizontal.mt-4
              .field-label.is-normal
                label.bulmalabel 請求書番号
              .field-body
                .field
                  .control.has-icons-right
                    input.input#invoiceNumber.itemForSearch(type="text" name="invoiceNumber" maxlength="100" pattern="^.{0,100}$")
-           .field.is-horizontal
+           .field.is-horizontal.my-5
              .field-label.is-normal
                label.bulmalabel 発行日
              .field-body
@@ -34,7 +36,7 @@ block content
                  .control.is-expanded
                    input.input#maxIssuedate.itemForSearch(type="date" name="maxIssuedate" value= maxissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
 
-           .field.is-horizontal
+           .field.is-horizontal.mt-5
              .field-label.is-normal
                label.bulmalabel 送信企業
              .field-body
@@ -53,16 +55,43 @@ block content
             .field-body.level
               .container#displaySendToSearchResultField
 
+           .field.is-horizontal.my-3
+             .field-label
+               label.bulmalabel ダウンロード対象
+             .field-body#chkFinalapproval
+               .field.has-addons
+                 label.radio
+                   input#finalapproval(type='radio' name='chkFinalapproval' checked=true value='finalapproval')
+                   label.ml-1(for='finalapproval') 最終承認済みの請求書
+                 label.radio.ml-6
+                   input#noneFinalapproval(type='radio' name='chkFinalapproval' checked=false value='noneFinalapproval')
+                   label.ml-1(for='noneFinalapproval') 仕訳済みの請求書
+           
+           .field.is-horizontal.my-4
+            .field-label
+              label.bulmalabel 出力フォーマット
+            .field-body
+              .control
+                .select.is-fullwidth
+                  select(name='serviceDataFormat')
+                    option(value=0)=serviceDataFormatName[0]
+                    option(value=1)=serviceDataFormatName[1]
+                    option(value=2)=serviceDataFormatName[2]
+                    option(value=3)=serviceDataFormatName[3]
+                .mt-3
+                  div
+                    p ※「既定フォーマット（デジタルトレードフォーマット）」以外の出力フォーマットのダウンロードは、今後有料化を予定しております。
+                  div
+                    p 　有料化の時期については決まり次第「お知らせ」に掲載させていただきます。
+            
         .field.is-grouped.is-grouped-centered
           .control.mx-4
             .mt-5.has-text-centered
               div
-                p.border-journaldownload ※ダウンロード対象は仕訳済みの請求書になります。
-              div
                 p.border-journaldownload ※ダウンロードされる請求書数は100件以内となるように設定してください。
               .column
                 div.button-area
-                  a.button.is-info#submit(type="submit")  CSVダウンロード
+                  a.button.is-info#submit(type="submit") CSVダウンロード
             
     template#templateAllSelectBtn
         p.control

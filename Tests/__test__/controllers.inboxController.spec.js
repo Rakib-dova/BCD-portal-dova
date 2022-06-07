@@ -14,12 +14,17 @@ const SubAccountCode = require('../../Application/models').SubAccountCode
 const DepartmentCode = require('../../Application/models').DepartmentCode
 const JournalizeInvoice = require('../../Application/models').JournalizeInvoice
 const RequestApproval = require('../../Application/models').RequestApproval
-const ApproveStatus = require('../../Application/models').ApproveStatus
 const Approval = require('../../Application/models').Approval
 const RequestApprovalDAO = require('../../Application/DAO/RequestApprovalDAO')
 const TradeshiftDTO = require('../../Application/DTO/TradeshiftDTO')
 const ApprovalDAO = require('../../Application/DAO/ApprovalDAO')
 const timeStamp = require('../../Application/lib/utils').timestampForList
+const processStatus = {
+  PAID_CONFIRMED: 0, // 入金確認済み
+  PAID_UNCONFIRMED: 1, // 送金済み
+  ACCEPTED: 2, // 受理済み
+  DELIVERED: 3 // 受信済み
+}
 
 const modelsBuilder = function (modelName) {
   return function (values) {
@@ -43,23 +48,6 @@ const getWorkflowStatusCode = (name) => {
       return '80'
   }
 }
-
-let accessTradeshiftSpy,
-  errorSpy,
-  journalizeInvoiceFindAllSpy,
-  accountCodeFindOneSpy,
-  accountCodeFindAllSpy,
-  subAccountCodeFindOneSpy,
-  journalizeInvoiceCreateSpy,
-  departmentCodeFindOneSpy,
-  departmentCodeFindAllSpy,
-  requestApprovalFindOneSpy,
-  requestApprovalDTOgetWaitingWorkflowisMineSpy,
-  ApproveStatusFindOneSpy,
-  requestApprovalDAOGetAllRequestApproval,
-  tradeshiftDTOFindDocuments,
-  approvalDAOGetWaitingApprovals,
-  requestApprovalFindAll
 
 const accountCodeMock = require('../mockDB/AccountCode_Table')
 const subAccountCodeMock = require('../mockDB/SubAccountCode_Table')
@@ -679,6 +667,24 @@ const pageId = 1
 const tenantId = '15e2d952-8ba0-42a4-8582-b234cb4a2089'
 const contractId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
 
+let accessTradeshiftSpy,
+  errorSpy,
+  journalizeInvoiceFindAllSpy,
+  accountCodeFindOneSpy,
+  accountCodeFindAllSpy,
+  subAccountCodeFindOneSpy,
+  journalizeInvoiceCreateSpy,
+  departmentCodeFindOneSpy,
+  departmentCodeFindAllSpy,
+  requestApprovalFindOneSpy,
+  requestApprovalDTOgetWaitingWorkflowisMineSpy,
+  requestApprovalDAOGetAllRequestApproval,
+  tradeshiftDTOFindDocuments,
+  approvalDAOGetWaitingApprovals,
+  requestApprovalFindAll,
+  tradeshiftDTOGetDocumentSearch,
+  requestApprovalFindOne
+
 describe('inboxControllerのテスト', () => {
   beforeEach(() => {
     accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
@@ -694,9 +700,8 @@ describe('inboxControllerのテスト', () => {
     JournalizeInvoice.save = jest.fn(async function () {})
     JournalizeInvoice.destory = jest.fn(async function () {})
     JournalizeInvoice.set = jest.fn(function () {})
-    requestApprovalFindOneSpy = jest.spyOn(DepartmentCode, 'findOne')
+    requestApprovalFindOneSpy = jest.spyOn(RequestApproval, 'findOne')
     requestApprovalDTOgetWaitingWorkflowisMineSpy = jest.fn(async function () {})
-    ApproveStatusFindOneSpy = jest.spyOn(ApproveStatus, 'findOne')
     requestApprovalDAOGetAllRequestApproval = jest.spyOn(RequestApprovalDAO.prototype, 'getAllRequestApproval')
     tradeshiftDTOFindDocuments = jest.spyOn(TradeshiftDTO.prototype, 'findDocuments')
     approvalDAOGetWaitingApprovals = jest.spyOn(ApprovalDAO.prototype, 'getWaitingApprovals')
@@ -704,6 +709,8 @@ describe('inboxControllerのテスト', () => {
     RequestApproval.prototype.getWorkflowStatusCode = jest.fn(getWorkflowStatusCode)
     requestApprovalFindAll = jest.fn(Approval, 'findAll')
     Approval.build = jest.fn(modelsBuilder('Approval'))
+    tradeshiftDTOGetDocumentSearch = jest.spyOn(TradeshiftDTO.prototype, 'getDocumentSearch')
+    requestApprovalFindOne = jest.spyOn(RequestApproval, 'findOne')
   })
   afterEach(() => {
     accessTradeshiftSpy.mockRestore()
@@ -717,12 +724,13 @@ describe('inboxControllerのテスト', () => {
     departmentCodeFindAllSpy.mockRestore()
     requestApprovalFindOneSpy.mockRestore()
     requestApprovalDTOgetWaitingWorkflowisMineSpy.mockRestore()
-    ApproveStatusFindOneSpy.mockRestore()
     requestApprovalDAOGetAllRequestApproval.mockRestore()
     requestApprovalDAOGetAllRequestApproval.mockRestore()
     tradeshiftDTOFindDocuments.mockRestore()
     approvalDAOGetWaitingApprovals.mockRestore()
     requestApprovalFindAll.mockRestore()
+    tradeshiftDTOGetDocumentSearch.mockRestore()
+    requestApprovalFindOne.mockRestore()
   })
 
   describe('getInbox', () => {
@@ -1075,6 +1083,9 @@ describe('inboxControllerのテスト', () => {
       lineNo1_lineAccountCode1_accountCode: '',
       lineNo1_lineAccountCode1_subAccountCode: '',
       lineNo1_lineAccountCode1_departmentCode: '',
+      lineNo1_lineCreditAccountCode1_creditAccountCode: '',
+      lineNo1_lineCreditAccountCode1_creditSubAccountCode: '',
+      lineNo1_lineCreditAccountCode1_creditDepartmentCode: '',
       lineNo1_lineAccountCode1_input_amount: '1000'
     }
     test('正常：明細が１個の時、何も操作なく「登録」ボタンを押す', async () => {
@@ -1093,7 +1104,7 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す', async () => {
+    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
@@ -1111,9 +1122,9 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す、勘定科目がない場合', async () => {
+    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す、勘定科目がない場合（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
-      data.lineNo = ['1', '2']
+      data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       accountCodeFindOneSpy.mockReturnValueOnce(null)
       journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
@@ -1121,11 +1132,11 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(-1)
     })
 
-    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、補助科目ない場合', async () => {
+    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す（貸方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
-      data.lineNo1_lineAccountCode1_accountCode = 'AB001'
-      data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
       ab001.contractId = accountCodeMock[0].contractId
@@ -1137,36 +1148,28 @@ describe('inboxControllerのテスト', () => {
       accountCodeFindAllSpy.mockReturnValueOnce([])
       journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
       const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
-      expect(result.status).toBe(-2)
+      expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目と部門データ操作し「登録」ボタンを押す、部門データない場合', async () => {
+    test('正常：明細が１個の時、勘定科目のみ操作し「登録」ボタンを押す、勘定科目がない場合（貸方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
-      data.lineNo1_lineAccountCode1_accountCode = 'AB001'
-      data.lineNo1_lineAccountCode1_subAccountCode = ''
-      data.lineNo1_lineAccountCode1_departmentCode = 'DE001'
-      const ab001 = new AccountCode()
-      ab001.accountCodeId = accountCodeMock[0].accountCodeId
-      ab001.contractId = accountCodeMock[0].contractId
-      ab001.accountCodeName = accountCodeMock[0].accountCodeName
-      ab001.accountCode = accountCodeMock[0].accountCode
-      ab001.createdAt = accountCodeMock[0].createdAt
-      ab001.updatedAt = accountCodeMock[0].updatedAt
-      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
-      accountCodeFindAllSpy.mockReturnValueOnce([])
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      accountCodeFindOneSpy.mockReturnValueOnce(null)
       journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
-      departmentCodeFindOneSpy.mockReturnValueOnce([])
       const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
-      expect(result.status).toBe(-3)
+      expect(result.status).toBe(-1)
     })
 
-    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、DBにはデータがない場合', async () => {
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
       data.lineNo1_lineAccountCode1_departmentCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = ''
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
       ab001.contractId = accountCodeMock[0].contractId
@@ -1189,11 +1192,193 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ変更', async () => {
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = 'AB001001'
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = ''
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const suut = new SubAccountCode()
+      suut.subAccountCodeId = subAccountCodeMock[0].subAccountCodeId
+      suut.accountCodeId = subAccountCodeMock[0].accountCodeId
+      suut.subjectName = subAccountCodeMock[0].subjectName
+      suut.subjectCode = subAccountCodeMock[0].subjectCode
+      suut.createdAt = subAccountCodeMock[0].createdAt
+      suut.updatedAt = subAccountCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([suut])
+      accountCodeFindAllSpy.mockReturnValueOnce([suut])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、補助科目ない場合（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = ''
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(-2)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、補助科目ない場合（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = 'AB001001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(-2)
+    })
+
+    test('正常：明細が１個の時、勘定科目と部門データ操作し「登録」ボタンを押す（借方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = 'AB001'
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = 'DE001'
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = ''
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const de001 = new DepartmentCode()
+      de001.departmentCodeId = departmentCodeMock[0].departmentCodeId
+      de001.contractId = departmentCodeMock[0].contractId
+      de001.departmentCodeName = departmentCodeMock[0].departmentCodeName
+      de001.departmentCode = departmentCodeMock[0].departmentCode
+      de001.createdAt = departmentCodeMock[0].createdAt
+      de001.updatedAt = departmentCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      departmentCodeFindOneSpy.mockReturnValueOnce(de001)
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が１個の時、勘定科目と部門データ操作し「登録」ボタンを押す、部門データない場合（借方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = 'AB001'
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = 'DE001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      departmentCodeFindOneSpy.mockReturnValueOnce([])
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(-3)
+    })
+
+    test('正常：明細が１個の時、勘定科目と部門データ操作し「登録」ボタンを押す（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = 'DE001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const de001 = new DepartmentCode()
+      de001.departmentCodeId = departmentCodeMock[0].departmentCodeId
+      de001.contractId = departmentCodeMock[0].contractId
+      de001.departmentCodeName = departmentCodeMock[0].departmentCodeName
+      de001.departmentCode = departmentCodeMock[0].departmentCode
+      de001.createdAt = departmentCodeMock[0].createdAt
+      de001.updatedAt = departmentCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      departmentCodeFindOneSpy.mockReturnValueOnce(de001)
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が１個の時、勘定科目と部門データ操作し「登録」ボタンを押す、部門データない場合（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineAccountCode1_departmentCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = 'DE001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      accountCodeFindAllSpy.mockReturnValueOnce([])
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      departmentCodeFindOneSpy.mockReturnValueOnce([])
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(-3)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ変更（借方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = 'AB001'
+      data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditDepartmentCode = ''
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
       ab001.contractId = accountCodeMock[0].contractId
@@ -1230,11 +1415,56 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ削除', async () => {
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ変更（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = 'AB001001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const suut = new SubAccountCode()
+      suut.subAccountCodeId = subAccountCodeMock[0].subAccountCodeId
+      suut.accountCodeId = subAccountCodeMock[0].accountCodeId
+      suut.subjectName = subAccountCodeMock[0].subjectName
+      suut.subjectCode = subAccountCodeMock[0].subjectCode
+      suut.createdAt = subAccountCodeMock[0].createdAt
+      suut.updatedAt = subAccountCodeMock[0].updatedAt
+      const date = new Date()
+      const dbJournal = JournalizeInvoice.build({
+        journalId: '7a7cb163-421e-4c6a-affb-88a481b335fe',
+        contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
+        invoiceId: invoiceId,
+        lineNo: 1,
+        journalNo: 'lineAccountCode1',
+        accountCode: ab001.accountCode,
+        subAccountCode: suut.subjectCode,
+        departmentCode: null,
+        installmentAmount: 1000000.0,
+        createdAt: date,
+        updatedAt: date
+      })
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([dbJournal])
+      accountCodeFindAllSpy.mockReturnValueOnce([suut])
+
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ削除（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = ''
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
       ab001.contractId = accountCodeMock[0].contractId
@@ -1271,11 +1501,168 @@ describe('inboxControllerのテスト', () => {
       expect(result.status).toBe(0)
     })
 
-    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、DBエラー', async () => {
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、データ削除（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = 'AB001001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const suut = new SubAccountCode()
+      suut.subAccountCodeId = subAccountCodeMock[0].subAccountCodeId
+      suut.accountCodeId = subAccountCodeMock[0].accountCodeId
+      suut.subjectName = subAccountCodeMock[0].subjectName
+      suut.subjectCode = subAccountCodeMock[0].subjectCode
+      suut.createdAt = subAccountCodeMock[0].createdAt
+      suut.updatedAt = subAccountCodeMock[0].updatedAt
+      const date = new Date()
+      const dbJournal = JournalizeInvoice.build({
+        journalId: '7a7cb163-421e-4c6a-affb-88a481b335fe',
+        contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
+        invoiceId: invoiceId,
+        lineNo: 1,
+        journalNo: 'lineAccountCode2',
+        accountCode: ab001.accountCode,
+        subAccountCode: suut.subjectCode,
+        departmentCode: null,
+        installmentAmount: 1000000.0,
+        createdAt: date,
+        updatedAt: date
+      })
+      accountCodeFindOneSpy.mockReturnValueOnce(ab001)
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([dbJournal])
+      accountCodeFindAllSpy.mockReturnValueOnce([suut])
+
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が２００個の時、１明細あたり仕訳情報1１０個を設定し「登録」ボタンを押す', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      const invoiceLines = Array(200)
+        .fill()
+        .map((v, i) => i + 1)
+
+      const param = { lineNo: invoiceLines, lineId: invoiceLines }
+
+      for (let lines = 1; lines < 201; lines++) {
+        for (let idx = 1; idx < 11; idx++) {
+          param[`lineNo${lines}_lineAccountCode${idx}_accountCode`] = `A${lines}${idx}`
+          param[`lineNo${lines}_lineAccountCode${idx}_subAccountCode`] = `S${lines}${idx}`
+          param[`lineNo${lines}_lineAccountCode${idx}_departmentCode`] = `D${lines}${idx}`
+          param[`lineNo${lines}_lineCreditAccountCode${idx}_creditAccountCode`] = `CA${lines}${idx}`
+          param[`lineNo${lines}_lineCreditAccountCode${idx}_creditSubAccountCode`] = `CS${lines}${idx}`
+          param[`lineNo${lines}_lineCreditAccountCode${idx}_creditDepartmentCode`] = `CD${lines}${idx}`
+          param[`lineNo${lines}_lineAccountCode${idx}_input_amount`] = '1,000'
+        }
+      }
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+
+      const suut = new SubAccountCode()
+      suut.subAccountCodeId = subAccountCodeMock[0].subAccountCodeId
+      suut.accountCodeId = subAccountCodeMock[0].accountCodeId
+      suut.subjectName = subAccountCodeMock[0].subjectName
+      suut.subjectCode = subAccountCodeMock[0].subjectCode
+      suut.createdAt = subAccountCodeMock[0].createdAt
+      suut.updatedAt = subAccountCodeMock[0].updatedAt
+
+      const de001 = new DepartmentCode()
+      de001.departmentCodeId = departmentCodeMock[0].departmentCodeId
+      de001.contractId = departmentCodeMock[0].contractId
+      de001.departmentCodeName = departmentCodeMock[0].departmentCodeName
+      de001.departmentCode = departmentCodeMock[0].departmentCode
+      de001.createdAt = departmentCodeMock[0].createdAt
+      de001.updatedAt = departmentCodeMock[0].updatedAt
+
+      accountCodeFindOneSpy.mockImplementation((option) => {
+        if (option.where.accountCode !== undefined) {
+          return ab001
+        }
+        if (option.where.departmentCode !== undefined) {
+          return de001
+        }
+        return null
+      })
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([])
+      departmentCodeFindOneSpy.mockImplementation((option) => {
+        if (option.where.departmentCode !== undefined) {
+          return de001
+        }
+        if (option.where.accountCode !== undefined) {
+          return ab001
+        }
+        return null
+      })
+      accountCodeFindAllSpy.mockReturnValue([suut])
+
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, param)
+      expect(result.status).toBe(0)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、DBエラー（借方）', async () => {
       const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
       data.lineNo = '1'
       data.lineNo1_lineAccountCode1_accountCode = 'AB001'
       data.lineNo1_lineAccountCode1_subAccountCode = 'AB001001'
+      const ab001 = new AccountCode()
+      ab001.accountCodeId = accountCodeMock[0].accountCodeId
+      ab001.contractId = accountCodeMock[0].contractId
+      ab001.accountCodeName = accountCodeMock[0].accountCodeName
+      ab001.accountCode = accountCodeMock[0].accountCode
+      ab001.createdAt = accountCodeMock[0].createdAt
+      ab001.updatedAt = accountCodeMock[0].updatedAt
+      const suut = new SubAccountCode()
+      suut.subAccountCodeId = subAccountCodeMock[0].subAccountCodeId
+      suut.accountCodeId = subAccountCodeMock[0].accountCodeId
+      suut.subjectName = subAccountCodeMock[0].subjectName
+      suut.subjectCode = subAccountCodeMock[0].subjectCode
+      suut.createdAt = subAccountCodeMock[0].createdAt
+      suut.updatedAt = subAccountCodeMock[0].updatedAt
+      const date = new Date()
+      const dbJournal = JournalizeInvoice.build({
+        journalId: '7a7cb163-421e-4c6a-affb-88a481b335fe',
+        contractId: '9fdd2a54-ea5c-45a4-8bbe-3a2e5299e8f9',
+        invoiceId: invoiceId,
+        lineNo: 1,
+        journalNo: 'lineAccountCode2',
+        accountCode: ab001.accountCode,
+        subAccountCode: suut.subjectCode,
+        departmentCode: null,
+        installmentAmount: 1000000.0,
+        createdAt: date,
+        updatedAt: date
+      })
+      const dbError = new Error('DB Conncetion Error')
+      accountCodeFindOneSpy.mockImplementation(() => {
+        throw dbError
+      })
+      journalizeInvoiceFindAllSpy.mockReturnValueOnce([dbJournal])
+      accountCodeFindAllSpy.mockReturnValueOnce([suut])
+
+      const result = await inboxController.insertAndUpdateJournalizeInvoice(contractId, invoiceId, data)
+      expect(result.error).toBe(dbError)
+    })
+
+    test('正常：明細が１個の時、勘定科目と補助科目操作し「登録」ボタンを押す、DBエラー（貸方）', async () => {
+      const invoiceId = '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      data.lineNo = '1'
+      data.lineNo1_lineAccountCode1_accountCode = ''
+      data.lineNo1_lineAccountCode1_subAccountCode = ''
+      data.lineNo1_lineCreditAccountCode1_creditAccountCode = 'AB001'
+      data.lineNo1_lineCreditAccountCode1_creditSubAccountCode = 'AB001001'
       const ab001 = new AccountCode()
       ab001.accountCodeId = accountCodeMock[0].accountCodeId
       ab001.contractId = accountCodeMock[0].contractId
@@ -1849,6 +2236,544 @@ describe('inboxControllerのテスト', () => {
       expect(result[1]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
       expect(result[1]).toHaveProperty('updatedAt', timeStamp(new Date()))
       expect(result[1]).toHaveProperty('expire', timeStamp(new Date()))
+    })
+  })
+
+  describe('getSearchResult', () => {
+    test('正常', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc'
+      }
+
+      const resultGetDocumentSearch = [
+        {
+          DocumentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          ID: 'PBI2848buyer2_入金確認済み',
+          URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          DocumentType: { type: 'invoice' },
+          State: 'LOCKED',
+          CreatedDateTime: '2021-12-16T07:34:03.248Z',
+          LastEdit: '2021-12-16T07:34:03.248Z',
+          SenderCompanyName: 'バイヤー2',
+          Actor: {
+            Created: '2021-07-27T08:58:14.266Z',
+            Modified: '2021-07-27T08:58:14.266Z',
+            FirstName: '管理者1',
+            LastName: 'サプライヤー2',
+            Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+            MobileNumberVerified: false
+          },
+          ApplicationResponse: { ResponseDate: '2021-12-16' },
+          ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+          ReceiverCompanyName: 'サプライヤー2',
+          Tags: { Tag: [] },
+          ItemInfos: [
+            { type: 'document.currency', value: 'JPY' },
+            { type: 'document.total', value: '1000.00' },
+            { type: 'document.issuedate', value: '2022-04-01' }
+          ],
+          ProcessState: 'PENDING',
+          ConversationStates: [[Object], [Object]],
+          UnifiedState: 'PAID_CONFIRMED',
+          CopyIndicator: false,
+          Deleted: false,
+          DueDate: '2021-12-23',
+          TenantId: '7e5255fe-05e6-4fc9-acf0-076574bc35f7',
+          InvoiceTypeCode: '380',
+          Properties: [],
+          SettlementBusinessIds: []
+        }
+      ]
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+
+      // 結果確認
+      expect(result).toEqual([
+        {
+          no: 1,
+          invoiceNo: 'PBI2848buyer2_入金確認済み',
+          status: 0,
+          currency: 'JPY',
+          ammount: '1,000',
+          sentTo: 'バイヤー2',
+          sentBy: 'サプライヤー2',
+          updated: '2021-12-16',
+          expire: '2021-12-23',
+          documentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          approveStatus: '10'
+        }
+      ])
+    })
+
+    test('正常：送信企業がない場合', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: [],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc'
+      }
+
+      const resultGetDocumentSearch = [
+        {
+          DocumentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          ID: 'PBI2848buyer2_入金確認済み',
+          URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          DocumentType: { type: 'invoice' },
+          State: 'LOCKED',
+          CreatedDateTime: '2021-12-16T07:34:03.248Z',
+          LastEdit: '2021-12-16T07:34:03.248Z',
+          SenderCompanyName: 'バイヤー2',
+          Actor: {
+            Created: '2021-07-27T08:58:14.266Z',
+            Modified: '2021-07-27T08:58:14.266Z',
+            FirstName: '管理者1',
+            LastName: 'サプライヤー2',
+            Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+            MobileNumberVerified: false
+          },
+          ApplicationResponse: { ResponseDate: '2021-12-16' },
+          ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+          ReceiverCompanyName: 'サプライヤー2',
+          Tags: { Tag: [] },
+          ItemInfos: [
+            { type: 'document.currency', value: 'JPY' },
+            { type: 'document.total', value: '1000.00' },
+            { type: 'document.issuedate', value: '2022-04-01' }
+          ],
+          ProcessState: 'PENDING',
+          ConversationStates: [[Object], [Object]],
+          UnifiedState: 'PAID_CONFIRMED',
+          CopyIndicator: false,
+          Deleted: false,
+          DueDate: '2021-12-23',
+          TenantId: '7e5255fe-05e6-4fc9-acf0-076574bc35f7',
+          InvoiceTypeCode: '380',
+          Properties: [],
+          SettlementBusinessIds: [],
+          approveStatus: '11'
+        }
+      ]
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '12',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+
+      // 結果確認
+      expect(result).toEqual([
+        {
+          no: 1,
+          invoiceNo: 'PBI2848buyer2_入金確認済み',
+          status: 0,
+          currency: 'JPY',
+          ammount: '1,000',
+          sentTo: 'バイヤー2',
+          sentBy: 'サプライヤー2',
+          updated: '2021-12-16',
+          expire: '2021-12-23',
+          documentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          approveStatus: '12'
+        }
+      ])
+    })
+
+    test('正常：ステータスが未処理の請求書の場合', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: [],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc'
+      }
+
+      const resultGetDocumentSearch = [
+        {
+          ID: 'PBI2848buyer2_入金確認済み',
+          URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          DocumentType: { type: 'invoice' },
+          State: 'LOCKED',
+          CreatedDateTime: '2021-12-16T07:34:03.248Z',
+          Actor: {
+            Created: '2021-07-27T08:58:14.266Z',
+            Modified: '2021-07-27T08:58:14.266Z',
+            FirstName: '管理者1',
+            LastName: 'サプライヤー2',
+            Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+            MobileNumberVerified: false
+          },
+          ApplicationResponse: { ResponseDate: '2021-12-16' },
+          ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+          Tags: { Tag: [] },
+          ItemInfos: [
+            { type: 'document.currency' },
+            { type: 'document.total' },
+            { type: 'document.issuedate', value: '2022-04-01' }
+          ],
+          ProcessState: 'PENDING',
+          ConversationStates: [[Object], [Object]],
+          CopyIndicator: false,
+          Deleted: false,
+          TenantId: '7e5255fe-05e6-4fc9-acf0-076574bc35f7',
+          InvoiceTypeCode: '380',
+          Properties: [],
+          SettlementBusinessIds: []
+        }
+      ]
+
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(null)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+
+      // 結果確認
+      expect(result).toEqual([
+        {
+          no: 1,
+          invoiceNo: 'PBI2848buyer2_入金確認済み',
+          status: '-',
+          currency: '-',
+          ammount: 'NaN',
+          sentTo: '-',
+          sentBy: '-',
+          updated: '-',
+          expire: '-',
+          documentId: undefined,
+          approveStatus: ''
+        }
+      ])
+    })
+
+    test('正常：合計金額がない場合', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc'
+      }
+
+      const resultGetDocumentSearch = [
+        {
+          DocumentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          ID: 'PBI2848buyer2_入金確認済み',
+          URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          DocumentType: { type: 'invoice' },
+          State: 'LOCKED',
+          CreatedDateTime: '2021-12-16T07:34:03.248Z',
+          LastEdit: '2021-12-16T07:34:03.248Z',
+          SenderCompanyName: 'バイヤー2',
+          Actor: {
+            Created: '2021-07-27T08:58:14.266Z',
+            Modified: '2021-07-27T08:58:14.266Z',
+            FirstName: '管理者1',
+            LastName: 'サプライヤー2',
+            Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+            MobileNumberVerified: false
+          },
+          ApplicationResponse: { ResponseDate: '2021-12-16' },
+          ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+          ReceiverCompanyName: 'サプライヤー2',
+          Tags: { Tag: [] },
+          ItemInfos: [{ type: 'document.currency', value: 'JPY' }],
+          ProcessState: 'PENDING',
+          ConversationStates: [[Object], [Object]],
+          UnifiedState: 'PAID_CONFIRMED',
+          CopyIndicator: false,
+          Deleted: false,
+          DueDate: '2021-12-23',
+          TenantId: '7e5255fe-05e6-4fc9-acf0-076574bc35f7',
+          InvoiceTypeCode: '380',
+          Properties: [],
+          SettlementBusinessIds: []
+        }
+      ]
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+
+      // 結果確認
+      expect(result).toEqual([
+        {
+          no: 1,
+          invoiceNo: 'PBI2848buyer2_入金確認済み',
+          status: 0,
+          currency: 'JPY',
+          ammount: '-',
+          sentTo: 'バイヤー2',
+          sentBy: 'サプライヤー2',
+          updated: '2021-12-16',
+          expire: '2021-12-23',
+          documentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          approveStatus: '10'
+        }
+      ])
+    })
+
+    test('正常：検索結果が０件の場合', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'abc',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: [],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc'
+      }
+
+      const resultGetDocumentSearch = []
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '12',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+
+      // 結果確認
+      expect(result).toEqual([])
+    })
+
+    test('正常：キーワード無の場合', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: '',
+        issueDate: ['', ''],
+        sentBy: [],
+        status: [],
+        contactEmail: ''
+      }
+
+      const tradeshiftDocumentTable = require('../mockDB/TradeshiftDocumentsTable')
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(tradeshiftDocumentTable)
+      requestApprovalFindOne.mockReturnValue(null)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+
+      const expectedResult = tradeshiftDocumentTable.map((document, idx) => {
+        const ammount = function () {
+          if (document.ItemInfos[1] === undefined) return '-'
+          return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
+        }
+        return {
+          no: idx + 1,
+          invoiceNo: document.ID,
+          status: processStatus[`${document.UnifiedState}`] ?? '-',
+          currency: document.ItemInfos[0].value ?? '-',
+          ammount: ammount(),
+          sentTo: document.SenderCompanyName ?? '-',
+          sentBy: document.ReceiverCompanyName ?? '-',
+          updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
+          expire: document.DueDate ?? '-',
+          documentId: document.DocumentId,
+          approveStatus: document.approveStatus ?? ''
+        }
+      })
+
+      // 結果確認
+      expect(result).toEqual(expectedResult)
+    })
+
+    test('正常：複数企業の検索', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: '',
+        issueDate: ['', ''],
+        sentBy: ['11367bd9-9710-4772-bdf7-10be2085976c', '9bd4923d-1b65-43b9-9b8d-34dbd1c9ac40'],
+        status: [],
+        contactEmail: ''
+      }
+
+      const tradeshiftDocumentTable = require('../mockDB/TradeshiftDocumentsTable')
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce([tradeshiftDocumentTable[0], tradeshiftDocumentTable[1]])
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce([tradeshiftDocumentTable[2]])
+      requestApprovalFindOne.mockReturnValue(null)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+
+      const expectedResult = tradeshiftDocumentTable.map((document, idx) => {
+        const ammount = function () {
+          if (document.ItemInfos[1] === undefined) return '-'
+          return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
+        }
+        return {
+          no: idx + 1,
+          invoiceNo: document.ID,
+          status: processStatus[`${document.UnifiedState}`] ?? '-',
+          currency: document.ItemInfos[0].value ?? '-',
+          ammount: ammount(),
+          sentTo: document.SenderCompanyName ?? '-',
+          sentBy: document.ReceiverCompanyName ?? '-',
+          updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
+          expire: document.DueDate ?? '-',
+          documentId: document.DocumentId,
+          approveStatus: document.approveStatus ?? ''
+        }
+      })
+
+      // 結果確認
+      expect(result).toEqual(expectedResult)
+    })
+
+    test('異常：検索結果がnullの場合', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'abc',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: [],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc'
+      }
+
+      const resultGetDocumentSearch = null
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '12',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+
+      // 結果確認
+      expect(result).toEqual(new Error("Cannot read property 'length' of null"))
+    })
+
+    test('異常：検索結果でAPIエラーの場合', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'abc',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: [],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc'
+      }
+
+      const resultGetDocumentSearch = new Error()
+
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+
+      // 結果確認
+      expect(result).toEqual(resultGetDocumentSearch)
     })
   })
 })

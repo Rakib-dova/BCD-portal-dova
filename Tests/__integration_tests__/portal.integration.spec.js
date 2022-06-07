@@ -11,7 +11,7 @@ const getCookies = require('./getCookies')
 
 describe('ルーティングのインテグレーションテスト', () => {
   let acCookies
-  // let userCookies
+  let userCookies
   let testTenantId
 
   describe('0.前準備', () => {
@@ -20,12 +20,12 @@ describe('ルーティングのインテグレーションテスト', () => {
       const options = require('minimist')(process.argv.slice(2))
       const adminId = options.adminid
       const adminSecret = options.adminsecret
-      // const userId = options.userid
-      // const userSecret = options.usersecret
+      const userId = options.userid
+      const userSecret = options.usersecret
       // --------------------アカウント管理者のCookieを取得---------------
       acCookies = await getCookies(app, request, getTenantId, adminId, adminSecret)
       // ---------------------一般ユーザのCookieを取得--------------------
-      // userCookies = await getCookies(userId, userSecret)
+      userCookies = await getCookies(app, request, getTenantId, userId, userSecret)
 
       // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
 
@@ -82,6 +82,16 @@ describe('ルーティングのインテグレーションテスト', () => {
       const res = await request(app)
         .get('/portal')
         .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+    })
+
+    // 利用登録後、一般ユーザ登録
+    test('一般ユーザ登録', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
         .expect(200)
 
       expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
@@ -169,7 +179,7 @@ describe('ルーティングのインテグレーションテスト', () => {
       await page.goto('https://localhost:3000/portal')
       if (page.url() === 'https://localhost:3000/portal') {
         await page.click(
-          'body > div.container.is-max-widescreen > columns > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div > a'
+          'body > div.container.is-max-widescreen > columns > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div > a'
         )
         await page.waitForTimeout(1000)
         const checkLocation = await page.evaluate(() => {
@@ -200,10 +210,10 @@ describe('ルーティングのインテグレーションテスト', () => {
           for (let row = 1; row < 3; row++) {
             for (let col = 1; col < 4; col++) {
               const iconObj = document.querySelector(
-                `body > div.container.is-max-widescreen > columns > div:nth-child(2) > div:nth-child(${row}) > div:nth-child(${col}) > div > a > div > div.media-content > p.title.is-5`
+                `body > div.container.is-max-widescreen > columns > div:nth-child(3) > div:nth-child(${row}) > div:nth-child(${col}) > div > a > div > div.media-content > p.title.is-5`
               )
               const contentObj = document.querySelector(
-                `body > div.container.is-max-widescreen > columns > div:nth-child(2) > div:nth-child(${row}) > div:nth-child(${col}) > div > a > div > div.media-content > p:nth-child(2)`
+                `body > div.container.is-max-widescreen > columns > div:nth-child(3) > div:nth-child(${row}) > div:nth-child(${col}) > div > a > div > div.media-content > p:nth-child(2)`
               )
               if (iconObj === null || iconObj === undefined) continue
               iconTiles.push({
@@ -216,10 +226,10 @@ describe('ルーティングのインテグレーションテスト', () => {
           // 外部サービスアイコンとコンテンツを読み込み
           for (let row = 1; row < 3; row++) {
             const iconObj = document.querySelector(
-              `body > div.container.is-max-widescreen > columns > div:nth-child(3) > div > div:nth-child(${row}) > div > a > div > div.media-content > p.title.is-5`
+              `body > div.container.is-max-widescreen > columns > div:nth-child(4) > div > div:nth-child(${row}) > div > a > div > div.media-content > p.title.is-5`
             )
             const contentObj = document.querySelector(
-              `body > div.container.is-max-widescreen > columns > div:nth-child(3) > div > div:nth-child(${row}) > div > a > div > div.media-content > p:nth-child(2)`
+              `body > div.container.is-max-widescreen > columns > div:nth-child(4) > div > div:nth-child(${row}) > div > a > div > div.media-content > p:nth-child(2)`
             )
             if (iconObj === null || iconObj === undefined) continue
             iconTiles.push({
@@ -239,7 +249,7 @@ describe('ルーティングのインテグレーションテスト', () => {
           '商奉行®クラウド連携',
           'サポート',
           '設定',
-          'ファクタリング',
+          // 'ファクタリング',
           '銀行振込消込'
         ]
 
@@ -251,7 +261,7 @@ describe('ルーティングのインテグレーションテスト', () => {
           '請求書情報を商奉行クラウド間で連携できます。',
           '設定方法、利用方法に関するお問い合わせが無料で利用できます。その他FAQを参照できます。',
           '契約情報変更と解約を行うことができます。',
-          '請求書（売掛金）を買い取らせていただくことで素早く簡単に現金化ができるサービスです。',
+          // '請求書（売掛金）を買い取らせていただくことで素早く簡単に現金化ができるサービスです。',
           '専用の振込口座をご利用いただくことで振込名義人によらず請求先を特定できるサービスです。'
         ]
 
@@ -264,6 +274,200 @@ describe('ルーティングのインテグレーションテスト', () => {
         // ブラウザ終了
         await page.close()
       }
+    })
+
+    let redirectUrl
+    test('支払依頼-支払依頼申請', async () => {
+      const contract = await db.Contract.findOne({
+        where: {
+          tenantId: testTenantId
+        }
+      })
+
+      // 承認ルート登録
+      const v4 = require('uuid').v4
+      const testApproveRoute = new db.ApproveRoute({
+        approveRouteId: v4(),
+        contractId: contract.contractId,
+        approveRouteName: 'integrationApproveRoute',
+        deleteFlag: 0,
+        updateFlag: 0
+      })
+      await testApproveRoute.save()
+
+      const testApproveUserId1 = v4()
+      const testApproveUserId2 = v4()
+      const testApproveUser1 = new db.ApproveUser({
+        approveUserId: testApproveUserId1,
+        approveRouteId: testApproveRoute.approveRouteId,
+        approveUser: 'aa974511-8188-4022-bd86-45e251fd259e',
+        prevApproveUser: null,
+        nextApproveUser: testApproveUserId2,
+        isLastApproveUser: 0
+      })
+      await testApproveUser1.save()
+
+      const testApproveUser2 = new db.ApproveUser({
+        approveUserId: testApproveUserId2,
+        approveRouteId: testApproveRoute.approveRouteId,
+        approveUser: '53607702-b94b-4a94-9459-6cf3acd65603',
+        prevApproveUser: testApproveUserId1,
+        nextApproveUser: null,
+        isLastApproveUser: 1
+      })
+      await testApproveUser2.save()
+
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/inboxList/1')
+
+      await page.click('#informationTab > table > tbody > tr:nth-child(1) > td.text-center.display-row-td > a')
+
+      await page.waitForTimeout(2000)
+
+      redirectUrl = await page.evaluate(() => {
+        return document.querySelector('#form > div.grouped-button > a.button.is-link').getAttribute('href')
+      })
+
+      const approvalInbox = redirectUrl.replace('/requestApproval/', '')
+      redirectUrl = '/approvalInbox/' + approvalInbox
+
+      // 支払依頼へボタン押下
+      await page.click('#form > div.grouped-button > a.button.is-link')
+
+      await page.waitForTimeout(2000)
+
+      // 支払依頼画面にredirectする。
+      expect(page.url()).toBe(`https://localhost:3000/requestApproval/${approvalInbox}`)
+
+      // 承認ルート選択ボタン押下
+      await page.click('#btn-approveRouteInsert')
+
+      await page.waitForTimeout(1000)
+
+      // 承認ルート検索
+      await page.click('#btnSearchApproveRoute')
+
+      await page.waitForTimeout(2000)
+
+      await page.click('#displayFieldApproveRouteResultBody > tr > td.btnSelect > a')
+
+      await page.waitForTimeout(2500)
+
+      // メッセージ入力
+      await page.type('#inputMsg', 'インテグレーションテスト')
+
+      // 保存ボタン押下
+      await page.click('#form > div.grouped-button > button')
+
+      await page.waitForTimeout(7000)
+
+      // 支払依頼画面にredirectする。
+      expect(page.url()).toBe(`https://localhost:3000/requestApproval/${approvalInbox}`)
+
+      // 確認ボタン押下
+      await page.click('#btn-confirm')
+
+      await page.waitForTimeout(1000)
+
+      // 依頼ボタン押下
+      await page.click('#btn-approval')
+
+      await page.waitForTimeout(6000)
+
+      // 一覧画面にredirectする。
+      expect(await page.url()).toBe('https://localhost:3000/inboxList/1')
+
+      browser.close()
+    })
+
+    test('ポータル画面：支払依頼通知（承認者）', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/支払依頼が/i) // 支払依頼通知が含まれていること
+      expect(res.text).toMatch(/件あります。/i) // 支払依頼差し戻し通知が含まれていること
+    })
+
+    test('支払依頼通知の確認ボタン遷移確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal')
+
+      await page.click('body > div.container.is-max-widescreen > columns > div:nth-child(1) > div > a')
+      await page.waitForTimeout(2000)
+
+      // 支払一覧（承認待ちタブ）に遷移される。
+      expect(page.url()).toBe('https://localhost:3000/inboxList/approvals')
+
+      await browser.close()
+    })
+
+    test('支払依頼-差し戻し', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+      const page = await browser.newPage()
+      await page.setCookie(userCookies[0])
+      await page.goto(`https://localhost:3000${redirectUrl}`)
+
+      await page.click('#rejectApproval')
+      await page.waitForTimeout(500)
+
+      await page.click('#btn-reject')
+      await page.waitForTimeout(6000)
+
+      // 支払依頼一覧に遷移
+      expect(page.url()).toBe('https://localhost:3000/inboxList/1')
+
+      await browser.close()
+    })
+
+    test('ポータル画面：支払依頼差し戻し通知（依頼者）', async () => {
+      const res = await request(app)
+        .get('/portal')
+        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+        .expect(200)
+
+      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
+      expect(res.text).toMatch(/差し戻しされた支払依頼が/i) // 支払依頼差し戻し通知が含まれていること
+      expect(res.text).toMatch(/件あります。/i) // 支払依頼差し戻し通知が含まれていること
+    })
+
+    test('支払依頼差し戻し通知の確認ボタン遷移確認', async () => {
+      const puppeteer = require('puppeteer')
+      const browser = await puppeteer.launch({
+        headless: true,
+        ignoreHTTPSErrors: true
+      })
+
+      const page = await browser.newPage()
+      await page.setCookie(acCookies[0])
+      await page.goto('https://localhost:3000/portal')
+
+      await page.click('body > div.container.is-max-widescreen > columns > div:nth-child(1) > div:nth-child(1) > a')
+      await page.waitForTimeout(2000)
+
+      // 支払一覧（承認待ちタブ）に遷移される。
+      expect(page.url()).toBe('https://localhost:3000/inboxList/approvals')
+
+      await browser.close()
     })
   })
 
@@ -452,6 +656,22 @@ describe('ルーティングのインテグレーションテスト', () => {
   })
 
   afterAll(async () => {
+    const contract = await db.Contract.findOne({
+      where: {
+        tenantId: testTenantId
+      }
+    })
+
+    const requestId = await db.RequestApproval.findOne({
+      where: {
+        contractId: contract.contractId
+      }
+    })
+
+    if (requestId.length !== 0) {
+      await db.Approval.destroy({ where: { requestId: requestId.requestId } })
+      await db.RequestApproval.destroy({ where: { contractId: contract.contractId } })
+    }
     await db.User.destroy({ where: { tenantId: testTenantId } })
     await db.Tenant.destroy({ where: { tenantId: testTenantId } })
   })

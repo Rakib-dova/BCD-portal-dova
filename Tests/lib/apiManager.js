@@ -17,6 +17,7 @@ module.exports = async (accessToken, refreshToken, method, query, body = {}, con
     try {
       if (_method === 'get') {
         const res = await axios.get(`${_query}`, _config)
+
         return res.data
       }
     } catch (error) {
@@ -80,6 +81,29 @@ const axios = {
       .replace('&type=invoice', '')
       .replace('&', '')
 
+    if (url === '/account') {
+      const accountResult = {
+        data: {
+          Id: '53607702-b94b-4a94-9459-6cf3acd65603',
+          CompanyAccountId: '621559d0-53aa-44a2-ab29-0c4a6cb02bd1',
+          Identifiers: [{ scheme: 'TS:ID', value: '621559d0-53aa-44a2-ab29-0c4a6cb02bd1' }],
+          CompanyName: 'UTテスト会社',
+          Username: 'UTTESTER1@UTCODE.COM',
+          Language: 'ja',
+          TimeZone: 'Asia/Tokyo',
+          Created: '2021-05-24T09:54:47.962Z',
+          Modified: '2021-07-05T04:14:47.912Z',
+          State: 'ACTIVE',
+          Type: 'PERSON',
+          FirstName: 'UTテスト',
+          LastName: 'ユーザー',
+          AccountType: 'FREE'
+        }
+      }
+
+      return accountResult
+    }
+
     if (url.search('/account/users') !== -1) {
       return accountUsers(url)
     }
@@ -99,6 +123,7 @@ const axios = {
 
     const businessId = paramateter.businessId || null
     url = businessId !== null ? 'bussinessId' : url
+
     switch (url) {
       case 'bussinessId': {
         switch (businessId) {

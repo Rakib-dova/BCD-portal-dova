@@ -243,6 +243,11 @@ const cbPostGetCode = async (req, res, next) => {
     targetSubAccountCodeName
   )
 
+  if (searchResult instanceof Error) {
+    req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
+    return res.redirect(303, '/inboxList/1')
+  }
+
   const codeLists = searchResult.map((item) => {
     return {
       accountCode: item.accountCode,
@@ -262,6 +267,10 @@ const cbPostIndex = async (req, res, next) => {
   if (!req.session || !req.user?.userId) {
     return next(errorHelper.create(500))
   }
+
+  // アプリ効果測定用ログ出力
+  let jsonLog = { tenantId: req.user.tenantId, action: 'journalSetupRequest' }
+  logger.info(jsonLog)
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
@@ -332,6 +341,17 @@ const cbPostIndex = async (req, res, next) => {
       ])
       return res.redirect('/inboxList/1')
   }
+
+  // アプリ効果測定用ログ出力
+  jsonLog = {
+    tenantId: req.user.tenantId,
+    action: 'setupJournalInfo',
+    accountCode: accountCode,
+    subAccountCode: subAccountCode,
+    departmentCode: departmentCode,
+    status: status
+  }
+  logger.info(jsonLog)
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
   req.flash('info', '仕訳情報設定を保存しました。')
