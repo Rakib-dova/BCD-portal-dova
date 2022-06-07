@@ -227,7 +227,6 @@ describe('journalDownloadControllerのテスト', () => {
       )
 
       // 期待結果
-      // return値がない
       expect(result).toEqual(new Error('Request failed with status code 404'))
     })
 
@@ -249,7 +248,6 @@ describe('journalDownloadControllerのテスト', () => {
       )
 
       // 期待結果
-      // return値がない
       expect(errorSpy).toHaveBeenCalledWith({ DocumentId: document[0].DocumentId, stack: errorDb.stack, status: 0 })
       expect(result).toEqual(errorDb)
     })
