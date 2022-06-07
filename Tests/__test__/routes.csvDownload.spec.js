@@ -5089,7 +5089,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5125,7 +5125,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5163,7 +5163,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5201,7 +5201,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         '条件に合致する請求書が見つかりませんでした。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5462,7 +5462,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         '条件に合致する請求書が見つかりませんでした。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5502,7 +5502,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         'ダウンロード対象の請求書が100件を超えています。（ダウンロード対象：101件）<br>検索条件を絞り込んでください。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5960,7 +5960,7 @@ describe('csvDownloadのテスト', () => {
       // 期待結果
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('NotLoggedIn')
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -6039,7 +6039,7 @@ describe('csvDownloadのテスト', () => {
       // 期待結果
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('NotLoggedIn')
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })

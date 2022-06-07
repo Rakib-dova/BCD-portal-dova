@@ -931,8 +931,8 @@ describe('journalDownloadのテスト', () => {
       expect(response.redirect).toBeCalledWith(303, '/journalDownload')
     })
 
-    test('正常:結果結果請求書100件超過した場合', async () => {
-      // \準備
+    test('正常:検索結果請求書100件超過した場合', async () => {
+      // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
