@@ -820,7 +820,6 @@ body > div.hero.is-small {
   font-weight: bold;
 }
 
-<<<<<<< HEAD
 #chkFinalapproval {
   margin-top: auto;
   margin-bottom: auto;
@@ -831,17 +830,13 @@ body > div.hero.is-small {
 }
 
 .input-comment-size {
-=======
-.input-comment-size {
   border: 1px solid;
   display: flex;
->>>>>>> PB#3872
   margin-top: 0.75rem;
   width: 100%;
   resize: none;
   font-size: 16px;
 }
-<<<<<<< HEAD
 
 .border-bottom-2px-solid {
   border-bottom: 2px solid;
@@ -957,5 +952,3 @@ body > div.hero.is-small {
   font-size: 1.25rem;
   font-weight: 600;
 }
-=======
->>>>>>> PB#3872
