@@ -34,7 +34,9 @@ class TradeshiftDTO {
 
     if (includeDraftAttachments) uri = `${uri}?${this.getQuery('includeDraftAttachments', includeDraftAttachments)}`
 
-    return await this.accessTradeshift(get, uri)
+    const result = await this.accessTradeshift(get, uri)
+
+    return { ...result, documentId }
   }
 
   async findDocuments(documentId) {
