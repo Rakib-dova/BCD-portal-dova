@@ -1,7 +1,5 @@
 const pdfInvoiceUpload = require('../models').PdfInvoiceUpload
 const pdfInvoiceUploadDetail = require('../models').PdfInvoiceUploadDetail
-const PdfInvoice = require('../models').PdfInvoice
-const PdfInvoiceLine = require('../models').PdfInvoiceLine
 const constantsDefine = require('../constants')
 const logger = require('../lib/logger')
 const { Op } = require('sequelize')
@@ -17,47 +15,25 @@ module.exports = {
   //   skipCount,
   //   invoiceCount
   // }
-  createUploadHistoryAndRows: async (history, rows, transaction = null) => {
+  createUploadHistoryAndRows: async (history, rows, transaction) => {
     if (Object.keys(history).length === 0) return null
-
+    if (!transaction) return null
     try {
       // pdfInvoiceUpload テーブルにレコード挿入
-      let createdHistory
-      if (transaction) createdHistory = await pdfInvoiceUpload.create(history, { transaction })
-      else createdHistory = await pdfInvoiceUpload.create(history)
+      const createdHistory = await pdfInvoiceUpload.create(history, { transaction })
 
       // pdfInvoiceUploadDetail テーブルにレコード挿入
-      await Promise.all(rows.map(async (row) => {
-        if (transaction) return await pdfInvoiceUploadDetail.create(row, { transaction })
-        else return await PdfInvoiceLine.create(row)
-      }))
+      await Promise.all(
+        rows.map(async (row) => {
+          return pdfInvoiceUploadDetail.create(row, { transaction })
+        })
+      )
 
       return createdHistory
     } catch (error) {
       logger.info(error)
-      throw error
+      return error
     }
-  },
-  create: async (values) => {
-    const functionName = 'pdfInvoiceUploadController.insert'
-    logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
-    let result
-    try {
-      result = await pdfInvoiceUpload.create({
-        ...values
-      })
-    } catch (error) {
-      logger.error({
-        values: {
-          ...values
-        },
-        stack: error.stack,
-        status: 0
-      })
-      result = error
-    }
-    logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
-    return result
   },
   updateCount: async ({ invoiceUploadId, successCount, failCount, skipCount, invoiceCount }) => {
     const functionName = 'pdfInvoiceUploadController.updateCount'
