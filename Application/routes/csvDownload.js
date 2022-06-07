@@ -331,13 +331,20 @@ const cbPostIndex = async (req, res, next) => {
   let downloadFile = ''
   // resultForQuery（API呼出）エラー検査
   if (resultForQuery instanceof Error) {
-    errorHandle(resultForQuery, res, req)
+    return errorHandle(resultForQuery, res, req)
   } else {
     // documentsResultのデータ有無確認
     if (!documentsResult) {
       req.flash('noti', [
         notiTitle,
         '請求書ダウンロードに失敗しました。<br>（送信企業と受信企業で同じ企業を選択している場合はどちらか一方をチェックしてください。）'
+      ])
+      res.redirect(303, '/csvDownload')
+    } else if (documentsResult.itemCount > 100) {
+      // 請求書検索結果、100件以上の場合ポップを表示
+      req.flash('noti', [
+        notiTitle,
+        `ダウンロード対象の請求書が100件を超えています。（ダウンロード対象：${documentsResult.itemCount}件）<br>検索条件を絞り込んでください。`
       ])
       res.redirect(303, '/csvDownload')
     } else if (documentsResult.itemCount === 0) {
@@ -372,7 +379,7 @@ const cbPostIndex = async (req, res, next) => {
 
           // resultエラー検査
           if (resultForDocumentId instanceof Error) {
-            errorHandle(resultForDocumentId, res, req)
+            return errorHandle(resultForDocumentId, res, req)
           } else {
             // アプリ効果測定用ログ出力
             jsonLog = {
@@ -398,15 +405,42 @@ const cbPostIndex = async (req, res, next) => {
           res.redirect(303, '/csvDownload')
         }
       } else {
-        const invoicesForDownload = await csvDownloadController.createInvoiceDataForDownload(
-          req.user.accessToken,
-          req.user.refreshToken,
-          documentsResult.Document
-        )
+        let invoicesForDownload
+        await Promise.all(
+          documentsResult.Document.map(async (key) => {
+            return csvDownloadController.createInvoiceDataForDownload(req.user.accessToken, req.user.refreshToken, key)
+          })
+        ).then(function (result) {
+          invoicesForDownload = result
+        })
 
         // エラーを確認する
-        if (invoicesForDownload instanceof Error) {
-          errorHandle(invoicesForDownload, res, req)
+        for (let i = 0; invoicesForDownload.length > i; i++) {
+          if (invoicesForDownload[i] instanceof Error) {
+            return errorHandle(invoicesForDownload[i], res, req)
+          }
+        }
+
+        // CSVファイルをまとめる変数
+        let fileData = ''
+        // 取得した文書データをCSVファイルにまとめる
+        for (let idx = 0; idx < invoicesForDownload.length; idx++) {
+          const invoice = await invoicesForDownload[idx]
+          // 最初の請求書の場合
+          if (idx === 0) {
+            fileData += jsonToCsv(dataToJson(invoice[0]))
+            fileData += String.fromCharCode(0x0a) // 改行の追加
+            // 最初以外の請求書の場合
+          } else {
+            const rows = jsonToCsv(dataToJson(invoice[0])).split(/\r?\n|\r/)
+            for (let row = 0; row < rows.length; row++) {
+              // ヘッダ除外したもののみ追加
+              if (row !== 0) {
+                fileData += rows[row]
+                fileData += String.fromCharCode(0x0a) // 改行の追加
+              }
+            }
+          }
         }
 
         // アプリ効果測定用ログ出力
@@ -419,7 +453,7 @@ const cbPostIndex = async (req, res, next) => {
 
         filename = encodeURIComponent(`${today}_請求書.csv`)
         res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
-        res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
+        res.status(200).send(`${String.fromCharCode(0xfeff)}${fileData}`)
       }
     }
   }

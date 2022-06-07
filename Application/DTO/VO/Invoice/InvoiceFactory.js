@@ -47,19 +47,23 @@ class InvoiceFactory {
   }
 
   async getInvoices(sentBy, businessId, minIssuedate, maxIssuedate, isCloedApproval) {
-    const documents = []
+    let documents = []
     const result = []
     const isSearchedDocument = await this.findDocuments(sentBy, businessId, minIssuedate, maxIssuedate)
 
     if (isSearchedDocument.length === 0) return null
 
-    for (const document of isSearchedDocument) {
-      const documentId = document.DocumentId
-      const response = await this.tradeshiftDTO.getDocument(documentId)
+    await Promise.all(
+      isSearchedDocument.map(async (key) => {
+        return this.tradeshiftDTO.getDocument(key.DocumentId)
+      })
+    ).then(function (result) {
+      documents = result
+    })
 
-      if (response instanceof Error) throw response
-
-      documents.push({ ...response, documentId })
+    // エラーを確認する
+    for (let i = 0; documents.length > i; i++) {
+      if (documents[i] instanceof Error) throw documents
     }
 
     for (const invoice of documents) {
