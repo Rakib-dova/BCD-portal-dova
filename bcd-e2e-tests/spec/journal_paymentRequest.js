@@ -126,6 +126,9 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       await comment('コード"' + accountCodes[i].code + '"、科目名"' + accountCodes[i].name + '"を登録する');
       await registAccountCodePage.regist(accountCodes[i].code, accountCodes[i].name);
       await registAccountCodePage.clickPopupOK();
+      await accountCodeListPage.waitPopup();
+      await comment('ポップアップメッセージを閉じる');
+      await accountCodeListPage.closePopup();
       await accountCodeListPage.waitForLoading();
     }
 
@@ -148,6 +151,9 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       await comment('補助科目コード"' + accountCodes[i].subCode + '"、補助科目名"' + accountCodes[i].subName + '"を登録する');
       await registSubAccountCodePage.regist(accountCodes[i].subCode, accountCodes[i].subName);
       await registSubAccountCodePage.clickPopupOK();
+      await subAccountCodeListPage.waitPopup();
+      await comment('ポップアップメッセージを閉じる');
+      await subAccountCodeListPage.closePopup();
       await subAccountCodeListPage.waitForLoading();
     }
 
@@ -168,6 +174,9 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       await comment('部門コード"' + departments[i].code + '"、部門名"' + departments[i].name + '"を登録する');
       await registDepartmentPage.regist(departments[i].code, departments[i].name);
       await registDepartmentPage.clickPopupOK();
+      await departmentListPage.waitPopup();
+      await comment('ポップアップメッセージを閉じる');
+      await departmentListPage.closePopup();
       await departmentListPage.waitForLoading();
     }
 
@@ -205,7 +214,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await page.waitForTimeout(1000);
   });
 
-  it("STEP6_No.220. 支払依頼ページ_未処理（申請者）", async function () {
+  /**
+   * STEP6_No.220
+   */
+  it("支払依頼ページ_未処理（申請者）", async function () {
     // テストの初期化を実施
     await initBrowser();
     const context = await browser.newContext(contextOption);
@@ -237,7 +249,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await page.waitForTimeout(1000);
   });
 
-  it("STEP6_No.45,46,48. 支払依頼ページ表示", async function () {
+  /**
+   * STEP6_No.45,46,48
+   */
+  it("支払依頼ページ表示", async function () {
     // テストの初期化を実施
     await initBrowser();
     const context = await browser.newContext(contextOption);
@@ -288,7 +303,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await page.waitForTimeout(1000);
   });
 
-  it("STEP6_No.49,52. 支払依頼ページ_メッセージ入力", async function () {
+  /**
+   * STEP6_No.49,52
+   */
+  it("支払依頼ページ_メッセージ入力", async function () {
     // テストの初期化を実施
     await initBrowser();
     const context = await browser.newContext(contextOption);
@@ -336,7 +354,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await page.waitForTimeout(1000);
   });
 
-  it("STEP6_No.53,54,56,57,58. 支払依頼ページ_承認ルート選択", async function () {
+  /**
+   * STEP6_No.53,54,56,57,58
+   */
+  it("支払依頼ページ_承認ルート選択", async function () {
     // テストの初期化を実施
     await initBrowser();
     const context = await browser.newContext(contextOption);
@@ -408,7 +429,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await page.waitForTimeout(1000);
   });
 
-  it("STEP6_No.65,78. 支払依頼ページ_依頼", async function () {
+  /**
+   * STEP6_No.65,78-81,140,144,222
+   */
+  it("支払依頼ページ_依頼", async function () {
     // テストの初期化を実施
     await initBrowser();
     const context = await browser.newContext(contextOption);
@@ -483,6 +507,11 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     // 支払依頼を行う
     await comment('支払依頼を行う');
     await paymentRequestPage.submit();
+    await paymentRequestListPage.waitPopup();
+
+    // ポップアップを閉じる
+    await comment('ポップアップメッセージを閉じる');
+    await paymentRequestListPage.closePopup();
     await paymentRequestListPage.waitForLoading();
 
     // 依頼がされること
@@ -494,46 +523,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 支払依頼の請求書があること
     expect(await paymentRequestListPage.hasConstructRow(invoiceNo)).to.equal(true, '支払依頼の請求書があること');
-    await page.waitForTimeout(1000);
-  });
-
-  it("STEP6_No.79,80,81,140,144,222. 支払依頼ページ_依頼中（申請者）", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage, paymentRequestPage }
-      = common.getPageObject(browser, page);
-
-    // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
-    // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
-
-    // ステータスが「支払依頼中」となっていること
-    expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('支払依頼中', 'ステータスが「支払依頼中」となっていること');
-
-    // 承認待ちタブを開く
-    await comment('「承認待ち」タブを開く');
-    await paymentRequestListPage.clickConstruct();
-
-    // 承認状況に「支払依頼中」と表示されていること
-    expect(await paymentRequestListPage.getConstructStatus(invoiceNo)).to.equal('支払依頼中', '承認状況に「支払依頼中」と表示されていること');
-
+    
     // 支払依頼ページへ遷移する
     await comment(invoiceNo + 'の「依頼内容確認」をクリックする');
     await paymentRequestListPage.clickConstructDetail(invoiceNo);
@@ -557,7 +547,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await page.waitForTimeout(1000);
   });
 
-  it("STEP6_No.94,95,96. 支払依頼ページ_承認（1次申請）", async function () {
+  /**
+   * STEP6_No.94,95,96
+   */
+  it("支払依頼ページ_承認（1次申請）", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -616,10 +609,15 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 承認する
     await paymentRequestPage.approve();
-    await paymentRequestListPage.waitForLoading();
+    await paymentRequestListPage.waitPopup();
 
     // 「承認を完了しました。」のメッセージが表示されていること
     expect(await paymentRequestListPage.getPopupMessage()).to.contains('承認を完了しました。', '「承認を完了しました。」のメッセージが表示されていること');
+
+    // ポップアップを閉じる
+    await comment('ポップアップメッセージを閉じる');
+    await paymentRequestListPage.closePopup();
+    await paymentRequestListPage.waitForLoading();
 
     // 請求書一覧画面にて承認ステータスに変更されていること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('一次承認済み', '請求書一覧画面にて承認ステータスに変更されていること');
@@ -634,7 +632,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await page.waitForTimeout(1000);
   });
 
-  it("STEP6_No.146,147,224,349,350. 支払依頼ページ_1次承認済み（申請者）", async function () {
+  /**
+   * STEP6_No.146,147,224,349,350
+   */
+  it("支払依頼ページ_1次承認済み（申請者）", async function () {
     // テストの初期化を実施
     await initBrowser();
     const context = await browser.newContext(contextOption);
@@ -689,7 +690,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await page.waitForTimeout(1000);
   });
 
-  it("STEP6_No.98,99,125. 支払依頼ページ_差し戻し", async function () {
+  /**
+   * STEP6_No.98,99,125
+   */
+  it("支払依頼ページ_差し戻し", async function () {
     // テストの初期化を実施
     await initBrowser();
     const context = await browser.newContext(contextOption);
@@ -728,10 +732,15 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     // 差し戻す
     await comment('差し戻す');
     await paymentRequestPage.reject();
-    await paymentRequestListPage.waitForLoading();
+    await paymentRequestListPage.waitPopup();
 
     // 「支払依頼を差し戻しました。」と表示されること
     expect(await paymentRequestListPage.getPopupMessage()).to.contains('支払依頼を差し戻しました。', '「支払依頼を差し戻しました。」と表示されること');
+
+    // ポップアップを閉じる
+    await comment('ポップアップメッセージを閉じる');
+    await paymentRequestListPage.closePopup();
+    await paymentRequestListPage.waitForLoading();
 
     // 差し戻しができること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('差し戻し', '差し戻しができること');

@@ -37,6 +37,7 @@ class DepartmentListPage {
   async delete(departmentCode) {
     await this.actionUtils.click(this.frame, '//td[contains(text(), "' + departmentCode + '")]/..//a[contains(text(),"削除")]');
     await this.actionUtils.click(this.frame, '#modalCodeDelBtn');
+    await this.waitPopup();
   }
 
   // 部門データをすべて削除する
@@ -45,7 +46,8 @@ class DepartmentListPage {
     while((rows = await this.actionUtils.getElements(this.frame, '//tr//a[contains(text(),"削除")]')).length > 0) {
       await rows[0].click();
       await this.actionUtils.click(this.frame, '#modalCodeDelBtn');
-      await this.frame.waitForTimeout(3000);
+      await this.waitPopup();
+      await this.closePopup();
     }
   }
 
@@ -59,9 +61,21 @@ class DepartmentListPage {
     return await this.actionUtils.isExist(this.frame, '//td[contains(text(), "' + departmentCode + '")]/../td[contains(text(), "' + departmentName + '")]');
   }
 
+  // ポップアップが表示されるまで待機する
+  async waitPopup() {
+    await this.actionUtils.waitForLoading('//*[@class="notification is-info animate__animated animate__faster"]');
+    await this.frame.waitForTimeout(500);
+  }
+
   // ポップアップメッセージを取得する
   async getPopupMessage() {
-    return await this.actionUtils.getText(this.frame, '//div[@class="notification is-info animate__animated animate__faster"]');
+    return await this.actionUtils.getText(this.frame, '//*[@class="notification is-info animate__animated animate__faster"]');
+  }
+
+  // ポップアップを閉じる
+  async closePopup() {
+    await this.actionUtils.click(this.frame, '//*[@class="notification is-info animate__animated animate__faster"]/button');
+    await this.frame.waitForTimeout(500);
   }
 }
 exports.DepartmentListPage = DepartmentListPage;

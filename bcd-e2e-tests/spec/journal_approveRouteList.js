@@ -67,7 +67,10 @@ describe('仕訳情報設定_承認ルート一覧', function () {
     await approveRouteListPage.waitForLoading();
   };
 
-  it("STEP6_No.3. 承認ルート登録_承認ルート名", async function () {
+  /**
+   * STEP6_No.3
+   */
+  it("承認ルート登録_承認ルート名入力", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -126,7 +129,10 @@ describe('仕訳情報設定_承認ルート一覧', function () {
     }
   });
 
-  it("STEP6_No.9. 承認ルート登録_承認者検索（メールアドレス）", async function () {
+  /**
+   * STEP6_No.9,11,15,16
+   */
+  it("承認ルート登録_承認者選択", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -156,7 +162,8 @@ describe('仕訳情報設定_承認ルート一覧', function () {
         = common.getPageObject(browser, page);
 
       // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
+      await gotoApproveRouteList(config.baseUrl, account, loginPage, tradeShiftTopPage,
+        topPage, journalMenuPage, approveRouteListPage);
 
       // 承認ルート登録ページへ遷移する
       await comment('「新規登録する」をクリックする');
@@ -164,174 +171,35 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       await registApproveRoutePage.waitForLoading();
 
       // 最終承認者を検索する
-      let mail = config.company1.mng.id;
+      let authorizer = config.company1.mng;
       await comment('最終承認者の「検索」をクリックする');
       await registApproveRoutePage.clickBtnSearch(1);
-      await comment('メールアドレスへ"' + mail + '"と入力し、「検索」をクリックする');
-      await registApproveRoutePage.searchAuthorizer(null, null, mail);
+      await comment(
+        '承認者名（姓）へ"' + authorizer.family
+        + '"と、承認者名（名）へ"' + authorizer.first
+        + '"と、メールアドレスへ"' + authorizer.id + '"と入力し、「検索」をクリックする');
+      await registApproveRoutePage.searchAuthorizer(authorizer.family, authorizer.first, authorizer.id);
 
       // 対象のアカウントが表示されること
       let users = await registApproveRoutePage.getUsersOnResult();
-      let isCorrect = users.length > 0;
+      isCorrect = users.length > 0;
       for (i = 0; i < users.length; i++) {
-        if (users[i].mail != mail) {
+        if (!users[i].mail.includes(authorizer.id)
+          || !users[i].name.includes(authorizer.first)
+          || !users[i].name.includes(authorizer.family)) {
           isCorrect = false;
           break;
         }
       }
-      expect(isCorrect).to.equal(true, '対象のアカウントが表示されること');
-      await page.waitForTimeout(1000);
-    }
-  });
-  
-  it("STEP6_No.11. 承認ルート登録_承認者検索（名）", async function () {
-    // テストの初期化を実施
-    await initBrowser();
+      expect(isCorrect).to.equal(true, '対象のアカウントが検索結果に表示されること');
 
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
-        = common.getPageObject(browser, page);
-
-      // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
-
-      // 承認ルート登録ページへ遷移する
-      await comment('「新規登録する」をクリックする');
-      await approveRouteListPage.clickRegist();
-      await registApproveRoutePage.waitForLoading();
-
-      // 最終承認者を検索する
-      let firstName = config.company1.mng.first;
-      await comment('最終承認者の「検索」をクリックする');
-      await registApproveRoutePage.clickBtnSearch(1);
-      await comment('承認者名（名）へ"' + firstName + '"と入力し、「検索」をクリックする');
-      await registApproveRoutePage.searchAuthorizer(null, firstName, null);
-
-      // 対象のアカウントが表示されること
-      let users = await registApproveRoutePage.getUsersOnResult();
-      let isCorrect = users.length > 0;
-      for (i = 0; i < users.length; i++) {
-        if (!users[i].name.includes(firstName)) {
-          isCorrect = false;
-          break;
-        }
-      }
-      expect(isCorrect).to.equal(true, '対象のアカウントが表示されること');
-      await page.waitForTimeout(1000);
-    }
-  });
-  
-  it("STEP6_No.15. 承認ルート登録_承認者選択", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
-        = common.getPageObject(browser, page);
-
-      // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
-
-      // 承認ルート登録ページへ遷移する
-      await comment('「新規登録する」をクリックする');
-      await approveRouteListPage.clickRegist();
-      await registApproveRoutePage.waitForLoading();
-
-      // 最終承認者を選択する
-      let autorizer = config.company1.mng;
-      await comment('最終承認者の「検索」をクリックする');
-      await registApproveRoutePage.clickBtnSearch(1);
-      await comment('承認者名（姓）へ"' + autorizer.family + '"と、承認者名（名）へ"' + autorizer.first + '"と、メールアドレスへ"' + autorizer.id + '"と入力し、「検索」をクリックする');
-      await registApproveRoutePage.searchAuthorizer(autorizer.family, autorizer.first, autorizer.id);
       await comment('検索結果の先頭行をクリックする');
       await registApproveRoutePage.selectAuthorizer();
 
       // 担当者行の担当者とメールアドレスが画面に反映されていること
-      let users = await registApproveRoutePage.getUsers();
-      expect(users[0].name).to.equal(autorizer.first + ' ' + autorizer.family, '承認者名が反映されること');
-      expect(users[0].mail).to.equal(autorizer.id, 'メールアドレスが反映されること');
-      await page.waitForTimeout(1000);
-    }
-  });
-
-  it("STEP6_No.16. 承認ルート登録_承認者追加", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
-        = common.getPageObject(browser, page);
-
-      // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
-
-      // 承認ルート登録ページへ遷移する
-      await comment('「新規登録する」をクリックする');
-      await approveRouteListPage.clickRegist();
-      await registApproveRoutePage.waitForLoading();
+      users = await registApproveRoutePage.getUsers();
+      expect(users[0].name).to.equal(authorizer.first + ' ' + authorizer.family, '承認者名が反映されること');
+      expect(users[0].mail).to.equal(authorizer.id, 'メールアドレスが反映されること');
 
       // 承認者を追加する
       await comment('「承認者追加」を11回クリックする');
@@ -340,12 +208,12 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       }
 
       // 10件まで承認者設定行が追加されること
-      let users = await registApproveRoutePage.getUsers();
+      users = await registApproveRoutePage.getUsers();
       expect(users.length).to.equal(11, '10件まで承認者設定行が追加されること');
       await page.waitForTimeout(1000);
     }
   });
-
+  
   async function setAuthorizers(authorizers) {
     // テストの初期化を実施
     await initBrowser();
@@ -414,7 +282,10 @@ describe('仕訳情報設定_承認ルート一覧', function () {
     }
   };
   
-  it("STEP6_No.17. 承認ルート登録_承認者選択（1次承認、最終承認）", async function () {
+  /**
+   * STEP6_No.17
+   */
+  it("承認ルート登録_承認者選択（1次承認、最終承認）", async function () {
     let users = [
       config.company1.user02,
       config.company1.mng
@@ -422,7 +293,10 @@ describe('仕訳情報設定_承認ルート一覧', function () {
     await setAuthorizers(users);
   });
   
-  it("STEP6_No.26. 承認ルート登録_承認者選択（1～10次承認、最終承認）", async function () {
+  /**
+   * STEP6_No.26
+   */
+  it("承認ルート登録_承認者選択（1～10次承認、最終承認）", async function () {
     let users = [
       config.company1.user02,
       config.company1.user03,
@@ -439,7 +313,10 @@ describe('仕訳情報設定_承認ルート一覧', function () {
     await setAuthorizers(users);
   });
   
-  it("STEP6_No.32. 承認ルート登録_戻る", async function () {
+  /**
+   * STEP6_No.32
+   */
+  it("承認ルート登録_戻る", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -487,7 +364,10 @@ describe('仕訳情報設定_承認ルート一覧', function () {
     }
   });
   
-  it("STEP6_No.346. 承認ルート一覧_Homeへ戻る", async function () {
+  /**
+   * STEP6_No.346
+   */
+  it("承認ルート一覧_Homeへ戻る", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -528,46 +408,11 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       await page.waitForTimeout(1000);
     }
   });
-  
-  it("STEP6_No.261. 承認ルート一覧_データ無", async function () {
-    // テストの初期化を実施
-    await initBrowser();
 
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, approveRouteListPage }
-        = common.getPageObject(browser, page);
-
-      // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
-
-      // 「現在、承認ルートはありません。新規登録するボタンから登録を行ってください。」と表示されていること
-      expect(await approveRouteListPage.getNodataMessage()).to.equal('現在、承認ルートはありません。', '「現在、承認ルートはありません。新規登録するボタンから登録を行ってください。」と表示されていること');
-      await page.waitForTimeout(1000);
-    }
-  });
-  
-  it("STEP6_No.260,262,275. 承認ルート登録", async function () {
+  /**
+   * STEP6_No.260,261,262,275-278,285,287
+   */
+  it("承認ルート登録・削除", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -598,6 +443,9 @@ describe('仕訳情報設定_承認ルート一覧', function () {
 
       // 承認ルート一覧ページへ遷移する
       await gotoApproveRouteList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
+
+      // 「現在、承認ルートはありません。新規登録するボタンから登録を行ってください。」と表示されていること
+      expect(await approveRouteListPage.getNodataMessage()).to.equal('現在、承認ルートはありません。', '「現在、承認ルートはありません。新規登録するボタンから登録を行ってください。」と表示されていること');
 
       // 承認ルート登録ページへ遷移する
       await comment('「新規登録する」をクリックする');
@@ -630,53 +478,22 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       await registApproveRoutePage.clickConfirm();
       await comment('「登録」をクリックする');
       await registApproveRoutePage.submit();
-      await approveRouteListPage.waitForLoading();
+      await approveRouteListPage.waitPopup();
 
       // 「承認ルートを登録しました。」と表示されていること
       expect(await approveRouteListPage.getPopupMessage()).to.equal('承認ルートを登録しました。', '「承認ルートを登録しました。」と表示されていること');
+
+      // ポップアップを閉じる
+      await comment('ポップアップメッセージを閉じる');
+      await approveRouteListPage.closePopup();
+      await approveRouteListPage.waitForLoading();
 
       // 「No.、承認ルート名、登録されている承認者数、確認・変更ボタン、削除ボタン」が表示されていること
       let row = await approveRouteListPage.getRow(routeName);
       expect(row.no).to.equal('1', '承認ルート"' + routeName + '"のNo.が1であること');
       expect(row.authCount).to.equal(users.length.toString(), '承認ルート"' + routeName + '"の承認者数が' + users.length + 'であること');
-      await page.waitForTimeout(1000);
-    }
-  });
 
-  it("STEP6_No.276,278. 承認ルート一覧_確認・変更", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
-        = common.getPageObject(browser, page);
-
-      // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
-
-      // 承認ルートの「削除」をクリックする
-      let routeName = '承認ルートテスト';
+      // 承認ルートの「確認・変更する」をクリックする
       let rowData = await approveRouteListPage.getRow(routeName);
       await approveRouteListPage.clickEdit(routeName);
       await registApproveRoutePage.waitForLoading();
@@ -684,46 +501,15 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       // 確認・変更画面に遷移すること
       expect(await registApproveRoutePage.getPageTitle()).to.equal('承認ルート確認・変更', '確認・変更画面に遷移すること');
       expect(await registApproveRoutePage.getName()).to.equal(routeName, '承認ルート名が"' + routeName + '"であること');
-      let users = await registApproveRoutePage.getUsers();
-      expect(users.length.toString()).to.equal(rowData.authCount, '承認者数が"' + rowData.authCount + '"であること');
-      await page.waitForTimeout(1000);
-    }
-  });
+      let actualUsers = await registApproveRoutePage.getUsers();
+      expect(actualUsers.length.toString()).to.equal(rowData.authCount, '承認者数が"' + rowData.authCount + '"であること');
 
-  it("STEP6_No.277,285,287. 承認ルート一覧_削除", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, approveRouteListPage }
-        = common.getPageObject(browser, page);
-
-      // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
+      // 承認ルート一覧ページへ戻る
+      await comment('「戻る」をクリックする');
+      await registApproveRoutePage.clickBack();
+      await approveRouteListPage.waitForLoading();
 
       // 承認ルートの「削除」をクリックする
-      let routeName = '承認ルートテスト';
       await approveRouteListPage.deleteRoute(routeName);
 
       // 「削除しますか？」のポップアップが表示されること

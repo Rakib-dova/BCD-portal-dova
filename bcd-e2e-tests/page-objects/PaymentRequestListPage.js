@@ -68,9 +68,21 @@ class PaymentRequestListPage {
     await this.actionUtils.click(this.frame, '//div[@id="constructTab"]//td[contains(text(), "' + invoiceNo + '")]/..//a[contains(text(), "依頼内容確認")]');
   }
 
+  // ポップアップが表示されるまで待機する
+  async waitPopup() {
+    await this.actionUtils.waitForLoading('//*[@class="notification is-info animate__animated animate__faster"]');
+    await this.frame.waitForTimeout(500);
+  }
+
   // ポップアップメッセージを取得する
   async getPopupMessage() {
     return await this.actionUtils.getText(this.frame, '//*[@class="notification is-info animate__animated animate__faster"]');
+  }
+
+  // ポップアップを閉じる
+  async closePopup() {
+    await this.actionUtils.click(this.frame, '//*[@class="notification is-info animate__animated animate__faster"]/button');
+    await this.frame.waitForTimeout(500);
   }
 }
 exports.PaymentRequestListPage = PaymentRequestListPage;

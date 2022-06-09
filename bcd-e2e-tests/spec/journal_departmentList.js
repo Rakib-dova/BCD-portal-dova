@@ -76,7 +76,10 @@ describe('仕訳情報設定_部門データ一覧', function () {
     await departmentListPage.waitForLoading();
   };
 
-  it("STEP5_No.79. 新規作成・確認", async function () {
+  /**
+   * STEP5 No.79,80
+   */
+  it("新規作成・変更", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -114,57 +117,24 @@ describe('仕訳情報設定_部門データ一覧', function () {
       await registDepartmentPage.waitForLoading();
 
       // 部門データを登録する
+      await comment('コード"' + departments[0].code + '"、部門名"' + departments[0].name + '"で登録する');
       await registDepartmentPage.regist(departments[0].code, departments[0].name);
       await registDepartmentPage.clickPopupOK();
+      await departmentListPage.waitPopup();
+
+      // ポップアップを閉じる
+      await comment('ポップアップメッセージを閉じる');
+      await departmentListPage.closePopup();
       await departmentListPage.waitForLoading();
 
       // 部門データ確認・変更ページへ遷移する
+      await comment('部門コード"' + departments[0].code + '"の「確認・変更する」をクリックする');
       await departmentListPage.clickEdit(departments[0].code);
       await registDepartmentPage.waitForLoading();
   
       // 詳細が表示されること
       expect(await registDepartmentPage.getCode()).to.equal(departments[0].code, '部門コードが表示されること');
       expect(await registDepartmentPage.getName()).to.equal(departments[0].name, '部門名が表示されること');
-      await page.waitForTimeout(1000);
-    }
-  });
-  
-  it("STEP5_No.80. 変更", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-  
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, departmentListPage, registDepartmentPage }
-        = common.getPageObject(browser, page);
-  
-      // 部門データ一覧ページへ遷移する
-      await gotoDepartmentList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
-
-      // 部門データ確認・変更ページへ遷移する
-      await comment('部門コード"' + departments[0].code + '"の「確認・変更する」をクリックする');
-      await departmentListPage.clickEdit(departments[0].code);
-      await registDepartmentPage.waitForLoading();
 
       // 部門データを変更する
       await comment('コード"' + departments[1].code + '"、部門名"' + departments[1].name + '"で登録する');
@@ -172,15 +142,18 @@ describe('仕訳情報設定_部門データ一覧', function () {
       await page.waitForTimeout(1000);
       await registDepartmentPage.clickPopupOK();
       await departmentListPage.waitForLoading();
+      await departmentListPage.waitPopup();
   
       // 変更が反映されること
       expect(await departmentListPage.hasRow(departments[1].code, departments[1].name)).to.equal(true, '変更が反映されること');
       await page.waitForTimeout(1000);
     }
   });
-
-  // 部門データ一括作成のテスト共通
-  async function uploadDepartment(csvPath) {
+  
+  /**
+   * STEP5 No.88,94,95
+   */
+  it("部門データ一括作成", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -212,40 +185,42 @@ describe('仕訳情報設定_部門データ一覧', function () {
       // 部門データ一覧ページへ遷移する
       await gotoDepartmentList(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
 
-      // 部門データ一括作成ページへ遷移する
-      await comment('「部門データ一括作成」をクリックする');
-      await departmentListPage.clickUpload();
-      await uploadDepartmentPage.waitForLoading();
+      let files = [
+        'testdata/upload/TESTCSV41.csv',
+        'testdata/upload/TESTCSV47.csv',
+        'testdata/upload/TESTCSV48.csv'
+      ];
 
-      // CSVファイルをアップロードする
-      await comment('CSVファイル"' + csvPath + '"をアップロードする');
-      await uploadDepartmentPage.uploadCsv(csvPath);
-      await departmentListPage.waitForLoading();
+      // ファイルを1つずつアップロードする
+      for (i = 0; i < files.length; i++) {
+        // 部門データ一括作成ページへ遷移する
+        await comment('「部門データ一括作成」をクリックする');
+        await departmentListPage.clickUpload();
+        await uploadDepartmentPage.waitForLoading();
 
-      // 正しくすべてのデータが一覧に反映されること
-      expect(await departmentListPage.getPopupMessage()).to.equal('部門データ取込が完了しました。', '「部門データ取込が完了しました」のメッセージが表示されること');
-      let csvData = await getCsvData(csvPath);
-      i = 2;
-      for (row of csvData) {
-        expect(await departmentListPage.hasRow(row['部門コード'], row['部門名'])).to.equal(true, i + '行目のデータが一覧に反映されること');
-        i++;
+        // CSVファイルをアップロードする
+        await comment('CSVファイル"' + files[i] + '"をアップロードする');
+        await uploadDepartmentPage.uploadCsv(files[i]);
+        await departmentListPage.waitPopup();
+        expect(await departmentListPage.getPopupMessage()).to.equal('部門データ取込が完了しました。', '「部門データ取込が完了しました」のメッセージが表示されること');
+
+        // ポップアップを閉じる
+        await comment('ポップアップメッセージを閉じる');
+        await departmentListPage.closePopup();
+        await departmentListPage.waitForLoading();
+
+        // 正しくすべてのデータが一覧に反映されること
+        let csvData = await getCsvData(files[i]);
+        let j = 2;
+        for (row of csvData) {
+          expect(await departmentListPage.hasRow(row['部門コード'], row['部門名'])).to.equal(true, j + '行目のデータが一覧に反映されること');
+          j++;
+        }
       }
       await page.waitForTimeout(1000);
     }
-  };
-  
-  it("STEP5_No.88. 部門データ一括作成", async function () {
-    await uploadDepartment('testdata/upload/TESTCSV41.csv');
   });
 
-  it("STEP5_No.94. 部門データ一括作成", async function () {
-    await uploadDepartment('testdata/upload/TESTCSV47.csv');
-  });
-
-  it("STEP5_No.95. 部門データ一括作成", async function () {
-    await uploadDepartment('testdata/upload/TESTCSV48.csv');
-  });
-  
   it("後片付け（部門データ全削除）", async function() {
     // テストの初期化を実施
     await initBrowser();
