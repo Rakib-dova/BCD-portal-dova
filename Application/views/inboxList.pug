@@ -35,6 +35,7 @@ block content
                       .columns.is-centered
                         .column                        
                           form#form(method="POST" action=`/inboxList/${currPage}`)
+                            input(type="hidden" name="_csrf" value=csrfToken)
                             article.panel.no-box-shadow.is-info                            
                               .panel-block
                                 .container

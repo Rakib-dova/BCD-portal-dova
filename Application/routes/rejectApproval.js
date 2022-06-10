@@ -19,6 +19,8 @@ router.use(
     limit: '6826KB'
   })
 )
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbPostApprove = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostApprove')
@@ -93,7 +95,7 @@ const cbPostApprove = async (req, res, next) => {
 }
 
 // router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)
-router.post('/:invoiceId', helper.isAuthenticated, cbPostApprove)
+router.post('/:invoiceId', helper.isAuthenticated, csrfProtection, cbPostApprove)
 
 module.exports = {
   router: router,

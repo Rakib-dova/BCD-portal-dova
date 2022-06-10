@@ -14,6 +14,8 @@ router.use(
     limit: '100KB'
   })
 )
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbSearchAddress = async (req, res) => {
   let resultAddress = { addressList: [] }
@@ -58,7 +60,7 @@ const cbSearchAddress = async (req, res) => {
   return res.status(resultStatusCode).send(resultAddress)
 }
 
-router.post('/', cbSearchAddress)
+router.post('/', csrfProtection, cbSearchAddress)
 
 module.exports = {
   router: router,
