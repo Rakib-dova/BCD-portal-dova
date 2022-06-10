@@ -59,7 +59,7 @@ describe('accountCodeEditのテスト', () => {
     request.flash = jest.fn()
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     updatedAccountCodeSpy = jest.spyOn(accountCodeController, 'updatedAccountCode')
-    request.csrfToken = function () {}
+    request.csrfToken = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -134,7 +134,6 @@ describe('accountCodeEditのテスト', () => {
         backUrl: '/accountCodeList',
         valueForCodeInput: AccountCode[0].accountCode,
         valueForNameInput: AccountCode[0].accountCodeName
-        // csrfToken: expect.anything()
       })
     })
 
