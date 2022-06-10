@@ -53,7 +53,7 @@ document.getElementsByName('confirmButton').forEach((item) => {
     const uuid = item.getAttribute('uuid')
     const url = `/uploadFormat/${uuid}`
     const elements = document.getElementsByName('_csrf')
-    const csrf = elements.item(0)
+    const csrf = elements.item(0).value
     fetch(url, {
       method: 'GET',
       headers: {
@@ -101,7 +101,7 @@ document.getElementsByName('modalDelBtn').forEach((item) => {
     const uuid = item.getAttribute('uuid')
     const url = `/uploadFormat/${uuid}`
     const elements = document.getElementsByName('_csrf')
-    const csrf = elements.item(0)
+    const csrf = elements.item(0).value
     fetch(url, {
       method: 'DELETE',
       headers: {

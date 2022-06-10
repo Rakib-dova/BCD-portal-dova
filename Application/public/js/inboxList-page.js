@@ -360,7 +360,7 @@ document.querySelector('#sendToSearchBtn').addEventListener('click', function (e
       const requestCompaniesApi = new XMLHttpRequest()
 
       const elements = document.getElementsByName('_csrf')
-      const csrf = elements.item(0)
+      const csrf = elements.item(0).value
 
       requestCompaniesApi.open('POST', '/searchCompanies/', true)
       requestCompaniesApi.setRequestHeader('Content-Type', 'application/json')

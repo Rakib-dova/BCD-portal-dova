@@ -1349,7 +1349,21 @@ describe('uploadFormatのテスト', () => {
   describe('ルーティング', () => {
     test('uploadFormatのルーティングを確認', async () => {
       expect(uploadFormat.router.post).toHaveBeenCalledTimes(2)
-      expect(uploadFormat.router.post).toHaveBeenLastCalledWith('/cbPostConfirmIndex', uploadFormat.cbPostConfirmIndex)
+      expect(uploadFormat.router.post).toHaveBeenLastCalledWith(
+        '/cbPostConfirmIndex',
+        expect.any(Function),
+        uploadFormat.cbPostConfirmIndex
+      )
+      expect(uploadFormat.router.delete).toHaveBeenLastCalledWith(
+        '/:uploadFormatId',
+        expect.any(Function),
+        uploadFormat.cbDeleteFormat
+      )
+      expect(uploadFormat.router.get).toHaveBeenLastCalledWith(
+        '/:uploadFormatId',
+        expect.any(Function),
+        uploadFormat.cbGetCheckFormat
+      )
     })
   })
 
@@ -1472,6 +1486,11 @@ describe('uploadFormatのテスト', () => {
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
       fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
@@ -1515,6 +1534,11 @@ describe('uploadFormatのテスト', () => {
         uploadFilePath,
         Buffer.from(decodeURIComponent(fileDataDataStartRowNo5), 'base64').toString('utf8')
       )
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
@@ -1558,6 +1582,11 @@ describe('uploadFormatのテスト', () => {
         uploadFilePath,
         Buffer.from(decodeURIComponent(fileDataItemRowNo3DataStartRowNo4), 'base64').toString('utf8')
       )
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
@@ -1600,6 +1629,11 @@ describe('uploadFormatのテスト', () => {
         uploadFilePath,
         Buffer.from(decodeURIComponent(fileDataItemRowNo4DataStartRowNo3), 'base64').toString('utf8')
       )
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
@@ -1642,7 +1676,11 @@ describe('uploadFormatのテスト', () => {
         uploadFilePath,
         Buffer.from(decodeURIComponent(fileDataItemRowNo5DataStartRowNo1), 'base64').toString('utf8')
       )
-
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1684,6 +1722,11 @@ describe('uploadFormatのテスト', () => {
         uploadFilePath,
         Buffer.from(decodeURIComponent(fileDataBlankItemRowNo2DataStartRowNo4), 'base64').toString('utf8')
       )
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
@@ -1721,6 +1764,11 @@ describe('uploadFormatのテスト', () => {
       const fs = require('fs')
       const uploadFilePath = path.resolve(`${filePath}${path.sep}8d73eae9e5bcd33f5863b9251a76c551`)
       fs.writeFileSync(uploadFilePath, Buffer.from(decodeURIComponent(fileData), 'base64').toString('utf8'))
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
@@ -1762,6 +1810,12 @@ describe('uploadFormatのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractdataValues)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1784,7 +1838,8 @@ describe('uploadFormatのテスト', () => {
         uploadGeneral: uploadGeneral,
         checkItemNameLine: reqBodyForCbPostIndexTaxErr.checkItemNameLine,
         itemRowNo: reqBodyForCbPostIndexTaxErr.uploadFormatNumber,
-        dataStartRowNo: reqBodyForCbPostIndexTaxErr.defaultNumber
+        dataStartRowNo: reqBodyForCbPostIndexTaxErr.defaultNumber,
+        csrfToken: dummyToken
       })
     })
 
@@ -1819,6 +1874,12 @@ describe('uploadFormatのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractdataValues)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -1841,7 +1902,8 @@ describe('uploadFormatのテスト', () => {
         uploadGeneral: uploadGeneral,
         checkItemNameLine: reqBodyForCbPostIndexUnitErr.checkItemNameLine,
         itemRowNo: reqBodyForCbPostIndexUnitErr.uploadFormatNumber,
-        dataStartRowNo: reqBodyForCbPostIndexUnitErr.defaultNumber
+        dataStartRowNo: reqBodyForCbPostIndexUnitErr.defaultNumber,
+        csrfToken: dummyToken
       })
     })
 
@@ -2726,6 +2788,12 @@ describe('uploadFormatのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractdataValues)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2748,7 +2816,8 @@ describe('uploadFormatのテスト', () => {
         uploadGeneral: uploadGeneral,
         checkItemNameLine: reqBodyForCbPostIndexOn.checkItemNameLine,
         itemRowNo: reqBodyForCbPostIndexOn.uploadFormatNumber,
-        dataStartRowNo: reqBodyForCbPostIndexOn.defaultNumber
+        dataStartRowNo: reqBodyForCbPostIndexOn.defaultNumber,
+        csrfToken: dummyToken
       })
     })
 
@@ -2883,6 +2952,12 @@ describe('uploadFormatのテスト', () => {
       findOneSpyContracts.mockReturnValue(contractdataValues)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractdataValues.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await uploadFormat.cbPostIndex(request, response, next)
 
@@ -2905,7 +2980,8 @@ describe('uploadFormatのテスト', () => {
         uploadGeneral: uploadGeneral,
         checkItemNameLine: reqBodyForCbPostIndexOn.checkItemNameLine,
         itemRowNo: reqBodyForCbPostIndexOn.uploadFormatNumber,
-        dataStartRowNo: reqBodyForCbPostIndexOn.defaultNumber
+        dataStartRowNo: reqBodyForCbPostIndexOn.defaultNumber,
+        csrfToken: dummyToken
       })
     })
 

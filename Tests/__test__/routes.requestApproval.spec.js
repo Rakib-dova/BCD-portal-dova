@@ -348,24 +348,28 @@ describe('requestApprovalのテスト', () => {
       expect(requestApproval.router.get).toBeCalledWith(
         '/:invoiceId',
         helper.isAuthenticated,
+        expect.any(Function),
         requestApproval.cbGetRequestApproval
       )
 
       expect(requestApproval.router.post).toBeCalledWith(
         '/approveRoute',
         helper.isAuthenticated,
+        expect.any(Function),
         requestApproval.cbPostGetApproveRoute
       )
 
       expect(requestApproval.router.post).toBeCalledWith(
         '/detailApproveRoute',
         helper.isAuthenticated,
+        expect.any(Function),
         requestApproval.cbPostGetDetailApproveRoute
       )
 
       expect(requestApproval.router.post).toBeCalledWith(
         '/:invoiceId',
         helper.isAuthenticated,
+        expect.any(Function),
         requestApproval.cbPostApproval
       )
     })
@@ -396,6 +400,11 @@ describe('requestApprovalのテスト', () => {
 
       inboxControllerGetInvoiceDetail.mockReturnValue(inboxControllerGetInvoiceDetailResult)
       // approverControllerReadApproval.mockReturnValue(null)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
@@ -415,7 +424,8 @@ describe('requestApprovalのテスト', () => {
         documentId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904',
         message: 'test',
         approveRoute: null,
-        rejectedUser: null
+        rejectedUser: null,
+        csrfToken: dummyToken
       })
     })
 
@@ -441,6 +451,12 @@ describe('requestApprovalのテスト', () => {
       approverControllerReadApproval.mockReturnValue(readApprovalResult)
 
       approverControllerGetApproveRoute.mockReturnValue(searchResult2)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 
@@ -459,7 +475,8 @@ describe('requestApprovalのテスト', () => {
         documentId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904',
         message: readApprovalResult.message,
         approveRoute: searchResult2,
-        rejectedUser: null
+        rejectedUser: null,
+        csrfToken: dummyToken
       })
     })
 
@@ -485,6 +502,11 @@ describe('requestApprovalのテスト', () => {
       approverControllerReadApproval.mockReturnValue(readApprovalResult2)
 
       approverControllerGetApproveRoute.mockReturnValue(searchResult2)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
       // 試験実施
       await requestApproval.cbGetRequestApproval(request, response, next)
 
@@ -503,7 +525,8 @@ describe('requestApprovalのテスト', () => {
         documentId: 'bfc26e3a-f2e8-5a05-9f8d-1e8f41196904',
         message: null,
         approveRoute: null,
-        rejectedUser: false
+        rejectedUser: false,
+        csrfToken: dummyToken
       })
     })
 

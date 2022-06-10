@@ -46,7 +46,7 @@ $('#btn-search-approver').addEventListener('click', function () {
     email: $('#searchModalApproveUserMailAddress').value
   }
   const elements = document.getElementsByName('_csrf')
-  const csrf = elements.item(0)
+  const csrf = elements.item(0).value
 
   approverApi.open('POST', '/searchApprover', true)
   approverApi.setRequestHeader('Content-Type', 'application/json')

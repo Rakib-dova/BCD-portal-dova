@@ -254,7 +254,12 @@ describe('csvBasicFormatのテスト', () => {
   }
   describe('ルーティング', () => {
     test('csvBasicFormatのルーティングを確認', async () => {
-      expect(csvBasicFormat.router.get).toBeCalledWith('/', helper.isAuthenticated, csvBasicFormat.cbGetCsvBasicFormat)
+      expect(csvBasicFormat.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.any(Function),
+        csvBasicFormat.cbGetCsvBasicFormat
+      )
     })
   })
 
@@ -276,6 +281,11 @@ describe('csvBasicFormatのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
       checkContractStatusSpy.mockReturnValue('00')
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await csvBasicFormat.cbGetCsvBasicFormat(request, response, next)
@@ -292,7 +302,8 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('csvBasicFormat', {
         csvTax: csvTax,
         csvUnit: csvUnit,
-        TS_HOST: process.env.TS_HOST
+        TS_HOST: process.env.TS_HOST,
+        csrfToken: dummyToken
       })
     })
 
@@ -312,6 +323,11 @@ describe('csvBasicFormatのテスト', () => {
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
       checkContractStatusSpy.mockReturnValue('00')
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await csvBasicFormat.cbGetCsvBasicFormat(request, response, next)
@@ -328,7 +344,8 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('csvBasicFormat', {
         csvTax: csvTax,
         csvUnit: csvUnit,
-        TS_HOST: process.env.TS_HOST
+        TS_HOST: process.env.TS_HOST,
+        csrfToken: dummyToken
       })
     })
 
@@ -352,6 +369,11 @@ describe('csvBasicFormatのテスト', () => {
       findOneSpy.mockReturnValue(dataValues)
       // DBからの正常な契約情報取得を想定する
       findOneSpyContracts.mockReturnValue(contractdataValues)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await csvBasicFormat.cbGetCsvBasicFormat(request, response, next)
@@ -368,7 +390,8 @@ describe('csvBasicFormatのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('csvBasicFormat', {
         csvTax: csvTax,
         csvUnit: csvUnit,
-        TS_HOST: process.env.TS_HOST
+        TS_HOST: process.env.TS_HOST,
+        csrfToken: dummyToken
       })
     })
 

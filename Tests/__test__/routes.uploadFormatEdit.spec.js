@@ -87,7 +87,15 @@ describe('uploadFormatのテスト', () => {
       expect(uploadFormatEdit.router.get).toHaveBeenLastCalledWith(
         '/:uploadFormatId',
         helper.isAuthenticated,
+        expect.any(Function),
         uploadFormatEdit.cbGetIndex
+      )
+      expect(uploadFormatEdit.router.post).toHaveBeenCalledTimes(1)
+      expect(uploadFormatEdit.router.post).toHaveBeenLastCalledWith(
+        '/:uploadFormatId',
+        helper.isAuthenticated,
+        expect.any(Function),
+        uploadFormatEdit.cbPostIndex
       )
     })
   })
@@ -553,6 +561,12 @@ describe('uploadFormatのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue('00')
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await uploadFormatEdit.cbGetIndex(request, response, next)
 
@@ -565,7 +579,8 @@ describe('uploadFormatのテスト', () => {
         ...result,
         csvTax: csvTax,
         csvUnit: csvUnit,
-        uploadFormatId: request.params.uploadFormatId
+        uploadFormatId: request.params.uploadFormatId,
+        csrfToken: dummyToken
       })
     })
   })

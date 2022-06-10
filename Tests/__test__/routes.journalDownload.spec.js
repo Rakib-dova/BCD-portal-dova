@@ -215,8 +215,18 @@ describe('journalDownloadのテスト', () => {
 
   describe('ルーティング', () => {
     test('journalDownloadのルーティングを確認', async () => {
-      expect(journalDownload.router.get).toBeCalledWith('/', helper.isAuthenticated, journalDownload.cbGetIndex)
-      expect(journalDownload.router.post).toBeCalledWith('/', helper.isAuthenticated, journalDownload.cbPostIndex)
+      expect(journalDownload.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.any(Function),
+        journalDownload.cbGetIndex
+      )
+      expect(journalDownload.router.post).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.any(Function),
+        journalDownload.cbPostIndex
+      )
     })
   })
 
@@ -235,6 +245,11 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await journalDownload.cbGetIndex(request, response, next)
@@ -261,7 +276,8 @@ describe('journalDownloadのテスト', () => {
         title: '仕訳情報ダウンロード',
         minissuedate: minissuedate,
         maxissuedate: maxissuedate,
-        serviceDataFormatName: serviceDataFormatName
+        serviceDataFormatName: serviceDataFormatName,
+        csrfToken: dummyToken
       })
     })
 

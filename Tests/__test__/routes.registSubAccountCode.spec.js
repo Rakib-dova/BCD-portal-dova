@@ -98,16 +98,19 @@ describe('registSubAccountCodeのテスト', () => {
       expect(registSubAccountCode.router.get).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.any(Function),
         registSubAccountCode.cbGetIndex
       )
       expect(registSubAccountCode.router.post).toBeCalledWith(
         '/getAccountCode',
         helper.isAuthenticated,
+        expect.any(Function),
         registSubAccountCode.cbPostGetAccountCode
       )
       expect(registSubAccountCode.router.post).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.any(Function),
         registSubAccountCode.cbPostIndex
       )
     })
@@ -129,6 +132,11 @@ describe('registSubAccountCodeのテスト', () => {
       checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
 
       accountCodeControllerGetAccountCodeListSpy.mockReturnValue([accountCodeList])
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await registSubAccountCode.cbGetIndex(request, response, next)
@@ -162,7 +170,8 @@ describe('registSubAccountCodeのテスト', () => {
         pTagForcheckInput3: 'checksetSubAccountNameInputId',
         checkModalLabel1: '勘定科目コード',
         checkModalLabel2: '補助科目コード',
-        checkModalLabel3: '補助科目名'
+        checkModalLabel3: '補助科目名',
+        csrfToken: dummyToken
       })
     })
 
@@ -185,6 +194,11 @@ describe('registSubAccountCodeのテスト', () => {
 
       // ユーザ権限チェック結果設定
       checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await registSubAccountCode.cbGetIndex(request, response, next)

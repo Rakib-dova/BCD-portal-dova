@@ -95,6 +95,16 @@ describe('searchCompaniesApiのテスト', () => {
     apiManagerSpy.mockRestore()
   })
 
+  describe('ルーティング', () => {
+    test('searchCompaniesApiのルーティングを確認', async () => {
+      expect(searchCompaniesApi.router.post).toBeCalledWith(
+        '/',
+        expect.any(Function),
+        searchCompaniesApi.cbSearchCompanies
+      )
+    })
+  })
+
   describe('cbSearchCompanies', () => {
     test('正常', async () => {
       // 準備

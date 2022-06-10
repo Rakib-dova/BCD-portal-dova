@@ -81,7 +81,7 @@ $('#btnSearchApproveRoute').addEventListener('click', function () {
   // サーバーからデータ取得
   const getApproveRoute = new XMLHttpRequest()
   const elements = document.getElementsByName('_csrf')
-  const csrf = elements.item(0)
+  const csrf = elements.item(0).value
   getApproveRoute.open('POST', '/requestApproval/approveRoute')
   getApproveRoute.setRequestHeader('Content-Type', 'application/json')
   getApproveRoute.setRequestHeader('CSRF-Token', csrf)
@@ -186,7 +186,7 @@ const displayNoApproveRoute = function () {
 const getDetailApproveRoute = function (_approveRouteId, btnName) {
   const getDetailApproveRoute = new XMLHttpRequest()
   const elements = document.getElementsByName('_csrf')
-  const csrf = elements.item(0)
+  const csrf = elements.item(0).value
   getDetailApproveRoute.open('POST', '/requestApproval/detailApproveRoute', true)
   getDetailApproveRoute.setRequestHeader('Content-Type', 'application/json')
   getDetailApproveRoute.setRequestHeader('CSRF-Token', csrf)

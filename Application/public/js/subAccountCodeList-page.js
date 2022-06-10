@@ -51,7 +51,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.checkChangeSubAccountCo
   item.addEventListener('click', function (e) {
     const checkSubAccountCode = item.getAttribute('uuid')
     const elements = document.getElementsByName('_csrf')
-    const csrf = elements.item(0)
+    const csrf = elements.item(0).value
     const url = `/deleteSubAccountCode/${checkSubAccountCode}`
     fetch(url, {
       method: 'GET',
@@ -94,7 +94,7 @@ Array.prototype.forEach.call(document.querySelectorAll('#modalCodeDelBtn'), (ite
   item.addEventListener('click', function (e) {
     const subAccountCodeId = item.getAttribute('uuid')
     const elements = document.getElementsByName('_csrf')
-    const csrf = elements.item(0)
+    const csrf = elements.item(0).value
     const url = `/deleteSubAccountCode/${subAccountCodeId}`
     fetch(url, {
       method: 'DELETE',
