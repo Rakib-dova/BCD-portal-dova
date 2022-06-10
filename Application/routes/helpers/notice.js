@@ -34,6 +34,16 @@ module.exports = {
       message = '本機能はご利用いただけません。'
       description1 = 'テナント管理者権限のあるユーザで再度操作をお試しください。'
       description2 = null
+    } else if (messageStatus === 'lightPlanRegistered') {
+      // 現在ライトプランは契約中画面を表示する
+      message = '現在ライトプランは契約中です。'
+      description1 = null
+      description2 = null
+    } else if (messageStatus === 'lightPlanUnregistered') {
+      // 現在ライトプランは契約中画面を表示する
+      message = '現在ライトプランは未契約です。'
+      description1 = null
+      description2 = null
     } else if (messageStatus.status === 500) {
       return next(errorHelper.create(500))
     } else {
