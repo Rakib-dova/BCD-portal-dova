@@ -59,6 +59,7 @@ describe('accountCodeEditのテスト', () => {
     request.flash = jest.fn()
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     updatedAccountCodeSpy = jest.spyOn(accountCodeController, 'updatedAccountCode')
+    request.csrfToken = function () {}
   })
   afterEach(() => {
     request.resetMocked()
@@ -80,11 +81,13 @@ describe('accountCodeEditのテスト', () => {
       expect(accountCodeEdit.router.get).toBeCalledWith(
         '/:accountCodeId',
         helper.isAuthenticated,
+        expect.anything(),
         accountCodeEdit.cbGetIndex
       )
       expect(accountCodeEdit.router.post).toBeCalledWith(
         '/:accountCodeId',
         helper.isAuthenticated,
+        expect.anything(),
         accountCodeEdit.cbPostIndex
       )
     })
@@ -131,6 +134,7 @@ describe('accountCodeEditのテスト', () => {
         backUrl: '/accountCodeList',
         valueForCodeInput: AccountCode[0].accountCode,
         valueForNameInput: AccountCode[0].accountCodeName
+        // csrfToken: expect.anything()
       })
     })
 

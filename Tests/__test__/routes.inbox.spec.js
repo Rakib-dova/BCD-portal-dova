@@ -83,6 +83,7 @@ describe('inboxのテスト', () => {
     request.flash = jest.fn()
     insertAndUpdateJournalizeInvoiceSpy = jest.spyOn(inboxController, 'insertAndUpdateJournalizeInvoice')
     getDepartmentSpy = jest.spyOn(inboxController, 'getDepartment')
+    request.csrfToken = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -101,9 +102,19 @@ describe('inboxのテスト', () => {
 
   describe('ルーティング', () => {
     test('inboxのルーティングを確認', async () => {
-      expect(inbox.router.get).toBeCalledWith('/:invoiceId', helper.isAuthenticated, inbox.cbGetIndex)
+      expect(inbox.router.get).toBeCalledWith(
+        '/:invoiceId',
+        helper.isAuthenticated,
+        expect.anything(),
+        inbox.cbGetIndex
+      )
       expect(inbox.router.post).toBeCalledWith('/getCode', helper.isAuthenticated, inbox.cbPostGetCode)
-      expect(inbox.router.post).toBeCalledWith('/:invoiceId', helper.isAuthenticated, inbox.cbPostIndex)
+      expect(inbox.router.post).toBeCalledWith(
+        '/:invoiceId',
+        helper.isAuthenticated,
+        expect.anything(),
+        inbox.cbPostIndex
+      )
       expect(inbox.router.post).toBeCalledWith('/department', helper.isAuthenticated, inbox.cbPostDepartment)
     })
   })
