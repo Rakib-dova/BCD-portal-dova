@@ -17,6 +17,9 @@ const csvDownloadController = require('../controllers/csvDownloadController.js')
 
 const notiTitle = '請求書ダウンロード'
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -76,7 +79,8 @@ const cbGetIndex = async (req, res, next) => {
     minissuedate: minissuedate,
     maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
     status: status,
-    buyAndSell: buyAndSell
+    buyAndSell: buyAndSell,
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -2050,8 +2054,8 @@ const paymentExtraPush = async (paymentExtra, data) => {
   return paymentExtra
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/', helper.isAuthenticated, cbPostIndex)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,

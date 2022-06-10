@@ -23,6 +23,8 @@ const serviceDataFormatName = [
   '勘定奉行クラウド',
   'PCA hyper'
 ]
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -72,7 +74,8 @@ const cbGetIndex = async (req, res, next) => {
     title: '仕訳情報ダウンロード',
     minissuedate: minissuedate,
     maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
-    serviceDataFormatName: serviceDataFormatName
+    serviceDataFormatName: serviceDataFormatName,
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -2236,8 +2239,8 @@ const paymentExtraPush = async (paymentExtra, data) => {
   return paymentExtra
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/', helper.isAuthenticated, cbPostIndex)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,

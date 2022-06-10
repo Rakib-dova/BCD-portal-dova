@@ -18,6 +18,8 @@ const path = require('path')
 const filePath = process.env.INVOICE_UPLOAD_PATH
 const multer = require('multer')
 const upload = multer({ dest: process.env.INVOICE_UPLOAD_PATH })
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 let uploadData
 
 const cbPostIndex = async (req, res, next) => {
@@ -390,7 +392,8 @@ const cbPostIndex = async (req, res, next) => {
     selectedFormatData: emptyselectedFormatData,
     itemRowNo: req.body.uploadFormatNumber,
     dataStartRowNo: req.body.defaultNumber,
-    checkItemNameLine: req.body.checkItemNameLine
+    checkItemNameLine: req.body.checkItemNameLine,
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
@@ -705,8 +708,8 @@ const cbGetCheckFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCheckFormat')
 }
 
-router.post('/', upload.single('dataFile'), cbPostIndex)
-router.post('/cbPostConfirmIndex', cbPostConfirmIndex)
+router.post('/', upload.single('dataFile'), csrfProtection, cbPostIndex)
+router.post('/cbPostConfirmIndex', csrfProtection, cbPostConfirmIndex)
 router.delete('/:uploadFormatId', cbDeleteFormat)
 router.get('/:uploadFormatId', cbGetCheckFormat)
 module.exports = {

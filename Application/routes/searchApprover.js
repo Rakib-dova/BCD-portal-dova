@@ -19,6 +19,8 @@ router.use(
     limit: '100KB'
   })
 )
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbPostSearchApprover = async (req, res, next) => {
   const functionName = 'cbPostSearchApprover'
@@ -90,7 +92,7 @@ const cbPostSearchApprover = async (req, res, next) => {
   return res.status(200).send(approverList)
 }
 
-router.post('', cbPostSearchApprover)
+router.post('', csrfProtection, cbPostSearchApprover)
 
 module.exports = {
   router: router,

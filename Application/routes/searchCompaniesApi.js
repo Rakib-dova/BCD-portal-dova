@@ -12,6 +12,8 @@ router.use(
     limit: '100KB'
   })
 )
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbSearchCompanies = async (req, res) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbSearchCompanies')
@@ -151,7 +153,7 @@ const errorHandle = (companiesResult, _res, _req) => {
   }
 }
 
-router.post('/', cbSearchCompanies)
+router.post('/', csrfProtection, cbSearchCompanies)
 
 module.exports = {
   router: router,

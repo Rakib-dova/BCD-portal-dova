@@ -11,6 +11,8 @@ const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const upload = require('multer')({ dest: process.env.INVOICE_UPLOAD_PATH })
 const uploadUsersController = require('../controllers/uploadUsersController')
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -85,7 +87,8 @@ const cbGetIndex = async (req, res, next) => {
     usersUpload: '/uploadUsers',
     procedureContents: procedureContents,
     formatFileLocation: '../html/ユーザー一括登録フォーマット.csv',
-    formatFileLinkText: 'アップロード用CSVファイルダウンロード'
+    formatFileLinkText: 'アップロード用CSVファイルダウンロード',
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -204,8 +207,8 @@ const cbPostIndex = async (req, res, next) => {
   res.redirect('/uploadUsers')
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/', helper.isAuthenticated, upload.single('userNameFileUpload'), cbPostIndex)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/', helper.isAuthenticated, upload.single('userNameFileUpload'), csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,

@@ -10,6 +10,8 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const subAccountCodeController = require('../controllers/subAccountCodeController')
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -94,7 +96,8 @@ const cbGetIndex = async (req, res, next) => {
     valueForAccountCodeInput: result.accountCodeId,
     valueForAccountCode: result.accountCode,
     valueForAccountCodeName: result.accountCodeName,
-    parentIdForCodeInputResult: 'setAccountCodeInputIdResult'
+    parentIdForCodeInputResult: 'setAccountCodeInputIdResult',
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -195,8 +198,8 @@ const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbPostIndex')
 }
 
-router.get('/:subAccountCodeId', helper.isAuthenticated, cbGetIndex)
-router.post('/:subAccountCodeId', helper.isAuthenticated, cbPostIndex)
+router.get('/:subAccountCodeId', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/:subAccountCodeId', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,

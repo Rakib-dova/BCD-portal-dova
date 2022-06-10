@@ -23,6 +23,9 @@ router.use(
   })
 )
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -113,7 +116,8 @@ const cbGetIndex = async (req, res, next) => {
     requester: requester,
     approveRoute: approveRoute,
     prevUser: prevUser,
-    requestId: requestId
+    requestId: requestId,
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -249,8 +253,8 @@ const cbPostApprove = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApprove')
 }
 
-router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)
-router.post('/:invoiceId', helper.isAuthenticated, cbPostApprove)
+router.get('/:invoiceId', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/:invoiceId', helper.isAuthenticated, csrfProtection, cbPostApprove)
 
 module.exports = {
   router: router,

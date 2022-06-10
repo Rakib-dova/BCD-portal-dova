@@ -18,6 +18,9 @@ const filePath = process.env.INVOICE_UPLOAD_PATH
 const constantsDefine = require('../constants')
 const { v4: uuidv4 } = require('uuid')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const bodyParser = require('body-parser')
 router.use(
   bodyParser.json({
@@ -71,7 +74,8 @@ const cbGetIndex = async (req, res, next) => {
 
   // ユーザ権限も画面に送る
   res.render('csvupload', {
-    formatkindsArr: formatkindsArr
+    formatkindsArr: formatkindsArr,
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -745,8 +749,8 @@ const setErrorLog = async (req, errorCode) => {
   logger.error(logMessage, err.name)
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/', helper.isAuthenticated, cbPostUpload)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostUpload)
 
 module.exports = {
   router: router,

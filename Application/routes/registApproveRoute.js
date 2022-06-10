@@ -11,6 +11,8 @@ const contractController = require('../controllers/contractController.js')
 const approverController = require('../controllers/approverController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetRegistApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegistApproveRoute')
@@ -60,7 +62,8 @@ const cbGetRegistApproveRoute = async (req, res, next) => {
       logTitleEng: 'REGIST APPROVE ROUTE',
       valueForApproveRouteNameInput: approveRouteName,
       approveUsers: approverUsers,
-      lastApprover: lastApprover
+      lastApprover: lastApprover,
+      csrfToken: req.csrfToken()
     })
   } else {
     res.render('registApproveRoute', {
@@ -71,7 +74,8 @@ const cbGetRegistApproveRoute = async (req, res, next) => {
       modalTitle: '承認者検索',
       backUrl: '/approveRouteList',
       logTitle: '承認ルート登録',
-      logTitleEng: 'REGIST APPROVE ROUTE'
+      logTitleEng: 'REGIST APPROVE ROUTE',
+      csrfToken: req.csrfToken()
     })
   }
 
@@ -141,8 +145,8 @@ const cbPostRegistApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostRegistApproveRoute')
 }
 
-router.get('/', helper.isAuthenticated, cbGetRegistApproveRoute)
-router.post('/', helper.isAuthenticated, cbPostRegistApproveRoute)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetRegistApproveRoute)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostRegistApproveRoute)
 
 module.exports = {
   router: router,

@@ -11,6 +11,8 @@ const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -83,7 +85,8 @@ const cbGetIndex = async (req, res, next) => {
     listArr: result.list,
     numPages: result.numPages,
     currPage: result.currPage,
-    rejectedFlag: rejectedFlag
+    rejectedFlag: rejectedFlag,
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -214,7 +217,8 @@ const cbGetApprovals = async (req, res, next) => {
     listArr: result.list,
     numPages: result.numPages,
     currPage: result.currPage,
-    rejectedFlag: rejectedFlag
+    rejectedFlag: rejectedFlag,
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetApprovals')
@@ -310,7 +314,8 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
       listArr: resultList,
       numPages: 1,
       currPage: 1,
-      rejectedFlag: false
+      rejectedFlag: false,
+      csrfToken: req.csrfToken()
     })
   } else {
     res.render('inboxList', {
@@ -318,16 +323,17 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
       numPages: 1,
       currPage: 1,
       rejectedFlag: false,
-      message: '条件に合致する支払依頼が見つかりませんでした。'
+      message: '条件に合致する支払依頼が見つかりませんでした。',
+      csrfToken: req.csrfToken()
     })
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbSearchApprovedInvoice')
 }
 
 router.get('/getWorkflow', cbGetWorkflow)
-router.get('/approvals', helper.isAuthenticated, cbGetApprovals)
-router.get('/:page', helper.isAuthenticated, cbGetIndex)
-router.post('/:page', helper.isAuthenticated, cbSearchApprovedInvoice)
+router.get('/approvals', helper.isAuthenticated, csrfProtection, cbGetApprovals)
+router.get('/:page', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/:page', helper.isAuthenticated, csrfProtection, cbSearchApprovedInvoice)
 
 module.exports = {
   router: router,

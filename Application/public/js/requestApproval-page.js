@@ -80,8 +80,11 @@ $('#btnSearchApproveRoute').addEventListener('click', function () {
 
   // サーバーからデータ取得
   const getApproveRoute = new XMLHttpRequest()
+  const elements = document.getElementsByName('_csrf')
+  const csrf = elements.item(0)
   getApproveRoute.open('POST', '/requestApproval/approveRoute')
   getApproveRoute.setRequestHeader('Content-Type', 'application/json')
+  getApproveRoute.setRequestHeader('CSRF-Token', csrf)
   getApproveRoute.onreadystatechange = function () {
     if (getApproveRoute.readyState === getApproveRoute.DONE) {
       switch (getApproveRoute.status) {
@@ -182,8 +185,11 @@ const displayNoApproveRoute = function () {
 
 const getDetailApproveRoute = function (_approveRouteId, btnName) {
   const getDetailApproveRoute = new XMLHttpRequest()
+  const elements = document.getElementsByName('_csrf')
+  const csrf = elements.item(0)
   getDetailApproveRoute.open('POST', '/requestApproval/detailApproveRoute', true)
   getDetailApproveRoute.setRequestHeader('Content-Type', 'application/json')
+  getDetailApproveRoute.setRequestHeader('CSRF-Token', csrf)
   getDetailApproveRoute.onreadystatechange = function () {
     if (getDetailApproveRoute.readyState === getDetailApproveRoute.DONE) {
       let result = null
