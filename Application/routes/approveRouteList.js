@@ -11,6 +11,9 @@ const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const approverController = require('../controllers/approverController')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -63,7 +66,7 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
 
 module.exports = {
   router: router,

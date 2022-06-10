@@ -12,6 +12,9 @@ const constantsDefine = require('../constants')
 const inboxController = require('../controllers/inboxController')
 const notiTitle = '仕分け情報設定'
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const bodyParser = require('body-parser')
 router.use(
   bodyParser.json({
@@ -187,7 +190,8 @@ const cbGetIndex = async (req, res, next) => {
     optionLine6: optionLine6,
     optionLine7: optionLine7,
     optionLine8: optionLine8,
-    documentId: invoiceId
+    documentId: invoiceId,
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -417,9 +421,9 @@ const cbPostDepartment = async (req, res, next) => {
 }
 
 router.post('/department', helper.isAuthenticated, cbPostDepartment)
-router.get('/:invoiceId', helper.isAuthenticated, cbGetIndex)
+router.get('/:invoiceId', helper.isAuthenticated, csrfProtection, cbGetIndex)
 router.post('/getCode', helper.isAuthenticated, cbPostGetCode)
-router.post('/:invoiceId', helper.isAuthenticated, cbPostIndex)
+router.post('/:invoiceId', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,
