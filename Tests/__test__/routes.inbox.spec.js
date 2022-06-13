@@ -108,14 +108,24 @@ describe('inboxのテスト', () => {
         expect.anything(),
         inbox.cbGetIndex
       )
-      expect(inbox.router.post).toBeCalledWith('/getCode', helper.isAuthenticated, inbox.cbPostGetCode)
+      expect(inbox.router.post).toBeCalledWith(
+        '/getCode',
+        helper.isAuthenticated,
+        expect.any(Function),
+        inbox.cbPostGetCode
+      )
       expect(inbox.router.post).toBeCalledWith(
         '/:invoiceId',
         helper.isAuthenticated,
         expect.anything(),
         inbox.cbPostIndex
       )
-      expect(inbox.router.post).toBeCalledWith('/department', helper.isAuthenticated, inbox.cbPostDepartment)
+      expect(inbox.router.post).toBeCalledWith(
+        '/department',
+        helper.isAuthenticated,
+        expect.any(Function),
+        inbox.cbPostDepartment
+      )
     })
   })
 
