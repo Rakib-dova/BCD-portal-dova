@@ -927,7 +927,7 @@ body > div.hero.is-small {
   left: -11px;
 }
 
-.modal-card-subTitle {
+/* .modal-card-subTitle {
   color: #363636;
   flex-grow: 1;
   flex-shrink: 0;
@@ -951,4 +951,4 @@ body > div.hero.is-small {
   color: #363636;
   font-size: 1.25rem;
   font-weight: 600;
-}
+} */
