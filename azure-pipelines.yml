@@ -3,7 +3,18 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
-trigger: none
+trigger:
+  branches:
+    include:
+      - refs/heads/snake_case
+
+  paths:
+    include:
+      - Application
+    exclude:
+      - Documents
+      - Tests
+      - '*.yml'
 
 parameters:
   - name: Environment
@@ -23,7 +34,7 @@ parameters:
     displayName: 'seedScriptName (.jsを含めて、カンマ区切りで入力)'
     default: 'default'
 
-  - name: skipManualOperation
+  - name: isManualOperation_prodstgOpt
     type: boolean
     default: false
     values:
@@ -39,9 +50,9 @@ variables:
   - name: japanwest #西日本デプロイフラグ
     value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
   - name: vmPipeline #パイプライン起動停止フラグ
-    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
-  - name: skipManualOperation #正常性確認スキップフラグ
-    value:  ${{ eq(parameters.skipManualOperation,'true') }}
+    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'demo'),eq(parameters.Environment,'test')) }}
+  - name: ManualOperation #正常性確認実施フラグ
+    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.isManualOperation_prodstgOpt,true)) }}
 
 stages:
   - stage: BuildandTest
@@ -95,6 +106,7 @@ stages:
               testResultsFiles: '$(System.DefaultWorkingDirectory)/Tests/coverage/junit.xml'
 
           - task: ArchiveFiles@2
+            condition: eq(variables['unittestsStatus'],'done')
             inputs:
               rootFolderOrFile: '$(System.DefaultWorkingDirectory)/Application'
               includeRootFolder: false
@@ -104,6 +116,7 @@ stages:
           
           - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
             artifact: drop
+            condition: eq(variables['unittestsStatus'],'done')
             displayName: Publush Arifacts
 
   - stage: devDeploy
@@ -253,7 +266,7 @@ stages:
           name: server
         steps:
           - task: ManualValidation@0
-            condition: ne(variables.skipManualOperation,'true')
+            condition: eq(variables.ManualOperation,'True')
             displayName: "本番スロットスワップ前手動正常性確認②"
             inputs:
               notifyUsers: |
@@ -269,7 +282,6 @@ stages:
           runOnce:            
             deploy:
               steps: 
-                - download: none
                 - task: AzureCLI@2
                   condition: eq(variables.japanwest,'True')
                   displayName: Swap slots on japanwest App Service
@@ -301,7 +313,7 @@ stages:
           name: server
         steps:
           - task: ManualValidation@0
-            condition: ne(variables.skipManualOperation,'true')
+            condition: eq(variables.ManualOperation,'True')
             displayName: "本番スロットスワップ後手動正常性確認①"
             inputs:
               notifyUsers: |
@@ -318,7 +330,6 @@ stages:
           runOnce:            
             deploy:
               steps: 
-                - download: none
                 - task: AzureCLI@2
                   displayName: Swap slots on japaneast App Service
                   name: swapSlots2
@@ -361,7 +372,7 @@ stages:
           name: server
         steps:
           - task: ManualValidation@0
-            condition: ne(variables.skipManualOperation,'true')
+            condition: eq(variables.ManualOperation,'True')
             displayName: "本番スロットスワップ後手動正常性確認②"
             inputs:
               notifyUsers: |
