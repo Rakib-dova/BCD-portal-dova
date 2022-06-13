@@ -58,17 +58,14 @@ stages:
           - task: Npm@0
             displayName: "Install application dependencies"
             inputs:
-              cwd: Application
               arguments: "--force"
 
           - task: Npm@0
+            enabled: false
             displayName: "Install test dependencies"
-            inputs:
+            inputs: 
               cwd: Tests
               arguments: "--force"
-
-          - bash: sudo mkdir /home/upload
-            displayName: Make directory for upload files
 
           - bash: | 
               npm install jest-junit --save-dev
@@ -78,6 +75,7 @@ stages:
               echo "##vso[task.setvariable variable=unittestsStatus]done"
             displayName: "Run unit tests"
             name: "UnitTests"
+            enabled: false
             
           - task: PublishCodeCoverageResults@1
             condition: eq(variables['unittestsStatus'],'done')
@@ -85,7 +83,8 @@ stages:
             inputs:
               codeCoverageTool: Cobertura
               summaryFileLocation: $(System.DefaultWorkingDirectory)/Tests/coverage/cobertura-coverage.xml
-          
+            enabled: false
+
           - task: PublishTestResults@2
             condition: eq(variables['unittestsStatus'],'done')
             displayName: 'Publish test results'
@@ -93,10 +92,11 @@ stages:
               testRunTitle: '${{ parameters.Environment }}'
               testResultsFormat: 'JUnit'
               testResultsFiles: '$(System.DefaultWorkingDirectory)/Tests/coverage/junit.xml'
+            enabled: false
 
           - task: ArchiveFiles@2
             inputs:
-              rootFolderOrFile: '$(System.DefaultWorkingDirectory)/Application'
+              rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
               includeRootFolder: false
               archiveType: 'zip'
               archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
@@ -118,15 +118,17 @@ stages:
           runOnce:
             deploy:
               steps:
-              - task: AzureWebApp@1
-                displayName: 'Azure Web App Deploy'
+
+              - task: AzureFunctionApp@1
+                displayName: 'Azure functions Deploy'
                 inputs:
                   azureSubscription: $(azureSubscription)
-                  appType: webAppLinux
-                  appName: $(appserviceName)
+                  appType: 'functionApp'
+                  appName: $(portalbatchName)
                   resourceGroupName: $(portalRg)
-                  runtimeStack: NODE|14-lts
-                  package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+                  runtimeStack: NODE|14
+                  package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+                  deploymentMethod: 'auto'
                   startUpCommand: npm run start
 
   - stage: Deploy
@@ -202,6 +204,7 @@ stages:
                   }
                 displayName: npx sequelize db:migrate
                 name: dbmigrate
+                enabled: false
             
             on:
               failure:
@@ -214,36 +217,36 @@ stages:
                         npx sequelize  db:migrate:undo --env ${{ parameters.Environment }}
                       }
                     displayName: npx sequelize  db:migrate:undo
+                    enabled: false
                     
       - job: DeployStagingSlots
         dependsOn: DBSchema
         steps:
           - download: current 
             displayName: Download artifacts
-
-          - task: AzureWebApp@1
-            displayName: 'Deploy to staging slot of japaneast App Service'
-            inputs:
-              azureSubscription: $(azureSubscription)
-              appType: webAppLinux
-              appName: $(appServiceName)
-              resourceGroupName: $(portalRg)
-              runtimeStack: NODE|14-lts
-              slotName: staging
-              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-              startUpCommand: npm run start
           
-          - task: AzureWebApp@1
-            displayName: 'Deploy to staging slot of japanwest App Service'
-            condition: eq(variables.japanwest,'True')
+          - task: AzureFunctionApp@1
+            displayName: 'Deploy to staging slot of japaneast Azure Functions'
             inputs:
               azureSubscription: $(azureSubscription)
-              appType: webAppLinux
-              appName: $(appServiceSecName)
+              appType: 'functionApp'
+              appName: $(portalbatchName)
+              resourceGroupName: $(portalRg)
+              runtimeStack: NODE|14
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              deploymentMethod: 'auto'
+              startUpCommand: npm run start
+
+          - task: AzureFunctionApp@1
+            displayName: 'Deploy to staging slot of japanwest Azure Functions'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              appType: 'functionApp'
+              appName: $(portalbatchSecName)
               resourceGroupName: $(portalSecRg)
-              runtimeStack: NODE|14-lts
-              slotName: staging
-              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+              runtimeStack: NODE|14
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              deploymentMethod: 'auto'
               startUpCommand: npm run start
               
 
@@ -269,18 +272,18 @@ stages:
           runOnce:            
             deploy:
               steps: 
-                - download: none
+                - download: none  
                 - task: AzureCLI@2
                   condition: eq(variables.japanwest,'True')
-                  displayName: Swap slots on japanwest App Service
+                  displayName: Swap slots on japanwest Azure Functions
                   name: swapSlots1
                   inputs:
                     azureSubscription: '$(azureSubscription)'
                     scriptType: 'ps'
                     scriptLocation: 'inlineScript'
                     inlineScript: |
-                      az webapp deployment slot swap --slot 'staging' --action 'swap' `
-                      --name $(appServiceSecName) -g $(portalSecRg)
+                      az functionapp deployment slot swap --slot 'staging' --action 'swap' `
+                      --name $(portalbatchSecName) -g $(portalSecRg)
                       Write-Host "##vso[task.setvariable variable=swapSlots1Status]Success"
 
             on:
@@ -294,6 +297,7 @@ stages:
                       npx sequelize  db:migrate:undo --env ${{ parameters.Environment }}
                     }
                   displayName: npx sequelize  db:migrate:undo
+                  enabled: false
 
       - job: postManualOperation1
         dependsOn: SwapSlots1
@@ -318,17 +322,17 @@ stages:
           runOnce:            
             deploy:
               steps: 
-                - download: none
+                - download: none  
                 - task: AzureCLI@2
-                  displayName: Swap slots on japaneast App Service
+                  displayName: Swap slots on japaneast Azure Functions
                   name: swapSlots2
                   inputs:
                     azureSubscription: '$(azureSubscription)'
                     scriptType: 'ps'
                     scriptLocation: 'inlineScript'
                     inlineScript: |
-                      az webapp deployment slot swap --slot 'staging' --action 'swap' `
-                      --name $(appserviceName) -g $(portalRg)
+                      az functionapp deployment slot swap --slot 'staging' --action 'swap' `
+                      --name $(portalbatchName) -g $(portalRg)
                       Write-Host "##vso[task.setvariable variable=swapSlots2Status]Success"
                       Write-Host 'swapSlots2Status'
                       Write-Host '$(swapSlots2Status)'
@@ -354,6 +358,7 @@ stages:
                       npx sequelize  db:migrate:undo --env ${{ parameters.Environment }}
                     }
                   displayName: npx sequelize  db:migrate:undo
+                  enabled: false
 
       - job: postManualOperation2
         dependsOn: SwapSlots2
