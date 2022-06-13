@@ -81,9 +81,9 @@ class OrderData {
       this.contractAccountInfo.tatemono1 = inputData.tatemono1 ?? ''
 
       // 契約情報リストの設定
-      this.contactList = []
+      this.contactList = [{}]
       // 連絡先種別(SOPFで補填のため空)
-      this.contactType = ''
+      this.contactList[0].contactType = ''
       // 連絡先担当者名
       this.contactList[0].contactPersonName = inputData.contactPersonName ?? ''
       // 連絡先電話番号
@@ -110,11 +110,11 @@ class OrderData {
       this.contactList[0].billMailingMailAddress = inputData.billMailingMailAddress ?? ''
 
       // 商品情報の設定
-      this.prdtList = []
+      this.prdtList = [{}]
       // 商品コード
       this.prdtList[0].prdtCode = prdtCode
       // 利用ID数
-      this.idnumber = ''
+      this.prdtList[0].idnumber = ''
       // 申込区分
       this.prdtList[0].appType = appType
     }
