@@ -4,6 +4,7 @@ const userController = require('../../controllers/userController')
 const tenantController = require('../../controllers/tenantController')
 const contractController = require('../../controllers/contractController')
 
+const noticeHelper = require('./notice')
 const errorHelper = require('./error')
 const validate = require('../../lib/validate')
 
@@ -99,4 +100,92 @@ exports.checkContractStatus = async (tenantId) => {
   } else {
     return 999
   }
+}
+
+exports.bcdAuthenticate = async (req, res, next) => {
+  // ==========================================================================
+  // TS OAuth2認証をパスしたか確認
+  // ==========================================================================
+  if (req.user?.userId) {
+    // セッションにユーザ情報が格納されている
+    // TODO: 将来的には、セッション情報に前のアカウント情報が残っていて、異なるアカウントでTradeshiftにログインした場合の判定が必要か
+    if (!validate.isUUID(req.user?.userId)) {
+      if (req.method === 'DELETE') {
+        return res.send({ result: 0 })
+      } else {
+        return next(errorHelper.create(500))
+      }
+    }
+  } else {
+    if (req.method === 'DELETE') {
+      return res.send({ result: 0 })
+    } else {
+      // authに飛ばす HTTP1.1仕様に従い303を使う
+      // https://developer.mozilla.org/ja/docs/Web/HTTP/Status/303
+      return res.redirect(303, '/auth')
+    }
+  }
+
+  // ==========================================================================
+  // DBのユーザー情報確認
+  // ==========================================================================
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) {
+    if (req.method === 'DELETE') {
+      return res.send({ result: 0 })
+    } else {
+      return next(errorHelper.create(500))
+    }
+  }
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) {
+    if (req.method === 'DELETE') {
+      return res.send({ result: 0 })
+    } else {
+      return next(errorHelper.create(404))
+    }
+  }
+
+  // ユーザ権限を session に保存
+  req.session.userRole = user.dataValues?.userRole
+
+  // ==========================================================================
+  // DBの契約情報確認
+  // ==========================================================================
+
+  // テナントIDに紐付いている全ての契約情報を取得
+  const contracts = await contractController.findContractsBytenantId(req.user.tenantId)
+  if (!contracts || !Array.isArray(contracts) || contracts.length === 0) {
+    if (req.method === 'DELETE') {
+      return res.send({ result: 0 })
+    } else {
+      return next(errorHelper.create(500))
+    }
+  }
+
+  // BCD無料アプリの契約情報確認
+  const bcdContract = contracts.find((contract) => contract.serviceType === '010' && contract.deleteFlag === false)
+  if (!bcdContract || !bcdContract.contractStatus) {
+    if (req.method === 'DELETE') {
+      return res.send({ result: 0 })
+    } else {
+      return next(errorHelper.create(500))
+    }
+  }
+
+  // 現在解約中か確認
+  if (validate.isBcdCancelling(bcdContract)) {
+    if (req.method === 'DELETE') {
+      return res.send({ result: 0 })
+    } else {
+      return next(noticeHelper.create('cancelprocedure'))
+    }
+  }
+
+  req.dbUser = user
+  req.contracts = contracts
+  next()
 }
