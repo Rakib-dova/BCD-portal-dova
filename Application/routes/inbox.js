@@ -420,9 +420,9 @@ const cbPostDepartment = async (req, res, next) => {
   }
 }
 
-router.post('/department', helper.isAuthenticated, cbPostDepartment)
+router.post('/department', helper.isAuthenticated, csrfProtection, cbPostDepartment)
 router.get('/:invoiceId', helper.isAuthenticated, csrfProtection, cbGetIndex)
-router.post('/getCode', helper.isAuthenticated, cbPostGetCode)
+router.post('/getCode', helper.isAuthenticated, csrfProtection, cbPostGetCode)
 router.post('/:invoiceId', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
