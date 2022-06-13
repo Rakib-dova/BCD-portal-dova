@@ -86,7 +86,12 @@ describe('approveRouteListのテスト', () => {
 
   describe('ルーティング', () => {
     test('approveRouteListのルーティングを確認', async () => {
-      expect(approveRouteList.router.get).toBeCalledWith('/', helper.isAuthenticated, approveRouteList.cbGetIndex)
+      expect(approveRouteList.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.any(Function),
+        approveRouteList.cbGetIndex
+      )
     })
   })
 

@@ -359,8 +359,12 @@ document.querySelector('#sendToSearchBtn').addEventListener('click', function (e
       const sendData = { companyName: sendTo }
       const requestCompaniesApi = new XMLHttpRequest()
 
+      const elements = document.getElementsByName('_csrf')
+      const csrf = elements.item(0).value
+
       requestCompaniesApi.open('POST', '/searchCompanies/', true)
       requestCompaniesApi.setRequestHeader('Content-Type', 'application/json')
+      requestCompaniesApi.setRequestHeader('CSRF-Token', csrf)
 
       // 検索結果による処理
       requestCompaniesApi.onreadystatechange = function () {
@@ -440,7 +444,7 @@ $('#BtnInboxSearch').addEventListener('click', function (e) {
   let sentBy = form['sentBy[]']
   if (sentBy !== undefined) {
     sentBy = Array.prototype.slice.call(sentBy)
-    sentBy = sentBy.filter(ele => ele.checked === true)
+    sentBy = sentBy.filter((ele) => ele.checked === true)
     if (!sentBy) {
       sentBy = []
     }
@@ -451,7 +455,7 @@ $('#BtnInboxSearch').addEventListener('click', function (e) {
   let status = form['status[]']
   if (status !== undefined) {
     status = Array.prototype.slice.call(status)
-    status = status.filter(ele => ele.checked === true)
+    status = status.filter((ele) => ele.checked === true)
     if (!status) {
       status = []
     }
@@ -511,8 +515,11 @@ function managerAddressValidationCheck(managerAddress) {
       regExpResult = false
     } else if (addressArray.length === 2) {
       // 例："test test"@test.com
-      const firstCheck = (addressArray[0].indexOf('"') === 0) && (addressArray[0].indexOf('"') === addressArray[0].lastIndexOf('"'))
-      const secondCheck = (addressArray[1].indexOf('"') === (addressArray[1].length - 1)) && (addressArray[1].indexOf('"') === addressArray[1].lastIndexOf('"'))
+      const firstCheck =
+        addressArray[0].indexOf('"') === 0 && addressArray[0].indexOf('"') === addressArray[0].lastIndexOf('"')
+      const secondCheck =
+        addressArray[1].indexOf('"') === addressArray[1].length - 1 &&
+        addressArray[1].indexOf('"') === addressArray[1].lastIndexOf('"')
       if (firstCheck && secondCheck) {
         regExpResult = true
       } else {

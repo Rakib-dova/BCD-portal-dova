@@ -10,6 +10,8 @@ const uploadFormatListController = require('../controllers/uploadFormatListContr
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -56,12 +58,13 @@ const cbGetIndex = async (req, res, next) => {
 
   // アップロードフォーマットデータを画面に渡す。
   res.render('uploadFormatList', {
-    uploadFormatListArr: uploadFormatListArr
+    uploadFormatListArr: uploadFormatListArr,
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
 
 module.exports = {
   router: router,

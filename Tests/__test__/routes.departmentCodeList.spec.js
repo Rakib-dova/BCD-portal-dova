@@ -99,7 +99,12 @@ describe('routes.departmentListのテスト', () => {
 
   describe('ルーティング', () => {
     test('departmentListのルーティングを確認', async () => {
-      expect(departmentCodeList.router.get).toBeCalledWith('/', helper.isAuthenticated, departmentCodeList.cbGetIndex)
+      expect(departmentCodeList.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.any(Function),
+        departmentCodeList.cbGetIndex
+      )
     })
   })
 

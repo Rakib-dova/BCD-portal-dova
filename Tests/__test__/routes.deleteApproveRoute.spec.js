@@ -146,7 +146,13 @@ describe('deleteApproveRouteのテスト', () => {
     test('deleteApproveRouteのルーティングを確認', async () => {
       expect(deleteApproveRoute.router.delete).toHaveBeenLastCalledWith(
         '/:approveRouteId',
+        expect.any(Function),
         deleteApproveRoute.cbDeleteApproveRoute
+      )
+      expect(deleteApproveRoute.router.get).toHaveBeenLastCalledWith(
+        '/:approveRouteId',
+        expect.any(Function),
+        deleteApproveRoute.cbGetCheckApproveRoute
       )
     })
   })

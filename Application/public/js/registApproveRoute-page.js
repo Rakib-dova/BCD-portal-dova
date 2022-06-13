@@ -45,8 +45,12 @@ $('#btn-search-approver').addEventListener('click', function () {
     lastName: $('#searchModalApproveUserFirstName').value,
     email: $('#searchModalApproveUserMailAddress').value
   }
+  const elements = document.getElementsByName('_csrf')
+  const csrf = elements.item(0).value
+
   approverApi.open('POST', '/searchApprover', true)
   approverApi.setRequestHeader('Content-Type', 'application/json')
+  approverApi.setRequestHeader('CSRF-Token', csrf)
   approverApi.onreadystatechange = function () {
     if (approverApi.readyState === approverApi.DONE) {
       // 既存の検索結果を取り消す

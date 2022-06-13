@@ -11,6 +11,8 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const accountCodeController = require('../controllers/accountCodeController')
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetRegistAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetRegistAccountCode')
@@ -55,7 +57,8 @@ const cbGetRegistAccountCode = async (req, res, next) => {
     modalTitle: '勘定科目設定確認',
     backUrl: '/accountCodeList',
     logTitle: '勘定科目登録',
-    logTitleEng: 'REGIST ACCOUNT CODE'
+    logTitleEng: 'REGIST ACCOUNT CODE',
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRegistAccountCode')
@@ -116,8 +119,8 @@ const cbPostRegistAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostRegistAccountCode')
 }
 
-router.get('/', helper.isAuthenticated, cbGetRegistAccountCode)
-router.post('/', helper.isAuthenticated, cbPostRegistAccountCode)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetRegistAccountCode)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostRegistAccountCode)
 
 module.exports = {
   router: router,

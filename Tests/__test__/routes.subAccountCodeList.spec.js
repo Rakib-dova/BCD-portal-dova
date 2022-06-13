@@ -226,7 +226,12 @@ describe('subAccountCodeListのテスト', () => {
 
   describe('ルーティング', () => {
     test('uploadFormatListのルーティングを確認', async () => {
-      expect(subAccountCodeList.router.get).toBeCalledWith('/', helper.isAuthenticated, subAccountCodeList.cbGetIndex)
+      expect(subAccountCodeList.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.any(Function),
+        subAccountCodeList.cbGetIndex
+      )
     })
   })
 
@@ -247,6 +252,11 @@ describe('subAccountCodeListのテスト', () => {
       subAccountCodeControllerGetSubAccountCodeListSpy.mockReturnValue(subAccountListArrOne)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue('00')
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await subAccountCodeList.cbGetIndex(request, response, next)
@@ -272,7 +282,8 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/uploadSubAccount',
-        prevLocationName: '←補助科目一括作成'
+        prevLocationName: '←補助科目一括作成',
+        csrfToken: dummyToken
       })
     })
 
@@ -293,6 +304,11 @@ describe('subAccountCodeListのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue('00')
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await subAccountCodeList.cbGetIndex(request, response, next)
@@ -318,7 +334,8 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/uploadSubAccount',
-        prevLocationName: '←補助科目一括作成'
+        prevLocationName: '←補助科目一括作成',
+        csrfToken: dummyToken
       })
     })
 
@@ -339,6 +356,12 @@ describe('subAccountCodeListのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptContract.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await subAccountCodeList.cbGetIndex(request, response, next)
 
@@ -363,7 +386,8 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/uploadSubAccount',
-        prevLocationName: '←補助科目一括作成'
+        prevLocationName: '←補助科目一括作成',
+        csrfToken: dummyToken
       })
     })
 
@@ -384,6 +408,12 @@ describe('subAccountCodeListのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptingContract.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await subAccountCodeList.cbGetIndex(request, response, next)
 
@@ -408,7 +438,8 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/uploadSubAccount',
-        prevLocationName: '←補助科目一括作成'
+        prevLocationName: '←補助科目一括作成',
+        csrfToken: dummyToken
       })
     })
 
@@ -429,6 +460,12 @@ describe('subAccountCodeListのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptingContract.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await subAccountCodeList.cbGetIndex(request, response, next)
 
@@ -453,7 +490,8 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/uploadSubAccount',
-        prevLocationName: '←補助科目一括作成'
+        prevLocationName: '←補助科目一括作成',
+        csrfToken: dummyToken
       })
     })
 
@@ -474,6 +512,12 @@ describe('subAccountCodeListのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptingContract.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await subAccountCodeList.cbGetIndex(request, response, next)
 
@@ -498,7 +542,8 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/uploadSubAccount',
-        prevLocationName: '←補助科目一括作成'
+        prevLocationName: '←補助科目一括作成',
+        csrfToken: dummyToken
       })
     })
 
@@ -521,6 +566,12 @@ describe('subAccountCodeListのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptingContract.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await subAccountCodeList.cbGetIndex(request, response, next)
 
@@ -545,7 +596,8 @@ describe('subAccountCodeListのテスト', () => {
         setClassChangeBtn: 'checkChangeSubAccountCodeBtn',
         setClassDeleteBtn: 'deleteSubAccountCodeBtn',
         prevLocation: '/uploadSubAccount',
-        prevLocationName: '←補助科目一括作成'
+        prevLocationName: '←補助科目一括作成',
+        csrfToken: dummyToken
       })
     })
 

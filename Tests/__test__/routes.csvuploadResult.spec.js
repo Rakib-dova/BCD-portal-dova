@@ -434,6 +434,7 @@ describe('csvuploadResultのテスト', () => {
         helper.isAuthenticated,
         helper.isTenantRegistered,
         helper.isUserRegistered,
+        expect.any(Function),
         csvuploadResult.cbGetIndex
       )
     })

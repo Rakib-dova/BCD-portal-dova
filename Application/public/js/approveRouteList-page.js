@@ -58,12 +58,14 @@ document.getElementsByName('deleteButton').forEach((item) => {
 // Modalの削除ボタン押下
 Array.prototype.forEach.call(document.querySelectorAll('#modalDelBtn'), (item) => {
   item.addEventListener('click', function (e) {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value
     const approveRouteId = item.getAttribute('uuid')
     const url = `/deleteApproveRoute/${approveRouteId}`
     fetch(url, {
       method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'CSRF-Token': csrfToken
       }
     })
       .then((response) => response.json())
@@ -89,12 +91,14 @@ Array.prototype.forEach.call(document.querySelectorAll('#modalDelBtn'), (item) =
 // 「確認・変更」ボタン押下時の処理
 document.getElementsByName('confirmButton').forEach((item) => {
   item.addEventListener('click', function (e) {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value
     const uuid = item.getAttribute('uuid')
     const url = `/deleteApproveRoute/${uuid}`
     fetch(url, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'CSRF-Token': csrfToken
       }
     })
       .then((response) => response.json())
