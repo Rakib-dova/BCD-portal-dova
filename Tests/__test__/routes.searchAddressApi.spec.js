@@ -20,7 +20,7 @@ let request, response
 
 describe('searchAddressApi', () => {
   test('searchAddressApi', async () => {
-    expect(searchAddressApi.router.post).toBeCalledWith('/', expect.any(Function), searchAddressApi.cbSearchAddress)
+    expect(searchAddressApi.router.post).toBeCalledWith('/', searchAddressApi.cbSearchAddress)
   })
 })
 

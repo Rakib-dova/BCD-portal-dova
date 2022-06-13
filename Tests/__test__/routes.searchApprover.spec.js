@@ -81,7 +81,7 @@ describe('registApproveRouteのテスト', () => {
 
   describe('ルーティング', () => {
     test('searchApproverのルーティングを確認', async () => {
-      expect(searchApprover.router.post).toBeCalledWith('', expect.any(Function), searchApprover.cbPostSearchApprover)
+      expect(searchApprover.router.post).toBeCalledWith('', searchApprover.cbPostSearchApprover)
     })
   })
 

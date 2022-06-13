@@ -97,11 +97,7 @@ describe('searchCompaniesApiのテスト', () => {
 
   describe('ルーティング', () => {
     test('searchCompaniesApiのルーティングを確認', async () => {
-      expect(searchCompaniesApi.router.post).toBeCalledWith(
-        '/',
-        expect.any(Function),
-        searchCompaniesApi.cbSearchCompanies
-      )
+      expect(searchCompaniesApi.router.post).toBeCalledWith('/', searchCompaniesApi.cbSearchCompanies)
     })
   })
 
