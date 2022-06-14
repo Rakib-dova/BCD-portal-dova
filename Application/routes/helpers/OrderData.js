@@ -30,30 +30,30 @@ class OrderData {
     // 申込年月日
     this.appDate = ''
     // 開通希望年月日
-    this.contractBasicInfo.OpeningDate = inputData.openingDate.replace(/-/g, '') ?? ''
+    this.contractBasicInfo.OpeningDate = inputData.openingDate?.replace(/-/g, '') ?? ''
     // 契約番号
     this.contractBasicInfo.contractNumber = inputData.contractNumber ?? ''
     // 販売チャネルコード
-    this.contractBasicInfo.salesChannelCode = inputData.salesChannelCode ?? ''
+    this.contractBasicInfo.salesChannelCode = inputData.salesChannelCode ?? '79100100'
     // 販売チャネル名
-    this.contractBasicInfo.salesChannelName = inputData.salesChannelName ?? ''
+    this.contractBasicInfo.salesChannelName = inputData.salesChannelName ?? 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ'
     // 部課名
-    this.contractBasicInfo.salesChannelDeptName = inputData.salesChannelDeptName ?? ''
+    this.contractBasicInfo.salesChannelDeptName = inputData.salesChannelDeptName ?? '第二ＳＣ部門　第一グループ'
     // 社員コード
     this.contractBasicInfo.salesChannelEmplyeeCode = inputData.salesChannelEmplyeeCode ?? ''
     // 担当者名
-    this.contractBasicInfo.salesChannelPersonName = inputData.salesChannelPersonName ?? ''
+    this.contractBasicInfo.salesChannelPersonName = inputData.salesChannelPersonName ?? 'デジトレアプリ担当'
     // 組織区分
-    this.contractBasicInfo.salesChannelDeptType = inputData.salesChannelDeptType ?? ''
+    this.contractBasicInfo.salesChannelDeptType = inputData.salesChannelDeptType ?? 'アプリケーションサービス部'
     // 電話番号
-    this.contractBasicInfo.salesChannelPhoneNumber = inputData.salesChannelPhoneNumber ?? ''
+    this.contractBasicInfo.salesChannelPhoneNumber = inputData.salesChannelPhoneNumber ?? '050-3383-9608'
     // メールアドレス
-    this.contractBasicInfo.salesChannelMailAddress = inputData.salesChannelMailAddress ?? ''
+    this.contractBasicInfo.salesChannelMailAddress = inputData.salesChannelMailAddress ?? 'digitaltrade-ap-ops@ntt.com'
     // 開通案内パスワード
-    this.contractBasicInfo.kaianPassword = inputData.passworddd ?? ''
+    this.contractBasicInfo.kaianPassword = inputData.password ?? ''
 
     // 新設の場合
-    if (orderType === statusConstants.orderTypeNewOrder) {
+    if (orderType === statusConstants.orderType.newOrder) {
       // 販売店コード
       this.contractBasicInfo.campaignCode = inputData.campaignCode ?? ''
       // 販売担当者名
@@ -118,6 +118,42 @@ class OrderData {
       // 申込区分
       this.prdtList[0].appType = appType
     }
+  }
+
+  validateContractBasicInfo() {
+    const contractBasicInfo = this.contractBasicInfo
+    return contractBasicInfo.kaianPassword
+  }
+
+  validateContractAccountInfo() {
+    const contractAccountInfo = this.contractAccountInfo
+    return (
+      contractAccountInfo.commonCustomerId &&
+      contractAccountInfo.contractorName &&
+      contractAccountInfo.contractorKanaName &&
+      contractAccountInfo.postalNumber &&
+      contractAccountInfo.contractAddress &&
+      contractAccountInfo.banch1
+    )
+  }
+
+  validateContractInfo() {
+    const contractInfo = this.contactList[0]
+    return contractInfo.contactPersonName && contractInfo.contactPhoneNumber && contractInfo.contactMail
+  }
+
+  validateBillMailingInfo() {
+    const billMailingInfo = this.contactList[0]
+    return (
+      billMailingInfo.billMailingPostalNumber &&
+      billMailingInfo.billMailingAddress &&
+      billMailingInfo.billMailingAddressBanchi1 &&
+      billMailingInfo.billMailingKanaName &&
+      billMailingInfo.billMailingName &&
+      billMailingInfo.billMailingPersonName &&
+      billMailingInfo.billMailingPhoneNumber &&
+      billMailingInfo.billMailingMailAddress
+    )
   }
 }
 
