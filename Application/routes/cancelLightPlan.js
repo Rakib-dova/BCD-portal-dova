@@ -28,12 +28,28 @@ const checkContractStatus = async (req, res, next) => {
     null
   )
 
-  // 申し込み前、または申し込み～竣工完了まで場合
+  // 申し込み前、または申し込み～申し込み竣工完了まで、または解約完了場合
   if (
     !contracts?.length ||
-    !contracts.some((i) => i.contractStatus === constantsDefine.statusConstants.contractStatus.onContract)
+    contracts.some(
+      (i) =>
+        i.contractStatus === constantsDefine.statusConstants.contractStatus.newContractOrder ||
+        i.contractStatus === constantsDefine.statusConstants.contractStatus.newContractReceive ||
+        i.contractStatus === constantsDefine.statusConstants.contractStatus.newContractBeforeCompletion ||
+        i.contractStatus === constantsDefine.statusConstants.contractStatus.canceledContract
+    )
   ) {
     return next(noticeHelper.create('lightPlanUnregistered'))
+  }
+  // 解約中の場合(解約着手待ち～解約完了竣工まで)
+  if (
+    contracts.some(
+      (i) =>
+        i.contractStatus === constantsDefine.statusConstants.contractStatus.cancellationOrder ||
+        i.contractStatus === constantsDefine.statusConstants.contractStatus.cancellationReceive
+    )
+  ) {
+    return next(noticeHelper.create('lightPlanCanceling'))
   }
   next()
 }

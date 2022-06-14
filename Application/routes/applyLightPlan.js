@@ -28,12 +28,25 @@ const checkContractStatus = async (req, res, next) => {
     null
   )
 
-  //  契約中の場合(申し込み～解約処理完了まで)
+  // 申し込み済の場合(申し込み～解約処理完了まで)
   if (
     contracts?.length > 0 &&
     contracts.some((i) => i.contractStatus !== constantsDefine.statusConstants.contractStatus.canceledContract)
   ) {
-    return next(noticeHelper.create('lightPlanRegistered'))
+    if (
+      contracts.some(
+        (i) =>
+          i.contractStatus === constantsDefine.statusConstants.contractStatus.newContractOrder ||
+          i.contractStatus === constantsDefine.statusConstants.contractStatus.newContractReceive ||
+          i.contractStatus === constantsDefine.statusConstants.contractStatus.newContractBeforeCompletion
+      )
+    ) {
+      //  申込中の場合(申し込み～竣工まで)
+      return next(noticeHelper.create('lightPlanRegistering'))
+    } else {
+      //  契約中の場合(竣工～解約処理完了まで)
+      return next(noticeHelper.create('lightPlanRegistered'))
+    }
   }
   next()
 }
