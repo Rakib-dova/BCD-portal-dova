@@ -85,7 +85,7 @@ const cancelOrder = async (tenantId, serviceType, orderData) => {
       // 現在の日時
       const date = new Date()
 
-      // Contractデータの登録
+      // Contractデータの更新
       await Contract.update(
         {
           contractStatus: statusConstants.contractStatus.cancellationOrder,

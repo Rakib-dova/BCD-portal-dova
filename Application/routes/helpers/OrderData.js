@@ -12,45 +12,56 @@ class OrderData {
    */
   constructor(tenantId, inputData, orderType, serviceType, prdtCode, appType) {
     // 基本情報の設定
-    this.contractBasicInfo = {}
-    // トレシフテナントID
-    this.contractBasicInfo.tradeshiftId = tenantId
-    // オーダーID
-    this.contractBasicInfo.orderId = ''
-    // オーダー種別
-    this.contractBasicInfo.orderType = orderType
-    // サービス種別
-    this.contractBasicInfo.serviceType = serviceType
-    // 契約者名変更フラッグ
-    this.contractChangeName = ''
-    // 契約者住所変更フラッグ
-    this.contractChangeAddress = ''
-    // 契約者連絡先変更フラッグ
-    this.contractChangeContact = ''
-    // 申込年月日
-    this.appDate = ''
-    // 開通希望年月日
-    this.contractBasicInfo.OpeningDate = inputData.openingDate?.replace(/-/g, '') ?? ''
-    // 契約番号
-    this.contractBasicInfo.contractNumber = inputData.contractNumber ?? ''
-    // 販売チャネルコード
-    this.contractBasicInfo.salesChannelCode = inputData.salesChannelCode ?? '79100100'
-    // 販売チャネル名
-    this.contractBasicInfo.salesChannelName = inputData.salesChannelName ?? 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ'
-    // 部課名
-    this.contractBasicInfo.salesChannelDeptName = inputData.salesChannelDeptName ?? '第二ＳＣ部門　第一グループ'
-    // 社員コード
-    this.contractBasicInfo.salesChannelEmplyeeCode = inputData.salesChannelEmplyeeCode ?? ''
-    // 担当者名
-    this.contractBasicInfo.salesChannelPersonName = inputData.salesChannelPersonName ?? 'デジトレアプリ担当'
-    // 組織区分
-    this.contractBasicInfo.salesChannelDeptType = inputData.salesChannelDeptType ?? 'アプリケーションサービス部'
-    // 電話番号
-    this.contractBasicInfo.salesChannelPhoneNumber = inputData.salesChannelPhoneNumber ?? '050-3383-9608'
-    // メールアドレス
-    this.contractBasicInfo.salesChannelMailAddress = inputData.salesChannelMailAddress ?? 'digitaltrade-ap-ops@ntt.com'
-    // 開通案内パスワード
-    this.contractBasicInfo.kaianPassword = inputData.password ?? ''
+    this.contractBasicInfo = {
+      // トレシフテナントID
+      tradeshiftId: tenantId,
+      // オーダーID
+      orderId: '',
+      // オーダー種別
+      orderType: orderType,
+      // サービス種別
+      serviceType: serviceType,
+      // 契約者名変更フラッグ
+      contractChangeName: '',
+      // 契約者住所変更フラッグ
+      contractChangeAddress: '',
+      // 契約者連絡先変更フラッグ
+      contractChangeContact: '',
+      // 申込年月日
+      appDate: '',
+      // 開通希望年月日
+      OpeningDate: inputData.openingDate?.replace(/-/g, '') ?? '',
+      // 契約番号
+      contractNumber: inputData.contractNumber ?? '',
+      // 販売チャネルコード
+      salesChannelCode: inputData.salesChannelCode ? inputData.salesChannelCode : '79100100',
+      // 販売チャネル名
+      salesChannelName: inputData.salesChannelName
+        ? inputData.salesChannelName
+        : 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
+      // 部課名
+      salesChannelDeptName: inputData.salesChannelDeptName
+        ? inputData.salesChannelDeptName
+        : '第二ＳＣ部門　第一グループ',
+      // 社員コード
+      salesChannelEmplyeeCode: inputData.salesChannelEmplyeeCode ?? '',
+      // 担当者名
+      salesChannelPersonName: inputData.salesChannelPersonName
+        ? inputData.salesChannelPersonName
+        : 'デジトレアプリ担当',
+      // 組織区分
+      salesChannelDeptType: inputData.salesChannelDeptType
+        ? inputData.salesChannelDeptType
+        : 'アプリケーションサービス部',
+      // 電話番号
+      salesChannelPhoneNumber: inputData.salesChannelPhoneNumber ? inputData.salesChannelPhoneNumber : '050-3383-9608',
+      // メールアドレス
+      salesChannelMailAddress: inputData.salesChannelMailAddress
+        ? inputData.salesChannelMailAddress
+        : 'digitaltrade-ap-ops@ntt.com',
+      // 開通案内パスワード
+      kaianPassword: inputData.password ?? ''
+    }
 
     // 新設の場合
     if (orderType === statusConstants.orderType.newOrder) {
@@ -59,72 +70,86 @@ class OrderData {
       // 販売担当者名
       this.contractBasicInfo.salesPersonName = inputData.salesPersonName.replace(/\s+/g, '') ?? ''
 
-      // 契約情報の設定
-      this.contractAccountInfo = {}
-      // 契約アカウントID(SOPFで補填のため空)
-      this.contractAccountId = ''
-      // 顧客区分ダミー番号とする(SOPFで補填のため空)
-      this.customerType = ''
-      // 共通顧客ID
-      this.contractAccountInfo.commonCustomerId = inputData.commonCustomerId ?? ''
-      // 契約者名
-      this.contractAccountInfo.contractorName = inputData.contractorName ?? ''
-      // 契約者カナ名
-      this.contractAccountInfo.contractorKanaName = inputData.contractorKanaName ?? ''
-      // 契約者郵便番号
-      this.contractAccountInfo.postalNumber = inputData.postalNumber ?? ''
-      // 契約者住所（丁目まで）
-      this.contractAccountInfo.contractAddress = inputData.contractAddressVal ?? ''
-      // 契約者番地等1番地以下を入力
-      this.contractAccountInfo.banch1 = inputData.banch1 ?? ''
-      // 契約者建物等1
-      this.contractAccountInfo.tatemono1 = inputData.tatemono1 ?? ''
+      // 契約者情報の設定
+      this.contractAccountInfo = {
+        // 契約アカウントID(SOPFで補填のため空)
+        contractAccountId: '',
+        // 顧客区分ダミー番号とする(SOPFで補填のため空)
+        customerType: '',
+        // 共通顧客ID
+        commonCustomerId: inputData.commonCustomerId ?? '',
+        // 契約者名
+        contractorName: inputData.contractorName ?? '',
+        // 契約者カナ名
+        contractorKanaName: inputData.contractorKanaName ?? '',
+        // 契約者郵便番号
+        postalNumber: inputData.postalNumber ?? '',
+        // 契約者住所（丁目まで）
+        contractAddress: inputData.contractAddressVal ?? '',
+        // 契約者番地等1番地以下を入力
+        banch1: inputData.banch1 ?? '',
+        // 契約者建物等1
+        tatemono1: inputData.tatemono1 ?? ''
+      }
 
       // 契約情報リストの設定
-      this.contactList = [{}]
-      // 連絡先種別(SOPFで補填のため空)
-      this.contactList[0].contactType = ''
-      // 連絡先担当者名
-      this.contactList[0].contactPersonName = inputData.contactPersonName ?? ''
-      // 連絡先電話番号
-      this.contactList[0].contactPhoneNumber = inputData.contactPhoneNumber ?? ''
-      // 連絡先メールアドレス
-      this.contactList[0].contactMail = inputData.contactMail ?? ''
-      // 請求書送付先郵便番号
-      this.contactList[0].billMailingPostalNumber = inputData.billMailingPostalNumber ?? ''
-      // 請求書送付先住所（丁目まで）
-      this.contactList[0].billMailingAddress = inputData.billMailingAddress ?? ''
-      // 請求書送付先番地等1
-      this.contactList[0].billMailingAddressBanchi1 = inputData.billMailingAddressBanchi1 ?? ''
-      // 請求書送付先建物等1
-      this.contactList[0].billMailingAddressBuilding1 = inputData.billMailingAddressBuilding1 ?? ''
-      // 請求書送付先宛名（会社名+部課名）カナ名
-      this.contactList[0].billMailingKanaName = inputData.billMailingKanaName ?? ''
-      // 請求書送付先宛名（会社名+部課名）
-      this.contactList[0].billMailingName = inputData.billMailingName ?? ''
-      // 請求に関する連絡先お名前
-      this.contactList[0].billMailingPersonName = inputData.billMailingPersonName ?? ''
-      // 請求に関する連絡先電話番号
-      this.contactList[0].billMailingPhoneNumber = inputData.billMailingPhoneNumber ?? ''
-      // 請求に関する連絡先メールアドレス
-      this.contactList[0].billMailingMailAddress = inputData.billMailingMailAddress ?? ''
+      this.contactList = [
+        {
+          // 連絡先種別(SOPFで補填のため空)
+          contactType: '',
+          // 連絡先担当者名
+          contactPersonName: inputData.contactPersonName ?? '',
+          // 連絡先電話番号
+          contactPhoneNumber: inputData.contactPhoneNumber ?? '',
+          // 連絡先メールアドレス
+          contactMail: inputData.contactMail ?? '',
+          // 請求書送付先郵便番号
+          billMailingPostalNumber: inputData.billMailingPostalNumber ?? '',
+          // 請求書送付先住所（丁目まで）
+          billMailingAddress: inputData.billMailingAddress ?? '',
+          // 請求書送付先番地等1
+          billMailingAddressBanchi1: inputData.billMailingAddressBanchi1 ?? '',
+          // 請求書送付先建物等1
+          billMailingAddressBuilding1: inputData.billMailingAddressBuilding1 ?? '',
+          // 請求書送付先宛名（会社名+部課名）カナ名
+          billMailingKanaName: inputData.billMailingKanaName ?? '',
+          // 請求書送付先宛名（会社名+部課名）
+          billMailingName: inputData.billMailingName ?? '',
+          // 請求に関する連絡先お名前
+          billMailingPersonName: inputData.billMailingPersonName ?? '',
+          // 請求に関する連絡先電話番号
+          billMailingPhoneNumber: inputData.billMailingPhoneNumber ?? '',
+          // 請求に関する連絡先メールアドレス
+          billMailingMailAddress: inputData.billMailingMailAddress ?? ''
+        }
+      ]
 
-      // 商品情報の設定
-      this.prdtList = [{}]
-      // 商品コード
-      this.prdtList[0].prdtCode = prdtCode
-      // 利用ID数
-      this.prdtList[0].idnumber = ''
-      // 申込区分
-      this.prdtList[0].appType = appType
+      // 商品情報リストの設定
+      this.prdtList = [
+        {
+          // 商品コード
+          prdtCode: prdtCode,
+          // 利用ID数
+          idnumber: '',
+          // 申込区分
+          appType: appType
+        }
+      ]
     }
   }
 
+  /**
+   * 基本情報のバリデーション
+   * @returns 基本情報のバリデーション結果
+   */
   validateContractBasicInfo() {
-    const contractBasicInfo = this.contractBasicInfo
-    return contractBasicInfo.kaianPassword
+    return this.contractBasicInfo.kaianPassword
   }
 
+  /**
+   * 契約者情報のバリデーション
+   * @returns 契約者情報のバリデーション結果
+   */
   validateContractAccountInfo() {
     const contractAccountInfo = this.contractAccountInfo
     return (
@@ -137,11 +162,19 @@ class OrderData {
     )
   }
 
+  /**
+   * 契約者連絡情報のバリデーション
+   * @returns 契約者連絡情報のバリデーション結果
+   */
   validateContractInfo() {
     const contractInfo = this.contactList[0]
     return contractInfo.contactPersonName && contractInfo.contactPhoneNumber && contractInfo.contactMail
   }
 
+  /**
+   * 請求情報のバリデーション
+   * @returns 請求情報のバリデーション結果
+   */
   validateBillMailingInfo() {
     const billMailingInfo = this.contactList[0]
     return (

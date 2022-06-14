@@ -5,7 +5,7 @@ const express = require('express')
 const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
-const OrderData = require('./helpers/OrderData')
+const OrderData = require('./helpers/orderData')
 const contractController = require('../controllers/contractController.js')
 const applyOrderController = require('../controllers/applyOrderController.js')
 const logger = require('../lib/logger')
@@ -14,6 +14,13 @@ const constantsDefine = require('../constants')
 const router = express.Router()
 const csrfProtection = csrf({ cookie: false })
 
+/**
+ * ライトプランの解約の事前チェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns
+ */
 const checkContractStatus = async (req, res, next) => {
   // ライトプランの契約情報を取得する
   const contracts = await contractController.findContracts(
@@ -31,6 +38,13 @@ const checkContractStatus = async (req, res, next) => {
   next()
 }
 
+/**
+ * ライトプランの解約画面の表示
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns
+ */
 const showCancelLightPlan = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'showCancelLightPlan')
 
@@ -54,6 +68,13 @@ const showCancelLightPlan = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'showCancelLightPlan')
 }
 
+/**
+ * ライトプランの解約の実施
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns
+ */
 const cancelLightPlan = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cancelLightPlan')
 
@@ -90,8 +111,9 @@ router.get(
   checkContractStatus,
   showCancelLightPlan
 )
+
 router.post(
-  '/',
+  '/register',
   helper.isAuthenticated,
   helper.isTenantRegistered,
   helper.isUserRegistered,
