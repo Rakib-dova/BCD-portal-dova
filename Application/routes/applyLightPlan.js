@@ -8,15 +8,21 @@ const noticeHelper = require('./helpers/notice')
 const OrderData = require('./helpers/OrderData')
 const logger = require('../lib/logger')
 const applyOrderController = require('../controllers/applyOrderController.js')
+const contractController = require('../controllers/contractController.js')
 const constantsDefine = require('../constants')
 
 const router = express.Router()
 const csrfProtection = csrf({ cookie: false })
 
 const checkContractStatus = async (req, res, next) => {
-  // TODO 契約中の場合(申し込み～解約処理完了まで)
-  const contractStatus = ''
-  if (contractStatus) {
+  // ライトプランの契約情報を取得する
+  const contract = await contractController.findOneByServiceType(
+    req.user.tenantId,
+    constantsDefine.statusConstants.serviceType.lightPlan
+  )
+
+  //  契約中の場合(申し込み～解約処理完了まで)
+  if (contract && contract.contractStatus !== constantsDefine.statusConstants.contractStatus.canceledContract) {
     return next(noticeHelper.create('lightPlanRegistered'))
   }
   next()
@@ -25,6 +31,7 @@ const checkContractStatus = async (req, res, next) => {
 const showLightPlan = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'showLightPlan')
 
+  // TODO DBマスターから取得
   const salesChannelDeptList = [
     { code: '001', name: 'Com第一営業本部' },
     { code: '002', name: 'Com第二営業本部' },
@@ -33,7 +40,7 @@ const showLightPlan = async (req, res, next) => {
 
   // ライトプラン申し込み画面表示
   res.render('lightPlan', {
-    title: 'ライトプラン申し込み',
+    title: 'ライトプラン申込',
     salesChannelDeptList: salesChannelDeptList,
     csrfToken: req.csrfToken()
   })
@@ -47,15 +54,29 @@ const registerLightPlan = async (req, res, next) => {
   const orderData = new OrderData(
     req.user.tenantId,
     req.body,
-    constantsDefine.statusConstants.orderTypeNewOrder,
-    constantsDefine.statusConstants.serviceTypeLightPlan,
-    constantsDefine.statusConstants.prdtCodeLightPlan,
-    constantsDefine.statusConstants.appTypeNew
+    constantsDefine.statusConstants.orderType.newOrder,
+    constantsDefine.statusConstants.serviceType.lightPlan,
+    constantsDefine.statusConstants.prdtCode.lightPlan,
+    constantsDefine.statusConstants.appType.new
   )
-  console.log(orderData)
+
+  // バリデーション
+  if (
+    !orderData.validateContractBasicInfo() ||
+    !orderData.validateContractAccountInfo() ||
+    !orderData.validateContractInfo() ||
+    !orderData.validateBillMailingInfo()
+  ) {
+    req.flash('info', 'システムエラーが発生しました。')
+    return res.redirect(303, '/portal')
+  }
 
   // Contracts,Ordersにデータを登録する
-  const result = await applyOrderController.applyOrderController(req.user?.tenantId, orderData)
+  const result = await applyOrderController.applyNewOrder(
+    req.user?.tenantId,
+    constantsDefine.statusConstants.serviceType.lightPlan,
+    orderData
+  )
   // データベースエラーは、エラーオブジェクトが返る
   if (result instanceof Error) return next(errorHelper.create(500))
 

@@ -16,10 +16,67 @@ block content
               .panel-block
                 .container
                   p.title.is-5 解約する前に以下の内容をご確認ください。
-                  p ・デジタルトレードアプリ解約後は、デジタルトレードアプリで提供中のすべてのサービスがご利用できなくなります。
-                  p ・デジタルトレードアプリ解約後もTradeshiftはそのままご利用いただけます。
-                  p ・デジタルトレードアプリの解約申請申し込み後の取り消しはお受けできません。
+                  p ・ライトプラン解約後は、ライトプランで提供中のサービスがご利用できなくなります。
+                  p ・ライトプラン解約後もデジタルトレードアプリはそのままご利用いただけます。
+                  p ・ライトプランの解約申請申し込み後の取り消しはお受けできません。
                   p ・お客さまデータは規約に基づき取り扱いさせていただきます。
+
+                  .columns.is-centered: .column.is-four-fifths
+                    .field.card
+                      .card-content
+                        .title.is-4 基本情報
+                        .field
+                          label(for="salesChannelCode").input-label 販売チャネルコード
+                          p#salesChannelCodeMessage.input-label-required.input-label
+                          .control
+                            input.input#salesChannelCode(type="text" name="salesChannelCode" value="" pattern=inputPatternEngNumKana maxlength=8 placeholder='半角英数カナ8桁まで')
+                        .field
+                          label(for="salesChannelName").input-label 販売チャネル名
+                          p#salesChannelNameMessage.input-label-required.input-label
+                          .control
+                            input.input#salesChannelName(type="text" name="salesChannelName" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16桁まで')
+                        .field
+                          label(for="salesChannelDeptName").input-label 部課名
+                          p#salesChannelDeptNameMessage.input-label-required.input-label
+                          .control
+                            input.input#salesChannelDeptName(type="text" name="salesChannelDeptName" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16桁まで')
+                        .field
+                          label(for="salesChannelEmplyeeCode").input-label 社員コード
+                          p#salesChannelEmplyeeCodeMessage.input-label-required.input-label
+                          .control
+                            input.input#salesChannelEmplyeeCode(type="text" name="salesChannelEmplyeeCode" value="" pattern=inputPatternEngNumKana maxlength=8 placeholder='半角8桁まで')
+                        .field
+                          label(for="salesChannelPersonName").input-label 担当者名
+                          p#salesChannelPersonNameMessage.input-label-required.input-label
+                          .control
+                            input.input#salesChannelPersonName(type="text" name="salesChannelPersonName" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16桁まで')
+                        .field
+                          label(for="salesChannelDeptType").input-label 組織区分
+                          p#salesChannelDeptTypeMessage.input-label-required.input-label
+                          .control
+                            .select.is-fullwidth
+                              select#salesChannelDeptType(name="salesChannelDeptType")
+                                option(value= '')= '選択してください'
+                                each salesChannelDept in salesChannelDeptList
+                                  option(value= salesChannelDept.name)= salesChannelDept.name 
+                        .field
+                          label(for="salesChannelPhoneNumber").input-label 電話番号
+                          p#salesChannelPhoneNumberRequired.input-label
+                          p.input-label ※ハイフン含む13桁まで　
+                          p#salesChannelPhoneNumberMessage.input-label-required.input-label
+                          .control
+                            input.input#salesChannelPhoneNumber(type="text" name="salesChannelPhoneNumber" value="" pattern=inputPattarnTellNumber maxlength=13 placeholder='例：000-0000-0000')
+                        .field
+                          label(for="salesChannelMailAddress").input-label メールアドレス
+                          p#salesChannelMailAddressRequired.input-label
+                          p.input-label ※メールアドレス　
+                          p#salesChannelMailAddressMessage.input-label-required.input-label
+                          .control
+                            input.input#salesChannelMailAddress(type="text" name="salesChannelMailAddress" value="" pattern=inputPattarnMailAddress maxlength=82 placeholder='例：bcd@gma.com')
+                            //- CSRF対策
+                        input(type="hidden" name="_csrf" value=csrfToken)
+                        //- input(type="hidden" name="contractNumber" value=numberN)
+
                   .columns.is-centered: .column.is-four-fifths
                     .field.is-grouped.is-grouped-centered
                       .control
@@ -45,6 +102,35 @@ block content
                       tr
                         td.confirmation-item お客様番号
                         td #{numberN}
+                  table.table.is-fullwidth.is-bordered
+                    tbody
+                      tr
+                        th(colspan="3") 基本情報
+                      tr
+                        td.confirmation-item(colspan="2") 販売チャネルコード
+                        td#resalesChannelCode.checkData
+                      tr
+                        td.confirmation-item(colspan="2") 販売チャネル名
+                        td#resalesChannelName.checkData
+                      tr
+                        td.confirmation-item(colspan="2") 部課名
+                        td#resalesChannelDeptName.checkData
+                      tr
+                          td.confirmation-item(colspan="2") 社員コード
+                          td#resalesChannelEmplyeeCode.checkData
+                      tr
+                          td.confirmation-item(colspan="2") 担当者名
+                          td#resalesChannelPersonName.checkData
+                      tr
+                          td.confirmation-item(colspan="2") 組織区分
+                          td#resalesChannelDeptType.checkData
+                      tr
+                          td.confirmation-item(colspan="2") 電話番号
+                          td#resalesChannelPhoneNumber.checkData
+                      tr
+                          td.confirmation-item(colspan="2") メールアドレス
+                          td#resalesChannelMailAddress.checkData
+
                   p.has-text-danger 下記の「解約」ボタンを押下した後の取り消しはできません。
 
                 footer.modal-card-foot
@@ -54,4 +140,5 @@ block content
   include footer
 
 block append scripts
+  script(src="/js/common/common.js")
   script(src="/js/cancelLightPlan-page.js")

@@ -3,8 +3,8 @@ block content
   .max-width
     section.hero.is-small.is-com
       .hero-body-noImage
-        .title.is-family-noto-sans 利用登録
-        .subtitle.is-family-noto-sans REGISTER
+        .title.is-family-noto-sans ライトプラン申込
+        .subtitle.is-family-noto-sans LIGHTPLAN REGISTER
 
 
     .columns.is-centered
@@ -12,7 +12,7 @@ block content
         .container.is-max-widescreen.is-family-noto-sans
           form#form(action="#")
             article.panel.is-info
-              h2.panel-heading デジタルトレードアプリご利用にあたって
+              h2.panel-heading ライトプランご利用にあたって
               .panel-block
                 .container
                   p.ml-4 必要項目を入力後、利用規約に同意して「次へ」ボタンを押してください。
@@ -25,9 +25,10 @@ block content
                           .title.is-4 契約者名
                           .field
                             label(for="commonCustomerId").input-label 共通顧客ID
+                            p#commonCustomerIdRequired.input-label-required.input-label （必須）
                             p#commonCustomerIdMessage.input-label-required.input-label
                             .control
-                              input.input#commonCustomerId(type="text" name="commonCustomerId" value="" pattern=inputPatternEngNum minlength=11 maxlength=11 placeholder='半角英数11桁')
+                              input.input#commonCustomerId(type="text" name="commonCustomerId" value="" pattern=inputPatternEngNum required minlength=11 maxlength=11 placeholder='半角英数11桁')
                           .field
                             label(for="contractorName").input-label 契約者名（企業名）
                             p#contractorNameRequired.input-label-required.input-label （必須）
@@ -211,7 +212,7 @@ block content
                             label(for="openingDate").input-label 開通希望日
                             p#openingDateMessage.input-label-required.input-label
                             .control
-                              input.input#openingDate.itemForSearch(type="date" name="openingDate" value= minissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+                              input.input#openingDate.itemForSearch(type="date" name="openingDate" value= minissuedate pattern=inputPatternDate)
                           .field
                             label(for="salesChannelCode").input-label 販売チャネルコード
                             p#salesChannelCodeMessage.input-label-required.input-label

@@ -32,6 +32,22 @@ module.exports = {
       return error
     }
   },
+  findOneByServiceType: async (tenantId, serviceType) => {
+    try {
+      const contract = await Contract.findOne({
+        where: {
+          tenantId: tenantId,
+          serviceType: serviceType
+        }
+      })
+
+      return contract
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
+  },
   findContract: async (_where, _orders) => {
     try {
       const contract = await Contract.findOne(

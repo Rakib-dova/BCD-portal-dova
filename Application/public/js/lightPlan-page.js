@@ -270,7 +270,6 @@ $('#next-btn').addEventListener('click', function (e) {
   // 各項目のバリデーションチェック
   for (const element of elements) {
     // 項目のエラーメッセージ表示先のエレメントの取得
-    console.log(element.getAttribute('name'))
     const messageElement = $('#' + element.getAttribute('name') + 'Message')
     // 項目のエラーメッセージのクリア
     if (messageElement) messageElement.textContent = ''
@@ -297,6 +296,15 @@ $('#next-btn').addEventListener('click', function (e) {
   if ($('#password').value !== $('#passwordConfirm').value) {
     if (!firstError) firstError = $('#password')
     $('#passwordMessage').textContent = '　入力されたパスワードが一致しません。'
+  }
+
+  // 開通希望日チェック(過去の日付を設定された場合)
+  if (
+    $('#openingDate').value &&
+    new Date($('#openingDate').value).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)
+  ) {
+    if (!firstError) firstError = $('#openingDate')
+    $('#openingDateMessage').textContent = '　過去の日付を設定できません。'
   }
 
   if (firstError) {

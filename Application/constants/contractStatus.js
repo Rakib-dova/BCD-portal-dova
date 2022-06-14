@@ -39,20 +39,19 @@ constantsDefine({
     lightPlan: '030'
   },
 
-  // サービス種別
-  serviceTypeFree: '010',
-  serviceTypeIntroductionSupport: '020',
-  serviceTypeLightPlan: '030',
-
   // 商品コード
-  prdtCodeFree: 'BF1021000000100',
-  prdtCodeIntroductionSupport: 'BF4022000000100',
-  prdtCodeLightPlan: 'BF3022000000100',
+  prdtCode: {
+    bcd: 'BF1021000000100',
+    introductionSupport: 'BF4022000000100',
+    lightPlan: 'BF3022000000100'
+  },
 
   // 申込区分
-  appTypeNew: '010',
-  appTypeChange: '020',
-  appTypeCancel: '030',
+  appType: {
+    new: '010',
+    change: '020',
+    cancel: '030'
+  },
 
   // 変更有無
   contractChange: '1',
