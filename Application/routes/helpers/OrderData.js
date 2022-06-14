@@ -50,7 +50,7 @@ class OrderData {
     // メールアドレス
     this.contractBasicInfo.salesChannelMailAddress = inputData.salesChannelMailAddress ?? 'digitaltrade-ap-ops@ntt.com'
     // 開通案内パスワード
-    this.contractBasicInfo.kaianPassword = inputData.passworddd ?? ''
+    this.contractBasicInfo.kaianPassword = inputData.password ?? ''
 
     // 新設の場合
     if (orderType === statusConstants.orderType.newOrder) {

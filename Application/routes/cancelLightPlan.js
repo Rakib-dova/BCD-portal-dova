@@ -16,13 +16,16 @@ const csrfProtection = csrf({ cookie: false })
 
 const checkContractStatus = async (req, res, next) => {
   // ライトプランの契約情報を取得する
-  const contract = await contractController.findOneByServiceType(
-    req.user.tenantId,
-    constantsDefine.statusConstants.serviceType.lightPlan
+  const contracts = await contractController.findContracts(
+    { tenantId: req.user.tenantId, serviceType: constantsDefine.statusConstants.serviceType.lightPlan },
+    null
   )
 
   // 申し込み前、または申し込み～竣工完了まで場合
-  if (!contract || contract.contractStatus !== constantsDefine.statusConstants.contractStatus.onContract) {
+  if (
+    !contracts?.length ||
+    !contracts.some((i) => i.contractStatus === constantsDefine.statusConstants.contractStatus.onContract)
+  ) {
     return next(noticeHelper.create('lightPlanUnregistered'))
   }
   next()
@@ -70,7 +73,6 @@ const cancelLightPlan = async (req, res, next) => {
     constantsDefine.statusConstants.serviceType.lightPlan,
     orderData
   )
-  console.log(result)
   // データベースエラーは、エラーオブジェクトが返る
   if (result instanceof Error) return next(errorHelper.create(500))
 

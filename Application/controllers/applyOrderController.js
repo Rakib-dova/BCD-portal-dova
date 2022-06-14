@@ -24,13 +24,8 @@ const applyNewOrder = async (tenantId, serviceType, orderData) => {
       const contractId = uuidv4()
 
       // Contractデータの登録
-      await Contract.findOrCreate({
-        where: {
-          tenantId: tenantId,
-          deleteFlag: false,
-          serviceType: serviceType
-        },
-        defaults: {
+      await Contract.create(
+        {
           contractId: contractId,
           tenantId: tenantId,
           serviceType: serviceType,
@@ -40,8 +35,10 @@ const applyNewOrder = async (tenantId, serviceType, orderData) => {
           createdAt: date,
           updatedAt: date
         },
-        transaction: t
-      })
+        {
+          transaction: t
+        }
+      )
 
       // Orderデータの登録
       await Order.create(
@@ -73,12 +70,18 @@ const applyNewOrder = async (tenantId, serviceType, orderData) => {
 const cancelOrder = async (tenantId, serviceType, orderData) => {
   try {
     const created = await db.sequelize.transaction(async (t) => {
-      const contract = await contractController.findOneByServiceType(tenantId, serviceType)
+      const contract = await contractController.findContract(
+        {
+          tenantId: tenantId,
+          serviceType: serviceType,
+          contractStatus: statusConstants.contractStatus.onContract
+        },
+        null
+      )
 
       // 契約が存在しない場合
       if (!contract?.contractId) throw new Error('Not Founded ContractId')
 
-      console.log(contract?.contractId)
       // 現在の日時
       const date = new Date()
 

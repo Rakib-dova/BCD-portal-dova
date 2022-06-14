@@ -32,22 +32,6 @@ module.exports = {
       return error
     }
   },
-  findOneByServiceType: async (tenantId, serviceType) => {
-    try {
-      const contract = await Contract.findOne({
-        where: {
-          tenantId: tenantId,
-          serviceType: serviceType
-        }
-      })
-
-      return contract
-    } catch (error) {
-      // status 0はDBエラー
-      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
-      return error
-    }
-  },
   findContract: async (_where, _orders) => {
     try {
       const contract = await Contract.findOne(
@@ -61,6 +45,21 @@ module.exports = {
       return contract
     } catch (error) {
       logger.error({ SQL: `SELECT * FROM WHERE ${_where} ORDER BY ${_orders} / Error : ${error}` })
+      return error
+    }
+  },
+  findContracts: async (where, order) => {
+    try {
+      const contract = await Contract.findAll({
+        raw: true,
+        where: where,
+        order
+      })
+
+      return contract
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ where: where, stack: error.stack, status: 0 }, error.name)
       return error
     }
   },
