@@ -16,6 +16,20 @@ constantsDefine({
   orderTypeCancelOrder: '030',
   orderTypeSimpleChangeOrder: '040',
 
+  // 商品コード
+  prdtCode: {
+    bcd: 'BF1021000000100',
+    introductionSupport: 'BF4022000000100',
+    lightPlan: 'BF3022000000100'
+  },
+
+  // 申込区分
+  appType: {
+    new: '010',
+    change: '020',
+    cancel: '030'
+  },
+
   // 変更有無
   contractChange: '1',
 
