@@ -25,9 +25,10 @@ block content
                           .title.is-4 契約者名
                           .field
                             label(for="commonCustomerId").input-label 共通顧客ID
+                            p#commonCustomerIdRequired.input-label-required.input-label （必須）
                             p#commonCustomerIdMessage.input-label-required.input-label
                             .control
-                              input.input#commonCustomerId(type="text" name="commonCustomerId" value="" pattern=inputPatternEngNum minlength=11 maxlength=11 placeholder='半角英数11桁')
+                              input.input#commonCustomerId(type="text" name="commonCustomerId" value="" pattern=inputPatternEngNum required minlength=11 maxlength=11 placeholder='半角英数11桁')
                           .field
                             label(for="contractorName").input-label 契約者名（企業名）
                             p#contractorNameRequired.input-label-required.input-label （必須）
