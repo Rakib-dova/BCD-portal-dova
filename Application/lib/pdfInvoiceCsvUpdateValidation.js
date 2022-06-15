@@ -1,5 +1,4 @@
 const pdfInvoiceController = require('../controllers/pdfInvoiceController.js')
-const logger = require('../lib/logger')
 const tax = require('../lib/tax')
 const { convertCsvStringToMultiArray } = require('../lib/csv')
 const { v4: uuidv4 } = require('uuid')
@@ -32,6 +31,7 @@ const invoiceRules = [
   },
   {
     prop: 'deliveryDate',
+    customValidator: (value) => !isNaN(new Date(value).getDate()),
     regexp: '',
     message: '納品日が不正な日付です。',
     colName: '納品日',
@@ -53,7 +53,7 @@ const invoiceRules = [
   },
   {
     prop: 'recAddr1',
-    regexp: /^.{1,7}$/,
+    regexp: /^.{1,10}$/,
     message: '宛先都道府県は10文字以内で入力して下さい。',
     colName: '宛先都道府県',
     required: true
@@ -118,7 +118,7 @@ const lineRules = [
     required: true
   },
   {
-    prop: 'lineDiscription',
+    prop: 'lineDescription',
     regexp: /^.{0,100}$/,
     message: '明細-内容は100文字以内で入力してください。',
     colName: '明細-内容',
@@ -126,9 +126,9 @@ const lineRules = [
   },
   {
     prop: 'quantity',
-    customValidator: (value) => value > 0 && value <= 1000000000000,
+    customValidator: (value) => value > 0 && value <= 999999999999.999,
     regexp: '',
-    message: '明細-数量は整数or少数 0 ～ 1000000000000 の範囲で入力してください。',
+    message: '数量は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。',
     colName: '明細-数量',
     required: true
   },
@@ -177,7 +177,8 @@ const validate = async (invoices, lines, tenantId, fileName) => {
   const doneList = [] // バリデーションが完了した請求書Noの配列
   const uploadedList = uploadedInvoices.map((invoice) => invoice.invoiceNo) // アップロード済み(DB保存済み)PDF請求書Noの配列
   const historyId = uuidv4() // アップロード履歴ID生成
-  const uploadHistory = { // アップロード履歴objの初期化 (最終的にこれを返してDBに保存)
+  const uploadHistory = {
+    // アップロード履歴objの初期化 (最終的にこれを返してDBに保存)
     invoiceUploadId: historyId,
     tenantId,
     csvFileName: fileName,
@@ -220,7 +221,8 @@ const validate = async (invoices, lines, tenantId, fileName) => {
     })
 
     doneList.push(invoice.invoiceNo)
-    if (invoiceIsValid) { // バリデーションに全部パスした場合
+    if (invoiceIsValid) {
+      // バリデーションに全部パスした場合
       uploadHistory.invoiceCount++
       validInvoices.push(invoice) // DB保存用配列に追加
       validLines = validLines.concat(filteredLines) // DB保存用配列に追加
@@ -331,7 +333,14 @@ const validateLine = (line, history, csvRow) => {
  * @returns
  */
 const validateHeader = (uploadedCsvString, defaultCsvString) => {
-  if (!uploadedCsvString || !defaultCsvString || typeof uploadedCsvString !== 'string' || typeof defaultCsvString !== 'string') return false
+  if (
+    !uploadedCsvString ||
+    !defaultCsvString ||
+    typeof uploadedCsvString !== 'string' ||
+    typeof defaultCsvString !== 'string'
+  ) {
+    return false
+  }
 
   const uploadedCsvArray = convertCsvStringToMultiArray(uploadedCsvString)
   const defaultCsvArray = convertCsvStringToMultiArray(defaultCsvString)

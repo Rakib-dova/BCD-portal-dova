@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   PdfInvoiceUploadDetail.init(
     {
+      // 以下、修正予定のため残しています
       // historyId: {
       //   type: DataTypes.UUID,
       //   primaryKey: true,
