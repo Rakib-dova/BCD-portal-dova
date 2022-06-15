@@ -2,6 +2,20 @@ const Contract = require('../models').Contract
 const logger = require('../lib/logger')
 
 module.exports = {
+  findContractsBytenantId: async (tenantId, order) => {
+    try {
+      const contracts = await Contract.findAll({
+        raw: true,
+        where: { tenantId: tenantId },
+        order
+      })
+
+      return contracts
+    } catch (error) {
+      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+      return null
+    }
+  },
   findOne: async (tenantId) => {
     try {
       const contract = await Contract.findOne({

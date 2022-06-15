@@ -7,6 +7,8 @@ const contractController = require('../../controllers/contractController')
 const noticeHelper = require('./notice')
 const errorHelper = require('./error')
 const validate = require('../../lib/validate')
+const constantsDefine = require('../../constants')
+const serviceTypes = constantsDefine.statusConstants.serviceTypes
 
 exports.isAuthenticated = async (req, res, next) => {
   if (req.user?.userId) {
@@ -155,20 +157,10 @@ exports.bcdAuthenticate = async (req, res, next) => {
   // ==========================================================================
   // DBの契約情報確認
   // ==========================================================================
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) {
-    if (req.method === 'DELETE') {
-      return res.send({ result: 0 })
-    } else {
-      return next(errorHelper.create(500))
-    }
-  }
-  // 契約情報の確認
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  if (!contractStatus) {
+
+  // テナントIDに紐付いている全ての契約情報を取得
+  const contracts = await contractController.findContractsBytenantId(req.user.tenantId)
+  if (!contracts || !Array.isArray(contracts) || contracts.length === 0) {
     if (req.method === 'DELETE') {
       return res.send({ result: 0 })
     } else {
@@ -176,8 +168,18 @@ exports.bcdAuthenticate = async (req, res, next) => {
     }
   }
 
-  // 解約受付中か確認
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+  // BCD無料アプリの契約情報確認
+  const bcdContract = contracts.find((contract) => contract.serviceType === serviceTypes.bcd && contract.deleteFlag === false)
+  if (!bcdContract || !bcdContract.contractStatus) {
+    if (req.method === 'DELETE') {
+      return res.send({ result: 0 })
+    } else {
+      return next(errorHelper.create(500))
+    }
+  }
+
+  // 現在解約中か確認
+  if (validate.isBcdCancelling(bcdContract)) {
     if (req.method === 'DELETE') {
       return res.send({ result: 0 })
     } else {
@@ -185,20 +187,7 @@ exports.bcdAuthenticate = async (req, res, next) => {
     }
   }
 
-  // 契約変更 or 解約 場合は追加のバリデーションをする
-  if (req.originalUrl === '/change' || req.originalUrl === '/cancellation') {
-    if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
-      return next(noticeHelper.create('generaluser'))
-    }
-    if (!validate.isStatusForRegister(contractStatus, deleteFlag)) {
-      return next(noticeHelper.create('registerprocedure'))
-    }
-    if (!validate.isStatusForSimpleChange(contractStatus, deleteFlag)) {
-      return next(noticeHelper.create('changeprocedure'))
-    }
-  }
-
   req.dbUser = user
-  req.contract = contract
+  req.contracts = contracts
   next()
 }

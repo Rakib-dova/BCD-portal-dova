@@ -1,5 +1,6 @@
 // See https://qiita.com/standard-software/items/0b2617062b2e4c7f1abb
 const constantsDefine = require('../constants')
+const contractStatuses = constantsDefine.statusConstants.contractStatuses
 
 const assert = function (value, message) {
   if (typeof message === 'undefined' || message === null) {
@@ -137,6 +138,23 @@ const isStatusForSimpleChange = function (contractStatus, deleteFlag) {
     return false
   }
   return true
+}
+
+/**
+ * デジトレ契約が解約中か判定する
+ * @param {*} contract デジトレ契約情報
+ * @returns
+ */
+const isBcdCancelling = (bcdContract) => {
+  // deleteFlag: false & 契約ステータスが解約着手待ちor解約対応中 の場合
+  if (
+    !bcdContract.deleteFlag &&
+    (bcdContract.contractStatus === contractStatuses.cancellationOrder || bcdContract.contractStatus === contractStatuses.cancellationReceive)
+  ) {
+    return true
+  } else {
+    return false
+  }
 }
 
 // CSVファイルのバリデーションチェック（現在行～）
@@ -611,6 +629,7 @@ module.exports = {
   isStatusForRegister: isStatusForRegister,
   isStatusForCancel: isStatusForCancel,
   isStatusForSimpleChange: isStatusForSimpleChange,
+  isBcdCancelling: isBcdCancelling,
   isInvoiceId: isInvoiceId,
   isBankName: isBankName,
   isDate: isDate,
