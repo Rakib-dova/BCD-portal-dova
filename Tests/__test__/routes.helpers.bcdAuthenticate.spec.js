@@ -14,8 +14,8 @@ const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const constantsDefine = require('../../Application/constants')
-const cStatus = constantsDefine.statusConstants.contractStatus
-const cServiceTyp = constantsDefine.statusConstants.serviceType
+const contractStatuses = constantsDefine.statusConstants.contractStatuses
+const serviceTypes = constantsDefine.statusConstants.serviceTypes
 
 let request, response, accessTradeshiftSpy, userFindOneSpy, tenantFindOneSpy, findContractsSpy
 
@@ -49,8 +49,8 @@ describe('helpers/middleware.bcdAuthenthicete()のテスト', () => {
     })
     findContractsSpy.mockResolvedValue([
       {
-        serviceType: cServiceTyp.bcd,
-        contractStatus: cStatus.onContract,
+        serviceType: serviceTypes.bcd,
+        contractStatus: contractStatuses.onContract,
         deleteFlag: false
       }
     ])
@@ -70,8 +70,8 @@ describe('helpers/middleware.bcdAuthenthicete()のテスト', () => {
     })
     findContractsSpy.mockResolvedValue([
       {
-        serviceType: cServiceTyp.bcd,
-        contractStatus: cStatus.onContract,
+        serviceType: serviceTypes.bcd,
+        contractStatus: contractStatuses.onContract,
         deleteFlag: false
       }
     ])
@@ -317,7 +317,7 @@ describe('helpers/middleware.bcdAuthenthicete()のテスト', () => {
           userRole: 'dummyRole'
         }
       })
-      findContractsSpy.mockResolvedValue([{ serviceType: cServiceTyp.bcd, deleteFlag: false }])
+      findContractsSpy.mockResolvedValue([{ serviceType: serviceTypes.bcd, deleteFlag: false }])
 
       await middleware.bcdAuthenticate(request, response, next)
 
@@ -333,7 +333,7 @@ describe('helpers/middleware.bcdAuthenthicete()のテスト', () => {
           userRole: 'dummyRole'
         }
       })
-      findContractsSpy.mockResolvedValue([{ serviceType: cServiceTyp.bcd, deleteFlag: false }])
+      findContractsSpy.mockResolvedValue([{ serviceType: serviceTypes.bcd, deleteFlag: false }])
 
       await middleware.bcdAuthenticate(request, response, next)
 
@@ -351,8 +351,8 @@ describe('helpers/middleware.bcdAuthenthicete()のテスト', () => {
       })
       findContractsSpy.mockResolvedValue([
         {
-          serviceType: cServiceTyp.bcd,
-          contractStatus: cStatus.cancellationOrder,
+          serviceType: serviceTypes.bcd,
+          contractStatus: contractStatuses.cancellationOrder,
           deleteFlag: false
         }
       ])
@@ -373,8 +373,8 @@ describe('helpers/middleware.bcdAuthenthicete()のテスト', () => {
       })
       findContractsSpy.mockResolvedValue([
         {
-          serviceType: cServiceTyp.bcd,
-          contractStatus: cStatus.cancellationOrder,
+          serviceType: serviceTypes.bcd,
+          contractStatus: contractStatuses.cancellationOrder,
           deleteFlag: false
         }
       ])
@@ -394,8 +394,8 @@ describe('helpers/middleware.bcdAuthenthicete()のテスト', () => {
       })
       findContractsSpy.mockResolvedValue([
         {
-          serviceType: cServiceTyp.bcd,
-          contractStatus: cStatus.cancellationReceive,
+          serviceType: serviceTypes.bcd,
+          contractStatus: contractStatuses.cancellationReceive,
           deleteFlag: false
         }
       ])
@@ -416,8 +416,8 @@ describe('helpers/middleware.bcdAuthenthicete()のテスト', () => {
       })
       findContractsSpy.mockResolvedValue([
         {
-          serviceType: cServiceTyp.bcd,
-          contractStatus: cStatus.cancellationReceive,
+          serviceType: serviceTypes.bcd,
+          contractStatus: contractStatuses.cancellationReceive,
           deleteFlag: false
         }
       ])

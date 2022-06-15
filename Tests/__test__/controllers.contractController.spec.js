@@ -4,8 +4,8 @@ jest.mock('../../Application/lib/logger')
 
 const contractController = require('../../Application/controllers/contractController')
 const constantsDefine = require('../../Application/constants')
-const cStatus = constantsDefine.statusConstants.contractStatus
-const cServiceTyp = constantsDefine.statusConstants.serviceType
+const contractStatuses = constantsDefine.statusConstants.contractStatuses
+const serviceTypes = constantsDefine.statusConstants.serviceTypes
 
 let findAllSpy, findOneSpy, errorSpy, tenantId, findContractSpy, updateSpy
 describe('contractControllerのテスト', () => {
@@ -32,8 +32,8 @@ describe('contractControllerのテスト', () => {
   // 正常系契約情報
   const normalContracts = [
     {
-      serviceType: cServiceTyp.bcd,
-      contractStatus: cStatus.onContract,
+      serviceType: serviceTypes.bcd,
+      contractStatus: contractStatuses.onContract,
       deleteFlag: false
     }
   ]
