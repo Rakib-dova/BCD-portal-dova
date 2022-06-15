@@ -9,10 +9,11 @@ constantsDefine({
   contractStatusCancellationReceive: '31',
   contractStatusSimpleChangeContractOrder: '40',
   contractStatusSimpleChangeContractReceive: '41',
-  contractStatus: {
+  contractStatuses: {
     onContract: '00',
     newContractOrder: '10',
     newContractReceive: '11',
+    newContractBeforeCompletion: '12',
     cancellationOrder: '30',
     cancellationReceive: '31',
     simpleChangeContractOrder: '40',
@@ -25,7 +26,7 @@ constantsDefine({
   orderTypeChangeOrder: '020',
   orderTypeCancelOrder: '030',
   orderTypeSimpleChangeOrder: '040',
-  orderType: {
+  orderTypes: {
     newOrder: '010',
     changeOrder: '020',
     cancelOrder: '030',
@@ -33,7 +34,7 @@ constantsDefine({
   },
 
   // serviceType
-  serviceType: {
+  serviceTypes: {
     bcd: '010',
     introductionSupport: '020',
     lightPlan: '030'
