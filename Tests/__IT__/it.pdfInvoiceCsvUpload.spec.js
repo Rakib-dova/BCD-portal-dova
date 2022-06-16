@@ -75,6 +75,7 @@ jest.mock('../../Application/routes/helpers/middleware', () => {
       req.params = defaultParams
       req.body = defaultBody
       req.file = { buffer: Buffer.from(uploadFileData) }
+      req.csrfToken = () => 'dummyCsrfToken'
       return next()
     }
   }

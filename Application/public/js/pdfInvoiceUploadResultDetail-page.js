@@ -114,7 +114,8 @@ const apiController = async (url, method, callback = null) => {
   const options = {
     method,
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
     }
   }
 

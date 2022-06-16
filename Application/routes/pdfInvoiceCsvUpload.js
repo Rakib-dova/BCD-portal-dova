@@ -7,6 +7,9 @@ const path = require('path')
 const db = require('../models')
 const multer = require('multer')
 const upload = multer({ storage: multer.memoryStorage() })
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const logger = require('../lib/logger')
@@ -33,7 +36,8 @@ const pdfInvoiceCsvUploadIndex = async (req, res, next) => {
 
   res.render('pdfInvoiceCsvUpload', {
     title: 'PDF請求書ドラフト一括作成',
-    engTitle: 'CSV UPLOAD for PDF'
+    engTitle: 'CSV UPLOAD for PDF',
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceCsvUploadIndex')
@@ -175,7 +179,8 @@ const pdfInvoiceCsvUploadResult = async (req, res, next) => {
   res.render('pdfInvoiceCsvUploadResult', {
     title: '取込結果一覧',
     engTitle: 'Result LIST',
-    resultArr: resultArr
+    resultArr: resultArr,
+    csrfToken: req.csrfToken()
   })
   logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
 }

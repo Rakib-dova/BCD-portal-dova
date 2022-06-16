@@ -216,7 +216,7 @@ const validLinesData = {
       invoiceId: '9994113d-79aa-4222-837d-46423f292ba1',
       lineIndex: 0,
       lineId: 'a001',
-      lineDiscription: '明細１',
+      lineDescription: '明細１',
       unit: '個',
       unitPrice: '単価',
       quantity: '1',
@@ -226,7 +226,7 @@ const validLinesData = {
       invoiceId: '915f6baf-1aa5-41a2-9ba0-e8734b9bb9cc',
       lineIndex: 0,
       lineId: 'a001',
-      lineDiscription: '明細１',
+      lineDescription: '明細１',
       unit: '1000',
       unitPrice: '100000',
       quantity: '1',
@@ -238,7 +238,7 @@ const validLinesData = {
       invoiceId: '9994113d-79aa-4222-837d-46423f292ba1',
       lineIndex: 0,
       lineId: 'a001',
-      lineDiscription: '明細１',
+      lineDescription: '明細１',
       unit: '個',
       unitPrice: '単価',
       quantity: '1',
@@ -251,7 +251,7 @@ const validLinesData = {
       invoiceId: '9994113d-79aa-4222-837d-46423f292ba1',
       lineIndex: 0,
       lineId: 'a001',
-      lineDiscription: '明細１',
+      lineDescription: '明細１',
       unit: '個',
       unitPrice: '単価',
       quantity: '1',
@@ -368,12 +368,14 @@ const exprectedResultData = {
         status: true,
         invoiceUploadId: '0b906415-308c-449f-964c-18662c33c592'
       }
-    ]
+    ],
+    csrfToken: 'dummyCsrfToken'
   },
   err: {
     title: '取込結果一覧',
     engTitle: 'Result LIST',
-    resultArr: []
+    resultArr: [],
+    csrfToken: 'dummyCsrfToken'
   }
 }
 
@@ -454,6 +456,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
   beforeEach(() => {
     request = new Request()
     request.user = user[0]
+    request.csrfToken = () => 'dummyCsrfToken'
     response = new Response()
     infoSpy = jest.spyOn(logger, 'info')
     errorSpy = jest.spyOn(logger, 'error')
@@ -494,7 +497,8 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       expect(response.render).toHaveBeenCalledWith('pdfInvoiceCsvUpload', {
         title: 'PDF請求書ドラフト一括作成',
-        engTitle: 'CSV UPLOAD for PDF'
+        engTitle: 'CSV UPLOAD for PDF',
+        csrfToken: 'dummyCsrfToken'
       })
     })
   })
