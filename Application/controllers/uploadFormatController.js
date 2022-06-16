@@ -32,7 +32,7 @@ module.exports = {
     }
 
     try {
-      contractRow = await contractController.findContract({ tenantId: _tenantId, deleteFlag: false }, 'createdAt DESC')
+      contractRow = await contractController.findContract({ tenantId: _tenantId, serviceType: '010', deleteFlag: false }, 'createdAt DESC')
       contractId = contractRow?.dataValues?.contractId
     } catch (error) {
       logger.error({ contractId: uploadContractId, stack: error.stack, status: 0 })
