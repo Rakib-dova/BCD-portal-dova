@@ -84,7 +84,7 @@ exports.isUserRegistered = async (req, res, next) => {
 }
 
 exports.checkContractStatus = async (tenantId) => {
-  const contracts = await contractController.findContract({ tenantId: tenantId, deleteFlag: false }, 'createdAt DESC')
+  const contracts = await contractController.findContract({ tenantId: tenantId, serviceType: '010', deleteFlag: false }, 'createdAt DESC')
 
   // DB検索エラーの場合
   if (contracts instanceof Error) {
