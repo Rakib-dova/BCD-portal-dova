@@ -41,7 +41,7 @@ const pdfInvoiceMapper = [
   { col: '口座名義', prop: 'accountName', modifier: null },
   { col: '備考', prop: 'note', modifier: null },
   { col: '明細-項目ID', prop: 'lineId', modifier: null },
-  { col: '明細-内容', prop: 'lineDiscription', modifier: null },
+  { col: '明細-内容', prop: 'lineDescription', modifier: null },
   { col: '明細-数量', prop: 'quantity', modifier: null },
   { col: '明細-単位', prop: 'unit', modifier: null },
   { col: '明細-単価', prop: 'unitPrice', modifier: null },

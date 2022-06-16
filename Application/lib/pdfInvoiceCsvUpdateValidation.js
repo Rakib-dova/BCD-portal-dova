@@ -213,9 +213,10 @@ const validate = async (invoices, lines, tenantId, fileName) => {
       // 請求書明細のバリデーション
       const lineIsValid = validateLine(line, uploadHistory, csvRow)
       console.log('==  validateLine  ======================: ', lineIsValid)
+
       // 請求書項目バリデーションまでパス & 明細バリデーション失敗 の場合のみバリデーションフラグを false にする
       // この条件を指定しないと、請求書項目バリデーションが失敗しても明細バリデーションが成功すると全体のバリデーションがパスしてしまう
-      if (invoiceIsValid && !lineIsValid) invoiceIsValid = true
+      if (invoiceIsValid && !lineIsValid) invoiceIsValid = false
       if (invoiceIsValid) uploadHistory.successCount++
       csvRows.push(csvRow)
     })

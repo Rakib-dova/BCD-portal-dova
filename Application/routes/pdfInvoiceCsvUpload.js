@@ -49,10 +49,7 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   let defaultCsvData
   try {
     uploadFileData = req.file.buffer.toString('UTF-8') // CSV文字列データ
-    defaultCsvData = fs.readFileSync(
-      path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv'),
-      'utf8'
-    ) // アップロードフォーマット文字列データ
+    defaultCsvData = fs.readFileSync(path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv'), 'utf8') // アップロードフォーマット文字列データ
   } catch (error) {
     logger.info(error)
     return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
@@ -79,6 +76,7 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
 
   // アカウント情報取得 (CSVデータ多次元配列をデータオブジェクトに変換するのに必要)
   const { senderInfo } = await pdfInvoice.getAccountAndSenderInfo(req)
+
   if (!senderInfo) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
 
   // DB保存&バリデーションするために、CSV行データオブジェクト配列をDBモデルに変換
@@ -238,7 +236,9 @@ const pdfInvoiceCsvUploadResultDetail = async (req, res, next) => {
 }
 
 const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) => {
-  if (!Array.isArray(csvArray) || getType(senderInfo) !== 'Object' || typeof tenantId !== 'string') return { pdfInvoices: null, pdfInvoiceLines: null }
+  if (!Array.isArray(csvArray) || getType(senderInfo) !== 'Object' || typeof tenantId !== 'string') {
+    return { pdfInvoices: null, pdfInvoiceLines: null }
+  }
 
   const pdfInvoices = [] // 変換済み請求書
   const pdfInvoiceLines = []
@@ -285,7 +285,7 @@ const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) =
       invoiceId,
       lineIndex,
       lineId: row.lineId,
-      lineDiscription: row.lineDiscription,
+      lineDescription: row.lineDescription,
       unit: row.unit,
       unitPrice: row.unitPrice,
       quantity: row.quantity,
