@@ -4,8 +4,13 @@ const Contract = require('../models').Contract
 const Order = require('../models').Order
 const db = require('../models')
 const contractController = require('../controllers/contractController')
-const statusConstants = require('../constants').statusConstants
+const constants = require('../constants').statusConstants
 const logger = require('../lib/logger')
+
+// 契約ステータス
+const contractStatuses = constants.contractStatuses
+// オーダー種別
+const orderTypes = constants.orderTypes
 
 /**
  * 契約
@@ -16,7 +21,7 @@ const logger = require('../lib/logger')
  */
 const applyNewOrder = async (tenantId, serviceType, orderData) => {
   try {
-    const created = await db.sequelize.transaction(async (t) => {
+    await db.sequelize.transaction(async (t) => {
       // 現在の日時
       const date = new Date()
 
@@ -30,7 +35,7 @@ const applyNewOrder = async (tenantId, serviceType, orderData) => {
           tenantId: tenantId,
           serviceType: serviceType,
           numberN: '',
-          contractStatus: statusConstants.contractStatus.newContractOrder,
+          contractStatus: contractStatuses.newContractOrder,
           deleteFlag: false,
           createdAt: date,
           updatedAt: date
@@ -45,14 +50,12 @@ const applyNewOrder = async (tenantId, serviceType, orderData) => {
         {
           contractId: contractId,
           tenantId: tenantId,
-          orderType: statusConstants.orderType.newOrder,
+          orderType: orderTypes.newOrder,
           orderData: JSON.stringify(orderData)
         },
         { transaction: t }
       )
     })
-
-    return created
   } catch (error) {
     // status 0はDBエラー
     logger.error({ tenant: tenantId, stack: error.stack, status: 0 }, error.name)
@@ -69,12 +72,12 @@ const applyNewOrder = async (tenantId, serviceType, orderData) => {
  */
 const cancelOrder = async (tenantId, serviceType, orderData) => {
   try {
-    const created = await db.sequelize.transaction(async (t) => {
+    await db.sequelize.transaction(async (t) => {
       const contract = await contractController.findContract(
         {
           tenantId: tenantId,
           serviceType: serviceType,
-          contractStatus: statusConstants.contractStatus.onContract
+          contractStatus: contractStatuses.onContract
         },
         null
       )
@@ -88,7 +91,7 @@ const cancelOrder = async (tenantId, serviceType, orderData) => {
       // Contractデータの更新
       await Contract.update(
         {
-          contractStatus: statusConstants.contractStatus.cancellationOrder,
+          contractStatus: contractStatuses.cancellationOrder,
           updatedAt: date
         },
         {
@@ -104,14 +107,12 @@ const cancelOrder = async (tenantId, serviceType, orderData) => {
         {
           contractId: contract.contractId,
           tenantId: tenantId,
-          orderType: statusConstants.orderType.cancelOrder,
+          orderType: orderTypes.cancelOrder,
           orderData: JSON.stringify(orderData)
         },
         { transaction: t }
       )
     })
-
-    return created
   } catch (error) {
     // status 0はDBエラー
     logger.error({ tenant: tenantId, stack: error.stack, status: 0 }, error.name)

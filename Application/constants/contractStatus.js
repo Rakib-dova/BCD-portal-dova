@@ -41,14 +41,14 @@ constantsDefine({
   },
 
   // 商品コード
-  prdtCode: {
+  prdtCodes: {
     bcd: 'BF1021000000100',
     introductionSupport: 'BF4022000000100',
     lightPlan: 'BF3022000000100'
   },
 
   // 申込区分
-  appType: {
+  appTypes: {
     new: '010',
     change: '020',
     cancel: '030'

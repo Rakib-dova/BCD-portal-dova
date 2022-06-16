@@ -9,10 +9,17 @@ const OrderData = require('./helpers/orderData')
 const logger = require('../lib/logger')
 const applyOrderController = require('../controllers/applyOrderController.js')
 const contractController = require('../controllers/contractController.js')
-const constantsDefine = require('../constants')
+const constants = require('../constants')
 
 const router = express.Router()
 const csrfProtection = csrf({ cookie: false })
+
+// 契約ステータス
+const contractStatuses = constants.statusConstants.contractStatuses
+// サービス種別
+const serviceTypes = constants.statusConstants.serviceTypes
+// ログメッセージ
+const logMessage = constants.logMessage
 
 /**
  * ライトプランの申込の事前チェック
@@ -24,21 +31,20 @@ const csrfProtection = csrf({ cookie: false })
 const checkContractStatus = async (req, res, next) => {
   // ライトプランの契約情報を取得する
   const contracts = await contractController.findContracts(
-    { tenantId: req.user.tenantId, serviceType: constantsDefine.statusConstants.serviceType.lightPlan },
+    { tenantId: req.user.tenantId, serviceType: serviceTypes.lightPlan },
     null
   )
 
+  if (contracts instanceof Error) return next(errorHelper.create(500))
+
   // 申し込み済の場合(申し込み～解約処理完了まで)
-  if (
-    contracts?.length > 0 &&
-    contracts.some((i) => i.contractStatus !== constantsDefine.statusConstants.contractStatus.canceledContract)
-  ) {
+  if (contracts?.length > 0 && contracts.some((i) => i.contractStatus !== contractStatuses.canceledContract)) {
     if (
       contracts.some(
         (i) =>
-          i.contractStatus === constantsDefine.statusConstants.contractStatus.newContractOrder ||
-          i.contractStatus === constantsDefine.statusConstants.contractStatus.newContractReceive ||
-          i.contractStatus === constantsDefine.statusConstants.contractStatus.newContractBeforeCompletion
+          i.contractStatus === contractStatuses.newContractOrder ||
+          i.contractStatus === contractStatuses.newContractReceive ||
+          i.contractStatus === contractStatuses.newContractBeforeCompletion
       )
     ) {
       //  申込中の場合(申し込み～竣工まで)
@@ -59,7 +65,7 @@ const checkContractStatus = async (req, res, next) => {
  * @returns
  */
 const showLightPlan = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'showLightPlan')
+  logger.info(logMessage.INF000 + 'showLightPlan')
 
   // TODO DBマスターから取得
   const salesChannelDeptList = [
@@ -74,7 +80,7 @@ const showLightPlan = async (req, res, next) => {
     salesChannelDeptList: salesChannelDeptList,
     csrfToken: req.csrfToken()
   })
-  logger.info(constantsDefine.logMessage.INF001 + 'showLightPlan')
+  logger.info(logMessage.INF001 + 'showLightPlan')
 }
 
 /**
@@ -85,16 +91,16 @@ const showLightPlan = async (req, res, next) => {
  * @returns
  */
 const registerLightPlan = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'registerLightPlan')
+  logger.info(logMessage.INF000 + 'registerLightPlan')
 
   // オーダー情報の取得
   const orderData = new OrderData(
     req.user.tenantId,
     req.body,
-    constantsDefine.statusConstants.orderType.newOrder,
-    constantsDefine.statusConstants.serviceType.lightPlan,
-    constantsDefine.statusConstants.prdtCode.lightPlan,
-    constantsDefine.statusConstants.appType.new
+    constants.statusConstants.orderTypes.newOrder,
+    serviceTypes.lightPlan,
+    constants.statusConstants.prdtCodes.lightPlan,
+    constants.statusConstants.appTypes.new
   )
 
   // バリデーション
@@ -104,16 +110,11 @@ const registerLightPlan = async (req, res, next) => {
     !orderData.validateContractInfo() ||
     !orderData.validateBillMailingInfo()
   ) {
-    req.flash('info', 'システムエラーが発生しました。')
-    return res.redirect(303, '/portal')
+    return next(errorHelper.create(404))
   }
 
-  // Contracts,Ordersにデータを登録する
-  const result = await applyOrderController.applyNewOrder(
-    req.user?.tenantId,
-    constantsDefine.statusConstants.serviceType.lightPlan,
-    orderData
-  )
+  // 契約する
+  const result = await applyOrderController.applyNewOrder(req.user?.tenantId, serviceTypes.lightPlan, orderData)
   // データベースエラーは、エラーオブジェクトが返る
   if (result instanceof Error) return next(errorHelper.create(500))
 

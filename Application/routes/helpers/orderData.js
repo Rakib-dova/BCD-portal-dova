@@ -1,4 +1,4 @@
-const statusConstants = require('../../constants').statusConstants
+const constants = require('../../constants')
 
 class OrderData {
   /**
@@ -64,11 +64,11 @@ class OrderData {
     }
 
     // 新設の場合
-    if (orderType === statusConstants.orderType.newOrder) {
+    if (orderType === constants.statusConstants.orderTypes.newOrder) {
       // 販売店コード
       this.contractBasicInfo.campaignCode = inputData.campaignCode ?? ''
       // 販売担当者名
-      this.contractBasicInfo.salesPersonName = inputData.salesPersonName.replace(/\s+/g, '') ?? ''
+      this.contractBasicInfo.salesPersonName = inputData.salesPersonName?.replace(/\s+/g, '') ?? ''
 
       // 契約者情報の設定
       this.contractAccountInfo = {
