@@ -9,10 +9,17 @@ const OrderData = require('./helpers/OrderData')
 const logger = require('../lib/logger')
 const applyOrderController = require('../controllers/applyOrderController.js')
 const contractController = require('../controllers/contractController.js')
-const constantsDefine = require('../constants')
+const constants = require('../constants')
 
 const router = express.Router()
 const csrfProtection = csrf({ cookie: false })
+
+// 契約ステータス
+const contractStatuses = constants.statusConstants.contractStatuses
+// サービス種別
+const serviceTypes = constants.statusConstants.serviceTypes
+// ログメッセージ
+const logMessage = constants.logMessage
 
 /**
  * 導入支援サービスが既に申し込み済か事前チェック
@@ -25,15 +32,14 @@ const csrfProtection = csrf({ cookie: false })
 const checkContractStatus = async (req, res, next) => {
   // 導入支援サービスの契約情報を取得する
   const contracts = await contractController.findContracts(
-    { tenantId: req.user.tenantId, serviceType: constantsDefine.statusConstants.serviceType.introductionSupport },
+    { tenantId: req.user.tenantId, serviceType: serviceTypes.introductionSupport },
     null
   )
 
+  if (contracts instanceof Error) return next(errorHelper.create(500))
+
   // 申し込み済の場合は通知ページへ処理を渡す
-  if (
-    contracts?.length > 0 &&
-    contracts.some((i) => i.contractStatus !== constantsDefine.statusConstants.contractStatus.canceledContract)
-  ) {
+  if (contracts?.length > 0 && contracts.some((i) => i.contractStatus !== contractStatuses.canceledContract)) {
     return next(noticeHelper.create('introductionSupportregistered'))
   }
   next()
@@ -47,7 +53,7 @@ const checkContractStatus = async (req, res, next) => {
  * @returns
  */
 const showIntroductionSupport = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'showIntroductionSupport')
+  logger.info(logMessage.INF000 + 'showIntroductionSupport')
   const salesChannelDeptList = [
     { code: '001', name: 'Com第一営業本部' },
     { code: '002', name: 'Com第二営業本部' },
@@ -60,7 +66,7 @@ const showIntroductionSupport = async (req, res, next) => {
     salesChannelDeptList: salesChannelDeptList,
     csrfToken: req.csrfToken()
   })
-  logger.info(constantsDefine.logMessage.INF001 + 'showIntroductionSupport')
+  logger.info(logMessage.INF001 + 'showIntroductionSupport')
 }
 
 /**
@@ -71,16 +77,16 @@ const showIntroductionSupport = async (req, res, next) => {
  * @returns
  */
 const registerIntroductionSupport = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'registerIntroductionSupport')
+  logger.info(logMessage.INF000 + 'registerIntroductionSupport')
 
   // オーダー情報の取得
   const orderData = new OrderData(
     req.user.tenantId,
     req.body,
-    constantsDefine.statusConstants.orderTypeNewOrder,
-    constantsDefine.statusConstants.serviceType.introductionSupport,
-    constantsDefine.statusConstants.prdtCode.introductionSupport,
-    constantsDefine.statusConstants.appType.new
+    constants.statusConstants.orderTypes.newOrder,
+    serviceTypes.introductionSupport,
+    constants.statusConstants.prdtCodes.introductionSupport,
+    constants.statusConstants.appTypes.new
   )
 
   // バリデーション
@@ -90,14 +96,11 @@ const registerIntroductionSupport = async (req, res, next) => {
     !orderData.validateContractInfo() ||
     !orderData.validateBillMailingInfo()
   ) {
-    req.flash('info', 'システムエラーが発生しました。')
-    return res.redirect(303, '/portal')
+    return next(errorHelper.create(404))
   }
 
-  // Contracts,Ordersにデータを登録する
-  const result = await applyOrderController.applyNewOrder(req.user?.tenantId,
-    constantsDefine.statusConstants.serviceType.introductionSupport,
-    orderData)
+  // 契約する
+  const result = await applyOrderController.applyNewOrder(req.user?.tenantId, serviceTypes.introductionSupport, orderData)
   // データベースエラーは、エラーオブジェクトが返る
   if (result instanceof Error) return next(errorHelper.create(500))
 
