@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
         const contractId = await sequelize.models.Contract.findOne({
           where: {
             tenantId: tenantId,
+            serviceType: '010',
             deleteFlag: false
           }
         })

@@ -21,6 +21,7 @@ module.exports = {
       const contract = await Contract.findOne({
         where: {
           tenantId: tenantId,
+          serviceType: '010',
           deleteFlag: false
         }
       })
