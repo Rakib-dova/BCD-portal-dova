@@ -7,7 +7,7 @@ const requestApproval = require('./requestApprovalController')
 const YayoiService = require('../service/YayoiService')
 const ObcService = require('../service/ObcService')
 const PcaService = require('../service/PcaService')
-const OhkenService = require('../service/PcaService')
+const OhkenService = require('../service/OhkenService')
 
 // 複数の請求書を1つのCSVファイルにまとめる関数
 const createInvoiceDataForDownload = async (
