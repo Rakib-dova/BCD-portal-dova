@@ -216,10 +216,44 @@ describe('contractControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await contractController.findContract({ tenantId: 'tenantId', deleteFlag: false }, 'createdAt DESC')
+      const result = await contractController.findContract(
+        { tenantId: 'tenantId', deleteFlag: false },
+        'createdAt DESC'
+      )
       // 期待結果
       // DBErrorが返されること
       expect(result).toEqual(new Error('DB error mock'))
+    })
+  })
+
+  describe('findContracts', () => {
+    test('正常： 契約情報配列を返す', async () => {
+      findAllSpy.mockResolvedValue(normalContracts)
+
+      const contracts = await contractController.findContracts({ tenantId: tenantId }, null)
+
+      expect(contracts).toEqual(normalContracts)
+    })
+
+    test('正常：データ０件', async () => {
+      findAllSpy.mockReturnValueOnce([])
+
+      const contracts = await contractController.findContracts({ tenantId: tenantId }, null)
+
+      expect(contracts.length).toEqual(0)
+    })
+
+    test('準正常: DBエラー時', async () => {
+      const dbError = new Error('DB error mock')
+      findAllSpy.mockImplementation(() => new Promise((resolve, reject) => reject(dbError)))
+
+      const contracts = await contractController.findContracts({ tenantId: tenantId }, null)
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        { where: { tenantId: tenantId }, stack: expect.anything(), status: 0 },
+        expect.anything()
+      )
+      expect(contracts).toEqual(dbError)
     })
   })
 
@@ -232,10 +266,7 @@ describe('contractControllerのテスト', () => {
       updateSpy.mockReturnValueOnce(contractInfoDataUpdated)
 
       // 試験実施
-      const result = await contractController.updateStatus(
-        contractId,
-        orderType
-      )
+      const result = await contractController.updateStatus(contractId, orderType)
 
       // 期待結果
       // 想定した契約情報がReturnされていること
@@ -253,10 +284,7 @@ describe('contractControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await contractController.updateStatus(
-        contractId,
-        orderType
-      )
+      const result = await contractController.updateStatus(contractId, orderType)
       // 期待結果
       // DBErrorが返されること
       expect(result).toEqual(dbError)
