@@ -33,6 +33,10 @@ $('#file-upload').addEventListener('change', function (e) {
 })
 
 $('#start-upload-btn')?.addEventListener('click', async () => {
+  if ($('#start-upload-btn').getAttribute('Disabled') || fileReader === null) {
+    return null
+  }
+
   const modal = document.getElementById('upload-progress-modal')
   modal.classList.add('is-active')
 
