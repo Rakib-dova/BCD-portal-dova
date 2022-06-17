@@ -25,8 +25,8 @@ class Ohken {
     this.creditTaxCode = this.creditTax[0]
     this.creditAmount = coding.creditAmount
     this.creditTaxAmount = this.creditTax[1]
-    // Etc
-    this.scrip = ''
+    // 摘要
+    this.note = ''
   }
 
   getTax(taxCategory, amount, isCredit) {
