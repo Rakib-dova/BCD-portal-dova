@@ -581,7 +581,6 @@ describe('journalDownloadControllerのテスト', () => {
       // 期待結果
       // 想定したデータがReturnされていること
       // データ確認
-      // expect(dataHeader).toEqual(pcaServiceHeader)
       expect(result).toEqual([ohkenResult])
     })
 
