@@ -5,10 +5,11 @@ const express = require('express')
 const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
-const OrderData = require('./helpers/OrderData')
+const OrderData = require('./helpers/orderData')
 const logger = require('../lib/logger')
 const applyOrderController = require('../controllers/applyOrderController.js')
 const contractController = require('../controllers/contractController.js')
+const channelDepartmentController = require('../controllers/channelDepartmentController.js')
 const constants = require('../constants')
 
 const router = express.Router()
@@ -32,7 +33,7 @@ const logMessage = constants.logMessage
 const checkContractStatus = async (req, res, next) => {
   // 導入支援サービスの契約情報を取得する
   const contracts = await contractController.findContracts(
-    { tenantId: req.user.tenantId, serviceType: serviceTypes.introductionSupport },
+    { tenantId: req.user?.tenantId, serviceType: serviceTypes.introductionSupport },
     null
   )
 
@@ -54,11 +55,9 @@ const checkContractStatus = async (req, res, next) => {
  */
 const showIntroductionSupport = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'showIntroductionSupport')
-  const salesChannelDeptList = [
-    { code: '001', name: 'Com第一営業本部' },
-    { code: '002', name: 'Com第二営業本部' },
-    { code: '003', name: 'Com第三営業本部' }
-  ]
+
+  // チャネル組織マスターからチャネル組織情報リストを取得
+  const salesChannelDeptList = await channelDepartmentController.findAll()
 
   // 導入支援サービス申し込み画面表示
   res.render('introductionSupport', {
@@ -79,14 +78,24 @@ const showIntroductionSupport = async (req, res, next) => {
 const registerIntroductionSupport = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'registerIntroductionSupport')
 
+  let salesChannelDeptType
+  // 組織区分が選択された場合、コードで組織区分を取得し、オーダー情報に設定する
+  const salesChannelDeptTypeCode = JSON.parse(req.body.salesChannelDeptType || '{}').code
+  if (salesChannelDeptTypeCode) {
+    const salesChannelDeptInfo = await channelDepartmentController.findOne(salesChannelDeptTypeCode)
+    if (salesChannelDeptInfo instanceof Error) return next(errorHelper.create(500))
+    if (salesChannelDeptInfo?.name) salesChannelDeptType = salesChannelDeptInfo.name
+  }
+
   // オーダー情報の取得
   const orderData = new OrderData(
-    req.user.tenantId,
+    req.user?.tenantId,
     req.body,
     constants.statusConstants.orderTypes.newOrder,
     serviceTypes.introductionSupport,
     constants.statusConstants.prdtCodes.introductionSupport,
-    constants.statusConstants.appTypes.new
+    constants.statusConstants.appTypes.new,
+    salesChannelDeptType
   )
 
   // バリデーション
@@ -100,7 +109,11 @@ const registerIntroductionSupport = async (req, res, next) => {
   }
 
   // 契約する
-  const result = await applyOrderController.applyNewOrder(req.user?.tenantId, serviceTypes.introductionSupport, orderData)
+  const result = await applyOrderController.applyNewOrder(
+    req.user?.tenantId,
+    serviceTypes.introductionSupport,
+    orderData
+  )
   // データベースエラーは、エラーオブジェクトが返る
   if (result instanceof Error) return next(errorHelper.create(500))
 

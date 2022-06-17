@@ -17,6 +17,7 @@ const constants = require('../../Application/constants').statusConstants
 // const constants = require('../../Application/constants').contractStatus
 const errorHelper = require('../../Application/routes/helpers/error')
 const noticeHelper = require('../../Application/routes/helpers/notice')
+const channelDepartmentController = require('../../Application/controllers/channelDepartmentController.js')
 
 // 契約ステータス
 const contractStatuses = constants.contractStatuses
@@ -67,12 +68,52 @@ const inputData = {
   salesChannelDeptName: '部課名',
   salesChannelEmplyeeCode: '11111111',
   salesChannelPersonName: '担当者名',
-  salesChannelDeptType: 'Com第一営業本部',
+  salesChannelDeptType: '{"code":"01","name":"Com第一営業本部"}',
   salesChannelPhoneNumber: '000-0000-0000',
   salesChannelMailAddress: 'aaa@aaa.com'
 }
+const onlyRequiredData = {
+  commonCustomerId: '11111111111',
+  contractorName: '契約者名',
+  contractorKanaName: 'カナ',
+  postalNumber: '1000004',
+  contractAddressVal: '東京都千代田区大手町一丁目',
+  banch1: '１番',
+  tatemono1: '',
+  contactPersonName: '連絡先担当者名',
+  contactPhoneNumber: '000-0000-0000',
+  contactMail: 'aaaaaa@aaa.com',
+  campaignCode: '',
+  salesPersonName: '',
+  password: 'Aa11111111',
+  passwordConfirm: 'Aa11111111',
+  billMailingPostalNumber: '1000004',
+  billMailingAddress: '東京都千代田区大手町一丁目',
+  billMailingAddressBanchi1: '請求書送付先番地等',
+  billMailingAddressBuilding1: '',
+  billMailingKanaName: '請求書送付先宛名',
+  billMailingName: 'カナ',
+  billMailingPersonName: '請求に関する連絡先',
+  billMailingPhoneNumber: '000-0000-0000',
+  billMailingMailAddress: 'aaa@aaa.com',
+  openingDate: '',
+  salesChannelCode: '',
+  salesChannelName: '',
+  salesChannelDeptName: '',
+  salesChannelEmplyeeCode: '',
+  salesChannelPersonName: '',
+  salesChannelDeptType: '',
+  salesChannelPhoneNumber: '',
+  salesChannelMailAddress: ''
+}
+const salesChannelDept = { code: '001', name: 'Com第一営業本部' }
+const salesChannelDeptList = [
+  { code: '001', name: 'Com第一営業本部' },
+  { code: '002', name: 'Com第二営業本部' },
+  { code: '003', name: 'Com第三営業本部' }
+]
 
-let request, response, applyNewOrderSpy, findContractSpy, infoSpy
+let request, response, applyNewOrderSpy, findContractSpy, infoSpy, findAllDept, findOneDept
 
 describe('receiveIntroductionSupportのテスト', () => {
   beforeEach(() => {
@@ -84,6 +125,8 @@ describe('receiveIntroductionSupportのテスト', () => {
     // 使っている内部モジュールの関数をspyOn
     applyNewOrderSpy = jest.spyOn(applyOrderController, 'applyNewOrder')
     findContractSpy = jest.spyOn(contractController, 'findContracts')
+    findAllDept = jest.spyOn(channelDepartmentController, 'findAll')
+    findOneDept = jest.spyOn(channelDepartmentController, 'findOne')
     infoSpy = jest.spyOn(logger, 'info')
     request.csrfToken = jest.fn(() => {
       return dummyToken
@@ -96,6 +139,8 @@ describe('receiveIntroductionSupportのテスト', () => {
     next.mockReset()
     applyNewOrderSpy.mockRestore()
     findContractSpy.mockRestore()
+    findAllDept.mockRestore()
+    findOneDept.mockRestore()
     infoSpy.mockRestore()
   })
 
@@ -179,6 +224,9 @@ describe('receiveIntroductionSupportのテスト', () => {
 
   describe('showIntroductionSupport', () => {
     test('正常', async () => {
+      // 準備
+      findAllDept.mockReturnValue(salesChannelDeptList)
+
       // request.userに正常値を設定する
       request.user = user
 
@@ -188,19 +236,16 @@ describe('receiveIntroductionSupportのテスト', () => {
       // 期待結果
       expect(response.render).toHaveBeenCalledWith('introductionSupport', {
         title: '導入支援サービス申し込み',
-        salesChannelDeptList: [
-          { code: '001', name: 'Com第一営業本部' },
-          { code: '002', name: 'Com第二営業本部' },
-          { code: '003', name: 'Com第三営業本部' }
-        ],
+        salesChannelDeptList: salesChannelDeptList,
         csrfToken: dummyToken
       })
     })
   })
 
   describe('registerIntroductionSupport', () => {
-    test('正常', async () => {
+    test('正常 全入力', async () => {
       // 準備
+      findOneDept.mockReturnValue(salesChannelDept)
       applyNewOrderSpy.mockImplementation(async (tenantId, serviceType, OrderData) => {
         expect(tenantId).toEqual(tenantId)
         expect(serviceType).toEqual(serviceTypesIntroductionSupport)
@@ -210,6 +255,27 @@ describe('receiveIntroductionSupportのテスト', () => {
       // requestに正常値を設定する
       request.user = user
       request.body = inputData
+
+      // 試験実施
+      await receiveIntroductionSupport.registerIntroductionSupport(request, response, next)
+
+      // 期待結果
+      expect(request.flash).toHaveBeenCalledWith('info', '導入支援サービスの申し込みが完了いたしました。')
+      expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
+    })
+
+    test('正常 必須のみ入力', async () => {
+      // 準備
+      findOneDept.mockReturnValue(salesChannelDept)
+      applyNewOrderSpy.mockImplementation(async (tenantId, serviceType, orderData) => {
+        expect(tenantId).toEqual(tenantId)
+        expect(serviceType).toEqual(serviceTypesIntroductionSupport)
+        expect(orderData).toBeDefined()
+      })
+
+      // requestに正常値を設定する
+      request.user = user
+      request.body = onlyRequiredData
 
       // 試験実施
       await receiveIntroductionSupport.registerIntroductionSupport(request, response, next)
@@ -238,7 +304,24 @@ describe('receiveIntroductionSupportのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(404))
     })
 
-    test('準正常：DBエラー時', async () => {
+    test('準正常：DBエラー時-組織区分取得', async () => {
+      // 準備
+      findOneDept.mockImplementation(async () => {
+        return dbError
+      })
+
+      // requestに正常値を設定する
+      request.user = user
+      request.body = inputData
+
+      // 試験実施
+      await receiveIntroductionSupport.registerIntroductionSupport(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('準正常：DBエラー時-契約情報登録', async () => {
       // 準備
       applyNewOrderSpy.mockImplementation(async (tenantId, serviceType, orderData) => {
         expect(tenantId).toEqual(tenantId)
