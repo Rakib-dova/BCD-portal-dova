@@ -21,7 +21,8 @@ const serviceDataFormatName = [
   '既定フォーマット（デジタルトレードフォーマット）',
   '弥生会計',
   '勘定奉行クラウド',
-  'PCA hyper'
+  'PCA hyper',
+  '大蔵大臣NX'
 ]
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
@@ -174,6 +175,7 @@ const cbPostIndex = async (req, res, next) => {
     case 1:
     case 2:
     case 3:
+    case 4:
       req.body.sentBy = req.body.sentBy ?? []
       if (typeof req.body.sentBy === 'string') {
         req.body.sentBy = [req.body.sentBy]

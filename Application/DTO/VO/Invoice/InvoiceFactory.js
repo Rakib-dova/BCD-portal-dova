@@ -14,6 +14,12 @@ class InvoiceFactory {
     const searchResult = []
     let page = 0
     let numPages = 1
+    const states = [
+      'DELIVERED', // 送信済み・受信済み
+      'ACCEPTED', // 受理済み
+      'PAID_UNCONFIRMED', // 送金済み
+      'PAID_CONFIRMED' // 入金確認済み
+    ]
     do {
       const documents = await this.tradeshiftDTO.getDocuments(
         null,
@@ -27,7 +33,7 @@ class InvoiceFactory {
         null,
         minIssuedate,
         maxIssuedate,
-        null,
+        states,
         businessId,
         false
       )

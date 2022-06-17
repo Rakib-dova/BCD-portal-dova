@@ -11,8 +11,16 @@ const requestApprovalController = require('../../Application/controllers/request
 const YayoiService = require('../../Application/service/YayoiService')
 const ObcService = require('../../Application/service/ObcService')
 const PcaService = require('../../Application/service/PcaService')
+const OhkenService = require('../../Application/service/OhkenService')
 
-let findOneRequestApprovalSpy, journalfindAllSpy, errorSpy, getCodingSpy, yayoiServiceSpy, obcServiceSpy, pcaServiceSpy
+let findOneRequestApprovalSpy,
+  journalfindAllSpy,
+  errorSpy,
+  getCodingSpy,
+  yayoiServiceSpy,
+  obcServiceSpy,
+  pcaServiceSpy,
+  OhkenServiceSpy
 
 describe('journalDownloadControllerのテスト', () => {
   beforeEach(() => {
@@ -23,6 +31,7 @@ describe('journalDownloadControllerのテスト', () => {
     yayoiServiceSpy = jest.spyOn(YayoiService.prototype, 'convertToKaikei')
     obcServiceSpy = jest.spyOn(ObcService.prototype, 'convertToKaikei')
     pcaServiceSpy = jest.spyOn(PcaService.prototype, 'convertToKaikei')
+    OhkenServiceSpy = jest.spyOn(OhkenService.prototype, 'convertToKaikei')
     errorSpy = jest.spyOn(logger, 'error')
   })
   afterEach(() => {
@@ -32,6 +41,7 @@ describe('journalDownloadControllerのテスト', () => {
     yayoiServiceSpy.mockRestore()
     obcServiceSpy.mockRestore()
     pcaServiceSpy.mockRestore()
+    OhkenServiceSpy.mockRestore()
     errorSpy.mockRestore()
   })
 
@@ -54,6 +64,9 @@ describe('journalDownloadControllerのテスト', () => {
     '"*20220505","00001","21","0","1","000","","0000001710","","","","Q6","",24200,"1936","1","000","","0000001110","","","","00","",24200,"0","","","","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n' +
     '"20220505","00001","21","0","1","000","","0000001710","","","","Q6","",24200,"1936","1","000","","0000001110","","","","00","",24200,"0","","","","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n' +
     '"20220505","00001","21","0","1","000","","0000001710","","","","Q6","",29340,"2347","1","000","","0000001110","","","","00","",29340,"0","","","","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n'
+
+  const ohkenResult =
+    '"","","","1","1","","","160","","","","","115","","","1320","","","","","100","","","","","115","","","1320","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""'
 
   // DBデータ設定
   const Contracts = require('../mockDB/Contracts_Table')
@@ -524,6 +537,93 @@ describe('journalDownloadControllerのテスト', () => {
       const serviceDataFormat = 3
 
       pcaServiceSpy.mockReturnValue(null)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(null)
+    })
+
+    test('正常:企業条件がない場合（大蔵大臣NX））', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 4
+
+      OhkenServiceSpy.mockReturnValue(ohkenResult)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      // データ確認
+      expect(result).toEqual([ohkenResult])
+    })
+
+    test('正常:企業条件がある場合（大蔵大臣NX）', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = ['221559d0-53aa-44a2-ab29-0c4a6cb02bd1']
+      const serviceDataFormat = 4
+
+      OhkenServiceSpy.mockReturnValue(ohkenResult)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      // データ確認
+      // expect(dataHeader).toEqual(pcaServiceHeader)
+      expect(result).toEqual([ohkenResult])
+    })
+
+    test('正常:データがない場合（大蔵大臣NX)', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2021-10-01'
+      const maxIssuedate = '2022-04-25'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 4
+
+      OhkenServiceSpy.mockReturnValue(null)
 
       // 試験実施
       const result = await journalDownloadController.dowonloadKaikei(

@@ -7,6 +7,7 @@ const requestApproval = require('./requestApprovalController')
 const YayoiService = require('../service/YayoiService')
 const ObcService = require('../service/ObcService')
 const PcaService = require('../service/PcaService')
+const OhkenService = require('../service/OhkenService')
 
 // 複数の請求書を1つのCSVファイルにまとめる関数
 const createInvoiceDataForDownload = async (
@@ -103,11 +104,11 @@ const getSentToCompany = async (accessToken, refreshToken) => {
  * @param {object} passport トレードシフトのAPIアクセス用データ
  * @param {object} contract 契約情報
  * @param {string} businessId 請求書番号
- * @param {string} minIssuedate 発行日（最小）
- * @param {string} maxIssuedate 発行日（最大）
+ * @param {string} minIssuedate 発行日（初日）
+ * @param {string} maxIssuedate 発行日（最終日）
  * @param {uuid} sentBy 送信企業
  * @param {string} isCloedApproval 差し戻しメッセージ
- * @param {int} serviceDataFormat 出力フォーマット（0:デフォルト,1:弥生会計,2:勘定奉行）
+ * @param {int} serviceDataFormat 出力フォーマット（0:デフォルト,1:弥生会計,2:勘定奉行, 3:PCA, 4:大蔵大臣）
  * @returns {string} ダウンロードデータ
  */
 
@@ -123,7 +124,6 @@ const dowonloadKaikei = async (
 ) => {
   const result = []
 
-  // 弥生会計の場合
   let service = null
   switch (serviceDataFormat) {
     case 1:
@@ -134,6 +134,9 @@ const dowonloadKaikei = async (
       break
     case 3:
       service = new PcaService(passport, contract)
+      break
+    case 4:
+      service = new OhkenService(passport, contract)
       break
     default:
       return null
