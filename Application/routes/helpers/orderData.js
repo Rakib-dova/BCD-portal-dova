@@ -9,8 +9,9 @@ class OrderData {
    * @param {string} serviceType サービス種別
    * @param {string} prdtCode 商品コード
    * @param {string} appType 申込区分
+   * @param {string} salesChannelDeptType 組織区分
    */
-  constructor(tenantId, inputData, orderType, serviceType, prdtCode, appType) {
+  constructor(tenantId, inputData, orderType, serviceType, prdtCode, appType, salesChannelDeptType) {
     // 基本情報の設定
     this.contractBasicInfo = {
       // トレシフテナントID
@@ -34,31 +35,21 @@ class OrderData {
       // 契約番号
       contractNumber: inputData.contractNumber ?? '',
       // 販売チャネルコード
-      salesChannelCode: inputData.salesChannelCode ? inputData.salesChannelCode : '79100100',
+      salesChannelCode: inputData.salesChannelCode || '79100100',
       // 販売チャネル名
-      salesChannelName: inputData.salesChannelName
-        ? inputData.salesChannelName
-        : 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
+      salesChannelName: inputData.salesChannelName || 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
       // 部課名
-      salesChannelDeptName: inputData.salesChannelDeptName
-        ? inputData.salesChannelDeptName
-        : '第二ＳＣ部門　第一グループ',
+      salesChannelDeptName: inputData.salesChannelDeptName || '第二ＳＣ部門　第一グループ',
       // 社員コード
       salesChannelEmplyeeCode: inputData.salesChannelEmplyeeCode ?? '',
       // 担当者名
-      salesChannelPersonName: inputData.salesChannelPersonName
-        ? inputData.salesChannelPersonName
-        : 'デジトレアプリ担当',
+      salesChannelPersonName: inputData.salesChannelPersonName || 'デジトレアプリ担当',
       // 組織区分
-      salesChannelDeptType: inputData.salesChannelDeptType
-        ? inputData.salesChannelDeptType
-        : 'アプリケーションサービス部',
+      salesChannelDeptType: salesChannelDeptType || 'アプリケーションサービス部',
       // 電話番号
-      salesChannelPhoneNumber: inputData.salesChannelPhoneNumber ? inputData.salesChannelPhoneNumber : '050-3383-9608',
+      salesChannelPhoneNumber: inputData.salesChannelPhoneNumber || '050-3383-9608',
       // メールアドレス
-      salesChannelMailAddress: inputData.salesChannelMailAddress
-        ? inputData.salesChannelMailAddress
-        : 'digitaltrade-ap-ops@ntt.com',
+      salesChannelMailAddress: inputData.salesChannelMailAddress || 'digitaltrade-ap-ops@ntt.com',
       // 開通案内パスワード
       kaianPassword: inputData.password ?? ''
     }

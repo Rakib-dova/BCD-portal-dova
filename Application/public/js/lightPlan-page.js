@@ -315,7 +315,7 @@ $('#next-btn').addEventListener('click', function (e) {
     contactAddress(contractElementIdMap)
     contactAddress(billMailingElementIdMap)
 
-    $('#resalesChannelDeptType').textContent = $('#salesChannelDeptType').value
+    $('#resalesChannelDeptType').textContent = JSON.parse($('#salesChannelDeptType').value || '{}').name
 
     const modal = $('#confirmregister-modal')
     if (modal) modal.classList.toggle('is-active')

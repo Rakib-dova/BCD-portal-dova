@@ -8,6 +8,7 @@ const noticeHelper = require('./helpers/notice')
 const OrderData = require('./helpers/orderData')
 const contractController = require('../controllers/contractController.js')
 const applyOrderController = require('../controllers/applyOrderController.js')
+const channelDepartmentController = require('../controllers/channelDepartmentController.js')
 const logger = require('../lib/logger')
 const constants = require('../constants')
 
@@ -76,12 +77,10 @@ const showCancelLightPlan = async (req, res, next) => {
   // ライトプランの解約の事前チェック
   const contracts = await checkContractStatus(req, res, next)
 
-  // TODO DBマスターから取得
-  const salesChannelDeptList = [
-    { code: '001', name: 'Com第一営業本部' },
-    { code: '002', name: 'Com第二営業本部' },
-    { code: '003', name: 'Com第三営業本部' }
-  ]
+  // チャネル組織マスターからチャネル組織情報リストを取得
+  const salesChannelDeptList = await channelDepartmentController.findAll()
+
+  if (salesChannelDeptList instanceof Error) return next(errorHelper.create(500))
 
   // ライトプラン解約画面表示
   res.render('cancelLightPlan', {
@@ -106,6 +105,15 @@ const cancelLightPlan = async (req, res, next) => {
   // ライトプランの解約の事前チェック
   await checkContractStatus(req, res, next)
 
+  let salesChannelDeptType
+  // 組織区分が選択された場合、コードで組織区分を取得し、オーダー情報に設定する
+  const salesChannelDeptTypeCode = JSON.parse(req.body.salesChannelDeptType || '{}').code
+  if (salesChannelDeptTypeCode) {
+    const salesChannelDeptInfo = await channelDepartmentController.findOne(salesChannelDeptTypeCode)
+    if (salesChannelDeptInfo instanceof Error) return next(errorHelper.create(500))
+    if (salesChannelDeptInfo?.name) salesChannelDeptType = salesChannelDeptInfo.name
+  }
+
   // オーダー情報の取得
   const orderData = new OrderData(
     req.user.tenantId,
@@ -113,7 +121,8 @@ const cancelLightPlan = async (req, res, next) => {
     constants.statusConstants.orderTypes.cancelOrder,
     serviceTypes.lightPlan,
     constants.statusConstants.prdtCodes.lightPlan,
-    constants.statusConstants.appTypes.cancel
+    constants.statusConstants.appTypes.cancel,
+    salesChannelDeptType
   )
 
   // 解約する

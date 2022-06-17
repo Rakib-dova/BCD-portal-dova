@@ -32,7 +32,7 @@ $('#cancelltion-button').addEventListener('click', function (e) {
     // 初回エラー 項目にフォーカス
     firstError?.focus()
   } else {
-    $('#resalesChannelDeptType').textContent = $('#salesChannelDeptType').value
+    $('#resalesChannelDeptType').textContent = JSON.parse($('#salesChannelDeptType').value || '{}').name
 
     const modal = $('#cancellation-modal')
     if (modal) modal.classList.toggle('is-active')

@@ -58,7 +58,7 @@ block content
                               select#salesChannelDeptType(name="salesChannelDeptType")
                                 option(value= '')= '選択してください'
                                 each salesChannelDept in salesChannelDeptList
-                                  option(value= salesChannelDept.name)= salesChannelDept.name 
+                                  option(value= salesChannelDept)= salesChannelDept.name 
                         .field
                           label(for="salesChannelPhoneNumber").input-label 電話番号
                           p#salesChannelPhoneNumberRequired.input-label
