@@ -270,7 +270,8 @@ describe('journalDownloadのテスト', () => {
         '既定フォーマット（デジタルトレードフォーマット）',
         '弥生会計',
         '勘定奉行クラウド',
-        'PCA hyper'
+        'PCA hyper',
+        '大蔵大臣NX'
       ]
       expect(response.render).toHaveBeenCalledWith('journalDownload', {
         title: '仕訳情報ダウンロード',
@@ -4959,7 +4960,7 @@ describe('journalDownloadのテスト', () => {
     })
 
     // 弥生会計フォーマットダウンロード
-    test('正常:1件（最終承認済みの請求書）', async () => {
+    test('正常:1件 弥生会計（最終承認済みの請求書）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -5008,7 +5009,7 @@ describe('journalDownloadのテスト', () => {
       expect(response.setHeader().headers['Content-Disposition']).toContain(`${filename}`)
     })
 
-    test('正常:1件（仕訳済みの請求書）', async () => {
+    test('正常:1件 弥生会計（仕訳済みの請求書）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -5059,8 +5060,8 @@ describe('journalDownloadのテスト', () => {
       expect(response.setHeader().headers['Content-Disposition']).toContain(`${filename}`)
     })
 
-    // 勘定奉行フォーマットダウンロード
-    test('正常:1件（最終承認済みの請求書）', async () => {
+    // 勘定奉行クラウドフォーマットダウンロード
+    test('正常:1件 勘定奉行クラウド（最終承認済みの請求書）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -5113,7 +5114,7 @@ describe('journalDownloadのテスト', () => {
       expect(response.setHeader().headers['Content-Disposition']).toContain(`${filename}`)
     })
 
-    test('正常:1件（仕訳済みの請求書）', async () => {
+    test('正常:1件 勘定奉行クラウド（仕訳済みの請求書）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -5168,8 +5169,8 @@ describe('journalDownloadのテスト', () => {
       expect(response.setHeader().headers['Content-Disposition']).toContain(`${filename}`)
     })
 
-    // 勘定奉行フォーマットダウンロード
-    test('正常:1件（最終承認済みの請求書）', async () => {
+    // PCA hyperフォーマットダウンロード
+    test('正常:1件 PCA hyper（最終承認済みの請求書）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -5181,7 +5182,7 @@ describe('journalDownloadのテスト', () => {
         maxIssuedate: '2021-11-09',
         serviceDataFormat: '3'
       }
-      const expectedObcFormat = [
+      const expectedPcaFormat = [
         '"伝票日付","伝票番号","仕訳区分","管理仕訳区分","借方税計算モード","借方部門コード","借方部門名","借方科目コード","借方科目名","借方補助コード","借方補助名","借方税区分コード","借方税区分名","借方金額","借方消費税額","貸方税計算モード","貸方部門コード","貸方部門名","貸方科目コード","貸方科目名","貸方補助コード","貸方補助名","貸方税区分コード","貸方税区分名","貸方金額","貸方消費税額","摘要文","数字１","数字２","入力プログラム区分","配賦元税計算","配賦元集計方法","配賦元集計開始日付","配賦元集計終了日付","配賦元管理仕訳区分","配賦元部門コード","配賦元部門名","配賦元科目コード","配賦元科目名","配賦元補助コード","配賦元補助名","配賦元金額","数字３","数字４","数字５","金額１","金額２","金額３","金額４","金額５","文字列１","文字列２","文字列３","文字列４","文字列５","入力日付時間","借方取引先コード","借方取引先名","借方セグメント１コード","借方セグメント１名","借方セグメント２コード","借方セグメント２名","借方セグメント３コード","借方セグメント３名","貸方取引先コード","貸方取引先名","貸方セグメント１コード","貸方セグメント１名","貸方セグメント２コード","貸方セグメント２名","貸方セグメント３コード","貸方セグメント３名","配賦選択","配賦元取引先コード","配賦元取引先名","配賦元セグメント１コード","配賦元セグメント１名","配賦元セグメント２コード","配賦元セグメント２名","配賦元セグメント３コード","配賦元セグメント３名"\r\n' +
           '"*20220505","00001","21","0","1","000","","0000001710","","","","Q6","",24200,"1936","1","000","","0000001110","","","","00","",24200,"0","","","","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n' +
           '"20220505","00001","21","0","1","000","","0000001710","","","","Q6","",24200,"1936","1","000","","0000001110","","","","00","",24200,"0","","","","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n' +
@@ -5204,7 +5205,7 @@ describe('journalDownloadのテスト', () => {
       journalfindAllSpy.mockReturnValue(journalfindAllSpyResult)
 
       dowonloadKaikeiSpy.mockImplementation(() => {
-        return expectedObcFormat
+        return expectedPcaFormat
       })
 
       // 試験実施
@@ -5222,7 +5223,7 @@ describe('journalDownloadのテスト', () => {
       expect(response.setHeader().headers['Content-Disposition']).toContain(`${filename}`)
     })
 
-    test('正常:1件（仕訳済みの請求書）', async () => {
+    test('正常:1件 PCA hyper（仕訳済みの請求書）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -5236,7 +5237,7 @@ describe('journalDownloadのテスト', () => {
         serviceDataFormat: '3'
       }
 
-      const expectedObcFormat = [
+      const expectedPcaFormat = [
         '"伝票日付","伝票番号","仕訳区分","管理仕訳区分","借方税計算モード","借方部門コード","借方部門名","借方科目コード","借方科目名","借方補助コード","借方補助名","借方税区分コード","借方税区分名","借方金額","借方消費税額","貸方税計算モード","貸方部門コード","貸方部門名","貸方科目コード","貸方科目名","貸方補助コード","貸方補助名","貸方税区分コード","貸方税区分名","貸方金額","貸方消費税額","摘要文","数字１","数字２","入力プログラム区分","配賦元税計算","配賦元集計方法","配賦元集計開始日付","配賦元集計終了日付","配賦元管理仕訳区分","配賦元部門コード","配賦元部門名","配賦元科目コード","配賦元科目名","配賦元補助コード","配賦元補助名","配賦元金額","数字３","数字４","数字５","金額１","金額２","金額３","金額４","金額５","文字列１","文字列２","文字列３","文字列４","文字列５","入力日付時間","借方取引先コード","借方取引先名","借方セグメント１コード","借方セグメント１名","借方セグメント２コード","借方セグメント２名","借方セグメント３コード","借方セグメント３名","貸方取引先コード","貸方取引先名","貸方セグメント１コード","貸方セグメント１名","貸方セグメント２コード","貸方セグメント２名","貸方セグメント３コード","貸方セグメント３名","配賦選択","配賦元取引先コード","配賦元取引先名","配賦元セグメント１コード","配賦元セグメント１名","配賦元セグメント２コード","配賦元セグメント２名","配賦元セグメント３コード","配賦元セグメント３名"\r\n' +
           '"*20220505","00001","21","0","1","000","","0000001710","","","","Q6","",24200,"1936","1","000","","0000001110","","","","00","",24200,"0","","","","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n' +
           '"20220505","00001","21","0","1","000","","0000001710","","","","Q6","",24200,"1936","1","000","","0000001110","","","","00","",24200,"0","","","","1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n' +
@@ -5259,13 +5260,119 @@ describe('journalDownloadのテスト', () => {
       journalfindAllSpy.mockReturnValue(dbJournalTable)
 
       dowonloadKaikeiSpy.mockImplementation(() => {
-        return expectedObcFormat
+        return expectedPcaFormat
       })
 
       // 試験実施
       await journalDownload.cbPostIndex(request, response, next)
 
       const filename = encodeURIComponent('請求書_PCA hyper.csv')
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      expect(response.statusCode).toBe(200)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${filename}`)
+    })
+
+    // 大蔵大臣NXフォーマットダウンロード
+    test('正常:1件 大蔵大臣NX（最終承認済みの請求書）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'finalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '4'
+      }
+
+      const expecteOhkenFormat = [
+        '"","","","1","1","","","1111","","","","","115","","","41600","","","","","1111","","","","","115","","","41600","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n' +
+          '"","","","1","1","","","1111","","","","","115","","","2500","","","","","1111","","","","","115","","","2500","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n'
+      ]
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(findOneRequestApprovalResult)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(journalfindAllSpyResult)
+
+      dowonloadKaikeiSpy.mockImplementation(() => {
+        return expecteOhkenFormat
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      const filename = encodeURIComponent('請求書_大蔵大臣NX.csv')
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      expect(response.statusCode).toBe(200)
+      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
+      expect(response.setHeader().headers['Content-Disposition']).toContain(`${filename}`)
+    })
+
+    test('正常:1件 大蔵大臣NX（仕訳済みの請求書）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        sentBy: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+        serviceDataFormat: '4'
+      }
+
+      const expecteOhkenFormat = [
+        '"","","","1","1","","","2022","","","","","115","","","41600","","","","","","","","","","115","","","41600","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n' +
+          '"","","","1","1","","","2022","","","","","115","","","20000","","","","","","","","","","115","","","20000","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""\r\n'
+      ]
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      findOneRequestApprovalSpy.mockReturnValue(null)
+
+      checkContractStatus.mockReturnValue('00')
+
+      journalfindAllSpy.mockReturnValue(dbJournalTable)
+
+      dowonloadKaikeiSpy.mockImplementation(() => {
+        return expecteOhkenFormat
+      })
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      const filename = encodeURIComponent('請求書_大蔵大臣NX.csv')
 
       // 期待結果
       // userContextがLoggedInになっている
