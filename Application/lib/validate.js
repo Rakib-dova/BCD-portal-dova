@@ -1,6 +1,6 @@
 // See https://qiita.com/standard-software/items/0b2617062b2e4c7f1abb
 const constantsDefine = require('../constants')
-const cStatus = constantsDefine.statusConstants.contractStatus
+const contractStatuses = constantsDefine.statusConstants.contractStatuses
 
 const assert = function (value, message) {
   if (typeof message === 'undefined' || message === null) {
@@ -141,15 +141,15 @@ const isStatusForSimpleChange = function (contractStatus, deleteFlag) {
 }
 
 /**
- * デジトレ契約が解約中か判定する
+ * デジトレ契約が解約手続き中か判定する
  * @param {*} contract デジトレ契約情報
  * @returns
  */
 const isBcdCancelling = (bcdContract) => {
-  // deleteFlag: false & 契約ステータスが解約着手待ちor解約対応中 の場合
+  // deleteFlag: false & 契約ステータスが解約着手待ち(30)or解約対応中(31) の場合
   if (
     !bcdContract.deleteFlag &&
-    (bcdContract.contractStatus === cStatus.cancellationOrder || bcdContract.contractStatus === cStatus.cancellationReceive)
+    (bcdContract.contractStatus === contractStatuses.cancellationOrder || bcdContract.contractStatus === contractStatuses.cancellationReceive)
   ) {
     return true
   } else {

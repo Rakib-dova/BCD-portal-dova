@@ -126,6 +126,7 @@ block content
                       p.title.is-5 設定
                       p 契約情報変更と解約を行うことができます。
                       p 解約の場合は取り消しはできません。
+
         .columns.is-desktop.is-family-noto-sans
           .column.is-one-third-desktop.hvr-float
             .box.iconBox.textOverflow
@@ -137,6 +138,17 @@ block content
                     p.title.is-5 導入支援サービス
                     p 導入支援サービスの新規申し込みを行うことができます。
                     p 表示メッセージは仮置きです。
+          .column.is-one-third-desktop.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='lightPlan-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                  .media-content
+                    p.title.is-5 ライトプラン
+                    p ライトプラン契約と解約を行うことができます。
+                    p 解約の場合は取り消しはできません。
+
       .column.is-12.menu
        p.olta-title-font-size 提携サービス
         .columns.is-desktop.is-family-noto-sans
@@ -436,8 +448,7 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 新設申込み
-            // a.panel-block(href='/cancelLightPlan') 
-            a.panel-block(href='/applyLightPlan')
+            a.panel-block(href='/cancelLightPlan') 
               span.panel-icon
                 i.fas.fa-file
               p 解約申込み

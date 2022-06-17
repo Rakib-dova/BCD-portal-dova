@@ -335,6 +335,12 @@ app.use('/uploadUsers', require('./routes/uploadUsers').router)
 // ------------導入支援(PBI3875)
 // 新規申込のみ
 app.use('/receiveIntroductionSupport', require('./routes/receiveIntroductionSupport').router)
+// ------------ライトプラン
+// 新設申込み
+app.use('/applyLightPlan', require('./routes/applyLightPlan').router)
+
+// 解約申込み
+app.use('/cancelLightPlan', require('./routes/cancelLightPlan').router)
 
 // 請求書ダウンロード
 app.use('/csvDownload', require('./routes/csvDownload').router)

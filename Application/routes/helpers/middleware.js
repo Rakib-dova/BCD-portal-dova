@@ -7,6 +7,8 @@ const contractController = require('../../controllers/contractController')
 const noticeHelper = require('./notice')
 const errorHelper = require('./error')
 const validate = require('../../lib/validate')
+const constantsDefine = require('../../constants')
+const serviceTypes = constantsDefine.statusConstants.serviceTypes
 
 exports.isAuthenticated = async (req, res, next) => {
   if (req.user?.userId) {
@@ -82,7 +84,7 @@ exports.isUserRegistered = async (req, res, next) => {
 }
 
 exports.checkContractStatus = async (tenantId) => {
-  const contracts = await contractController.findContract({ tenantId: tenantId, deleteFlag: false }, 'createdAt DESC')
+  const contracts = await contractController.findContract({ tenantId: tenantId, serviceType: '010', deleteFlag: false }, 'createdAt DESC')
 
   // DB検索エラーの場合
   if (contracts instanceof Error) {
@@ -167,7 +169,7 @@ exports.bcdAuthenticate = async (req, res, next) => {
   }
 
   // BCD無料アプリの契約情報確認
-  const bcdContract = contracts.find((contract) => contract.serviceType === '010' && contract.deleteFlag === false)
+  const bcdContract = contracts.find((contract) => contract.serviceType === serviceTypes.bcd && contract.deleteFlag === false)
   if (!bcdContract || !bcdContract.contractStatus) {
     if (req.method === 'DELETE') {
       return res.send({ result: 0 })
