@@ -32,7 +32,7 @@ const logMessage = constants.logMessage
 const checkContractStatus = async (req, res, next) => {
   // ライトプランの契約情報を取得する
   const contracts = await contractController.findContracts(
-    { tenantId: req.user.tenantId, serviceType: serviceTypes.lightPlan },
+    { tenantId: req.user?.tenantId, serviceType: serviceTypes.lightPlan },
     null
   )
 
@@ -103,7 +103,7 @@ const registerLightPlan = async (req, res, next) => {
 
   // オーダー情報の取得
   const orderData = new OrderData(
-    req.user.tenantId,
+    req.user?.tenantId,
     req.body,
     constants.statusConstants.orderTypes.newOrder,
     serviceTypes.lightPlan,
