@@ -172,7 +172,7 @@ const cbPostIndex = async (req, res, next) => {
 }
 
 router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
-router.post('/', helper.isAuthenticated, csrfProtection, upload.single('bulkSubAccountCode'), cbPostIndex)
+router.post('/', helper.isAuthenticated, upload.single('bulkSubAccountCode'), csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,
