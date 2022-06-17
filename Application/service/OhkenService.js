@@ -73,7 +73,7 @@ class OhkenService {
         '',
         '',
         '',
-        `${ohken.scrip}`,
+        `${ohken.note}`,
         '',
         '',
         '',
@@ -157,7 +157,7 @@ class OhkenService {
         creditTaxCode = ['211', '']
         break
       case 'JP 非課税 0%':
-        creditTaxCode = ['311', '']
+        creditTaxCode = ['811', '']
         break
       default:
         creditTaxCode = ['999', '']

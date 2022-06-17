@@ -104,7 +104,7 @@ const getSentToCompany = async (accessToken, refreshToken) => {
  * @param {object} passport トレードシフトのAPIアクセス用データ
  * @param {object} contract 契約情報
  * @param {string} businessId 請求書番号
- * @param {string} minIssuedate 発行日（最初日）
+ * @param {string} minIssuedate 発行日（初日）
  * @param {string} maxIssuedate 発行日（最終日）
  * @param {uuid} sentBy 送信企業
  * @param {string} isCloedApproval 差し戻しメッセージ
@@ -124,7 +124,6 @@ const dowonloadKaikei = async (
 ) => {
   const result = []
 
-  // 弥生会計の場合
   let service = null
   switch (serviceDataFormat) {
     case 1:
