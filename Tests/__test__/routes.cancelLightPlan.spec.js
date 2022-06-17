@@ -1,19 +1,19 @@
 'use strict'
+jest.mock('../../Application/lib/logger')
 jest.mock('../../Application/node_modules/express', () => {
   return require('jest-express')
 })
-jest.mock('../../Application/controllers/applyOrderController.js')
 
 const cancelLightPlan = require('../../Application/routes/cancelLightPlan')
 const applyOrderController = require('../../Application/controllers/applyOrderController.js')
 const contractController = require('../../Application/controllers/contractController.js')
+const channelDepartmentController = require('../../Application/controllers/channelDepartmentController.js')
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
 const noticeHelper = require('../../Application/routes/helpers/notice')
 const errorHelper = require('../../Application/routes/helpers/error')
 const middleware = require('../../Application/routes/helpers/middleware')
-const logger = require('../../Application/lib/logger.js')
 const constants = require('../../Application/constants').statusConstants
 
 // 契約ステータス
@@ -41,10 +41,29 @@ const inputData = {
   salesChannelDeptName: '部課名',
   salesChannelEmplyeeCode: '11111111',
   salesChannelPersonName: '担当者名',
-  salesChannelDeptType: 'Com第一営業本部',
+  salesChannelDeptType: '{"code":"01","name":"Com第一営業本部"}',
   salesChannelPhoneNumber: '000-0000-0000',
   salesChannelMailAddress: 'aaa@aaa.com'
 }
+
+const emptyData = {
+  salesChannelCode: '',
+  salesChannelName: '',
+  salesChannelDeptName: '',
+  salesChannelEmplyeeCode: '',
+  salesChannelPersonName: '',
+  salesChannelDeptType: '',
+  salesChannelPhoneNumber: '',
+  salesChannelMailAddress: '@aaa.com'
+}
+
+const salesChannelDept = { code: '001', name: 'Com第一営業本部' }
+
+const salesChannelDeptList = [
+  { code: '001', name: 'Com第一営業本部' },
+  { code: '002', name: 'Com第二営業本部' },
+  { code: '003', name: 'Com第三営業本部' }
+]
 
 const onContractContracts = [
   {
@@ -59,7 +78,7 @@ const onContractContracts = [
   }
 ]
 
-let request, response, infoSpy, cancelOrderSpy, findContractsSpy
+let request, response, cancelOrderSpy, findContractsSpy, findAllDept, findOneDept
 
 describe('cancelLightPlanのテスト', () => {
   beforeEach(() => {
@@ -69,19 +88,22 @@ describe('cancelLightPlanのテスト', () => {
     // 使っている内部モジュールの関数をspyOn
     cancelOrderSpy = jest.spyOn(applyOrderController, 'cancelOrder')
     findContractsSpy = jest.spyOn(contractController, 'findContracts')
-    infoSpy = jest.spyOn(logger, 'info')
+    findAllDept = jest.spyOn(channelDepartmentController, 'findAll')
+    findOneDept = jest.spyOn(channelDepartmentController, 'findOne')
     request.csrfToken = jest.fn(() => {
       return dummyTokne
     })
     request.flash = jest.fn()
   })
+
   afterEach(() => {
     request.resetMocked()
     response.resetMocked()
     next.mockReset()
     cancelOrderSpy.mockRestore()
     findContractsSpy.mockRestore()
-    infoSpy.mockRestore()
+    findAllDept.mockRestore()
+    findOneDept.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -232,6 +254,7 @@ describe('cancelLightPlanのテスト', () => {
     test('正常', async () => {
       // 準備
       findContractsSpy.mockReturnValue(onContractContracts)
+      findAllDept.mockReturnValue(salesChannelDeptList)
 
       // request.userに正常値を想定する
       request.user = user
@@ -243,20 +266,34 @@ describe('cancelLightPlanのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('cancelLightPlan', {
         title: 'ライトプラン解約',
         numberN: '123',
-        salesChannelDeptList: [
-          { code: '001', name: 'Com第一営業本部' },
-          { code: '002', name: 'Com第二営業本部' },
-          { code: '003', name: 'Com第三営業本部' }
-        ],
+        salesChannelDeptList: salesChannelDeptList,
         csrfToken: dummyTokne
       })
+    })
+
+    test('準正常: DBエラー時', async () => {
+      // 準備
+      findContractsSpy.mockReturnValue(onContractContracts)
+      findAllDept.mockImplementation(async () => {
+        return dbError
+      })
+
+      // requestに正常値を想定する
+      request.user = user
+
+      // 試験実施
+      await cancelLightPlan.showCancelLightPlan(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })
 
   describe('cancelLightPlan', () => {
-    test('正常', async () => {
+    test('正常 全入力', async () => {
       // 準備
       findContractsSpy.mockReturnValue(onContractContracts)
+      findOneDept.mockReturnValue(salesChannelDept)
       cancelOrderSpy.mockImplementation(async (tenantId, serviceType, orderData) => {
         expect(tenantId).toEqual(tenantId)
         expect(serviceType).toEqual(serviceTypesLightPlan)
@@ -275,9 +312,49 @@ describe('cancelLightPlanのテスト', () => {
       expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
     })
 
-    test('準正常: DBエラー時', async () => {
+    test('正常 全空', async () => {
       // 準備
       findContractsSpy.mockReturnValue(onContractContracts)
+      cancelOrderSpy.mockImplementation(async (tenantId, serviceType, orderData) => {
+        expect(tenantId).toEqual(tenantId)
+        expect(serviceType).toEqual(serviceTypesLightPlan)
+        expect(orderData).toBeDefined()
+      })
+
+      // requestに正常値を想定する
+      request.user = user
+      request.body = emptyData
+
+      // 試験実施
+      await cancelLightPlan.cancelLightPlan(request, response, next)
+
+      // 期待結果
+      expect(request.flash).toHaveBeenCalledWith('info', 'ライトプラン解約が完了いたしました。')
+      expect(response.redirect).toHaveBeenCalledWith(303, '/portal')
+    })
+
+    test('準正常: DBエラー時-組織区分取得', async () => {
+      // 準備
+      findContractsSpy.mockReturnValue(onContractContracts)
+      findOneDept.mockImplementation(async () => {
+        return dbError
+      })
+
+      // requestに正常値を想定する
+      request.user = user
+      request.body = inputData
+
+      // 試験実施
+      await cancelLightPlan.cancelLightPlan(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('準正常: DBエラー時-解約情報登録', async () => {
+      // 準備
+      findContractsSpy.mockReturnValue(onContractContracts)
+      findOneDept.mockReturnValue(salesChannelDept)
       cancelOrderSpy.mockImplementation(async (tenantId, serviceType, orderData) => {
         expect(tenantId).toEqual(tenantId)
         expect(serviceType).toEqual(serviceTypesLightPlan)

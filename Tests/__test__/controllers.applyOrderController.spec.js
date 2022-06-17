@@ -6,7 +6,6 @@ const Contract = require('../../Application/models').Contract
 const Order = require('../../Application/models').Order
 const applyOrderController = require('../../Application/controllers/applyOrderController')
 const contractController = require('../../Application/controllers/contractController')
-const logger = require('../../Application/lib/logger')
 const constants = require('../../Application/constants').statusConstants
 const OrderData = require('../../Application/routes/helpers/orderData')
 
@@ -54,7 +53,7 @@ const contractData = {
 
 const dbError = new Error('DB error')
 
-let contractCreateSpy, contractUpdateSpy, orderCreateSpy, findContractSpy, errorSpy
+let contractCreateSpy, contractUpdateSpy, orderCreateSpy, findContractSpy
 
 describe('applyOrderControllerのテスト', () => {
   beforeEach(() => {
@@ -62,7 +61,6 @@ describe('applyOrderControllerのテスト', () => {
     contractUpdateSpy = jest.spyOn(Contract, 'update')
     orderCreateSpy = jest.spyOn(Order, 'create')
     findContractSpy = jest.spyOn(contractController, 'findContract')
-    errorSpy = jest.spyOn(logger, 'error')
 
     db.transaction = jest.fn(async (callback) => {
       const transactionObj = {}
@@ -76,7 +74,6 @@ describe('applyOrderControllerのテスト', () => {
     contractUpdateSpy.mockRestore()
     orderCreateSpy.mockRestore()
     findContractSpy.mockRestore()
-    errorSpy.mockRestore()
   })
 
   describe('applyNewOrder', () => {
