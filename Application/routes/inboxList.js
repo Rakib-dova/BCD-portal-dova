@@ -67,6 +67,12 @@ const cbGetIndex = async (req, res, next) => {
   // const user = req.dbUser
   // const contracts = req.contracts
 
+  let presentation = 'inboxList'
+  const litePlan = contracts.find((contract) => contract.serviceType === '030' && contract.deleteFlag === false)
+  if (litePlan) {
+    presentation = 'inboxList_light_plan'
+  }
+
   // ページ取得
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
@@ -96,7 +102,7 @@ const cbGetIndex = async (req, res, next) => {
   }
 
   // 受領した請求書一覧レンダリング
-  res.render('inboxList', {
+  res.render(presentation, {
     listArr: result.list,
     numPages: result.numPages,
     currPage: result.currPage,
@@ -297,6 +303,7 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   if (!litePlan || !litePlan.contractStatus) {
     return res.redirect('/inboxList/1')
   }
+  const presentation = 'inboxList_light_plan'
 
   // ページ取得
   const accessToken = req.user.accessToken
@@ -330,7 +337,7 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
 
   const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenantId)
   const keyword = { invoiceNumber, issueDate: [minIssuedate, maxIssuedate], sentBy, status, contactEmail }
-  const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, contract.contractId, tenantId)
+  const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, bcdContract.contractId, tenantId)
 
   if (resultList instanceof Error) {
     if (String(resultList.response?.status).slice(0, 1) === '4') {
@@ -345,7 +352,7 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
 
   // 支払一覧画面レンダリング
   if (resultList.length !== 0) {
-    res.render('inboxList', {
+    res.render(presentation, {
       listArr: resultList,
       numPages: 1,
       currPage: 1,
@@ -353,7 +360,7 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
       csrfToken: req.csrfToken()
     })
   } else {
-    res.render('inboxList', {
+    res.render(presentation, {
       listArr: resultList,
       numPages: 1,
       currPage: 1,
