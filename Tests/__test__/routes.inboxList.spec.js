@@ -230,7 +230,6 @@ describe('inboxListのテスト', () => {
       expect(inboxList.router.get).toBeCalledWith('/getWorkflow', inboxList.cbGetWorkflow)
       expect(inboxList.router.get).toBeCalledWith(
         '/:page',
-        helper.isAuthenticated,
         expect.any(Function),
         helper.bcdAuthenticate,
         inboxList.cbGetIndex
@@ -244,7 +243,6 @@ describe('inboxListのテスト', () => {
       )
       expect(inboxList.router.post).toBeCalledWith(
         '/:page',
-        helper.isAuthenticated,
         expect.any(Function),
         helper.bcdAuthenticate,
         inboxList.cbSearchApprovedInvoice

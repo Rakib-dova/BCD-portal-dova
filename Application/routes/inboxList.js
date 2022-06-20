@@ -255,12 +255,12 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
 
   // DBからuserデータ取得
   const user = await userController.findOne(req.user.userId)
-  // // データベースエラーは、エラーオブジェクトが返る
-  // // user未登録の場合もエラーを上げる
-  // if (user instanceof Error || user === null) return next(errorHelper.create(500))
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
 
-  // // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  // if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
   // // DBから契約情報取得
   // const contract = await contractController.findOne(req.user.tenantId)
@@ -374,8 +374,8 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
 
 router.get('/getWorkflow', cbGetWorkflow)
 router.get('/approvals', helper.isAuthenticated, csrfProtection, cbGetApprovals)
-router.get('/:page', helper.isAuthenticated, csrfProtection, helper.bcdAuthenticate, cbGetIndex)
-router.post('/:page', helper.isAuthenticated, csrfProtection, helper.bcdAuthenticate, cbSearchApprovedInvoice)
+router.get('/:page', csrfProtection, helper.bcdAuthenticate, cbGetIndex)
+router.post('/:page', csrfProtection, helper.bcdAuthenticate, cbSearchApprovedInvoice)
 
 module.exports = {
   router: router,
