@@ -6,7 +6,6 @@ block content
       .hero-body-noImage
         .title.is-family-noto-sans 支払依頼一覧
         .subtitle.is-family-noto-sans PAYMENT REQUEST LIST
-
     .columns.is-centered
       .column.is-11
         .box
@@ -31,11 +30,13 @@ block content
                 if rejectedFlag !== true
                   .tab-pane.is-active#informationTab
                     .box
-                      h2.title 支払依頼検索
-                      .columns.is-centered
+                      h2.title 支払依頼検索　
+                        a.button.is-link.i.fas.fa-lock
+                          .span.is-link.lockBorder 
+                          .span.is-link.lockText 検索機能を利用
+                      //- .columns.is-centered
                         .column                        
                           form#form(method="POST" action=`/inboxList/${currPage}`)
-                            input(type="hidden" name="_csrf" value=csrfToken)
                             article.panel.no-box-shadow.is-info                            
                               .panel-block
                                 .container
