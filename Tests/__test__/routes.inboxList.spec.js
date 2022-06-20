@@ -19,6 +19,7 @@ const inboxController = require('../../Application/controllers/inboxController')
 const requestApprovalController = require('../../Application/controllers/requestApprovalController')
 const logger = require('../../Application/lib/logger.js')
 const constantsDefine = require('../../Application/constants')
+const validate = require('../../Application/lib/validate.js')
 
 let request, response, infoSpy
 let userControllerFindOneSpy,
@@ -28,7 +29,9 @@ let userControllerFindOneSpy,
   getInboxSpy,
   requestApprovalControllerSpy,
   getWorkflowSpy,
-  getSearchResultSpy
+  getSearchResultSpy,
+  contractControllerFindContractsBytenantIdSpy,
+  validateIsStatusForCancelSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -61,7 +64,7 @@ const session = {
 // モックテーブル定義
 const Users = require('../mockDB/Users_Table')
 const Tenants = require('../mockDB/Tenants_Table')
-const Contracts = require('../mockDB/Contracts_Table')
+const Contracts = require('../mockDB/Contracts_Table2')
 
 const searchResult1 = {
   list: [
@@ -202,6 +205,8 @@ describe('inboxListのテスト', () => {
     getWorkflowSpy = jest.spyOn(inboxController, 'getWorkflow')
     request.flash = jest.fn()
     getSearchResultSpy = jest.spyOn(inboxController, 'getSearchResult')
+    contractControllerFindContractsBytenantIdSpy = jest.spyOn(contractController, 'findContractsBytenantId')
+    validateIsStatusForCancelSpy = jest.spyOn(validate, 'isStatusForCancel')
   })
   afterEach(() => {
     request.resetMocked()
@@ -216,14 +221,18 @@ describe('inboxListのテスト', () => {
     requestApprovalControllerSpy.mockRestore()
     getWorkflowSpy.mockRestore()
     getSearchResultSpy.mockRestore()
+    contractControllerFindContractsBytenantIdSpy.mockRestore()
+    validateIsStatusForCancelSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
     test('inboxListのルーティングを確認', async () => {
+      expect(inboxList.router.get).toBeCalledWith('/getWorkflow', inboxList.cbGetWorkflow)
       expect(inboxList.router.get).toBeCalledWith(
         '/:page',
         helper.isAuthenticated,
         expect.any(Function),
+        helper.bcdAuthenticate,
         inboxList.cbGetIndex
       )
       expect(inboxList.router.get).toBeCalledWith('/getWorkflow', inboxList.cbGetWorkflow)
@@ -237,6 +246,7 @@ describe('inboxListのテスト', () => {
         '/:page',
         helper.isAuthenticated,
         expect.any(Function),
+        helper.bcdAuthenticate,
         inboxList.cbSearchApprovedInvoice
       )
     })
@@ -251,22 +261,20 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       requestApprovalControllerSpy.mockReturnValue(null)
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
       // CSRF対策
       const dummyToken = 'testCsrfToken'
       request.csrfToken = jest.fn(() => {
         return dummyToken
       })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[0])
 
       // 試験実施
       await inboxList.cbGetIndex(request, response, next)
@@ -286,6 +294,82 @@ describe('inboxListのテスト', () => {
       })
     })
 
+    test('正常：有償プラン', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      requestApprovalControllerSpy.mockReturnValue(null)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
+
+      // 試験実施
+      await inboxList.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxListが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
+        listArr: searchResult1.list,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
+        rejectedFlag: false,
+        csrfToken: dummyToken
+      })
+    })
+
+    test('異常：SeviceTypeなし', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      requestApprovalControllerSpy.mockReturnValue(null)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[10])
+
+      // 試験実施
+      await inboxList.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
     test('正常：承認待ちの場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -295,22 +379,20 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       requestApprovalControllerSpy.mockReturnValue(null)
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
       // CSRF対策
       const dummyToken = 'testCsrfToken'
       request.csrfToken = jest.fn(() => {
         return dummyToken
       })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[0])
 
       // 試験実施
       await inboxList.cbGetIndex(request, response, next)
@@ -338,22 +420,20 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       requestApprovalControllerSpy.mockReturnValue(returnRequestApproval)
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
       // CSRF対策
       const dummyToken = 'testCsrfToken'
       request.csrfToken = jest.fn(() => {
         return dummyToken
       })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[0])
 
       // 試験実施
       await inboxList.cbGetIndex(request, response, next)
@@ -381,15 +461,13 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[6])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[5])
+
       // 試験実施
       await inboxList.cbGetIndex(request, response, next)
 
@@ -413,18 +491,16 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       const dbError = new Error('DB Conncetion Error')
       requestApprovalControllerSpy.mockReturnValue(dbError)
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[0])
+
       // 試験実施
       await inboxList.cbGetIndex(request, response, next)
 
@@ -565,11 +641,11 @@ describe('inboxListのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0][0])
 
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0][0])
 
       getWorkflowSpy.mockReturnValue(searchResult1Rejected)
 
@@ -582,6 +658,33 @@ describe('inboxListのテスト', () => {
       expect(response.send).toHaveBeenCalledWith(searchResult1Rejected)
     })
 
+    test('準正常：解約（403エラー）', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0][0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0][0])
+
+      getWorkflowSpy.mockReturnValue(searchResult1Rejected)
+
+      validateIsStatusForCancelSpy.mockReturnValue(null)
+
+      // 試験実施
+      await inboxList.cbGetWorkflow(request, response, next)
+
+      // 期待結果
+      // response.statusが「403」
+      expect(response.status).toHaveBeenCalledWith(403)
+    })
+
     test('500エラー:getWorkflowエラー', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -591,11 +694,11 @@ describe('inboxListのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0][0])
 
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0][0])
 
       const dbError = new Error('DB Conncetion Error')
       getWorkflowSpy.mockReturnValue(dbError)
@@ -617,15 +720,12 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[6])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[5])
 
       // 試験実施
       await inboxList.cbGetWorkflow(request, response, next)
@@ -645,11 +745,11 @@ describe('inboxListのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[7])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[7][0])
 
       tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[7])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[7][0])
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
@@ -742,7 +842,7 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0][0])
       tenantControllerFindOneSpy.mockReturnValue(null)
       contractControllerFindContractSpyon.mockReturnValue(null)
 
@@ -766,11 +866,11 @@ describe('inboxListのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0][0])
 
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0][0])
 
       requestApprovalControllerSpy.mockReturnValue(null)
 
@@ -810,11 +910,11 @@ describe('inboxListのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0][0])
 
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0][0])
 
       requestApprovalControllerSpy.mockReturnValue(null)
 
@@ -853,11 +953,11 @@ describe('inboxListのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0][0])
 
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0][0])
 
       requestApprovalControllerSpy.mockReturnValue(returnRequestApproval)
 
@@ -896,11 +996,11 @@ describe('inboxListのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[6])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5][0])
 
       tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[5][0])
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
@@ -928,11 +1028,11 @@ describe('inboxListのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0][0])
 
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0][0])
 
       const dbError = new Error('DB Conncetion Error')
       requestApprovalControllerSpy.mockReturnValue(dbError)
@@ -956,11 +1056,11 @@ describe('inboxListのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[7])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[7][0])
 
       tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
 
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[7])
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[7][0])
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
@@ -1056,7 +1156,7 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0][0])
       tenantControllerFindOneSpy.mockReturnValue(null)
       contractControllerFindContractSpyon.mockReturnValue(null)
 
@@ -1099,12 +1199,7 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       getSearchResultSpy.mockReturnValueOnce(searchResultData)
 
@@ -1116,6 +1211,8 @@ describe('inboxListのテスト', () => {
         return dummyToken
       })
 
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
+
       // 試験実施
       await inboxList.cbSearchApprovedInvoice(request, response, next)
 
@@ -1125,13 +1222,121 @@ describe('inboxListのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxListが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('inboxList', {
+      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
         listArr: searchResultData,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: false,
         csrfToken: dummyToken
       })
+    })
+
+    test('準正常：無償プラン', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: ''
+      }
+
+      const searchResultData = [
+        {
+          ammount: '3,080,000',
+          currency: 'JPY',
+          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          expire: '2021-11-10',
+          invoiceNo: 'PB1649meisai001',
+          no: 1,
+          sentBy: 'バイヤー1',
+          sentTo: 'サプライヤー1',
+          status: 0,
+          updated: '2021-12-27'
+        }
+      ]
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      getSearchResultSpy.mockReturnValueOnce(searchResultData)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[0])
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+    })
+
+    test('異常：SeviceTypeなし', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: ''
+      }
+
+      const searchResultData = [
+        {
+          ammount: '3,080,000',
+          currency: 'JPY',
+          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          expire: '2021-11-10',
+          invoiceNo: 'PB1649meisai001',
+          no: 1,
+          sentBy: 'バイヤー1',
+          sentTo: 'サプライヤー1',
+          status: 0,
+          updated: '2021-12-27'
+        }
+      ]
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      getSearchResultSpy.mockReturnValueOnce(searchResultData)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[10])
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.nextの関数が呼び出されて、５００エラーをチェックする。
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('正常：検索結果が０件の場合', async () => {
@@ -1150,12 +1355,7 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       getSearchResultSpy.mockReturnValueOnce(searchResultData)
 
@@ -1167,6 +1367,8 @@ describe('inboxListのテスト', () => {
         return dummyToken
       })
 
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
+
       // 試験実施
       await inboxList.cbSearchApprovedInvoice(request, response, next)
 
@@ -1176,7 +1378,7 @@ describe('inboxListのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxListが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('inboxList', {
+      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
         listArr: searchResultData,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
@@ -1215,12 +1417,7 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       getSearchResultSpy.mockReturnValueOnce(searchResultData)
 
@@ -1232,6 +1429,8 @@ describe('inboxListのテスト', () => {
         return dummyToken
       })
 
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
+
       // 試験実施
       await inboxList.cbSearchApprovedInvoice(request, response, next)
 
@@ -1241,7 +1440,7 @@ describe('inboxListのテスト', () => {
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでinboxListが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('inboxList', {
+      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
         listArr: searchResultData,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
@@ -1279,17 +1478,14 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       getSearchResultSpy.mockReturnValueOnce(searchResultData)
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
 
       // 試験実施
       await inboxList.cbSearchApprovedInvoice(request, response, next)
@@ -1335,17 +1531,14 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       getSearchResultSpy.mockReturnValueOnce(searchResultData)
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
 
       // 試験実施
       await inboxList.cbSearchApprovedInvoice(request, response, next)
@@ -1392,17 +1585,14 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       getSearchResultSpy.mockReturnValueOnce(searchResultData)
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
 
       // 試験実施
       await inboxList.cbSearchApprovedInvoice(request, response, next)
@@ -1433,12 +1623,7 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       const searchError = new Error()
       searchError.response = { status: 400 }
@@ -1446,6 +1631,8 @@ describe('inboxListのテスト', () => {
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
 
       // 試験実施
       await inboxList.cbSearchApprovedInvoice(request, response, next)
@@ -1476,12 +1663,7 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
 
       const searchError = new Error()
       searchError.response = { status: 500 }
@@ -1489,6 +1671,8 @@ describe('inboxListのテスト', () => {
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
 
       // 試験実施
       await inboxList.cbSearchApprovedInvoice(request, response, next)
@@ -1516,15 +1700,13 @@ describe('inboxListのテスト', () => {
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[6])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
-
       tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[5])
+
       // 試験実施
       await inboxList.cbSearchApprovedInvoice(request, response, next)
 
@@ -1608,29 +1790,6 @@ describe('inboxListのテスト', () => {
 
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-    })
-
-    test('404エラー：user.statusが0ではない場合', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.user = { ...user[2] }
-      request.body = {
-        invoiceNumber: 'PB1649meisai001',
-        minIssuedate: '',
-        maxIssuedate: '',
-        managerAddress: ''
-      }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[8])
-
-      // 試験実施
-      await inboxList.cbSearchApprovedInvoice(request, response, next)
-
-      // 期待結果
-      // 404エラーがエラーハンドリング「される」
-      expect(next).toHaveBeenCalledWith(errorHelper.create(404))
     })
 
     test('500エラー：contracts検索の時、DBエラー', async () => {
