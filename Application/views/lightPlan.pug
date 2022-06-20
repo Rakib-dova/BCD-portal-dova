@@ -55,8 +55,8 @@ block content
                                 .column.is-one-third.pl-0
                                   input.input#postalNumber(type="text" name="postalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7 placeholder='例：1234567')
                                 .column
-                                  .button.is-link.mr-3#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
-                                  .button.is-danger#postalClearBtn(type="button" disabled) クリア
+                                  button.button.is-link.mr-3#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
+                                  button.button.is-danger#postalClearBtn(type="button" disabled) クリア
                           .field
                             label(for="contractAddressVal").input-label 住所
                             p#contractAddressValRequired.input-label-required.input-label （必須）
@@ -149,8 +149,8 @@ block content
                                 .column.is-one-third.pl-0
                                   input.input#billMailingPostalNumber(type="text" name="billMailingPostalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7 placeholder='例：1234567')
                                 .column
-                                  .button.is-link.mr-3#billMailingSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
-                                  .button.is-danger#billMailingClearBtn(type="button" disabled) クリア
+                                  button.button.is-link.mr-3#billMailingSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
+                                  button.button.is-danger#billMailingClearBtn(type="button" disabled) クリア
                           .field
                             label(for="billMailingAddress").input-label 請求書送付先住所（丁目まで）
                             p#billMailingAddressRequired.input-label-required.input-label （必須）

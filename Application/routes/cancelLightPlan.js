@@ -85,7 +85,7 @@ const showCancelLightPlan = async (req, res, next) => {
   // ライトプラン解約画面表示
   res.render('cancelLightPlan', {
     title: 'ライトプラン解約',
-    numberN: contracts.find((i) => i.contractStatus === contractStatuses.onContract)?.numberN,
+    numberN: contracts?.find((i) => i.contractStatus === contractStatuses.onContract)?.numberN,
     salesChannelDeptList: salesChannelDeptList,
     csrfToken: req.csrfToken()
   })

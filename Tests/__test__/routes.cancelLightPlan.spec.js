@@ -33,7 +33,7 @@ const user = {
 const dbError = new Error('DB error')
 
 // CSRF対策
-const dummyTokne = 'testCsrfToken'
+const dummyToken = 'testCsrfToken'
 
 const inputData = {
   salesChannelCode: '000000',
@@ -91,7 +91,7 @@ describe('cancelLightPlanのテスト', () => {
     findAllDept = jest.spyOn(channelDepartmentController, 'findAll')
     findOneDept = jest.spyOn(channelDepartmentController, 'findOne')
     request.csrfToken = jest.fn(() => {
-      return dummyTokne
+      return dummyToken
     })
     request.flash = jest.fn()
   })
@@ -267,7 +267,7 @@ describe('cancelLightPlanのテスト', () => {
         title: 'ライトプラン解約',
         numberN: '123',
         salesChannelDeptList: salesChannelDeptList,
-        csrfToken: dummyTokne
+        csrfToken: dummyToken
       })
     })
 
