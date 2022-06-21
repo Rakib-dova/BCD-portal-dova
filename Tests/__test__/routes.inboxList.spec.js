@@ -227,7 +227,6 @@ describe('inboxListのテスト', () => {
 
   describe('ルーティング', () => {
     test('inboxListのルーティングを確認', async () => {
-      expect(inboxList.router.get).toBeCalledWith('/getWorkflow', inboxList.cbGetWorkflow)
       expect(inboxList.router.get).toBeCalledWith(
         '/:page',
         expect.any(Function),
@@ -323,7 +322,7 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxListが呼ばれ「る」
+      // response.renderでinboxList_light_planが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
@@ -705,7 +704,7 @@ describe('inboxListのテスト', () => {
       await inboxList.cbGetWorkflow(request, response, next)
 
       // 期待結果
-      // response.statusが「200」
+      // response.statusが「500」
       expect(response.status).toHaveBeenCalledWith(500)
       expect(response.send).toHaveBeenCalledWith('サーバーエラーが発生しました。')
     })
@@ -1219,7 +1218,7 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxListが呼ばれ「る」
+      // response.renderでinboxList_light_planが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
         listArr: searchResultData,
         numPages: searchResult1.numPages,
@@ -1375,7 +1374,7 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxListが呼ばれ「る」
+      // response.renderでinboxList_light_planが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
         listArr: searchResultData,
         numPages: searchResult1.numPages,
@@ -1437,7 +1436,7 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxListが呼ばれ「る」
+      // response.renderでinboxList_light_planが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
         listArr: searchResultData,
         numPages: searchResult1.numPages,
@@ -1788,6 +1787,29 @@ describe('inboxListのテスト', () => {
 
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('404エラー：user.statusが0ではない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[2] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: ''
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[8])
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(404))
     })
 
     test('500エラー：contracts検索の時、DBエラー', async () => {
