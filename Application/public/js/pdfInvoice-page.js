@@ -339,12 +339,11 @@ function addLine() {
 
 $('#output-modal-btn')?.addEventListener('click', async () => {
   setPaymentRequired(invoice, outputRules)
-  if (!location.pathname.match(/show/) && !validate(
-    invoice,
-    lines,
-    outputRules,
-    { lineLength: String(lines.length), fileSize: imageFile?.size }
-  )) return alert('入力項目に不備があります。')
+  if (
+    !location.pathname.match(/show/) &&
+    !validate(invoice, lines, outputRules, { lineLength: String(lines.length), fileSize: imageFile?.size })
+  )
+    return alert('入力項目に不備があります。')
 
   $('#output-modal').classList.add('is-active')
 })

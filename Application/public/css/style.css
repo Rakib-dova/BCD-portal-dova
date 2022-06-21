@@ -339,9 +339,17 @@ img.logo-ncom {
   width: 60%;
 }
 
+.mr-auto {
+  margin: auto;
+}
 .detailLise-text-center {
   margin: auto;
   text-align: center;
+}
+
+.space-between {
+  display: flex;
+  justify-content: space-between;
 }
 
 .status-text {

@@ -95,7 +95,7 @@ const pdfInvoiceEdit = async (req, res, next) => {
 
   // PDF請求書情報取得
   const { invoice, lines, sealImpRecord } = await getInvoiceInfo(req, senderInfo)
-  if (!invoice || !lines || !sealImpRecord) return next(errorHelper.create(500))
+  if (!invoice || !lines) return next(errorHelper.create(500))
 
   // console.log('=== sealImpRecord =========\n', sealImpRecord)
   console.log('=== invoice =========\n', invoice)
@@ -103,8 +103,8 @@ const pdfInvoiceEdit = async (req, res, next) => {
   console.log('=== sealImpRecord =========\n', sealImpRecord)
 
   // 印影設定
-  const sealImpSrc = sealImpRecord.dataValues.image
-    ? `data:image/png;base64,${sealImpRecord.dataValues.image.toString('base64')}`
+  const sealImpSrc = sealImpRecord?.dataValues.image
+    ? `data:image/png;base64,${sealImpRecord?.dataValues.image.toString('base64')}`
     : '/image/ts-app-digitaltrade-func-icon-pdf_stamp_select.svg'
   // 企業ロゴ設定
   const logoSrc = accountInfo.LogoURL ? accountInfo.LogoURL : null
@@ -213,6 +213,7 @@ const updatePdfInvoice = async (req, res, next) => {
   })
 
   console.log('==  lines  ===================\n', lines)
+  console.log('==  req.file  ===================\n', req.file)
 
   let updatedInvoice
   try {
