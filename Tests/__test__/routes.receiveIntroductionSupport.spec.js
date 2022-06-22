@@ -113,7 +113,7 @@ const salesChannelDeptList = [
   { code: '003', name: 'Com第三営業本部' }
 ]
 
-let request, response, applyNewOrderSpy, findContractSpy, infoSpy, findAllDept, findOneDept
+let request, response, applyNewOrderSpy, findContractSpy, findAllDept, findOneDept
 
 describe('receiveIntroductionSupportのテスト', () => {
   beforeEach(() => {
@@ -127,7 +127,6 @@ describe('receiveIntroductionSupportのテスト', () => {
     findContractSpy = jest.spyOn(contractController, 'findContracts')
     findAllDept = jest.spyOn(channelDepartmentController, 'findAll')
     findOneDept = jest.spyOn(channelDepartmentController, 'findOne')
-    infoSpy = jest.spyOn(logger, 'info')
     request.csrfToken = jest.fn(() => {
       return dummyToken
     })
@@ -141,7 +140,6 @@ describe('receiveIntroductionSupportのテスト', () => {
     findContractSpy.mockRestore()
     findAllDept.mockRestore()
     findOneDept.mockRestore()
-    infoSpy.mockRestore()
   })
 
   describe('ルーティング', () => {

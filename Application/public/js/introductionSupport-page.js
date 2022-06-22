@@ -299,6 +299,15 @@ $('#next-btn').addEventListener('click', function (e) {
     $('#passwordMessage').textContent = '　入力されたパスワードが一致しません。'
   }
 
+  // 開通希望日チェック(過去の日付を設定された場合)
+  if (
+    $('#openingDate').value &&
+    new Date($('#openingDate').value).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)
+  ) {
+    if (!firstError) firstError = $('#openingDate')
+    $('#openingDateMessage').textContent = '　過去の日付を設定できません。'
+  }
+
   if (firstError) {
     // 初回エラー 項目にフォーカス
     firstError?.focus()
@@ -307,7 +316,7 @@ $('#next-btn').addEventListener('click', function (e) {
     contactAddress(contractElementIdMap)
     contactAddress(billMailingElementIdMap)
 
-    $('#resalesChannelDeptType').textContent = $('#salesChannelDeptType').value
+    $('#resalesChannelDeptType').textContent = JSON.parse($('#salesChannelDeptType').value || '{}').name
 
     const modal = $('#confirmregister-modal')
     if (modal) modal.classList.toggle('is-active')
