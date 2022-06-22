@@ -19,7 +19,7 @@ module.exports = {
       lineId: {
         type: Sequelize.STRING(5)
       },
-      lineDiscription: {
+      lineDescription: {
         type: Sequelize.STRING(100)
       },
       unit: {
@@ -33,6 +33,33 @@ module.exports = {
       },
       taxType: {
         type: Sequelize.STRING(12)
+      },
+      discountDescription1: {
+        type: Sequelize.STRING(100)
+      },
+      discountAmount1: {
+        type: Sequelize.DECIMAL(12, 0)
+      },
+      discountUnit1: {
+        type: Sequelize.STRING(10)
+      },
+      discountDescription2: {
+        type: Sequelize.STRING(100)
+      },
+      discountAmount2: {
+        type: Sequelize.DECIMAL(12, 0)
+      },
+      discountUnit2: {
+        type: Sequelize.STRING(10)
+      },
+      discountDescription3: {
+        type: Sequelize.STRING(100)
+      },
+      discountAmount3: {
+        type: Sequelize.DECIMAL(12, 0)
+      },
+      discountUnit3: {
+        type: Sequelize.STRING(10)
       }
     })
   },

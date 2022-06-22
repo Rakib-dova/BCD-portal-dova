@@ -59,7 +59,7 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
     }
 
     // invoiceDetail検索
-    const invoiceUploadId = td[9].defaultValue
+    const historyId = td[9].defaultValue
     const resultDetailTable = $('#resultDetail')
     let detail = ''
 
@@ -68,7 +68,7 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
     }
 
     apiController(
-      `https://${location.host}/pdfInvoiceCsvUpload/resultList/detail/${invoiceUploadId}`,
+      `https://${location.host}/pdfInvoiceCsvUpload/resultList/detail/${historyId}`,
       'GET',
       async (response) => {
         const resultDetail = await response.json()

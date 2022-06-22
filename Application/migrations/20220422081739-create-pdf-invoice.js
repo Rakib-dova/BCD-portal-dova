@@ -62,6 +62,9 @@ module.exports = {
       sendAddr3: {
         type: Sequelize.STRING(50)
       },
+      sendRegistrationNo: {
+        type: Sequelize.STRING(14)
+      },
       bankName: {
         type: Sequelize.STRING(50)
       },
@@ -83,6 +86,33 @@ module.exports = {
       sealImpressionPath: {
         type: Sequelize.STRING(255),
         defaultValue: ''
+      },
+      discountDescription1: {
+        type: Sequelize.STRING(100)
+      },
+      discountAmount1: {
+        type: Sequelize.DECIMAL(12, 0)
+      },
+      discountUnit1: {
+        type: Sequelize.STRING(10)
+      },
+      discountDescription2: {
+        type: Sequelize.STRING(100)
+      },
+      discountAmount2: {
+        type: Sequelize.DECIMAL(12, 0)
+      },
+      discountUnit2: {
+        type: Sequelize.STRING(10)
+      },
+      discountDescription3: {
+        type: Sequelize.STRING(100)
+      },
+      discountAmount3: {
+        type: Sequelize.DECIMAL(12, 0)
+      },
+      discountUnit3: {
+        type: Sequelize.STRING(10)
       },
       createdAt: {
         allowNull: false,

@@ -1,22 +1,22 @@
 'use strict'
 const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-  class PdfInvoiceUploadDetail extends Model {
+  class pdfInvoiceHistoryDetail extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      PdfInvoiceUploadDetail.belongsTo(models.PdfInvoiceUpload, {
-        foreignKey: 'invoiceUploadId', // k1を指定
-        targetKey: 'invoiceUploadId', // k2を指定
+      pdfInvoiceHistoryDetail.belongsTo(models.pdfInvoiceHistory, {
+        foreignKey: 'historyId', // k1を指定
+        targetKey: 'historyId', // k2を指定
         onDelete: 'casecade',
         onUpdate: 'casecade'
       })
     }
   }
-  PdfInvoiceUploadDetail.init(
+  pdfInvoiceHistoryDetail.init(
     {
       // 以下、修正予定のため残しています
       // historyId: {
@@ -32,13 +32,13 @@ module.exports = (sequelize, DataTypes) => {
       //   type: DataTypes.INTEGER,
       //   primaryKey: true
       // },
-      invoiceUploadDetailId: {
+      historyDetailId: {
         type: DataTypes.UUID,
         primaryKey: true,
         unique: true,
         allowNull: false
       },
-      invoiceUploadId: {
+      historyId: {
         type: DataTypes.UUID,
         foreignKey: true,
         allowNull: false
@@ -66,8 +66,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'PdfInvoiceUploadDetail'
+      modelName: 'pdfInvoiceHistoryDetail'
     }
   )
-  return PdfInvoiceUploadDetail
+  return pdfInvoiceHistoryDetail
 }

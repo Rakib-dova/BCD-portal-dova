@@ -153,7 +153,7 @@ const saveRules = [
   {
     target: 'lines',
     displayLocation: 'lines',
-    prop: 'lineDiscription',
+    prop: 'lineDescription',
     regexp: /^.{0,100}$/,
     message: '内容は100文字以内で入力してください。',
     emptyMessage: '内容が空欄のため、明細情報が不完全です。入力して下さい。',
@@ -366,7 +366,7 @@ const outputRules = [
   {
     target: 'lines',
     displayLocation: 'lines',
-    prop: 'lineDiscription',
+    prop: 'lineDescription',
     regexp: /^.{0,100}$/,
     message: '内容は100文字以内で入力してください。',
     emptyMessage: '内容が空欄のため、明細情報が不完全です。入力して下さい。',

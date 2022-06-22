@@ -1,25 +1,25 @@
-const pdfInvoiceUploadDetail = require('../models').PdfInvoiceUploadDetail
+const pdfInvoiceHistoryDetail = require('../models').pdfInvoiceHistoryDetail
 const constantsDefine = require('../constants')
 const logger = require('../lib/logger')
 
 module.exports = {
   // パラメータ値
   // values{
-  //   invoiceUploadDetailId,
-  //   invoiceUploadId,
+  //   invoiceHistoryDetailId,
+  //   historyId,
   //   lines,
   //   invoiceId,
   //   status,
   //   errorData
   // }
-  findInvoiceDetail: async (invoiceUploadId) => {
+  findInvoiceDetail: async (historyId) => {
     const functionName = 'invoiceDetailController.findInvoiceDetail'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     let result
     try {
-      result = await pdfInvoiceUploadDetail.findAll({
+      result = await pdfInvoiceHistoryDetail.findAll({
         where: {
-          invoiceUploadId: invoiceUploadId
+          historyId: historyId
         },
         order: [
           ['lines', 'ASC'],
@@ -27,18 +27,18 @@ module.exports = {
         ]
       })
     } catch (error) {
-      logger.error({ invoiceUploadId: invoiceUploadId, stack: error.stack, status: 0 })
+      logger.error({ historyId: historyId, stack: error.stack, status: 0 })
       result = error
     }
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return result
   },
   create: async (values) => {
-    const functionName = 'pdfInvoiceUploadDetailController.insert'
+    const functionName = 'pdfInvoiceHistoryDetailController.insert'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     let result
     try {
-      result = await pdfInvoiceUploadDetail.create({
+      result = await pdfInvoiceHistoryDetail.create({
         ...values
       })
     } catch (error) {

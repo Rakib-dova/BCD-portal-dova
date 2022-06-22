@@ -10,8 +10,8 @@ const request = require('supertest')
 const fs = require('fs')
 
 const pdfInvoice = require('../../Application/routes/pdfInvoice.js')
-const uploadController = require('../../Application/controllers/pdfInvoiceUploadController.js')
-const uploadDetailController = require('../../Application/controllers/pdfInvoiceUploadDetailController.js')
+const uploadController = require('../../Application/controllers/pdfInvoiceHistoryController.js')
+const uploadDetailController = require('../../Application/controllers/pdfInvoiceHistoryDetailController.js')
 const pdfInvoiceController = require('../../Application/controllers/pdfInvoiceController.js')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const db = require('../../Application/models')
@@ -19,7 +19,7 @@ const db = require('../../Application/models')
 jest.mock('../../Application/lib/pdfGenerator')
 
 const defaultUser = { tenantId: 'dummyTenantId' }
-const defaultParams = { invoiceUploadId: 'invoiceUploadId' }
+const defaultParams = { historyId: 'historyId' }
 const defaultBody = {}
 
 const accountInfo = {
@@ -105,7 +105,7 @@ let pdfInvoiceGetAccountAndSenderInfoSpy
 const historyData = [
   {
     dataValues: {
-      invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+      historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
       tenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
       csvFileName: 'PDF請求書ドラフト一括作成フォーマット1.csv',
       successCount: 1,
@@ -118,7 +118,7 @@ const historyData = [
   },
   {
     dataValues: {
-      invoiceUploadId: '0b906415-308c-449f-964c-18662c33c592',
+      historyId: '0b906415-308c-449f-964c-18662c33c592',
       tenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
       csvFileName: 'PDF請求書ドラフト一括作成フォーマット2.csv',
       successCount: 7,
@@ -134,7 +134,7 @@ const historyData = [
 const historyDataSuccess = [
   {
     dataValues: {
-      invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+      historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
       tenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
       csvFileName: 'PDF請求書ドラフト一括作成フォーマット1.csv',
       successCount: 1,
@@ -151,8 +151,8 @@ const details = {
   success: [
     {
       dataValues: {
-        invoiceUploadDetailId: 'bbcbbe53-101c-4dca-89a0-c5709c4c790f',
-        invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+        historyDetailId: 'bbcbbe53-101c-4dca-89a0-c5709c4c790f',
+        historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
         lines: 1,
         invoiceNo: 'detail001',
         status: 0,
@@ -163,8 +163,8 @@ const details = {
   skip: [
     {
       dataValues: {
-        invoiceUploadDetailId: '77c6b3d2-33fb-4698-8241-48359704d5c6',
-        invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+        historyDetailId: '77c6b3d2-33fb-4698-8241-48359704d5c6',
+        historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
         lines: 1,
         invoiceNo: 'detail002',
         status: 1,
@@ -175,8 +175,8 @@ const details = {
   fail: [
     {
       dataValues: {
-        invoiceUploadDetailId: '5fef89d8-3639-4d12-ae1e-b4ef4b7ff2d8',
-        invoiceUploadId: '3c8204ac-1a7f-4d88-833f-270aa919f937',
+        historyDetailId: '5fef89d8-3639-4d12-ae1e-b4ef4b7ff2d8',
+        historyId: '3c8204ac-1a7f-4d88-833f-270aa919f937',
         lines: 1,
         invoiceNo: 'detail003',
         status: 2,
@@ -187,8 +187,8 @@ const details = {
   successSkip: [
     {
       dataValues: {
-        invoiceUploadDetailId: 'bbcbbe53-101c-4dca-89a0-c5709c4c790f',
-        invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+        historyDetailId: 'bbcbbe53-101c-4dca-89a0-c5709c4c790f',
+        historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
         lines: 1,
         invoiceNo: 'detail001',
         status: 0,
@@ -197,8 +197,8 @@ const details = {
     },
     {
       dataValues: {
-        invoiceUploadDetailId: '77c6b3d2-33fb-4698-8241-48359704d5c6',
-        invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+        historyDetailId: '77c6b3d2-33fb-4698-8241-48359704d5c6',
+        historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
         lines: 1,
         invoiceNo: 'detail002',
         status: 1,
@@ -209,8 +209,8 @@ const details = {
   successFail: [
     {
       dataValues: {
-        invoiceUploadDetailId: 'bbcbbe53-101c-4dca-89a0-c5709c4c790f',
-        invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+        historyDetailId: 'bbcbbe53-101c-4dca-89a0-c5709c4c790f',
+        historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
         lines: 1,
         invoiceNo: 'detail001',
         status: 0,
@@ -219,8 +219,8 @@ const details = {
     },
     {
       dataValues: {
-        invoiceUploadDetailId: '5fef89d8-3639-4d12-ae1e-b4ef4b7ff2d8',
-        invoiceUploadId: '3c8204ac-1a7f-4d88-833f-270aa919f937',
+        historyDetailId: '5fef89d8-3639-4d12-ae1e-b4ef4b7ff2d8',
+        historyId: '3c8204ac-1a7f-4d88-833f-270aa919f937',
         lines: 1,
         invoiceNo: 'detail003',
         status: 2,
@@ -231,8 +231,8 @@ const details = {
   skipFail: [
     {
       dataValues: {
-        invoiceUploadDetailId: '77c6b3d2-33fb-4698-8241-48359704d5c6',
-        invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+        historyDetailId: '77c6b3d2-33fb-4698-8241-48359704d5c6',
+        historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
         lines: 1,
         invoiceNo: 'detail002',
         status: 1,
@@ -241,8 +241,8 @@ const details = {
     },
     {
       dataValues: {
-        invoiceUploadDetailId: '5fef89d8-3639-4d12-ae1e-b4ef4b7ff2d8',
-        invoiceUploadId: '3c8204ac-1a7f-4d88-833f-270aa919f937',
+        historyDetailId: '5fef89d8-3639-4d12-ae1e-b4ef4b7ff2d8',
+        historyId: '3c8204ac-1a7f-4d88-833f-270aa919f937',
         lines: 1,
         invoiceNo: 'detail003',
         status: 2,
@@ -253,8 +253,8 @@ const details = {
   all: [
     {
       dataValues: {
-        invoiceUploadDetailId: 'bbcbbe53-101c-4dca-89a0-c5709c4c790f',
-        invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+        historyDetailId: 'bbcbbe53-101c-4dca-89a0-c5709c4c790f',
+        historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
         lines: 1,
         invoiceNo: 'detail001',
         status: 0,
@@ -263,8 +263,8 @@ const details = {
     },
     {
       dataValues: {
-        invoiceUploadDetailId: '77c6b3d2-33fb-4698-8241-48359704d5c6',
-        invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+        historyDetailId: '77c6b3d2-33fb-4698-8241-48359704d5c6',
+        historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
         lines: 1,
         invoiceNo: 'detail002',
         status: 1,
@@ -273,8 +273,8 @@ const details = {
     },
     {
       dataValues: {
-        invoiceUploadDetailId: '5fef89d8-3639-4d12-ae1e-b4ef4b7ff2d8',
-        invoiceUploadId: '3c8204ac-1a7f-4d88-833f-270aa919f937',
+        historyDetailId: '5fef89d8-3639-4d12-ae1e-b4ef4b7ff2d8',
+        historyId: '3c8204ac-1a7f-4d88-833f-270aa919f937',
         lines: 1,
         invoiceNo: 'detail003',
         status: 2,
@@ -382,7 +382,7 @@ describe('pdfInvocie.js ITテスト', () => {
       let renderedHTML = res.text
       renderedHTML = renderedHTML.replace('<!DOCTYPE html><html>', '')
       renderedHTML = renderedHTML.replace(
-        '<script src="/js/common-page.js"></script><script src="/js/portal-page.js"></script><!-- End of DigitalTrade Portal Page--><script src="/js/pdfInvoiceUploadResultDetail-page.js"></script><!-- ResultDetail-->',
+        '<script src="/js/common-page.js"></script><script src="/js/portal-page.js"></script><!-- End of DigitalTrade Portal Page--><script src="/js/pdfInvoiceHistoryResultDetail-page.js"></script><!-- ResultDetail-->',
         ''
       )
       renderedHTML = renderedHTML.replace('</html>', '')
@@ -392,7 +392,7 @@ describe('pdfInvocie.js ITテスト', () => {
       // resultList/detailのリクエスト
       findInvoiceDetailSpy.mockReturnValue(details.success)
       const res2 = await request(app)
-        .get('/pdfInvoiceCsvUpload/resultList/detail/invoiceUploadId:dummyId')
+        .get('/pdfInvoiceCsvUpload/resultList/detail/historyId:dummyId')
         .set('Accept', 'application/json')
 
       global.fetch = jest.fn(() =>
@@ -404,7 +404,7 @@ describe('pdfInvocie.js ITテスト', () => {
 
       const commonPage = require('../../Application/public/js/common-page')
       const portalPage = require('../../Application/public/js/portal-page.js')
-      const csvuploadResultDetail = require('../../Application/public/js/pdfInvoiceUploadResultDetail-page.js')
+      const csvuploadResultDetail = require('../../Application/public/js/pdfInvoiceHistoryResultDetail-page.js')
 
       // ステータスボタンクリック
       const detailBtn = document.getElementsByClassName('btnDetail')
@@ -427,7 +427,7 @@ describe('pdfInvocie.js ITテスト', () => {
       // resultList/detailのリクエスト
       findInvoiceDetailSpy.mockReturnValue(details.skip)
       const res2 = await request(app)
-        .get('/pdfInvoiceCsvUpload/resultList/detail/invoiceUploadId:dummyId')
+        .get('/pdfInvoiceCsvUpload/resultList/detail/historyId:dummyId')
         .set('Accept', 'application/json')
 
       global.fetch = jest.fn(() =>
@@ -459,7 +459,7 @@ describe('pdfInvocie.js ITテスト', () => {
       // resultList/detailのリクエスト
       findInvoiceDetailSpy.mockReturnValue(details.fail)
       const res2 = await request(app)
-        .get('/pdfInvoiceCsvUpload/resultList/detail/invoiceUploadId:dummyId')
+        .get('/pdfInvoiceCsvUpload/resultList/detail/historyId:dummyId')
         .set('Accept', 'application/json')
 
       global.fetch = jest.fn(() =>
@@ -491,7 +491,7 @@ describe('pdfInvocie.js ITテスト', () => {
       // resultList/detailのリクエスト
       findInvoiceDetailSpy.mockReturnValue(details.successSkip)
       const res2 = await request(app)
-        .get('/pdfInvoiceCsvUpload/resultList/detail/invoiceUploadId:dummyId')
+        .get('/pdfInvoiceCsvUpload/resultList/detail/historyId:dummyId')
         .set('Accept', 'application/json')
 
       global.fetch = jest.fn(() =>
@@ -525,7 +525,7 @@ describe('pdfInvocie.js ITテスト', () => {
       // resultList/detailのリクエスト
       findInvoiceDetailSpy.mockReturnValue(details.successFail)
       const res2 = await request(app)
-        .get('/pdfInvoiceCsvUpload/resultList/detail/invoiceUploadId:dummyId')
+        .get('/pdfInvoiceCsvUpload/resultList/detail/historyId:dummyId')
         .set('Accept', 'application/json')
 
       global.fetch = jest.fn(() =>
@@ -561,7 +561,7 @@ describe('pdfInvocie.js ITテスト', () => {
       // resultList/detailのリクエスト
       findInvoiceDetailSpy.mockReturnValue(details.skipFail)
       const res2 = await request(app)
-        .get('/pdfInvoiceCsvUpload/resultList/detail/invoiceUploadId:dummyId')
+        .get('/pdfInvoiceCsvUpload/resultList/detail/historyId:dummyId')
         .set('Accept', 'application/json')
 
       global.fetch = jest.fn(() =>
@@ -597,7 +597,7 @@ describe('pdfInvocie.js ITテスト', () => {
       // resultList/detailのリクエスト
       findInvoiceDetailSpy.mockReturnValue(details.all)
       const res2 = await request(app)
-        .get('/pdfInvoiceCsvUpload/resultList/detail/invoiceUploadId:dummyId')
+        .get('/pdfInvoiceCsvUpload/resultList/detail/historyId:dummyId')
         .set('Accept', 'application/json')
 
       global.fetch = jest.fn(() =>
@@ -639,7 +639,7 @@ describe('pdfInvocie.js ITテスト', () => {
         throw new Error('DB Error')
       })
       const res2 = await request(app)
-        .get('/pdfInvoiceCsvUpload/resultList/detail/invoiceUploadId:dummyId')
+        .get('/pdfInvoiceCsvUpload/resultList/detail/historyId:dummyId')
         .set('Accept', 'application/json')
 
       global.fetch = jest.fn(() =>

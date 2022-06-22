@@ -1,6 +1,6 @@
 /**
  * 必須入力パラメーター設定
-*/
+ */
 const requiredProps = [
   'recCompany',
   'recPost',
@@ -325,7 +325,11 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
         </div>
       </div>
     </div>
-    ${(input.bankName && input.bankName && input.bankName && input.bankName && input.bankName) ? '<p class="font-bold width-100 mr-075">支払い条件と手段</p>' :  ''}
+    ${
+      input.bankName && input.bankName && input.bankName && input.bankName && input.bankName
+        ? '<p class="font-bold width-100 mr-075">支払い条件と手段</p>'
+        : ''
+    }
     <div class="columns">
       <div class="column text-l width-50">
         ${setPayment(input)}
@@ -358,7 +362,8 @@ const validateInvoiceInput = (input) => {
 
 const padOptionProps = (input) => {
   for (let i = 0; i < optionProps.length; i++) {
-    if (!input.hasOwnProperty(optionProps[i]) || !input[optionProps[i]]) { // eslint-disable-line
+    if (!input.hasOwnProperty(optionProps[i]) || !input[optionProps[i]]) {
+      // eslint-disable-line
       input[optionProps[i]] = ''
     }
   }
@@ -409,11 +414,15 @@ const setLines = (lines) => {
           <p class="line-lineId" data-prop="lineId">${line.lineId}</p>
         </td>
         <td class="text-center">
-          <p class="line-lineDiscription" data-prop="lineDiscription">${line.lineDiscription}</p>
+          <p class="line-lineDescription" data-prop="lineDescription">${line.lineDescription}</p>
         </td>
-        <td class="text-center"><p class="line-quantity" data-prop="quantity">${parseFloat(line.quantity).toLocaleString()}</p></td>
+        <td class="text-center"><p class="line-quantity" data-prop="quantity">${parseFloat(
+          line.quantity
+        ).toLocaleString()}</p></td>
         <td class="text-center"><p class="line-unit" data-prop="unit">${line.unit}</p></td>
-        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">${parseInt(line.unitPrice).toLocaleString()}</p></td>
+        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">${parseInt(
+          line.unitPrice
+        ).toLocaleString()}</p></td>
         <td class="text-center"><p class="line-taxType" data-prop="taxType">${getTaxTypeName(line.taxType)}</p></td>
         <td class="text-right line-subtotal"><p class="line-subtotal" data-prop="subtotal">${subTotal.toLocaleString()}</p></td>
       </tr>`
@@ -452,9 +461,9 @@ const setTaxGroup = (taxGroups) => {
 const setImageTag = (imageBuffer, type, size = 120) => {
   if (!imageBuffer || !Buffer.isBuffer(imageBuffer)) return ''
 
-  return `<img src="data:image/${type};base64,${
-    imageBuffer.toString('base64')
-  }" width="${size}" height="${size}" class="image" />`
+  return `<img src="data:image/${type};base64,${imageBuffer.toString(
+    'base64'
+  )}" width="${size}" height="${size}" class="image" />`
 }
 
 /**

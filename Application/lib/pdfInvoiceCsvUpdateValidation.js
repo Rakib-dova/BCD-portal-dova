@@ -179,7 +179,7 @@ const validate = async (invoices, lines, tenantId, fileName) => {
   const historyId = uuidv4() // アップロード履歴ID生成
   const uploadHistory = {
     // アップロード履歴objの初期化 (最終的にこれを返してDBに保存)
-    invoiceUploadId: historyId,
+    historyId: historyId,
     tenantId,
     csvFileName: fileName,
     successCount: 0, // バリデーションをパスしたCSV行数
@@ -194,8 +194,8 @@ const validate = async (invoices, lines, tenantId, fileName) => {
     const filteredLines = lines.filter((line) => line.invoiceId === invoice.invoiceId)
     filteredLines.forEach((line, index) => {
       const csvRow = {
-        invoiceUploadDetailId: uuidv4(),
-        invoiceUploadId: historyId,
+        historyDetailId: uuidv4(),
+        historyId: historyId,
         lines: lines.indexOf(line) + 1,
         invoiceNo: line.invoiceNo,
         status: 0,

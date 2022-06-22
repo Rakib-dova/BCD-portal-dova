@@ -1,9 +1,9 @@
 'use strict'
 jest.mock('../../Application/lib/logger')
 
-const pdfInvoiceUploadDetailController = require('../../Application/controllers/pdfInvoiceUploadDetailController')
+const pdfInvoiceHistoryDetailController = require('../../Application/controllers/pdfInvoiceHistoryDetailController')
 const logger = require('../../Application/lib/logger')
-const pdfInvoiceUploadDetail = require('../../Application/models').PdfInvoiceUploadDetail
+const pdfInvoiceHistoryDetail = require('../../Application/models').pdfInvoiceHistoryDetail
 const Sequelize = require('../../Application/models').Sequelize
 const Op = Sequelize.Op
 
@@ -14,8 +14,8 @@ describe('contractControllerのテスト', () => {
   beforeEach(() => {
     infoSpy = jest.spyOn(logger, 'info')
     errorSpy = jest.spyOn(logger, 'error')
-    createSpy = jest.spyOn(pdfInvoiceUploadDetail, 'create')
-    findAllSpy = jest.spyOn(pdfInvoiceUploadDetail, 'findAll')
+    createSpy = jest.spyOn(pdfInvoiceHistoryDetail, 'create')
+    findAllSpy = jest.spyOn(pdfInvoiceHistoryDetail, 'findAll')
   })
   afterEach(() => {
     infoSpy.mockRestore()
@@ -29,14 +29,14 @@ describe('contractControllerのテスト', () => {
       findAllSpy.mockReturnValue('findAllReturn')
 
       // 試験実施
-      const result = await pdfInvoiceUploadDetailController.findInvoiceDetail('dummyInvoiceUploadId')
+      const result = await pdfInvoiceHistoryDetailController.findInvoiceDetail('dummyhistoryId')
 
       // 期待結果
       expect(findAllSpy).toHaveBeenCalled()
       expect(result).toEqual('findAllReturn')
       expect(findAllSpy).nthCalledWith(1, {
         where: {
-          invoiceUploadId: 'dummyInvoiceUploadId'
+          historyId: 'dummyhistoryId'
         },
         order: [
           ['lines', 'ASC'],
@@ -52,7 +52,7 @@ describe('contractControllerのテスト', () => {
         throw dbError
       })
       // 試験実施
-      const result = await pdfInvoiceUploadDetailController.findInvoiceDetail('dummyTenantId')
+      const result = await pdfInvoiceHistoryDetailController.findInvoiceDetail('dummyTenantId')
 
       // 期待結果
       expect(result).toEqual(dbError)
@@ -64,7 +64,7 @@ describe('contractControllerのテスト', () => {
       createSpy.mockReturnValue('createReturn')
 
       // 試験実施
-      const result = await pdfInvoiceUploadDetailController.create({
+      const result = await pdfInvoiceHistoryDetailController.create({
         values1: 'dummyValues1',
         values2: 'dummyValues2',
         values3: 'dummyValues3'
@@ -86,7 +86,7 @@ describe('contractControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await pdfInvoiceUploadDetailController.create({
+      const result = await pdfInvoiceHistoryDetailController.create({
         values1: 'dummyValues1',
         values2: 'dummyValues2',
         values3: 'dummyValues3'

@@ -1,8 +1,8 @@
 'use strict'
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('pdfInvoiceUploads', {
-      invoiceUploadId: {
+    await queryInterface.createTable('pdfInvoiceHistorys', {
+      historyId: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID
@@ -39,6 +39,6 @@ module.exports = {
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('pdfInvoiceUploads')
+    await queryInterface.dropTable('pdfInvoiceHistorys')
   }
 }

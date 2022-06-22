@@ -24,8 +24,8 @@ const { getType } = require('../lib/utils')
 const constantsDefine = require('../constants')
 
 const pdfInvoiceController = require('../controllers/pdfInvoiceController.js')
-const uploadController = require('../controllers/pdfInvoiceUploadController.js')
-const pdfInvoiceUploadDetailController = require('../controllers/pdfInvoiceUploadDetailController.js')
+const uploadController = require('../controllers/pdfInvoiceHistoryController.js')
+const pdfInvoiceHistoryDetailController = require('../controllers/pdfInvoiceHistoryDetailController.js')
 const pdfInvoice = require('../routes/pdfInvoice.js')
 
 const { v4: uuidv4 } = require('uuid')
@@ -166,7 +166,7 @@ const pdfInvoiceCsvUploadResult = async (req, res, next) => {
         invoicesSkip: invoice.dataValues.skipCount,
         invoicesFail: invoice.dataValues.failCount,
         status: status,
-        invoiceUploadId: invoice.dataValues.invoiceUploadId
+        historyId: invoice.dataValues.historyId
       })
     })
 
@@ -190,19 +190,19 @@ const pdfInvoiceCsvUploadResultDetail = async (req, res, next) => {
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
 
   let resultStatusCode
-  let invoiceUploadId
+  let historyId
 
-  if (req.params.invoiceUploadId === undefined) {
+  if (req.params.historyId === undefined) {
     resultStatusCode = 400
     return res.status(resultStatusCode).send()
   } else {
-    invoiceUploadId = req.params.invoiceUploadId
+    historyId = req.params.historyId
   }
 
   const resultDetailArr = []
 
   try {
-    const result = await pdfInvoiceUploadDetailController.findInvoiceDetail(invoiceUploadId)
+    const result = await pdfInvoiceHistoryDetailController.findInvoiceDetail(historyId)
     resultStatusCode = 200
 
     result.map((currVal) => {
@@ -312,7 +312,7 @@ const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) =
 router.get('/', helper.bcdAuthenticate, pdfInvoiceCsvUploadIndex)
 router.post('/upload', helper.bcdAuthenticate, upload.single('csvFile'), pdfInvoiceCsvUpload)
 router.get('/resultList', helper.bcdAuthenticate, pdfInvoiceCsvUploadResult)
-router.get('/resultList/detail/:invoiceUploadId', helper.bcdAuthenticate, pdfInvoiceCsvUploadResultDetail)
+router.get('/resultList/detail/:historyId', helper.bcdAuthenticate, pdfInvoiceCsvUploadResultDetail)
 
 module.exports = {
   router,

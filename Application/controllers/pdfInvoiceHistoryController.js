@@ -1,5 +1,5 @@
-const pdfInvoiceUpload = require('../models').PdfInvoiceUpload
-const pdfInvoiceUploadDetail = require('../models').PdfInvoiceUploadDetail
+const pdfInvoiceHistory = require('../models').pdfInvoiceHistory
+const pdfInvoiceHistoryDetail = require('../models').pdfInvoiceHistoryDetail
 const constantsDefine = require('../constants')
 const logger = require('../lib/logger')
 const { Op } = require('sequelize')
@@ -7,7 +7,7 @@ const { Op } = require('sequelize')
 module.exports = {
   // パラメータ値
   // values{
-  //   invoiceUploadId,
+  //   historyId,
   //   tenantId,
   //   csvFileName,
   //   successCount,
@@ -19,13 +19,13 @@ module.exports = {
     if (Object.keys(history).length === 0) return null
     if (!transaction) return null
     try {
-      // pdfInvoiceUpload テーブルにレコード挿入
-      const createdHistory = await pdfInvoiceUpload.create(history, { transaction })
+      // pdfInvoiceHistory テーブルにレコード挿入
+      const createdHistory = await pdfInvoiceHistory.create(history, { transaction })
 
-      // pdfInvoiceUploadDetail テーブルにレコード挿入
+      // pdfInvoiceHistoryDetail テーブルにレコード挿入
       await Promise.all(
         rows.map(async (row) => {
-          return pdfInvoiceUploadDetail.create(row, { transaction })
+          return pdfInvoiceHistoryDetail.create(row, { transaction })
         })
       )
 
@@ -35,12 +35,12 @@ module.exports = {
       return error
     }
   },
-  updateCount: async ({ invoiceUploadId, successCount, failCount, skipCount, invoiceCount }) => {
-    const functionName = 'pdfInvoiceUploadController.updateCount'
+  updateCount: async ({ historyId, successCount, failCount, skipCount, invoiceCount }) => {
+    const functionName = 'pdfInvoiceHistoryController.updateCount'
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     let result
     try {
-      result = await pdfInvoiceUpload.update(
+      result = await pdfInvoiceHistory.update(
         {
           successCount: successCount,
           failCount: failCount,
@@ -49,25 +49,25 @@ module.exports = {
         },
         {
           where: {
-            invoiceUploadId: invoiceUploadId
+            historyId: historyId
           }
         }
       )
     } catch (error) {
-      logger.error({ invoiceUploadId: invoiceUploadId, stack: error.stack, status: 0 })
+      logger.error({ historyId: historyId, stack: error.stack, status: 0 })
       result = error
     }
     logger.info(`${constantsDefine.logMessage.INF001}${functionName}`)
     return result
   },
   findforTenant: async (tenantId) => {
-    const functionName = 'pdfInvoiceUploadController.findforTenant'
+    const functionName = 'pdfInvoiceHistoryController.findforTenant'
     let result
     const now = new Date()
     const beforeOneYear = new Date(`${now.getFullYear() - 1}-${now.getMonth() + 1}-${now.getDate()}`)
     logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
     try {
-      result = await pdfInvoiceUpload.findAll({
+      result = await pdfInvoiceHistory.findAll({
         where: {
           tenantId: tenantId,
           createdAt: {

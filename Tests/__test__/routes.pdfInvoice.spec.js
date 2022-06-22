@@ -71,7 +71,7 @@ const pdfInvoices = [
           invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
           lineIndex: 0,
           lineId: 'a0001',
-          lineDiscription: '内容１',
+          lineDescription: '内容１',
           unit: 'KG',
           unitPrice: 100,
           quantity: 20,
@@ -81,7 +81,7 @@ const pdfInvoices = [
           invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
           lineIndex: 1,
           lineId: 'a0002',
-          lineDiscription: '内容２',
+          lineDescription: '内容２',
           unit: 'KG',
           unitPrice: 200,
           quantity: 20,
@@ -135,7 +135,7 @@ const pdfInvoiceTestData = {
           invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
           lineIndex: 0,
           lineId: 'a0001',
-          lineDiscription: '内容１',
+          lineDescription: '内容１',
           unit: 'KG',
           unitPrice: 100,
           quantity: 20,
@@ -147,7 +147,7 @@ const pdfInvoiceTestData = {
           invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
           lineIndex: 1,
           lineId: 'a0002',
-          lineDiscription: '内容２',
+          lineDescription: '内容２',
           unit: 'KG',
           unitPrice: 200,
           quantity: 20,
@@ -195,7 +195,7 @@ const pdfInvoiceTestData = {
           invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
           lineIndex: 0,
           lineId: 'a0001',
-          lineDiscription: '内容１',
+          lineDescription: '内容１',
           unit: 'KG',
           unitPrice: 100,
           quantity: 20,
@@ -207,7 +207,7 @@ const pdfInvoiceTestData = {
           invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
           lineIndex: 1,
           lineId: 'a0002',
-          lineDiscription: '内容２',
+          lineDescription: '内容２',
           unit: 'KG',
           unitPrice: 200,
           quantity: 20,
@@ -255,7 +255,7 @@ const pdfInvoiceTestData = {
           invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
           lineIndex: 0,
           lineId: 'a0001',
-          lineDiscription: '内容１',
+          lineDescription: '内容１',
           unit: 'KG',
           unitPrice: 100,
           quantity: 20,
@@ -267,7 +267,7 @@ const pdfInvoiceTestData = {
           invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
           lineIndex: 1,
           lineId: 'a0002',
-          lineDiscription: '内容２',
+          lineDescription: '内容２',
           unit: 'KG',
           unitPrice: 200,
           quantity: 20,
@@ -460,7 +460,7 @@ const exprectedShowData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 0,
         lineId: 'a0001',
-        lineDiscription: '内容１',
+        lineDescription: '内容１',
         unit: 'KG',
         unitPrice: 100,
         quantity: 20,
@@ -470,7 +470,7 @@ const exprectedShowData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 1,
         lineId: 'a0002',
-        lineDiscription: '内容２',
+        lineDescription: '内容２',
         unit: 'KG',
         unitPrice: 200,
         quantity: 20,
@@ -518,7 +518,7 @@ const exprectedShowData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 0,
         lineId: 'a0001',
-        lineDiscription: '内容１',
+        lineDescription: '内容１',
         unit: 'KG',
         unitPrice: 100,
         quantity: 20,
@@ -528,7 +528,7 @@ const exprectedShowData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 1,
         lineId: 'a0002',
-        lineDiscription: '内容２',
+        lineDescription: '内容２',
         unit: 'KG',
         unitPrice: 200,
         quantity: 20,
@@ -576,7 +576,7 @@ const exprectedShowData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 0,
         lineId: 'a0001',
-        lineDiscription: '内容１',
+        lineDescription: '内容１',
         unit: 'KG',
         unitPrice: 100,
         quantity: 20,
@@ -586,7 +586,7 @@ const exprectedShowData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 1,
         lineId: 'a0002',
-        lineDiscription: '内容２',
+        lineDescription: '内容２',
         unit: 'KG',
         unitPrice: 200,
         quantity: 20,
@@ -634,7 +634,7 @@ const exprectedShowData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 0,
         lineId: 'a0001',
-        lineDiscription: '内容１',
+        lineDescription: '内容１',
         unit: 'KG',
         unitPrice: 100,
         quantity: 20,
@@ -644,7 +644,7 @@ const exprectedShowData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 1,
         lineId: 'a0002',
-        lineDiscription: '内容２',
+        lineDescription: '内容２',
         unit: 'KG',
         unitPrice: 200,
         quantity: 20,
@@ -695,7 +695,7 @@ const exprectedEditData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 0,
         lineId: 'a0001',
-        lineDiscription: '内容１',
+        lineDescription: '内容１',
         unit: 'KG',
         unitPrice: 100,
         quantity: 20,
@@ -705,7 +705,7 @@ const exprectedEditData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 1,
         lineId: 'a0002',
-        lineDiscription: '内容２',
+        lineDescription: '内容２',
         unit: 'KG',
         unitPrice: 200,
         quantity: 20,
@@ -754,7 +754,7 @@ const exprectedEditData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 0,
         lineId: 'a0001',
-        lineDiscription: '内容１',
+        lineDescription: '内容１',
         unit: 'KG',
         unitPrice: 100,
         quantity: 20,
@@ -764,7 +764,7 @@ const exprectedEditData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 1,
         lineId: 'a0002',
-        lineDiscription: '内容２',
+        lineDescription: '内容２',
         unit: 'KG',
         unitPrice: 200,
         quantity: 20,
@@ -813,7 +813,7 @@ const exprectedEditData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 0,
         lineId: 'a0001',
-        lineDiscription: '内容１',
+        lineDescription: '内容１',
         unit: 'KG',
         unitPrice: 100,
         quantity: 20,
@@ -823,7 +823,7 @@ const exprectedEditData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 1,
         lineId: 'a0002',
-        lineDiscription: '内容２',
+        lineDescription: '内容２',
         unit: 'KG',
         unitPrice: 200,
         quantity: 20,
@@ -872,7 +872,7 @@ const exprectedEditData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 0,
         lineId: 'a0001',
-        lineDiscription: '内容１',
+        lineDescription: '内容１',
         unit: 'KG',
         unitPrice: 100,
         quantity: 20,
@@ -882,7 +882,7 @@ const exprectedEditData = {
         invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
         lineIndex: 1,
         lineId: 'a0002',
-        lineDiscription: '内容２',
+        lineDescription: '内容２',
         unit: 'KG',
         unitPrice: 200,
         quantity: 20,
@@ -1052,7 +1052,7 @@ describe('pdfInvoiceのテスト', () => {
                 invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
                 lineIndex: 0,
                 lineId: 'a0001',
-                lineDiscription: '内容１',
+                lineDescription: '内容１',
                 unit: 'KG',
                 unitPrice: 100,
                 quantity: 20,
@@ -1062,7 +1062,7 @@ describe('pdfInvoiceのテスト', () => {
                 invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
                 lineIndex: 1,
                 lineId: 'a0002',
-                lineDiscription: '内容２',
+                lineDescription: '内容２',
                 unit: 'KG',
                 unitPrice: 200,
                 quantity: 20,
@@ -1080,7 +1080,9 @@ describe('pdfInvoiceのテスト', () => {
     })
 
     test('準正常: PDF請求書情報取得時、DBエラー', async () => {
-      pdfInvoiceControllerFindAllInvoicesSpy.mockImplementation(() => { throw new Error('PdfInvoice Table Error') })
+      pdfInvoiceControllerFindAllInvoicesSpy.mockImplementation(() => {
+        throw new Error('PdfInvoice Table Error')
+      })
 
       await pdfInvoice.pdfInvoiceList(request, response, next)
 
@@ -1200,7 +1202,9 @@ describe('pdfInvoiceのテスト', () => {
     test('準正常: PDF請求書情報取得時、DBエラー', async () => {
       request.params.invoiceId = 'dummyId'
       accessTradeshift.mockReturnValue(accountInfoTestData.noLogo)
-      pdfInvoiceControllerfindInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      pdfInvoiceControllerfindInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
       await pdfInvoice.pdfInvoiceEdit(request, response, next)
 
@@ -1263,7 +1267,9 @@ describe('pdfInvoiceのテスト', () => {
     test('準正常: PDF請求書情報取得時、DBエラー', async () => {
       request.params.invoiceId = 'dummyId'
       accessTradeshift.mockReturnValue(accountInfoTestData.noLogo)
-      pdfInvoiceControllerfindInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      pdfInvoiceControllerfindInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
       await pdfInvoice.pdfInvoiceEdit(request, response, next)
 
@@ -1297,7 +1303,9 @@ describe('pdfInvoiceのテスト', () => {
     })
     test('準正常: PDF請求書作成時 DBエラー', async () => {
       request.body = { invoice: '{}', lines: '[]' }
-      createInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      createInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
       await pdfInvoice.createPdfInvoice(request, response, next)
 
@@ -1343,7 +1351,9 @@ describe('pdfInvoiceのテスト', () => {
     test('準正常: PDF請求書情報取得時、DBエラー', async () => {
       request.params.invoiceId = 'dummyID'
       request.body = { invoice: '{}', lines: '[]' }
-      pdfInvoiceControllerfindInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      pdfInvoiceControllerfindInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
       await pdfInvoice.updatePdfInvoice(request, response, next)
 
@@ -1353,7 +1363,9 @@ describe('pdfInvoiceのテスト', () => {
       request.params.invoiceId = 'dummyId'
       request.body = { invoice: '{}', lines: '[]' }
       pdfInvoiceControllerfindInvoiceSpy.mockResolvedValue(pdfInvoiceTestData.noSealImp)
-      updateInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      updateInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
       await pdfInvoice.updatePdfInvoice(request, response, next)
 
@@ -1412,7 +1424,9 @@ describe('pdfInvoiceのテスト', () => {
       request.body = { invoice: '{"billingDate":null,"paymentDate":null,"deliveryDate":null}', lines: '[]' }
       accessTradeshift.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
-      pdfGenerator.generatePdf.mockImplementation(() => { throw new Error('pdf generate failed') })
+      pdfGenerator.generatePdf.mockImplementation(() => {
+        throw new Error('pdf generate failed')
+      })
 
       await pdfInvoice.createAndOutputPdfInvoice(request, response, next)
 
@@ -1423,7 +1437,9 @@ describe('pdfInvoiceのテスト', () => {
       accessTradeshift.mockReturnValue(accountInfoTestData.noLogo) // ユーザ情報正常取得を想定する
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
       pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
-      createInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      createInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
       await pdfInvoice.createAndOutputPdfInvoice(request, response, next)
 
@@ -1471,7 +1487,9 @@ describe('pdfInvoiceのテスト', () => {
     test('準正常: PDF請求書情報取得時、DBエラー', async () => {
       request.params.invoiceId = 'dummyID'
       request.body = { invoice: '{}', lines: '[]' }
-      pdfInvoiceControllerfindInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      pdfInvoiceControllerfindInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
       await pdfInvoice.updateAndOutputPdfInvoice(request, response, next)
 
@@ -1504,7 +1522,9 @@ describe('pdfInvoiceのテスト', () => {
       pdfInvoiceControllerfindInvoiceSpy.mockResolvedValue(pdfInvoiceTestData.hasPdfSealImp)
       accessTradeshift.mockReturnValue(accountInfoTestData.noLogo)
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
-      pdfGenerator.generatePdf.mockImplementation(() => { throw new Error('pdf generate failed') })
+      pdfGenerator.generatePdf.mockImplementation(() => {
+        throw new Error('pdf generate failed')
+      })
 
       await pdfInvoice.updateAndOutputPdfInvoice(request, response, next)
 
@@ -1517,7 +1537,9 @@ describe('pdfInvoiceのテスト', () => {
       accessTradeshift.mockReturnValue(accountInfoTestData.noLogo)
       pdfGenerator.renderInvoiceHTML.mockReturnValue('<html></html>')
       pdfGenerator.generatePdf.mockResolvedValue('dummyBuffer')
-      updateInvoiceSpy.mockImplementation(() => { throw new Error('DB Error') })
+      updateInvoiceSpy.mockImplementation(() => {
+        throw new Error('DB Error')
+      })
 
       await pdfInvoice.updateAndOutputPdfInvoice(request, response, next)
 

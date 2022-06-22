@@ -1,18 +1,18 @@
 'use strict'
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('pdfInvoiceUploadDetails', {
-      invoiceUploadDetailId: {
+    await queryInterface.createTable('pdfInvoiceHistoryDetails', {
+      historyDetailId: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID
       },
-      invoiceUploadId: {
+      historyId: {
         allowNull: false,
         type: Sequelize.UUID,
         references: {
-          model: { tableName: 'pdfInvoiceUploads' },
-          key: 'invoiceUploadId'
+          model: { tableName: 'pdfInvoiceHistorys' },
+          key: 'historyId'
         },
         onUpdate: 'cascade',
         onDelete: 'cascade'
@@ -43,6 +43,6 @@ module.exports = {
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('pdfInvoiceUploadDetails')
+    await queryInterface.dropTable('pdfInvoiceHistoryDetails')
   }
 }

@@ -99,8 +99,8 @@ function setStaticProp(invoice, lines) {
       const lineId = clone.querySelector('.line-lineId')
       lineId.textContent = line.lineId
       // 内容設定
-      const lineDescription = clone.querySelector('.line-lineDiscription')
-      lineDescription.textContent = line.lineDiscription
+      const lineDescription = clone.querySelector('.line-lineDescription')
+      lineDescription.textContent = line.lineDescription
       // 数量設定
       const quantity = clone.querySelector('.line-quantity')
       quantity.textContent = parseFloat(line.quantity).toLocaleString()
@@ -180,7 +180,7 @@ function updateLineValues(e, target) {
     if (prop === 'quantity' || prop === 'unitPrice') {
       if (isNumberString(target.value)) updatedLine[prop] = target.value
       else updatedLine[prop] = ''
-    } else if (prop === 'lineDiscription') {
+    } else if (prop === 'lineDescription') {
       updatedLine[prop] = target.value.replace(/\r\n|\r|\n| /g, '')
     } else {
       updatedLine[prop] = target.value
@@ -230,8 +230,8 @@ function renderLines() {
     const lineIdInput = clone.querySelector('.line-lineId')
     lineIdInput.value = line.lineId
     // 内容設定
-    const lineDescriptionInput = clone.querySelector('.line-lineDiscription')
-    lineDescriptionInput.value = line.lineDiscription
+    const lineDescriptionInput = clone.querySelector('.line-lineDescription')
+    lineDescriptionInput.value = line.lineDescription
     // 数量設定
     const quantityInput = clone.querySelector('.line-quantity')
     quantityInput.value = line.quantity
@@ -327,7 +327,7 @@ function addLine() {
   lines.push({
     lineIndex: lines.length,
     lineId: '',
-    lineDiscription: '',
+    lineDescription: '',
     unit: '',
     unitPrice: '',
     quantity: '',

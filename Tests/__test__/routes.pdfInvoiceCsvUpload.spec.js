@@ -14,8 +14,8 @@ const fs = require('fs')
 const errorHelper = require('../../Application/routes/helpers/error')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const pdfInvoiceController = require('../../Application/controllers/pdfInvoiceController.js')
-const pdfInvoiceUploadController = require('../../Application/controllers/pdfInvoiceUploadController.js')
-const pdfInvoiceUploadDetailController = require('../../Application/controllers/pdfInvoiceUploadDetailController.js')
+const pdfInvoiceHistoryController = require('../../Application/controllers/pdfInvoiceHistoryController.js')
+const pdfInvoiceHistoryDetailController = require('../../Application/controllers/pdfInvoiceHistoryDetailController.js')
 const logger = require('../../Application/lib/logger.js')
 const csv = require('../../Application/lib/csv.js')
 const validation = require('../../Application/lib/pdfInvoiceCsvUpdateValidation')
@@ -262,7 +262,7 @@ const validLinesData = {
 
 const uploadHistoryData = {
   all: {
-    invoiceUploadId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
+    historyId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
     tenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
     csvFileName: 'PDF請求書ドラフト一括作成フォーマット.csv',
     successCount: 1,
@@ -271,7 +271,7 @@ const uploadHistoryData = {
     invoiceCount: 1
   },
   success: {
-    invoiceUploadId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
+    historyId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
     tenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
     csvFileName: 'PDF請求書ドラフト一括作成フォーマット.csv',
     successCount: 1,
@@ -280,7 +280,7 @@ const uploadHistoryData = {
     invoiceCount: 1
   },
   skip: {
-    invoiceUploadId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
+    historyId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
     tenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
     csvFileName: 'PDF請求書ドラフト一括作成フォーマット.csv',
     successCount: 0,
@@ -293,24 +293,24 @@ const uploadHistoryData = {
 const csvRowsData = {
   all: [
     {
-      invoiceUploadDetailId: '032771bf-214b-4ab5-91bb-0b855577e689',
-      invoiceUploadId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
+      historyDetailId: '032771bf-214b-4ab5-91bb-0b855577e689',
+      historyId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
       lines: 1,
       invoiceNo: 'upload001',
       status: 2,
       errorData: '明細-単価は整数 0 ～ 999999999999 の範囲で入力してください。\r\n'
     },
     {
-      invoiceUploadDetailId: 'c209d341-d377-4948-813f-af51f28492f5',
-      invoiceUploadId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
+      historyDetailId: 'c209d341-d377-4948-813f-af51f28492f5',
+      historyId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
       lines: 2,
       invoiceNo: 'upload002',
       status: 1,
       errorData: '取込済みのため、処理をスキップしました。'
     },
     {
-      invoiceUploadDetailId: 'd88c54a1-7e78-4a2a-980a-35d2f50a98d1',
-      invoiceUploadId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
+      historyDetailId: 'd88c54a1-7e78-4a2a-980a-35d2f50a98d1',
+      historyId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
       lines: 3,
       invoiceNo: 'upload003',
       status: 0,
@@ -319,8 +319,8 @@ const csvRowsData = {
   ],
   success: [
     {
-      invoiceUploadDetailId: 'd88c54a1-7e78-4a2a-980a-35d2f50a98d1',
-      invoiceUploadId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
+      historyDetailId: 'd88c54a1-7e78-4a2a-980a-35d2f50a98d1',
+      historyId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
       lines: 1,
       invoiceNo: 'upload001',
       status: 0,
@@ -329,8 +329,8 @@ const csvRowsData = {
   ],
   skip: [
     {
-      invoiceUploadDetailId: 'c209d341-d377-4948-813f-af51f28492f5',
-      invoiceUploadId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
+      historyDetailId: 'c209d341-d377-4948-813f-af51f28492f5',
+      historyId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
       lines: 1,
       invoiceNo: 'upload001',
       status: 1,
@@ -354,7 +354,7 @@ const exprectedResultData = {
         invoicesSkip: 3,
         invoicesFail: 2,
         status: false,
-        invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037'
+        historyId: '3287e409-d064-4896-ae54-e8b8e2aee037'
       },
       {
         index: 2,
@@ -366,7 +366,7 @@ const exprectedResultData = {
         invoicesSkip: 9,
         invoicesFail: 0,
         status: true,
-        invoiceUploadId: '0b906415-308c-449f-964c-18662c33c592'
+        historyId: '0b906415-308c-449f-964c-18662c33c592'
       }
     ],
     csrfToken: 'dummyCsrfToken'
@@ -382,7 +382,7 @@ const exprectedResultData = {
 const historyData = [
   {
     dataValues: {
-      invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+      historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
       tenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
       csvFileName: 'PDF請求書ドラフト一括作成フォーマット1.csv',
       successCount: 1,
@@ -395,7 +395,7 @@ const historyData = [
   },
   {
     dataValues: {
-      invoiceUploadId: '0b906415-308c-449f-964c-18662c33c592',
+      historyId: '0b906415-308c-449f-964c-18662c33c592',
       tenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
       csvFileName: 'PDF請求書ドラフト一括作成フォーマット2.csv',
       successCount: 0,
@@ -411,8 +411,8 @@ const historyData = [
 const historyDetailData = [
   {
     dataValues: {
-      invoiceUploadDetailId: 'bbcbbe53-101c-4dca-89a0-c5709c4c790f',
-      invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+      historyDetailId: 'bbcbbe53-101c-4dca-89a0-c5709c4c790f',
+      historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
       lines: 1,
       invoiceNo: 'detail001',
       status: 0,
@@ -421,8 +421,8 @@ const historyDetailData = [
   },
   {
     dataValues: {
-      invoiceUploadDetailId: '77c6b3d2-33fb-4698-8241-48359704d5c6',
-      invoiceUploadId: '3287e409-d064-4896-ae54-e8b8e2aee037',
+      historyDetailId: '77c6b3d2-33fb-4698-8241-48359704d5c6',
+      historyId: '3287e409-d064-4896-ae54-e8b8e2aee037',
       lines: 2,
       invoiceNo: 'detail002',
       status: 1,
@@ -431,8 +431,8 @@ const historyDetailData = [
   },
   {
     dataValues: {
-      invoiceUploadDetailId: '5fef89d8-3639-4d12-ae1e-b4ef4b7ff2d8',
-      invoiceUploadId: '3c8204ac-1a7f-4d88-833f-270aa919f937',
+      historyDetailId: '5fef89d8-3639-4d12-ae1e-b4ef4b7ff2d8',
+      historyId: '3c8204ac-1a7f-4d88-833f-270aa919f937',
       lines: 3,
       invoiceNo: 'detail003',
       status: 2,
@@ -462,10 +462,10 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
     errorSpy = jest.spyOn(logger, 'error')
     accessTradeshift = jest.spyOn(apiManager, 'accessTradeshift')
     request.flash = jest.fn()
-    pdfInvoiceFindforTenantSpy = jest.spyOn(pdfInvoiceUploadController, 'findforTenant')
-    findInvoiceDetailSpy = jest.spyOn(pdfInvoiceUploadDetailController, 'findInvoiceDetail')
+    pdfInvoiceFindforTenantSpy = jest.spyOn(pdfInvoiceHistoryController, 'findforTenant')
+    findInvoiceDetailSpy = jest.spyOn(pdfInvoiceHistoryDetailController, 'findInvoiceDetail')
     createInvoicesAndLinesSpy = jest.spyOn(pdfInvoiceController, 'createInvoicesAndLines')
-    createUploadHistoryAndRowsSpy = jest.spyOn(pdfInvoiceUploadController, 'createUploadHistoryAndRows')
+    createUploadHistoryAndRowsSpy = jest.spyOn(pdfInvoiceHistoryController, 'createUploadHistoryAndRows')
     convertCsvStringToMultiArraySpy = jest.spyOn(csv, 'convertCsvStringToMultiArray')
     fsSpy = jest.spyOn(fs, 'readFileSync')
     validateSpy = jest.spyOn(validation, 'validate')
@@ -712,7 +712,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
   describe('コールバック:pdfInvoiceCsvUploadResultDetail', () => {
     test('正常:', async () => {
-      request.params.invoiceUploadId = 'dummyId'
+      request.params.historyId = 'dummyId'
 
       findInvoiceDetailSpy.mockReturnValue(historyDetailData) // DBからの正常なPDF請求書情報の取得を想定する
 
@@ -721,15 +721,15 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       expect(response.status).toHaveBeenCalledWith(200)
       expect(response.status(200).send).toHaveBeenCalledWith(JSON.stringify(exprectedResultDetailData))
     })
-    test('準正常: invoiceUploadIdなしの不正リクエスト', async () => {
-      request.params.invoiceUploadId = undefined
+    test('準正常: historyIdなしの不正リクエスト', async () => {
+      request.params.historyId = undefined
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUploadResultDetail(request, response, next)
 
       expect(response.status).toHaveBeenCalledWith(400)
       expect(response.status(400).send).toHaveBeenCalledWith()
     })
     test('準正常: PDF請求書詳細情報取得時、DBエラー', async () => {
-      request.params.invoiceUploadId = 'dummyId'
+      request.params.historyId = 'dummyId'
 
       findInvoiceDetailSpy.mockReturnValue(() => {
         throw new Error('DB Error')

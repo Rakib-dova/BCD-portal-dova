@@ -80,6 +80,9 @@ module.exports = (sequelize, DataTypes) => {
       sendAddr3: {
         type: DataTypes.STRING
       },
+      sendRegistrationNo: {
+        type: DataTypes.STRING
+      },
       bankName: {
         type: DataTypes.STRING
       },
@@ -96,6 +99,36 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING
       },
       note: {
+        type: DataTypes.STRING
+      },
+      sealImpressionPath: {
+        type: DataTypes.STRING
+      },
+      discountDescription1: {
+        type: DataTypes.STRING
+      },
+      discountAmount1: {
+        type: DataTypes.FLOAT
+      },
+      discountUnit1: {
+        type: DataTypes.STRING
+      },
+      discountDescription2: {
+        type: DataTypes.STRING
+      },
+      discountAmount2: {
+        type: DataTypes.FLOAT
+      },
+      discountUnit2: {
+        type: DataTypes.STRING
+      },
+      discountDescription3: {
+        type: DataTypes.STRING
+      },
+      discountAmount3: {
+        type: DataTypes.FLOAT
+      },
+      discountUnit3: {
         type: DataTypes.STRING
       },
       createdAt: {

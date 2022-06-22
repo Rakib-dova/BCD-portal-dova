@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
       lineId: {
         type: DataTypes.STRING
       },
-      lineDiscription: {
+      lineDescription: {
         type: DataTypes.STRING
       },
       unit: {
@@ -48,6 +48,33 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.FLOAT
       },
       taxType: {
+        type: DataTypes.STRING
+      },
+      discountDescription1: {
+        type: DataTypes.STRING
+      },
+      discountAmount1: {
+        type: DataTypes.FLOAT
+      },
+      discountUnit1: {
+        type: DataTypes.STRING
+      },
+      discountDescription2: {
+        type: DataTypes.STRING
+      },
+      discountAmount2: {
+        type: DataTypes.FLOAT
+      },
+      discountUnit2: {
+        type: DataTypes.STRING
+      },
+      discountDescription3: {
+        type: DataTypes.STRING
+      },
+      discountAmount3: {
+        type: DataTypes.FLOAT
+      },
+      discountUnit3: {
         type: DataTypes.STRING
       }
     },
