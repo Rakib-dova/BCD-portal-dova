@@ -113,6 +113,7 @@ describe('cancelLightPlanのテスト', () => {
         middleware.isAuthenticated,
         middleware.isTenantRegistered,
         middleware.isUserRegistered,
+        middleware.isOnOrChangeContract,
         expect.any(Function),
         cancelLightPlan.showCancelLightPlan
       )
@@ -122,6 +123,7 @@ describe('cancelLightPlanのテスト', () => {
         middleware.isAuthenticated,
         middleware.isTenantRegistered,
         middleware.isUserRegistered,
+        middleware.isOnOrChangeContract,
         expect.any(Function),
         cancelLightPlan.cancelLightPlan
       )

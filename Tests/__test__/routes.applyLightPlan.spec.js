@@ -147,6 +147,7 @@ describe('applyLightPlanのテスト', () => {
         middleware.isAuthenticated,
         middleware.isTenantRegistered,
         middleware.isUserRegistered,
+        middleware.isOnOrChangeContract,
         expect.any(Function),
         applyLightPlan.checkContractStatus,
         applyLightPlan.showLightPlan
@@ -157,6 +158,7 @@ describe('applyLightPlanのテスト', () => {
         middleware.isAuthenticated,
         middleware.isTenantRegistered,
         middleware.isUserRegistered,
+        middleware.isOnOrChangeContract,
         expect.any(Function),
         applyLightPlan.checkContractStatus,
         applyLightPlan.registerLightPlan

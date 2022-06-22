@@ -1,12 +1,17 @@
 'use strict'
 const request = require('supertest')
 const puppeteer = require('puppeteer')
-const { JSDOM } = require('jsdom')
 const app = require('../../Application/app')
 const db = require('../../Application/models')
 const constants = require('../../Application/constants')
 const contractController = require('../../Application/controllers/contractController.js')
 const getCookies = require('./getCookies')
+const common = require('./common')
+
+// 契約ステータス
+const contractStatuses = constants.statusConstants.contractStatuses
+// サービス種別
+const serviceTypes = constants.statusConstants.serviceTypes
 
 const getTenantId = {}
 
@@ -256,188 +261,519 @@ describe('ライトプラン申込のインテグレーションテスト', () =
 
   afterAll(async () => {
     // userデータ削除
-    // await db.User.destroy({ where: { tenantId: testTenantId } })
-    // await db.Tenant.destroy({ where: { tenantId: testTenantId } })
+    await db.User.destroy({ where: { tenantId: testTenantId } })
+    await db.Tenant.destroy({ where: { tenantId: testTenantId } })
     // 住所情報クリア
-    // await db.Address.destroy({ where: {} })
+    await db.Address.destroy({ where: {} })
   })
 
-  describe('1.無償契約ステータス：未登録', () => {
-    describe('管理者', () => {
-      test('ライトプラン申込画面が表示されない、テナント登録画面へリダイレクト', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-          .expect(303)
+  describe('無償契約の制御の確認', () => {
+    describe('無償契約：未登録', () => {
+      describe('管理者', () => {
+        test('ライトプラン申込画面が表示されない、テナント登録画面へリダイレクト', async () => {
+          const res = await request(app)
+            .get('/applyLightPlan')
+            .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+            .expect(303)
 
-        // リダイレクト先
-        expect(res.headers.location).toMatch('/tenant/register')
+          // リダイレクト先
+          expect(res.headers.location).toMatch('/tenant/register')
+        })
+
+        test('ライトプラン申込の登録(POST)ができない、テナント登録画面へリダイレクト', async () => {
+          const res = await request(app)
+            .post('/applyLightPlan/register')
+            .send({ ...postData })
+            .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+            .expect(303)
+
+          // リダイレクト先
+          expect(res.headers.location).toMatch('/tenant/register')
+        })
       })
 
-      test('ライトプラン申込の登録(POST)ができない、テナント登録画面へリダイレクト', async () => {
-        const res = await request(app)
-          .post('/applyLightPlan/register')
-          .send({ ...postData })
-          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-          .expect(303)
+      describe('一般ユーザ', () => {
+        test('ライトプラン申込画面が表示されない、テナント登録画面へリダイレクト', async () => {
+          const res = await request(app)
+            .get('/applyLightPlan')
+            .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+            .expect(303)
 
-        // リダイレクト先
-        expect(res.headers.location).toMatch('/tenant/register')
+          // リダイレクト先
+          expect(res.headers.location).toMatch('/tenant/register')
+        })
+
+        test('ライトプラン申込の登録(POST)ができない、テナント登録画面へリダイレクト', async () => {
+          const res = await request(app)
+            .post('/applyLightPlan/register')
+            .send({ ...postData })
+            .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+            .expect(303)
+
+          // リダイレクト先
+          expect(res.headers.location).toMatch('/tenant/register')
+        })
       })
     })
 
-    describe('一般ユーザ', () => {
-      test('ライトプラン申込画面が表示されない、テナント登録画面へリダイレクト', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-          .expect(303)
-
-        // リダイレクト先
-        expect(res.headers.location).toMatch('/tenant/register')
+    describe('無償契約：登録済', () => {
+      beforeAll(async () => {
+        // BCD無償契約の利用登録
+        await common.bcdRegister(acCookies[0])
       })
 
-      test('ライトプラン申込の登録(POST)ができない、テナント登録画面へリダイレクト', async () => {
-        const res = await request(app)
-          .post('/applyLightPlan/register')
-          .send({ ...postData })
-          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-          .expect(303)
+      afterAll(async () => {
+        // userデータ削除
+        await db.User.destroy({ where: { tenantId: testTenantId } })
+        await db.Tenant.destroy({ where: { tenantId: testTenantId } })
+      })
 
-        // リダイレクト先
-        expect(res.headers.location).toMatch('/tenant/register')
+      describe('1.無償契約ステータス：登録申込(10)', () => {
+        describe('管理者', () => {
+          test('ライトプラン申込画面が表示されない、「現在利用登録手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在利用登録手続き中です。/i)
+          })
+
+          test('ライトプラン申込の登録(POST)ができない、「現在利用登録手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .post('/applyLightPlan/register')
+              .send({ ...postData })
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在利用登録手続き中です。/i)
+          })
+        })
+
+        describe('一般ユーザ', () => {
+          test('ライトプラン申込画面が表示されない、「現在利用登録手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在利用登録手続き中です。/i)
+          })
+
+          test('ライトプラン申込の登録(POST)ができない、「現在利用登録手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .post('/applyLightPlan/register')
+              .send({ ...postData })
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在利用登録手続き中です。/i)
+          })
+        })
+      })
+
+      describe('2.無償契約ステータス：登録受付(11)', () => {
+        beforeAll(async () => {
+          await db.Contract.update(
+            {
+              contractStatus: contractStatuses.newContractReceive
+            },
+            {
+              where: {
+                tenantId: testTenantId,
+                serviceType: serviceTypes.bcd
+              }
+            }
+          )
+        })
+
+        describe('管理者', () => {
+          test('ライトプラン申込画面が表示されない、「現在利用登録手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在利用登録手続き中です。/i)
+          })
+
+          test('ライトプラン申込の登録(POST)ができない、「現在利用登録手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .post('/applyLightPlan/register')
+              .send({ ...postData })
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在利用登録手続き中です。/i)
+          })
+        })
+
+        describe('一般ユーザ', () => {
+          test('ライトプラン申込画面が表示されない、「現在利用登録手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在利用登録手続き中です。/i)
+          })
+
+          test('ライトプラン申込の登録(POST)ができない、「現在利用登録手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .post('/applyLightPlan/register')
+              .send({ ...postData })
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在利用登録手続き中です。/i)
+          })
+        })
+      })
+
+      describe('3.無償契約ステータス：契約中(00)', () => {
+        beforeAll(async () => {
+          await db.Order.destroy({ where: { tenantId: testTenantId } })
+          await db.Contract.update(
+            {
+              numberN: '1234567890',
+              contractStatus: contractStatuses.onContract
+            },
+            {
+              where: {
+                tenantId: testTenantId,
+                serviceType: serviceTypes.bcd
+              }
+            }
+          )
+        })
+
+        describe('管理者', () => {
+          test('ライトプラン申込画面へ遷移', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
+          })
+        })
+
+        describe('一般ユーザ', () => {
+          test('ライトプラン申込画面へ遷移', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
+          })
+        })
+      })
+
+      describe('4.無償契約ステータス：変更申込(40)', () => {
+        beforeAll(async () => {
+          await db.Contract.update(
+            {
+              contractStatus: contractStatuses.simpleChangeContractOrder
+            },
+            {
+              where: {
+                tenantId: testTenantId,
+                serviceType: serviceTypes.bcd
+              }
+            }
+          )
+        })
+
+        describe('管理者', () => {
+          test('ライトプラン申込画面へ遷移', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
+          })
+        })
+
+        describe('一般ユーザ', () => {
+          test('ライトプラン申込画面へ遷移', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
+          })
+        })
+      })
+
+      describe('5.無償契約ステータス：変更受付(41)', () => {
+        beforeAll(async () => {
+          await db.Contract.update(
+            {
+              contractStatus: contractStatuses.simpleChangeContractReceive
+            },
+            {
+              where: {
+                tenantId: testTenantId,
+                serviceType: serviceTypes.bcd
+              }
+            }
+          )
+        })
+
+        describe('管理者', () => {
+          test('ライトプラン申込画面へ遷移', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
+          })
+        })
+
+        describe('一般ユーザ', () => {
+          test('ライトプラン申込画面へ遷移', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
+          })
+        })
+      })
+
+      describe('6.無償契約ステータス：解約申込(30)', () => {
+        beforeAll(async () => {
+          await db.Contract.update(
+            {
+              contractStatus: contractStatuses.cancellationOrder
+            },
+            {
+              where: {
+                tenantId: testTenantId,
+                serviceType: serviceTypes.bcd
+              }
+            }
+          )
+        })
+
+        describe('管理者', () => {
+          test('ライトプラン申込画面が表示されない、「現在解約手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在解約手続き中です。/i)
+          })
+
+          test('ライトプラン申込の登録(POST)ができない、「現在解約手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .post('/applyLightPlan/register')
+              .send({ ...postData })
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在解約手続き中です。/i)
+          })
+        })
+
+        describe('一般ユーザ', () => {
+          test('ライトプラン申込画面が表示されない、「現在解約手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在解約手続き中です。/i)
+          })
+
+          test('ライトプラン申込の登録(POST)ができない、「現在解約手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .post('/applyLightPlan/register')
+              .send({ ...postData })
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在解約手続き中です。/i)
+          })
+        })
+      })
+
+      describe('7.無償契約ステータス：解約受付(31)', () => {
+        beforeAll(async () => {
+          await db.Contract.update(
+            {
+              contractStatus: contractStatuses.cancellationOrder
+            },
+            {
+              where: {
+                tenantId: testTenantId,
+                serviceType: serviceTypes.bcd
+              }
+            }
+          )
+        })
+
+        describe('管理者', () => {
+          test('ライトプラン申込画面が表示されない、「現在解約手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在解約手続き中です。/i)
+          })
+
+          test('ライトプラン申込の登録(POST)ができない、「現在解約手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .post('/applyLightPlan/register')
+              .send({ ...postData })
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在解約手続き中です。/i)
+          })
+        })
+
+        describe('一般ユーザ', () => {
+          test('ライトプラン申込画面が表示されない、「現在解約手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在解約手続き中です。/i)
+          })
+
+          test('ライトプラン申込の登録(POST)ができない、「現在解約手続き中です。」が表示される', async () => {
+            const res = await request(app)
+              .post('/applyLightPlan/register')
+              .send({ ...postData })
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(200)
+
+            // 画面内容確認
+            expect(res.text).toMatch(/現在解約手続き中です。/i)
+          })
+        })
+      })
+
+      describe('8.無償契約ステータス：解約(99)', () => {
+        beforeAll(async () => {
+          await db.Contract.update(
+            {
+              contractStatus: contractStatuses.canceledContract,
+              deleteFlag: true
+            },
+            {
+              where: {
+                tenantId: testTenantId,
+                serviceType: serviceTypes.bcd
+              }
+            }
+          )
+          await db.Tenant.update(
+            {
+              deleteFlag: true
+            },
+            {
+              where: {
+                tenantId: testTenantId
+              }
+            }
+          )
+        })
+
+        describe('管理者', () => {
+          test('ライトプラン申込画面が表示されない、テナント登録画面へリダイレクト', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(303)
+
+            // リダイレクト先
+            expect(res.headers.location).toMatch('/tenant/register')
+          })
+
+          test('ライトプラン申込の登録(POST)ができない、テナント登録画面へリダイレクト', async () => {
+            const res = await request(app)
+              .post('/applyLightPlan/register')
+              .send({ ...postData })
+              .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+              .expect(303)
+
+            // リダイレクト先
+            expect(res.headers.location).toMatch('/tenant/register')
+          })
+        })
+
+        describe('一般ユーザ', () => {
+          test('ライトプラン申込画面が表示されない、テナント登録画面へリダイレクト', async () => {
+            const res = await request(app)
+              .get('/applyLightPlan')
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(303)
+
+            // リダイレクト先
+            expect(res.headers.location).toMatch('/tenant/register')
+          })
+
+          test('ライトプラン申込の登録(POST)ができない、テナント登録画面へリダイレクト', async () => {
+            const res = await request(app)
+              .post('/applyLightPlan/register')
+              .send({ ...postData })
+              .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+              .expect(303)
+
+            // リダイレクト先
+            expect(res.headers.location).toMatch('/tenant/register')
+          })
+        })
       })
     })
   })
 
-  describe('2.無償契約ステータス：新規登録', () => {
-    // 利用登録
-    let tenantCsrf
-    test('利用登録画面へ遷移', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      // 画面内容確認
-      expect(res.text).toMatch(/利用登録 - BConnectionデジタルトレード/i)
-    })
-
-    // 利用登録後
-    test('利用登録実施', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on', salesPersonName: 'any' })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(303)
-
-      expect(res.header.location).toBe('/portal') // リダイレクト先は/portal
-    })
-
-    // 利用登録後、ユーザコンテキスト変更
-    test('ユーザコンテキスト変更', async () => {
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
-    })
-
-    // 利用登録後、一般ユーザ登録
-    test('一般ユーザ登録', async () => {
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
-    })
-  })
-
-  describe('3.無償契約ステータス：登録申込', () => {
-    describe('管理者', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-
-    describe('一般ユーザ', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-  })
-
-  describe('4.無償契約ステータス：登録受付', () => {
+  describe('ライトプラン画面動作の確認', () => {
     beforeAll(async () => {
-      await db.Contract.update(
-        {
-          contractStatus: constants.statusConstants.contractStatuses.newContractReceive
-        },
-        {
-          where: {
-            tenantId: testTenantId,
-            serviceType: constants.statusConstants.serviceTypes.bcd
-          }
-        }
-      )
-    })
+      // BCD無償契約の利用登録
+      await common.bcdRegister(acCookies[0])
 
-    describe('管理者', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-
-    describe('一般ユーザ', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-  })
-
-  describe('5.無償契約ステータス：契約中', () => {
-    beforeAll(async () => {
       await db.Order.destroy({ where: { tenantId: testTenantId } })
       await db.Contract.update(
         {
           numberN: '1234567890',
-          contractStatus: constants.statusConstants.contractStatuses.onContract
+          contractStatus: contractStatuses.onContract
         },
         {
           where: {
             tenantId: testTenantId,
-            serviceType: constants.statusConstants.serviceTypes.bcd
+            serviceType: serviceTypes.bcd
           }
         }
       )
@@ -461,18 +797,8 @@ describe('ライトプラン申込のインテグレーションテスト', () =
         await browser.close()
       })
 
-      describe('ライトプラン申込画面の遷移・初期表示', () => {
-        test('ライトプラン申込画面へ遷移', async () => {
-          const res = await request(app)
-            .get('/applyLightPlan')
-            .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-            .expect(200)
-
-          // 画面内容確認
-          expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-        })
-
-        test('ライトプラン申込画面の初期表示', async () => {
+      describe('ライトプラン申込画面の初期表示', () => {
+        test('初期表示', async () => {
           const browser = await puppeteer.launch({
             headless: true,
             ignoreHTTPSErrors: true
@@ -1256,11 +1582,11 @@ describe('ライトプラン申込のインテグレーションテスト', () =
 
           // DB確認
           const contracts = await contractController.findContracts(
-            { tenantId: testTenantId, serviceType: constants.statusConstants.serviceTypes.lightPlan },
+            { tenantId: testTenantId, serviceType: serviceTypes.lightPlan },
             null
           )
           expect(contracts?.length).toBe(1)
-          expect(contracts[0].contractStatus).toBe(constants.statusConstants.contractStatuses.newContractOrder)
+          expect(contracts[0].contractStatus).toBe(contractStatuses.newContractOrder)
 
           const order = await db.Order.findOne({
             where: { contractId: contracts[0].contractId }
@@ -1286,11 +1612,11 @@ describe('ライトプラン申込のインテグレーションテスト', () =
 
           // DB確認
           const contracts = await contractController.findContracts(
-            { tenantId: testTenantId, serviceType: constants.statusConstants.serviceTypes.lightPlan },
+            { tenantId: testTenantId, serviceType: serviceTypes.lightPlan },
             null
           )
           expect(contracts?.length).toBe(1)
-          expect(contracts[0].contractStatus).toBe(constants.statusConstants.contractStatuses.newContractOrder)
+          expect(contracts[0].contractStatus).toBe(contractStatuses.newContractOrder)
 
           const order = await db.Order.findOne({
             where: { contractId: contracts[0].contractId }
@@ -1412,12 +1738,12 @@ describe('ライトプラン申込のインテグレーションテスト', () =
           // 準備
           await db.Contract.update(
             {
-              contractStatus: constants.statusConstants.contractStatuses.newContractReceive
+              contractStatus: contractStatuses.newContractReceive
             },
             {
               where: {
                 tenantId: testTenantId,
-                serviceType: constants.statusConstants.serviceTypes.lightPlan
+                serviceType: serviceTypes.lightPlan
               }
             }
           )
@@ -1432,12 +1758,12 @@ describe('ライトプラン申込のインテグレーションテスト', () =
           // 準備
           await db.Contract.update(
             {
-              contractStatus: constants.statusConstants.contractStatuses.newContractBeforeCompletion
+              contractStatus: contractStatuses.newContractBeforeCompletion
             },
             {
               where: {
                 tenantId: testTenantId,
-                serviceType: constants.statusConstants.serviceTypes.lightPlan
+                serviceType: serviceTypes.lightPlan
               }
             }
           )
@@ -1454,12 +1780,12 @@ describe('ライトプラン申込のインテグレーションテスト', () =
           // 準備
           await db.Contract.update(
             {
-              contractStatus: constants.statusConstants.contractStatuses.onContract
+              contractStatus: contractStatuses.onContract
             },
             {
               where: {
                 tenantId: testTenantId,
-                serviceType: constants.statusConstants.serviceTypes.lightPlan
+                serviceType: serviceTypes.lightPlan
               }
             }
           )
@@ -1474,12 +1800,12 @@ describe('ライトプラン申込のインテグレーションテスト', () =
           // 準備
           await db.Contract.update(
             {
-              contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
+              contractStatus: contractStatuses.cancellationOrder
             },
             {
               where: {
                 tenantId: testTenantId,
-                serviceType: constants.statusConstants.serviceTypes.lightPlan
+                serviceType: serviceTypes.lightPlan
               }
             }
           )
@@ -1494,12 +1820,12 @@ describe('ライトプラン申込のインテグレーションテスト', () =
           // 準備
           await db.Contract.update(
             {
-              contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
+              contractStatus: contractStatuses.cancellationOrder
             },
             {
               where: {
                 tenantId: testTenantId,
-                serviceType: constants.statusConstants.serviceTypes.lightPlan
+                serviceType: serviceTypes.lightPlan
               }
             }
           )
@@ -1516,12 +1842,12 @@ describe('ライトプラン申込のインテグレーションテスト', () =
           // 準備
           await db.Contract.update(
             {
-              contractStatus: constants.statusConstants.contractStatuses.canceledContract
+              contractStatus: contractStatuses.canceledContract
             },
             {
               where: {
                 tenantId: testTenantId,
-                serviceType: constants.statusConstants.serviceTypes.lightPlan
+                serviceType: serviceTypes.lightPlan
               }
             }
           )
@@ -1544,11 +1870,11 @@ describe('ライトプラン申込のインテグレーションテスト', () =
 
           // DB確認
           const contracts = await contractController.findContracts(
-            { tenantId: testTenantId, serviceType: constants.statusConstants.serviceTypes.lightPlan },
-            [['contractedAt', 'ASC']]
+            { tenantId: testTenantId, serviceType: serviceTypes.lightPlan },
+            [['createdAt', 'ASC']]
           )
           expect(contracts?.length).toBe(2)
-          expect(contracts[1].contractStatus).toBe(constants.statusConstants.contractStatuses.newContractOrder)
+          expect(contracts[1].contractStatus).toBe(contractStatuses.newContractOrder)
 
           const order = await db.Order.findOne({
             where: { contractId: contracts[1].contractId }
@@ -1556,227 +1882,6 @@ describe('ライトプラン申込のインテグレーションテスト', () =
           expect(order.orderType).toBe(constants.statusConstants.orderTypes.newOrder)
           expect(order.orderData).toBe(JSON.stringify(requiredOnlyOrderData))
         })
-      })
-    })
-  })
-
-  describe('6.無償契約ステータス：変更申込', () => {
-    beforeAll(async () => {
-      await db.Contract.update(
-        {
-          contractStatus: constants.statusConstants.contractStatuses.simpleChangeContractOrder
-        },
-        {
-          where: {
-            tenantId: testTenantId,
-            serviceType: constants.statusConstants.serviceTypes.bcd
-          }
-        }
-      )
-    })
-
-    describe('管理者', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-
-    describe('一般ユーザ', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-  })
-
-  describe('7.無償契約ステータス：変更受付', () => {
-    beforeAll(async () => {
-      await db.Contract.update(
-        {
-          contractStatus: constants.statusConstants.contractStatuses.simpleChangeContractReceive
-        },
-        {
-          where: {
-            tenantId: testTenantId,
-            serviceType: constants.statusConstants.serviceTypes.bcd
-          }
-        }
-      )
-    })
-
-    describe('管理者', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-
-    describe('一般ユーザ', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-  })
-
-  describe('8.無償契約ステータス：解約申込', () => {
-    beforeAll(async () => {
-      await db.Contract.update(
-        {
-          contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
-        },
-        {
-          where: {
-            tenantId: testTenantId,
-            serviceType: constants.statusConstants.serviceTypes.bcd
-          }
-        }
-      )
-    })
-
-    describe('管理者', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-
-    describe('一般ユーザ', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-  })
-
-  describe('9.無償契約ステータス：解約受付', () => {
-    beforeAll(async () => {
-      await db.Contract.update(
-        {
-          contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
-        },
-        {
-          where: {
-            tenantId: testTenantId,
-            serviceType: constants.statusConstants.serviceTypes.bcd
-          }
-        }
-      )
-    })
-
-    describe('管理者', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-
-    describe('一般ユーザ', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-  })
-
-  describe('10.無償契約ステータス：解約', () => {
-    beforeAll(async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-      const inputTime = new Date()
-      await db.Order.update(
-        {
-          contractId: contract.dataValues.contractId,
-          tenantId: testTenantId,
-          orderType: '030',
-          orderData: 'test',
-          createdAt: inputTime,
-          updatedAt: inputTime
-        },
-        {
-          where: {
-            contractId: contract.dataValues.contractId
-          }
-        }
-      )
-      await db.Contract.update(
-        {
-          contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
-        },
-        {
-          where: {
-            tenantId: testTenantId,
-            serviceType: constants.statusConstants.serviceTypes.bcd
-          }
-        }
-      )
-    })
-
-    describe('管理者', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
-      })
-    })
-
-    describe('一般ユーザ', () => {
-      test('ライトプラン申込画面へ遷移', async () => {
-        const res = await request(app)
-          .get('/applyLightPlan')
-          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-          .expect(200)
-
-        // 画面内容確認
-        expect(res.text).toMatch(/ライトプラン申込 - BConnectionデジタルトレード/i)
       })
     })
   })

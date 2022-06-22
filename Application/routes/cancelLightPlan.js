@@ -50,18 +50,18 @@ const checkContractStatus = async (req, res, next) => {
     )
   ) {
     return next(noticeHelper.create('lightPlanUnregistered'))
-  }
-  // 解約中の場合(解約着手待ち～解約完了竣工まで)
-  if (
+  } else if (
     contracts.some(
       (i) =>
         i.contractStatus === contractStatuses.cancellationOrder ||
         i.contractStatus === contractStatuses.cancellationReceive
     )
   ) {
+    // 解約中の場合(解約着手待ち～解約完了竣工まで)
     return next(noticeHelper.create('lightPlanCanceling'))
+  } else {
+    return contracts
   }
-  return contracts
 }
 
 /**
@@ -76,6 +76,7 @@ const showCancelLightPlan = async (req, res, next) => {
 
   // ライトプランの解約の事前チェック
   const contracts = await checkContractStatus(req, res, next)
+  if (!contracts) return
 
   // チャネル組織マスターからチャネル組織情報リストを取得
   const salesChannelDeptList = await channelDepartmentController.findAll()
@@ -103,7 +104,8 @@ const cancelLightPlan = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'cancelLightPlan')
 
   // ライトプランの解約の事前チェック
-  await checkContractStatus(req, res, next)
+  const contracts = await checkContractStatus(req, res, next)
+  if (!contracts) return
 
   let salesChannelDeptType
   // 組織区分が選択された場合、コードで組織区分を取得し、オーダー情報に設定する
@@ -140,6 +142,7 @@ router.get(
   helper.isAuthenticated,
   helper.isTenantRegistered,
   helper.isUserRegistered,
+  helper.isOnOrChangeContract,
   csrfProtection,
   showCancelLightPlan
 )
@@ -149,6 +152,7 @@ router.post(
   helper.isAuthenticated,
   helper.isTenantRegistered,
   helper.isUserRegistered,
+  helper.isOnOrChangeContract,
   csrfProtection,
   cancelLightPlan
 )

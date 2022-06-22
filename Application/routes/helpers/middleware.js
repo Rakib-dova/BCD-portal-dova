@@ -9,6 +9,7 @@ const errorHelper = require('./error')
 const validate = require('../../lib/validate')
 const constantsDefine = require('../../constants')
 const serviceTypes = constantsDefine.statusConstants.serviceTypes
+const contractStatuses = constantsDefine.statusConstants.contractStatuses
 
 exports.isAuthenticated = async (req, res, next) => {
   if (req.user?.userId) {
@@ -84,7 +85,10 @@ exports.isUserRegistered = async (req, res, next) => {
 }
 
 exports.checkContractStatus = async (tenantId) => {
-  const contracts = await contractController.findContract({ tenantId: tenantId, serviceType: '010', deleteFlag: false }, 'createdAt DESC')
+  const contracts = await contractController.findContract(
+    { tenantId: tenantId, serviceType: '010', deleteFlag: false },
+    'createdAt DESC'
+  )
 
   // DB検索エラーの場合
   if (contracts instanceof Error) {
@@ -169,7 +173,9 @@ exports.bcdAuthenticate = async (req, res, next) => {
   }
 
   // BCD無料アプリの契約情報確認
-  const bcdContract = contracts.find((contract) => contract.serviceType === serviceTypes.bcd && contract.deleteFlag === false)
+  const bcdContract = contracts.find(
+    (contract) => contract.serviceType === serviceTypes.bcd && contract.deleteFlag === false
+  )
   if (!bcdContract || !bcdContract.contractStatus) {
     if (req.method === 'DELETE') {
       return res.send({ result: 0 })
@@ -190,4 +196,37 @@ exports.bcdAuthenticate = async (req, res, next) => {
   req.dbUser = user
   req.contracts = contracts
   next()
+}
+
+/**
+ * 無償契約が契約中、または、簡易変更中ことのチェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ */
+exports.isOnOrChangeContract = async (req, res, next) => {
+  // テナントIDに紐付いている未解約無償契約情報を取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  const contractStatus = contract?.dataValues?.contractStatus
+  if (contract instanceof Error || !contractStatus) return next(errorHelper.create(500))
+
+  if (
+    contractStatus === contractStatuses.onContract ||
+    contractStatus === contractStatuses.simpleChangeContractOrder ||
+    contractStatus === contractStatuses.simpleChangeContractReceive
+  ) {
+    return next()
+  } else if (
+    contractStatus === contractStatuses.newContractOrder ||
+    contractStatus === contractStatuses.newContractReceive
+  ) {
+    return next(noticeHelper.create('registerprocedure'))
+  } else if (
+    contractStatus === contractStatuses.cancellationOrder ||
+    contractStatus === contractStatuses.cancellationReceive
+  ) {
+    return next(noticeHelper.create('cancelprocedure'))
+  } else {
+    return next(errorHelper.create(500))
+  }
 }

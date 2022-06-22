@@ -139,6 +139,7 @@ router.get(
   helper.isAuthenticated,
   helper.isTenantRegistered,
   helper.isUserRegistered,
+  helper.isOnOrChangeContract,
   csrfProtection,
   checkContractStatus,
   showLightPlan
@@ -149,6 +150,7 @@ router.post(
   helper.isAuthenticated,
   helper.isTenantRegistered,
   helper.isUserRegistered,
+  helper.isOnOrChangeContract,
   csrfProtection,
   checkContractStatus,
   registerLightPlan
