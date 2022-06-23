@@ -149,6 +149,7 @@ describe('receiveIntroductionSupportのテスト', () => {
         middleware.isAuthenticated,
         middleware.isTenantRegistered,
         middleware.isUserRegistered,
+        middleware.isOnOrChangeContract,
         expect.any(Function),
         receiveIntroductionSupport.checkContractStatus,
         receiveIntroductionSupport.showIntroductionSupport
@@ -158,6 +159,7 @@ describe('receiveIntroductionSupportのテスト', () => {
         middleware.isAuthenticated,
         middleware.isTenantRegistered,
         middleware.isUserRegistered,
+        middleware.isOnOrChangeContract,
         expect.any(Function),
         receiveIntroductionSupport.checkContractStatus,
         receiveIntroductionSupport.registerIntroductionSupport

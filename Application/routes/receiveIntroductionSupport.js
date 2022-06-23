@@ -127,6 +127,7 @@ router.get(
   helper.isAuthenticated,
   helper.isTenantRegistered,
   helper.isUserRegistered,
+  helper.isOnOrChangeContract,
   csrfProtection,
   checkContractStatus,
   showIntroductionSupport
@@ -137,6 +138,7 @@ router.post(
   helper.isAuthenticated,
   helper.isTenantRegistered,
   helper.isUserRegistered,
+  helper.isOnOrChangeContract,
   csrfProtection,
   checkContractStatus,
   registerIntroductionSupport
