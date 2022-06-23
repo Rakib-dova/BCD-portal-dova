@@ -13,6 +13,7 @@ const wrongPatternError = '　入力値が間違いました。'
 const passwordConfirmError = '　入力されたパスワードが一致しません。'
 const pastOpeningDateError = '　過去の日付を設定できません。'
 const introductionSupportRegistering = '導入支援サービスは申し込み済です。'
+const introductionSupportRegistered = '導入支援サービスは申し込み済です。'
 
 jest.setTimeout(60000) // jestのタイムアウトを60秒とする
 
@@ -1823,6 +1824,305 @@ describe('導入支援インテグレーションテスト', () => {
           // 期待結果
           expect(await page.$eval('.subtitle', (el) => el.textContent)).toBe(introductionSupportRegistering)
         })
+      })
+      describe('契約中:現在導入支援は契約中です。', () => {
+        test('ライトプラン契約ステータス:00', async () => {
+          // 準備
+          await db.Contract.update(
+            {
+              contractStatus: constants.statusConstants.contractStatuses.onContract
+            },
+            {
+              where: {
+                tenantId: testTenantId,
+                serviceType: constants.statusConstants.serviceTypes.introductionSupport
+              }
+            }
+          )
+          await page.goto('https://localhost:3000/receiveIntroductionSupport')
+          // 期待結果
+          expect(await page.$eval('.subtitle', (el) => el.textContent)).toBe(introductionSupportRegistered)
+        })
+        test('導入支援契約ステータス:30', async () => {
+          // 準備
+          await db.Contract.update(
+            {
+              contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
+            },
+            {
+              where: {
+                tenantId: testTenantId,
+                serviceType: constants.statusConstants.serviceTypes.introductionSupport
+              }
+            }
+          )
+          await page.goto('https://localhost:3000/receiveIntroductionSupport')
+          // 期待結果
+          expect(await page.$eval('.subtitle', (el) => el.textContent)).toBe(introductionSupportRegistered)
+        })
+        test('導入支援契約ステータス:31', async () => {
+          // 準備
+          await db.Contract.update(
+            {
+              contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
+            },
+            {
+              where: {
+                tenantId: testTenantId,
+                serviceType: constants.statusConstants.serviceTypes.introductionSupport
+              }
+            }
+          )
+          await page.goto('https://localhost:3000/receiveIntroductionSupport')
+          // 期待結果
+          expect(await page.$eval('.subtitle', (el) => el.textContent)).toBe(introductionSupportRegistered)
+        })
+      })
+      describe('解約済(導入支援契約ステータス:99):再契約可能', () => {
+        test('導入支援契約ステータス:00', async () => {
+          // 準備
+          await db.Contract.update(
+            {
+              contractStatus: constants.statusConstants.contractStatuses.canceledContract
+            },
+            {
+              where: {
+                tenantId: testTenantId,
+                serviceType: constants.statusConstants.serviceTypes.introductionSupport
+              }
+            }
+          )
+          await page.goto('https://localhost:3000/receiveIntroductionSupport')
+
+          // 導入支援申込画面の必須項目のみ入力動作
+          await fillRequiredOnly(page)
+          // 利用規約のスクロール⇒同意チェックボックスのチェック⇒次へボタンのクリック
+          await showConfirm(page)
+          // 登録ボタンのクリック
+          await page.click('#submit')
+          await page.waitForTimeout(500)
+          // 期待結果
+          expect(page.url()).toBe('https://localhost:3000/portal')
+          expect(await page.$eval('#message-info', (el) => el.title)).toBe(
+            '導入支援サービスの申し込みが完了いたしました。'
+          )
+          // DB確認
+          // const contracts = await contractController.findContracts(
+          //   { tenantId: testTenantId, serviceType: constants.statusConstants.serviceTypes.introductionSupport },
+          //   [['contractedAt', 'ASC']]
+          // )
+          const contracts = await contractController.findContracts(
+            { tenantId: testTenantId, serviceType: constants.statusConstants.serviceTypes.introductionSupport },
+            [['createdAt', 'ASC']]
+          )
+          expect(contracts?.length).toBe(2)
+          expect(contracts[1].contractStatus).toBe(constants.statusConstants.contractStatuses.newContractOrder)
+
+          const order = await db.Order.findOne({
+            where: { contractId: contracts[1].contractId }
+          })
+          expect(order.orderType).toBe(constants.statusConstants.orderTypes.newOrder)
+          const a = JSON.parse(order.orderData)
+          delete a.contractBasicInfo.tradeshiftId
+          // expect(order.orderData).toBe(JSON.stringify(requiredOnlyOrderData))
+          expect(JSON.stringify(a)).toBe(JSON.stringify(requiredOnlyOrderData))
+        })
+      })
+    })
+  })
+  describe('6.無償契約ステータス：変更申込', () => {
+    beforeAll(async () => {
+      await db.Contract.update(
+        {
+          contractStatus: constants.statusConstants.contractStatuses.simpleChangeContractOrder
+        },
+        {
+          where: {
+            tenantId: testTenantId,
+            serviceType: constants.statusConstants.serviceTypes.bcd
+          }
+        }
+      )
+    })
+    describe('管理者', () => {
+      test('導入支援申込画面へ遷移', async () => {
+        const res = await request(app)
+          .get('/receiveIntroductionSupport')
+          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+          .expect(200)
+        // 画面内容確認
+        expect(res.text).toMatch(/導入支援サービス申し込み - BConnectionデジタルトレード/i)
+      })
+    })
+    describe('一般ユーザ', () => {
+      test('導入支援申込画面へ遷移', async () => {
+        const res = await request(app)
+          .get('/receiveIntroductionSupport')
+          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+          .expect(200)
+        // 画面内容確認
+        expect(res.text).toMatch(/導入支援サービス申し込み - BConnectionデジタルトレード/i)
+      })
+    })
+  })
+  describe('7.無償契約ステータス：変更受付', () => {
+    beforeAll(async () => {
+      await db.Contract.update(
+        {
+          contractStatus: constants.statusConstants.contractStatuses.simpleChangeContractReceive
+        },
+        {
+          where: {
+            tenantId: testTenantId,
+            serviceType: constants.statusConstants.serviceTypes.bcd
+          }
+        }
+      )
+    })
+    describe('管理者', () => {
+      test('導入支援申込画面へ遷移', async () => {
+        const res = await request(app)
+          .get('/receiveIntroductionSupport')
+          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+          .expect(200)
+        // 画面内容確認
+        expect(res.text).toMatch(/導入支援サービス申し込み - BConnectionデジタルトレード/i)
+      })
+    })
+    describe('一般ユーザ', () => {
+      test('導入支援申込画面へ遷移', async () => {
+        const res = await request(app)
+          .get('/receiveIntroductionSupport')
+          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+          .expect(200)
+        // 画面内容確認
+        expect(res.text).toMatch(/導入支援サービス申し込み - BConnectionデジタルトレード/i)
+      })
+    })
+  })
+  describe('8.無償契約ステータス：解約申込', () => {
+    beforeAll(async () => {
+      await db.Contract.update(
+        {
+          contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
+        },
+        {
+          where: {
+            tenantId: testTenantId,
+            serviceType: constants.statusConstants.serviceTypes.bcd
+          }
+        }
+      )
+    })
+    describe('管理者', () => {
+      test('導入支援申込画面へ遷移', async () => {
+        const res = await request(app)
+          .get('/receiveIntroductionSupport')
+          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+          .expect(200)
+        // 画面内容確認
+        expect(res.text).toMatch(/導入支援サービス申し込み - BConnectionデジタルトレード/i)
+      })
+    })
+    describe('一般ユーザ', () => {
+      test('導入支援申込画面へ遷移', async () => {
+        const res = await request(app)
+          .get('/receiveIntroductionSupport')
+          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+          .expect(200)
+        // 画面内容確認
+        expect(res.text).toMatch(/導入支援サービス申し込み - BConnectionデジタルトレード/i)
+      })
+    })
+  })
+  describe('9.無償契約ステータス：解約受付', () => {
+    beforeAll(async () => {
+      await db.Contract.update(
+        {
+          contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
+        },
+        {
+          where: {
+            tenantId: testTenantId,
+            serviceType: constants.statusConstants.serviceTypes.bcd
+          }
+        }
+      )
+    })
+    describe('管理者', () => {
+      test('導入支援申込画面へ遷移', async () => {
+        const res = await request(app)
+          .get('/receiveIntroductionSupport')
+          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+          .expect(200)
+        // 画面内容確認
+        expect(res.text).toMatch(/導入支援サービス申し込み - BConnectionデジタルトレード/i)
+      })
+      describe('一般ユーザ', () => {
+        test('導入支援申込画面へ遷移', async () => {
+          const res = await request(app)
+            .get('/receiveIntroductionSupport')
+            .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+            .expect(200)
+          // 画面内容確認
+          expect(res.text).toMatch(/導入支援サービス申し込み - BConnectionデジタルトレード/i)
+        })
+      })
+    })
+  })
+  describe('10.無償契約ステータス：解約', () => {
+    beforeAll(async () => {
+      const contract = await db.Contract.findOne({
+        where: {
+          tenantId: testTenantId
+        }
+      })
+      const inputTime = new Date()
+      await db.Order.update(
+        {
+          contractId: contract.dataValues.contractId,
+          tenantId: testTenantId,
+          orderType: '020',
+          orderData: 'test',
+          createdAt: inputTime,
+          updatedAt: inputTime
+        },
+        {
+          where: {
+            contractId: contract.dataValues.contractId
+          }
+        }
+      )
+      await db.Contract.update(
+        {
+          contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
+        },
+        {
+          where: {
+            tenantId: testTenantId,
+            serviceType: constants.statusConstants.serviceTypes.bcd
+          }
+        }
+      )
+    })
+    describe('管理者', () => {
+      test('導入支援申込画面へ遷移', async () => {
+        const res = await request(app)
+          .get('/receiveIntroductionSupport')
+          .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
+          .expect(200)
+        // 画面内容確認
+        expect(res.text).toMatch(/導入支援サービス申し込み - BConnectionデジタルトレード/i)
+      })
+    })
+    describe('一般ユーザ', () => {
+      test('導入支援申込画面へ遷移', async () => {
+        const res = await request(app)
+          .get('/receiveIntroductionSupport')
+          .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
+          .expect(200)
+        // 画面内容確認
+        expect(res.text).toMatch(/導入支援サービス申し込み - BConnectionデジタルトレード/i)
       })
     })
   })
