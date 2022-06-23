@@ -127,6 +127,11 @@ const cancelLightPlan = async (req, res, next) => {
     salesChannelDeptType
   )
 
+  // 客様番号の設定
+  orderData.contractBasicInfo.contractNumber = contracts?.find(
+    (i) => i.contractStatus === contractStatuses.onContract
+  )?.numberN
+
   // 解約する
   const result = await applyOrderController.cancelOrder(req.user?.tenantId, serviceTypes.lightPlan, orderData)
   // データベースエラーは、エラーオブジェクトが返る

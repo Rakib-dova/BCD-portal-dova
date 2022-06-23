@@ -75,7 +75,6 @@ block content
                             input.input#salesChannelMailAddress(type="text" name="salesChannelMailAddress" value="" pattern=inputPattarnMailAddress maxlength=82 placeholder='例：bcd@gma.com')
                             //- CSRF対策
                         input(type="hidden" name="_csrf" value=csrfToken)
-                        //- input(type="hidden" name="contractNumber" value=numberN)
 
                   .columns.is-centered: .column.is-four-fifths
                     .field.is-grouped.is-grouped-centered
@@ -101,7 +100,7 @@ block content
                         td BConnectionデジタルトレードアプリライトプラン
                       tr
                         td.confirmation-item お客様番号
-                        td #{numberN}
+                        td#numberN #{numberN}
                   table.table.is-fullwidth.is-bordered
                     tbody
                       tr

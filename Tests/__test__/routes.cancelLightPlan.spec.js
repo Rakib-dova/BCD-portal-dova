@@ -54,7 +54,7 @@ const emptyData = {
   salesChannelPersonName: '',
   salesChannelDeptType: '',
   salesChannelPhoneNumber: '',
-  salesChannelMailAddress: '@aaa.com'
+  salesChannelMailAddress: ''
 }
 
 const salesChannelDept = { code: '001', name: 'Com第一営業本部' }

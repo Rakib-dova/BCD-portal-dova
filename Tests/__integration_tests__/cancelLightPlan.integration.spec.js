@@ -21,6 +21,8 @@ const wrongPatternError = '　入力値が間違いました。'
 const lightPlanCanceling = '現在ライトプランは解約中です。'
 const lightPlanUnregistered = '現在ライトプランは未契約です。'
 
+const contractNumber = '000000000'
+
 const postData = {
   salesChannelCode: '000000',
   salesChannelName: '販売チャネル名',
@@ -43,7 +45,7 @@ const lessOrderData = {
     contractChangeContact: '',
     appDate: '',
     OpeningDate: '',
-    contractNumber: '',
+    contractNumber: contractNumber,
     salesChannelCode: '79100100',
     salesChannelName: 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
     salesChannelDeptName: '第二ＳＣ部門　第一グループ',
@@ -67,7 +69,7 @@ const fullOrderData = {
     contractChangeContact: '',
     appDate: '',
     OpeningDate: '',
-    contractNumber: '',
+    contractNumber: contractNumber,
     salesChannelCode: '000000',
     salesChannelName: '販売チャネル名',
     salesChannelDeptName: '部課名',
@@ -102,7 +104,7 @@ jest.setTimeout(60000)
 describe('ライトプラン解約のインテグレーションテスト', () => {
   let acCookies, userCookies, testTenantId
 
-  test('beforeAll', async () => {
+  beforeAll(async () => {
     // /authにアクセス:oauth2認証をし、セッション用Cookieを取得
     const options = require('minimist')(process.argv.slice(2))
 
@@ -862,7 +864,7 @@ describe('ライトプラン解約のインテグレーションテスト', () =
 
       await db.Contract.update(
         {
-          numberN: '000000000',
+          numberN: contractNumber,
           contractStatus: contractStatuses.onContract
         },
         {
@@ -910,6 +912,7 @@ describe('ライトプラン解約のインテグレーションテスト', () =
 
         // 解約確認モーダルの期待結果
         expect(await page.$eval('#cancellation-modal', (el) => el.classList?.value)).toMatch(/is-active/i)
+        expect(await page.$eval('#numberN', (el) => el.textContent)).toBe(contractNumber)
         expect(await page.$eval('#resalesChannelCode', (el) => el.textContent)).toBe('')
         expect(await page.$eval('#resalesChannelName', (el) => el.textContent)).toBe('')
         expect(await page.$eval('#resalesChannelDeptName', (el) => el.textContent)).toBe('')
@@ -1173,7 +1176,8 @@ describe('ライトプラン解約のインテグレーションテスト', () =
 
         await db.Contract.update(
           {
-            contractStatus: contractStatuses.onContract
+            contractStatus: contractStatuses.onContract,
+            numberN: contractNumber
           },
           {
             where: {
