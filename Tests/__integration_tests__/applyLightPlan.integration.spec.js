@@ -59,7 +59,7 @@ const postData = {
 
 const requiredOnlyOrderData = {
   contractBasicInfo: {
-    tradeshiftId: '2b95d31b-60c6-4c47-a813-17092d8c7434',
+    tradeshiftId: 'any',
     orderId: '',
     orderType: '010',
     serviceType: '030',
@@ -250,6 +250,7 @@ describe('ライトプラン申込のインテグレーションテスト', () =
 
     // テナントID設定
     testTenantId = getTenantId.id
+    requiredOnlyOrderData.contractBasicInfo.tradeshiftId = testTenantId
 
     // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
     await db.User.destroy({ where: { tenantId: testTenantId } })
@@ -1625,7 +1626,7 @@ describe('ライトプラン申込のインテグレーションテスト', () =
           expect(order.orderData).toBe(
             JSON.stringify({
               contractBasicInfo: {
-                tradeshiftId: '2b95d31b-60c6-4c47-a813-17092d8c7434',
+                tradeshiftId: testTenantId,
                 orderId: '',
                 orderType: '010',
                 serviceType: '030',

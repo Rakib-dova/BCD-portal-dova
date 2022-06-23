@@ -34,7 +34,7 @@ const postData = {
 
 const lessOrderData = {
   contractBasicInfo: {
-    tradeshiftId: '2b95d31b-60c6-4c47-a813-17092d8c7434',
+    tradeshiftId: 'any',
     orderId: '',
     orderType: '030',
     serviceType: '030',
@@ -58,7 +58,7 @@ const lessOrderData = {
 
 const fullOrderData = {
   contractBasicInfo: {
-    tradeshiftId: '2b95d31b-60c6-4c47-a813-17092d8c7434',
+    tradeshiftId: 'any',
     orderId: '',
     orderType: '030',
     serviceType: '030',
@@ -118,6 +118,8 @@ describe('ライトプラン解約のインテグレーションテスト', () =
 
     // テナントID設定
     testTenantId = getTenantId.id
+    lessOrderData.contractBasicInfo.tradeshiftId = testTenantId
+    fullOrderData.contractBasicInfo.tradeshiftId = testTenantId
 
     // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
     await db.User.destroy({ where: { tenantId: testTenantId } })
