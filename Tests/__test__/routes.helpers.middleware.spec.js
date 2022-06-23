@@ -1030,7 +1030,7 @@ describe('helpers/middlewareのテスト', () => {
         await middleware.isOnOrChangeContract(request, response, next)
 
         // 期待結果
-        expect(next).toHaveBeenCalledWith()
+        expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
       })
 
       test('契約ステータス:11', async () => {
