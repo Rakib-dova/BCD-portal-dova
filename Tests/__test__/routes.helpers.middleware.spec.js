@@ -1003,7 +1003,7 @@ describe('helpers/middlewareのテスト', () => {
     })
   })
 
-  describe.only('checkContractStatus', () => {
+  describe('isOnOrChangeContract', () => {
     describe('正常系', () => {
       test('契約ステータス:10', async () => {
         // 準備
