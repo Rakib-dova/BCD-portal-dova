@@ -682,7 +682,7 @@ class InvoiceDetail {
           } else {
             meisaiDetailObject.item = '割引'
           }
-          meisaiDetailObject.value = ac.AllowanceChargeReason.value
+          meisaiDetailObject.value = ac.AllowanceChargeReason?.value ?? ''
           meisaiDetail.push(meisaiDetailObject)
         })
       }
@@ -1020,7 +1020,7 @@ class InvoiceDetail {
             costArr.push('-' + ac.Amount.value.toLocaleString('ja-JP'))
           }
           meisai.allowanceCharge.push({
-            allowanceChargeReason: ac.AllowanceChargeReason.value,
+            allowanceChargeReason: ac.AllowanceChargeReason?.value ?? '',
             multiplierFactorNumeric: `${ac.MultiplierFactorNumeric.value * 100}%`,
             sequenceNumeric: ac.SequenceNumeric,
             amount: (~~`${ac.ChargeIndicator.value ? 1 : -1}` * ac.Amount.value).toLocaleString('ja-JP'),
@@ -1066,6 +1066,9 @@ class InvoiceDetail {
               accountCode: journalize.accountCode,
               subAccountCode: journalize.subAccountCode,
               departmentCode: journalize.departmentCode,
+              creditAccountCode: journalize.creditAccountCode,
+              creditSubAccountCode: journalize.creditSubAccountCode,
+              creditDepartmentCode: journalize.creditDepartmentCode,
               installmentAmount: journalize.installmentAmount
             })
           }
@@ -1087,31 +1090,49 @@ class InvoiceDetail {
       if (!item.ChargeIndicator.value) {
         const discountObject = {}
         discountObject['割引-項目ID'] = '割引'
-        discountObject['割引-内容'] = item.AllowanceChargeReason.value
+        if (item.AllowanceChargeReason) {
+          discountObject['割引-内容'] = item.AllowanceChargeReason.value
+        } else {
+          discountObject['割引-内容'] = ''
+        }
         if (item.MultiplierFactorNumeric.value !== 1) {
           discountObject['割引-数量'] = item.MultiplierFactorNumeric.value * 100
           discountObject['割引-単位'] = '%'
         } else {
-          discountObject['割引-数量'] = 1
-          discountObject['割引-単位'] = 1
+          discountObject['割引-数量'] = ''
+          discountObject['割引-単位'] = ''
         }
-        discountObject['割引-税（消費税／軽減税率／不課税／免税／非課税）'] = `${item.TaxCategory[0].Percent.value}%`
+        if (item.TaxCategory) {
+          discountObject['割引-税（消費税／軽減税率／不課税／免税／非課税）'] = `${item.TaxCategory[0].Percent.value}%`
+        } else {
+          discountObject['追加料金-税（消費税／軽減税率／不課税／免税／非課税）'] = ''
+        }
         discountObject['割引-小計（税抜）'] = '-' + item.Amount.value.toLocaleString('ja-JP')
         discountArr.push(discountObject)
       } else {
         // 追加料金の場合
         const chargeObject = {}
-        chargeObject['割引-項目ID'] = '追加料金'
-        chargeObject['割引-内容'] = item.AllowanceChargeReason.value
-        if (item.MultiplierFactorNumeric.value !== 1) {
-          chargeObject['割引-数量'] = item.MultiplierFactorNumeric.value * 100
-          chargeObject['割引-単位'] = '%'
+        chargeObject['追加料金-項目ID'] = '追加料金'
+        if (item.AllowanceChargeReason) {
+          chargeObject['追加料金-内容'] = item.AllowanceChargeReason.value
         } else {
-          chargeObject['割引-数量'] = 1
-          chargeObject['割引-単位'] = 1
+          chargeObject['追加料金-内容'] = ''
         }
-        chargeObject['割引-税（消費税／軽減税率／不課税／免税／非課税）'] = `${item.TaxCategory[0].Percent.value}%`
-        chargeObject['割引-小計（税抜）'] = item.Amount.value.toLocaleString('ja-JP')
+        if (item.MultiplierFactorNumeric.value !== 1) {
+          chargeObject['追加料金-数量'] = item.MultiplierFactorNumeric.value * 100
+          chargeObject['追加料金-単位'] = '%'
+        } else {
+          chargeObject['追加料金-数量'] = ''
+          chargeObject['追加料金-単位'] = ''
+        }
+        if (item.TaxCategory) {
+          chargeObject[
+            '追加料金-税（消費税／軽減税率／不課税／免税／非課税）'
+          ] = `${item.TaxCategory[0].Percent.value}%`
+        } else {
+          chargeObject['追加料金-税（消費税／軽減税率／不課税／免税／非課税）'] = ''
+        }
+        chargeObject['追加料金-小計（税抜）'] = item.Amount.value.toLocaleString('ja-JP')
         chargeArr.push(chargeObject)
       }
 
@@ -1121,7 +1142,7 @@ class InvoiceDetail {
           case 'Z':
             this.allowanceCharge.push({
               allowanceChargeIndicator: item.ChargeIndicator.value,
-              allowanceChargeReason: item.AllowanceChargeReason.value,
+              allowanceChargeReason: item.AllowanceChargeReason?.value ?? '',
               multiplierFactorNumeric: `${item.MultiplierFactorNumeric.value * 100}%`,
               percent: `${item.TaxCategory[0].Percent.value}%`,
               amount: (~~`${item.ChargeIndicator.value ? 1 : -1}` * item.Amount.value).toLocaleString('ja-JP'),
@@ -1134,7 +1155,7 @@ class InvoiceDetail {
           default:
             this.allowanceCharge.push({
               allowanceChargeIndicator: item.ChargeIndicator.value,
-              allowanceChargeReason: item.AllowanceChargeReason.value,
+              allowanceChargeReason: item.AllowanceChargeReason?.value ?? '',
               multiplierFactorNumeric: `${item.MultiplierFactorNumeric.value * 100}%`,
               percent: `${item.TaxCategory[0].Percent.value}%`,
               amount: (~~`${item.ChargeIndicator.value ? 1 : -1}` * item.Amount.value).toLocaleString('ja-JP'),

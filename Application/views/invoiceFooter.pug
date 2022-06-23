@@ -24,7 +24,7 @@
         if subtotal.taxCategoryId === 'G' || subtotal.taxCategoryId === 'Z'
           .columns.m-0.p-0
             .column.m-0.p-0
-              | #{subtotal.categoryName}
+              | #{subtotal.taxableAmount.toLocaleString()}の#{subtotal.categoryName}
             .column.m-0.p-0.text-right
               | #{subtotal.taxAmount.toLocaleString()}
         else

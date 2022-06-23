@@ -14,8 +14,15 @@ const apiManager = require('../controllers/apiManager')
 const functionName = 'cbPostIndex'
 const bconCsvUnitDefault = require('../lib/bconCsvUnitcode')
 const journalDownloadController = require('../controllers/journalDownloadController.js')
+const iconv = require('iconv-lite')
 
 const notiTitle = '請求書ダウンロード'
+const serviceDataFormatName = [
+  '既定フォーマット（デジタルトレードフォーマット）',
+  '弥生会計',
+  '勘定奉行クラウド',
+  'PCA hyper'
+]
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -60,11 +67,12 @@ const cbGetIndex = async (req, res, next) => {
   const minissuedate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0]
   const maxissuedate = today.toISOString().split('T')[0]
 
-  // 請求書ダウンロード画面表示
+  // 仕訳情報ダウンロード画面表示
   res.render('journalDownload', {
     title: '仕訳情報ダウンロード',
     minissuedate: minissuedate,
-    maxissuedate: maxissuedate // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
+    maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
+    serviceDataFormatName: serviceDataFormatName
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -75,7 +83,8 @@ const cbPostIndex = async (req, res, next) => {
 
   // 認証情報取得処理
   if (!req.session || !req.user?.userId) {
-    return next(errorHelper.create(400))
+    req.flash('noti', [notiTitle, 'ログインユーザーではありません。'])
+    return res.redirect(303, '/journalDownload')
   }
 
   // DBからuserデータ取得
@@ -116,6 +125,12 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
   req.session.userRole = user.dataValues?.userRole
 
+  // アプリ効果測定用ログ出力
+  let jsonLog = { tenantId: req.user.tenantId, action: 'journalDownloadRequest' }
+  logger.info(jsonLog)
+
+  const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
+
   // 絞り込みの条件データチェック
   const findDocumentQuery = {
     withouttag: ['archived', 'AP_DOCUMENT_DRAFT', 'PARTNER_DOCUMENT_DRAFT', 'tsgo-document'],
@@ -143,6 +158,63 @@ const cbPostIndex = async (req, res, next) => {
     findDocumentQuery.maxissuedate = req.body.maxIssuedate
   }
 
+  if (isNaN(Number(req.body.serviceDataFormat))) {
+    req.flash('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+    return res.redirect(303, '/journalDownload')
+  } else {
+    req.body.serviceDataFormat = Number(req.body.serviceDataFormat)
+  }
+
+  switch (req.body.serviceDataFormat) {
+    case 0:
+      break
+    case 1:
+    case 2:
+    case 3:
+      req.body.sentBy = req.body.sentBy ?? []
+      if (typeof req.body.sentBy === 'string') {
+        req.body.sentBy = [req.body.sentBy]
+      }
+      if (req.body.sentBy instanceof Array === false) {
+        req.body.sentBy = []
+      }
+
+      {
+        const isCloedApproval = req.body.chkFinalapproval === 'finalapproval'
+
+        try {
+          const result = await journalDownloadController.dowonloadKaikei(
+            req.user,
+            contract,
+            req.body.invoiceNumber,
+            req.body.minIssuedate,
+            req.body.maxIssuedate,
+            req.body.sentBy,
+            isCloedApproval,
+            req.body.serviceDataFormat
+          )
+
+          if (result === null) {
+            // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
+            // 条件に合わせるデータがない場合、お知らせを表示する。
+            req.flash('noti', [notiTitle, '条件に合致する請求書が見つかりませんでした。'])
+            return res.redirect(303, '/journalDownload')
+          } else {
+            const filename = encodeURIComponent(
+              `${today}_請求書_${serviceDataFormatName[req.body.serviceDataFormat]}.csv`
+            )
+            res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
+            return res.status(200).send(iconv.encode(`${result}`, 'Shift_JIS'))
+          }
+        } catch (e) {
+          return errorHandle(e, res, req)
+        }
+      }
+    default:
+      req.flash('noti', [notiTitle, '選択したダウンロード対象には誤りがあります。'])
+      return res.redirect(303, '/journalDownload')
+  }
+
   const invoiceNumber = req.body.invoiceNumber
   const findDocuments = '/documents'
 
@@ -157,7 +229,6 @@ const cbPostIndex = async (req, res, next) => {
     req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
     return res.redirect(303, '/journalDownload')
   }
-
   // 送信企業の条件のチェック
   let sentBy
   if (Array.isArray(req.body.sentBy)) {
@@ -177,6 +248,14 @@ const cbPostIndex = async (req, res, next) => {
   const company = sentTo[0]
   let sentByIdx = 0
 
+  let chkFinalapproval
+  // 請求書の最終承認済み・仕訳済み区分
+  if (req.body.chkFinalapproval || false) {
+    chkFinalapproval = req.body.chkFinalapproval
+  } else {
+    return next(errorHelper.create(400))
+  }
+
   do {
     const sentByCompany = sentBy[sentByIdx]
     findDocumentQuery.sentTo = sentTo[0]
@@ -193,7 +272,6 @@ const cbPostIndex = async (req, res, next) => {
       // 請求書を検索する
       let pageId = 0
       let numPages = 1
-
       do {
         resultForQuery = await apiManager.accessTradeshift(
           req.user.accessToken,
@@ -224,7 +302,7 @@ const cbPostIndex = async (req, res, next) => {
   let filename = ''
   // resultForQuery（API呼出）エラー検査
   if (resultForQuery instanceof Error) {
-    errorHandle(resultForQuery, res, req)
+    return errorHandle(resultForQuery, res, req)
   } else {
     if (documentsResult.itemCount === 0) {
       // 請求書検索結果、1件以上の場合ダウンロード、0件の場合ポップを表示
@@ -233,7 +311,7 @@ const cbPostIndex = async (req, res, next) => {
       res.redirect(303, '/journalDownload')
     } else {
       let invoicesForDownload = []
-      const today = new Date().toISOString().split('T').join().replace(',', '_').replace(/:/g, '').replace('Z', '') // yyyy-mm-dd_HHMMSS.sss
+
       if (req.body.invoiceNumber || false) {
         // documentIdの初期化
         let documentId = ''
@@ -257,15 +335,25 @@ const cbPostIndex = async (req, res, next) => {
             req.user.accessToken,
             req.user.refreshToken,
             invoiceDocument,
-            contract.contractId
+            contract.contractId,
+            chkFinalapproval,
+            req.user.userId
           )
 
           // エラーを確認する
           if (invoicesForDownload instanceof Error) {
-            errorHandle(invoicesForDownload, res, req)
+            return errorHandle(invoicesForDownload, res, req)
           }
 
           if (invoicesForDownload.length !== 0) {
+            jsonLog = {
+              tenantId: req.user.tenantId,
+              action: 'downloadedJournalInfo',
+              downloadedJournalCount: 1,
+              finalApproved: chkFinalapproval
+            }
+            logger.info(jsonLog)
+
             filename = encodeURIComponent(`${today}_${invoiceNumber}.csv`)
             res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
             res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
@@ -285,14 +373,14 @@ const cbPostIndex = async (req, res, next) => {
           req.user.accessToken,
           req.user.refreshToken,
           documentsResult.Document,
-          contract.contractId
+          contract.contractId,
+          chkFinalapproval,
+          req.user.userId
         )
 
         // エラーを確認する
         if (invoicesForDownload instanceof Error) {
-          req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
-          logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
-          return res.redirect(303, '/journalDownload')
+          return errorHandle(invoicesForDownload, res, req)
         }
 
         if (invoicesForDownload.length === 0) {
@@ -301,12 +389,23 @@ const cbPostIndex = async (req, res, next) => {
           return res.redirect(303, '/journalDownload')
         }
 
+        // アプリ効果測定用ログ出力
+        const invoiceArray = invoicesForDownload.split(/\r?\n|\r/)
+        jsonLog = {
+          tenantId: req.user.tenantId,
+          action: 'downloadedJournalInfo',
+          downloadedJournalCount: invoiceArray.length - 2 > 0 ? invoiceArray.length - 2 : undefined,
+          finalApproved: chkFinalapproval
+        }
+        logger.info(jsonLog)
+
         filename = encodeURIComponent(`${today}_請求書.csv`)
         res.set({ 'Content-Disposition': `attachment; filename=${filename}` })
         res.status(200).send(`${String.fromCharCode(0xfeff)}${invoicesForDownload}`)
       }
     }
   }
+
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
@@ -324,7 +423,7 @@ const errorHandle = (documentsResult, _res, _req) => {
     )
     _req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_APIERROR])
     _res.redirect(303, '/journalDownload')
-  } else if (String(documentsResult.response?.status).slice(0, 1) === '5') {
+  } else {
     // 500番エラーの場合
     logger.error(
       {
@@ -541,45 +640,135 @@ const dataToJson = (invoiceData, journalData) => {
     追加料金4以降: '',
     '固定税-項目ID': '',
     '固定税-税': '',
-    '仕訳情報1-勘定科目コード': '',
-    '仕訳情報1-補助科目コード': '',
-    '仕訳情報1-部門コード': '',
+    '仕訳情報1-借方勘定科目名': '',
+    '仕訳情報1-借方勘定科目コード': '',
+    '仕訳情報1-借方補助科目名': '',
+    '仕訳情報1-借方補助科目コード': '',
+    '仕訳情報1-借方部門名': '',
+    '仕訳情報1-借方部門コード': '',
+    '仕訳情報1-貸方勘定科目名': '',
+    '仕訳情報1-貸方勘定科目コード': '',
+    '仕訳情報1-貸方補助科目名': '',
+    '仕訳情報1-貸方補助科目コード': '',
+    '仕訳情報1-貸方部門名': '',
+    '仕訳情報1-貸方部門コード': '',
     '仕訳情報1-計上金額': '',
-    '仕訳情報2-勘定科目コード': '',
-    '仕訳情報2-補助科目コード': '',
-    '仕訳情報2-部門コード': '',
+    '仕訳情報2-借方勘定科目名': '',
+    '仕訳情報2-借方勘定科目コード': '',
+    '仕訳情報2-借方補助科目名': '',
+    '仕訳情報2-借方補助科目コード': '',
+    '仕訳情報2-借方部門名': '',
+    '仕訳情報2-借方部門コード': '',
+    '仕訳情報2-貸方勘定科目名': '',
+    '仕訳情報2-貸方勘定科目コード': '',
+    '仕訳情報2-貸方補助科目名': '',
+    '仕訳情報2-貸方補助科目コード': '',
+    '仕訳情報2-貸方部門名': '',
+    '仕訳情報2-貸方部門コード': '',
     '仕訳情報2-計上金額': '',
-    '仕訳情報3-勘定科目コード': '',
-    '仕訳情報3-補助科目コード': '',
-    '仕訳情報3-部門コード': '',
+    '仕訳情報3-借方勘定科目名': '',
+    '仕訳情報3-借方勘定科目コード': '',
+    '仕訳情報3-借方補助科目名': '',
+    '仕訳情報3-借方補助科目コード': '',
+    '仕訳情報3-借方部門名': '',
+    '仕訳情報3-借方部門コード': '',
+    '仕訳情報3-貸方勘定科目名': '',
+    '仕訳情報3-貸方勘定科目コード': '',
+    '仕訳情報3-貸方補助科目名': '',
+    '仕訳情報3-貸方補助科目コード': '',
+    '仕訳情報3-貸方部門名': '',
+    '仕訳情報3-貸方部門コード': '',
     '仕訳情報3-計上金額': '',
-    '仕訳情報4-勘定科目コード': '',
-    '仕訳情報4-補助科目コード': '',
-    '仕訳情報4-部門コード': '',
+    '仕訳情報4-借方勘定科目名': '',
+    '仕訳情報4-借方勘定科目コード': '',
+    '仕訳情報4-借方補助科目名': '',
+    '仕訳情報4-借方補助科目コード': '',
+    '仕訳情報4-借方部門名': '',
+    '仕訳情報4-借方部門コード': '',
+    '仕訳情報4-貸方勘定科目名': '',
+    '仕訳情報4-貸方勘定科目コード': '',
+    '仕訳情報4-貸方補助科目名': '',
+    '仕訳情報4-貸方補助科目コード': '',
+    '仕訳情報4-貸方部門名': '',
+    '仕訳情報4-貸方部門コード': '',
     '仕訳情報4-計上金額': '',
-    '仕訳情報5-勘定科目コード': '',
-    '仕訳情報5-補助科目コード': '',
-    '仕訳情報5-部門コード': '',
+    '仕訳情報5-借方勘定科目名': '',
+    '仕訳情報5-借方勘定科目コード': '',
+    '仕訳情報5-借方補助科目名': '',
+    '仕訳情報5-借方補助科目コード': '',
+    '仕訳情報5-借方部門名': '',
+    '仕訳情報5-借方部門コード': '',
+    '仕訳情報5-貸方勘定科目名': '',
+    '仕訳情報5-貸方勘定科目コード': '',
+    '仕訳情報5-貸方補助科目名': '',
+    '仕訳情報5-貸方補助科目コード': '',
+    '仕訳情報5-貸方部門名': '',
+    '仕訳情報5-貸方部門コード': '',
     '仕訳情報5-計上金額': '',
-    '仕訳情報6-勘定科目コード': '',
-    '仕訳情報6-補助科目コード': '',
-    '仕訳情報6-部門コード': '',
+    '仕訳情報6-借方勘定科目名': '',
+    '仕訳情報6-借方勘定科目コード': '',
+    '仕訳情報6-借方補助科目名': '',
+    '仕訳情報6-借方補助科目コード': '',
+    '仕訳情報6-借方部門名': '',
+    '仕訳情報6-借方部門コード': '',
+    '仕訳情報6-貸方勘定科目名': '',
+    '仕訳情報6-貸方勘定科目コード': '',
+    '仕訳情報6-貸方補助科目名': '',
+    '仕訳情報6-貸方補助科目コード': '',
+    '仕訳情報6-貸方部門名': '',
+    '仕訳情報6-貸方部門コード': '',
     '仕訳情報6-計上金額': '',
-    '仕訳情報7-勘定科目コード': '',
-    '仕訳情報7-補助科目コード': '',
-    '仕訳情報7-部門コード': '',
+    '仕訳情報7-借方勘定科目名': '',
+    '仕訳情報7-借方勘定科目コード': '',
+    '仕訳情報7-借方補助科目名': '',
+    '仕訳情報7-借方補助科目コード': '',
+    '仕訳情報7-借方部門名': '',
+    '仕訳情報7-借方部門コード': '',
+    '仕訳情報7-貸方勘定科目名': '',
+    '仕訳情報7-貸方勘定科目コード': '',
+    '仕訳情報7-貸方補助科目名': '',
+    '仕訳情報7-貸方補助科目コード': '',
+    '仕訳情報7-貸方部門名': '',
+    '仕訳情報7-貸方部門コード': '',
     '仕訳情報7-計上金額': '',
-    '仕訳情報8-勘定科目コード': '',
-    '仕訳情報8-補助科目コード': '',
-    '仕訳情報8-部門コード': '',
+    '仕訳情報8-借方勘定科目名': '',
+    '仕訳情報8-借方勘定科目コード': '',
+    '仕訳情報8-借方補助科目名': '',
+    '仕訳情報8-借方補助科目コード': '',
+    '仕訳情報8-借方部門名': '',
+    '仕訳情報8-借方部門コード': '',
+    '仕訳情報8-貸方勘定科目名': '',
+    '仕訳情報8-貸方勘定科目コード': '',
+    '仕訳情報8-貸方補助科目名': '',
+    '仕訳情報8-貸方補助科目コード': '',
+    '仕訳情報8-貸方部門名': '',
+    '仕訳情報8-貸方部門コード': '',
     '仕訳情報8-計上金額': '',
-    '仕訳情報9-勘定科目コード': '',
-    '仕訳情報9-補助科目コード': '',
-    '仕訳情報9-部門コード': '',
+    '仕訳情報9-借方勘定科目名': '',
+    '仕訳情報9-借方勘定科目コード': '',
+    '仕訳情報9-借方補助科目名': '',
+    '仕訳情報9-借方補助科目コード': '',
+    '仕訳情報9-借方部門名': '',
+    '仕訳情報9-借方部門コード': '',
+    '仕訳情報9-貸方勘定科目名': '',
+    '仕訳情報9-貸方勘定科目コード': '',
+    '仕訳情報9-貸方補助科目名': '',
+    '仕訳情報9-貸方補助科目コード': '',
+    '仕訳情報9-貸方部門名': '',
+    '仕訳情報9-貸方部門コード': '',
     '仕訳情報9-計上金額': '',
-    '仕訳情報10-勘定科目コード': '',
-    '仕訳情報10-補助科目コード': '',
-    '仕訳情報10-部門コード': '',
+    '仕訳情報10-借方勘定科目名': '',
+    '仕訳情報10-借方勘定科目コード': '',
+    '仕訳情報10-借方補助科目名': '',
+    '仕訳情報10-借方補助科目コード': '',
+    '仕訳情報10-借方部門名': '',
+    '仕訳情報10-借方部門コード': '',
+    '仕訳情報10-貸方勘定科目名': '',
+    '仕訳情報10-貸方勘定科目コード': '',
+    '仕訳情報10-貸方補助科目名': '',
+    '仕訳情報10-貸方補助科目コード': '',
+    '仕訳情報10-貸方部門名': '',
+    '仕訳情報10-貸方部門コード': '',
     '仕訳情報10-計上金額': ''
   }
 
@@ -1927,9 +2116,26 @@ const dataToJson = (invoiceData, journalData) => {
 
       for (let no = 0; no < lineJournaData.length; ++no) {
         if (lineJournaData[no].lineNo === i + 1) {
-          invoice[`仕訳情報${no + 1}-勘定科目コード`] = lineJournaData[no].accountCode
-          invoice[`仕訳情報${no + 1}-補助科目コード`] = lineJournaData[no].subAccountCode
-          invoice[`仕訳情報${no + 1}-部門コード`] = lineJournaData[no].departmentCode
+          invoice[`仕訳情報${no + 1}-借方勘定科目名`] = lineJournaData[no].accountName
+          invoice[`仕訳情報${no + 1}-借方勘定科目コード`] = lineJournaData[no].accountCode
+          invoice[`仕訳情報${no + 1}-借方補助科目名`] = lineJournaData[no].subAccountName
+          invoice[`仕訳情報${no + 1}-借方補助科目コード`] = lineJournaData[no].subAccountCode
+          invoice[`仕訳情報${no + 1}-借方部門名`] = lineJournaData[no].departmentName
+          if (lineJournaData[no].departmentCode) {
+            invoice[`仕訳情報${no + 1}-借方部門コード`] = lineJournaData[no].departmentCode.substr(0, 6)
+          } else {
+            invoice[`仕訳情報${no + 1}-借方部門コード`] = lineJournaData[no].departmentCode
+          }
+          invoice[`仕訳情報${no + 1}-貸方勘定科目名`] = lineJournaData[no].creditAccountName
+          invoice[`仕訳情報${no + 1}-貸方勘定科目コード`] = lineJournaData[no].creditAccountCode
+          invoice[`仕訳情報${no + 1}-貸方補助科目名`] = lineJournaData[no].creditSubAccountName
+          invoice[`仕訳情報${no + 1}-貸方補助科目コード`] = lineJournaData[no].creditSubAccountCode
+          invoice[`仕訳情報${no + 1}-貸方部門名`] = lineJournaData[no].creditDepartmentName
+          if (lineJournaData[no].creditDepartmentCode) {
+            invoice[`仕訳情報${no + 1}-貸方部門コード`] = lineJournaData[no].creditDepartmentCode.substr(0, 6)
+          } else {
+            invoice[`仕訳情報${no + 1}-貸方部門コード`] = lineJournaData[no].creditDepartmentCode
+          }
           invoice[`仕訳情報${no + 1}-計上金額`] = lineJournaData[no].installmentAmount
         }
       }

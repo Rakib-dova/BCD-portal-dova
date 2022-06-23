@@ -161,10 +161,10 @@ p:focus {
 }
 
 #check-approval-modal > .modal-card {
-  width: 100%;
+  width: 60%;
 }
 #reject-approval-modal > .modal-card {
-  width: 100%;
+  width: 60%;
 }
 
 .columns .rows {

@@ -1,8 +1,6 @@
 'use strict'
 const app = require('../../Application/app')
 const request = require('supertest')
-const { JSDOM } = require('jsdom')
-const db = require('../../Application/models')
 const getTenantId = {}
 
 jest.setTimeout(60000) // jestのタイムアウトを60秒とする
@@ -10,499 +8,311 @@ jest.setTimeout(60000) // jestのタイムアウトを60秒とする
 const getCookies = require('./getCookies')
 
 describe('仕訳情報ダウンロードのインテグレーションテスト', () => {
-  let acCookies
-  let userCookies
-  let testTenantId
-
-  describe('0.前準備', () => {
-    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
-      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
-      const options = require('minimist')(process.argv.slice(2))
-      const adminId = options.adminid
-      const adminSecret = options.adminsecret
-      const userId = options.userid
-      const userSecret = options.usersecret
-      // --------------------アカウント管理者のCookieを取得---------------
-      acCookies = await getCookies(app, request, getTenantId, adminId, adminSecret)
-      // ---------------------一般ユーザのCookieを取得--------------------
-      userCookies = await getCookies(app, request, getTenantId, userId, userSecret)
-
-      // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
-
-      // DBクリア
-      await db.User.destroy({ where: { tenantId: getTenantId.id } })
-      await db.Tenant.destroy({ where: { tenantId: getTenantId.id } })
-    })
-  })
-
-  test('テナントID設定', async () => {
-    testTenantId = getTenantId.id
-  })
+  let acStatus
+  let userStatus
+  let acStatus10
+  let userStatus10
+  let acStatus11
+  let userStatus11
+  let acStatus00
+  let userStatus00
+  let acStatus40
+  let userStatus40
+  let acStatus41
+  let userStatus41
+  let acStatus30
+  let userStatus30
+  let acStatus31
+  let userStatus31
+  let acStatus99
+  let userStatus99
 
   describe('1.契約ステータス：未登録', () => {
-    // 利用登録をしていないため、請求書ダウンロードページ利用できない
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus = await getCookies(app, request, getTenantId, 'inte.test.user+@gmail.com', '1q2w3e4r5t')
+      userStatus = await getCookies(app, request, getTenantId, 'inte.test.user+user@gmail.com', '1q2w3e4r5t')
+    })
+
+    // 利用登録をしていないため、仕訳情報ダウンロードページ利用できない
     test('管理者、契約ステータス：未登録、利用不可', async () => {
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(500)
+      const cookieAdmin = `${acStatus[0].name}=${acStatus[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookieAdmin).expect(500)
 
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i) // タイトル
     })
 
     test('一般ユーザ、契約ステータス：未登録、利用不可', async () => {
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(500)
+      const cookieUser = `${userStatus[0].name}=${userStatus[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookieUser).expect(500)
 
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i) // タイトル
     })
   })
 
-  describe('2.契約ステータス：新規登録', () => {
-    // 利用登録
-    let tenantCsrf
-    test('利用登録画面へ遷移', async () => {
-      const res = await request(app)
-        .get('/tenant/register')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      // CSRFのワンタイムトークン取得
-      const dom = new JSDOM(res.text)
-      tenantCsrf = dom.window.document.getElementsByName('_csrf')[0]?.value
-
-      expect(res.text).toMatch(/利用登録 - BConnectionデジタルトレード/i) // タイトル
-    })
-
-    // 利用登録後
-    test('利用登録実施', async () => {
-      const res = await request(app)
-        .post('/tenant/register')
-        .type('form')
-        .send({ _csrf: tenantCsrf, termsCheck: 'on' })
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(303)
-
-      expect(res.header.location).toBe('/portal') // リダイレクト先は/portal
-    })
-
-    // 利用登録後、ユーザコンテキスト変更
-    test('ユーザコンテキスト変更', async () => {
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
-    })
-
-    // 利用登録後、一般ユーザ登録
-    test('一般ユーザ登録', async () => {
-      const res = await request(app)
-        .get('/portal')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
-
-      expect(res.text).toMatch(/ポータル - BConnectionデジタルトレード/i) // タイトルが含まれていること
-    })
-  })
-
   describe('3.契約ステータス：登録申込', () => {
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus10 = await getCookies(app, request, getTenantId, 'inte.test.user+10@gmail.com', '1q2w3e4r5t')
+      userStatus10 = await getCookies(app, request, getTenantId, 'inte.test.user+10user@gmail.com', '1q2w3e4r5t')
+    })
+
     test('管理者、契約ステータス：登録申込、利用可能', async () => {
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
+      const cookie10Admin = `${acStatus10[0].name}=${acStatus10[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie10Admin).expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：登録申込、利用可能', async () => {
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
+      const cookie10User = `${userStatus10[0].name}=${userStatus10[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie10User).expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
   })
 
   describe('4.契約ステータス：登録受付', () => {
-    test('管理者、契約ステータス：登録受付、利用可能', async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-      if (contract.dataValues.contractStatus !== '11') {
-        await db.Contract.update(
-          {
-            contractStatus: '11'
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-      }
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus11 = await getCookies(app, request, getTenantId, 'inte.test.user+11@gmail.com', '1q2w3e4r5t')
+      userStatus11 = await getCookies(app, request, getTenantId, 'inte.test.user+11user@gmail.com', '1q2w3e4r5t')
+    })
 
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
+    test('管理者、契約ステータス：登録受付、利用可能', async () => {
+      const cookie11Admin = `${acStatus11[0].name}=${acStatus11[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie11Admin).expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：登録受付、利用可能', async () => {
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
+      const cookie11User = `${userStatus11[0].name}=${userStatus11[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie11User).expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
   })
 
   describe('5.契約ステータス：契約中', () => {
-    test('管理者、契約ステータス：契約中、利用可能', async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-      await db.Order.destroy({ where: { tenantId: testTenantId } })
-      if (contract.dataValues.contractStatus !== '00') {
-        await db.Contract.update(
-          {
-            numberN: '1234567890',
-            contractStatus: '00'
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-      }
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus00 = await getCookies(app, request, getTenantId, 'inte.test.user+00@gmail.com', '1q2w3e4r5t')
+      userStatus00 = await getCookies(app, request, getTenantId, 'inte.test.user+00user@gmail.com', '1q2w3e4r5t')
+    })
 
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
+    test('管理者、契約ステータス：契約中、利用可能', async () => {
+      const cookie00Admin = `${acStatus00[0].name}=${acStatus00[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie00Admin).expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：契約中、利用可能', async () => {
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
+      const cookie00User = `${userStatus00[0].name}=${userStatus00[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie00User).expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
-    })
-
-    // 送信企業ボタン確認
-    test('送信企業ボタン確認（全選択、全解除）', async () => {
-      const puppeteer = require('puppeteer')
-      const browser = await puppeteer.launch({
-        headless: true,
-        ignoreHTTPSErrors: true
-      })
-
-      await db.Contract.update({ contractStatus: '00' }, { where: { tenantId: testTenantId } })
-      const page = await browser.newPage()
-      await page.setCookie(acCookies[0])
-      await page.goto('https://localhost:3000/journalDownload')
-      if (page.url() === 'https://localhost:3000/journalDownload') {
-        await page.click('#sendToSearchBtn')
-
-        await page.waitForTimeout(2000)
-
-        // 全選択ボタン確認
-        const checkAllSelectSentToBtn = await page.evaluate(() => {
-          return document.querySelector('#allSelectSentToBtn').innerText
-        })
-        expect(checkAllSelectSentToBtn).toBe('全選択')
-
-        // 全解除ボタン確認
-        const checkAllClearSentToBtn = await page.evaluate(() => {
-          return document.querySelector('#allClearSentToBtn').innerText
-        })
-        expect(checkAllClearSentToBtn).toBe('全解除')
-      }
-
-      await browser.close()
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
   })
 
   describe('6.契約ステータス：変更申込', () => {
-    test('管理者、契約ステータス：変更申込、利用可能', async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-      const inputTime = new Date()
-      await db.Order.create({
-        contractId: contract.dataValues.contractId,
-        tenantId: testTenantId,
-        orderType: '040',
-        orderData: 'test',
-        createdAt: inputTime,
-        updatedAt: inputTime
-      })
-      if (contract.dataValues.contractStatus !== '40') {
-        await db.Contract.update(
-          {
-            contractStatus: '40'
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-      }
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus40 = await getCookies(app, request, getTenantId, 'inte.test.user+40@gmail.com', '1q2w3e4r5t')
+      userStatus40 = await getCookies(app, request, getTenantId, 'inte.test.user+40user@gmail.com', '1q2w3e4r5t')
+    })
 
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
+    test('管理者、契約ステータス：変更申込、利用可能', async () => {
+      const cookie40Admin = `${acStatus40[0].name}=${acStatus40[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie40Admin).expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：変更申込、利用可能', async () => {
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
+      const cookie40User = `${userStatus40[0].name}=${userStatus40[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie40User).expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
   })
 
   describe('7.契約ステータス：変更受付', () => {
-    test('管理者、契約ステータス：変更受付、利用可能', async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-      if (contract.dataValues.contractStatus !== '41') {
-        await db.Contract.update(
-          {
-            contractStatus: '41'
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-      }
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus41 = await getCookies(app, request, getTenantId, 'inte.test.user+41@gmail.com', '1q2w3e4r5t')
+      userStatus41 = await getCookies(app, request, getTenantId, 'inte.test.user+41user@gmail.com', '1q2w3e4r5t')
+    })
 
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
+    test('管理者、契約ステータス：変更受付、利用可能', async () => {
+      const cookie41Admin = `${acStatus41[0].name}=${acStatus41[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie41Admin).expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
 
     test('一般ユーザ、契約ステータス：変更受付、利用可能', async () => {
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
+      const cookie41User = `${userStatus41[0].name}=${userStatus41[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie41User).expect(200)
 
       expect(res.text).toMatch(/- BConnectionデジタルトレード/i) // タイトルが含まれていること
       expect(res.text).toMatch(/請求書番号/i) // 請求書番号ラベルがあること
       expect(res.text).toMatch(/発行日/i) // 発行日ラベルがあること
       expect(res.text).toMatch(/送信企業/i) // 送信企業ラベルがあること
+      expect(res.text).toMatch(/ダウンロード対象/i) // ダウンロード対象ラベルがあること
+      expect(res.text).toMatch(/最終承認済みの請求書/i) // 最終承認済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/仕訳済みの請求書/i) // 仕訳済みの請求書チェックボックスがあること
+      expect(res.text).toMatch(/出力フォーマット/i) // 出力フォーマットラベルがあること
+      expect(res.text).toMatch(/既定フォーマット（デジタルトレードフォーマット）/i) // 既定フォーマット（デジタルトレードフォーマット）のドロップボックスがあること
+      expect(res.text).toMatch(/弥生会計/i) // 弥生会計ドロップボックスがあること
     })
   })
 
   describe('8.契約ステータス：解約申込', () => {
-    test('管理者、契約ステータス：解約申込、利用不可', async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-      const inputTime = new Date()
-      await db.Order.update(
-        {
-          contractId: contract.dataValues.contractId,
-          tenantId: testTenantId,
-          orderType: '030',
-          orderData: 'test',
-          createdAt: inputTime,
-          updatedAt: inputTime
-        },
-        {
-          where: {
-            contractId: contract.dataValues.contractId
-          }
-        }
-      )
-      if (contract.dataValues.contractStatus !== '30') {
-        await db.Contract.update(
-          {
-            contractStatus: '30'
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-      }
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus30 = await getCookies(app, request, getTenantId, 'inte.test.user+30@gmail.com', '1q2w3e4r5t')
+      userStatus30 = await getCookies(app, request, getTenantId, 'inte.test.user+30user@gmail.com', '1q2w3e4r5t')
+    })
 
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
+    test('管理者、契約ステータス：解約申込、利用不可', async () => {
+      const cookie30Admin = `${acStatus30[0].name}=${acStatus30[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie30Admin).expect(200)
 
       expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容確認
     })
 
     test('一般ユーザ、契約ステータス：解約申込、利用不可', async () => {
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
+      const cookie30User = `${userStatus30[0].name}=${userStatus30[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie30User).expect(200)
 
       expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容確認
     })
   })
 
   describe('9.契約ステータス：解約受付', () => {
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus31 = await getCookies(app, request, getTenantId, 'inte.test.user+31@gmail.com', '1q2w3e4r5t')
+      userStatus31 = await getCookies(app, request, getTenantId, 'inte.test.user+31user@gmail.com', '1q2w3e4r5t')
+    })
+
     test('管理者、契約ステータス：解約受付、利用不可', async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-
-      if (contract.dataValues.contractStatus !== '31') {
-        await db.Contract.update(
-          {
-            contractStatus: '31'
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-      }
-
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(200)
+      const cookie31Admin = `${acStatus31[0].name}=${acStatus31[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie31Admin).expect(200)
 
       expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容確認
     })
 
     test('一般ユーザ、契約ステータス：解約受付、利用不可', async () => {
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(200)
+      const cookie31User = `${userStatus31[0].name}=${userStatus31[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie31User).expect(200)
 
       expect(res.text).toMatch(/現在解約手続き中です。/i) // 画面内容確認
     })
   })
 
   describe('10.契約ステータス：解約', () => {
+    test('/authにアクセス：oauth2認証をし、セッション用Cookieを取得', async () => {
+      // アカウント管理者と一般ユーザのID/SECRETは、テストコマンドの引数から取得
+      acStatus99 = await getCookies(app, request, getTenantId, 'inte.test.user+99@gmail.com', '1q2w3e4r5t')
+      userStatus99 = await getCookies(app, request, getTenantId, 'inte.test.user+99user@gmail.com', '1q2w3e4r5t')
+    })
+
     test('管理者、契約ステータス：解約、利用不可', async () => {
-      const contract = await db.Contract.findOne({
-        where: {
-          tenantId: testTenantId
-        }
-      })
-
-      if (contract.dataValues.contractStatus !== '99') {
-        await db.Contract.update(
-          {
-            numberN: '',
-            contractStatus: '99',
-            deleteFlag: true
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-        await db.Tenant.update(
-          {
-            deleteFlag: true
-          },
-          {
-            where: {
-              tenantId: testTenantId
-            }
-          }
-        )
-      }
-
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', acCookies[0].name + '=' + acCookies[0].value)
-        .expect(500)
+      const cookie99Admin = `${acStatus99[0].name}=${acStatus99[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie99Admin).expect(500)
 
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i) // 画面内容確認
     })
 
     test('一般ユーザ、契約ステータス：解約、利用不可', async () => {
-      const res = await request(app)
-        .get('/journalDownload')
-        .set('Cookie', userCookies[0].name + '=' + userCookies[0].value)
-        .expect(500)
+      const cookie99User = `${userStatus99[0].name}=${userStatus99[0].value}`
+      const res = await request(app).get('/journalDownload').set('Cookie', cookie99User).expect(500)
 
       expect(res.text).toMatch(/上部メニューのHOMEボタンを押下し、トップページへお戻りください。/i) // 画面内容確認
-    })
-  })
-
-  describe('後処理', () => {
-    test('userデータ削除', async () => {
-      await db.User.destroy({ where: { tenantId: testTenantId } })
-      await db.Tenant.destroy({ where: { tenantId: testTenantId } })
     })
   })
 })

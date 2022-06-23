@@ -105,10 +105,12 @@ const cbGetIndex = async (req, res, next) => {
     req.session.requestApproval = { approval: requestApproval }
   }
 
+  const requester = requestApproval.requester
   res.render(presentation, {
     ...result,
     title: '支払依頼',
     documentId: invoiceId,
+    requester: requester,
     approveRoute: approveRoute,
     prevUser: prevUser,
     requestId: requestId

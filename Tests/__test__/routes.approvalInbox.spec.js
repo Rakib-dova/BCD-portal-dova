@@ -273,6 +273,12 @@ describe('approvalInboxのテスト', () => {
         title: '支払依頼',
         documentId: request.params.invoiceId,
         approveRoute: expectGetRequestApproval.approveRoute,
+        requester: {
+          name: UserAccounts.setUserAccounts(findUser[16]).getName(),
+          no: '支払依頼',
+          requestedAt: '2022-3-17 0:59:59',
+          status: '依頼済み'
+        },
         prevUser: expectGetRequestApproval.prevUser,
         requestId: expectGetRequestApproval.requestId
       })

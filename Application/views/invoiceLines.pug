@@ -71,52 +71,113 @@ if invoiceLine.length !== 0
           .column.p-0.lineAccountCode(id= `lineNo${idx + 1}`)
             if key === "journalize" && value.length !== 0
               each jValue, jdx in value
-                .columns.m-0.p-1.lineAccountcode(id= `lineNo${idx + 1}_lineAccountCode${jdx + 1}`)
+                if jdx ===0
+                  .columns.m-0
+                    .column.is-one-third.border-bottom-2px-solid
+                      p.text-center.font-bold 借方
+                    .column.is-0.p-1.border-bottom-2px-solid
+                    .column.is-one-third.border-bottom-2px-solid
+                      p.text-center.font-bold 貸方
+                    .column.is-0.p-1.border-bottom-2px-solid
+                    .column.is-one-quarter.border-bottom-2px-solid
+                      p.text-center.font-bold 計上金額
+                .columns.m-0.pt-1.lineAccountcode(id= `lineNo${idx + 1}_lineAccountCode${jdx + 1}`)                
                   .column.is-one-third.p-0.border-div-rad-4
-                    .field.is-horizontal.m-1.has-addons-centered
-                      .field-label.is-normal.m-0.text-center
-                        label 勘定科目コード
-                      .field-label.is-normal.m-0.text-center
-                        label 補助科目コード
-                      .field-label.is-normal.m-0.is-1.fixed-void-66
-                        label 　
-                    .field.is-horizontal.p-1
-                      .field-body.m-1
-                        .field
-                          p.control
-                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_accountCode` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_accountCode` value= jValue.accountCode readonly)
-                      .field-body.m-1
-                        .field
-                          p.control
-                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_subAccountCode` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_subAccountCode` value= jValue.subAccountCode readonly)
-                      .field-body.m-1.is-1.none-flex-grow
-                        .field
-                          p.control
-                            a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`) 検索
+                    table.table.table-margin-left
+                      tr
+                        td.table-td-padding
+                          .field.is-horizontal
+                            .field-label.m-0.padding-top-halfRem            
+                              label 勘定科目コード
+                        td.table-td-padding
+                          .field-body.m-0
+                            .field.margin-left-7px            
+                              input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_accountCode` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_accountCode` value= jValue.accountCode readonly)
+                        td.table-td-upbutton-padding 
+                          .field-body.m-1.is-1.none-flex-grow.margin-top-0.padding-top-7
+                            .field
+                              p.control
+                                a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`) 検索
+                      tr
+                        td.table-td-padding.padding-top-0
+                          .field.is-horizontal                       
+                            .field-label.m-0.padding-top-halfRem 
+                              label 補助科目コード
+                        td.table-td-padding.padding-top-0
+                          .field-body.m-0
+                            .field.margin-left-7px
+                              p.control
+                                input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_subAccountCode` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_subAccountCode` value= jValue.subAccountCode readonly)
+                        td.table-td-upbutton-padding.padding-top-0 
+                          .field-body.m-1.is-1.none-flex-grow.padding-top-0.margin-top-0
+                            .field
+                              p.control
+                                a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`) 検索                                
+                      tr
+                        td.table-td-padding.padding-top-0
+                          .field.is-horizontal  
+                            .field-label.m-0.padding-top-halfRem 
+                              label 部門コード 
+                        td.table-td-padding.padding-top-0
+                          .field-body.m-0
+                            .field.margin-left-7px 
+                              p.control
+                                input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_departmentCode` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_departmentCode` value=jValue.departmentCode readonly)
+                        td.table-td-button-padding.padding-top-0
+                          .field-body.m-1.is-1.none-flex-grow.margin-top-0
+                            .field
+                              p.control
+                                a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`) 検索
                   .column.is-0.p-1
-                  .column.is-one-fifth.p-0.border-div-rad-4
-                   .field.is-horizontal.m-1.has-addons-centered
-                     .field-label.is-normal.m-0.text-center
-                       label 部門コード
-                     .field-label.is-normal.m-0.is-1.fixed-void-66
-                       label 　
-                   .field.is-horizontal.p-1
-                     .field-body.m-1
-                       .field
-                         p.control
-                           input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_departmentCode` name=`lineNo${idx + 1}_lineAccountCode${jdx + 1}_departmentCode` value=jValue.departmentCode readonly)
-                     .field-body.m-1.is-1.none-flex-grow
-                       .field
-                         p.control
-                           a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`) 検索
+                  .column.is-one-third.p-0.border-div-rad-4
+                    table.table.table-margin-left
+                      tr
+                        td.table-td-padding
+                          .field.is-horizontal
+                            .field-label.m-0.padding-top-halfRem            
+                              label 勘定科目コード
+                        td.table-td-padding
+                          .field-body.m-0
+                            .field.margin-left-7px            
+                              input.input(type='text' id=`lineNo${idx + 1}_lineCreditAccountCode${jdx + 1}_creditAccountCode` name=`lineNo${idx + 1}_lineCreditAccountCode${jdx + 1}_creditAccountCode` value= jValue.creditAccountCode readonly)
+                        td.table-td-upbutton-padding 
+                          .field-body.m-1.is-1.none-flex-grow.margin-top-0.padding-top-7 
+                            .field
+                              p.control
+                                a.button.is-link.show-modal.btn-search-main.BtnlineCreditAccountCodeSearch(data-target='creditAccountCode-modal' data-info=`lineNo${idx + 1}_lineCreditAccountCode${jdx + 1}`) 検索
+                      tr
+                        td.table-td-padding.padding-top-0
+                          .field.is-horizontal                       
+                            .field-label.m-0.padding-top-halfRem 
+                              label 補助科目コード
+                        td.table-td-padding.padding-top-0
+                          .field-body.m-0
+                            .field.margin-left-7px
+                              p.control
+                                input.input(type='text' id=`lineNo${idx + 1}_lineCreditAccountCode${jdx + 1}_creditSubAccountCode` name=`lineNo${idx + 1}_lineCreditAccountCode${jdx + 1}_creditSubAccountCode` value= jValue.creditSubAccountCode readonly)
+                        td.table-td-upbutton-padding 
+                          .field-body.m-1.is-1.none-flex-grow.margin-top-0 
+                            .field
+                              p.control
+                                a.button.is-link.show-modal.btn-search-main.BtnlineCreditAccountCodeSearch(data-target='creditAccountCode-modal' data-info=`lineNo${idx + 1}_lineCreditAccountCode${jdx + 1}`) 検索                                
+                      tr
+                        td.table-td-padding.padding-top-0
+                          .field.is-horizontal  
+                            .field-label.m-0.padding-top-halfRem 
+                              label 部門コード 
+                        td.table-td-padding.padding-top-0
+                          .field-body.m-0
+                            .field.margin-left-7px 
+                              p.control
+                                input.input(type='text' id=`lineNo${idx + 1}_lineCreditAccountCode${jdx + 1}_creditDepartmentCode` name=`lineNo${idx + 1}_lineCreditAccountCode${jdx + 1}_creditDepartmentCode` value=jValue.creditDepartmentCode readonly)
+                        td.table-td-button-padding.padding-top-0
+                          .field-body.m-1.is-1.none-flex-grow.margin-top-0.margin-top-0
+                            .field
+                              p.control
+                                a.button.is-link.show-modal.btn-search-departmentCode.BtnlineCreditDepartmentCodeSearch(data-target='creditDepartmentCode-modal' data-info=`lineNo${idx + 1}_lineCreditAccountCode${jdx + 1}`) 検索
                   .column.is-0.p-1
                   .column.is-one-quarter.p-0.border-div-rad-4
-                    .field.is-horizontal.m-1.has-addons-centered
-                      .field-label.is-normal.m-0.text-center
-                        label 計上金額
-                      .field-label.is-normal.m-0.is-1.fixed-void-66
-                        label 　
-                    .field-body.p-1
+                    .field-body.p-1.margin-top-101px
                       .field.is-horizontal
                         .field-body.m-1
                           .field
@@ -132,65 +193,126 @@ if invoiceLine.length !== 0
                       a.red-color.btn-minus-accountCode(id=`btn_minus_lineNo${idx + 1}_accountCode` data-target=`lineNo${idx + 1}_lineAccountCode${jdx + 1}`)
                         i.fas.fa-minus-circle
             else
-              .columns.m-0.p-1.lineAccountcode(id= `lineNo${idx + 1}_lineAccountCode1`)
+              .columns.m-0
+              .columns.m-0
+                .column.is-one-third.border-bottom-2px-solid
+                  p.text-center.font-bold 借方
+                .column.is-0.p-1.border-bottom-2px-solid
+                .column.is-one-third.border-bottom-2px-solid
+                  p.text-center.font-bold 貸方
+                .column.is-0.p-1.border-bottom-2px-solid
+                .column.is-one-quarter.border-bottom-2px-solid
+                  p.text-center.font-bold 計上金額
+              .columns.m-0.pt-1.lineAccountcode(id= `lineNo${idx + 1}_lineAccountCode1`)
                 .column.is-one-third.p-0.border-div-rad-4
-                  .field.is-horizontal.m-1.has-addons-centered
-                    .field-label.is-normal.m-0.text-center
-                      label 勘定科目コード
-                    .field-label.is-normal.m-0.text-center
-                      label 補助科目コード
-                    .field-label.is-normal.m-0.is-1.fixed-void-66
-                      label 　
-                  .field.is-horizontal.p-1
-                    .field-body.m-1
-                      .field
-                        p.control
-                          input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_accountCode` name=`lineNo${idx + 1}_lineAccountCode1_accountCode` value readonly)
-                    .field-body.m-1
-                      .field
-                        p.control
-                          input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_subAccountCode` name=`lineNo${idx + 1}_lineAccountCode1_subAccountCode` value readonly)
-                    .field-body.m-1.is-1.none-flex-grow
-                      .field
-                        p.control
-                          a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode1`) 検索
+                  table.table.table-margin-left
+                    tr
+                      td.table-td-padding
+                        .field.is-horizontal
+                          .field-label.m-0.padding-top-halfRem            
+                            label 勘定科目コード
+                      td.table-td-padding
+                        .field-body.m-0
+                          .field.margin-left-7px            
+                            input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_accountCode` name=`lineNo${idx + 1}_lineAccountCode1_accountCode` value readonly)
+                      td.table-td-upbutton-padding 
+                        .field-body.m-1.is-1.none-flex-grow.margin-top-0.padding-top-7
+                          .field
+                            p.control
+                              a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode1`) 検索
+                    tr
+                      td.table-td-padding.padding-top-0
+                        .field.is-horizontal                       
+                          .field-label.m-0.padding-top-halfRem 
+                            label 補助科目コード
+                      td.table-td-padding.padding-top-0
+                        .field-body.m-0
+                          .field.margin-left-7px
+                            p.control
+                              input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_subAccountCode` name=`lineNo${idx + 1}_lineAccountCode1_subAccountCode` value readonly)
+                      td.table-td-upbutton-padding.padding-top-0 
+                        .field-body.m-1.is-1.none-flex-grow.margin-top-0 
+                          .field
+                            p.control
+                              a.button.is-link.show-modal.btn-search-main.BtnlineAccountCodeSearch(data-target='accountCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode1`) 検索                              
+                    tr
+                      td.table-td-padding.padding-top-0
+                        .field.is-horizontal  
+                          .field-label.m-0.padding-top-halfRem 
+                            label 部門コード 
+                      td.table-td-padding.padding-top-0
+                        .field-body.m-0
+                          .field.margin-left-7px 
+                            p.control
+                              input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_departmentCode` name=`lineNo${idx + 1}_lineAccountCode1_departmentCode` value readonly)
+                      td.table-td-button-padding.padding-top-0
+                        .field-body.m-1.is-1.none-flex-grow.margin-top-0
+                          .field
+                            p.control
+                              a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode1`) 検索
                 .column.is-0.p-1
-                .column.is-one-fifth.p-0.border-div-rad-4
-                  .field.is-horizontal.m-1.has-addons-centered
-                    .field-label.is-normal.m-0.text-center
-                      label 部門コード
-                    .field-label.is-normal.m-0.is-1.fixed-void-66
-                      label 　
-                  .field.is-horizontal.p-1
-                    .field-body.m-1
-                      .field
-                        p.control
-                          input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_departmentCode` name=`lineNo${idx + 1}_lineAccountCode1_departmentCode` value readonly)
-                    .field-body.m-1.is-1.none-flex-grow
-                      .field
-                        p.control
-                          a.button.is-link.show-modal.btn-search-departmentCode.BtnlineDepartmentCodeSearch(data-target='departmentCode-modal' data-info=`lineNo${idx + 1}_lineAccountCode1`) 検索
+                .column.is-one-third.p-0.border-div-rad-4
+                  table.table.table-margin-left
+                    tr
+                      td.table-td-padding
+                        .field.is-horizontal
+                          .field-label.m-0.padding-top-halfRem            
+                            label 勘定科目コード
+                      td.table-td-padding
+                        .field-body.m-0
+                          .field.margin-left-7px            
+                            input.input(type='text' id=`lineNo${idx + 1}_lineCreditAccountCode1_creditAccountCode` name=`lineNo${idx + 1}_lineCreditAccountCode1_creditAccountCode` value readonly)
+                      td.table-td-upbutton-padding 
+                        .field-body.m-1.is-1.none-flex-grow.margin-top-0.padding-top-7 
+                          .field
+                            p.control
+                              a.button.is-link.show-modal.btn-search-main.BtnlineCreditAccountCodeSearch(data-target='creditAccountCode-modal' data-info=`lineNo${idx + 1}_lineCreditAccountCode1`) 検索
+                    tr
+                      td.table-td-padding.padding-top-0
+                        .field.is-horizontal                       
+                          .field-label.m-0.padding-top-halfRem 
+                            label 補助科目コード
+                      td.table-td-padding.padding-top-0
+                        .field-body.m-0
+                          .field.margin-left-7px
+                            p.control
+                              input.input(type='text' id=`lineNo${idx + 1}_lineCreditAccountCode1_creditSubAccountCode` name=`lineNo${idx + 1}_lineCreditAccountCode1_creditSubAccountCode` value readonly)
+                      td.table-td-upbutton-padding.padding-top-0
+                        .field-body.m-1.is-1.none-flex-grow.margin-top-0 
+                          .field
+                            p.control
+                              a.button.is-link.show-modal.btn-search-main.BtnlineCreditAccountCodeSearch(data-target='creditAccountCode-modal' data-info=`lineNo${idx + 1}_lineCreditAccountCode1`) 検索                              
+                    tr
+                      td.table-td-padding.padding-top-0
+                        .field.is-horizontal  
+                          .field-label.m-0.padding-top-halfRem 
+                            label 部門コード 
+                      td.table-td-padding.padding-top-0
+                        .field-body.m-0
+                          .field.margin-left-7px 
+                            p.control
+                              input.input(type='text' id=`lineNo${idx + 1}_lineCreditAccountCode1_creditDepartmentCode` name=`lineNo${idx + 1}_lineCreditAccountCode1_creditDepartmentCode` value readonly)
+                      td.table-td-button-padding.padding-top-0
+                        .field-body.m-1.is-1.none-flex-grow.margin-top-0
+                          .field
+                            p.control
+                              a.button.is-link.show-modal.btn-search-departmentCode.BtnlineCreditDepartmentCodeSearch(data-target='creditDepartmentCode-modal' data-info=`lineNo${idx + 1}_lineCreditAccountCode1`) 検索
                 .column.is-0.p-1
                 .column.is-one-quarter.p-0.border-div-rad-4
-                  .field.is-horizontal.m-1.has-addons-centered
-                    .field-label.is-normal.m-0.text-center
-                      label 計上金額
-                    .field-label.is-normal.m-0.is-1.fixed-void-66
-                      label 　
-                  .field-body.p-1
+                  .field-body.p-1.margin-top-101px
                     .field.is-horizontal
                       .field-body.m-1
                         .field
                           p.control
                             input.input(type='text' id=`lineNo${idx + 1}_lineAccountCode1_input_amount` name=`lineNo${idx + 1}_lineAccountCode1_input_amount` class=`lineNo${idx + 1}_input_amount` readonly  value= item['明細-小計 (税抜)'])
-                      .field-body.m-1.is-1.none-flex-grow
+                      .field-body.m-1.is-1.none-flex-grow.margin-top-0
                         .field
                           p.control
 
     else
       .box
         - for (var [key,value] of Object.entries(item))
-          - var idx = 0
+          - var jdx = 0
           each subitem in value
             div.paymentmean
               .columns.m-0
@@ -198,26 +320,26 @@ if invoiceLine.length !== 0
                     if (subKey === '割引-項目ID'||subKey === '追加料金-項目ID') && subValue.length !== 0
                       .column-header.is-2-header
                         p.text-left-lines= subValue
-                    if (subKey === '割引-内容'||subKey === '追加料金-内容') && subValue.length !== 0
+                    if (subKey === '割引-内容'||subKey === '追加料金-内容')
                       .column-header.is-5-header
                         p= subValue
-                    if (subKey === '割引-数量'||subKey === '追加料金-数量') && subValue.length !== 0
+                    if (subKey === '割引-数量'||subKey === '追加料金-数量')
                       .column-header.mr-1
                         p.text-right-lines= subValue
-                    if (subKey === '割引-単位'||subKey === '追加料金-単位') && subValue.length !== 0
+                    if (subKey === '割引-単位'||subKey === '追加料金-単位')
                       .column-header.ml-1
                         p.text-left-lines= subValue
                       .column-header
                         p 　
-                    if (subKey === '割引-税（消費税／軽減税率／不課税／免税／非課税）'||subKey === '追加料金-税（消費税／軽減税率／不課税／免税／非課税）') && subValue.length !== 0
+                    if (subKey === '割引-税（消費税／軽減税率／不課税／免税／非課税）'||subKey === '追加料金-税（消費税／軽減税率／不課税／免税／非課税）')
                       .column-header
                         p.text-right-lines= subValue
                     if (subKey === '割引-小計（税抜）'||subKey === '追加料金-小計（税抜）') && subValue.length !== 0
                       .column-header
                         p.text-right-lines= subValue
               .columns.m-0
-                if allowanceCharge[idx]
-                  if allowanceCharge[idx].taxCategoryId === 'G' || allowanceCharge[idx].taxCategoryId === 'Z'
+                if allowanceCharge[jdx]
+                  if allowanceCharge[jdx].taxCategoryId === 'G' || allowanceCharge[jdx].taxCategoryId === 'Z'
                     .column-header
-                      | #{allowanceCharge[idx].taxCategory}
-              - idx++
+                      | #{allowanceCharge[jdx].taxCategory}
+              - jdx++
