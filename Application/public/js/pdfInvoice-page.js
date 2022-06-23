@@ -75,6 +75,8 @@ function setStaticProp(invoice, lines) {
     $('#invoice-recAddr2').textContent = invoice.recAddr2
     $('#invoice-recAddr3').textContent = invoice.recAddr3
 
+    $('#invoice-sendRegistrationNo').textContent = invoice.sendRegistrationNo
+
     $('#invoice-invoiceNo').textContent = invoice.invoiceNo
     $('#invoice-billingDate').textContent = formatDate(new Date(invoice.billingDate), 'YYYY年MM月DD日')
     $('#invoice-currency').textContent = invoice.currency
@@ -342,19 +344,17 @@ $('#output-modal-btn')?.addEventListener('click', async () => {
   if (
     !location.pathname.match(/show/) &&
     !validate(invoice, lines, outputRules, { lineLength: String(lines.length), fileSize: imageFile?.size })
-  )
+  ) {
     return alert('入力項目に不備があります。')
+  }
 
   $('#output-modal').classList.add('is-active')
 })
 
 $('#save-btn')?.addEventListener('click', async () => {
-  if (!location.pathname.match(/show/) && !validate(
-    invoice,
-    lines,
-    saveRules,
-    { fileSize: imageFile?.size }
-  )) return alert('入力項目に不備があります。')
+  if (!location.pathname.match(/show/) && !validate(invoice, lines, saveRules, { fileSize: imageFile?.size })) {
+    return alert('入力項目に不備があります。')
+  }
 
   const modal = document.getElementById('request-progress-modal')
   modal.classList.add('is-active')

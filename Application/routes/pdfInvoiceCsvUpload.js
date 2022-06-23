@@ -272,6 +272,7 @@ const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) =
         sendAddr1: senderInfo.sendAddr1,
         sendAddr2: senderInfo.sendAddr2,
         sendAddr3: senderInfo.sendAddr3,
+        sendRegistrationNo: row.sendRegistrationNo,
         bankName: row.bankName,
         branchName: row.branchName,
         accountType: row.accountType,

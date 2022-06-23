@@ -12,6 +12,7 @@ const requiredProps = [
   'sendAddr1',
   'sendAddr2',
   'sendAddr3',
+  'sendRegistrationNo',
 
   'invoiceNo',
   'currency',
@@ -287,6 +288,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
         <p class="p width-250px" id="invoice-sendAddr1">${input.sendAddr1}</p>
         <p class="p width-250px" id="invoice-sendAddr2">${input.sendAddr2}</p>
         <p class="p width-250px" id="invoice-sendAddr3">${input.sendAddr3}</p>
+        <p class="p width-250px" id="invoice-sendAddr3">${input.sendRegistrationNo}</p>
       </div>
     </div>
     <div class="columns">

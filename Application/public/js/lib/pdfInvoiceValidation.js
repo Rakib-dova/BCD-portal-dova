@@ -89,6 +89,15 @@ const saveRules = [
   },
   {
     target: 'invoice',
+    displayLocation: 'header',
+    prop: 'sendRegistrationNo',
+    regexp: /^T\d{13}$/,
+    message: '登録番号は"T"+半角数字13桁で入力してください。',
+    emptyMessage: '登録番号が空欄のため、差出人情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice',
     displayLocation: 'footer',
     prop: 'bankName',
     regexp: /^.{0,50}$/,
@@ -481,14 +490,22 @@ function validate(invoice, lines, rules, option = {}) {
       }
     })
 
-    if (line['unitPrice'] && line['quantity'] && line['unitPrice'] * line['quantity'] > 9000000000000000) { // eslint-disable-line
-      setValidationMessage(`${i + 1}番目の` + '小計が扱うことができる最大値を超えました。9,000,000,000,000,000 以下となるように入力して下さい。', 'lines')
+    if (line['unitPrice'] && line['quantity'] && line['unitPrice'] * line['quantity'] > 9000000000000000) {
+      // eslint-disable-line
+      setValidationMessage(
+        `${i + 1}番目の` +
+          '小計が扱うことができる最大値を超えました。9,000,000,000,000,000 以下となるように入力して下さい。',
+        'lines'
+      )
       result = false
     }
   })
 
   if (getSubTotal(lines) > 9000000000000000) {
-    setValidationMessage('小計の合計が扱うことができる最大値を超えました。9,000,000,000,000,000 以下となるように入力して下さい。', 'lines')
+    setValidationMessage(
+      '小計の合計が扱うことができる最大値を超えました。9,000,000,000,000,000 以下となるように入力して下さい。',
+      'lines'
+    )
     result = false
   }
 

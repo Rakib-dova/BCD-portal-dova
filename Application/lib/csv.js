@@ -1,5 +1,6 @@
 // CSVアップロードファイルヘッダー (PDF請求書)
 const invoiceHeaderArray = [
+  '登録番号',
   '請求書番号',
   '支払期日',
   '請求日',
@@ -25,6 +26,7 @@ const invoiceHeaderArray = [
 
 // CSVアップロードファイルヘッダーとCSV行データオブジェクトの対応表
 const pdfInvoiceMapper = [
+  { col: '登録番号', prop: 'sendRegistrationNo', modifier: null },
   { col: '請求書番号', prop: 'invoiceNo', modifier: null },
   { col: '支払期日', prop: 'paymentDate', modifier: null },
   { col: '請求日', prop: 'billingDate', modifier: null },
