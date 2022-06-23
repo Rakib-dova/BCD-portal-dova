@@ -614,7 +614,33 @@ describe('cancellationのテスト', () => {
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue(userInfoData)
       findOneSpyContracts.mockReturnValue(contractInfoData)
-      createSpy.mockReturnValue(createData)
+      createSpy.mockImplementation(async (_tenantId, _cancelData, contractInformationcancelOrder) => {
+        expect(_tenantId).toEqual('15e2d952-8ba0-42a4-8582-b234cb4a2089')
+        expect(contractInformationcancelOrder).toEqual({
+          contractBasicInfo: {
+            tradeshiftId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            orderId: '',
+            orderType: '030',
+            serviceType: '010',
+            contractChangeName: '',
+            contractChangeAddress: '',
+            contractChangeContact: '',
+            appDate: '',
+            OpeningDate: '',
+            contractNumber: '0000011111',
+            salesChannelCode: '79100100',
+            salesChannelName: 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
+            salesChannelDeptName: '第二ＳＣ部門　第一グループ',
+            salesChannelEmplyeeCode: '',
+            salesChannelPersonName: 'デジトレアプリ担当',
+            salesChannelDeptType: 'アプリケーションサービス部',
+            salesChannelPhoneNumber: '050-3383-9608',
+            salesChannelMailAddress: 'digitaltrade-ap-ops@ntt.com',
+            kaianPassword: ''
+          }
+        })
+        return createData
+      })
       checkContractStatusSpy.mockReturnValue('00')
 
       // 試験実施
