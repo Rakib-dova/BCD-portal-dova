@@ -809,7 +809,7 @@ describe('ライトプラン申込のインテグレーションテスト', () =
 
           // 期待結果
           // URL
-          expect(page.url()).toBe('https://localhost:3000/applyLightPlan')
+          expect(await page.url()).toBe('https://localhost:3000/applyLightPlan')
           // 初期値
           expect(await page.$eval('#commonCustomerId', (el) => el.value)).toBe('')
           expect(await page.$eval('#contractorName', (el) => el.value)).toBe('')
@@ -1577,7 +1577,7 @@ describe('ライトプラン申込のインテグレーションテスト', () =
           await page.waitForTimeout(500)
 
           // 期待結果
-          expect(page.url()).toBe('https://localhost:3000/portal')
+          expect(await page.url()).toBe('https://localhost:3000/portal')
           expect(await page.$eval('#message-info', (el) => el.title)).toBe('ライトプラン申込が完了いたしました。')
 
           // DB確認
@@ -1607,7 +1607,7 @@ describe('ライトプラン申込のインテグレーションテスト', () =
           await page.waitForTimeout(500)
 
           // 期待結果
-          expect(page.url()).toBe('https://localhost:3000/portal')
+          expect(await page.url()).toBe('https://localhost:3000/portal')
           expect(await page.$eval('#message-info', (el) => el.title)).toBe('ライトプラン申込が完了いたしました。')
 
           // DB確認
@@ -1838,7 +1838,7 @@ describe('ライトプラン申込のインテグレーションテスト', () =
       })
 
       describe('解約済(ライトプラン契約ステータス:99):再契約可能', () => {
-        test('ライトプラン契約ステータス:00', async () => {
+        test('再契約', async () => {
           // 準備
           await db.Contract.update(
             {
@@ -1865,7 +1865,7 @@ describe('ライトプラン申込のインテグレーションテスト', () =
           await page.waitForTimeout(500)
 
           // 期待結果
-          expect(page.url()).toBe('https://localhost:3000/portal')
+          expect(await page.url()).toBe('https://localhost:3000/portal')
           expect(await page.$eval('#message-info', (el) => el.title)).toBe('ライトプラン申込が完了いたしました。')
 
           // DB確認

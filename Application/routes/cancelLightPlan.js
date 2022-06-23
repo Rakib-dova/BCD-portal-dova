@@ -45,9 +45,9 @@ const checkContractStatus = async (req, res, next) => {
       (i) =>
         i.contractStatus === contractStatuses.newContractOrder ||
         i.contractStatus === contractStatuses.newContractReceive ||
-        i.contractStatus === contractStatuses.newContractBeforeCompletion ||
-        i.contractStatus === contractStatuses.canceledContract
-    )
+        i.contractStatus === contractStatuses.newContractBeforeCompletion
+    ) ||
+    contracts.every((i) => i.contractStatus === contractStatuses.canceledContract)
   ) {
     return next(noticeHelper.create('lightPlanUnregistered'))
   } else if (
