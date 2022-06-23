@@ -36,8 +36,7 @@ const pdfInvoiceCsvUploadIndex = async (req, res, next) => {
 
   res.render('pdfInvoiceCsvUpload', {
     title: 'PDF請求書ドラフト一括作成',
-    engTitle: 'CSV UPLOAD for PDF',
-    csrfToken: req.csrfToken()
+    engTitle: 'CSV UPLOAD for PDF'
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceCsvUploadIndex')
