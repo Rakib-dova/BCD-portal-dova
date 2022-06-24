@@ -49,6 +49,21 @@ module.exports = {
       return error
     }
   },
+  findContracts: async (where, order) => {
+    try {
+      const contract = await Contract.findAll({
+        raw: true,
+        where: where,
+        order
+      })
+
+      return contract
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ where: where, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
+  },
   updateStatus: async (_contractId, _orderType) => {
     try {
       const contract = await Contract.update(

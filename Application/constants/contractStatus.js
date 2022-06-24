@@ -40,6 +40,20 @@ constantsDefine({
     lightPlan: '030'
   },
 
+  // 商品コード
+  prdtCodes: {
+    bcd: 'BF1021000000100',
+    introductionSupport: 'BF4022000000100',
+    lightPlan: 'BF3022000000100'
+  },
+
+  // 申込区分
+  appTypes: {
+    new: '010',
+    change: '020',
+    cancel: '030'
+  },
+
   // 変更有無
   contractChange: '1',
 

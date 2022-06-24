@@ -332,6 +332,13 @@ app.use('/change', require('./routes/change').router)
 // ユーザー一括登録
 app.use('/uploadUsers', require('./routes/uploadUsers').router)
 
+// ------------ライトプラン
+// 新設申込み
+app.use('/applyLightPlan', require('./routes/applyLightPlan').router)
+
+// 解約申込み
+app.use('/cancelLightPlan', require('./routes/cancelLightPlan').router)
+
 // 請求書ダウンロード
 app.use('/csvDownload', require('./routes/csvDownload').router)
 

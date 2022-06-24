@@ -56,6 +56,7 @@ let request,
   userFindOneSpy,
   userCreateSpy,
   findContractSpy,
+  contractFindOneSpy,
   checkContractStatusSpy
 describe('helpers/middlewareのテスト', () => {
   beforeEach(() => {
@@ -65,6 +66,7 @@ describe('helpers/middlewareのテスト', () => {
     userFindOneSpy = jest.spyOn(userController, 'findOne')
     userCreateSpy = jest.spyOn(userController, 'create')
     findContractSpy = jest.spyOn(contractController, 'findContract')
+    contractFindOneSpy = jest.spyOn(contractController, 'findOne')
     accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
     checkContractStatusSpy = jest.spyOn(middleware, 'checkContractStatus')
   })
@@ -998,6 +1000,226 @@ describe('helpers/middlewareのテスト', () => {
       // 期待結果
       // return値が999であること
       expect(result).toBe(999)
+    })
+  })
+
+  describe('isOnOrChangeContract', () => {
+    describe('正常系', () => {
+      test('契約ステータス:10', async () => {
+        // 準備
+        // request.userのuserId、tenantIdに正常なUUIDを想定する
+        request.user = {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+
+        // DBから正常な契約データの取得を想定する
+        contractFindOneSpy.mockReturnValue({
+          dataValues: {
+            contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            numberN: 'numberN',
+            contractStatus: '10',
+            deleteFlag: false,
+            createdAt: '2021-07-15 17:41:38',
+            updatedAt: '2021-07-15 17:41:38'
+          }
+        })
+
+        // 試験実施
+        await middleware.isOnOrChangeContract(request, response, next)
+
+        // 期待結果
+        expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
+      })
+
+      test('契約ステータス:11', async () => {
+        // 準備
+        // request.userのuserId、tenantIdに正常なUUIDを想定する
+        request.user = {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+
+        // DBから正常な契約データの取得を想定する
+        contractFindOneSpy.mockReturnValue({
+          dataValues: {
+            contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            numberN: 'numberN',
+            contractStatus: '11',
+            deleteFlag: false,
+            createdAt: '2021-07-15 17:41:38',
+            updatedAt: '2021-07-15 17:41:38'
+          }
+        })
+
+        // 試験実施
+        await middleware.isOnOrChangeContract(request, response, next)
+
+        // 期待結果
+        expect(next).toHaveBeenCalledWith(noticeHelper.create('registerprocedure'))
+      })
+
+      test('契約ステータス:30', async () => {
+        // 準備
+        // request.userのuserId、tenantIdに正常なUUIDを想定する
+        request.user = {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+
+        // DBから正常な契約データの取得を想定する
+        contractFindOneSpy.mockReturnValue({
+          dataValues: {
+            contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            numberN: 'numberN',
+            contractStatus: '30',
+            deleteFlag: false,
+            createdAt: '2021-07-15 17:41:38',
+            updatedAt: '2021-07-15 17:41:38'
+          }
+        })
+
+        // 試験実施
+        await middleware.isOnOrChangeContract(request, response, next)
+
+        // 期待結果
+        expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+      })
+
+      test('契約ステータス:31', async () => {
+        // 準備
+        // request.userのuserId、tenantIdに正常なUUIDを想定する
+        request.user = {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+
+        // DBから正常な契約データの取得を想定する
+        contractFindOneSpy.mockReturnValue({
+          dataValues: {
+            contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            numberN: 'numberN',
+            contractStatus: '31',
+            deleteFlag: false,
+            createdAt: '2021-07-15 17:41:38',
+            updatedAt: '2021-07-15 17:41:38'
+          }
+        })
+
+        // 試験実施
+        await middleware.isOnOrChangeContract(request, response, next)
+
+        // 期待結果
+        expect(next).toHaveBeenCalledWith(noticeHelper.create('cancelprocedure'))
+      })
+
+      test('契約ステータス:40', async () => {
+        // 準備
+        // request.userのuserId、tenantIdに正常なUUIDを想定する
+        request.user = {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+
+        // DBから正常な契約データの取得を想定する
+        contractFindOneSpy.mockReturnValue({
+          dataValues: {
+            contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            numberN: 'numberN',
+            contractStatus: '40',
+            deleteFlag: false,
+            createdAt: '2021-07-15 17:41:38',
+            updatedAt: '2021-07-15 17:41:38'
+          }
+        })
+
+        // 試験実施
+        await middleware.isOnOrChangeContract(request, response, next)
+
+        // 期待結果
+        expect(next).toHaveBeenCalledWith()
+      })
+
+      test('契約ステータス:41', async () => {
+        // 準備
+        // request.userのuserId、tenantIdに正常なUUIDを想定する
+        request.user = {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+
+        // DBから正常な契約データの取得を想定する
+        contractFindOneSpy.mockReturnValue({
+          dataValues: {
+            contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            numberN: 'numberN',
+            contractStatus: '41',
+            deleteFlag: false,
+            createdAt: '2021-07-15 17:41:38',
+            updatedAt: '2021-07-15 17:41:38'
+          }
+        })
+
+        // 試験実施
+        await middleware.isOnOrChangeContract(request, response, next)
+
+        // 期待結果
+        expect(next).toHaveBeenCalledWith()
+      })
+    })
+
+    describe('準正常系', () => {
+      test('想定外契約ステータス', async () => {
+        // 準備
+        // request.userのuserId、tenantIdに正常なUUIDを想定する
+        request.user = {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+
+        // DBから正常な契約データの取得を想定する
+        contractFindOneSpy.mockReturnValue({
+          dataValues: {
+            contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            numberN: 'numberN',
+            contractStatus: '01',
+            deleteFlag: false,
+            createdAt: '2021-07-15 17:41:38',
+            updatedAt: '2021-07-15 17:41:38'
+          }
+        })
+
+        // 試験実施
+        await middleware.isOnOrChangeContract(request, response, next)
+
+        // 期待結果
+        expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      })
+
+      test('DBエラー', async () => {
+        // 準備
+        // request.userのuserId、tenantIdに正常なUUIDを想定する
+        request.user = {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+        }
+
+        // DBから正常な契約データの取得を想定する
+        contractFindOneSpy.mockReturnValue(new Error('any'))
+
+        // 試験実施
+        await middleware.isOnOrChangeContract(request, response, next)
+
+        // 期待結果
+        expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      })
     })
   })
 })
