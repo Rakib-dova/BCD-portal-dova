@@ -43,35 +43,52 @@ const cbGetIndex = async (req, res, next) => {
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
   if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
 
-  // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+  // // DBから契約情報取得
+  // const contract = await contractController.findOne(req.user.tenantId)
+  // // データベースエラーは、エラーオブジェクトが返る
+  // // 契約情報未登録の場合もエラーを上げる
+  // if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
 
   req.session.userContext = 'LoggedIn'
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+  // const deleteFlag = contract.dataValues.deleteFlag
+  // const contractStatus = contract.dataValues.contractStatus
+  // const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
-  if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
-  }
+  // if (checkContractStatus === null || checkContractStatus === 999) {
+  //   return next(errorHelper.create(500))
+  // }
 
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return next(noticeHelper.create('cancelprocedure'))
-  }
+  // if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+  //   return next(noticeHelper.create('cancelprocedure'))
+  // }
+
+  // テナントIDに紐付いている全ての契約情報を取得
+  const contracts = await contractController.findContractsBytenantId(req.user.tenantId)
+  if (!contracts || !Array.isArray(contracts) || contracts.length === 0) return next(errorHelper.create(500))
+
+  // BCD無料アプリの契約情報確認
+  const bcdContract = contracts.find((contract) => contract.serviceType === '010' && contract.deleteFlag === false)
+  if (!bcdContract || !bcdContract.contractStatus) return next(errorHelper.create(500))
+
+  // 現在解約中か確認
+  if (validate.isBcdCancelling(bcdContract)) return next(noticeHelper.create('cancelprocedure'))
 
   // 発行日開始日と終了日の算定(今日の日付の月 - 1)
   const today = new Date()
   const minissuedate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0]
   const maxissuedate = today.toISOString().split('T')[0]
 
+  let presentation = 'journalDownload'
+  const litePlan = await contractController.findLightPlan(req.user.tenantId)
+  if (litePlan) {
+    presentation = 'journalDownload_light_plan'
+  }
+
   // 仕訳情報ダウンロード画面表示
-  res.render('journalDownload', {
+  res.render(presentation, {
     title: '仕訳情報ダウンロード',
     minissuedate: minissuedate,
     maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
@@ -169,6 +186,8 @@ const cbPostIndex = async (req, res, next) => {
     req.body.serviceDataFormat = Number(req.body.serviceDataFormat)
   }
 
+  const litePlan = await contractController.findLightPlan(req.user.tenantId)
+
   switch (req.body.serviceDataFormat) {
     case 0:
       break
@@ -176,6 +195,10 @@ const cbPostIndex = async (req, res, next) => {
     case 2:
     case 3:
     case 4:
+      if (!litePlan || !litePlan.contractStatus) {
+        req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
+        return res.redirect(303, '/journalDownload')
+      }
       req.body.sentBy = req.body.sentBy ?? []
       if (typeof req.body.sentBy === 'string') {
         req.body.sentBy = [req.body.sentBy]
@@ -186,7 +209,6 @@ const cbPostIndex = async (req, res, next) => {
 
       {
         const isCloedApproval = req.body.chkFinalapproval === 'finalapproval'
-
         try {
           const result = await journalDownloadController.dowonloadKaikei(
             req.user,
