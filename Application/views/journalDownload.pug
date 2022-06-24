@@ -74,11 +74,11 @@ block content
               .select
                 select(name='serviceDataFormat' is='ms-dropdown')
                   option(value=0)=serviceDataFormatName[0]
-                  option(data-image='/image/lock.svg' value=1)=serviceDataFormatName[1]
-                  option(data-image='/image/lock.svg' value=2)=serviceDataFormatName[2]
-                  option(data-image='/image/lock.svg' value=3)=serviceDataFormatName[3]
+                  option(data-image='/image/lock.svg' value=1 disabled)=serviceDataFormatName[1]
+                  option(data-image='/image/lock.svg' value=2 disabled)=serviceDataFormatName[2]
+                  option(data-image='/image/lock.svg' value=3 disabled)=serviceDataFormatName[3]
               .span.is-link.midSpace 
-              a.button.is-link.i.fas.fa-lock
+              a.button.is-link.i.fas.fa-lock.show-modal(data-target='information-lightplan')
                 .span.is-link.lockBorder 
                 .span.is-link.lockText 出力フォーマットを追加
         .field.is-grouped.is-grouped-centered
@@ -121,6 +121,27 @@ block content
        footer.modal-card-foot
          div.button-area
           a.button.cancel-button(data-target="searchCompany-modal") 確認
+
+    .modal.modal-fx-fadeInscale#information-lightplan
+      .modal-background.cancel-button(data-target="information-lightplan")
+      .modal-card
+        header.modal-card-head
+          p.modal-card-title ライトプランのご案内
+          button.delete(type="button" data-target="information-lightplan")
+        section.modal-card-body
+          p.modal-card-result#modal-card-checkStatus
+            | 本アプリの一部機能（鍵アイコン表示）は「ライトプラン(仮)」にお申込みいただくことでご利用可能です。
+          br
+          p.subtitle
+            | ライトプラン加入後にご利用いただける機能
+          p ・○○機能
+          p ・○○機能
+          p ・○○機能
+          .grouped-button
+              a.button.is-success(href="https://www.ntt.com/business/services/application/crm-dm/bconnection.html" target='_blank') ライトプラン詳細
+              a.button.is-success(href="") お申込みフォーム
+        footer.modal-card-foot
+          .button-area
 
     include footer
 
