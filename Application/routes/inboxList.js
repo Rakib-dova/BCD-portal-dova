@@ -68,7 +68,7 @@ const cbGetIndex = async (req, res, next) => {
   // const contracts = req.contracts
 
   let presentation = 'inboxList'
-  const litePlan = contracts.find((contract) => contract.serviceType === '030' && contract.deleteFlag === false)
+  const litePlan = await contractController.findLightPlan(req.user.tenantId)
   if (litePlan) {
     presentation = 'inboxList_light_plan'
   }
@@ -299,7 +299,7 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   // const user = req.dbUser
   // const contracts = req.contracts
 
-  const litePlan = contracts.find((contract) => contract.serviceType === '030' && contract.deleteFlag === false)
+  const litePlan = await contractController.findLightPlan(req.user.tenantId)
   if (!litePlan || !litePlan.contractStatus) {
     return res.redirect('/inboxList/1')
   }
