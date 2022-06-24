@@ -332,6 +332,9 @@ app.use('/change', require('./routes/change').router)
 // ユーザー一括登録
 app.use('/uploadUsers', require('./routes/uploadUsers').router)
 
+// ------------導入支援(PBI3875)
+// 新規申込のみ
+app.use('/receiveIntroductionSupport', require('./routes/receiveIntroductionSupport').router)
 // ------------ライトプラン
 // 新設申込み
 app.use('/applyLightPlan', require('./routes/applyLightPlan').router)

@@ -130,6 +130,16 @@ block content
         .columns.is-desktop.is-family-noto-sans
           .column.is-one-third-desktop.hvr-float
             .box.iconBox.textOverflow
+              a(href='/receiveIntroductionSupport')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                  .media-content
+                    p.title.is-5 導入支援サービス
+                    p 導入支援サービスの新規申し込みを行うことができます。
+                    p 表示メッセージは仮置きです。
+          .column.is-one-third-desktop.hvr-float
+            .box.iconBox.textOverflow
               a.show-modal(data-target='lightPlan-modal')
                 .media.appdesc
                   .media-left
@@ -426,7 +436,6 @@ block content
                 i.fas.fa-file
               p 操作マニュアルダウンロード
         footer.modal-card-foot
-
     .modal#lightPlan-modal
       .modal-background.cancel-button(data-target='lightPlan-modal')
       .modal-card.is-family-noto-sans
