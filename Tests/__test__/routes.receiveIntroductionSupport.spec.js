@@ -143,9 +143,7 @@ describe('receiveIntroductionSupportのテスト', () => {
     test('receiveIntroductionSupportのルーティングを確認', async () => {
       expect(receiveIntroductionSupport.router.get).toBeCalledWith(
         '/',
-        middleware.isAuthenticated,
-        middleware.isTenantRegistered,
-        middleware.isUserRegistered,
+        middleware.bcdAuthenticate,
         middleware.isOnOrChangeContract,
         expect.any(Function),
         receiveIntroductionSupport.checkContractStatus,
@@ -153,9 +151,7 @@ describe('receiveIntroductionSupportのテスト', () => {
       )
       expect(receiveIntroductionSupport.router.post).toBeCalledWith(
         '/register',
-        middleware.isAuthenticated,
-        middleware.isTenantRegistered,
-        middleware.isUserRegistered,
+        middleware.bcdAuthenticate,
         middleware.isOnOrChangeContract,
         expect.any(Function),
         receiveIntroductionSupport.checkContractStatus,
