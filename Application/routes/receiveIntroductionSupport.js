@@ -126,9 +126,7 @@ const registerIntroductionSupport = async (req, res, next) => {
 
 router.get(
   '/',
-  helper.isAuthenticated,
-  helper.isTenantRegistered,
-  helper.isUserRegistered,
+  helper.bcdAuthenticate,
   helper.isOnOrChangeContract,
   csrfProtection,
   checkContractStatus,
@@ -137,9 +135,7 @@ router.get(
 
 router.post(
   '/register',
-  helper.isAuthenticated,
-  helper.isTenantRegistered,
-  helper.isUserRegistered,
+  helper.bcdAuthenticate,
   helper.isOnOrChangeContract,
   csrfProtection,
   checkContractStatus,
