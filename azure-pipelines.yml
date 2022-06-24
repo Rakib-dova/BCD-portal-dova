@@ -39,7 +39,7 @@ variables:
   - name: japanwest #西日本デプロイフラグ
     value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
   - name: vmPipeline #パイプライン起動停止フラグ
-    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'test')) }}
+    value:  ${{ or(eq(parameters.Environment,'prod'),eq(parameters.Environment,'prodstg'),eq(parameters.Environment,'demo'),eq(parameters.Environment,'test')) }}
   - name: skipManualOperation #正常性確認スキップフラグ
     value:  ${{ eq(parameters.skipManualOperation,'true') }}
 
