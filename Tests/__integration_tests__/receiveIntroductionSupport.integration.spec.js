@@ -22,7 +22,6 @@ const serviceTypes = constants.statusConstants.serviceTypes
 jest.setTimeout(60000) // jestのタイムアウトを60秒とする
 
 const getCookies = require('./getCookies')
-// const { slice } = require('../../Application/obc/routes/helpers/middleware')
 const postData = {
   commonCustomerId: '11111111111',
   contractorName: '契約者名',
@@ -283,8 +282,6 @@ describe('導入支援インテグレーションテスト', () => {
 
     // Cookieを使ってローカル開発環境のDBからCookieと紐づくユーザを削除しておく
     // DBクリア
-    // await db.User.destroy({ where: { tenantId: getTenantId.id } })
-    // await db.Tenant.destroy({ where: { tenantId: getTenantId.id } })
     await db.User.destroy({ where: { tenantId: testTenantId } })
     await db.Tenant.destroy({ where: { tenantId: testTenantId } })
 
@@ -1561,7 +1558,6 @@ describe('導入支援インテグレーションテスト', () => {
           expect(order.orderType).toBe(constants.statusConstants.orderTypes.newOrder)
           const a = JSON.parse(order.orderData)
           delete a.contractBasicInfo.tradeshiftId
-          // expect(order.orderData).toBe(
           expect(JSON.stringify(a)).toBe(
             JSON.stringify({
               contractBasicInfo: {
@@ -1718,90 +1714,6 @@ describe('導入支援インテグレーションテスト', () => {
           await page.goto('https://localhost:3000/receiveIntroductionSupport')
           // 期待結果
           expect(await page.$eval('.subtitle', (el) => el.textContent)).toBe(introductionSupportRegistered)
-        })
-        test('導入支援契約ステータス:30', async () => {
-          // 準備
-          await db.Contract.update(
-            {
-              contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
-            },
-            {
-              where: {
-                tenantId: testTenantId,
-                serviceType: constants.statusConstants.serviceTypes.introductionSupport
-              }
-            }
-          )
-          await page.goto('https://localhost:3000/receiveIntroductionSupport')
-          // 期待結果
-          expect(await page.$eval('.subtitle', (el) => el.textContent)).toBe(introductionSupportRegistered)
-        })
-        test('導入支援契約ステータス:31', async () => {
-          // 準備
-          await db.Contract.update(
-            {
-              contractStatus: constants.statusConstants.contractStatuses.cancellationOrder
-            },
-            {
-              where: {
-                tenantId: testTenantId,
-                serviceType: constants.statusConstants.serviceTypes.introductionSupport
-              }
-            }
-          )
-          await page.goto('https://localhost:3000/receiveIntroductionSupport')
-          // 期待結果
-          expect(await page.$eval('.subtitle', (el) => el.textContent)).toBe(introductionSupportRegistered)
-        })
-      })
-      describe('解約済(導入支援契約ステータス:99):再契約可能', () => {
-        test('導入支援契約ステータス:00', async () => {
-          // 準備
-          await db.Contract.update(
-            {
-              contractStatus: constants.statusConstants.contractStatuses.canceledContract
-            },
-            {
-              where: {
-                tenantId: testTenantId,
-                serviceType: constants.statusConstants.serviceTypes.introductionSupport
-              }
-            }
-          )
-          await page.goto('https://localhost:3000/receiveIntroductionSupport')
-
-          // 導入支援申込画面の必須項目のみ入力動作
-          await fillRequiredOnly(page)
-          // 利用規約のスクロール⇒同意チェックボックスのチェック⇒次へボタンのクリック
-          await showConfirm(page)
-          // 登録ボタンのクリック
-          await page.click('#submit')
-          await page.waitForTimeout(500)
-          // 期待結果
-          expect(page.url()).toBe('https://localhost:3000/portal')
-          expect(await page.$eval('#message-info', (el) => el.title)).toBe(
-            '導入支援サービスの申し込みが完了いたしました。'
-          )
-          // DB確認
-          // const contracts = await contractController.findContracts(
-          //   { tenantId: testTenantId, serviceType: constants.statusConstants.serviceTypes.introductionSupport },
-          //   [['contractedAt', 'ASC']]
-          // )
-          const contracts = await contractController.findContracts(
-            { tenantId: testTenantId, serviceType: constants.statusConstants.serviceTypes.introductionSupport },
-            [['createdAt', 'ASC']]
-          )
-          expect(contracts?.length).toBe(2)
-          expect(contracts[1].contractStatus).toBe(constants.statusConstants.contractStatuses.newContractOrder)
-
-          const order = await db.Order.findOne({
-            where: { contractId: contracts[1].contractId }
-          })
-          expect(order.orderType).toBe(constants.statusConstants.orderTypes.newOrder)
-          const a = JSON.parse(order.orderData)
-          delete a.contractBasicInfo.tradeshiftId
-          // expect(order.orderData).toBe(JSON.stringify(requiredOnlyOrderData))
-          expect(JSON.stringify(a)).toBe(JSON.stringify(requiredOnlyOrderData))
         })
       })
     })

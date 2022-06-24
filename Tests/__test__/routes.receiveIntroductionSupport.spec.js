@@ -10,11 +10,8 @@ const contractController = require('../../Application/controllers/contractContro
 const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
-const logger = require('../../Application/lib/logger.js')
 const middleware = require('../../Application/routes/helpers/middleware')
-// const OrderData = require('../../Application/routes/helpers/OrderData')
 const constants = require('../../Application/constants').statusConstants
-// const constants = require('../../Application/constants').contractStatus
 const errorHelper = require('../../Application/routes/helpers/error')
 const noticeHelper = require('../../Application/routes/helpers/notice')
 const channelDepartmentController = require('../../Application/controllers/channelDepartmentController.js')
@@ -239,6 +236,21 @@ describe('receiveIntroductionSupportのテスト', () => {
         salesChannelDeptList: salesChannelDeptList,
         csrfToken: dummyToken
       })
+    })
+    test('準正常: DBエラー時', async () => {
+      // 準備
+      findAllDept.mockImplementation(async () => {
+        return dbError
+      })
+
+      // requestに正常値を設定する
+      request.user = user
+
+      // 試験実施
+      await receiveIntroductionSupport.showIntroductionSupport(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })
 

@@ -59,6 +59,8 @@ const showIntroductionSupport = async (req, res, next) => {
   // チャネル組織マスターからチャネル組織情報リストを取得
   const salesChannelDeptList = await channelDepartmentController.findAll()
 
+  if (salesChannelDeptList instanceof Error) return next(errorHelper.create(500))
+
   // 導入支援サービス申し込み画面表示
   res.render('introductionSupport', {
     title: '導入支援サービス申し込み',
