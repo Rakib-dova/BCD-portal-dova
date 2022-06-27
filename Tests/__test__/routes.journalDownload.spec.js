@@ -327,7 +327,7 @@ describe('journalDownloadのテスト', () => {
       await journalDownload.cbGetIndex(request, response, next)
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
       // expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // userContextがLoggedInになっている

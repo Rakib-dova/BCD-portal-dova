@@ -332,7 +332,7 @@ describe('contractControllerのテスト', () => {
       expect(result).toEqual(null)
     })
 
-    test('DBエラーが派生した場合', async () => {
+    test('DBエラーが発生した場合', async () => {
       // 準備
       findOneSpy.mockImplementation((findOneArg) => {
         let result = null
