@@ -1,3 +1,4 @@
+import BconAxios from './lib/BconAxios.js'
 // UserAgentで判定し
 // IE以外は動的にスクリプトをロード
 const ua = window.navigator.userAgent
@@ -25,4 +26,25 @@ window.onload = () => {
       }
     })
   })
+}
+
+const result = BconAxios.get('/api/message', {})
+console.log('resu', result)
+result.then((res) => {
+  console.log('test')
+  console.log('res', res)
+  createNotification(res)
+})
+
+function createNotification(itemCnt) {
+  if (~~itemCnt <= 0) {
+    return
+  }
+  const approvalNotification = document.createElement('div')
+  const approvalNotificationMessage = approvalNotification.createElement('div')
+  const approvalNotificationCnt = approvalNotificationMessage.createElement('div')
+  const approvalNotificationLink = approvalNotificationMessage.createElement('a')
+
+  approvalNotificationMessage.innerText = '支払依頼が'
+  document.querySelector('.column .is-12.menu').append(approvalNotification)
 }
