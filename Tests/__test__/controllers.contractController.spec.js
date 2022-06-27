@@ -7,6 +7,17 @@ const constantsDefine = require('../../Application/constants')
 const contractStatuses = constantsDefine.statusConstants.contractStatuses
 const serviceTypes = constantsDefine.statusConstants.serviceTypes
 
+// 準備
+const Op = require('../../Application/models').Sequelize.Op
+const contracts = require('../mockDB/Contracts_Table2')
+function * filter(f, iter) {
+  for (const item of iter) {
+    if (f(item)) {
+      yield item
+    }
+  }
+}
+
 let findAllSpy, findOneSpy, errorSpy, tenantId, findContractSpy, updateSpy
 describe('contractControllerのテスト', () => {
   beforeEach(() => {
@@ -216,7 +227,10 @@ describe('contractControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await contractController.findContract({ tenantId: 'tenantId', deleteFlag: false }, 'createdAt DESC')
+      const result = await contractController.findContract(
+        { tenantId: 'tenantId', deleteFlag: false },
+        'createdAt DESC'
+      )
       // 期待結果
       // DBErrorが返されること
       expect(result).toEqual(new Error('DB error mock'))
@@ -232,10 +246,7 @@ describe('contractControllerのテスト', () => {
       updateSpy.mockReturnValueOnce(contractInfoDataUpdated)
 
       // 試験実施
-      const result = await contractController.updateStatus(
-        contractId,
-        orderType
-      )
+      const result = await contractController.updateStatus(contractId, orderType)
 
       // 期待結果
       // 想定した契約情報がReturnされていること
@@ -253,13 +264,106 @@ describe('contractControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await contractController.updateStatus(
-        contractId,
-        orderType
-      )
+      const result = await contractController.updateStatus(contractId, orderType)
       // 期待結果
       // DBErrorが返されること
       expect(result).toEqual(dbError)
+    })
+  })
+
+  describe('findLightPlan', () => {
+    test('正常', async () => {
+      // 準備
+      findOneSpy.mockImplementation((findOneArg) => {
+        let result = null
+        for (const contract of contracts) {
+          result = filter((item) => {
+            if (
+              findOneArg.where.tenantId === item.tenantId &&
+              (findOneArg.where.contractStatus[Op.or][0] === item.contractStatus ||
+                findOneArg.where.contractStatus[Op.or][1] === item.contractStatus) &&
+              findOneArg.where.serviceType === item.serviceType &&
+              findOneArg.where.deleteFlag === item.deleteFlag
+            ) {
+              return true
+            }
+            return false
+          }, contract).next().value
+          if (result !== undefined) break
+        }
+        if (result === undefined) return null
+        return result
+      })
+
+      // テスト実行
+      const result = await contractController.findLightPlan('5778c070-5dd3-42db-aaa8-848424fb80f9')
+
+      // 期待結果
+      expect(result).toEqual(contracts[9][1])
+    })
+
+    test('ライトプラン契約者ない場合', async () => {
+      // 準備
+      findOneSpy.mockImplementation((findOneArg) => {
+        let result = null
+        for (const contract of contracts) {
+          result = filter((item) => {
+            if (
+              findOneArg.where.tenantId === item.tenantId &&
+              (findOneArg.where.contractStatus[Op.or][0] === item.contractStatus ||
+                findOneArg.where.contractStatus[Op.or][1] === item.contractStatus) &&
+              findOneArg.where.serviceType === item.serviceType &&
+              findOneArg.where.deleteFlag === item.deleteFlag
+            ) {
+              return true
+            }
+            return false
+          }, contract).next().value
+          if (result !== undefined) break
+        }
+        if (result === undefined) return null
+        return result
+      })
+
+      // テスト実行
+      const result = await contractController.findLightPlan('4778c070-5dd3-42db-aaa8-848424fb80f9')
+
+      // 期待結果
+      expect(result).toEqual(null)
+    })
+
+    test('DBエラーが派生した場合', async () => {
+      // 準備
+      findOneSpy.mockImplementation((findOneArg) => {
+        let result = null
+        for (const contract of contracts) {
+          result = filter((item) => {
+            if (
+              findOneArg.where.tenantId === item.tenantId &&
+              (findOneArg.where.contractStatus[Op.or][0] === item.contractStatus() ||
+                findOneArg.where.contractStatus[Op.or][1] === item.contractStatus) &&
+              findOneArg.where.serviceType === item.serviceType &&
+              findOneArg.where.deleteFlag === item.deleteFlag
+            ) {
+              return true
+            }
+            return false
+          }, contract).next().value
+          if (result !== undefined) break
+        }
+        if (result === undefined) return null
+        return result
+      })
+
+      // テスト実行
+      const result = await contractController.findLightPlan('3778c070-5dd3-42db-aaa8-848424fb80f9')
+
+      // 期待結果
+      expect(result instanceof Error).toEqual(true)
+      expect(errorSpy).toHaveBeenCalledWith(
+        { user: '3778c070-5dd3-42db-aaa8-848424fb80f9', stack: expect.anything(), status: 0 },
+        'Error'
+      )
     })
   })
 })
