@@ -41,7 +41,7 @@ parameters:
     default: デジタルトレードアプリ（モック）
     values:
       - デジタルトレードアプリ（モック）
-      - デジタルトレード (prodstg)
+      - "デジタルトレード (prodstg)"
   - name: account
     displayName: "実行したいアカウントを選択してください"
     type: string
