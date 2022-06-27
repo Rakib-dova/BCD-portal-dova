@@ -82,8 +82,8 @@ const cbGetIndex = async (req, res, next) => {
   const maxissuedate = today.toISOString().split('T')[0]
 
   let presentation = 'journalDownload'
-  const litePlan = await contractController.findLightPlan(req.user.tenantId)
-  if (litePlan) {
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
     presentation = 'journalDownload_light_plan'
   }
 
@@ -186,7 +186,8 @@ const cbPostIndex = async (req, res, next) => {
     req.body.serviceDataFormat = Number(req.body.serviceDataFormat)
   }
 
-  const litePlan = await contractController.findLightPlan(req.user.tenantId)
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  console.log(lightPlan)
 
   switch (req.body.serviceDataFormat) {
     case 0:
@@ -195,7 +196,7 @@ const cbPostIndex = async (req, res, next) => {
     case 2:
     case 3:
     case 4:
-      if (!litePlan || !litePlan.contractStatus) {
+      if (!lightPlan) {
         req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
         return res.redirect(303, '/journalDownload')
       }
