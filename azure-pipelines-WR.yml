@@ -35,6 +35,13 @@ parameters:
       - journal_paymentRequest
       - journal_paymentRequest_long
       - journal_journalDownload
+  - name: app
+    displayName: "実行したいアプリを選択してください"
+    type: string
+    default: デジタルトレードアプリ（モック）
+    values:
+      - デジタルトレードアプリ（モック）
+      - デジタルトレード (prodstg)
   - name: account
     displayName: "実行したいアカウントを選択してください"
     type: string
@@ -102,12 +109,12 @@ stages:
                 workingDirectory: $(DIR)
                 displayName: install
 
-              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}} -- spec\*.js
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && SET APP=${{ parameters.app }}) && npm run ${{BROWSER_NAME}} -- spec\*.js
                 workingDirectory: $(DIR)
                 displayName: test
                 condition: eq( '${{ parameters.scenario }}', 'all' )
 
-              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && npm run ${{BROWSER_NAME}} -- spec\${{ parameters.scenario }}.js
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && SET APP=${{ parameters.app }}) && npm run ${{BROWSER_NAME}} -- spec\${{ parameters.scenario }}.js
                 workingDirectory: $(DIR)
                 displayName: test
                 condition: ne( '${{ parameters.scenario }}', 'all' )
