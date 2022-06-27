@@ -60,10 +60,10 @@ describe('仕訳情報設定_補助科目一覧', function () {
   };
 
   // トップページまで遷移する
-  async function gotoTop(baseUrl, account, loginPage, tradeShiftTopPage, topPage) {
+  async function gotoTop(account, loginPage, tradeShiftTopPage, topPage) {
     // 指定したURLに遷移する
     await comment('Tradeshiftログインページへ移動する');
-    await page.goto(baseUrl);
+    await page.goto(config.baseUrl);
 
     // ログインを行う
     await comment('ユーザ"' + account.id + '"でログインする');
@@ -71,8 +71,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
     await tradeShiftTopPage.waitForLoading();
 
     // デジタルトレードアプリをクリックする
-    await comment('デジタルトレードアプリのアイコンをクリックする');
-    await tradeShiftTopPage.clickBcdApp();
+    let appName = process.env.APP ? process.env.APP : config.appName;
+    await comment('アイコン「' + appName + '」をクリックする');
+    await tradeShiftTopPage.clickBcdApp(appName);
     await topPage.waitForLoading();
   };
 
@@ -109,7 +110,7 @@ describe('仕訳情報設定_補助科目一覧', function () {
         = common.getPageObject(browser, page);
 
       // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage);
+      await gotoTop(account, loginPage, tradeShiftTopPage, topPage);
   
       // 仕訳情報管理メニューを開く
       await comment('「仕訳情報管理」をクリックする');
@@ -165,7 +166,7 @@ describe('仕訳情報設定_補助科目一覧', function () {
         = common.getPageObject(browser, page);
   
       // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage);
+      await gotoTop(account, loginPage, tradeShiftTopPage, topPage);
   
       // 仕訳情報管理メニューを開く
       await comment('「仕訳情報管理」をクリックする');
@@ -246,7 +247,7 @@ describe('仕訳情報設定_補助科目一覧', function () {
         = common.getPageObject(browser, page);
   
       // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage);
+      await gotoTop(account, loginPage, tradeShiftTopPage, topPage);
   
       // 仕訳情報管理メニューを開く
       await comment('「仕訳情報管理」をクリックする');
@@ -330,67 +331,7 @@ describe('仕訳情報設定_補助科目一覧', function () {
   });
 
   /**
-   * STEP5 No.53
-   */
-  it("補助科目一括作成フォーマットファイルダウンロード", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-  
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-  
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, subAccountCodeListPage, uploadSubAccountCodePage }
-        = common.getPageObject(browser, page);
-
-      // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage);
-
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-  
-      // 補助科目一覧ページへ遷移する
-      await comment('「補助科目設定」をクリックする');
-      await journalMenuPage.clickSubAccount();
-      await subAccountCodeListPage.waitForLoading();
-
-      // 補助科目一括作成ページへ遷移する
-      await comment('「補助科目一括作成」をクリックする');
-      await subAccountCodeListPage.clickUpload();
-      await uploadSubAccountCodePage.waitForLoading();
-
-      // アップロード用CSVファイルをダウンロードする
-      await comment('「アップロード用CSVファイルダウンロード」をクリックする');
-      let csvPath = await uploadSubAccountCodePage.downloadCsv();
-
-      // 補助科目一括作成フォーマット.csvがダウンロードできること
-      expect(await fs.existsSync(csvPath)).to.equal(true, '補助科目一括作成フォーマット.csvがダウンロードできること');
-      await page.waitForTimeout(1000);
-    }
-  });
-  
-  /**
-   * STEP5 No.54,56,62,63
+   * STEP5 No.53,54,56,62,63
    */
   it("補助科目一括作成", async function () {
     // テストの初期化を実施
@@ -422,7 +363,7 @@ describe('仕訳情報設定_補助科目一覧', function () {
         = common.getPageObject(browser, page);
 
       // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage);
+      await gotoTop(account, loginPage, tradeShiftTopPage, topPage);
 
       // 仕訳情報管理メニューを開く
       await comment('「仕訳情報管理」をクリックする');
@@ -434,6 +375,18 @@ describe('仕訳情報設定_補助科目一覧', function () {
       await journalMenuPage.clickSubAccount();
       await subAccountCodeListPage.waitForLoading();
 
+      // 補助科目一括作成ページへ遷移する
+      await comment('「補助科目一括作成」をクリックする');
+      await subAccountCodeListPage.clickUpload();
+      await uploadSubAccountCodePage.waitForLoading();
+
+      // アップロード用CSVファイルをダウンロードする
+      await comment('「アップロード用CSVファイルダウンロード」をクリックする');
+      let fmtPath = await uploadSubAccountCodePage.downloadCsv();
+
+      // 補助科目一括作成フォーマット.csvがダウンロードできること
+      expect(await fs.existsSync(fmtPath)).to.equal(true, '補助科目一括作成フォーマット.csvがダウンロードできること');
+
       let files = [
         'testdata/upload/補助科目一括アップロード試験１.csv',
         'testdata/upload/TESTCSV21.csv',
@@ -444,9 +397,11 @@ describe('仕訳情報設定_補助科目一覧', function () {
       // ファイルを1つずつアップロードする
       for (i = 0; i < files.length; i++) {
         // 補助科目一括作成ページへ遷移する
-        await comment('「補助科目一括作成」をクリックする');
-        await subAccountCodeListPage.clickUpload();
-        await uploadSubAccountCodePage.waitForLoading();
+        if(i > 0) {
+          await comment('「補助科目一括作成」をクリックする');
+          await subAccountCodeListPage.clickUpload();
+          await uploadSubAccountCodePage.waitForLoading();
+        }
 
         // CSVファイルをアップロードする
         await comment('CSVファイル"' + files[i] + '"をアップロードする');
@@ -501,7 +456,7 @@ describe('仕訳情報設定_補助科目一覧', function () {
         = common.getPageObject(browser, page);
 
       // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(config.baseUrl, account, loginPage, tradeShiftTopPage, topPage);
+      await gotoTop(account, loginPage, tradeShiftTopPage, topPage);
 
       // 補助科目をすべて削除する
       await comment('「仕訳情報管理」をクリックする');

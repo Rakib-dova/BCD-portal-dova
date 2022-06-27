@@ -20,6 +20,9 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
   // 依頼者
   const requester = config.company1.user12;
 
+  // 承認待ちインデックス（未申請=-1）
+  let authorizerNo = -1;
+
   // 支払依頼に使用する承認ルート
   const approveRoute = {
     name: '承認依頼テスト',
@@ -77,10 +80,10 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
   };
 
   // トップページまで遷移する
-  async function gotoTop(baseUrl, account, loginPage, tradeShiftTopPage, topPage) {
+  async function gotoTop(account, loginPage, tradeShiftTopPage, topPage) {
     // 指定したURLに遷移する
     await comment('Tradeshiftログインページへ移動する');
-    await page.goto(baseUrl);
+    await page.goto(config.baseUrl);
 
     // ログインを行う
     await comment('ユーザ"' + account.id + '"でログインする');
@@ -88,8 +91,9 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await tradeShiftTopPage.waitForLoading();
 
     // デジタルトレードアプリをクリックする
-    await comment('デジタルトレードアプリのアイコンをクリックする');
-    await tradeShiftTopPage.clickBcdApp();
+    let appName = process.env.APP ? process.env.APP : config.appName;
+    await comment('アイコン「' + appName + '」をクリックする');
+    await tradeShiftTopPage.clickBcdApp(appName);
     await topPage.waitForLoading();
   };
 
@@ -110,7 +114,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
 
     // 勘定科目を登録する
     await comment('「仕訳情報管理」をクリックする');
@@ -233,7 +237,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(requester, loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -277,6 +281,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
     // 再度申請ができること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('支払依頼中', 'ステータスが「承認依頼中」となっていること');
+    authorizerNo++;
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');
@@ -304,7 +309,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
       = common.getPageObject(browser, page);
   
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, approveRoute.authorizers[no], loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(approveRoute.authorizers[no], loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -336,6 +341,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     // 請求書一覧画面にて承認ステータスに変更されていること
     await paymentRequestListPage.waitForLoading();
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal(status, '請求書一覧画面にて承認ステータスに変更されていること');
+    authorizerNo++;
     await page.waitForTimeout(1000);
   }
 
@@ -427,7 +433,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(requester, loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -486,7 +492,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, approveRoute.authorizers[approveRoute.authorizers.length - 1], loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(approveRoute.authorizers[authorizerNo], loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -522,6 +528,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
     // 差し戻しができること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('差し戻し', '差し戻しができること');
+    authorizerNo = -1;
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');
@@ -548,7 +555,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
         = common.getPageObject(browser, page);
   
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
 
     // 承認ルートを削除する
     await comment('「仕訳情報管理」をクリックする');

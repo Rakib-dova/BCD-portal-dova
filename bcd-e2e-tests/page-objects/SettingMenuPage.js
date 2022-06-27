@@ -9,15 +9,19 @@ class SettingMenuPage {
 
   // ページが表示されるまで待機する
   async waitForLoading() {
-    let frame = await this.actionUtils.waitForLoading('//*[text()="契約情報変更"]')
+    let frame = await this.actionUtils.waitForLoading('//*[text()="契約情報変更"]');
     this.frame = frame;
     return frame;
   }
 
   // 契約情報変更ページに遷移する
   async clickContractChange() {
-    await this.actionUtils.click(this.frame, '//*[text()="契約情報変更"]')
+    await this.actionUtils.click(this.frame, '//*[text()="契約情報変更"]');
   }
 
+  // 解約する
+  async clickCancel() {
+    await this.actionUtils.click(this.frame, '//*[text()="解約"]');
+  }
 }
 exports.SettingMenuPage = SettingMenuPage;

@@ -61,7 +61,8 @@ describe('リグレッションテスト', function () {
       await tradeShiftTopPage.waitForLoading();
 
       // デジタルトレードアプリをクリックする
-      await tradeShiftTopPage.clickBcdApp();
+      let appName = process.env.APP ? process.env.APP : config.appName;
+      await tradeShiftTopPage.clickBcdApp(appName);
       await topPage.waitForLoading();
 
       // 「銀行振込消印」ダイアログを開く

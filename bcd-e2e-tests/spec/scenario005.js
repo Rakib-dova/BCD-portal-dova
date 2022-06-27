@@ -62,7 +62,8 @@ describe('リグレッションテスト', function () {
       await tradeShiftTopPage.waitForLoading();
 
       // デジタルトレードアプリをクリックする
-      await tradeShiftTopPage.clickBcdApp();
+      let appName = process.env.APP ? process.env.APP : config.appName;
+      await tradeShiftTopPage.clickBcdApp(appName);
       await topPage.waitForLoading();
 
       // 請求書一括作成メニューを表示する

@@ -180,5 +180,10 @@ class ActionUtils {
     return (elems.length > 0) && (await target.evaluate(node => window.getComputedStyle(node).display, elems[0]) != 'none')
   }
 
+  // 一番下までスクロールする
+  async scrollToEnd(target, selector) {
+    const elem = await this.getElement(target, selector);
+    await elem.press('End');
+  }
 }
 exports.ActionUtils = ActionUtils;
