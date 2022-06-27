@@ -350,5 +350,64 @@ module.exports = [
         canceledAt: null
       }
     }
+  ],
+  // controller.contractController.spec.jsのサービスない企業
+  [
+    {
+      contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+      tenantId: '4778c070-5dd3-42db-aaa8-848424fb80f9',
+      numberN: '123456789',
+      contractStatus: '00',
+      serviceType: '010',
+      deleteFlag: false,
+      createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+      updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+      contractedAt: null,
+      canceledAt: null,
+      dataValues: {
+        contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+        tenantId: '4778c070-5dd3-42db-aaa8-848424fb80f9',
+        numberN: '123456789',
+        contractStatus: '00',
+        serviceType: '010',
+        deleteFlag: false,
+        createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+        updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+        contractedAt: null,
+        canceledAt: null
+      }
+    }
+  ],
+  // エラーが発生する企業
+  [
+    {
+      contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+      tenantId: '3778c070-5dd3-42db-aaa8-848424fb80f9',
+      numberN: '123456789',
+      contractStatus: (function () {
+        const dbE = new Error('DB error')
+        return function () {
+          throw dbE
+        }
+      })(),
+      serviceType: '010',
+      deleteFlag: false,
+      createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+      updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+      contractedAt: null,
+      canceledAt: null,
+      dataValues: {
+        contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+        tenantId: '4778c070-5dd3-42db-aaa8-848424fb80f9',
+        numberN: '123456789',
+        contractStatus: '00',
+        serviceType: '010',
+        deleteFlag: false,
+        createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+        updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+        contractedAt: null,
+        canceledAt: null
+      }
+    }
   ]
 ]
