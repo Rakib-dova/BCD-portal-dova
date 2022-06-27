@@ -62,6 +62,7 @@ describe('仕訳情報設定_勘定科目一覧', function () {
 
     // デジタルトレードアプリをクリックする
     let appName = process.env.APP ? process.env.APP : config.appName;
+    appName = appName.replace(/\"/g, '');
     await comment('アイコン「' + appName + '」をクリックする');
     await tradeShiftTopPage.clickBcdApp(appName);
     await topPage.waitForLoading();

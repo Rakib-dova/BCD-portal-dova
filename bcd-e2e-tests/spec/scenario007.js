@@ -62,6 +62,7 @@ describe('リグレッションテスト', function () {
 
       // デジタルトレードアプリをクリックする
       let appName = process.env.APP ? process.env.APP : config.appName;
+      appName = appName.replace(/\"/g, '');
       await tradeShiftTopPage.clickBcdApp(appName);
       await topPage.waitForLoading();
 

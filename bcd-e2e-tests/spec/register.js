@@ -92,7 +92,8 @@ describe('利用登録', function () {
 
     // デジタルトレードアプリをクリックする
     let appName = process.env.APP ? process.env.APP : config.appName;
-    await comment('デジタルトレードアプリのアイコンをクリックする');
+    appName = appName.replace(/\"/g, '');
+    await comment('アイコン「' + appName + '」をクリックする');
     await tradeShiftTopPage.clickBcdApp(appName);
     await registerPage.waitForLoading();
 
