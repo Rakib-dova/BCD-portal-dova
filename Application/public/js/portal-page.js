@@ -29,9 +29,7 @@ window.onload = () => {
 }
 
 const result = BconAxios.get('/api/message', {})
-console.log('resu', result)
 result.then((res) => {
-  console.log('test')
   console.log('res', res)
   createNotification(res)
 })
@@ -41,10 +39,22 @@ function createNotification(itemCnt) {
     return
   }
   const approvalNotification = document.createElement('div')
-  const approvalNotificationMessage = approvalNotification.createElement('div')
-  const approvalNotificationCnt = approvalNotificationMessage.createElement('div')
-  const approvalNotificationLink = approvalNotificationMessage.createElement('a')
+  const approvalNotificationMessage = document.createElement('div')
+  const approvalNotificationCnt = document.createElement('div')
+  const approvalNotificationLink = document.createElement('a')
 
+  approvalNotificationCnt.innerText = `${itemCnt}件あります。`
+  approvalNotificationCnt.classList.add('approvalNotificationCnt')
   approvalNotificationMessage.innerText = '支払依頼が'
-  document.querySelector('.column .is-12.menu').append(approvalNotification)
+  approvalNotificationMessage.classList.add('approvalNotificationMessage')
+
+  approvalNotificationLink.setAttribute('href', '/inboxList/approvals')
+  approvalNotificationLink.innerText = '確認'
+  approvalNotificationLink.classList.add('approvalNotificationLink')
+
+  approvalNotificationMessage.append(approvalNotificationCnt)
+  approvalNotificationMessage.append(approvalNotificationLink)
+  approvalNotification.append(approvalNotificationMessage)
+  approvalNotification.classList.add('approvalNotification')
+  document.querySelector('.column.is-12.menu').append(approvalNotification)
 }

@@ -12,23 +12,20 @@ class BconAxios {
         this.request.setRequestHeader(prop, config.headers[prop])
       }
     }
-    await this.run()
-    return Promise.resolve(this.request.response)
+    return this.run()
   }
 
   async post(url, config) {}
 
   async run() {
-    this.request.onreadystatechange = async () => {
-      if (this.request.readyState === this.request.DONE) {
-        this.callback(this.request.response)
+    return new Promise((resolve, reject) => {
+      this.request.onload = () => {
+        if (this.request.readyState === this.request.DONE && this.request.status === 200) {
+          resolve(this.request.response)
+        }
       }
-    }
-    this.request.send(JSON.stringify(this.config.body))
-  }
-
-  async callback(response) {
-    this.response = Promise.resolve(response)
+      this.request.send(JSON.stringify(this.config.body))
+    })
   }
 }
 
