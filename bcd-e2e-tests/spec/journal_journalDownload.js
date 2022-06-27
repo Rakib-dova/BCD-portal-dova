@@ -44,6 +44,7 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
 
   /**
    * STEP5_No.129
+   * STEP7_No.113
    */
   it("データ有", async function () {
     // テストの初期化を実施
@@ -84,8 +85,10 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
       await tradeShiftTopPage.waitForLoading();
 
       // デジタルトレードアプリをクリックする
-      await comment('デジタルトレードアプリのアイコンをクリックする');
-      await tradeShiftTopPage.clickBcdApp();
+      let appName = process.env.APP ? process.env.APP : config.appName;
+      appName = appName.replace(/\"/g, '');
+      await comment('アイコン「' + appName + '」をクリックする');
+      await tradeShiftTopPage.clickBcdApp(appName);
       await topPage.waitForLoading();
 
       // 支払依頼一覧から、仕訳情報の詳細を取得する
@@ -118,13 +121,11 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
       await journalDownloadPage.waitForLoading();
 
       // 条件を入力する
-      await comment('条件を入力する');
       await journalDownloadPage.inputConditions(invoiceNo, '2021-04-01', '2023-03-31', sender, false);
-      await comment('「CSVダウンロード」をクリックする');
       let csvPath = await journalDownloadPage.download();
 
       // CSVデータがダウンロードされ、GQ列～ID列に設定した仕訳情報が入力されていること
-      expect(await fs.existsSync(csvPath)).to.equal(true, 'CSVデータがダウンロードされること');
+      expect(await fs.existsSync(csvPath)).to.equal(true, '【仕訳情報ダウンロード】CSVデータがダウンロードされること');
       let actual = await getCsvData(csvPath);
       for (i = 0; i < expected.length; i++) {
         expect(actual[0]['仕訳情報' + (i + 1) + '-借方勘定科目コード']).to.equal(expected[i].accountCode, '仕訳情報' + (i + 1) + '-勘定科目コードが出力されていること');

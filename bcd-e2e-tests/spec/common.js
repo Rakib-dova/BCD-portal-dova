@@ -18,6 +18,7 @@ const { UploadFormatSettingPage } = require('../page-objects/UploadFormatSetting
 const { UploadFormatConfirmPage } = require('../page-objects/UploadFormatConfirmPage');
 const { UploadFormatModPage } = require('../page-objects/UploadFormatModPage');
 const { SettingMenuPage } = require('../page-objects/SettingMenuPage');
+const { ContractCancelPage } = require('../page-objects/ContractCancelPage');
 const { ContractChangePage } = require('../page-objects/ContractChangePage');
 const { UploadListPage } = require('../page-objects/UploadListPage');
 const { UploadListDetailPage } = require('../page-objects/UploadListDetailPage');
@@ -40,6 +41,7 @@ const { UploadAccountCodePage } = require('../page-objects/UploadAccountCodePage
 const { UploadSubAccountCodePage } = require('../page-objects/UploadSubAccountCodePage');
 const { UploadDepartmentPage } = require('../page-objects/UploadDepartmentPage');
 const { JournalDownloadPage } = require('../page-objects/JournalDownloadPage');
+const { RegisterPage } = require('../page-objects/RegisterPage');
 
 // テストの準備を行う
 exports.initTest = async () => {
@@ -94,6 +96,7 @@ exports.getPageObject = (browser, page) => {
   pages.uploadFormatConfirmPage = new UploadFormatConfirmPage(browser, page);
   pages.uploadFormatModPage = new UploadFormatModPage(browser, page);
   pages.settingMenuPage = new SettingMenuPage(browser, page);
+  pages.contractCancelPage = new ContractCancelPage(browser, page);
   pages.contractChangePage = new ContractChangePage(browser, page);
   pages.uploadListPage = new UploadListPage(browser, page);
   pages.uploadListDetailPage = new UploadListDetailPage(browser, page);
@@ -116,6 +119,7 @@ exports.getPageObject = (browser, page) => {
   pages.uploadSubAccountCodePage = new UploadSubAccountCodePage(browser, page);
   pages.uploadDepartmentPage = new UploadDepartmentPage(browser, page);
   pages.journalDownloadPage = new JournalDownloadPage(browser, page);
+  pages.registerPage = new RegisterPage(browser, page);
   this.pages = pages;
   return pages;
 }

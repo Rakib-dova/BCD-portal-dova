@@ -13,16 +13,15 @@ class TradeShiftTopPage {
   }
 
   // デジタルトレードアプリをクリックする
-  async clickBcdApp() {
-    if(await this.actionUtils.isExist(this.page, '//*[contains(@data-tooltip,"デジタルトレード")]')) {
-      await this.actionUtils.click(this.page, '//*[contains(@data-tooltip,"デジタルトレード")]');
+  async clickBcdApp(appName) {
+    if(await this.actionUtils.isExist(this.page, '//*[contains(@data-tooltip,"' + appName + '")]')) {
+      await this.actionUtils.click(this.page, '//*[contains(@data-tooltip,"' + appName + '")]');
       await this.page.mouse.move(0, 100); // tooltipを消す
     } else {
       await this.actionUtils.click(this.page, '//*[contains(@data-tooltip,"すべてのアプリ")]');
-      await this.actionUtils.waitForLoading('//span[contains(text(), "デジタルトレード (prodstg)")]');
-      await this.actionUtils.click(this.page, '//span[contains(text(), "デジタルトレード (prodstg)")]');
+      await this.actionUtils.waitForLoading('//span[contains(text(), "' + appName + '")]');
+      await this.actionUtils.click(this.page, '//span[contains(text(), "' + appName + '")]');
     }
   }
-
 }
 exports.TradeShiftTopPage = TradeShiftTopPage;

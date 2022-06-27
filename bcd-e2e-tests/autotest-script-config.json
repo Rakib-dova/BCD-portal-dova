@@ -1,5 +1,6 @@
 {
   "baseUrl": "https://sandbox.tradeshift.com/",
+  "appName": "デジタルトレードアプリ（モック）",
   "company1": {
     "mng": {
       "id": "zahoti82@via.tokyo.jp",
@@ -84,6 +85,20 @@
       "password": "ptyPMSyhu2",
       "family": "一般",
       "first": "ユーザー１３"
+    }
+  },
+  "company2": {
+    "user": {
+      "id": "zeryu803@ahk.jp",
+      "password": "yANSfPLP27",
+      "family": "担当者姓",
+      "first": "担当者名"
+    },
+    "user02": {
+      "id": "kufira@nyasan.com",
+      "password": "7wiHxZmYRq",
+      "family": "担当者姓",
+      "first": "担当者名"
     }
   }
 }

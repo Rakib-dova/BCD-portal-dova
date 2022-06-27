@@ -63,7 +63,9 @@ describe('リグレッションテスト', function () {
       await tradeShiftTopPage.waitForLoading();
 
       // デジタルトレードアプリをクリックする
-      await tradeShiftTopPage.clickBcdApp();
+      let appName = process.env.APP ? process.env.APP : config.appName;
+      appName = appName.replace(/\"/g, '');
+      await tradeShiftTopPage.clickBcdApp(appName);
       await topPage.waitForLoading();
 
       // 「お知らせ」の「もっと見る」をクリックして、リンク先URLをチェックする

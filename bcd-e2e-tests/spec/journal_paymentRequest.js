@@ -20,6 +20,9 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
   // 依頼者
   const requester = config.company1.user12;
 
+  // 承認待ちインデックス（未申請=-1）
+  let authorizerNo = -1;
+
   // 支払依頼に使用する承認ルート
   const approveRoute = {
     name: '承認依頼テスト',
@@ -77,10 +80,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
   };
 
   // トップページまで遷移する
-  async function gotoTop(baseUrl, account, loginPage, tradeShiftTopPage, topPage) {
+  async function gotoTop(account, loginPage, tradeShiftTopPage, topPage) {
     // 指定したURLに遷移する
     await comment('Tradeshiftログインページへ移動する');
-    await page.goto(baseUrl);
+    await page.goto(config.baseUrl);
 
     // ログインを行う
     await comment('ユーザ"' + account.id + '"でログインする');
@@ -88,8 +91,10 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await tradeShiftTopPage.waitForLoading();
 
     // デジタルトレードアプリをクリックする
-    await comment('デジタルトレードアプリのアイコンをクリックする');
-    await tradeShiftTopPage.clickBcdApp();
+    let appName = process.env.APP ? process.env.APP : config.appName;
+    appName = appName.replace(/\"/g, '');
+    await comment('アイコン「' + appName + '」をクリックする');
+    await tradeShiftTopPage.clickBcdApp(appName);
     await topPage.waitForLoading();
   };
 
@@ -110,7 +115,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
 
     // 勘定科目を登録する
     await comment('「仕訳情報管理」をクリックする');
@@ -215,42 +220,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
   });
 
   /**
-   * STEP6_No.220
-   */
-  it("支払依頼ページ_未処理（申請者）", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage }
-      = common.getPageObject(browser, page);
-
-    // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
-
-    // 仕訳情報管理メニューを開く
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-
-    // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
-    await journalMenuPage.clickPaymentRequest();
-    await paymentRequestListPage.waitForLoading();
-
-    // ステータスが「未処理」となっていること
-    expect(await paymentRequestListPage.getApproveStatus('fcde40393')).to.equal('未処理', 'ステータスが「未処理」となっていること');
-    await page.waitForTimeout(1000);
-  });
-
-  /**
-   * STEP6_No.45,46,48
+   * STEP6_No.220,45,46,48
    */
   it("支払依頼ページ表示", async function () {
     // テストの初期化を実施
@@ -268,7 +238,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(requester, loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -279,6 +249,9 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await comment('「支払依頼一覧」をクリックする');
     await journalMenuPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
+
+    // ステータスが「未処理」となっていること
+    expect(await paymentRequestListPage.getApproveStatus('fcde40393')).to.equal('未処理', 'ステータスが「未処理」となっていること');
 
     // 仕訳情報設定ページへ遷移する
     await comment('「仕訳情報設定」をクリックする');
@@ -322,7 +295,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(requester, loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -373,7 +346,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(requester, loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -431,6 +404,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
   /**
    * STEP6_No.65,78-81,140,144,222
+   * STEP7_No.27
    */
   it("支払依頼ページ_依頼", async function () {
     // テストの初期化を実施
@@ -448,7 +422,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(requester, loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -471,13 +445,13 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await comment('仕訳情報入力数：' + accountCodeCount);
     for (i = 0; i < accountCodeCount; i++) {
       await comment('借方の勘定科目"' + accountCodes[0].name + '"・補助科目"' + accountCodes[0].subName + '"を選択する');
-      await journalDetailPage.selectAccountCode(i + 1, accountCodes[0].code, accountCodes[0].subCode);
+      await journalDetailPage.selectAccountCode(i + 1, false, accountCodes[0].code, accountCodes[0].subCode);
       await comment('借方の部門データ"' + departments[0].name + '"を選択する');
-      await journalDetailPage.selectDepartment(i + 1, departments[0].code);
+      await journalDetailPage.selectDepartment(i + 1, false, departments[0].code);
       await comment('貸方の勘定科目"' + accountCodes[1].name + '"・補助科目"' + accountCodes[1].subName + '"を選択する');
-      await journalDetailPage.selectCreditAccountCode(i + 1, accountCodes[1].code, accountCodes[1].subCode);
+      await journalDetailPage.selectAccountCode(i + 1, true, accountCodes[1].code, accountCodes[1].subCode);
       await comment('貸方の部門データ"' + departments[1].name + '"を選択する');
-      await journalDetailPage.selectCreditDepartment(i + 1, departments[1].code);
+      await journalDetailPage.selectDepartment(i + 1, true, departments[1].code);
     }
 
     // 保存する
@@ -516,6 +490,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 依頼がされること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('支払依頼中', '依頼がされること');
+    authorizerNo++;
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');
@@ -533,10 +508,8 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     expect(await paymentRequestPage.getNo()).to.equal(invoiceNo, '詳細画面に遷移すること');
 
     // 仕訳情報が表示されること
-    let lineAccountCode = await paymentRequestPage.getLineAccountCode(1);
-    expect (lineAccountCode.accountCode).to.equal(accountCodes[0].code, '勘定科目が表示されること');
-    expect (lineAccountCode.subAccountCode).to.equal(accountCodes[0].subCode, '補助科目が表示されること');
-    expect (lineAccountCode.departmentCode).to.equal(departments[0].code, '部門データが表示されること');
+    expect(await paymentRequestPage.hasBreakdown(1, 1, false, accountCodes[0].code, accountCodes[0].subCode, departments[0].code)).to.equal(true, '仕訳情報（借方）が表示されること');
+    expect(await paymentRequestPage.hasBreakdown(1, 1, false, accountCodes[1].code, accountCodes[1].subCode, departments[1].code)).to.equal(true, '仕訳情報（貸方）が表示されること');
 
     // 依頼者名目が自分のユーザー名となっていること
     let actual = await paymentRequestPage.getRequestingRow(1);
@@ -547,8 +520,46 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await page.waitForTimeout(1000);
   });
 
+  // 勘定科目・補助科目を検索・選択する
+  async function selectAccount(paymentRequestPage, isCredit, accountCode) {
+    // 仕訳情報入力フォームにて、勘定科目の「検索」をクリックする
+    let msg = isCredit ? '貸方' : '借方';
+    await comment('勘定科目コード、補助科目コード（' + msg + '）の「検索」をクリックする');
+    await paymentRequestPage.clickAccountCodeSearch(1, isCredit);
+
+    // 勘定科目、補助科目を検索する
+    await comment('勘定科目コード"' + accountCode.code + '"、勘定科目名"' + accountCode.name
+      + '"、補助科目コード"' + accountCode.subCode + '"、補助科目名"' + accountCode.subName + '"を条件に検索する');
+    await paymentRequestPage.searchAccount(isCredit, accountCode.code, accountCode.name, accountCode.subCode, accountCode.subName);
+
+    // 検索結果に入力した勘定科目・補助科目が表示されること
+    expect(await paymentRequestPage.hasAccountRow(isCredit, accountCode.code, accountCode.subCode)).to.equal(true, '検索結果に入力した勘定科目・補助科目が表示されること');
+
+    // 先頭の検索結果をクリックする
+    await paymentRequestPage.clickAccountRow(isCredit, accountCode.code, accountCode.subCode);
+  };
+
+  // 部門データを検索・選択する
+  async function selectDepartment(paymentRequestPage, isCredit, department) {
+    // 先頭の仕訳情報入力フォームにて、部門データの「検索」をクリックする
+    let msg = isCredit ? '貸方' : '借方';
+    await comment('部門コード（' + msg + '）の「検索」をクリックする');
+    await paymentRequestPage.clickDepartmentSearch(1, isCredit);
+
+    // 部門データを検索する
+    await comment('部門コード"' + department.code + '"、部門名"' + department.name + '"を条件に検索する');
+    await paymentRequestPage.searchDepartment(isCredit, department.code, department.name);
+
+    // 検索結果に入力した部門データが表示されること
+    expect(await paymentRequestPage.hasDepartmentRow(isCredit, department.code)).to.equal(true, '検索結果に入力した部門データが表示されること');
+
+    // 先頭の検索結果をクリックする
+    await paymentRequestPage.clickDepartmentRow(isCredit, department.code);
+  };
+
   /**
    * STEP6_No.94,95,96
+   * STEP7_No.73-90
    */
   it("支払依頼ページ_承認（1次申請）", async function () {
     // テストの初期化を実施
@@ -567,7 +578,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
   
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, approveRoute.authorizers[0], loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(approveRoute.authorizers[authorizerNo], loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -589,18 +600,12 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     await paymentRequestPage.waitForLoading();
 
     // 仕訳情報にて、勘定科目・補助科目・部門データを選択する
-    await comment('借方の勘定科目"' + accountCodes[1].name + '"・補助科目"' + accountCodes[1].subName + '"を選択する');
-    await paymentRequestPage.selectAccountCode(1, accountCodes[1].code, accountCodes[1].subCode);
-    await comment('借方の部門データ"' + departments[1].name + '"を選択する');
-    await paymentRequestPage.selectDepartment(1, departments[1].code);
-    await comment('貸方の勘定科目"' + accountCodes[0].name + '"・補助科目"' + accountCodes[0].subName + '"を選択する');
-    await paymentRequestPage.selectCreditAccountCode(1, accountCodes[0].code, accountCodes[0].subCode);
-    await comment('貸方の部門データ"' + departments[0].name + '"を選択する');
-    await paymentRequestPage.selectCreditDepartment(1, departments[0].code);
-    let lineAccountCode = await paymentRequestPage.getLineAccountCode(1);
-    expect (lineAccountCode.accountCode).to.equal(accountCodes[1].code, '勘定科目を編集できること');
-    expect (lineAccountCode.subAccountCode).to.equal(accountCodes[1].subCode, '補助科目を編集できること');
-    expect (lineAccountCode.departmentCode).to.equal(departments[1].code, '部門データを編集できること');
+    await selectAccount(paymentRequestPage, false, accountCodes[1]);
+    await selectDepartment(paymentRequestPage, false, departments[1]);
+    expect(await paymentRequestPage.hasBreakdown(1, 1, false, accountCodes[1].code, accountCodes[1].subCode, departments[1].code)).to.equal(true, '選択した勘定科目・補助科目・部門データ（借方）が反映されていること');
+    await selectAccount(paymentRequestPage, true, accountCodes[0]);
+    await selectDepartment(paymentRequestPage, true, departments[0]);
+    expect(await paymentRequestPage.hasBreakdown(1, 1, true, accountCodes[0].code, accountCodes[0].subCode, departments[0].code)).to.equal(true, '選択した勘定科目・補助科目・部門データ（貸す方）が反映されていること');
 
     // メッセージを編集する
     let message = '1次承認者からのメッセージ';
@@ -621,7 +626,8 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 請求書一覧画面にて承認ステータスに変更されていること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('一次承認済み', '請求書一覧画面にて承認ステータスに変更されていること');
-    
+    authorizerNo++;
+
     // 仕訳情報設定ページへ遷移する
     await comment('「仕訳情報設定」をクリックする');
     await paymentRequestListPage.clickDetail(invoiceNo);
@@ -650,7 +656,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, requester, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(requester, loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -692,6 +698,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
   /**
    * STEP6_No.98,99,125
+   * STEP7_No.91,92
    */
   it("支払依頼ページ_差し戻し", async function () {
     // テストの初期化を実施
@@ -708,7 +715,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, approveRoute.authorizers[1], loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(approveRoute.authorizers[authorizerNo], loginPage, tradeShiftTopPage, topPage);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -744,6 +751,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 差し戻しができること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('差し戻し', '差し戻しができること');
+    authorizer = -1;
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');
@@ -770,7 +778,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
         = common.getPageObject(browser, page);
   
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.baseUrl, config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
 
     // 承認ルートを削除する
     await comment('「仕訳情報管理」をクリックする');
