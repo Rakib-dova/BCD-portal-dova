@@ -92,7 +92,7 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
       await topPage.waitForLoading();
 
       // 支払依頼一覧から、仕訳情報の詳細を取得する
-      let invoiceNo = 'A0000125';
+      let invoiceNo = 'fcde40392';
       await comment('「仕訳情報管理」をクリックする');
       await topPage.openJournalMenu();
       await journalMenuPage.waitForLoading();
