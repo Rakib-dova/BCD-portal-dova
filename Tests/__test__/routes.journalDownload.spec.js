@@ -22,6 +22,7 @@ const notiTitle = '請求書ダウンロード'
 const journalDownloadSysError = 'システムエラーが発生しました。時間を空けてもう一度試してください。'
 const JournalizeInvoice = require('../../Application/models').JournalizeInvoice
 const requestApproval = require('../../Application/controllers/requestApprovalController')
+const validate = require('../../Application/lib/validate')
 
 const journalizeResult = new JournalizeInvoice()
 journalizeResult.journalId = '388014b9-d667-4144-9cc4-5da420981433'
@@ -46,7 +47,10 @@ let userControllerFindOneSpy,
   getSentToCompanySpy,
   findOneRequestApprovalSpy,
   dowonloadKaikeiSpy,
-  journalDownloadControllerCreateInvoiceDataForDownloadSpy
+  journalDownloadControllerCreateInvoiceDataForDownloadSpy,
+  contractControllerFindContractsBytenantIdSpy,
+  validateIsBcdCancellingSpy,
+  contractControllerFindLightPlanSpy
 
 const dbJournalTable = []
 const dbJournal100Table = []
@@ -153,14 +157,17 @@ error404.status = 404
 const user = [
   {
     // 契約ステータス：契約中
+    tenantId: '388014b9-d667-4144-9cc4-5da420981439',
     userId: '388014b9-d667-4144-9cc4-5da420981438'
   },
   {
     // 契約ステータス：解約中
+    tenantId: '3b3ff8ac-f544-4eee-a4b0-0ca7a0edaceb',
     userId: '3b3ff8ac-f544-4eee-a4b0-0ca7a0edacea'
   },
   {
     // ユーザステータス：0以外
+    tenantId: '045fb5fd-7cd1-499e-9e1d-b3635b039d9g',
     userId: '045fb5fd-7cd1-499e-9e1d-b3635b039d9f'
   }
 ]
@@ -177,6 +184,7 @@ const headers =
 const Users = require('../mockDB/Users_Table')
 const Tenants = require('../mockDB/Tenants_Table')
 const Contracts = require('../mockDB/Contracts_Table')
+const Contracts2 = require('../mockDB/Contracts_Table2')
 
 describe('journalDownloadのテスト', () => {
   beforeEach(() => {
@@ -197,6 +205,9 @@ describe('journalDownloadのテスト', () => {
       journalDownloadController,
       'createInvoiceDataForDownload'
     )
+    contractControllerFindContractsBytenantIdSpy = jest.spyOn(contractController, 'findContractsBytenantId')
+    validateIsBcdCancellingSpy = jest.spyOn(validate, 'isBcdCancelling')
+    contractControllerFindLightPlanSpy = jest.spyOn(contractController, 'findLightPlan')
   })
   afterEach(() => {
     request.resetMocked()
@@ -211,6 +222,9 @@ describe('journalDownloadのテスト', () => {
     getSentToCompanySpy.mockRestore()
     findOneRequestApprovalSpy.mockRestore()
     journalDownloadControllerCreateInvoiceDataForDownloadSpy.mockRestore()
+    contractControllerFindContractsBytenantIdSpy.mockRestore()
+    validateIsBcdCancellingSpy.mockRestore()
+    contractControllerFindLightPlanSpy.mockRestore()
   })
 
   describe('ルーティング', () => {
@@ -245,6 +259,9 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts2[0])
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts2[0])
+
       // CSRF対策
       const dummyToken = 'testCsrfToken'
       request.csrfToken = jest.fn(() => {
@@ -273,13 +290,52 @@ describe('journalDownloadのテスト', () => {
         'PCA hyper',
         '大蔵大臣NX'
       ]
-      expect(response.render).toHaveBeenCalledWith('journalDownload', {
+      expect(response.render).toHaveBeenCalledWith('journalDownload_light_plan', {
         title: '仕訳情報ダウンロード',
         minissuedate: minissuedate,
         maxissuedate: maxissuedate,
         serviceDataFormatName: serviceDataFormatName,
         csrfToken: dummyToken
       })
+    })
+
+    test('正常：契約条件にContractStatusがない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[1] }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[6])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[5])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts2[10])
+      validateIsBcdCancellingSpy.mockReturnValue(true)
+      contractControllerFindLightPlanSpy.mockReturnValue(null)
+
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
+      // 試験実施
+      await journalDownload.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      // expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // 500エラーがエラーハンドリング「される」
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('正常：解約申込中の場合', async () => {
@@ -296,6 +352,14 @@ describe('journalDownloadのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[5])
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts2[9])
+      validateIsBcdCancellingSpy.mockReturnValue(true)
+
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await journalDownload.cbGetIndex(request, response, next)
@@ -431,7 +495,7 @@ describe('journalDownloadのテスト', () => {
   })
 
   describe('コールバック:cbPostIndex', () => {
-    test('正常:1件（最終承認済みの請求書）', async () => {
+    test('正常:有償企業、1件（最終承認済みの請求書', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -786,6 +850,47 @@ describe('journalDownloadのテスト', () => {
           checkingData.InvoiceLine[0].DocumentReference ? checkingData.InvoiceLine[0].DocumentReference[0].ID.value : ''
         }`
       )
+    })
+
+    test('異常：無償企業が会計システムを選択した場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        chkFinalapproval: 'noneFinalapproval',
+        invoiceNumber: 'A01001',
+        minIssuedate: '2021-08-01',
+        maxIssuedate: '2021-11-09',
+        serviceDataFormat: '4'
+      }
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      // DBからの正常な契約情報取得を想定する
+      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
+
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
+
+      journalfindAllSpy.mockReturnValue([])
+      contractControllerFindLightPlanSpy.mockReturnValue(null)
+
+      // 試験実施
+      await journalDownload.cbPostIndex(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // エラーメッセージの表示
+      expect(request.flash).toBeCalledWith('noti', [
+        '請求書ダウンロード',
+        'システムエラーが発生しました。時間を空けてもう一度試してください。'
+      ])
+      expect(response.redirect).toBeCalledWith(303, '/journalDownload')
     })
 
     test('正常:0件(請求書番号あり、仕訳情報の設定なし)', async () => {
