@@ -74,7 +74,8 @@ const cbGetIndex = async (req, res, next) => {
     prevLocation: '/uploadDepartment',
     prevLocationName: '←部門データ一括作成',
     // 削除モーダル表示
-    deleteModalTitle: '部門データ削除'
+    deleteModalTitle: '部門データ削除',
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
