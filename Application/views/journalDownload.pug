@@ -11,6 +11,7 @@ block content
      .column.is-11
       .box
        form#form(method="POST")
+        input(type="hidden" name="_csrf" value=csrfToken)
         article.panel.is-info
          h2.panel-heading 条件絞り込み
          .panel-block.mr-4
