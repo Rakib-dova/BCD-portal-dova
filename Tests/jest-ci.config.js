@@ -98,14 +98,14 @@ module.exports = {
       rootDir: '../',
       testMatch: ['<rootDir>/Tests/__test__/**/*.[jt]s?(x)'],
       collectCoverageFrom: ['<rootDir>/Application/routes/**', '<rootDir>/Application/controllers/**']
-    },
-    {
-      displayName: 'lint',
-      runner: 'jest-runner-eslint',
-      rootDir: '../',
-      collectCoverageFrom: ['<rootDir>/Application/**/*.js'],
-      testMatch: ['<rootDir>/Application/**/*.js']
     }
+    // {
+    //   displayName: 'lint',
+    //   runner: 'jest-runner-eslint',
+    //   rootDir: '../',
+    //   collectCoverageFrom: ['<rootDir>/Application/**/*.js'],
+    //   testMatch: ['<rootDir>/Application/**/*.js']
+    // }
   ],
 
   // Use this configuration option to add custom reporters to Jest
