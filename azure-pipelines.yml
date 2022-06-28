@@ -71,7 +71,7 @@ stages:
             displayName: Make directory for upload files
 
           - bash: | 
-              npm install jest-junit --save-dev
+              npm install jest-junit@13.2.0 --save-dev
               cd ./Tests
               npm install jest-runner-eslint --save-dev
               npm run test:ci
