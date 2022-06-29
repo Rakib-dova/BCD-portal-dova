@@ -6,6 +6,13 @@ const { v4: uuidv4 } = require('uuid')
 // PDF請求書バリデーション
 const invoiceRules = [
   {
+    prop: 'sendRegistrationNo',
+    regexp: /^T\d{13}$/,
+    message: '登録番号は"T"+半角数字13桁で入力してください。',
+    colName: '登録番号',
+    required: true
+  },
+  {
     prop: 'invoiceNo',
     regexp: /^([a-zA-Z0-9]{1,50})$/,
     message: '請求書番号は半角英数字50文字以内で入力して下さい。',

@@ -36,7 +36,8 @@ const pdfInvoiceCsvUploadIndex = async (req, res, next) => {
 
   res.render('pdfInvoiceCsvUpload', {
     title: 'PDF請求書ドラフト一括作成',
-    engTitle: 'CSV UPLOAD for PDF'
+    engTitle: 'CSV UPLOAD for PDF',
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceCsvUploadIndex')
@@ -309,10 +310,10 @@ const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) =
   return { pdfInvoices, pdfInvoiceLines }
 }
 
-router.get('/', helper.bcdAuthenticate, pdfInvoiceCsvUploadIndex)
-router.post('/upload', helper.bcdAuthenticate, upload.single('csvFile'), pdfInvoiceCsvUpload)
-router.get('/resultList', helper.bcdAuthenticate, pdfInvoiceCsvUploadResult)
-router.get('/resultList/detail/:historyId', helper.bcdAuthenticate, pdfInvoiceCsvUploadResultDetail)
+router.get('/', csrfProtection, helper.bcdAuthenticate, pdfInvoiceCsvUploadIndex)
+router.post('/upload', csrfProtection, helper.bcdAuthenticate, upload.single('csvFile'), pdfInvoiceCsvUpload)
+router.get('/resultList', csrfProtection, helper.bcdAuthenticate, pdfInvoiceCsvUploadResult)
+router.get('/resultList/detail/:historyId', csrfProtection, helper.bcdAuthenticate, pdfInvoiceCsvUploadResultDetail)
 
 module.exports = {
   router,
