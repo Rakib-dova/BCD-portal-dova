@@ -76,9 +76,9 @@ block content
                 select(name='serviceDataFormat' is='ms-dropdown')
                   option(value=0)=serviceDataFormatName[0]
                   option(data-image='/image/lock.svg' value=1 disabled)=serviceDataFormatName[1]
-                  option(value=2 enabled)=serviceDataFormatName[2]
+                  option(data-image='/image/lock.svg' value=2 disabled)=serviceDataFormatName[2]
                   option(data-image='/image/lock.svg' value=3 disabled)=serviceDataFormatName[3]
-                  option(value=4 enabled)=serviceDataFormatName[4]
+                  option(data-image='/image/lock.svg' value=4 disabled)=serviceDataFormatName[4]
               .span.is-link.midSpace 
               a.button.is-link.i.fas.fa-lock.show-modal(data-target='information-lightplan')
                 .span.is-link.lockBorder 
@@ -150,5 +150,6 @@ block content
 block append scripts
   //- 画面のJSファイル
   script(src="/js/journalDownload-page.js")
+  script(src="https://code.jquery.com/jquery-3.6.0.min.js")
   script(src="/js/dd.min.js")
   link(rel='stylesheet', type='text/css', href='/css/journalDownload.css')
