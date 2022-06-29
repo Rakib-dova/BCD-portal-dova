@@ -332,9 +332,6 @@ app.use('/change', require('./routes/change').router)
 // ユーザー一括登録
 app.use('/uploadUsers', require('./routes/uploadUsers').router)
 
-//ご契約内容
-app.use('/contractDetail', require('./routes/contractDetail').router)
-
 // ------------導入支援(PBI3875)
 // 新規申込のみ
 app.use('/receiveIntroductionSupport', require('./routes/receiveIntroductionSupport').router)

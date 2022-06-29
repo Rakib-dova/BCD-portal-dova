@@ -1,0 +1,20 @@
+
+.box .table .ver-mid{
+  vertical-align: middle;
+  padding: 1em 1.5em;
+}
+.box .table .icon-aic{
+  display: flex;
+  align-items: center;
+}
+#contractDetail h2{
+  font-size:18px ;
+}
+#contractDetail .is-flex a.button{
+  padding-left: 1.4em;
+  padding-right: 1.4em;
+}
+.is-can{
+  background-color: #ccc;
+  color: white;
+}
