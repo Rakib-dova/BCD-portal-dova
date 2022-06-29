@@ -156,7 +156,7 @@ class PaymentRequestPage {
   async searchRoute(routeName) {
     await this.actionUtils.fill(this.frame, '#searchModalApproveRoute', routeName);
     await this.actionUtils.click(this.frame, '#btnSearchApproveRoute');
-    await this.actionUtils.waitForLoading('#displayFieldApproveRouteResultBody');
+    await this.actionUtils.waitForLoading('//tbody[@id="displayFieldApproveRouteResultBody"]/tr');
   }
 
   // 承認ルートの有無を確認する

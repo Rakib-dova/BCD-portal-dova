@@ -121,6 +121,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       await journalMenuPage.clickAccount();
       await accountCodeListPage.waitForLoading();
       for (i = 0; i < accountCodes.length; i++) {
+        if (await accountCodeListPage.hasRow(accountCodes[i].code, accountCodes[i].name)) {
+          continue;
+        }
         await comment('「新規登録」をクリックする');
         await accountCodeListPage.clickRegist();
         await registAccountCodePage.waitForLoading();
@@ -144,6 +147,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       await journalMenuPage.clickSubAccount();
       await subAccountCodeListPage.waitForLoading();
       for (i = 0; i < accountCodes.length; i++) {
+        if (await subAccountCodeListPage.hasRow(accountCodes[i].subCode, accountCodes[i].subName)) {
+          continue;
+        }
         await comment('「新規登録する」をクリックする');
         await subAccountCodeListPage.clickRegist();
         await registSubAccountCodePage.waitForLoading();
@@ -169,6 +175,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       await journalMenuPage.clickDepartment();
       await departmentListPage.waitForLoading();
       for(i = 0; i < departments.length; i++) {
+        if (await departmentListPage.hasRow(departments[i].code, departments[i].name)) {
+          continue;
+        }
         await comment('「新規登録する」をクリックする');
         await departmentListPage.clickRegist();
         await registDepartmentPage.waitForLoading();

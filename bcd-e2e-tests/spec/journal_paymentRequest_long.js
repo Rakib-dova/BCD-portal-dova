@@ -125,6 +125,9 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await journalMenuPage.clickAccount();
     await accountCodeListPage.waitForLoading();
     for (i = 0; i < accountCodes.length; i++) {
+      if (await accountCodeListPage.hasRow(accountCodes[i].code, accountCodes[i].name)) {
+        continue;
+      }
       await comment('「新規登録」をクリックする');
       await accountCodeListPage.clickRegist();
       await registAccountCodePage.waitForLoading();
@@ -148,6 +151,9 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await journalMenuPage.clickSubAccount();
     await subAccountCodeListPage.waitForLoading();
     for (i = 0; i < accountCodes.length; i++) {
+      if (await subAccountCodeListPage.hasRow(accountCodes[i].subCode, accountCodes[i].subName)) {
+        continue;
+      }
       await comment('「新規登録する」をクリックする');
       await subAccountCodeListPage.clickRegist();
       await registSubAccountCodePage.waitForLoading();
@@ -173,6 +179,9 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await journalMenuPage.clickDepartment();
     await departmentListPage.waitForLoading();
     for(i = 0; i < departments.length; i++) {
+      if (await departmentListPage.hasRow(departments[i].code, departments[i].name)) {
+        continue;
+      }
       await comment('「新規登録する」をクリックする');
       await departmentListPage.clickRegist();
       await registDepartmentPage.waitForLoading();
@@ -195,27 +204,29 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await comment('「承認ルート一覧」をクリックする');
     await journalMenuPage.clickApproveRoute();
     await approveRouteListPage.waitForLoading();
-    await comment('「新規登録する」をクリックする');
-    await approveRouteListPage.clickRegist();
-    await registApproveRoutePage.waitForLoading();
-    await comment('承認ルート名へ"' + approveRoute.name + '"と入力する');
-    await registApproveRoutePage.inputName(approveRoute.name);
-    for (i = 0; i < approveRoute.authorizers.length; i++) {
-      if (i < approveRoute.authorizers.length - 1) {
-        await comment(approveRoute.authorizers[i].family + ' ' + approveRoute.authorizers[i].first + 'を' + (i + 1) + '次承認者に設定する');
-        await registApproveRoutePage.addAuthorizer();
-      } else {
-        await comment(approveRoute.authorizers[i].family + ' ' + approveRoute.authorizers[i].first + 'を最終承認者に設定する');
+    if (!await approveRouteListPage.hasRow(approveRoute.name)) {
+      await comment('「新規登録する」をクリックする');
+      await approveRouteListPage.clickRegist();
+      await registApproveRoutePage.waitForLoading();
+      await comment('承認ルート名へ"' + approveRoute.name + '"と入力する');
+      await registApproveRoutePage.inputName(approveRoute.name);
+      for (i = 0; i < approveRoute.authorizers.length; i++) {
+        if (i < approveRoute.authorizers.length - 1) {
+          await comment(approveRoute.authorizers[i].family + ' ' + approveRoute.authorizers[i].first + 'を' + (i + 1) + '次承認者に設定する');
+          await registApproveRoutePage.addAuthorizer();
+        } else {
+          await comment(approveRoute.authorizers[i].family + ' ' + approveRoute.authorizers[i].first + 'を最終承認者に設定する');
+        }
+        await registApproveRoutePage.clickBtnSearch(i + 1);
+        await registApproveRoutePage.searchAuthorizer(approveRoute.authorizers[i].family, approveRoute.authorizers[i].first, null);
+        await registApproveRoutePage.selectAuthorizer();
       }
-      await registApproveRoutePage.clickBtnSearch(i + 1);
-      await registApproveRoutePage.searchAuthorizer(approveRoute.authorizers[i].family, approveRoute.authorizers[i].first, null);
-      await registApproveRoutePage.selectAuthorizer();
+      await comment('「確認」をクリックする');
+      await registApproveRoutePage.clickConfirm();
+      await comment('「登録」をクリックする');
+      await registApproveRoutePage.submit();
+      await approveRouteListPage.waitForLoading();
     }
-    await comment('「確認」をクリックする');
-    await registApproveRoutePage.clickConfirm();
-    await comment('「登録」をクリックする');
-    await registApproveRoutePage.submit();
-    await approveRouteListPage.waitForLoading();
     await page.waitForTimeout(1000);
   });
 
