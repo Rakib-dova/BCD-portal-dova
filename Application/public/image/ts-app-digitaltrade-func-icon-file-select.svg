@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="256" height="256"
+  viewBox="0 0 256 256">
+  <defs>
+    <style>
+      .cls-1 {
+        font-size: 17px;
+        font-family: "Kozuka Gothic Pr6N";
+      }
+    </style>
+  </defs>
+  <rect x="0" y="0" width="256" height="256" fill="#e5e5e5" />
+  <text class="cls-1" x="50%" y="50%" text-anchor="middle">ファイルを選択してください</text>
+</svg>

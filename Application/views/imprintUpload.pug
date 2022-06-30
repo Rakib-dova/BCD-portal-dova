@@ -1,0 +1,42 @@
+extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans 印影登録
+        .subtitle.is-family-noto-sans Imprint UPLOAD for PDF
+
+    .columns.is-centered
+      .column.is-11
+        .box
+          .columns.is-centered
+            .column.is-10
+              .columns
+                .column.is-one-third
+                  img.ml-5#imprintImg(src = imprint ? imprint : '/image/ts-app-digitaltrade-func-icon-file-select.svg' width='256' height='256')
+                .column.ml-3
+                  p.mt-2 PDFに挿入する印影を登録することができます。
+                  form.columns.my-3.mx-0(action="#")
+                    input.input.mr-2#fileName(type="text" name="fileName" readonly)
+                    label.button.is-link.ml-2.mr-2(for="upload-file") ファイル選択
+                    input.is-invisible#upload-file(type="file" name="file" accept=".png,.jpeg")
+                    input(type="hidden" name="_csrf" value=csrfToken)
+                    button.button.is-link.is-outlined.is-family-noto-sans.ml-2#upload-btn(disabled='disabled' type="submit" formaction="/imprintUpload/upload" formmethod="POST") アップロード
+                  p ※対応ファイル形式
+                  p 　拡張子：png, jpeg
+                  p 　サイズ(推奨)：150px × 150px
+                  p 　大きさ：1MB以下
+                  form(action="#")
+                    input(type="hidden" name="_csrf" value=csrfToken)
+                    button.button.is-danger.mt-5#delete-btn(disabled= imprint ? false : 'disabled' type="submit" formaction="/imprintUpload/delete" formmethod="POST") 登録済み印影の削除
+
+        .mt-1.space-between
+          a.button.is-link.is-light.has-text-left(href='/pdfInvoices/list') ← ドラフト一覧 
+
+  include footer
+
+block append scripts
+  script(src="/js/lib/utils.js")
+  script(src="/js/imprintUpload-page.js")
+  script(type="module" src="/js/loaded-portal-page.js")

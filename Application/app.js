@@ -338,6 +338,9 @@ app.use('/pdfInvoices', require('./routes/pdfInvoice').router)
 /* PoC PDF請求書ドラフト一括作成 */
 app.use('/pdfInvoiceCsvUpload', require('./routes/pdfInvoiceCsvUpload').router)
 
+/* PoC 印影登録 */
+app.use('/imprintUpload', require('./routes/imprintUpload').router)
+
 /**  会員サイト開発 20220228 */
 // アプリ一覧からの遷移受付けエンドポイント
 app.use('/memberCooperation', require('./memberSite/routes/memberCooperationRouter').router)
