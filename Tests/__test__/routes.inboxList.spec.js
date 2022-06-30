@@ -370,48 +370,6 @@ describe('inboxListのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('正常：承認待ちの場合', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.session.waitingApprovalList = true
-      request.user = { ...user[0] }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      requestApprovalControllerSpy.mockReturnValue(null)
-
-      // inboxControllerのgetInobox実施結果設定
-      getInboxSpy.mockReturnValue(searchResult1)
-
-      // CSRF対策
-      const dummyToken = 'testCsrfToken'
-      request.csrfToken = jest.fn(() => {
-        return dummyToken
-      })
-
-      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[0])
-
-      // 試験実施
-      await inboxList.cbGetIndex(request, response, next)
-
-      // 期待結果
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxList_light_planが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
-        listArr: searchResult1.list,
-        numPages: searchResult1.numPages,
-        currPage: searchResult1.currPage,
-        rejectedFlag: true,
-        csrfToken: dummyToken
-      })
-    })
-
     test('正常:請求書の支払依頼検索の結果がnullではない場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
@@ -904,7 +862,6 @@ describe('inboxListのテスト', () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
-      request.session.waitingApprovalList = true
       request.user = { ...user[0] }
 
       // DBからの正常なユーザデータの取得を想定する

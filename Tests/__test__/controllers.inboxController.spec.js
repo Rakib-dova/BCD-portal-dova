@@ -1091,8 +1091,10 @@ describe('inboxControllerのテスト', () => {
   })
 
   describe('insertAndUpdateJournalizeInvoice', () => {
+    const dummyToken = 'testCsrfToken'
     const data = {
       lineNo: 1,
+      _csrf: dummyToken,
       lineNo1_lineAccountCode1_accountCode: '',
       lineNo1_lineAccountCode1_subAccountCode: '',
       lineNo1_lineAccountCode1_departmentCode: '',
