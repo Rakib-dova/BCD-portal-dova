@@ -137,10 +137,10 @@ class PaymentRequestPage {
 
   // 仕訳情報入力フォームにて、指定の勘定科目、補助科目、部門コードが入力されているものを検索する
   async hasBreakdown(lineNo, acNo, isCredit, accountCode, subAccountCode, departmentCode) {
-    let xpathBase = '#lineNo' + lineNo + '_line' + (isCredit ? 'Credit' : '') + 'AccountCode' + acNo + '_';
-    let xpathAccountCode = isCredit ? 'creditAccountCode' : 'accountCode';
-    let xpathSubAccountCode = isCredit ? 'creditSubAccountCode' : 'subAccountCode';
-    let xpathDepartmentCode = isCredit ? 'creditDepartmentCode' : 'departmentCode';
+    let xpathBase = '//div[@id="lineNo' + lineNo + '"]/div[position()=' + (acNo + 1) + ']/div[position()=' + (isCredit ? '3' : '1') + ']/table/tbody';
+    let xpathAccountCode = '/tr[position()=1]//input[@type="text"]';
+    let xpathSubAccountCode = '/tr[position()=2]//input[@type="text"]';
+    let xpathDepartmentCode = '/tr[position()=3]//input[@type="text"]';
     return await this.actionUtils.getValue(this.frame, xpathBase + xpathAccountCode) == accountCode
         && await this.actionUtils.getValue(this.frame, xpathBase + xpathSubAccountCode) == subAccountCode
         && await this.actionUtils.getValue(this.frame, xpathBase + xpathDepartmentCode) == departmentCode;

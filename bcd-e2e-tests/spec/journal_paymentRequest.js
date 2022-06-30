@@ -517,7 +517,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
 
     // 仕訳情報が表示されること
     expect(await paymentRequestPage.hasBreakdown(1, 1, false, accountCodes[0].code, accountCodes[0].subCode, departments[0].code)).to.equal(true, '仕訳情報（借方）が表示されること');
-    expect(await paymentRequestPage.hasBreakdown(1, 1, false, accountCodes[1].code, accountCodes[1].subCode, departments[1].code)).to.equal(true, '仕訳情報（貸方）が表示されること');
+    expect(await paymentRequestPage.hasBreakdown(1, 1, true, accountCodes[1].code, accountCodes[1].subCode, departments[1].code)).to.equal(true, '仕訳情報（貸方）が表示されること');
 
     // 依頼者名目が自分のユーザー名となっていること
     let actual = await paymentRequestPage.getRequestingRow(1);
@@ -584,7 +584,7 @@ describe('仕訳情報設定_支払依頼（一次承認まで）', function () 
     const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage,
       paymentRequestPage, journalDetailPage }
       = common.getPageObject(browser, page);
-  
+
     // デジタルトレードアプリのトップページへ遷移する
     await gotoTop(approveRoute.authorizers[authorizerNo], loginPage, tradeShiftTopPage, topPage);
 
