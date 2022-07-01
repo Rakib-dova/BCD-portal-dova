@@ -354,6 +354,9 @@ app.use('/idLinking', require('./memberSite/routes/idLinkingRouter').router)
 // 奉行クラウド連携
 app.use('/bugyo', require('./obc/obc'))
 
+// API専用
+app.use('/api', require('./routes/api').router)
+
 // notice
 const noticeHelper = require('./routes/helpers/notice')
 
