@@ -55,7 +55,7 @@ module.exports = async (req, res, next) => {
   }
 
   resultStatusCode = 200
-  noticeCount = { requestNoticeCnt: requestNoticeCnt, rejectedNoticeCnt: rejectedNoticeCnt }
+  noticeCount = `${requestNoticeCnt},${rejectedNoticeCnt}`
 
   return res.status(resultStatusCode).send(noticeCount)
 }
