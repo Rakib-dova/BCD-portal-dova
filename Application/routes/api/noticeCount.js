@@ -6,12 +6,12 @@ const db = require('../../models')
 const requestApproval = db.RequestApproval
 
 module.exports = async (req, res, next) => {
+  let resultStatusCode
   if (!req.session || !req.user?.userId || !req.user?.tenantId) {
     resultStatusCode = 403
     return res.status(resultStatusCode).send()
   }
 
-  let resultStatusCode
   const tenantId = req.user.tenantId
   const userId = req.user.userId
   const contract = await contractController.findOne(tenantId).catch((error) => {
