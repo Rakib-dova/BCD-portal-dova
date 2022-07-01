@@ -45,8 +45,8 @@ result.then((res) => {
       return
   }
 
-  const data = res.data.split(',')
-  createNotification(data[0], data[1])
+  const data = JSON.parse(res.data)
+  createNotification(data.requestNoticeCnt, data.rejectedNoticeCnt)
 })
 
 function createElement(cnt, request, link) {
@@ -85,7 +85,7 @@ function createNotification(requestNoticeCnt, rejectedNoticeCnt) {
     document.querySelector('.column.is-12.menu').append(requestNotice)
   }
   if (~~rejectedNoticeCnt > 0) {
-    const rejectedNotice = createElement(rejectedNoticeCnt, '差し替え依頼', '/inboxList/1')
+    const rejectedNotice = createElement(rejectedNoticeCnt, '差し戻しされた支払依頼', '/inboxList/1')
     document.querySelector('.column.is-12.menu').append(rejectedNotice)
   }
 }
