@@ -15,12 +15,10 @@ class BconAxios {
     return this.run()
   }
 
-  async post(url, config) {}
-
   async run() {
     return new Promise((resolve, reject) => {
       this.request.onload = () => {
-        if (this.request.readyState === this.request.DONE && this.request.status === 200) {
+        if (this.request.readyState === this.request.DONE) {
           resolve({ status: this.request.status, data: this.request.response })
         }
       }

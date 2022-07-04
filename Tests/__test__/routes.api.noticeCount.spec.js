@@ -95,7 +95,7 @@ describe('noticeCountのテスト', () => {
       noticeCount(request, response, next)
 
       // 期待結果
-      // response.statusが200
+      // response.statusが403
       expect(response.status).toHaveBeenCalledWith(403)
     })
 
@@ -142,7 +142,7 @@ describe('noticeCountのテスト', () => {
       await noticeCount(request, response, next)
 
       // 期待結果
-      // response.statusが200
+      // response.statusが500
       expect(response.status).toHaveBeenCalledWith(500)
       expect(response.send).toBeCalledWith(null)
     })
