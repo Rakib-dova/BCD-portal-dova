@@ -24,6 +24,11 @@ class JournalDownloadPage {
     return frame;
   }
 
+  // 「最終承認済みの請求書」のチェック状態を取得する
+  async isFinalApprovalChecked() {
+    return await this.actionUtils.isChecked(this.frame, '#finalapproval');
+  }
+
   // 条件絞り込みへ条件を入力する
   async inputConditions(invoiceNo, minIssuedate, maxIssuedate, sendTo, wasApproved) {
     if (invoiceNo) {
@@ -52,6 +57,15 @@ class JournalDownloadPage {
   async download() {
     await this.addComment('「CSVダウンロード」をクリックする');
     return await this.actionUtils.downloadFile(this.frame, '#submit');
+  }
+
+  // 「CSVダウンロード」をクリックする（データ無）
+  async downloadNG() {
+    await this.addComment('「CSVダウンロード」をクリックする');
+    await this.actionUtils.click(this.frame, '#submit');
+    let msgPath = '//div[@id="confirmmodify-modal" and contains(@class, "is-active")]//section[@class="modal-card-body"]/p';
+    await this.actionUtils.waitForLoading(msgPath);
+    return await this.actionUtils.getText(this.frame, msgPath);
   }
 }
 exports.JournalDownloadPage = JournalDownloadPage;
