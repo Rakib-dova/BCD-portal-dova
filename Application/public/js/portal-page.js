@@ -41,7 +41,7 @@ result.then((res) => {
       document.querySelector('.approvalNotificationMessage').innerText = 'ログインユーザーではありません。'
       return
     case 500:
-      document.querySelector('.approvalNotificationMessage').innerText = 'システムエラーが発生しました。'
+      document.querySelector('.approvalNotificationMessage').innerText = '情報取得に失敗しました。'
       return
   }
 
@@ -73,12 +73,11 @@ function createElement(cnt, request, link) {
 }
 
 function createNotification(requestNoticeCnt, rejectedNoticeCnt) {
+  document.querySelector('.approvalNotification').remove()
+
   if (~~requestNoticeCnt <= 0 && ~~rejectedNoticeCnt <= 0) {
-    document.querySelector('.approvalNotificationMessage').innerText = '承認・差し戻し依頼はありません。'
     return
   }
-
-  document.querySelector('.approvalNotification').remove()
 
   if (~~requestNoticeCnt > 0) {
     const requestNotice = createElement(requestNoticeCnt, '支払依頼', '/inboxList/approvals')
