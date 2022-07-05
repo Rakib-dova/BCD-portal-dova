@@ -1,67 +1,83 @@
 'use strict'
 const express = require('express')
-const router = express.Router()
-const helper = require('./helpers/middleware')
-const validate = require('../lib/validate')
+const csrf = require('csurf')
+
+const middleware = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
-const noticeHelper = require('./helpers/notice')
-const userController = require('../controllers/userController.js')
-const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
-const constantsDefine = require('../constants')
+const constants = require('../constants')
+const Op = require('../models').Sequelize.Op
+const contractController = require('../controllers/contractController.js')
 
+const router = express.Router()
+const csrfProtection = csrf({ cookie: false })
 
-const cbGetIndex = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
-  // 認証情報取得処理
-  if (!req.session || !req.user?.userId) {
-    return next(errorHelper.create(500))
+// 契約ステータス
+const contractStatuses = constants.statusConstants.contractStatuses
+// サービス種別
+const serviceTypes = constants.statusConstants.serviceTypes
+// ログメッセージ
+const logMessage = constants.logMessage
+
+class ContractInfo {
+  /**
+   * 契約情報コンストラクタ
+   * @param {object} contract 契約情報
+   */
+  constructor(contract) {
+    this.serviceType = contract.serviceType
+    this.contractNumber = contract.numberN
+    this.contractStatus = contract.contractStatus
   }
+}
 
-  // DBからuserデータ取得
-  const user = await userController.findOne(req.user.userId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // user未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+const showContractDetail = async (req, res, next) => {
+  logger.info(logMessage.INF000 + 'showContractDetail')
 
-  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  // 解約済以外契約情報を取得する
+  const contracts = await contractController.findContracts(
+    {
+      tenantId: req.user?.tenantId,
+      contractStatus: { [Op.ne]: constants.statusConstants.contractStatuses.canceledContract }
+    },
+    [['serviceType', 'ASC']]
+  )
+  if (contracts instanceof Error) return next(errorHelper.create(500))
 
-  // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+  // 継続利用サービスリスト
+  const continuingContractList = []
+  // 初回利用サービスリスト
+  const oneShotContractList = []
 
-  req.session.userContext = 'LoggedIn'
-
-  // ユーザ権限を取得
-  req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
-
-  if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
-  }
-
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return next(noticeHelper.create('cancelprocedure'))
+  for (const contract of contracts) {
+    // 導入支援サービスの場合
+    if (contract.serviceType === serviceTypes.introductionSupport) {
+      // 導入支援サービスが申込処理中や設定準備中の場合
+      if (
+        contract.contractStatus === contractStatuses.newContractOrder ||
+        contract.contractStatus === contractStatuses.newContractReceive ||
+        contract.contractStatus === contractStatuses.newContractBeforeCompletion
+      ) {
+        oneShotContractList.push(new ContractInfo(contract))
+      }
+    } else {
+      continuingContractList.push(new ContractInfo(contract))
+    }
   }
 
   // ご契約内容を画面に渡す。
   res.render('contractDetail', {
     title: 'ご契約内容',
     engTitle: 'CONTRACT DETAIL',
+    continuingContractList: continuingContractList,
+    oneShotContractList: oneShotContractList
   })
-  logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
+  logger.info(logMessage.INF001 + 'showContractDetail')
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
+router.get('/', csrfProtection, middleware.bcdAuthenticate, middleware.isTenantManager, showContractDetail)
 
 module.exports = {
   router: router,
-  cbGetIndex: cbGetIndex
+  showContractDetail: showContractDetail
 }
-
-

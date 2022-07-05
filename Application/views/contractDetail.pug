@@ -20,55 +20,59 @@ block content
                 th.text-center ステータス
                 th(colspan='2').width-20.text-center ご契約に関する処理 
             tbody
-              tr
-                td.ver-mid 
-                  .icon-aic 
-                    img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
-                    span BConnectionデジタルトレードアプリ フリー
-                td.text-center.ver-mid 無料
-                td.text-center.ver-mid N000000000
-                td.text-center.ver-mid 
-                  span.btn-status.st-navy 契約中
-                td.text-center.ver-mid.px-1 
-                  a.button.is-success.is-block.btn-contract 契約変更
-                td.text-center.ver-mid.px-1  
-                  a.button.is-can.is-block.btn-contract 解約申請
-              tr 
-                td.ver-mid 
-                  .icon-aic 
-                    img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
-                    span BConnectionデジタルトレードアプリ スタンダード
-                td.text-center.ver-mid 有料
-                td.text-center.ver-mid N000000000
-                td.text-center.ver-mid 
-                  span.btn-status.st-navy 契約中
-                td  
-                td.text-center.ver-mid.px-1 
-                  a.button.is-can.is-block.btn-contract 解約申請
+              each contract in continuingContractList
+                tr
+                  td.ver-mid 
+                    .icon-aic 
+                      if contract.serviceType === '010'
+                        img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
+                        span BConnectionデジタルトレードアプリ フリー
+                      else 
+                        img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
+                        span BConnectionデジタルトレードアプリ スタンダード
+                  td.text-center.ver-mid #{contract.serviceType === '010' ? '無料' : '有料'}
+                  td.text-center.ver-mid #{contract.contractNumber}
+                  td.text-center.ver-mid 
+                    if contract.contractStatus === '10' || contract.contractStatus === '11' || contract.contractStatus === '12'
+                      span.btn-status.st-navy 登録処理中
+                    else if contract.contractStatus === '30' || contract.contractStatus === '31'
+                      span.btn-status.st-navy 解約処理中
+                    else if contract.contractStatus === '40' || contract.contractStatus === '41'
+                      span.btn-status.st-navy 変更処理中
+                    else
+                      span.btn-status.st-navy 契約中
+                  td.text-center.ver-mid.px-1 
+                    if contract.serviceType === '010'
+                      a.button.is-success.is-block.btn-contract(href='/change') 契約変更
+                  td.text-center.ver-mid.px-1  
+                    a.button.is-can.is-block.btn-contract(href= (contract.serviceType === '010' ? '/cancellation' : '/cancelLightPlan')) 解約申請
 
-        h2.mb-4.mt-6 ■初回利用サービス
-        .box
-          table.table.is-fullwidth.is-hoverable.table-fixed
-            thead
-              tr
-                th.width-40.text-center サービス名
-                th.width-8.text-center 種類
-                th.width-10.text-center 契約番号
-                th.text-center ステータス
-                th(colspan='2').width-20.text-center ご契約に関する処理   
-            tbody
-              tr
-                td.ver-mid 
-                  .icon-aic 
-                    img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
-                    span 導入支援サービス
-                td.text-center.ver-mid 有料
-                td.text-center.ver-mid N000000000
-                td.text-center.ver-mid 
-                  span.btn-status.st-white 設定準備中
-                td.text-center.ver-mid.px-1 
-                  a.button.is-success.is-block.btn-contract 契約変更
-
+        if oneShotContractList.length > 0
+          h2.mb-4.mt-6 ■初回利用サービス
+          .box
+            table.table.is-fullwidth.is-hoverable.table-fixed
+              thead
+                tr
+                  th.width-40.text-center サービス名
+                  th.width-8.text-center 種類
+                  th.width-10.text-center 契約番号
+                  th.text-center ステータス
+                  th(colspan='2').width-20.text-center ご契約に関する処理   
+              tbody
+                tr
+                  td.ver-mid 
+                    .icon-aic 
+                      img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
+                      span 導入支援サービス
+                  td.text-center.ver-mid 有料
+                  td.text-center.ver-mid #{oneShotContractList[0].contractNumber}
+                  td.text-center.ver-mid 
+                    if oneShotContractList[0].contractStatus === '10' || oneShotContractList[0].contractStatus === '11'
+                      span.btn-status.st-white 申込処理中
+                    else 
+                      span.btn-status.st-white 設定準備中
+                  td
+                  td
 
     include footer
 
