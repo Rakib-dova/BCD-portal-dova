@@ -1031,7 +1031,7 @@ describe('pdfInvoiceのテスト', () => {
       await pdfInvoice.pdfInvoiceList(request, response, next)
 
       expect(response.render).toHaveBeenCalledWith('pdfInvoiceList', {
-        title: 'PDF請求書',
+        title: 'PDF請求書作成ドラフト一覧',
         engTitle: 'PDF INVOICING',
         itemCount: 1,
         invoices: JSON.stringify([
