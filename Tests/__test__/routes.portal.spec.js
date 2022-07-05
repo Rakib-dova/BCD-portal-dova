@@ -422,6 +422,11 @@ describe('portalのテスト', () => {
       }
       constructDataArr.items.push(rssMaker('BConnection RSS 1', 'http://test', '2022-03-08'))
       constructDataArr.items.push(rssMaker('BConnection RSS 2', 'http://test', '2022-03-08'))
+      newsDataArr.items.push({
+        date: '2022年7月6日',
+        title: 'BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
+        link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
+      })
       newsDataArr.items.push(rssMaker('BConnection RSS2 1', 'http://test', '2022-03-08'))
       newsDataArr.items.push(rssMaker('BConnection RSS2 2', 'http://test', '2022-03-08'))
       const expectDateArr = newsDataArr.items.map((item) => {
