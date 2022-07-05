@@ -321,8 +321,13 @@ describe('portalのテスト', () => {
       parseUrlSpy.mockImplementationOnce(async () => {
         return constructDataArr
       })
+      // TODO: RSS不具合のため一時的な対応
+      // const expectDateArr = [{ message: '現在、お知らせはありません。' }]
+      const constructDataArr = {
+        items: []
+      }
 
-      const expectDateArr = [{ message: '現在、お知らせはありません。' }]
+
       const expectconstructDataArr = [{ message: '現在、工事故障情報はありません。' }]
       // CSRF対策
       const dummyTokne = 'testCsrfToken'
@@ -422,11 +427,14 @@ describe('portalのテスト', () => {
       }
       constructDataArr.items.push(rssMaker('BConnection RSS 1', 'http://test', '2022-03-08'))
       constructDataArr.items.push(rssMaker('BConnection RSS 2', 'http://test', '2022-03-08'))
+      
+      // TODO: RSS不具合のための一時的な対応
       newsDataArr.items.push({
-        date: '2022年7月6日',
+        date: '2022-07-06',
         title: 'BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
         link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
       })
+      
       newsDataArr.items.push(rssMaker('BConnection RSS2 1', 'http://test', '2022-03-08'))
       newsDataArr.items.push(rssMaker('BConnection RSS2 2', 'http://test', '2022-03-08'))
       const expectDateArr = newsDataArr.items.map((item) => {
