@@ -27,7 +27,7 @@ html
     
     block vars
       - var inputPattarnZenkakuHiragana = '^[^ -~｡-ﾟ\t]+$' // 全角ひらがな
-      - var inputPattarnZenkaku = '^[ぁ-んァ-ヶａ-ｚＡ-Ｚー　－‐―−—・，．＆’０-９\u4E00-\u9FFF\u3005-\u3007]+$' // 全角文字
+      - var inputPattarnZenkaku = '^[ぁ-んァ-ヶａ-ｚＡ-Ｚー　－‐―−—・，．＆’０-９\u4E00-\u9FFF\u3005-\u3007\u309d\u309e]+$' // 全角文字
       - var inputPattarnZenkakuKatakana = '^[ァ-ヶー]+$' // 全角カタカナ
       - var inputPattarnHankakuNumber = '[0-9]{7}' //半角数値　7文字固定
       - var inputPattarnTellNumber = '^([0-9]{1,4})-([0-9]{1,4})-([0-9]{1,4})'// 電話番号（-あり）
