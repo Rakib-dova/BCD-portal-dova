@@ -14,10 +14,19 @@ block content
     //-   .level-item
     //-     p.title.mb-4 Apps
     columns.is-centered
-      .column.is-12.menu        
-        .approvalNotification
-          .approvalNotificationMessage 承認・差し戻し件数を取得しています。
-
+      .column.is-12.menu
+        if Number.isInteger(requestNoticeCnt) && requestNoticeCnt > 0
+          .approvalNotification
+            .approvalNotificationMessage 支払依頼が
+              .approvalNotificationCnt #{requestNoticeCnt}
+              | 件あります。
+            a.approvalNotificationLink(href='/inboxList/approvals') 確認
+        if Number.isInteger(rejectedNoticeCnt) && rejectedNoticeCnt > 0
+          .approvalNotification
+            .approvalNotificationMessage 差し戻しされた支払依頼が
+              .approvalNotificationCnt #{rejectedNoticeCnt}
+              | 件あります。
+            a.approvalNotificationLink(href='/inboxList/approvals') 確認
       .column.is-12.menu
         .box
           .media-content
@@ -294,10 +303,14 @@ block content
           button.delete(data-target="config-modal")
         section.modal-card-body
           nav.panel
-            a.panel-block(href='/contractDetail') 
+            a.panel-block(href='/change')
               span.panel-icon
                 i.fas.fa-file
-              p ご契約内容
+              p 契約情報変更
+            a.panel-block(href='/cancellation') 
+              span.panel-icon
+                i.fas.fa-file
+              p 解約
             a.panel-block(href='/uploadUsers') 
               span.panel-icon
                 i.fas.fa-file
@@ -443,7 +456,7 @@ block content
   include footer
 
 block append scripts
-  script(type='module' src="/js/portal-page.js")
+  script(src="/js/portal-page.js")
   //- 会員サイト連携開発追加 fingerpirnt未検証の場合、fingerprint値をXHRで送信する。
   //- TODO:ポータル画面表示時に紐づけを実施するように修正
   if (memberSiteFlg)
