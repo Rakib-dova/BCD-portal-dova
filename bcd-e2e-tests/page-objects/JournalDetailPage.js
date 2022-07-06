@@ -267,7 +267,7 @@ class JournalDetailPage {
     await this.frame.waitForTimeout(500);
 
     // 仕訳情報設定確認ポップアップが表示された場合、「OK」をクリックする
-    if (this.actionUtils.isDisplayed(this.frame, '//div[@id="check-journalize-modal"]//a[text()="OK"]')) {
+    if (await this.actionUtils.isExist(this.frame, '//div[@id="check-journalize-modal"]//a[text()="OK"]')) {
       await this.addComment('仕訳情報設定確認ポップアップにて、「OK」をクリックする');
       await this.actionUtils.click(this.frame, '//div[@id="check-journalize-modal"]//a[text()="OK"]');
     }
