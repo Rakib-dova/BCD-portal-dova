@@ -248,21 +248,6 @@ app.use('/csvDownload', require('./routes/csvDownload').router)
 // 仕訳情報
 app.use('/journalDownload', require('./routes/journalDownload').router)
 
-// 契約情報解約
-app.use('/contractCancellation', require('./routes/contractCancellation').router)
-
-// 契約情報解約完了画面
-app.use('/contractCancellationComplete', require('./routes/contractCancellationComplete').router)
-
-// 有料サービス利用登録
-app.use('/paidServiceRegister', require('./routes/paidServiceRegister').router)
-
-// 有料サービス利用登録規約
-app.use('/paidServiceRegisterTerms', require('./routes/paidServiceRegisterTerms').router)
-
-// 有料サービス利用登録完了画面
-app.use('/paidServiceRegisterComplete', require('./routes/paidServiceRegisterComplete').router)
-
 // 仕訳情報設定
 // ------------勘定科目
 // 勘定科目一覧

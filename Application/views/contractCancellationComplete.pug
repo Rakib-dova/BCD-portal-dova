@@ -1,0 +1,35 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans #{title}
+        .subtitle.is-family-noto-sans #{engTitle}
+
+  .section#contractBox
+    .is-family-noto-sans.contractWidth.mb-5
+      form#form(method="post")
+        article.panel.is-info
+          h2.panel-heading 解約処理を完了しました
+          .panel-block
+            .container
+              .columns.is-centered: .column
+                .field.is-grouped.is-grouped-left.is-block
+                  h3 解約サービス
+                .serviceWrap
+                  .icon-aic.is-flex.is-align-items-center
+                    img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
+                    span スタンダードプラン
+                .field.is-grouped.is-grouped-left.is-block
+                  p.my-3 
+                    | この度は弊社サービスをご利用いただき誠にありがとうございました。<br>
+                    | 今後もサービスの向上を目指してまいります。
+                  p
+                    | 現在のご契約状況を確認する場合は<a href ="">「ご契約内容」</a>からご確認ください。 
+                .is-flex.my-5.btnWrap
+                  a.button.btn-contract.btnHome(href="/portal") HOMEへ戻る
+    include footer
+block append scripts
+  //- script(src="/js/register-page.js")
+  link(rel='stylesheet', type='text/css', href='/css/contractCancellation.css')
