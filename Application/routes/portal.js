@@ -73,7 +73,7 @@ const cbGetIndex = async (req, res, next) => {
         // })
         newsDataArr.push({
           date: '2022年7月6日',
-          title: 'BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
+          title: '【復旧連絡】BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
           link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
         })
       } else {
@@ -86,7 +86,7 @@ const cbGetIndex = async (req, res, next) => {
         // RSS不具合の暫定対処
         newsDataArr.push({
           date: '2022年7月6日',
-          title: 'BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
+          title: '【復旧連絡】BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
           link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
         })
 

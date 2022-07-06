@@ -351,7 +351,7 @@ describe('portalのテスト', () => {
         constructDataArrSize: expectconstructDataArr[0].title ? expectconstructDataArr.length : 0,
         newsDataArr: [{
           date: '2022年7月6日',
-          title: 'BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
+          title: '【復旧連絡】BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
           link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
         }],
         newsDataArrSize: newsDataArr.items.length,
@@ -474,7 +474,7 @@ describe('portalのテスト', () => {
         constructDataArrSize: expectconstructDataArr[0].title ? expectconstructDataArr.length : 0,
         newsDataArr: [{
           date: '2022年7月6日',
-          title: 'BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
+          title: '【復旧連絡】BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
           link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
         }, ...expectDateArr],
         newsDataArrSize: expectDateArr.length,
@@ -610,7 +610,7 @@ describe('portalのテスト', () => {
         constructDataArrSize: expectconstructDataArr[0].title ? expectconstructDataArr.length : 0,
         newsDataArr: [{
           date: '2022年7月6日',
-          title: 'BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
+          title: '【復旧連絡】BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
           link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
         }, ...expectDateArr],
         newsDataArrSize: newsDataArr.items.length,
