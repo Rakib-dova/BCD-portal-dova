@@ -66,15 +66,29 @@ const cbGetIndex = async (req, res, next) => {
     .parseURL('https://support.ntt.com/informationRss/goods/rss/bconnection')
     .then((feed) => {
       newsDataArrSize = feed.items.length
+      // TODO: RSS不具合が解消後、コメントアウトを復活
       if (newsDataArrSize === 0) {
+        // newsDataArr.push({
+        //   message: constants.portalMsg.NEWS_NONE
+        // })
         newsDataArr.push({
-          message: constants.portalMsg.NEWS_NONE
+          date: '2022年7月6日',
+          title: '【復旧連絡】BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
+          link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
         })
       } else {
-        let getlength = 3
-        if (newsDataArrSize < 3) {
+        // TODO: RSS不具合が解消後、2→3へ
+        let getlength = 2
+        if (newsDataArrSize < 2) {
           getlength = newsDataArrSize
         }
+
+        // RSS不具合の暫定対処
+        newsDataArr.push({
+          date: '2022年7月6日',
+          title: '【復旧連絡】BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
+          link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
+        })
 
         for (let i = 0; i < getlength; i++) {
           const day = new Date(feed.items[i].date)
