@@ -83,7 +83,6 @@ const cbPostApprove = async (req, res, next) => {
       } else {
         req.flash('error', '支払依頼を差し戻しました。メールの通知に失敗しましたので、依頼者に連絡をとってください。')
       }
-      req.session.waitingApprovalList = true
       res.redirect('/inboxList/1')
     } else {
       req.flash('noti', ['支払依頼', '差し戻しに失敗しました。'])

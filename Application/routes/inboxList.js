@@ -94,12 +94,7 @@ const cbGetIndex = async (req, res, next) => {
     }
   }
 
-  let rejectedFlag = false
-
-  if (req.session.waitingApprovalList) {
-    rejectedFlag = true
-    delete req.session.waitingApprovalList
-  }
+  const rejectedFlag = false
 
   // 受領した請求書一覧レンダリング
   res.render(presentation, {
@@ -226,12 +221,7 @@ const cbGetApprovals = async (req, res, next) => {
     }
   }
 
-  let rejectedFlag = true
-
-  if (req.session.waitingApprovalList) {
-    rejectedFlag = true
-    delete req.session.waitingApprovalList
-  }
+  const rejectedFlag = true
 
   // 受領した請求書一覧レンダリング
   res.render('inboxList', {

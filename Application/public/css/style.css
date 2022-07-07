@@ -987,3 +987,10 @@ margin: auto;
   max-width: 120px;
   margin: auto;
 }
+/* アイコンをリンクと同じ色にする */
+.iconLink .fas{
+  color: #3273dc;
+}
+.iconLink :hover{
+  color: #363636;
+}

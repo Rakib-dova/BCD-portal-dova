@@ -1,0 +1,22 @@
+#termBox h3{
+  font-size: 18px;
+  font-weight: bold;
+}
+
+#termBox h3 span{
+  color: #FF0000;
+}
+
+.termWrap{
+  margin: 1rem .5rem 0; 
+}
+
+.termCheck{
+  display: inline-block;
+  margin-right: 2rem;
+  margin-left: .5rem;
+}
+
+.termText{
+  text-align: center;
+}
