@@ -200,6 +200,12 @@ const cbGetApprovals = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  let presentation = 'inboxList'
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
+    presentation = 'inboxList_light_plan'
+  }
+
   // ページ取得
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
@@ -224,7 +230,7 @@ const cbGetApprovals = async (req, res, next) => {
   const rejectedFlag = true
 
   // 受領した請求書一覧レンダリング
-  res.render('inboxList', {
+  res.render(presentation, {
     listArr: result.list,
     numPages: result.numPages,
     currPage: result.currPage,
