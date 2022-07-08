@@ -974,15 +974,29 @@ padding: .5em;
 width: 155px;
 margin: auto;
 }
+/* 契約中*/
 .btn-status.st-navy{
   background-color: #0065A3;
   color: #fff;
 }
+/* 設定準備中、変更処理中*/
 .btn-status.st-white{
   background-color: white;
   border: 2px solid #0065A3;
   color: #0065A3;
 }
+/* 申込処理中*/
+.btn-status.st-yellow{
+  background-color: white;
+  border: 2px solid #FFA800;
+}
+/* 解約処理中*/
+.btn-status.st-red{
+  background-color: white;
+  border: 2px solid #F14668;
+  color:#F14668 ;
+}
+
 .btn-contract{
   max-width: 120px;
   margin: auto;

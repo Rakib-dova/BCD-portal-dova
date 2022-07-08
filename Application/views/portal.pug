@@ -119,6 +119,17 @@ block content
                       p 解約の場合は取り消しはできません。
 
         .columns.is-desktop.is-family-noto-sans
+          if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+            .column.is-one-third-desktop.hvr-float
+              .box.iconBox.textOverflow
+                a.show-modal(data-target='information-lightplan')
+                  .media.appdesc
+                    .media-left
+                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                    .media-content
+                      p.title-law オプションサービス
+                      p.title.is-5.margin-bottom-02rem 申込
+                      p オプションサービスの新規申し込みを行うことができます。
           .column.is-one-third-desktop.hvr-float
             .box.iconBox.textOverflow
               a(href='/receiveIntroductionSupport')
@@ -440,6 +451,8 @@ block content
                 i.fas.fa-file
               p 解約申込み
         footer.modal-card-foot
+
+    include informationLightplanModal
   include footer
 
 block append scripts
