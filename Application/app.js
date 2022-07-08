@@ -70,7 +70,7 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      'img-src': ["'self'"],
+      'img-src': ["'self'", "https: data:"],  // eslint-disable-line
       'form-action': ["'self'"], // form-actionは自己ドメインに制限
       // bulma-toast、fontawasom、googlefontsを使うためstyle-srcを一部許可
       // prettier-ignore
@@ -331,6 +331,9 @@ app.use('/change', require('./routes/change').router)
 
 // 請求書ダウンロード
 app.use('/csvDownload', require('./routes/csvDownload').router)
+
+/* PoC PDF出力機能 */
+app.use('/pdfInvoices', require('./routes/pdfInvoice').router)
 
 /**  会員サイト開発 20220228 */
 // アプリ一覧からの遷移受付けエンドポイント
