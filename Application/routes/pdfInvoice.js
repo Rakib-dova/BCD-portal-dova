@@ -205,16 +205,9 @@ const outputPdfInvoice = async (req, res, next) => {
   const { accountInfo, senderInfo } = await getAccountAndSenderInfo(req)
   if (!accountInfo || !senderInfo) return next(errorHelper.create(500))
 
-  const invoiceId = uuidV4()
-  invoice.sendTenantId = req.user.tenantId
-  invoice.invoiceId = invoiceId
-  invoice.tmpFlg = true
-  invoice.outputDate = new Date()
   lines.forEach((line, index) => {
     line.unitPrice = line.unitPrice ? line.unitPrice : null
     line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
-    line.invoiceId = invoiceId
-    line.lineIndex = index
   })
   invoice.lines = lines
   const billingDate = new Date(invoice.billingDate)
@@ -327,8 +320,6 @@ const deleteAndOutputPdfInvoice = async (req, res, next) => {
   lines.forEach((line, index) => {
     line.unitPrice = line.unitPrice ? line.unitPrice : null
     line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
-    line.invoiceId = req.params.invoiceId
-    line.lineIndex = index
   })
   invoice.lines = lines
   const billingDate = new Date(invoice.billingDate)
