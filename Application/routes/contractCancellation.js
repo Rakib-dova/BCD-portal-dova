@@ -1,67 +1,152 @@
 'use strict'
+const csrf = require('csurf')
 const express = require('express')
+
+const csrfProtection = csrf({ cookie: false })
 const router = express.Router()
+
 const helper = require('./helpers/middleware')
-const validate = require('../lib/validate')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
-const userController = require('../controllers/userController.js')
+const OrderData = require('./helpers/orderData')
 const contractController = require('../controllers/contractController.js')
+const applyOrderController = require('../controllers/applyOrderController.js')
+const channelDepartmentController = require('../controllers/channelDepartmentController.js')
 const logger = require('../lib/logger')
-const constantsDefine = require('../constants')
+const constants = require('../constants')
 
+// 契約ステータス
+const contractStatuses = constants.statusConstants.contractStatuses
+// サービス種別
+const serviceTypes = constants.statusConstants.serviceTypes
+// ログメッセージ
+const logMessage = constants.logMessage
 
-const cbGetIndex = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
-  // 認証情報取得処理
-  if (!req.session || !req.user?.userId) {
-    return next(errorHelper.create(500))
-  }
+/**
+ * 解約画面の表示
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns
+ */
+const showContractCancel = async (req, res, next) => {
+  logger.info(logMessage.INF000 + 'showContractCancel')
 
-  // DBからuserデータ取得
-  const user = await userController.findOne(req.user.userId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // user未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
-
-  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
-
-  // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
-
-  req.session.userContext = 'LoggedIn'
-
-  // ユーザ権限を取得
-  req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
-  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
-
-  if (checkContractStatus === null || checkContractStatus === 999) {
-    return next(errorHelper.create(500))
-  }
-
-  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
-    return next(noticeHelper.create('cancelprocedure'))
-  }
+  // 解約の事前チェック
+  const contracts = await checkContractStatus(req, res, next)
+  if (!contracts) return
 
   // ご契約内容を画面に渡す。
   res.render('contractCancellation', {
     title: '契約情報解約',
-    engTitle: 'CONTRACT CANCELLATION',
+    engTitle: 'CONTRACT CANCELLATION'
   })
-  logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
+  logger.info(logMessage.INF001 + 'showContractCancel')
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
+/**
+ * 解約の事前チェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns ライトプラン契約情報
+ */
+const checkContractStatus = async (req, res, next) => {
+  // ライトプランの契約情報を取得する
+  const contractslightPlan = await contractController.findContracts(
+    { tenantId: req.user?.tenantId, serviceType: serviceTypes.lightPlan },
+    null
+  )
+  if (contractslightPlan instanceof Error) return next(errorHelper.create(500))
+  // ライトプラン契約中の場合、メッセージを返却
+  if (!contractslightPlan) {
+    return next(noticeHelper.create('lightPlanCanceling'))
+  }
+
+  const contracts = await contractController.findContracts(
+    { tenantId: req.user?.tenantId, serviceType: serviceTypes.bcd },
+    null
+  )
+  // 申し込み前、または申し込み～申し込み竣工完了まで、または解約完了場合
+  if (
+    !contracts?.length ||
+    contracts.some(
+      (i) =>
+        i.contractStatus === contractStatuses.newContractOrder ||
+        i.contractStatus === contractStatuses.newContractReceive ||
+        i.contractStatus === contractStatuses.newContractBeforeCompletion
+    ) ||
+    contracts.every((i) => i.contractStatus === contractStatuses.canceledContract)
+  ) {
+    return next(noticeHelper.create('registerprocedure'))
+  } else if (
+    contracts.some(
+      (i) =>
+        i.contractStatus === contractStatuses.cancellationOrder ||
+        i.contractStatus === contractStatuses.cancellationReceive
+    )
+  ) {
+    // 解約中の場合(解約着手待ち～解約完了竣工まで)
+    return next(noticeHelper.create('cancellation'))
+  } else {
+    return contracts
+  }
+}
+
+/**
+ * 解約の実施
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ * @returns
+ */
+const contractCancel = async (req, res, next) => {
+  logger.info(logMessage.INF000 + 'contractCancel')
+
+  // ライトプランの解約の事前チェック
+  const contracts = await checkContractStatus(req, res, next)
+  if (!contracts) return
+
+  let salesChannelDeptType
+  // 組織区分が選択された場合、コードで組織区分を取得し、オーダー情報に設定する
+  const salesChannelDeptTypeCode = JSON.parse(req.body.salesChannelDeptType || '{}').code
+  if (salesChannelDeptTypeCode) {
+    const salesChannelDeptInfo = await channelDepartmentController.findOne(salesChannelDeptTypeCode)
+    if (salesChannelDeptInfo instanceof Error) return next(errorHelper.create(500))
+    if (salesChannelDeptInfo?.name) salesChannelDeptType = salesChannelDeptInfo.name
+  }
+
+  // オーダー情報の取得
+  const orderData = new OrderData(
+    req.user?.tenantId,
+    req.body,
+    constants.statusConstants.orderTypes.cancelOrder,
+    serviceTypes.bcd,
+    constants.statusConstants.prdtCodes.bcd,
+    constants.statusConstants.appTypes.cancel,
+    salesChannelDeptType
+  )
+
+  // 客様番号の設定
+  orderData.contractBasicInfo.contractNumber = contracts?.find(
+    (i) => i.contractStatus === contractStatuses.onContract
+  )?.numberN
+
+  // 解約する
+  const result = await applyOrderController.cancelOrder(req.user?.tenantId, serviceTypes.bcd, orderData)
+  // データベースエラーは、エラーオブジェクトが返る
+  if (result instanceof Error) return next(errorHelper.create(500))
+
+  req.flash('info', '解約が完了いたしました。')
+  logger.info(logMessage.INF001 + 'contractCancel')
+  return res.redirect(303, '/contractDetail')
+}
+
+router.get('/', helper.bcdAuthenticate, csrfProtection, showContractCancel)
+router.post('/register', helper.bcdAuthenticate, csrfProtection, contractCancel)
 
 module.exports = {
   router: router,
-  cbGetIndex: cbGetIndex
+  showContractCancel,
+  contractCancel
 }
-
-
