@@ -86,8 +86,9 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
   if (presentation === 'inboxList_light_plan') {
     await Promise.all(
       document.map(async (key) => {
+        let managerAddress
         if (!(key instanceof Error)) {
-          const managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
           if (
             typeof managerAddress !== 'undefined' &&
             managerAddress.trim().length !== 0 &&
@@ -99,13 +100,44 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
               'get',
               `/account/users/byemail/${managerAddress}`
             )
-            return { userInfo, documentId: key.documentId }
+            return { userInfo, managerAddress: managerAddress, documentId: key.documentId }
           }
         }
-        return ''
+        return { managerAddress: managerAddress, documentId: key.documentId }
       })
     ).then(function (result) {
-      contactor = result.filter((element) => !(element.userInfo instanceof Error) && element !== '')
+      contactor = result.filter(
+        (element) =>
+          element.managerAddress !== '' &&
+          element.managerAddress !== undefined &&
+          validate.isValidEmail(element.managerAddress)
+      )
+    })
+  } else {
+    // スタンダードプランではない場合
+    await Promise.all(
+      document.map(async (key) => {
+        let managerAddress = ''
+        if (!(key instanceof Error)) {
+          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+        }
+        if (
+          typeof managerAddress !== 'undefined' &&
+          managerAddress.trim().length !== 0 &&
+          validate.isValidEmail(managerAddress)
+        ) {
+          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+        }
+
+        return { managerAddress: managerAddress, documentId: key.documentId }
+      })
+    ).then(function (result) {
+      contactor = result.filter(
+        (element) =>
+          element.managerAddress !== '' &&
+          element.managerAddress !== undefined &&
+          validate.isValidEmail(element.managerAddress)
+      )
     })
   }
 
@@ -117,21 +149,12 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
     }
 
     const managerInfo = { managerAddress: '-', managerName: '（担当者不明）' }
-    for (let i = 0; i < document.length; i++) {
-      if (!(document[i] instanceof Error)) {
-        const managerAddress = document[i].AccountingCustomerParty.Party.Contact?.ID?.value
-        if (
-          document[i].documentId === item.DocumentId &&
-          typeof managerAddress !== 'undefined' &&
-          managerAddress.trim().length !== 0 &&
-          validate.isValidEmail(managerAddress)
-        ) {
-          managerInfo.managerAddress = managerAddress
-          for (let j = 0; j < contactor.length; j++) {
-            if (!(contactor[j].userInfo instanceof Error) && contactor[j].documentId === item.DocumentId) {
-              managerInfo.managerName = `${contactor[j].userInfo.Person.FirstName} ${contactor[j].userInfo.Person.LastName}`
-            }
-          }
+    for (let i = 0; i < contactor.length; i++) {
+      if (contactor[i].documentId === item.DocumentId) {
+        managerInfo.managerAddress = contactor[i].managerAddress
+        if (contactor[i].userInfo && !(contactor[i].userInfo instanceof Error)) {
+          managerInfo.managerName = `${contactor[i].userInfo.Person.FirstName} ${contactor[i].userInfo.Person.LastName}`
+          break
         }
       }
     }
@@ -740,12 +763,107 @@ const getRequestApproval = async (contractId, invoiceId) => {
  * @param {uuid} userId ユーザーの識別番号
  * @param {uuid} contractId コントラクター識別番号
  * @param {object} tradeshiftDTO トレードシフトのdata transfer
+ * @param {string} presentation スタンダードプランの有無確認
  * @returns {array<WaitingWorkflow>} 承認待ちのリスト
  */
-const getWorkflow = async (userId, contractId, tradeshiftDTO) => {
+const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
   const requestApprovalDTO = new (require('../DTO/RequestApprovalDTO'))(contractId)
   requestApprovalDTO.setTradeshiftDTO(tradeshiftDTO)
-  return await requestApprovalDTO.getWaitingWorkflowisMine(userId)
+  const getWaitingWorkflow = await requestApprovalDTO.getWaitingWorkflowisMine(userId)
+
+  // Promise.allが利用できない場合のため
+  // const document = []
+  // for (let i = 0; i < getWaitingWorkflow.length; i++) {
+  //   const result = await tradeshiftDTO.getDocument(getWaitingWorkflow[i].documentId, '')
+  //   document.push(result)
+  // }
+
+  // 請求書情報取得
+  let document = []
+  await Promise.all(
+    getWaitingWorkflow.map(async (key) => {
+      return tradeshiftDTO.getDocument(key.documentId)
+    })
+  ).then(function (result) {
+    document = result
+  })
+
+  // 社内に担当者ユーザーの有無確認
+  let contactor = []
+  if (presentation === 'inboxList_light_plan') {
+    await Promise.all(
+      document.map(async (key) => {
+        let managerAddress = ''
+        if (!(key instanceof Error)) {
+          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+          if (
+            typeof managerAddress !== 'undefined' &&
+            managerAddress.trim().length !== 0 &&
+            validate.isValidEmail(managerAddress)
+          ) {
+            const userInfo = await apiManager.accessTradeshift(
+              tradeshiftDTO.accessToken,
+              tradeshiftDTO.refreshToken,
+              'get',
+              `/account/users/byemail/${managerAddress}`
+            )
+            return { userInfo, managerAddress: managerAddress, documentId: key.documentId }
+          }
+        }
+        return { managerAddress: managerAddress, documentId: key.documentId }
+      })
+    ).then(function (result) {
+      contactor = result.filter(
+        (element) =>
+          element.managerAddress !== '' &&
+          element.managerAddress !== undefined &&
+          validate.isValidEmail(element.managerAddress)
+      )
+    })
+  } else {
+    // スタンダードプランではない場合
+    await Promise.all(
+      document.map(async (key) => {
+        let managerAddress = ''
+        if (!(key instanceof Error)) {
+          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+        }
+        if (
+          typeof managerAddress !== 'undefined' &&
+          managerAddress.trim().length !== 0 &&
+          validate.isValidEmail(managerAddress)
+        ) {
+          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+        }
+
+        return { managerAddress: managerAddress, documentId: key.documentId }
+      })
+    ).then(function (result) {
+      contactor = result.filter(
+        (element) =>
+          element.managerAddress !== '' &&
+          element.managerAddress !== undefined &&
+          validate.isValidEmail(element.managerAddress)
+      )
+    })
+  }
+
+  // リストに担当者アドレス、ユーザー情報入力
+  for (let i = 0; i < getWaitingWorkflow.length; i++) {
+    const managerInfo = { managerAddress: '-', managerName: '（担当者不明）' }
+    for (let j = 0; j < contactor.length; j++) {
+      if (contactor[j].documentId === getWaitingWorkflow[i].documentId) {
+        managerInfo.managerAddress = contactor[j].managerAddress
+        if (contactor[j].userInfo && !(contactor[j].userInfo instanceof Error)) {
+          managerInfo.managerName = `${contactor[j].userInfo.Person.FirstName} ${contactor[j].userInfo.Person.LastName}`
+          break
+        }
+      }
+    }
+    getWaitingWorkflow[i].managerInfo = managerInfo
+  }
+
+  return getWaitingWorkflow
 }
 
 /**

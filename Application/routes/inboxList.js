@@ -154,7 +154,13 @@ const cbGetWorkflow = async (req, res, next) => {
     user.tenantId
   )
 
-  const workflow = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+  let presentation
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
+    presentation = 'inboxList_light_plan'
+  }
+
+  const workflow = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
 
   if (workflow instanceof Error === true) res.status(500).send('サーバーエラーが発生しました。')
 
