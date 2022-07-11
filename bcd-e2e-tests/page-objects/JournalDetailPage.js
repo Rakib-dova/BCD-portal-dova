@@ -51,16 +51,16 @@ class JournalDetailPage {
   }
 
   // 仕訳情報の「+」をクリックする
-  async clickAddBreakdown() {
+  async clickAddBreakdown(lineNo) {
     await this.addComment('「仕訳情報」にて、「＋」をクリックする');
-    await this.actionUtils.click(this.frame, '//a[@class="btn-plus-accountCode" and @data-target="#lineNo1"]');
+    await this.actionUtils.click(this.frame, '//a[@class="btn-plus-accountCode" and @data-target="#lineNo' + lineNo + '"]');
     await this.frame.waitForTimeout(1000);
   }
 
   // 仕訳情報の「-」をクリックする
-  async clickDelBreakdown(no) {
+  async clickDelBreakdown(lineNo, acNo) {
     await this.addComment('「仕訳情報」にて、「-」をクリックする');
-    await this.actionUtils.click(this.frame, '//div[@id="lineNo1_lineAccountCode' + no + '"]//a[@class="red-color btn-minus-accountCode"]');
+    await this.actionUtils.click(this.frame, '//div[@id="lineNo' + lineNo + '_lineAccountCode' + acNo + '"]//a[@class="red-color btn-minus-accountCode"]');
     await this.frame.waitForTimeout(1000);
   }
 
@@ -71,7 +71,7 @@ class JournalDetailPage {
 
   // 仕訳情報入力フォームにて、指定の勘定科目、補助科目、部門コードが入力されているものを検索する
   async hasBreakdown(lineNo, acNo, isCredit, accountCode, subAccountCode, departmentCode) {
-    let xpathBase = '//div[@id="lineNo' + lineNo + '"]/div[position()=' + (acNo + 2) + ']/div[position()=' + (isCredit ? '3' : '1') + ']/table/tbody';
+    let xpathBase = '//div[@id="lineNo' + lineNo + '"]/div[contains(@class, "lineAccountcode")][' + acNo + ']/div[' + (isCredit ? '3' : '1') + ']/table/tbody';
     let xpathAccountCode = '/tr[position()=1]//input[@type="text"]';
     let xpathSubAccountCode = '/tr[position()=2]//input[@type="text"]';
     let xpathDepartmentCode = '/tr[position()=3]//input[@type="text"]';
@@ -105,10 +105,10 @@ class JournalDetailPage {
   }
 
   // 仕訳情報入力フォームにて、勘定科目の検索ポップアップを表示する
-  async clickAccountCodeSearch(no, isCredit) {
+  async clickAccountCodeSearch(lineNo, acNo, isCredit) {
     let modalId = isCredit ? 'creditAccountCode-modal' : 'accountCode-modal';
     await this.addComment('「仕訳情報」の勘定科目にて、「検索」をクリックする');
-    await this.actionUtils.click(this.frame, '//div[@id="lineNo' + no + '"]//a[@data-target="' + modalId + '"]');
+    await this.actionUtils.click(this.frame, '//div[@id="lineNo' + lineNo + '_lineAccountCode' + acNo + '"]//a[@data-target="' + modalId + '"]');
     await this.actionUtils.waitForLoading('#' + modalId);
   }
 
@@ -140,9 +140,9 @@ class JournalDetailPage {
   async clickAccountRow(isCredit, code, subCode) {
     let elmId = isCredit ? 'Credit' : '';
     await this.addComment('検索結果をクリックする');
-    await this.actionUtils.click(this.frame,
-      '//tbody[@id="display' + elmId + 'FieldResultBody"]//td[contains(text(), "'
-      + code + '")]/../td[contains(text(), "' + subCode + '")]');
+    let xpath = '//tbody[@id="display' + elmId + 'FieldResultBody"]';
+    xpath += subCode ? '/tr[@data-account-code="' + code + '" and @data-sub-account-code="' + subCode + '"]' : '/tr[@data-account-code="' + code + '"]';
+    await this.actionUtils.click(this.frame, xpath);
     await this.frame.waitForTimeout(1000);
   }
 
@@ -153,17 +153,20 @@ class JournalDetailPage {
   }
 
   // 仕訳情報にて、勘定科目・補助科目を選択する
-  async selectAccountCode(no, isCredit, code, subCode) {
-    await this.clickAccountCodeSearch(no, isCredit);
+  async selectAccountCode(lineNo, acNo, isCredit, code, subCode) {
+    if (!(await this.actionUtils.isExist(this.frame, '//div[@id="lineNo' + lineNo + '_lineAccountCode' + acNo + '"]'))) {
+      await this.clickAddBreakdown(lineNo);
+    }
+    await this.clickAccountCodeSearch(lineNo, acNo, isCredit);
     await this.searchAccount(isCredit, code, '', subCode, '');
     await this.clickAccountRow(isCredit, code, subCode);
   }
 
   // 先頭の仕訳情報入力フォームにて、部門データの検索ポップアップを表示する
-  async clickDepartmentSearch(no, isCredit) {
+  async clickDepartmentSearch(lineNo, acNo, isCredit) {
     await this.addComment('「仕訳情報」の部門データにて、「検索」をクリックする');
     let modalId = isCredit ? 'creditDepartmentCode-modal' : 'departmentCode-modal';
-    await this.actionUtils.click(this.frame, '//div[@id="lineNo' + no + '"]//a[@data-target="' + modalId + '"]');
+    await this.actionUtils.click(this.frame, '//div[@id="lineNo' + lineNo + '_lineAccountCode' + acNo + '"]//a[@data-target="' + modalId + '"]');
     await this.actionUtils.waitForLoading('#' + modalId);
   }
 
@@ -189,22 +192,26 @@ class JournalDetailPage {
   // 部門データの検索結果をクリックする
   async clickDepartmentRow(isCredit, code) {
     let elmId = isCredit ? 'Credit' : '';
+    await this.addComment('検索結果をクリックする');
     await this.actionUtils.click(this.frame,
       '//tbody[@id="display' + elmId + 'FieldDepartmentResultBody"]//td[contains(text(), "' + code + '")]');
     await this.frame.waitForTimeout(1000);
   }
 
   // 仕訳情報にて、部門データを選択する
-  async selectDepartment(no, isCredit, code) {
-    await this.clickDepartmentSearch(no, isCredit);
+  async selectDepartment(lineNo, acNo, isCredit, code) {
+    if (!(await this.actionUtils.isExist(this.frame, '//div[@id="lineNo' + lineNo + '_lineAccountCode' + acNo + '"]'))) {
+      await this.clickAddBreakdown(lineNo);
+    }
+    await this.clickDepartmentSearch(lineNo, acNo, isCredit);
     await this.searchDepartment(isCredit, code, '');
     await this.clickDepartmentRow(isCredit, code);
   }
 
   // 仕訳情報入力フォームの計上価格を入力する
-  async inputBreakdownCost(no, cost) {
+  async inputBreakdownCost(lineNo, acNo, cost) {
     await this.addComment('「仕訳情報」の「計上価格」にて、"' + cost + '"と入力する');
-    await this.actionUtils.click(this.frame, '#btn_lineNo1_lineAccountCode' + no + '_installmentAmount');
+    await this.actionUtils.click(this.frame, '//a[@data-input="lineNo' + lineNo + '_lineAccountCode' + acNo + '_input_amount"]');
     await this.actionUtils.fill(this.frame, '#inputInstallmentAmount', cost);
     await this.actionUtils.click(this.frame, '#btn-insert');
   }
@@ -267,7 +274,7 @@ class JournalDetailPage {
     await this.frame.waitForTimeout(500);
 
     // 仕訳情報設定確認ポップアップが表示された場合、「OK」をクリックする
-    if (await this.actionUtils.isExist(this.frame, '//div[@id="check-journalize-modal"]//a[text()="OK"]')) {
+    if (await this.actionUtils.isExist(this.frame, '//div[@id="check-journalize-modal" and @class="modal is-active"]')) {
       await this.addComment('仕訳情報設定確認ポップアップにて、「OK」をクリックする');
       await this.actionUtils.click(this.frame, '//div[@id="check-journalize-modal"]//a[text()="OK"]');
     }

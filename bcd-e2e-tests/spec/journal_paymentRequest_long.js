@@ -18,7 +18,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
   const invoiceNo = 'fcde40392';
 
   // 依頼者
-  const requester = config.company1.user12;
+  const requester = config.company1.user02;
 
   // 承認待ちインデックス（未申請=-1）
   let authorizerNo = -1;
@@ -27,7 +27,6 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
   const approveRoute = {
     name: '承認依頼テスト',
     authorizers: [
-      config.company1.user02,
       config.company1.user03,
       config.company1.user04,
       config.company1.user05,
@@ -37,7 +36,8 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
       config.company1.user09,
       config.company1.user10,
       config.company1.user11,
-      config.company1.mng
+      config.company1.user12,
+      config.company1.user13
     ]
   }
 
@@ -115,7 +115,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(approveRoute.authorizers[0], loginPage, tradeShiftTopPage, topPage);
 
     // 勘定科目を登録する
     await comment('「仕訳情報管理」をクリックする');
@@ -151,7 +151,8 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     await journalMenuPage.clickSubAccount();
     await subAccountCodeListPage.waitForLoading();
     for (i = 0; i < accountCodes.length; i++) {
-      if (await subAccountCodeListPage.hasRow(accountCodes[i].subCode, accountCodes[i].subName)) {
+      if (!accountCodes[i].subCode || !accountCodes[i].subName
+        || await subAccountCodeListPage.hasRow(accountCodes[i].subCode, accountCodes[i].subName)) {
         continue;
       }
       await comment('「新規登録する」をクリックする');
@@ -293,7 +294,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
     // 再度申請ができること
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal('支払依頼中', 'ステータスが「承認依頼中」となっていること');
-    authorizerNo++;
+    authorizerNo = 0;
 
     // 承認待ちタブを開く
     await comment('「承認待ち」タブを開く');
@@ -353,7 +354,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     // 請求書一覧画面にて承認ステータスに変更されていること
     await paymentRequestListPage.waitForLoading();
     expect(await paymentRequestListPage.getApproveStatus(invoiceNo)).to.equal(status, '請求書一覧画面にて承認ステータスに変更されていること');
-    authorizerNo++;
+    authorizerNo = no + 1;
     await page.waitForTimeout(1000);
   }
 
@@ -567,7 +568,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
         = common.getPageObject(browser, page);
   
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+    await gotoTop(approveRoute.authorizers[0], loginPage, tradeShiftTopPage, topPage);
 
     // 承認ルートを削除する
     await comment('「仕訳情報管理」をクリックする');

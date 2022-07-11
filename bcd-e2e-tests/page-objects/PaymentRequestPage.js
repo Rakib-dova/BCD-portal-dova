@@ -54,7 +54,6 @@ class PaymentRequestPage {
     return await this.actionUtils.getValue(this.frame, '#inputMsg');
   }
 
-  
   // 仕訳情報入力フォームにて、勘定科目の検索ポップアップを表示する
   async clickAccountCodeSearch(no, isCredit) {
     let modalId = isCredit ? 'creditAccountCode-modal' : 'accountCode-modal';
