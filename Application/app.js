@@ -248,21 +248,6 @@ app.use('/csvDownload', require('./routes/csvDownload').router)
 // 仕訳情報
 app.use('/journalDownload', require('./routes/journalDownload').router)
 
-// 契約情報解約
-app.use('/contractCancellation', require('./routes/contractCancellation').router)
-
-// 契約情報解約完了画面
-app.use('/contractCancellationComplete', require('./routes/contractCancellationComplete').router)
-
-// 有料サービス利用登録
-app.use('/paidServiceRegister', require('./routes/paidServiceRegister').router)
-
-// 有料サービス利用登録規約
-app.use('/paidServiceRegisterTerms', require('./routes/paidServiceRegisterTerms').router)
-
-// 有料サービス利用登録完了画面
-app.use('/paidServiceRegisterComplete', require('./routes/paidServiceRegisterComplete').router)
-
 // 仕訳情報設定
 // ------------勘定科目
 // 勘定科目一覧
@@ -338,17 +323,24 @@ app.use('/deleteApproveRoute', require('./routes/deleteApproveRoute').router)
 app.use('/approveRouteEdit', require('./routes/approveRouteEdit').router)
 
 // 設定
-// cancellation
+// ご契約内容
+app.use('/contractDetail', require('./routes/contractDetail').router)
+
+// 無料契約者情報の修正
+app.use('/change', require('./routes/change').router)
+
+// 無料契約情報解約
 app.use('/cancellation', require('./routes/cancellation').router)
 
-// 契約者情報の修正
-app.use('/change', require('./routes/change').router)
+// 有料契約情報解約
+app.use('/contractCancellation', require('./routes/contractCancellation').router)
 
 // ユーザー一括登録
 app.use('/uploadUsers', require('./routes/uploadUsers').router)
 
-// ご契約内容
-app.use('/contractDetail', require('./routes/contractDetail').router)
+// ------------オプションサービス申込
+// 有料サービス利用登録
+app.use('/paidServiceRegister', require('./routes/paidServiceRegister').router)
 
 // ------------導入支援(PBI3875)
 // 新規申込のみ

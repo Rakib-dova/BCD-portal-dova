@@ -144,7 +144,6 @@ class OrderData {
   validateContractAccountInfo() {
     const contractAccountInfo = this.contractAccountInfo
     return (
-      contractAccountInfo.commonCustomerId &&
       contractAccountInfo.contractorName &&
       contractAccountInfo.contractorKanaName &&
       contractAccountInfo.postalNumber &&

@@ -22,38 +22,6 @@ const billMailingElementIdMap = {
   clearBtnId: 'billMailingClearBtn'
 }
 
-// ----利用規約を最後までスクロールしないとチェックボックスが有効化しない
-const iframe = $('#terms-of-service')
-// iframeの高さ
-const height = iframe.offsetHeight
-
-const scrollEvent = function () {
-  // スクロールイベントを定義
-  iframe.contentDocument.onscroll = function () {
-    const scrollHeight = iframe.contentDocument.body.scrollHeight || iframe.contentDocument.documentElement.scrollHeight
-    const scrollTop = iframe.contentDocument.body.scrollTop || iframe.contentDocument.documentElement.scrollTop
-
-    // 現在の表示位置の高さ
-    const scrollPosition = height + scrollTop
-    const proximity = 0
-
-    if ((scrollHeight - scrollPosition) / scrollHeight <= proximity) {
-      $('#check').removeAttribute('disabled')
-    }
-  }
-}
-
-// iframeのonloadはchromeしか動かないためsetIntervalで監視する
-// iframe.onload = scrollEvent
-const timer = setInterval(function () {
-  const iframeDoc = iframe.contentDocument
-  // Check if loading is complete
-  if (iframeDoc.readyState === 'complete' || iframeDoc.readyState === 'interactive') {
-    scrollEvent()
-    return clearInterval(timer)
-  }
-}, 1000)
-
 /**
  * 郵便番号のチェック
  * @param {string} postalNumber 郵便番号
@@ -248,16 +216,6 @@ const contactAddress = function (elementIdMap) {
 setAddressEventListener(contractElementIdMap)
 // 請求情報住所の各イベント監視の設定
 setAddressEventListener(billMailingElementIdMap)
-
-// ----チェックボックスがオンになれば「次へ」ボタンを有効化
-$('#check').onclick = function () {
-  const btn = $('#next-btn')
-  if (this.checked) {
-    btn.removeAttribute('disabled')
-  } else {
-    btn.setAttribute('disabled', 'disabled')
-  }
-}
 
 // ----「次へ」ボタンが押された
 $('#next-btn').addEventListener('click', function (e) {

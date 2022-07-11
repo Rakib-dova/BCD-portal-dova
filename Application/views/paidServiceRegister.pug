@@ -3,9 +3,8 @@ block content
   .max-width
     section.hero.is-small.is-com
       .hero-body-noImage
-        .title.is-family-noto-sans 有料サービス利用登録
-        .subtitle.is-family-noto-sans PAID SERVICE REGISTER
-
+        .title.is-family-noto-sans #{title}
+        .subtitle.is-family-noto-sans #{engTitle}
 
     .columns.is-centered
       .column.is-11
@@ -17,7 +16,6 @@ block content
                 .container
                   p.ml-4 必要項目を入力後、「内容確認」ボタンを押してください。
 
-                    //- p.ml-4.mb-4 ※法人名、担当者名、メールアドレスはTradeshiftのプロフィール情報より取得しております。
                     .columns.is-centered: .column.is-four-fifths
                       .field.card
                         .card-content
@@ -25,11 +23,13 @@ block content
                           .field
                             label(for="contractorName").input-label 契約者名（企業名）
                             p#contractorNameRequired.input-label-required.input-label （必須）
+                            p#contractorNameMessage.input-label-required.input-label
                             .control
                               input.input#contractorName(type="text" name="contractorName" value="" pattern=inputPattarnZenkaku required maxlength=80 placeholder='全角80文字まで')
                           .field
                             label(for="contractorKanaName").input-label 契約者カナ名（企業名）
                             p#contractorKanaNameRequired.input-label-required.input-label （必須）
+                            p#contractorKanaNameMessage.input-label-required.input-label
                             .control
                               input.input#contractorKanaName(type="text" name="contractorKanaName" value="" pattern=inputPattarnZenkakuKatakana required maxlength=80 placeholder='全角カタカナ80文字まで')
 
@@ -39,26 +39,30 @@ block content
                           .field
                             label(for="postalNumber").input-label 郵便番号
                             p#postalNumberRequired.input-label-required.input-label （必須）
-                            p.input-label ※数字7桁　
+                            p.input-label ※数字7桁
+                            p#postalNumberMessage.input-label-required.input-label
                             .control
                               .columns.ml-0.pl-0
                                 .column.is-one-third.pl-0
                                   input.input#postalNumber(type="text" name="postalNumber" value="" pattern=inputPattarnHankakuNumber required maxlength=7 placeholder='例：1234567')
                                 .column
-                                  .button.is-link.mr-3#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
-                                  .button.is-danger#postalClearBtn(type="button" disabled) クリア
+                                  button.button.is-link.mr-3#postalSearchBtn(type="button" data-toggle="modal" data-target="#searchPostalNumber-modal" disabled) 検索
+                                  button.button.is-danger#postalClearBtn(type="button" disabled) クリア
                           .field
                             label(for="contractAddressVal").input-label 住所
                             p#contractAddressValRequired.input-label-required.input-label （必須）
+                            p#contractAddressValMessage.input-label-required.input-label
                             .control
                               input.input#contractAddressVal(type="text" name="contractAddressVal" value readonly required)
                           .field
                             label(for="banch1").input-label 番地
                             p#banch1Required.input-label-required.input-label （必須）
+                            p#banch1Message.input-label-required.input-label
                             .control
                               input.input#banch1(type="text" name="banch1" value="" pattern=inputPattarnZenkaku maxlength=20 required placeholder='全角20文字まで')
                           .field
                             label(for="tatemono1").input-label 建物等　
+                            p#tatemono1Message.input-label-required.input-label
                             .control
                               input.input#tatemono1(type="text" name="tatemono1" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16文字まで')
 
@@ -68,18 +72,21 @@ block content
                           .field
                             label(for="contactPersonName").input-label 連絡先担当者名
                             p#contactPersonNameRequired.input-label-required.input-label （必須）
+                            p#contactPersonNameMessage.input-label-required.input-label
                             .control
                               input.input#contactPersonName(type="text" name="contactPersonName" value="" pattern=inputPattarnZenkaku required maxlength=10 placeholder='全角10文字まで')
                           .field
                             label(for="contactPhoneNumber").input-label 連絡先電話番号
                             p#contactPhoneNumberRequired.input-label-required.input-label （必須）
                             p.input-label ※ハイフン含む13桁まで　
+                            p#contactPhoneNumberMessage.input-label-required.input-label
                             .control
                               input.input#contactPhoneNumber(type="text" name="contactPhoneNumber" value="" pattern=inputPattarnTellNumber required maxlength=13 placeholder='例：000-0000-0000')
                           .field
                             label(for="contactMail").input-label 連絡先メールアドレス
                             p#contactMailRequired.input-label-required.input-label （必須）
                             p.input-label ※メールアドレス　
+                            p#contactMailMessage.input-label-required.input-label
                             .control
                               input.input#contactMail(type="text" name="contactMail" value="" pattern=inputPattarnMailAddress required maxlength=82 placeholder='例：bcd@gma.com')
 
@@ -159,12 +166,14 @@ block content
                             label(for="password").input-label パスワード
                             p#passwordRequired.input-label-required.input-label （必須）
                             p.input-label ※半角英数8~10桁（大・小文字数字必須）
+                            p#passwordMessage.input-label-required.input-label
                             .control
                               input.input#password.form-control(type="password" name="password" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
                           .field
                             label(for="passwordConfirm").input-label パスワード確認
                             p#passwordConfirmRequired.input-label-required.input-label （必須）
                             p.input-label ※半角英数8~10桁（大・小文字数字必須）
+                            p#passwordConfirmMessage.input-label-required.input-label
                             .control
                               input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
 
@@ -175,9 +184,9 @@ block content
                           br
                           .field
                             label(for="openingDate").input-label 利用開始日
-                            p#openingDateMessage.input-label-required.input-label 
+                            p#openingDateMessage.input-label-required.input-label
                             .control
-                              input.input#openingDate.itemForSearch(type="date" name="openingDate" value= minissuedate pattern="^(19|20)\\d{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[0-1])$")
+                              input.input#openingDate.itemForSearch(type="date" name="openingDate" value= minissuedate pattern=inputPatternDate)
 
                       .field.card
                         .card-content
@@ -197,9 +206,9 @@ block content
                               input.input#salesChannelName(type="text" name="salesChannelName" value="" pattern=inputPattarnZenkaku maxlength=16 placeholder='全角16桁まで')
                           .field
                             label(for="commonCustomerId").input-label 共通顧客ID
-                            p#commonCustomerIdMessage.input-label.input-label
+                            p#commonCustomerIdMessage.input-label-required.input-label
                             .control
-                              input.input#commonCustomerId(type="text" name="commonCustomerId" value="" pattern=inputPatternEngNum  minlength=11 maxlength=11 placeholder='半角英数11桁')
+                              input.input#commonCustomerId(type="text" name="commonCustomerId" value="" pattern=inputPatternEngNum minlength=11 maxlength=11 placeholder='半角英数11桁')
                           .field
                             label(for="salesChannelDeptName").input-label 部課名
                             p#salesChannelDeptNameMessage.input-label-required.input-label
@@ -219,11 +228,11 @@ block content
                             label(for="salesChannelDeptType").input-label 組織区分
                             .control
                               .select.is-fullwidth
-                                //- select#salesChannelDeptType(name="salesChannelDeptType")
-                                select(name="")
+                                select#salesChannelDeptType(name="salesChannelDeptType")
                                   option(value= '')= '選択してください'
-                                  //- each salesChannelDept in salesChannelDeptList
-                                    //- option(value= salesChannelDept)= salesChannelDept.name 
+                                  if salesChannelDeptList && salesChannelDeptList.length > 0
+                                    for salesChannelDept of salesChannelDeptList
+                                      option(value= salesChannelDept)= salesChannelDept.name 
                           .field
                             label(for="salesChannelPhoneNumber").input-label 電話番号
                             p#salesChannelPhoneNumberRequired.input-label
@@ -242,7 +251,9 @@ block content
                   .columns.is-centered: .column.is-four-fifths
                     .field.is-grouped.is-grouped-centered
                       .control
-                        a.button.is-link.btn-contract.show-modal(data-target='confirmregister-modal') 内容確認
+                        //- CSRF対策
+                        input(type="hidden" name="_csrf" value=csrfToken)
+                        button.button.is-link.btn-contract.show-modal#next-btn(type="submit") 内容確認
 
             .modal.modal-fx-fadeInScale#confirmregister-modal
               .modal-background.cancel-button(data-target='confirmregister-modal')
@@ -378,12 +389,12 @@ block content
 
                 footer.modal-card-foot
                   div.button-area
-                    span.checkboxtext 「申し込む」ボタン押下することで、<a href ="">利用規約</a>に同意したものとします。
+                    span.checkboxtext 「申し込む」ボタン押下することで、<a href='/html/terms-of-service_20220419.pdf' target="_blank" rel="noopener noreferrer">利用規約</a>に同意したものとします。
                     .columns.is-centered: .column.is-four-fifths
                       .field.is-grouped.is-grouped-centered
                         .control
                           a.button.cancel-button.mr-6(data-target='confirmregister-modal') キャンセル
-                          a.button.is-success.is-link(href='/paidServiceRegisterComplete') 申し込む
+                          button.button.is-success.is-link(type="submit" formaction="/paidServiceRegister/apply" formmethod="POST") 申し込む
 
             .modal.modal-fx-fadeInscale#searchPostalNumber-modal
               .modal-background.cancel-button(data-target="searchPostalNumber-modal")
@@ -397,3 +408,5 @@ block content
   include footer
 
 block append scripts
+  script(src="/js/common/common.js")
+  script(src="/js/paidServiceRegister-page.js")

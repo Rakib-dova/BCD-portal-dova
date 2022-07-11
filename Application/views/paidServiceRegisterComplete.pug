@@ -9,27 +9,28 @@ block content
 
   .section#contractBox
     .is-family-noto-sans.contractWidth.mb-5
-      form#form(method="post")
-        article.panel.is-info
-          h2.panel-heading 利用申し込みを完了しました
-          .panel-block
-            .container
-              .columns.is-centered: .column
-                .field.is-grouped.is-grouped-left.is-block
-                  h3 申し込みサービス
-                .serviceWrap
-                  .icon-aic.is-flex.is-align-items-center
+      article.panel.is-info
+        h2.panel-heading 利用申し込みを完了しました
+        .panel-block
+          .container
+            .columns.is-centered: .column
+              .field.is-grouped.is-grouped-left.is-block
+                h3 申し込みサービス
+              .serviceWrap
+                .icon-aic.is-flex.is-align-items-center
+                  if serviceList.some((i) =>i === '030')
                     img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
                     span スタンダードプラン
+                  if serviceList.some((i) =>i === '020')
                     img.mr-3.ml-6.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
                     span 導入支援サービス                    
-                .field.is-grouped.is-grouped-left.is-block
-                  p.my-3 
-                    | この度は弊社サービスへの利用申し込みありがとうございました。
-                  p
-                    | 現在のご契約状況を確認する場合は<a href ="/contractDetail">「ご契約内容」</a>からご確認ください。 
-                .is-flex.my-5.btnWrap
-                  a.button.btn-contract.btnHome(href="/portal") HOMEへ戻る
+              .field.is-grouped.is-grouped-left.is-block
+                p.my-3 
+                  | この度は弊社サービスへの利用申し込みありがとうございました。
+                p
+                  | 現在のご契約状況を確認する場合は<a href ="/contractDetail">「ご契約内容」</a>からご確認ください。 
+              .is-flex.my-5.btnWrap
+                a.button.btn-contract.btnHome(href="/portal") HOMEへ戻る
     include footer
 block append scripts
   //- script(src="/js/register-page.js")

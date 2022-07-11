@@ -1,5 +1,6 @@
-// eslint-disable-next-line no-undef
-const $ = getElement
+/* global
+ $
+*/
 
 // ----「次へ」ボタンが押された
 $('#cancelltion-button').addEventListener('click', function (e) {

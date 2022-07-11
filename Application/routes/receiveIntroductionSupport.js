@@ -111,11 +111,9 @@ const registerIntroductionSupport = async (req, res, next) => {
   }
 
   // 契約する
-  const result = await applyOrderController.applyNewOrder(
-    req.user?.tenantId,
-    serviceTypes.introductionSupport,
+  const result = await applyOrderController.applyNewOrders(req.user?.tenantId, serviceTypes.introductionSupport, [
     orderData
-  )
+  ])
   // データベースエラーは、エラーオブジェクトが返る
   if (result instanceof Error) return next(errorHelper.create(500))
 
