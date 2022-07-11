@@ -163,7 +163,8 @@ const showPaidServiceRegister = async (req, res, next) => {
     title: '有料サービス利用登録',
     engTitle: 'PAID SERVICE REGISTER',
     csrfToken: req.csrfToken(),
-    salesChannelDeptList: salesChannelDeptList
+    salesChannelDeptList: salesChannelDeptList,
+    serviceList: serviceList
   })
   logger.info(logMessage.INF001 + 'showPaidServiceRegister')
 }

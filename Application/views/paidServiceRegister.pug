@@ -1,4 +1,8 @@
 ﻿extends layout
+
+block vars
+  - var standard = '030' // スタンダードプラン
+
 block content
   .max-width
     section.hero.is-small.is-com
@@ -177,16 +181,17 @@ block content
                             .control
                               input.input#passwordConfirm.form-control(type="password" name="passwordConfirm" value="" pattern=inputPatternKaituPW required maxlength=10 placeholder='例：Abcd1234')
 
-                      .field.card
-                        .card-content
-                          .title.is-4 スタンダードプラン利用開始日
-                          p ご希望の導入支援の内容によっては利用開始日を変更させていただきます。
-                          br
-                          .field
-                            label(for="openingDate").input-label 利用開始日
-                            p#openingDateMessage.input-label-required.input-label
-                            .control
-                              input.input#openingDate.itemForSearch(type="date" name="openingDate" value= minissuedate pattern=inputPatternDate)
+                      if serviceList.some((i) =>i === standard)
+                        .field.card
+                          .card-content
+                            .title.is-4 スタンダードプラン利用開始日
+                            p ご希望の導入支援の内容によっては利用開始日を変更させていただきます。
+                            br
+                            .field
+                              label(for="openingDate").input-label 利用開始日
+                              p#openingDateMessage.input-label-required.input-label
+                              .control
+                                input.input#openingDate.itemForSearch(type="date" name="openingDate" value= minissuedate pattern=inputPatternDate)
 
                       .field.card
                         .card-content
@@ -252,7 +257,8 @@ block content
                     .field.is-grouped.is-grouped-centered
                       .control
                         //- CSRF対策
-                        input(type="hidden" name="_csrf" value=csrfToken)
+                        input.is-hidden(name="_csrf" value=csrfToken)
+                        input.is-hidden#serviceList-json(name="serviceList" value=serviceList)
                         button.button.is-link.btn-contract.show-modal#next-btn(type="submit") 内容確認
 
             .modal.modal-fx-fadeInScale#confirmregister-modal

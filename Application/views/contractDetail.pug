@@ -31,12 +31,12 @@ block content
                         img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
                         span BConnectionデジタルトレードアプリ スタンダード
                   td.text-center.ver-mid #{contract.serviceType === '010' ? '無料' : '有料'}
-                  td.text-center.ver-mid #{contract.contractNumber}
+                  td.text-center.ver-mid #{contract.contractNumber ? contract.contractNumber : 'ー'}
                   td.text-center.ver-mid 
                     if contract.contractStatus === '10' || contract.contractStatus === '11' || contract.contractStatus === '12'
-                      span.btn-status.st-navy 登録処理中
+                      span.btn-status.st-yellow 申込処理中
                     else if contract.contractStatus === '30' || contract.contractStatus === '31'
-                      span.btn-status.st-navy 解約処理中
+                      span.btn-status.st-red 解約処理中
                     else if contract.contractStatus === '40' || contract.contractStatus === '41'
                       span.btn-status.st-white 変更処理中
                     else
@@ -46,7 +46,7 @@ block content
                       button.button.is-success.is-block.btn-contract(type="submit" formaction='/change' disabled=contract.contractStatus !== '00') 契約変更
                   td.text-center.ver-mid.px-1
                     if contract.serviceType === '010'
-                      button.button.is-can.is-block.btn-contract(type="submit" formaction='/cancellation' disabled=(contract.contractStatus !== '00' || continuingContractList.some((i) =>i.serviceType === '030'))) 解約申請
+                      button.button.is-can.is-block.btn-contract(type="submit" formaction='/cancellation' disabled=(contract.contractStatus !== '00' || continuingContractList.some((i) =>i.serviceType === '030') || oneShotContractList.some((i) =>i.serviceType === '020'))) 解約申請
                     else if contract.serviceType === '030'
                       button.button.is-can.is-block.btn-contract(type="submit" formaction='/contractCancellation' disabled=contract.contractStatus !== '00') 解約申請
 
@@ -68,10 +68,10 @@ block content
                       img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
                       span 導入支援サービス
                   td.text-center.ver-mid 有料
-                  td.text-center.ver-mid #{oneShotContractList[0].contractNumber}
+                  td.text-center.ver-mid #{oneShotContractList[0].contractNumber ? oneShotContractList[0].contractNumber : 'ー'}
                   td.text-center.ver-mid 
                     if oneShotContractList[0].contractStatus === '10' || oneShotContractList[0].contractStatus === '11'
-                      span.btn-status.st-white 申込処理中
+                      span.btn-status.st-yellow 申込処理中
                     else 
                       span.btn-status.st-white 設定準備中
                   td

@@ -256,13 +256,22 @@ $('#next-btn').addEventListener('click', function (e) {
     $('#passwordMessage').textContent = '　入力されたパスワードが一致しません。'
   }
 
-  // 開通希望日チェック(過去の日付を設定された場合)
-  if (
-    $('#openingDate').value &&
-    new Date($('#openingDate').value).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)
-  ) {
-    if (!firstError) firstError = $('#openingDate')
-    $('#openingDateMessage').textContent = '　過去の日付を設定できません。'
+  const openingDate = $('#openingDate').value
+
+  // 開通希望日チェック
+  if (openingDate) {
+    const serviceList = JSON.parse($('#serviceList-json').value)
+
+    // 過去の日付を設定された場合
+    if (new Date(openingDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) {
+      if (!firstError) firstError = $('#openingDate')
+      $('#openingDateMessage').textContent = '　過去の日付を設定できません。'
+
+      // 導入支援をチェックされた、かつ、16日前の日付を設定された場合
+    } else if (serviceList.some((i) => i === '020') && new Date(openingDate).getDate() < 16) {
+      if (!firstError) firstError = $('#openingDate')
+      $('#openingDateMessage').textContent = '　16日前の日付を設定できません。'
+    }
   }
 
   if (firstError) {
