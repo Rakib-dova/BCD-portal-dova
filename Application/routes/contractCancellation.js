@@ -36,10 +36,12 @@ const showContractCancel = async (req, res, next) => {
   const contracts = await checkContractStatus(req, res, next)
   if (!contracts) return
 
-  // ご契約内容を画面に渡す。
+  // 解約画面に渡す。
   res.render('contractCancellation', {
     title: '契約情報解約',
-    engTitle: 'CONTRACT CANCELLATION'
+    engTitle: 'CONTRACT CANCELLATION',
+    numberN: contracts?.find((i) => i.contractStatus === contractStatuses.onContract)?.numberN,
+    csrfToken: req.csrfToken()
   })
   logger.info(logMessage.INF001 + 'showContractCancel')
 }
@@ -137,13 +139,17 @@ const contractCancel = async (req, res, next) => {
   // データベースエラーは、エラーオブジェクトが返る
   if (result instanceof Error) return next(errorHelper.create(500))
 
-  req.flash('info', '解約が完了いたしました。')
+  // 完了画面へ遷移
+  res.render('contractCancellationComplete', {
+    title: '契約情報解約',
+    engTitle: 'CONTRACT CANCELLATION',
+    csrfToken: req.csrfToken()
+  })
   logger.info(logMessage.INF001 + 'contractCancel')
-  return res.redirect(303, '/contractDetail')
 }
 
-router.get('/', helper.bcdAuthenticate, csrfProtection, showContractCancel)
-router.post('/register', helper.bcdAuthenticate, csrfProtection, contractCancel)
+router.get('/', csrfProtection, helper.bcdAuthenticate, showContractCancel)
+router.post('/register', csrfProtection, helper.bcdAuthenticate, contractCancel)
 
 module.exports = {
   router: router,
