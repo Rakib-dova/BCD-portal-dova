@@ -10,7 +10,7 @@ block content
     .columns.is-centered#contractDetail
       .column.is-11     
         h2.mb-4 ■継続利用サービス
-        .box
+        form.box(method='get')
           table.table.is-fullwidth.is-hoverable.table-fixed
             thead
               tr
@@ -38,14 +38,17 @@ block content
                     else if contract.contractStatus === '30' || contract.contractStatus === '31'
                       span.btn-status.st-navy 解約処理中
                     else if contract.contractStatus === '40' || contract.contractStatus === '41'
-                      span.btn-status.st-navy 変更処理中
+                      span.btn-status.st-white 変更処理中
                     else
                       span.btn-status.st-navy 契約中
                   td.text-center.ver-mid.px-1 
                     if contract.serviceType === '010'
-                      a.button.is-success.is-block.btn-contract(href='/change') 契約変更
-                  td.text-center.ver-mid.px-1  
-                    a.button.is-can.is-block.btn-contract(href= (contract.serviceType === '010' ? '/cancellation' : '/cancelLightPlan')) 解約申請
+                      button.button.is-success.is-block.btn-contract(type="submit" formaction='/change' disabled=contract.contractStatus !== '00') 契約変更
+                  td.text-center.ver-mid.px-1
+                    if contract.serviceType === '010'
+                      button.button.is-can.is-block.btn-contract(type="submit" formaction='/cancellation' disabled=(contract.contractStatus !== '00' || continuingContractList.some((i) =>i.serviceType === '030'))) 解約申請
+                    else if contract.serviceType === '030'
+                      button.button.is-can.is-block.btn-contract(type="submit" formaction='/contractCancellation' disabled=contract.contractStatus !== '00') 解約申請
 
         if oneShotContractList.length > 0
           h2.mb-4.mt-6 ■初回利用サービス

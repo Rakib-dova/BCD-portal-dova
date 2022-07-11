@@ -1,23 +1,21 @@
 'use strict'
 const express = require('express')
-const csrf = require('csurf')
 
 const middleware = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const logger = require('../lib/logger')
-const constants = require('../constants')
+const constantsDefine = require('../constants')
 const Op = require('../models').Sequelize.Op
 const contractController = require('../controllers/contractController.js')
 
 const router = express.Router()
-const csrfProtection = csrf({ cookie: false })
 
 // 契約ステータス
-const contractStatuses = constants.statusConstants.contractStatuses
+const contractStatuses = constantsDefine.statusConstants.contractStatuses
 // サービス種別
-const serviceTypes = constants.statusConstants.serviceTypes
+const serviceTypes = constantsDefine.statusConstants.serviceTypes
 // ログメッセージ
-const logMessage = constants.logMessage
+const logMessage = constantsDefine.logMessage
 
 class ContractInfo {
   /**
@@ -38,7 +36,7 @@ const showContractDetail = async (req, res, next) => {
   const contracts = await contractController.findContracts(
     {
       tenantId: req.user?.tenantId,
-      contractStatus: { [Op.ne]: constants.statusConstants.contractStatuses.canceledContract }
+      contractStatus: { [Op.ne]: constantsDefine.statusConstants.contractStatuses.canceledContract }
     },
     [['serviceType', 'ASC']]
   )
@@ -75,7 +73,7 @@ const showContractDetail = async (req, res, next) => {
   logger.info(logMessage.INF001 + 'showContractDetail')
 }
 
-router.get('/', csrfProtection, middleware.bcdAuthenticate, middleware.isTenantManager, showContractDetail)
+router.get('/', middleware.bcdAuthenticate, middleware.isTenantManager, showContractDetail)
 
 module.exports = {
   router: router,
