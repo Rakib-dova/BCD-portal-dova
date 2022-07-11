@@ -311,6 +311,15 @@ const outputRules = [
   },
   {
     target: 'invoice',
+    displayLocation: 'header',
+    prop: 'sendRegistrationNo',
+    regexp: /^T\d{13}$/,
+    message: '登録番号は"T"+半角数字13桁で入力してください。',
+    emptyMessage: '登録番号が空欄のため、差出人情報が不完全です。入力して下さい。',
+    required: true
+  },
+  {
+    target: 'invoice',
     displayLocation: 'footer',
     prop: 'bankName',
     regexp: /^.{0,50}$/,

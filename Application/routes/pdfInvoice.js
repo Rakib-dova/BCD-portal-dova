@@ -14,10 +14,7 @@ const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const apiManager = require('../controllers/apiManager')
 const pdfInvoiceController = require('../controllers/pdfInvoiceController.js')
-const {
-  generatePdf,
-  renderInvoiceHTML
-} = require('../lib/pdfGenerator')
+const { generatePdf, renderInvoiceHTML } = require('../lib/pdfGenerator')
 const { formatDate } = require('../lib/utils')
 
 const taxDatabase = [
@@ -49,7 +46,7 @@ const pdfInvoiceList = async (req, res, next) => {
   console.log('==  加工後 invoices  ===================\n', invoices)
 
   res.render('pdfInvoiceList', {
-    title: 'PDF請求書',
+    title: 'PDF請求書作成ドラフト一覧',
     engTitle: 'PDF INVOICING',
     itemCount: invoices.length, // ページネーションで必要な情報
     invoices: JSON.stringify(invoices), // フロントエンドにデータを渡す為
@@ -123,37 +120,6 @@ const pdfInvoiceEdit = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceEdit')
 }
 
-const pdfInvoiceShow = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'pdfInvoiceShow')
-  if (!req.params.invoiceId) return next(errorHelper.create(400))
-
-  // アカウント情報取得
-  const { accountInfo, senderInfo } = await getAccountAndSenderInfo(req)
-  if (!accountInfo || !senderInfo) return next(errorHelper.create(500))
-
-  // PDF請求書情報取得
-  const { invoice, lines, sealImpRecord } = await getInvoiceInfo(req, senderInfo)
-  if (!invoice || !lines || !sealImpRecord) return next(errorHelper.create(500))
-
-  // 印影設定
-  const sealImpSrc = sealImpRecord.dataValues.image
-    ? `data:image/png;base64,${sealImpRecord.dataValues.image.toString('base64')}`
-    : null
-  // 企業ロゴ設定
-  const logoSrc = accountInfo.LogoURL ? accountInfo.LogoURL : null
-
-  res.render('pdfInvoice', {
-    title: 'PDF請求書',
-    engTitle: 'PDF INVOICE',
-    invoice: JSON.stringify(invoice),
-    lines: JSON.stringify(lines),
-    sealImpSrc,
-    logoSrc,
-    csrfToken: req.csrfToken()
-  })
-  logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceShow')
-}
-
 const createPdfInvoice = async (req, res, next) => {
   if (!req.body.invoice || !req.body.lines) return next(errorHelper.create(400))
   const invoice = JSON.parse(req.body.invoice)
@@ -172,11 +138,7 @@ const createPdfInvoice = async (req, res, next) => {
 
   let createdInvoice
   try {
-    createdInvoice = await pdfInvoiceController.createInvoice(
-      invoice,
-      lines,
-      req.file ? req.file.buffer : null
-    )
+    createdInvoice = await pdfInvoiceController.createInvoice(invoice, lines, req.file ? req.file.buffer : null)
   } catch (error) {
     console.log(error)
     return next(errorHelper.create(500))
@@ -232,7 +194,7 @@ const updatePdfInvoice = async (req, res, next) => {
   return res.status(200).send({ result: updatedInvoice[0] })
 }
 
-const createAndOutputPdfInvoice = async (req, res, next) => {
+const outputPdfInvoice = async (req, res, next) => {
   if (!req.body.invoice || !req.body.lines) return next(errorHelper.create(400))
   const invoice = JSON.parse(req.body.invoice)
   const lines = JSON.parse(req.body.lines)
@@ -243,16 +205,9 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
   const { accountInfo, senderInfo } = await getAccountAndSenderInfo(req)
   if (!accountInfo || !senderInfo) return next(errorHelper.create(500))
 
-  const invoiceId = uuidV4()
-  invoice.sendTenantId = req.user.tenantId
-  invoice.invoiceId = invoiceId
-  invoice.tmpFlg = true
-  invoice.outputDate = new Date()
   lines.forEach((line, index) => {
     line.unitPrice = line.unitPrice ? line.unitPrice : null
     line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
-    line.invoiceId = invoiceId
-    line.lineIndex = index
   })
   invoice.lines = lines
   const billingDate = new Date(invoice.billingDate)
@@ -302,29 +257,12 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
   }
   console.log('== PDF生成完了 ====================')
 
-  console.log('== PDF請求書レコード挿入 開始 ====================')
-  invoice.billingDate = billingDate
-  invoice.paymentDate = paymentDate
-  invoice.deliveryDate = deliveryDate
-  try {
-    const createdInvoice = await pdfInvoiceController.createInvoice(
-      invoice,
-      lines,
-      req.file ? req.file.buffer : null
-    )
-    console.log('==  createdInvoice  ===================\n', createdInvoice)
-  } catch (error) {
-    console.log(error)
-    return next(errorHelper.create(500))
-  }
-  console.log('== PDF請求書レコード挿入 成功 ====================')
-
   res.set({ 'Content-Disposition': 'attachment;' })
   res.status(200).send(pdfBuffer)
 }
 
-const updateAndOutputPdfInvoice = async (req, res, next) => {
-  logger.info(constantsDefine.logMessage.INF000 + 'updateAndOutputPdfInvoice')
+const deleteAndOutputPdfInvoice = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'deleteAndOutputPdfInvoice')
   if (!req.params.invoiceId || !req.body.invoice || !req.body.lines) return next(errorHelper.create(400))
   const invoice = JSON.parse(req.body.invoice)
   const lines = JSON.parse(req.body.lines)
@@ -382,8 +320,6 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
   lines.forEach((line, index) => {
     line.unitPrice = line.unitPrice ? line.unitPrice : null
     line.quantity = line.quantity ? Math.floor(line.quantity * 1000) / 1000 : null
-    line.invoiceId = req.params.invoiceId
-    line.lineIndex = index
   })
   invoice.lines = lines
   const billingDate = new Date(invoice.billingDate)
@@ -406,35 +342,24 @@ const updateAndOutputPdfInvoice = async (req, res, next) => {
   }
   console.log('== PDF生成完了 ====================')
 
-  if (!invoiceRecord.dataValues.tmpFlg) {
-    console.log('== PDF請求書レコード更新 開始 ====================')
-    delete invoice.lines
-    invoice.billingDate = billingDate
-    invoice.paymentDate = paymentDate
-    invoice.deliveryDate = deliveryDate
-    invoice.tmpFlg = true
-    invoice.outputDate = new Date()
-
-    try {
-      const updatedInvoice = await pdfInvoiceController.updateInvoice(
-        req.params.invoiceId,
-        invoice,
-        lines,
-        sealImp ? sealImp.buffer : null
-      )
-      console.log('==  updatedInvoice  ===================\n', updatedInvoice)
-    } catch (error) {
-      console.log(error)
-      return next(errorHelper.create(500))
+  console.log('== PDF請求書レコード削除 開始 ====================')
+  try {
+    const deleteInvoice = await pdfInvoiceController.deleteInvoice(req.params.invoiceId)
+    if (deleteInvoice === 0) {
+      console.log('指定の請求書は既に削除済みです。')
     }
-    console.log('== PDF請求書レコード更新 成功 ====================')
+  } catch (error) {
+    console.log(error)
+    return next(errorHelper.create(500))
   }
+  console.log('== PDF請求書レコード削除 成功 ====================')
 
   res.set({ 'Content-Disposition': 'attachment;' })
   res.status(200).send(pdfBuffer)
-  logger.info(constantsDefine.logMessage.INF001 + 'updateAndOutputPdfInvoice')
+  logger.info(constantsDefine.logMessage.INF001 + 'deleteAndOutputPdfInvoice')
 }
 
+// 一覧画面からの削除用
 // const deletePdfInvoice = async (req, res, next) => {
 //   if (!req.params.invoiceId) return next(errorHelper.create(400))
 
@@ -514,12 +439,17 @@ const getTotal = (lines, taxDatabase) => {
 router.get('/list', csrfProtection, helper.bcdAuthenticate, pdfInvoiceList)
 router.get('/register', csrfProtection, helper.bcdAuthenticate, pdfInvoiceRegister)
 router.get('/edit/:invoiceId', csrfProtection, helper.bcdAuthenticate, pdfInvoiceEdit)
-router.get('/show/:invoiceId', csrfProtection, helper.bcdAuthenticate, pdfInvoiceShow)
 
 router.post('/', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), createPdfInvoice)
 router.put('/:invoiceId', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), updatePdfInvoice)
-router.post('/createAndOutput', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), createAndOutputPdfInvoice)
-router.post('/updateAndOutput/:invoiceId', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), updateAndOutputPdfInvoice)
+router.post('/output', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), outputPdfInvoice)
+router.post(
+  '/deleteAndOutput/:invoiceId',
+  csrfProtection,
+  helper.bcdAuthenticate,
+  upload.single('sealImp'),
+  deleteAndOutputPdfInvoice
+)
 // router.delete('/:invoiceId', helper.bcdAuthenticate, deletePdfInvoice)
 
 module.exports = {
@@ -527,11 +457,10 @@ module.exports = {
   pdfInvoiceList,
   pdfInvoiceRegister,
   pdfInvoiceEdit,
-  pdfInvoiceShow,
   createPdfInvoice,
   updatePdfInvoice,
-  createAndOutputPdfInvoice,
-  updateAndOutputPdfInvoice,
+  outputPdfInvoice,
+  deleteAndOutputPdfInvoice,
   getAccountAndSenderInfo,
   getInvoiceInfo
 }

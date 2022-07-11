@@ -10,9 +10,7 @@ const savePdfInvoice = async (invoice, lines, file, invoiceId = null) => {
   console.log('==  API 前 file ===================\n', file)
 
   return await apiController(
-    invoiceId
-      ? `https://${location.host}/pdfInvoices/${invoiceId}`
-      : `https://${location.host}/pdfInvoices`,
+    invoiceId ? `https://${location.host}/pdfInvoices/${invoiceId}` : `https://${location.host}/pdfInvoices`,
     invoiceId ? 'PUT' : 'POST',
     formData
   )
@@ -31,8 +29,8 @@ const outputPdfInvoice = async (invoice, lines, file, invoiceId = null, timerId 
 
   apiController(
     invoiceId
-      ? `https://${location.host}/pdfInvoices/updateAndOutput/${invoiceId}`
-      : `https://${location.host}/pdfInvoices/createAndOutput`,
+      ? `https://${location.host}/pdfInvoices/deleteAndOutput/${invoiceId}`
+      : `https://${location.host}/pdfInvoices/output`,
     'POST',
     formData,
     async (response) => {

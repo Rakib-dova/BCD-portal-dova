@@ -12,7 +12,7 @@ const pageButtonsUl = document.querySelector('.pagination-list')
 
 function getDisplayItems(curPageIndex) {
   return items.filter((_, index) => {
-    return (index >= curPageIndex * itemsPerPage && index < (curPageIndex * itemsPerPage + itemsPerPage))
+    return index >= curPageIndex * itemsPerPage && index < curPageIndex * itemsPerPage + itemsPerPage
   })
 }
 
@@ -47,19 +47,13 @@ function renderItems(curPageIndex) {
     // 期限日設定
     const paymentDateTd = clone.querySelector('.paymentDate')
     paymentDateTd.textContent = item.paymentDate
-    // ステータス設定
-    const statusTd = clone.querySelector('.status')
-    statusTd.textContent = item.tmpFlg ? '出力済み' : 'ドラフト'
     // リンクボタン設定
     const linkButtonTd = clone.querySelector('.link-btn')
     const linkButtonA = document.createElement('a')
     linkButtonTd.appendChild(linkButtonA)
     linkButtonA.className = 'button is-success'
-    linkButtonA.setAttribute('href',
-      item.tmpFlg
-        ? `/pdfInvoices/show/${item.invoiceId}`
-        : `/pdfInvoices/edit/${item.invoiceId}`)
-    linkButtonA.textContent = item.tmpFlg ? '確認・出力' : '編集・出力'
+    linkButtonA.setAttribute('href', `/pdfInvoices/edit/${item.invoiceId}`)
+    linkButtonA.textContent = '編集・出力'
 
     itemListTable.appendChild(tr)
   })
