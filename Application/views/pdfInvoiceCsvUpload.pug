@@ -1,0 +1,63 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans PDF請求書ドラフト一括作成
+        .subtitle.is-family-noto-sans CSV UPLOAD for PDF
+    .columns.is-centered
+      .column.is-11
+        .box
+          .columns.is-centered.uploader-columns
+            .column
+              form#accountCodeUpload
+                .file.is-centered.is-medium.is-boxed.has-name.is-border.is-white
+                  label.file-label.has-text-centered
+                    input(type='file',id="file-upload",name="fileUpload", accept=".csv").is-purple
+                    span.file-cta.inbox-size-selected-file
+                      span.file-idForCodeInput
+                        i.fas.fa-upload.fa-3x.title-selected-file-icon.up-selected-file-title
+                      span.file-label.up-selected-file-title
+                        p.td-overflow.font-is-macSystem.title-selected-file ファイルを選択してください。
+                      span
+                        a.button.btn-primary.is-small.is-family-noto-sans.pt-0.pb-0.up-selected-file-title ファイル選択
+                    span.file-name
+                      p.td-overflow.is-family-noto-sans#filename             
+
+          .mt-5.has-text-centered
+            .button.is-medium.is-link.is-outlined.is-family-noto-sans.box-large(disabled='disabled', id='start-upload-btn') アップロード開始
+
+          .mt-5
+            .columns.is-mobile.mt-0.mb-0.box-large.mr-auto
+              .column-csvupload
+                p (手順)
+                p 1. 下記リンクをクリックし、アップロード用のCSVファイルをダウンロード
+                a(download href='..html/pdfInvoiceCsvUpload.csv') 　アップロード用CSVファイルダウンロード
+                p 2. CSVファイルに請求書データを記入
+                a(download href='..html/pdfInvoiceCsvUpload.pdf') 　作成マニュアルダウンロード
+                p 　※1ファイルで作成できる請求書の数は200まで
+                p 　※文字コードはUTF-8 BOM付で作成してください
+                p 3.「ファイル選択」ボタンをクリックし、記入したCSVファイルを選択
+                p 4.「アップロード開始」ボタンをクリック
+        .mt-1.space-between
+          a.button.is-link.is-light.has-text-left(href='/pdfInvoices/list') ← PDF請求書一覧 
+          a.button.is-link.is-light.has-text-right(href='/pdfInvoiceCsvUpload/resultList') 取込結果一覧 →
+
+      .modal.modal-fx-fadeInscale#upload-progress-modal
+          .modal-background
+          .modal-card
+            header.modal-card-head
+              p.modal-card-title
+            section.modal-card-body
+              center
+                p.modal-card-result#modal-card-result アップロード中
+            footer.modal-card-foot
+
+    include footer
+
+block append scripts
+  script(src="/js/portal-page.js")
+  // End of DigitalTrade Portal Page
+  script(src="/js/pdfInvoiceUploadResult.js") 
+  // CSV アップロード

@@ -1,0 +1,46 @@
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans #{title}
+        .subtitle.is-family-noto-sans #{engTitle}
+
+    .columns.is-centered
+      .column.is-11
+        a.button.is-link.mb-4(href="/pdfInvoices/register") 新規作成
+        a.button.is-link.mb-4.ml-4(href="/pdfInvoiceCsvUpload") ドラフト一括登録
+
+        .box
+          if itemCount === 0
+            p 現在、PDF請求書はありません。新規登録するボタンから登録を行ってください。
+          else
+            table.table.is-fullwidth.is-hoverable.table-fixed
+              thead
+                tr
+                  th.width-5.text-center No
+                  th.width-13.text-center 請求書番号
+                  th.width-13.text-center 宛先
+                  th.width-10.text-center 金額
+                  th.width-10.text-center 更新日
+                  th.width-10.text-center 期限日
+                  th.width-10.text-center ステータス
+                  th.width-10.text-center 
+              tbody#item-list
+
+              template#pfdInvoice-template
+                tr
+                  th.text-center.td-overflow.no
+                  td.text-center.td-overflow.invoiceNo
+                  td.text-center.td-overflow.recCompany
+                  td.has-text-right.td-overflow.total
+                  td.text-center.td-overflow.updatedAt
+                  td.text-center.td-overflow.paymentDate
+                  td.text-center.td-overflow.status
+                  td.text-center.link-btn
+
+            nav.pagination.is-centered(role='navigation' aria-label='pagination')
+              ul.pagination-list
+                      
+    include footer
+
+    div#invoices-json(hidden="true") #{invoices}

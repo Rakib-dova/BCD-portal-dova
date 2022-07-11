@@ -6,7 +6,8 @@ html
       meta(charset='utf-8')
       meta(name='viewport', content='width=device-width, initial-scale=1.0')
       meta(name="referrer" content="origin-when-cross-origin")
-      //- meta(name="csrf-token" content="")
+      if csrfToken
+        meta(name='csrf-token', content=csrfToken)
       title #{title} - BConnectionデジタルトレード
       link(rel='stylesheet', type='text/css', href='https://use.fontawesome.com/releases/v5.6.1/css/all.css')
       link(rel='stylesheet', type='text/css', href='/css/bulma.css')
@@ -25,7 +26,10 @@ html
               span.fas.fa-home
                 | Home
           .navbar-item.right
-            img.ncom-logo(src='../image/ts-app-digitaltrade-ncom-logo.svg')
+            if title && (title === 'PDF請求書編集' || title === 'PDF請求書')
+              img.ncom-logo(src='../../image/ts-app-digitaltrade-ncom-logo.svg')
+            else
+              img.ncom-logo(src='../image/ts-app-digitaltrade-ncom-logo.svg')
     
     block vars
       - var inputPattarnZenkakuHiragana = '^[^ -~｡-ﾟ\t]+$' // 全角ひらがな

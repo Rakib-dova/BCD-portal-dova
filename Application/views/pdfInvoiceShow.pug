@@ -1,0 +1,35 @@
+extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans #{title}
+        .subtitle.is-family-noto-sans #{engTitle}
+
+  .container
+    div.title-box-journallzing
+      h4.title-text-journallzing.text-inbox 出力内容登録
+    .box
+      include invoicePDFHeader
+      include invoicePDFLines
+      include invoicePDFFooter
+      .grouped-button.margin-top-40p
+        a.button.mr-6(href='/pdfInvoices/list')  戻る
+        if title === 'PDF請求書作成' && editing
+          a.button.mr-6.is-success#save-btn 一時保存
+        else if title === 'PDF請求書編集' && editing
+          a.button.mr-6.is-success#update-btn 一時保存
+        a.button.is-link#output-btn 出力
+  
+  include footer
+
+  div#invoice-json(hidden="true") #{invoice}
+  div#lines-json(hidden="true") #{lines}
+
+block append scripts
+  script(src="/js/lib/utils.js")
+  script(src="/js/lib/pdfInvoiceValidation.js")
+  script(src="/js/services/pdfInvoice.js")
+  script(src="/js/pdfInvoice-page.js")
+  link(rel='stylesheet', type='text/css', href='/css/inbox.css')
