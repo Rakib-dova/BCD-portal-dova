@@ -130,8 +130,17 @@ function getWorkflow() {
               sentBy.innerText = item.sendBy
 
               const contactAddress = document.createElement('td')
-              addColumnCSS(contactAddress)
-              contactAddress.innerText = item.sendTo
+              const lightPlan = document.querySelector('#BtnInboxSearch')
+              if (lightPlan) {
+                if (item.managerInfo.managerName === '（担当者不明）') {
+                  contactAddress.classList.add('text-color-red')
+                }
+                addColumnCSS(contactAddress)
+                contactAddress.innerText = item.managerInfo.managerAddress + '\n' + item.managerInfo.managerName
+              } else {
+                addColumnCSS(contactAddress)
+                contactAddress.innerText = item.managerInfo.managerAddress
+              }
 
               const expire = document.createElement('td')
               addColumnCSS(expire)
