@@ -227,10 +227,11 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
+                              - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
                               if (item.managerInfo.managerName === '（担当者不明）')
-                                td.text-center.td-overflow.text-color-red!= item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                                td.text-center.td-overflow.text-color-red!= managerinfo
                               else 
-                                td.text-center.td-overflow!= item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                                td.text-center.td-overflow!= managerinfo
                               td.text-center.td-overflow= item.expire
                               td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
@@ -473,10 +474,11 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
+                              - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
                               if (item.managerInfo.managerName === '（担当者不明）')
-                                td.text-center.td-overflow.text-color-red!= item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                                td.text-center.td-overflow.text-color-red!= managerinfo
                               else 
-                                td.text-center.td-overflow!= item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                                td.text-center.td-overflow!= managerinfo
                               td.text-center.td-overflow= item.expire
                               td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
