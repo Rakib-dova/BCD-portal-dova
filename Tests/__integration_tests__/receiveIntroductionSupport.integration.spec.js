@@ -57,6 +57,40 @@ const postData = {
   salesChannelMailAddress: 'aaa@aaa.com'
 }
 
+const maxLengthData = {
+  commonCustomerId: '12345678901',
+  contractorName:
+    '一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十',
+  contractorKanaName:
+    'アイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコ',
+  postalNumber: '1234567',
+  banch1: '一二三四五六七八九十一二三四五六七八九十',
+  tatemono1: '一二三四五六七八九十一二三四五六',
+  contactPersonName: '一二三四五六七八九十',
+  contactPhoneNumber: '123-5678-0123',
+  contactMail: '123456789@12345678901234567890123456789012345678901234567890123456789012345678.com',
+  campaignCode: '1234567890',
+  salesPersonName:
+    '一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六',
+  password: 'Aa12345678',
+  passwordConfirm: 'Aa12345678',
+  billMailingPostalNumber: '1234567',
+  billMailingAddressBanchi1: '一二三四五六七八九十一二三四五六七八九十',
+  billMailingAddressBuilding1: '一二三四五六七八九十一二三四五六',
+  billMailingKanaName: '一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五',
+  billMailingName: 'アイウエオカキクケコアイウエオカキクケコアイウエオカキクケコアイウエオカキクケコ',
+  billMailingPersonName: '一二三四五六七八九十',
+  billMailingPhoneNumber: '123-5678-0123',
+  billMailingMailAddress: '123456789@12345678901234567890123456789012345678901234567890123456789012345678.com',
+  salesChannelCode: '12345678',
+  salesChannelName: '一二三四五六七八九十一二三四五六',
+  salesChannelDeptName: '一二三四五六七八九十一二三四五六',
+  salesChannelEmplyeeCode: '12345678',
+  salesChannelPersonName: '一二三四五六七八九十',
+  salesChannelPhoneNumber: '123-5678-0123',
+  salesChannelMailAddress: '123456789@12345678901234567890123456789012345678901234567890123456789012345678.com'
+}
+
 const receiveIntroductionSupportData = {
   commonCustomerId: '11111111111',
   contractorName: '契約者名',
@@ -144,6 +178,41 @@ const requiredOnlyOrderData = {
     }
   ],
   prdtList: [{ prdtCode: 'BF4022000000100', idnumber: '', appType: '010' }]
+}
+
+/**
+ * 導入支援サービス申込画面の全部項目の最大桁数値になっていることのチェック
+ * @param {*} page
+ */
+const checkMaxLengthValues = async (page) => {
+  expect(await page.$eval('#commonCustomerId', (el) => el.value)).toBe(maxLengthData.commonCustomerId)
+  expect(await page.$eval('#contractorName', (el) => el.value)).toBe(maxLengthData.contractorName)
+  expect(await page.$eval('#contractorKanaName', (el) => el.value)).toBe(maxLengthData.contractorKanaName)
+  expect(await page.$eval('#postalNumber', (el) => el.value)).toBe(maxLengthData.postalNumber)
+  expect(await page.$eval('#banch1', (el) => el.value)).toBe(maxLengthData.banch1)
+  expect(await page.$eval('#tatemono1', (el) => el.value)).toBe(maxLengthData.tatemono1)
+  expect(await page.$eval('#contactPersonName', (el) => el.value)).toBe(maxLengthData.contactPersonName)
+  expect(await page.$eval('#contactPhoneNumber', (el) => el.value)).toBe(maxLengthData.contactPhoneNumber)
+  expect(await page.$eval('#contactMail', (el) => el.value)).toBe(maxLengthData.contactMail)
+  expect(await page.$eval('#password', (el) => el.value)).toBe(maxLengthData.password)
+  expect(await page.$eval('#passwordConfirm', (el) => el.value)).toBe(maxLengthData.passwordConfirm)
+  expect(await page.$eval('#billMailingPostalNumber', (el) => el.value)).toBe(maxLengthData.billMailingPostalNumber)
+  expect(await page.$eval('#billMailingAddressBanchi1', (el) => el.value)).toBe(maxLengthData.billMailingAddressBanchi1)
+  expect(await page.$eval('#billMailingAddressBuilding1', (el) => el.value)).toBe(
+    maxLengthData.billMailingAddressBuilding1
+  )
+  expect(await page.$eval('#billMailingKanaName', (el) => el.value)).toBe(maxLengthData.billMailingKanaName)
+  expect(await page.$eval('#billMailingName', (el) => el.value)).toBe(maxLengthData.billMailingName)
+  expect(await page.$eval('#billMailingPersonName', (el) => el.value)).toBe(maxLengthData.billMailingPersonName)
+  expect(await page.$eval('#billMailingPhoneNumber', (el) => el.value)).toBe(maxLengthData.billMailingPhoneNumber)
+  expect(await page.$eval('#billMailingMailAddress', (el) => el.value)).toBe(maxLengthData.billMailingMailAddress)
+  expect(await page.$eval('#salesChannelCode', (el) => el.value)).toBe(maxLengthData.salesChannelCode)
+  expect(await page.$eval('#salesChannelName', (el) => el.value)).toBe(maxLengthData.salesChannelName)
+  expect(await page.$eval('#salesChannelDeptName', (el) => el.value)).toBe(maxLengthData.salesChannelDeptName)
+  expect(await page.$eval('#salesChannelEmplyeeCode', (el) => el.value)).toBe(maxLengthData.salesChannelEmplyeeCode)
+  expect(await page.$eval('#salesChannelPersonName', (el) => el.value)).toBe(maxLengthData.salesChannelPersonName)
+  expect(await page.$eval('#salesChannelPhoneNumber', (el) => el.value)).toBe(maxLengthData.salesChannelPhoneNumber)
+  expect(await page.$eval('#salesChannelMailAddress', (el) => el.value)).toBe(maxLengthData.salesChannelMailAddress)
 }
 
 const addressDbReset = async () => {
@@ -820,6 +889,75 @@ describe('導入支援インテグレーションテスト', () => {
           expect(await page.$eval('#next-btn', (el) => el.disabled)).toBeTruthy()
 
           await browser.close()
+        })
+      })
+      describe('入力動作の確認', () => {
+        test('最大桁数の入力確認', async () => {
+          await page.type('#commonCustomerId', maxLengthData.commonCustomerId)
+          await page.type('#contractorName', maxLengthData.contractorName)
+          await page.type('#contractorKanaName', maxLengthData.contractorKanaName)
+          await page.type('#postalNumber', maxLengthData.postalNumber)
+          await page.type('#banch1', maxLengthData.banch1)
+          await page.type('#tatemono1', maxLengthData.tatemono1)
+          await page.type('#contactPersonName', maxLengthData.contactPersonName)
+          await page.type('#contactPhoneNumber', maxLengthData.contactPhoneNumber)
+          await page.type('#contactMail', maxLengthData.contactMail)
+          await page.type('#campaignCode', maxLengthData.campaignCode)
+          await page.type('#salesPersonName', maxLengthData.salesPersonName)
+          await page.type('#password', maxLengthData.password)
+          await page.type('#passwordConfirm', maxLengthData.passwordConfirm)
+          await page.type('#billMailingPostalNumber', maxLengthData.billMailingPostalNumber)
+          await page.type('#billMailingAddressBanchi1', maxLengthData.billMailingAddressBanchi1)
+          await page.type('#billMailingAddressBuilding1', maxLengthData.billMailingAddressBuilding1)
+          await page.type('#billMailingKanaName', maxLengthData.billMailingKanaName)
+          await page.type('#billMailingName', maxLengthData.billMailingName)
+          await page.type('#billMailingPersonName', maxLengthData.billMailingPersonName)
+          await page.type('#billMailingPhoneNumber', maxLengthData.billMailingPhoneNumber)
+          await page.type('#billMailingMailAddress', maxLengthData.billMailingMailAddress)
+          await page.type('#salesChannelCode', maxLengthData.salesChannelCode)
+          await page.type('#salesChannelName', maxLengthData.salesChannelName)
+          await page.type('#salesChannelDeptName', maxLengthData.salesChannelDeptName)
+          await page.type('#salesChannelEmplyeeCode', maxLengthData.salesChannelEmplyeeCode)
+          await page.type('#salesChannelPersonName', maxLengthData.salesChannelPersonName)
+          await page.type('#salesChannelPhoneNumber', maxLengthData.salesChannelPhoneNumber)
+          await page.type('#salesChannelMailAddress', maxLengthData.salesChannelMailAddress)
+
+          // 導入支援サービス申込画面の全部項目の最大桁数値になっていることのチェック
+          await checkMaxLengthValues(page)
+        })
+
+        test('最大桁数により多い値の入力確認', async () => {
+          await page.type('#commonCustomerId', maxLengthData.commonCustomerId + '1')
+          await page.type('#contractorName', maxLengthData.contractorName + '1')
+          await page.type('#contractorKanaName', maxLengthData.contractorKanaName + '1')
+          await page.type('#postalNumber', maxLengthData.postalNumber + '1')
+          await page.type('#banch1', maxLengthData.banch1 + '1')
+          await page.type('#tatemono1', maxLengthData.tatemono1 + '1')
+          await page.type('#contactPersonName', maxLengthData.contactPersonName + '1')
+          await page.type('#contactPhoneNumber', maxLengthData.contactPhoneNumber + '1')
+          await page.type('#contactMail', maxLengthData.contactMail + '1')
+          await page.type('#campaignCode', maxLengthData.campaignCode + '1')
+          await page.type('#salesPersonName', maxLengthData.salesPersonName + '1')
+          await page.type('#password', maxLengthData.password + '1')
+          await page.type('#passwordConfirm', maxLengthData.passwordConfirm + '1')
+          await page.type('#billMailingPostalNumber', maxLengthData.billMailingPostalNumber + '1')
+          await page.type('#billMailingAddressBanchi1', maxLengthData.billMailingAddressBanchi1 + '1')
+          await page.type('#billMailingAddressBuilding1', maxLengthData.billMailingAddressBuilding1 + '1')
+          await page.type('#billMailingKanaName', maxLengthData.billMailingKanaName + '1')
+          await page.type('#billMailingName', maxLengthData.billMailingName + '1')
+          await page.type('#billMailingPersonName', maxLengthData.billMailingPersonName + '1')
+          await page.type('#billMailingPhoneNumber', maxLengthData.billMailingPhoneNumber + '1')
+          await page.type('#billMailingMailAddress', maxLengthData.billMailingMailAddress + '1')
+          await page.type('#salesChannelCode', maxLengthData.salesChannelCode + '1')
+          await page.type('#salesChannelName', maxLengthData.salesChannelName + '1')
+          await page.type('#salesChannelDeptName', maxLengthData.salesChannelDeptName + '1')
+          await page.type('#salesChannelEmplyeeCode', maxLengthData.salesChannelEmplyeeCode + '1')
+          await page.type('#salesChannelPersonName', maxLengthData.salesChannelPersonName + '1')
+          await page.type('#salesChannelPhoneNumber', maxLengthData.salesChannelPhoneNumber + '1')
+          await page.type('#salesChannelMailAddress', maxLengthData.salesChannelMailAddress + '1')
+
+          // 導入支援サービス申込画面の全部項目の最大桁数値になっていることのチェック
+          await checkMaxLengthValues(page)
         })
       })
       describe('住所検索動作の確認', () => {
