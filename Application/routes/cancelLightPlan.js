@@ -133,7 +133,7 @@ const cancelLightPlan = async (req, res, next) => {
   )?.numberN
 
   // 解約する
-  const result = await applyOrderController.cancelOrder(req.user?.tenantId, serviceTypes.lightPlan, orderData)
+  const result = await applyOrderController.cancelOrder(req.user?.tenantId, orderData)
   // データベースエラーは、エラーオブジェクトが返る
   if (result instanceof Error) return next(errorHelper.create(500))
 

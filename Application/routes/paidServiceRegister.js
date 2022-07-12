@@ -27,6 +27,7 @@ const logMessage = constantsDefine.logMessage
  * 有料サービス申込前の契約状態のチェック
  * @param {string} tenantId テナントID
  * @param {string[]} serviceList 有料サービスリスト
+ * @param {function} next 次の処理
  * @returns 解約済以外契約情報
  */
 const checkPaidServiceContract = async (tenantId, serviceList, next) => {

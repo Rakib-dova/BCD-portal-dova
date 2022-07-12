@@ -68,7 +68,7 @@ class OrderData {
         // 顧客区分ダミー番号とする(SOPFで補填のため空)
         customerType: '',
         // 共通顧客ID
-        commonCustomerId: inputData.commonCustomerId ?? '',
+        commonCustomerId: inputData.commonCustomerId || 'C9999999999',
         // 契約者名
         contractorName: inputData.contractorName ?? '',
         // 契約者カナ名

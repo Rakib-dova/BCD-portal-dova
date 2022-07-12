@@ -36,7 +36,7 @@ block content
                     li ・仕訳情報ダウンロード出力フォーマットの選択
                     li ・メール通知機能
                 .is-flex.mb-5.btnWrap 
-                  a.button.btn-contract キャンセル   
+                  a.button.btn-contract(href="contractDetail") キャンセル   
                   a.button.is-success.btn-contract.show-modal(data-target='cancell-modal') 解約手続へ
 
     .modal#cancell-modal
@@ -57,7 +57,7 @@ block content
               td #{numberN}
           p.my-5.cancellText 下記の「解約」ボタンを押下した後の取り消しはできません。  
           .is-flex.btnWrap   
-            a.button.btn-contract キャンセル   
+            a.button.cancel-button.btn-contract(data-target="cancell-modal") キャンセル   
             a.button.status-text.is-fail.btn-contract(href="/contractCancellationComplete") 解約  
         footer.modal-card-foot
     include footer

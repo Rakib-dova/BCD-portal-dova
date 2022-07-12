@@ -57,6 +57,16 @@ module.exports = {
       message = '現在ライトプランは未契約です。'
       description1 = null
       description2 = null
+    } else if (messageStatus === 'haveStandard') {
+      // 「スタンダードプラン契約中のため解約できません。」画面を表示する
+      message = 'スタンダードプラン契約中のため解約できません。'
+      description1 = null
+      description2 = null
+    } else if (messageStatus === 'haveIntroductionSupport') {
+      // 「導入支援サービス契約処理中のため解約できません。」画面を表示する
+      message = '導入支援サービス契約処理中のため解約できません。'
+      description1 = null
+      description2 = null
     } else if (messageStatus.status === 500) {
       return next(errorHelper.create(500))
     } else {

@@ -67,17 +67,16 @@ const applyNewOrders = async (tenantId, orderDataList) => {
 /**
  * 解約
  * @param {string} tenantId テナントID
- * @param {string} serviceType サービス種別
  * @param {object} orderData オーダーデータ
  * @returns
  */
-const cancelOrder = async (tenantId, serviceType, orderData) => {
+const cancelOrder = async (tenantId, orderData) => {
   try {
     await db.sequelize.transaction(async (t) => {
       const contract = await contractController.findContract(
         {
           tenantId: tenantId,
-          serviceType: serviceType,
+          serviceType: orderData.contractBasicInfo.serviceType,
           contractStatus: contractStatuses.onContract
         },
         null

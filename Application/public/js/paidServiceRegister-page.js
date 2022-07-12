@@ -256,7 +256,7 @@ $('#next-btn').addEventListener('click', function (e) {
     $('#passwordMessage').textContent = '　入力されたパスワードが一致しません。'
   }
 
-  const openingDate = $('#openingDate').value
+  const openingDate = $('#openingDate')?.value
 
   // 開通希望日チェック
   if (openingDate) {

@@ -5,6 +5,7 @@ const helper = require('./helpers/middleware')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const cancellationsController = require('../controllers/cancellationsController.js')
+const Op = require('../models').Sequelize.Op
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 
@@ -16,6 +17,44 @@ const contractInformationcancelOrder = require('../orderTemplate/contractInforma
 
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
+
+// サービス種別
+const serviceTypes = constantsDefine.statusConstants.serviceTypes
+
+/**
+ * 契約情報の取得とチェック
+ * @param {string} tenantId テナントID
+ * @param {function} next 次の処理
+ * @returns 無料契約情報
+ */
+const getAndCheckContracts = async (tenantId, next) => {
+  // 解約済以外契約情報を取得する
+  const contracts = await contractController.findContracts(
+    {
+      tenantId: tenantId,
+      contractStatus: { [Op.ne]: constantsDefine.statusConstants.contractStatuses.canceledContract }
+    },
+    null
+  )
+  // データベースエラー、または、契約情報未登録の場合エラーを上げる
+  if (contracts instanceof Error || !contracts || contracts.length === 0) return next(errorHelper.create(500))
+
+  // ライトプラン契約中の場合
+  if (contracts.some((i) => i.serviceType === serviceTypes.lightPlan)) {
+    return next(noticeHelper.create('haveStandard'))
+
+    // 導入支援サービス契約中の場合
+  } else if (contracts.some((i) => i.serviceType === serviceTypes.introductionSupport)) {
+    return next(noticeHelper.create('haveIntroductionSupport'))
+  }
+
+  // 無料契約情報の取得
+  const contract = contracts.find((i) => i.serviceType === serviceTypes.bcd)
+  if (!contract) return next(errorHelper.create(500))
+
+  // 無料契約情報の返却
+  return contract
+}
 
 const cbGetCancellation = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCancellation')
@@ -37,16 +76,14 @@ const cbGetCancellation = async (req, res, next) => {
     return next(errorHelper.create(400))
   }
 
-  // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+  // 無料契約情報の取得
+  const contract = await getAndCheckContracts(req.user.tenantId, next)
+  if (!contract) return
 
   // ユーザ権限を取得
   req.session.userRole = user.dataValues?.userRole
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
+  const deleteFlag = contract.deleteFlag
+  const contractStatus = contract.contractStatus
 
   const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
@@ -74,7 +111,7 @@ const cbGetCancellation = async (req, res, next) => {
   res.render('cancellation', {
     tenantId: req.user.tenantId,
     userRole: req.session.userRole,
-    numberN: contract.dataValues?.numberN,
+    numberN: contract?.numberN,
     TS_HOST: process.env.TS_HOST,
     csrfToken: req.csrfToken()
   })
@@ -90,14 +127,12 @@ const cbPostCancellation = async (req, res, next) => {
   // user未登録の場合もエラーを上げる
   if (user instanceof Error || user === null) return next(errorHelper.create(500))
 
-  // DBから契約情報取得
-  const contract = await contractController.findOne(req.user.tenantId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // 契約情報未登録の場合もエラーを上げる
-  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+  // 無料契約情報の取得
+  const contract = await getAndCheckContracts(req.user.tenantId, next)
+  if (!contract) return
 
-  const deleteFlag = contract.dataValues.deleteFlag
-  const contractStatus = contract.dataValues.contractStatus
+  const deleteFlag = contract.deleteFlag
+  const contractStatus = contract.contractStatus
 
   const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
 
@@ -123,7 +158,7 @@ const cbPostCancellation = async (req, res, next) => {
   // contractBasicInfo 設定
   contractInformationcancelOrder.contractBasicInfo.tradeshiftId = req.user.tenantId
   contractInformationcancelOrder.contractBasicInfo.orderType = constantsDefine.statusConstants.orderTypeCancelOrder
-  contractInformationcancelOrder.contractBasicInfo.contractNumber = contract.dataValues?.numberN
+  contractInformationcancelOrder.contractBasicInfo.contractNumber = contract?.numberN
 
   // 解約申込登録を行う
   const cancellation = await cancellationsController.create(req.user.tenantId, '{}', contractInformationcancelOrder)
@@ -139,6 +174,7 @@ router.post('/', helper.isAuthenticated, csrfProtection, cbPostCancellation)
 
 module.exports = {
   router: router,
+  getAndCheckContracts: getAndCheckContracts,
   cbGetCancellation: cbGetCancellation,
   cbPostCancellation: cbPostCancellation
 }
