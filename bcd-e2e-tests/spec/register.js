@@ -191,7 +191,7 @@ describe('利用登録', function () {
     // 解約する
     await contractCancelPage.cancel();
     await page.waitForTimeout(1000);
-  }
+  };
 
   /**
    * STEP7 No.1,3,15,25-30,37-40

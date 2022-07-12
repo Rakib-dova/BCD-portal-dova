@@ -98,8 +98,6 @@ describe('仕訳情報設定_補助科目一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -154,8 +152,6 @@ describe('仕訳情報設定_補助科目一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -235,8 +231,6 @@ describe('仕訳情報設定_補助科目一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -351,8 +345,6 @@ describe('仕訳情報設定_補助科目一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -430,58 +422,42 @@ describe('仕訳情報設定_補助科目一覧', function () {
   it("後片付け（勘定科目、補助科目全削除）", async function() {
     // テストの初期化を実施
     await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-  
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-  
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, subAccountCodeListPage, accountCodeListPage }
-        = common.getPageObject(browser, page);
-
-      // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(account, loginPage, tradeShiftTopPage, topPage);
-
-      // 補助科目をすべて削除する
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-      await comment('「補助科目設定」をクリックする');
-      await journalMenuPage.clickSubAccount();
-      await subAccountCodeListPage.waitForLoading();
-      await comment('補助科目をすべて削除する');
-      await subAccountCodeListPage.deleteAll();
-
-      // 同様に、勘定科目をすべて削除する
-      await comment('「Home」をクリックする');
-      await subAccountCodeListPage.clickHome();
-      await topPage.waitForLoading();
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-      await comment('「勘定科目設定」をクリックする');
-      await journalMenuPage.clickAccount();
-      await accountCodeListPage.waitForLoading();
-      await comment('勘定科目をすべて削除する');
-      await accountCodeListPage.deleteAll();
+    const context = await browser.newContext(contextOption);
+    if (page != null) {
+      page.close();
     }
+    page = await context.newPage();
+    global.reporter.setBrowserInfo(browser, page);
+
+    // ページオブジェクト
+    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, subAccountCodeListPage, accountCodeListPage }
+      = common.getPageObject(browser, page);
+
+    // デジタルトレードアプリのトップページへ遷移する
+    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+
+    // 補助科目をすべて削除する
+    await comment('「仕訳情報管理」をクリックする');
+    await topPage.openJournalMenu();
+    await journalMenuPage.waitForLoading();
+    await comment('「補助科目設定」をクリックする');
+    await journalMenuPage.clickSubAccount();
+    await subAccountCodeListPage.waitForLoading();
+    await comment('補助科目をすべて削除する');
+    await subAccountCodeListPage.deleteAll();
+
+    // 同様に、勘定科目をすべて削除する
+    await comment('「Home」をクリックする');
+    await subAccountCodeListPage.clickHome();
+    await topPage.waitForLoading();
+    await comment('「仕訳情報管理」をクリックする');
+    await topPage.openJournalMenu();
+    await journalMenuPage.waitForLoading();
+    await comment('「勘定科目設定」をクリックする');
+    await journalMenuPage.clickAccount();
+    await accountCodeListPage.waitForLoading();
+    await comment('勘定科目をすべて削除する');
+    await accountCodeListPage.deleteAll();
   });
 });
 
