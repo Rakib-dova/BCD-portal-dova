@@ -3998,54 +3998,6 @@ describe('journalDownloadのテスト', () => {
       expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
     })
 
-    test('正常:請求書複数の場合（ヘッダーのみ）', async () => {
-      // 準備
-      // requestのsession,userIdに正常値を入れる
-      request.session = { ...session }
-      request.user = { ...user[0] }
-      request.body = {
-        chkFinalapproval: 'noneFinalapproval',
-        invoiceNumber: '',
-        minIssuedate: '2021-08-01',
-        maxIssuedate: '2021-11-09',
-        serviceDataFormat: '0'
-      }
-
-      // DBからの正常なユーザデータの取得を想定する
-      userControllerFindOneSpy.mockReturnValue(Users[0])
-      // DBからの正常な契約情報取得を想定する
-      contractControllerFindOneSpy.mockReturnValue(Contracts[0])
-
-      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
-
-      contractControllerFindContractSpyon.mockReturnValue(Contracts[0])
-
-      findOneRequestApprovalSpy.mockReturnValue(null)
-
-      journalfindAllSpy.mockReturnValue(dbJournalTable)
-
-      journalDownloadControllerCreateInvoiceDataForDownloadSpy.mockReturnValue(headers)
-
-      // 試験実施
-      await journalDownload.cbPostIndex(request, response, next)
-
-      // 期待結果
-      // userContextがLoggedInになっている
-      expect(request.session?.userContext).toBe('LoggedIn')
-      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
-      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // responseのヘッダ
-      const today = new Date().toISOString().split('T')[0]
-      expect(response.setHeader().headers['Content-Disposition']).toContain('attachment; filename=')
-      expect(response.setHeader().headers['Content-Disposition']).toContain(`${today}`)
-      expect(response.setHeader().headers['Content-Disposition']).toContain(encodeURIComponent('請求書.csv'))
-
-      // responseのcsvファイル
-      const csvHeader = response.setHeader().body.split('\r\n')[0]
-
-      expect(csvHeader).toBe(`${String.fromCharCode(0xfeff)}${headers}`)
-    })
-
     test('準正常:請求書複数の場合のAPIエラー', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
