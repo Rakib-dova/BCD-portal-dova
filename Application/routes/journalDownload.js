@@ -455,7 +455,7 @@ const cbPostIndex = async (req, res, next) => {
           const invoice = arrDownload[idx]
           const journalizeInvoice = arrDownload[idx]
           // 最初の請求書の場合
-          if (invoice.length !== 0 && invoice[0].invoice) {
+          if (invoice.length !== 0) {
             if (idx === 0) {
               fileData += jsonToCsv(dataToJson(invoice[0].invoice, journalizeInvoice[0].journalizeInvoiceFinal))
               fileData += String.fromCharCode(0x0d) + String.fromCharCode(0x0a) // 改行の追加
