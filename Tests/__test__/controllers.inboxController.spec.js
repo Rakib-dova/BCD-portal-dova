@@ -869,6 +869,21 @@ const userInfo = {
   CompanyAccountIdModifyDate: '2021-06-01T08:49:08.410Z'
 }
 
+const noNameUserInfo = {
+  Id: '27f7188b-f6c7-4b5e-9826-96052bba495c',
+  Person: { LastName: ' ', FirstName: ' ' },
+  CompanyAccountId: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
+  UserName: 'abc@test.co.jp',
+  Credentials: [],
+  State: 'ACTIVE',
+  Language: 'ja',
+  Kind: 'PERSON',
+  LastLogin: 1657590818711,
+  TimeZone: 'Asia/Tokyo',
+  Visible: false,
+  CompanyAccountIdModifyDate: '2021-06-01T08:49:08.410Z'
+}
+
 const accessToken = 'dummyAccessToken'
 const refreshToken = 'dummyRefreshToken'
 const pageId = 1
@@ -1001,6 +1016,23 @@ describe('inboxControllerのテスト', () => {
       // 期待結果
       // 想定した契約情報がReturnされていること
       expect(result).toEqual(managerInfoResult)
+    })
+
+    test('正常：担当者アドレスがある場合、ユーザー情報あり：名前なし（有償）', async () => {
+      // 準備
+      // APIからの正常情報の取得を想定する
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(noNameUserInfo)
+      const presentation = 'inboxList_light_plan'
+
+      // 試験実施
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(freeManagerInfoResult)
     })
 
     test('正常：担当者アドレスがある場合、ユーザー情報なし（有償）', async () => {
@@ -2263,6 +2295,68 @@ describe('inboxControllerのテスト', () => {
       expect(result[0]).toHaveProperty('managerInfo', {
         managerAddress: 'abc@test.co.jp',
         managerName: 'テスト UT'
+      })
+    })
+
+    test('正常:担当者アドレスがある場合、ユーザー情報あり:名前なし(有償)', async () => {
+      // 準備
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+      const getAllRequestApproval = []
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+        })
+      )
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(noNameUserInfo)
+      const presentation = 'inboxList_light_plan'
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
+      expect(result.length).toBe(1)
+      expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', {
+        managerAddress: 'abc@test.co.jp',
+        managerName: '（担当者不明）'
       })
     })
 
