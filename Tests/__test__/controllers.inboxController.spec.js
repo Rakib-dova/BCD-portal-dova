@@ -2121,8 +2121,8 @@ describe('inboxControllerのテスト', () => {
 
   describe('getWorkflow', () => {
     test('正常:対象がない', async () => {
-      const userId = 'dummyUserId'
       // 準備
+      const userId = 'dummyUserId'
       const req = {
         user: {
           accessToken: 'dummy-accessToken',
