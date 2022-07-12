@@ -47,7 +47,7 @@ const checkContractStatus = async (tenantId, next) => {
     ) ||
     contracts.every((i) => i.contractStatus === contractStatuses.canceledContract)
   ) {
-    return next(noticeHelper.create('lightPlanUnregistered'))
+    return next(noticeHelper.create('standardUnregistered'))
   } else if (
     contracts.some(
       (i) =>
@@ -56,7 +56,7 @@ const checkContractStatus = async (tenantId, next) => {
     )
   ) {
     // 解約中の場合(解約着手待ち～解約完了竣工まで)
-    return next(noticeHelper.create('lightPlanCanceling'))
+    return next(noticeHelper.create('standardCanceling'))
   } else {
     return contracts
   }
@@ -97,7 +97,7 @@ const contractCancel = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'contractCancel')
 
   // ライトプランの解約の事前チェック
-  const contracts = await checkContractStatus(req, res, next)
+  const contracts = await checkContractStatus(req.user?.tenantId, next)
   if (!contracts) return
 
   // オーダー情報の取得
@@ -124,8 +124,7 @@ const contractCancel = async (req, res, next) => {
   // 完了画面へ遷移
   res.render('contractCancellationComplete', {
     title: '契約情報解約',
-    engTitle: 'CONTRACT CANCELLATION',
-    csrfToken: req.csrfToken()
+    engTitle: 'CONTRACT CANCELLATION'
   })
   logger.info(logMessage.INF001 + 'contractCancel')
 }

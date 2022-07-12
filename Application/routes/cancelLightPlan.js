@@ -49,7 +49,7 @@ const checkContractStatus = async (req, res, next) => {
     ) ||
     contracts.every((i) => i.contractStatus === contractStatuses.canceledContract)
   ) {
-    return next(noticeHelper.create('lightPlanUnregistered'))
+    return next(noticeHelper.create('standardUnregistered'))
   } else if (
     contracts.some(
       (i) =>
@@ -58,7 +58,7 @@ const checkContractStatus = async (req, res, next) => {
     )
   ) {
     // 解約中の場合(解約着手待ち～解約完了竣工まで)
-    return next(noticeHelper.create('lightPlanCanceling'))
+    return next(noticeHelper.create('standardCanceling'))
   } else {
     return contracts
   }

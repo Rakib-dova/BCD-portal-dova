@@ -49,10 +49,10 @@ const checkContractStatus = async (req, res, next) => {
       )
     ) {
       //  申込中の場合(申し込み～竣工まで)
-      return next(noticeHelper.create('lightPlanRegistering'))
+      return next(noticeHelper.create('standardRegistering'))
     } else {
       //  契約中の場合(竣工～解約処理完了まで)
-      return next(noticeHelper.create('lightPlanRegistered'))
+      return next(noticeHelper.create('standardRegistered'))
     }
   }
   next()

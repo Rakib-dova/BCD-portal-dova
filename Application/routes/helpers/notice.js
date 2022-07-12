@@ -37,24 +37,24 @@ module.exports = {
     } else if (messageStatus === 'introductionSupportregistered') {
       // 現在導入支援サービスは申し込み済画面を表示する
       message = '導入支援サービスは申し込み済です。'
-    } else if (messageStatus === 'lightPlanRegistering') {
-      // 現在ライトプランは申込中画面を表示する
-      message = '現在ライトプランは申込中です。'
+    } else if (messageStatus === 'standardRegistering') {
+      // 現在スタンダードプランは申込中画面を表示する
+      message = '現在スタンダードプランは申込中です。'
       description1 = null
       description2 = null
-    } else if (messageStatus === 'lightPlanRegistered') {
-      // 現在ライトプランは契約中画面を表示する
-      message = '現在ライトプランは契約中です。'
+    } else if (messageStatus === 'standardRegistered') {
+      // 現在スタンダードプランは契約中画面を表示する
+      message = '現在スタンダードプランは契約中です。'
       description1 = null
       description2 = null
-    } else if (messageStatus === 'lightPlanCanceling') {
-      // 現在ライトプランは解約中画面を表示する
-      message = '現在ライトプランは解約中です。'
+    } else if (messageStatus === 'standardCanceling') {
+      // 現在スタンダードプランは解約中画面を表示する
+      message = '現在スタンダードプランは解約中です。'
       description1 = null
       description2 = null
-    } else if (messageStatus === 'lightPlanUnregistered') {
-      // 現在ライトプランは未契約画面を表示する
-      message = '現在ライトプランは未契約です。'
+    } else if (messageStatus === 'standardUnregistered') {
+      // 現在スタンダードプランは未契約画面を表示する
+      message = '現在スタンダードプランは未契約です。'
       description1 = null
       description2 = null
     } else if (messageStatus === 'haveStandard') {

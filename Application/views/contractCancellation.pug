@@ -58,7 +58,10 @@ block content
           p.my-5.cancellText 下記の「解約」ボタンを押下した後の取り消しはできません。  
           .is-flex.btnWrap   
             a.button.cancel-button.btn-contract(data-target="cancell-modal") キャンセル   
-            a.button.status-text.is-fail.btn-contract(href="/contractCancellationComplete") 解約  
+            form#form(action="/contractCancellation/register" method="POST")
+              //- CSRF対策
+              input(type="hidden" name="_csrf" value=csrfToken)
+              button.button.status-text.is-fail.btn-contract(type="submit") 解約  
         footer.modal-card-foot
     include footer
 

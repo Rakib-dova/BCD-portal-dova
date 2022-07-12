@@ -24,14 +24,14 @@ const serviceTypes = constantsDefine.statusConstants.serviceTypes
 const logMessage = constantsDefine.logMessage
 
 /**
- * 有料サービス申込前の契約状態のチェック
+ * 契約情報の取得とチェック
  * @param {string} tenantId テナントID
  * @param {string[]} serviceList 有料サービスリスト
  * @param {function} next 次の処理
  * @returns 解約済以外契約情報
  */
-const checkPaidServiceContract = async (tenantId, serviceList, next) => {
-  logger.info(logMessage.INF000 + 'checkPaidServiceContract')
+const getAndCheckContracts = async (tenantId, serviceList, next) => {
+  logger.info(logMessage.INF000 + 'getAndCheckContracts')
 
   // 希望サービスの値のチェック
   if (!(serviceList instanceof Array) || serviceList.length === 0) {
@@ -68,11 +68,11 @@ const checkPaidServiceContract = async (tenantId, serviceList, next) => {
                 i.contractStatus === contractStatuses.newContractBeforeCompletion
             )
           ) {
-            return next(noticeHelper.create('lightPlanRegistering'))
+            return next(noticeHelper.create('standardRegistering'))
 
             //  契約中の場合(竣工～解約処理完了まで)
           } else {
-            return next(noticeHelper.create('lightPlanRegistered'))
+            return next(noticeHelper.create('standardRegistered'))
           }
 
         // 想定外サービス種別の場合
@@ -82,7 +82,7 @@ const checkPaidServiceContract = async (tenantId, serviceList, next) => {
     }
   }
 
-  logger.info(logMessage.INF001 + 'checkPaidServiceContract')
+  logger.info(logMessage.INF001 + 'getAndCheckContracts')
   return contracts
 }
 
@@ -100,7 +100,7 @@ const showPaidServiceRegisterTerms = async (req, res, next) => {
   const serviceType = req.params.serviceType
 
   // 有料サービス申込前の契約状態のチェック
-  const contracts = await checkPaidServiceContract(req.user?.tenantId, [serviceType], next)
+  const contracts = await getAndCheckContracts(req.user?.tenantId, [serviceType], next)
   if (!contracts) return
 
   const paidServiceInfo = {
@@ -149,7 +149,7 @@ const showPaidServiceRegister = async (req, res, next) => {
   const serviceList = services instanceof Array ? services : [services]
 
   // 有料サービス申込前の契約状態のチェック
-  const contracts = await checkPaidServiceContract(req.user?.tenantId, serviceList, next)
+  const contracts = await getAndCheckContracts(req.user?.tenantId, serviceList, next)
   if (!contracts) return
 
   // セッションにチェックされている申込サービスリストを設定する
@@ -184,7 +184,7 @@ const applyPaidServiceRegister = async (req, res, next) => {
   const serviceList = req.session.serviceList
 
   // 有料サービス申込前の契約状態のチェック
-  const contracts = await checkPaidServiceContract(req.user?.tenantId, serviceList, next)
+  const contracts = await getAndCheckContracts(req.user?.tenantId, serviceList, next)
   if (!contracts) return
 
   // セッションから申込サービスリストをクリアする
@@ -289,7 +289,7 @@ router.post(
 
 module.exports = {
   router: router,
-  checkPaidServiceContract: checkPaidServiceContract,
+  getAndCheckContracts: getAndCheckContracts,
   showPaidServiceRegisterTerms: showPaidServiceRegisterTerms,
   showPaidServiceRegister: showPaidServiceRegister,
   applyPaidServiceRegister: applyPaidServiceRegister
