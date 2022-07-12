@@ -79,7 +79,8 @@ const searchResult1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-27',
       expire: '2021-11-10',
-      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+      managerInfo: { managerAddress: 'dev.master.bconnection+buyer1.001@gmail.com', managerName: 'バイヤー1管理者1' }
     },
     {
       no: 2,
@@ -91,7 +92,8 @@ const searchResult1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-22',
-      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f'
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
+      managerInfo: { managerAddress: 'dev.master.bconnection+buyer1.001@gmail.com', managerName: 'バイヤー1管理者1' }
     },
     {
       no: 3,
@@ -103,7 +105,8 @@ const searchResult1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd'
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
+      managerInfo: { managerAddress: 'dev.master.bconnection+buyer1.001@gmail.com', managerName: 'バイヤー1管理者1' }
     },
     {
       no: 4,
@@ -115,7 +118,8 @@ const searchResult1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537'
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+      managerInfo: { managerAddress: 'test@test.com', managerName: '（担当者不明）' }
     }
   ],
   numPages: 1,
@@ -145,7 +149,8 @@ const searchResult1Rejected = {
       updated: '2021-12-27',
       expire: '2021-11-10',
       documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
-      approveStatus: '90'
+      approveStatus: '90',
+      managerInfo: { managerAddress: 'dev.master.bconnection+buyer1.001@gmail.com', managerName: 'バイヤー1管理者1' }
     },
     {
       no: 2,
@@ -158,7 +163,8 @@ const searchResult1Rejected = {
       updated: '2021-12-16',
       expire: '2021-12-22',
       documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
-      approveStatus: '90'
+      approveStatus: '90',
+      managerInfo: { managerAddress: 'dev.master.bconnection+buyer1.001@gmail.com', managerName: 'バイヤー1管理者1' }
     },
     {
       no: 3,
@@ -171,7 +177,8 @@ const searchResult1Rejected = {
       updated: '2021-12-16',
       expire: '2021-12-28',
       documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
-      approveStatus: '90'
+      approveStatus: '90',
+      managerInfo: { managerAddress: 'dev.master.bconnection+buyer1.001@gmail.com', managerName: 'バイヤー1管理者1' }
     },
     {
       no: 4,
@@ -184,7 +191,8 @@ const searchResult1Rejected = {
       updated: '2021-12-16',
       expire: '2021-12-28',
       documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
-      approveStatus: '90'
+      approveStatus: '90',
+      managerInfo: { managerAddress: 'test@test.com', managerName: '（担当者不明）' }
     }
   ],
   numPages: 1,
@@ -265,6 +273,8 @@ describe('inboxListのテスト', () => {
 
       requestApprovalControllerSpy.mockReturnValue(null)
 
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
+
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
 
@@ -275,6 +285,8 @@ describe('inboxListのテスト', () => {
       })
 
       contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[0])
+
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
 
       // 試験実施
       await inboxList.cbGetIndex(request, response, next)
@@ -316,6 +328,8 @@ describe('inboxListのテスト', () => {
       })
 
       contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
+
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
 
       // 試験実施
       await inboxList.cbGetIndex(request, response, next)
@@ -392,6 +406,8 @@ describe('inboxListのテスト', () => {
       })
 
       contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[0])
+
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
 
       // 試験実施
       await inboxList.cbGetIndex(request, response, next)
@@ -832,6 +848,8 @@ describe('inboxListのテスト', () => {
 
       requestApprovalControllerSpy.mockReturnValue(null)
 
+      contractControllerFindLightPlanSpy.mockReturnValue(null)
+
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
       // CSRF対策
@@ -875,6 +893,8 @@ describe('inboxListのテスト', () => {
 
       requestApprovalControllerSpy.mockReturnValue(null)
 
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
+
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
       // CSRF対策
@@ -891,8 +911,8 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxListが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('inboxList', {
+      // response.renderでinboxList_light_planが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
@@ -918,6 +938,8 @@ describe('inboxListのテスト', () => {
 
       requestApprovalControllerSpy.mockReturnValue(returnRequestApproval)
 
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
+
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
       // CSRF対策
@@ -934,8 +956,8 @@ describe('inboxListのテスト', () => {
       expect(request.session?.userContext).toBe('LoggedIn')
       // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
-      // response.renderでinboxListが呼ばれ「る」
-      expect(response.render).toHaveBeenCalledWith('inboxList', {
+      // response.renderでinboxList_light_planが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
@@ -958,6 +980,8 @@ describe('inboxListのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[5])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[5][0])
+
+      contractControllerFindLightPlanSpy.mockReturnValue(null)
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
@@ -994,6 +1018,8 @@ describe('inboxListのテスト', () => {
       const dbError = new Error('DB Conncetion Error')
       requestApprovalControllerSpy.mockReturnValue(dbError)
 
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
+
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
       // 試験実施
@@ -1018,6 +1044,8 @@ describe('inboxListのテスト', () => {
       tenantControllerFindOneSpy.mockReturnValue(Tenants[1])
 
       contractControllerFindContractSpyon.mockReturnValue(Contracts[7][0])
+
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)

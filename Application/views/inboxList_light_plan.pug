@@ -121,7 +121,7 @@ block content
                                   .column          
                                     .field.is-horizontal
                                       .field-label.is-normal
-                                        label.bulmalabel 取引先担当者(アドレス)
+                                        label.bulmalabel 担当者アドレス
                                       .field-body
                                         .field.has-addons
                                           p.control.is-expanded
@@ -164,9 +164,9 @@ block content
                             th.width-10.text-center 通貨
                             th.width-10.text-center 金額
                             th.width-10.text-center 送信企業
-                            th.width-10.text-center 受信企業
+                            th.width-10.text-center 担当者アドレス<br>（担当者名）
+                            th.width-10.text-center 支払い期限日
                             th.width-10.text-center 更新日
-                            th.width-10.text-center 期限日
                             th.width-10.text-center
                         tbody.display-row
                           each item in listArr
@@ -227,9 +227,13 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
-                              td.text-center.td-overflow= item.sentBy
-                              td.text-center.td-overflow= item.updated
+                              - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                              if (item.managerInfo.managerName === '（担当者不明）')
+                                td.text-center.td-overflow.text-color-red!= managerinfo
+                              else 
+                                td.text-center.td-overflow!= managerinfo
                               td.text-center.td-overflow= item.expire
+                              td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
                                 a.button.is-success.td-overflow.display-row-td-button(href=`/inbox/${item.documentId}`) 仕訳情報設定
                       nav.pagination.is-centered(role='navigation' aria-label='pagination')
@@ -268,9 +272,9 @@ block content
                           th.width-10.text-center 通貨
                           th.width-10.text-center 金額
                           th.width-10.text-center 送信企業
-                          th.width-10.text-center 受信企業
+                          th.width-10.text-center 担当者アドレス<br>（担当者名）
+                          th.width-10.text-center 支払い期限日
                           th.width-10.text-center 更新日
-                          th.width-10.text-center 期限日
                           th.width-10.text-center
                       tbody.display-row           
                 else
@@ -365,7 +369,7 @@ block content
                                   .column          
                                     .field.is-horizontal
                                       .field-label.is-normal
-                                        label.bulmalabel 取引先担当者(アドレス)
+                                        label.bulmalabel 担当者アドレス
                                       .field-body
                                         .field.has-addons
                                           p.control.is-expanded
@@ -395,7 +399,7 @@ block content
                               .field-body
                                 p.control
                                   label.checkbox
-                                    input.m-3.p-1(type='checkbox' checked=false)                
+                                    input.m-3.p-1(type='checkbox' checked=false)
                     if listArr.length !== 0
                       table.table.is-fullwidth.is-hoverable.table-fixed
                         thead
@@ -407,9 +411,9 @@ block content
                             th.width-10.text-center 通貨
                             th.width-10.text-center 金額
                             th.width-10.text-center 送信企業
-                            th.width-10.text-center 受信企業
+                            th.width-10.text-center 担当者アドレス<br>（担当者名）
+                            th.width-10.text-center 支払い期限日
                             th.width-10.text-center 更新日
-                            th.width-10.text-center 期限日
                             th.width-10.text-center
                         tbody.display-row
                           each item in listArr
@@ -470,9 +474,13 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
-                              td.text-center.td-overflow= item.sentBy
-                              td.text-center.td-overflow= item.updated
+                              - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
+                              if (item.managerInfo.managerName === '（担当者不明）')
+                                td.text-center.td-overflow.text-color-red!= managerinfo
+                              else 
+                                td.text-center.td-overflow!= managerinfo
                               td.text-center.td-overflow= item.expire
+                              td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
                                 a.button.is-success.td-overflow.display-row-td-button(href=`/inbox/${item.documentId}`) 仕訳情報設定
                       nav.pagination.is-centered(role='navigation' aria-label='pagination')
@@ -508,9 +516,9 @@ block content
                           th.width-10.text-center 通貨
                           th.width-10.text-center 金額
                           th.width-10.text-center 送信企業
-                          th.width-10.text-center 受信企業
+                          th.width-10.text-center 担当者アドレス<br>（担当者名）
+                          th.width-10.text-center 支払い期限日
                           th.width-10.text-center 更新日
-                          th.width-10.text-center 期限日
                           th.width-10.text-center
                       tbody.display-row
         .mt-1.has-text-left

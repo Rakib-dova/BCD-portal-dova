@@ -78,7 +78,7 @@ const cbGetIndex = async (req, res, next) => {
   const refreshToken = req.user.refreshToken
   const pageId = ~~req.params.page
   const tenantId = user.tenantId
-  const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+  const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
 
   // 請求書の承認依頼検索
   for (let i = 0; i < result.list.length; i++) {
@@ -154,7 +154,13 @@ const cbGetWorkflow = async (req, res, next) => {
     user.tenantId
   )
 
-  const workflow = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+  let presentation
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
+    presentation = 'inboxList_light_plan'
+  }
+
+  const workflow = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
 
   if (workflow instanceof Error === true) res.status(500).send('サーバーエラーが発生しました。')
 
@@ -200,12 +206,18 @@ const cbGetApprovals = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
+  let presentation = 'inboxList'
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
+    presentation = 'inboxList_light_plan'
+  }
+
   // ページ取得
   const accessToken = req.user.accessToken
   const refreshToken = req.user.refreshToken
   const pageId = 1
   const tenantId = user.tenantId
-  const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+  const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
 
   // 請求書の承認依頼検索
   for (let i = 0; i < result.list.length; i++) {
@@ -224,7 +236,7 @@ const cbGetApprovals = async (req, res, next) => {
   const rejectedFlag = true
 
   // 受領した請求書一覧レンダリング
-  res.render('inboxList', {
+  res.render(presentation, {
     listArr: result.list,
     numPages: result.numPages,
     currPage: result.currPage,
