@@ -2122,6 +2122,7 @@ describe('inboxControllerのテスト', () => {
   describe('getWorkflow', () => {
     test('正常:対象がない', async () => {
       const userId = 'dummyUserId'
+      // 準備
       const req = {
         user: {
           accessToken: 'dummy-accessToken',
@@ -2134,13 +2135,17 @@ describe('inboxControllerのテスト', () => {
       requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce([])
       approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
       const presentation = 'inboxList'
-
       const finalExpectResult = []
+
+      // 実施
       const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
       expect(result).toStrictEqual(finalExpectResult)
     })
 
     test('正常:担当者アドレスがある場合(無償)', async () => {
+      // 準備
       const userId = 'dummyUserId'
       const req = {
         user: {
@@ -2151,7 +2156,6 @@ describe('inboxControllerのテスト', () => {
       const accessToken = req.user.accessToken
       const refreshToken = req.user.refreshToken
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
-
       const getAllRequestApproval = []
       getAllRequestApproval.push(
         RequestApproval.build({
@@ -2160,7 +2164,6 @@ describe('inboxControllerのテスト', () => {
           invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
         })
       )
-
       requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
       approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
       const document1 = {
@@ -2175,13 +2178,15 @@ describe('inboxControllerのテスト', () => {
         LastEdit: new Date(),
         DueDate: new Date()
       }
-
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
       const resultGetDocument = require('../mockInvoice/invoice1')
       tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
       const presentation = 'inboxList'
 
+      // 実施
       const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
       expect(result.length).toBe(1)
       expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
       expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
@@ -2200,6 +2205,7 @@ describe('inboxControllerのテスト', () => {
     })
 
     test('正常:担当者アドレスがある場合、ユーザー情報あり(有償)', async () => {
+      // 準備
       const userId = 'dummyUserId'
       const req = {
         user: {
@@ -2210,7 +2216,6 @@ describe('inboxControllerのテスト', () => {
       const accessToken = req.user.accessToken
       const refreshToken = req.user.refreshToken
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
-
       const getAllRequestApproval = []
       getAllRequestApproval.push(
         RequestApproval.build({
@@ -2219,7 +2224,6 @@ describe('inboxControllerのテスト', () => {
           invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
         })
       )
-
       requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
       approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
       const document1 = {
@@ -2241,7 +2245,10 @@ describe('inboxControllerのテスト', () => {
       accessTradeshiftSpy.mockReturnValue(userInfo)
       const presentation = 'inboxList_light_plan'
 
+      // 実施
       const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
       expect(result.length).toBe(1)
       expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
       expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
@@ -2260,6 +2267,7 @@ describe('inboxControllerのテスト', () => {
     })
 
     test('正常:担当者アドレスがある場合、ユーザー情報なし(有償)', async () => {
+      // 準備
       const userId = 'dummyUserId'
       const req = {
         user: {
@@ -2270,7 +2278,6 @@ describe('inboxControllerのテスト', () => {
       const accessToken = req.user.accessToken
       const refreshToken = req.user.refreshToken
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
-
       const getAllRequestApproval = []
       getAllRequestApproval.push(
         RequestApproval.build({
@@ -2279,7 +2286,6 @@ describe('inboxControllerのテスト', () => {
           invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
         })
       )
-
       requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
       approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
       const document1 = {
@@ -2294,7 +2300,6 @@ describe('inboxControllerのテスト', () => {
         LastEdit: new Date(),
         DueDate: new Date()
       }
-
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
       const resultGetDocument = require('../mockInvoice/invoice1')
       tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
@@ -2303,7 +2308,10 @@ describe('inboxControllerのテスト', () => {
       accessTradeshiftSpy.mockReturnValue(noUser)
       const presentation = 'inboxList_light_plan'
 
+      // 実施
       const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
       expect(result.length).toBe(1)
       expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
       expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
@@ -2322,6 +2330,7 @@ describe('inboxControllerのテスト', () => {
     })
 
     test('正常:自分が依頼した場合', async () => {
+      // 準備
       const userId = 'dummyUserId'
       const req = {
         user: {
@@ -2410,7 +2419,6 @@ describe('inboxControllerのテスト', () => {
         LastEdit: null,
         DueDate: null
       }
-
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document2)
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document3)
@@ -2419,7 +2427,10 @@ describe('inboxControllerのテスト', () => {
       tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
       const presentation = 'inboxList'
 
+      // 実施
       const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
       expect(result.length).toBe(4)
       expect(result[0]).toHaveProperty('documentId', 'ut-test1')
       expect(result[0]).toHaveProperty('invoiceid', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
@@ -2471,6 +2482,7 @@ describe('inboxControllerのテスト', () => {
     })
 
     test('正常:自分に依頼がきた時', async () => {
+      // 準備
       const userId = 'dummyUserId'
       const req = {
         user: {
@@ -2481,9 +2493,7 @@ describe('inboxControllerのテスト', () => {
       const accessToken = req.user.accessToken
       const refreshToken = req.user.refreshToken
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
-
       requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce([])
-
       const waitingApprovals = []
       // 最終承認者になって、承認担当者になっているもの
       waitingApprovals.push(
@@ -2678,7 +2688,6 @@ describe('inboxControllerのテスト', () => {
         })
       )
       approvalDAOGetWaitingApprovals.mockReturnValueOnce(waitingApprovals)
-
       const document1 = {
         ID: 'UTテスト1',
         UnifiedState: 'PAID_UNCONFIRMED',
@@ -2708,8 +2717,10 @@ describe('inboxControllerのテスト', () => {
       tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
       const presentation = 'inboxList'
 
+      // 実施
       const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
 
+      // 期待結果
       expect(result.length).toBe(2)
       expect(result[0]).toHaveProperty('documentId', 'ut-test1')
       expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
