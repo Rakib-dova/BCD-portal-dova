@@ -149,7 +149,8 @@ const isBcdCancelling = (bcdContract) => {
   // deleteFlag: false & 契約ステータスが解約着手待ち(30)or解約対応中(31) の場合
   if (
     !bcdContract.deleteFlag &&
-    (bcdContract.contractStatus === contractStatuses.cancellationOrder || bcdContract.contractStatus === contractStatuses.cancellationReceive)
+    (bcdContract.contractStatus === contractStatuses.cancellationOrder ||
+      bcdContract.contractStatus === contractStatuses.cancellationReceive)
   ) {
     return true
   } else {
@@ -615,6 +616,77 @@ const isValidEmail = function (emailAddress) {
   return true
 }
 
+// トレードシフトのユーザアカウント用に使用するメールアドレスの形式チェック
+const isValidEmailTsUser = function (emailAddress) {
+  const emailType = typeof emailAddress
+
+  if (emailType === 'undefined' || emailAddress.length === 0) return false
+  // 255文字まで
+  if (emailAddress.length > 255) return false
+
+  const getCharCode = function (character) {
+    return character.charCodeAt()
+  }
+
+  // 取引担当者メールアドレスが配列形式で受け取った場合
+  if (emailType !== 'string') return false
+
+  if (emailAddress.match(/@/g) === null || emailAddress.match(/@/g).length !== 1) return false
+  const emailParty = emailAddress.split('@')
+
+  let local = null
+  let domain = null
+
+  if (emailParty.length === 1) return false
+
+  if (emailParty.length === 2) {
+    local = emailParty[0]
+    domain = emailParty[1]
+  } else {
+    local = ''
+    for (let idx = emailParty.length - 1; idx >= 0; idx--) {
+      if ((idx = emailParty.length - 1)) {
+        domain = emailParty[idx]
+      } else {
+        if (emailParty[idx].length === 0) return false
+        local += emailParty[idx]
+      }
+    }
+  }
+
+  if (typeof domain === 'undefined') return false
+
+  // @より前：64文字以下、後：190文字以下
+  if (local.length > 64) return false
+  if (domain.length > 190) return false
+
+  // @より前のチェック
+  for (const character of local) {
+    const code = getCharCode(character)
+    // 半角英数字以外場合エラー発生
+    // 利用不可の特殊文字コード設定("<>():,@;)
+    const disabledCharacterCode = [34, 60, 62, 40, 41, 58, 44, 59]
+    if (code > 127 || disabledCharacterCode.indexOf(code) > -1) {
+      return false
+    }
+  }
+
+  // @より後のチェック
+  // 「.」が存在しない場合、エラー
+  if (domain.indexOf('.') === -1) return false
+  // 文字種チェック
+  const pattern = /^[A-Za-z0-9.]{1,190}$/
+  if (!pattern.test(domain)) return false
+
+  // 先頭、末尾のドットはNG
+  if (local.indexOf('.') === 0) return false
+  if (local.lastIndexOf('.') === local.length - 1) return false
+  if (domain.indexOf('.') === 0) return false
+  if (domain.lastIndexOf('.') === domain.length - 1) return false
+
+  return true
+}
+
 module.exports = {
   isArray: isArray,
   isNumber: isNumber,
@@ -655,5 +727,6 @@ module.exports = {
   isName: isName,
   isDepartmentCode: isDepartmentCode,
   isContactEmail: isContactEmail,
-  isValidEmail: isValidEmail
+  isValidEmail: isValidEmail,
+  isValidEmailTsUser: isValidEmailTsUser
 }
