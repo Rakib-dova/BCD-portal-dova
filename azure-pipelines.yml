@@ -127,7 +127,6 @@ stages:
                   resourceGroupName: $(portalRg)
                   runtimeStack: NODE|14-lts
                   package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-                  startUpCommand: npm run start
 
   - stage: Deploy
     pool:
@@ -231,7 +230,6 @@ stages:
               runtimeStack: NODE|14-lts
               slotName: staging
               package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-              startUpCommand: npm run start
           
           - task: AzureWebApp@1
             displayName: 'Deploy to staging slot of japanwest App Service'
@@ -244,8 +242,6 @@ stages:
               runtimeStack: NODE|14-lts
               slotName: staging
               package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
-              startUpCommand: npm run start
-              
 
       - job: preManualOperation
         dependsOn: DeployStagingSlots

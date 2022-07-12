@@ -34,6 +34,16 @@ const postData = {
   salesChannelMailAddress: 'aaa@aaa.com'
 }
 
+const maxLengthData = {
+  salesChannelCode: '12345678',
+  salesChannelName: '一二三四五六七八九十一二三四五六',
+  salesChannelDeptName: '一二三四五六七八九十一二三四五六',
+  salesChannelEmplyeeCode: '12345678',
+  salesChannelPersonName: '一二三四五六七八九十',
+  salesChannelPhoneNumber: '123-5678-0123',
+  salesChannelMailAddress: '123456789@12345678901234567890123456789012345678901234567890123456789012345678.com'
+}
+
 const lessOrderData = {
   contractBasicInfo: {
     tradeshiftId: 'any',
@@ -80,6 +90,20 @@ const fullOrderData = {
     salesChannelMailAddress: 'aaa@aaa.com',
     kaianPassword: ''
   }
+}
+
+/**
+ * ライトプラン解約画面の全部項目の最大桁数値になっていることのチェック
+ * @param {*} page
+ */
+const checkMaxLengthValues = async (page) => {
+  expect(await page.$eval('#salesChannelCode', (el) => el.value)).toBe(maxLengthData.salesChannelCode)
+  expect(await page.$eval('#salesChannelName', (el) => el.value)).toBe(maxLengthData.salesChannelName)
+  expect(await page.$eval('#salesChannelDeptName', (el) => el.value)).toBe(maxLengthData.salesChannelDeptName)
+  expect(await page.$eval('#salesChannelEmplyeeCode', (el) => el.value)).toBe(maxLengthData.salesChannelEmplyeeCode)
+  expect(await page.$eval('#salesChannelPersonName', (el) => el.value)).toBe(maxLengthData.salesChannelPersonName)
+  expect(await page.$eval('#salesChannelPhoneNumber', (el) => el.value)).toBe(maxLengthData.salesChannelPhoneNumber)
+  expect(await page.$eval('#salesChannelMailAddress', (el) => el.value)).toBe(maxLengthData.salesChannelMailAddress)
 }
 
 /**
@@ -892,6 +916,34 @@ describe('ライトプラン解約のインテグレーションテスト', () =
         expect(await page.$eval('#salesChannelDeptType', (el) => el.value)).toBe('')
         expect(await page.$eval('#salesChannelPhoneNumber', (el) => el.value)).toBe('')
         expect(await page.$eval('#salesChannelMailAddress', (el) => el.value)).toBe('')
+      })
+    })
+
+    describe('入力動作の確認', () => {
+      test('最大桁数の入力確認', async () => {
+        await page.type('#salesChannelCode', maxLengthData.salesChannelCode)
+        await page.type('#salesChannelName', maxLengthData.salesChannelName)
+        await page.type('#salesChannelDeptName', maxLengthData.salesChannelDeptName)
+        await page.type('#salesChannelEmplyeeCode', maxLengthData.salesChannelEmplyeeCode)
+        await page.type('#salesChannelPersonName', maxLengthData.salesChannelPersonName)
+        await page.type('#salesChannelPhoneNumber', maxLengthData.salesChannelPhoneNumber)
+        await page.type('#salesChannelMailAddress', maxLengthData.salesChannelMailAddress)
+
+        // ライトプラン解約画面の全部項目の最大桁数値になっていることのチェック
+        await checkMaxLengthValues(page)
+      })
+
+      test('最大桁数により多い値の入力確認', async () => {
+        await page.type('#salesChannelCode', maxLengthData.salesChannelCode + '1')
+        await page.type('#salesChannelName', maxLengthData.salesChannelName + '1')
+        await page.type('#salesChannelDeptName', maxLengthData.salesChannelDeptName + '1')
+        await page.type('#salesChannelEmplyeeCode', maxLengthData.salesChannelEmplyeeCode + '1')
+        await page.type('#salesChannelPersonName', maxLengthData.salesChannelPersonName + '1')
+        await page.type('#salesChannelPhoneNumber', maxLengthData.salesChannelPhoneNumber + '1')
+        await page.type('#salesChannelMailAddress', maxLengthData.salesChannelMailAddress + '1')
+
+        // ライトプラン解約画面の全部項目の最大桁数値になっていることのチェック
+        await checkMaxLengthValues(page)
       })
     })
 

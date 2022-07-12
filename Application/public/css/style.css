@@ -54,6 +54,18 @@ input[readonly] {
   cursor: not-allowed;
 }
 
+input.width-80px {
+  width: 80px;
+}
+
+input.width-220px {
+  width: 320px;
+}
+
+input.width-320px {
+  width: 320px;
+}
+
 .appdesc {
   color: hsl(0, 0%, 21%);
 }
@@ -284,36 +296,44 @@ img.logo-ncom {
   white-space: nowrap;
 }
 
+.width-2 {
+  width: 2%;
+}
+
 .width-5 {
   width: 5%;
 }
 
-.width-20 {
-  width: 20%;
-}
-
-.width-13 {
-  width: 13%;
-}
-
-.width-25 {
-  width: 25%;
+.width-8 {
+  width: 8%;
 }
 
 .width-10 {
   width: 10%;
 }
 
+.width-13 {
+  width: 13%;
+}
+
+.width-18 {
+  width: 18%;
+}
+
+.width-20 {
+  width: 20%;
+}
+
+.width-23 {
+  width: 23%;
+}
+
+.width-25 {
+  width: 25%;
+}
+
 .width-35 {
   width: 35%;
-}
-
-.width-40 {
-  width: 40%;
-}
-
-.width-8 {
-  width: 8%;
 }
 
 .width-50 {
@@ -324,9 +344,17 @@ img.logo-ncom {
   width: 60%;
 }
 
+.mr-auto {
+  margin: auto;
+}
 .detailLise-text-center {
   margin: auto;
   text-align: center;
+}
+
+.space-between {
+  display: flex;
+  justify-content: space-between;
 }
 
 .status-text {
@@ -429,6 +457,14 @@ img.logo-ncom {
 
 .margin-top-10p {
   margin-top: 10px;
+}
+
+.margin-top-20p {
+  margin-top: 20px;
+}
+
+.margin-top-40p {
+  margin-top: 40px;
 }
 
 .div-border {
@@ -718,6 +754,10 @@ body > div.hero.is-small {
   margin-left: 1.5rem;
 }
 
+.content-coution-font-size {
+  font-size: 0.65rem;
+}
+
 .color-err-message {
   color: #f00;
 }
@@ -840,6 +880,8 @@ body > div.hero.is-small {
 }
 
 .input-comment-size {
+  border: 1px solid;
+  display: flex;
   margin-top: 0.75rem;
   width: 100%;
   resize: none;

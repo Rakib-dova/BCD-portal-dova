@@ -1,0 +1,41 @@
+html
+  head
+    link(rel='stylesheet', type='text/css', href='/css/invoicePDF.css')
+
+div.margin-top-20p
+  // エラーメッセージ表示場所                            
+  p#basicInfoErrorMesage.input-label-required.is-invisible
+                             
+  table#table-invoice-details.table.is-fullwidth.is-hoverable.table-fixed
+    thead
+      tr
+        th.width-5.text-center 項目ID
+        th.width-20.text-left 内容
+        th.width-10.text-left 数量
+        th.width-5.text-left 単位
+        th.width-10.text-left 単価
+        th.width-10.text-left 税
+        th.width-10.text-center 小計（税抜）
+        th.width-5.text-center 
+    tbody
+      tr
+        th.text-center 1
+        td.text-center
+          input.input.width-120px(name='content' type='text')
+        td.text-right
+          input.input.width-330px(name='quantity' type='text') 
+        td.text-center
+          input.input.width-120px(name='unit' type='text')
+        td.text-right
+          input.input.width-120px(name='unitPrice' type='text')
+        td.text-center.input.width-120px
+          select(name='taxType')
+            option(value='freeTax') 不課税
+            option(value='dutyFree') 免税
+            option(value='tax10p' selected) 消費税 10%
+            option(value='tax8p') 消費税(軽減税率) 8%
+            option(value='otherTax') その他消費税
+        td.text-right 
+        td.text-center 
+          a#btn-plus-invoice-detail
+            i.fas.fa-plus-circle

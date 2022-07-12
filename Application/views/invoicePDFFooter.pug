@@ -1,0 +1,49 @@
+div.margin-top-40p
+  #footer-error
+
+  .columns
+    h3.subtitle.font-bold 支払い条件と手段
+    br
+  .columns
+    .column.width-50.float-left
+      p.font-bold 銀行口座情報
+      if editing
+        div.items 
+          p.item 銀行名 
+          input.input.width-330px(data-prop='bankName' id='invoice-bankName' type='text' placeholder='銀行名(半角全角 50文字)')
+        div.items
+          P.item 支店名
+          input.input.width-330px(data-prop='branchName' id='invoice-branchName' type='text' placeholder='支店名(半角全角 50文字)')
+        div.items
+          p.item 科目
+          input.input.width-330px(data-prop='accountType' id='invoice-accountType' type='text' placeholder='科目("当座"または"普通")')
+        div.items
+          p.item 口座番号
+          input.input.width-330px(data-prop='accountNumber' id='invoice-accountNumber' type='text' placeholder='口座番号(数字 7桁)')
+        div.items
+          p.item 口座名義
+          input.input.width-330px(data-prop='accountName' id='invoice-accountName' type='text' placeholder='口座名義(半角全角 50文字)')
+      else
+        div.items 
+          p.item 銀行名 
+          p.width-330px#invoice-bankName
+        div.items
+          P.item 支店名
+          p.width-330px#invoice-branchName
+        div.items
+          p.item 科目
+          p.width-330px#invoice-accountType
+        div.items
+          p.item 口座番号
+          p.width-330px#invoice-accountNumber
+        div.items
+          p.item 口座名義
+          p.width-330px#invoice-accountName
+  
+    .column.width-50
+      p.font-bold 備考
+      if editing
+        textarea.input.input-comment-size(data-prop='note' id='invoice-note' rows='10' placeholder='400文字まで' name='remark')
+        div(id='msgCount') (0/400)
+      else
+        pre(data-prop='note' id='invoice-note')

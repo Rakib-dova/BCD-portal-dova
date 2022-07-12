@@ -23,5 +23,12 @@ class TradeShiftTopPage {
       await this.actionUtils.click(this.page, '//span[contains(text(), "' + appName + '")]');
     }
   }
+
+  // ログアウトする
+  async logout() {
+    await this.actionUtils.click(this.page, '//div[contains(@class, "userimage-icon")]');
+    await this.page.waitForTimeout(500);
+    await this.actionUtils.click(this.page, '//span[contains(text(), "ログアウト")]');
+  }
 }
 exports.TradeShiftTopPage = TradeShiftTopPage;

@@ -51,7 +51,7 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
       $('#invoicesCount').innerHTML = td[5].innerHTML
       $('#tabs').classList.add('is-invisible')
       $('#detailTable').classList.add('is-invisible')
-      $('#errormessage').innerHTML =
+      $('#errorMessage').innerHTML =
         '<h3>システムエラーが発生しました。</h3><h3>CSVファイルをもう一度アップロードしてください。</h3><br>'
       return
     } else {
@@ -78,18 +78,18 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
           if (resultDetail.length === 0) {
             $('#tabs').classList.add('is-invisible')
             $('#detailTable').classList.add('is-invisible')
-            $('#errormessage').innerHTML =
+            $('#errorMessage').innerHTML =
               '<h3>請求書が0件か100件を超えています。</h3><h3>CSVファイルを確認後もう一度アップロードしてください。</h3><br>'
           } else {
             resultDetail.forEach((obj) => {
               if (~~obj.lines === 0) {
                 $('#tabs').classList.add('is-invisible')
                 $('#detailTable').classList.add('is-invisible')
-                $('#errormessage').innerHTML = `<h3>${obj.errorData}</h3><br>`
+                $('#errorMessage').innerHTML = `<h3>${obj.errorData}</h3><br>`
               } else {
                 $('#tabs').classList.remove('is-invisible')
                 $('#detailTable').classList.remove('is-invisible')
-                $('#errormessage').innerHTML = ''
+                $('#errorMessage').innerHTML = ''
 
                 if (obj.status === '成功') {
                   detail += `<tr class="tr-success"><td class="text-center">${obj.lines}</td><td class="text-center td-overflow">${obj.invoiceId}</td><td class="text-center"><p class="status-text is-success">${obj.status}</p></td>`
@@ -113,12 +113,12 @@ Array.prototype.forEach.call($('.btnDetail'), function (ele) {
             case 403:
               $('#tabs').classList.add('is-invisible')
               $('#detailTable').classList.add('is-invisible')
-              $('#errormessage').innerHTML = '<h3>ログインユーザーではありません。</h3><br>'
+              $('#errorMessage').innerHTML = '<h3>ログインユーザーではありません。</h3><br>'
               break
             default:
               $('#tabs').classList.add('is-invisible')
               $('#detailTable').classList.add('is-invisible')
-              $('#errormessage').innerHTML = '<h3>システムエラーが発生しました。</h3><br>'
+              $('#errorMessage').innerHTML = '<h3>システムエラーが発生しました。</h3><br>'
               break
           }
         }

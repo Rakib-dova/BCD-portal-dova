@@ -167,8 +167,6 @@ describe('仕訳情報設定_部門データ一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -218,39 +216,23 @@ describe('仕訳情報設定_部門データ一覧', function () {
   it("後片付け（部門データ全削除）", async function() {
     // テストの初期化を実施
     await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-  
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, departmentListPage }
-        = common.getPageObject(browser, page);
-  
-      // 部門データ一覧ページへ遷移する
-      await gotoDepartmentList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
-
-      // 部門データをすべて削除する
-      await departmentListPage.deleteAll();
-      await page.waitForTimeout(1000);
+    const context = await browser.newContext(contextOption);
+    if (page != null) {
+      page.close();
     }
+    page = await context.newPage();
+    global.reporter.setBrowserInfo(browser, page);
+
+    // ページオブジェクト
+    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, departmentListPage }
+      = common.getPageObject(browser, page);
+
+    // 部門データ一覧ページへ遷移する
+    await gotoDepartmentList(config.company1.mng, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
+
+    // 部門データをすべて削除する
+    await departmentListPage.deleteAll();
+    await page.waitForTimeout(1000);
   });
 });
 

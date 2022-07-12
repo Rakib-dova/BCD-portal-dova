@@ -215,7 +215,8 @@ const searchResult1 = {
     }
   ]
 }
-const result1 = {
+
+const managerInfoResult = {
   list: [
     {
       no: 1,
@@ -227,7 +228,11 @@ const result1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-27',
       expire: '2021-11-10',
-      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+      managerInfo: {
+        managerAddress: 'abc@test.co.jp',
+        managerName: 'テスト UT'
+      }
     },
     {
       no: 2,
@@ -239,7 +244,11 @@ const result1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-22',
-      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f'
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
     },
     {
       no: 3,
@@ -251,7 +260,11 @@ const result1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd'
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
     },
     {
       no: 4,
@@ -263,7 +276,153 @@ const result1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537'
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
+    }
+  ],
+  numPages: 1,
+  currPage: 1
+}
+
+const freeManagerInfoResult = {
+  list: [
+    {
+      no: 1,
+      invoiceNo: 'PB1649meisai001',
+      status: 0,
+      currency: 'JPY',
+      ammount: '3,080,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-27',
+      expire: '2021-11-10',
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+      managerInfo: {
+        managerAddress: 'abc@test.co.jp',
+        managerName: '（担当者不明）'
+      }
+    },
+    {
+      no: 2,
+      invoiceNo: 'PBI2848supplier_送金済み',
+      status: 0,
+      currency: 'JPY',
+      ammount: '91,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-22',
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
+    },
+    {
+      no: 3,
+      invoiceNo: 'PBI2848supplier_承認済み',
+      status: 1,
+      currency: 'JPY',
+      ammount: '178,320',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
+    },
+    {
+      no: 4,
+      invoiceNo: 'PBI2848supplier_受信済み',
+      status: 2,
+      currency: 'JPY',
+      ammount: '67,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
+    }
+  ],
+  numPages: 1,
+  currPage: 1
+}
+
+const noManagerInfoResult = {
+  list: [
+    {
+      no: 1,
+      invoiceNo: 'PB1649meisai001',
+      status: 0,
+      currency: 'JPY',
+      ammount: '3,080,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-27',
+      expire: '2021-11-10',
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
+    },
+    {
+      no: 2,
+      invoiceNo: 'PBI2848supplier_送金済み',
+      status: 0,
+      currency: 'JPY',
+      ammount: '91,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-22',
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
+    },
+    {
+      no: 3,
+      invoiceNo: 'PBI2848supplier_承認済み',
+      status: 1,
+      currency: 'JPY',
+      ammount: '178,320',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
+    },
+    {
+      no: 4,
+      invoiceNo: 'PBI2848supplier_受信済み',
+      status: 2,
+      currency: 'JPY',
+      ammount: '67,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
     }
   ],
   numPages: 1,
@@ -432,7 +591,11 @@ const result3 = {
       sentBy: '-',
       sentTo: '-',
       status: 0,
-      updated: '-'
+      updated: '-',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
     },
     {
       ammount: '3,080,000',
@@ -444,7 +607,11 @@ const result3 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: '-',
-      updated: ''
+      updated: '',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
     },
     {
       ammount: '178,320',
@@ -456,7 +623,11 @@ const result3 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 1,
-      updated: '2021-12-16'
+      updated: '2021-12-16',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
     },
     {
       ammount: '-',
@@ -468,7 +639,11 @@ const result3 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 2,
-      updated: '2021-12-16'
+      updated: '2021-12-16',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
     }
   ],
   numPages: 1
@@ -621,7 +796,11 @@ const result4 = {
       sentBy: 'サプライヤー1',
       sentTo: 'バイヤー1',
       status: 0,
-      updated: '-'
+      updated: '-',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
     },
     {
       ammount: '178,320',
@@ -633,7 +812,11 @@ const result4 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 1,
-      updated: '-'
+      updated: '-',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
     },
     {
       ammount: '-',
@@ -645,7 +828,11 @@ const result4 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 2,
-      updated: '-'
+      updated: '-',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
     },
     {
       ammount: '3,080,000',
@@ -657,11 +844,31 @@ const result4 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: '-',
-      updated: '-'
+      updated: '-',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      }
     }
   ],
   numPages: 1
 }
+
+const userInfo = {
+  Id: '27f7188b-f6c7-4b5e-9826-96052bba495c',
+  Person: { LastName: 'UT', FirstName: 'テスト' },
+  CompanyAccountId: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
+  UserName: 'abc@test.co.jp',
+  Credentials: [],
+  State: 'ACTIVE',
+  Language: 'ja',
+  Kind: 'PERSON',
+  LastLogin: 1657590818711,
+  TimeZone: 'Asia/Tokyo',
+  Visible: false,
+  CompanyAccountIdModifyDate: '2021-06-01T08:49:08.410Z'
+}
+
 const accessToken = 'dummyAccessToken'
 const refreshToken = 'dummyRefreshToken'
 const pageId = 1
@@ -747,26 +954,83 @@ describe('inboxControllerのテスト', () => {
   })
 
   describe('getInbox', () => {
-    test('正常', async () => {
+    test('正常：担当者アドレスがある場合（無償）', async () => {
       // 準備
       // APIからの正常情報の取得を想定する
       tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
       // 試験実施
-      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
 
       // 期待結果
       // 想定した契約情報がReturnされていること
-      expect(result).toEqual(result1)
+      expect(result).toEqual(freeManagerInfoResult)
+    })
+
+    test('正常：担当者アドレスがない場合（無償）', async () => {
+      // 準備
+      // APIからの正常情報の取得を想定する
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
+
+      // 試験実施
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(noManagerInfoResult)
+    })
+
+    test('正常：担当者アドレスがある場合、ユーザー情報あり（有償）', async () => {
+      // 準備
+      // APIからの正常情報の取得を想定する
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
+      const presentation = 'inboxList_light_plan'
+
+      // 試験実施
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(managerInfoResult)
+    })
+
+    test('正常：担当者アドレスがある場合、ユーザー情報なし（有償）', async () => {
+      // 準備
+      // APIからの正常情報の取得を想定する
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const noUser = new Error()
+      accessTradeshiftSpy.mockReturnValue(noUser)
+      const presentation = 'inboxList_light_plan'
+
+      // 試験実施
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(freeManagerInfoResult)
     })
 
     test('正常：文書をリスト化する時値がない場合', async () => {
       // 準備
       // APIからの正常情報の取得を想定する
       tradeshiftDTOGetDocuments.mockReturnValue(searchResult3)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
       // 試験実施
-      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
       // 期待結果
       expect(result).toEqual(result3)
     })
@@ -775,9 +1039,12 @@ describe('inboxControllerのテスト', () => {
       // 準備
       // APIからの正常情報の取得を想定する
       tradeshiftDTOGetDocuments.mockReturnValue(searchResult4)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
       // 試験実施
-      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
       // 期待結果
       expect(result).toEqual(result4)
     })
@@ -786,11 +1053,31 @@ describe('inboxControllerのテスト', () => {
       // 準備
       // APIからの正常情報の取得を想定する
       tradeshiftDTOGetDocuments.mockReturnValue(searchResult2)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
       // 試験実施
-      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
       // 期待結果
       expect(result).toEqual(result0)
+    })
+
+    test('異常：GetDocumentAPIエラー(500)が発生した場合', async () => {
+      // 準備
+      // APIからの正常情報の取得を想定する
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const apiError = new Error('API ERROR')
+      apiError.status = 500
+      tradeshiftDTOGetDocument.mockReturnValue(apiError)
+      const presentation = 'inboxList_light_plan'
+
+      // 試験実施
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(noManagerInfoResult)
     })
   })
 
@@ -1834,6 +2121,7 @@ describe('inboxControllerのテスト', () => {
 
   describe('getWorkflow', () => {
     test('正常:対象がない', async () => {
+      // 準備
       const userId = 'dummyUserId'
       const req = {
         user: {
@@ -1846,13 +2134,203 @@ describe('inboxControllerのテスト', () => {
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
       requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce([])
       approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
-
+      const presentation = 'inboxList'
       const finalExpectResult = []
-      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
       expect(result).toStrictEqual(finalExpectResult)
     })
 
+    test('正常:担当者アドレスがある場合(無償)', async () => {
+      // 準備
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+      const getAllRequestApproval = []
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+        })
+      )
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
+      expect(result.length).toBe(1)
+      expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', {
+        managerAddress: 'abc@test.co.jp',
+        managerName: '（担当者不明）'
+      })
+    })
+
+    test('正常:担当者アドレスがある場合、ユーザー情報あり(有償)', async () => {
+      // 準備
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+      const getAllRequestApproval = []
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+        })
+      )
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
+      const presentation = 'inboxList_light_plan'
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
+      expect(result.length).toBe(1)
+      expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', {
+        managerAddress: 'abc@test.co.jp',
+        managerName: 'テスト UT'
+      })
+    })
+
+    test('正常:担当者アドレスがある場合、ユーザー情報なし(有償)', async () => {
+      // 準備
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+      const getAllRequestApproval = []
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+        })
+      )
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const noUser = new Error()
+      noUser.status = 403
+      accessTradeshiftSpy.mockReturnValue(noUser)
+      const presentation = 'inboxList_light_plan'
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
+      expect(result.length).toBe(1)
+      expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', {
+        managerAddress: 'abc@test.co.jp',
+        managerName: '（担当者不明）'
+      })
+    })
+
     test('正常:自分が依頼した場合', async () => {
+      // 準備
       const userId = 'dummyUserId'
       const req = {
         user: {
@@ -1896,7 +2374,7 @@ describe('inboxControllerのテスト', () => {
       requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
       approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
       const document1 = {
-        ID: 'UTテスト1',
+        ID: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
         UnifiedState: 'PAID_UNCONFIRMED',
         ItemInfos: [
           { type: 'document.currency', value: 'JPY' },
@@ -1945,11 +2423,17 @@ describe('inboxControllerのテスト', () => {
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document2)
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document3)
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document4)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
-      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
       expect(result.length).toBe(4)
       expect(result[0]).toHaveProperty('documentId', 'ut-test1')
-      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('invoiceid', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
       expect(result[0]).toHaveProperty('status', 1)
       expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
       expect(result[0]).toHaveProperty('currency', 'JPY')
@@ -1958,6 +2442,7 @@ describe('inboxControllerのテスト', () => {
       expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
       expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
       expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（担当者不明）' })
 
       expect(result[1]).toHaveProperty('documentId', 'ut-test2')
       expect(result[1]).toHaveProperty('invoiceid', 'UTテスト2')
@@ -1969,6 +2454,7 @@ describe('inboxControllerのテスト', () => {
       expect(result[1]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
       expect(result[1]).toHaveProperty('updatedAt', timeStamp(new Date()))
       expect(result[1]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[1]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（担当者不明）' })
 
       expect(result[2]).toHaveProperty('documentId', 'ut-test3')
       expect(result[2]).toHaveProperty('invoiceid', 'UTテスト3')
@@ -1980,6 +2466,7 @@ describe('inboxControllerのテスト', () => {
       expect(result[2]).toHaveProperty('sendTo', '-')
       expect(result[2]).toHaveProperty('updatedAt', timeStamp(new Date()))
       expect(result[2]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[2]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（担当者不明）' })
 
       expect(result[3]).toHaveProperty('documentId', 'ut-test4')
       expect(result[3]).toHaveProperty('invoiceid', 'UTテスト4')
@@ -1991,9 +2478,11 @@ describe('inboxControllerのテスト', () => {
       expect(result[3]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
       expect(result[3]).toHaveProperty('updatedAt', '-')
       expect(result[3]).toHaveProperty('expire', '-')
+      expect(result[3]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（担当者不明）' })
     })
 
     test('正常:自分に依頼がきた時', async () => {
+      // 準備
       const userId = 'dummyUserId'
       const req = {
         user: {
@@ -2004,9 +2493,7 @@ describe('inboxControllerのテスト', () => {
       const accessToken = req.user.accessToken
       const refreshToken = req.user.refreshToken
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
-
       requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce([])
-
       const waitingApprovals = []
       // 最終承認者になって、承認担当者になっているもの
       waitingApprovals.push(
@@ -2201,7 +2688,6 @@ describe('inboxControllerのテスト', () => {
         })
       )
       approvalDAOGetWaitingApprovals.mockReturnValueOnce(waitingApprovals)
-
       const document1 = {
         ID: 'UTテスト1',
         UnifiedState: 'PAID_UNCONFIRMED',
@@ -2227,8 +2713,14 @@ describe('inboxControllerのテスト', () => {
       }
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document2)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
-      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
       expect(result.length).toBe(2)
       expect(result[0]).toHaveProperty('documentId', 'ut-test1')
       expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
@@ -2240,6 +2732,7 @@ describe('inboxControllerのテスト', () => {
       expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
       expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
       expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（担当者不明）' })
 
       expect(result[1]).toHaveProperty('documentId', 'ut-test3')
       expect(result[1]).toHaveProperty('invoiceid', 'UTテスト3')
@@ -2251,6 +2744,68 @@ describe('inboxControllerのテスト', () => {
       expect(result[1]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
       expect(result[1]).toHaveProperty('updatedAt', timeStamp(new Date()))
       expect(result[1]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[1]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（担当者不明）' })
+    })
+
+    test('異常:GetDocumentAPIエラー(500)', async () => {
+      // 準備
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+      const getAllRequestApproval = []
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+        })
+      )
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      const apiError = new Error('API ERROR')
+      apiError.status = 500
+      tradeshiftDTOGetDocument.mockReturnValue(apiError)
+      const presentation = 'inboxList_light_plan'
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
+      expect(result.length).toBe(1)
+      expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', {
+        managerAddress: '-',
+        managerName: '（担当者不明）'
+      })
     })
   })
 
