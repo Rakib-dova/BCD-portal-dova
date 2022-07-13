@@ -1,8 +1,8 @@
 ﻿extends layout
 
 block vars
-  - var standard = '030' // スタンダードプラン
   - var introduction = '020' // 導入支援サービス
+  - var standard = '030' // スタンダードプラン
 
 block content
   .max-width
@@ -24,18 +24,18 @@ block content
                     span （必須）
                   .termWrap.my-5  
                     label.checkbox
-                      input.serviceCheckboxes(type='checkbox', name='services', value=standard, disabled=paidServiceInfo.standardDisabled, checked=paidServiceInfo.serviceType===standard)
+                      input.serviceCheckboxes(type='checkbox', name='services', value=standard, disabled=paidServiceInfo.standardDisabled, checked=paidServiceInfo.standardChecked)
                       span.termCheck スタンダードプラン
                     label.checkbox
-                      input.serviceCheckboxes(type='checkbox', name='services', value=introduction, disabled=paidServiceInfo.introductionSupportDisabled, checked=paidServiceInfo.serviceType===introduction)
+                      input.serviceCheckboxes(type='checkbox', name='services', value=introduction, disabled=paidServiceInfo.introductionSupportDisabled, checked=paidServiceInfo.introductionSupportChecked)
                       span.termCheck 導入支援サービス
 
                 .field.is-grouped.is-grouped-left.is-block.mt-6
                   h3.my-3.has-text-centered 重要事項説明
-                .serviceBox.mb-5#standard(class=paidServiceInfo.serviceType===standard ? '' :'is-hidden')    
+                .serviceBox.mb-5#standard(class=paidServiceInfo.standardChecked ? '' :'is-hidden')    
                   h3.mb-3 スタンダードプラン
                   p スタンダードプランの重要事項説明が入ります。テキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキスト
-                .serviceBox.mb-6#introductionSupport(class=paidServiceInfo.serviceType===introduction ? '' :'is-hidden')    
+                .serviceBox.mb-6#introductionSupport(class=paidServiceInfo.introductionSupportChecked ? '' :'is-hidden')    
                   h3.mb-3 導入支援サービス
                   p 導入支援サービスの重要事項説明が入ります。テキストテキストテキストテキストテキストテテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストテキストキストテキスト
 
@@ -48,12 +48,12 @@ block content
               .columns.is-centered: .column.is-four-fifths
                 .field.is-horizontal.is-grouped.is-grouped-centered
                   .control: label.checkbox
-                    input(type="hidden" name="_csrf" value=csrfToken)
                     input.is-normal#check(name="termsCheck" type="checkbox" required="required")
-                  span.checkboxtext 利用規約に同意します
+                    span.checkboxtext 重要事項説明・利用規約に同意します
               .columns.is-centered: .column.is-four-fifths.mb-6.mt-4
                 .field.is-grouped.is-grouped-centered
                   .control
+                    input(type="hidden" name="_csrf" value=csrfToken)
                     button.button.is-link#next-btn(type="submit" formaction="/paidServiceRegister/showForm" disabled) お申し込み内容入力へ
     include footer
 

@@ -39,12 +39,18 @@ const getAndCheckContracts = async (tenantId, next) => {
   // データベースエラー、または、契約情報未登録の場合エラーを上げる
   if (contracts instanceof Error || !contracts || contracts.length === 0) return next(errorHelper.create(500))
 
-  // ライトプラン契約中の場合
+  // スタンダードプラン契約中の場合
   if (contracts.some((i) => i.serviceType === serviceTypes.lightPlan)) {
     return next(noticeHelper.create('haveStandard'))
 
     // 導入支援サービス契約中の場合
-  } else if (contracts.some((i) => i.serviceType === serviceTypes.introductionSupport)) {
+  } else if (
+    contracts.some(
+      (i) =>
+        i.serviceType === serviceTypes.introductionSupport &&
+        i.contractStatus !== constantsDefine.statusConstants.contractStatuses.onContract
+    )
+  ) {
     return next(noticeHelper.create('haveIntroductionSupport'))
   }
 

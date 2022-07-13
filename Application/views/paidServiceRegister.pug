@@ -256,10 +256,11 @@ block content
                   .columns.is-centered: .column.is-four-fifths
                     .field.is-grouped.is-grouped-centered
                       .control
-                        //- CSRF対策
-                        input.is-hidden(name="_csrf" value=csrfToken)
-                        input.is-hidden#serviceList-json(name="serviceList" value=serviceList)
-                        button.button.is-link.btn-contract.show-modal#next-btn(type="submit") 内容確認
+                          //- CSRF対策
+                          input.is-hidden(name="_csrf" value=csrfToken)
+                          input.is-hidden#serviceList-json(name="serviceList" value=serviceList)
+                          a.button.mr-6(href="/paidServiceRegister/") 戻る
+                          button.button.is-link.btn-contract.show-modal#next-btn(type="submit") 内容確認
 
             .modal.modal-fx-fadeInScale#confirmregister-modal
               .modal-background.cancel-button(data-target='confirmregister-modal')

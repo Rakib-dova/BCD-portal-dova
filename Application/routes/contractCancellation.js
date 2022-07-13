@@ -6,6 +6,7 @@ const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 const OrderData = require('./helpers/orderData')
+const Op = require('../models').Sequelize.Op
 const contractController = require('../controllers/contractController.js')
 const applyOrderController = require('../controllers/applyOrderController.js')
 const logger = require('../lib/logger')
@@ -23,14 +24,18 @@ const logMessage = constants.logMessage
 
 /**
  * 解約の事前チェック
- * @param {object} req リクエスト
+ * @param {string} tenantId テナントID
  * @param {function} next 次の処理
- * @returns ライトプラン契約情報
+ * @returns スタンダードプラン契約情報
  */
 const checkContractStatus = async (tenantId, next) => {
-  // ライトプランの契約情報を取得する
+  // 解約済以外スタンダードプランの契約情報を取得する
   const contracts = await contractController.findContracts(
-    { tenantId: tenantId, serviceType: serviceTypes.lightPlan },
+    {
+      tenantId: tenantId,
+      serviceType: serviceTypes.lightPlan,
+      contractStatus: { [Op.ne]: contractStatuses.canceledContract }
+    },
     null
   )
 
@@ -44,8 +49,7 @@ const checkContractStatus = async (tenantId, next) => {
         i.contractStatus === contractStatuses.newContractOrder ||
         i.contractStatus === contractStatuses.newContractReceive ||
         i.contractStatus === contractStatuses.newContractBeforeCompletion
-    ) ||
-    contracts.every((i) => i.contractStatus === contractStatuses.canceledContract)
+    )
   ) {
     return next(noticeHelper.create('standardUnregistered'))
   } else if (
@@ -96,7 +100,7 @@ const showContractCancel = async (req, res, next) => {
 const contractCancel = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'contractCancel')
 
-  // ライトプランの解約の事前チェック
+  // スタンダードプランの解約の事前チェック
   const contracts = await checkContractStatus(req.user?.tenantId, next)
   if (!contracts) return
 

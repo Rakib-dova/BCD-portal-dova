@@ -50,34 +50,37 @@ const getAndCheckContracts = async (tenantId, serviceList, next) => {
   if (contracts instanceof Error) return next(errorHelper.create(500))
 
   for (const service of serviceList) {
-    // 希望サービスの解約済以外契約情報が存在する場合
-    if (contracts.some((i) => i.serviceType === service)) {
-      switch (service) {
-        // 導入支援サービスの場合
-        case serviceTypes.introductionSupport:
-          return next(noticeHelper.create('introductionSupportregistered'))
+    for (const contract of contracts) {
+      // 希望サービスの解約済以外契約情報が存在する場合
+      if (contract.serviceType === service) {
+        switch (service) {
+          // 導入支援サービスの場合
+          case serviceTypes.introductionSupport:
+            // 申込済の場合
+            if (contract.contractStatus !== contractStatuses.onContract) {
+              return next(noticeHelper.create('introductionSupportregistered'))
+            }
+            break
 
-        // スタンダードプランの場合
-        case serviceTypes.lightPlan:
-          //  申込中の場合(申し込み～竣工まで)
-          if (
-            contracts.some(
-              (i) =>
-                i.contractStatus === contractStatuses.newContractOrder ||
-                i.contractStatus === contractStatuses.newContractReceive ||
-                i.contractStatus === contractStatuses.newContractBeforeCompletion
-            )
-          ) {
-            return next(noticeHelper.create('standardRegistering'))
+          // スタンダードプランの場合
+          case serviceTypes.lightPlan:
+            // 申込中の場合(申し込み～竣工まで)
+            if (
+              contract.contractStatus === contractStatuses.newContractOrder ||
+              contract.contractStatus === contractStatuses.newContractReceive ||
+              contract.contractStatus === contractStatuses.newContractBeforeCompletion
+            ) {
+              return next(noticeHelper.create('standardRegistering'))
 
-            //  契約中の場合(竣工～解約処理完了まで)
-          } else {
-            return next(noticeHelper.create('standardRegistered'))
-          }
+              //  契約中の場合(竣工～解約処理完了まで)
+            } else {
+              return next(noticeHelper.create('standardRegistered'))
+            }
 
-        // 想定外サービス種別の場合
-        default:
-          return next(errorHelper.create(500))
+          // 想定外サービス種別の場合
+          default:
+            return next(errorHelper.create(500))
+        }
       }
     }
   }
@@ -99,13 +102,21 @@ const showPaidServiceRegisterTerms = async (req, res, next) => {
   // 申込サービスタイプ
   const serviceType = req.params.serviceType
 
+  // 申込サービスリスト
+  const serviceList = serviceType ? [serviceType] : req.session.serviceList
+
   // 有料サービス申込前の契約状態のチェック
-  const contracts = await getAndCheckContracts(req.user?.tenantId, [serviceType], next)
+  const contracts = await getAndCheckContracts(req.user?.tenantId, serviceList, next)
   if (!contracts) return
 
+  // セッションに申込サービスリストを設定する
+  req.session.serviceList = serviceList
+
   const paidServiceInfo = {
-    // 申込サービスタイプ
-    serviceType: serviceType,
+    // スタンダードプランチェックボックス値
+    standardChecked: serviceList.some((i) => i === serviceTypes.lightPlan),
+    // スタンダードプランチェックボックス値
+    introductionSupportChecked: serviceList.some((i) => i === serviceTypes.introductionSupport),
     // スタンダードプランチェックボックス非活性
     standardDisabled: false,
     // 導入支援サービスチェックボックス非活性
@@ -115,7 +126,10 @@ const showPaidServiceRegisterTerms = async (req, res, next) => {
   // 有料サービス契約情報が存在する場合
   for (const contract of contracts) {
     // 導入支援サービスの契約が存在する場合
-    if (contract.serviceType === serviceTypes.introductionSupport) {
+    if (
+      contract.serviceType === serviceTypes.introductionSupport &&
+      contract.contractStatus !== contractStatuses.onContract
+    ) {
       paidServiceInfo.introductionSupportDisabled = true
 
       // スタンダードプランの契約が存在する場合
@@ -152,7 +166,7 @@ const showPaidServiceRegister = async (req, res, next) => {
   const contracts = await getAndCheckContracts(req.user?.tenantId, serviceList, next)
   if (!contracts) return
 
-  // セッションにチェックされている申込サービスリストを設定する
+  // セッションに申込サービスリストを設定する
   req.session.serviceList = serviceList
 
   // チャネル組織マスターからチャネル組織情報リストを取得
@@ -259,7 +273,7 @@ const applyPaidServiceRegister = async (req, res, next) => {
 
 // 有料サービス利用登録規約
 router.get(
-  '/:serviceType',
+  '/:serviceType?',
   csrfProtection,
   middleware.bcdAuthenticate,
   middleware.isTenantManager,

@@ -2,7 +2,7 @@ const constants = require('../../constants')
 
 class OrderData {
   /**
-   * 導入支援・ライトプラン用オーダー情報コンストラクタ
+   * 導入支援・スタンダードプラン用オーダー情報コンストラクタ
    * @param {string} tenantId テナントID
    * @param {object} inputData 画面入力データ
    * @param {string} orderType オーダー種別
