@@ -163,7 +163,7 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
             contactor[i].userInfo.Person.LastName.trim().length !== 0 ||
             contactor[i].userInfo.Person.FirstName.trim().length !== 0
           ) {
-            managerInfo.managerName = `${contactor[i].userInfo.Person.FirstName} ${contactor[i].userInfo.Person.LastName}`
+            managerInfo.managerName = `${contactor[i].userInfo.Person.LastName} ${contactor[i].userInfo.Person.FirstName}`
           }
 
           break
@@ -876,7 +876,7 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
             contactor[i].userInfo.Person.LastName.trim().length !== 0 ||
             contactor[i].userInfo.Person.FirstName.trim().length !== 0
           ) {
-            managerInfo.managerName = `${contactor[j].userInfo.Person.FirstName} ${contactor[j].userInfo.Person.LastName}`
+            managerInfo.managerName = `${contactor[j].userInfo.Person.LastName} ${contactor[j].userInfo.Person.FirstName}`
           }
           break
         }

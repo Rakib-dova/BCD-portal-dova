@@ -231,7 +231,7 @@ const managerInfoResult = {
       documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
       managerInfo: {
         managerAddress: 'abc@test.co.jp',
-        managerName: 'テスト UT'
+        managerName: 'UT テスト'
       }
     },
     {
@@ -2294,7 +2294,7 @@ describe('inboxControllerのテスト', () => {
       expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
       expect(result[0]).toHaveProperty('managerInfo', {
         managerAddress: 'abc@test.co.jp',
-        managerName: 'テスト UT'
+        managerName: 'UT テスト'
       })
     })
 
