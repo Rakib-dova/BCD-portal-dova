@@ -322,7 +322,7 @@ app.use('/deleteApproveRoute', require('./routes/deleteApproveRoute').router)
 // 承認ルート確認
 app.use('/approveRouteEdit', require('./routes/approveRouteEdit').router)
 
-// 設定
+// ------------設定
 // ご契約内容
 app.use('/contractDetail', require('./routes/contractDetail').router)
 
@@ -341,16 +341,6 @@ app.use('/uploadUsers', require('./routes/uploadUsers').router)
 // ------------オプションサービス申込
 // 有料サービス利用登録
 app.use('/paidServiceRegister', require('./routes/paidServiceRegister').router)
-
-// ------------導入支援(PBI3875)
-// 新規申込のみ
-app.use('/receiveIntroductionSupport', require('./routes/receiveIntroductionSupport').router)
-// ------------ライトプラン
-// 新設申込み
-app.use('/applyLightPlan', require('./routes/applyLightPlan').router)
-
-// 解約申込み
-app.use('/cancelLightPlan', require('./routes/cancelLightPlan').router)
 
 // 請求書ダウンロード
 app.use('/csvDownload', require('./routes/csvDownload').router)
