@@ -121,7 +121,7 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
       return Math.floor(item.ItemInfos[1].value).toLocaleString('ja-JP')
     }
 
-    const managerInfo = { managerAddress: '-', managerName: '（担当者不明）' }
+    const managerInfo = { managerAddress: '-', managerName: '（ユーザー登録なし）' }
     for (let i = 0; i < contactor.length; i++) {
       if (contactor[i].documentId === item.DocumentId) {
         managerInfo.managerAddress = contactor[i].managerAddress
@@ -131,6 +131,8 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
             contactor[i].userInfo.Person.FirstName.trim().length !== 0
           ) {
             managerInfo.managerName = `${contactor[i].userInfo.Person.LastName} ${contactor[i].userInfo.Person.FirstName}`
+          } else {
+            managerInfo.managerName = '-'
           }
 
           break
@@ -801,7 +803,7 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
 
   // リストに担当者アドレス、ユーザー情報入力
   for (let i = 0; i < getWaitingWorkflow.length; i++) {
-    const managerInfo = { managerAddress: '-', managerName: '（担当者不明）' }
+    const managerInfo = { managerAddress: '-', managerName: '（ユーザー登録なし）' }
     for (let j = 0; j < contactor.length; j++) {
       if (contactor[j].documentId === getWaitingWorkflow[i].documentId) {
         managerInfo.managerAddress = contactor[j].managerAddress
@@ -811,6 +813,8 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
             contactor[i].userInfo.Person.FirstName.trim().length !== 0
           ) {
             managerInfo.managerName = `${contactor[j].userInfo.Person.LastName} ${contactor[j].userInfo.Person.FirstName}`
+          } else {
+            managerInfo.managerName = '-'
           }
           break
         }
@@ -837,7 +841,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     const contactEmail = keyword.contactEmail
     let unKnownManager = ''
     if (keyword.unKnownManager === 'unKnownManager') {
-      unKnownManager = '担当者不明'
+      unKnownManager = 'ユーザー登録なし'
     }
     let result = null
 
@@ -884,7 +888,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
             logger.warn(
               `contractId:${contractId}, DocumentId:${data.DocumentId}, msg: ${constantsDefine.statusConstants.FAILED_TO_CREATE_TAG}(${constantsDefine.statusConstants.INVOICE_CONTACT_EMAIL_NOT_VERIFY})`
             )
-            await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('担当者不明'))
+            await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
           } else {
             await tradeshiftDTO.createTags(data.DocumentId, invoice.AccountingCustomerParty.Party.Contact.ID.value)
 
@@ -896,11 +900,11 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
             )
 
             if (userInfo instanceof Error && userInfo.response.status) {
-              await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('担当者不明'))
+              await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
             }
           }
         } else {
-          await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('担当者不明'))
+          await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
         }
         // 確認請求書にタグを追加
         await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked')
@@ -972,7 +976,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
         return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
       }
 
-      const managerInfo = { managerAddress: '-', managerName: '（担当者不明）' }
+      const managerInfo = { managerAddress: '-', managerName: '（ユーザー登録なし）' }
       for (let i = 0; i < contactor.length; i++) {
         if (contactor[i].documentId === document.DocumentId) {
           managerInfo.managerAddress = contactor[i].managerAddress

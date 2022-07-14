@@ -237,7 +237,7 @@ block content
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
                               - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
-                              if (item.managerInfo.managerName === '（担当者不明）')
+                              if (item.managerInfo.managerName === '（ユーザー登録なし）')
                                 td.text-center.td-overflow.text-color-red!= managerinfo
                               else 
                                 td.text-center.td-overflow!= managerinfo
@@ -493,7 +493,7 @@ block content
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
                               - var managerinfo = item.managerInfo.managerAddress + '<br>' + item.managerInfo.managerName
-                              if (item.managerInfo.managerName === '（担当者不明）')
+                              if (item.managerInfo.managerName === '（ユーザー登録なし）')
                                 td.text-center.td-overflow.text-color-red!= managerinfo
                               else 
                                 td.text-center.td-overflow!= managerinfo

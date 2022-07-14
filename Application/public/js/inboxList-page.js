@@ -132,7 +132,7 @@ function getWorkflow() {
               const contactAddress = document.createElement('td')
               const lightPlan = document.querySelector('#BtnInboxSearch')
               if (lightPlan) {
-                if (item.managerInfo.managerName === '（担当者不明）') {
+                if (item.managerInfo.managerName === '（ユーザー登録なし）') {
                   contactAddress.classList.add('text-color-red')
                 }
                 addColumnCSS(contactAddress)
