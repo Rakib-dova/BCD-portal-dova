@@ -938,7 +938,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
       document.push(documentInfo)
     }
 
-    // // 社内に担当者ユーザーの有無確認
+    // 社内に担当者ユーザーの有無確認
     const contactor = await getCompanyUserInfo(document, tradeshiftDTO.accessToken, tradeshiftDTO.refreshToken)
 
     // 請求書の承認依頼検索
