@@ -1918,7 +1918,7 @@ describe('inboxListのテスト', () => {
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
 
-    test('正常：担当者不明にチェックなし', async () => {
+    test('正常：担当者不明の請求書をチェックしない場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -1982,7 +1982,7 @@ describe('inboxListのテスト', () => {
       })
     })
 
-    test('正常：担当者不明にチェックあり', async () => {
+    test('正常：担当者不明の請求書をチェックした場合', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
