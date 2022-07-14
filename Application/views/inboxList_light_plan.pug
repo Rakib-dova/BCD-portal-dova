@@ -126,6 +126,15 @@ block content
                                         .field.has-addons
                                           p.control.is-expanded
                                             input.input#managerAddress(type='text' name='managerAddress' maxlength=128 pattern=inputPattarnManagerAddress placeholder='例：bcd@gma.com　※省略不可')
+                                  .column
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 担当者不明の請求書
+                                      .field-body
+                                        .field
+                                          .control.has-icons-right
+                                            .is-fullwidth.is-multiple
+                                              input.m-3.p-1(type="checkbox" name="unKnownManager" checked=false value= 'unKnownManager')
                                   .column          
                                     .field.is-horizontal                                        
                                       .field-body.m-1.is-4.text-center.width-45percent
@@ -374,6 +383,15 @@ block content
                                         .field.has-addons
                                           p.control.is-expanded
                                             input.input#managerAddress(type='text' name='managerAddress' maxlength=128 placeholder='例：bcd@gma.com　※省略不可')
+                                  .column
+                                    .field.is-horizontal
+                                      .field-label.is-normal
+                                        label.bulmalabel 担当者不明の請求書
+                                      .field-body
+                                        .field
+                                          .control.has-icons-right
+                                            .is-fullwidth.is-multiple
+                                              input.m-3.p-1(type="checkbox" name="unKnownManager" checked=false value= 'unKnownManager')
                                   .column          
                                     .field.is-horizontal                                        
                                       .field-body.m-1.is-4.text-center.width-45percent
