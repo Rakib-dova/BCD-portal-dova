@@ -899,7 +899,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
               `/account/users/byemail/${invoice.AccountingCustomerParty.Party.Contact.ID.value}?searchlocked=false`
             )
 
-            if (userInfo instanceof Error && userInfo.response.status) {
+            if (userInfo instanceof Error) {
               await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
             }
           }

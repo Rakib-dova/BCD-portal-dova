@@ -119,7 +119,7 @@ const searchResult1 = {
       updated: '2021-12-16',
       expire: '2021-12-28',
       documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
-      managerInfo: { managerAddress: 'test@test.com', managerName: '（担当者不明）' }
+      managerInfo: { managerAddress: 'test@test.com', managerName: '（ユーザー登録なし）' }
     }
   ],
   numPages: 1,
@@ -192,7 +192,7 @@ const searchResult1Rejected = {
       expire: '2021-12-28',
       documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
       approveStatus: '90',
-      managerInfo: { managerAddress: 'test@test.com', managerName: '（担当者不明）' }
+      managerInfo: { managerAddress: 'test@test.com', managerName: '（ユーザー登録なし）' }
     }
   ],
   numPages: 1,
@@ -2007,7 +2007,7 @@ describe('inboxListのテスト', () => {
           sentTo: 'サプライヤー1',
           status: 0,
           updated: '2021-12-27',
-          managerInfo: { managerAddress: '-', managerName: '（担当者不明）' }
+          managerInfo: { managerAddress: '-', managerName: '（ユーザー登録なし）' }
         }
       ]
 
