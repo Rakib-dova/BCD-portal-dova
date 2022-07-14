@@ -64,81 +64,87 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
     }
   }
 
-  // Promise.allが利用できない場合のため
-  // const document = []
-  // for (let i = 0; i < documents.Document.length; i++) {
-  //   const result = await tradeshiftDTO.getDocument(documents.Document[i].DocumentId, '')
-  //   document.push(result)
-  // }
-
   // 請求書情報取得
-  let document = []
-  await Promise.all(
-    documents.Document.map(async (key) => {
-      return tradeshiftDTO.getDocument(key.DocumentId)
-    })
-  ).then(function (result) {
-    document = result
-  })
+  const document = []
+  for (let i = 0; i < documents.Document.length; i++) {
+    const result = await tradeshiftDTO.getDocument(documents.Document[i].DocumentId, '')
+    document.push(result)
+  }
+
+  // // 請求書情報取得
+  // let document = []
+  // await Promise.all(
+  //   documents.Document.map(async (key) => {
+  //     return tradeshiftDTO.getDocument(key.DocumentId)
+  //   })
+  // ).then(function (result) {
+  //   document = result
+  // })
 
   // 社内に担当者ユーザーの有無確認
   let contactor = []
   if (presentation === 'inboxList_light_plan') {
-    await Promise.all(
-      document.map(async (key) => {
-        let managerAddress
-        if (!(key instanceof Error)) {
-          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
-          if (
-            typeof managerAddress !== 'undefined' &&
-            managerAddress.trim().length !== 0 &&
-            validate.isValidEmail(managerAddress)
-          ) {
-            const userInfo = await apiManager.accessTradeshift(
-              accessToken,
-              refreshToken,
-              'get',
-              `/account/users/byemail/${managerAddress}`
-            )
-            return { userInfo, managerAddress: managerAddress, documentId: key.documentId }
-          }
-        }
-        return { managerAddress: managerAddress, documentId: key.documentId }
-      })
-    ).then(function (result) {
-      contactor = result.filter(
-        (element) =>
-          element.managerAddress !== '' &&
-          element.managerAddress !== undefined &&
-          validate.isValidEmail(element.managerAddress)
-      )
-    })
-  } else {
-    // スタンダードプランではない場合
-    await Promise.all(
-      document.map(async (key) => {
-        let managerAddress = ''
-        if (!(key instanceof Error)) {
-          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
-        }
+    // await Promise.all(
+    //  document.map(async (key) => {
+
+    const result = []
+    for (let i = 0; i < document.length; i++) {
+      let managerAddress
+      if (!(document[i] instanceof Error)) {
+        managerAddress = document[i].AccountingCustomerParty.Party.Contact?.ID?.value
         if (
           typeof managerAddress !== 'undefined' &&
           managerAddress.trim().length !== 0 &&
           validate.isValidEmail(managerAddress)
         ) {
-          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+          const userInfo = await apiManager.accessTradeshift(
+            accessToken,
+            refreshToken,
+            'get',
+            `/account/users/byemail/${managerAddress}?searchlocked=false`
+          )
+          // return { userInfo, managerAddress: managerAddress, documentId: key.documentId }
+          result.push({ userInfo, managerAddress: managerAddress, documentId: document[i].documentId })
         }
+      }
+      result.push({ managerAddress: managerAddress, documentId: document[i].documentId })
+      // return { managerAddress: managerAddress, documentId: key.documentId }
+    }
+    // })
+    // ).then(function (result) {
+    contactor = result.filter(
+      (element) =>
+        element.managerAddress !== '' &&
+        element.managerAddress !== undefined &&
+        validate.isValidEmail(element.managerAddress)
+    )
+    // })
+  } else {
+    // スタンダードプランではない場合
+    // await Promise.allSettled(
+    const result = document.map((key) => {
+      let managerAddress = ''
+      if (!(key instanceof Error)) {
+        managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+      }
+      if (
+        typeof managerAddress !== 'undefined' &&
+        managerAddress.trim().length !== 0 &&
+        validate.isValidEmail(managerAddress)
+      ) {
+        managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+      }
 
-        return { managerAddress: managerAddress, documentId: key.documentId }
-      })
-    ).then(function (result) {
-      contactor = result.filter(
-        (element) =>
-          element.managerAddress !== '' &&
-          element.managerAddress !== undefined &&
-          validate.isValidEmail(element.managerAddress)
-      )
+      return { managerAddress: managerAddress, documentId: key.documentId }
     })
+    // ).then(function (result) {
+    contactor = result.filter(
+      (element) =>
+        element.managerAddress !== '' &&
+        element.managerAddress !== undefined &&
+        validate.isValidEmail(element.managerAddress)
+    )
+    // })
   }
 
   // 文書をリスト化する
@@ -153,7 +159,13 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
       if (contactor[i].documentId === item.DocumentId) {
         managerInfo.managerAddress = contactor[i].managerAddress
         if (contactor[i].userInfo && !(contactor[i].userInfo instanceof Error)) {
-          managerInfo.managerName = `${contactor[i].userInfo.Person.FirstName} ${contactor[i].userInfo.Person.LastName}`
+          if (
+            contactor[i].userInfo.Person.LastName.trim().length !== 0 ||
+            contactor[i].userInfo.Person.FirstName.trim().length !== 0
+          ) {
+            managerInfo.managerName = `${contactor[i].userInfo.Person.LastName} ${contactor[i].userInfo.Person.FirstName}`
+          }
+
           break
         }
       }
@@ -771,81 +783,86 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
   requestApprovalDTO.setTradeshiftDTO(tradeshiftDTO)
   const getWaitingWorkflow = await requestApprovalDTO.getWaitingWorkflowisMine(userId)
 
-  // Promise.allが利用できない場合のため
-  // const document = []
-  // for (let i = 0; i < getWaitingWorkflow.length; i++) {
-  //   const result = await tradeshiftDTO.getDocument(getWaitingWorkflow[i].documentId, '')
-  //   document.push(result)
-  // }
-
   // 請求書情報取得
-  let document = []
-  await Promise.all(
-    getWaitingWorkflow.map(async (key) => {
-      return tradeshiftDTO.getDocument(key.documentId)
-    })
-  ).then(function (result) {
-    document = result
-  })
+  const document = []
+  for (let i = 0; i < getWaitingWorkflow.length; i++) {
+    const result = await tradeshiftDTO.getDocument(getWaitingWorkflow[i].documentId, '')
+    document.push(result)
+  }
+
+  // // 請求書情報取得
+  // let document = []
+  // await Promise.all(
+  //   getWaitingWorkflow.map(async (key) => {
+  //     return tradeshiftDTO.getDocument(key.documentId)
+  //   })
+  // ).then(function (result) {
+  //   document = result
+  // })
 
   // 社内に担当者ユーザーの有無確認
   let contactor = []
   if (presentation === 'inboxList_light_plan') {
-    await Promise.all(
-      document.map(async (key) => {
-        let managerAddress = ''
-        if (!(key instanceof Error)) {
-          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
-          if (
-            typeof managerAddress !== 'undefined' &&
-            managerAddress.trim().length !== 0 &&
-            validate.isValidEmail(managerAddress)
-          ) {
-            const userInfo = await apiManager.accessTradeshift(
-              tradeshiftDTO.accessToken,
-              tradeshiftDTO.refreshToken,
-              'get',
-              `/account/users/byemail/${managerAddress}`
-            )
-            return { userInfo, managerAddress: managerAddress, documentId: key.documentId }
-          }
-        }
-        return { managerAddress: managerAddress, documentId: key.documentId }
-      })
-    ).then(function (result) {
-      contactor = result.filter(
-        (element) =>
-          element.managerAddress !== '' &&
-          element.managerAddress !== undefined &&
-          validate.isValidEmail(element.managerAddress)
-      )
-    })
-  } else {
-    // スタンダードプランではない場合
-    await Promise.all(
-      document.map(async (key) => {
-        let managerAddress = ''
-        if (!(key instanceof Error)) {
-          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
-        }
+    // await Promise.all(
+    // document.map(async (key) => {
+    const result = []
+    for (let i = 0; i < document.length; i++) {
+      let managerAddress = ''
+      if (!(document[i] instanceof Error)) {
+        managerAddress = document[i].AccountingCustomerParty.Party.Contact?.ID?.value
         if (
           typeof managerAddress !== 'undefined' &&
           managerAddress.trim().length !== 0 &&
           validate.isValidEmail(managerAddress)
         ) {
-          managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+          const userInfo = await apiManager.accessTradeshift(
+            tradeshiftDTO.accessToken,
+            tradeshiftDTO.refreshToken,
+            'get',
+            `/account/users/byemail/${managerAddress}?searchlocked=false`
+          )
+          // return { userInfo, managerAddress: managerAddress, documentId: key.documentId }
+          result.push({ userInfo, managerAddress: managerAddress, documentId: document[i].documentId })
         }
+      }
+      // return { managerAddress: managerAddress, documentId: key.documentId }
+      result.push({ managerAddress: managerAddress, documentId: document[i].documentId })
+    }
+    // })
+    // ).then(function (result) {
+    contactor = result.filter(
+      (element) =>
+        element.managerAddress !== '' &&
+        element.managerAddress !== undefined &&
+        validate.isValidEmail(element.managerAddress)
+    )
+    // })
+  } else {
+    // スタンダードプランではない場合
+    // await Promise.all(
+    const result = document.map((key) => {
+      let managerAddress = ''
+      if (!(key instanceof Error)) {
+        managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+      }
+      if (
+        typeof managerAddress !== 'undefined' &&
+        managerAddress.trim().length !== 0 &&
+        validate.isValidEmail(managerAddress)
+      ) {
+        managerAddress = key.AccountingCustomerParty.Party.Contact?.ID?.value
+      }
 
-        return { managerAddress: managerAddress, documentId: key.documentId }
-      })
-    ).then(function (result) {
-      contactor = result.filter(
-        (element) =>
-          element.managerAddress !== '' &&
-          element.managerAddress !== undefined &&
-          validate.isValidEmail(element.managerAddress)
-      )
+      return { managerAddress: managerAddress, documentId: key.documentId }
     })
+    // ).then(function (result) {
+    contactor = result.filter(
+      (element) =>
+        element.managerAddress !== '' &&
+        element.managerAddress !== undefined &&
+        validate.isValidEmail(element.managerAddress)
+    )
+    // })
   }
 
   // リストに担当者アドレス、ユーザー情報入力
@@ -855,7 +872,12 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
       if (contactor[j].documentId === getWaitingWorkflow[i].documentId) {
         managerInfo.managerAddress = contactor[j].managerAddress
         if (contactor[j].userInfo && !(contactor[j].userInfo instanceof Error)) {
-          managerInfo.managerName = `${contactor[j].userInfo.Person.FirstName} ${contactor[j].userInfo.Person.LastName}`
+          if (
+            contactor[i].userInfo.Person.LastName.trim().length !== 0 ||
+            contactor[i].userInfo.Person.FirstName.trim().length !== 0
+          ) {
+            managerInfo.managerName = `${contactor[j].userInfo.Person.LastName} ${contactor[j].userInfo.Person.FirstName}`
+          }
           break
         }
       }
