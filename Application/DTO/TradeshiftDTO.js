@@ -142,10 +142,11 @@ class TradeshiftDTO {
    * @param {string} invoiceId 請求書番号
    * @param {Array} issueDate 発行日の期限['yyyy-mm-dd', 'yyyy-mm-dd']
    * @param {string} contractEmail 取引先担当者のメールアドレス
+   * @param {string} unKnownManager 社内に取引先担当者の情報の存在有無条件
    * @returns {Array<object>} 検索結果
    * https://developers.tradeshift.com/docs/api#documents-documentを参照
    */
-  async getDocumentSearch(sentByCompany, invoiceId, issueDate, contractEmail) {
+  async getDocumentSearch(sentByCompany, invoiceId, issueDate, contractEmail, unKnownManager) {
     sentByCompany = sentByCompany ?? ''
     invoiceId = invoiceId ?? ''
     if (issueDate instanceof Array === false) issueDate = []
@@ -166,7 +167,11 @@ class TradeshiftDTO {
       uri = `${uri}&${this.getQuery('maxissuedate', issueDate[1])}`
     }
 
+    if (contractEmail.length > 0 && unKnownManager.length > 0) uri = `${uri}&useAndOperatorForTags=true`
+
     if (contractEmail.length > 0) uri = `${uri}&tag=${contractEmail}`
+
+    if (unKnownManager.length > 0) uri = `${uri}&tag=${encodeURIComponent(unKnownManager)}`
 
     uri = `${uri}&${this.getQuery('onlydeleted', false)}&${this.getQuery('onlydrafts', false)}&${this.getQuery(
       'ascending',
