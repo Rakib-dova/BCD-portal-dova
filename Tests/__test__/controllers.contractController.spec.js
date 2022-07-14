@@ -333,7 +333,7 @@ describe('contractControllerのテスト', () => {
       expect(result).toEqual(contracts[9][1])
     })
 
-    test('ライトプラン契約者ない場合', async () => {
+    test('スタンダード契約者ない場合', async () => {
       // 準備
       findOneSpy.mockImplementation((findOneArg) => {
         let result = null

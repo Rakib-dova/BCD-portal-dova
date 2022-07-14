@@ -28,6 +28,8 @@ const serviceTypes = constantsDefine.statusConstants.serviceTypes
  * @returns 無料契約情報
  */
 const getAndCheckContracts = async (tenantId, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'getAndCheckContracts')
+
   // 解約済以外契約情報を取得する
   const contracts = await contractController.findContracts(
     {
@@ -36,6 +38,7 @@ const getAndCheckContracts = async (tenantId, next) => {
     },
     null
   )
+
   // データベースエラー、または、契約情報未登録の場合エラーを上げる
   if (contracts instanceof Error || !contracts || contracts.length === 0) return next(errorHelper.create(500))
 
@@ -58,6 +61,7 @@ const getAndCheckContracts = async (tenantId, next) => {
   const contract = contracts.find((i) => i.serviceType === serviceTypes.bcd)
   if (!contract) return next(errorHelper.create(500))
 
+  logger.info(constantsDefine.logMessage.INF001 + 'getAndCheckContracts')
   // 無料契約情報の返却
   return contract
 }

@@ -45,7 +45,6 @@ describe('contractDetailのテスト', () => {
     test('contractDetailのルーティングを確認', async () => {
       expect(contractDetail.router.get).toBeCalledWith(
         '/',
-        expect.any(Function),
         middleware.bcdAuthenticate,
         middleware.isTenantManager,
         contractDetail.showContractDetail
@@ -84,7 +83,7 @@ describe('contractDetailのテスト', () => {
       })
     })
 
-    test('正常 無償契約、ライトプランス', async () => {
+    test('正常 無償契約、スタンダードプラン', async () => {
       // 準備
       findContractsSpy.mockReturnValue([
         {
@@ -287,7 +286,7 @@ describe('contractDetailのテスト', () => {
       })
     })
 
-    test('正常 無償契約、ライトプランス、導入支援', async () => {
+    test('正常 無償契約、スタンダードプラン、導入支援', async () => {
       // 準備
       findContractsSpy.mockReturnValue([
         {

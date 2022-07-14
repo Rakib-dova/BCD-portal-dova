@@ -50,38 +50,43 @@ const getAndCheckContracts = async (tenantId, serviceList, next) => {
   if (contracts instanceof Error) return next(errorHelper.create(500))
 
   for (const service of serviceList) {
-    for (const contract of contracts) {
-      // 希望サービスの解約済以外契約情報が存在する場合
-      if (contract.serviceType === service) {
-        switch (service) {
-          // 導入支援サービスの場合
-          case serviceTypes.introductionSupport:
-            // 申込済の場合
-            if (contract.contractStatus !== contractStatuses.onContract) {
-              return next(noticeHelper.create('introductionSupportregistered'))
-            }
-            break
-
-          // スタンダードプランの場合
-          case serviceTypes.lightPlan:
-            // 申込中の場合(申し込み～竣工まで)
-            if (
-              contract.contractStatus === contractStatuses.newContractOrder ||
-              contract.contractStatus === contractStatuses.newContractReceive ||
-              contract.contractStatus === contractStatuses.newContractBeforeCompletion
-            ) {
-              return next(noticeHelper.create('standardRegistering'))
-
-              //  契約中の場合(竣工～解約処理完了まで)
-            } else {
-              return next(noticeHelper.create('standardRegistered'))
-            }
-
-          // 想定外サービス種別の場合
-          default:
-            return next(errorHelper.create(500))
+    switch (service) {
+      // 導入支援サービスの場合
+      case serviceTypes.introductionSupport:
+        // 申込済の場合
+        if (
+          contracts.some(
+            (i) =>
+              i.serviceType === serviceTypes.introductionSupport && i.contractStatus !== contractStatuses.onContract
+          )
+        ) {
+          return next(noticeHelper.create('introductionSupportregistered'))
         }
-      }
+        break
+
+      // スタンダードプランの場合
+      case serviceTypes.lightPlan:
+        // 申込中の場合(申し込み～竣工まで)
+        if (
+          contracts.some(
+            (i) =>
+              i.serviceType === serviceTypes.lightPlan &&
+              (i.contractStatus === contractStatuses.newContractOrder ||
+                i.contractStatus === contractStatuses.newContractReceive ||
+                i.contractStatus === contractStatuses.newContractBeforeCompletion)
+          )
+        ) {
+          return next(noticeHelper.create('standardRegistering'))
+
+          //  契約中の場合(竣工～解約処理完了まで)
+        } else if (contracts.some((i) => i.serviceType === serviceTypes.lightPlan)) {
+          return next(noticeHelper.create('standardRegistered'))
+        }
+        break
+
+      // 想定外サービス種別の場合
+      default:
+        return next(errorHelper.create(500))
     }
   }
 
@@ -100,10 +105,10 @@ const showPaidServiceRegisterTerms = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'showPaidServiceRegisterTerms')
 
   // 申込サービスタイプ
-  const serviceType = req.params.serviceType
+  const serviceType = req.params?.serviceType
 
   // 申込サービスリスト
-  const serviceList = serviceType ? [serviceType] : req.session.serviceList
+  const serviceList = serviceType ? [serviceType] : req.session?.serviceList
 
   // 有料サービス申込前の契約状態のチェック
   const contracts = await getAndCheckContracts(req.user?.tenantId, serviceList, next)
@@ -159,7 +164,7 @@ const showPaidServiceRegister = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'showPaidServiceRegister')
 
   // チェックされている申込サービスの取得
-  const services = req.body.services
+  const services = req.body?.services
   const serviceList = services instanceof Array ? services : [services]
 
   // 有料サービス申込前の契約状態のチェック
@@ -195,7 +200,7 @@ const applyPaidServiceRegister = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'applyPaidServiceRegister')
 
   // 申込サービスリストの取得
-  const serviceList = req.session.serviceList
+  const serviceList = req.session?.serviceList
 
   // 有料サービス申込前の契約状態のチェック
   const contracts = await getAndCheckContracts(req.user?.tenantId, serviceList, next)
@@ -206,7 +211,7 @@ const applyPaidServiceRegister = async (req, res, next) => {
 
   let salesChannelDeptType
   // 組織区分が選択された場合、コードで組織区分を取得し、オーダー情報に設定する
-  const salesChannelDeptTypeCode = JSON.parse(req.body.salesChannelDeptType || '{}').code
+  const salesChannelDeptTypeCode = JSON.parse(req.body?.salesChannelDeptType || '{}').code
   if (salesChannelDeptTypeCode) {
     const salesChannelDeptInfo = await channelDepartmentController.findOne(salesChannelDeptTypeCode)
     if (salesChannelDeptInfo instanceof Error) return next(errorHelper.create(500))
