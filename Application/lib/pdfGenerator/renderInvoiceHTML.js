@@ -306,6 +306,7 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
         </thead>
         <tbody id="lines">
           ${setLines(input.lines)}
+          ${setDiscountLines(input)}
         </tbody>
       </table>
     </div>
@@ -316,10 +317,11 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
           <p class="text-l width-50">小計（税抜）</p>
           <p class="text-r width-50" id="subTotal">${input.subTotal.toLocaleString()}</p>
         </div>
+        ${setDiscountInvoice(input)}
         ${setTaxGroup(input.taxGroups)}
         <div class="flex">
           <p class="text-l width-50 font-bold">合計 ￥</p>
-          <p class="text-r width-50 font-bold" id="total">${input.total.toLocaleString()}</p>
+          <p class="text-r width-50 font-bold" id="total">${(input.total - getDiscountInvoiceTotal(input)).toLocaleString()}</p>
         </div>
         <div class="flex">
           <p class="text-l">税額合計 ￥</p>
@@ -409,7 +411,21 @@ const setPayment = (input) => {
 const setLines = (lines) => {
   let tags = ''
   lines.forEach((line) => {
-    const subTotal = Math.floor(line.unitPrice * line.quantity)
+    let discountPrice, discount1Price, discount2Price, discount3Price
+    discountPrice = 0
+    if (line.discounts >= 1) {
+      discount1Price = functionDiscountCalcs[1](line, Math.floor(line.unitPrice * line.quantity))
+      discountPrice += discount1Price
+    }
+    if (line.discounts >= 2) {
+      discount2Price = functionDiscountCalcs[2](line, Math.floor(line.unitPrice * line.quantity))
+      discountPrice += discount2Price
+    }
+    if (line.discounts === 3) {
+      discount3Price = functionDiscountCalcs[3](line, Math.floor(line.unitPrice * line.quantity))
+      discountPrice += discount3Price
+    }
+    const subTotal = Math.floor(line.unitPrice * line.quantity - discountPrice)
     tags += `
       <tr>
         <td class="text-center">
@@ -428,8 +444,161 @@ const setLines = (lines) => {
         <td class="text-center"><p class="line-taxType" data-prop="taxType">${getTaxTypeName(line.taxType)}</p></td>
         <td class="text-right line-subtotal"><p class="line-subtotal" data-prop="subtotal">${subTotal.toLocaleString()}</p></td>
       </tr>`
+    if (discount1Price) {
+      tags += `
+      <tr>
+        <td class="text-center">
+          <p class="line-lineId" data-prop="lineId">項目割引</p>
+        </td>
+        <td class="text-center">
+          <p class="line-lineDescription" data-prop="lineDescription">${line.discountDescription1}</p>
+        </td>
+        <td class="text-center"><p class="line-quantity" data-prop="quantity">${(line.discountAmount1).toLocaleString()}</p></td>
+        <td class="text-center"><p class="line-unit" data-prop="unit">${getUnitTypeName(line.discountUnit1)}</p></td>
+        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">${discount1Price.toLocaleString()}</p></td>
+        <td></td>
+        <td></td>
+      </tr>`
+    }
+    if (discount2Price) {
+      tags += `
+      <tr>
+        <td class="text-center">
+          <p class="line-lineId" data-prop="lineId">項目割引</p>
+        </td>
+        <td class="text-center">
+          <p class="line-lineDescription" data-prop="lineDescription">${line.discountDescription2}</p>
+        </td>
+        <td class="text-center"><p class="line-quantity" data-prop="quantity">${(line.discountAmount2).toLocaleString()}</p></td>
+        <td class="text-center"><p class="line-unit" data-prop="unit">${getUnitTypeName(line.discountUnit2)}</p></td>
+        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">${discount2Price.toLocaleString()}</p></td>
+        <td></td>
+        <td></td>
+      </tr>`
+    }
+    if (discount3Price) {
+      tags += `
+      <tr>
+        <td class="text-center">
+          <p class="line-lineId" data-prop="lineId">項目割引</p>
+        </td>
+        <td class="text-center">
+          <p class="line-lineDescription" data-prop="lineDescription">${line.discountDescription3}</p>
+        </td>
+        <td class="text-center"><p class="line-quantity" data-prop="quantity">${(line.discountAmount3).toLocaleString()}</p></td>
+        <td class="text-center"><p class="line-unit" data-prop="unit">${getUnitTypeName(line.discountUnit3)}</p></td>
+        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">${discount3Price.toLocaleString()}</p></td>
+        <td></td>
+        <td></td>
+      </tr>`
+    }
   })
   return tags
+}
+
+/**
+ * 割引行タグ生成
+ *
+ * @param {object} input 請求書に埋め込む変数リスト
+ * @return {string} 割引行タグ
+ */
+const setDiscountLines = (input) => {
+  let tags = ''
+  if (input.discounts >= 1) {
+    tags += `
+    <tr>
+      <td class="text-center">
+        <p class="line-lineId" data-prop="lineId">割引</p>
+      </td>
+      <td class="text-center">
+        <p class="line-lineDescription" data-prop="lineDescription">${input.discounts.toLocaleString()}</p>
+      </td>
+      <td class="text-center"><p class="line-quantity" data-prop="quantity">${input.discountAmount1.toLocaleString()}</p></td>
+      <td class="text-center"><p class="line-unit" data-prop="unit">${getUnitTypeName(input.discountUnit1)} </p></td>
+      <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">- ${functionDiscountCalcs[1](input, input.subTotal).toLocaleString()}</p></td>
+      <td></td>
+      <td></td>
+    </tr>`
+  }
+  if (input.discounts >= 2) {
+    tags += `
+    <tr>
+      <td class="text-center">
+        <p class="line-lineId" data-prop="lineId">割引</p>
+      </td>
+      <td class="text-center">
+        <p class="line-lineDescription" data-prop="lineDescription">${input.discounts.toLocaleString()}</p>
+      </td>
+      <td class="text-center"><p class="line-quantity" data-prop="quantity">${input.discountAmount2.toLocaleString()}</p></td>
+      <td class="text-center"><p class="line-unit" data-prop="unit">${getUnitTypeName(input.discountUnit2)} </p></td>
+      <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">- ${functionDiscountCalcs[2](input, input.subTotal).toLocaleString()}</p></td>
+      <td></td>
+      <td></td>
+    </tr>`
+  }
+  if (input.discounts === 3) {
+    tags += `
+    <tr>
+      <td class="text-center">
+        <p class="line-lineId" data-prop="lineId">割引</p>
+      </td>
+      <td class="text-center">
+        <p class="line-lineDescription" data-prop="lineDescription">${input.discounts.toLocaleString()}</p>
+      </td>
+      <td class="text-center"><p class="line-quantity" data-prop="quantity">${input.discountAmount3.toLocaleString()}</p></td>
+      <td class="text-center"><p class="line-unit" data-prop="unit">${getUnitTypeName(input.discountUnit3)} </p></td>
+      <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">- ${functionDiscountCalcs[3](input, input.subTotal).toLocaleString()}</p></td>
+      <td></td>
+      <td></td>
+    </tr>`
+  }
+  return tags
+}
+
+/**
+ * 小計割引タグ生成
+ *
+ * @param {object} input 請求書に埋め込む変数リスト
+ * @return {string} 小計割引タグ
+ */
+const setDiscountInvoice = (input) => {
+  let tags = ''
+  if (input.discounts >= 1) {
+    tags += `
+    <div class="flex">
+      <p class="text-l width-50">割引 ${input.discountDescription1}</p>
+      <p class="text-r width-50" id="subTotal">- ${functionDiscountCalcs[1](input, input.subTotal).toLocaleString()}</p>
+    </div>`
+  }
+  if (input.discounts >= 2) {
+    tags += `
+    <div class="flex">
+      <p class="text-l width-50">割引 ${input.discountDescription2}</p>
+      <p class="text-r width-50" id="subTotal">- ${functionDiscountCalcs[2](input, input.subTotal).toLocaleString()}</p>
+    </div>`
+  }
+  if (input.discounts === 3) {
+    tags += `
+    <div class="flex">
+      <p class="text-l width-50">割引 ${input.discountDescription3}</p>
+      <p class="text-r width-50" id="subTotal">- ${functionDiscountCalcs[3](input, input.subTotal).toLocaleString()}</p>
+    </div>`
+  }
+  return tags
+}
+
+/**
+ * 割引金額合計を取得
+ *
+ * @param {object} input 請求書に埋め込む変数リスト
+ * @return let discounttotal 合計割引金額
+ */
+const getDiscountInvoiceTotal = (input) => {
+  let discounttotal = 0
+  if (input.discounts >= 1) discounttotal += functionDiscountCalcs[1](input, input.subTotal)
+  if (input.discounts >= 2) discounttotal += functionDiscountCalcs[2](input, input.subTotal)
+  if (input.discounts === 3) discounttotal += functionDiscountCalcs[3](input, input.subTotal)
+  return discounttotal
 }
 
 /**
@@ -490,6 +659,45 @@ const getTaxTypeName = (taxType) => {
       return 'その他の消費税'
     default:
       return ''
+  }
+}
+
+/**
+ * 割引タイプ取得
+ *
+ * @param {string} unitType 割引区分文字列
+ * @returns {string} 割引区分名
+ */
+const getUnitTypeName = (unitType) => {
+  switch (unitType) {
+    case 'percent':
+      return '%'
+    case 'jpy':
+      return 'jpy'
+    default:
+      return '%'
+  }
+}
+
+/**
+ * 割引額取得
+ *
+ * @param {string} objects 請求書に埋め込む変数リスト
+ * @param {number} subTotal 小計
+ * @returns {number} 割引額
+ */
+const functionDiscountCalcs = {
+  1: function(objects, subTotal) {
+    if (objects.discountUnit1 === 'jpy') return Math.floor(objects.discountAmount1)
+    else return Math.floor(subTotal * objects.discountAmount1 * 0.01)
+  },
+  2: function(objects, subTotal) {
+    if (objects.discountUnit2 === 'jpy') return Math.floor(objects.discountAmount2)
+    else return Math.floor(subTotal * objects.discountAmount2 * 0.01)
+  },
+  3: function(objects, subTotal) {
+    if (objects.discountUnit3 === 'jpy') return Math.floor(objects.discountAmount3)
+    else return Math.floor(subTotal * objects.discountAmount3 * 0.01)
   }
 }
 

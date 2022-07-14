@@ -80,6 +80,16 @@ input.width-330px {
   color: red !important;
 }
 
+.discount-table {
+  border: 0px none;
+  width: 100%;
+} 
+
+.discount-table td,
+.discount-table th {
+  padding: 0.25em !important;
+}
+
 pre {
   white-space: pre-wrap;
 }
