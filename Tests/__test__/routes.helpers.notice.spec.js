@@ -76,36 +76,60 @@ describe('helpers/errorのテスト', () => {
       expect(result).toBe('generaluser')
     })
 
-    test('lightPlanRegistering: messageStatusがlightPlanRegisteringの場合', () => {
+    test('introductionSupportregistered: messageStatusがintroductionSupportregisteredの場合', () => {
       // 試験実施
-      const result = noticHelper.create('lightPlanRegistering')
+      const result = noticHelper.create('introductionSupportregistered')
 
       // 期待結果
-      expect(result).toBe('lightPlanRegistering')
+      expect(result).toBe('introductionSupportregistered')
     })
 
-    test('lightPlanRegistered: messageStatusがlightPlanRegisteredの場合', () => {
+    test('standardRegistering: messageStatusがstandardRegisteringの場合', () => {
       // 試験実施
-      const result = noticHelper.create('lightPlanRegistered')
+      const result = noticHelper.create('standardRegistering')
 
       // 期待結果
-      expect(result).toBe('lightPlanRegistered')
+      expect(result).toBe('standardRegistering')
     })
 
-    test('lightPlanCanceling: messageStatusがlightPlanCancelingの場合', () => {
+    test('standardRegistered: messageStatusがstandardRegisteredの場合', () => {
       // 試験実施
-      const result = noticHelper.create('lightPlanCanceling')
+      const result = noticHelper.create('standardRegistered')
 
       // 期待結果
-      expect(result).toBe('lightPlanCanceling')
+      expect(result).toBe('standardRegistered')
     })
 
-    test('lightPlanUnregistered: messageStatusがlightPlanUnregisteredの場合', () => {
+    test('standardCanceling: messageStatusがstandardCancelingの場合', () => {
       // 試験実施
-      const result = noticHelper.create('lightPlanUnregistered')
+      const result = noticHelper.create('standardCanceling')
 
       // 期待結果
-      expect(result).toBe('lightPlanUnregistered')
+      expect(result).toBe('standardCanceling')
+    })
+
+    test('standardUnregistered: messageStatusがstandardUnregisteredの場合', () => {
+      // 試験実施
+      const result = noticHelper.create('standardUnregistered')
+
+      // 期待結果
+      expect(result).toBe('standardUnregistered')
+    })
+
+    test('haveStandard: messageStatusがhaveStandardの場合', () => {
+      // 試験実施
+      const result = noticHelper.create('haveStandard')
+
+      // 期待結果
+      expect(result).toBe('haveStandard')
+    })
+
+    test('haveIntroductionSupport: messageStatusがhaveIntroductionSupportの場合', () => {
+      // 試験実施
+      const result = noticHelper.create('haveIntroductionSupport')
+
+      // 期待結果
+      expect(result).toBe('haveIntroductionSupport')
     })
   })
   describe('render', () => {
@@ -194,61 +218,106 @@ describe('helpers/errorのテスト', () => {
       })
     })
 
-    test('lightPlanRegistering: messageStatusがlightPlanRegisteringの場合', () => {
+    test('introductionSupportregistered: messageStatusがintroductionSupportregisteredの場合', () => {
       // 準備
-      const messageStatus = 'lightPlanRegistering'
+      const messageStatus = 'introductionSupportregistered'
 
       // 試験実施
       noticHelper.render(messageStatus, request, response, next)
 
       // 期待結果
       expect(response.render).toHaveBeenCalledWith('notice', {
-        message: '現在ライトプランは申込中です。',
+        message: '導入支援サービスは申し込み済です。',
         description1: null,
         description2: null
       })
     })
 
-    test('lightPlanRegistered: messageStatusがlightPlanRegisteredの場合', () => {
+    test('standardRegistering: messageStatusがstandardRegisteringの場合', () => {
       // 準備
-      const messageStatus = 'lightPlanRegistered'
+      const messageStatus = 'standardRegistering'
 
       // 試験実施
       noticHelper.render(messageStatus, request, response, next)
 
       // 期待結果
       expect(response.render).toHaveBeenCalledWith('notice', {
-        message: '現在ライトプランは契約中です。',
+        message: '現在スタンダードプランは申込中です。',
         description1: null,
         description2: null
       })
     })
 
-    test('lightPlanCanceling: messageStatusがlightPlanCancelingの場合', () => {
+    test('standardRegistered: messageStatusがstandardRegisteredの場合', () => {
       // 準備
-      const messageStatus = 'lightPlanCanceling'
+      const messageStatus = 'standardRegistered'
 
       // 試験実施
       noticHelper.render(messageStatus, request, response, next)
 
       // 期待結果
       expect(response.render).toHaveBeenCalledWith('notice', {
-        message: '現在ライトプランは解約中です。',
+        message: '現在スタンダードプランは契約中です。',
         description1: null,
         description2: null
       })
     })
 
-    test('lightPlanUnregistered: messageStatusがlightPlanUnregisteredの場合', () => {
+    test('standardCanceling: messageStatusがstandardCancelingの場合', () => {
       // 準備
-      const messageStatus = 'lightPlanUnregistered'
+      const messageStatus = 'standardCanceling'
 
       // 試験実施
       noticHelper.render(messageStatus, request, response, next)
 
       // 期待結果
       expect(response.render).toHaveBeenCalledWith('notice', {
-        message: '現在ライトプランは未契約です。',
+        message: '現在スタンダードプランは解約中です。',
+        description1: null,
+        description2: null
+      })
+    })
+
+    test('standardUnregistered: messageStatusがstandardUnregisteredの場合', () => {
+      // 準備
+      const messageStatus = 'standardUnregistered'
+
+      // 試験実施
+      noticHelper.render(messageStatus, request, response, next)
+
+      // 期待結果
+      expect(response.render).toHaveBeenCalledWith('notice', {
+        message: '現在スタンダードプランは未契約です。',
+        description1: null,
+        description2: null
+      })
+    })
+
+    test('haveStandard: messageStatusがhaveStandardの場合', () => {
+      // 準備
+      const messageStatus = 'haveStandard'
+
+      // 試験実施
+      noticHelper.render(messageStatus, request, response, next)
+
+      // 期待結果
+      expect(response.render).toHaveBeenCalledWith('notice', {
+        message: 'スタンダードプラン契約中のため解約できません。',
+        description1: null,
+        description2: null
+      })
+    })
+
+    test('haveIntroductionSupport: messageStatusがhaveIntroductionSupportの場合', () => {
+      // 準備
+      const messageStatus = 'haveIntroductionSupport'
+
+      // 試験実施
+      noticHelper.render(messageStatus, request, response, next)
+
+      // 期待結果
+      expect(response.render).toHaveBeenCalledWith('notice', {
+        message: '導入支援サービス契約処理中のため解約できません。',
         description1: null,
         description2: null
       })

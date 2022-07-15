@@ -1,5 +1,6 @@
-// eslint-disable-next-line no-undef
-const $ = getElement
+/* global
+ $, doPost
+*/
 
 // 契約者住所関連要素Idマップ
 const contractElementIdMap = {
@@ -112,7 +113,6 @@ const searchAddress = function (e, clearBtnId, postalNumberId, addressId, banchI
   searchBtnElement.classList.add('is-loading')
 
   // 郵便番号で住所を取得する
-  // eslint-disable-next-line no-undef
   doPost('/searchAddress/', postData, function (httpRequest) {
     const dataTarget = searchBtnElement.getAttribute('data-target')
 

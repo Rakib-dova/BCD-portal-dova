@@ -22,38 +22,6 @@ const billMailingElementIdMap = {
   clearBtnId: 'billMailingClearBtn'
 }
 
-// ----利用規約を最後までスクロールしないとチェックボックスが有効化しない
-const iframe = $('#terms-of-service')
-// iframeの高さ
-const height = iframe.offsetHeight
-
-const scrollEvent = function () {
-  // スクロールイベントを定義
-  iframe.contentDocument.onscroll = function () {
-    const scrollHeight = iframe.contentDocument.body.scrollHeight || iframe.contentDocument.documentElement.scrollHeight
-    const scrollTop = iframe.contentDocument.body.scrollTop || iframe.contentDocument.documentElement.scrollTop
-
-    // 現在の表示位置の高さ
-    const scrollPosition = height + scrollTop
-    const proximity = 0
-
-    if ((scrollHeight - scrollPosition) / scrollHeight <= proximity) {
-      $('#check').removeAttribute('disabled')
-    }
-  }
-}
-
-// iframeのonloadはchromeしか動かないためsetIntervalで監視する
-// iframe.onload = scrollEvent
-const timer = setInterval(function () {
-  const iframeDoc = iframe.contentDocument
-  // Check if loading is complete
-  if (iframeDoc.readyState === 'complete' || iframeDoc.readyState === 'interactive') {
-    scrollEvent()
-    return clearInterval(timer)
-  }
-}, 1000)
-
 /**
  * 郵便番号のチェック
  * @param {string} postalNumber 郵便番号
@@ -249,16 +217,6 @@ setAddressEventListener(contractElementIdMap)
 // 請求情報住所の各イベント監視の設定
 setAddressEventListener(billMailingElementIdMap)
 
-// ----チェックボックスがオンになれば「次へ」ボタンを有効化
-$('#check').onclick = function () {
-  const btn = $('#next-btn')
-  if (this.checked) {
-    btn.removeAttribute('disabled')
-  } else {
-    btn.setAttribute('disabled', 'disabled')
-  }
-}
-
 // ----「次へ」ボタンが押された
 $('#next-btn').addEventListener('click', function (e) {
   e.preventDefault()
@@ -298,13 +256,25 @@ $('#next-btn').addEventListener('click', function (e) {
     $('#passwordMessage').textContent = '　入力されたパスワードが一致しません。'
   }
 
-  // 開通希望日チェック(過去の日付を設定された場合)
-  if (
-    $('#openingDate').value &&
-    new Date($('#openingDate').value).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)
-  ) {
-    if (!firstError) firstError = $('#openingDate')
-    $('#openingDateMessage').textContent = '　過去の日付を設定できません。'
+  const openingDateValue = $('#openingDate')?.value
+
+  // 開通希望日チェック
+  if (openingDateValue) {
+    const serviceList = JSON.parse($('#serviceList-json').value)
+    const openingDate = new Date(openingDateValue).setHours(0, 0, 0, 0)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    // 過去の日付を設定された場合
+    if (openingDate < today) {
+      if (!firstError) firstError = $('#openingDate')
+      $('#openingDateMessage').textContent = '　過去の日付を設定できません。'
+
+      // 導入支援をチェックされた、かつ、16日後の日付を設定されない場合
+    } else if (serviceList.some((i) => i === '020') && openingDate < today.setDate(today.getDate() + 16)) {
+      if (!firstError) firstError = $('#openingDate')
+      $('#openingDateMessage').textContent = '　16日後の日付から設定してください。'
+    }
   }
 
   if (firstError) {

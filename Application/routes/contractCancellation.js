@@ -6,9 +6,9 @@ const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 const OrderData = require('./helpers/orderData')
+const Op = require('../models').Sequelize.Op
 const contractController = require('../controllers/contractController.js')
 const applyOrderController = require('../controllers/applyOrderController.js')
-const channelDepartmentController = require('../controllers/channelDepartmentController.js')
 const logger = require('../lib/logger')
 const constants = require('../constants')
 
@@ -23,16 +23,19 @@ const serviceTypes = constants.statusConstants.serviceTypes
 const logMessage = constants.logMessage
 
 /**
- * ライトプランの解約の事前チェック
- * @param {object} req リクエスト
- * @param {object} res レスポンス
+ * 解約の事前チェック
+ * @param {string} tenantId テナントID
  * @param {function} next 次の処理
- * @returns ライトプラン契約情報
+ * @returns スタンダードプラン契約情報
  */
-const checkContractStatus = async (req, res, next) => {
-  // ライトプランの契約情報を取得する
+const checkContractStatus = async (tenantId, next) => {
+  // 解約済以外スタンダードプランの契約情報を取得する
   const contracts = await contractController.findContracts(
-    { tenantId: req.user?.tenantId, serviceType: serviceTypes.lightPlan },
+    {
+      tenantId: tenantId,
+      serviceType: serviceTypes.lightPlan,
+      contractStatus: { [Op.ne]: contractStatuses.canceledContract }
+    },
     null
   )
 
@@ -46,10 +49,9 @@ const checkContractStatus = async (req, res, next) => {
         i.contractStatus === contractStatuses.newContractOrder ||
         i.contractStatus === contractStatuses.newContractReceive ||
         i.contractStatus === contractStatuses.newContractBeforeCompletion
-    ) ||
-    contracts.every((i) => i.contractStatus === contractStatuses.canceledContract)
+    )
   ) {
-    return next(noticeHelper.create('lightPlanUnregistered'))
+    return next(noticeHelper.create('standardUnregistered'))
   } else if (
     contracts.some(
       (i) =>
@@ -58,63 +60,49 @@ const checkContractStatus = async (req, res, next) => {
     )
   ) {
     // 解約中の場合(解約着手待ち～解約完了竣工まで)
-    return next(noticeHelper.create('lightPlanCanceling'))
+    return next(noticeHelper.create('standardCanceling'))
   } else {
     return contracts
   }
 }
 
 /**
- * ライトプランの解約画面の表示
+ * 解約画面の表示
  * @param {object} req リクエスト
  * @param {object} res レスポンス
  * @param {function} next 次の処理
  * @returns
  */
-const showCancelLightPlan = async (req, res, next) => {
-  logger.info(logMessage.INF000 + 'showCancelLightPlan')
+const showContractCancel = async (req, res, next) => {
+  logger.info(logMessage.INF000 + 'showContractCancel')
 
-  // ライトプランの解約の事前チェック
-  const contracts = await checkContractStatus(req, res, next)
+  // 解約の事前チェック
+  const contracts = await checkContractStatus(req.user?.tenantId, next)
   if (!contracts) return
 
-  // チャネル組織マスターからチャネル組織情報リストを取得
-  const salesChannelDeptList = await channelDepartmentController.findAll()
-
-  if (salesChannelDeptList instanceof Error) return next(errorHelper.create(500))
-
-  // ライトプラン解約画面表示
-  res.render('cancelLightPlan', {
-    title: 'ライトプラン解約',
+  // 解約画面に渡す。
+  res.render('contractCancellation', {
+    title: '契約情報解約',
+    engTitle: 'CONTRACT CANCELLATION',
     numberN: contracts?.find((i) => i.contractStatus === contractStatuses.onContract)?.numberN,
-    salesChannelDeptList: salesChannelDeptList,
     csrfToken: req.csrfToken()
   })
-  logger.info(logMessage.INF001 + 'showCancelLightPlan')
+  logger.info(logMessage.INF001 + 'showContractCancel')
 }
 
 /**
- * ライトプランの解約の実施
+ * 解約の実施
  * @param {object} req リクエスト
  * @param {object} res レスポンス
  * @param {function} next 次の処理
  * @returns
  */
-const cancelLightPlan = async (req, res, next) => {
-  logger.info(logMessage.INF000 + 'cancelLightPlan')
+const contractCancel = async (req, res, next) => {
+  logger.info(logMessage.INF000 + 'contractCancel')
 
-  // ライトプランの解約の事前チェック
-  const contracts = await checkContractStatus(req, res, next)
+  // スタンダードプランの解約の事前チェック
+  const contracts = await checkContractStatus(req.user?.tenantId, next)
   if (!contracts) return
-
-  let salesChannelDeptType
-  // 組織区分が選択された場合、コードで組織区分を取得し、オーダー情報に設定する
-  const salesChannelDeptTypeCode = JSON.parse(req.body.salesChannelDeptType || '{}').code
-  if (salesChannelDeptTypeCode) {
-    const salesChannelDeptInfo = await channelDepartmentController.findOne(salesChannelDeptTypeCode)
-    if (salesChannelDeptInfo instanceof Error) return next(errorHelper.create(500))
-    if (salesChannelDeptInfo?.name) salesChannelDeptType = salesChannelDeptInfo.name
-  }
 
   // オーダー情報の取得
   const orderData = new OrderData(
@@ -124,7 +112,7 @@ const cancelLightPlan = async (req, res, next) => {
     serviceTypes.lightPlan,
     constants.statusConstants.prdtCodes.lightPlan,
     constants.statusConstants.appTypes.cancel,
-    salesChannelDeptType
+    null
   )
 
   // 客様番号の設定
@@ -133,38 +121,39 @@ const cancelLightPlan = async (req, res, next) => {
   )?.numberN
 
   // 解約する
-  const result = await applyOrderController.cancelOrder(req.user?.tenantId, serviceTypes.lightPlan, orderData)
+  const result = await applyOrderController.cancelOrder(req.user?.tenantId, orderData)
   // データベースエラーは、エラーオブジェクトが返る
   if (result instanceof Error) return next(errorHelper.create(500))
 
-  req.flash('info', 'ライトプラン解約が完了いたしました。')
-  logger.info(logMessage.INF001 + 'cancelLightPlan')
-  return res.redirect(303, '/portal')
+  // 完了画面へ遷移
+  res.render('contractCancellationComplete', {
+    title: '契約情報解約',
+    engTitle: 'CONTRACT CANCELLATION'
+  })
+  logger.info(logMessage.INF001 + 'contractCancel')
 }
 
 router.get(
   '/',
-  helper.isAuthenticated,
-  helper.isTenantRegistered,
-  helper.isUserRegistered,
-  helper.isOnOrChangeContract,
   csrfProtection,
-  showCancelLightPlan
+  helper.bcdAuthenticate,
+  helper.isTenantManager,
+  helper.isOnOrChangeContract,
+  showContractCancel
 )
 
 router.post(
   '/register',
-  helper.isAuthenticated,
-  helper.isTenantRegistered,
-  helper.isUserRegistered,
-  helper.isOnOrChangeContract,
   csrfProtection,
-  cancelLightPlan
+  helper.bcdAuthenticate,
+  helper.isTenantManager,
+  helper.isOnOrChangeContract,
+  contractCancel
 )
 
 module.exports = {
   router: router,
   checkContractStatus: checkContractStatus,
-  showCancelLightPlan: showCancelLightPlan,
-  cancelLightPlan: cancelLightPlan
+  showContractCancel: showContractCancel,
+  contractCancel: contractCancel
 }

@@ -206,7 +206,7 @@ exports.bcdAuthenticate = async (req, res, next) => {
  */
 exports.isOnOrChangeContract = async (req, res, next) => {
   // テナントIDに紐付いている未解約無償契約情報を取得
-  const contract = await contractController.findOne(req.user.tenantId)
+  const contract = await contractController.findOne(req.user?.tenantId)
   const contractStatus = contract?.dataValues?.contractStatus
   if (contract instanceof Error || !contractStatus) return next(errorHelper.create(500))
 
@@ -229,4 +229,21 @@ exports.isOnOrChangeContract = async (req, res, next) => {
   } else {
     return next(errorHelper.create(500))
   }
+}
+
+/**
+ * 管理者権限のチェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ */
+exports.isTenantManager = async (req, res, next) => {
+  const user = await userController.findOne(req.user?.userId)
+  // データベースエラー、または、ユーザ未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  if (user.dataValues?.userRole !== constantsDefine.userRoleConstants.tenantManager) {
+    return next(noticeHelper.create('generaluser'))
+  }
+  return next()
 }

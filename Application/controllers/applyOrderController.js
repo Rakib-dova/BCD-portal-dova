@@ -13,48 +13,49 @@ const contractStatuses = constants.contractStatuses
 const orderTypes = constants.orderTypes
 
 /**
- * 契約
+ * 有料サービスの契約(複数可能)
  * @param {string} tenantId テナントID
- * @param {string} serviceType サービス種別
- * @param {object} orderData オーダーデータ
+ * @param {object[]} orderDataList オーダーデータリスト
  * @returns
  */
-const applyNewOrder = async (tenantId, serviceType, orderData) => {
+const applyNewOrders = async (tenantId, orderDataList) => {
   try {
     await db.sequelize.transaction(async (t) => {
       // 現在の日時
       const date = new Date()
 
-      // contractIdの生成（uuid）
-      const contractId = uuidv4()
+      const contractList = []
+      const orderList = []
 
-      // Contractデータの登録
-      await Contract.create(
-        {
+      for (const orderData of orderDataList) {
+        // contractIdの生成（uuid）
+        const contractId = uuidv4()
+
+        contractList.push({
           contractId: contractId,
           tenantId: tenantId,
-          serviceType: serviceType,
+          serviceType: orderData.contractBasicInfo.serviceType,
           numberN: '',
           contractStatus: contractStatuses.newContractOrder,
           deleteFlag: false,
           createdAt: date,
           updatedAt: date
-        },
-        {
-          transaction: t
-        }
-      )
+        })
 
-      // Orderデータの登録
-      await Order.create(
-        {
+        orderList.push({
           contractId: contractId,
           tenantId: tenantId,
           orderType: orderTypes.newOrder,
           orderData: JSON.stringify(orderData)
-        },
-        { transaction: t }
-      )
+        })
+      }
+      // Contractデータの登録
+      await Contract.bulkCreate(contractList, {
+        transaction: t
+      })
+
+      // Orderデータの登録
+      await Order.bulkCreate(orderList, { transaction: t })
     })
   } catch (error) {
     // status 0はDBエラー
@@ -66,17 +67,16 @@ const applyNewOrder = async (tenantId, serviceType, orderData) => {
 /**
  * 解約
  * @param {string} tenantId テナントID
- * @param {string} serviceType サービス種別
  * @param {object} orderData オーダーデータ
  * @returns
  */
-const cancelOrder = async (tenantId, serviceType, orderData) => {
+const cancelOrder = async (tenantId, orderData) => {
   try {
     await db.sequelize.transaction(async (t) => {
       const contract = await contractController.findContract(
         {
           tenantId: tenantId,
-          serviceType: serviceType,
+          serviceType: orderData.contractBasicInfo.serviceType,
           contractStatus: contractStatuses.onContract
         },
         null
@@ -121,6 +121,6 @@ const cancelOrder = async (tenantId, serviceType, orderData) => {
 }
 
 module.exports = {
-  applyNewOrder: applyNewOrder,
+  applyNewOrders: applyNewOrders,
   cancelOrder: cancelOrder
 }
