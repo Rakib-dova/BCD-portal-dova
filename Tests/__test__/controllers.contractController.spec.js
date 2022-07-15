@@ -10,7 +10,7 @@ const serviceTypes = constantsDefine.statusConstants.serviceTypes
 // 準備
 const Op = require('../../Application/models').Sequelize.Op
 const contracts = require('../mockDB/Contracts_Table2')
-function* filter(f, iter) {
+function * filter(f, iter) {
   for (const item of iter) {
     if (f(item)) {
       yield item
