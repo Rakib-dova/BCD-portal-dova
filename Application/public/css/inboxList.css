@@ -249,3 +249,12 @@
   font-size: 15px;
   font-weight: normal;
 }
+
+th.text-center,
+td.text-center {
+  vertical-align: middle;
+}
+
+.text-color-red {
+  color: red;
+}

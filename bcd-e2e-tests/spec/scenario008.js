@@ -84,16 +84,11 @@ describe('リグレッションテスト', function () {
 
       // 絞り込み条件「発行日」の初期値を確認する
       let { from, to } = await downloadInvoicePage.getIssuedate();
-      // 現在の日付
-      const now = new Date();
-      const strNow = common.getFormattedDateHyphen(now);
-      // 1ヶ月と1日前
-      const lastMonth = new Date();
-      lastMonth.setMonth(lastMonth.getMonth() - 1); // 1ヶ月戻す
-      lastMonth.setDate(lastMonth.getDate() - 1); // 1日戻す
-      const strLastMonth = common.getFormattedDateHyphen(lastMonth);
-      expect(from).to.equal(strLastMonth, '絞り込み条件「発行日」の初期値が1ヶ月と1日前からとなっていること');
-      expect(to).to.equal(strNow, '絞り込み条件「発行日」の初期値が本日までとなっていること');
+      const today = new Date();
+      const minissuedate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate(), today.getHours()).toISOString().split('T')[0];
+      const maxissuedate = today.toISOString().split('T')[0];
+      expect(from).to.equal(minissuedate, '絞り込み条件「発行日」の初期値が1ヶ月前からとなっていること');
+      expect(to).to.equal(maxissuedate, '絞り込み条件「発行日」の初期値が本日までとなっていること');
 
       // 絞り込み条件「送信企業」の初期値を確認する
       expect(await downloadInvoicePage.getSendCompanySearchKeyword()).to.equal('', '絞り込み条件「送信企業」の初期値が空となっていること');

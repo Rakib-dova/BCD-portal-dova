@@ -129,17 +129,26 @@ function getWorkflow() {
               addColumnCSS(sentBy)
               sentBy.innerText = item.sendBy
 
-              const sentTo = document.createElement('td')
-              addColumnCSS(sentTo)
-              sentTo.innerText = item.sendTo
-
-              const updatedAt = document.createElement('td')
-              addColumnCSS(updatedAt)
-              updatedAt.innerText = item.updatedAt.toLocaleString('ja-JP')
+              const contactAddress = document.createElement('td')
+              const lightPlan = document.querySelector('#BtnInboxSearch')
+              if (lightPlan) {
+                if (item.managerInfo.managerName === '（担当者不明）') {
+                  contactAddress.classList.add('text-color-red')
+                }
+                addColumnCSS(contactAddress)
+                contactAddress.innerText = item.managerInfo.managerAddress + '\n' + item.managerInfo.managerName
+              } else {
+                addColumnCSS(contactAddress)
+                contactAddress.innerText = item.managerInfo.managerAddress
+              }
 
               const expire = document.createElement('td')
               addColumnCSS(expire)
               expire.innerText = item.expire
+
+              const updatedAt = document.createElement('td')
+              addColumnCSS(updatedAt)
+              updatedAt.innerText = item.updatedAt.toLocaleString('ja-JP')
 
               const btn = document.createElement('td')
               addCss(btn, ['text-center', 'display-row-td'])
@@ -157,9 +166,9 @@ function getWorkflow() {
                 curr,
                 currency,
                 sentBy,
-                sentTo,
-                updatedAt,
+                contactAddress,
                 expire,
+                updatedAt,
                 btn
               ])
               appendChilds($('.tab-content > .tab-pane:nth-child(2) > .table > .display-row')[0], [row])
@@ -241,11 +250,15 @@ function createTable() {
     '通貨',
     '金額',
     '送信企業',
-    '受信企業',
+    !$('#BtnInboxSearch')
+      ? '担当者アドレス'
+      : `担当者アドレス
+    （担当者名）`,
+    '支払い期限日',
     '更新日',
-    '期限日',
     ''
   ]
+
   const thead = document.createElement('thead')
   const tr = document.createElement('tr')
   let idx = 0
@@ -319,187 +332,191 @@ function sendToSelectBtnCreate() {
   }
 }
 // 送信企業検索ボタン機能
-document.querySelector('#sendToSearchBtn').addEventListener('click', function (e) {
-  const sendTo = document.getElementById('sendTo').value
+if (document.querySelector('#sendToSearchBtn')) {
+  document.querySelector('#sendToSearchBtn').addEventListener('click', function (e) {
+    const sendTo = document.getElementById('sendTo').value
 
-  // レイアウト初期化
-  if (
-    (document.querySelector('#allSelectSentToBtn') ?? false) ||
-    (document.querySelector('#allClearSentToBtn') ?? false)
-  ) {
-    const sendToSelectBtnFieldChildren = []
-    const sendToSelectBtnField = document.querySelector('#sendToSelectBtnField')
-    Array.prototype.forEach.call(sendToSelectBtnField.children, (item) => {
-      sendToSelectBtnFieldChildren.push(item)
-    })
-    sendToSelectBtnFieldChildren.forEach((item) => item.remove())
-  }
-
-  if (document.querySelector('#searchResultBox') ?? false) {
-    document.querySelector('#searchResultBox').remove()
-    document
-      .querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)')
-      .classList.add('is-invisible')
-    document.querySelector('#sendToSearchBtn').classList.remove('is-loading')
-  }
-
-  if ('content' in document.createElement('template')) {
-    document.querySelector('#sendToSearchBtn').classList.add('is-loading')
-
-    // 検索結果を表示
-    if (!document.querySelector('#searchResultBox') ?? false) {
-      const searchResultBoxTemplate = document.querySelector('#templateSearchResultBox')
-      const displaySearchResultField = document.querySelector('#displaySendToSearchResultField')
-      const cloneSearchResultBoxTemplate = document.importNode(searchResultBoxTemplate.content, true)
-      const searchResultItemTemplate = document.querySelector('#templateSearchResultItem')
-
-      cloneSearchResultBoxTemplate.querySelector('.box').id = 'searchResultBox'
-
-      // 検索企業名格納
-      const sendData = { companyName: sendTo }
-      const requestCompaniesApi = new XMLHttpRequest()
-
-      const elements = document.getElementsByName('_csrf')
-      const csrf = elements.item(0).value
-
-      requestCompaniesApi.open('POST', '/searchCompanies/', true)
-      requestCompaniesApi.setRequestHeader('Content-Type', 'application/json')
-      requestCompaniesApi.setRequestHeader('CSRF-Token', csrf)
-
-      // 検索結果による処理
-      requestCompaniesApi.onreadystatechange = function () {
-        if (requestCompaniesApi.readyState === requestCompaniesApi.DONE) {
-          // statusが200の場合（正常）
-          if (requestCompaniesApi.status === 200) {
-            const resultCompanies = JSON.parse(requestCompaniesApi.responseText)
-            // 検索結果が0件の場合
-            if (resultCompanies.length === 0) {
-              const cloneSearchResultItemTemplate = document.importNode(searchResultItemTemplate.content, true)
-              const sendToSelectBtnField = document.querySelector('#sendToSelectBtnField')
-              cloneSearchResultItemTemplate.querySelector('label').textContent = '該当する企業が存在しませんでした。'
-              cloneSearchResultItemTemplate.querySelector('.field ').id = 'allSelectSentToBtn'
-              sendToSelectBtnField.appendChild(cloneSearchResultItemTemplate)
-            } else {
-              // 検索結果がある場合
-              sendToSelectBtnCreate()
-              resultCompanies.forEach((item, idx) => {
-                const cloneSearchResultItemTemplate = document.importNode(searchResultItemTemplate.content, true)
-                cloneSearchResultItemTemplate.querySelector('label').append(item.CompanyName)
-                cloneSearchResultItemTemplate.querySelector('input').id = `sendTo${idx}`
-                cloneSearchResultItemTemplate.querySelector('input').name = 'sentBy[]'
-                cloneSearchResultItemTemplate.querySelector('input').classList.add('sendToCompanies')
-                cloneSearchResultItemTemplate.querySelector('input').value = item.CompanyAccountId
-                cloneSearchResultBoxTemplate.querySelector('.box').appendChild(cloneSearchResultItemTemplate)
-              })
-              document
-                .querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)')
-                .classList.remove('is-invisible')
-              displaySearchResultField.appendChild(cloneSearchResultBoxTemplate)
-            }
-          } else {
-            // statusが200以外の場合（異常）
-            const errortext = requestCompaniesApi.responseText
-            const errStatus = requestCompaniesApi.status
-            const dataTarget = document.querySelector('#searchCompany-modal')
-            const modalCardBody = document.querySelector('#modal-card-result')
-            modalCardBody.innerHTML = ''
-            switch (errStatus) {
-              case 403:
-                // 認証情報取得失敗した場合
-                modalCardBody.innerHTML = 'ログインユーザーではありません。'
-                break
-              case 400:
-                // APIエラーが発生した場合
-                if (errortext) {
-                  modalCardBody.innerHTML = errortext
-                } else {
-                  // 入力した企業名がundefinedの場合
-                  modalCardBody.innerHTML = '正しい企業名を入力してください。'
-                }
-                break
-              case 500:
-                // APIエラーが発生した場合
-                modalCardBody.innerHTML = errortext
-                break
-            }
-            dataTarget.classList.add('is-active')
-          }
-        }
-        document.querySelector('#sendToSearchBtn').classList.remove('is-loading')
-      }
-      requestCompaniesApi.send(JSON.stringify(sendData))
+    // レイアウト初期化
+    if (
+      (document.querySelector('#allSelectSentToBtn') ?? false) ||
+      (document.querySelector('#allClearSentToBtn') ?? false)
+    ) {
+      const sendToSelectBtnFieldChildren = []
+      const sendToSelectBtnField = document.querySelector('#sendToSelectBtnField')
+      Array.prototype.forEach.call(sendToSelectBtnField.children, (item) => {
+        sendToSelectBtnFieldChildren.push(item)
+      })
+      sendToSelectBtnFieldChildren.forEach((item) => item.remove())
     }
-  }
-})
+
+    if (document.querySelector('#searchResultBox') ?? false) {
+      document.querySelector('#searchResultBox').remove()
+      document
+        .querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)')
+        .classList.add('is-invisible')
+      document.querySelector('#sendToSearchBtn').classList.remove('is-loading')
+    }
+
+    if ('content' in document.createElement('template')) {
+      document.querySelector('#sendToSearchBtn').classList.add('is-loading')
+
+      // 検索結果を表示
+      if (!document.querySelector('#searchResultBox') ?? false) {
+        const searchResultBoxTemplate = document.querySelector('#templateSearchResultBox')
+        const displaySearchResultField = document.querySelector('#displaySendToSearchResultField')
+        const cloneSearchResultBoxTemplate = document.importNode(searchResultBoxTemplate.content, true)
+        const searchResultItemTemplate = document.querySelector('#templateSearchResultItem')
+
+        cloneSearchResultBoxTemplate.querySelector('.box').id = 'searchResultBox'
+
+        // 検索企業名格納
+        const sendData = { companyName: sendTo }
+        const requestCompaniesApi = new XMLHttpRequest()
+
+        const elements = document.getElementsByName('_csrf')
+        const csrf = elements.item(0).value
+
+        requestCompaniesApi.open('POST', '/searchCompanies/', true)
+        requestCompaniesApi.setRequestHeader('Content-Type', 'application/json')
+        requestCompaniesApi.setRequestHeader('CSRF-Token', csrf)
+
+        // 検索結果による処理
+        requestCompaniesApi.onreadystatechange = function () {
+          if (requestCompaniesApi.readyState === requestCompaniesApi.DONE) {
+            // statusが200の場合（正常）
+            if (requestCompaniesApi.status === 200) {
+              const resultCompanies = JSON.parse(requestCompaniesApi.responseText)
+              // 検索結果が0件の場合
+              if (resultCompanies.length === 0) {
+                const cloneSearchResultItemTemplate = document.importNode(searchResultItemTemplate.content, true)
+                const sendToSelectBtnField = document.querySelector('#sendToSelectBtnField')
+                cloneSearchResultItemTemplate.querySelector('label').textContent = '該当する企業が存在しませんでした。'
+                cloneSearchResultItemTemplate.querySelector('.field ').id = 'allSelectSentToBtn'
+                sendToSelectBtnField.appendChild(cloneSearchResultItemTemplate)
+              } else {
+                // 検索結果がある場合
+                sendToSelectBtnCreate()
+                resultCompanies.forEach((item, idx) => {
+                  const cloneSearchResultItemTemplate = document.importNode(searchResultItemTemplate.content, true)
+                  cloneSearchResultItemTemplate.querySelector('label').append(item.CompanyName)
+                  cloneSearchResultItemTemplate.querySelector('input').id = `sendTo${idx}`
+                  cloneSearchResultItemTemplate.querySelector('input').name = 'sentBy[]'
+                  cloneSearchResultItemTemplate.querySelector('input').classList.add('sendToCompanies')
+                  cloneSearchResultItemTemplate.querySelector('input').value = item.CompanyAccountId
+                  cloneSearchResultBoxTemplate.querySelector('.box').appendChild(cloneSearchResultItemTemplate)
+                })
+                document
+                  .querySelector('#form > article > div > div > div:nth-child(3) > div:nth-child(3)')
+                  .classList.remove('is-invisible')
+                displaySearchResultField.appendChild(cloneSearchResultBoxTemplate)
+              }
+            } else {
+              // statusが200以外の場合（異常）
+              const errortext = requestCompaniesApi.responseText
+              const errStatus = requestCompaniesApi.status
+              const dataTarget = document.querySelector('#searchCompany-modal')
+              const modalCardBody = document.querySelector('#modal-card-result')
+              modalCardBody.innerHTML = ''
+              switch (errStatus) {
+                case 403:
+                  // 認証情報取得失敗した場合
+                  modalCardBody.innerHTML = 'ログインユーザーではありません。'
+                  break
+                case 400:
+                  // APIエラーが発生した場合
+                  if (errortext) {
+                    modalCardBody.innerHTML = errortext
+                  } else {
+                    // 入力した企業名がundefinedの場合
+                    modalCardBody.innerHTML = '正しい企業名を入力してください。'
+                  }
+                  break
+                case 500:
+                  // APIエラーが発生した場合
+                  modalCardBody.innerHTML = errortext
+                  break
+              }
+              dataTarget.classList.add('is-active')
+            }
+          }
+          document.querySelector('#sendToSearchBtn').classList.remove('is-loading')
+        }
+        requestCompaniesApi.send(JSON.stringify(sendData))
+      }
+    }
+  })
+}
 
 // 検索ボタンクリック時、機能
-$('#BtnInboxSearch').addEventListener('click', function (e) {
-  e.preventDefault()
+if ($('#BtnInboxSearch')) {
+  $('#BtnInboxSearch').addEventListener('click', function (e) {
+    e.preventDefault()
 
-  // 検索処理
-  const form = document.querySelector('#form')
-  const invoiceNumber = form.invoiceNumber.value
-  const minIssuedate = form.minIssuedate.value
-  const maxIssuedate = form.maxIssuedate.value
-  let sentBy = form['sentBy[]']
-  if (sentBy !== undefined) {
-    sentBy = Array.prototype.slice.call(sentBy)
-    sentBy = sentBy.filter((ele) => ele.checked === true)
-    if (!sentBy) {
-      sentBy = []
-    }
-  } else {
-    sentBy = []
-  }
-
-  let status = form['status[]']
-  if (status !== undefined) {
-    status = Array.prototype.slice.call(status)
-    status = status.filter((ele) => ele.checked === true)
-    if (!status) {
-      status = []
-    }
-  } else {
-    status = []
-  }
-
-  const managerAddress = form.managerAddress.value
-  const validationCheck = []
-  validationCheck.push(invoiceNumber)
-  validationCheck.push(minIssuedate)
-  validationCheck.push(maxIssuedate)
-  validationCheck.push(managerAddress)
-  validationCheck.push(sentBy)
-  validationCheck.push(status)
-  let checkCount = 0
-  for (let i = 0; i < validationCheck.length; i++) {
-    if (i < 4) {
-      if (validationCheck[i] === '' || validationCheck[i] === undefined) {
-        ++checkCount
+    // 検索処理
+    const form = document.querySelector('#form')
+    const invoiceNumber = form.invoiceNumber.value
+    const minIssuedate = form.minIssuedate.value
+    const maxIssuedate = form.maxIssuedate.value
+    let sentBy = form['sentBy[]']
+    if (sentBy !== undefined) {
+      sentBy = Array.prototype.slice.call(sentBy)
+      sentBy = sentBy.filter((ele) => ele.checked === true)
+      if (!sentBy) {
+        sentBy = []
       }
     } else {
-      if (validationCheck[i].length === 0) {
-        ++checkCount
+      sentBy = []
+    }
+
+    let status = form['status[]']
+    if (status !== undefined) {
+      status = Array.prototype.slice.call(status)
+      status = status.filter((ele) => ele.checked === true)
+      if (!status) {
+        status = []
+      }
+    } else {
+      status = []
+    }
+
+    const managerAddress = form.managerAddress.value
+    const validationCheck = []
+    validationCheck.push(invoiceNumber)
+    validationCheck.push(minIssuedate)
+    validationCheck.push(maxIssuedate)
+    validationCheck.push(managerAddress)
+    validationCheck.push(sentBy)
+    validationCheck.push(status)
+    let checkCount = 0
+    for (let i = 0; i < validationCheck.length; i++) {
+      if (i < 4) {
+        if (validationCheck[i] === '' || validationCheck[i] === undefined) {
+          ++checkCount
+        }
+      } else {
+        if (validationCheck[i].length === 0) {
+          ++checkCount
+        }
       }
     }
-  }
-  if (checkCount === 6) {
-    alert('検索条件を入力してください。')
-  } else {
-    if (managerAddress.length > 0) {
-      const result = managerAddressValidationCheck(managerAddress)
-      if (!result) {
-        alert('入力したメールアドレスに誤りがあります。')
+    if (checkCount === 6) {
+      alert('検索条件を入力してください。')
+    } else {
+      if (managerAddress.length > 0) {
+        const result = managerAddressValidationCheck(managerAddress)
+        if (!result) {
+          alert('入力したメールアドレスに誤りがあります。')
+        } else {
+          searchProgressModal.classList.add('is-active')
+          form.submit()
+        }
       } else {
         searchProgressModal.classList.add('is-active')
         form.submit()
       }
-    } else {
-      searchProgressModal.classList.add('is-active')
-      form.submit()
     }
-  }
-})
+  })
+}
 
 // 検索文字に半角スペースが含まれていて先頭文字が 「"」以外の文字で始まる場合、検索不可。
 function managerAddressValidationCheck(managerAddress) {

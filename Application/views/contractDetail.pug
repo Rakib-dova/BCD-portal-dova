@@ -46,9 +46,9 @@ block content
                       button.button.is-success.is-block.btn-contract(type="submit" formaction='/change' disabled=contract.contractStatus !== '00') 契約変更
                   td.text-center.ver-mid.px-1
                     if contract.serviceType === '010'
-                      button.button.is-can.is-block.btn-contract(type="submit" formaction='/cancellation' disabled=(contract.contractStatus !== '00' || continuingContractList.some((i) =>i.serviceType === '030') || oneShotContractList.some((i) =>i.serviceType === '020'))) 解約申請
+                      button.button.is-danger.is-block.btn-contract(type="submit" formaction='/cancellation' disabled=(contract.contractStatus !== '00' || continuingContractList.some((i) =>i.serviceType === '030') || oneShotContractList.some((i) =>i.serviceType === '020'))) 解約申請
                     else if contract.serviceType === '030'
-                      button.button.is-can.is-block.btn-contract(type="submit" formaction='/contractCancellation' disabled=contract.contractStatus !== '00') 解約申請
+                      button.button.is-danger.is-block.btn-contract(type="submit" formaction='/contractCancellation' disabled=contract.contractStatus !== '00') 解約申請
 
         if oneShotContractList.length > 0
           h2.mb-4.mt-6 ■初回利用サービス
@@ -60,7 +60,7 @@ block content
                   th.width-8.text-center 種類
                   th.width-10.text-center 契約番号
                   th.text-center ステータス
-                  th(colspan='2').width-20.text-center ご契約に関する処理   
+                  th(colspan='2').width-20.text-center  
               tbody
                 tr
                   td.ver-mid 
@@ -74,8 +74,7 @@ block content
                       span.btn-status.st-yellow 申込処理中
                     else 
                       span.btn-status.st-white 設定準備中
-                  td
-                  td
+                  td(colspan='2').text-center.ver-mid.px-1 
 
     include footer
 
