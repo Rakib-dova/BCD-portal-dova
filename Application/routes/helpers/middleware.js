@@ -239,13 +239,40 @@ exports.isOnOrChangeContract = async (req, res, next) => {
  */
 exports.getContractPlan = async (req, res, next) => {
   // 有償契約チェック
-  let islightPlan = false
+  let isLightPlan = false
+  let isIntroductionSupportPlan = false
+  let isLightPlanForEntry = false
+  let isIntroductionSupportPlanForEntry = false
+
   const lightPlan = await contractController.findLightPlan(req.user.tenantId)
   if (lightPlan) {
-    islightPlan = true
+    isLightPlan = true
+  }
+  const introductionSupportPlan = await contractController.findIntroductionSupportPlan(req.user.tenantId)
+  if (introductionSupportPlan) {
+    isIntroductionSupportPlan = true
   }
 
-  const contractPlan = { islightPlan: islightPlan }
+  // スタンダードプランの申し込み
+  const lightPlanForEntry = await contractController.findLightPlanForEntry(req.user.tenantId)
+  if (lightPlanForEntry) {
+    isLightPlanForEntry = true
+  } else {
+    // 導入支援プランの申し込み
+    const introductionSupportPlanForEntry = await contractController.findIntroductionSupportPlanForEntry(
+      req.user.tenantId
+    )
+    if (introductionSupportPlanForEntry) {
+      isIntroductionSupportPlanForEntry = true
+    }
+  }
+
+  const contractPlan = {
+    isLightPlan: isLightPlan,
+    isIntroductionSupportPlan: isIntroductionSupportPlan,
+    isLightPlanForEntry: isLightPlanForEntry,
+    isIntroductionSupportPlanForEntry: isIntroductionSupportPlanForEntry
+  }
 
   req.contractPlan = contractPlan
   next()

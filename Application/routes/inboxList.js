@@ -102,7 +102,9 @@ const cbGetIndex = async (req, res, next) => {
     numPages: result.numPages,
     currPage: result.currPage,
     rejectedFlag: rejectedFlag,
-    csrfToken: req.csrfToken()
+    csrfToken: req.csrfToken(),
+    userRole: req.session.userRole,
+    contractPlan: req.contractPlan
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -241,7 +243,9 @@ const cbGetApprovals = async (req, res, next) => {
     numPages: result.numPages,
     currPage: result.currPage,
     rejectedFlag: rejectedFlag,
-    csrfToken: req.csrfToken()
+    csrfToken: req.csrfToken(),
+    userRole: req.session.userRole,
+    contractPlan: req.contractPlan
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetApprovals')
@@ -367,7 +371,9 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
       numPages: 1,
       currPage: 1,
       rejectedFlag: false,
-      csrfToken: req.csrfToken()
+      csrfToken: req.csrfToken(),
+      userRole: req.session.userRole,
+      contractPlan: req.contractPlan
     })
   } else {
     res.render(presentation, {
@@ -376,16 +382,18 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
       currPage: 1,
       rejectedFlag: false,
       message: '条件に合致する支払依頼が見つかりませんでした。',
-      csrfToken: req.csrfToken()
+      csrfToken: req.csrfToken(),
+      userRole: req.session.userRole,
+      contractPlan: req.contractPlan
     })
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbSearchApprovedInvoice')
 }
 
 router.get('/getWorkflow', cbGetWorkflow)
-router.get('/approvals', helper.isAuthenticated, csrfProtection, cbGetApprovals)
-router.get('/:page', csrfProtection, helper.bcdAuthenticate, cbGetIndex)
-router.post('/:page', csrfProtection, helper.bcdAuthenticate, cbSearchApprovedInvoice)
+router.get('/approvals', helper.isAuthenticated, helper.getContractPlan, csrfProtection, cbGetApprovals)
+router.get('/:page', csrfProtection, helper.bcdAuthenticate, helper.getContractPlan, cbGetIndex)
+router.post('/:page', csrfProtection, helper.bcdAuthenticate, helper.getContractPlan, cbSearchApprovedInvoice)
 
 module.exports = {
   router: router,
