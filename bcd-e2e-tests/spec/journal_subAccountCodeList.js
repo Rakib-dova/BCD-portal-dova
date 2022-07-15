@@ -152,6 +152,8 @@ describe('仕訳情報設定_補助科目一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
+        await comment('一般ユーザーは対象外です。')
+        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -415,6 +417,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
           j++;
         }
       }
+
+      // 補助科目をすべて削除する
+      await subAccountCodeListPage.deleteAll();
       await page.waitForTimeout(1000);
     }
   });
@@ -430,26 +435,13 @@ describe('仕訳情報設定_補助科目一覧', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, subAccountCodeListPage, accountCodeListPage }
+    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage }
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
 
-    // 補助科目をすべて削除する
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-    await comment('「補助科目設定」をクリックする');
-    await journalMenuPage.clickSubAccount();
-    await subAccountCodeListPage.waitForLoading();
-    await comment('補助科目をすべて削除する');
-    await subAccountCodeListPage.deleteAll();
-
-    // 同様に、勘定科目をすべて削除する
-    await comment('「Home」をクリックする');
-    await subAccountCodeListPage.clickHome();
-    await topPage.waitForLoading();
+    // 勘定科目をすべて削除する
     await comment('「仕訳情報管理」をクリックする');
     await topPage.openJournalMenu();
     await journalMenuPage.waitForLoading();

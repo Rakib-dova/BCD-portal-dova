@@ -224,7 +224,6 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       // 差出人・宛先・価格を取得する
       let cost = await paymentRequestListPage.getCost(invoiceNo);
       let sender = await paymentRequestListPage.getSender(invoiceNo);
-      let receiver = await paymentRequestListPage.getReceiver(invoiceNo);
 
       // 仕訳情報設定ページへ遷移する
       await comment('「仕訳情報設定」をクリックする');
@@ -234,7 +233,6 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       // 文書管理の請求書と比較して表示内容に誤りがないこと
       expect(await journalDetailPage.getInvoiceNo()).to.equal(invoiceNo, '請求書番号が一覧ページのものと合致すること');
       expect(await journalDetailPage.getSender()).to.equal(sender, '差出人が一覧ページのものと合致すること');
-      expect(await journalDetailPage.getReceiver()).to.equal(receiver, '宛先が一覧ページのものと合致すること');
       expect(await journalDetailPage.getCost()).to.equal(cost, '価格が一覧ページのものと合致すること');
       await page.waitForTimeout(1000);
     }
@@ -324,7 +322,7 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     let msg = isCredit ? '貸方' : '借方';
     await comment('勘定科目コード、補助科目コード（' + msg + '）の「検索」をクリックする');
     if (fromBulk) {
-      await journalDetailPage.clickAccountCodeSearchOnBulk(isCredit);
+      await journalDetailPage.clickAccountCodeSearchOnBulk(1, isCredit);
     } else {
       await journalDetailPage.clickAccountCodeSearch(1, 1, isCredit);
     }
@@ -347,7 +345,7 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     let msg = isCredit ? '貸方' : '借方';
     await comment('部門コード（' + msg + '）の「検索」をクリックする');
     if (fromBulk) {
-      await journalDetailPage.clickDepartmentSearchOnBulk(isCredit);
+      await journalDetailPage.clickDepartmentSearchOnBulk(1, isCredit);
     } else {
       await journalDetailPage.clickDepartmentSearch(1, 1, isCredit);
     }
@@ -403,12 +401,10 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       await journalMenuPage.waitForLoading();
 
       // 支払依頼一覧ページへ遷移する
-      await comment('「支払依頼一覧」をクリックする');
       await journalMenuPage.clickPaymentRequest();
       await paymentRequestListPage.waitForLoading();
 
       // 仕訳情報設定ページへ遷移する
-      await comment('「仕訳情報設定」をクリックする');
       await paymentRequestListPage.clickDetail(invoiceNo);
       await journalDetailPage.waitForLoading();
 
@@ -469,27 +465,20 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       await journalMenuPage.waitForLoading();
 
       // 支払依頼一覧ページへ遷移する
-      await comment('「支払依頼一覧」をクリックする');
       await journalMenuPage.clickPaymentRequest();
       await paymentRequestListPage.waitForLoading();
 
       // 仕訳情報設定ページへ遷移する
-      await comment('「仕訳情報設定」をクリックする');
       await paymentRequestListPage.clickDetail(invoiceNo);
       await journalDetailPage.waitForLoading();
 
       // 勘定科目・補助科目・部門データを選択する
-      await comment('勘定科目・補助科目（借方）を選択する');
       await journalDetailPage.selectAccountCode(1, 1, false, accountCodes[0].code, accountCodes[0].subCode);
-      await comment('部門データ（借方）を選択する');
       await journalDetailPage.selectDepartment(1, 1, false, departments[0].code);
-      await comment('勘定科目・補助科目（貸方）を選択する');
       await journalDetailPage.selectAccountCode(1, 1, true, accountCodes[0].code, accountCodes[0].subCode);
-      await comment('部門データ（貸方）を選択する');
       await journalDetailPage.selectDepartment(1, 1, true, departments[0].code);
 
       // 「一括入力」をクリックする
-      await comment('「一括入力」をクリックする');
       await journalDetailPage.clickBulkInsert();
 
       // 一括入力にて、勘定科目・補助科目・部門データを選択する
@@ -499,11 +488,9 @@ describe('仕訳情報設定_支払依頼一覧', function () {
       await selectDepartment(journalDetailPage, true, true, departments[1]);
 
       // 項目IDにチェックを入れる
-      await comment('項目IDにチェックを入れる');
-      await journalDetailPage.checkBulkON();
+      await journalDetailPage.checkBulkON(1);
 
       // 「反映」をクリックする
-      await comment('「反映」をクリックする');
       await journalDetailPage.clickBulkOK();
 
       // 一括入力したデータが反映されていること。一括入力前に入力したデータが上書きされていないこと
@@ -526,47 +513,29 @@ describe('仕訳情報設定_支払依頼一覧', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, subAccountCodeListPage,
+    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage,
       accountCodeListPage, departmentListPage }
       = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
     await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
 
-    // 補助科目をすべて削除する
-    await comment('「仕訳情報管理」をクリックする');
-    await topPage.openJournalMenu();
-    await journalMenuPage.waitForLoading();
-    await comment('「補助科目設定」をクリックする');
-    await journalMenuPage.clickSubAccount();
-    await subAccountCodeListPage.waitForLoading();
-    await comment('補助科目をすべて削除する');
-    await subAccountCodeListPage.deleteAll();
-
     // 勘定科目をすべて削除する
-    await comment('「Home」をクリックする');
-    await subAccountCodeListPage.clickHome();
-    await topPage.waitForLoading();
     await comment('「仕訳情報管理」をクリックする');
     await topPage.openJournalMenu();
     await journalMenuPage.waitForLoading();
-    await comment('「勘定科目設定」をクリックする');
     await journalMenuPage.clickAccount();
     await accountCodeListPage.waitForLoading();
-    await comment('勘定科目をすべて削除する');
     await accountCodeListPage.deleteAll();
 
     // 部門データをすべて削除する
-    await comment('「Home」をクリックする');
     await accountCodeListPage.clickHome();
     await topPage.waitForLoading();
     await comment('「仕訳情報管理」をクリックする');
     await topPage.openJournalMenu();
     await journalMenuPage.waitForLoading();
-    await comment('「部門データ設定」をクリックする');
     await journalMenuPage.clickDepartment();
     await departmentListPage.waitForLoading();
-    await comment('部門データをすべて削除する');
     await departmentListPage.deleteAll();
     await page.waitForTimeout(1000);
   });

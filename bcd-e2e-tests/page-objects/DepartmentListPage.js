@@ -54,8 +54,8 @@ class DepartmentListPage {
   // 部門データをすべて削除する
   async deleteAll() {
     let rows;
+    await this.addComment('部門データをすべて削除する');
     while((rows = await this.actionUtils.getElements(this.frame, '//tr//a[contains(text(),"削除")]')).length > 0) {
-      await this.addComment('先頭の部門データを削除する');
       await rows[0].click();
       await this.actionUtils.click(this.frame, '#modalCodeDelBtn');
       await this.waitPopup();
