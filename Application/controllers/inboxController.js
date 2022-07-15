@@ -809,8 +809,8 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
         managerInfo.managerAddress = contactor[j].managerAddress
         if (contactor[j].userInfo && !(contactor[j].userInfo instanceof Error)) {
           if (
-            contactor[i].userInfo.Person.LastName.trim().length !== 0 ||
-            contactor[i].userInfo.Person.FirstName.trim().length !== 0
+            contactor[j].userInfo.Person.LastName.trim().length !== 0 ||
+            contactor[j].userInfo.Person.FirstName.trim().length !== 0
           ) {
             managerInfo.managerName = `${contactor[j].userInfo.Person.LastName} ${contactor[j].userInfo.Person.FirstName}`
           } else {
