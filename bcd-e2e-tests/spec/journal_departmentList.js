@@ -81,7 +81,7 @@ describe('仕訳情報設定_部門データ一覧', function () {
   /**
    * STEP5 No.79,80
    */
-  it("新規作成・変更", async function () {
+  it("新規作成・変更・削除", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -105,11 +105,11 @@ describe('仕訳情報設定_部門データ一覧', function () {
         await comment('その他アカウントは対象外です。')
         continue;
       }
-  
+
       // ページオブジェクト
       const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, departmentListPage, registDepartmentPage }
         = common.getPageObject(browser, page);
-  
+
       // 部門データ一覧ページへ遷移する
       await gotoDepartmentList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
 
@@ -129,7 +129,7 @@ describe('仕訳情報設定_部門データ一覧', function () {
       // 部門データ確認・変更ページへ遷移する
       await departmentListPage.clickEdit(departments[0].code);
       await registDepartmentPage.waitForLoading();
-  
+
       // 詳細が表示されること
       expect(await registDepartmentPage.getCode()).to.equal(departments[0].code, '【部門データ確認・変更】部門コードが表示されること');
       expect(await registDepartmentPage.getName()).to.equal(departments[0].name, '【部門データ確認・変更】部門名が表示されること');
@@ -140,9 +140,12 @@ describe('仕訳情報設定_部門データ一覧', function () {
       await registDepartmentPage.clickPopupOK();
       await departmentListPage.waitForLoading();
       await departmentListPage.waitPopup();
-  
+
       // 変更が反映されること
       expect(await departmentListPage.hasRow(departments[1].code, departments[1].name)).to.equal(true, '【部門データ一覧】変更が反映されること');
+
+      // 部門データをすべて削除する
+      await departmentListPage.deleteAll();
       await page.waitForTimeout(1000);
     }
   });
@@ -209,30 +212,11 @@ describe('仕訳情報設定_部門データ一覧', function () {
           j++;
         }
       }
+
+      // 部門データをすべて削除する
+      await departmentListPage.deleteAll();
       await page.waitForTimeout(1000);
     }
-  });
-
-  it("後片付け（部門データ全削除）", async function() {
-    // テストの初期化を実施
-    await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, departmentListPage }
-      = common.getPageObject(browser, page);
-
-    // 部門データ一覧ページへ遷移する
-    await gotoDepartmentList(config.company1.mng, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
-
-    // 部門データをすべて削除する
-    await departmentListPage.deleteAll();
-    await page.waitForTimeout(1000);
   });
 });
 

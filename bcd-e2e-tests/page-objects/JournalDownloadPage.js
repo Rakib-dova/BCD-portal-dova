@@ -30,7 +30,7 @@ class JournalDownloadPage {
   }
 
   // 条件絞り込みへ条件を入力する
-  async inputConditions(invoiceNo, minIssuedate, maxIssuedate, sendTo, wasApproved) {
+  async inputConditions(invoiceNo, minIssuedate, maxIssuedate, sendTo, wasApproved, dataFormat) {
     if (invoiceNo) {
       await this.addComment('「請求書番号」にて、"' + invoiceNo + '"と入力する');
       await this.actionUtils.fill(this.frame, '#invoiceNumber', invoiceNo);
@@ -50,6 +50,10 @@ class JournalDownloadPage {
     if(!wasApproved) {
       await this.addComment('「ダウンロード対象」にて、「仕訳済みの請求書」をクリックする');
       await this.actionUtils.click(this.frame, '#noneFinalapproval');
+    }
+    if (dataFormat) {
+      await this.addComment('「出力フォーマット」にて、value値が"' + dataFormat + '"の選択肢を選択する');
+      await this.actionUtils.selectByXpath(this.frame, '//select[@name="serviceDataFormat"]', dataFormat);
     }
   }
 

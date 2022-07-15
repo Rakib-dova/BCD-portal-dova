@@ -89,8 +89,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -159,8 +157,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -268,8 +264,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -391,8 +385,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')

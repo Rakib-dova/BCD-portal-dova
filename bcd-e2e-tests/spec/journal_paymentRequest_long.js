@@ -77,6 +77,12 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
       browser = browserInfo.browserType;
       contextOption = browserInfo.contextOption;
     }
+    const context = await browser.newContext(contextOption);
+    if (page != null) {
+      page.close();
+    }
+    page = await context.newPage();
+    global.reporter.setBrowserInfo(browser, page);
   };
 
   // トップページまで遷移する
@@ -101,12 +107,6 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
   it("準備（承認ルート）", async function () {
     // テストの初期化を実施
     await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
     const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage,registAccountCodePage,
@@ -237,12 +237,6 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
   it("支払依頼ページ_依頼", async function () {
     // テストの初期化を実施
     await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
     const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage,
@@ -310,13 +304,6 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
     // テストの初期化を実施
     await initBrowser();
 
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
     // ページオブジェクト
     const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage, paymentRequestPage }
       = common.getPageObject(browser, page);
@@ -345,6 +332,7 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
     // 承認する
     await comment('承認する');
+    await paymentRequestPage.checkApproval();
     await paymentRequestPage.approve();
     await paymentRequestListPage.waitPopup();
 
@@ -361,70 +349,70 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
   /**
    * STEP6_No.94,95,96
    */
-  it("支払依頼ページ_承認（1次申請）", async function () {
+  it("支払依頼ページ_承認（1次承認）", async function () {
     await approve(0, '一次承認済み');
   });
 
   /**
    * STEP6_No.226
    */
-  it("支払依頼ページ_承認（2次申請）", async function () {
+  it("支払依頼ページ_承認（2次承認）", async function () {
     await approve(1, '二次承認済み');
   });
 
   /**
    * STEP6_No.228
    */
-  it("支払依頼ページ_承認（3次申請）", async function () {
+  it("支払依頼ページ_承認（3次承認）", async function () {
     await approve(2, '三次承認済み');
   });
 
   /**
    * STEP6_No.230
    */
-  it("支払依頼ページ_承認（4次申請）", async function () {
+  it("支払依頼ページ_承認（4次承認）", async function () {
     await approve(3, '四次承認済み');
   });
 
   /**
    * STEP6_No.232
    */
-  it("支払依頼ページ_承認（5次申請）", async function () {
+  it("支払依頼ページ_承認（5次承認）", async function () {
     await approve(4, '五次承認済み');
   });
 
   /**
    * STEP6_No.234
    */
-  it("支払依頼ページ_承認（6次申請）", async function () {
+  it("支払依頼ページ_承認（6次承認）", async function () {
     await approve(5, '六次承認済み');
   });
 
   /**
    * STEP6_No.236
    */
-  it("支払依頼ページ_承認（7次申請）", async function () {
+  it("支払依頼ページ_承認（7次承認）", async function () {
     await approve(6, '七次承認済み');
   });
 
   /**
    * STEP6_No.238
    */
-  it("支払依頼ページ_承認（8次申請）", async function () {
+  it("支払依頼ページ_承認（8次承認）", async function () {
     await approve(7, '八次承認済み');
   });
 
   /**
    * STEP6_No.240
    */
-  it("支払依頼ページ_承認（9次申請）", async function () {
+  it("支払依頼ページ_承認（9次承認）", async function () {
     await approve(8, '九次承認済み');
   });
 
   /**
    * STEP6_No.242
    */
-  it("支払依頼ページ_承認（10次申請）", async function () {
+  it("支払依頼ページ_承認（10次承認）", async function () {
     await approve(9, '十次承認済み');
   });
 
@@ -434,12 +422,6 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
   it("支払依頼ページ_10次承認済み（申請者）", async function () {
     // テストの初期化を実施
     await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
     const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage, paymentRequestPage }
@@ -493,12 +475,6 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
   it("支払依頼ページ_差し戻し", async function () {
     // テストの初期化を実施
     await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
     const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage, paymentRequestPage }
@@ -555,12 +531,6 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
   it("後片付け（承認ルート削除）", async function() {
     // テストの初期化を実施
     await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
     const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, subAccountCodeListPage,

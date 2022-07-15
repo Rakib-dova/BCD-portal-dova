@@ -51,11 +51,6 @@ class PaymentRequestListPage {
     return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[6]');
   }
 
-  // 宛先を取得する
-  async getReceiver(invoiceNo) {
-    return await this.actionUtils.getText(this.frame, '//table//td[contains(text(), "' + invoiceNo + '")]/../td[7]');
-  }
-
   // 承認待ちタブを表示する
   async clickConstruct() {
     await this.addComment('「承認待ち」タブをクリックする');
