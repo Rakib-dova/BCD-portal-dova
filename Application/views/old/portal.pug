@@ -14,15 +14,10 @@ block content
     //-   .level-item
     //-     p.title.mb-4 Apps
     columns.is-centered
-      .column.is-12.menu
-        .is-justify-content-start.planStatus
-          .planTitle
-            span ご利用中プラン
-          div
-            a スタンダードプラン
-      .column.is-12.menu
+      .column.is-12.menu        
         .approvalNotification
           .approvalNotificationMessage 承認・差し戻し件数を取得しています。
+
       .column.is-12.menu
         .box
           .media-content
@@ -130,12 +125,33 @@ block content
                 a.show-modal(data-target='information-lightplan')
                   .media.appdesc
                     .media-left
-                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-add.svg')
+                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
                     .media-content
-                      p.title-law 追加オプション申込
+                      p.title-law オプションサービス
+                      p.title.is-5.margin-bottom-02rem 申込
                       p オプションサービスの新規申し込みを行うことができます。
+          .column.is-one-third-desktop.hvr-float
+            .box.iconBox.textOverflow
+              a(href='/receiveIntroductionSupport')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                  .media-content
+                    p.title.is-5 導入支援サービス
+                    p 導入支援サービスの新規申し込みを行うことができます。
+                    p 表示メッセージは仮置きです。
+          .column.is-one-third-desktop.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='lightPlan-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                  .media-content
+                    p.title.is-5 ライトプラン
+                    p ライトプラン契約と解約を行うことができます。
+                    p 解約の場合は取り消しはできません。
       .column.is-12.menu
-      p.olta-title-font-size PoC
+       p.olta-title-font-size PoC
         .columns.is-desktop.is-family-noto-sans
           .column.hvr-float
             .box.iconBox.textOverflow
@@ -150,7 +166,7 @@ block content
           .column.hvr-float
 
       .column.is-12.menu
-      p.olta-title-font-size 提携サービス
+       p.olta-title-font-size 提携サービス
         .columns.is-desktop.is-family-noto-sans
           .column.hvr-float
             .box.iconBox.textOverflow
@@ -303,10 +319,14 @@ block content
           button.delete(data-target="config-modal")
         section.modal-card-body
           nav.panel
-            a.panel-block(href='/contractDetail')
+            a.panel-block(href='/change')
               span.panel-icon
                 i.fas.fa-file
-              p ご契約内容
+              p 契約情報変更
+            a.panel-block(href='/cancellation') 
+              span.panel-icon
+                i.fas.fa-file
+              p 解約
             a.panel-block(href='/uploadUsers') 
               span.panel-icon
                 i.fas.fa-file
@@ -432,102 +452,25 @@ block content
                 i.fas.fa-file
               p 操作マニュアルダウンロード
         footer.modal-card-foot
-
-    .modal#information-lightplan
-      .modal-background.cancel-button(data-target='information-lightplan')
+    .modal#lightPlan-modal
+      .modal-background.cancel-button(data-target='lightPlan-modal')
       .modal-card.is-family-noto-sans
         header.modal-card-head
-          p.modal-card-title.title.mb-0 オプションサービス申込
-          button.delete(data-target="information-lightplan")
+          p.modal-card-title ライトプラン
+          button.delete(data-target="lightPlan-modal")
         section.modal-card-body
-          .is-flex.opSelect.is-justify-content-space-between
-            a(href='#stPlan') スタンダードプラン
-              span
-            a(href='#inService') 導入支援サービス
-              span
-          h2#stPlan スタンダードプランについて
-          p.mt-3.px-4 スタンダートプランは、請求書の電子化を通じてインボイス制度や電子帳簿保存法といった法制度への対応のみならず、高い費用対効果で請求書業務の効率化を実現したいお客さま向けのプランです。ご要望の多い機能を大きな負担なくご利用いただけます。 
-          .columns.text-center.mx-0 
-            .column.planWrap.pr-2.pl-0 
-              .freeColor
-                h3.has-text-weight-bold.py-3 フリー
-                p.pb-3.has-text-left.mx-4
-                  | 無料で請求書の電子化<br>​
-                  | インボイス制度や電子帳簿保存法に対応​<br>
-                  | 受取請求書目安：～100件/月
-                .planBody 
-                  span.is-block.has-text-weight-bold.planBodyPrice.pt-0.pb-2
-                    | <span class="mr-1">0</span>円  
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">電子請求書の作成・発行・受取・保管が可能</span>
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">受取請求書の支払依頼や承認が可能</span>                    
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">勘定科目や補助科目を支払依頼に追加する機能も利用可能</span>                    
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">仕訳情報をCSV形式でダウンロード可能（フォーマット固定）</span>                    
-                  p.has-text-right.mt-5.pr-4 など
-            .column.planWrap.px-0
-              .stanColor
-                h3.has-text-weight-bold.py-3 スタンダード
-                p.pb-3.has-text-left.mx-4
-                  | 請求書の電子化と一緒に、高い費用対効果で業務効率化を実現​​<br>
-                  | 受取請求書目安：100～500件/月
-                .planBody 
-                  span.is-block.has-text-weight-bold.planBodyPrice.pt-0.pb-2
-                    | 月額利用料 <span class="mr-1">4</span>万円
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">フリープランの機能はすべて利用可能</span>
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">クラウド会計システムに対応したフォーマットで仕訳情報CSVをダウンロード</span>                    
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">請求書受取時に担当者へメール通知（請求書に担当者メールアドレスが記載されている場合）</span>                    
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">支払依頼の検索が可能</span>                    
-                  p.has-text-right.mt-5.pr-4 など                  
-            .column.planWrap.pl-2.pr-0
-              .freeColor 
-                h3.has-text-weight-bold.py-3 エンタープライズ
-                p.pb-3.has-text-left.mx-4
-                  | お使いの基幹システムと請求データを自動連携​<br>​
-                  | 請求業務の自動化と効率化を実現​​<br>
-                  | 受取請求書目安：500件～/月​
-                .planBody 
-                  span.is-block.has-text-weight-bold.planBodyPrice 御見積り
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">販売管理システムや会計システムとデータ連携、稼働やミスの削減</span>
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">カスタマイズされた支払依頼承認フローを構築</span>                    
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">請求書へのアクセス権を組織・ユーザーごとに設定することでガバナンス強化</span>                    
-                  p.is-flex.m-2 
-                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">その他貴社の業務に沿うようにカスタマイズした機能をご提供</span>                  
-          p.px-4.my-5 ※フリープランとスタンダードプランは、下記の導入支援サービスにお申し込み頂くことでセットアップのサポートをいたします。          
-          .mb-4.btnWrap.is-block.text-center
-            a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
-            //- a.button.ml-1.is-success.show-modal(data-target='') お申込みフォーム  
-            a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込み済み
-          p.text-center.cauText ※有料オプションはテナント管理者のみお申込み可能です。  
-          h2#inService.mt-6 導入支援サービスについて
-          p.mt-3.px-4 
-            | 導入支援サービスは、フリープラン、スタンダードプランをお申込みのお客様の環境につきまして、​<br>
-            | それぞれのプランで提供される機能の登録や設定を支援・代行するサービスです。<br>
-            | （オプションとして個別マニュアル作成や説明会も実施します）​<br>
-            | 利用開始にあたっての必要な登録や設定を実施いたしますので、設定等完了後はすぐにお使います。
-          .planBody.noHeight 
-            p.has-text-weight-bold 料金（導入支援サービスご利用1回あたり） 
-            p.is-flex.mx-2.mt-2.mb-0 
-              | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">フリープランをご利用の方　5万円～</span>
-            p.is-flex.mx-2.mt-0.mb-2
-              | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">スタンダードプランをご利用の方　15万円～</span>  
-          img(src='../image/flow.jpg' alt='フロー図').flowImg
-          .mb-4.btnWrap.is-block.text-center
-            a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
-            a.button.ml-1.is-success.show-modal(data-target='') お申込みフォーム  
-          p.text-center.cauText ※有料オプションはテナント管理者のみお申込み可能です。
-          
+          nav.panel
+            a.panel-block(href='/applyLightPlan')
+              span.panel-icon
+                i.fas.fa-file
+              p 新設申込み
+            a.panel-block(href='/cancelLightPlan') 
+              span.panel-icon
+                i.fas.fa-file
+              p 解約申込み
         footer.modal-card-foot
-    //- include informationLightplanModal　→これいれるとエラーになる
+
+    include informationLightplanModal
   include footer
 
 block append scripts
@@ -538,5 +481,3 @@ block append scripts
     script(src="/js/portal-page-memberSite.js")
   //- 会員サイト連携開発追加
   // End of DigitalTrade Portal Page
-  //- 画面のcssファイル
-  link(rel='stylesheet', type='text/css', href='/css/portal.css')
