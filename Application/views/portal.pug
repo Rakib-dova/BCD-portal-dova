@@ -14,10 +14,15 @@ block content
     //-   .level-item
     //-     p.title.mb-4 Apps
     columns.is-centered
-      .column.is-12.menu        
+      .column.is-12.menu
+        .is-justify-content-start.planStatus
+          .planTitle
+            span ご利用中プラン
+          div
+            a スタンダードプラン
+      .column.is-12.menu
         .approvalNotification
           .approvalNotificationMessage 承認・差し戻し件数を取得しています。
-
       .column.is-12.menu
         .box
           .media-content
@@ -125,15 +130,12 @@ block content
                 a.show-modal(data-target='information-lightplan')
                   .media.appdesc
                     .media-left
-                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-add.svg')
                     .media-content
-                      p.title-law オプションサービス
-                      p.title.is-5.margin-bottom-02rem 申込
+                      p.title-law 追加オプション申込
                       p オプションサービスの新規申し込みを行うことができます。
-          .column.is-one-third-desktop.hvr-float
-          .column.is-one-third-desktop.hvr-float
       .column.is-12.menu
-       p.olta-title-font-size PoC
+      p.olta-title-font-size PoC
         .columns.is-desktop.is-family-noto-sans
           .column.hvr-float
             .box.iconBox.textOverflow
@@ -148,7 +150,7 @@ block content
           .column.hvr-float
 
       .column.is-12.menu
-       p.olta-title-font-size 提携サービス
+      p.olta-title-font-size 提携サービス
         .columns.is-desktop.is-family-noto-sans
           .column.hvr-float
             .box.iconBox.textOverflow
@@ -301,14 +303,10 @@ block content
           button.delete(data-target="config-modal")
         section.modal-card-body
           nav.panel
-            a.panel-block(href='/change')
+            a.panel-block(href='/contractDetail')
               span.panel-icon
                 i.fas.fa-file
-              p 契約情報変更
-            a.panel-block(href='/cancellation') 
-              span.panel-icon
-                i.fas.fa-file
-              p 解約
+              p ご契約内容
             a.panel-block(href='/uploadUsers') 
               span.panel-icon
                 i.fas.fa-file
@@ -445,6 +443,7 @@ block content
               p 操作マニュアルダウンロード
         footer.modal-card-foot
 
+
     include informationLightplanModal
   include footer
 
@@ -456,3 +455,6 @@ block append scripts
     script(src="/js/portal-page-memberSite.js")
   //- 会員サイト連携開発追加
   // End of DigitalTrade Portal Page
+  //- 画面のcssファイル
+  link(rel='stylesheet', type='text/css', href='/css/portal.css')
+  
