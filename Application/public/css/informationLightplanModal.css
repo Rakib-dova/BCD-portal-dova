@@ -34,6 +34,7 @@
 .planWrap p{
   font-size: 14px;
 }
+
 .planWrap>div>p{
   min-height: 100px;
 }
