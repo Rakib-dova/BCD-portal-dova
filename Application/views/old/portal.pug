@@ -1,0 +1,542 @@
+﻿extends layout
+
+block content
+  .hero.is-small
+    .hero-body.is-logo
+      .container
+
+  //- 会員サイト連携開発追加
+  input(type="hidden" name="_csrf" value=csrfToken)
+  //- 会員サイト連携開発追加
+
+  .container.is-max-widescreen
+    //- .level-left.is-family-sans-serif
+    //-   .level-item
+    //-     p.title.mb-4 Apps
+    columns.is-centered
+      .column.is-12.menu
+        .is-justify-content-start.planStatus
+          .planTitle
+            span ご利用中プラン
+          div
+            a スタンダードプラン
+      .column.is-12.menu
+        .approvalNotification
+          .approvalNotificationMessage 承認・差し戻し件数を取得しています。
+      .column.is-12.menu
+        .box
+          .media-content
+            .tabs.is-centered.is-boxed.is-medium
+              ul
+                li.is-active
+                  a#informationTab
+                    span お知らせ
+                li
+                  a#constructTab
+                    span 工事・故障情報
+            .tab-content
+              .tab-pane.is-active#informationTab
+                if newsDataArrSize==0
+                  p.text-center=newsDataArr[0].message
+                else
+                  table.table.is-fullwidth.table-fixed
+                    tbody
+                      each item in newsDataArr
+                        tr
+                          td.newsDate=item.date
+                          td.newsTitle
+                            a.has-text-right(href=item.link target='_blank')=item.title
+                .mt-1.has-text-right
+                  a.button.is-link.is-light(href='https://support.ntt.com/bconnection/information/search' target='_blank') もっと見る 
+
+              .tab-pane#constructTab
+                if constructDataArrSize==0
+                  p.text-center=constructDataArr[0].message
+                else
+                  table.table.is-fullwidth.table-fixed
+                    tbody
+                      each item in constructDataArr
+                        tr
+                          td.newsDate=item.date
+                          td.newsTitle
+                            a.has-text-right(href=item.link target='_blank')=item.title
+                .mt-1.has-text-right
+                  a.button.is-link.is-light(href='https://support.ntt.com/bconnection/maintenance/search' target='_blank') もっと見る 
+      .column.is-12.menu
+        .columns.is-desktop.is-family-noto-sans
+          .column.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='csvupload-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_upload-type2c.svg')
+                  .media-content
+                    p.title.is-5 請求書一括作成
+                    p 指定ファイルをアップロードすることで、複数のドラフト状態の請求書を一括で作成できます。 
+          .column.hvr-float
+            .box.iconBox.textOverflow
+              a(href='/csvDownload')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-csv_download.svg')
+                  .media-content
+                    p.title.is-5 請求情報ダウンロード
+                    p 送受信した請求情報をCSV形式でダウンロードできます。
+          .column.hvr-float
+              .box.iconBox.textOverflow
+                a.show-modal(data-target='registAccountCode-modal')
+                  .media.appdesc
+                    .media-left
+                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-siwake-type3.svg')
+                    .media-content
+                      p.title.is-5 仕訳情報管理
+                      p 請求書に対して勘定科目などの仕訳情報を設定できます。また、仕訳情報をCSV形式でダウンロードできます。
+
+        .columns.is-desktop.is-family-noto-sans
+          .column.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='bugyo-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../obc/images/ts-app-digitaltrade-appicon.svg')
+                  .media-content
+                    p.title.is-5 商奉行#[sup &reg;]クラウド連携
+                    p 請求書情報を商奉行クラウド間で連携できます。
+          .column.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='support-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-support.svg')
+                  .media-content
+                    p.title.is-5 サポート
+                    p 設定方法、利用方法に関するお問い合わせが無料で利用できます。その他FAQを参照できます。
+          .column.hvr-float
+            if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+              .box.iconBox.textOverflow
+                a.show-modal(data-target='config-modal')
+                  .media.appdesc
+                    .media-left
+                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
+                    .media-content
+                      p.title.is-5 設定
+                      p 契約情報変更と解約を行うことができます。
+                      p 解約の場合は取り消しはできません。
+
+        .columns.is-desktop.is-family-noto-sans
+          if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+            .column.is-one-third-desktop.hvr-float
+              .box.iconBox.textOverflow
+                a.show-modal(data-target='information-lightplan')
+                  .media.appdesc
+                    .media-left
+                      img.app-icon(src='../image/ts-app-digitaltrade-func-icon-add.svg')
+                    .media-content
+                      p.title-law 追加オプション申込
+                      p オプションサービスの新規申し込みを行うことができます。
+      .column.is-12.menu
+      p.olta-title-font-size PoC
+        .columns.is-desktop.is-family-noto-sans
+          .column.hvr-float
+            .box.iconBox.textOverflow
+              a.href(href="/pdfInvoices/list") 
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-pdf_invoices.svg')
+                  .media-content
+                    p.title.is-5 PDF請求書作成
+                    p Tradeshift非導入企業へ送付可能なPDFを出力できます。
+                    p.content-coution-font-size ※この機能で作成した請求書はTradeshiftの文書管理アプリの管理外となります。
+          .column.hvr-float
+
+      .column.is-12.menu
+      p.olta-title-font-size 提携サービス
+        .columns.is-desktop.is-family-noto-sans
+          .column.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='factoring-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-olta-type1.svg')
+                  .media-content
+                    p.title.is-5 ファクタリング
+                    p 請求書（売掛金）を買い取らせていただくことで素早く簡単に現金化ができるサービスです。
+          .column.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='law-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ben.svg')
+                  .media-content
+                    p.title-law 法律・会計税務の
+                    p.title.is-5.margin-bottom-02rem サポート
+                    p 企業の法律や会計税務に関する悩みについて、専門家に相談することから、最適な方をご紹介することまで可能。                     
+          .column.hvr-float
+            .box.iconBox.textOverflow
+              a.show-modal(data-target='settlement-modal')
+                .media.appdesc
+                  .media-left
+                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-nttsmarttrade.svg')
+                  .media-content
+                    p.title.is-5 銀行振込消込
+                    p 専用の振込口座をご利用いただくことで振込名義人によらず請求先を特定できるサービスです。
+
+    .modal#support-modal
+      .modal-background.cancel-button(data-target='support-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title サポート
+          button.delete(data-target="support-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='https://support.ntt.com/bconnection/faq/search' target='_blank') 
+              span.panel-icon
+                i.fas.fa-file
+              p よくある質問（日本語）を参照する
+            a.panel-block.show-modal(data-target='support-confirmation-modal')
+              span.panel-icon
+                i.fas.fa-file
+              p 設定方法、ご利用方法のお問い合わせ
+        footer.modal-card-foot
+      
+    .modal#csvupload-modal
+      .modal-background.cancel-button(data-target='csvupload-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title.title.mb-0 請求書一括作成
+          button.delete(data-target="csvupload-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/csvupload') 
+              span.panel-icon
+                i.fas.fa-file
+              p 請求書一括作成
+            a.panel-block(href='/uploadFormatList') 
+              span.panel-icon
+                i.fas.fa-file
+              p 請求書アップロードフォーマット一覧
+            a.panel-block(download href="../html/請求書一括作成フォーマット.csv")
+              span.panel-icon
+                i.fas.fa-file
+              p アップロード用請求書フォーマットcsvダウンロード
+            a.panel-block(download href="../html/【Bconnectionデジタルトレードアプリ】操作マニュアル_請求書一括作成.pdf")
+              span.panel-icon
+                i.fas.fa-file
+              p 操作マニュアルダウンロード
+        footer.modal-card-foot
+
+    .modal#support-confirmation-modal
+      .modal-background.cancel-button(data-target='support-confirmation-modal')
+      .modal-content.is-family-noto-sans
+        .card
+          .card-content.notification.m-0
+            button.delete(data-target="support-confirmation-modal")
+            if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN !== '')
+              p お問い合わせの際は、問い合わせフォームに以下のお客様番号をご入力ください。
+              .field.has-addons
+                .control.is-expanded
+                  input.input#numberN(type='text' value=numberN)
+                .control
+                  a.button#copy-btn(data-clipboard-target="#numberN")
+                    | Copy                
+              a.button.is-success.is-pulled-right.mb-3(href='https://support.ntt.com/bconnection/inquiry/input/pid2200000saa' target='_blank') お問い合わせページを開く
+            else if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d" && numberN === '')
+              p 現在お客様番号払出中です。
+              p 払出後、本画面からお問い合わせが可能となります。
+            else
+              p お問い合わせは、テナント管理者のみ可能です。
+              p テナント管理者にご相談の上、お問い合わせください。
+
+    .modal#registAccountCode-modal
+      .modal-background.cancel-button(data-target='registAccountCode-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title 仕訳情報管理
+          button.delete(data-target="registAccountCode-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/accountCodeList')
+              span.panel-icon
+                i.fas.fa-file
+              p 勘定科目設定
+            a.panel-block(href='/subAccountCodeList')
+              span.panel-icon
+                i.fas.fa-file
+              p 補助科目設定
+            a.panel-block(href='/departmentCodeList')
+              span.panel-icon
+                i.fas.fa-file
+              p 部門データ設定 
+            a.panel-block(href='/inboxList/1')
+              span.panel-icon
+                i.fas.fa-file
+              p 支払依頼一覧
+            a.panel-block(href='/journalDownload')
+             span.panel-icon
+               i.fas.fa-file
+             p 仕訳情報ダウンロード
+            a.panel-block(href='/approveRouteList')
+             span.panel-icon
+               i.fas.fa-file
+             p 承認ルート一覧
+        footer.modal-card-foot
+
+    .modal#csvDownload-modal
+      .modal-background.cancel-button(data-target='csvDownload-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title 請求情報ダウンロード
+          button.delete(data-target="csvDownload-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/csvDownload')
+              span.panel-icon
+                i.fas.fa-file
+              p 請求情報ダウンロード
+        footer.modal-card-foot
+
+    .modal#config-modal
+      .modal-background.cancel-button(data-target='config-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title 設定
+          button.delete(data-target="config-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/contractDetail')
+              span.panel-icon
+                i.fas.fa-file
+              p ご契約内容
+            a.panel-block(href='/uploadUsers') 
+              span.panel-icon
+                i.fas.fa-file
+              p ユーザー一括登録
+        footer.modal-card-foot
+
+    .modal#law-modal
+      .modal-background.cancel-button(data-target='law-modal')
+      .modal-card#olta-modal-card
+        header.modal-card-head
+          p.modal-card-title 法律・会計税務のサポート
+          p.modal-card-subTitle 弁護士ドットコムの提供するサービスとなります
+          button.delete(data-target='law-modal')
+        section.modal-card-body
+          .media
+            .media-left
+              img.app-icon(src='../image/ben.svg')  
+            div      
+              p.modal-card-body-media-p みんなの法律相談
+          br
+          p  弁護士が法律トラブルの相談について回答してくれるQAサービス。
+          p  自分にあった弁護士を検索することも可能。
+          br
+          p  『みんなの法律相談』で公開されている、
+          p  同じような法律トラブルにあった他者が投稿した相談に対する。
+          p  弁護士の有益な回答内容を閲覧することもできます。
+          br
+          a.olta-link-underline(href='https://www.bengo4.com/bbs/?utm_source=alliance&utm_medium=link&utm_campaign=nc202110' target='_blank') みんなの法律相談：相談の投稿と投稿した質問への弁護士回答内容の閲覧は無料
+          br
+          br
+          a.olta-link-underline(href='https://www.bengo4.com/search/?utm_source=alliance&utm_medium=link&utm_campaign=nc202109' target='_blank') 弁護士の検索：無料
+          br
+          br
+          .media
+            .media-left
+              img.app-icon(src='../image/zei.svg')        
+            p.modal-card-body-media-p 税理士紹介
+          br
+          p ご要望にあった最適な税理士を経験豊富なコーディネーターがご紹介します。
+          p ご利用手数料は一切いただきません。
+          br
+          p 全国6000名以上の日本最大級のネットワークから、適切な税理士をご紹介します。
+          p 面談設定や価格交渉、依頼の可否連絡など全てコーディネーターが行います。
+          p 初めての顧問税理士探しから、顧問税理士の変更検討、決算申告や相続税申告などの単発でのご依頼など、
+          p どのような業務依頼でも適した税理士をご紹介します。
+          br
+          a.olta-link-underline(href='https://www.zeiri4.com/shoukai/promotion/external-cooperation/503/' target='_blank') 税理士紹介：無料
+          br
+          br
+          .media
+            .media-left
+              img.app-icon(src='../image/cloudzei.svg')        
+            p.modal-card-body-media-p クラウド税務相談
+          br
+          p オンライン上かつ『非公開』な環境で、会計・経理・税務についての
+          p 相談すれば、税理士が回答してくれます。
+          br
+          p 自分で税理士を探す手間や予定調整は一切不要で、24時間お好きなタイミングで
+          p 相談を投稿できます。対面だと1万円以上が相場ですが、
+          p 1相談3000円（税抜）の超低価格で利用可能です。※料金は2022/5時点
+          p そのまま業務依頼したい場合は回答した税理士に連絡が取れますし、
+          p 会計・経理・税務など多岐に渡る経営相談や最新の税制改正についての知見など
+          p どのようなお悩みにでも対応してくれます。
+          br
+          a.olta-link-underline(href='https://httpslink.com/nttcom-cloud-tax' target='_blank') クラウド税務相談：3,000円／1相談成立（税抜）
+
+    .modal#factoring-modal
+      .modal-background.cancel-button(data-target='factoring-modal')
+      .modal-card#olta-modal-card
+        header.modal-card-head
+          p.modal-card-title ファクタリング
+          button.delete(data-target='factoring-modal')
+        section.modal-card-body
+          p 【本サービスはOLTA株式会社が提供する提携サービスとなります】
+          br
+          p  最短即日で資金調達できるオンライン完結のファクタリングサービス
+          p  ファクタリングとは、「入金待ちの請求書」（売掛金）を売却して、早期に運転資金を調達する「借りない資金調達」です。
+          p  借入ではないため、審査に信用情報は参照せず、信用情報への記録もなし。担保や保証人を必要としません。
+          br
+          p  OLTAのクラウドファクタリングなら法人・個人事業主いずれもご利用いただけて、買取金額に上限も下限も設定していません。
+          br
+          p  さらに、お客様の取引先に知られることなくすべての手続きが完了する2社間ファクタリングです。
+          br
+          p  お問合せ・お申込みは下記リンクから。※リンク先は外部サイトとなります。
+          a.olta-link-underline(href='https://www.olta.co.jp/lp/bconnection/?utm_source=digitatrad&utm_campaign=lp&utm_medium=alliance&utm_term=DIGITALTRAD' target='_blank') https://www.olta.co.jp/lp/bconnection/
+        footer.modal-card-foot
+
+    .modal#settlement-modal
+      .modal-background.cancel-button(data-target='settlement-modal')
+      .modal-card#olta-modal-card
+        header.modal-card-head
+          p.modal-card-title 銀行振込消込
+          button.delete(data-target='settlement-modal')
+        section.modal-card-body
+          p 【本サービスはNTTスマートトレード株式会社が提供する提携サービスとなります】
+          br
+          p  銀行振込消込サービスではお取引先様向けの専用振込口座番号をご用意いたします。
+          p  BConnectionデジタルトレードで発行する請求書にこの口座番号を記載いただくと本口座に入金のあった振込は振込名義人がどのように記載されるかに関わらずご請求先様からの振込と認識できるようになります。
+          br
+          p  メリット
+          p  ・名義人の確認が不要に。煩わしいカナ名の確認が不要になります
+          p  ・入金の通知を電文・メールで受け取ることができます
+          p  ・ほぼリアルタイムで入金確認（最大タイムラグ15分）ができます
+          br
+          p  お問合せ・お申込みは下記リンクから。※リンク先は外部サイトとなります。
+          a.olta-link-underline(href='https://www.nttsmarttrade.co.jp/bconnection_lp/' target='_blank') https://www.nttsmarttrade.co.jp/bconnection_lp/
+        footer.modal-card-foot
+    
+    .modal#bugyo-modal
+      .modal-background.cancel-button(data-target='bugyo-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title.title.mb-0 商奉行クラウド連携
+          button.delete(data-target="bugyo-modal")
+        section.modal-card-body
+          nav.panel
+            a.panel-block(href='/bugyo/menu' target='_top')
+              span.panel-icon
+                i.fas.fa-file
+              p 利用開始
+            a.panel-block(download href="../html/【Bconnectionデジタルトレードアプリ】操作マニュアル_商奉行クラウド連携機能.pdf")
+              span.panel-icon
+                i.fas.fa-file
+              p 操作マニュアルダウンロード
+        footer.modal-card-foot
+
+    .modal#information-lightplan
+      .modal-background.cancel-button(data-target='information-lightplan')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title.title.mb-0 オプションサービス申込
+          button.delete(data-target="information-lightplan")
+        section.modal-card-body
+          .is-flex.opSelect.is-justify-content-space-between
+            a(href='#stPlan') スタンダードプラン
+              span
+            a(href='#inService') 導入支援サービス
+              span
+          h2#stPlan スタンダードプランについて
+          p.mt-3.px-4 スタンダートプランは、請求書の電子化を通じてインボイス制度や電子帳簿保存法といった法制度への対応のみならず、高い費用対効果で請求書業務の効率化を実現したいお客さま向けのプランです。ご要望の多い機能を大きな負担なくご利用いただけます。 
+          .columns.text-center.mx-0 
+            .column.planWrap.pr-2.pl-0 
+              .freeColor
+                h3.has-text-weight-bold.py-3 フリー
+                p.pb-3.has-text-left.mx-4
+                  | 無料で請求書の電子化<br>​
+                  | インボイス制度や電子帳簿保存法に対応​<br>
+                  | 受取請求書目安：～100件/月
+                .planBody 
+                  span.is-block.has-text-weight-bold.planBodyPrice.pt-0.pb-2
+                    | <span class="mr-1">0</span>円  
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">電子請求書の作成・発行・受取・保管が可能</span>
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">受取請求書の支払依頼や承認が可能</span>                    
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">勘定科目や補助科目を支払依頼に追加する機能も利用可能</span>                    
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">仕訳情報をCSV形式でダウンロード可能（フォーマット固定）</span>                    
+                  p.has-text-right.mt-5.pr-4 など
+            .column.planWrap.px-0
+              .stanColor
+                h3.has-text-weight-bold.py-3 スタンダード
+                p.pb-3.has-text-left.mx-4
+                  | 請求書の電子化と一緒に、高い費用対効果で業務効率化を実現​​<br>
+                  | 受取請求書目安：100～500件/月
+                .planBody 
+                  span.is-block.has-text-weight-bold.planBodyPrice.pt-0.pb-2
+                    | 月額利用料 <span class="mr-1">4</span>万円
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">フリープランの機能はすべて利用可能</span>
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">クラウド会計システムに対応したフォーマットで仕訳情報CSVをダウンロード</span>                    
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">請求書受取時に担当者へメール通知（請求書に担当者メールアドレスが記載されている場合）</span>                    
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">支払依頼の検索が可能</span>                    
+                  p.has-text-right.mt-5.pr-4 など                  
+            .column.planWrap.pl-2.pr-0
+              .freeColor 
+                h3.has-text-weight-bold.py-3 エンタープライズ
+                p.pb-3.has-text-left.mx-4
+                  | お使いの基幹システムと請求データを自動連携​<br>​
+                  | 請求業務の自動化と効率化を実現​​<br>
+                  | 受取請求書目安：500件～/月​
+                .planBody 
+                  span.is-block.has-text-weight-bold.planBodyPrice 御見積り
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">販売管理システムや会計システムとデータ連携、稼働やミスの削減</span>
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">カスタマイズされた支払依頼承認フローを構築</span>                    
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">請求書へのアクセス権を組織・ユーザーごとに設定することでガバナンス強化</span>                    
+                  p.is-flex.m-2 
+                    | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">その他貴社の業務に沿うようにカスタマイズした機能をご提供</span>                  
+          p.px-4.my-5 ※フリープランとスタンダードプランは、下記の導入支援サービスにお申し込み頂くことでセットアップのサポートをいたします。          
+          .mb-4.btnWrap.is-block.text-center
+            a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
+            //- a.button.ml-1.is-success.show-modal(data-target='') お申込みフォーム  
+            a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込み済み
+          p.text-center.cauText ※有料オプションはテナント管理者のみお申込み可能です。  
+          h2#inService.mt-6 導入支援サービスについて
+          p.mt-3.px-4 
+            | 導入支援サービスは、フリープラン、スタンダードプランをお申込みのお客様の環境につきまして、​<br>
+            | それぞれのプランで提供される機能の登録や設定を支援・代行するサービスです。<br>
+            | （オプションとして個別マニュアル作成や説明会も実施します）​<br>
+            | 利用開始にあたっての必要な登録や設定を実施いたしますので、設定等完了後はすぐにお使います。
+          .planBody.noHeight 
+            p.has-text-weight-bold 料金（導入支援サービスご利用1回あたり） 
+            p.is-flex.mx-2.mt-2.mb-0 
+              | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">フリープランをご利用の方　5万円～</span>
+            p.is-flex.mx-2.mt-0.mb-2
+              | <span class="panel-icon"><i class="fas fa-check"></i></span><span class="planBodyText has-text-left">スタンダードプランをご利用の方　15万円～</span>  
+          img(src='../image/flow.jpg' alt='フロー図').flowImg
+          .mb-4.btnWrap.is-block.text-center
+            a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
+            a.button.ml-1.is-success.show-modal(data-target='') お申込みフォーム  
+          p.text-center.cauText ※有料オプションはテナント管理者のみお申込み可能です。
+          
+        footer.modal-card-foot
+    //- include informationLightplanModal　→これいれるとエラーになる
+  include footer
+
+block append scripts
+  script(type='module' src="/js/portal-page.js")
+  //- 会員サイト連携開発追加 fingerpirnt未検証の場合、fingerprint値をXHRで送信する。
+  //- TODO:ポータル画面表示時に紐づけを実施するように修正
+  if (memberSiteFlg)
+    script(src="/js/portal-page-memberSite.js")
+  //- 会員サイト連携開発追加
+  // End of DigitalTrade Portal Page
+  //- 画面のcssファイル
+  link(rel='stylesheet', type='text/css', href='/css/portal.css')
