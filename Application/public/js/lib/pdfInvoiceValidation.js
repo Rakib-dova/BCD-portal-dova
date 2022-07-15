@@ -140,6 +140,63 @@ const saveRules = [
     message: '備考は400文字以内で入力して下さい。',
     required: false
   },
+  {
+    target: 'invoice-discount',
+    displayLocation: 'lines',
+    prop: 'discountDescription1',
+    regexp: /^.{0,100}$/,
+    message: '1番目の割引の内容は100文字以内で入力してください。',
+    emptyMessage: '1番目の割引の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice-discount',
+    displayLocation: 'lines',
+    prop: 'discountDescription2',
+    regexp: /^.{0,100}$/,
+    message: '2番目の割引の内容は100文字以内で入力してください。',
+    emptyMessage: '2番目の割引の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice-discount',
+    displayLocation: 'lines',
+    prop: 'discountDescription3',
+    regexp: /^.{0,100}$/,
+    message: '3番目の割引の内容は100文字以内で入力してください。',
+    emptyMessage: '3番目の割引の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice-discount',
+    displayLocation: 'lines',
+    prop: 'discountAmount1',
+    customValidator: (value) => value > 0 && value <= 999999999999.999,
+    regexp: '',
+    message: '1番目の割引の数値は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。',
+    emptyMessage: '1番目の割引の数値が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice-discount',
+    displayLocation: 'lines',
+    prop: 'discountAmount2',
+    customValidator: (value) => value > 0 && value <= 999999999999.999,
+    regexp: '',
+    message: '2番目の割引の数値は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。',
+    emptyMessage: '2番目の割引の数値が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
+  {
+    target: 'invoice-discount',
+    displayLocation: 'lines',
+    prop: 'discountAmount3',
+    customValidator: (value) => value > 0 && value <= 999999999999.999,
+    regexp: '',
+    message: '3番目の割引の数値は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。',
+    emptyMessage: '3番目の割引の数値が空欄のため、明細情報が不完全です。入力して下さい。',
+    required: false
+  },
 
   {
     target: 'lines',
@@ -194,6 +251,69 @@ const saveRules = [
     regexp: '',
     message: '',
     emptyMessage: '税が選択されていないので、明細情報が不完全です。選択して下さい。',
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'discountDescription1',
+    regexp: /^.{0,100}$/,
+    message: '項目割引1の内容は100文字以内で入力してください。',
+    emptyMessage: '項目割引1の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 1,
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'discountDescription2',
+    regexp: /^.{0,100}$/,
+    message: '項目割引2の内容は100文字以内で入力してください。',
+    emptyMessage: '項目割引2の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 2,
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'discountDescription3',
+    regexp: /^.{0,100}$/,
+    message: '項目割引3の内容は100文字以内で入力してください。',
+    emptyMessage: '項目割引3の内容が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 3,
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'discountAmount1',
+    customValidator: (value) => value > 0 && value <= 999999999999.999,
+    regexp: '',
+    message: '項目割引1の数値は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。',
+    emptyMessage: '項目割引1の数値が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 1,
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'discountAmount2',
+    customValidator: (value) => value > 0 && value <= 999999999999.999,
+    regexp: '',
+    message: '項目割引2の数値は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。',
+    emptyMessage: '項目割引2の数値が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 2,
+    required: false
+  },
+  {
+    target: 'lines',
+    displayLocation: 'lines',
+    prop: 'discountAmount3',
+    customValidator: (value) => value > 0 && value <= 999999999999.999,
+    regexp: '',
+    message: '項目割引3の数値は整数or少数 0 ～ 999999999999.999 の範囲で入力してください。',
+    emptyMessage: '項目割引3の数値が空欄のため、明細情報が不完全です。入力して下さい。',
+    discount: 3,
     required: false
   },
 
