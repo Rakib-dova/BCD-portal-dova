@@ -283,7 +283,7 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 部門データ設定 
-            a.panel-block(href='/inboxList/1')
+            a.panel-block(id='moveInboxList' href='/inboxList/1')
               span.panel-icon
                 i.fas.fa-file
               p 支払依頼一覧
@@ -332,6 +332,16 @@ block content
                 i.fas.fa-file
               p ユーザー一括登録
         footer.modal-card-foot
+    
+    .modal.modal-fx-fadeInscale#loading-progress-modal
+          .modal-background
+          .modal-card
+            header.modal-card-head
+              p.modal-card-title
+            section.modal-card-body
+              center
+                p.modal-card-result#modal-card-result 処理中
+            footer.modal-card-foot
 
     .modal#law-modal
       .modal-background.cancel-button(data-target='law-modal')

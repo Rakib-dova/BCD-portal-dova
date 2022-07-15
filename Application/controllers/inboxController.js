@@ -84,41 +84,8 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
   // 社内に担当者ユーザーの有無確認
   let contactor = []
   if (presentation === 'inboxList_light_plan') {
-    // await Promise.all(
-    //  document.map(async (key) => {
-
-    const result = []
-    for (let i = 0; i < document.length; i++) {
-      let managerAddress
-      if (!(document[i] instanceof Error)) {
-        managerAddress = document[i].AccountingCustomerParty.Party.Contact?.ID?.value
-        if (
-          typeof managerAddress !== 'undefined' &&
-          managerAddress.trim().length !== 0 &&
-          validate.isValidEmail(managerAddress)
-        ) {
-          const userInfo = await apiManager.accessTradeshift(
-            accessToken,
-            refreshToken,
-            'get',
-            `/account/users/byemail/${managerAddress}?searchlocked=false`
-          )
-          // return { userInfo, managerAddress: managerAddress, documentId: key.documentId }
-          result.push({ userInfo, managerAddress: managerAddress, documentId: document[i].documentId })
-        }
-      }
-      result.push({ managerAddress: managerAddress, documentId: document[i].documentId })
-      // return { managerAddress: managerAddress, documentId: key.documentId }
-    }
-    // })
-    // ).then(function (result) {
-    contactor = result.filter(
-      (element) =>
-        element.managerAddress !== '' &&
-        element.managerAddress !== undefined &&
-        validate.isValidEmail(element.managerAddress)
-    )
-    // })
+    // 社内に担当者ユーザーの有無確認
+    contactor = await getCompanyUserInfo(document, accessToken, refreshToken)
   } else {
     // スタンダードプランではない場合
     // await Promise.allSettled(
@@ -154,7 +121,7 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
       return Math.floor(item.ItemInfos[1].value).toLocaleString('ja-JP')
     }
 
-    const managerInfo = { managerAddress: '-', managerName: '（担当者不明）' }
+    const managerInfo = { managerAddress: '-', managerName: '（ユーザー登録なし）' }
     for (let i = 0; i < contactor.length; i++) {
       if (contactor[i].documentId === item.DocumentId) {
         managerInfo.managerAddress = contactor[i].managerAddress
@@ -164,6 +131,8 @@ const getInbox = async function (accessToken, refreshToken, pageId, tenantId, pr
             contactor[i].userInfo.Person.FirstName.trim().length !== 0
           ) {
             managerInfo.managerName = `${contactor[i].userInfo.Person.LastName} ${contactor[i].userInfo.Person.FirstName}`
+          } else {
+            managerInfo.managerName = '-'
           }
 
           break
@@ -803,40 +772,7 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
   // 社内に担当者ユーザーの有無確認
   let contactor = []
   if (presentation === 'inboxList_light_plan') {
-    // await Promise.all(
-    // document.map(async (key) => {
-    const result = []
-    for (let i = 0; i < document.length; i++) {
-      let managerAddress = ''
-      if (!(document[i] instanceof Error)) {
-        managerAddress = document[i].AccountingCustomerParty.Party.Contact?.ID?.value
-        if (
-          typeof managerAddress !== 'undefined' &&
-          managerAddress.trim().length !== 0 &&
-          validate.isValidEmail(managerAddress)
-        ) {
-          const userInfo = await apiManager.accessTradeshift(
-            tradeshiftDTO.accessToken,
-            tradeshiftDTO.refreshToken,
-            'get',
-            `/account/users/byemail/${managerAddress}?searchlocked=false`
-          )
-          // return { userInfo, managerAddress: managerAddress, documentId: key.documentId }
-          result.push({ userInfo, managerAddress: managerAddress, documentId: document[i].documentId })
-        }
-      }
-      // return { managerAddress: managerAddress, documentId: key.documentId }
-      result.push({ managerAddress: managerAddress, documentId: document[i].documentId })
-    }
-    // })
-    // ).then(function (result) {
-    contactor = result.filter(
-      (element) =>
-        element.managerAddress !== '' &&
-        element.managerAddress !== undefined &&
-        validate.isValidEmail(element.managerAddress)
-    )
-    // })
+    contactor = await getCompanyUserInfo(document, tradeshiftDTO.accessToken, tradeshiftDTO.refreshToken)
   } else {
     // スタンダードプランではない場合
     // await Promise.all(
@@ -867,7 +803,7 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
 
   // リストに担当者アドレス、ユーザー情報入力
   for (let i = 0; i < getWaitingWorkflow.length; i++) {
-    const managerInfo = { managerAddress: '-', managerName: '（担当者不明）' }
+    const managerInfo = { managerAddress: '-', managerName: '（ユーザー登録なし）' }
     for (let j = 0; j < contactor.length; j++) {
       if (contactor[j].documentId === getWaitingWorkflow[i].documentId) {
         managerInfo.managerAddress = contactor[j].managerAddress
@@ -877,6 +813,8 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
             contactor[i].userInfo.Person.FirstName.trim().length !== 0
           ) {
             managerInfo.managerName = `${contactor[j].userInfo.Person.LastName} ${contactor[j].userInfo.Person.FirstName}`
+          } else {
+            managerInfo.managerName = '-'
           }
           break
         }
@@ -901,6 +839,10 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     const issueDate = keyword.issueDate
     const status = keyword.status
     const contactEmail = keyword.contactEmail
+    let unKnownManager = ''
+    if (keyword.unKnownManager === 'unKnownManager') {
+      unKnownManager = 'ユーザー登録なし'
+    }
     let result = null
 
     // 請求書のタグ付け有無確認
@@ -946,9 +888,23 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
             logger.warn(
               `contractId:${contractId}, DocumentId:${data.DocumentId}, msg: ${constantsDefine.statusConstants.FAILED_TO_CREATE_TAG}(${constantsDefine.statusConstants.INVOICE_CONTACT_EMAIL_NOT_VERIFY})`
             )
+            await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
           } else {
             await tradeshiftDTO.createTags(data.DocumentId, invoice.AccountingCustomerParty.Party.Contact.ID.value)
+
+            const userInfo = await apiManager.accessTradeshift(
+              tradeshiftDTO.accessToken,
+              tradeshiftDTO.refreshToken,
+              'get',
+              `/account/users/byemail/${invoice.AccountingCustomerParty.Party.Contact.ID.value}?searchlocked=false`
+            )
+
+            if (userInfo instanceof Error) {
+              await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
+            }
           }
+        } else {
+          await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
         }
         // 確認請求書にタグを追加
         await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked')
@@ -959,15 +915,31 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     if (sentByCompanies.length > 0) {
       const response = []
       for (const company of sentByCompanies) {
-        const result = await tradeshiftDTO.getDocumentSearch(company, invoiceId, issueDate, contactEmail)
+        const result = await tradeshiftDTO.getDocumentSearch(
+          company,
+          invoiceId,
+          issueDate,
+          contactEmail,
+          unKnownManager
+        )
         response.push(...result)
       }
       result = response
     } else {
-      result = await tradeshiftDTO.getDocumentSearch('', invoiceId, issueDate, contactEmail)
+      result = await tradeshiftDTO.getDocumentSearch('', invoiceId, issueDate, contactEmail, unKnownManager)
     }
 
     if (result instanceof Error) return result
+
+    // 請求書情報取得
+    const document = []
+    for (let i = 0; i < result.length; i++) {
+      const documentInfo = await tradeshiftDTO.getDocument(result[i].DocumentId, '')
+      document.push(documentInfo)
+    }
+
+    // 社内に担当者ユーザーの有無確認
+    const contactor = await getCompanyUserInfo(document, tradeshiftDTO.accessToken, tradeshiftDTO.refreshToken)
 
     // 請求書の承認依頼検索
     for (let i = 0; i < result.length; i++) {
@@ -1003,6 +975,26 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
         if (document.ItemInfos[1] === undefined) return '-'
         return Math.floor(document.ItemInfos[1].value).toLocaleString('ja-JP')
       }
+
+      const managerInfo = { managerAddress: '-', managerName: '（ユーザー登録なし）' }
+      for (let i = 0; i < contactor.length; i++) {
+        if (contactor[i].documentId === document.DocumentId) {
+          managerInfo.managerAddress = contactor[i].managerAddress
+          if (contactor[i].userInfo && !(contactor[i].userInfo instanceof Error)) {
+            if (
+              contactor[i].userInfo.Person.LastName.trim().length !== 0 ||
+              contactor[i].userInfo.Person.FirstName.trim().length !== 0
+            ) {
+              managerInfo.managerName = `${contactor[i].userInfo.Person.LastName} ${contactor[i].userInfo.Person.FirstName}`
+            } else {
+              managerInfo.managerName = '-'
+            }
+
+            break
+          }
+        }
+      }
+
       return {
         no: idx + 1,
         invoiceNo: document.ID,
@@ -1014,7 +1006,8 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
         updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
         expire: document.DueDate ?? '-',
         documentId: document.DocumentId,
-        approveStatus: document.approveStatus ?? ''
+        approveStatus: document.approveStatus ?? '',
+        managerInfo: managerInfo
       }
     })
 
@@ -1022,6 +1015,48 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
   } catch (error) {
     return error
   }
+}
+
+/**
+ * 社内の取引先担当者の情報取得
+ * @param {array} document 請求書情報
+ * @param {string} accessToken アクセストークン
+ * @param {string} refreshToken リフレッシュトークン
+ * @returns {contactor} 社内の取引先担当者の情報取得
+ */
+const getCompanyUserInfo = async (document, accessToken, refreshToken) => {
+  let contactor = []
+  // 社内に担当者ユーザーの有無確認
+  const result = []
+  for (let i = 0; i < document.length; i++) {
+    let managerAddress
+    if (!(document[i] instanceof Error)) {
+      managerAddress = document[i].AccountingCustomerParty.Party.Contact?.ID?.value
+      if (
+        typeof managerAddress !== 'undefined' &&
+        managerAddress.trim().length !== 0 &&
+        validate.isValidEmail(managerAddress)
+      ) {
+        const userInfo = await apiManager.accessTradeshift(
+          accessToken,
+          refreshToken,
+          'get',
+          `/account/users/byemail/${managerAddress}?searchlocked=false`
+        )
+        result.push({ userInfo, managerAddress: managerAddress, documentId: document[i].documentId })
+      }
+    }
+    result.push({ managerAddress: managerAddress, documentId: document[i].documentId })
+  }
+
+  contactor = result.filter(
+    (element) =>
+      element.managerAddress !== '' &&
+      element.managerAddress !== undefined &&
+      validate.isValidEmail(element.managerAddress)
+  )
+
+  return contactor
 }
 
 module.exports = {
@@ -1032,5 +1067,6 @@ module.exports = {
   getDepartment: getDepartment,
   getRequestApproval: getRequestApproval,
   getWorkflow: getWorkflow,
-  getSearchResult: getSearchResult
+  getSearchResult: getSearchResult,
+  getCompanyUserInfo: getCompanyUserInfo
 }

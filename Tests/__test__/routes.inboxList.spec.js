@@ -119,7 +119,7 @@ const searchResult1 = {
       updated: '2021-12-16',
       expire: '2021-12-28',
       documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
-      managerInfo: { managerAddress: 'test@test.com', managerName: '（担当者不明）' }
+      managerInfo: { managerAddress: 'test@test.com', managerName: '（ユーザー登録なし）' }
     }
   ],
   numPages: 1,
@@ -192,7 +192,7 @@ const searchResult1Rejected = {
       expire: '2021-12-28',
       documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
       approveStatus: '90',
-      managerInfo: { managerAddress: 'test@test.com', managerName: '（担当者不明）' }
+      managerInfo: { managerAddress: 'test@test.com', managerName: '（ユーザー登録なし）' }
     }
   ],
   numPages: 1,
@@ -1164,7 +1164,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: ''
+        managerAddress: '',
+        unKnownManager: ''
       }
 
       const searchResultData = [
@@ -1226,7 +1227,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: ''
+        managerAddress: '',
+        unKnownManager: ''
       }
 
       const searchResultData = [
@@ -1282,7 +1284,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: ''
+        managerAddress: '',
+        unKnownManager: ''
       }
 
       const searchResultData = [
@@ -1335,7 +1338,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: ''
+        managerAddress: '',
+        unKnownManager: ''
       }
 
       const searchResultData = [
@@ -1390,7 +1394,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: ''
+        managerAddress: '',
+        unKnownManager: ''
       }
 
       const searchResultData = []
@@ -1439,7 +1444,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: '"test test"@test.com'
+        managerAddress: '"test test"@test.com',
+        unKnownManager: ''
       }
 
       const searchResultData = [
@@ -1500,7 +1506,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: 'test'
+        managerAddress: 'test',
+        unKnownManager: ''
       }
 
       const searchResultData = [
@@ -1553,7 +1560,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: 'test test@test.com'
+        managerAddress: 'test test@test.com',
+        unKnownManager: ''
       }
 
       const searchResultData = [
@@ -1607,7 +1615,8 @@ describe('inboxListのテスト', () => {
         minIssuedate: '',
         maxIssuedate: '',
         managerAddress:
-          'test.testtest.test.test.testtest.testtest.testtest.testtest.test@testestestestesttesttestestestestesttesttestestestestesttest.com'
+          'test.testtest.test.test.testtest.testtest.testtest.testtest.test@testestestestesttesttestestestestesttesttestestestestesttest.com',
+        unKnownManager: ''
       }
 
       const searchResultData = [
@@ -1660,7 +1669,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: ''
+        managerAddress: '',
+        unKnownManager: ''
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1700,7 +1710,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: ''
+        managerAddress: '',
+        unKnownManager: ''
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1737,7 +1748,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: ''
+        managerAddress: '',
+        unKnownManager: ''
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1816,7 +1828,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: ''
+        managerAddress: '',
+        unKnownManager: ''
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1843,7 +1856,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: ''
+        managerAddress: '',
+        unKnownManager: ''
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1886,7 +1900,8 @@ describe('inboxListのテスト', () => {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
         maxIssuedate: '',
-        managerAddress: ''
+        managerAddress: '',
+        unKnownManager: ''
       }
 
       // DBからの正常なユーザデータの取得を想定する
@@ -1901,6 +1916,134 @@ describe('inboxListのテスト', () => {
       // 期待結果
       // 500エラーがエラーハンドリング「される」
       expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+
+    test('正常：担当者不明の請求書をチェックしない場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: '',
+        unKnownManager: ''
+      }
+
+      const searchResultData = [
+        {
+          ammount: '3,080,000',
+          currency: 'JPY',
+          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          expire: '2021-11-10',
+          invoiceNo: 'PB1649meisai001',
+          no: 1,
+          sentBy: 'バイヤー1',
+          sentTo: 'サプライヤー1',
+          status: 0,
+          updated: '2021-12-27',
+          managerInfo: { managerAddress: 'test@test.com', managerName: 'サプライヤー1管理者1' }
+        }
+      ]
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      getSearchResultSpy.mockReturnValueOnce(searchResultData)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxList_light_planが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
+        listArr: searchResultData,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
+        rejectedFlag: false,
+        csrfToken: dummyToken
+      })
+    })
+
+    test('正常：担当者不明の請求書をチェックした場合', async () => {
+      // 準備
+      // requestのsession,userIdに正常値を入れる
+      request.session = { ...session }
+      request.user = { ...user[0] }
+      request.body = {
+        invoiceNumber: 'PB1649meisai001',
+        minIssuedate: '',
+        maxIssuedate: '',
+        managerAddress: '',
+        unKnownManager: 'unKnownManager'
+      }
+
+      const searchResultData = [
+        {
+          ammount: '3,080,000',
+          currency: 'JPY',
+          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          expire: '2021-11-10',
+          invoiceNo: 'PB1649meisai001',
+          no: 1,
+          sentBy: 'バイヤー1',
+          sentTo: 'サプライヤー1',
+          status: 0,
+          updated: '2021-12-27',
+          managerInfo: { managerAddress: '-', managerName: '（ユーザー登録なし）' }
+        }
+      ]
+
+      // DBからの正常なユーザデータの取得を想定する
+      userControllerFindOneSpy.mockReturnValue(Users[0])
+      tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
+
+      getSearchResultSpy.mockReturnValueOnce(searchResultData)
+
+      // inboxControllerのgetInobox実施結果設定
+      getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
+      contractControllerFindContractsBytenantIdSpy.mockReturnValue(Contracts[9])
+      contractControllerFindLightPlanSpy.mockReturnValue(Contracts[9][0])
+
+      // 試験実施
+      await inboxList.cbSearchApprovedInvoice(request, response, next)
+
+      // 期待結果
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでinboxList_light_planが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('inboxList_light_plan', {
+        listArr: searchResultData,
+        numPages: searchResult1.numPages,
+        currPage: searchResult1.currPage,
+        rejectedFlag: false,
+        csrfToken: dummyToken
+      })
     })
   })
 })

@@ -318,6 +318,7 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   const sentBy = req.body.sentBy || []
   const status = req.body.status || []
   const contactEmail = req.body.managerAddress
+  const unKnownManager = req.body.unKnownManager
 
   switch (validate.isContactEmail(contactEmail)) {
     case -1:
@@ -338,7 +339,14 @@ const cbSearchApprovedInvoice = async (req, res, next) => {
   }
 
   const tradeshiftDTO = new (require('../DTO/TradeshiftDTO'))(accessToken, refreshToken, tenantId)
-  const keyword = { invoiceNumber, issueDate: [minIssuedate, maxIssuedate], sentBy, status, contactEmail }
+  const keyword = {
+    invoiceNumber,
+    issueDate: [minIssuedate, maxIssuedate],
+    sentBy,
+    status,
+    contactEmail,
+    unKnownManager
+  }
   const resultList = await inboxController.getSearchResult(tradeshiftDTO, keyword, bcdContract.contractId, tenantId)
 
   if (resultList instanceof Error) {
