@@ -33,7 +33,7 @@ class OrderData {
       // 開通希望年月日
       OpeningDate: inputData.openingDate?.replace(/-/g, '') ?? '',
       // 契約番号
-      contractNumber: inputData.contractNumber ?? '',
+      contractNumber: '',
       // 販売チャネルコード
       salesChannelCode: inputData.salesChannelCode || '79100100',
       // 販売チャネル名
@@ -57,9 +57,9 @@ class OrderData {
     // 新設の場合
     if (orderType === constants.statusConstants.orderTypes.newOrder) {
       // 販売店コード
-      this.contractBasicInfo.campaignCode = inputData.campaignCode ?? ''
+      this.contractBasicInfo.campaignCode = ''
       // 販売担当者名
-      this.contractBasicInfo.salesPersonName = inputData.salesPersonName?.replace(/\s+/g, '') ?? ''
+      this.contractBasicInfo.salesPersonName = ''
 
       // 契約者情報の設定
       this.contractAccountInfo = {
