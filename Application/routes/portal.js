@@ -132,11 +132,20 @@ const cbGetIndex = async (req, res, next) => {
     constructDataArr: constructDataArr,
     constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0,
     memberSiteFlg: req.session.memberSiteCoopSession.memberSiteFlg /* 会員サイト開発により追加 */,
-    csrfToken: req.csrfToken() /* 会員サイト開発により追加 */
+    csrfToken: req.csrfToken() /* 会員サイト開発により追加 */,
+    contractPlan: req.contractPlan
   })
 }
 
-router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, csrfProtection, cbGetIndex)
+router.get(
+  '/',
+  helper.isAuthenticated,
+  helper.isTenantRegistered,
+  helper.isUserRegistered,
+  helper.getContractPlan,
+  csrfProtection,
+  cbGetIndex
+)
 
 module.exports = {
   router: router,

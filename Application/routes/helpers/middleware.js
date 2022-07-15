@@ -230,3 +230,23 @@ exports.isOnOrChangeContract = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 }
+
+/**
+ * 契約プランのチェック結果を取得
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ */
+exports.getContractPlan = async (req, res, next) => {
+  // 有償契約チェック
+  let islightPlan = false
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
+    islightPlan = true
+  }
+
+  const contractPlan = { islightPlan: islightPlan }
+
+  req.contractPlan = contractPlan
+  next()
+}

@@ -18,8 +18,11 @@ block content
         .is-justify-content-start.planStatus
           .planTitle
             span ご利用中プラン
+          - var planName = 'フリープラン'
+          if (contractPlan.islightPlan === true)
+            - planName = 'スタンダードプラン'
           div
-            a スタンダードプラン
+            a.show-modal(data-target='information-lightplan')=planName
       .column.is-12.menu
         .approvalNotification
           .approvalNotificationMessage 承認・差し戻し件数を取得しています。
