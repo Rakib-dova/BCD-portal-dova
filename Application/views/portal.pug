@@ -19,10 +19,13 @@ block content
           .planTitle
             span ご利用中プラン
           - var planName = 'フリープラン'
-          if (contractPlan.islightPlan === true)
+          if (contractPlan.isLightPlan === true)
             - planName = 'スタンダードプラン'
           div
-            a.show-modal(data-target='information-lightplan')=planName
+            if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+              a.show-modal(data-target='information-lightplan')=planName
+            else
+              a.notPointer=planName
       .column.is-12.menu
         .approvalNotification
           .approvalNotificationMessage 承認・差し戻し件数を取得しています。

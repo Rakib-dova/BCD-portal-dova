@@ -70,8 +70,14 @@
       p.px-4.my-5 ※フリープランとスタンダードプランは、下記の導入支援サービスにお申し込み頂くことでセットアップのサポートをいたします。          
       .mb-4.btnWrap.is-block.text-center
         a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
-        //- a.button.ml-1.is-success.show-modal(data-target='') お申込みフォーム  
-        a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込み済み
+        if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+          if (contractPlan.isLightPlan === true || contractPlan.isLightPlanForEntry === true)
+            a.button.ml-1.is-success.show-modal(data-target='' disabled) お申込みフォーム
+            //- a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込み済み
+          else
+            a.button.ml-1.is-success.show-modal(data-target='') お申込みフォーム
+        else
+          a.button.ml-1.is-success.show-modal(data-target='' disabled) お申込みフォーム
       p.text-center.cauText ※有料オプションはテナント管理者のみお申込み可能です。  
       h2#inService.mt-6 導入支援サービスについて
       p.mt-3.px-4 
@@ -88,7 +94,14 @@
       img(src='../image/flow.jpg' alt='フロー図').flowImg
       .mb-4.btnWrap.is-block.text-center
         a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
-        a.button.ml-1.is-success.show-modal(data-target='') お申込みフォーム  
+        if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
+          if (contractPlan.isIntroductionSupportPlan === true || contractPlan.isIntroductionSupportPlanForEntry === true)
+            a.button.ml-1.is-success.show-modal(data-target='' disabled) お申込みフォーム
+            //- a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込み済み
+          else
+            a.button.ml-1.is-success.show-modal(data-target='') お申込みフォーム
+        else
+          a.button.ml-1.is-success.show-modal(data-target='' disabled) お申込みフォーム
       p.text-center.cauText ※有料オプションはテナント管理者のみお申込み可能です。
       
     footer.modal-card-foot

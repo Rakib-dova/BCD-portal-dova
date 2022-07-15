@@ -1,4 +1,4 @@
-.planStatus{
+.planStatus {
   border-radius: 6px;
   padding: 0;
   height: 50px;
@@ -7,15 +7,18 @@
   border: solid 1px #dbdbdb;
   margin: 5px;
 }
-.planStatus .planTitle{
-  background-color:#dbdbdb ;
+.planStatus .planTitle {
+  background-color: #dbdbdb;
 }
-.planStatus .planTitle span{
+.planStatus .planTitle span {
   color: #4a4a4a;
 }
-.planStatus span,.planStatus a{
+.planStatus span,
+.planStatus a {
   margin: 12px 15px 14px;
   display: inline-block;
 }
 
-
+.notPointer {
+  pointer-events: none;
+}
