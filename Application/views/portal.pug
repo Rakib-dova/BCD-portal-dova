@@ -131,25 +131,7 @@ block content
                       p.title.is-5.margin-bottom-02rem 申込
                       p オプションサービスの新規申し込みを行うことができます。
           .column.is-one-third-desktop.hvr-float
-            .box.iconBox.textOverflow
-              a(href='/receiveIntroductionSupport')
-                .media.appdesc
-                  .media-left
-                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
-                  .media-content
-                    p.title.is-5 導入支援サービス
-                    p 導入支援サービスの新規申し込みを行うことができます。
-                    p 表示メッセージは仮置きです。
           .column.is-one-third-desktop.hvr-float
-            .box.iconBox.textOverflow
-              a.show-modal(data-target='lightPlan-modal')
-                .media.appdesc
-                  .media-left
-                    img.app-icon(src='../image/ts-app-digitaltrade-func-icon-setting.svg')
-                  .media-content
-                    p.title.is-5 ライトプラン
-                    p ライトプラン契約と解約を行うことができます。
-                    p 解約の場合は取り消しはできません。
       .column.is-12.menu
        p.olta-title-font-size PoC
         .columns.is-desktop.is-family-noto-sans
@@ -461,23 +443,6 @@ block content
               span.panel-icon
                 i.fas.fa-file
               p 操作マニュアルダウンロード
-        footer.modal-card-foot
-    .modal#lightPlan-modal
-      .modal-background.cancel-button(data-target='lightPlan-modal')
-      .modal-card.is-family-noto-sans
-        header.modal-card-head
-          p.modal-card-title ライトプラン
-          button.delete(data-target="lightPlan-modal")
-        section.modal-card-body
-          nav.panel
-            a.panel-block(href='/applyLightPlan')
-              span.panel-icon
-                i.fas.fa-file
-              p 新設申込み
-            a.panel-block(href='/cancelLightPlan') 
-              span.panel-icon
-                i.fas.fa-file
-              p 解約申込み
         footer.modal-card-foot
 
     include informationLightplanModal
