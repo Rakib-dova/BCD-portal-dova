@@ -1048,7 +1048,6 @@ body > div.hero.is-small {
   .btn-contract{
     max-width: 120px;
     margin: auto;
-    color: #fff;
   }
   /* アイコンをリンクと同じ色にする */
   .iconLink .fas{
