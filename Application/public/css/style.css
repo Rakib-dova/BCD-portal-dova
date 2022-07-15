@@ -1010,43 +1010,54 @@ body > div.hero.is-small {
 
 /* button */
 .btn-status{
-border-radius:30px ;
-display: block;
-padding: .5em;
-width: 155px;
-margin: auto;
-}
-/* 契約中*/
-.btn-status.st-navy{
-  background-color: #0065A3;
-  color: #fff;
-}
-/* 設定準備中、変更処理中*/
-.btn-status.st-white{
-  background-color: white;
-  border: 2px solid #0065A3;
-  color: #0065A3;
-}
-/* 申込処理中*/
-.btn-status.st-yellow{
-  background-color: white;
-  border: 2px solid #FFA800;
-}
-/* 解約処理中*/
-.btn-status.st-red{
-  background-color: white;
-  border: 2px solid #F14668;
-  color:#F14668 ;
-}
-
-.btn-contract{
-  max-width: 120px;
+  border-radius:30px ;
+  display: block;
+  padding: .5em;
+  width: 155px;
   margin: auto;
-}
-/* アイコンをリンクと同じ色にする */
-.iconLink .fas{
-  color: #3273dc;
-}
-.iconLink :hover{
-  color: #363636;
-}
+  }
+  /* 契約中*/
+  .btn-status.st-navy{
+    background-color: #0065A3;
+    color: #fff;
+  }
+  /* 設定準備中、変更処理中*/
+  .btn-status.st-white{
+    background-color: #fff;
+    border: 2px solid #0065A3;
+    color: #0065A3;
+  }
+  /* 申込処理中*/
+  .btn-status.st-yellow{
+    background-color: #fff;
+    border: 2px solid #FFA800;
+  }
+  /* 解約処理中*/
+  .btn-status.st-red{
+    background-color: #fff;
+    border: 2px solid #F14668;
+    color:#F14668 ;
+  }
+
+  /* 解約申請 */
+  .button.is-can{
+    background-color: #ccc;
+    color: #fff;
+  }
+
+  .btn-contract{
+    max-width: 120px;
+    margin: auto;
+    color: #fff;
+  }
+  /* アイコンをリンクと同じ色にする */
+  .iconLink .fas{
+    color: #3273dc;
+  }
+  .iconLink :hover{
+    color: #363636;
+  }
+  /* ボタン非活性 */
+  .button[disabled]{
+    opacity:1 ;
+  }
