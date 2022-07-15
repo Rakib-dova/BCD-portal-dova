@@ -46,9 +46,15 @@ block content
                       button.button.is-success.is-block.btn-contract(type="submit" formaction='/change' disabled=contract.contractStatus !== '00') 契約変更
                   td.text-center.ver-mid.px-1
                     if contract.serviceType === '010'
-                      button.button.is-danger.is-block.btn-contract(type="submit" formaction='/cancellation' disabled=(contract.contractStatus !== '00' || continuingContractList.some((i) =>i.serviceType === '030') || oneShotContractList.some((i) =>i.serviceType === '020'))) 解約申請
+                      if contract.contractStatus !== '00' || continuingContractList.some((i) =>i.serviceType === '030') || oneShotContractList.some((i) =>i.serviceType === '020')
+                        button.button.is-can.is-block.btn-contract(type="submit" formaction='/cancellation' disabled) 解約申請
+                      else
+                        button.button.is-danger.is-block.btn-contract(type="submit" formaction='/cancellation') 解約申請
                     else if contract.serviceType === '030'
-                      button.button.is-danger.is-block.btn-contract(type="submit" formaction='/contractCancellation' disabled=contract.contractStatus !== '00') 解約申請
+                      if contract.contractStatus !== '00'
+                        button.button.is-can.is-block.btn-contract(type="submit" formaction='/contractCancellation' disabled) 解約申請
+                      else 
+                        button.button.is-danger.is-block.btn-contract(type="submit" formaction='/contractCancellation') 解約申請
 
         if oneShotContractList.length > 0
           h2.mb-4.mt-6 ■初回利用サービス
