@@ -105,7 +105,13 @@ describe('アプリ効果測定UT_デジトレ', () => {
 
       expect(infoSpy).nthCalledWith(1, 'INF001:Start - cbPostIndex')
       expect(infoSpy).nthCalledWith(2, { action: 'journalDownloadRequest', tenantId: 'dummyTenantId' })
-      expect(infoSpy).nthCalledWith(3, { action: 'downloadedJournalInfo', downloadedJournalCount: 1, tenantId: 'dummyTenantId', finalApproved: true })
+      expect(infoSpy).nthCalledWith(3, {
+        action: 'downloadedJournalInfo',
+        downloadedJournalCount: 1,
+        tenantId: 'dummyTenantId',
+        dataFormat: 'デフォルト',
+        finalApproved: true
+      })
     })
 
     test('請求書番号を指定する場合', async () => {
@@ -152,7 +158,32 @@ describe('アプリ効果測定UT_デジトレ', () => {
 
       expect(infoSpy).nthCalledWith(1, 'INF001:Start - cbPostIndex')
       expect(infoSpy).nthCalledWith(2, { action: 'journalDownloadRequest', tenantId: 'dummyTenantId' })
-      expect(infoSpy).nthCalledWith(3, { action: 'downloadedJournalInfo', downloadedJournalCount: 1, tenantId: 'dummyTenantId', finalApproved: true })
+      expect(infoSpy).nthCalledWith(3, {
+        action: 'downloadedJournalInfo',
+        downloadedJournalCount: 1,
+        tenantId: 'dummyTenantId',
+        dataFormat: 'デフォルト',
+        finalApproved: true
+      })
+    })
+  })
+
+  describe('個別: getServiceNameForDataFormat() ', () => {
+    test('デフォルトの場合', () => {
+      const dataFormat = journalDownloadRouter.getServiceNameForDataFormat(0)
+      expect(dataFormat).toBe('デフォルト')
+    })
+    test('弥生会計の場合', () => {
+      const dataFormat = journalDownloadRouter.getServiceNameForDataFormat(1)
+      expect(dataFormat).toBe('弥生会計')
+    })
+    test('デフォルトの場合', () => {
+      const dataFormat = journalDownloadRouter.getServiceNameForDataFormat(2)
+      expect(dataFormat).toBe('勘定奉行')
+    })
+    test('デフォルトの場合', () => {
+      const dataFormat = journalDownloadRouter.getServiceNameForDataFormat(3)
+      expect(dataFormat).toBe('PCA')
     })
   })
 })

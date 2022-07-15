@@ -73,6 +73,7 @@ const cbGetIndex = async (req, res, next) => {
 }
 
 const cbPostIndex = async (req, res, next) => {
+  console.log('@@  req.body.serviceDataFormat  @@@@@@@@@@@@@@@@@@@', req.body.serviceDataFormat)
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
   const qs = require('qs')
 
@@ -346,6 +347,7 @@ const cbPostIndex = async (req, res, next) => {
               tenantId: req.user.tenantId,
               action: 'downloadedJournalInfo',
               downloadedJournalCount: 1,
+              dataFormat: getServiceNameForDataFormat(req.body.serviceDataFormat),
               finalApproved: chkFinalapproval
             }
             logger.info(jsonLog)
@@ -391,6 +393,7 @@ const cbPostIndex = async (req, res, next) => {
           tenantId: req.user.tenantId,
           action: 'downloadedJournalInfo',
           downloadedJournalCount: (invoiceArray.length - 2) > 0 ? (invoiceArray.length - 2) : undefined,
+          dataFormat: getServiceNameForDataFormat(req.body.serviceDataFormat),
           finalApproved: chkFinalapproval
         }
         logger.info(jsonLog)
@@ -2159,6 +2162,21 @@ const paymentExtraPush = async (paymentExtra, data) => {
   return paymentExtra
 }
 
+const getServiceNameForDataFormat = (magicNumber) => {
+  switch (magicNumber) {
+    case 0:
+      return 'デフォルト'
+    case 1:
+      return '弥生会計'
+    case 2:
+      return '勘定奉行'
+    case 3:
+      return 'PCA'
+    default:
+      return null
+  }
+}
+
 router.get('/', helper.isAuthenticated, cbGetIndex)
 router.post('/', helper.isAuthenticated, cbPostIndex)
 
@@ -2168,5 +2186,6 @@ module.exports = {
   cbPostIndex: cbPostIndex,
   errorHandle: errorHandle,
   dataToJson: dataToJson,
-  jsonToCsv: jsonToCsv
+  jsonToCsv: jsonToCsv,
+  getServiceNameForDataFormat
 }
