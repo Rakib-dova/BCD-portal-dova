@@ -847,7 +847,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
 
     // 請求書のタグ付け有無確認
     const checkTagDocumentList = []
-    const withouttag = ['tag_checked']
+    const withouttag = ['tag_checked_portal']
     const type = ['invoice']
     const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
     const stag = ['purchases']
@@ -907,7 +907,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
           await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
         }
         // 確認請求書にタグを追加
-        await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked')
+        await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked_portal')
       }
     }
 
