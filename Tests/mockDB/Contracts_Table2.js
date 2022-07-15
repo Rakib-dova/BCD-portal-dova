@@ -409,5 +409,158 @@ module.exports = [
         canceledAt: null
       }
     }
+  ],
+  // 契約DB値：serviceType：020、契約中：0
+  [
+    {
+      contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+      tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+      numberN: '123456789',
+      contractStatus: '00',
+      serviceType: '010',
+      deleteFlag: false,
+      createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+      updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+      contractedAt: null,
+      canceledAt: null,
+      dataValues: {
+        contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+        tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+        numberN: '123456789',
+        contractStatus: '00',
+        serviceType: '010',
+        deleteFlag: false,
+        createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+        updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+        contractedAt: null,
+        canceledAt: null
+      }
+    },
+    {
+      contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+      tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+      numberN: '123456789',
+      contractStatus: '00',
+      serviceType: '020',
+      deleteFlag: false,
+      createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+      updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+      contractedAt: null,
+      canceledAt: null,
+      dataValues: {
+        contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+        tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+        numberN: '123456789',
+        contractStatus: '00',
+        serviceType: '020',
+        deleteFlag: false,
+        createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+        updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+        contractedAt: null,
+        canceledAt: null
+      }
+    }
+  ],
+  // 契約DB値：serviceType：030、契約中：10
+  [
+    {
+      contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+      tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+      numberN: '123456789',
+      contractStatus: '00',
+      serviceType: '010',
+      deleteFlag: false,
+      createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+      updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+      contractedAt: null,
+      canceledAt: null,
+      dataValues: {
+        contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+        tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+        numberN: '123456789',
+        contractStatus: '00',
+        serviceType: '010',
+        deleteFlag: false,
+        createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+        updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+        contractedAt: null,
+        canceledAt: null
+      }
+    },
+    {
+      contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+      tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+      numberN: '123456789',
+      contractStatus: '10',
+      serviceType: '030',
+      deleteFlag: false,
+      createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+      updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+      contractedAt: null,
+      canceledAt: null,
+      dataValues: {
+        contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+        tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+        numberN: '123456789',
+        contractStatus: '10',
+        serviceType: '030',
+        deleteFlag: false,
+        createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+        updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+        contractedAt: null,
+        canceledAt: null
+      }
+    }
+  ],
+  // 契約DB値：serviceType：020、契約中：10
+  [
+    {
+      contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+      tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+      numberN: '123456789',
+      contractStatus: '00',
+      serviceType: '010',
+      deleteFlag: false,
+      createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+      updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+      contractedAt: null,
+      canceledAt: null,
+      dataValues: {
+        contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+        tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+        numberN: '123456789',
+        contractStatus: '00',
+        serviceType: '010',
+        deleteFlag: false,
+        createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+        updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+        contractedAt: null,
+        canceledAt: null
+      }
+    },
+    {
+      contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+      tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+      numberN: '123456789',
+      contractStatus: '10',
+      serviceType: '020',
+      deleteFlag: false,
+      createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+      updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+      contractedAt: null,
+      canceledAt: null,
+      dataValues: {
+        contractId: 'a31fe56d-6ea1-49a2-95f9-200e370984f8',
+        tenantId: '5778c070-5dd3-42db-aaa8-848424fb80f9',
+        numberN: '123456789',
+        contractStatus: '10',
+        serviceType: '020',
+        deleteFlag: false,
+        createdAt: '2021-10-26 10:40:27.3680000 +00:00',
+        updatedAt: '2021-11-05 04:03:57.1680000 +00:00',
+        contractedAt: null,
+        canceledAt: null
+      }
+    }
   ]
 ]
