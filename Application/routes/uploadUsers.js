@@ -21,14 +21,13 @@ const cbGetIndex = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 
-  // DBからuserデータ取得
-  const user = await userController.findOne(req.user.userId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // user未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+  // ユーザ情報の更新と取得
+  const user = await userController.findAndUpdate(req.user?.userId, req.user?.accessToken, req.user?.refreshToken)
+  // データベースエラー、または、ユーザ未登録の場合もエラーを上げる
+  if (user instanceof Error || !user) return next(errorHelper.create(500))
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (user.userStatus !== 0) return next(errorHelper.create(404))
 
   // DBから契約情報取得
   const contract = await contractController.findOne(req.user.tenantId)
@@ -39,7 +38,7 @@ const cbGetIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
 
   // ユーザ権限を取得
-  req.session.userRole = user.dataValues?.userRole
+  req.session.userRole = user.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
@@ -52,7 +51,7 @@ const cbGetIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
+  if (!validate.isTenantManager(user.userRole, deleteFlag)) {
     return next(noticeHelper.create('generaluser'))
   }
 
@@ -100,14 +99,13 @@ const cbPostIndex = async (req, res, next) => {
     return next(errorHelper.create(500))
   }
 
-  // DBからuserデータ取得
-  const user = await userController.findOne(req.user.userId)
-  // データベースエラーは、エラーオブジェクトが返る
-  // user未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+  // ユーザ情報の更新と取得
+  const user = await userController.findAndUpdate(req.user?.userId, req.user?.accessToken, req.user?.refreshToken)
+  // データベースエラー、または、ユーザ未登録の場合もエラーを上げる
+  if (user instanceof Error || !user) return next(errorHelper.create(500))
 
   // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
-  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+  if (user.userStatus !== 0) return next(errorHelper.create(404))
 
   // DBから契約情報取得
   const contract = await contractController.findOne(req.user.tenantId)
@@ -118,7 +116,7 @@ const cbPostIndex = async (req, res, next) => {
   req.session.userContext = 'LoggedIn'
 
   // ユーザ権限を取得
-  req.session.userRole = user.dataValues?.userRole
+  req.session.userRole = user.userRole
   const deleteFlag = contract.dataValues.deleteFlag
   const contractStatus = contract.dataValues.contractStatus
   const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
@@ -131,7 +129,7 @@ const cbPostIndex = async (req, res, next) => {
     return next(noticeHelper.create('cancelprocedure'))
   }
 
-  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
+  if (!validate.isTenantManager(user.userRole, deleteFlag)) {
     return next(noticeHelper.create('generaluser'))
   }
 

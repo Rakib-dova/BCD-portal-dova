@@ -291,11 +291,12 @@ exports.getContractPlan = async (req, res, next) => {
  * @param {function} next 次の処理
  */
 exports.isTenantManager = async (req, res, next) => {
-  const user = await userController.findOne(req.user?.userId)
+  // ユーザ情報の更新と取得
+  const user = await userController.findAndUpdate(req.user.userId, req.user.accessToken, req.user.refreshToken)
   // データベースエラー、または、ユーザ未登録の場合もエラーを上げる
-  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+  if (user instanceof Error || !user) return next(errorHelper.create(500))
 
-  if (user.dataValues?.userRole !== constantsDefine.userRoleConstants.tenantManager) {
+  if (user.userRole !== constantsDefine.userRoleConstants.tenantManager) {
     return next(noticeHelper.create('generaluser'))
   }
   return next()
