@@ -1063,7 +1063,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -1143,19 +1143,77 @@ describe('tenantのテスト', () => {
           AccountType: 'FREE'
         })
       // DBからの正常なユーザデータ取得を想定する
-      createSpy.mockReturnValue([
-        {
-          dataValues: {
-            userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
-            tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
-            userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
-            appVersion: '0.0.1',
-            refreshToken: 'dummyRefreshToken',
-            userStatus: 0
-          }
-        },
-        true
-      ])
+      createSpy.mockImplementation(async (accessToken, refreshToken, contractInformationnewOrder) => {
+        expect(accessToken).toEqual('dummyAccessToken')
+        expect(refreshToken).toEqual('dummyRefreshToken')
+        expect(contractInformationnewOrder).toEqual({
+          contractBasicInfo: {
+            tradeshiftId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+            orderId: '',
+            orderType: '010',
+            serviceType: '010',
+            contractChangeName: '',
+            contractChangeAddress: '',
+            contractChangeContact: '',
+            appDate: '',
+            OpeningDate: '',
+            contractNumber: '',
+            salesChannelCode: '79100100',
+            salesChannelName: 'ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ',
+            salesChannelDeptName: '第二ＳＣ部門　第一グループ',
+            salesChannelEmplyeeCode: '',
+            salesChannelPersonName: 'デジトレアプリ担当',
+            salesChannelDeptType: 'アプリケーションサービス部',
+            salesChannelPhoneNumber: '050-3383-9608',
+            salesChannelMailAddress: 'digitaltrade-ap-ops@ntt.com',
+            campaignCode: 'A1b2C3d4E5',
+            salesPersonName: '',
+            kaianPassword: '1q2w3e4r5t'
+          },
+          contractAccountInfo: {
+            contractAccountId: '',
+            customerType: '',
+            commonCustomerId: '',
+            contractorName: '市江素',
+            contractorKanaName: 'シエス',
+            postalNumber: '1234567',
+            contractAddress: '東京都渋谷区１丁目',
+            banch1: '１番地',
+            tatemono1: '銀王ビル'
+          },
+          contactList: [
+            {
+              contactType: '',
+              contactPersonName: 'トレド',
+              contactPhoneNumber: '080-1234-5678',
+              contactMail: 'example@example.com',
+              billMailingPostalNumber: '1234567',
+              billMailingAddress: '東京都渋谷区１丁目',
+              billMailingAddressBanchi1: '１番地',
+              billMailingAddressBuilding1: '銀王ビル',
+              billMailingKanaName: 'シエス',
+              billMailingName: '市江素',
+              billMailingPersonName: 'トレド',
+              billMailingPhoneNumber: '080-1234-5678',
+              billMailingMailAddress: 'example@example.com'
+            }
+          ],
+          prdtList: [{ prdtCode: 'BF1021000000100', idnumber: '', appType: '010' }]
+        })
+        return [
+          {
+            dataValues: {
+              userId: '976d46d7-cb0b-48ad-857d-4b42a44ede13',
+              tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+              userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+              appVersion: '0.0.1',
+              refreshToken: 'dummyRefreshToken',
+              userStatus: 0
+            }
+          },
+          true
+        ]
+      })
 
       checkContractStatusSpy.mockReturnValue(null)
 
@@ -1194,7 +1252,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -1227,7 +1285,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -1292,7 +1350,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -1411,7 +1469,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -1530,7 +1588,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -1649,7 +1707,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -1768,7 +1826,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -1887,7 +1945,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -2006,7 +2064,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -2125,7 +2183,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -2168,7 +2226,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -2213,7 +2271,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -2269,7 +2327,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -2337,7 +2395,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -2405,7 +2463,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',
@@ -2480,7 +2538,7 @@ describe('tenantのテスト', () => {
         contractorName: '市江素',
         contractorKanaName: 'シエス',
         postalNumber: '1234567',
-        contractAddress: '東京都渋谷区１丁目',
+        contractAddressVal: '東京都渋谷区１丁目',
         banch1: '１番地',
         tatemono1: '銀王ビル',
         contactPersonName: 'トレド',

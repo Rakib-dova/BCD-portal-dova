@@ -239,3 +239,22 @@
   margin-right: 1.3rem !important;
 }
 
+.lockBorder {
+  border-left: 1px solid;
+  padding-block: 12px;
+  margin: 16px;
+}
+
+.lockText {
+  font-size: 15px;
+  font-weight: normal;
+}
+
+th.text-center,
+td.text-center {
+  vertical-align: middle;
+}
+
+.text-color-red {
+  color: red;
+}

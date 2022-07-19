@@ -4,13 +4,27 @@ jest.mock('../../Application/lib/logger')
 
 const contractController = require('../../Application/controllers/contractController')
 const constantsDefine = require('../../Application/constants')
+const contractStatuses = constantsDefine.statusConstants.contractStatuses
+const serviceTypes = constantsDefine.statusConstants.serviceTypes
 
-let findOneSpy, errorSpy, tenantId, findContractSpy, updateSpy
+// 準備
+const Op = require('../../Application/models').Sequelize.Op
+const contracts = require('../mockDB/Contracts_Table2')
+function * filter(f, iter) {
+  for (const item of iter) {
+    if (f(item)) {
+      yield item
+    }
+  }
+}
+
+let findAllSpy, findOneSpy, errorSpy, tenantId, findContractSpy, updateSpy
 describe('contractControllerのテスト', () => {
   beforeEach(() => {
     const Contract = require('../../Application/models').Contract
     const Contractcontroller = require('../../Application/controllers/contractController')
     const logger = require('../../Application/lib/logger')
+    findAllSpy = jest.spyOn(Contract, 'findAll')
     findOneSpy = jest.spyOn(Contract, 'findOne')
     updateSpy = jest.spyOn(Contract, 'update')
     findContractSpy = jest.spyOn(Contractcontroller, 'findContract')
@@ -18,12 +32,22 @@ describe('contractControllerのテスト', () => {
     errorSpy = jest.spyOn(logger, 'error')
   })
   afterEach(() => {
+    findAllSpy.mockRestore()
     findOneSpy.mockRestore()
     findContractSpy.mockRestore()
     errorSpy.mockRestore()
     updateSpy.mockRestore()
   })
   tenantId = '12345678-bdac-4195-80b9-1ea64b8cb70c'
+
+  // 正常系契約情報
+  const normalContracts = [
+    {
+      serviceType: serviceTypes.bcd,
+      contractStatus: contractStatuses.onContract,
+      deleteFlag: false
+    }
+  ]
 
   const contractInfoDataCount0 = {}
 
@@ -56,6 +80,34 @@ describe('contractControllerのテスト', () => {
     createdAt: '2021-07-09T04:30:00.000Z',
     updatedAt: '2021-07-09T04:30:00.000Z'
   }
+
+  describe('findContractsBytenantId', () => {
+    test('正常： 契約情報配列を返す', async () => {
+      findAllSpy.mockResolvedValue(normalContracts)
+
+      const contracts = await contractController.findContractsBytenantId(tenantId)
+
+      expect(contracts).toEqual(normalContracts)
+    })
+
+    test('正常：データ０件', async () => {
+      findAllSpy.mockReturnValueOnce([])
+
+      const contracts = await contractController.findContractsBytenantId(tenantId)
+
+      expect(contracts.length).toEqual(0)
+    })
+
+    test('準正常: DBエラー時', async () => {
+      const dbError = new Error('DB error mock')
+      findAllSpy.mockImplementation(() => new Promise((resolve, reject) => reject(dbError)))
+
+      const contracts = await contractController.findContractsBytenantId(tenantId)
+
+      expect(errorSpy).toHaveBeenCalledWith({ user: tenantId, stack: expect.anything(), status: 0 }, expect.anything())
+      expect(contracts).toEqual(null)
+    })
+  })
 
   describe('findOne', () => {
     test('正常：N番なし', async () => {
@@ -175,10 +227,44 @@ describe('contractControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await contractController.findContract({ tenantId: 'tenantId', deleteFlag: false }, 'createdAt DESC')
+      const result = await contractController.findContract(
+        { tenantId: 'tenantId', deleteFlag: false },
+        'createdAt DESC'
+      )
       // 期待結果
       // DBErrorが返されること
       expect(result).toEqual(new Error('DB error mock'))
+    })
+  })
+
+  describe('findContracts', () => {
+    test('正常： 契約情報配列を返す', async () => {
+      findAllSpy.mockResolvedValue(normalContracts)
+
+      const contracts = await contractController.findContracts({ tenantId: tenantId }, null)
+
+      expect(contracts).toEqual(normalContracts)
+    })
+
+    test('正常：データ０件', async () => {
+      findAllSpy.mockReturnValueOnce([])
+
+      const contracts = await contractController.findContracts({ tenantId: tenantId }, null)
+
+      expect(contracts.length).toEqual(0)
+    })
+
+    test('準正常: DBエラー時', async () => {
+      const dbError = new Error('DB error mock')
+      findAllSpy.mockImplementation(() => new Promise((resolve, reject) => reject(dbError)))
+
+      const contracts = await contractController.findContracts({ tenantId: tenantId }, null)
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        { where: { tenantId: tenantId }, stack: expect.anything(), status: 0 },
+        expect.anything()
+      )
+      expect(contracts).toEqual(dbError)
     })
   })
 
@@ -191,10 +277,7 @@ describe('contractControllerのテスト', () => {
       updateSpy.mockReturnValueOnce(contractInfoDataUpdated)
 
       // 試験実施
-      const result = await contractController.updateStatus(
-        contractId,
-        orderType
-      )
+      const result = await contractController.updateStatus(contractId, orderType)
 
       // 期待結果
       // 想定した契約情報がReturnされていること
@@ -212,13 +295,106 @@ describe('contractControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await contractController.updateStatus(
-        contractId,
-        orderType
-      )
+      const result = await contractController.updateStatus(contractId, orderType)
       // 期待結果
       // DBErrorが返されること
       expect(result).toEqual(dbError)
+    })
+  })
+
+  describe('findLightPlan', () => {
+    test('正常', async () => {
+      // 準備
+      findOneSpy.mockImplementation((findOneArg) => {
+        let result = null
+        for (const contract of contracts) {
+          result = filter((item) => {
+            if (
+              findOneArg.where.tenantId === item.tenantId &&
+              (findOneArg.where.contractStatus[Op.or][0] === item.contractStatus ||
+                findOneArg.where.contractStatus[Op.or][1] === item.contractStatus) &&
+              findOneArg.where.serviceType === item.serviceType &&
+              findOneArg.where.deleteFlag === item.deleteFlag
+            ) {
+              return true
+            }
+            return false
+          }, contract).next().value
+          if (result !== undefined) break
+        }
+        if (result === undefined) return null
+        return result
+      })
+
+      // テスト実行
+      const result = await contractController.findLightPlan('5778c070-5dd3-42db-aaa8-848424fb80f9')
+
+      // 期待結果
+      expect(result).toEqual(contracts[9][1])
+    })
+
+    test('スタンダード契約者ない場合', async () => {
+      // 準備
+      findOneSpy.mockImplementation((findOneArg) => {
+        let result = null
+        for (const contract of contracts) {
+          result = filter((item) => {
+            if (
+              findOneArg.where.tenantId === item.tenantId &&
+              (findOneArg.where.contractStatus[Op.or][0] === item.contractStatus ||
+                findOneArg.where.contractStatus[Op.or][1] === item.contractStatus) &&
+              findOneArg.where.serviceType === item.serviceType &&
+              findOneArg.where.deleteFlag === item.deleteFlag
+            ) {
+              return true
+            }
+            return false
+          }, contract).next().value
+          if (result !== undefined) break
+        }
+        if (result === undefined) return null
+        return result
+      })
+
+      // テスト実行
+      const result = await contractController.findLightPlan('4778c070-5dd3-42db-aaa8-848424fb80f9')
+
+      // 期待結果
+      expect(result).toEqual(null)
+    })
+
+    test('DBエラーが発生した場合', async () => {
+      // 準備
+      findOneSpy.mockImplementation((findOneArg) => {
+        let result = null
+        for (const contract of contracts) {
+          result = filter((item) => {
+            if (
+              findOneArg.where.tenantId === item.tenantId &&
+              (findOneArg.where.contractStatus[Op.or][0] === item.contractStatus() ||
+                findOneArg.where.contractStatus[Op.or][1] === item.contractStatus) &&
+              findOneArg.where.serviceType === item.serviceType &&
+              findOneArg.where.deleteFlag === item.deleteFlag
+            ) {
+              return true
+            }
+            return false
+          }, contract).next().value
+          if (result !== undefined) break
+        }
+        if (result === undefined) return null
+        return result
+      })
+
+      // テスト実行
+      const result = await contractController.findLightPlan('3778c070-5dd3-42db-aaa8-848424fb80f9')
+
+      // 期待結果
+      expect(result instanceof Error).toEqual(true)
+      expect(errorSpy).toHaveBeenCalledWith(
+        { user: '3778c070-5dd3-42db-aaa8-848424fb80f9', stack: expect.anything(), status: 0 },
+        'Error'
+      )
     })
   })
 })

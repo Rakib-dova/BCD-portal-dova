@@ -3,13 +3,21 @@
     "tradeshiftId": "",
     "orderId": "",
     "orderType": "",
+    "serviceType": "010",
     "contractChangeName": "",
     "contractChangeAddress": "",
     "contractChangeContact": "",
     "appDate": "",
     "OpeningDate": "",
     "contractNumber": "",
-    "salesChannelCode": "",
+    "salesChannelCode": "79100100",
+    "salesChannelName": "ＰＳ本部＿ＡＰＳ部＿第二ＳＣ部門一Ｇ四Ｔ",
+    "salesChannelDeptName": "第二ＳＣ部門　第一グループ",
+    "salesChannelEmplyeeCode": "",
+    "salesChannelPersonName": "デジトレアプリ担当",
+    "salesChannelDeptType": "アプリケーションサービス部",
+    "salesChannelPhoneNumber": "050-3383-9608",
+    "salesChannelMailAddress": "digitaltrade-ap-ops@ntt.com",
     "campaignCode": "",
     "salesPersonName": "",
     "kaianPassword": ""
@@ -32,13 +40,23 @@
       "contactType": "",
       "contactPersonName": "",
       "contactPhoneNumber": "",
-      "contactMail": ""
+      "contactMail": "",
+      "billMailingPostalNumber": "",
+      "billMailingAddress": "",
+      "billMailingAddressBanchi1": "",
+      "billMailingAddressBuilding1": "",
+      "billMailingKanaName": "",
+      "billMailingName": "",
+      "billMailingPersonName": "",
+      "billMailingPhoneNumber": "",
+      "billMailingMailAddress": ""
     }
   ],
 
   "prdtList": [
     {
       "prdtCode": "BF1021000000100",
+      "idnumber": "",
       "appType": "010"
     }
   ]

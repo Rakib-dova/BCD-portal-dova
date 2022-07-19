@@ -1,0 +1,40 @@
+.contractWidth{
+  max-width: 980px;
+  margin: auto;
+}
+#contractBox h3{
+  font-size: 18px;
+  font-weight: bold;
+}
+.serviceWrap{
+  background-color: #f5f5f5;
+  padding: 1rem;
+  border-radius: 10px;
+}
+.serviceBox{
+  border: 1px solid #ccc;
+  padding: .5rem 1rem 1rem;
+}
+.btnWrap{
+  max-width: 340px;
+  margin: auto;
+}
+.btnWrap .btn-contract{
+  width: 150px;
+}
+.cancellTable{
+  width: 100%;
+}
+.cancellTable th{
+  background-color: #ededed;
+}
+.cancellTable th, .cancellTable td{
+  border: 1px solid;
+  padding: .5rem 1rem;
+}
+.cancellText{
+  color: #f14668;
+}
+.btn-contract.btnHome{
+  max-width: 134px;
+}

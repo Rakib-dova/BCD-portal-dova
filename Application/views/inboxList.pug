@@ -6,7 +6,6 @@ block content
       .hero-body-noImage
         .title.is-family-noto-sans 支払依頼一覧
         .subtitle.is-family-noto-sans PAYMENT REQUEST LIST
-
     .columns.is-centered
       .column.is-11
         .box
@@ -30,6 +29,12 @@ block content
               .tab-content
                 if rejectedFlag !== true
                   .tab-pane.is-active#informationTab
+                    .box
+                      h2.title 支払依頼検索　
+                        a.button.is-link.i.fas.fa-lock.show-modal(data-target='information-lightplan')
+                          .span.is-link.lockBorder 
+                          .span.is-link.lockText 検索機能を利用
+
                     if listArr.length !== 0
                       table.table.is-fullwidth.is-hoverable.table-fixed
                         thead
@@ -41,9 +46,9 @@ block content
                             th.width-10.text-center 通貨
                             th.width-10.text-center 金額
                             th.width-10.text-center 送信企業
-                            th.width-10.text-center 受信企業
+                            th.width-10.text-center 担当者アドレス
+                            th.width-10.text-center 支払い期限日
                             th.width-10.text-center 更新日
-                            th.width-10.text-center 期限日
                             th.width-10.text-center
                         tbody.display-row
                           each item in listArr
@@ -104,9 +109,9 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
-                              td.text-center.td-overflow= item.sentBy
-                              td.text-center.td-overflow= item.updated
+                              td.text-center.td-overflow= item.managerInfo.managerAddress
                               td.text-center.td-overflow= item.expire
+                              td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
                                 a.button.is-success.td-overflow.display-row-td-button(href=`/inbox/${item.documentId}`) 仕訳情報設定
                       nav.pagination.is-centered(role='navigation' aria-label='pagination')
@@ -145,13 +150,18 @@ block content
                           th.width-10.text-center 通貨
                           th.width-10.text-center 金額
                           th.width-10.text-center 送信企業
-                          th.width-10.text-center 受信企業
+                          th.width-10.text-center 担当者アドレス
+                          th.width-10.text-center 支払い期限日
                           th.width-10.text-center 更新日
-                          th.width-10.text-center 期限日
                           th.width-10.text-center
                       tbody.display-row           
                 else
                   .tab-pane#informationTab
+                    .box
+                      h2.title 支払依頼検索　
+                        a.button.is-link.i.fas.fa-lock.show-modal(data-target='information-lightplan')
+                          .span.is-link.lockBorder
+                          .span.is-link.lockText 検索機能を利用
                     if listArr.length !== 0
                       table.table.is-fullwidth.is-hoverable.table-fixed
                         thead
@@ -163,9 +173,9 @@ block content
                             th.width-10.text-center 通貨
                             th.width-10.text-center 金額
                             th.width-10.text-center 送信企業
-                            th.width-10.text-center 受信企業
+                            th.width-10.text-center 担当者アドレス
+                            th.width-10.text-center 支払い期限日
                             th.width-10.text-center 更新日
-                            th.width-10.text-center 期限日
                             th.width-10.text-center
                         tbody.display-row
                           each item in listArr
@@ -226,9 +236,9 @@ block content
                               td.text-center.td-overflow= item.currency
                               td.text-center.td-overflow= item.ammount
                               td.text-center.td-overflow= item.sentTo
-                              td.text-center.td-overflow= item.sentBy
-                              td.text-center.td-overflow= item.updated
+                              td.text-center.td-overflow= item.managerInfo.managerAddress
                               td.text-center.td-overflow= item.expire
+                              td.text-center.td-overflow= item.updated
                               td.text-center.display-row-td
                                 a.button.is-success.td-overflow.display-row-td-button(href=`/inbox/${item.documentId}`) 仕訳情報設定
                       nav.pagination.is-centered(role='navigation' aria-label='pagination')
@@ -264,9 +274,9 @@ block content
                           th.width-10.text-center 通貨
                           th.width-10.text-center 金額
                           th.width-10.text-center 送信企業
-                          th.width-10.text-center 受信企業
+                          th.width-10.text-center 担当者アドレス
+                          th.width-10.text-center 支払い期限日
                           th.width-10.text-center 更新日
-                          th.width-10.text-center 期限日
                           th.width-10.text-center
                       tbody.display-row
         .mt-1.has-text-left
@@ -292,6 +302,8 @@ block content
             center
               p.modal-card-result#modal-card-result 処理中
           footer.modal-card-foot          
+    
+    include informationLightplanModal
 
   include footer
 

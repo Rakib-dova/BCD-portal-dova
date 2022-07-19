@@ -8,6 +8,7 @@ jest.mock('../../Application/DAO/ApprovalDAO')
 const inboxController = require('../../Application/controllers/inboxController')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const logger = require('../../Application/lib/logger')
+const constantsDefine = require('../../Application/constants')
 const InvoiceDetailObj = require('../../Application/lib/invoiceDetail')
 const AccountCode = require('../../Application/models').AccountCode
 const SubAccountCode = require('../../Application/models').SubAccountCode
@@ -214,7 +215,8 @@ const searchResult1 = {
     }
   ]
 }
-const result1 = {
+
+const managerInfoResult = {
   list: [
     {
       no: 1,
@@ -226,7 +228,11 @@ const result1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-27',
       expire: '2021-11-10',
-      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+      managerInfo: {
+        managerAddress: 'abc@test.co.jp',
+        managerName: 'UT テスト'
+      }
     },
     {
       no: 2,
@@ -238,7 +244,11 @@ const result1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-22',
-      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f'
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
     },
     {
       no: 3,
@@ -250,7 +260,11 @@ const result1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd'
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
     },
     {
       no: 4,
@@ -262,7 +276,224 @@ const result1 = {
       sentBy: 'バイヤー1',
       updated: '2021-12-16',
       expire: '2021-12-28',
-      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537'
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
+    }
+  ],
+  numPages: 1,
+  currPage: 1
+}
+
+const noNameManagerInfoResult = {
+  list: [
+    {
+      no: 1,
+      invoiceNo: 'PB1649meisai001',
+      status: 0,
+      currency: 'JPY',
+      ammount: '3,080,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-27',
+      expire: '2021-11-10',
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+      managerInfo: {
+        managerAddress: 'abc@test.co.jp',
+        managerName: '-'
+      }
+    },
+    {
+      no: 2,
+      invoiceNo: 'PBI2848supplier_送金済み',
+      status: 0,
+      currency: 'JPY',
+      ammount: '91,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-22',
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
+    },
+    {
+      no: 3,
+      invoiceNo: 'PBI2848supplier_承認済み',
+      status: 1,
+      currency: 'JPY',
+      ammount: '178,320',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
+    },
+    {
+      no: 4,
+      invoiceNo: 'PBI2848supplier_受信済み',
+      status: 2,
+      currency: 'JPY',
+      ammount: '67,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
+    }
+  ],
+  numPages: 1,
+  currPage: 1
+}
+
+const freeManagerInfoResult = {
+  list: [
+    {
+      no: 1,
+      invoiceNo: 'PB1649meisai001',
+      status: 0,
+      currency: 'JPY',
+      ammount: '3,080,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-27',
+      expire: '2021-11-10',
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+      managerInfo: {
+        managerAddress: 'abc@test.co.jp',
+        managerName: '（ユーザー登録なし）'
+      }
+    },
+    {
+      no: 2,
+      invoiceNo: 'PBI2848supplier_送金済み',
+      status: 0,
+      currency: 'JPY',
+      ammount: '91,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-22',
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
+    },
+    {
+      no: 3,
+      invoiceNo: 'PBI2848supplier_承認済み',
+      status: 1,
+      currency: 'JPY',
+      ammount: '178,320',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
+    },
+    {
+      no: 4,
+      invoiceNo: 'PBI2848supplier_受信済み',
+      status: 2,
+      currency: 'JPY',
+      ammount: '67,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
+    }
+  ],
+  numPages: 1,
+  currPage: 1
+}
+
+const noManagerInfoResult = {
+  list: [
+    {
+      no: 1,
+      invoiceNo: 'PB1649meisai001',
+      status: 0,
+      currency: 'JPY',
+      ammount: '3,080,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-27',
+      expire: '2021-11-10',
+      documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
+    },
+    {
+      no: 2,
+      invoiceNo: 'PBI2848supplier_送金済み',
+      status: 0,
+      currency: 'JPY',
+      ammount: '91,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-22',
+      documentId: '0aa6c428-b1d0-5cef-8044-3fe78acb226f',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
+    },
+    {
+      no: 3,
+      invoiceNo: 'PBI2848supplier_承認済み',
+      status: 1,
+      currency: 'JPY',
+      ammount: '178,320',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '5792b9b9-fe31-5b1d-a58f-9798089359fd',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
+    },
+    {
+      no: 4,
+      invoiceNo: 'PBI2848supplier_受信済み',
+      status: 2,
+      currency: 'JPY',
+      ammount: '67,000',
+      sentTo: 'サプライヤー1',
+      sentBy: 'バイヤー1',
+      updated: '2021-12-16',
+      expire: '2021-12-28',
+      documentId: '76b589ab-1fc2-5aa3-bdb4-151abadd9537',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
     }
   ],
   numPages: 1,
@@ -431,7 +662,11 @@ const result3 = {
       sentBy: '-',
       sentTo: '-',
       status: 0,
-      updated: '-'
+      updated: '-',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
     },
     {
       ammount: '3,080,000',
@@ -443,7 +678,11 @@ const result3 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: '-',
-      updated: ''
+      updated: '',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
     },
     {
       ammount: '178,320',
@@ -455,7 +694,11 @@ const result3 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 1,
-      updated: '2021-12-16'
+      updated: '2021-12-16',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
     },
     {
       ammount: '-',
@@ -467,7 +710,11 @@ const result3 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 2,
-      updated: '2021-12-16'
+      updated: '2021-12-16',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
     }
   ],
   numPages: 1
@@ -620,7 +867,11 @@ const result4 = {
       sentBy: 'サプライヤー1',
       sentTo: 'バイヤー1',
       status: 0,
-      updated: '-'
+      updated: '-',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
     },
     {
       ammount: '178,320',
@@ -632,7 +883,11 @@ const result4 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 1,
-      updated: '-'
+      updated: '-',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
     },
     {
       ammount: '-',
@@ -644,7 +899,11 @@ const result4 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: 2,
-      updated: '-'
+      updated: '-',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
     },
     {
       ammount: '3,080,000',
@@ -656,11 +915,46 @@ const result4 = {
       sentBy: 'バイヤー1',
       sentTo: 'サプライヤー1',
       status: '-',
-      updated: '-'
+      updated: '-',
+      managerInfo: {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      }
     }
   ],
   numPages: 1
 }
+
+const userInfo = {
+  Id: '27f7188b-f6c7-4b5e-9826-96052bba495c',
+  Person: { LastName: 'UT', FirstName: 'テスト' },
+  CompanyAccountId: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
+  UserName: 'abc@test.co.jp',
+  Credentials: [],
+  State: 'ACTIVE',
+  Language: 'ja',
+  Kind: 'PERSON',
+  LastLogin: 1657590818711,
+  TimeZone: 'Asia/Tokyo',
+  Visible: false,
+  CompanyAccountIdModifyDate: '2021-06-01T08:49:08.410Z'
+}
+
+const noNameUserInfo = {
+  Id: '27f7188b-f6c7-4b5e-9826-96052bba495c',
+  Person: { LastName: ' ', FirstName: ' ' },
+  CompanyAccountId: 'f783be0e-e716-4eab-a7ec-5ce36b3c7b31',
+  UserName: 'abc@test.co.jp',
+  Credentials: [],
+  State: 'ACTIVE',
+  Language: 'ja',
+  Kind: 'PERSON',
+  LastLogin: 1657590818711,
+  TimeZone: 'Asia/Tokyo',
+  Visible: false,
+  CompanyAccountIdModifyDate: '2021-06-01T08:49:08.410Z'
+}
+
 const accessToken = 'dummyAccessToken'
 const refreshToken = 'dummyRefreshToken'
 const pageId = 1
@@ -669,6 +963,7 @@ const contractId = 'f10b95a4-74a1-4691-880a-827c9f1a1faf'
 
 let accessTradeshiftSpy,
   errorSpy,
+  warnSpy,
   journalizeInvoiceFindAllSpy,
   accountCodeFindOneSpy,
   accountCodeFindAllSpy,
@@ -682,7 +977,10 @@ let accessTradeshiftSpy,
   tradeshiftDTOFindDocuments,
   approvalDAOGetWaitingApprovals,
   requestApprovalFindAll,
+  tradeshiftDTOGetDocuments,
+  tradeshiftDTOGetDocument,
   tradeshiftDTOGetDocumentSearch,
+  tradeshiftDTOCreateTags,
   requestApprovalFindOne
 
 describe('inboxControllerのテスト', () => {
@@ -690,6 +988,7 @@ describe('inboxControllerのテスト', () => {
     accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
     journalizeInvoiceFindAllSpy = jest.spyOn(JournalizeInvoice, 'findAll')
     errorSpy = jest.spyOn(logger, 'error')
+    warnSpy = jest.spyOn(logger, 'warn')
     accountCodeFindOneSpy = jest.spyOn(AccountCode, 'findOne')
     accountCodeFindAllSpy = jest.spyOn(AccountCode, 'findAll')
     subAccountCodeFindOneSpy = jest.spyOn(SubAccountCode, 'findOne')
@@ -709,12 +1008,16 @@ describe('inboxControllerのテスト', () => {
     RequestApproval.prototype.getWorkflowStatusCode = jest.fn(getWorkflowStatusCode)
     requestApprovalFindAll = jest.fn(Approval, 'findAll')
     Approval.build = jest.fn(modelsBuilder('Approval'))
+    tradeshiftDTOGetDocuments = jest.spyOn(TradeshiftDTO.prototype, 'getDocuments')
+    tradeshiftDTOGetDocument = jest.spyOn(TradeshiftDTO.prototype, 'getDocument')
     tradeshiftDTOGetDocumentSearch = jest.spyOn(TradeshiftDTO.prototype, 'getDocumentSearch')
+    tradeshiftDTOCreateTags = jest.spyOn(TradeshiftDTO.prototype, 'createTags')
     requestApprovalFindOne = jest.spyOn(RequestApproval, 'findOne')
   })
   afterEach(() => {
     accessTradeshiftSpy.mockRestore()
     errorSpy.mockRestore()
+    warnSpy.mockRestore()
     subAccountCodeFindOneSpy.mockRestore()
     journalizeInvoiceFindAllSpy.mockRestore()
     accountCodeFindOneSpy.mockRestore()
@@ -729,31 +1032,108 @@ describe('inboxControllerのテスト', () => {
     tradeshiftDTOFindDocuments.mockRestore()
     approvalDAOGetWaitingApprovals.mockRestore()
     requestApprovalFindAll.mockRestore()
+    tradeshiftDTOGetDocuments.mockRestore()
+    tradeshiftDTOGetDocument.mockRestore()
     tradeshiftDTOGetDocumentSearch.mockRestore()
+    tradeshiftDTOCreateTags.mockRestore()
     requestApprovalFindOne.mockRestore()
   })
 
   describe('getInbox', () => {
-    test('正常', async () => {
+    test('正常：担当者アドレスがある場合（無償）', async () => {
       // 準備
       // APIからの正常情報の取得を想定する
-      accessTradeshiftSpy.mockReturnValue(searchResult1)
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
       // 試験実施
-      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
 
       // 期待結果
       // 想定した契約情報がReturnされていること
-      expect(result).toEqual(result1)
+      expect(result).toEqual(freeManagerInfoResult)
+    })
+
+    test('正常：担当者アドレスがない場合（無償）', async () => {
+      // 準備
+      // APIからの正常情報の取得を想定する
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
+
+      // 試験実施
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(noManagerInfoResult)
+    })
+
+    test('正常：担当者アドレスがある場合、ユーザー情報あり（有償）', async () => {
+      // 準備
+      // APIからの正常情報の取得を想定する
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
+      const presentation = 'inboxList_light_plan'
+
+      // 試験実施
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(managerInfoResult)
+    })
+
+    test('正常：担当者アドレスがある場合、ユーザー情報あり：名前なし（有償）', async () => {
+      // 準備
+      // APIからの正常情報の取得を想定する
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(noNameUserInfo)
+      const presentation = 'inboxList_light_plan'
+
+      // 試験実施
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(noNameManagerInfoResult)
+    })
+
+    test('正常：担当者アドレスがある場合、ユーザー情報なし（有償）', async () => {
+      // 準備
+      // APIからの正常情報の取得を想定する
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const noUser = new Error()
+      accessTradeshiftSpy.mockReturnValue(noUser)
+      const presentation = 'inboxList_light_plan'
+
+      // 試験実施
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(freeManagerInfoResult)
     })
 
     test('正常：文書をリスト化する時値がない場合', async () => {
       // 準備
       // APIからの正常情報の取得を想定する
-      accessTradeshiftSpy.mockReturnValue(searchResult3)
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult3)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
       // 試験実施
-      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
       // 期待結果
       expect(result).toEqual(result3)
     })
@@ -761,10 +1141,13 @@ describe('inboxControllerのテスト', () => {
     test('正常：更新日がない場合、期限日で整列', async () => {
       // 準備
       // APIからの正常情報の取得を想定する
-      accessTradeshiftSpy.mockReturnValue(searchResult4)
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult4)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
       // 試験実施
-      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
       // 期待結果
       expect(result).toEqual(result4)
     })
@@ -772,12 +1155,32 @@ describe('inboxControllerのテスト', () => {
     test('異常: アクセストークンの有効期限が終わるの場合の場合', async () => {
       // 準備
       // APIからの正常情報の取得を想定する
-      accessTradeshiftSpy.mockReturnValue(searchResult2)
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult2)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
       // 試験実施
-      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId)
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
       // 期待結果
       expect(result).toEqual(result0)
+    })
+
+    test('異常：GetDocumentAPIエラー(500)が発生した場合', async () => {
+      // 準備
+      // APIからの正常情報の取得を想定する
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const apiError = new Error('API ERROR')
+      apiError.status = 500
+      tradeshiftDTOGetDocument.mockReturnValue(apiError)
+      const presentation = 'inboxList_light_plan'
+
+      // 試験実施
+      const result = await inboxController.getInbox(accessToken, refreshToken, pageId, tenantId, presentation)
+
+      // 期待結果
+      // 想定した契約情報がReturnされていること
+      expect(result).toEqual(noManagerInfoResult)
     })
   })
 
@@ -1078,8 +1481,10 @@ describe('inboxControllerのテスト', () => {
   })
 
   describe('insertAndUpdateJournalizeInvoice', () => {
+    const dummyToken = 'testCsrfToken'
     const data = {
       lineNo: 1,
+      _csrf: dummyToken,
       lineNo1_lineAccountCode1_accountCode: '',
       lineNo1_lineAccountCode1_subAccountCode: '',
       lineNo1_lineAccountCode1_departmentCode: '',
@@ -1819,6 +2224,7 @@ describe('inboxControllerのテスト', () => {
 
   describe('getWorkflow', () => {
     test('正常:対象がない', async () => {
+      // 準備
       const userId = 'dummyUserId'
       const req = {
         user: {
@@ -1831,13 +2237,265 @@ describe('inboxControllerのテスト', () => {
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
       requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce([])
       approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
-
+      const presentation = 'inboxList'
       const finalExpectResult = []
-      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
       expect(result).toStrictEqual(finalExpectResult)
     })
 
+    test('正常:担当者アドレスがある場合(無償)', async () => {
+      // 準備
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+      const getAllRequestApproval = []
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+        })
+      )
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
+      expect(result.length).toBe(1)
+      expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', {
+        managerAddress: 'abc@test.co.jp',
+        managerName: '（ユーザー登録なし）'
+      })
+    })
+
+    test('正常:担当者アドレスがある場合、ユーザー情報あり(有償)', async () => {
+      // 準備
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+      const getAllRequestApproval = []
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+        })
+      )
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
+      const presentation = 'inboxList_light_plan'
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
+      expect(result.length).toBe(1)
+      expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', {
+        managerAddress: 'abc@test.co.jp',
+        managerName: 'UT テスト'
+      })
+    })
+
+    test('正常:担当者アドレスがある場合、ユーザー情報あり:名前なし(有償)', async () => {
+      // 準備
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+      const getAllRequestApproval = []
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+        })
+      )
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(noNameUserInfo)
+      const presentation = 'inboxList_light_plan'
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
+      expect(result.length).toBe(1)
+      expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', {
+        managerAddress: 'abc@test.co.jp',
+        managerName: '-'
+      })
+    })
+
+    test('正常:担当者アドレスがある場合、ユーザー情報なし(有償)', async () => {
+      // 準備
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+      const getAllRequestApproval = []
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+        })
+      )
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const noUser = new Error()
+      noUser.status = 403
+      accessTradeshiftSpy.mockReturnValue(noUser)
+      const presentation = 'inboxList_light_plan'
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
+      expect(result.length).toBe(1)
+      expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', {
+        managerAddress: 'abc@test.co.jp',
+        managerName: '（ユーザー登録なし）'
+      })
+    })
+
     test('正常:自分が依頼した場合', async () => {
+      // 準備
       const userId = 'dummyUserId'
       const req = {
         user: {
@@ -1881,7 +2539,7 @@ describe('inboxControllerのテスト', () => {
       requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
       approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
       const document1 = {
-        ID: 'UTテスト1',
+        ID: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
         UnifiedState: 'PAID_UNCONFIRMED',
         ItemInfos: [
           { type: 'document.currency', value: 'JPY' },
@@ -1930,11 +2588,17 @@ describe('inboxControllerのテスト', () => {
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document2)
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document3)
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document4)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
-      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
       expect(result.length).toBe(4)
       expect(result[0]).toHaveProperty('documentId', 'ut-test1')
-      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('invoiceid', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
       expect(result[0]).toHaveProperty('status', 1)
       expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
       expect(result[0]).toHaveProperty('currency', 'JPY')
@@ -1943,6 +2607,7 @@ describe('inboxControllerのテスト', () => {
       expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
       expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
       expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（ユーザー登録なし）' })
 
       expect(result[1]).toHaveProperty('documentId', 'ut-test2')
       expect(result[1]).toHaveProperty('invoiceid', 'UTテスト2')
@@ -1954,6 +2619,7 @@ describe('inboxControllerのテスト', () => {
       expect(result[1]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
       expect(result[1]).toHaveProperty('updatedAt', timeStamp(new Date()))
       expect(result[1]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[1]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（ユーザー登録なし）' })
 
       expect(result[2]).toHaveProperty('documentId', 'ut-test3')
       expect(result[2]).toHaveProperty('invoiceid', 'UTテスト3')
@@ -1965,6 +2631,7 @@ describe('inboxControllerのテスト', () => {
       expect(result[2]).toHaveProperty('sendTo', '-')
       expect(result[2]).toHaveProperty('updatedAt', timeStamp(new Date()))
       expect(result[2]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[2]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（ユーザー登録なし）' })
 
       expect(result[3]).toHaveProperty('documentId', 'ut-test4')
       expect(result[3]).toHaveProperty('invoiceid', 'UTテスト4')
@@ -1976,9 +2643,11 @@ describe('inboxControllerのテスト', () => {
       expect(result[3]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
       expect(result[3]).toHaveProperty('updatedAt', '-')
       expect(result[3]).toHaveProperty('expire', '-')
+      expect(result[3]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（ユーザー登録なし）' })
     })
 
     test('正常:自分に依頼がきた時', async () => {
+      // 準備
       const userId = 'dummyUserId'
       const req = {
         user: {
@@ -1989,9 +2658,7 @@ describe('inboxControllerのテスト', () => {
       const accessToken = req.user.accessToken
       const refreshToken = req.user.refreshToken
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
-
       requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce([])
-
       const waitingApprovals = []
       // 最終承認者になって、承認担当者になっているもの
       waitingApprovals.push(
@@ -2186,7 +2853,6 @@ describe('inboxControllerのテスト', () => {
         })
       )
       approvalDAOGetWaitingApprovals.mockReturnValueOnce(waitingApprovals)
-
       const document1 = {
         ID: 'UTテスト1',
         UnifiedState: 'PAID_UNCONFIRMED',
@@ -2212,8 +2878,14 @@ describe('inboxControllerのテスト', () => {
       }
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
       tradeshiftDTOFindDocuments.mockReturnValueOnce(document2)
+      const resultGetDocument = require('../mockInvoice/invoice2')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const presentation = 'inboxList'
 
-      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO)
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
       expect(result.length).toBe(2)
       expect(result[0]).toHaveProperty('documentId', 'ut-test1')
       expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
@@ -2225,6 +2897,7 @@ describe('inboxControllerのテスト', () => {
       expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
       expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
       expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（ユーザー登録なし）' })
 
       expect(result[1]).toHaveProperty('documentId', 'ut-test3')
       expect(result[1]).toHaveProperty('invoiceid', 'UTテスト3')
@@ -2236,6 +2909,68 @@ describe('inboxControllerのテスト', () => {
       expect(result[1]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
       expect(result[1]).toHaveProperty('updatedAt', timeStamp(new Date()))
       expect(result[1]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[1]).toHaveProperty('managerInfo', { managerAddress: '-', managerName: '（ユーザー登録なし）' })
+    })
+
+    test('異常:GetDocumentAPIエラー(500)', async () => {
+      // 準備
+      const userId = 'dummyUserId'
+      const req = {
+        user: {
+          accessToken: 'dummy-accessToken',
+          refreshToken: 'dummy-refreshToken'
+        }
+      }
+      const accessToken = req.user.accessToken
+      const refreshToken = req.user.refreshToken
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken)
+      const getAllRequestApproval = []
+      getAllRequestApproval.push(
+        RequestApproval.build({
+          requester: userId,
+          status: '10',
+          invoiceId: '3064665f-a90a-5f2e-a9e1-d59988ef3591'
+        })
+      )
+      requestApprovalDAOGetAllRequestApproval.mockReturnValueOnce(getAllRequestApproval)
+      approvalDAOGetWaitingApprovals.mockReturnValueOnce([])
+      const document1 = {
+        ID: 'UTテスト1',
+        UnifiedState: 'PAID_UNCONFIRMED',
+        ItemInfos: [
+          { type: 'document.currency', value: 'JPY' },
+          { type: 'document.total', value: '100.00' }
+        ],
+        SenderCompanyName: 'UTSenderCompanyName',
+        ReceiverCompanyName: 'UTReceiverCompanyName',
+        LastEdit: new Date(),
+        DueDate: new Date()
+      }
+      tradeshiftDTOFindDocuments.mockReturnValueOnce(document1)
+      const apiError = new Error('API ERROR')
+      apiError.status = 500
+      tradeshiftDTOGetDocument.mockReturnValue(apiError)
+      const presentation = 'inboxList_light_plan'
+
+      // 実施
+      const result = await inboxController.getWorkflow(userId, contractId, tradeshiftDTO, presentation)
+
+      // 期待結果
+      expect(result.length).toBe(1)
+      expect(result[0]).toHaveProperty('documentId', '3064665f-a90a-5f2e-a9e1-d59988ef3591')
+      expect(result[0]).toHaveProperty('invoiceid', 'UTテスト1')
+      expect(result[0]).toHaveProperty('status', 1)
+      expect(result[0]).toHaveProperty('workflowStatus', '支払依頼中')
+      expect(result[0]).toHaveProperty('currency', 'JPY')
+      expect(result[0]).toHaveProperty('amount', '100')
+      expect(result[0]).toHaveProperty('sendBy', 'UTSenderCompanyName')
+      expect(result[0]).toHaveProperty('sendTo', 'UTReceiverCompanyName')
+      expect(result[0]).toHaveProperty('updatedAt', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('expire', timeStamp(new Date()))
+      expect(result[0]).toHaveProperty('managerInfo', {
+        managerAddress: '-',
+        managerName: '（ユーザー登録なし）'
+      })
     })
   })
 
@@ -2255,7 +2990,8 @@ describe('inboxControllerのテスト', () => {
         issueDate: ['2022-03-01', '2022-04-01'],
         sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
         status: ['80', '10', '11', '12'],
-        contactEmail: 'abc'
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
       }
 
       const resultGetDocumentSearch = [
@@ -2297,6 +3033,9 @@ describe('inboxControllerのテスト', () => {
           SettlementBusinessIds: []
         }
       ]
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
 
       const rejectTestData = await RequestApproval.build({
         requestId: requestId,
@@ -2310,10 +3049,11 @@ describe('inboxControllerのテスト', () => {
         isSaved: true
       })
 
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
       tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
       requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
 
-      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
 
       // 結果確認
       expect(result).toEqual([
@@ -2328,7 +3068,316 @@ describe('inboxControllerのテスト', () => {
           updated: '2021-12-16',
           expire: '2021-12-23',
           documentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
-          approveStatus: '10'
+          approveStatus: '10',
+          managerInfo: {
+            managerAddress: '-',
+            managerName: '（ユーザー登録なし）'
+          }
+        }
+      ])
+    })
+
+    test('正常:担当者ユーザー情報あり', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
+      }
+
+      const resultGetDocumentSearch = [
+        {
+          DocumentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          ID: 'PBI2848buyer2_入金確認済み',
+          URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          DocumentType: { type: 'invoice' },
+          State: 'LOCKED',
+          CreatedDateTime: '2021-12-16T07:34:03.248Z',
+          LastEdit: '2021-12-16T07:34:03.248Z',
+          SenderCompanyName: 'バイヤー2',
+          Actor: {
+            Created: '2021-07-27T08:58:14.266Z',
+            Modified: '2021-07-27T08:58:14.266Z',
+            FirstName: '管理者1',
+            LastName: 'サプライヤー2',
+            Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+            MobileNumberVerified: false
+          },
+          ApplicationResponse: { ResponseDate: '2021-12-16' },
+          ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+          ReceiverCompanyName: 'サプライヤー2',
+          Tags: { Tag: [] },
+          ItemInfos: [
+            { type: 'document.currency', value: 'JPY' },
+            { type: 'document.total', value: '1000.00' },
+            { type: 'document.issuedate', value: '2022-04-01' }
+          ],
+          ProcessState: 'PENDING',
+          ConversationStates: [[Object], [Object]],
+          UnifiedState: 'PAID_CONFIRMED',
+          CopyIndicator: false,
+          Deleted: false,
+          DueDate: '2021-12-23',
+          TenantId: '7e5255fe-05e6-4fc9-acf0-076574bc35f7',
+          InvoiceTypeCode: '380',
+          Properties: [],
+          SettlementBusinessIds: []
+        }
+      ]
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
+
+      // 結果確認
+      expect(result).toEqual([
+        {
+          no: 1,
+          invoiceNo: 'PBI2848buyer2_入金確認済み',
+          status: 0,
+          currency: 'JPY',
+          ammount: '1,000',
+          sentTo: 'バイヤー2',
+          sentBy: 'サプライヤー2',
+          updated: '2021-12-16',
+          expire: '2021-12-23',
+          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          approveStatus: '10',
+          managerInfo: {
+            managerAddress: 'abc@test.co.jp',
+            managerName: 'UT テスト'
+          }
+        }
+      ])
+    })
+
+    test('正常:担当者ユーザー情報あり、名前なし', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
+      }
+
+      const resultGetDocumentSearch = [
+        {
+          DocumentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          ID: 'PBI2848buyer2_入金確認済み',
+          URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          DocumentType: { type: 'invoice' },
+          State: 'LOCKED',
+          CreatedDateTime: '2021-12-16T07:34:03.248Z',
+          LastEdit: '2021-12-16T07:34:03.248Z',
+          SenderCompanyName: 'バイヤー2',
+          Actor: {
+            Created: '2021-07-27T08:58:14.266Z',
+            Modified: '2021-07-27T08:58:14.266Z',
+            FirstName: '管理者1',
+            LastName: 'サプライヤー2',
+            Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+            MobileNumberVerified: false
+          },
+          ApplicationResponse: { ResponseDate: '2021-12-16' },
+          ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+          ReceiverCompanyName: 'サプライヤー2',
+          Tags: { Tag: [] },
+          ItemInfos: [
+            { type: 'document.currency', value: 'JPY' },
+            { type: 'document.total', value: '1000.00' },
+            { type: 'document.issuedate', value: '2022-04-01' }
+          ],
+          ProcessState: 'PENDING',
+          ConversationStates: [[Object], [Object]],
+          UnifiedState: 'PAID_CONFIRMED',
+          CopyIndicator: false,
+          Deleted: false,
+          DueDate: '2021-12-23',
+          TenantId: '7e5255fe-05e6-4fc9-acf0-076574bc35f7',
+          InvoiceTypeCode: '380',
+          Properties: [],
+          SettlementBusinessIds: []
+        }
+      ]
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(noNameUserInfo)
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
+
+      // 結果確認
+      expect(result).toEqual([
+        {
+          no: 1,
+          invoiceNo: 'PBI2848buyer2_入金確認済み',
+          status: 0,
+          currency: 'JPY',
+          ammount: '1,000',
+          sentTo: 'バイヤー2',
+          sentBy: 'サプライヤー2',
+          updated: '2021-12-16',
+          expire: '2021-12-23',
+          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          approveStatus: '10',
+          managerInfo: {
+            managerAddress: 'abc@test.co.jp',
+            managerName: '-'
+          }
+        }
+      ])
+    })
+
+    test('正常:担当者ユーザー情報なし', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
+      }
+
+      const resultGetDocumentSearch = [
+        {
+          DocumentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          ID: 'PBI2848buyer2_入金確認済み',
+          URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          DocumentType: { type: 'invoice' },
+          State: 'LOCKED',
+          CreatedDateTime: '2021-12-16T07:34:03.248Z',
+          LastEdit: '2021-12-16T07:34:03.248Z',
+          SenderCompanyName: 'バイヤー2',
+          Actor: {
+            Created: '2021-07-27T08:58:14.266Z',
+            Modified: '2021-07-27T08:58:14.266Z',
+            FirstName: '管理者1',
+            LastName: 'サプライヤー2',
+            Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+            MobileNumberVerified: false
+          },
+          ApplicationResponse: { ResponseDate: '2021-12-16' },
+          ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+          ReceiverCompanyName: 'サプライヤー2',
+          Tags: { Tag: [] },
+          ItemInfos: [
+            { type: 'document.currency', value: 'JPY' },
+            { type: 'document.total', value: '1000.00' },
+            { type: 'document.issuedate', value: '2022-04-01' }
+          ],
+          ProcessState: 'PENDING',
+          ConversationStates: [[Object], [Object]],
+          UnifiedState: 'PAID_CONFIRMED',
+          CopyIndicator: false,
+          Deleted: false,
+          DueDate: '2021-12-23',
+          TenantId: '7e5255fe-05e6-4fc9-acf0-076574bc35f7',
+          InvoiceTypeCode: '380',
+          Properties: [],
+          SettlementBusinessIds: []
+        }
+      ]
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      const noUesrinfo = new Error('NO USER INFO')
+      accessTradeshiftSpy.mockReturnValue(noUesrinfo)
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
+
+      // 結果確認
+      expect(result).toEqual([
+        {
+          no: 1,
+          invoiceNo: 'PBI2848buyer2_入金確認済み',
+          status: 0,
+          currency: 'JPY',
+          ammount: '1,000',
+          sentTo: 'バイヤー2',
+          sentBy: 'サプライヤー2',
+          updated: '2021-12-16',
+          expire: '2021-12-23',
+          documentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+          approveStatus: '10',
+          managerInfo: {
+            managerAddress: 'abc@test.co.jp',
+            managerName: '（ユーザー登録なし）'
+          }
         }
       ])
     })
@@ -2348,7 +3397,8 @@ describe('inboxControllerのテスト', () => {
         issueDate: ['2022-03-01', '2022-04-01'],
         sentBy: [],
         status: ['80', '10', '11', '12'],
-        contactEmail: 'abc'
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
       }
 
       const resultGetDocumentSearch = [
@@ -2404,10 +3454,14 @@ describe('inboxControllerのテスト', () => {
         isSaved: true
       })
 
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      const resultGetDocument = require('../mockInvoice/invoice3')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
       tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
       requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
 
-      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
 
       // 結果確認
       expect(result).toEqual([
@@ -2422,7 +3476,11 @@ describe('inboxControllerのテスト', () => {
           updated: '2021-12-16',
           expire: '2021-12-23',
           documentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
-          approveStatus: '12'
+          approveStatus: '12',
+          managerInfo: {
+            managerAddress: '-',
+            managerName: '（ユーザー登録なし）'
+          }
         }
       ])
     })
@@ -2436,7 +3494,8 @@ describe('inboxControllerのテスト', () => {
         issueDate: ['2022-03-01', '2022-04-01'],
         sentBy: [],
         status: ['80', '10', '11', '12'],
-        contactEmail: 'abc'
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
       }
 
       const resultGetDocumentSearch = [
@@ -2473,10 +3532,14 @@ describe('inboxControllerのテスト', () => {
         }
       ]
 
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
       tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
       requestApprovalFindOne.mockReturnValueOnce(null)
 
-      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
 
       // 結果確認
       expect(result).toEqual([
@@ -2491,7 +3554,113 @@ describe('inboxControllerのテスト', () => {
           updated: '-',
           expire: '-',
           documentId: undefined,
-          approveStatus: ''
+          approveStatus: '',
+          managerInfo: {
+            managerAddress: '-',
+            managerName: '（ユーザー登録なし）'
+          }
+        }
+      ])
+    })
+
+    test('正常:担当者不明の請求書をチェックした場合', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: 'unKnownManager'
+      }
+
+      const resultGetDocumentSearch = [
+        {
+          DocumentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          ID: 'PBI2848buyer2_入金確認済み',
+          URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          DocumentType: { type: 'invoice' },
+          State: 'LOCKED',
+          CreatedDateTime: '2021-12-16T07:34:03.248Z',
+          LastEdit: '2021-12-16T07:34:03.248Z',
+          SenderCompanyName: 'バイヤー2',
+          Actor: {
+            Created: '2021-07-27T08:58:14.266Z',
+            Modified: '2021-07-27T08:58:14.266Z',
+            FirstName: '管理者1',
+            LastName: 'サプライヤー2',
+            Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+            MobileNumberVerified: false
+          },
+          ApplicationResponse: { ResponseDate: '2021-12-16' },
+          ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+          ReceiverCompanyName: 'サプライヤー2',
+          Tags: { Tag: [] },
+          ItemInfos: [
+            { type: 'document.currency', value: 'JPY' },
+            { type: 'document.total', value: '1000.00' },
+            { type: 'document.issuedate', value: '2022-04-01' }
+          ],
+          ProcessState: 'PENDING',
+          ConversationStates: [[Object], [Object]],
+          UnifiedState: 'PAID_CONFIRMED',
+          CopyIndicator: false,
+          Deleted: false,
+          DueDate: '2021-12-23',
+          TenantId: '7e5255fe-05e6-4fc9-acf0-076574bc35f7',
+          InvoiceTypeCode: '380',
+          Properties: [],
+          SettlementBusinessIds: []
+        }
+      ]
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
+
+      // 結果確認
+      expect(result).toEqual([
+        {
+          no: 1,
+          invoiceNo: 'PBI2848buyer2_入金確認済み',
+          status: 0,
+          currency: 'JPY',
+          ammount: '1,000',
+          sentTo: 'バイヤー2',
+          sentBy: 'サプライヤー2',
+          updated: '2021-12-16',
+          expire: '2021-12-23',
+          documentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          approveStatus: '10',
+          managerInfo: {
+            managerAddress: '-',
+            managerName: '（ユーザー登録なし）'
+          }
         }
       ])
     })
@@ -2511,7 +3680,8 @@ describe('inboxControllerのテスト', () => {
         issueDate: ['2022-03-01', '2022-04-01'],
         sentBy: ['011c0e85-aabb-437b-9dcd-5b941dd4e1aa'],
         status: ['80', '10', '11', '12'],
-        contactEmail: 'abc'
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
       }
 
       const resultGetDocumentSearch = [
@@ -2562,10 +3732,14 @@ describe('inboxControllerのテスト', () => {
         isSaved: true
       })
 
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
       tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
       requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
 
-      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
 
       // 結果確認
       expect(result).toEqual([
@@ -2580,7 +3754,11 @@ describe('inboxControllerのテスト', () => {
           updated: '2021-12-16',
           expire: '2021-12-23',
           documentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
-          approveStatus: '10'
+          approveStatus: '10',
+          managerInfo: {
+            managerAddress: '-',
+            managerName: '（ユーザー登録なし）'
+          }
         }
       ])
     })
@@ -2600,7 +3778,8 @@ describe('inboxControllerのテスト', () => {
         issueDate: ['2022-03-01', '2022-04-01'],
         sentBy: [],
         status: ['80', '10', '11', '12'],
-        contactEmail: 'abc'
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
       }
 
       const resultGetDocumentSearch = []
@@ -2617,10 +3796,11 @@ describe('inboxControllerのテスト', () => {
         isSaved: true
       })
 
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
       tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
       requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
 
-      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
 
       // 結果確認
       expect(result).toEqual([])
@@ -2636,14 +3816,19 @@ describe('inboxControllerのテスト', () => {
         issueDate: ['', ''],
         sentBy: [],
         status: [],
-        contactEmail: ''
+        contactEmail: '',
+        unKnownManager: undefined
       }
 
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
       const tradeshiftDocumentTable = require('../mockDB/TradeshiftDocumentsTable')
       tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(tradeshiftDocumentTable)
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
       requestApprovalFindOne.mockReturnValue(null)
 
-      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
 
       const expectedResult = tradeshiftDocumentTable.map((document, idx) => {
         const ammount = function () {
@@ -2661,7 +3846,11 @@ describe('inboxControllerのテスト', () => {
           updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
           expire: document.DueDate ?? '-',
           documentId: document.DocumentId,
-          approveStatus: document.approveStatus ?? ''
+          approveStatus: document.approveStatus ?? '',
+          managerInfo: {
+            managerAddress: '-',
+            managerName: '（ユーザー登録なし）'
+          }
         }
       })
 
@@ -2679,15 +3868,20 @@ describe('inboxControllerのテスト', () => {
         issueDate: ['', ''],
         sentBy: ['11367bd9-9710-4772-bdf7-10be2085976c', '9bd4923d-1b65-43b9-9b8d-34dbd1c9ac40'],
         status: [],
-        contactEmail: ''
+        contactEmail: '',
+        unKnownManager: undefined
       }
 
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
       const tradeshiftDocumentTable = require('../mockDB/TradeshiftDocumentsTable')
       tradeshiftDTOGetDocumentSearch.mockReturnValueOnce([tradeshiftDocumentTable[0], tradeshiftDocumentTable[1]])
       tradeshiftDTOGetDocumentSearch.mockReturnValueOnce([tradeshiftDocumentTable[2]])
+      const resultGetDocument = require('../mockInvoice/invoice1')
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      accessTradeshiftSpy.mockReturnValue(userInfo)
       requestApprovalFindOne.mockReturnValue(null)
 
-      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
 
       const expectedResult = tradeshiftDocumentTable.map((document, idx) => {
         const ammount = function () {
@@ -2705,12 +3899,372 @@ describe('inboxControllerのテスト', () => {
           updated: document.LastEdit !== undefined ? document.LastEdit.substring(0, 10) : '-',
           expire: document.DueDate ?? '-',
           documentId: document.DocumentId,
-          approveStatus: document.approveStatus ?? ''
+          approveStatus: document.approveStatus ?? '',
+          managerInfo: {
+            managerAddress: '-',
+            managerName: '（ユーザー登録なし）'
+          }
         }
       })
 
       // 結果確認
       expect(result).toEqual(expectedResult)
+    })
+
+    test('正常：タグがない請求書がある場合', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '011c0e85-aabb-437b-9dcd-5b941dd4e1aa'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: [],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
+      }
+
+      const resultGetDocumentSearch = [
+        {
+          DocumentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          ID: 'PBI2848buyer2_入金確認済み',
+          URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          DocumentType: { type: 'invoice' },
+          State: 'LOCKED',
+          CreatedDateTime: '2021-12-16T07:34:03.248Z',
+          LastEdit: '2021-12-16T07:34:03.248Z',
+          SenderCompanyName: 'バイヤー2',
+          Actor: {
+            Created: '2021-07-27T08:58:14.266Z',
+            Modified: '2021-07-27T08:58:14.266Z',
+            FirstName: '管理者1',
+            LastName: 'サプライヤー2',
+            Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+            MobileNumberVerified: false
+          },
+          ApplicationResponse: { ResponseDate: '2021-12-16' },
+          ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+          ReceiverCompanyName: 'サプライヤー2',
+          Tags: { Tag: [] },
+          ItemInfos: [
+            { type: 'document.currency', value: 'JPY' },
+            { type: 'document.total', value: '1000.00' },
+            { type: 'document.issuedate', value: '2022-04-01' }
+          ],
+          ProcessState: 'PENDING',
+          ConversationStates: [[Object], [Object]],
+          UnifiedState: 'PAID_CONFIRMED',
+          CopyIndicator: false,
+          Deleted: false,
+          DueDate: '2021-12-23',
+          TenantId: '011c0e85-aabb-437b-9dcd-5b941dd4e1aa',
+          InvoiceTypeCode: '380',
+          Properties: [],
+          SettlementBusinessIds: []
+        }
+      ]
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      const resultGetDocument = require('../mockInvoice/invoice1')
+
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      tradeshiftDTOCreateTags.mockReturnValue('')
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
+
+      // 結果確認
+      expect(result).toEqual([
+        {
+          no: 1,
+          invoiceNo: 'PBI2848buyer2_入金確認済み',
+          status: 0,
+          currency: 'JPY',
+          ammount: '1,000',
+          sentTo: 'バイヤー2',
+          sentBy: 'サプライヤー2',
+          updated: '2021-12-16',
+          expire: '2021-12-23',
+          documentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          approveStatus: '10',
+          managerInfo: {
+            managerAddress: '-',
+            managerName: '（ユーザー登録なし）'
+          }
+        }
+      ])
+    })
+
+    test('正常：タグがない請求書がある場合,担当者メールアドレスがない場合', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '011c0e85-aabb-437b-9dcd-5b941dd4e1aa'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: [],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
+      }
+
+      const resultGetDocumentSearch = [
+        {
+          DocumentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          ID: 'PBI2848buyer2_入金確認済み',
+          URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          DocumentType: { type: 'invoice' },
+          State: 'LOCKED',
+          CreatedDateTime: '2021-12-16T07:34:03.248Z',
+          LastEdit: '2021-12-16T07:34:03.248Z',
+          SenderCompanyName: 'バイヤー2',
+          Actor: {
+            Created: '2021-07-27T08:58:14.266Z',
+            Modified: '2021-07-27T08:58:14.266Z',
+            FirstName: '管理者1',
+            LastName: 'サプライヤー2',
+            Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+            MobileNumberVerified: false
+          },
+          ApplicationResponse: { ResponseDate: '2021-12-16' },
+          ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+          ReceiverCompanyName: 'サプライヤー2',
+          Tags: { Tag: [] },
+          ItemInfos: [
+            { type: 'document.currency', value: 'JPY' },
+            { type: 'document.total', value: '1000.00' },
+            { type: 'document.issuedate', value: '2022-04-01' }
+          ],
+          ProcessState: 'PENDING',
+          ConversationStates: [[Object], [Object]],
+          UnifiedState: 'PAID_CONFIRMED',
+          CopyIndicator: false,
+          Deleted: false,
+          DueDate: '2021-12-23',
+          TenantId: '011c0e85-aabb-437b-9dcd-5b941dd4e1aa',
+          InvoiceTypeCode: '380',
+          Properties: [],
+          SettlementBusinessIds: []
+        }
+      ]
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      const resultGetDocument = require('../mockInvoice/invoice3')
+
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      tradeshiftDTOCreateTags.mockReturnValue('')
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
+
+      // 結果確認
+      expect(result).toEqual([
+        {
+          no: 1,
+          invoiceNo: 'PBI2848buyer2_入金確認済み',
+          status: 0,
+          currency: 'JPY',
+          ammount: '1,000',
+          sentTo: 'バイヤー2',
+          sentBy: 'サプライヤー2',
+          updated: '2021-12-16',
+          expire: '2021-12-23',
+          documentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          approveStatus: '10',
+          managerInfo: {
+            managerAddress: '-',
+            managerName: '（ユーザー登録なし）'
+          }
+        }
+      ])
+    })
+
+    test('正常：タグがない請求書がある場合（メールアドレスの形式が正しくない場合）', async () => {
+      // パラメータ作成
+      const requestId = '111b34d1-f4db-484e-b822-8e2ce9017d14'
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const approveRouteId = 'eb9835ae-afc7-4a55-92b3-9df762b3d6e6'
+      const invoiceId = '48c8e45e-376f-5f02-a1a4-5862c5c35baf'
+      const message = 'messege'
+      const userId = '12345678-cb0b-48ad-857d-4b42a44ede13'
+      const tenantId = '011c0e85-aabb-437b-9dcd-5b941dd4e1aa'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'buyer2',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: [],
+        status: ['80', '10', '11', '12'],
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
+      }
+
+      const searchResultTag = {
+        itemsPerPage: 20,
+        itemCount: 1,
+        indexing: false,
+        numPages: 1,
+        pageId: 0,
+        Document: [
+          {
+            DocumentId: '3064665f-a90a-5f2e-a9e1-d59988ef3591',
+            ID: 'PB1649meisai001',
+            URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/3064665f-a90a-5f2e-a9e1-d59988ef3591',
+            DocumentType: [Object],
+            State: 'LOCKED',
+            CreatedDateTime: '2021-12-27T05:25:39.360Z',
+            LastEdit: '2021-12-27T05:25:39.360Z',
+            SenderCompanyName: 'サプライヤー1',
+            Actor: [Object],
+            ConversationId: '0ba5c4ea-3f67-42be-bbd4-9ec533dc6625',
+            ReceiverCompanyName: 'バイヤー1',
+            Tags: [Object],
+            ItemInfos: [
+              { type: 'document.currency', value: 'JPY' },
+              { type: 'document.total', value: '3080000.00' },
+              { type: 'document.issuedate', value: '2021-11-08' }
+            ],
+            ProcessState: 'PENDING',
+            ConversationStates: [Array],
+            UnifiedState: 'PAID_CONFIRMED',
+            CopyIndicator: false,
+            Deleted: false,
+            DueDate: '2021-11-10',
+            Note: '請求書一括作成_1649_test_no1.csv',
+            TenantId: '011c0e85-aabb-437b-9dcd-5b941dd4e1aa',
+            InvoiceTypeCode: '380',
+            ProfileID: 'urn:www.cenbii.eu:profile:bii04:ver1.0',
+            Properties: [],
+            SettlementBusinessIds: []
+          }
+        ]
+      }
+
+      const resultGetDocumentSearch = [
+        {
+          DocumentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          ID: 'PBI2848buyer2_入金確認済み',
+          URI: 'https://api-sandbox.tradeshift.com/tradeshift/rest/external/documents/48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          DocumentType: { type: 'invoice' },
+          State: 'LOCKED',
+          CreatedDateTime: '2021-12-16T07:34:03.248Z',
+          LastEdit: '2021-12-16T07:34:03.248Z',
+          SenderCompanyName: 'バイヤー2',
+          Actor: {
+            Created: '2021-07-27T08:58:14.266Z',
+            Modified: '2021-07-27T08:58:14.266Z',
+            FirstName: '管理者1',
+            LastName: 'サプライヤー2',
+            Email: 'dev.master.bconnection+supplier2.001@gmail.com',
+            MobileNumberVerified: false
+          },
+          ApplicationResponse: { ResponseDate: '2021-12-16' },
+          ConversationId: '48b89f82-c92e-4356-8ce7-66781b7d3d55',
+          ReceiverCompanyName: 'サプライヤー2',
+          Tags: { Tag: [] },
+          ItemInfos: [
+            { type: 'document.currency', value: 'JPY' },
+            { type: 'document.total', value: '1000.00' },
+            { type: 'document.issuedate', value: '2022-04-01' }
+          ],
+          ProcessState: 'PENDING',
+          ConversationStates: [[Object], [Object]],
+          UnifiedState: 'PAID_CONFIRMED',
+          CopyIndicator: false,
+          Deleted: false,
+          DueDate: '2021-12-23',
+          TenantId: '011c0e85-aabb-437b-9dcd-5b941dd4e1aa',
+          InvoiceTypeCode: '380',
+          Properties: [],
+          SettlementBusinessIds: []
+        }
+      ]
+
+      const rejectTestData = await RequestApproval.build({
+        requestId: requestId,
+        contractId: contractId,
+        approveRouteId: approveRouteId,
+        invoiceId: invoiceId,
+        requester: userId,
+        status: '10',
+        message: message,
+        create: '2021-01-25T08:45:49.803Z',
+        isSaved: true
+      })
+
+      const resultGetDocument = require('../mockInvoice/invoice2')
+
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResultTag)
+      tradeshiftDTOGetDocument.mockReturnValue(resultGetDocument)
+      tradeshiftDTOCreateTags.mockReturnValue('')
+      tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
+      requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
+
+      // 結果確認
+      expect(logger.warn).toHaveBeenCalledWith(
+        `contractId:${contractId}, DocumentId:${searchResultTag.Document[0].DocumentId}, msg: ${constantsDefine.statusConstants.FAILED_TO_CREATE_TAG}(${constantsDefine.statusConstants.INVOICE_CONTACT_EMAIL_NOT_VERIFY})`
+      )
+      expect(result).toEqual([
+        {
+          no: 1,
+          invoiceNo: 'PBI2848buyer2_入金確認済み',
+          status: 0,
+          currency: 'JPY',
+          ammount: '1,000',
+          sentTo: 'バイヤー2',
+          sentBy: 'サプライヤー2',
+          updated: '2021-12-16',
+          expire: '2021-12-23',
+          documentId: '48c8e45e-376f-5f02-a1a4-5862c5c35baf',
+          approveStatus: '10',
+          managerInfo: {
+            managerAddress: '-',
+            managerName: '（ユーザー登録なし）'
+          }
+        }
+      ])
     })
 
     test('異常：検索結果がnullの場合', async () => {
@@ -2728,7 +4282,8 @@ describe('inboxControllerのテスト', () => {
         issueDate: ['2022-03-01', '2022-04-01'],
         sentBy: [],
         status: ['80', '10', '11', '12'],
-        contactEmail: 'abc'
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
       }
 
       const resultGetDocumentSearch = null
@@ -2745,35 +4300,84 @@ describe('inboxControllerのテスト', () => {
         isSaved: true
       })
 
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
       tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
       requestApprovalFindOne.mockReturnValueOnce(rejectTestData)
 
-      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
 
       // 結果確認
       expect(result).toEqual(new Error("Cannot read property 'length' of null"))
     })
 
-    test('異常：検索結果でAPIエラーの場合', async () => {
+    test('異常：検索結果でAPIエラーの場合（getDocumentSearch）', async () => {
       // パラメータ作成
-      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
       const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
       const keyword = {
         invoiceNumber: 'abc',
         issueDate: ['2022-03-01', '2022-04-01'],
         sentBy: [],
         status: ['80', '10', '11', '12'],
-        contactEmail: 'abc'
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
       }
 
       const resultGetDocumentSearch = new Error()
 
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
       tradeshiftDTOGetDocumentSearch.mockReturnValueOnce(resultGetDocumentSearch)
 
-      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId)
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
 
       // 結果確認
       expect(result).toEqual(resultGetDocumentSearch)
+    })
+
+    test('異常：検索結果でAPIエラーの場合（getDocuments）', async () => {
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'abc',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: [],
+        status: [],
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
+      }
+
+      const getDocumentsError = new Error()
+
+      tradeshiftDTOGetDocuments.mockReturnValue(getDocumentsError)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
+
+      // 結果確認
+      expect(result).toEqual(getDocumentsError)
+    })
+
+    test('異常：検索結果でAPIエラーの場合（getDocument）', async () => {
+      // パラメータ作成
+      const contractId = '343b34d1-f4db-484e-b822-8e2ce9017d14'
+      const tenantId = '011c0e85-aabb-437b-9dcd-5b941dd4e1aa'
+
+      const tradeshiftDTO = new TradeshiftDTO(accessToken, refreshToken, tenantId)
+      const keyword = {
+        invoiceNumber: 'abc',
+        issueDate: ['2022-03-01', '2022-04-01'],
+        sentBy: [],
+        status: [],
+        contactEmail: 'abc@test.co.jp',
+        unKnownManager: undefined
+      }
+
+      const getDocumentError = new Error()
+
+      tradeshiftDTOGetDocuments.mockReturnValue(searchResult1)
+      tradeshiftDTOGetDocument.mockReturnValue(getDocumentError)
+
+      const result = await inboxController.getSearchResult(tradeshiftDTO, keyword, contractId, tenantId)
+
+      // 結果確認
+      expect(result).toEqual(getDocumentError)
     })
   })
 })

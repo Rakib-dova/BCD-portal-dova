@@ -56,6 +56,7 @@ describe('departmentCodeUploadのテスト', () => {
     request.flash = jest.fn()
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     departmentCodeUploadControllerUploadSpy = jest.spyOn(departmentCodeUploadController, 'upload')
+    request.csrfToken = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -76,6 +77,7 @@ describe('departmentCodeUploadのテスト', () => {
       expect(departmentCodeUpload.router.get).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.anything(),
         departmentCodeUpload.cbGetIndex
       )
 
@@ -83,6 +85,7 @@ describe('departmentCodeUploadのテスト', () => {
         '/',
         helper.isAuthenticated,
         expect.any(Function),
+        expect.anything(),
         departmentCodeUpload.cbPostIndex
       )
     })

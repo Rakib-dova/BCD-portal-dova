@@ -174,7 +174,7 @@ module.exports = {
           }
         }
       },
-      Contact: {}
+      Contact: { ID: { value: 'abc' } }
     }
   },
   Delivery: [

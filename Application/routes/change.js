@@ -16,6 +16,9 @@ const contractAccountInfoTemplate = require('../orderTemplate/contractInformatio
 const contractContactListTemplate = require('../orderTemplate/contractInformationchangeOrder_contactList.json')
 const constantsDefine = require('../constants')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetChangeIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetChangeIndex')
 
@@ -73,7 +76,8 @@ const cbGetChangeIndex = async (req, res, next) => {
     tenantId: req.user.tenantId,
     userRole: req.session.userRole,
     numberN: contract.dataValues?.numberN,
-    TS_HOST: process.env.TS_HOST
+    TS_HOST: process.env.TS_HOST,
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetChangeIndex')
 }
@@ -265,8 +269,8 @@ const cbPostChangeIndex = async (req, res, next) => {
   return res.redirect('/portal')
 }
 
-router.get('/', helper.isAuthenticated, cbGetChangeIndex)
-router.post('/', helper.isAuthenticated, cbPostChangeIndex)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetChangeIndex)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostChangeIndex)
 
 module.exports = {
   router: router,

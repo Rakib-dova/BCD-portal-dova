@@ -1,13 +1,122 @@
 {
   "baseUrl": "https://sandbox.tradeshift.com/",
+  "appName": "デジタルトレードアプリ（モック）",
   "company1": {
     "mng": {
       "id": "zahoti82@via.tokyo.jp",
-      "password": "6UQMnLqZGk"
+      "password": "6UQMnLqZGk",
+      "family": "管理者",
+      "first": "アカウント"
     },
     "user": {
       "id": "hikita-toshiyuki+ci@webrage.jp",
-      "password": "De5-cN*m(,rG"
+      "password": "De5-cN*m(,rG",
+      "family": "一般",
+      "first": "ユーザー"
+    },
+    "user02": {
+      "id": "fukami-yusuke+cia@webrage.jp",
+      "password": "tbty9vDb6p",
+      "family": "一般",
+      "first": "ユーザー２"
+    },
+    "user03": {
+      "id": "fukami-yusuke+cib@webrage.jp",
+      "password": "qCSttSF5a9",
+      "family": "一般",
+      "first": "ユーザー３"
+    },
+    "user04": {
+      "id": "fukami-yusuke+cic@webrage.jp",
+      "password": "Xi4jdTrcWd",
+      "family": "一般",
+      "first": "ユーザー４"
+    },
+    "user05": {
+      "id": "fukami-yusuke+cid@webrage.jp",
+      "password": "xHX2xMKTBD",
+      "family": "一般",
+      "first": "ユーザー５"
+    },
+    "user06": {
+      "id": "fukami-yusuke+cie@webrage.jp",
+      "password": "hgjZ4Rz4jk",
+      "family": "一般",
+      "first": "ユーザー６"
+    },
+    "user07": {
+      "id": "fukami-yusuke+cif@webrage.jp",
+      "password": "zpPQT99DpT",
+      "family": "一般",
+      "first": "ユーザー７"
+    },
+    "user08": {
+      "id": "fukami-yusuke+cig@webrage.jp",
+      "password": "DA7cawKjMp",
+      "family": "一般",
+      "first": "ユーザー８"
+    },
+    "user09": {
+      "id": "fukami-yusuke+cih@webrage.jp",
+      "password": "b3Q55MyRns",
+      "family": "一般",
+      "first": "ユーザー９"
+    },
+    "user10": {
+      "id": "fukami-yusuke+cii@webrage.jp",
+      "password": "vxjX9wvivZ",
+      "family": "一般",
+      "first": "ユーザー１０"
+    },
+    "user11": {
+      "id": "fukami-yusuke+cij@webrage.jp",
+      "password": "ZF7c5rk4Vk",
+      "family": "一般",
+      "first": "ユーザー１１"
+    },
+    "user12": {
+      "id": "fukami-yusuke+cik@webrage.jp",
+      "password": "4LdzDQvWY3",
+      "family": "一般",
+      "first": "ユーザー１２"
+    },
+    "user13": {
+      "id": "fukami-yusuke+cil@webrage.jp",
+      "password": "ptyPMSyhu2",
+      "family": "一般",
+      "first": "ユーザー１３"
+    }
+  },
+  "company2": {
+    "user": {
+      "id": "zeryu803@ahk.jp",
+      "password": "yANSfPLP27",
+      "family": "担当者姓",
+      "first": "担当者名"
+    },
+    "user02": {
+      "id": "kufira@nyasan.com",
+      "password": "7wiHxZmYRq",
+      "family": "担当者姓",
+      "first": "担当者名"
+    },
+    "user03": {
+      "id": "nusugipyo@mama3.org",
+      "password": "NTTcom0033",
+      "family": "ひろはし",
+      "first": "サプライヤー２"
+    },
+    "user04": {
+      "id": "tto884756+0001@gmail.com",
+      "password": "He1qXXO9mo",
+      "family": "担当者姓",
+      "first": "担当者名"
+    },
+    "user05": {
+      "id": "tto884756+0002@gmail.com",
+      "password": "2BbF0BFSFT",
+      "family": "担当者姓",
+      "first": "担当者名"
     }
   }
 }

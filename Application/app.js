@@ -322,12 +322,25 @@ app.use('/deleteApproveRoute', require('./routes/deleteApproveRoute').router)
 // 承認ルート確認
 app.use('/approveRouteEdit', require('./routes/approveRouteEdit').router)
 
-// 設定
-// cancellation
+// ------------設定
+// ご契約内容
+app.use('/contractDetail', require('./routes/contractDetail').router)
+
+// 無料契約者情報の修正
+app.use('/change', require('./routes/change').router)
+
+// 無料契約情報解約
 app.use('/cancellation', require('./routes/cancellation').router)
 
-// 契約者情報の修正
-app.use('/change', require('./routes/change').router)
+// 有料契約情報解約
+app.use('/contractCancellation', require('./routes/contractCancellation').router)
+
+// ユーザー一括登録
+app.use('/uploadUsers', require('./routes/uploadUsers').router)
+
+// ------------オプションサービス申込
+// 有料サービス利用登録
+app.use('/paidServiceRegister', require('./routes/paidServiceRegister').router)
 
 // 請求書ダウンロード
 app.use('/csvDownload', require('./routes/csvDownload').router)
@@ -346,6 +359,9 @@ app.use('/idLinking', require('./memberSite/routes/idLinkingRouter').router)
 
 // 奉行クラウド連携
 app.use('/bugyo', require('./obc/obc'))
+
+// API専用
+app.use('/api', require('./routes/api').router)
 
 // notice
 const noticeHelper = require('./routes/helpers/notice')

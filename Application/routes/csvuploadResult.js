@@ -12,6 +12,9 @@ const constantsDefine = require('../constants')
 const invoiceController = require('../controllers/invoiceController')
 const invoiceDetailController = require('../controllers/invoiceDetailController')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const bodyParser = require('body-parser')
 router.use(
   bodyParser.json({
@@ -189,7 +192,7 @@ const cbPostIndex = async (req, res, next) => {
   return res.status(resultStatusCode).send(csvuploadResultDetailsArr)
 }
 
-router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, cbGetIndex)
+router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, csrfProtection, cbGetIndex)
 router.post('/', helper.isAuthenticated, cbPostIndex)
 
 module.exports = {

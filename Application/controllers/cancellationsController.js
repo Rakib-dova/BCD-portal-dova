@@ -11,7 +11,7 @@ const constantsDefine = require('../constants')
 module.exports = {
   create: async (_tenantId, _cancelData, contractInformationcancelOrder) => {
     try {
-      const contract = await Contract.findContract({ tenantId: _tenantId, deleteFlag: false }, 'createdAt DESC')
+      const contract = await Contract.findContract({ tenantId: _tenantId, serviceType: '010', deleteFlag: false }, 'createdAt DESC')
 
       const cancelId = uuidv4()
       const createdDate = new Date()
