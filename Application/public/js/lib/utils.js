@@ -101,7 +101,7 @@ function getTaxGroups(lines, taxDatabase) {
 // eslint-disable-next-line no-unused-vars
 function getTaxTotal(taxGroups) {
   let taxTotal = 0
-  taxGroups.forEach((taxGroup) => (taxTotal += taxGroup.taxGroupTotal)) // eslint-disable-line
+  taxGroups.forEach((taxGroup) => (taxTotal += taxGroup.taxGroupTotal))
   return taxTotal
 }
 

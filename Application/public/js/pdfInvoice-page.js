@@ -192,9 +192,9 @@ function setStaticProp(invoice, lines) {
       const DescriptionInput = clone.querySelector(invoicediscountId[i - 1].description)
       DescriptionInput.textContent = invoice['discountDescription' + i]
       const AmountInput = clone.querySelector(invoicediscountId[i - 1].amount)
-      AmountInput.textContent = invoice['discountDiscountAmount' + i]
+      AmountInput.textContent = invoice['discountAmount' + i]
       const TypeSelect = clone.querySelector(invoicediscountId[i - 1].unit)
-      if (!getDiscountTypeIndex(invoice['discountDiscountUnit' + i])) TypeSelect.textContent = '%'
+      if (!getDiscountTypeIndex(invoice['discountUnit' + i])) TypeSelect.textContent = '%'
       else TypeSelect.textContent = 'JPY'
       const DiscountTd = clone.querySelector(invoicediscountId[i - 1].total)
       DiscountTd.textContent = functionDiscountCalcs[i](
@@ -582,21 +582,24 @@ function addLine() {
 
 // 割引行初期化
 function initDiscountLine(line, linenum = 0) {
-  if (linenum === 1) {
-    line.discountDescription1 = null
-    line.discountAmount1 = null
-    // line.discountUnit1 = null
-  }
-  if (linenum === 2) {
-    line.discountDescription2 = null
-    line.discountAmount2 = null
-    line.discountUnit2 = null
-  }
-  if (linenum === 3) {
-    line.discountDescription3 = null
-    line.discountAmount3 = null
-    line.discountUnit3 = null
-  }
+  line['discountDescription' + linenum] = null
+  line['discountAmount' + linenum] = null
+  line['discountUnit' + linenum] = null
+  // if (linenum === 1) {
+  //   line.discountDescription1 = null
+  //   line.discountAmount1 = null
+  //   line.discountUnit1 = null
+  // }
+  // if (linenum === 2) {
+  //   line.discountDescription2 = null
+  //   line.discountAmount2 = null
+  //   line.discountUnit2 = null
+  // }
+  // if (linenum === 3) {
+  //   line.discountDescription3 = null
+  //   line.discountAmount3 = null
+  //   line.discountUnit3 = null
+  // }
 }
 
 // 割引行追加
