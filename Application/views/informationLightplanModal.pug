@@ -95,7 +95,7 @@
       .mb-4.btnWrap.is-block.text-center
         a.button.mr-1.is-success.show-modal(href='https://www.ntt.com/business/services/application/crm-dm/bconnection.html' target='_blank') オプションサービス詳細   
         if (userRole === "a6a3edcd-00d9-427c-bf03-4ef0112ba16d")
-          if (contractPlan.isIntroductionSupportPlan === true || contractPlan.isIntroductionSupportPlanForEntry === true)
+          if (contractPlan.isIntroductionSupportPlanForEntry === true)
             a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込みフォーム
             //- a.button.ml-1.is-can.show-modal(data-target='' disabled) お申込み済み
           else
