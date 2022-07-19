@@ -43,8 +43,16 @@ describe('仕訳情報設定_支払依頼（十次承認まで）', function () 
 
   // 支払依頼時、支払内訳に使用する勘定科目・補助科目
   const accountCodes = [
-    { code:'TAccount01', name:'テスト用勘定科目名１', subCode:'TAccoSUB01', subName:'テスト用補助科目名１' },
-    { code:'TAccount02', name:'テスト用勘定科目名２', subCode:'TAccoSUB02', subName:'テスト用補助科目名２' }
+    { code:'TAccount01', name:'テスト用勘定科目名１', subCode:'TAccoSUB11', subName:'テスト用補助科目名１' },
+    { code:'TAccount01', name:'テスト用勘定科目名１', subCode:'TAccoSUB12', subName:'テスト用補助科目名２' },
+    { code:'TAccount01', name:'テスト用勘定科目名１', subCode:'TAccoSUB13', subName:'テスト用補助科目名３' },
+    { code:'TAccount01', name:'テスト用勘定科目名１', subCode:'TAccoSUB14', subName:'テスト用補助科目名４' },
+    { code:'TAccount01', name:'テスト用勘定科目名１', subCode:'TAccoSUB15', subName:'テスト用補助科目名５' },
+    { code:'TAccount02', name:'テスト用勘定科目名２', subCode:'TAccoSUB21', subName:'テスト用補助科目名１' },
+    { code:'TAccount02', name:'テスト用勘定科目名２', subCode:'TAccoSUB22', subName:'テスト用補助科目名２' },
+    { code:'TAccount02', name:'テスト用勘定科目名２', subCode:'TAccoSUB23', subName:'テスト用補助科目名３' },
+    { code:'TAccount02', name:'テスト用勘定科目名２', subCode:'TAccoSUB24', subName:'テスト用補助科目名４' },
+    { code:'TAccount02', name:'テスト用勘定科目名２', subCode:'TAccoSUB25', subName:'テスト用補助科目名５' }
   ];
 
   // 支払依頼時、支払内訳に使用する部門データ
