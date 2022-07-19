@@ -4,7 +4,7 @@
  * @returns エレメント
  */
 // eslint-disable-next-line no-unused-vars
-const getElement = function (tagObjName) {
+const $ = function (tagObjName) {
   const classNamePattern = '\\.+[a-zA-Z0-9]'
   const idNamePatten = '\\#+[a-zA-Z0-9]'
   const classNameReg = new RegExp(classNamePattern)

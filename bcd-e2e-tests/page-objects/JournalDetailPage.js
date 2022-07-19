@@ -147,8 +147,9 @@ class JournalDetailPage {
   }
 
   // 仕訳情報内、借方の勘定科目数を取得する
-  async getAccountCodeCount() {
-    let elements = await this.actionUtils.getElements(this.frame, '//div[@class="column p-0 lineAccountCode"]');
+  async getAccountCodeCount(lineNo) {
+    let xpath = (lineNo < 1 ? '//div[contains(@id, "lineNo")]' : '//div[@id="lineNo' + lineNo + '"]') + '/div[contains(@class, "lineAccountcode")]';
+    let elements = await this.actionUtils.getElements(this.frame, xpath);
     return elements.length;
   }
 
@@ -215,7 +216,7 @@ class JournalDetailPage {
     await this.actionUtils.fill(this.frame, '#inputInstallmentAmount', cost);
     await this.actionUtils.click(this.frame, '#btn-insert');
   }
-  
+
   // 仕訳情報入力フォームの計上価格を取得する
   async getBreakdownCost(no) {
     return await this.actionUtils.getValue(this.frame, '#lineNo1_lineAccountCode' + no + '_input_amount');
@@ -228,26 +229,34 @@ class JournalDetailPage {
     await this.actionUtils.waitForLoading('#btn-bulk-insert');
   }
 
+  // 仕訳情報一括設定ポップアップにて、仕訳情報を追加する
+  async clickAddBreakdownOnBulk() {
+    await this.addComment('「仕訳情報一括設定」にて、「＋」をクリックする');
+    await this.actionUtils.click(this.frame,'#btn-plus-accountCode-bulkInsert-modal');
+  }
+
   // 仕訳情報一括設定ポップアップから、勘定科目の検索ポップアップを表示する
-  async clickAccountCodeSearchOnBulk(isCredit) {
+  async clickAccountCodeSearchOnBulk(acNo, isCredit) {
     await this.addComment('「仕訳情報一括設定」の「勘定科目コード」にて、「検索」をクリックする');
+    let dataInfo = 'bulkInsertNo1_line' + (isCredit ? 'Credit' : '') + 'AccountCode' + acNo;
     let modalId = isCredit ? 'creditAccountCode-modal' : 'accountCode-modal';
-    await this.actionUtils.click(this.frame, '//div[@id="bulkInsert-journal-modal"]//a[@data-target="' + modalId +'"]');
+    await this.actionUtils.click(this.frame, '//div[@id="bulkInsert-journal-modal"]//a[@data-info="' + dataInfo +'" and @data-target="' + modalId + '"]');
     await this.actionUtils.waitForLoading('#' + modalId);
   }
   
   // 仕訳情報一括設定ポップアップから、部門データの検索ポップアップを表示する
-  async clickDepartmentSearchOnBulk(isCredit) {
+  async clickDepartmentSearchOnBulk(acNo, isCredit) {
     await this.addComment('「仕訳情報一括設定」の「部門コード」にて、「検索」をクリックする');
+    let dataInfo = 'bulkInsertNo1_line' + (isCredit ? 'Credit' : '') + 'AccountCode' + acNo;
     let modalId = isCredit ? 'creditDepartmentCode-modal' : 'departmentCode-modal';
-    await this.actionUtils.click(this.frame, '//div[@id="bulkInsert-journal-modal"]//a[@data-target="' + modalId + '"]');
+    await this.actionUtils.click(this.frame, '//div[@id="bulkInsert-journal-modal"]//a[@data-info="' + dataInfo +'" and @data-target="' + modalId + '"]');
     await this.actionUtils.waitForLoading('#' + modalId);
   }
 
   // 仕訳情報一括設定ポップアップにて、項目IDのチェックを入れる
-  async checkBulkON() {
-    await this.addComment('「仕訳情報一括設定」にて、項目IDにチェックを入れる');
-    await this.actionUtils.check(this.frame, '//div[@id="field-invoiceLine"]//input[@class="isCheckedForInvoiceLine"]', true);
+  async checkBulkON(lineNo) {
+    await this.addComment('「仕訳情報一括設定」にて、' + lineNo + '番目の項目IDにチェックを入れる');
+    await this.actionUtils.check(this.frame, '//div[contains(@class, "column-invoiceLine-journalModal")][' + lineNo + ']//input[@class="isCheckedForInvoiceLine"]', true);
   }
 
   // 仕訳情報一括設定ポップアップの「反映」をクリックする

@@ -1,0 +1,70 @@
+﻿extends layout
+
+block content
+  .max-width
+    section.hero.is-small.is-com
+      .hero-body-noImage
+        .title.is-family-noto-sans #{title}
+        .subtitle.is-family-noto-sans #{engTitle}
+
+  .section#contractBox
+    .is-family-noto-sans.contractWidth.mb-5
+      form#form(method="post")
+        article.panel.is-info
+          h2.panel-heading 解約確認
+          .panel-block
+            .container
+              .columns.is-centered: .column
+                .field.is-grouped.is-grouped-left.is-block
+                  h3 解約サービス
+                .serviceWrap
+                  .icon-aic.is-flex.is-align-items-center
+                    img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
+                    span スタンダードプラン
+                .field.is-grouped.is-grouped-left.is-block
+                  h3.my-3 解約する前に以下の内容をご確認ください。
+                  p.ml-3.mb-4 
+                    |スタンダードプラン解約後は、一部機能がご利用できなくなります。
+                    br
+                    |※デジタルトレードアプリ フリープラン、Tradeshiftはそのままご利用いただけます。
+                    br
+                    |※スタンダードプラン解約申請申し込み後の取り消しはお受けできません。
+                .serviceBox.mb-5    
+                  h3.mb-3 ご利用できなくなる機能
+                  ul 
+                    li ・支払依頼検索機能
+                    li ・仕訳情報ダウンロード出力フォーマットの選択
+                    li ・メール通知機能
+                .is-flex.mb-5.btnWrap 
+                  a.button.btn-contract(href="contractDetail") キャンセル   
+                  a.button.is-success.btn-contract.show-modal(data-target='cancell-modal') 解約手続へ
+
+    .modal#cancell-modal
+      .modal-background.cancel-button(data-target='cancell-modal')
+      .modal-card.is-family-noto-sans
+        header.modal-card-head
+          p.modal-card-title 以下の内容を解約します
+          button.delete(data-target="cancell-modal")
+        section.modal-card-body
+          table.cancellTable
+            tr
+              th(colspan='2') サービス情報 
+            tr 
+              td サービス名
+              td スタンダードプラン
+            tr 
+              td お客様番号
+              td #{numberN}
+          p.my-5.cancellText 下記の「解約」ボタンを押下した後の取り消しはできません。  
+          .is-flex.btnWrap   
+            a.button.cancel-button.btn-contract(data-target="cancell-modal") キャンセル   
+            form#form(action="/contractCancellation/register" method="POST")
+              //- CSRF対策
+              input(type="hidden" name="_csrf" value=csrfToken)
+              button.button.status-text.is-fail.btn-contract(type="submit") 解約  
+        footer.modal-card-foot
+    include footer
+
+block append scripts
+  //- script(src="/js/register-page.js")
+  link(rel='stylesheet', type='text/css', href='/css/contractCancellation.css')

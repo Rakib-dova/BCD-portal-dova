@@ -21,6 +21,7 @@ class JournalMenuPage {
   async waitForLoading() {
     let frame = await this.actionUtils.waitForLoading('//*[@id="registAccountCode-modal"]//*[contains(text(),"承認ルート一覧")]')
     this.frame = frame;
+    await this.frame.waitForTimeout(1000);
     return frame;
   }
 

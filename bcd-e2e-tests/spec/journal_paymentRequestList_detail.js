@@ -97,7 +97,6 @@ describe('仕訳情報設定_支払依頼一覧（仕訳情報保存）', functi
     await journalMenuPage.waitForLoading();
 
     // 支払依頼一覧ページへ遷移する
-    await comment('「支払依頼一覧」をクリックする');
     await journalMenuPage.clickPaymentRequest();
     await paymentRequestListPage.waitForLoading();
   };
@@ -237,7 +236,7 @@ describe('仕訳情報設定_支払依頼一覧（仕訳情報保存）', functi
     }
   };
 
-  // 支払依頼ページ内、仕訳情報設定のテスト（「支払依頼」タブ）
+  // 支払依頼ページ内、仕訳情報設定のテスト
   async function setDetails(invoiceNo, lineCount, acCount, withNoCredit, withCredit) {
     // テストの初期化を実施
     await initBrowser();
@@ -327,6 +326,105 @@ describe('仕訳情報設定_支払依頼一覧（仕訳情報保存）', functi
   it("明細数2、仕訳数10（借方なし、貸方あり）", async function() {
     await setDetails('atest021001', 2, 10, false, true);
   });*/
+
+  // 支払依頼ページ内、仕訳情報設定のテスト（一括登録）
+  async function setBulk(invoiceNo, lineCount, acCount, withNoCredit, withCredit) {
+    // テストの初期化を実施
+    await initBrowser();
+    const context = await browser.newContext(contextOption);
+    if (page != null) {
+      page.close();
+    }
+    page = await context.newPage();
+    global.reporter.setBrowserInfo(browser, page);
+
+    // ページオブジェクト
+    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, paymentRequestListPage, journalDetailPage, paymentRequestPage }
+      = common.getPageObject(browser, page);
+
+    // 支払依頼一覧ページへ遷移する
+    await gotoPaymentRequestList(config.company2.user04, loginPage, tradeShiftTopPage, topPage, journalMenuPage, paymentRequestListPage);
+
+    // 仕訳情報設定ページへ遷移する
+    await comment('「仕訳情報設定」をクリックする');
+    await paymentRequestListPage.clickDetail(invoiceNo);
+    await journalDetailPage.waitForLoading();
+
+    // 全ての明細にて、仕訳情報を削除する
+    for (i = 0; i < lineCount; i++) {
+      let accountCount = await journalDetailPage.getAccountCodeCount(i + 1);
+      await comment(accountCount);
+      while (accountCount > 1) {
+        await journalDetailPage.clickDelBreakdown(i + 1, accountCount);
+        await page.waitForTimeout(500);
+        accountCount--;
+      }
+    }
+
+    // 一括入力を行う
+    await journalDetailPage.clickBulkInsert();
+    for (i = 0; i < acCount; i++) {
+      if (i > 0) {
+        await journalDetailPage.clickAddBreakdownOnBulk();
+      }
+      if (withNoCredit) {
+        await journalDetailPage.clickAccountCodeSearchOnBulk(i + 1, false);
+        await journalDetailPage.searchAccount(false, accountCodes[i].code, accountCodes[i].name, accountCodes[i].subCode, accountCodes[i].subName);
+        await journalDetailPage.clickAccountRow(false, accountCodes[i].code, accountCodes[i].subCode);
+        await journalDetailPage.clickDepartmentSearchOnBulk(i + 1, false);
+        await journalDetailPage.searchDepartment(false, departments[i].code, departments[i].name);
+        await journalDetailPage.clickDepartmentRow(false, departments[i].code);
+      }
+      if (withCredit) {
+        await journalDetailPage.clickAccountCodeSearchOnBulk(i + 1, true);
+        let acIndex = i < accountCodes.length - 1 ? i + 1 : 0;
+        await journalDetailPage.searchAccount(true, accountCodes[acIndex].code, accountCodes[acIndex].name, accountCodes[acIndex].subCode, accountCodes[acIndex].subName);
+        await journalDetailPage.clickAccountRow(true, accountCodes[acIndex].code, accountCodes[acIndex].subCode);
+        await journalDetailPage.clickDepartmentSearchOnBulk(i + 1, true);
+        await journalDetailPage.searchDepartment(true, departments[acIndex].code, departments[acIndex].name);
+        await journalDetailPage.clickDepartmentRow(true, departments[acIndex].code);
+      }
+    }
+    for (i = 0; i < lineCount; i++) {
+      await journalDetailPage.checkBulkON(i + 1);
+    }
+    await journalDetailPage.clickBulkOK();
+
+    // チェックした明細に一括入力で設定した仕訳情報が反映されていること
+    for (i = 0; i < lineCount; i++) {
+      for (j = 0; j < acCount; j++) {
+        if (withNoCredit) {
+          expect(await journalDetailPage.hasBreakdown(i + 1, j + 2, false, accountCodes[j].code, accountCodes[j].subCode, departments[j].code)).to.equal(true, '明細' + (i + 1) + '番目、内訳番号' + (j + 1) + '番目：借方の情報が保持されていること');
+        }
+        if (withCredit) {
+          let acIndex = j < accountCodes.length - 1 ? j + 1 : 0;
+          expect(await journalDetailPage.hasBreakdown(i + 1, j + 2, true, accountCodes[acIndex].code, accountCodes[acIndex].subCode, departments[acIndex].code)).to.equal(true, '明細' + (i + 1) + '番目、内訳番号' + (j + 1) + '番目：貸方の情報が保持されていること');
+        }
+      }
+    }
+    await page.waitForTimeout(1000);
+  };
+
+  /**
+   * STEP7_No.70
+   *//*
+  it("明細数2、仕訳数2（借方あり、貸方なし、一括入力）", async function() {
+    await setBulk('atest021010', 2, 2, true, true);
+  });*/
+
+  /**
+   * STEP7_No.70
+   *//*
+  it("明細数2、仕訳数2（借方なし、貸方あり、一括入力）", async function() {
+    await setBulk('atest021001', 2, 2, true, true);
+  });*/
+
+  /**
+   * STEP7_No.71
+   */
+  it("明細数2、仕訳数2（借方あり、貸方あり、一括入力）", async function() {
+    await setBulk('atest021011', 2, 2, true, true);
+  });
 
   it("後片付け（勘定科目、補助科目、部門データ全削除）", async function() {
     // テストの初期化を実施
