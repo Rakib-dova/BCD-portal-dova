@@ -186,6 +186,13 @@ const Tenants = require('../mockDB/Tenants_Table')
 const Contracts = require('../mockDB/Contracts_Table')
 const Contracts2 = require('../mockDB/Contracts_Table2')
 
+const contractPlan = {
+  isLightPlan: true,
+  isIntroductionSupportPlan: false,
+  isLightPlanForEntry: false,
+  isIntroductionSupportPlanForEntry: false
+}
+
 describe('journalDownloadのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -232,6 +239,7 @@ describe('journalDownloadのテスト', () => {
       expect(journalDownload.router.get).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        helper.getContractPlan,
         expect.any(Function),
         journalDownload.cbGetIndex
       )
@@ -250,6 +258,7 @@ describe('journalDownloadのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -295,7 +304,9 @@ describe('journalDownloadのテスト', () => {
         minissuedate: minissuedate,
         maxissuedate: maxissuedate,
         serviceDataFormatName: serviceDataFormatName,
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
 

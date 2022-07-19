@@ -1419,4 +1419,86 @@ describe('helpers/middlewareのテスト', () => {
       expect(request.contractPlan.isIntroductionSupportPlanForEntry).toEqual(true)
     })
   })
+
+  describe('isTenantManager', () => {
+    test('正常 管理者', async () => {
+      // 準備
+      // request.userのuserId、tenantIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      // DBから正常なユーザーデータの取得を想定する
+      userFindOneSpy.mockReturnValue({
+        dataValues: {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: null,
+          userStatus: 0,
+          lastRefreshedAt: null,
+          createdAt: '2021-01-25T10:15:15.086Z',
+          updatedAt: '2021-01-25T10:15:15.086Z'
+        }
+      })
+
+      // 試験実施
+      await middleware.isTenantManager(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith()
+    })
+
+    test('正常 一般ユーザー', async () => {
+      // 準備
+      // request.userのuserId、tenantIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      // DBから正常なユーザーデータの取得を想定する
+      userFindOneSpy.mockReturnValue({
+        dataValues: {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          userRole: 'fe888fbb-172f-467c-b9ad-efe0720fecf9',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: null,
+          userStatus: 0,
+          lastRefreshedAt: null,
+          createdAt: '2021-01-25T10:15:15.086Z',
+          updatedAt: '2021-01-25T10:15:15.086Z'
+        }
+      })
+
+      // 試験実施
+      await middleware.isTenantManager(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
+    })
+
+    test('準正常 DBエラー', async () => {
+      // 準備
+      // request.userのuserId、tenantIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      // DBから正常な契約データの取得を想定する
+      contractFindOneSpy.mockReturnValue(new Error('any'))
+
+      // 試験実施
+      await middleware.isOnOrChangeContract(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+    })
+  })
 })

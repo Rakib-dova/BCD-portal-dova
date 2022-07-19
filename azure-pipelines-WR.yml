@@ -90,7 +90,7 @@ stages:
     jobs:
       - ${{ each BROWSER_NAME in parameters.BROWSER_NAME_LIST }}:
           - job: ${{ BROWSER_NAME }}
-            timeoutInMinutes: 180
+            timeoutInMinutes: 300
             displayName: ${{ BROWSER_NAME }}
             condition: or( eq( '${{ parameters.browser }}', '${{ BROWSER_NAME }}' ), eq( '${{ parameters.browser }}', 'all' ))
             steps:

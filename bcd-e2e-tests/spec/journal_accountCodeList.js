@@ -213,32 +213,11 @@ describe('仕訳情報設定_勘定科目一覧', function () {
         expect(await accountCodeListPage.hasRow(row['勘定科目コード'], row['勘定科目名'])).to.equal(true, '【勘定科目一覧】' + i + '行目のデータが一覧に反映されること');
         i++;
       }
+      
+      // 勘定科目をすべて削除する
+      await accountCodeListPage.deleteAll();
       await page.waitForTimeout(1000);
     }
-  });
-  
-  it("後片付け（勘定科目全削除）", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage }
-      = common.getPageObject(browser, page);
-
-    // 勘定科目一覧ページへ遷移する
-    await gotoAccountCodeList(config.company1.mng, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
-
-    // 勘定科目をすべて削除する
-    await accountCodeListPage.deleteAll();
-    await page.waitForTimeout(1000);
   });
 });
 

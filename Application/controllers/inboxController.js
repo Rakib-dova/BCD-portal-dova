@@ -809,8 +809,8 @@ const getWorkflow = async (userId, contractId, tradeshiftDTO, presentation) => {
         managerInfo.managerAddress = contactor[j].managerAddress
         if (contactor[j].userInfo && !(contactor[j].userInfo instanceof Error)) {
           if (
-            contactor[i].userInfo.Person.LastName.trim().length !== 0 ||
-            contactor[i].userInfo.Person.FirstName.trim().length !== 0
+            contactor[j].userInfo.Person.LastName.trim().length !== 0 ||
+            contactor[j].userInfo.Person.FirstName.trim().length !== 0
           ) {
             managerInfo.managerName = `${contactor[j].userInfo.Person.LastName} ${contactor[j].userInfo.Person.FirstName}`
           } else {
@@ -839,15 +839,12 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     const issueDate = keyword.issueDate
     const status = keyword.status
     const contactEmail = keyword.contactEmail
-    let unKnownManager = ''
-    if (keyword.unKnownManager === 'unKnownManager') {
-      unKnownManager = 'ユーザー登録なし'
-    }
+    const unKnownManager = keyword.unKnownManager
     let result = null
 
     // 請求書のタグ付け有無確認
     const checkTagDocumentList = []
-    const withouttag = ['tag_checked']
+    const withouttag = ['tag_checked_portal']
     const type = ['invoice']
     const state = ['DELIVERED', 'ACCEPTED', 'PAID_UNCONFIRMED', 'PAID_CONFIRMED']
     const stag = ['purchases']
@@ -888,26 +885,27 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
             logger.warn(
               `contractId:${contractId}, DocumentId:${data.DocumentId}, msg: ${constantsDefine.statusConstants.FAILED_TO_CREATE_TAG}(${constantsDefine.statusConstants.INVOICE_CONTACT_EMAIL_NOT_VERIFY})`
             )
-            await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
+            await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('unKnownManager'))
           } else {
             await tradeshiftDTO.createTags(data.DocumentId, invoice.AccountingCustomerParty.Party.Contact.ID.value)
 
+            // 企業にユーザー有無確認
             const userInfo = await apiManager.accessTradeshift(
               tradeshiftDTO.accessToken,
               tradeshiftDTO.refreshToken,
               'get',
               `/account/users/byemail/${invoice.AccountingCustomerParty.Party.Contact.ID.value}?searchlocked=false`
             )
-
+            // ユーザー情報がない場合
             if (userInfo instanceof Error) {
-              await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
+              await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('unKnownManager'))
             }
           }
         } else {
-          await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
+          await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('unKnownManager'))
         }
         // 確認請求書にタグを追加
-        await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked')
+        await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked_portal')
       }
     }
 

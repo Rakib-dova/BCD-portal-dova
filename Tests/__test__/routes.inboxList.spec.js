@@ -199,6 +199,13 @@ const searchResult1Rejected = {
   currPage: 1
 }
 
+const contractPlan = {
+  isLightPlan: true,
+  isIntroductionSupportPlan: false,
+  isLightPlanForEntry: false,
+  isIntroductionSupportPlanForEntry: false
+}
+
 describe('inboxListのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -242,12 +249,14 @@ describe('inboxListのテスト', () => {
         '/:page',
         expect.any(Function),
         helper.bcdAuthenticate,
+        helper.getContractPlan,
         inboxList.cbGetIndex
       )
       expect(inboxList.router.get).toBeCalledWith('/getWorkflow', inboxList.cbGetWorkflow)
       expect(inboxList.router.get).toBeCalledWith(
         '/approvals',
         helper.isAuthenticated,
+        helper.getContractPlan,
         expect.any(Function),
         inboxList.cbGetApprovals
       )
@@ -255,6 +264,7 @@ describe('inboxListのテスト', () => {
         '/:page',
         expect.any(Function),
         helper.bcdAuthenticate,
+        helper.getContractPlan,
         inboxList.cbSearchApprovedInvoice
       )
     })
@@ -266,7 +276,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
-
+      request.contractPlan = contractPlan
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
       tenantControllerFindOneSpy.mockReturnValue(Tenants[0])
@@ -302,7 +312,9 @@ describe('inboxListのテスト', () => {
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: false,
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
 
@@ -311,6 +323,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -345,7 +358,9 @@ describe('inboxListのテスト', () => {
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: false,
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
 
@@ -354,6 +369,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -389,6 +405,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -423,7 +440,9 @@ describe('inboxListのテスト', () => {
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: false,
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
 
@@ -462,6 +481,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -836,6 +856,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -872,7 +893,9 @@ describe('inboxListのテスト', () => {
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: true,
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
 
@@ -881,6 +904,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -917,7 +941,9 @@ describe('inboxListのテスト', () => {
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: true,
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
 
@@ -926,6 +952,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -962,7 +989,9 @@ describe('inboxListのテスト', () => {
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: true,
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
 
@@ -1005,6 +1034,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
 
       // DBからの正常なユーザデータの取得を想定する
       userControllerFindOneSpy.mockReturnValue(Users[0])
@@ -1160,6 +1190,8 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
+
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1214,7 +1246,9 @@ describe('inboxListのテスト', () => {
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: false,
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
 
@@ -1223,6 +1257,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1280,6 +1315,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1334,6 +1370,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1390,6 +1427,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1431,7 +1469,9 @@ describe('inboxListのテスト', () => {
         currPage: searchResult1.currPage,
         rejectedFlag: false,
         message: '条件に合致する支払依頼が見つかりませんでした。',
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
 
@@ -1440,6 +1480,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1493,7 +1534,9 @@ describe('inboxListのテスト', () => {
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: false,
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
 
@@ -1502,6 +1545,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1556,6 +1600,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1610,6 +1655,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1665,6 +1711,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1706,6 +1753,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1923,6 +1971,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -1978,7 +2027,9 @@ describe('inboxListのテスト', () => {
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: false,
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
 
@@ -1987,6 +2038,7 @@ describe('inboxListのテスト', () => {
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
       request.user = { ...user[0] }
+      request.contractPlan = contractPlan
       request.body = {
         invoiceNumber: 'PB1649meisai001',
         minIssuedate: '',
@@ -2042,7 +2094,9 @@ describe('inboxListのテスト', () => {
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: false,
-        csrfToken: dummyToken
+        csrfToken: dummyToken,
+        contractPlan: contractPlan,
+        userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'
       })
     })
   })
