@@ -16,12 +16,30 @@ const invoiceHeaderArray = [
   '口座番号',
   '口座名義',
   '備考',
+  '請求書割引内容1',
+  '請求書割引数値1',
+  '請求書割引種別1',
+  '請求書割引内容2',
+  '請求書割引数値2',
+  '請求書割引種別2',
+  '請求書割引内容3',
+  '請求書割引数値3',
+  '請求書割引種別3',
   '明細-項目ID',
   '明細-内容',
   '明細-数量',
   '明細-単位',
   '明細-単価',
-  '明細-税（消費税／軽減税率／不課税／免税／非課税）'
+  '明細-税（消費税／軽減税率／不課税／免税／非課税）',
+  '明細-割引内容1',
+  '明細-割引数値1',
+  '明細-割引種別1',
+  '明細-割引内容2',
+  '明細-割引数値2',
+  '明細-割引種別2',
+  '明細-割引内容3',
+  '明細-割引数値3',
+  '明細-割引種別3'
 ]
 
 // CSVアップロードファイルヘッダーとCSV行データオブジェクトの対応表
@@ -42,12 +60,30 @@ const pdfInvoiceMapper = [
   { col: '口座番号', prop: 'accountNumber', modifier: null },
   { col: '口座名義', prop: 'accountName', modifier: null },
   { col: '備考', prop: 'note', modifier: null },
+  { col: '請求書割引内容1', prop: 'inv-discountDescription1', modifier: null },
+  { col: '請求書割引数値1', prop: 'inv-discountAmount1', modifier: null },
+  { col: '請求書割引種別1', prop: 'inv-discountUnit1', modifier: null },
+  { col: '請求書割引内容2', prop: 'inv-discountDescription2', modifier: null },
+  { col: '請求書割引数値2', prop: 'inv-discountAmount2', modifier: null },
+  { col: '請求書割引種別2', prop: 'inv-discountUnit2', modifier: null },
+  { col: '請求書割引内容3', prop: 'inv-discountDescription3', modifier: null },
+  { col: '請求書割引数値3', prop: 'inv-discountAmount3', modifier: null },
+  { col: '請求書割引種別3', prop: 'inv-discountUnit3', modifier: null },
   { col: '明細-項目ID', prop: 'lineId', modifier: null },
   { col: '明細-内容', prop: 'lineDescription', modifier: null },
   { col: '明細-数量', prop: 'quantity', modifier: null },
   { col: '明細-単位', prop: 'unit', modifier: null },
   { col: '明細-単価', prop: 'unitPrice', modifier: null },
-  { col: '明細-税（消費税／軽減税率／不課税／免税／非課税）', prop: 'taxType', modifier: null }
+  { col: '明細-税（消費税／軽減税率／不課税／免税／非課税）', prop: 'taxType', modifier: null },
+  { col: '明細-割引内容1', prop: 'line-discountDescription1', modifier: null },
+  { col: '明細-割引数値1', prop: 'line-discountAmount1', modifier: null },
+  { col: '明細-割引種別1', prop: 'line-discountUnit1', modifier: null },
+  { col: '明細-割引内容2', prop: 'line-discountDescription2', modifier: null },
+  { col: '明細-割引数値2', prop: 'line-discountAmount2', modifier: null },
+  { col: '明細-割引種別2', prop: 'line-discountUnit2', modifier: null },
+  { col: '明細-割引内容3', prop: 'line-discountDescription3', modifier: null },
+  { col: '明細-割引数値3', prop: 'line-discountAmount3', modifier: null },
+  { col: '明細-割引種別3', prop: 'line-discountUnit3', modifier: null }
 ]
 
 /**
@@ -66,8 +102,12 @@ const convertCsvStringToMultiArray = (csvString) => {
     rowArray[i] = rowArray[i].split(',')
   }
 
-  // 末尾に付く空配列を取り除く処理
-  rowArray = rowArray.filter((row) => row[0] !== '')
+  // 空行を削除
+  rowArray = rowArray.filter((row) => {
+    let allEmpty = true
+    row.forEach((col) => { if (col !== '') allEmpty = false })
+    return !allEmpty
+  })
 
   return rowArray
 }

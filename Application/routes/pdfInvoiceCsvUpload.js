@@ -13,7 +13,7 @@ const csrfProtection = csrf({ cookie: false })
 const helper = require('./helpers/middleware')
 const errorHelper = require('./helpers/error')
 const logger = require('../lib/logger')
-const validation = require('../lib/pdfInvoiceCsvUpdateValidation')
+const validation = require('../lib/pdfInvoiceCsvUploadValidation')
 const {
   convertCsvStringToMultiArray,
   convertToDataObject,
@@ -43,7 +43,7 @@ const pdfInvoiceCsvUploadIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceCsvUploadIndex')
 }
 
-const pdfInvoiceCsvUpload = async (req, res, next) => {
+const pdfInvoiceCsvUpload = async (req, res, next) => { 
   const functionName = 'pdfInvoiceCsvUpload'
   if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -56,32 +56,40 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     defaultCsvData = fs.readFileSync(path.resolve('./public/html/PDF請求書ドラフト一括作成フォーマット.csv'), 'utf8') // アップロードフォーマット文字列データ
   } catch (error) {
     logger.info(error)
-    return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
+    return res.status(500).send(JSON.stringify({ message: 'システムエラーです。（後程、接続してください）' }))
   }
+
   const csvMultiArray = convertCsvStringToMultiArray(uploadFileData) // CSV文字列データをCSV多次元配列データに変換
-  if (!csvMultiArray) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
-  console.log('==  csvMultiArray  ======================\n', csvMultiArray)
+  if (!csvMultiArray) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。' }))
 
   // ヘッダーバリデーション
-  if (!validation.validateHeader(uploadFileData, defaultCsvData)) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
+  if (!validation.validateHeader(uploadFileData, defaultCsvData)) return res.status(400).send(JSON.stringify({ message: 'ヘッダーが指定のものと異なります。' }))
 
   console.log('==  validateHeader pass  ======================')
 
   const csvRowObjects = [] // CSVファイル行情報をデータオブジェクト(アップロードファイル行データ)に変換し、配列化させたもの
-  csvMultiArray.forEach((row, index) => {
-    // console.log('==  row  ======================\n', row)
-    if (index === 0) return
 
-    csvRowObjects.push(convertToDataObject(row, invoiceHeaderArray, pdfInvoiceMapper))
-  })
+  try {
+    csvMultiArray.forEach((row, index) => {
+      if (index === 0) return
+
+      csvRowObjects.push(convertToDataObject(row, invoiceHeaderArray, pdfInvoiceMapper))
+    })
+  } catch (error) {
+    return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
+  }
+
+  if (csvRowObjects.length === 0) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータが存在しません。' }))
   console.log('==  csvRowObjects  ======================\n', csvRowObjects)
+
   // CSV行データオブジェクトに空情報(null)が含まれている場合
-  if (csvRowObjects.filter((row) => row === null).length) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
+  if (csvRowObjects.filter((row) => !row).length) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。' }))
 
   // アカウント情報取得 (CSVデータ多次元配列をデータオブジェクトに変換するのに必要)
   const { senderInfo } = await pdfInvoice.getAccountAndSenderInfo(req)
 
-  if (!senderInfo) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
+  if (!senderInfo) return res.status(500).send(JSON.stringify({ message: 'APIエラーです、時間を空けて再度実行をお願いいたします。' }))
+  console.log('==  アカウント情報取得  ======================\n', senderInfo)
 
   // DB保存&バリデーションするために、CSV行データオブジェクト配列をDBモデルに変換
   const { pdfInvoices, pdfInvoiceLines } = convertCsvDataArrayToPdfInvoiceModels(
@@ -91,7 +99,7 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   )
   console.log('==  pdfInvoices  ======================\n', pdfInvoices)
   console.log('==  pdfInvoiceLines  ======================\n', pdfInvoiceLines)
-  if (!pdfInvoices || !pdfInvoiceLines) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
+  if (!pdfInvoices || !pdfInvoiceLines) return res.status(500).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
 
   // バリデーション
   const { validInvoices, validLines, uploadHistory, csvRows } = await validation.validate(
@@ -105,7 +113,7 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   console.log('==  uploadHistory  ======================\n', uploadHistory)
   console.log('==  csvRows  ======================\n', csvRows)
 
-  if (!validInvoices || !validLines || !uploadHistory || !csvRows) return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
+  if (!validInvoices || !validLines || !uploadHistory || !csvRows) return res.status(500).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
 
   // DB保存
   try {
@@ -117,8 +125,7 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     })
   } catch (error) {
     logger.info(error)
-    return next(errorHelper.create(500)) // [WIP] エラーメッセージを返す実装に修正する
-    // return res.redirect('/pdfInvoiceCsvUpload')
+    return res.status(500).send(JSON.stringify({ message: 'システムエラーです。（後程、接続してください）' }))
   }
 
   if (uploadHistory?.failCount > 0 || (uploadHistory?.skipCount > 0 && uploadHistory?.successCount === 0)) {
@@ -241,7 +248,7 @@ const pdfInvoiceCsvUploadResultDetail = async (req, res, next) => {
 }
 
 const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) => {
-  if (!Array.isArray(csvArray) || getType(senderInfo) !== 'Object' || typeof tenantId !== 'string') {
+  if (!Array.isArray(csvArray) || csvArray.filter((row) => getType(row) === 'Object').length === 0 || getType(senderInfo) !== 'Object' || typeof tenantId !== 'string') {
     return { pdfInvoices: null, pdfInvoiceLines: null }
   }
 
@@ -249,58 +256,83 @@ const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) =
   const pdfInvoiceLines = []
   let curInvoiceIdx = 0
 
-  csvArray.forEach((row) => {
-    const foundInvoices = pdfInvoices.filter((invoice) => invoice.invoiceNo === row.invoiceNo)
-    let pdfInvoice = foundInvoices.length ? foundInvoices[foundInvoices.length - 1] : null
-    if (!pdfInvoice || (pdfInvoice && pdfInvoice.index !== curInvoiceIdx - 1)) {
-      pdfInvoice = {
-        index: curInvoiceIdx, // 連続する請求書番号だけで同じ請求書扱いする為に一時的にプロパティを設ける
-        sendTenantId: tenantId,
-        invoiceId: uuidv4(),
-        invoiceNo: row.invoiceNo,
-        billingDate: new Date(row.billingDate),
-        paymentDate: new Date(row.paymentDate),
-        deliveryDate: new Date(row.deliveryDate),
-        currency: 'JPY',
-        recCompany: row.recCompany,
-        recPost: row.recPost,
-        recAddr1: row.recAddr1,
-        recAddr2: row.recAddr2,
-        recAddr3: row.recAddr3,
-        sendCompany: senderInfo.sendCompany,
-        sendPost: senderInfo.sendPost,
-        sendAddr1: senderInfo.sendAddr1,
-        sendAddr2: senderInfo.sendAddr2,
-        sendAddr3: senderInfo.sendAddr3,
-        sendRegistrationNo: row.sendRegistrationNo,
-        bankName: row.bankName,
-        branchName: row.branchName,
-        accountType: row.accountType,
-        accountName: row.accountName,
-        accountNumber: row.accountNumber,
-        note: row.note
+  try {
+    csvArray.forEach((row) => {
+      const foundInvoices = pdfInvoices.filter((invoice) => invoice.invoiceNo === row.invoiceNo)
+      let pdfInvoice = foundInvoices.length ? foundInvoices[foundInvoices.length - 1] : null
+      if (!pdfInvoice || (pdfInvoice && pdfInvoice.index !== curInvoiceIdx - 1)) {
+        pdfInvoice = {
+          index: curInvoiceIdx, // 連続する請求書番号だけで同じ請求書扱いする為に一時的にプロパティを設ける
+          sendTenantId: tenantId,
+          invoiceId: uuidv4(),
+          invoiceNo: row.invoiceNo,
+          billingDate: new Date(row.billingDate),
+          paymentDate: new Date(row.paymentDate),
+          deliveryDate: new Date(row.deliveryDate),
+          currency: 'JPY',
+          recCompany: row.recCompany,
+          recPost: row.recPost,
+          recAddr1: row.recAddr1,
+          recAddr2: row.recAddr2,
+          recAddr3: row.recAddr3,
+          sendCompany: senderInfo.sendCompany,
+          sendPost: senderInfo.sendPost,
+          sendAddr1: senderInfo.sendAddr1,
+          sendAddr2: senderInfo.sendAddr2,
+          sendAddr3: senderInfo.sendAddr3,
+          sendRegistrationNo: row.sendRegistrationNo,
+          bankName: row.bankName,
+          branchName: row.branchName,
+          accountType: row.accountType,
+          accountName: row.accountName,
+          accountNumber: row.accountNumber,
+          note: row.note,
+          discounts: getDiscountLength(row, 'invoice'),
+          discountDescription1: row['inv-discountDescription1'],
+          discountAmount1: row['inv-discountAmount1'],
+          discountUnit1: row['inv-discountUnit1'],
+          discountDescription2: row['inv-discountDescription2'],
+          discountAmount2: row['inv-discountAmount2'],
+          discountUnit2: row['inv-discountUnit2'],
+          discountDescription3: row['inv-discountDescription3'],
+          discountAmount3: row['inv-discountAmount3'],
+          discountUnit3: row['inv-discountUnit3']
+        }
+
+        curInvoiceIdx++
+        pdfInvoices.push(pdfInvoice)
+      }
+      const invoiceId = pdfInvoice.invoiceId
+      const lineIndex = pdfInvoiceLines.filter((line) => line.invoiceId === invoiceId).length
+
+      const line = {
+        invoiceId,
+        lineIndex,
+        lineId: row.lineId,
+        lineDescription: row.lineDescription,
+        unit: row.unit,
+        unitPrice: row.unitPrice,
+        quantity: row.quantity,
+        taxType: row.taxType,
+        discounts: getDiscountLength(row, 'line'),
+        discountDescription1: row['line-discountDescription1'],
+        discountAmount1: row['line-discountAmount1'],
+        discountUnit1: row['line-discountUnit1'],
+        discountDescription2: row['line-discountDescription2'],
+        discountAmount2: row['line-discountAmount2'],
+        discountUnit2: row['line-discountUnit2'],
+        discountDescription3: row['line-discountDescription3'],
+        discountAmount3: row['line-discountAmount3'],
+        discountUnit3: row['line-discountUnit3'],
+        invoiceNo: row.invoiceNo // CSV行テーブルレコード作成の為、一時的に設けるプロパティ
       }
 
-      curInvoiceIdx++
-      pdfInvoices.push(pdfInvoice)
-    }
-    const invoiceId = pdfInvoice.invoiceId
-    const lineIndex = pdfInvoiceLines.filter((line) => line.invoiceId === invoiceId).length
-
-    const line = {
-      invoiceId,
-      lineIndex,
-      lineId: row.lineId,
-      lineDescription: row.lineDescription,
-      unit: row.unit,
-      unitPrice: row.unitPrice,
-      quantity: row.quantity,
-      taxType: row.taxType,
-      invoiceNo: row.invoiceNo // CSV行テーブルレコード作成の為、一時的に設けるプロパティ
-    }
-
-    pdfInvoiceLines.push(line)
-  })
+      pdfInvoiceLines.push(line)
+    })
+  } catch (error) {
+    console.error(error)
+    return { pdfInvoices: null, pdfInvoiceLines: null }
+  }
 
   // 不要なプロパティを削除
   pdfInvoices.forEach((invoice) => {
@@ -310,6 +342,23 @@ const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) =
   return { pdfInvoices, pdfInvoiceLines }
 }
 
+// CSV行情報から 請求書割引 or 明細割引数 を求める
+const getDiscountLength = (row, discountType) => {
+  let count = 0
+
+  if (discountType === 'invoice') {
+    if (row['inv-discountDescription1'] && row['inv-discountAmount1'] && row['inv-discountUnit1']) count++ // 請求書割引1の情報が全部入力されている場合
+    if (row['inv-discountDescription2'] && row['inv-discountAmount2'] && row['inv-discountUnit2']) count++ // 請求書割引2の情報が全部入力されている場合
+    if (row['inv-discountDescription3'] && row['inv-discountAmount3'] && row['inv-discountUnit3']) count++ // 請求書割引3の情報が全部入力されている場合
+  } else if (discountType === 'line') {
+    if (row['line-discountDescription1'] && row['line-discountAmount1'] && row['line-discountUnit1']) count++ // 明細割引1の情報が全部入力されている場合
+    if (row['line-discountDescription2'] && row['line-discountAmount2'] && row['line-discountUnit2']) count++ // 明細割引2の情報が全部入力されている場合
+    if (row['line-discountDescription3'] && row['line-discountAmount3'] && row['line-discountUnit3']) count++ // 明細割引3の情報が全部入力されている場合
+  }
+
+  return count
+}
+
 router.get('/', csrfProtection, helper.bcdAuthenticate, pdfInvoiceCsvUploadIndex)
 router.post('/upload', csrfProtection, helper.bcdAuthenticate, upload.single('csvFile'), pdfInvoiceCsvUpload)
 router.get('/resultList', csrfProtection, helper.bcdAuthenticate, pdfInvoiceCsvUploadResult)
@@ -317,6 +366,7 @@ router.get('/resultList/detail/:historyId', csrfProtection, helper.bcdAuthentica
 
 module.exports = {
   router,
+  convertCsvDataArrayToPdfInvoiceModels,
   pdfInvoiceCsvUploadIndex,
   pdfInvoiceCsvUpload,
   pdfInvoiceCsvUploadResult,

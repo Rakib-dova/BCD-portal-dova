@@ -11,14 +11,14 @@ const Response = require('jest-express').Response
 const next = require('jest-express').Next
 const fs = require('fs')
 
-const errorHelper = require('../../Application/routes/helpers/error')
 const apiManager = require('../../Application/controllers/apiManager.js')
 const pdfInvoiceController = require('../../Application/controllers/pdfInvoiceController.js')
 const pdfInvoiceHistoryController = require('../../Application/controllers/pdfInvoiceHistoryController.js')
 const pdfInvoiceHistoryDetailController = require('../../Application/controllers/pdfInvoiceHistoryDetailController.js')
 const logger = require('../../Application/lib/logger.js')
-const csv = require('../../Application/lib/csv.js')
-const validation = require('../../Application/lib/pdfInvoiceCsvUpdateValidation')
+jest.mock('../../Application/lib/csv.js', () => ({ convertCsvStringToMultiArray: jest.fn(), convertToDataObject: jest.fn() }))
+const { convertCsvStringToMultiArray, convertToDataObject } = require('../../Application/lib/csv.js')
+const validation = require('../../Application/lib/pdfInvoiceCsvUploadValidation')
 const db = require('../../Application/models')
 
 let request, response, infoSpy, errorSpy, accessTradeshift
@@ -28,7 +28,6 @@ let findInvoiceDetailSpy
 let fsSpy
 let validateSpy, validateHeaderSpy
 let pdfInvoiceGetAccountAndSenderInfoSpy
-let convertCsvStringToMultiArraySpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -47,29 +46,6 @@ const user = [
 ]
 
 // 戻り値定義
-const accountInfo = {
-  CompanyName: '送信先ダミー企業',
-  Country: 'JP',
-  CompanyAccountId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
-  State: 'ACTIVE',
-  Description: '送信先ダミー企業',
-  Identifiers: [{ scheme: 'TS:ID', value: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af' }],
-  AddressLines: [
-    { scheme: 'city', value: '東京都' },
-    { scheme: 'locality', value: '大手町プレイスウエスト' },
-    { scheme: 'street', value: '大手町' },
-    { scheme: 'zip', value: '100-8019' }
-  ],
-  LogoURL: 'https://res.cloudinary.com/tradeshift-test/image/upload/fa0cc2df-fa4f-5052-b22a-b6984d326ab6.png',
-  PublicProfile: false,
-  NonuserInvoicing: false,
-  AutoAcceptConnections: false,
-  Restricted: true,
-  Created: '2021-07-27T09:10:59.241Z',
-  Modified: '2021-07-27T09:13:17.436Z',
-  AccountType: 'FREE'
-}
-
 const senderInfo = {
   sendCompany: '送信先ダミー企業',
   sendPost: '100-8019',
@@ -78,29 +54,22 @@ const senderInfo = {
   sendAddr3: '大手町プレイスウエスト'
 }
 
-const uploadFileData =
-  '登録番号,請求書番号,支払期日,請求日,納品日,宛先企業名,宛先郵便番号,宛先都道府県,宛先住所,宛先ビル名/フロア等,銀行名,支店名,科目,口座番号,口座名義,備考,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）' +
-  '\r\n' +
-  'T1234567890123,upload001,2021-5-1,2021-5-2,2021-5-3,宛先企業１,000-0000,宛先東京,宛先中央区,宛先びる１Ｆ,ＡＢＣ銀行,１２３支店,普通,1234567,MEIGI KOZA,備考備考,a001,明細１,1,個,単価,消費税' +
-  '\r\n' +
-  'T1234567890123,upload002,2021-5-1,2021-5-2,2021-5-3,宛先企業１,000-0000,宛先東京,宛先中央区,宛先びる１Ｆ,ＡＢＣ銀行,１２３支店,普通,1234567,MEIGI KOZA,備考備考,a001,明細１,1,1000,100000,消費税' +
-  '\r\n' +
-  'T1234567890123,upload003,2021-5-1,2021-5-2,2021-5-3,宛先企業１,000-0000,宛先東京,宛先中央区,宛先びる１Ｆ,ＡＢＣ銀行,１２３支店,普通,1234567,MEIGI KOZA,備考備考,a001,明細１,1,1000,100000,消費税'
-
-const uploadFileDataSuccess =
-  '登録番号,請求書番号,支払期日,請求日,納品日,宛先企業名,宛先郵便番号,宛先都道府県,宛先住所,宛先ビル名/フロア等,銀行名,支店名,科目,口座番号,口座名義,備考,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）' +
-  '\r\n' +
-  'T1234567890123,upload001,2021-5-1,2021-5-2,2021-5-3,宛先企業１,000-0000,宛先東京,宛先中央区,宛先びる１Ｆ,ＡＢＣ銀行,１２３支店,普通,1234567,MEIGI KOZA,備考備考,a001,明細１,1,個,単価,消費税' +
-  '\r\n' +
-  'T1234567890123,upload001,2021-5-1,2021-5-2,2021-5-3,宛先企業１,000-0000,宛先東京,宛先中央区,宛先びる１Ｆ,ＡＢＣ銀行,１２３支店,普通,1234567,MEIGI KOZA,備考備考,a002,明細１,1,個,単価,消費税'
-
-const uploadFileDataNull =
-  '登録番号,請求書番号,支払期日,請求日,納品日,宛先企業名,宛先郵便番号,宛先都道府県,宛先住所,宛先ビル名/フロア等,銀行名,支店名,科目,口座番号,口座名義,備考,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）' +
-  '\r\n' +
-  '\r\n'
-
 const defaultCsvData =
-  '登録番号,請求書番号,支払期日,請求日,納品日,宛先企業名,宛先郵便番号,宛先都道府県,宛先住所,宛先ビル名/フロア等,銀行名,支店名,科目,口座番号,口座名義,備考,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）'
+  '登録番号,請求書番号,支払期日,請求日,納品日,宛先企業名,宛先郵便番号,宛先都道府県,宛先住所,宛先ビル名/フロア等,銀行名,支店名,科目,口座番号,口座名義,備考,請求書割引内容1,請求書割引数値1,請求書割引種別1,請求書割引内容2,請求書割引数値2,請求書割引種別2,請求書割引内容3,請求書割引数値3,請求書割引種別3,明細-項目ID,明細-内容,明細-数量,明細-単位,明細-単価,明細-税（消費税／軽減税率／不課税／免税／非課税）,明細-割引内容1,明細-割引数値1,明細-割引種別1,明細-割引内容2,明細-割引数値2,明細-割引種別2,明細-割引内容3,明細-割引数値3,明細-割引種別3'
+
+const invoiceData = {
+  singleValid: [{}]
+}
+
+const uploadHistoryData = {
+  success: { successCount: 1, failCount: 0, skipCount: 0 },
+  skip: { successCount: 0, failCount: 0, skipCount: 1 },
+  fail: { successCount: 0, failCount: 1, skipCount: 1 },
+  successFail: { successCount: 1, failCount: 1, skipCount: 0 },
+  successSkip: { successCount: 1, failCount: 0, skipCount: 1 },
+  failSkip: { successCount: 0, failCount: 1, skipCount: 1 },
+  all: { successCount: 1, failCount: 1, skipCount: 1 }
+}
 
 const validInvoicesData = {
   all: [
@@ -262,36 +231,6 @@ const validLinesData = {
       taxType: 'tax10p'
     }
   ]
-}
-
-const uploadHistoryData = {
-  all: {
-    historyId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
-    tenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
-    csvFileName: 'PDF請求書ドラフト一括作成フォーマット.csv',
-    successCount: 1,
-    failCount: 1,
-    skipCount: 1,
-    invoiceCount: 1
-  },
-  success: {
-    historyId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
-    tenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
-    csvFileName: 'PDF請求書ドラフト一括作成フォーマット.csv',
-    successCount: 1,
-    failCount: 0,
-    skipCount: 0,
-    invoiceCount: 1
-  },
-  skip: {
-    historyId: 'd82b45fc-8c4b-48f7-b6a1-37caaa5ae018',
-    tenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
-    csvFileName: 'PDF請求書ドラフト一括作成フォーマット.csv',
-    successCount: 0,
-    failCount: 0,
-    skipCount: 1,
-    invoiceCount: 1
-  }
 }
 
 const csvRowsData = {
@@ -470,13 +409,12 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
     findInvoiceDetailSpy = jest.spyOn(pdfInvoiceHistoryDetailController, 'findInvoiceDetail')
     createInvoicesAndLinesSpy = jest.spyOn(pdfInvoiceController, 'createInvoicesAndLines')
     createUploadHistoryAndRowsSpy = jest.spyOn(pdfInvoiceHistoryController, 'createUploadHistoryAndRows')
-    convertCsvStringToMultiArraySpy = jest.spyOn(csv, 'convertCsvStringToMultiArray')
     fsSpy = jest.spyOn(fs, 'readFileSync')
     validateSpy = jest.spyOn(validation, 'validate')
     validateHeaderSpy = jest.spyOn(validation, 'validateHeader')
     pdfInvoiceGetAccountAndSenderInfoSpy = jest.spyOn(pdfInvoice, 'getAccountAndSenderInfo')
+    convertCsvStringToMultiArray.mockImplementation(() => [])
   })
-
   afterEach(() => {
     request.resetMocked()
     response.resetMocked()
@@ -488,11 +426,12 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
     findInvoiceDetailSpy.mockRestore()
     createInvoicesAndLinesSpy.mockRestore()
     createUploadHistoryAndRowsSpy.mockRestore()
-    convertCsvStringToMultiArraySpy.mockRestore()
     fsSpy.mockRestore()
     validateSpy.mockRestore()
     validateHeaderSpy.mockRestore()
     pdfInvoiceGetAccountAndSenderInfoSpy.mockRestore()
+    convertCsvStringToMultiArray.mockRestore()
+    convertToDataObject.mockRestore()
   })
 
   describe('コールバック:pdfInvoiceCsvUploadIndex', () => {
@@ -508,39 +447,17 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
   })
 
   describe('コールバック:pdfInvoiceCsvUpload', () => {
-    test('正常-成功失敗スキップ含む', async () => {
-      request.file = { buffer: Buffer.from(uploadFileData) }
-
+    test('正常: 成功のみ', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
       fsSpy.mockReturnValue(defaultCsvData)
       validateHeaderSpy.mockReturnValue(true)
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ accountInfo, senderInfo })
-      validateSpy.mockReturnValue({
-        validInvoices: validInvoicesData.all,
-        validLines: validLinesData.all,
-        uploadHistory: uploadHistoryData.all,
-        csvRows: csvRowsData.all
-      })
-
-      db.sequelize.transaction = jest.fn(async (callback) => {
-        createInvoicesAndLinesSpy.mockReturnThis()
-        createUploadHistoryAndRowsSpy.mockReturnThis()
-        return await callback()
-      })
-
-      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
-    })
-
-    test('正常-成功のみ', async () => {
-      request.file = { buffer: Buffer.from(uploadFileDataSuccess) }
-
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(true)
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ accountInfo, senderInfo })
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue({})
+      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
 
       validateSpy.mockReturnValue({
-        validInvoices: validInvoicesData.success,
+        validInvoices: invoiceData.singleValid,
         validLines: validLinesData.success,
         uploadHistory: uploadHistoryData.success,
         csvRows: csvRowsData.success
@@ -556,14 +473,41 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       expect(response.redirect).toHaveBeenCalledWith('/pdfInvoices/list')
     })
-    test('正常-スキップのみ', async () => {
-      request.file = { buffer: Buffer.from(uploadFileDataSuccess) }
+    test('正常: 失敗のみ', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
       fsSpy.mockReturnValue(defaultCsvData)
       validateHeaderSpy.mockReturnValue(true)
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ accountInfo, senderInfo })
-
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue({})
+      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
       validateSpy.mockReturnValue({
-        validInvoices: validInvoicesData.skip,
+        validInvoices: invoiceData.singleValid,
+        validLines: validLinesData.skip,
+        uploadHistory: uploadHistoryData.fail,
+        csvRows: csvRowsData.skip
+      })
+
+      db.sequelize.transaction = jest.fn(async (callback) => {
+        createInvoicesAndLinesSpy.mockReturnThis()
+        createUploadHistoryAndRowsSpy.mockReturnThis()
+        return await callback()
+      })
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+    })
+    test('正常-スキップのみ', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
+      fsSpy.mockReturnValue(defaultCsvData)
+      validateHeaderSpy.mockReturnValue(true)
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue({})
+      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
+      validateSpy.mockReturnValue({
+        validInvoices: invoiceData.singleValid,
         validLines: validLinesData.skip,
         uploadHistory: uploadHistoryData.skip,
         csvRows: csvRowsData.skip
@@ -579,12 +523,105 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
     })
-    test('準正常: ユーザIDなしの不正リクエスト', async () => {
-      request.user = null
+    test('正常: 成功 & 失敗', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
+      fsSpy.mockReturnValue(defaultCsvData)
+      validateHeaderSpy.mockReturnValue(true)
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue({})
+      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
+      validateSpy.mockReturnValue({
+        validInvoices: invoiceData.singleValid,
+        validLines: validLinesData.skip,
+        uploadHistory: uploadHistoryData.successFail,
+        csvRows: csvRowsData.skip
+      })
+
+      db.sequelize.transaction = jest.fn(async (callback) => {
+        createInvoicesAndLinesSpy.mockReturnThis()
+        createUploadHistoryAndRowsSpy.mockReturnThis()
+        return await callback()
+      })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+    })
+    test('正常: 成功 & スキップ', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
+      fsSpy.mockReturnValue(defaultCsvData)
+      validateHeaderSpy.mockReturnValue(true)
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue({})
+      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
+      validateSpy.mockReturnValue({
+        validInvoices: invoiceData.singleValid,
+        validLines: validLinesData.skip,
+        uploadHistory: uploadHistoryData.successSkip,
+        csvRows: csvRowsData.skip
+      })
+
+      db.sequelize.transaction = jest.fn(async (callback) => {
+        createInvoicesAndLinesSpy.mockReturnThis()
+        createUploadHistoryAndRowsSpy.mockReturnThis()
+        return await callback()
+      })
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoices/list')
+    })
+    test('正常: 失敗 & スキップ', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
+      fsSpy.mockReturnValue(defaultCsvData)
+      validateHeaderSpy.mockReturnValue(true)
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue({})
+      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
+      validateSpy.mockReturnValue({
+        validInvoices: invoiceData.singleValid,
+        validLines: validLinesData.skip,
+        uploadHistory: uploadHistoryData.failSkip,
+        csvRows: csvRowsData.skip
+      })
+
+      db.sequelize.transaction = jest.fn(async (callback) => {
+        createInvoicesAndLinesSpy.mockReturnThis()
+        createUploadHistoryAndRowsSpy.mockReturnThis()
+        return await callback()
+      })
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+    })
+    test('正常: 成功 & 失敗 & スキップ', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
+      fsSpy.mockReturnValue(defaultCsvData)
+      validateHeaderSpy.mockReturnValue(true)
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue({})
+      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
+      validateSpy.mockReturnValue({
+        validInvoices: invoiceData.singleValid,
+        validLines: validLinesData.all,
+        uploadHistory: uploadHistoryData.all,
+        csvRows: csvRowsData.all
+      })
+
+      db.sequelize.transaction = jest.fn(async (callback) => {
+        createInvoicesAndLinesSpy.mockReturnThis()
+        createUploadHistoryAndRowsSpy.mockReturnThis()
+        return await callback()
+      })
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
     })
 
     test('準正常: アップロードデータ空の不正リクエスト', async () => {
@@ -592,78 +629,139 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"システムエラーです。（後程、接続してください）\"}')
+      expect(response.status).toHaveBeenCalledWith(500)
+    })
+    test('準正常: CSVファイル読込エラー', async () => {
+      request.file = { buffer: undefined }
+      fsSpy.mockImplementation(() => { throw new Error('File Read Error') })
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"システムエラーです。（後程、接続してください）\"}')
+      expect(response.status).toHaveBeenCalledWith(500)
     })
     test('準正常: デフォルトフォーマットデータ取得エラー', async () => {
-      fsSpy.mockReturnValue(() => {
-        throw new Error('File Read Error')
-      })
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
+      fsSpy.mockImplementation(() => { throw new Error('File Read Error') })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"システムエラーです。（後程、接続してください）\"}')
+      expect(response.status).toHaveBeenCalledWith(500)
+    })
+    test('準正常: CSV文字列データをCSV多次元配列データに変換時エラー', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
+      fsSpy.mockReturnValue(defaultCsvData)
+      convertCsvStringToMultiArray.mockImplementation(() => null)
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。\"}')
+      expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: ヘッダーバリデーションエラー', async () => {
-      request.file = { buffer: Buffer.from(uploadFileData) }
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
       fsSpy.mockReturnValue(defaultCsvData)
       validateHeaderSpy.mockReturnValue(false)
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"ヘッダーが指定のものと異なります。\"}')
+      expect(response.status).toHaveBeenCalledWith(400)
     })
-    test('準正常: バリデーションエラー', async () => {
-      request.file = { buffer: Buffer.from(uploadFileDataSuccess) }
+    test('準正常: CSV多次元配列データをデータオブジェクト配列に変換時エラー', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
       fsSpy.mockReturnValue(defaultCsvData)
       validateHeaderSpy.mockReturnValue(true)
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ accountInfo, senderInfo })
-
-      validateSpy.mockReturnValue({
-        validInvoices: null,
-        validLines: validLinesData.skip,
-        uploadHistory: uploadHistoryData.skip,
-        csvRows: csvRowsData.skip
-      })
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockImplementation(() => { throw new Error('data convert Error') })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.status).toHaveBeenCalledWith(400)
+    })
+    test('準正常: CSVファイルにデータが存在しない', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
+      fsSpy.mockReturnValue(defaultCsvData)
+      validateHeaderSpy.mockReturnValue(true)
+      convertCsvStringToMultiArray.mockImplementation(() => [])
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータが存在しません。\"}')
+      expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: CSVファイル空行エラー', async () => {
-      request.file = { buffer: Buffer.from(uploadFileDataNull) }
-      fsSpy.mockReturnValue(defaultCsvData)
-      validateHeaderSpy.mockReturnValue(false)
-
-      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
-    })
-    test('準正常: 送信先情報取得APIエラー', async () => {
-      request.file = { buffer: Buffer.from(uploadFileData) }
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
       fsSpy.mockReturnValue(defaultCsvData)
       validateHeaderSpy.mockReturnValue(true)
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ accountInfo, senderInfo: null })
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue(undefined)
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。\"}')
+      expect(response.status).toHaveBeenCalledWith(400)
     })
-    test('準正常: 送信先情報取得エラー', async () => {
-      request.file = { buffer: Buffer.from(uploadFileData) }
+    test('準正常: 送信先情報取得失敗', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
       fsSpy.mockReturnValue(defaultCsvData)
       validateHeaderSpy.mockReturnValue(true)
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ accountInfo, senderInfo: 'senderInfo' })
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue({})
+      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo: null })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      expect(response.status).toHaveBeenCalledWith(500)
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"APIエラーです、時間を空けて再度実行をお願いいたします。\"}')
+    })
+    test('準正常: データオブジェクト配列をDBモデルに変換時にエラー', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
+      fsSpy.mockReturnValue(defaultCsvData)
+      validateHeaderSpy.mockReturnValue(true)
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue('XXX')
+      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.status).toHaveBeenCalledWith(500)
+    })
+    test('準正常: バリデーション失敗', async () => {
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
+      fsSpy.mockReturnValue(defaultCsvData)
+      validateHeaderSpy.mockReturnValue(true)
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue({})
+      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
+      validateSpy.mockReturnValue({})
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.status).toHaveBeenCalledWith(500)
     })
     test('準正常: DB登録エラー createUploadHistoryAndRows', async () => {
-      request.file = { buffer: Buffer.from(uploadFileData) }
-
+      const csvString = fs.readFileSync('./testData/pdfInvoiceUpload/success.csv', 'utf8')
+      request.file = { buffer: Buffer.from(csvString) }
       fsSpy.mockReturnValue(defaultCsvData)
       validateHeaderSpy.mockReturnValue(true)
-      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ accountInfo, senderInfo })
+      convertCsvStringToMultiArray.mockImplementation(() => [[], []])
+      convertToDataObject.mockReturnValue({})
+      pdfInvoiceGetAccountAndSenderInfoSpy.mockReturnValue({ senderInfo })
       validateSpy.mockReturnValue({
         validInvoices: validInvoicesData.all,
         validLines: validLinesData.all,
@@ -672,7 +770,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       db.sequelize.transaction = jest.fn(async (callback) => {
-        createInvoicesAndLinesSpy.mockReturnValue(() => {
+        createInvoicesAndLinesSpy.mockImplementation(() => {
           throw new Error('DB Error')
         })
         return await callback()
@@ -680,7 +778,8 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"システムエラーです。（後程、接続してください）\"}')
+      expect(response.status).toHaveBeenCalledWith(500)
     })
   })
 

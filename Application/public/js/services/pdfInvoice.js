@@ -56,6 +56,21 @@ const outputPdfInvoice = async (invoice, lines, file, invoiceId = null, timerId 
   )
 }
 
+// eslint-disable-next-line no-unused-vars
+const uploadCsv = async (file) => {
+  const formData = new FormData()
+  if (file) formData.append('csvFile', file)
+
+  return await apiController(`https://${location.host}/pdfInvoiceCsvUpload/upload`, 'POST', formData, async (response) => {
+    const url = response.url
+    const a = document.createElement('a')
+    document.body.appendChild(a)
+    a.href = url
+    a.click()
+    a.remove()
+  })
+}
+
 const apiController = async (url, method, body = null, callback = null) => {
   const options = {
     method,
@@ -70,10 +85,11 @@ const apiController = async (url, method, body = null, callback = null) => {
     const response = await fetch(url, options)
     if (response.ok) {
       if (callback) callback(response)
-      else return response
     } else {
       console.log('失敗しました response:\n', response)
     }
+
+    return response
   } catch (err) {
     console.error('失敗しました ERR:\n', err)
   }
