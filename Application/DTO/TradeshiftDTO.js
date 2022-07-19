@@ -151,6 +151,7 @@ class TradeshiftDTO {
     invoiceId = invoiceId ?? ''
     if (issueDate instanceof Array === false) issueDate = []
     contractEmail = contractEmail ?? ''
+    unKnownManager = unKnownManager ?? ''
 
     const get = 'get'
     let uri = `/documents?sentTo=${this.tenantId}&type=invoice&limit=10000&_onlyIndex=true`

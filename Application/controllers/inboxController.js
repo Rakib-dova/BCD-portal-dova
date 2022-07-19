@@ -839,10 +839,7 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
     const issueDate = keyword.issueDate
     const status = keyword.status
     const contactEmail = keyword.contactEmail
-    let unKnownManager = ''
-    if (keyword.unKnownManager === 'unKnownManager') {
-      unKnownManager = 'ユーザー登録なし'
-    }
+    const unKnownManager = keyword.unKnownManager
     let result = null
 
     // 請求書のタグ付け有無確認
@@ -888,23 +885,24 @@ const getSearchResult = async (tradeshiftDTO, keyword, contractId, tenantId) => 
             logger.warn(
               `contractId:${contractId}, DocumentId:${data.DocumentId}, msg: ${constantsDefine.statusConstants.FAILED_TO_CREATE_TAG}(${constantsDefine.statusConstants.INVOICE_CONTACT_EMAIL_NOT_VERIFY})`
             )
-            await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
+            await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('unKnownManager'))
           } else {
             await tradeshiftDTO.createTags(data.DocumentId, invoice.AccountingCustomerParty.Party.Contact.ID.value)
 
+            // 企業にユーザー有無確認
             const userInfo = await apiManager.accessTradeshift(
               tradeshiftDTO.accessToken,
               tradeshiftDTO.refreshToken,
               'get',
               `/account/users/byemail/${invoice.AccountingCustomerParty.Party.Contact.ID.value}?searchlocked=false`
             )
-
+            // ユーザー情報がない場合
             if (userInfo instanceof Error) {
-              await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
+              await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('unKnownManager'))
             }
           }
         } else {
-          await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('ユーザー登録なし'))
+          await tradeshiftDTO.createTags(data.DocumentId, encodeURIComponent('unKnownManager'))
         }
         // 確認請求書にタグを追加
         await tradeshiftDTO.createTags(data.DocumentId, 'tag_checked_portal')
