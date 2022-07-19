@@ -101,8 +101,8 @@ describe('リグレッションテスト', function () {
 
       let msg, expectInvoiceList, companies;
       // 発行日を設定する
-      from = '2021/08/01';
-      to = '2021/08/31';
+      from = '2021/08/21';
+      to = '2021/08/25';
       await downloadInvoicePage.setIssuedate(from, to);
 
       // -------------------- 「請求書番号」のみ指定し、請求情報を確認する --------------------

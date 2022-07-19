@@ -87,17 +87,21 @@ describe('リグレッションテスト', function () {
       await supportMenuPage.waitForLoading();
 
       // 「設定方法、ご利用方法のお問い合わせ」をクリックする(管理者のみ)
+      let notRegistered = true;
       if (account.type == 'manager') {
         await supportMenuPage.clickContact();
 
         // 「設定方法、ご利用方法のお問い合わせ」画面の表示内容を確認する
-        expect(await supportMenuPage.getNumberN()).to.equal('N999999999', 'N番が表示されていること');
-        expect(await supportMenuPage.isCopyExist()).to.equal(true, 'フォーム右側に「copy」ボタンが表示されていること');
-        expect(await supportMenuPage.isContactLinkExist()).to.equal(true, 'フォーム下部に「お問い合わせページを開く」ボタンが表示されていること');
-
-        // 「お問い合わせページを開く」をクリックして、リンク先URLをチェックする
-        url = await supportMenuPage.getContactLinkUrl();
-        expect(url).to.equal('https://support.ntt.com/bconnection/inquiry/input/pid2200000saa', 'お問い合わせ画面が表示されること');
+        notRegistered = await supportMenuPage.isModalShown();
+        if (!notRegistered) {
+          expect(await supportMenuPage.getNumberN()).to.equal('N999999999', 'N番が表示されていること');
+          expect(await supportMenuPage.isCopyExist()).to.equal(true, 'フォーム右側に「copy」ボタンが表示されていること');
+          expect(await supportMenuPage.isContactLinkExist()).to.equal(true, 'フォーム下部に「お問い合わせページを開く」ボタンが表示されていること');
+  
+          // 「お問い合わせページを開く」をクリックして、リンク先URLをチェックする
+          url = await supportMenuPage.getContactLinkUrl();
+          expect(url).to.equal('https://support.ntt.com/bconnection/inquiry/input/pid2200000saa', 'お問い合わせ画面が表示されること');
+        }
 
         // 「設定方法、ご利用方法のお問い合わせ」を閉じる
         await supportMenuPage.closeContact();
@@ -181,7 +185,7 @@ describe('リグレッションテスト', function () {
       expect(await topPage.isConstructTabExist()).to.equal(true, 'Home画面に遷移すること');
 
       // 設定メニューを表示する(管理者のみ)
-      if (account.type == 'manager') {
+      if (account.type == 'manager' && !notRegistered) {
         await topPage.openSettingMenu();
         await settingMenuPage.waitForLoading();
 
