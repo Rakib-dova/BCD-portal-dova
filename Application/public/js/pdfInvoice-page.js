@@ -162,98 +162,47 @@ function setStaticProp(invoice, lines) {
       subtotal.textContent = Math.floor(line.unitPrice * line.quantity).toLocaleString()
 
       linesTbody.appendChild(tr)
-      if (line.discounts >= 1) {
-        // 割引1
+
+      for (let i = 1; i <= line.discounts; i++) {
+        if (i >= 4) break
         const trDiscount = clone.querySelector('tr')
         trDiscount.setAttribute('id', line.lineIndex)
-        const DescriptionInput = clone.querySelector(discountId[0].description)
-        DescriptionInput.textContent = line.discountDescription1
-        const AmountInput = clone.querySelector(discountId[0].amount)
-        AmountInput.textContent = line.discountAmount1
-        const TypeSelect = clone.querySelector(discountId[0].unit)
-        if (!getDiscountTypeIndex(line.discountUnit1)) TypeSelect.textContent = '%'
+        const DescriptionInput = clone.querySelector(discountId[i - 1].description)
+        DescriptionInput.textContent = line['discountDescription' + i]
+        const AmountInput = clone.querySelector(discountId[i - 1].amount)
+        AmountInput.textContent = line['discountAmount' + i]
+        const TypeSelect = clone.querySelector(discountId[i - 1].unit)
+        if (!getDiscountTypeIndex(line['discountUnit' + i])) TypeSelect.textContent = '%'
         else TypeSelect.textContent = 'JPY'
-        const DiscountTd = clone.querySelector(discountId[0].total)
-        DiscountTd.textContent = functionDiscountCalcs[1](line, Math.floor(line.unitPrice * line.quantity)).toLocaleString()
-        linesTbody.appendChild(trDiscount)
-      }
-      if (line.discounts >= 2) {
-        // 割引2
-        const trDiscount = clone.querySelector('tr')
-        trDiscount.setAttribute('id', line.lineIndex)
-        const DescriptionInput = clone.querySelector(discountId[1].description)
-        DescriptionInput.textContent = line.discountDescription2
-        const AmountInput = clone.querySelector(discountId[1].amount)
-        AmountInput.textContent = line.discountAmount2
-        const TypeSelect = clone.querySelector(discountId[1].unit)
-        if (!getDiscountTypeIndex(line.discountUnit2)) TypeSelect.textContent = '%'
-        else TypeSelect.textContent = 'JPY'
-        const DiscountTd = clone.querySelector(discountId[1].total)
-        DiscountTd.textContent = functionDiscountCalcs[2](line, Math.floor(line.unitPrice * line.quantity)).toLocaleString()
-        linesTbody.appendChild(trDiscount)
-      }
-      if (line.discounts === 3) {
-        // 割引3
-        const trDiscount = clone.querySelector('tr')
-        trDiscount.setAttribute('id', line.lineIndex)
-        const DescriptionInput = clone.querySelector(discountId[2].description)
-        DescriptionInput.textContent = line.discountDescription3
-        const AmountInput = clone.querySelector(discountId[2].amount)
-        AmountInput.textContent = line.discountAmount3
-        const TypeSelect = clone.querySelector(discountId[2].unit)
-        if (!getDiscountTypeIndex(line.discountUnit3)) TypeSelect.textContent = '%'
-        else TypeSelect.textContent = 'JPY'
-        const DiscountTd = clone.querySelector(discountId[2].total)
-        DiscountTd.textContent = functionDiscountCalcs[3](line, Math.floor(line.unitPrice * line.quantity)).toLocaleString()
+        const DiscountTd = clone.querySelector(discountId[i - 1].total)
+        DiscountTd.textContent = functionDiscountCalcs[i](
+          line,
+          Math.floor(line.unitPrice * line.quantity)
+        ).toLocaleString()
         linesTbody.appendChild(trDiscount)
       }
     })
+
     const discounttemplate = document.getElementById('invoice-discount')
     const clone = discounttemplate.content.cloneNode(true)
-    if (invoice.discounts >= 1) {
-      // 割引1
-      const trDiscount1 = clone.querySelector('tr')
-      const DescriptionInput = clone.querySelector(invoicediscountId[0].description)
-      DescriptionInput.textContent = invoice.discountDescription1
-      const AmountInput = clone.querySelector(invoicediscountId[0].amount)
-      AmountInput.textContent = invoice.discountAmount1
-      const TypeSelect = clone.querySelector(invoicediscountId[0].unit)
-      if (!getDiscountTypeIndex(invoice.discountUnit1)) TypeSelect.textContent = '%'
-      else TypeSelect.textContent = 'JPY'
-      const DiscountTd = clone.querySelector(invoicediscountId[0].total)
-      DiscountTd.textContent = functionDiscountCalcs[1](invoice, getSubTotal(lines) - getDiscountLinePriceTotal(lines)).toLocaleString()
 
-      discountsTbody.appendChild(trDiscount1)
-    }
-    if (invoice.discounts >= 2) {
-      // 割引2
-      const trDiscount1 = clone.querySelector('tr')
-      const DescriptionInput = clone.querySelector(invoicediscountId[1].description)
-      DescriptionInput.textContent = invoice.discountDescription2
-      const AmountInput = clone.querySelector(invoicediscountId[1].amount)
-      AmountInput.textContent = invoice.discountAmount2
-      const TypeSelect = clone.querySelector(invoicediscountId[1].unit)
-      if (!getDiscountTypeIndex(invoice.discountUnit2)) TypeSelect.textContent = '%'
+    for (let i = 1; i <= invoice.discounts; i++) {
+      if (i >= 4) break
+      const trDiscount = clone.querySelector('tr')
+      const DescriptionInput = clone.querySelector(invoicediscountId[i - 1].description)
+      DescriptionInput.textContent = invoice['discountDescription' + i]
+      const AmountInput = clone.querySelector(invoicediscountId[i - 1].amount)
+      AmountInput.textContent = invoice['discountDiscountAmount' + i]
+      const TypeSelect = clone.querySelector(invoicediscountId[i - 1].unit)
+      if (!getDiscountTypeIndex(invoice['discountDiscountUnit' + i])) TypeSelect.textContent = '%'
       else TypeSelect.textContent = 'JPY'
-      const DiscountTd = clone.querySelector(invoicediscountId[1].total)
-      DiscountTd.textContent = functionDiscountCalcs[2](invoice, getSubTotal(lines) - getDiscountLinePriceTotal(lines)).toLocaleString()
+      const DiscountTd = clone.querySelector(invoicediscountId[i - 1].total)
+      DiscountTd.textContent = functionDiscountCalcs[i](
+        invoice,
+        getSubTotal(lines) - getDiscountLinePriceTotal(lines)
+      ).toLocaleString()
 
-      discountsTbody.appendChild(trDiscount1)
-    }
-    if (invoice.discounts === 3) {
-      // 割引3
-      const trDiscount1 = clone.querySelector('tr')
-      const DescriptionInput = clone.querySelector(invoicediscountId[2].description)
-      DescriptionInput.textContent = invoice.discountDescription3
-      const AmountInput = clone.querySelector(invoicediscountId[2].amount)
-      AmountInput.textContent = invoice.discountAmount3
-      const TypeSelect = clone.querySelector(invoicediscountId[2].unit)
-      if (!getDiscountTypeIndex(invoice.discountUnit3)) TypeSelect.textContent = '%'
-      else TypeSelect.textContent = 'JPY'
-      const DiscountTd = clone.querySelector(invoicediscountId[2].total)
-      DiscountTd.textContent = functionDiscountCalcs[3](invoice, getSubTotal(lines) - getDiscountLinePriceTotal(lines)).toLocaleString()
-
-      discountsTbody.appendChild(trDiscount1)
+      discountsTbody.appendChild(trDiscount)
     }
   }
 }
@@ -314,11 +263,22 @@ function updateLineValues(e, target) {
   const prop = target.getAttribute('data-prop')
   const updatedLine = lines.find((line) => parseInt(line.lineIndex) === parseInt(id))
   if (updatedLine) {
-    if (prop === 'quantity' || prop === 'unitPrice' || prop === 'discountAmount1' || prop === 'discountAmount2' || prop === 'discountAmount3') {
+    if (
+      prop === 'quantity' ||
+      prop === 'unitPrice' ||
+      prop === 'discountAmount1' ||
+      prop === 'discountAmount2' ||
+      prop === 'discountAmount3'
+    ) {
       if (isNumberString(target.value)) {
         updatedLine[prop] = target.value
       } else updatedLine[prop] = ''
-    } else if (prop === 'lineDescription' || prop === 'discountDescription1' || prop === 'discountDescription2' || prop === 'discountDescription3') {
+    } else if (
+      prop === 'lineDescription' ||
+      prop === 'discountDescription1' ||
+      prop === 'discountDescription2' ||
+      prop === 'discountDescription3'
+    ) {
       updatedLine[prop] = target.value.replace(/\r\n|\r|\n| /g, '')
     } else {
       updatedLine[prop] = target.value
@@ -344,9 +304,11 @@ function renderInvoice(target) {
       $('#msgCount').innerText = '(' + element.value.length + '/400)'
     }
   }
-  if (Object.keys(invoice).some(function(value) {
-    return value.match(/^discount/)
-  })) {
+  if (
+    Object.keys(invoice).some(function (value) {
+      return value.match(/^discount/)
+    })
+  ) {
     renderInvoicecDiscount()
     renderTotals()
   }
@@ -426,26 +388,19 @@ function renderLines() {
     actionTd.appendChild(deleteBtn)
     linesTbody.appendChild(tr)
 
-    if (line.discounts >= 1) {
-      // 割引1
-      const trDiscount1 = clone.querySelector('tr')
-      trDiscount1.setAttribute('id', line.lineIndex)
-      renderDiscountLine(clone, line, 1, line.discountDescription1, line.discountAmount1, line.discountUnit1)
-      linesTbody.appendChild(trDiscount1)
-    }
-    if (line.discounts >= 2) {
-      // 割引2
-      const trDiscount2 = clone.querySelector('tr')
-      trDiscount2.setAttribute('id', line.lineIndex)
-      renderDiscountLine(clone, line, 2, line.discountDescription2, line.discountAmount2, line.discountUnit2)
-      linesTbody.appendChild(trDiscount2)
-    }
-    if (line.discounts >= 3) {
-      // 割引3
-      const trDiscount3 = clone.querySelector('tr')
-      trDiscount3.setAttribute('id', line.lineIndex)
-      renderDiscountLine(clone, line, 3, line.discountDescription3, line.discountAmount3, line.discountUnit3)
-      linesTbody.appendChild(trDiscount3)
+    for (let i = 1; i <= line.discounts; i++) {
+      if (i >= 4) break
+      const trDiscount = clone.querySelector('tr')
+      trDiscount.setAttribute('id', line.lineIndex)
+      renderDiscountLine(
+        clone,
+        line,
+        i,
+        line['discountDescription' + i],
+        line['discountAmount' + i],
+        line['discountUnit' + i]
+      )
+      linesTbody.appendChild(trDiscount)
     }
   })
 
@@ -472,23 +427,17 @@ function renderInvoicecDiscount() {
   const clone = discounttemplate.content.cloneNode(true)
   if (typeof invoice.discounts === 'undefined') invoice.discounts = 0
   if (lines.length > 0) {
-    if (invoice.discounts >= 1) {
-    // 割引1
-      const trDiscount1 = clone.querySelector('tr')
-      renderInvoiceDiscount(clone, 1, invoice.discountDescription1, invoice.discountAmount1, invoice.discountUnit1)
-      discountsTbody.appendChild(trDiscount1)
-    }
-    if (invoice.discounts >= 2) {
-      // 割引2
-      const trDiscount2 = clone.querySelector('tr')
-      renderInvoiceDiscount(clone, 2, invoice.discountDescription2, invoice.discountAmount2, invoice.discountUnit2)
-      discountsTbody.appendChild(trDiscount2)
-    }
-    if (invoice.discounts === 3) {
-      // 割引3
-      const trDiscount3 = clone.querySelector('tr')
-      renderInvoiceDiscount(clone, 3, invoice.discountDescription3, invoice.discountAmount3, invoice.discountUnit3)
-      discountsTbody.appendChild(trDiscount3)
+    for (let i = 1; i <= invoice.discounts; i++) {
+      if (i >= 4) break
+      const trDiscount = clone.querySelector('tr')
+      renderInvoiceDiscount(
+        clone,
+        i,
+        invoice['discountDescription' + i],
+        invoice['discountAmount' + i],
+        invoice['discountUnit' + i]
+      )
+      discountsTbody.appendChild(trDiscount)
     }
     if (lines.length > 0 && (invoice.discounts < 3 || typeof invoice.discounts === 'undefined')) {
       const discounttemplate = document.getElementById('invoice-discount-add-btn')
@@ -686,19 +635,17 @@ $('#output-modal-btn')?.addEventListener('click', async () => {
   if (
     !location.pathname.match(/show/) &&
     !validate(invoice, lines, outputRules, { lineLength: String(lines.length), fileSize: imageFile?.size })
-  )
+  ) {
     return alert('入力項目に不備があります。')
+  }
 
   $('#output-modal').classList.add('is-active')
 })
 
 $('#save-btn')?.addEventListener('click', async () => {
-  if (!location.pathname.match(/show/) && !validate(
-    invoice,
-    lines,
-    saveRules,
-    { fileSize: imageFile?.size }
-  )) return alert('入力項目に不備があります。')
+  if (!location.pathname.match(/show/) && !validate(invoice, lines, saveRules, { fileSize: imageFile?.size })) {
+    return alert('入力項目に不備があります。')
+  }
 
   const modal = document.getElementById('request-progress-modal')
   modal.classList.add('is-active')

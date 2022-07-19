@@ -10,7 +10,7 @@ div.margin-top-40p
         th.width-8.text-center 単位
         th.width-10.text-center 単価
         th.width-10.text-center 税
-        th.width-8.text-center 小計（税抜
+        th.width-8.text-center 小計（税抜）
         th.width-2.text-center 
         th.width-8.text-center 
     tbody#lines
@@ -60,87 +60,35 @@ div.margin-top-40p
           td.text-center.button.discount-line-action.is-info#discount-btn 項目割引
         else 
           td
-      tr
-        td.text-center 項目割引
-        td.text-center
-          if editing
-            input.input.placeholder-min(data-prop='discountDescription1' class='line-discountDescription1' type='text' placeholder='割引内容 半角全角 100文字') 
-          eles
-            p.line-discountDescription1
-        td.text-center
-          if editing
-            input.input(data-prop='discountAmount1' class='line-discountAmount1' type='text' placeholder='0～999999999999')
-          eles
-            p.line-discountAmount1
-        td.text-center
-          if editing
-            select.tax-type.select(data-prop='discountUnit1' class='line-discountUnit1')
-                  option(value='percent' selected) %
-                  option(value='jpy') JPY
-          eles
-            p.line-discountUnit1
-        td.text-right.line-discounttotal1.align-middle
-        td
-        td
-        td
-        if editing
-          td.text-center.button.discount-line-del-action.is-danger#discount-btn 割引削除
-        else 
+
+      - for (var x = 1; x < 4; x++)
+        tr
+          td.text-center 項目割引
+          td.text-center
+            if editing
+              input.input.placeholder-min(data-prop='discountDescription' + x class='line-discountDescription' + x type='text' placeholder='割引内容 半角全角 100文字')
+            eles
+              p(class='line-discountDescription' + x)
+          td.text-center
+            if editing
+              input.input(data-prop='discountAmount' + x class='line-discountAmount' + x type='text' placeholder='0～999999999999')
+            eles
+              p(class='line-discountAmount' + x)
+          td.text-center
+            if editing
+              select.tax-type.select(data-prop='discountUnit' + x class='line-discountUnit' + x)
+                    option(value='percent' selected) %
+                    option(value='jpy') JPY
+            eles
+              p(class='line-discountUnit' + x)
+          td.text-right.align-middle(class='line-discounttotal' + x)
           td
-      tr
-        td.text-center 項目割引
-        td.text-center
-          if editing
-            input.input.placeholder-min(data-prop='discountDescription2' class='line-discountDescription2' type='text' placeholder='割引内容 半角全角 100文字') 
-          eles
-            p.line-discountDescription2
-        td.text-center
-          if editing
-            input.input(data-prop='discountAmount2' class='line-discountAmount2' type='text' placeholder='0～999999999999')
-          eles
-            p.line-discountAmount2
-        td.text-center
-          if editing
-            select.tax-type.select(data-prop='discountUnit2' class='line-discountUnit2')
-                  option(value='percent' selected) %
-                  option(value='jpy') JPY
-          eles
-            p.line-discountUnit2
-        td.text-right.line-discounttotal2.align-middle
-        td
-        td
-        td
-        if editing
-          td.text-center.button.discount-line-del-action.is-danger#discount-btn 割引削除
-        else 
           td
-      tr
-        td.text-center 項目割引
-        td.text-center
-          if editing
-            input.input.placeholder-min(data-prop='discountDescription3' class='line-discountDescription3' type='text' placeholder='割引内容 半角全角 100文字') 
-          eles
-            p.line-discountDescription3
-        td.text-center
-          if editing
-            input.input(data-prop='discountAmount3' class='line-discountAmount3' type='text' placeholder='0～999999999999')
-          eles
-            p.line-discountAmount3
-        td.text-center
-          if editing
-            select.tax-type.select(data-prop='discountUnit3' class='line-discountUnit3')
-                  option(value='percent' selected) %
-                  option(value='jpy') JPY
-          eles
-            p.line-discountUnit3
-        td.text-right.line-discounttotal3.align-middle
-        td
-        td
-        td
-        if editing
-          td.text-center.button.discount-line-del-action.is-danger#discount-btn 割引削除
-        else 
           td
+          if editing
+            td.text-center.button.discount-line-del-action.is-danger#discount-btn 割引削除
+          else
+            td
 
     template#line-add-btn
       tr
@@ -169,90 +117,34 @@ div.margin-top-40p
         th.width-8.text-center 
     tbody#discounts
     template#invoice-discount
-      tr
-        td.text-center 割引
-        td.text-center
-          if editing
-            input.input.placeholder-min(data-prop='discountDescription1' 
-            id='invoice-discountDescription1' class='invoice-discountDescription1' type='text' placeholder='割引内容 半角全角 100文字') 
-          eles
-            p.invoice-discountDescription1
-        td.text-center
-          if editing
-            input.input(data-prop='discountAmount1' id='invoice-discountAmount1' class='invoice-discountAmount1' type='text' placeholder='0～999999999999')
-          eles
-            p.invoice-discountAmount1
-        td.text-center
-          if editing
-            select.tax-type.select(data-prop='discountUnit1' id='invoice-discountUnit1' class='invoice-discountUnit1')
-                  option(value='percent' selected) %
-                  option(value='jpy') JPY
-          eles
-            p.invoice-discountUnit1
-        td.text-right.invoice-discounttotal1.align-middle
-        td
-        td
-        td
-        if editing
-          td.text-center.button.discount-line-del-action.is-danger#discount-btn 割引削除
-        else 
+      - for (var x = 1; x < 4; x++)
+        tr
+          td.text-center 割引
+          td.text-center
+            if editing
+              input.input.placeholder-min(data-prop='discountDescription' + x id='invoice-discountDescription' + x class='invoice-discountDescription' + x type='text' placeholder='割引内容 半角全角 100文字')
+            eles
+              p(class='invoice-discountDescription' + x)
+          td.text-center
+            if editing
+              input.input(data-prop='discountAmount' + x id='invoice-discountAmount' + x class='invoice-discountAmount' + x type='text' placeholder='0～999999999999')
+            eles
+              p(class='invoice-discountAmount' + x)
+          td.text-center
+            if editing
+              select.tax-type.select(data-prop='discountUnit' + x id='invoice-discountUnit' + x class='invoice-discountUnit' + x)
+                    option(value='percent' selected) %
+                    option(value='jpy') JPY
+            eles
+              p(class='invoice-discountUnit' + x)
+          td.text-right.align-middle(class='invoice-discounttotal' + x)
           td
-      tr
-        td.text-center 割引
-        td.text-center
-          if editing
-            input.input.placeholder-min(data-prop='discountDescription2' 
-            id='invoice-discountDescription2' class='invoice-discountDescription2' type='text' placeholder='割引内容 半角全角 100文字') 
-          eles
-            p.invoice-discountDescription2
-        td.text-center
-          if editing
-            input.input(data-prop='discountAmount2' id='invoice-discountAmount2' class='invoice-discountAmount2' type='text' placeholder='0～999999999999')
-          eles
-            p.invoice-discountAmount2
-        td.text-center
-          if editing
-            select.tax-type.select(data-prop='discountUnit2' id='invoice-discountUnit2' class='invoice-discountUnit2')
-                  option(value='percent' selected) %
-                  option(value='jpy') JPY
-          eles
-            p.invoice-discountUnit2
-        td.text-right.invoice-discounttotal2.align-middle
-        td
-        td
-        td
-        if editing
-          td.text-center.button.discount-line-del-action.is-danger#discount-btn 割引削除
-        else 
           td
-      tr
-        td.text-center 割引
-        td.text-center
-          if editing
-            input.input.placeholder-min(data-prop='discountDescription3' 
-            id='invoice-discountDescription3' class='invoice-discountDescription3' type='text' placeholder='割引内容 半角全角 100文字') 
-          eles
-            p.invoice-discountDescription3
-        td.text-center
-          if editing
-            input.input(data-prop='discountAmount3' id='invoice-discountAmount3' class='invoice-discountAmount3' type='text' placeholder='0～999999999999')
-          eles
-            p.invoice-discountAmount3
-        td.text-center
-          if editing
-            select.tax-type.select(data-prop='discountUnit3' id='invoice-discountUnit3' class='invoice-discountUnit3')
-                  option(value='percent' selected) %
-                  option(value='jpy') JPY
-          eles
-            p.invoice-discountUnit3
-        td.text-right.invoice-discounttotal3.align-middle
-        td
-        td
-        td
-        if editing
-          td.text-center.button.discount-line-del-action.is-danger#discount-btn 割引削除
-        else 
           td
+          if editing
+            td.text-center.button.discount-line-del-action.is-danger#discount-btn 割引削除
+          else
+            td
     template#invoice-discount-add-btn
       tr
         td
