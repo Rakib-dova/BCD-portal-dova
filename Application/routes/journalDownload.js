@@ -93,7 +93,9 @@ const cbGetIndex = async (req, res, next) => {
     minissuedate: minissuedate,
     maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
     serviceDataFormatName: serviceDataFormatName,
-    csrfToken: req.csrfToken()
+    csrfToken: req.csrfToken(),
+    userRole: req.session.userRole,
+    contractPlan: req.contractPlan
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -187,7 +189,6 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   const lightPlan = await contractController.findLightPlan(req.user.tenantId)
-  console.log(lightPlan)
 
   switch (req.body.serviceDataFormat) {
     case 0:
@@ -2264,7 +2265,7 @@ const paymentExtraPush = async (paymentExtra, data) => {
   return paymentExtra
 }
 
-router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.get('/', helper.isAuthenticated, helper.getContractPlan, csrfProtection, cbGetIndex)
 router.post('/', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {

@@ -105,5 +105,66 @@ module.exports = {
       logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
       return error
     }
+  },
+  findIntroductionSupportPlan: async (tenantId) => {
+    try {
+      const contract = await Contract.findOne({
+        where: {
+          tenantId: tenantId,
+          contractStatus: {
+            [Op.or]: [contractStatuses.onContract]
+          },
+          serviceType: serviceTypes.introductionSupport,
+          deleteFlag: false
+        }
+      })
+      return contract
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
+  },
+  findLightPlanForEntry: async (tenantId) => {
+    try {
+      const contract = await Contract.findOne({
+        where: {
+          tenantId: tenantId,
+          contractStatus: {
+            [Op.or]: [contractStatuses.newContractOrder, contractStatuses.newContractReceive]
+          },
+          serviceType: serviceTypes.lightPlan,
+          deleteFlag: false
+        }
+      })
+      return contract
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
+  },
+  findIntroductionSupportPlanForEntry: async (tenantId) => {
+    try {
+      const contract = await Contract.findOne({
+        where: {
+          tenantId: tenantId,
+          contractStatus: {
+            [Op.or]: [
+              contractStatuses.newContractOrder,
+              contractStatuses.newContractReceive,
+              contractStatuses.newContractBeforeCompletion
+            ]
+          },
+          serviceType: serviceTypes.introductionSupport,
+          deleteFlag: false
+        }
+      })
+      return contract
+    } catch (error) {
+      // status 0はDBエラー
+      logger.error({ user: tenantId, stack: error.stack, status: 0 }, error.name)
+      return error
+    }
   }
 }
