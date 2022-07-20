@@ -25,10 +25,10 @@ block content
                   td.ver-mid 
                     .icon-aic 
                       if contract.serviceType === '010'
-                        img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
+                        img.mr-3.image.is-48x48(src='/image/ts-app-digitaltrade-contract-app.svg')
                         span BConnectionデジタルトレードアプリ フリー
                       else 
-                        img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
+                        img.mr-3.image.is-48x48(src='/image/ts-app-digitaltrade-contract-app.svg')
                         span BConnectionデジタルトレードアプリ スタンダード
                   td.text-center.ver-mid #{contract.serviceType === '010' ? '無料' : '有料'}
                   td.text-center.ver-mid #{contract.contractNumber ? contract.contractNumber : 'ー'}
@@ -71,7 +71,7 @@ block content
                 tr
                   td.ver-mid 
                     .icon-aic 
-                      img.mr-3.image.is-48x48(src='../obc/images/ts-app-digitaltrade-appicon.svg')
+                      img.mr-3.image.is-48x48(src='/image/ts-app-digitaltrade-contract-introduction-support.svg')
                       span 導入支援サービス
                   td.text-center.ver-mid 有料
                   td.text-center.ver-mid #{oneShotContractList[0].contractNumber ? oneShotContractList[0].contractNumber : 'ー'}
