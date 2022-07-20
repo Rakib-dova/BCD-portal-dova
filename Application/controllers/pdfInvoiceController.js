@@ -70,7 +70,7 @@ module.exports = {
       throw error
     }
   },
-  createInvoicesAndLines: async (invoices, lines, image = null, transaction = null) => {
+  createInvoicesAndLines: async (invoices, lines, transaction = null) => {
     if (!Array.isArray(invoices) || !Array.isArray(lines)) return null
 
     try {

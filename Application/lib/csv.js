@@ -60,30 +60,30 @@ const pdfInvoiceMapper = [
   { col: '口座番号', prop: 'accountNumber', modifier: null },
   { col: '口座名義', prop: 'accountName', modifier: null },
   { col: '備考', prop: 'note', modifier: null },
-  { col: '請求書割引内容1', prop: 'inv-discountDescription1', modifier: null },
-  { col: '請求書割引数値1', prop: 'inv-discountAmount1', modifier: null },
-  { col: '請求書割引種別1', prop: 'inv-discountUnit1', modifier: null },
-  { col: '請求書割引内容2', prop: 'inv-discountDescription2', modifier: null },
-  { col: '請求書割引数値2', prop: 'inv-discountAmount2', modifier: null },
-  { col: '請求書割引種別2', prop: 'inv-discountUnit2', modifier: null },
-  { col: '請求書割引内容3', prop: 'inv-discountDescription3', modifier: null },
-  { col: '請求書割引数値3', prop: 'inv-discountAmount3', modifier: null },
-  { col: '請求書割引種別3', prop: 'inv-discountUnit3', modifier: null },
+  { col: '請求書割引内容1', prop: 'inv-discountDescription1', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '請求書割引数値1', prop: 'inv-discountAmount1', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '請求書割引種別1', prop: 'inv-discountUnit1', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '請求書割引内容2', prop: 'inv-discountDescription2', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '請求書割引数値2', prop: 'inv-discountAmount2', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '請求書割引種別2', prop: 'inv-discountUnit2', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '請求書割引内容3', prop: 'inv-discountDescription3', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '請求書割引数値3', prop: 'inv-discountAmount3', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '請求書割引種別3', prop: 'inv-discountUnit3', modifier: (value, _) => convertEmptyStringToNull(value) },
   { col: '明細-項目ID', prop: 'lineId', modifier: null },
   { col: '明細-内容', prop: 'lineDescription', modifier: null },
   { col: '明細-数量', prop: 'quantity', modifier: null },
   { col: '明細-単位', prop: 'unit', modifier: null },
   { col: '明細-単価', prop: 'unitPrice', modifier: null },
   { col: '明細-税（消費税／軽減税率／不課税／免税／非課税）', prop: 'taxType', modifier: null },
-  { col: '明細-割引内容1', prop: 'line-discountDescription1', modifier: null },
-  { col: '明細-割引数値1', prop: 'line-discountAmount1', modifier: null },
-  { col: '明細-割引種別1', prop: 'line-discountUnit1', modifier: null },
-  { col: '明細-割引内容2', prop: 'line-discountDescription2', modifier: null },
-  { col: '明細-割引数値2', prop: 'line-discountAmount2', modifier: null },
-  { col: '明細-割引種別2', prop: 'line-discountUnit2', modifier: null },
-  { col: '明細-割引内容3', prop: 'line-discountDescription3', modifier: null },
-  { col: '明細-割引数値3', prop: 'line-discountAmount3', modifier: null },
-  { col: '明細-割引種別3', prop: 'line-discountUnit3', modifier: null }
+  { col: '明細-割引内容1', prop: 'line-discountDescription1', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '明細-割引数値1', prop: 'line-discountAmount1', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '明細-割引種別1', prop: 'line-discountUnit1', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '明細-割引内容2', prop: 'line-discountDescription2', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '明細-割引数値2', prop: 'line-discountAmount2', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '明細-割引種別2', prop: 'line-discountUnit2', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '明細-割引内容3', prop: 'line-discountDescription3', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '明細-割引数値3', prop: 'line-discountAmount3', modifier: (value, _) => convertEmptyStringToNull(value) },
+  { col: '明細-割引種別3', prop: 'line-discountUnit3', modifier: (value, _) => convertEmptyStringToNull(value) }
 ]
 
 /**
@@ -142,6 +142,11 @@ const convertToDataObject = (csvStringArray, headerArray, stringMapper) => {
 
 const removeBOM = (str) => {
   return str.replace(/\ufeff/, '')
+}
+
+const convertEmptyStringToNull = (str) => {
+  if (str === '') return null
+  else return str
 }
 
 module.exports = {

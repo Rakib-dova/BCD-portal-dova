@@ -659,7 +659,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。\"}')
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: ヘッダーバリデーションエラー', async () => {
@@ -670,7 +670,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"ヘッダーが指定のものと異なります。\"}')
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"ヘッダーが指定のものと異なります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: CSV多次元配列データをデータオブジェクト配列に変換時エラー', async () => {
@@ -695,7 +695,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータが存在しません。\"}')
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータが存在しません。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: CSVファイル空行エラー', async () => {
@@ -708,7 +708,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。\"}')
+      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: 送信先情報取得失敗', async () => {

@@ -60,10 +60,10 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   }
 
   const csvMultiArray = convertCsvStringToMultiArray(uploadFileData) // CSV文字列データをCSV多次元配列データに変換
-  if (!csvMultiArray) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。' }))
+  if (!csvMultiArray) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
 
   // ヘッダーバリデーション
-  if (!validation.validateHeader(uploadFileData, defaultCsvData)) return res.status(400).send(JSON.stringify({ message: 'ヘッダーが指定のものと異なります。' }))
+  if (!validation.validateHeader(uploadFileData, defaultCsvData)) return res.status(400).send(JSON.stringify({ message: 'ヘッダーが指定のものと異なります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
 
   console.log('==  validateHeader pass  ======================')
 
@@ -79,11 +79,11 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
   }
 
-  if (csvRowObjects.length === 0) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータが存在しません。' }))
+  if (csvRowObjects.length === 0) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータが存在しません。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
   console.log('==  csvRowObjects  ======================\n', csvRowObjects)
 
   // CSV行データオブジェクトに空情報(null)が含まれている場合
-  if (csvRowObjects.filter((row) => !row).length) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。' }))
+  if (csvRowObjects.filter((row) => !row).length) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
 
   // アカウント情報取得 (CSVデータ多次元配列をデータオブジェクトに変換するのに必要)
   const { senderInfo } = await pdfInvoice.getAccountAndSenderInfo(req)
