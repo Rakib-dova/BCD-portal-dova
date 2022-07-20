@@ -23,10 +23,13 @@ block content
                   h3 ご利用希望サービス
                     span （必須）
                   .termWrap.my-5  
-                    input(type='checkbox', name='', value='')
-                    span.termCheck スタンダードプラン
-                    input(type='checkbox', name='', value='')
-                    span.termCheck 導入支援サービス
+                    label.checkbox
+                      input.serviceCheckboxes(type='checkbox', name='services', value=standard, disabled=paidServiceInfo.standardDisabled, checked=paidServiceInfo.standardChecked)
+                      span.termCheck スタンダードプラン
+                    label.checkbox
+                      input.serviceCheckboxes(type='checkbox', name='services', value=introduction, disabled=paidServiceInfo.introductionSupportDisabled, checked=paidServiceInfo.introductionSupportChecked)
+                      span.termCheck 導入支援サービス
+
                 .field.is-grouped.is-grouped-left.is-block.mt-6
                   h3.my-3.has-text-centered 【必ずご確認下さい】申込みに関する注意事項
                 .serviceBox.mb-6.searchResultBox    
