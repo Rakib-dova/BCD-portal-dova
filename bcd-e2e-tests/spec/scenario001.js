@@ -87,13 +87,11 @@ describe('リグレッションテスト', function () {
       await supportMenuPage.waitForLoading();
 
       // 「設定方法、ご利用方法のお問い合わせ」をクリックする(管理者のみ)
-      let notRegistered = true;
       if (account.type == 'manager') {
         await supportMenuPage.clickContact();
 
         // 「設定方法、ご利用方法のお問い合わせ」画面の表示内容を確認する
-        notRegistered = await supportMenuPage.isModalShown();
-        if (!notRegistered) {
+        if (!(await supportMenuPage.isModalShown())) {
           expect(await supportMenuPage.getNumberN()).to.equal('N999999999', 'N番が表示されていること');
           expect(await supportMenuPage.isCopyExist()).to.equal(true, 'フォーム右側に「copy」ボタンが表示されていること');
           expect(await supportMenuPage.isContactLinkExist()).to.equal(true, 'フォーム下部に「お問い合わせページを開く」ボタンが表示されていること');
@@ -185,14 +183,14 @@ describe('リグレッションテスト', function () {
       expect(await topPage.isConstructTabExist()).to.equal(true, 'Home画面に遷移すること');
 
       // 設定メニューを表示する(管理者のみ)
-      if (account.type == 'manager' && !notRegistered) {
+      if (account.type == 'manager') {
         await topPage.openSettingMenu();
         await settingMenuPage.waitForLoading();
 
         // 契約情報変更画面に遷移する
         await settingMenuPage.clickContractChange();
         await contractChangePage.waitForLoading();
-        expect(await contractChangePage.getTitle()).to.equal('契約情報変更', '契約情報変更画面に遷移すること');
+        expect(await contractChangePage.getTitle()).to.equal('ご契約内容', 'ご契約内容画面に遷移すること');
       }
 
       await page.waitForTimeout(1000);
