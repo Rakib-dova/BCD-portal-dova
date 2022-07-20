@@ -313,13 +313,13 @@ const renderInvoiceHTML = (input, sealImp = null, logo = null) => {
       <div class="column width-50">
         <div class="flex">
           <p class="text-l width-50">小計（税抜）</p>
-          <p class="text-r width-50" id="subTotal">${input.subTotal.toLocaleString()}</p>
+          <p class="text-r width-50" id="subTotal">${Math.floor(input.subTotal).toLocaleString()}</p>
         </div>
         ${setDiscountInvoice(input)}
         ${setTaxGroup(input.taxGroups)}
         <div class="flex">
           <p class="text-l width-50 font-bold">合計 ￥</p>
-          <p class="text-r width-50 font-bold" id="total">${(
+          <p class="text-r width-50 font-bold" id="total">${Math.floor(
             input.total - getDiscountInvoiceTotal(input)
           ).toLocaleString()}</p>
         </div>
@@ -452,9 +452,8 @@ const setLines = (lines) => {
         <td class="text-center"><p class="line-unit" data-prop="unit">${getUnitTypeName(
           line['discountUnit' + i]
         )}</p></td>
-        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">- ${functionDiscountCalcs[i](
-          line,
-          Math.floor(line.unitPrice * line.quantity)
+        <td class="text-center"><p class="line-unitPrice" data-prop="unitPrice">- ${Math.floor(
+          functionDiscountCalcs[i](line, Math.floor(line.unitPrice * line.quantity))
         ).toLocaleString()}</p></td>
         <td></td>
         <td></td>
@@ -492,9 +491,8 @@ const setDiscountLines = (input) => {
       )} </p></td>
       <td></td>
       <td></td>
-      <td class="text-right line-subtotal"><p class="line-unitPrice" data-prop="unitPrice">- ${functionDiscountCalcs[i](
-        input,
-        input.subTotal
+      <td class="text-right line-subtotal"><p class="line-unitPrice" data-prop="unitPrice">- ${Math.floor(
+        functionDiscountCalcs[i](input, input.subTotal)
       ).toLocaleString()}</p></td>
     </tr>`
   }
@@ -514,7 +512,9 @@ const setDiscountInvoice = (input) => {
     tags += `
     <div class="flex">
       <p class="text-l width-50">割引 ${input['discountDescription' + i]}</p>
-      <p class="text-r width-50" id="subTotal">- ${functionDiscountCalcs[i](input, input.subTotal).toLocaleString()}</p>
+      <p class="text-r width-50" id="subTotal">- ${Math.floor(
+        functionDiscountCalcs[i](input, input.subTotal)
+      ).toLocaleString()}</p>
     </div>`
   }
   return tags
@@ -623,15 +623,15 @@ const getUnitTypeName = (unitType) => {
 const functionDiscountCalcs = {
   1: function (objects, subTotal) {
     if (objects.discountUnit1 === 'jpy') return Math.floor(objects.discountAmount1)
-    else return Math.floor(subTotal * objects.discountAmount1 * 0.01)
+    else return subTotal * objects.discountAmount1 * 0.01
   },
   2: function (objects, subTotal) {
     if (objects.discountUnit2 === 'jpy') return Math.floor(objects.discountAmount2)
-    else return Math.floor(subTotal * objects.discountAmount2 * 0.01)
+    else return subTotal * objects.discountAmount2 * 0.01
   },
   3: function (objects, subTotal) {
     if (objects.discountUnit3 === 'jpy') return Math.floor(objects.discountAmount3)
-    else return Math.floor(subTotal * objects.discountAmount3 * 0.01)
+    else return subTotal * objects.discountAmount3 * 0.01
   }
 }
 

@@ -159,7 +159,11 @@ function setStaticProp(invoice, lines) {
       taxType.textContent = getTaxTypeName(line.taxType)
       // 小計設定
       const subtotal = clone.querySelector('.line-subtotal')
-      subtotal.textContent = Math.floor(line.unitPrice * line.quantity).toLocaleString()
+      let subTotalDiscount = 0
+      for (let i = 1; i <= line.discounts; i++) {
+        subTotalDiscount += functionDiscountCalcs[i](line, Math.floor(line.unitPrice * line.quantity))
+      }
+      subtotal.textContent = Math.floor(line.unitPrice * line.quantity - subTotalDiscount).toLocaleString()
 
       linesTbody.appendChild(tr)
 
@@ -175,9 +179,8 @@ function setStaticProp(invoice, lines) {
         if (!getDiscountTypeIndex(line['discountUnit' + i])) TypeSelect.textContent = '%'
         else TypeSelect.textContent = 'JPY'
         const DiscountTd = clone.querySelector(discountId[i - 1].total)
-        DiscountTd.textContent = functionDiscountCalcs[i](
-          line,
-          Math.floor(line.unitPrice * line.quantity)
+        DiscountTd.textContent = Math.floor(
+          functionDiscountCalcs[i](line, Math.floor(line.unitPrice * line.quantity))
         ).toLocaleString()
         linesTbody.appendChild(trDiscount)
       }
@@ -197,9 +200,8 @@ function setStaticProp(invoice, lines) {
       if (!getDiscountTypeIndex(invoice['discountUnit' + i])) TypeSelect.textContent = '%'
       else TypeSelect.textContent = 'JPY'
       const DiscountTd = clone.querySelector(invoicediscountId[i - 1].total)
-      DiscountTd.textContent = functionDiscountCalcs[i](
-        invoice,
-        getSubTotal(lines) - getDiscountLinePriceTotal(lines)
+      DiscountTd.textContent = Math.floor(
+        functionDiscountCalcs[i](invoice, getSubTotal(lines) - getDiscountLinePriceTotal(lines))
       ).toLocaleString()
 
       discountsTbody.appendChild(trDiscount)
@@ -357,7 +359,7 @@ function renderLines() {
     taxTypeSelect.selectedIndex = getTaxTypeIndex(line.taxType)
     // 小計設定
     const subtotalTd = clone.querySelector('.line-subtotal')
-    subtotalTd.textContent = (Math.floor(line.unitPrice * line.quantity) - getLineDiscountPrice(line)).toLocaleString()
+    subtotalTd.textContent = Math.floor(line.unitPrice * line.quantity - getLineDiscountPrice(line)).toLocaleString()
     // 削除ボタンの作成&追加
     const actionTd = clone.querySelector('.line-action')
     const deleteBtn = document.createElement('a')
@@ -476,7 +478,9 @@ function renderDiscountLine(clone, line, num, description, amount, unit) {
   renderDiscount(clone, id, description, amount, unit, discountId)
   // 割引額
   const DiscountTd = clone.querySelector(discountId[id].total)
-  DiscountTd.textContent = functionDiscountCalcs[num](line, Math.floor(line.unitPrice * line.quantity)).toLocaleString()
+  DiscountTd.textContent = Math.floor(
+    functionDiscountCalcs[num](line, Math.floor(line.unitPrice * line.quantity))
+  ).toLocaleString()
   // 割引行削除ボタン
   const discountdelBtn = clone.querySelector('.discount-line-del-action')
   discountdelBtn.addEventListener('click', () => {
@@ -491,7 +495,7 @@ function renderInvoiceDiscount(clone, num, description, amount, unit) {
   // 割引額
   subTotal = getSubTotal(lines) - getDiscountLinePriceTotal(lines)
   const DiscountTd = clone.querySelector(invoicediscountId[id].total)
-  DiscountTd.textContent = functionDiscountCalcs[num](invoice, subTotal).toLocaleString()
+  DiscountTd.textContent = Math.floor(functionDiscountCalcs[num](invoice, subTotal)).toLocaleString()
 
   // 全体割引- 行削除ボタン
   if (num <= 3) {
@@ -510,28 +514,27 @@ function renderTotals() {
 
   // 小計 (税抜)
   const subTotalDiv = $('#subTotal')
-  subTotalDiv.textContent = subTotal.toLocaleString()
+  subTotalDiv.textContent = Math.floor(subTotal).toLocaleString()
 
   // 税区分を全部削除
   const totalParentDiv = $('#total').parentNode
   const taxGroupDivs = $('.taxGroup')
   taxGroupDivs.forEach((node) => node.remove())
 
-  let invoiceTotal = 0
-  const descriptions = [invoice.discountDescription1, invoice.discountDescription2, invoice.discountDescription3]
+  let invoiceDiscountTotal = 0.0
   for (let i = 1; i <= invoice.discounts; i++) {
     const template = document.getElementById('taxGroup-template')
     const clone = template.content.cloneNode(true)
     const taxGroupDiv = clone.querySelector('.taxGroup')
 
     const taxGroupLabel = clone.querySelector('.taxGroupLabel')
-    taxGroupLabel.textContent = `割引 ${descriptions[i - 1] ? descriptions[i - 1] : ''}`
+    taxGroupLabel.textContent = `割引 ${invoice['discountDescription' + i] ? invoice['discountDescription' + i] : ''}`
     taxGroupDiv.appendChild(taxGroupLabel)
 
     const taxGroupValue = clone.querySelector('.taxGroupValue')
-    const invoicediscount1 = functionDiscountCalcs[i](invoice, subTotal)
-    taxGroupValue.textContent = `- ${invoicediscount1.toLocaleString()}`
-    invoiceTotal += invoicediscount1
+    const invoicediscount = functionDiscountCalcs[i](invoice, subTotal)
+    taxGroupValue.textContent = `- ${Math.floor(invoicediscount).toLocaleString()}`
+    invoiceDiscountTotal += invoicediscount
     taxGroupDiv.appendChild(taxGroupValue)
     totalParentDiv.before(taxGroupDiv)
   }
@@ -555,7 +558,7 @@ function renderTotals() {
 
   // 合計
   const totalDiv = $('#total')
-  totalDiv.textContent = (subTotal + taxTotal - invoiceTotal).toLocaleString()
+  totalDiv.textContent = Math.floor(subTotal + taxTotal - invoiceDiscountTotal).toLocaleString()
 
   // 税額合計
   const taxTotalDiv = $('#taxTotal')
@@ -585,21 +588,6 @@ function initDiscountLine(line, linenum = 0) {
   line['discountDescription' + linenum] = null
   line['discountAmount' + linenum] = null
   line['discountUnit' + linenum] = null
-  // if (linenum === 1) {
-  //   line.discountDescription1 = null
-  //   line.discountAmount1 = null
-  //   line.discountUnit1 = null
-  // }
-  // if (linenum === 2) {
-  //   line.discountDescription2 = null
-  //   line.discountAmount2 = null
-  //   line.discountUnit2 = null
-  // }
-  // if (linenum === 3) {
-  //   line.discountDescription3 = null
-  //   line.discountAmount3 = null
-  //   line.discountUnit3 = null
-  // }
 }
 
 // 割引行追加

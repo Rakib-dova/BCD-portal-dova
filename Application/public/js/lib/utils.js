@@ -136,17 +136,17 @@ function getDiscountLinePriceTotal(lines) {
 const functionDiscountCalcs = {
   1: function (invoices, subTotal) {
     if (getDiscountTypeIndex(invoices.discountUnit1) === 0) {
-      return Math.floor(subTotal * invoices.discountAmount1 * 0.01)
+      return subTotal * invoices.discountAmount1 * 0.01
     } else return Math.floor(invoices.discountAmount1)
   },
   2: function (invoices, subTotal) {
     if (getDiscountTypeIndex(invoices.discountUnit2) === 0) {
-      return Math.floor(subTotal * invoices.discountAmount2 * 0.01)
+      return subTotal * invoices.discountAmount2 * 0.01
     } else return Math.floor(invoices.discountAmount2)
   },
   3: function (invoices, subTotal) {
     if (getDiscountTypeIndex(invoices.discountUnit3) === 0) {
-      return Math.floor(subTotal * invoices.discountAmount3 * 0.01)
+      return subTotal * invoices.discountAmount3 * 0.01
     } else return Math.floor(invoices.discountAmount3)
   }
 }

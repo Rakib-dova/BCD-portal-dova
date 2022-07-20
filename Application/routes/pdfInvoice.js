@@ -14,10 +14,7 @@ const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const apiManager = require('../controllers/apiManager')
 const pdfInvoiceController = require('../controllers/pdfInvoiceController.js')
-const {
-  generatePdf,
-  renderInvoiceHTML
-} = require('../lib/pdfGenerator')
+const { generatePdf, renderInvoiceHTML } = require('../lib/pdfGenerator')
 const { formatDate } = require('../lib/utils')
 
 const taxDatabase = [
@@ -41,7 +38,8 @@ const pdfInvoiceList = async (req, res, next) => {
 
   const invoices = invoiceRecords.map((record) => record.dataValues)
   invoices.forEach((invoice) => {
-    invoice.total = getTotal(invoice.PdfInvoiceLines, taxDatabase)
+    const linetotal = getTotal(invoice.PdfInvoiceLines, taxDatabase)
+    invoice.total = linetotal - getDiscount(invoice, getNoTaxTotal(invoice.PdfInvoiceLines))
     invoice.updatedAt = formatDate(invoice.updatedAt, 'YYYY年MM月DD日')
     invoice.paymentDate = invoice.paymentDate ? formatDate(invoice.paymentDate, 'YYYY年MM月DD日') : ''
   })
@@ -172,11 +170,7 @@ const createPdfInvoice = async (req, res, next) => {
 
   let createdInvoice
   try {
-    createdInvoice = await pdfInvoiceController.createInvoice(
-      invoice,
-      lines,
-      req.file ? req.file.buffer : null
-    )
+    createdInvoice = await pdfInvoiceController.createInvoice(invoice, lines, req.file ? req.file.buffer : null)
   } catch (error) {
     console.log(error)
     return next(errorHelper.create(500))
@@ -307,11 +301,7 @@ const createAndOutputPdfInvoice = async (req, res, next) => {
   invoice.paymentDate = paymentDate
   invoice.deliveryDate = deliveryDate
   try {
-    const createdInvoice = await pdfInvoiceController.createInvoice(
-      invoice,
-      lines,
-      req.file ? req.file.buffer : null
-    )
+    const createdInvoice = await pdfInvoiceController.createInvoice(invoice, lines, req.file ? req.file.buffer : null)
     console.log('==  createdInvoice  ===================\n', createdInvoice)
   } catch (error) {
     console.log(error)
@@ -505,10 +495,38 @@ const getTotal = (lines, taxDatabase) => {
     let taxRate = 0
     const taxInfo = taxDatabase.find((tax) => tax.type === line.taxType)
     if (taxInfo) taxRate = taxInfo.taxRate
-    total += Math.floor(line.unitPrice * line.quantity * (1 + taxRate))
+    total +=
+      (line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))) * (1 + taxRate)
   })
 
   return total
+}
+
+const getNoTaxTotal = (lines) => {
+  let total = 0
+  lines.forEach((line) => {
+    total += Math.floor(line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity)))
+  })
+  return total
+}
+
+/**
+ * 割引額取得
+ *
+ * @param {object} input DBから取得した変数リスト
+ * @param {number} subTotal  小計
+ * @returns {number} discounttotal 割引額
+ */
+function getDiscount(recodes, subTotal) {
+  let discounttotal = 0
+  for (let i = 1; i <= recodes.discounts; i++) {
+    if (recodes['discountUnit' + i] === 'jpy') {
+      discounttotal += Math.floor(recodes['discountAmount' + i])
+    } else {
+      discounttotal += subTotal * recodes['discountAmount' + i] * 0.01
+    }
+  }
+  return discounttotal
 }
 
 router.get('/list', csrfProtection, helper.bcdAuthenticate, pdfInvoiceList)
@@ -518,8 +536,20 @@ router.get('/show/:invoiceId', csrfProtection, helper.bcdAuthenticate, pdfInvoic
 
 router.post('/', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), createPdfInvoice)
 router.put('/:invoiceId', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), updatePdfInvoice)
-router.post('/createAndOutput', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), createAndOutputPdfInvoice)
-router.post('/updateAndOutput/:invoiceId', csrfProtection, helper.bcdAuthenticate, upload.single('sealImp'), updateAndOutputPdfInvoice)
+router.post(
+  '/createAndOutput',
+  csrfProtection,
+  helper.bcdAuthenticate,
+  upload.single('sealImp'),
+  createAndOutputPdfInvoice
+)
+router.post(
+  '/updateAndOutput/:invoiceId',
+  csrfProtection,
+  helper.bcdAuthenticate,
+  upload.single('sealImp'),
+  updateAndOutputPdfInvoice
+)
 // router.delete('/:invoiceId', helper.bcdAuthenticate, deletePdfInvoice)
 
 module.exports = {
