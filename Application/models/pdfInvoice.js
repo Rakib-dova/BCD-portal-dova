@@ -104,6 +104,9 @@ module.exports = (sequelize, DataTypes) => {
       sealImpressionPath: {
         type: DataTypes.STRING
       },
+      discounts: {
+        type: DataTypes.INTEGER
+      },
       discountDescription1: {
         type: DataTypes.STRING
       },

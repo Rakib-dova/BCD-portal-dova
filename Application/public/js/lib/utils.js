@@ -70,7 +70,7 @@ function getTaxTypeName(taxType) {
 // eslint-disable-next-line no-unused-vars
 function getSubTotal(lines) {
   let total = 0
-  lines.forEach((line) => total += Math.floor(line.unitPrice * line.quantity)) // eslint-disable-line
+  lines.forEach((line) => (total += Math.floor(line.unitPrice * line.quantity))) // eslint-disable-line
   return total
 }
 
@@ -83,8 +83,10 @@ function getTaxGroups(lines, taxDatabase) {
 
     lines.forEach((line) => {
       if (line.taxType === tax.type) {
-        taxGroup.subTotal += Math.floor(line.unitPrice * line.quantity)
-        taxGroup.taxGroupTotal += Math.floor(line.unitPrice * line.quantity * tax.taxRate)
+        taxGroup.subTotal += Math.floor(line.unitPrice * line.quantity - getLineDiscountPrice(line))
+        taxGroup.taxGroupTotal += Math.floor(
+          (line.unitPrice * line.quantity - getLineDiscountPrice(line)) * tax.taxRate
+        )
       }
     })
 
@@ -99,8 +101,54 @@ function getTaxGroups(lines, taxDatabase) {
 // eslint-disable-next-line no-unused-vars
 function getTaxTotal(taxGroups) {
   let taxTotal = 0
-  taxGroups.forEach((taxGroup) => taxTotal += taxGroup.taxGroupTotal) // eslint-disable-line
+  taxGroups.forEach((taxGroup) => (taxTotal += taxGroup.taxGroupTotal))
   return taxTotal
+}
+
+function getDiscountTypeIndex(discountType) {
+  switch (discountType) {
+    case 'percent':
+      return 0
+    case 'jpy':
+      return 1
+    default:
+      return 0
+  }
+}
+
+function getLineDiscountPrice(line) {
+  let discounttotal = 0
+  if (line.discountAmount1) discounttotal += functionDiscountCalcs[1](line, Math.floor(line.unitPrice * line.quantity))
+  if (line.discountAmount2) discounttotal += functionDiscountCalcs[2](line, Math.floor(line.unitPrice * line.quantity))
+  if (line.discountAmount3) discounttotal += functionDiscountCalcs[3](line, Math.floor(line.unitPrice * line.quantity))
+  return discounttotal
+}
+
+// eslint-disable-next-line no-unused-vars
+function getDiscountLinePriceTotal(lines) {
+  let discounttotal = 0
+  lines.forEach((line) => {
+    discounttotal += getLineDiscountPrice(line)
+  })
+  return discounttotal
+}
+
+const functionDiscountCalcs = {
+  1: function (invoices, subTotal) {
+    if (getDiscountTypeIndex(invoices.discountUnit1) === 0) {
+      return subTotal * invoices.discountAmount1 * 0.01
+    } else return Math.floor(invoices.discountAmount1)
+  },
+  2: function (invoices, subTotal) {
+    if (getDiscountTypeIndex(invoices.discountUnit2) === 0) {
+      return subTotal * invoices.discountAmount2 * 0.01
+    } else return Math.floor(invoices.discountAmount2)
+  },
+  3: function (invoices, subTotal) {
+    if (getDiscountTypeIndex(invoices.discountUnit3) === 0) {
+      return subTotal * invoices.discountAmount3 * 0.01
+    } else return Math.floor(invoices.discountAmount3)
+  }
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -112,4 +160,4 @@ const formatDate = (date, format) => {
 }
 
 // eslint-disable-next-line no-unused-vars
-const isNumberString = n => typeof n === 'string' && n !== '' && !isNaN(n)
+const isNumberString = (n) => typeof n === 'string' && n !== '' && !isNaN(n)

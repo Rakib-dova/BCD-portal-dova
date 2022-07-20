@@ -12,6 +12,7 @@ div.margin-top-40p
         th.width-10.text-center 税
         th.width-8.text-center 小計（税抜）
         th.width-2.text-center 
+        th.width-8.text-center 
     tbody#lines
 
     template#line-template
@@ -55,6 +56,39 @@ div.margin-top-40p
             p.line-taxType
         td.text-right.line-subtotal.align-middle
         td.text-center.line-action.align-middle
+        if editing
+          td.text-center.button.discount-line-action.is-info#discount-btn 項目割引
+        else 
+          td
+
+      - for (var x = 1; x < 4; x++)
+        tr
+          td.text-center 項目割引
+          td.text-center
+            if editing
+              input.input.placeholder-min(data-prop='discountDescription' + x class='line-discountDescription' + x type='text' placeholder='割引内容 半角全角 100文字')
+            eles
+              p(class='line-discountDescription' + x)
+          td.text-center
+            if editing
+              input.input(data-prop='discountAmount' + x class='line-discountAmount' + x type='text' placeholder='0～999999999999')
+            eles
+              p(class='line-discountAmount' + x)
+          td.text-center
+            if editing
+              select.tax-type.select(data-prop='discountUnit' + x class='line-discountUnit' + x)
+                    option(value='percent' selected) %
+                    option(value='jpy') JPY
+            eles
+              p(class='line-discountUnit' + x)
+          td.text-right.align-middle(class='line-discounttotal' + x)
+          td
+          td
+          td
+          if editing
+            td.text-center.button.discount-line-del-action.is-danger#discount-btn 割引削除
+          else
+            td
 
     template#line-add-btn
       tr
@@ -68,6 +102,59 @@ div.margin-top-40p
         td.text-center.align-middle
           a#btn-plus-invoice-detail.mr-auto
             i.fas.fa-plus-circle
+
+  table#discount-table.discount-table.is-fullwidth.is-hoverable.table-fixed
+    thead
+      tr
+        th.width-8.text-center 
+        th.width-18.text-center 
+        th.width-10.text-center 
+        th.width-8.text-center 
+        th.width-10.text-center 
+        th.width-10.text-center 
+        th.width-8.text-center 
+        th.width-2.text-center 
+        th.width-8.text-center 
+    tbody#discounts
+    template#invoice-discount
+      - for (var x = 1; x < 4; x++)
+        tr
+          td.text-center 割引
+          td.text-center
+            if editing
+              input.input.placeholder-min(data-prop='discountDescription' + x id='invoice-discountDescription' + x class='invoice-discountDescription' + x type='text' placeholder='割引内容 半角全角 100文字')
+            eles
+              p(class='invoice-discountDescription' + x)
+          td.text-center
+            if editing
+              input.input(data-prop='discountAmount' + x id='invoice-discountAmount' + x class='invoice-discountAmount' + x type='text' placeholder='0～999999999999')
+            eles
+              p(class='invoice-discountAmount' + x)
+          td.text-center
+            if editing
+              select.tax-type.select(data-prop='discountUnit' + x id='invoice-discountUnit' + x class='invoice-discountUnit' + x)
+                    option(value='percent' selected) %
+                    option(value='jpy') JPY
+            eles
+              p(class='invoice-discountUnit' + x)
+          td.text-right.align-middle(class='invoice-discounttotal' + x)
+          td
+          td
+          td
+          if editing
+            td.text-center.button.discount-line-del-action.is-danger#discount-btn 割引削除
+          else
+            td
+    template#invoice-discount-add-btn
+      tr
+        td
+        td.text-center.button.invoice-discount-action.is-info#invoice-discount-btn 割引行を追加
+        td
+        td
+        td
+        td
+        td
+        td
 
 div.margin-top-20p
   .columns
