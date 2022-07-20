@@ -39,7 +39,7 @@ class ActionUtils {
       }
       await this.page.waitForTimeout(1000);
     }
-    await this.page.waitForTimeout(3000)
+    await this.page.waitForTimeout(3000);
     return frame;
   }
 
@@ -47,14 +47,17 @@ class ActionUtils {
   async click(target, selector) {
     const elem = await this.getElement(target, selector);
     await elem.click();
+    await this.page.waitForTimeout(500);
   }
 
   // テキスト入力する
   async fill(target, selector, text) {
     await this.commonInput(target, selector, text, true);
+    await this.page.waitForTimeout(500);
   }
   async type(target, selector, text) {
     await this.commonInput(target, selector, text, false);
+    await this.page.waitForTimeout(500);
   }
   async commonInput(target, selector, text, isFill) {
     const elem = await this.getElement(target, selector);
@@ -73,6 +76,7 @@ class ActionUtils {
   async check(target, selector, checked) {
     const elem = await this.getElement(target, selector);
     await elem.setChecked(checked);
+    await this.page.waitForTimeout(500);
   }
 
   // チェックボックスにチェックが入っているか
@@ -94,12 +98,14 @@ class ActionUtils {
   // ドロップダウンリストから選択する（xpathのみ対応）
   async selectByXpath(target, xpath, text) {
     const option = await target.$(`${xpath}//option[text()="${text}"]`);
-    await target.evaluate(node => node.selected = true, option)
+    await target.evaluate(node => node.selected = true, option);
+    await this.page.waitForTimeout(500);
   }
 
   // ファイルをアップロードする
   async uploadFile(target, selector, filePath) {
     await target.setInputFiles(selector, filePath);
+    await this.page.waitForTimeout(500);
   }
 
   // ファイルをダウンロードする
@@ -114,6 +120,7 @@ class ActionUtils {
   // クリックにより開かれたタブのURLを取得する
   async openNewTabAndGetUrl(target, selector) {
     const newPage = await this.openNewTab(target, selector);
+    await this.page.waitForTimeout(500);
     const url = newPage.url();
     await newPage.close();
     await this.page.bringToFront();
@@ -180,10 +187,17 @@ class ActionUtils {
     return (elems.length > 0) && (await target.evaluate(node => window.getComputedStyle(node).display, elems[0]) != 'none')
   }
 
+  // 要素が非活性状態であるか
+  async isDisabled(target, selector) {
+    const elems = await this.getElements(target, selector);
+    return (elems.length > 0) && (await elems[0].isDisabled());
+  }
+
   // 一番下までスクロールする
   async scrollToEnd(target, selector) {
     const elem = await this.getElement(target, selector);
     await elem.press('End');
+    await this.page.waitForTimeout(500);
   }
 }
 exports.ActionUtils = ActionUtils;

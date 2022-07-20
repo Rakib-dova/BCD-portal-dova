@@ -23,7 +23,7 @@ describe('利用登録', function () {
     address: {
       post:'1010061',
       address:'東京都千代田区神田三崎町３丁目',
-      houseNo:'４－９',
+      houseNo:'４番地９号',
       other:'水道橋エムエスビル'
     },
     contact: {
@@ -140,7 +140,8 @@ describe('利用登録', function () {
     await contractChangePage.waitForLoading();
 
     // 利用登録手続き中の旨メッセージが表示されていること
-    expect(await contractChangePage.getSubTitle()).to.equal('現在利用登録手続き中です。', '利用登録手続き中の旨メッセージが表示されていること');
+    expect(await contractChangePage.getStatus()).to.equal('申込処理中', '【ご契約内容】ステータスが"申込処理中"であること');
+    expect(await contractChangePage.isCancelDisabled()).to.equal(true, '【ご契約内容】「解約申請」が非活性状態であること');
 */
     waited = false;
     await page.waitForTimeout(1000);
@@ -164,7 +165,7 @@ describe('利用登録', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, settingMenuPage, contractCancelPage }
+    const { loginPage, topPage, tradeShiftTopPage, settingMenuPage, contractChangePage }
       = common.getPageObject(browser, page);
 
     // 指定したURLに遷移する
@@ -184,12 +185,12 @@ describe('利用登録', function () {
     // 設定変更が可能な状態になっていること
     await topPage.openSettingMenu();
     await settingMenuPage.waitForLoading();
-    await settingMenuPage.clickCancel();
-    await contractCancelPage.waitForLoading();
-    expect(await contractCancelPage.ableToChange()).to.equal(true, '【契約情報解約】設定変更が可能な状態になっていること');
+    await settingMenuPage.clickContractChange();
+    await contractChangePage.waitForLoading();
+    expect(await contractChangePage.isCancelDisabled()).to.equal(false, '【ご契約内容】「解約申請」が活性状態であること');
 
     // 解約する
-    await contractCancelPage.cancel();
+    await contractChangePage.cancel();
     await page.waitForTimeout(1000);
   };
 

@@ -132,7 +132,7 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
     await topPage.waitForLoading();
 
     // ダウンロードする
-    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-04-01', '2023-03-31', null, false, null, true);
+    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-04-01', '2023-03-31', null, false, '既定フォーマット（デジタルトレードフォーマット）', true);
 
     // CSVデータがダウンロードされ、GQ列～ID列に設定した仕訳情報が入力されていること
     let actual = await getCsvData(csvPath);
@@ -148,7 +148,7 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
   /**
    * STEP7_No.195-197
    */
-   it("最終承認済_データ有", async function () {
+  it("最終承認済_データ有", async function () {
     // テストの初期化を実施
     await initBrowser();
 
@@ -161,7 +161,7 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
 
     // ダウンロードする
     let invoiceNo = 'atestApproved';
-    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-04-01', '2023-03-31', null, true, null, true);
+    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-04-01', '2023-03-31', null, true, '既定フォーマット（デジタルトレードフォーマット）', true);
 
     // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
     let actual = await getCsvData(csvPath);
@@ -197,14 +197,14 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
   /**
    * STEP7_No.113,116
    */
-   it("仕訳済_データ無", async function () {
+  it("仕訳済_データ無", async function () {
     await testWithoutData(config.company1.mng, 'fcde40392', '2021-04-01', '2023-03-31', true);
   });
 
   /**
    * STEP7_No.191
    */
-   it("最終承認済_データ無", async function () {
+  it("最終承認済_データ無", async function () {
     await testWithoutData(config.company2.user04, 'atestApproved', '2021-04-01', '2023-03-31', false);
   });
 
@@ -283,9 +283,137 @@ describe('仕訳情報設定_仕訳情報ダウンロード', function () {
   /**
    * STEP7_No.144,145,146
    */
-   it("明細1、仕訳数1（借方あり、貸方あり）", async function () {
+  it("明細1、仕訳数1（借方あり、貸方あり）", async function () {
     await testWithCredits('atest010111', '2022-07-13', '2022-07-13', 1, 1, true, true);
   });
+
+  /**
+   * STEP7_No.156,158
+   *//*
+  it("弥生会計_明細1", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
+    // ページオブジェクト
+    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, journalDownloadPage }
+      = common.getPageObject(browser, page);
+
+    // デジタルトレードアプリのトップページへ遷移する
+    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+
+    // ダウンロードする
+    let invoiceNo = 'fcde40393';
+    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-04-01', '2023-03-31', null, true, '弥生会計', true);
+
+    // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
+    let actual = await getCsvData(csvPath);
+    const headers = [];
+    for (i = 0; i < headers.length; i++) {
+      if (actual[0][headers[i]] == undefined) {
+        expect(false).to.equal(true, 'ヘッダ"' + headers[i] + '"が出力フォルダ内に含まれること');
+        return;
+      }
+    }
+    expect(true).to.equal(true, 'デジタルトレードフォーマットのファイルが出力されること');
+    expect(actual[0]['請求書番号']).to.equal(invoiceNo, '請求書番号"' + invoiceNo + '"が出力ファイルに含まれること');
+    await page.waitForTimeout(1000);
+  });*/
+
+  /**
+   * STEP7_No.163,167
+   *//*
+  it("弥生会計_明細2", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
+    // ページオブジェクト
+    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, journalDownloadPage }
+      = common.getPageObject(browser, page);
+
+    // デジタルトレードアプリのトップページへ遷移する
+    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+
+    // ダウンロードする
+    let invoiceNo = 'fcde40392';
+    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-04-01', '2023-03-31', null, true, '弥生会計', true);
+
+    // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
+    let actual = await getCsvData(csvPath);
+    const headers = [];
+    for (i = 0; i < headers.length; i++) {
+      if (actual[0][headers[i]] == undefined) {
+        expect(false).to.equal(true, 'ヘッダ"' + headers[i] + '"が出力フォルダ内に含まれること');
+        return;
+      }
+    }
+    expect(true).to.equal(true, 'デジタルトレードフォーマットのファイルが出力されること');
+    expect(actual[0]['請求書番号']).to.equal(invoiceNo, '請求書番号"' + invoiceNo + '"が出力ファイルに含まれること');
+    await page.waitForTimeout(1000);
+  });*/
+
+  /**
+   * STEP7_No.185,186
+   *//*
+  it("勘定奉行クラウド", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
+    // ページオブジェクト
+    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, journalDownloadPage }
+      = common.getPageObject(browser, page);
+
+    // デジタルトレードアプリのトップページへ遷移する
+    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+
+    // ダウンロードする
+    let invoiceNo = 'fcde40393';
+    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-04-01', '2023-03-31', null, true, '勘定奉行クラウド', true);
+
+    // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
+    let actual = await getCsvData(csvPath);
+    const headers = [];
+    for (i = 0; i < headers.length; i++) {
+      if (actual[0][headers[i]] == undefined) {
+        expect(false).to.equal(true, 'ヘッダ"' + headers[i] + '"が出力フォルダ内に含まれること');
+        return;
+      }
+    }
+    expect(true).to.equal(true, 'デジタルトレードフォーマットのファイルが出力されること');
+    expect(actual[0]['請求書番号']).to.equal(invoiceNo, '請求書番号"' + invoiceNo + '"が出力ファイルに含まれること');
+    await page.waitForTimeout(1000);
+  });*/
+
+  /**
+   * STEP7_No.190,191
+   *//*
+  it("PCA hyper", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
+    // ページオブジェクト
+    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, journalDownloadPage }
+      = common.getPageObject(browser, page);
+
+    // デジタルトレードアプリのトップページへ遷移する
+    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+
+    // ダウンロードする
+    let invoiceNo = 'fcde40393';
+    let csvPath = await download(topPage, journalMenuPage, journalDownloadPage, invoiceNo, '2021-04-01', '2023-03-31', null, true, 'PCA hyper', true);
+
+    // 仕訳情報ダウンロード画面で絞り込みをしたデータと同一の内容になっていること
+    let actual = await getCsvData(csvPath);
+    const headers = [];
+    for (i = 0; i < headers.length; i++) {
+      if (actual[0][headers[i]] == undefined) {
+        expect(false).to.equal(true, 'ヘッダ"' + headers[i] + '"が出力フォルダ内に含まれること');
+        return;
+      }
+    }
+    expect(true).to.equal(true, 'デジタルトレードフォーマットのファイルが出力されること');
+    expect(actual[0]['請求書番号']).to.equal(invoiceNo, '請求書番号"' + invoiceNo + '"が出力ファイルに含まれること');
+    await page.waitForTimeout(1000);
+  });*/
 });
 
 // CSVファイルをの中身を取得する

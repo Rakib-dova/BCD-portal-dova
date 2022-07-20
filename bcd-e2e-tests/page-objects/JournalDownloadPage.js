@@ -39,12 +39,10 @@ class JournalDownloadPage {
     await this.actionUtils.fill(this.frame, '#minIssuedate', minIssuedate);
     await this.actionUtils.fill(this.frame, '#maxIssuedate', maxIssuedate);
     if (sendTo) {
-      await this.addComment('「送信企業」にて、"' + sendTo + '"と入力する');
+      await this.addComment('「送信企業」にて、"' + sendTo + '"を選択する');
       await this.actionUtils.fill(this.frame, '#sendTo', sendTo);
-      await this.addComment('「送信企業」にて、「検索」をクリックする');
       await this.actionUtils.click(this.frame, '#sendToSearchBtn');
       await this.actionUtils.waitForLoading('//div[@id="searchResultBox"]//input');
-      await this.addComment('「送信企業」にて、「全選択」をクリックする');
       await this.actionUtils.click(this.frame, '#allSelectSentToBtn');
     }
     if(!wasApproved) {
@@ -52,8 +50,9 @@ class JournalDownloadPage {
       await this.actionUtils.click(this.frame, '#noneFinalapproval');
     }
     if (dataFormat) {
-      await this.addComment('「出力フォーマット」にて、value値が"' + dataFormat + '"の選択肢を選択する');
-      await this.actionUtils.selectByXpath(this.frame, '//select[@name="serviceDataFormat"]', dataFormat);
+      await this.addComment('「出力フォーマット」にて、"' + dataFormat + '"を選択する');
+      await this.actionUtils.click(this.frame, '//input[@name="serviceDataFormat"]/..');
+      await this.actionUtils.click(this.frame, '//input[@name="serviceDataFormat"]/../ul/li//span[contains(text(), "' + dataFormat + '")]');
     }
   }
 
