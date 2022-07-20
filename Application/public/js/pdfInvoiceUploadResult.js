@@ -1,18 +1,11 @@
+/* global
+
+ uploadCsv, $
+
+*/
+
 let fileReader = null
 let targetFile = null
-
-// 「アップロード開始」ボタンの活性化のスイッチ
-const $ = (_selector) => {
-  const selectorDelimeter = _selector.substr(0, 1)
-  const selector = _selector.substr(1, _selector.length)
-
-  switch (selectorDelimeter) {
-    case '#':
-      return document.getElementById(selector)
-    case '.':
-      return document.getElementsByClassName(selector)
-  }
-}
 
 $('#file-upload').addEventListener('change', function (e) {
   targetFile = this.files.item(0)
@@ -41,43 +34,12 @@ $('#start-upload-btn')?.addEventListener('click', async () => {
   modal.classList.add('is-active')
 
   const csvFile = $('#file-upload').files[0]
-  await sendSever(csvFile)
+  const response = await uploadCsv(csvFile)
+  console.log('==  response =====================:\n', response)
+  modal.classList.remove('is-active')
+  if (response.status === 500 || response.status === 400) {
+    const data = await response.json()
+    console.log('==  json data =====================:\n', data)
+    if (data.message) alert(data.message)
+  }
 })
-
-// eslint-disable-next-line no-unused-vars
-const sendSever = async (file) => {
-  const formData = new FormData()
-  if (file) formData.append('csvFile', file)
-
-  apiController(`https://${location.host}/pdfInvoiceCsvUpload/upload`, 'POST', formData, async (response) => {
-    const url = response.url
-    const a = document.createElement('a')
-    document.body.appendChild(a)
-    a.href = url
-    a.click()
-    a.remove()
-  })
-}
-
-const apiController = async (url, method, body = null, callback = null) => {
-  const options = {
-    method,
-    headers: {
-      credentials: 'include',
-      'CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-    },
-    body
-  }
-
-  try {
-    const response = await fetch(url, options)
-    if (response.ok) {
-      if (callback) callback(response)
-      else return response
-    } else {
-      console.log('失敗しました response:\n', response)
-    }
-  } catch (err) {
-    console.error('失敗しました ERR:\n', err)
-  }
-}

@@ -93,7 +93,6 @@ const saveRules = [
     prop: 'sendRegistrationNo',
     regexp: /^T\d{13}$/,
     message: '登録番号は"T"+半角数字13桁で入力してください。',
-    emptyMessage: '登録番号が空欄のため、差出人情報が不完全です。入力して下さい。',
     required: false
   },
   {
@@ -435,8 +434,7 @@ const outputRules = [
     prop: 'sendRegistrationNo',
     regexp: /^T\d{13}$/,
     message: '登録番号は"T"+半角数字13桁で入力してください。',
-    emptyMessage: '登録番号が空欄のため、差出人情報が不完全です。入力して下さい。',
-    required: true
+    required: false
   },
   {
     target: 'invoice',
@@ -711,16 +709,6 @@ function validate(invoice, lines, rules, option = {}) {
       result = false
     }
   })
-
-  // if (imageFileSize && imageFileSize > 1048576) {
-  //   setValidationMessage('印影ファイルのサイズは1MB以下にしてください。', 'header')
-  //   result = false
-  // }
-
-  // if (lines.length < 1) {
-  //   setValidationMessage('明細は１件以上必要です。', 'lines')
-  //   result = false
-  // }
 
   lines.forEach((line, i) => {
     rules.forEach((rule) => {
