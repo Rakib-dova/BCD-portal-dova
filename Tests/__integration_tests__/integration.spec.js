@@ -840,7 +840,7 @@ describe('ルーティングのインテグレーションテスト', () => {
           flag: 'r'
         })
 
-        const originFilePath = path.resolve('../Application/public/html/請求書一括作成フォーマット.csv')
+        const originFilePath = path.resolve('../Application/public/html/請求書一括作成フォーマット_v1.1.csv')
         const originFile = fs.readFileSync(originFilePath, {
           encoding: 'utf-8',
           flag: 'r'
@@ -980,7 +980,7 @@ describe('ルーティングのインテグレーションテスト', () => {
           flag: 'r'
         })
 
-        const originFilePath = path.resolve('../Application/public/html/請求書一括作成フォーマット.csv')
+        const originFilePath = path.resolve('../Application/public/html/請求書一括作成フォーマット_v1.1.csv')
         const originFile = fs.readFileSync(originFilePath, {
           encoding: 'utf-8',
           flag: 'r'
