@@ -54,3 +54,8 @@
   text-overflow: ellipsis;
   height: 600px;
 }
+#termBox button#next-btn[disabled]{
+  background-color: #ccc;
+  color: #fff;
+  border-color: #dbdbdb;
+}
