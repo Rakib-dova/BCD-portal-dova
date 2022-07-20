@@ -26,6 +26,7 @@ const baseResult = {
     { item: '支払期日', value: '2021-09-16' },
     { item: '納品日', value: '2021-09-16' },
     { item: '備考', value: 'PBI1483_手動試験' },
+    { item: '取引先メールアドレス', value: 'aaa@bbb.ccc' },
     { item: '銀行名', value: '手動銀行' },
     { item: '支店名', value: '手動支店' },
     { item: '科目', value: '普通' },
@@ -47,6 +48,7 @@ const baseResult = {
     { columnName: '支払期日', item: '', value: '' },
     { columnName: '納品日', item: '', value: '' },
     { columnName: '備考', item: '', value: '' },
+    { columnName: '取引先メールアドレス', item: '', value: '' },
     { columnName: '銀行名', item: '', value: '' },
     { columnName: '支店名', item: '', value: '' },
     { columnName: '科目', item: '', value: '' },
@@ -113,7 +115,7 @@ const baseResult = {
     keyOthers: { key: 'keyOthers', value: '', itemName: 'その他' }
   },
   csvFileName: uploadFileName,
-  selectedFormatData: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+  selectedFormatData: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
   itemRownNo: 1,
   dataStartRowNo: 2,
   checkItemNameLine: 'on'
@@ -211,6 +213,7 @@ describe('uploadFormatControllerのテスト', () => {
       '支払期日',
       '納品日',
       '備考',
+      '取引先メールアドレス',
       '銀行名',
       '支店名',
       '科目',
@@ -617,7 +620,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 7,
           uploadFormatItemName: '',
           uploadFormatNumber: 6,
-          defaultItemName: '銀行名',
+          defaultItemName: '取引先メールアドレス',
           defaultNumber: 6,
           createdAt: now,
           updatedAt: now
@@ -627,7 +630,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 8,
           uploadFormatItemName: '',
           uploadFormatNumber: 7,
-          defaultItemName: '支店名',
+          defaultItemName: '銀行名',
           defaultNumber: 7,
           createdAt: now,
           updatedAt: now
@@ -637,7 +640,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 9,
           uploadFormatItemName: '',
           uploadFormatNumber: 8,
-          defaultItemName: '科目',
+          defaultItemName: '支店名',
           defaultNumber: 8,
           createdAt: now,
           updatedAt: now
@@ -647,7 +650,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 10,
           uploadFormatItemName: '',
           uploadFormatNumber: 9,
-          defaultItemName: '口座番号',
+          defaultItemName: '科目',
           defaultNumber: 9,
           createdAt: now,
           updatedAt: now
@@ -657,7 +660,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 11,
           uploadFormatItemName: '',
           uploadFormatNumber: 10,
-          defaultItemName: '口座名義',
+          defaultItemName: '口座番号',
           defaultNumber: 10,
           createdAt: now,
           updatedAt: now
@@ -667,7 +670,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 12,
           uploadFormatItemName: '',
           uploadFormatNumber: 11,
-          defaultItemName: 'その他特記事項',
+          defaultItemName: '口座名義',
           defaultNumber: 11,
           createdAt: now,
           updatedAt: now
@@ -677,7 +680,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 13,
           uploadFormatItemName: '',
           uploadFormatNumber: 12,
-          defaultItemName: '明細-項目ID',
+          defaultItemName: 'その他特記事項',
           defaultNumber: 12,
           createdAt: now,
           updatedAt: now
@@ -687,7 +690,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 14,
           uploadFormatItemName: '',
           uploadFormatNumber: 13,
-          defaultItemName: '明細-内容',
+          defaultItemName: '明細-項目ID',
           defaultNumber: 13,
           createdAt: now,
           updatedAt: now
@@ -697,7 +700,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 15,
           uploadFormatItemName: '',
           uploadFormatNumber: 14,
-          defaultItemName: '明細-数量',
+          defaultItemName: '明細-内容',
           defaultNumber: 14,
           createdAt: now,
           updatedAt: now
@@ -707,7 +710,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 16,
           uploadFormatItemName: '',
           uploadFormatNumber: 15,
-          defaultItemName: '明細-単位',
+          defaultItemName: '明細-数量',
           defaultNumber: 15,
           createdAt: now,
           updatedAt: now
@@ -717,7 +720,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 17,
           uploadFormatItemName: '',
           uploadFormatNumber: 16,
-          defaultItemName: '明細-単価',
+          defaultItemName: '明細-単位',
           defaultNumber: 16,
           createdAt: now,
           updatedAt: now
@@ -727,7 +730,7 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 18,
           uploadFormatItemName: '',
           uploadFormatNumber: 17,
-          defaultItemName: '明細-税（消費税／軽減税率／不課税／免税／非課税）',
+          defaultItemName: '明細-単価',
           defaultNumber: 17,
           createdAt: now,
           updatedAt: now
@@ -737,8 +740,18 @@ describe('uploadFormatControllerのテスト', () => {
           serialNumber: 19,
           uploadFormatItemName: '',
           uploadFormatNumber: 18,
-          defaultItemName: ' 明細-備考',
+          defaultItemName: '明細-税（消費税／軽減税率／不課税／免税／非課税）',
           defaultNumber: 18,
+          createdAt: now,
+          updatedAt: now
+        },
+        {
+          uploadFormatId: 'c1e543ad-c23e-455b-b33a-2b84651ffe05',
+          serialNumber: 20,
+          uploadFormatItemName: '',
+          uploadFormatNumber: 19,
+          defaultItemName: ' 明細-備考',
+          defaultNumber: 19,
           createdAt: now,
           updatedAt: now
         }
@@ -777,7 +790,7 @@ describe('uploadFormatControllerのテスト', () => {
       uploadFormatDetailIdsGetUploadFormatId.mockReturnValue([])
       const userUploadFormatId = 'c1e543ad-c23e-455b-b33a-2b84651ffe05'
       successResult.selectedFormatData = []
-      for (let idx = 0; idx < 19; idx++) {
+      for (let idx = 0; idx < 20; idx++) {
         successResult.selectedFormatData.push('')
       }
 
@@ -794,7 +807,7 @@ describe('uploadFormatControllerのテスト', () => {
       const uploadData2 =
         uploadData.split(/\r?\n|\r/)[0] +
         '\r\n' +
-        '2021-09-16,,7e5255fe-05e6-4fc9-acf0-076574bc35f7,2021-09-16,2021-09-16,PBI1483_手動試験,手動銀行,手動支店,普通,1234567,手動,請求書一括作成_7.csv,3,明細,1,個,100000,消費税,PBI318_手動試験'
+        '2021-09-16,,7e5255fe-05e6-4fc9-acf0-076574bc35f7,2021-09-16,2021-09-16,PBI1483_手動試験,aaa@bbb.ccc,手動銀行,手動支店,普通,1234567,手動,請求書一括作成_7.csv,3,明細,1,個,100000,消費税,PBI318_手動試験'
       const uploadFormatDB = {
         uploadFormatId: 'c1e543ad-c23e-455b-b33a-2b84651ffe05',
         setName: 'controllersUploadFormatControllerSpecJs.getDataForUploadFormat',
@@ -812,7 +825,7 @@ describe('uploadFormatControllerのテスト', () => {
       uploadFormatDetailIdsGetUploadFormatId.mockReturnValue([])
       const userUploadFormatId = 'c1e543ad-c23e-455b-b33a-2b84651ffe05'
       successResult.selectedFormatData = []
-      for (let idx = 0; idx < 19; idx++) {
+      for (let idx = 0; idx < 20; idx++) {
         successResult.selectedFormatData.push('')
       }
       successResult.itemRownNo = 1
@@ -846,7 +859,7 @@ describe('uploadFormatControllerのテスト', () => {
       uploadFormatDetailIdsGetUploadFormatId.mockReturnValue([])
       const userUploadFormatId = 'c1e543ad-c23e-455b-b33a-2b84651ffe05'
       successResult.selectedFormatData = []
-      for (let idx = 0; idx < 19; idx++) {
+      for (let idx = 0; idx < 20; idx++) {
         successResult.selectedFormatData.push('')
       }
 
@@ -899,7 +912,7 @@ describe('uploadFormatControllerのテスト', () => {
       successResult.selectedFormatData = []
       successResult.taxIds.keyDutyFree.value = 'AAA'
       successResult.unitIds.keyManMonth.value = 'MANS'
-      for (let idx = 0; idx < 19; idx++) {
+      for (let idx = 0; idx < 20; idx++) {
         successResult.selectedFormatData.push('')
       }
 

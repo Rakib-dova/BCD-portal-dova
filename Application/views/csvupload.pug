@@ -10,6 +10,10 @@ block content
     .columns.is-centered
       .column.is-11
         .box
+          .mt-5.has-text-centered
+            .columns.is-mobile.is-centered.mt-0.mb-0
+              .column-csvupload
+                p.border 8/29 リリースより取引先メールアドレスが必須となりました。
           form.uploader
             input(type='hidden' name='_csrf' value=csrfToken)
             input(type='file',id="file-upload",name="fileUpload", accept=".csv")
@@ -36,6 +40,7 @@ block content
             .columns.is-mobile.is-centered.mt-0.mb-0
               .column-csvupload
                 p.border 社内システムから出力したCSV等、独自のCSVを利用して請求書を作成できます。ご利用には、アップロードフォーマット設定を登録の上、フォーマット種別を指定ください。
+                p.border ※ 8/29以前に登録いただいたアップロードフォーマットは利用できませんので修正もしくは再登録をお願いいたします。
             .columns.mt-0.pt-0
               .column.mt-0.pt-0
                 a.mr482(href='uploadFormatList') 設定はこちら

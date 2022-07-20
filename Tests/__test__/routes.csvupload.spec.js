@@ -7981,7 +7981,7 @@ describe('csvuploadのテスト', () => {
       const formatFlag = false
       const uploadFormatDetail = []
       const uploadFormatIdentifier = []
-      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット.csv')
+      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット_v1.1.csv')
       const uploadData = fs.readFileSync(defaultCsvPath)
 
       const csvObj = new bconCsv(
@@ -8026,7 +8026,7 @@ describe('csvuploadのテスト', () => {
       const formatFlag = false
       const uploadFormatDetail = []
       const uploadFormatIdentifier = []
-      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット.csv')
+      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット_v1.1.csv')
       const uploadData = fs.readFileSync(defaultCsvPath)
 
       const csvObj = new bconCsv(
@@ -8086,7 +8086,7 @@ describe('csvuploadのテスト', () => {
       const formatFlag = true
       const uploadFormatDetail = uploadFormatDetailResult
       const uploadFormatIdentifier = []
-      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット.csv')
+      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット_v1.1.csv')
       const uploadData = fs.readFileSync(defaultCsvPath)
 
       const csvObj = new bconCsv(
