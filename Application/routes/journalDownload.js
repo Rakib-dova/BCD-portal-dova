@@ -72,8 +72,7 @@ const cbGetIndex = async (req, res, next) => {
     title: '仕訳情報ダウンロード',
     minissuedate: minissuedate,
     maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
-    serviceDataFormatName: serviceDataFormatName,
-    csrfToken: 'test'
+    serviceDataFormatName: serviceDataFormatName
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }

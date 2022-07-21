@@ -76,8 +76,7 @@ const cbGetIndex = async (req, res, next) => {
     minissuedate: minissuedate,
     maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
     status: status,
-    buyAndSell: buyAndSell,
-    csrfToken: 'test'
+    buyAndSell: buyAndSell
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }

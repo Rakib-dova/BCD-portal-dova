@@ -52,13 +52,10 @@ document.getElementsByName('confirmButton').forEach((item) => {
   item.addEventListener('click', function (e) {
     const uuid = item.getAttribute('uuid')
     const url = `/uploadFormat/${uuid}`
-    const elements = document.getElementsByName('_csrf')
-    const csrf = elements.item(0).value
     fetch(url, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-        'CSRF-Token': csrf
+        'Content-Type': 'application/json'
       }
     })
       .then((response) => response.json())
@@ -100,13 +97,10 @@ document.getElementsByName('modalDelBtn').forEach((item) => {
   item.addEventListener('click', function (e) {
     const uuid = item.getAttribute('uuid')
     const url = `/uploadFormat/${uuid}`
-    const elements = document.getElementsByName('_csrf')
-    const csrf = elements.item(0).value
     fetch(url, {
       method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json',
-        'CSRF-Token': csrf
+        'Content-Type': 'application/json'
       }
     })
       .then((response) => response.json())

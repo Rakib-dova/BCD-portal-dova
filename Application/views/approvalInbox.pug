@@ -747,7 +747,6 @@ block content
         a.delete(data-target='check-approval-modal')
       section.modal-card-body
         form#approval(method='POST', action=`/approvalInbox/${documentId}`)
-          input(type='hidden' name='_csrf' value=csrfToken)
           include invoiceHeader
           .box#journal-list
           include invoiceFooter
@@ -775,7 +774,6 @@ block content
           a.delete(data-target='reject-approval-modal')
         section.modal-card-body
           form#reject(method='POST' action=`/rejectApproval/${documentId}`)
-            input(type='hidden' name='_csrf' value=csrfToken)
             include invoiceHeader
             .box#journal-list-reject-modal
             include invoiceFooter

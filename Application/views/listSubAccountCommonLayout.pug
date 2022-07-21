@@ -10,7 +10,6 @@
         a.button.is-link.mb-4(href="/registSubAccountCode") #{btnNameForRegister}
         
         .box
-          input(type='hidden' name='_csrf' value=csrfToken)
           if listArr.length === 0
             p #{messageForNotItem}
           else

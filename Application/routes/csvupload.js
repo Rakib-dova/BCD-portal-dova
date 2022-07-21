@@ -71,8 +71,7 @@ const cbGetIndex = async (req, res, next) => {
 
   // ユーザ権限も画面に送る
   res.render('csvupload', {
-    formatkindsArr: formatkindsArr,
-    csrfToken: 'test'
+    formatkindsArr: formatkindsArr
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }

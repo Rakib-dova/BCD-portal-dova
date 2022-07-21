@@ -11,7 +11,6 @@
           .columns.is-centered.uploader-columns
             .column
               form#accountCodeUpload(action= accountCodeUpload method='POST' enctype='multipart/form-data')
-                input(type='hidden' name='_csrf' value=csrfToken)
                 .file.is-centered.is-medium.is-boxed.has-name.is-border.is-white
                   label.file-label.has-text-centered
                     input.file-input(type='file' name= fileInputName accept='.csv').is-purple

@@ -6,7 +6,6 @@ block content
       h4.title-text-journallzing.text-inbox 支払依頼
     .box
       form#form(method='POST' action=`/requestApproval/save/${documentId}`)
-        input(type='hidden' name='_csrf' value=csrfToken)
         include requestApprovalRejectedMessage
         include invoiceHeader
         include requestApprovalInvoiceLines
