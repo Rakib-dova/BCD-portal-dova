@@ -146,7 +146,13 @@ describe('deleteDepartmentCodeのテスト', () => {
     test('deleteDepartmentCodeのルーティングを確認', async () => {
       expect(deleteDepartmentCode.router.delete).toHaveBeenLastCalledWith(
         '/:departmentCodeId',
+        expect.any(Function),
         deleteDepartmentCode.cbDeleteDepartmentCode
+      )
+      expect(deleteDepartmentCode.router.get).toHaveBeenLastCalledWith(
+        '/:checkDepartmentCode',
+        expect.any(Function),
+        deleteDepartmentCode.cbGetCheckDepartmentCode
       )
     })
   })
