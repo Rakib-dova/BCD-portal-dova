@@ -390,7 +390,8 @@ const cbPostIndex = async (req, res, next) => {
     selectedFormatData: emptyselectedFormatData,
     itemRowNo: req.body.uploadFormatNumber,
     dataStartRowNo: req.body.defaultNumber,
-    checkItemNameLine: req.body.checkItemNameLine
+    checkItemNameLine: req.body.checkItemNameLine,
+    csrfToken: 'test'
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')

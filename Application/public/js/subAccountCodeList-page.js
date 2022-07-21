@@ -50,11 +50,14 @@ window.onload = () => {
 Array.prototype.forEach.call(document.querySelectorAll('.checkChangeSubAccountCodeBtn'), (item) => {
   item.addEventListener('click', function (e) {
     const checkSubAccountCode = item.getAttribute('uuid')
+    const elements = document.getElementsByName('_csrf')
+    const csrf = elements.item(0).value
     const url = `/deleteSubAccountCode/${checkSubAccountCode}`
     fetch(url, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'CSRF-Token': csrf
       }
     })
       .then((response) => response.json())
@@ -90,11 +93,14 @@ Array.prototype.forEach.call(document.querySelectorAll('.deleteSubAccountCodeBtn
 Array.prototype.forEach.call(document.querySelectorAll('#modalCodeDelBtn'), (item) => {
   item.addEventListener('click', function (e) {
     const subAccountCodeId = item.getAttribute('uuid')
+    const elements = document.getElementsByName('_csrf')
+    const csrf = elements.item(0).value
     const url = `/deleteSubAccountCode/${subAccountCodeId}`
     fetch(url, {
       method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'CSRF-Token': csrf
       }
     })
       .then((response) => response.json())

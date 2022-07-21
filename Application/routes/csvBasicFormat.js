@@ -49,7 +49,8 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
   res.render('csvBasicFormat', {
     csvTax: csvTax,
     csvUnit: csvUnit,
-    TS_HOST: process.env.TS_HOST
+    TS_HOST: process.env.TS_HOST,
+    csrfToken: 'test'
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCsvBasicFormat')

@@ -60,7 +60,8 @@ const cbGetRegistApproveRoute = async (req, res, next) => {
       logTitleEng: 'REGIST APPROVE ROUTE',
       valueForApproveRouteNameInput: approveRouteName,
       approveUsers: approverUsers,
-      lastApprover: lastApprover
+      lastApprover: lastApprover,
+      csrfToken: 'test'
     })
   } else {
     res.render('registApproveRoute', {
@@ -71,7 +72,8 @@ const cbGetRegistApproveRoute = async (req, res, next) => {
       modalTitle: '承認者検索',
       backUrl: '/approveRouteList',
       logTitle: '承認ルート登録',
-      logTitleEng: 'REGIST APPROVE ROUTE'
+      logTitleEng: 'REGIST APPROVE ROUTE',
+      csrfToken: 'test'
     })
   }
 

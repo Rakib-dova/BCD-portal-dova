@@ -211,7 +211,8 @@ const cbGetRequestApproval = async (req, res, next) => {
     documentId: invoiceId,
     message: message,
     approveRoute: approveRoute,
-    rejectedUser: rejectedUser
+    rejectedUser: rejectedUser,
+    csrfToken: 'test'
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRequestApproval')
