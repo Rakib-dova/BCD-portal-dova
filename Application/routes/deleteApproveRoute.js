@@ -12,6 +12,9 @@ const constantsDefine = require('../constants')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbDeleteApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteApproveRoute')
 
@@ -145,8 +148,8 @@ const cbGetCheckApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCheckApproveRoute')
 }
 
-router.delete('/:approveRouteId', cbDeleteApproveRoute)
-router.get('/:approveRouteId', cbGetCheckApproveRoute)
+router.delete('/:approveRouteId', csrfProtection, cbDeleteApproveRoute)
+router.get('/:approveRouteId', csrfProtection, cbGetCheckApproveRoute)
 
 module.exports = {
   router: router,

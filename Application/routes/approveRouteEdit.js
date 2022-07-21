@@ -11,6 +11,9 @@ const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const approverController = require('../controllers/approverController')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -77,7 +80,8 @@ const cbGetIndex = async (req, res, next) => {
       logTitleEng: 'EDIT APPROVE ROUTE',
       approveRouteName: resultDuplicate.approveRouteName,
       approveUsers: resultDuplicate.approverUsers,
-      lastApprover: resultDuplicate.lastApprover
+      lastApprover: resultDuplicate.lastApprover,
+      csrfToken: req.csrfToken()
     })
   } else {
     res.render('registApproveRoute', {
@@ -92,7 +96,8 @@ const cbGetIndex = async (req, res, next) => {
       logTitleEng: 'EDIT APPROVE ROUTE',
       approveRouteName: approveRouteAndApprover.name,
       approveUsers: approveRouteAndApprover.users,
-      lastApprover: lastApprover
+      lastApprover: lastApprover,
+      csrfToken: req.csrfToken()
     })
   }
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -167,8 +172,8 @@ const cbPostEditApproveRoute = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostEditApproveRoute')
 }
 
-router.get('/:approveRouteId', helper.isAuthenticated, cbGetIndex)
-router.post('/:approveRouteId', helper.isAuthenticated, cbPostEditApproveRoute)
+router.get('/:approveRouteId', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/:approveRouteId', helper.isAuthenticated, csrfProtection, cbPostEditApproveRoute)
 
 module.exports = {
   router: router,

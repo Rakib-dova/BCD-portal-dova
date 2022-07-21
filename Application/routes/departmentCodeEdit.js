@@ -11,6 +11,9 @@ const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const departmentCodeController = require('../controllers/departmentCodeController')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -76,7 +79,8 @@ const cbGetIndex = async (req, res, next) => {
     checkModalLabel1: '部門コード',
     checkModalLabel2: '部門名',
     logTitle: '部門データ確認・変更',
-    logTitleEng: 'EDIT DEPARTMENT'
+    logTitleEng: 'EDIT DEPARTMENT',
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -179,8 +183,8 @@ const cbPostIndex = async function (req, res, next) {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
-router.get('/:departmentCodeId', helper.isAuthenticated, cbGetIndex)
-router.post('/:departmentCodeId', helper.isAuthenticated, cbPostIndex)
+router.get('/:departmentCodeId', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/:departmentCodeId', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,

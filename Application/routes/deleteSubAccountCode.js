@@ -12,6 +12,9 @@ const subAccountCodeController = require('../controllers/subAccountCodeControlle
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbDeleteSubAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteSubAccountCode')
 
@@ -139,8 +142,8 @@ const cbGetCheckSubAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCheckSubAccountCode')
 }
 
-router.delete('/:subAccountCodeId', cbDeleteSubAccountCode)
-router.get('/:checkSubAccountCode', cbGetCheckSubAccountCode)
+router.delete('/:subAccountCodeId', csrfProtection, cbDeleteSubAccountCode)
+router.get('/:checkSubAccountCode', csrfProtection, cbGetCheckSubAccountCode)
 
 module.exports = {
   router: router,
