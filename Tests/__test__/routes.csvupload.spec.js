@@ -125,6 +125,7 @@ describe('csvuploadのテスト', () => {
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     logger.info = jest.fn()
     logger.error = jest.fn()
+    request.csrfToken = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -1014,7 +1015,7 @@ describe('csvuploadのテスト', () => {
 
   describe('ルーティング', () => {
     test('csvuploadのルーティングを確認', async () => {
-      expect(csvupload.router.get).toBeCalledWith('/', helper.isAuthenticated, csvupload.cbGetIndex)
+      expect(csvupload.router.get).toBeCalledWith('/', helper.isAuthenticated, expect.anything(), csvupload.cbGetIndex)
     })
   })
 

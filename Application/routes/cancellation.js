@@ -14,6 +14,9 @@ const noticeHelper = require('./helpers/notice')
 const constantsDefine = require('../constants')
 const contractInformationcancelOrder = require('../orderTemplate/contractInformationcancelOrder.json')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetCancellation = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCancellation')
 
@@ -72,7 +75,8 @@ const cbGetCancellation = async (req, res, next) => {
     tenantId: req.user.tenantId,
     userRole: req.session.userRole,
     numberN: contract.dataValues?.numberN,
-    TS_HOST: process.env.TS_HOST
+    TS_HOST: process.env.TS_HOST,
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCancellation')
 }
@@ -130,8 +134,8 @@ const cbPostCancellation = async (req, res, next) => {
   return next(noticeHelper.create('cancellation'))
 }
 
-router.get('/', helper.isAuthenticated, cbGetCancellation)
-router.post('/', helper.isAuthenticated, cbPostCancellation)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetCancellation)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostCancellation)
 
 module.exports = {
   router: router,

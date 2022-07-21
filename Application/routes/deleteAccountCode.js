@@ -12,6 +12,9 @@ const accountCodeController = require('../controllers/accountCodeController')
 const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbDeleteAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbDeleteAccountCode')
 
@@ -139,8 +142,8 @@ const cbGetCheckAccountCode = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCheckAccountCode')
 }
 
-router.delete('/:accountCodeId', cbDeleteAccountCode)
-router.get('/:checkAccountCode', cbGetCheckAccountCode)
+router.delete('/:accountCodeId', csrfProtection, cbDeleteAccountCode)
+router.get('/:checkAccountCode', csrfProtection, cbGetCheckAccountCode)
 
 module.exports = {
   router: router,

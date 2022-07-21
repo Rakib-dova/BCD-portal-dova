@@ -82,11 +82,13 @@ describe('registAccountCodeのテスト', () => {
       expect(registDepartmentCode.router.get).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.any(Function),
         registDepartmentCode.cbGetRegistDepartmentCode
       )
       expect(registDepartmentCode.router.post).toBeCalledWith(
         '/',
         helper.isAuthenticated,
+        expect.any(Function),
         registDepartmentCode.cbPostRegistDepartmentCode
       )
     })
@@ -106,6 +108,11 @@ describe('registAccountCodeのテスト', () => {
 
       // ユーザ権限チェック結果設定
       checkContractStatusSpy.mockReturnValue(Contracts[0].dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await registDepartmentCode.cbGetRegistDepartmentCode(request, response, next)
@@ -132,7 +139,8 @@ describe('registAccountCodeのテスト', () => {
         pTagForcheckInput1: 'checksetDepartmentCodeInputId',
         pTagForcheckInput2: 'checksetDepartmentCodeNameInputId',
         checkModalLabel1: '部門コード',
-        checkModalLabel2: '部門名'
+        checkModalLabel2: '部門名',
+        csrfToken: dummyToken
       })
     })
 

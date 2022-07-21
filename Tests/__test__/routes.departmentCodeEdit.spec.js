@@ -59,6 +59,7 @@ describe('departmentCodeEditのテスト', () => {
     request.flash = jest.fn()
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     updatedDepartmentCodeSpy = jest.spyOn(departmentCodeController, 'updatedDepartmentCode')
+    request.csrfToken = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -80,11 +81,13 @@ describe('departmentCodeEditのテスト', () => {
       expect(departmentCodeEdit.router.get).toBeCalledWith(
         '/:departmentCodeId',
         helper.isAuthenticated,
+        expect.anything(),
         departmentCodeEdit.cbGetIndex
       )
       expect(departmentCodeEdit.router.post).toBeCalledWith(
         '/:departmentCodeId',
         helper.isAuthenticated,
+        expect.anything(),
         departmentCodeEdit.cbPostIndex
       )
     })

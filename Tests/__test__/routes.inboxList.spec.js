@@ -220,10 +220,25 @@ describe('inboxListのテスト', () => {
 
   describe('ルーティング', () => {
     test('inboxListのルーティングを確認', async () => {
-      expect(inboxList.router.get).toBeCalledWith('/:page', helper.isAuthenticated, inboxList.cbGetIndex)
+      expect(inboxList.router.get).toBeCalledWith(
+        '/:page',
+        expect.any(Function),
+        helper.isAuthenticated,
+        inboxList.cbGetIndex
+      )
       expect(inboxList.router.get).toBeCalledWith('/getWorkflow', inboxList.cbGetWorkflow)
-      expect(inboxList.router.get).toBeCalledWith('/approvals', helper.isAuthenticated, inboxList.cbGetApprovals)
-      expect(inboxList.router.post).toBeCalledWith('/:page', helper.isAuthenticated, inboxList.cbSearchApprovedInvoice)
+      expect(inboxList.router.get).toBeCalledWith(
+        '/approvals',
+        helper.isAuthenticated,
+        expect.any(Function),
+        inboxList.cbGetApprovals
+      )
+      expect(inboxList.router.post).toBeCalledWith(
+        '/:page',
+        expect.any(Function),
+        helper.isAuthenticated,
+        inboxList.cbSearchApprovedInvoice
+      )
     })
   })
 
@@ -247,6 +262,12 @@ describe('inboxListのテスト', () => {
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await inboxList.cbGetIndex(request, response, next)
 
@@ -260,7 +281,8 @@ describe('inboxListのテスト', () => {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
-        rejectedFlag: false
+        rejectedFlag: false,
+        csrfToken: dummyToken
       })
     })
 
@@ -284,6 +306,12 @@ describe('inboxListのテスト', () => {
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await inboxList.cbGetIndex(request, response, next)
 
@@ -297,7 +325,8 @@ describe('inboxListのテスト', () => {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
-        rejectedFlag: true
+        rejectedFlag: true,
+        csrfToken: dummyToken
       })
     })
 
@@ -320,6 +349,11 @@ describe('inboxListのテスト', () => {
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await inboxList.cbGetIndex(request, response, next)
@@ -334,7 +368,8 @@ describe('inboxListのテスト', () => {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
-        rejectedFlag: false
+        rejectedFlag: false,
+        csrfToken: dummyToken
       })
     })
 
@@ -741,6 +776,12 @@ describe('inboxListのテスト', () => {
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await inboxList.cbGetApprovals(request, response, next)
 
@@ -754,7 +795,8 @@ describe('inboxListのテスト', () => {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
-        rejectedFlag: true
+        rejectedFlag: true,
+        csrfToken: dummyToken
       })
     })
 
@@ -778,6 +820,12 @@ describe('inboxListのテスト', () => {
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await inboxList.cbGetApprovals(request, response, next)
 
@@ -791,7 +839,8 @@ describe('inboxListのテスト', () => {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
-        rejectedFlag: true
+        rejectedFlag: true,
+        csrfToken: dummyToken
       })
     })
 
@@ -814,6 +863,12 @@ describe('inboxListのテスト', () => {
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await inboxList.cbGetApprovals(request, response, next)
 
@@ -827,7 +882,8 @@ describe('inboxListのテスト', () => {
         listArr: searchResult1.list,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
-        rejectedFlag: true
+        rejectedFlag: true,
+        csrfToken: dummyToken
       })
     })
 
@@ -1054,6 +1110,11 @@ describe('inboxListのテスト', () => {
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await inboxList.cbSearchApprovedInvoice(request, response, next)
@@ -1068,7 +1129,8 @@ describe('inboxListのテスト', () => {
         listArr: searchResultData,
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
-        rejectedFlag: false
+        rejectedFlag: false,
+        csrfToken: dummyToken
       })
     })
 
@@ -1099,6 +1161,11 @@ describe('inboxListのテスト', () => {
 
       // inboxControllerのgetInobox実施結果設定
       getInboxSpy.mockReturnValue(searchResult1)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await inboxList.cbSearchApprovedInvoice(request, response, next)
@@ -1114,7 +1181,8 @@ describe('inboxListのテスト', () => {
         numPages: searchResult1.numPages,
         currPage: searchResult1.currPage,
         rejectedFlag: false,
-        message: '条件に合致する支払依頼が見つかりませんでした。'
+        message: '条件に合致する支払依頼が見つかりませんでした。',
+        csrfToken: dummyToken
       })
     })
 
