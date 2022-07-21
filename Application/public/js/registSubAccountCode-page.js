@@ -189,11 +189,8 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
   $('#setAccountCodeInputId').value = accountCode
   $('#setAccountCodeNameInputId').value = accountCodeName
   const getAccountCode = new XMLHttpRequest()
-  const elements = document.getElementsByName('_csrf')
-  const csrf = elements.item(0).value
   getAccountCode.open('POST', '/registSubAccountCode/getAccountCode')
   getAccountCode.setRequestHeader('Content-Type', 'application/json')
-  getAccountCode.setRequestHeader('CSRF-Token', csrf)
   getAccountCode.onreadystatechange = function () {
     if (getAccountCode.readyState === getAccountCode.DONE) {
       switch (getAccountCode.status) {

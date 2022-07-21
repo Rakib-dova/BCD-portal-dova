@@ -72,8 +72,7 @@ const cbGetCancellation = async (req, res, next) => {
     tenantId: req.user.tenantId,
     userRole: req.session.userRole,
     numberN: contract.dataValues?.numberN,
-    TS_HOST: process.env.TS_HOST,
-    csrfToken: 'test'
+    TS_HOST: process.env.TS_HOST
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCancellation')
 }

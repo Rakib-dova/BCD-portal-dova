@@ -58,8 +58,7 @@ const cbGetIndex = async (req, res, next) => {
 
   // 承認者ルートデータを画面に渡す。
   res.render('approveRouteList', {
-    approveRouteListArr: approveRouteListArr,
-    csrfToken: 'test'
+    approveRouteListArr: approveRouteListArr
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }

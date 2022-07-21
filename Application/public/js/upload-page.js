@@ -57,12 +57,9 @@ $('#start-upload-btn').addEventListener('click', () => {
       }
     }
 
-    const csrfToken = document.querySelector('input[name="_csrf"]').value
-
     const sender = new XMLHttpRequest()
     sender.open('POST', uploader.action, true)
     sender.setRequestHeader('Content-Type', 'application/json')
-    sender.setRequestHeader('CSRF-Token', csrfToken)
     sender.onreadystatechange = () => {
       if (sender.readyState === sender.DONE) {
         const fiveErrorMsg = '請求書アップロード中に予期しない問題が発生しました。\n取込結果は一覧画面でご確認下さい。'

@@ -187,8 +187,7 @@ const cbGetIndex = async (req, res, next) => {
     optionLine6: optionLine6,
     optionLine7: optionLine7,
     optionLine8: optionLine8,
-    documentId: invoiceId,
-    csrfToken: 'test'
+    documentId: invoiceId
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }

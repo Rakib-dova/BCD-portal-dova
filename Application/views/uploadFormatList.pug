@@ -23,7 +23,6 @@ block content
         a.button.is-link.mb-4(href="/csvBasicFormat") 新規登録する
         a.button.is-link.is-light.float-right(href="/csvupload") 請求書一括作成→
         .box
-          input(type='hidden' name='_csrf' value=csrfToken)
           if uploadFormatListArr.length === 0
             p 現在、請求書データのアップロードフォーマットはありません。
             p 新規登録するボタンから登録を行って下さい。

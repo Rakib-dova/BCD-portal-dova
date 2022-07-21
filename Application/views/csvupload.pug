@@ -11,7 +11,6 @@ block content
       .column.is-11
         .box
           form.uploader
-            input(type='hidden' name='_csrf' value=csrfToken)
             input(type='file',id="file-upload",name="fileUpload", accept=".csv")
             label.label(for='file-upload', id="file-drag")
               div(id='start')

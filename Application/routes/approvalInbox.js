@@ -113,8 +113,7 @@ const cbGetIndex = async (req, res, next) => {
     requester: requester,
     approveRoute: approveRoute,
     prevUser: prevUser,
-    requestId: requestId,
-    csrfToken: 'test'
+    requestId: requestId
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')

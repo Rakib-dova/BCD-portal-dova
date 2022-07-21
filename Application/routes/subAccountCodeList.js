@@ -72,8 +72,7 @@ const cbGetIndex = async (req, res, next) => {
     prevLocation: '/uploadSubAccount',
     prevLocationName: '←補助科目一括作成',
     // 削除モーダル表示
-    deleteModalTitle: '補助科目削除',
-    csrfToken: 'test'
+    deleteModalTitle: '補助科目削除'
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
