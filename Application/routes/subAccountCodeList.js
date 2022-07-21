@@ -10,6 +10,8 @@ const subAccountCodeController = require('../controllers/subAccountCodeControlle
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -72,12 +74,13 @@ const cbGetIndex = async (req, res, next) => {
     prevLocation: '/uploadSubAccount',
     prevLocationName: '←補助科目一括作成',
     // 削除モーダル表示
-    deleteModalTitle: '補助科目削除'
+    deleteModalTitle: '補助科目削除',
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
 
 module.exports = {
   router: router,
