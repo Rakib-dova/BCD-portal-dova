@@ -33,7 +33,7 @@ module.exports = {
   },
   findAllRawInvoices: async (tenantId) => {
     try {
-      return await PdfInvoice.findAll({ raw: true })
+      return await PdfInvoice.findAll({ where: { sendTenantId: tenantId }, raw: true })
     } catch (error) {
       logger.error({ stack: error.stack, status: 0 }, error.name)
       throw error
