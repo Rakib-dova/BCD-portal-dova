@@ -338,6 +338,9 @@ app.use('/contractCancellation', require('./routes/contractCancellation').router
 // ユーザー一括登録
 app.use('/uploadUsers', require('./routes/uploadUsers').router)
 
+// 取引先一括登録
+app.use('/uploadSuppliers', require('./routes/uploadSuppliers').router)
+
 // ------------オプションサービス申込
 // 有料サービス利用登録
 app.use('/paidServiceRegister', require('./routes/paidServiceRegister').router)

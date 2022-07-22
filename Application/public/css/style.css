@@ -666,13 +666,15 @@ img.logo-ncom {
 }
 
 #accountCodeUpload > div > label > span.file-cta > span.file-label,
-#usersUpload > div > label > span.file-cta > span.file-label {
+#usersUpload > div > label > span.file-cta > span.file-label,
+#suppliersUpload > div > label > span.file-cta > span.file-label {
   overflow: hidden;
   width: 100%;
 }
 
 #accountCodeUpload > div > label > span.file-name,
-#usersUpload > div > label > span.file-name {
+#usersUpload > div > label > span.file-name,
+#suppliersUpload > div > label > span.file-name {
   max-width: 100% !important;
   border: unset;
 }
@@ -687,13 +689,15 @@ img.logo-ncom {
 }
 
 #accountCodeUpload > div > label > input,
-#usersUpload > div > label > input {
+#usersUpload > div > label > input,
+#suppliersUpload > div > label > input {
   max-width: 100%;
   box-sizing: border-box;
 }
 
 #accountCodeUpload > div > label > span.file-cta,
-#usersUpload > div > label > span.file-cta {
+#usersUpload > div > label > span.file-cta,
+#suppliersUpload > div > label > span.file-cta {
   border: #eee solid 3px !important;
   border-radius: 7px 7px 0px 0px !important;
   max-width: 100%;
@@ -702,7 +706,8 @@ img.logo-ncom {
 }
 
 #accountCodeUpload > div > label > span.file-cta > span:nth-child(3) > a,
-#usersUpload > div > label > span.file-cta > span:nth-child(3) > a {
+#usersUpload > div > label > span.file-cta > span:nth-child(3) > a,
+#suppliersUpload > div > label > span.file-cta > span:nth-child(3) > a {
   line-height: 36px;
   background-color: #454cad;
   border: #454cad;
@@ -713,12 +718,14 @@ img.logo-ncom {
 }
 
 #accountCodeUpload > div > label,
-#usersUpload > div > label {
+#usersUpload > div > label,
+#suppliersUpload > div > label {
   min-width: 100%;
 }
 
 #accountCodeUpload > div > label > span.file-name,
-#usersUpload > div > label > span.file-name {
+#usersUpload > div > label > span.file-name,
+#suppliersUpload > div > label > span.file-name {
   border: #eee solid 3px !important;
   border-radius: 0px 0px 7px 7px;
   margin-top: -3px;
@@ -1009,54 +1016,54 @@ body > div.hero.is-small {
 }
 
 /* button */
-.btn-status{
-  border-radius:30px ;
+.btn-status {
+  border-radius: 30px;
   display: block;
-  padding: .5em;
+  padding: 0.5em;
   width: 155px;
   margin: auto;
-  }
-  /* 契約中*/
-  .btn-status.st-navy{
-    background-color: #0065A3;
-    color: #fff;
-  }
-  /* 設定準備中、変更処理中*/
-  .btn-status.st-white{
-    background-color: #fff;
-    border: 2px solid #0065A3;
-    color: #0065A3;
-  }
-  /* 申込処理中*/
-  .btn-status.st-yellow{
-    background-color: #fff;
-    border: 2px solid #FFA800;
-  }
-  /* 解約処理中*/
-  .btn-status.st-red{
-    background-color: #fff;
-    border: 2px solid #F14668;
-    color:#F14668 ;
-  }
+}
+/* 契約中*/
+.btn-status.st-navy {
+  background-color: #0065a3;
+  color: #fff;
+}
+/* 設定準備中、変更処理中*/
+.btn-status.st-white {
+  background-color: #fff;
+  border: 2px solid #0065a3;
+  color: #0065a3;
+}
+/* 申込処理中*/
+.btn-status.st-yellow {
+  background-color: #fff;
+  border: 2px solid #ffa800;
+}
+/* 解約処理中*/
+.btn-status.st-red {
+  background-color: #fff;
+  border: 2px solid #f14668;
+  color: #f14668;
+}
 
-  /* 解約申請 */
-  .button.is-can{
-    background-color: #ccc;
-    color: #fff;
-  }
+/* 解約申請 */
+.button.is-can {
+  background-color: #ccc;
+  color: #fff;
+}
 
-  .btn-contract{
-    max-width: 120px;
-    margin: auto;
-  }
-  /* アイコンをリンクと同じ色にする */
-  .iconLink .fas{
-    color: #3273dc;
-  }
-  .iconLink :hover{
-    color: #363636;
-  }
-  /* ボタン非活性 */
-  .button[disabled]{
-    opacity:1 ;
-  }
+.btn-contract {
+  max-width: 120px;
+  margin: auto;
+}
+/* アイコンをリンクと同じ色にする */
+.iconLink .fas {
+  color: #3273dc;
+}
+.iconLink :hover {
+  color: #363636;
+}
+/* ボタン非活性 */
+.button[disabled] {
+  opacity: 1;
+}
