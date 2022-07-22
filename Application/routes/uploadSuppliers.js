@@ -9,6 +9,8 @@ const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
+const upload = require('multer')({ dest: process.env.INVOICE_UPLOAD_PATH })
+const uploadSuppliersController = require('../controllers/uploadSuppliersController')
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
@@ -91,7 +93,83 @@ const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
 
+const cbPostIndex = async (req, res, next) => {
+  logger.info(constantsDefine.logMessage.INF000 + 'uploadSuppliers.cbPostIndex')
+  // 認証情報取得処理
+  if (!req.session || !req.user?.userId) {
+    return next(errorHelper.create(500))
+  }
+
+  // DBからuserデータ取得
+  const user = await userController.findOne(req.user.userId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // user未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  // TX依頼後に改修、ユーザステイタスが0以外の場合、「404」エラーとする not 403
+  if (user.dataValues?.userStatus !== 0) return next(errorHelper.create(404))
+
+  // DBから契約情報取得
+  const contract = await contractController.findOne(req.user.tenantId)
+  // データベースエラーは、エラーオブジェクトが返る
+  // 契約情報未登録の場合もエラーを上げる
+  if (contract instanceof Error || contract === null) return next(errorHelper.create(500))
+
+  req.session.userContext = 'LoggedIn'
+
+  // ユーザ権限を取得
+  req.session.userRole = user.dataValues?.userRole
+  const deleteFlag = contract.dataValues.deleteFlag
+  const contractStatus = contract.dataValues.contractStatus
+  const checkContractStatus = await helper.checkContractStatus(req.user.tenantId)
+
+  if (checkContractStatus === null || checkContractStatus === 999) {
+    return next(errorHelper.create(500))
+  }
+
+  if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('cancelprocedure'))
+  }
+
+  if (!validate.isTenantManager(user.dataValues?.userRole, deleteFlag)) {
+    return next(noticeHelper.create('generaluser'))
+  }
+
+  if (!validate.isStatusForRegister(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('registerprocedure'))
+  }
+
+  if (!validate.isStatusForSimpleChange(contractStatus, deleteFlag)) {
+    return next(noticeHelper.create('changeprocedure'))
+  }
+
+  // req.file.userId設定
+  req.file.userId = req.user.userId
+  const [status, invitationResult] = await uploadSuppliersController.upload(req.user, contract, req.file)
+
+  if (status instanceof Error) {
+    req.flash('noti', ['取込に失敗しました。', constantsDefine.codeErrMsg.SYSERR000, 'SYSERR'])
+    logger.info(constantsDefine.logMessage.INF001 + 'uploadSuppliers.cbPostIndex')
+    return res.redirect('/uploadSuppliers')
+  }
+
+  let resultMessage = null
+  let flashParams = null
+
+  switch (status) {
+    case -3:
+      resultMessage = constantsDefine.codeErrMsg.UPLOADSUPPLIERSCOUNTER000
+      flashParams = ['noti', ['取引先一括登録', resultMessage, 'SYSERR']]
+      break
+  }
+
+  logger.info(constantsDefine.logMessage.INF001 + 'uploadSuppliers.cbPostIndex')
+  req.flash(flashParams[0], flashParams[1])
+  res.redirect('/uploadSuppliers')
+}
+
 router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/', helper.isAuthenticated, upload.single('suppliersFileUpload'), csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,
