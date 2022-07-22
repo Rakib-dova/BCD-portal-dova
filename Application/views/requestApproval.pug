@@ -222,6 +222,7 @@ block content
         a.delete(data-target='check-approval-modal')
       section.modal-card-body
         form#approval(method='POST', action=`/requestApproval/${documentId}`)
+          input(type='hidden' name='_csrf' value=csrfToken)
           include invoiceHeader
           .box#journal-list
           include invoiceFooter
