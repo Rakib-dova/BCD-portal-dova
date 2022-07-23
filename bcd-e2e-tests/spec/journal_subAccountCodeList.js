@@ -21,16 +21,19 @@ describe('仕訳情報設定_補助科目一覧', function () {
     {
       code:'CSVAcc01',
       name:'テストCSV勘定科目名01',
-      subCode:'TAccoSUB01',
+      subCode:'ATAccSUB01',
       subName:'テスト用補助科目名１ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー'
     }, // 新規登録用
     {
       code:'CSVAcc07',
       name:'テストCSV勘定科目名07',
-      subCode:'TAccoSUB02',
+      subCode:'ATAccSUB02',
       subName:'テスト用補助科目名２ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー'
     } // 変更用
   ];
+
+  // 登録した勘定科目コード
+  let addedAccountCodes = [];
 
   beforeAll(async function () {
     // テストのタイムアウト時間を設定する（1時間）
@@ -58,79 +61,6 @@ describe('仕訳情報設定_補助科目一覧', function () {
       contextOption = browserInfo.contextOption;
     }
   };
-
-  // トップページまで遷移する
-  async function gotoTop(account, loginPage, tradeShiftTopPage, topPage) {
-    // 指定したURLに遷移する
-    await comment('Tradeshiftログインページへ移動する');
-    await page.goto(config.baseUrl);
-
-    // ログインを行う
-    await comment('ユーザ"' + account.id + '"でログインする');
-    await loginPage.doLogin(account.id, account.password);
-    await tradeShiftTopPage.waitForLoading();
-
-    // デジタルトレードアプリをクリックする
-    let appName = process.env.APP ? process.env.APP : config.appName;
-    appName = appName.replace(/\"/g, '');
-    await comment('アイコン「' + appName + '」をクリックする');
-    await tradeShiftTopPage.clickBcdApp(appName);
-    await topPage.waitForLoading();
-  };
-
-  /**
-   * STEP5 No.3
-   */
-  it("補助科目設定（勘定科目なし）", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    for (const account of accounts) {
-      const context = await browser.newContext(contextOption);
-      if (page != null) {
-        page.close();
-      }
-      page = await context.newPage();
-  
-      global.reporter.setBrowserInfo(browser, page);
-      if (account.type == 'manager') {
-        await comment('---------- 管理者アカウント ----------')
-      } else if (account.type == 'user') {
-        await comment('---------- 一般ユーザー ----------')
-      } else {
-        await comment('---------- その他アカウント ----------')
-        await comment('その他アカウントは対象外です。')
-        continue;
-      }
-  
-      // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, subAccountCodeListPage, registSubAccountCodePage }
-        = common.getPageObject(browser, page);
-
-      // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(account, loginPage, tradeShiftTopPage, topPage);
-  
-      // 仕訳情報管理メニューを開く
-      await comment('「仕訳情報管理」をクリックする');
-      await topPage.openJournalMenu();
-      await journalMenuPage.waitForLoading();
-  
-      // 補助科目一覧ページへ遷移する
-      await comment('「補助科目設定」をクリックする');
-      await journalMenuPage.clickSubAccount();
-      await subAccountCodeListPage.waitForLoading();
-
-      // 新規登録ページへ遷移する
-      await comment('「新規登録する」をクリックする');
-      await subAccountCodeListPage.clickRegist();
-      await registSubAccountCodePage.waitForLoading();
-  
-      // 「事前に勘定科目を登録する必要があります。」のメッセージが表示されること
-      expect(await registSubAccountCodePage.getPopupMessage()).to.equal('事前に勘定科目を登録する必要があります。', '「事前に勘定科目を登録する必要があります。」のメッセージが表示されること');
-      await page.waitForTimeout(1000);
-    }
-  });
 
   /**
    * STEP5 No.17,23,24
@@ -161,12 +91,11 @@ describe('仕訳情報設定_補助科目一覧', function () {
       }
   
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage, uploadAccountCodePage }
-        = common.getPageObject(browser, page);
+      const { topPage, journalMenuPage, accountCodeListPage, uploadAccountCodePage } = common.getPageObject(browser, page);
   
       // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(account, loginPage, tradeShiftTopPage, topPage);
-  
+      await common.gotoTop(page, account);
+
       // 仕訳情報管理メニューを開く
       await comment('「仕訳情報管理」をクリックする');
       await topPage.openJournalMenu();
@@ -203,10 +132,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
 
         // 正しくすべてのデータが一覧に反映されること
         let csvData = await getCsvData(files[i]);
-        let j = 2;
-        for (row of csvData) {
-          expect(await accountCodeListPage.hasRow(row['勘定科目コード'], row['勘定科目名'])).to.equal(true, j + '行目のデータが一覧に反映されること');
-          j++;
+        for (j = 0; j < csvData.length; j++) {
+          expect(await accountCodeListPage.hasRow(csvData[j]['勘定科目コード'], csvData[j]['勘定科目名'])).to.equal(true, (j + 2) + '行目のデータが一覧に反映されること');
+          addedAccountCodes.push(csvData[j]['勘定科目コード']);
         }
       }
       await page.waitForTimeout(1000);
@@ -240,12 +168,12 @@ describe('仕訳情報設定_補助科目一覧', function () {
       }
   
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, subAccountCodeListPage, registSubAccountCodePage }
+      const { topPage, journalMenuPage, subAccountCodeListPage, registSubAccountCodePage }
         = common.getPageObject(browser, page);
-  
+
       // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(account, loginPage, tradeShiftTopPage, topPage);
-  
+      await common.gotoTop(page, account);
+
       // 仕訳情報管理メニューを開く
       await comment('「仕訳情報管理」をクリックする');
       await topPage.openJournalMenu();
@@ -354,11 +282,11 @@ describe('仕訳情報設定_補助科目一覧', function () {
       }
   
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, subAccountCodeListPage, uploadSubAccountCodePage }
+      const { topPage, journalMenuPage, subAccountCodeListPage, uploadSubAccountCodePage }
         = common.getPageObject(browser, page);
 
       // デジタルトレードアプリのトップページへ遷移する
-      await gotoTop(account, loginPage, tradeShiftTopPage, topPage);
+      await common.gotoTop(page, account);
 
       // 仕訳情報管理メニューを開く
       await comment('「仕訳情報管理」をクリックする');
@@ -411,20 +339,15 @@ describe('仕訳情報設定_補助科目一覧', function () {
 
         // 正しくすべてのデータが一覧に反映されること
         let csvData = await getCsvData(files[i]);
-        let j = 2;
-        for (row of csvData) {
-          expect(await subAccountCodeListPage.hasRow(row['補助科目コード'], row['補助科目名'])).to.equal(true, j + '行目のデータが一覧に反映されること');
-          j++;
+        for (j = 0; j < csvData.length; j++) {
+          expect(await subAccountCodeListPage.hasRow(csvData[j]['補助科目コード'], csvData[j]['補助科目名'])).to.equal(true, (j + 2) + '行目のデータが一覧に反映されること');
         }
       }
-
-      // 補助科目をすべて削除する
-      await subAccountCodeListPage.deleteAll();
       await page.waitForTimeout(1000);
     }
   });
 
-  it("後片付け（勘定科目、補助科目全削除）", async function() {
+  it("後片付け", async function() {
     // テストの初期化を実施
     await initBrowser();
     const context = await browser.newContext(contextOption);
@@ -435,21 +358,73 @@ describe('仕訳情報設定_補助科目一覧', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage }
-      = common.getPageObject(browser, page);
+    const { topPage, journalMenuPage, accountCodeListPage } = common.getPageObject(browser, page);
 
     // デジタルトレードアプリのトップページへ遷移する
-    await gotoTop(config.company1.mng, loginPage, tradeShiftTopPage, topPage);
+    await common.gotoTop(page, config.company1.mng);
 
     // 勘定科目をすべて削除する
     await comment('「仕訳情報管理」をクリックする');
     await topPage.openJournalMenu();
     await journalMenuPage.waitForLoading();
-    await comment('「勘定科目設定」をクリックする');
     await journalMenuPage.clickAccount();
     await accountCodeListPage.waitForLoading();
-    await comment('勘定科目をすべて削除する');
     await accountCodeListPage.deleteAll();
+    await page.waitForTimeout(1000);
+  });
+  
+  /**
+   * STEP5 No.3
+   */
+   it("補助科目設定（勘定科目なし）", async function () {
+    // テストの初期化を実施
+    await initBrowser();
+
+    // 各アカウントごとにテストを実施
+    for (const account of accounts) {
+      const context = await browser.newContext(contextOption);
+      if (page != null) {
+        page.close();
+      }
+      page = await context.newPage();
+  
+      global.reporter.setBrowserInfo(browser, page);
+      if (account.type == 'manager') {
+        await comment('---------- 管理者アカウント ----------')
+      } else if (account.type == 'user') {
+        await comment('---------- 一般ユーザー ----------')
+      } else {
+        await comment('---------- その他アカウント ----------')
+        await comment('その他アカウントは対象外です。')
+        continue;
+      }
+  
+      // ページオブジェクト
+      const { topPage, journalMenuPage, subAccountCodeListPage, registSubAccountCodePage }
+        = common.getPageObject(browser, page);
+
+      // デジタルトレードアプリのトップページへ遷移する
+      await common.gotoTop(page, account);
+
+      // 仕訳情報管理メニューを開く
+      await comment('「仕訳情報管理」をクリックする');
+      await topPage.openJournalMenu();
+      await journalMenuPage.waitForLoading();
+  
+      // 補助科目一覧ページへ遷移する
+      await comment('「補助科目設定」をクリックする');
+      await journalMenuPage.clickSubAccount();
+      await subAccountCodeListPage.waitForLoading();
+
+      // 新規登録ページへ遷移する
+      await comment('「新規登録する」をクリックする');
+      await subAccountCodeListPage.clickRegist();
+      await registSubAccountCodePage.waitForLoading();
+  
+      // 「事前に勘定科目を登録する必要があります。」のメッセージが表示されること
+      expect(await registSubAccountCodePage.getPopupMessage()).to.equal('事前に勘定科目を登録する必要があります。', '「事前に勘定科目を登録する必要があります。」のメッセージが表示されること');
+      await page.waitForTimeout(1000);
+    }
   });
 });
 

@@ -37,9 +37,6 @@ describe('利用登録', function () {
     }
   };
 
-  // 待機フラグ
-  let waited = false;
-
   beforeAll(async function () {
     // テストのタイムアウト時間を設定する（1時間）
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 3600000;
@@ -78,7 +75,7 @@ describe('利用登録', function () {
     global.reporter.setBrowserInfo(browser, page);
 
     // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, registerPage, settingMenuPage, contractChangePage }
+    const { loginPage, tradeShiftTopPage, registerPage }
       = common.getPageObject(browser, page);
 
     // 指定したURLに遷移する
@@ -126,80 +123,15 @@ describe('利用登録', function () {
     actual = await registerPage.getRecampaign();
     expect(actual.code).to.equal(withCode ? user.campaign.code.substring(0, 10) : '', '【利用登録】入力した販売店コードがポップアップに表示されること');
     expect(actual.name).to.equal(withName ? user.campaign.name.substring(0, 256) : '', '【利用登録】入力した販売担当者名がポップアップに表示されること');
-/*
-    // 利用登録する
-    await registerPage.submit();
-    await topPage.waitPopup();
-    await topPage.waitForLoading();
-    await topPage.closePopup();
-
-    // 契約情報を確認する
-    await topPage.openSettingMenu();
-    await settingMenuPage.waitForLoading();
-    await settingMenuPage.clickContractChange();
-    await contractChangePage.waitForLoading();
-
-    // 利用登録手続き中の旨メッセージが表示されていること
-    expect(await contractChangePage.getStatus()).to.equal('申込処理中', '【ご契約内容】ステータスが"申込処理中"であること');
-    expect(await contractChangePage.isCancelDisabled()).to.equal(true, '【ご契約内容】「解約申請」が非活性状態であること');
-*/
-    waited = false;
-    await page.waitForTimeout(1000);
-  };
-
-  // 解約共通操作
-  async function cancel(account) {
-    // テストの初期化を実施
-    await initBrowser();
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-      
-      // 20分待機する
-      if(!waited) {
-        await page.waitForTimeout(1200000);
-        waited = true;
-      }
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, settingMenuPage, contractChangePage }
-      = common.getPageObject(browser, page);
-
-    // 指定したURLに遷移する
-    await comment('Tradeshiftログインページへ移動する');
-    await page.goto(config.baseUrl);
-
-    // ログインを行う
-    await comment('ユーザ"' + account.id + '"でログインする');
-    await loginPage.doLogin(account.id, account.password);
-    await tradeShiftTopPage.waitForLoading();
-
-    // デジタルトレードアプリをクリックする
-    await comment('デジタルトレードアプリのアイコンをクリックする');
-    await tradeShiftTopPage.clickBcdApp(config.appName);
-    await topPage.waitForLoading();
-
-    // 設定変更が可能な状態になっていること
-    await topPage.openSettingMenu();
-    await settingMenuPage.waitForLoading();
-    await settingMenuPage.clickContractChange();
-    await contractChangePage.waitForLoading();
-    expect(await contractChangePage.isCancelDisabled()).to.equal(false, '【ご契約内容】「解約申請」が活性状態であること');
-
-    // 解約する
-    await contractChangePage.cancel();
     await page.waitForTimeout(1000);
   };
 
   /**
    * STEP7 No.1,3,15,25-30,37-40
-   *//*
+   */
   it("利用登録（販売店コードあり、販売担当者あり）", async function () {
     await register(config.company2.user, true, true);
-  });*/
+  });
   
   /**
    * STEP7 No.1,3,15,25-30,47-50
@@ -207,18 +139,4 @@ describe('利用登録', function () {
   it("利用登録（販売店コードなし、販売担当者なし）", async function () {
     await register(config.company2.user02, false, false);
   });
-
-  /**
-   * STEP7 No.31,41
-   *//*
-  it("解約（販売店コードあり、販売担当者あり）", async function () {
-    await cancel(config.company2.user);
-  });*/
-
-  /**
-   * STEP7 No.31,51
-   *//*
-  it("解約（販売店コードなし、販売担当者なし）", async function () {
-    await cancel(config.company2.user02);
-  });*/
 });
