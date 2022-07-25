@@ -188,16 +188,16 @@ const cbPostIndex = async (req, res, next) => {
             break
         }
       }
-      flashParams = ['noti', ['取引先一括登録に成功しました。', resultMessage, '']]
+      flashParams = ['noti', ['取引先一括登録', resultMessage, '']]
       break
     // ヘッダー不一致
     case -1:
       resultMessage = constantsDefine.codeErrMsg.CODEHEADERERR000
-      flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
+      flashParams = ['noti', ['取引先一括登録', resultMessage, 'SYSERR']]
       break
     case -2:
       resultMessage = constantsDefine.codeErrMsg.CODEDATAERR000
-      flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
+      flashParams = ['noti', ['取引先一括登録', resultMessage, 'SYSERR']]
       break
     // 取引先数が200件超過
     case -3:
@@ -216,5 +216,6 @@ router.post('/', helper.isAuthenticated, upload.single('suppliersFileUpload'), c
 
 module.exports = {
   router: router,
-  cbGetIndex: cbGetIndex
+  cbGetIndex: cbGetIndex,
+  cbPostIndex: cbPostIndex
 }
