@@ -19,6 +19,8 @@ router.use(
     limit: '200KB'
   })
 )
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
@@ -81,7 +83,8 @@ const cbGetIndex = async (req, res, next) => {
     pTagForcheckInput3: 'checksetSubAccountNameInputId',
     checkModalLabel1: '勘定科目コード',
     checkModalLabel2: '補助科目コード',
-    checkModalLabel3: '補助科目名'
+    checkModalLabel3: '補助科目名',
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
@@ -202,9 +205,9 @@ const cbPostIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
-router.get('/', helper.isAuthenticated, cbGetIndex)
-router.post('/getAccountCode', helper.isAuthenticated, cbPostGetAccountCode)
-router.post('/', helper.isAuthenticated, cbPostIndex)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/getAccountCode', helper.isAuthenticated, csrfProtection, cbPostGetAccountCode)
+router.post('/', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,

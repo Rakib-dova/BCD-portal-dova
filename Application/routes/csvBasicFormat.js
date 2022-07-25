@@ -10,6 +10,8 @@ const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetCsvBasicFormat = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCsvBasicFormat')
@@ -49,13 +51,14 @@ const cbGetCsvBasicFormat = async (req, res, next) => {
   res.render('csvBasicFormat', {
     csvTax: csvTax,
     csvUnit: csvUnit,
-    TS_HOST: process.env.TS_HOST
+    TS_HOST: process.env.TS_HOST,
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetCsvBasicFormat')
 }
 
-router.get('/', helper.isAuthenticated, cbGetCsvBasicFormat)
+router.get('/', helper.isAuthenticated, csrfProtection, cbGetCsvBasicFormat)
 
 module.exports = {
   router: router,

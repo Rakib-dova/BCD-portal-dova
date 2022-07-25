@@ -49,12 +49,14 @@ window.onload = () => {
 // 「確認・変更」ボタン押下時の処理
 Array.prototype.forEach.call(document.querySelectorAll('.checkChangeAccountCodeBtn'), (item) => {
   item.addEventListener('click', function (e) {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value
     const checkAccountCode = item.getAttribute('uuid')
     const url = `/deleteAccountCode/${checkAccountCode}`
     fetch(url, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'CSRF-Token': csrfToken
       }
     })
       .then((response) => response.json())
@@ -90,12 +92,14 @@ Array.prototype.forEach.call(document.querySelectorAll('.deleteAccountCodeBtn'),
 // Modalの削除ボタン押下
 Array.prototype.forEach.call(document.querySelectorAll('#modalCodeDelBtn'), (item) => {
   item.addEventListener('click', function (e) {
+    const csrfToken = document.querySelector('input[name="_csrf"]').value
     const accountCodeId = item.getAttribute('uuid')
     const url = `/deleteAccountCode/${accountCodeId}`
     fetch(url, {
       method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'CSRF-Token': csrfToken
       }
     })
       .then((response) => response.json())

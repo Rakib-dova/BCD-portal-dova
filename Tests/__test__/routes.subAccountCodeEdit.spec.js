@@ -94,11 +94,13 @@ describe('registSubAccountCodeのテスト', () => {
       expect(subAccountCodeEdit.router.get).toBeCalledWith(
         '/:subAccountCodeId',
         helper.isAuthenticated,
+        expect.any(Function),
         subAccountCodeEdit.cbGetIndex
       )
       expect(subAccountCodeEdit.router.post).toBeCalledWith(
         '/:subAccountCodeId',
         helper.isAuthenticated,
+        expect.any(Function),
         subAccountCodeEdit.cbPostIndex
       )
     })
@@ -125,6 +127,11 @@ describe('registSubAccountCodeのテスト', () => {
       }
 
       subAccountCodeControllerGetSubAccountCode.mockReturnValue(accountCodeAndSubAccountCode)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await subAccountCodeEdit.cbGetIndex(request, response, next)
@@ -163,7 +170,8 @@ describe('registSubAccountCodeのテスト', () => {
         valueForAccountCodeInput: accountCodeAndSubAccountCode.accountCodeId,
         valueForAccountCode: accountCodeAndSubAccountCode.accountCode,
         valueForAccountCodeName: accountCodeAndSubAccountCode.accountCodeName,
-        parentIdForCodeInputResult: 'setAccountCodeInputIdResult'
+        parentIdForCodeInputResult: 'setAccountCodeInputIdResult',
+        csrfToken: dummyToken
       })
     })
 

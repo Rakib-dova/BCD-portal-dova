@@ -16,7 +16,7 @@ const userController = require('../../Application/controllers/userController.js'
 const contractController = require('../../Application/controllers/contractController.js')
 const tenantController = require('../../Application/controllers/tenantController')
 const logger = require('../../Application/lib/logger.js')
-const DOMParser = require('dom-parser')
+const DOMParser = require('../../Application/node_modules/dom-parser')
 const notiTitle = '請求書ダウンロード'
 const csvDownloadSysError = 'システムエラーが発生しました。時間を空けてもう一度試してください。'
 
@@ -73,6 +73,7 @@ describe('csvDownloadのテスト', () => {
     tenantControllerFindOneSpy = jest.spyOn(tenantController, 'findOne')
     contractControllerFindContractSpyon = jest.spyOn(contractController, 'findContract')
     request.flash = jest.fn()
+    request.csrfToken = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -87,8 +88,18 @@ describe('csvDownloadのテスト', () => {
 
   describe('ルーティング', () => {
     test('csvDownloadのルーティングを確認', async () => {
-      expect(csvDownload.router.get).toBeCalledWith('/', helper.isAuthenticated, csvDownload.cbGetIndex)
-      expect(csvDownload.router.post).toBeCalledWith('/', helper.isAuthenticated, csvDownload.cbPostIndex)
+      expect(csvDownload.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.anything(),
+        csvDownload.cbGetIndex
+      )
+      expect(csvDownload.router.post).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.anything(),
+        csvDownload.cbPostIndex
+      )
     })
   })
 
@@ -5089,7 +5100,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5125,7 +5136,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5163,7 +5174,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         'APIエラーが発生しました。時間を空けてもう一度試してください。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5201,7 +5212,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         '条件に合致する請求書が見つかりませんでした。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5462,7 +5473,7 @@ describe('csvDownloadのテスト', () => {
         '請求書ダウンロード',
         '条件に合致する請求書が見つかりませんでした。'
       ])
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5920,7 +5931,7 @@ describe('csvDownloadのテスト', () => {
       // 期待結果
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('NotLoggedIn')
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
@@ -5999,7 +6010,7 @@ describe('csvDownloadのテスト', () => {
       // 期待結果
       // userContextがLoggedInになっている
       expect(request.session?.userContext).toBe('NotLoggedIn')
-      // ポータルにリダイレクト「される」
+      // 請求情報ダウンロードにリダイレクト「される」
       expect(response.redirect).toHaveBeenCalledWith(303, '/csvDownload')
       expect(response.getHeader('Location')).toEqual('/csvDownload')
     })
