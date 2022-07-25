@@ -4,6 +4,8 @@ const fs = require('fs')
 const path = require('path')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
+const tradeshiftAPI = require('../lib/tradeshiftAPI')
+const { v4: uuidv4 } = require('uuid')
 
 /**
  *
@@ -37,6 +39,150 @@ const upload = async (passport, contract, nominalList) => {
     errorFlag = true
   }
 
+  // API処理
+  const resultSuppliersCompany = []
+  if (!errorFlag) {
+    for (const data of result.data) {
+      const companyName = data[0]
+      const mailAddress = data[1]
+      let companyId = ''
+      // 企業検索API
+      const getCompaniesResponse = []
+      let page = 0
+      let numPages = 1
+      do {
+        const connections = await tradeshiftAPI.getCompanies(passport, companyName, page)
+        if (connections instanceof Error) {
+          resultSuppliersCompany.push({
+            companyName: companyName,
+            mailAddress: mailAddress,
+            status: 'Get Companies Api Error',
+            stack: connections.stack
+          })
+          logger.error({ companyName: companyName, stack: connections.stack, status: 0 })
+          continue
+        }
+        numPages = connections.numPages
+        page++
+        getCompaniesResponse.push(...connections.connections)
+      } while (page < numPages)
+
+      // 企業検索APIがqueryで完全一致検索ではないため、CSVの企業名と再度比較
+      for (const connection of getCompaniesResponse) {
+        if (connection.CompanyName === companyName) {
+          companyId = connection.CompanyAccountId
+        }
+      }
+
+      if (companyId === '') {
+        // 企業が取得できなかった場合
+        // 招待有無確認API
+        const getConnectionsResponse = await tradeshiftAPI.getConnections(passport, mailAddress, 'ExternalConnection')
+        if (getConnectionsResponse instanceof Error) {
+          resultSuppliersCompany.push(
+            ...setErrorResponse(companyName, mailAddress, 'Get Connections', getConnectionsResponse)
+          )
+          continue
+        }
+        if (getConnectionsResponse.connection.length !== 0) {
+          let flg = false
+          for (const connection of getConnectionsResponse.connection) {
+            if (connection.Email === mailAddress) {
+              flg = true
+              resultSuppliersCompany.push({
+                companyName: companyName,
+                mailAddress: mailAddress,
+                status: 'Already Invitation',
+                stack: null
+              })
+              break
+            }
+          }
+          if (flg) continue
+        }
+
+        // ネットワーク接続更新API
+        // connectionIdの生成（uuid）
+        const connectionId = uuidv4()
+        const updateNetworkConnectionResponse = await tradeshiftAPI.updateNetworkConnection(
+          passport,
+          connectionId,
+          companyName,
+          mailAddress
+        )
+        if (updateNetworkConnectionResponse instanceof Error) {
+          resultSuppliersCompany.push(
+            ...setErrorResponse(companyName, mailAddress, 'Update NetworkConnection', updateNetworkConnectionResponse)
+          )
+          continue
+        }
+
+        resultSuppliersCompany.push({
+          companyName: companyName,
+          mailAddress: mailAddress,
+          status: 'Update NetworkConnection Api Success',
+          stack: null
+        })
+        continue
+      } else {
+        // 企業が取得できた場合
+        // Network確認API
+        const getConnectionForCompanyResponse = await tradeshiftAPI.getConnectionForCompany(passport, companyId)
+        if (getConnectionForCompanyResponse instanceof Error) {
+          resultSuppliersCompany.push(
+            ...setErrorResponse(companyName, mailAddress, 'Get ConnectionForCompany', getConnectionForCompanyResponse)
+          )
+          continue
+        }
+        // Network接続済みの場合
+        if (getConnectionForCompanyResponse.status === 200) {
+          resultSuppliersCompany.push({
+            companyName: companyName,
+            mailAddress: mailAddress,
+            status: 'Already Connection',
+            stack: null
+          })
+          continue
+        }
+
+        // メールアドレス情報検索API
+        const getUserInformationByEmailResponse = await tradeshiftAPI.getUserInformationByEmail(passport, mailAddress)
+        if (getUserInformationByEmailResponse instanceof Error) {
+          resultSuppliersCompany.push(
+            ...setErrorResponse(companyName, mailAddress, 'Get Username', getUserInformationByEmailResponse)
+          )
+          continue
+        }
+        // メールアドレス情報からすでに招待しているか確認
+        if (getUserInformationByEmailResponse.CompanyAccountId !== companyId) {
+          resultSuppliersCompany.push({
+            companyName: companyName,
+            mailAddress: mailAddress,
+            status: 'Email Not Match',
+            stack: null
+          })
+          continue
+        }
+
+        // ネットワーク接続追加API
+        const addNetworkConnectionResponse = await tradeshiftAPI.addNetworkConnection(passport, companyId)
+        if (addNetworkConnectionResponse instanceof Error) {
+          resultSuppliersCompany.push(
+            ...setErrorResponse(companyName, mailAddress, 'Add NetworkConnection', addNetworkConnectionResponse)
+          )
+          continue
+        }
+
+        resultSuppliersCompany.push({
+          companyName: companyName,
+          mailAddress: mailAddress,
+          status: 'Add NetworkConnection Api Success',
+          stack: null
+        })
+      }
+    }
+  }
+
   // 読み込んだファイル削除
   const deleteResult = await removeFile(pwdFile)
 
@@ -49,6 +195,25 @@ const upload = async (passport, contract, nominalList) => {
 
   logger.info(constantsDefine.logMessage.INF001 + 'uploadSuppliersController.upload')
   return [result.status, invitationResult]
+}
+
+/**
+ * エラー結果設定
+ * @param {string} companyName 企業名
+ * @param {string} mailAddress メールアドレス
+ * @param {string} apiName API名
+ * @param {string} response API実行結果
+ * @returns {object} 実行結果データ
+ */
+const setErrorResponse = (companyName, mailAddress, apiName, response) => {
+  const result = {
+    companyName: companyName,
+    mailAddress: mailAddress,
+    status: 'API Error',
+    stack: response.stack
+  }
+  logger.error({ companyName: companyName, apiName: apiName, stack: response.stack, status: 0 })
+  return result
 }
 
 const readNominalList = (pwdFile) => {
@@ -116,6 +281,7 @@ const removeFile = async (fullPath) => {
 
 module.exports = {
   upload: upload,
+  setErrorResponse: setErrorResponse,
   readNominalList: readNominalList,
   getReadCsvData: getReadCsvData,
   removeFile: removeFile
