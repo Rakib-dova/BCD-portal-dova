@@ -24,6 +24,15 @@ document.getElementsByName('suppliersFileUpload')[0].addEventListener('change', 
         alert('ファイルサイズが5MB超えています。\nCSVファイルを確認後もう一度アップロードしてください。')
         $('#filename').innerText = ''
         $('#upload').setAttribute('disabled', 'disabled')
+        location.reload()
+      } else if (
+        targetFile.name.lastIndexOf('.csv') === -1 ||
+        !(targetFile.name.lastIndexOf('.csv') === targetFile.name.length - 4)
+      ) {
+        alert('ファイル形式が異なります。\nCSVファイルを確認後もう一度アップロードしてください。')
+        $('#filename').innerText = ''
+        $('#upload').setAttribute('disabled', 'disabled')
+        location.reload()
       } else {
         $('#filename').innerText = targetFile.name
         $('#upload').removeAttribute('disabled')
@@ -34,6 +43,8 @@ document.getElementsByName('suppliersFileUpload')[0].addEventListener('change', 
 
 // アップロード開始ボタンクリックイベント
 $('#upload').addEventListener('click', function (e) {
-  // データをサーバーに送信
-  $('#suppliersUpload').submit()
+  if (!$('#upload').getAttribute('disabled')) {
+    document.querySelector('#upload-progress-modal').classList.add('is-active')
+    $('#suppliersUpload').submit()
+  }
 })
