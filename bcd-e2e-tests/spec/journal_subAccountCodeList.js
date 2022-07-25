@@ -342,6 +342,9 @@ describe('仕訳情報設定_補助科目一覧', function () {
         for (j = 0; j < csvData.length; j++) {
           expect(await subAccountCodeListPage.hasRow(csvData[j]['補助科目コード'], csvData[j]['補助科目名'])).to.equal(true, (j + 2) + '行目のデータが一覧に反映されること');
         }
+
+        // 確認し終えたデータを削除する
+        await subAccountCodeListPage.deleteAll();
       }
       await page.waitForTimeout(1000);
     }
