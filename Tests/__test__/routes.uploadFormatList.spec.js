@@ -253,7 +253,12 @@ describe('uploadFormatListのテスト', () => {
 
   describe('ルーティング', () => {
     test('uploadFormatListのルーティングを確認', async () => {
-      expect(uploadFormatList.router.get).toBeCalledWith('/', helper.isAuthenticated, uploadFormatList.cbGetIndex)
+      expect(uploadFormatList.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.any(Function),
+        uploadFormatList.cbGetIndex
+      )
     })
   })
 
@@ -274,6 +279,11 @@ describe('uploadFormatListのテスト', () => {
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue('00')
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
@@ -284,7 +294,8 @@ describe('uploadFormatListのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
-        uploadFormatListArr: uploadFormatListArrOne
+        uploadFormatListArr: uploadFormatListArrOne,
+        csrfToken: dummyToken
       })
     })
 
@@ -305,6 +316,11 @@ describe('uploadFormatListのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue('00')
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
@@ -315,7 +331,8 @@ describe('uploadFormatListのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
-        uploadFormatListArr: uploadFormatListArrFour
+        uploadFormatListArr: uploadFormatListArrFour,
+        csrfToken: dummyToken
       })
     })
 
@@ -336,6 +353,11 @@ describe('uploadFormatListのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue('00')
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
@@ -346,7 +368,8 @@ describe('uploadFormatListのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
-        uploadFormatListArr: []
+        uploadFormatListArr: [],
+        csrfToken: dummyToken
       })
     })
 
@@ -367,6 +390,11 @@ describe('uploadFormatListのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue('00')
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
 
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
@@ -377,7 +405,8 @@ describe('uploadFormatListのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
-        uploadFormatListArr: uploadFormatListArrOneHundred
+        uploadFormatListArr: uploadFormatListArrOneHundred,
+        csrfToken: dummyToken
       })
     })
 
@@ -398,6 +427,12 @@ describe('uploadFormatListのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptContract.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -407,7 +442,8 @@ describe('uploadFormatListのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
-        uploadFormatListArr: uploadFormatListArrOne
+        uploadFormatListArr: uploadFormatListArrOne,
+        csrfToken: dummyToken
       })
     })
 
@@ -428,6 +464,12 @@ describe('uploadFormatListのテスト', () => {
 
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptingContract.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -437,7 +479,8 @@ describe('uploadFormatListのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
-        uploadFormatListArr: uploadFormatListArrOne
+        uploadFormatListArr: uploadFormatListArrOne,
+        csrfToken: dummyToken
       })
     })
 
@@ -457,6 +500,12 @@ describe('uploadFormatListのテスト', () => {
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptContract.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -466,7 +515,8 @@ describe('uploadFormatListのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
-        uploadFormatListArr: uploadFormatListArrOne
+        uploadFormatListArr: uploadFormatListArrOne,
+        csrfToken: dummyToken
       })
     })
 
@@ -486,6 +536,12 @@ describe('uploadFormatListのテスト', () => {
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoDatatoBeReceiptingChange.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -495,7 +551,8 @@ describe('uploadFormatListのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
-        uploadFormatListArr: uploadFormatListArrOne
+        uploadFormatListArr: uploadFormatListArrOne,
+        csrfToken: dummyToken
       })
     })
 
@@ -515,6 +572,12 @@ describe('uploadFormatListのテスト', () => {
       getFormatListSpy.mockReturnValue(uploadFormatListArrOne)
       // ユーザ権限チェック結果設定
       helpercheckContractStatusSpy.mockReturnValue(contractInfoData.dataValues.contractStatus)
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await uploadFormatList.cbGetIndex(request, response, next)
 
@@ -524,7 +587,8 @@ describe('uploadFormatListのテスト', () => {
       expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
       // response.renderでuploadFormatListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('uploadFormatList', {
-        uploadFormatListArr: uploadFormatListArrOne
+        uploadFormatListArr: uploadFormatListArrOne,
+        csrfToken: dummyToken
       })
     })
 

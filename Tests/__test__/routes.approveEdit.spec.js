@@ -303,6 +303,7 @@ describe('approveRouteListのテスト', () => {
     })
     approveRouteFindOne = jest.spyOn(ApproveRoute, 'findOne')
     approverControllerEditApprover = jest.spyOn(approverController, 'editApprover')
+    request.csrfToken = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -326,11 +327,13 @@ describe('approveRouteListのテスト', () => {
       expect(approveRouteEdit.router.get).toBeCalledWith(
         '/:approveRouteId',
         helper.isAuthenticated,
+        expect.anything(),
         approveRouteEdit.cbGetIndex
       )
       expect(approveRouteEdit.router.post).toBeCalledWith(
         '/:approveRouteId',
         helper.isAuthenticated,
+        expect.anything(),
         approveRouteEdit.cbPostEditApproveRoute
       )
     })

@@ -474,9 +474,11 @@ $('#btnSearchAccountCode').addEventListener('click', function () {
   $('#searchModalSubAccountCode').value = subAccountCode
   $('#searchModalSubAccountCodeName').value = subAccountCodeName
 
+  const csrfToken = document.querySelector('input[name="_csrf"]').value
   const getAccountCode = new XMLHttpRequest()
   getAccountCode.open('POST', '/inbox/getCode')
   getAccountCode.setRequestHeader('Content-Type', 'application/json')
+  getAccountCode.setRequestHeader('CSRF-Token', csrfToken)
   getAccountCode.onreadystatechange = function () {
     if (getAccountCode.readyState === getAccountCode.DONE) {
       switch (getAccountCode.status) {
@@ -523,9 +525,11 @@ $('#btnSearchCreditAccountCode').addEventListener('click', function () {
   $('#searchModalCreditSubAccountCode').value = subAccountCode
   $('#searchModalCreditSubAccountCodeName').value = subAccountCodeName
 
+  const csrfToken = document.querySelector('input[name="_csrf"]').value
   const getAccountCode = new XMLHttpRequest()
   getAccountCode.open('POST', '/inbox/getCode')
   getAccountCode.setRequestHeader('Content-Type', 'application/json')
+  getAccountCode.setRequestHeader('CSRF-Token', csrfToken)
   getAccountCode.onreadystatechange = function () {
     if (getAccountCode.readyState === getAccountCode.DONE) {
       switch (getAccountCode.status) {
@@ -604,9 +608,11 @@ $('#btnSearchDepartmentCode').addEventListener('click', function () {
   $('#searchModalDepartmentCodeName').value = departmentCodeName
 
   // サーバーからデータ取得
+  const csrfToken = document.querySelector('input[name="_csrf"]').value
   const getAccountCode = new XMLHttpRequest()
   getAccountCode.open('POST', '/inbox/department')
   getAccountCode.setRequestHeader('Content-Type', 'application/json')
+  getAccountCode.setRequestHeader('CSRF-Token', csrfToken)
   getAccountCode.onreadystatechange = function () {
     if (getAccountCode.readyState === getAccountCode.DONE) {
       switch (getAccountCode.status) {
@@ -683,9 +689,11 @@ $('#btnSearchCreditDepartmentCode').addEventListener('click', function () {
   $('#searchModalCreditDepartmentCodeName').value = departmentCodeName
 
   // サーバーからデータ取得
+  const csrfToken = document.querySelector('input[name="_csrf"]').value
   const getAccountCode = new XMLHttpRequest()
   getAccountCode.open('POST', '/inbox/department')
   getAccountCode.setRequestHeader('Content-Type', 'application/json')
+  getAccountCode.setRequestHeader('CSRF-Token', csrfToken)
   getAccountCode.onreadystatechange = function () {
     if (getAccountCode.readyState === getAccountCode.DONE) {
       switch (getAccountCode.status) {

@@ -18,6 +18,12 @@ if (process.env.LOCALLY_HOSTED === 'true') {
 let postalNumberSpy
 let request, response
 
+describe('searchAddressApi', () => {
+  test('searchAddressApi', async () => {
+    expect(searchAddressApi.router.post).toBeCalledWith('/', searchAddressApi.cbSearchAddress)
+  })
+})
+
 describe('searchAddressApiのテスト', () => {
   beforeEach(() => {
     request = new Request()

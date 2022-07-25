@@ -22,6 +22,8 @@ router.use(
     limit: '6826KB'
   })
 )
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
 
 const cbGetRequestApproval = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetRequestApproval')
@@ -211,7 +213,8 @@ const cbGetRequestApproval = async (req, res, next) => {
     documentId: invoiceId,
     message: message,
     approveRoute: approveRoute,
-    rejectedUser: rejectedUser
+    rejectedUser: rejectedUser,
+    csrfToken: req.csrfToken()
   })
 
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetRequestApproval')
@@ -460,10 +463,10 @@ const cbPostApproval = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostApproval')
 }
 
-router.get('/:invoiceId', helper.isAuthenticated, cbGetRequestApproval)
-router.post('/approveRoute', helper.isAuthenticated, cbPostGetApproveRoute)
-router.post('/detailApproveRoute', helper.isAuthenticated, cbPostGetDetailApproveRoute)
-router.post('/:invoiceId', helper.isAuthenticated, cbPostApproval)
+router.get('/:invoiceId', helper.isAuthenticated, csrfProtection, cbGetRequestApproval)
+router.post('/approveRoute', helper.isAuthenticated, csrfProtection, cbPostGetApproveRoute)
+router.post('/detailApproveRoute', helper.isAuthenticated, csrfProtection, cbPostGetDetailApproveRoute)
+router.post('/:invoiceId', helper.isAuthenticated, csrfProtection, cbPostApproval)
 
 module.exports = {
   router: router,

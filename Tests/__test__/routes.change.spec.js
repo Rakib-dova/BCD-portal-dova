@@ -29,6 +29,7 @@ describe('changeのテスト', () => {
     createSpy = jest.spyOn(changOrderController, 'create')
     checkcontractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
     infoSpy = jest.spyOn(logger, 'info')
+    request.csrfToken = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -183,7 +184,7 @@ describe('changeのテスト', () => {
 
   describe('ルーティング', () => {
     test('changeのルーティングを確認', async () => {
-      expect(change.router.get).toBeCalledWith('/', helper.isAuthenticated, change.cbGetChangeIndex)
+      expect(change.router.get).toBeCalledWith('/', helper.isAuthenticated, expect.anything(), change.cbGetChangeIndex)
     })
   })
 
