@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
+const validate = require('../lib/validate')
 
 /**
  *
@@ -16,8 +17,7 @@ const upload = async (passport, contract, nominalList) => {
   logger.info(constantsDefine.logMessage.INF000 + 'uploadSuppliersController.upload')
   const destination = nominalList.destination
   const fileName = nominalList.filename
-  let invitationResult
-  let errorFlag = false
+  const invitationResult = []
   const pwdFile = path.resolve(destination, fileName)
 
   // ファイル読み込み
@@ -30,11 +30,45 @@ const upload = async (passport, contract, nominalList) => {
     return [error, null]
   }
 
+  if (result.status === -1) {
+    logger.error({ contractId: contract.contractId, stack: 'ヘッダーが指定のものと異なります。', status: 0 })
+    return [-1, null]
+  }
+
   if (result.data.length > 200) {
     logger.error({ contractId: contract.contractId, stack: '一括登録取引先ーが200件を超えています。', status: 0 })
-    result.status = -3
-    invitationResult = null
-    errorFlag = true
+    return [-3, null]
+  }
+
+  const mailList = []
+
+  for (let supplier of result.data) {
+    supplier = supplier.split(',')
+    if (supplier.length !== 2) {
+      logger.error({ contractId: contract.contractId, stack: '項目数が異なります。', status: 0 })
+      return [-2, null]
+    }
+
+    // メールアドレス重複確認
+    if (mailList.some((mail) => mail === supplier[1])) {
+      invitationResult.push({
+        companyName: supplier[0],
+        companyMailAddress: supplier[1],
+        status: 'Duplicate Email Error',
+        stack: null
+      })
+    }
+
+    if (validate.isContactEmail(supplier[1]) !== 0) {
+      invitationResult.push({
+        companyName: supplier[0],
+        companyMailAddress: supplier[1],
+        status: 'Email Type Error',
+        stack: null
+      })
+    } else {
+      mailList.push(supplier[1])
+    }
   }
 
   // 読み込んだファイル削除
