@@ -6,6 +6,7 @@ const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
 const tradeshiftAPI = require('../lib/tradeshiftAPI')
 const { v4: uuidv4 } = require('uuid')
+const validate = require('../lib/validate')
 
 /**
  *
@@ -32,6 +33,13 @@ const upload = async (passport, contract, nominalList) => {
     return [error, null]
   }
 
+  if (result.status === -1) {
+    logger.error({ contractId: contract.contractId, stack: 'ヘッダーが指定のものと異なります。', status: 0 })
+    result.status = -1
+    resultSuppliersCompany = null
+    errorFlag = true
+  }
+
   if (result.data.length > 200) {
     logger.error({ contractId: contract.contractId, stack: '一括登録取引先が200件を超えています。', status: 0 })
     result.status = -3
@@ -39,11 +47,43 @@ const upload = async (passport, contract, nominalList) => {
     errorFlag = true
   }
 
-  // API処理
+  const mailList = []
+
+  // バリデーションチェック、API処理
   if (!errorFlag) {
     for (const data of result.data) {
-      const companyName = data.split(',')[0]
-      const mailAddress = data.split(',')[1]
+      data = data.split(',')
+      const companyName = data[0]
+      const mailAddress = data[1]
+      if (supplier.length !== 2) {
+        logger.error({ contractId: contract.contractId, stack: '項目数が異なります。', status: 0 })
+        result.status = -2
+        resultSuppliersCompany = null
+        break
+      }
+
+      // メールアドレス重複確認
+      if (mailList.some((mail) => mail === mailAddress)) {
+        invitationResult.push({
+          companyName: companyName,
+          mailAddress: mailAddress,
+          status: 'Duplicate Email Error',
+          stack: null
+        })
+        continue
+      }
+
+      // メールアドレスバリデーションチェック
+      if (validate.isContactEmail(mailAddress) !== 0) {
+        invitationResult.push({
+          companyName: companyName,
+          mailAddress: mailAddress,
+          status: 'Email Type Error',
+          stack: null
+        })
+        continue
+      }
+
       let companyId = ''
       // 企業検索API
       const getCompaniesResponse = []
