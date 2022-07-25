@@ -188,7 +188,7 @@ const cbPostIndex = async (req, res, next) => {
             break
         }
       }
-      flashParams = ['noti', ['ユーザー一括登録に成功しました。', resultMessage, '']]
+      flashParams = ['noti', ['取引先一括登録に成功しました。', resultMessage, '']]
       break
     // ヘッダー不一致
     case -1:

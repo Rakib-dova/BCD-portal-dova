@@ -47,6 +47,18 @@ const upload = async (passport, contract, nominalList) => {
     errorFlag = true
   }
 
+  // 項目数確認
+  for (const data of result.data) {
+    data = data.split(',')
+    if (data.length !== 2) {
+      logger.error({ contractId: contract.contractId, stack: '項目数が異なります。', status: 0 })
+      result.status = -2
+      resultSuppliersCompany = null
+      errorFlag = true
+      break
+    }
+  }
+
   const mailList = []
 
   // バリデーションチェック、API処理
@@ -55,11 +67,16 @@ const upload = async (passport, contract, nominalList) => {
       data = data.split(',')
       const companyName = data[0]
       const mailAddress = data[1]
-      if (supplier.length !== 2) {
-        logger.error({ contractId: contract.contractId, stack: '項目数が異なります。', status: 0 })
-        result.status = -2
-        resultSuppliersCompany = null
-        break
+
+      // メールアドレスバリデーションチェック
+      if (validate.isContactEmail(mailAddress) !== 0) {
+        resultSuppliersCompany.push({
+          companyName: companyName,
+          mailAddress: mailAddress,
+          status: 'Email Type Error',
+          stack: null
+        })
+        continue
       }
 
       // メールアドレス重複確認
@@ -71,17 +88,8 @@ const upload = async (passport, contract, nominalList) => {
           stack: null
         })
         continue
-      }
-
-      // メールアドレスバリデーションチェック
-      if (validate.isContactEmail(mailAddress) !== 0) {
-        resultSuppliersCompany.push({
-          companyName: companyName,
-          mailAddress: mailAddress,
-          status: 'Email Type Error',
-          stack: null
-        })
-        continue
+      } else {
+        mailList.push(supplier[1])
       }
 
       let companyId = ''
