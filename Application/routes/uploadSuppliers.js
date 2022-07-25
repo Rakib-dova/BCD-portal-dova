@@ -157,6 +157,33 @@ const cbPostIndex = async (req, res, next) => {
   let flashParams = null
 
   switch (status) {
+    // 正常
+    case 0:
+      resultMessage = ''
+      for (const invitation of invitationResult) {
+        switch (invitation.status) {
+          case 'Add Success':
+            resultMessage += `${invitation.companyName}をネットワーク招待しました。<br>`
+            break
+          case 'Update Success':
+            resultMessage += `${invitation.companyName}を企業登録招待しました。<br>`
+            break
+          case 'API Error':
+            resultMessage += `${invitation.companyName}の招待でAPIエラーが発生しました。（スキップ）<br>`
+            break
+          case 'Already Invitation':
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は既に招待済みです。（スキップ）<br>`
+            break
+          case 'Already Connection':
+            resultMessage += `${invitation.companyName}は既にネットワークに登録されています。（スキップ）<br>`
+            break
+          case 'Email Not Match':
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は企業に登録されていません。（スキップ）<br>`
+            break
+        }
+      }
+      flashParams = ['noti', ['取引先一括登録', resultMessage, '']]
+      break
     case -3:
       resultMessage = constantsDefine.codeErrMsg.UPLOADSUPPLIERSCOUNTER000
       flashParams = ['noti', ['取引先一括登録', resultMessage, 'SYSERR']]

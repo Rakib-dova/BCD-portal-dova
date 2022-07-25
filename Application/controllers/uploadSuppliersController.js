@@ -18,7 +18,7 @@ const upload = async (passport, contract, nominalList) => {
   logger.info(constantsDefine.logMessage.INF000 + 'uploadSuppliersController.upload')
   const destination = nominalList.destination
   const fileName = nominalList.filename
-  let invitationResult
+  let resultSuppliersCompany = []
   let errorFlag = false
   const pwdFile = path.resolve(destination, fileName)
 
@@ -33,14 +33,13 @@ const upload = async (passport, contract, nominalList) => {
   }
 
   if (result.data.length > 200) {
-    logger.error({ contractId: contract.contractId, stack: '一括登録取引先ーが200件を超えています。', status: 0 })
+    logger.error({ contractId: contract.contractId, stack: '一括登録取引先が200件を超えています。', status: 0 })
     result.status = -3
-    invitationResult = null
+    resultSuppliersCompany = null
     errorFlag = true
   }
 
   // API処理
-  const resultSuppliersCompany = []
   if (!errorFlag) {
     for (const data of result.data) {
       const companyName = data[0]
@@ -53,13 +52,7 @@ const upload = async (passport, contract, nominalList) => {
       do {
         const connections = await tradeshiftAPI.getCompanies(passport, companyName, page)
         if (connections instanceof Error) {
-          resultSuppliersCompany.push({
-            companyName: companyName,
-            mailAddress: mailAddress,
-            status: 'Get Companies Api Error',
-            stack: connections.stack
-          })
-          logger.error({ companyName: companyName, stack: connections.stack, status: 0 })
+          resultSuppliersCompany.push(...setErrorResponse(companyName, mailAddress, 'Get Companies', connections))
           continue
         }
         numPages = connections.numPages
@@ -85,10 +78,10 @@ const upload = async (passport, contract, nominalList) => {
           continue
         }
         if (getConnectionsResponse.connection.length !== 0) {
-          let flg = false
+          let flag = false
           for (const connection of getConnectionsResponse.connection) {
             if (connection.Email === mailAddress) {
-              flg = true
+              flag = true
               resultSuppliersCompany.push({
                 companyName: companyName,
                 mailAddress: mailAddress,
@@ -98,7 +91,7 @@ const upload = async (passport, contract, nominalList) => {
               break
             }
           }
-          if (flg) continue
+          if (flag) continue
         }
 
         // ネットワーク接続更新API
@@ -120,7 +113,7 @@ const upload = async (passport, contract, nominalList) => {
         resultSuppliersCompany.push({
           companyName: companyName,
           mailAddress: mailAddress,
-          status: 'Update NetworkConnection Api Success',
+          status: 'Update Success',
           stack: null
         })
         continue
@@ -176,7 +169,7 @@ const upload = async (passport, contract, nominalList) => {
         resultSuppliersCompany.push({
           companyName: companyName,
           mailAddress: mailAddress,
-          status: 'Add NetworkConnection Api Success',
+          status: 'Add Success',
           stack: null
         })
       }
@@ -194,7 +187,7 @@ const upload = async (passport, contract, nominalList) => {
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'uploadSuppliersController.upload')
-  return [result.status, invitationResult]
+  return [result.status, resultSuppliersCompany]
 }
 
 /**
