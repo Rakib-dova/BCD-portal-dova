@@ -42,8 +42,8 @@ const upload = async (passport, contract, nominalList) => {
   // API処理
   if (!errorFlag) {
     for (const data of result.data) {
-      const companyName = data[0]
-      const mailAddress = data[1]
+      const companyName = data.split(',')[0]
+      const mailAddress = data.split(',')[1]
       let companyId = ''
       // 企業検索API
       const getCompaniesResponse = []
@@ -52,12 +52,12 @@ const upload = async (passport, contract, nominalList) => {
       do {
         const connections = await tradeshiftAPI.getCompanies(passport, companyName, page)
         if (connections instanceof Error) {
-          resultSuppliersCompany.push(...setErrorResponse(companyName, mailAddress, 'Get Companies', connections))
+          resultSuppliersCompany.push(setErrorResponse(companyName, mailAddress, 'Get Companies', connections))
           continue
         }
         numPages = connections.numPages
         page++
-        getCompaniesResponse.push(...connections.connections)
+        getCompaniesResponse.push(...connections.Connection)
       } while (page < numPages)
 
       // 企業検索APIがqueryで完全一致検索ではないため、CSVの企業名と再度比較
@@ -73,13 +73,13 @@ const upload = async (passport, contract, nominalList) => {
         const getConnectionsResponse = await tradeshiftAPI.getConnections(passport, mailAddress, 'ExternalConnection')
         if (getConnectionsResponse instanceof Error) {
           resultSuppliersCompany.push(
-            ...setErrorResponse(companyName, mailAddress, 'Get Connections', getConnectionsResponse)
+            setErrorResponse(companyName, mailAddress, 'Get Connections', getConnectionsResponse)
           )
           continue
         }
-        if (getConnectionsResponse.connection.length !== 0) {
+        if (getConnectionsResponse.Connection.length !== 0) {
           let flag = false
-          for (const connection of getConnectionsResponse.connection) {
+          for (const connection of getConnectionsResponse.Connection) {
             if (connection.Email === mailAddress) {
               flag = true
               resultSuppliersCompany.push({
@@ -105,7 +105,7 @@ const upload = async (passport, contract, nominalList) => {
         )
         if (updateNetworkConnectionResponse instanceof Error) {
           resultSuppliersCompany.push(
-            ...setErrorResponse(companyName, mailAddress, 'Update NetworkConnection', updateNetworkConnectionResponse)
+            setErrorResponse(companyName, mailAddress, 'Update NetworkConnection', updateNetworkConnectionResponse)
           )
           continue
         }
@@ -121,14 +121,17 @@ const upload = async (passport, contract, nominalList) => {
         // 企業が取得できた場合
         // Network確認API
         const getConnectionForCompanyResponse = await tradeshiftAPI.getConnectionForCompany(passport, companyId)
-        if (getConnectionForCompanyResponse instanceof Error) {
+        if (
+          getConnectionForCompanyResponse instanceof Error &&
+          getConnectionForCompanyResponse.response?.status !== 404
+        ) {
           resultSuppliersCompany.push(
-            ...setErrorResponse(companyName, mailAddress, 'Get ConnectionForCompany', getConnectionForCompanyResponse)
+            setErrorResponse(companyName, mailAddress, 'Get ConnectionForCompany', getConnectionForCompanyResponse)
           )
           continue
         }
         // Network接続済みの場合
-        if (getConnectionForCompanyResponse.status === 200) {
+        if (getConnectionForCompanyResponse.CompanyAccountId) {
           resultSuppliersCompany.push({
             companyName: companyName,
             mailAddress: mailAddress,
@@ -142,11 +145,11 @@ const upload = async (passport, contract, nominalList) => {
         const getUserInformationByEmailResponse = await tradeshiftAPI.getUserInformationByEmail(passport, mailAddress)
         if (getUserInformationByEmailResponse instanceof Error) {
           resultSuppliersCompany.push(
-            ...setErrorResponse(companyName, mailAddress, 'Get Username', getUserInformationByEmailResponse)
+            setErrorResponse(companyName, mailAddress, 'Get Username', getUserInformationByEmailResponse)
           )
           continue
         }
-        // メールアドレス情報からすでに招待しているか確認
+        // メールアドレスから取得した企業情報と企業検索APIで取得したテナントIDが一致しない場合
         if (getUserInformationByEmailResponse.CompanyAccountId !== companyId) {
           resultSuppliersCompany.push({
             companyName: companyName,
@@ -161,7 +164,7 @@ const upload = async (passport, contract, nominalList) => {
         const addNetworkConnectionResponse = await tradeshiftAPI.addNetworkConnection(passport, companyId)
         if (addNetworkConnectionResponse instanceof Error) {
           resultSuppliersCompany.push(
-            ...setErrorResponse(companyName, mailAddress, 'Add NetworkConnection', addNetworkConnectionResponse)
+            setErrorResponse(companyName, mailAddress, 'Add NetworkConnection', addNetworkConnectionResponse)
           )
           continue
         }

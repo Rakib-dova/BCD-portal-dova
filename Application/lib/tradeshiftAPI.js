@@ -7,14 +7,16 @@ const apiManager = require('../controllers/apiManager').accessTradeshift
  * @param {object} token トークン情報
  * @param {string} companyName 企業名
  * @param {int} page ページ番号
+ * @param {string} limit 取得する件数(最大値100)
  * @returns {object} 企業情報
  */
-const getCompanies = async (token, companyName, page, limit = '1000') => {
+const getCompanies = async (token, companyName, page, limit = '100') => {
+  // URIでcompanyNameの後ろにスペースがあるのは検索結果を絞り込むために必要
   const response = await apiManager(
     token.accessToken,
     token.refreshToken,
     'get',
-    `/network/companies?query=${encodeURIComponent(companyName)}&page=${page}&limit=${limit}`
+    `/network/companies?query=${encodeURIComponent(companyName)} &page=${page}&limit=${limit}`
   )
 
   return response
