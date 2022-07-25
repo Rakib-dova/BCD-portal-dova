@@ -64,7 +64,7 @@ const upload = async (passport, contract, nominalList) => {
 
       // メールアドレス重複確認
       if (mailList.some((mail) => mail === mailAddress)) {
-        invitationResult.push({
+        resultSuppliersCompany.push({
           companyName: companyName,
           mailAddress: mailAddress,
           status: 'Duplicate Email Error',
@@ -75,7 +75,7 @@ const upload = async (passport, contract, nominalList) => {
 
       // メールアドレスバリデーションチェック
       if (validate.isContactEmail(mailAddress) !== 0) {
-        invitationResult.push({
+        resultSuppliersCompany.push({
           companyName: companyName,
           mailAddress: mailAddress,
           status: 'Email Type Error',
