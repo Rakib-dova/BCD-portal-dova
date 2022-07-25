@@ -25,7 +25,6 @@ const upload = async (passport, contract, nominalList) => {
 
   // ファイル読み込み
   const result = readNominalList(pwdFile)
-
   if (result instanceof Error) {
     const error = result
     logger.error({ contractId: contract.contractId, stack: error.stack, status: 0 })
@@ -40,7 +39,7 @@ const upload = async (passport, contract, nominalList) => {
     errorFlag = true
   }
 
-  if (result.data.length > 200) {
+  if (!errorFlag && result.data.length > 200) {
     logger.error({ contractId: contract.contractId, stack: '一括登録取引先が200件を超えています。', status: 0 })
     result.status = -3
     resultSuppliersCompany = null
@@ -48,14 +47,16 @@ const upload = async (passport, contract, nominalList) => {
   }
 
   // 項目数確認
-  for (const data of result.data) {
-    data = data.split(',')
-    if (data.length !== 2) {
-      logger.error({ contractId: contract.contractId, stack: '項目数が異なります。', status: 0 })
-      result.status = -2
-      resultSuppliersCompany = null
-      errorFlag = true
-      break
+  if (!errorFlag) {
+    for (const data of result.data) {
+      const dataMap = data.split(',')
+      if (dataMap.length !== 2) {
+        logger.error({ contractId: contract.contractId, stack: '項目数が異なります。', status: 0 })
+        result.status = -2
+        resultSuppliersCompany = null
+        errorFlag = true
+        break
+      }
     }
   }
 
@@ -64,9 +65,9 @@ const upload = async (passport, contract, nominalList) => {
   // バリデーションチェック、API処理
   if (!errorFlag) {
     for (const data of result.data) {
-      data = data.split(',')
-      const companyName = data[0]
-      const mailAddress = data[1]
+      const dataMap = data.split(',')
+      const companyName = dataMap[0]
+      const mailAddress = dataMap[1]
 
       // メールアドレスバリデーションチェック
       if (validate.isContactEmail(mailAddress) !== 0) {
@@ -89,7 +90,7 @@ const upload = async (passport, contract, nominalList) => {
         })
         continue
       } else {
-        mailList.push(supplier[1])
+        mailList.push(mailAddress)
       }
 
       let companyId = ''
@@ -97,16 +98,20 @@ const upload = async (passport, contract, nominalList) => {
       const getCompaniesResponse = []
       let page = 0
       let numPages = 1
+      let getCompaniesErrorFlag = false
       do {
         const connections = await tradeshiftAPI.getCompanies(passport, companyName, page)
         if (connections instanceof Error) {
           resultSuppliersCompany.push(setErrorResponse(companyName, mailAddress, 'Get Companies', connections))
-          continue
+          getCompaniesErrorFlag = true
+          break
         }
         numPages = connections.numPages
         page++
         getCompaniesResponse.push(...connections.Connection)
       } while (page < numPages)
+
+      if (getCompaniesErrorFlag) continue
 
       // 企業検索APIがqueryで完全一致検索ではないため、CSVの企業名と再度比較
       for (const connection of getCompaniesResponse) {
