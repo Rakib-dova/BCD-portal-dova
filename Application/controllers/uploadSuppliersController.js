@@ -4,6 +4,8 @@ const fs = require('fs')
 const path = require('path')
 const logger = require('../lib/logger')
 const constantsDefine = require('../constants')
+const tradeshiftAPI = require('../lib/tradeshiftAPI')
+const { v4: uuidv4 } = require('uuid')
 const validate = require('../lib/validate')
 
 /**
@@ -17,7 +19,8 @@ const upload = async (passport, contract, nominalList) => {
   logger.info(constantsDefine.logMessage.INF000 + 'uploadSuppliersController.upload')
   const destination = nominalList.destination
   const fileName = nominalList.filename
-  const invitationResult = []
+  let resultSuppliersCompany = []
+  let errorFlag = false
   const pwdFile = path.resolve(destination, fileName)
 
   // ファイル読み込み
@@ -32,42 +35,195 @@ const upload = async (passport, contract, nominalList) => {
 
   if (result.status === -1) {
     logger.error({ contractId: contract.contractId, stack: 'ヘッダーが指定のものと異なります。', status: 0 })
-    return [-1, null]
+    result.status = -1
+    resultSuppliersCompany = null
+    errorFlag = true
   }
 
   if (result.data.length > 200) {
-    logger.error({ contractId: contract.contractId, stack: '一括登録取引先ーが200件を超えています。', status: 0 })
-    return [-3, null]
+    logger.error({ contractId: contract.contractId, stack: '一括登録取引先が200件を超えています。', status: 0 })
+    result.status = -3
+    resultSuppliersCompany = null
+    errorFlag = true
+  }
+
+  // 項目数確認
+  for (const data of result.data) {
+    data = data.split(',')
+    if (data.length !== 2) {
+      logger.error({ contractId: contract.contractId, stack: '項目数が異なります。', status: 0 })
+      result.status = -2
+      resultSuppliersCompany = null
+      errorFlag = true
+      break
+    }
   }
 
   const mailList = []
 
-  for (let supplier of result.data) {
-    supplier = supplier.split(',')
-    if (supplier.length !== 2) {
-      logger.error({ contractId: contract.contractId, stack: '項目数が異なります。', status: 0 })
-      return [-2, null]
-    }
+  // バリデーションチェック、API処理
+  if (!errorFlag) {
+    for (const data of result.data) {
+      data = data.split(',')
+      const companyName = data[0]
+      const mailAddress = data[1]
 
-    // メールアドレス重複確認
-    if (mailList.some((mail) => mail === supplier[1])) {
-      invitationResult.push({
-        companyName: supplier[0],
-        companyMailAddress: supplier[1],
-        status: 'Duplicate Email Error',
-        stack: null
-      })
-    }
+      // メールアドレスバリデーションチェック
+      if (validate.isContactEmail(mailAddress) !== 0) {
+        resultSuppliersCompany.push({
+          companyName: companyName,
+          mailAddress: mailAddress,
+          status: 'Email Type Error',
+          stack: null
+        })
+        continue
+      }
 
-    if (validate.isContactEmail(supplier[1]) !== 0) {
-      invitationResult.push({
-        companyName: supplier[0],
-        companyMailAddress: supplier[1],
-        status: 'Email Type Error',
-        stack: null
-      })
-    } else {
-      mailList.push(supplier[1])
+      // メールアドレス重複確認
+      if (mailList.some((mail) => mail === mailAddress)) {
+        resultSuppliersCompany.push({
+          companyName: companyName,
+          mailAddress: mailAddress,
+          status: 'Duplicate Email Error',
+          stack: null
+        })
+        continue
+      } else {
+        mailList.push(supplier[1])
+      }
+
+      let companyId = ''
+      // 企業検索API
+      const getCompaniesResponse = []
+      let page = 0
+      let numPages = 1
+      do {
+        const connections = await tradeshiftAPI.getCompanies(passport, companyName, page)
+        if (connections instanceof Error) {
+          resultSuppliersCompany.push(setErrorResponse(companyName, mailAddress, 'Get Companies', connections))
+          continue
+        }
+        numPages = connections.numPages
+        page++
+        getCompaniesResponse.push(...connections.Connection)
+      } while (page < numPages)
+
+      // 企業検索APIがqueryで完全一致検索ではないため、CSVの企業名と再度比較
+      for (const connection of getCompaniesResponse) {
+        if (connection.CompanyName === companyName) {
+          companyId = connection.CompanyAccountId
+        }
+      }
+
+      if (companyId === '') {
+        // 企業が取得できなかった場合
+        // 招待有無確認API
+        const getConnectionsResponse = await tradeshiftAPI.getConnections(passport, mailAddress, 'ExternalConnection')
+        if (getConnectionsResponse instanceof Error) {
+          resultSuppliersCompany.push(
+            setErrorResponse(companyName, mailAddress, 'Get Connections', getConnectionsResponse)
+          )
+          continue
+        }
+        if (getConnectionsResponse.Connection.length !== 0) {
+          let flag = false
+          for (const connection of getConnectionsResponse.Connection) {
+            if (connection.Email === mailAddress) {
+              flag = true
+              resultSuppliersCompany.push({
+                companyName: companyName,
+                mailAddress: mailAddress,
+                status: 'Already Invitation',
+                stack: null
+              })
+              break
+            }
+          }
+          if (flag) continue
+        }
+
+        // ネットワーク接続更新API
+        // connectionIdの生成（uuid）
+        const connectionId = uuidv4()
+        const updateNetworkConnectionResponse = await tradeshiftAPI.updateNetworkConnection(
+          passport,
+          connectionId,
+          companyName,
+          mailAddress
+        )
+        if (updateNetworkConnectionResponse instanceof Error) {
+          resultSuppliersCompany.push(
+            setErrorResponse(companyName, mailAddress, 'Update NetworkConnection', updateNetworkConnectionResponse)
+          )
+          continue
+        }
+
+        resultSuppliersCompany.push({
+          companyName: companyName,
+          mailAddress: mailAddress,
+          status: 'Update Success',
+          stack: null
+        })
+        continue
+      } else {
+        // 企業が取得できた場合
+        // Network確認API
+        const getConnectionForCompanyResponse = await tradeshiftAPI.getConnectionForCompany(passport, companyId)
+        if (
+          getConnectionForCompanyResponse instanceof Error &&
+          getConnectionForCompanyResponse.response?.status !== 404
+        ) {
+          resultSuppliersCompany.push(
+            setErrorResponse(companyName, mailAddress, 'Get ConnectionForCompany', getConnectionForCompanyResponse)
+          )
+          continue
+        }
+        // Network接続済みの場合
+        if (getConnectionForCompanyResponse.CompanyAccountId) {
+          resultSuppliersCompany.push({
+            companyName: companyName,
+            mailAddress: mailAddress,
+            status: 'Already Connection',
+            stack: null
+          })
+          continue
+        }
+
+        // メールアドレス情報検索API
+        const getUserInformationByEmailResponse = await tradeshiftAPI.getUserInformationByEmail(passport, mailAddress)
+        if (getUserInformationByEmailResponse instanceof Error) {
+          resultSuppliersCompany.push(
+            setErrorResponse(companyName, mailAddress, 'Get Username', getUserInformationByEmailResponse)
+          )
+          continue
+        }
+        // メールアドレスから取得した企業情報と企業検索APIで取得したテナントIDが一致しない場合
+        if (getUserInformationByEmailResponse.CompanyAccountId !== companyId) {
+          resultSuppliersCompany.push({
+            companyName: companyName,
+            mailAddress: mailAddress,
+            status: 'Email Not Match',
+            stack: null
+          })
+          continue
+        }
+
+        // ネットワーク接続追加API
+        const addNetworkConnectionResponse = await tradeshiftAPI.addNetworkConnection(passport, companyId)
+        if (addNetworkConnectionResponse instanceof Error) {
+          resultSuppliersCompany.push(
+            setErrorResponse(companyName, mailAddress, 'Add NetworkConnection', addNetworkConnectionResponse)
+          )
+          continue
+        }
+
+        resultSuppliersCompany.push({
+          companyName: companyName,
+          mailAddress: mailAddress,
+          status: 'Add Success',
+          stack: null
+        })
+      }
     }
   }
 
@@ -82,7 +238,26 @@ const upload = async (passport, contract, nominalList) => {
   }
 
   logger.info(constantsDefine.logMessage.INF001 + 'uploadSuppliersController.upload')
-  return [result.status, invitationResult]
+  return [result.status, resultSuppliersCompany]
+}
+
+/**
+ * エラー結果設定
+ * @param {string} companyName 企業名
+ * @param {string} mailAddress メールアドレス
+ * @param {string} apiName API名
+ * @param {string} response API実行結果
+ * @returns {object} 実行結果データ
+ */
+const setErrorResponse = (companyName, mailAddress, apiName, response) => {
+  const result = {
+    companyName: companyName,
+    mailAddress: mailAddress,
+    status: 'API Error',
+    stack: response.stack
+  }
+  logger.error({ companyName: companyName, apiName: apiName, stack: response.stack, status: 0 })
+  return result
 }
 
 const readNominalList = (pwdFile) => {
@@ -150,6 +325,7 @@ const removeFile = async (fullPath) => {
 
 module.exports = {
   upload: upload,
+  setErrorResponse: setErrorResponse,
   readNominalList: readNominalList,
   getReadCsvData: getReadCsvData,
   removeFile: removeFile

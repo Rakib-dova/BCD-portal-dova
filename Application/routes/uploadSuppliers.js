@@ -160,17 +160,35 @@ const cbPostIndex = async (req, res, next) => {
     // 正常
     case 0:
       resultMessage = ''
-      for (const invit of invitationResult) {
-        switch (invit.status) {
+      for (const invitation of invitationResult) {
+        switch (invitation.status) {
+          case 'Add Success':
+            resultMessage += `${invitation.companyName}をネットワーク招待しました。<br>`
+            break
+          case 'Update Success':
+            resultMessage += `${invitation.companyName}を企業登録招待しました。<br>`
+            break
+          case 'API Error':
+            resultMessage += `${invitation.companyName}の招待でAPIエラーが発生しました。スキップしました。<br>`
+            break
+          case 'Already Invitation':
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は既に招待済みです。スキップしました。<br>`
+            break
+          case 'Already Connection':
+            resultMessage += `${invitation.companyName}は既にネットワークに登録されています。スキップしました。<br>`
+            break
+          case 'Email Not Match':
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は企業に登録されていません。スキップしました。<br>`
+            break
           case 'Email Type Error':
-            resultMessage += `${invit.companyMailAddress}はメール形式ではありません。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})はメール形式ではありません。スキップしました。<br>`
             break
           case 'Duplicate Email Error':
-            resultMessage += `${invit.companyMailAddress}は重複しています。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}のメールアドレス${invitation.mailAddress}は重複しています。スキップしました。<br>`
             break
         }
       }
-      flashParams = ['noti', ['ユーザー一括登録に成功しました。', resultMessage, '']]
+      flashParams = ['noti', ['取引先一括登録に成功しました。', resultMessage, '']]
       break
     // ヘッダー不一致
     case -1:
