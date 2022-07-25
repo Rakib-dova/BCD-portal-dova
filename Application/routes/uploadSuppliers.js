@@ -157,6 +157,31 @@ const cbPostIndex = async (req, res, next) => {
   let flashParams = null
 
   switch (status) {
+    // 正常
+    case 0:
+      resultMessage = ''
+      for (const invit of invitationResult) {
+        switch (invit.status) {
+          case 'Email Type Error':
+            resultMessage += `${invit.companyMailAddress}はメール形式ではありません。スキップしました。<br>`
+            break
+          case 'Duplicate Email Error':
+            resultMessage += `${invit.companyMailAddress}は重複しています。スキップしました。<br>`
+            break
+        }
+      }
+      flashParams = ['noti', ['ユーザー一括登録に成功しました。', resultMessage, '']]
+      break
+    // ヘッダー不一致
+    case -1:
+      resultMessage = constantsDefine.codeErrMsg.CODEHEADERERR000
+      flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
+      break
+    case -2:
+      resultMessage = constantsDefine.codeErrMsg.CODEDATAERR000
+      flashParams = ['noti', ['取込に失敗しました。', resultMessage, 'SYSERR']]
+      break
+    // 取引先数が200件超過
     case -3:
       resultMessage = constantsDefine.codeErrMsg.UPLOADSUPPLIERSCOUNTER000
       flashParams = ['noti', ['取引先一括登録', resultMessage, 'SYSERR']]
