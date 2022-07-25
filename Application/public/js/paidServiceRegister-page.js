@@ -270,6 +270,15 @@ $('#next-btn').addEventListener('click', function (e) {
       if (!firstError) firstError = $('#openingDate')
       $('#openingDateMessage').textContent = '　過去の日付を設定できません。'
 
+      // スタンダードプランのみ申込、かつ、1か月後の日付を設定された場合
+    } else if (
+      serviceList.length === 1 &&
+      serviceList[0] === '030' &&
+      openingDate > today.setMonth(today.getMonth() + 1)
+    ) {
+      if (!firstError) firstError = $('#openingDate')
+      $('#openingDateMessage').textContent = '　1か月後の日付を設定できません。'
+
       // 導入支援をチェックされた、かつ、16日後の日付を設定されない場合
     } else if (serviceList.some((i) => i === '020') && openingDate < today.setDate(today.getDate() + 16)) {
       if (!firstError) firstError = $('#openingDate')

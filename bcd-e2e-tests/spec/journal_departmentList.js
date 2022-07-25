@@ -2,7 +2,6 @@ const webdriverUtils = require('../utils/webdriver-utils');
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
 const comment = require('../utils/chai-with-reporting').comment;
-const config = require('../autotest-script-config');
 const fs = require('fs');
 const { parse } = require('csv-parse/sync');
 const common = require('./common');
@@ -18,9 +17,12 @@ describe('仕訳情報設定_部門データ一覧', function () {
 
   // テストデータ
   const departments = [
-    {code:'TDept1', name:'テスト用部門コード名１ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミ'}, // 新規登録用
-    {code:'TDept2', name:'テスト用部門コード名２ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミ'} // 変更用
+    {code:'ATDep1', name:'テスト用部門コード名１ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミ'}, // 新規登録用
+    {code:'ATDep2', name:'テスト用部門コード名２ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミ'} // 変更用
   ];
+
+  // 登録した部門コード
+  addedDepartmentCodes = [];
 
   beforeAll(async function () {
     // テストのタイムアウト時間を設定する（1時間）
@@ -50,22 +52,9 @@ describe('仕訳情報設定_部門データ一覧', function () {
   };
 
   // 部門データ一覧ページまで遷移する
-  async function gotoDepartmentList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage) {
-    // 指定したURLに遷移する
-    await comment('Tradeshiftログインページへ移動する');
-    await page.goto(config.baseUrl);
-
-    // ログインを行う
-    await comment('ユーザ"' + account.id + '"でログインする');
-    await loginPage.doLogin(account.id, account.password);
-    await tradeShiftTopPage.waitForLoading();
-
-    // デジタルトレードアプリをクリックする
-    let appName = process.env.APP ? process.env.APP : config.appName;
-    appName = appName.replace(/\"/g, '');
-    await comment('アイコン「' + appName + '」をクリックする');
-    await tradeShiftTopPage.clickBcdApp(appName);
-    await topPage.waitForLoading();
+  async function gotoDepartmentList(account, topPage, journalMenuPage, departmentListPage) {
+    // デジタルトレードアプリのトップページを表示する
+    await common.gotoTop(page, account);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -107,11 +96,10 @@ describe('仕訳情報設定_部門データ一覧', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, departmentListPage, registDepartmentPage }
-        = common.getPageObject(browser, page);
+      const { topPage, journalMenuPage, departmentListPage, registDepartmentPage } = common.getPageObject(browser, page);
 
       // 部門データ一覧ページへ遷移する
-      await gotoDepartmentList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
+      await gotoDepartmentList(account, topPage, journalMenuPage, departmentListPage)
 
       // 新規登録ページへ遷移する
       await departmentListPage.clickRegist();
@@ -144,8 +132,8 @@ describe('仕訳情報設定_部門データ一覧', function () {
       // 変更が反映されること
       expect(await departmentListPage.hasRow(departments[1].code, departments[1].name)).to.equal(true, '【部門データ一覧】変更が反映されること');
 
-      // 部門データをすべて削除する
-      await departmentListPage.deleteAll();
+      // 部門データを削除する
+      await departmentListPage.delete(departments[1].code);
       await page.waitForTimeout(1000);
     }
   });
@@ -177,11 +165,10 @@ describe('仕訳情報設定_部門データ一覧', function () {
       }
   
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, departmentListPage, uploadDepartmentPage }
-        = common.getPageObject(browser, page);
+      const { topPage, journalMenuPage, departmentListPage, uploadDepartmentPage } = common.getPageObject(browser, page);
   
       // 部門データ一覧ページへ遷移する
-      await gotoDepartmentList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, departmentListPage)
+      await gotoDepartmentList(account, topPage, journalMenuPage, departmentListPage)
 
       let files = [
         'testdata/upload/TESTCSV41.csv',
@@ -206,15 +193,14 @@ describe('仕訳情報設定_部門データ一覧', function () {
 
         // 正しくすべてのデータが一覧に反映されること
         let csvData = await getCsvData(files[i]);
-        let j = 2;
-        for (row of csvData) {
-          expect(await departmentListPage.hasRow(row['部門コード'], row['部門名'])).to.equal(true, '【部門データ一覧】' + j + '行目のデータが一覧に反映されること');
-          j++;
+        for (j = 0; j < csvData.length; j++) {
+          expect(await departmentListPage.hasRow(csvData[j]['部門コード'], csvData[j]['部門名'])).to.equal(true, '【部門データ一覧】' + (j + 2) + '行目のデータが一覧に反映されること');
+
+          // 確認し終えたデータを削除する
+          await departmentListPage.delete(csvData[j]['部門コード']);
+          await departmentListPage.closePopup();
         }
       }
-
-      // 部門データをすべて削除する
-      await departmentListPage.deleteAll();
       await page.waitForTimeout(1000);
     }
   });
