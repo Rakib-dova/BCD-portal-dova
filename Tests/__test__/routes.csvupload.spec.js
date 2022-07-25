@@ -3488,7 +3488,7 @@ describe('csvuploadのテスト', () => {
       expect(result).toBeFalsy()
     })
 
-    test('User Directory is Nothing.(error)', async () => {
+    test('User Directory is Nothing.', async () => {
       // 準備
       request.user = user
 
@@ -3500,8 +3500,8 @@ describe('csvuploadのテスト', () => {
       const result = csvupload.cbUploadCsv(filePath, filename, uploadCsvData)
 
       // 期待結果
-      // returnがfalseであること
-      expect(result).toBeFalsy()
+      // ユーザディレクトリが存在しない場合、trueが返却される
+      expect(result).toBeTruthy()
     })
   })
 
