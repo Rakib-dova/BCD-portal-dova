@@ -2,7 +2,6 @@ const webdriverUtils = require('../utils/webdriver-utils');
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
 const comment = require('../utils/chai-with-reporting').comment;
-const config = require('../autotest-script-config');
 const common = require('./common');
 
 const expect = chai.expect;
@@ -50,21 +49,10 @@ describe('リグレッションテスト', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, settlementPage, rakkoToolsPage }
-        = common.getPageObject(browser, page);
+      const { topPage, settlementPage, rakkoToolsPage } = common.getPageObject(browser, page);
 
-      // 指定したURLに遷移する
-      await page.goto(config.baseUrl);
-
-      // ログインを行う
-      await loginPage.doLogin(account.id, account.password);
-      await tradeShiftTopPage.waitForLoading();
-
-      // デジタルトレードアプリをクリックする
-      let appName = process.env.APP ? process.env.APP : config.appName;
-      appName = appName.replace(/\"/g, '');
-      await tradeShiftTopPage.clickBcdApp(appName);
-      await topPage.waitForLoading();
+      // デジタルトレードアプリのトップページを表示する
+      await common.gotoTop(page, account);
 
       // 「銀行振込消印」ダイアログを開く
       await topPage.openSettlementDialog();

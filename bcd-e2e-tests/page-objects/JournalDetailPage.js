@@ -72,29 +72,31 @@ class JournalDetailPage {
   // 仕訳情報入力フォームにて、指定の勘定科目、補助科目、部門コードが入力されているものを検索する
   async hasBreakdown(lineNo, acNo, isCredit, accountCode, subAccountCode, departmentCode) {
     let xpathBase = '//div[@id="lineNo' + lineNo + '"]/div[contains(@class, "lineAccountcode")][' + acNo + ']/div[' + (isCredit ? '3' : '1') + ']/table/tbody';
-    let xpathAccountCode = '/tr[position()=1]//input[@type="text"]';
-    let xpathSubAccountCode = '/tr[position()=2]//input[@type="text"]';
-    let xpathDepartmentCode = '/tr[position()=3]//input[@type="text"]';
-    return await this.actionUtils.getValue(this.frame, xpathBase + xpathAccountCode) == accountCode
-        && await this.actionUtils.getValue(this.frame, xpathBase + xpathSubAccountCode) == subAccountCode
-        && await this.actionUtils.getValue(this.frame, xpathBase + xpathDepartmentCode) == departmentCode;
+    let actual = {
+      accountCode: await this.actionUtils.getValue(this.frame, xpathBase + '/tr[1]//input[@type="text"]'),
+      subAccountCode: await this.actionUtils.getValue(this.frame, xpathBase + '/tr[2]//input[@type="text"]'),
+      departmentCode: await this.actionUtils.getValue(this.frame, xpathBase + '/tr[3]//input[@type="text"]')
+    };
+    return (actual.accountCode == accountCode && actual.subAccountCode == subAccountCode && actual.departmentCode == departmentCode);
   }
 
-  // 仕訳情報入力フォーム内、全情報取得（10項目分）
-  async getAllBreakdown() {
+  // 仕訳情報入力フォーム内、全情報取得
+  async getAllBreakdown(lineNo) {
     let result = [];
     let i = 0;
-    for (i = 0; i < 10; i++) {
-      result.push({ accountCode: "", subAccountCode: "", departmentCode: "", cost: ""});
-    }
     for (i = 0; i < 10; i++) {
       if (!await this.actionUtils.isExist(this.frame, '#lineNo1_lineAccountCode' + (i + 1))) {
         break;
       }
-      result[i].accountCode = await this.actionUtils.getValue(this.frame, '#lineNo1_lineAccountCode' + (i + 1) + '_accountCode');
-      result[i].subAccountCode = await this.actionUtils.getValue(this.frame, '#lineNo1_lineAccountCode' + (i + 1) + '_subAccountCode');
-      result[i].departmentCode = await this.actionUtils.getValue(this.frame, '#lineNo1_lineAccountCode' + (i + 1) + '_departmentCode');
-      result[i].cost = await this.actionUtils.getValue(this.frame, '#lineNo1_lineAccountCode' + (i + 1) + '_input_amount');
+      result.push({
+        accountCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineAccountCode' + (i + 1) + '_accountCode'),
+        subAccountCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineAccountCode' + (i + 1) + '_subAccountCode'),
+        departmentCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineAccountCode' + (i + 1) + '_departmentCode'),
+        creditAccountCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineCreditAccountCode' + (i + 1) + '_creditAccountCode'),
+        creditSubAccountCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineCreditAccountCode' + (i + 1) + '_creditSubAccountCode'),
+        creditDepartmentCode: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineCreditAccountCode' + (i + 1) + '_creditDepartmentCode'),
+        cost: await this.actionUtils.getValue(this.frame, '#lineNo' + lineNo + '_lineAccountCode' + (i + 1) + '_input_amount')
+      });
     }
     return result;
   }
