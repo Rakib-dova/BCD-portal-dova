@@ -257,14 +257,14 @@ exports.getContractPlan = async (req, res, next) => {
   const lightPlanForEntry = await contractController.findLightPlanForEntry(req.user.tenantId)
   if (lightPlanForEntry) {
     isLightPlanForEntry = true
-  } else {
-    // 導入支援プランの申し込み
-    const introductionSupportPlanForEntry = await contractController.findIntroductionSupportPlanForEntry(
-      req.user.tenantId
-    )
-    if (introductionSupportPlanForEntry) {
-      isIntroductionSupportPlanForEntry = true
-    }
+  }
+
+  // 導入支援プランの申し込み
+  const introductionSupportPlanForEntry = await contractController.findIntroductionSupportPlanForEntry(
+    req.user.tenantId
+  )
+  if (introductionSupportPlanForEntry) {
+    isIntroductionSupportPlanForEntry = true
   }
 
   /*
