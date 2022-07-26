@@ -417,7 +417,7 @@ describe('uploadUsersのテスト', () => {
   })
 
   describe('コールバック:cbPostIndex', () => {
-    test('正常：ユーザー一括登録する。(1名)', async () => {
+    test('正常：取引先一括登録する。(1件)', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -449,14 +449,14 @@ describe('uploadUsersのテスト', () => {
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', [
         '取引先一括登録',
-        `${resgistSupplier.companyName}をネットワーク招待しました。<br>`,
+        `${resgistSupplier.companyName}をネットワークに招待しました。<br>`,
         ''
       ])
-      // ユーザー一括登録へリダイレクトされ「る」
+      // 取引先一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSuppliers')
     })
 
-    test('正常：ユーザー一括登録する。(正常2件、スキップ5件)', async () => {
+    test('正常：取引先一括登録する。(正常2件、スキップ5件)', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -489,28 +489,28 @@ describe('uploadUsersのテスト', () => {
       for (const invitation of invitationResult) {
         switch (invitation.status) {
           case 'Add Success':
-            resultMessage += `${invitation.companyName}をネットワーク招待しました。<br>`
+            resultMessage += `${invitation.companyName}をネットワークに招待しました。<br>`
             break
           case 'Update Success':
-            resultMessage += `${invitation.companyName}を企業登録招待しました。<br>`
+            resultMessage += `${invitation.companyName}を企業登録に招待しました。<br>`
             break
           case 'API Error':
-            resultMessage += `${invitation.companyName}の招待でAPIエラーが発生しました。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}の招待でAPIエラーが発生しました。（スキップ）<br>`
             break
           case 'Already Invitation':
-            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は既に招待済みです。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は既に招待済みです。（スキップ）<br>`
             break
           case 'Already Connection':
-            resultMessage += `${invitation.companyName}は既にネットワークに登録されています。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}は既にネットワークに登録されています。（スキップ）<br>`
             break
           case 'Email Not Match':
-            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は企業に登録されていません。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は企業に登録されていません。（スキップ）<br>`
             break
           case 'Email Type Error':
-            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})はメール形式ではありません。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})はメール形式ではありません。（スキップ）<br>`
             break
           case 'Duplicate Email Error':
-            resultMessage += `${invitation.companyName}のメールアドレス${invitation.mailAddress}は重複しています。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}のメールアドレス${invitation.mailAddress}は重複しています。（スキップ）<br>`
             break
         }
       }
@@ -527,11 +527,11 @@ describe('uploadUsersのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['取引先一括登録', resultMessage, ''])
-      // ユーザー一括登録へリダイレクトされ「る」
+      // 取引先一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSuppliers')
     })
 
-    test('異常：ユーザー一括登録エラー発生', async () => {
+    test('異常：取引先一括登録エラー発生', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -565,11 +565,11 @@ describe('uploadUsersのテスト', () => {
         'システムエラーです。<BR>（後程、接続してください。）',
         'SYSERR'
       ])
-      // ユーザー一括登録へリダイレクトされ「る」
+      // 取引先一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSuppliers')
     })
 
-    test('準正常：ユーザー一括登録（ヘッダーに誤り）', async () => {
+    test('準正常：取引先一括登録（ヘッダーに誤り）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -603,11 +603,11 @@ describe('uploadUsersのテスト', () => {
         'ヘッダーが指定のものと異なります。',
         'SYSERR'
       ])
-      // ユーザー一括登録へリダイレクトされ「る」
+      // 取引先一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSuppliers')
     })
 
-    test('準正常：ユーザー一括登録（取込データが存在しない）', async () => {
+    test('準正常：取引先一括登録（取込データが存在しない）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -637,11 +637,11 @@ describe('uploadUsersのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['取引先一括登録', '項目数が異なります。', 'SYSERR'])
-      // ユーザー一括登録へリダイレクトされ「る」
+      // 取引先一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSuppliers')
     })
 
-    test('準正常：ユーザー一括登録（一度に取り込めるユーザーが200件以上）', async () => {
+    test('準正常：取引先一括登録（一度に取り込める：取引先が200件以上）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -674,11 +674,11 @@ describe('uploadUsersのテスト', () => {
       const msg200Over = constantsCodeErrMsg.UPLOADSUPPLIERSCOUNTER000
 
       expect(request.flash).toHaveBeenCalledWith('noti', ['取引先一括登録', msg200Over, 'SYSERR'])
-      // ユーザー一括登録へリダイレクトされ「る」
+      // 取引先一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSuppliers')
     })
 
-    test('準正常：ユーザー一括登録（一部行目に誤り）', async () => {
+    test('準正常：取引先一括登録（一部行目に誤り）', async () => {
       // 準備
       // requestのsession,userIdに正常値を入れる
       request.session = { ...session }
@@ -708,7 +708,7 @@ describe('uploadUsersのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // request.flashが呼ばれ「る」
       expect(request.flash).toHaveBeenCalledWith('noti', ['取引先一括登録', '項目数が異なります。', 'SYSERR'])
-      // ユーザー一括登録へリダイレクトされ「る」
+      // 取引先一括登録へリダイレクトされ「る」
       expect(response.redirect).toHaveBeenCalledWith('/uploadSuppliers')
     })
 
