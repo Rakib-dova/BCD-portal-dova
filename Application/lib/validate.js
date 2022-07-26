@@ -481,8 +481,6 @@ const isContactEmail = function (contactEmail) {
 
   let quoteCnt = 0
   let spaceCnt = 0
-  let local = null
-  let domain = null
 
   const getCharCode = function (character) {
     return character.charCodeAt()
@@ -491,18 +489,8 @@ const isContactEmail = function (contactEmail) {
   // 取引担当者メールアドレスが配列形式で受け取った場合
   if (contactEmailType !== 'string') return -1
 
-  // 「@」が含まれているかの確認
-  if (contactEmail.indexOf('@') !== -1) {
-    local = contactEmail.split('@')[0]
-    domain = contactEmail.split('@')[1]
-  } else {
-    return -1
-  }
-
-  // 「.」が最後の文字かの確認
-  if (contactEmail.lastIndexOf('.') === -1 || contactEmail.lastIndexOf('.') === contactEmail.length - 1) {
-    return -1
-  }
+  const local = contactEmail.split('@')[0]
+  const domain = contactEmail.split('@')[1]
 
   // 取引担当者メールアドレスがメール形式ではない場合
   if (typeof domain === 'undefined') return -1
@@ -511,7 +499,7 @@ const isContactEmail = function (contactEmail) {
   if (contactEmail.length > 128) return -1
 
   // 取引担当者メールアドレスのローカル部のサイズが超えた場合
-  if (local.length > 64 || local.length === 0) return -1
+  if (local.length > 64) return -1
 
   // 取引担当者メールアドレスのローカル部チェック
   for (const character of local) {

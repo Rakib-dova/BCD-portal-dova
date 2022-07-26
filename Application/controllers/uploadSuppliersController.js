@@ -70,7 +70,7 @@ const upload = async (passport, contract, nominalList) => {
       const mailAddress = dataMap[1]
 
       // メールアドレスバリデーションチェック
-      if (validate.isContactEmail(mailAddress) !== 0) {
+      if (validate.isValidEmail(mailAddress) === false) {
         resultSuppliersCompany.push({
           companyName: companyName,
           mailAddress: mailAddress,
