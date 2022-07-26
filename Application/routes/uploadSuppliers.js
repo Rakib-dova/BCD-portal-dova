@@ -163,28 +163,28 @@ const cbPostIndex = async (req, res, next) => {
       for (const invitation of invitationResult) {
         switch (invitation.status) {
           case 'Add Success':
-            resultMessage += `${invitation.companyName}をネットワーク招待しました。<br>`
+            resultMessage += `${invitation.companyName}をネットワークに招待しました。<br>`
             break
           case 'Update Success':
-            resultMessage += `${invitation.companyName}を企業登録招待しました。<br>`
+            resultMessage += `${invitation.companyName}を企業登録に招待しました。<br>`
             break
           case 'API Error':
-            resultMessage += `${invitation.companyName}の招待でAPIエラーが発生しました。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}の招待でAPIエラーが発生しました。（スキップ）<br>`
             break
           case 'Already Invitation':
-            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は既に招待済みです。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は既に招待済みです。（スキップ）<br>`
             break
           case 'Already Connection':
-            resultMessage += `${invitation.companyName}は既にネットワークに登録されています。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}は既にネットワークに登録されています。（スキップ）<br>`
             break
           case 'Email Not Match':
-            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は企業に登録されていません。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は企業に登録されていません。（スキップ）<br>`
             break
           case 'Email Type Error':
-            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})はメール形式ではありません。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})はメール形式ではありません。（スキップ）<br>`
             break
           case 'Duplicate Email Error':
-            resultMessage += `${invitation.companyName}のメールアドレス${invitation.mailAddress}は重複しています。スキップしました。<br>`
+            resultMessage += `${invitation.companyName}のメールアドレス${invitation.mailAddress}は重複しています。（スキップ）<br>`
             break
         }
       }
