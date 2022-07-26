@@ -237,7 +237,7 @@ block content
                                   option(value= '')= '選択してください'
                                   if salesChannelDeptList && salesChannelDeptList.length > 0
                                     for salesChannelDept of salesChannelDeptList
-                                      option(value= salesChannelDept)= salesChannelDept.name 
+                                      option(value= salesChannelDept.code)= salesChannelDept.name 
                           .field
                             label(for="salesChannelPhoneNumber").input-label 電話番号
                             p#salesChannelPhoneNumberRequired.input-label

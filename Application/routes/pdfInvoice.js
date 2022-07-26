@@ -295,7 +295,7 @@ const deleteAndOutputPdfInvoice = async (req, res, next) => {
       type: req.file.mimetype.replace('image/', '')
     }
   } else {
-    if (invoiceRecord.PdfSealImp.dataValues.image) {
+    if (invoiceRecord.PdfSealImp?.dataValues.image) {
       const fileType = await FileType.fromBuffer(invoiceRecord.PdfSealImp.dataValues.image)
       console.log('==  fileType  ===================: ', fileType)
       sealImp = {

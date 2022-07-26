@@ -211,9 +211,8 @@ const applyPaidServiceRegister = async (req, res, next) => {
 
   let salesChannelDeptType
   // 組織区分が選択された場合、コードで組織区分を取得し、オーダー情報に設定する
-  const salesChannelDeptTypeCode = JSON.parse(req.body?.salesChannelDeptType || '{}').code
-  if (salesChannelDeptTypeCode) {
-    const salesChannelDeptInfo = await channelDepartmentController.findOne(salesChannelDeptTypeCode)
+  if (req.body?.salesChannelDeptType) {
+    const salesChannelDeptInfo = await channelDepartmentController.findOne(req.body?.salesChannelDeptType)
     if (salesChannelDeptInfo instanceof Error) return next(errorHelper.create(500))
     if (salesChannelDeptInfo?.name) salesChannelDeptType = salesChannelDeptInfo.name
   }
