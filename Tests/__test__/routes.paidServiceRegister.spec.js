@@ -63,7 +63,7 @@ const inputData = {
   salesChannelDeptName: '部課名',
   salesChannelEmplyeeCode: '11111111',
   salesChannelPersonName: '担当者名',
-  salesChannelDeptType: '{"code":"01","name":"Com第一営業本部"}',
+  salesChannelDeptType: '01',
   salesChannelPhoneNumber: '000-0000-0000',
   salesChannelMailAddress: 'aaa@aaa.com'
 }
@@ -100,12 +100,12 @@ const onlyRequiredData = {
   salesChannelPhoneNumber: '',
   salesChannelMailAddress: ''
 }
-const salesChannelDept = { code: '001', name: 'Com第一営業本部' }
+const salesChannelDept = { code: '01', name: 'Com第一営業本部' }
 
 const salesChannelDeptList = [
-  { code: '001', name: 'Com第一営業本部' },
-  { code: '002', name: 'Com第二営業本部' },
-  { code: '003', name: 'Com第三営業本部' }
+  { code: '01', name: 'Com第一営業本部' },
+  { code: '02', name: 'Com第二営業本部' },
+  { code: '03', name: 'Com第三営業本部' }
 ]
 
 let request, response, applyNewOrdersSpy, findContractsSpy, findAllDept, findOneDept
@@ -828,7 +828,7 @@ describe('paidServiceRegisterのテスト', () => {
           salesChannelDeptName: '部課名',
           salesChannelEmplyeeCode: '11111111',
           salesChannelPersonName: '担当者名',
-          salesChannelDeptType: '{"code":"01","name":"Com第一営業本部"}',
+          salesChannelDeptType: '01',
           salesChannelPhoneNumber: '000-0000-0000',
           salesChannelMailAddress: 'aaa@aaa.com'
         }
