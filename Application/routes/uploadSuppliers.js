@@ -184,7 +184,7 @@ const cbPostIndex = async (req, res, next) => {
             resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})はメール形式ではありません。（スキップ）<br>`
             break
           case 'Duplicate Email Error':
-            resultMessage += `${invitation.companyName}のメールアドレス${invitation.mailAddress}は重複しています。（スキップ）<br>`
+            resultMessage += `${invitation.companyName}のメールアドレス(${invitation.mailAddress})は重複しています。（スキップ）<br>`
             break
         }
       }
