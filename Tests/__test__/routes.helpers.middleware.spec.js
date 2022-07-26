@@ -1311,7 +1311,7 @@ describe('helpers/middlewareのテスト', () => {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
 
-      contractfindLightPlanSpy.mockReturnValue(null)
+      contractfindLightPlanSpy.mockReturnValue(true)
       // DBから導入支援プランの契約データの取得を想定する
       contractfindIntroductionSupportPlanSpy.mockReturnValue({
         dataValues: {
@@ -1334,7 +1334,7 @@ describe('helpers/middlewareのテスト', () => {
       // 引数なしでnextが呼ばれ「る」
       expect(next).toHaveBeenCalledWith()
       // islightPlanが「false」
-      expect(request.contractPlan.isLightPlan).toEqual(false)
+      expect(request.contractPlan.isLightPlan).toEqual(true)
       // isIntroductionSupportPlanが「true」
       expect(request.contractPlan.isIntroductionSupportPlan).toEqual(true)
       // isLightPlanForEntryが「false」
