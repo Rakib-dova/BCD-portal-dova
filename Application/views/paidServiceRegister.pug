@@ -191,7 +191,7 @@ block content
                               label(for="openingDate").input-label 利用開始日
                               p#openingDateMessage.input-label-required.input-label
                               .control
-                                input.input#openingDate.itemForSearch(type="date" name="openingDate" value= minissuedate pattern=inputPatternDate)
+                                input.input#openingDate.itemForSearch(type="date" name="openingDate" max="2100-12-31" pattern=inputPatternDate)
 
                       .field.card
                         .card-content
