@@ -1,3 +1,6 @@
+const { v4: uuidv4 } = require('uuid')
+const { getType } = require('./utils')
+
 // CSVアップロードファイルヘッダー (PDF請求書)
 const invoiceHeaderArray = [
   '登録番号',
@@ -149,10 +152,131 @@ const convertEmptyStringToNull = (str) => {
   else return str
 }
 
+/**
+ * データオブジェクト(配列)を請求書&明細データモデルに変換する
+ * @param {*} csvArray データオブジェクトの配列
+ * @param {*} senderInfo
+ * @param {*} tenantId
+ * @returns
+ */
+const convertCsvDataArrayToPdfInvoiceModels = (csvArray, senderInfo, tenantId) => {
+  if (!Array.isArray(csvArray) || csvArray.filter((row) => getType(row) === 'Object').length === 0 || getType(senderInfo) !== 'Object' || typeof tenantId !== 'string') {
+    return { pdfInvoices: null, pdfInvoiceLines: null }
+  }
+
+  const pdfInvoices = [] // 変換済み請求書
+  const pdfInvoiceLines = []
+  let curInvoiceIdx = 0
+
+  try {
+    csvArray.forEach((row) => {
+      const foundInvoices = pdfInvoices.filter((invoice) => invoice.invoiceNo === row.invoiceNo)
+      let pdfInvoice = foundInvoices.length ? foundInvoices[foundInvoices.length - 1] : null
+      if (!pdfInvoice || (pdfInvoice && pdfInvoice.index !== curInvoiceIdx - 1)) {
+        pdfInvoice = {
+          index: curInvoiceIdx, // 連続する請求書番号だけで同じ請求書扱いする為に一時的にプロパティを設ける
+          sendTenantId: tenantId,
+          invoiceId: uuidv4(),
+          invoiceNo: row.invoiceNo,
+          billingDate: new Date(row.billingDate),
+          paymentDate: new Date(row.paymentDate),
+          deliveryDate: new Date(row.deliveryDate),
+          currency: 'JPY',
+          recCompany: row.recCompany,
+          recPost: row.recPost,
+          recAddr1: row.recAddr1,
+          recAddr2: row.recAddr2,
+          recAddr3: row.recAddr3,
+          sendCompany: senderInfo.sendCompany,
+          sendPost: senderInfo.sendPost,
+          sendAddr1: senderInfo.sendAddr1,
+          sendAddr2: senderInfo.sendAddr2,
+          sendAddr3: senderInfo.sendAddr3,
+          sendRegistrationNo: row.sendRegistrationNo,
+          bankName: row.bankName,
+          branchName: row.branchName,
+          accountType: row.accountType,
+          accountName: row.accountName,
+          accountNumber: row.accountNumber,
+          note: row.note,
+          discounts: getDiscountLength(row, 'invoice'),
+          discountDescription1: row['inv-discountDescription1'],
+          discountAmount1: row['inv-discountAmount1'],
+          discountUnit1: row['inv-discountUnit1'],
+          discountDescription2: row['inv-discountDescription2'],
+          discountAmount2: row['inv-discountAmount2'],
+          discountUnit2: row['inv-discountUnit2'],
+          discountDescription3: row['inv-discountDescription3'],
+          discountAmount3: row['inv-discountAmount3'],
+          discountUnit3: row['inv-discountUnit3']
+        }
+
+        curInvoiceIdx++
+        pdfInvoices.push(pdfInvoice)
+      }
+      const invoiceId = pdfInvoice.invoiceId
+      const lineIndex = pdfInvoiceLines.filter((line) => line.invoiceId === invoiceId).length
+
+      const line = {
+        invoiceId,
+        lineIndex,
+        lineId: row.lineId,
+        lineDescription: row.lineDescription,
+        unit: row.unit,
+        unitPrice: row.unitPrice,
+        quantity: row.quantity,
+        taxType: row.taxType,
+        discounts: getDiscountLength(row, 'line'),
+        discountDescription1: row['line-discountDescription1'],
+        discountAmount1: row['line-discountAmount1'],
+        discountUnit1: row['line-discountUnit1'],
+        discountDescription2: row['line-discountDescription2'],
+        discountAmount2: row['line-discountAmount2'],
+        discountUnit2: row['line-discountUnit2'],
+        discountDescription3: row['line-discountDescription3'],
+        discountAmount3: row['line-discountAmount3'],
+        discountUnit3: row['line-discountUnit3'],
+        invoiceNo: row.invoiceNo // CSV行テーブルレコード作成の為、一時的に設けるプロパティ
+      }
+
+      pdfInvoiceLines.push(line)
+    })
+  } catch (error) {
+    console.error(error)
+    return { pdfInvoices: null, pdfInvoiceLines: null }
+  }
+
+  // 不要なプロパティを削除
+  pdfInvoices.forEach((invoice) => {
+    delete invoice.index
+  })
+
+  return { pdfInvoices, pdfInvoiceLines }
+}
+
+// CSV行情報から 請求書割引 or 明細割引数 を求める
+const getDiscountLength = (row, discountType) => {
+  let count = 0
+
+  if (discountType === 'invoice') {
+    if (row['inv-discountDescription1'] && row['inv-discountAmount1'] && row['inv-discountUnit1']) count++ // 請求書割引1の情報が全部入力されている場合
+    if (row['inv-discountDescription2'] && row['inv-discountAmount2'] && row['inv-discountUnit2']) count++ // 請求書割引2の情報が全部入力されている場合
+    if (row['inv-discountDescription3'] && row['inv-discountAmount3'] && row['inv-discountUnit3']) count++ // 請求書割引3の情報が全部入力されている場合
+  } else if (discountType === 'line') {
+    if (row['line-discountDescription1'] && row['line-discountAmount1'] && row['line-discountUnit1']) count++ // 明細割引1の情報が全部入力されている場合
+    if (row['line-discountDescription2'] && row['line-discountAmount2'] && row['line-discountUnit2']) count++ // 明細割引2の情報が全部入力されている場合
+    if (row['line-discountDescription3'] && row['line-discountAmount3'] && row['line-discountUnit3']) count++ // 明細割引3の情報が全部入力されている場合
+  }
+
+  return count
+}
+
 module.exports = {
   convertCsvStringToMultiArray,
   removeBOM,
   pdfInvoiceMapper,
   invoiceHeaderArray,
-  convertToDataObject
+  convertToDataObject,
+  convertCsvDataArrayToPdfInvoiceModels,
+  getDiscountLength
 }
