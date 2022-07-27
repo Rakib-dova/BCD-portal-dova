@@ -1,8 +1,5 @@
 ﻿extends layout
 
-block vars
-  - var standard = '030' // スタンダードプラン
-
 block content
   .max-width
     section.hero.is-small.is-com
@@ -13,6 +10,7 @@ block content
     .columns.is-centered
       .column.is-11
         .container.is-max-widescreen.is-family-noto-sans
+          - var standard = '030' // スタンダードプラン
           form#form(action="#")
             article.panel.is-info
               h2.panel-heading お申し込み内容入力

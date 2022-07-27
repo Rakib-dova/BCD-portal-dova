@@ -1,9 +1,5 @@
 ﻿extends layout
 
-block vars
-  - var introduction = '020' // 導入支援サービス
-  - var standard = '030' // スタンダードプラン
-
 block content
   .max-width
     section.hero.is-small.is-com
@@ -13,6 +9,8 @@ block content
 
   .section#termBox
     .is-family-noto-sans.contractWidth.mb-5
+      - var introduction = '020' // 導入支援サービス
+      - var standard = '030' // スタンダードプラン
       form#form(method="post")
         article.panel.is-info
           h2.panel-heading 有料プランご利用にあたって
