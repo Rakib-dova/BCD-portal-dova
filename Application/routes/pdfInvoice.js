@@ -152,6 +152,12 @@ const createPdfInvoice = async (req, res, next) => {
 const updatePdfInvoice = async (req, res, next) => {
   if (!req.params.invoiceId || !req.body.invoice || !req.body.lines) return next(errorHelper.create(400))
   const invoice = JSON.parse(req.body.invoice)
+
+  // 時刻を00:00:00にする
+  invoice.billingDate = await getJustDate(invoice.billingDate)
+  invoice.paymentDate = await getJustDate(invoice.paymentDate)
+  invoice.deliveryDate = await getJustDate(invoice.deliveryDate)
+
   const lines = JSON.parse(req.body.lines)
   if (!Array.isArray(lines)) return next(errorHelper.create(400))
 
@@ -193,6 +199,16 @@ const updatePdfInvoice = async (req, res, next) => {
   }
 
   return res.status(200).send({ result: updatedInvoice[0] })
+}
+
+// 受け取った日付の時刻を00:00:00にして返却する
+const getJustDate = async (target) => {
+  if (!target) {
+    return target
+  }
+  const targetDateJa = new Date(target).toLocaleDateString('ja')
+  const justDate = new Date(targetDateJa + ' 00:00:00')
+  return justDate
 }
 
 const outputPdfInvoice = async (req, res, next) => {
@@ -412,6 +428,11 @@ const getInvoiceInfo = async (req, senderInfo) => {
     return { invoice: null, lines: null, sealImpRecord: null }
   }
 
+  // 日本時間に変更
+  invoiceRecord.dataValues.billingDate = await getDateJST(invoiceRecord.dataValues.billingDate)
+  invoiceRecord.dataValues.paymentDate = await getDateJST(invoiceRecord.dataValues.paymentDate)
+  invoiceRecord.dataValues.deliveryDate = await getDateJST(invoiceRecord.dataValues.deliveryDate)
+
   const invoice = { ...invoiceRecord.dataValues, ...senderInfo }
   // console.log('=== invoice =========\n', invoice)
   const lines = invoiceRecord.PdfInvoiceLines.map((line) => line.dataValues)
@@ -421,6 +442,18 @@ const getInvoiceInfo = async (req, senderInfo) => {
   delete invoice.PdfSealImp
 
   return { invoice, lines, sealImpRecord }
+}
+
+// targetで受け取った日付を9時間進めて返却する
+const getDateJST = async (target) => {
+  if (!target) {
+    return target
+  }
+
+  const targetDateJST = new Date(new Date(target).toUTCString())
+  targetDateJST.setHours(targetDateJST.getHours() + 9)
+
+  return targetDateJST
 }
 
 const getTotal = (lines, taxDatabase) => {
