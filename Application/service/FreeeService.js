@@ -29,31 +29,62 @@ class FreeeService {
     const freees = []
     if (invoices === null) return null
 
+    let no = 1
     for (const invoice of invoices) {
+      const voucherNo = no > 100 ? `0${no}` : no > 10 ? `00${no}` : `000${no}`
       const invoiceLine = invoice.invoiceLine
       for (let idx = 0; idx < invoiceLine.length; idx++) {
         for (let j = 0; j < invoiceLine[idx].coding.length; j++) {
           if (idx === 0 && j === 0) {
             if (invoiceLine.length === 1 && invoiceLine[idx].coding.length === 1) {
               freees.push(
-                new Freee('*', invoiceLine[idx].coding[j], this.convertDebitTaxCategory, this.convertCreditTaxCategory)
+                new Freee(
+                  '*',
+                  voucherNo,
+                  invoice,
+                  invoiceLine[idx].coding[j],
+                  this.convertDebitTaxCategory,
+                  this.convertCreditTaxCategory
+                )
               )
             } else {
               freees.push(
-                new Freee('*', invoiceLine[idx].coding[j], this.convertDebitTaxCategory, this.convertCreditTaxCategory)
+                new Freee(
+                  '*',
+                  voucherNo,
+                  invoice,
+                  invoiceLine[idx].coding[j],
+                  this.convertDebitTaxCategory,
+                  this.convertCreditTaxCategory
+                )
               )
             }
           } else if (idx === invoiceLine.length - 1 && j === invoiceLine[idx].coding.length - 1) {
             freees.push(
-              new Freee('', invoiceLine[idx].coding[j], this.convertDebitTaxCategory, this.convertCreditTaxCategory)
+              new Freee(
+                '',
+                voucherNo,
+                invoice,
+                invoiceLine[idx].coding[j],
+                this.convertDebitTaxCategory,
+                this.convertCreditTaxCategory
+              )
             )
           } else {
             freees.push(
-              new Freee('', invoiceLine[idx].coding[j], this.convertDebitTaxCategory, this.convertCreditTaxCategory)
+              new Freee(
+                '',
+                voucherNo,
+                invoice,
+                invoiceLine[idx].coding[j],
+                this.convertDebitTaxCategory,
+                this.convertCreditTaxCategory
+              )
             )
           }
         }
       }
+      no++
     }
 
     let freeeFormat = ''
