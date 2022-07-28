@@ -20,8 +20,21 @@ const getType = (val) => {
   return Object.prototype.toString.call(val).replace(/\[|\]|object /g, '')
 }
 
+const getBrowser = (ua) => {
+  if (/^(?=.*AppleWebKit)(?=.*Safari)(?=.*Chrome)(?!.*Firefox)(?!.*Edg)(?!.*Mac)(?!.*OPR)/.test(ua)) {
+    return 'chrome'
+  } else if (/^(?=.*Chrome)(?=.*Edg)(?!.*Firefox)/.test(ua)) {
+    return 'edge'
+  } else if (/^(?=.*Firefox)(?!.*AppleWebKit)/.test(ua)) {
+    return 'firefox'
+  } else {
+    return 'others'
+  }
+}
+
 module.exports = {
   timestampForList: timestampForList,
   formatDate: formatDate,
-  getType
+  getType,
+  getBrowser
 }
