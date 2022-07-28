@@ -22,7 +22,8 @@ const serviceDataFormatName = [
   '弥生会計',
   '勘定奉行クラウド',
   'PCA hyper',
-  '大蔵大臣NX'
+  '大蔵大臣NX',
+  'freee会計'
 ]
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
