@@ -190,7 +190,13 @@ const idAssociation = async (mSiteSessionDto) => {
         if (insertResult instanceof Error) {
           return insertResult
         }
+
+        console.log('==  アプリ効果測定 開始  =========================================================')
+        // アプリ効果測定用ログ出力
+        const jsonLog = { tenantId: mSiteSessionDto?.tradeshiftTenantId, action: 'relatedBCD' }
+        logger.info(jsonLog)
       } else {
+        console.log('==  連携済み  =========================================================')
         logger.info('INF-MB106 ServiceLinkageId exists')
         // 紐づけ情報がある場合、トレシフID情報に変更があるかを確認
         logger.debug(
@@ -401,5 +407,6 @@ module.exports = {
   oauthTransfer: oauthTransfer,
   oauthCallbackTransfer: oauthCallbackTransfer,
   idLinkingProcess: idLinkingProcess,
+  idAssociation: idAssociation,
   privateFunc: privateFunc
 }

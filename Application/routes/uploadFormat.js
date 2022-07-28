@@ -567,6 +567,10 @@ const cbPostConfirmIndex = async (req, res, next) => {
     }
   }
 
+  // アプリ効果測定用ログ出力
+  const jsonLog = { tenantId: req.user.tenantId, action: 'registerUploadFormat' }
+  logger.info(jsonLog)
+
   // 画面移動
   req.flash('info', 'フォーマットの登録が完了しました。')
   res.redirect(303, '/uploadFormatList')
