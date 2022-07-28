@@ -12,7 +12,7 @@ const errorHelper = require('./helpers/error')
 const noticeHelper = require('./helpers/notice')
 
 const constantsDefine = require('../constants')
-const contractInformationcancelOrder = require('../orderTemplate/contractInformationcancelOrder.json')
+const cancelOrderTemplate = require('../orderTemplate/contractInformationcancelOrder.json')
 
 const cbGetCancellation = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetCancellation')
@@ -115,6 +115,9 @@ const cbPostCancellation = async (req, res, next) => {
   if (!validate.isStatusForSimpleChange(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('changeprocedure'))
   }
+
+  // オーダーテンプレート情報の取得
+  const contractInformationcancelOrder = JSON.parse(JSON.stringify(cancelOrderTemplate))
 
   // contractBasicInfo 設定
   contractInformationcancelOrder.contractBasicInfo.tradeshiftId = req.user.tenantId
