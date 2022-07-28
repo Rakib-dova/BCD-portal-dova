@@ -321,7 +321,7 @@ describe('portalのテスト', () => {
       parseUrlSpy.mockImplementationOnce(async () => {
         return constructDataArr
       })
-      // const expectDateArr = [{ message: '現在、お知らせはありません。' }] // TODO: RSS不具合修正後復活
+      const expectDateArr = [{ message: '現在、お知らせはありません。' }]
 
       const expectconstructDataArr = [{ message: '現在、工事故障情報はありません。' }]
       // CSRF対策
@@ -349,11 +349,7 @@ describe('portalのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('portal', {
         constructDataArr: expectconstructDataArr,
         constructDataArrSize: expectconstructDataArr[0].title ? expectconstructDataArr.length : 0,
-        newsDataArr: [{
-          date: '2022年7月6日',
-          title: '【復旧連絡】BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
-          link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
-        }],
+        newsDataArr: expectDateArr,
         newsDataArrSize: newsDataArr.items.length,
         title: 'ポータル',
         tenantId: request.user.tenantId,
@@ -472,11 +468,7 @@ describe('portalのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('portal', {
         constructDataArr: expectconstructDataArr,
         constructDataArrSize: expectconstructDataArr[0].title ? expectconstructDataArr.length : 0,
-        newsDataArr: [{
-          date: '2022年7月6日',
-          title: '【復旧連絡】BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
-          link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
-        }, ...expectDateArr],
+        newsDataArr: expectDateArr,
         newsDataArrSize: expectDateArr.length,
         title: 'ポータル',
         tenantId: request.user.tenantId,
@@ -592,7 +584,6 @@ describe('portalのテスト', () => {
       approvalInboxControllerGetRequestApprovalSpy.mockReturnValue(noRequestApproval)
       approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(false)
       requestApprovalModelFindAllSpy.mockReturnValueOnce([])
-      expectDateArr.pop()
       // 試験実施
       await portal.cbGetIndex(request, response, next)
 
@@ -608,11 +599,7 @@ describe('portalのテスト', () => {
       expect(response.render).toHaveBeenCalledWith('portal', {
         constructDataArr: expectconstructDataArr,
         constructDataArrSize: expectconstructDataArr[0].title ? expectconstructDataArr.length : 0,
-        newsDataArr: [{
-          date: '2022年7月6日',
-          title: '【復旧連絡】BConnectionデジタルトレードアプリケーション　申込フォーム/契約情報変更画面の不具合事象について',
-          link: 'https://support.ntt.com/bconnection/information/detail/pid2500001mth'
-        }, ...expectDateArr],
+        newsDataArr: expectDateArr,
         newsDataArrSize: newsDataArr.items.length,
         title: 'ポータル',
         tenantId: request.user.tenantId,
