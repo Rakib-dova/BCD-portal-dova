@@ -160,7 +160,11 @@ const cbPostRegister = async (req, res, next) => {
   contractInformationnewOrder.contactList[0].billMailingAddressBanchi1 = req.body.banch1
   contractInformationnewOrder.contactList[0].billMailingAddressBuilding1 = req.body.tatemono1
   contractInformationnewOrder.contactList[0].billMailingKanaName = req.body.contractorKanaName
+    ? req.body.contractorKanaName.substring(0, 40)
+    : ''
   contractInformationnewOrder.contactList[0].billMailingName = req.body.contractorName
+    ? req.body.contractorName.substring(0, 35)
+    : ''
   // 請求連絡先情報
   contractInformationnewOrder.contactList[0].billMailingPersonName = req.body.contactPersonName
   contractInformationnewOrder.contactList[0].billMailingPhoneNumber = req.body.contactPhoneNumber
