@@ -12,7 +12,7 @@ const logger = require('../lib/logger')
 const errorHelper = require('./helpers/error')
 
 const constantsDefine = require('../constants')
-const contractInformationnewOrder = require('../orderTemplate/contractInformationnewOrder.json')
+const newOrderTemplate = require('../orderTemplate/contractInformationnewOrder.json')
 
 // CSR対策
 const csrf = require('csurf')
@@ -129,6 +129,9 @@ const cbPostRegister = async (req, res, next) => {
   }
 
   if (req.body?.termsCheck !== 'on') return next(errorHelper.create(400))
+
+  // オーダーテンプレート情報の取得
+  const contractInformationnewOrder = JSON.parse(JSON.stringify(newOrderTemplate))
 
   // contractBasicInfo 設定
   contractInformationnewOrder.contractBasicInfo.tradeshiftId = req.user.tenantId
