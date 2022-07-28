@@ -198,6 +198,7 @@ const cbPostIndex = async (req, res, next) => {
     case 2:
     case 3:
     case 4:
+    case 5:
       if (!lightPlan) {
         req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
         return res.redirect(303, '/journalDownload')

@@ -8,6 +8,7 @@ const YayoiService = require('../service/YayoiService')
 const ObcService = require('../service/ObcService')
 const PcaService = require('../service/PcaService')
 const OhkenService = require('../service/OhkenService')
+const FreeeService = require('../service/FreeeService')
 
 // 複数の請求書を1つのCSVファイルにまとめる関数
 const createInvoiceDataForDownload = async (
@@ -137,6 +138,9 @@ const dowonloadKaikei = async (
       break
     case 4:
       service = new OhkenService(passport, contract)
+      break
+    case 5:
+      service = new FreeeService(passport, contract)
       break
     default:
       return null
