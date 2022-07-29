@@ -41,9 +41,10 @@ $('#start-upload-btn')?.addEventListener('click', async () => {
   const response = await uploadCsv(csvFile)
   console.log('==  response =====================:\n', response)
   modal.classList.remove('is-active')
-  if (response.status === 500 || response.status === 400) {
+  if (response.status === 500 || response.status === 400 || response.status === 200) {
     const data = await response.json()
     console.log('==  json data =====================:\n', data)
     if (data.message) alert(data.message)
+    if (response.status === 200 && data.url) location.href = data.url
   }
 })
