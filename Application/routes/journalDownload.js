@@ -22,7 +22,8 @@ const serviceDataFormatName = [
   '弥生会計',
   '勘定奉行クラウド',
   'PCA hyper',
-  '大蔵大臣NX'
+  '大蔵大臣NX',
+  'freee会計'
 ]
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
@@ -197,6 +198,7 @@ const cbPostIndex = async (req, res, next) => {
     case 2:
     case 3:
     case 4:
+    case 5:
       if (!lightPlan) {
         req.flash('noti', [notiTitle, constantsDefine.statusConstants.CSVDOWNLOAD_SYSERROR])
         return res.redirect(303, '/journalDownload')

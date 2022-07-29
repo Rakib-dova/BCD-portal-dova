@@ -12,6 +12,7 @@ const YayoiService = require('../../Application/service/YayoiService')
 const ObcService = require('../../Application/service/ObcService')
 const PcaService = require('../../Application/service/PcaService')
 const OhkenService = require('../../Application/service/OhkenService')
+const FreeeService = require('../../Application/service/FreeeService')
 
 let findOneRequestApprovalSpy,
   journalfindAllSpy,
@@ -20,7 +21,8 @@ let findOneRequestApprovalSpy,
   yayoiServiceSpy,
   obcServiceSpy,
   pcaServiceSpy,
-  OhkenServiceSpy
+  OhkenServiceSpy,
+  FreeeServiceSpy
 
 describe('journalDownloadControllerのテスト', () => {
   beforeEach(() => {
@@ -32,6 +34,7 @@ describe('journalDownloadControllerのテスト', () => {
     obcServiceSpy = jest.spyOn(ObcService.prototype, 'convertToKaikei')
     pcaServiceSpy = jest.spyOn(PcaService.prototype, 'convertToKaikei')
     OhkenServiceSpy = jest.spyOn(OhkenService.prototype, 'convertToKaikei')
+    FreeeServiceSpy = jest.spyOn(FreeeService.prototype, 'convertToKaikei')
     errorSpy = jest.spyOn(logger, 'error')
   })
   afterEach(() => {
@@ -42,6 +45,7 @@ describe('journalDownloadControllerのテスト', () => {
     obcServiceSpy.mockRestore()
     pcaServiceSpy.mockRestore()
     OhkenServiceSpy.mockRestore()
+    FreeeServiceSpy.mockRestore()
     errorSpy.mockRestore()
   })
 
@@ -67,6 +71,13 @@ describe('journalDownloadControllerのテスト', () => {
 
   const ohkenResult =
     '"","","","1","1","","","160","","","","","115","","","1320","","","","","100","","","","","115","","","1320","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""'
+
+  const freeeServiceHeader =
+    '"[表題行]","日付","伝票番号","決算整理仕訳","借方勘定科目","借方科目コード","借方補助科目","借方取引先","借方取引先コード","借方部門","借方品目","借方メモタグ","借方セグメント1","借方セグメント2","借方セグメント3","借方金額","借方税区分","借方税額","貸方勘定科目","貸方科目コード","貸方補助科目","貸方取引先","貸方取引先コード","貸方部門","貸方品目","貸方メモタグ","貸方セグメント1","貸方セグメント2","貸方セグメント3","貸方金額","貸方税区分","貸方税額","摘要"'
+
+  const freeeServiceResult =
+    '"[表題行]","日付","伝票番号","決算整理仕訳","借方勘定科目","借方科目コード","借方補助科目","借方取引先","借方取引先コード","借方部門","借方品目","借方メモタグ","借方セグメント1","借方セグメント2","借方セグメント3","借方金額","借方税区分","借方税額","貸方勘定科目","貸方科目コード","貸方補助科目","貸方取引先","貸方取引先コード","貸方部門","貸方品目","貸方メモタグ","貸方セグメント1","貸方セグメント2","貸方セグメント3","貸方金額","貸方税区分","貸方税額","摘要"\r\n' +
+    '"[明細行]","","0001","","現金","GENKIN","","","","販売部","商品A","","エリアA","プロジェクトA","","1100000","対象外","0","売上高","URIAGE","freee株式会社","","","販売部","商品A","","エリアA","プロジェクトA","","1100000","課税売上10%","100000","決済済み収入取引・単一行"\r\n'
 
   // DBデータ設定
   const Contracts = require('../mockDB/Contracts_Table')
@@ -642,6 +653,96 @@ describe('journalDownloadControllerのテスト', () => {
       expect(result).toEqual(null)
     })
 
+    test('正常:企業条件がない場合（freee会計））', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2022-01-01'
+      const maxIssuedate = '2022-07-31'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 5
+
+      FreeeServiceSpy.mockReturnValue(freeeServiceResult)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      // データ確認
+      const dataHeader = result[0].split('\r\n')[0]
+      expect(dataHeader).toEqual(freeeServiceHeader)
+      expect(result).toEqual([freeeServiceResult])
+    })
+
+    test('正常:企業条件がある場合（freee会計）', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2022-01-01'
+      const maxIssuedate = '2022-07-31'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = ['221559d0-53aa-44a2-ab29-0c4a6cb02bd1']
+      const serviceDataFormat = 5
+
+      FreeeServiceSpy.mockReturnValue(freeeServiceResult)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      // データ確認
+      const dataHeader = result[0].split('\r\n')[0]
+      expect(dataHeader).toEqual(freeeServiceHeader)
+      expect(result).toEqual([freeeServiceResult])
+    })
+
+    test('正常:データがない場合（freee会計', async () => {
+      // 準備
+      const invoiceNumber = ''
+      const minIssuedate = '2022-01-01'
+      const maxIssuedate = '2022-07-31'
+      const chkFinalapproval = 'finalapproval'
+      const sentBy = []
+      const serviceDataFormat = 5
+
+      FreeeServiceSpy.mockReturnValue(null)
+
+      // 試験実施
+      const result = await journalDownloadController.dowonloadKaikei(
+        passport,
+        Contracts[0],
+        invoiceNumber,
+        minIssuedate,
+        maxIssuedate,
+        sentBy,
+        chkFinalapproval,
+        serviceDataFormat
+      )
+
+      // 期待結果
+      // 想定したデータがReturnされていること
+      expect(result).toEqual(null)
+    })
+
     test('異常系:serviceDataFormatが正しくない場合', async () => {
       // 準備
       const invoiceNumber = ''
@@ -649,7 +750,7 @@ describe('journalDownloadControllerのテスト', () => {
       const maxIssuedate = '2022-04-25'
       const chkFinalapproval = 'finalapproval'
       const sentBy = []
-      const serviceDataFormat = 6
+      const serviceDataFormat = 99
 
       // 試験実施
       const result = await journalDownloadController.dowonloadKaikei(
