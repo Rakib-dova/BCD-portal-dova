@@ -694,7 +694,7 @@ describe('paidServiceRegisterのテスト', () => {
         findContractsSpy.mockReturnValue([])
         findAllDept.mockReturnValue(salesChannelDeptList)
         request.body = {}
-        request.body.services = '030'
+        request.body.services = ['030']
 
         // 試験実施
         await paidServiceRegister.showPaidServiceRegister(request, response, next)
@@ -714,7 +714,7 @@ describe('paidServiceRegisterのテスト', () => {
         findContractsSpy.mockReturnValue([])
         findAllDept.mockReturnValue(salesChannelDeptList)
         request.body = {}
-        request.body.services = '020'
+        request.body.services = ['020']
 
         // 試験実施
         await paidServiceRegister.showPaidServiceRegister(request, response, next)

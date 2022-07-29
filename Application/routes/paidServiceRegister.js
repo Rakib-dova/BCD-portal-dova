@@ -164,8 +164,7 @@ const showPaidServiceRegister = async (req, res, next) => {
   logger.info(logMessage.INF000 + 'showPaidServiceRegister')
 
   // チェックされている申込サービスの取得
-  const services = req.body?.services
-  const serviceList = services instanceof Array ? services : [services]
+  const serviceList = req.body?.services
 
   // 有料サービス申込前の契約状態のチェック
   const contracts = await getAndCheckContracts(req.user?.tenantId, serviceList, next)
