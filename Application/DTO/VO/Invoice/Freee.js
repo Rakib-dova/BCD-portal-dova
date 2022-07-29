@@ -1,8 +1,8 @@
 class Freee {
   constructor(header, voucherNo, invoice, coding, debitTaxCategory, creditTaxCategory) {
     // ヘッダー情報
-    this.header = '明細行'
-    this.date = invoice.paymentMeans[0]?.paymentDueDate?.replace(/-/g, '')
+    this.header = '[明細行]'
+    this.date = ''
     this.no = voucherNo
     this.settlementJournal = ''
     // 明細情報・借方

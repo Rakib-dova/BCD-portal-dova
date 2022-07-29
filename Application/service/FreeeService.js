@@ -93,6 +93,7 @@ class FreeeService {
     for (const freee of freees) {
       freeeFormat += `${this.covertFormatFile(freee)}${linefeed}`
     }
+    console.log(freeeFormat)
 
     return freeeFormat
   }
@@ -132,7 +133,7 @@ class FreeeService {
   }
 
   arrayToString(array) {
-    return JSON.stringify(array).replace(/\[|\]/g, '')
+    return JSON.stringify(array).replace(/\[|\]/, '').slice(0, -1)
   }
 
   getMappingUkeirikigouToDatalist() {
