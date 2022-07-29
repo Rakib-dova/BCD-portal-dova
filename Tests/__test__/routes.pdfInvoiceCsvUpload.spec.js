@@ -472,8 +472,10 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoices/list')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoices/list/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常: 失敗のみ', async () => {
       validateSpy.mockReturnValue({
@@ -490,8 +492,10 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoiceCsvUpload/resultList/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常-スキップのみ', async () => {
       validateSpy.mockReturnValue({
@@ -508,8 +512,10 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoiceCsvUpload/resultList/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常: 成功 & 失敗', async () => {
       validateSpy.mockReturnValue({
@@ -526,8 +532,10 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoiceCsvUpload/resultList/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常: 成功 & スキップ', async () => {
       validateSpy.mockReturnValue({
@@ -544,8 +552,10 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoices/list')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoices/list/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常: 失敗 & スキップ', async () => {
       validateSpy.mockReturnValue({
@@ -562,8 +572,10 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoiceCsvUpload/resultList/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
     test('正常: 成功 & 失敗 & スキップ', async () => {
       validateSpy.mockReturnValue({
@@ -580,8 +592,10 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
-
-      expect(response.redirect).toHaveBeenCalledWith('/pdfInvoiceCsvUpload/resultList')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"請求書取込が完了しました。\\n（反映には時間がかかる場合がございます。）","url":"/pdfInvoiceCsvUpload/resultList/"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(200)
     })
 
     test('準正常: アップロードデータ空の不正リクエスト', async () => {
@@ -589,24 +603,30 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: CSVファイル読込エラー', async () => {
       request.file = { buffer: undefined }
-      fsSpy.mockImplementation(() => { throw new Error('File Read Error') })
+      fsSpy.mockImplementation(() => {
+        throw new Error('File Read Error')
+      })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"システムエラーです。（後程、接続してください）\"}')
+      expect(response.send).toHaveBeenCalledWith('{"message":"システムエラーです。（後程、接続してください）"}')
       expect(response.status).toHaveBeenCalledWith(500)
     })
     test('準正常: デフォルトフォーマットデータ取得エラー', async () => {
-      fsSpy.mockImplementation(() => { throw new Error('File Read Error') })
+      fsSpy.mockImplementation(() => {
+        throw new Error('File Read Error')
+      })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"システムエラーです。（後程、接続してください）\"}')
+      expect(response.send).toHaveBeenCalledWith('{"message":"システムエラーです。（後程、接続してください）"}')
       expect(response.status).toHaveBeenCalledWith(500)
     })
     test('準正常: CSV文字列データをCSV多次元配列データに変換時エラー', async () => {
@@ -614,7 +634,9 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: ヘッダーバリデーションエラー', async () => {
@@ -622,15 +644,21 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"ヘッダーが指定のものと異なります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"ヘッダーが指定のものと異なります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: CSV多次元配列データをデータオブジェクト配列に変換時エラー', async () => {
-      convertToDataObject.mockImplementation(() => { throw new Error('data convert Error') })
+      convertToDataObject.mockImplementation(() => {
+        throw new Error('data convert Error')
+      })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: CSVファイルにデータが存在しない', async () => {
@@ -638,7 +666,9 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータが存在しません。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータが存在しません。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: CSVファイル空行エラー', async () => {
@@ -646,7 +676,9 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: 送信先情報取得失敗', async () => {
@@ -655,14 +687,18 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
       expect(response.status).toHaveBeenCalledWith(500)
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"APIエラーです、時間を空けて再度実行をお願いいたします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"APIエラーです、時間を空けて再度実行をお願いいたします。"}'
+      )
     })
     test('準正常: データオブジェクト配列をDBモデルに変換時にエラー', async () => {
       convertCsvDataArrayToPdfInvoiceModels.mockReturnValue({ pdfInvoices: null, pdfInvoiceLines: null })
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(500)
     })
     test('準正常: 請求書数200オーバーエラー', async () => {
@@ -670,7 +706,9 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"作成できる請求書数は200までです。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"作成できる請求書数は200までです。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: 明細数20オーバーエラー', async () => {
@@ -678,7 +716,9 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(400)
     })
     test('準正常: バリデーション失敗', async () => {
@@ -687,7 +727,9 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。\"}')
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
       expect(response.status).toHaveBeenCalledWith(500)
     })
     test('準正常: DB登録エラー createUploadHistoryAndRows', async () => {
@@ -708,7 +750,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
-      expect(response.send).toHaveBeenCalledWith('{\"message\":\"システムエラーです。（後程、接続してください）\"}')
+      expect(response.send).toHaveBeenCalledWith('{"message":"システムエラーです。（後程、接続してください）"}')
       expect(response.status).toHaveBeenCalledWith(500)
     })
   })

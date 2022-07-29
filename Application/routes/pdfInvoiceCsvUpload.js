@@ -37,7 +37,7 @@ const pdfInvoiceCsvUploadIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF001 + 'pdfInvoiceCsvUploadIndex')
 }
 
-const pdfInvoiceCsvUpload = async (req, res, next) => { 
+const pdfInvoiceCsvUpload = async (req, res, next) => {
   const functionName = 'pdfInvoiceCsvUpload'
   if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
@@ -52,13 +52,31 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
     logger.info(error)
     return res.status(500).send(JSON.stringify({ message: 'システムエラーです。（後程、接続してください）' }))
   }
-  if (!uploadFileData) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
+  if (!uploadFileData) {
+    return res.status(400).send(
+      JSON.stringify({
+        message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
 
   const csvMultiArray = csv.convertCsvStringToMultiArray(uploadFileData) // CSV文字列データをCSV多次元配列データに変換
-  if (!csvMultiArray) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
+  if (!csvMultiArray) {
+    return res.status(400).send(
+      JSON.stringify({
+        message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
 
   // ヘッダーバリデーション
-  if (!validation.validateHeader(uploadFileData, defaultCsvData)) return res.status(400).send(JSON.stringify({ message: 'ヘッダーが指定のものと異なります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
+  if (!validation.validateHeader(uploadFileData, defaultCsvData)) {
+    return res.status(400).send(
+      JSON.stringify({
+        message: 'ヘッダーが指定のものと異なります。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
 
   const csvRowObjects = [] // CSVファイル行情報をデータオブジェクト(アップロードファイル行データ)に変換し、配列化させたもの
 
@@ -69,19 +87,37 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
       csvRowObjects.push(csv.convertToDataObject(row, invoiceHeaderArray, pdfInvoiceMapper))
     })
   } catch (error) {
-    return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
+    return res.status(400).send(
+      JSON.stringify({
+        message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
   }
 
-  if (csvRowObjects.length === 0) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータが存在しません。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
+  if (csvRowObjects.length === 0) {
+    return res.status(400).send(
+      JSON.stringify({
+        message: 'CSVファイルのデータが存在しません。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
   console.log('==  csvRowObjects  ======================\n', csvRowObjects)
 
   // CSV行データオブジェクトに空情報(null)が含まれている場合
-  if (csvRowObjects.filter((row) => !row).length) return res.status(400).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
+  if (csvRowObjects.filter((row) => !row).length) {
+    return res.status(400).send(
+      JSON.stringify({
+        message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
 
   // アカウント情報取得 (CSVデータ多次元配列をデータオブジェクトに変換するのに必要)
   const { senderInfo } = await pdfInvoice.getAccountAndSenderInfo(req)
 
-  if (!senderInfo) return res.status(500).send(JSON.stringify({ message: 'APIエラーです、時間を空けて再度実行をお願いいたします。' }))
+  if (!senderInfo) {
+    return res.status(500).send(JSON.stringify({ message: 'APIエラーです、時間を空けて再度実行をお願いいたします。' }))
+  }
 
   // DB保存&バリデーションするために、CSV行データオブジェクト配列をDBモデルに変換
   const { pdfInvoices, pdfInvoiceLines } = csv.convertCsvDataArrayToPdfInvoiceModels(
@@ -91,11 +127,28 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   )
   console.log('==  pdfInvoices  ======================\n', pdfInvoices)
   console.log('==  pdfInvoiceLines  ======================\n', pdfInvoiceLines)
-  if (!pdfInvoices || !pdfInvoiceLines) return res.status(500).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
+  if (!pdfInvoices || !pdfInvoiceLines) {
+    return res.status(500).send(
+      JSON.stringify({
+        message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
 
-  if (pdfInvoices.length > 200) return res.status(400).send(JSON.stringify({ message: '作成できる請求書数は200までです。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
-  if (pdfInvoiceLines.length > 20) return res.status(400).send(JSON.stringify({ message: '一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
-
+  if (pdfInvoices.length > 200) {
+    return res.status(400).send(
+      JSON.stringify({
+        message: '作成できる請求書数は200までです。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
+  if (pdfInvoiceLines.length > 20) {
+    return res.status(400).send(
+      JSON.stringify({
+        message: '一つの請求書で作成できる明細数は20までです。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
   // バリデーション
   const { validInvoices, validLines, uploadHistory, csvRows } = await validation.validate(
     pdfInvoices,
@@ -108,7 +161,13 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   console.log('==  uploadHistory  ======================\n', uploadHistory)
   console.log('==  csvRows  ======================\n', csvRows)
 
-  if (!validInvoices || !validLines || !uploadHistory || !csvRows) return res.status(500).send(JSON.stringify({ message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。' }))
+  if (!validInvoices || !validLines || !uploadHistory || !csvRows) {
+    return res.status(500).send(
+      JSON.stringify({
+        message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
 
   // DB保存
   try {
@@ -124,9 +183,19 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   }
 
   if (uploadHistory?.failCount > 0 || (uploadHistory?.skipCount > 0 && uploadHistory?.successCount === 0)) {
-    return res.redirect('/pdfInvoiceCsvUpload/resultList')
+    return res.status(200).send(
+      JSON.stringify({
+        message: '請求書取込が完了しました。\n（反映には時間がかかる場合がございます。）',
+        url: '/pdfInvoiceCsvUpload/resultList/'
+      })
+    )
   } else {
-    return res.redirect('/pdfInvoices/list')
+    return res.status(200).send(
+      JSON.stringify({
+        message: '請求書取込が完了しました。\n（反映には時間がかかる場合がございます。）',
+        url: '/pdfInvoices/list/'
+      })
+    )
   }
 }
 
