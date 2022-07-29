@@ -323,7 +323,7 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
         itemRowNumber
       )
     } else {
-      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット.csv')
+      const defaultCsvPath = path.resolve('./public/html/請求書一括作成フォーマット_v1.1.csv')
       uploadData = uploadData ?? fs.readFileSync(defaultCsvPath)
       csvObj = new BconCsv(extractFullpathFile, formatFlag, uploadFormatDetail, uploadFormatIdentifier, uploadData)
     }
@@ -524,8 +524,6 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
           failCount += invoiceList[idx].failCount
           break
       }
-
-      // == TS にアップロード済み ========================================
 
       const invoiceLines = invoiceList[idx].INVOICE.getDocument().InvoiceLine
       const invoiceId = invoiceList[idx].invoiceId

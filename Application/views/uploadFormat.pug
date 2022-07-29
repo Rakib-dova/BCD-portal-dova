@@ -132,6 +132,23 @@ block content
                               option(value= index)= index+1                                
                           else
                             option(value= index)= index+1    
+                  
+                  tr 
+                    th 
+                      label.input-label 取引先メールアドレス
+                      p.input-label-required.input-label （必須）
+                      p.errormessage.input-label-required
+                    td.text-center 
+                      select.is-11.requiredItem#mailaddress(name="formatData")
+                        option(value='') 選択してください
+                        each content, index in headerItems 
+                          if selectedFormatData[6].length !== 0
+                            if ~~selectedFormatData[6] === index
+                              option(value= index selected)= index+1
+                            else
+                              option(value= index)= index+1                                
+                          else
+                            option(value= index)= index+1    
 
                   tr
                     th
@@ -141,8 +158,8 @@ block content
                       select.is-11#bankName(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[6].length !== 0
-                            if ~~selectedFormatData[6] === index
+                          if selectedFormatData[7].length !== 0
+                            if ~~selectedFormatData[7] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -157,8 +174,8 @@ block content
                       select.is-11#financialName(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[7].length !== 0
-                            if ~~selectedFormatData[7] === index
+                          if selectedFormatData[8].length !== 0
+                            if ~~selectedFormatData[8] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -173,8 +190,8 @@ block content
                       select.is-11#accountType(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[8].length !== 0
-                            if ~~selectedFormatData[8] === index
+                          if selectedFormatData[9].length !== 0
+                            if ~~selectedFormatData[9] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -189,8 +206,8 @@ block content
                       select.is-11#accountId(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[9].length !== 0
-                            if ~~selectedFormatData[9] === index
+                          if selectedFormatData[10].length !== 0
+                            if ~~selectedFormatData[10] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -205,8 +222,8 @@ block content
                       select.is-11#accountName(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[10].length !== 0
-                            if ~~selectedFormatData[10] === index
+                          if selectedFormatData[11].length !== 0
+                            if ~~selectedFormatData[11] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -221,8 +238,8 @@ block content
                       select.is-11#note(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[11].length !== 0
-                            if ~~selectedFormatData[11] === index
+                          if selectedFormatData[12].length !== 0
+                            if ~~selectedFormatData[12] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -238,8 +255,8 @@ block content
                       select.is-11.requiredItem#sellersItemNum(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[12].length !== 0
-                            if ~~selectedFormatData[12] === index
+                          if selectedFormatData[13].length !== 0
+                            if ~~selectedFormatData[13] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -255,8 +272,8 @@ block content
                       select.is-11.requiredItem#itemName(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[13].length !== 0
-                            if ~~selectedFormatData[13] === index
+                          if selectedFormatData[14].length !== 0
+                            if ~~selectedFormatData[14] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -272,8 +289,8 @@ block content
                       select.is-11.requiredItem#quantityValue(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[14].length !== 0
-                            if ~~selectedFormatData[14] === index
+                          if selectedFormatData[15].length !== 0
+                            if ~~selectedFormatData[15] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -289,8 +306,8 @@ block content
                       select.is-11.requiredItem#quantityUnitCode(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[15].length !== 0
-                            if ~~selectedFormatData[15] === index
+                          if selectedFormatData[16].length !== 0
+                            if ~~selectedFormatData[16] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -306,8 +323,8 @@ block content
                       select.is-11.requiredItem#priceValue(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[16].length !== 0
-                            if ~~selectedFormatData[16] === index
+                          if selectedFormatData[17].length !== 0
+                            if ~~selectedFormatData[17] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                                
@@ -324,8 +341,8 @@ block content
                       select.is-11.requiredItem#taxRate(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[17].length !== 0
-                            if ~~selectedFormatData[17] === index
+                          if selectedFormatData[18].length !== 0
+                            if ~~selectedFormatData[18] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1                            
@@ -340,8 +357,8 @@ block content
                       select.is-11#description(name="formatData")
                         option(value='') 選択してください
                         each content, index in headerItems
-                          if selectedFormatData[18].length !== 0
-                            if ~~selectedFormatData[18] === index
+                          if selectedFormatData[19].length !== 0
+                            if ~~selectedFormatData[19] === index
                               option(value= index selected)= index+1
                             else
                               option(value= index)= index+1    

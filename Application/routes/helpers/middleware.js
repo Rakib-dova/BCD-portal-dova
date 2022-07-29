@@ -206,7 +206,7 @@ exports.bcdAuthenticate = async (req, res, next) => {
  */
 exports.isOnOrChangeContract = async (req, res, next) => {
   // テナントIDに紐付いている未解約無償契約情報を取得
-  const contract = await contractController.findOne(req.user.tenantId)
+  const contract = await contractController.findOne(req.user?.tenantId)
   const contractStatus = contract?.dataValues?.contractStatus
   if (contract instanceof Error || !contractStatus) return next(errorHelper.create(500))
 
@@ -229,4 +229,74 @@ exports.isOnOrChangeContract = async (req, res, next) => {
   } else {
     return next(errorHelper.create(500))
   }
+}
+
+/**
+ * 契約プランのチェック結果を取得
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ */
+exports.getContractPlan = async (req, res, next) => {
+  // 有償契約チェック
+  let isLightPlan = false
+  let isIntroductionSupportPlan = false
+  let isLightPlanForEntry = false
+  let isIntroductionSupportPlanForEntry = false
+
+  const lightPlan = await contractController.findLightPlan(req.user.tenantId)
+  if (lightPlan) {
+    isLightPlan = true
+  }
+  const introductionSupportPlan = await contractController.findIntroductionSupportPlan(req.user.tenantId)
+  if (introductionSupportPlan) {
+    isIntroductionSupportPlan = true
+  }
+
+  // スタンダードプランの申し込み
+  const lightPlanForEntry = await contractController.findLightPlanForEntry(req.user.tenantId)
+  if (lightPlanForEntry) {
+    isLightPlanForEntry = true
+  }
+
+  // 導入支援プランの申し込み
+  const introductionSupportPlanForEntry = await contractController.findIntroductionSupportPlanForEntry(
+    req.user.tenantId
+  )
+  if (introductionSupportPlanForEntry) {
+    isIntroductionSupportPlanForEntry = true
+  }
+
+  /*
+   isLightPlan : スタンダードプラン利用有無（status:12,00）
+   isLightPlanForEntry : スタンダードプラン申し込み有無（status:10,11）
+   isIntroductionSupportPlan : 導入支援サービス利用有無（status:00）
+   isIntroductionSupportPlanForEntry : 導入支援サービス申し込み有無（status:10,11,12）
+   */
+  const contractPlan = {
+    isLightPlan: isLightPlan,
+    isIntroductionSupportPlan: isIntroductionSupportPlan,
+    isLightPlanForEntry: isLightPlanForEntry,
+    isIntroductionSupportPlanForEntry: isIntroductionSupportPlanForEntry
+  }
+
+  req.contractPlan = contractPlan
+  next()
+}
+
+/**
+ * 管理者権限のチェック
+ * @param {object} req リクエスト
+ * @param {object} res レスポンス
+ * @param {function} next 次の処理
+ */
+exports.isTenantManager = async (req, res, next) => {
+  const user = await userController.findOne(req.user?.userId)
+  // データベースエラー、または、ユーザ未登録の場合もエラーを上げる
+  if (user instanceof Error || user === null) return next(errorHelper.create(500))
+
+  if (user.dataValues?.userRole !== constantsDefine.userRoleConstants.tenantManager) {
+    return next(noticeHelper.create('generaluser'))
+  }
+  return next()
 }

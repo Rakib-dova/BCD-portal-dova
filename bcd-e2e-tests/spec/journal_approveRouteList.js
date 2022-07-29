@@ -41,22 +41,9 @@ describe('仕訳情報設定_承認ルート一覧', function () {
   };
 
   // 承認ルート一覧ページまで遷移する
-  async function gotoApproveRouteList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage) {
-    // 指定したURLに遷移する
-    await comment('Tradeshiftログインページへ移動する');
-    await page.goto(config.baseUrl);
-
-    // ログインを行う
-    await comment('ユーザ"' + account.id + '"でログインする');
-    await loginPage.doLogin(account.id, account.password);
-    await tradeShiftTopPage.waitForLoading();
-
-    // デジタルトレードアプリをクリックする
-    let appName = process.env.APP ? process.env.APP : config.appName;
-    appName = appName.replace(/\"/g, '');
-    await comment('アイコン「' + appName + '」をクリックする');
-    await tradeShiftTopPage.clickBcdApp(appName);
-    await topPage.waitForLoading();
+  async function gotoApproveRouteList(account, topPage, journalMenuPage, approveRouteListPage) {
+    // デジタルトレードアプリのトップページを表示する
+    await common.gotoTop(page, account);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -89,8 +76,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -98,11 +83,11 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
+      const { topPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
         = common.getPageObject(browser, page);
 
       // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
+      await gotoApproveRouteList(account, topPage, journalMenuPage, approveRouteListPage);
 
       // 承認ルート登録ページへ遷移する
       await approveRouteListPage.clickRegist();
@@ -159,8 +144,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -168,18 +151,18 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
+      const { topPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
         = common.getPageObject(browser, page);
 
       // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
+      await gotoApproveRouteList(account, topPage, journalMenuPage, approveRouteListPage);
 
       // 承認ルート登録ページへ遷移する
       await approveRouteListPage.clickRegist();
       await registApproveRoutePage.waitForLoading();
 
       // 承認ルート名を入力する
-      let routeName = '承認ルートテスト';
+      let routeName = '承認ルートテスト' + authorizers.length;
       await registApproveRoutePage.inputName(routeName);
 
       // 承認者を選択する
@@ -268,8 +251,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -277,14 +258,14 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
+      const { topPage, journalMenuPage, approveRouteListPage, registApproveRoutePage }
         = common.getPageObject(browser, page);
 
       // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
+      await gotoApproveRouteList(account, topPage, journalMenuPage, approveRouteListPage);
 
       // 「現在、承認ルートはありません。新規登録するボタンから登録を行ってください。」と表示されていること
-      expect(await approveRouteListPage.getNodataMessage()).to.equal('現在、承認ルートはありません。', '「現在、承認ルートはありません。新規登録するボタンから登録を行ってください。」と表示されていること');
+      // expect(await approveRouteListPage.getNodataMessage()).to.equal('現在、承認ルートはありません。', '「現在、承認ルートはありません。新規登録するボタンから登録を行ってください。」と表示されていること');
 
       // 承認ルート登録ページへ遷移する
       await approveRouteListPage.clickRegist();
@@ -391,8 +372,6 @@ describe('仕訳情報設定_承認ルート一覧', function () {
         await comment('---------- 管理者アカウント ----------')
       } else if (account.type == 'user') {
         await comment('---------- 一般ユーザー ----------')
-        await comment('一般ユーザーは対象外です。')
-        continue;
       } else {
         await comment('---------- その他アカウント ----------')
         await comment('その他アカウントは対象外です。')
@@ -400,11 +379,11 @@ describe('仕訳情報設定_承認ルート一覧', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, approveRouteListPage }
+      const { topPage, journalMenuPage, approveRouteListPage }
         = common.getPageObject(browser, page);
 
       // 承認ルート一覧ページへ遷移する
-      await gotoApproveRouteList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, approveRouteListPage);
+      await gotoApproveRouteList(account, topPage, journalMenuPage, approveRouteListPage);
 
       // 「Homeへ戻る」をクリックする
       await approveRouteListPage.clickHome();

@@ -93,7 +93,9 @@ const cbGetIndex = async (req, res, next) => {
     minissuedate: minissuedate,
     maxissuedate: maxissuedate, // 発行日、作成日、支払期日の日付をyyyy-mm-dd表示を今日の日付に表示
     serviceDataFormatName: serviceDataFormatName,
-    csrfToken: req.csrfToken()
+    csrfToken: req.csrfToken(),
+    userRole: req.session.userRole,
+    contractPlan: req.contractPlan
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -187,7 +189,6 @@ const cbPostIndex = async (req, res, next) => {
   }
 
   const lightPlan = await contractController.findLightPlan(req.user.tenantId)
-  console.log(lightPlan)
 
   switch (req.body.serviceDataFormat) {
     case 0:
@@ -373,11 +374,13 @@ const cbPostIndex = async (req, res, next) => {
             return errorHandle(invoicesForDownload, res, req)
           }
 
+          // アプリ効果測定用ログ出力
           if (invoicesForDownload.length !== 0) {
             jsonLog = {
               tenantId: req.user.tenantId,
               action: 'downloadedJournalInfo',
               downloadedJournalCount: 1,
+              dataFormat: getServiceNameForDataFormat(req.body.serviceDataFormat),
               finalApproved: chkFinalapproval
             }
             logger.info(jsonLog)
@@ -487,7 +490,8 @@ const cbPostIndex = async (req, res, next) => {
         jsonLog = {
           tenantId: req.user.tenantId,
           action: 'downloadedJournalInfo',
-          downloadedJournalCount: invoiceArray.length - 2 > 0 ? invoiceArray.length - 2 : undefined,
+          downloadedJournalCount: (invoiceArray.length - 2) > 0 ? (invoiceArray.length - 2) : undefined,
+          dataFormat: getServiceNameForDataFormat(req.body.serviceDataFormat),
           finalApproved: chkFinalapproval
         }
         logger.info(jsonLog)
@@ -2264,7 +2268,22 @@ const paymentExtraPush = async (paymentExtra, data) => {
   return paymentExtra
 }
 
-router.get('/', helper.isAuthenticated, csrfProtection, cbGetIndex)
+const getServiceNameForDataFormat = (magicNumber) => {
+  switch (magicNumber) {
+    case 0:
+      return 'デフォルト'
+    case 1:
+      return '弥生会計'
+    case 2:
+      return '勘定奉行'
+    case 3:
+      return 'PCA'
+    default:
+      return null
+  }
+}
+
+router.get('/', helper.isAuthenticated, helper.getContractPlan, csrfProtection, cbGetIndex)
 router.post('/', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
@@ -2273,5 +2292,6 @@ module.exports = {
   cbPostIndex: cbPostIndex,
   errorHandle: errorHandle,
   dataToJson: dataToJson,
-  jsonToCsv: jsonToCsv
+  jsonToCsv: jsonToCsv,
+  getServiceNameForDataFormat
 }

@@ -32,6 +32,7 @@ parameters:
       - 仕訳情報設定_部門データ一覧
       - 仕訳情報設定_承認ルート一覧
       - 仕訳情報設定_支払依頼一覧
+      - 仕訳情報設定_支払依頼一覧（仕訳情報保存）
       - 仕訳情報設定_支払依頼（一次承認まで）
       - 仕訳情報設定_支払依頼（十次承認まで）
       - 仕訳情報設定_仕訳情報ダウンロード
@@ -90,7 +91,7 @@ stages:
     jobs:
       - ${{ each BROWSER_NAME in parameters.BROWSER_NAME_LIST }}:
           - job: ${{ BROWSER_NAME }}
-            timeoutInMinutes: 180
+            timeoutInMinutes: 300
             displayName: ${{ BROWSER_NAME }}
             condition: or( eq( '${{ parameters.browser }}', '${{ BROWSER_NAME }}' ), eq( '${{ parameters.browser }}', 'all' ))
             steps:
@@ -179,6 +180,11 @@ stages:
                 workingDirectory: $(DIR)
                 displayName: test
                 condition: eq( '${{ parameters.scenario }}', '仕訳情報設定_支払依頼一覧' )
+
+              - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\journal_paymentRequestList_detail.js
+                workingDirectory: $(DIR)
+                displayName: test
+                condition: eq( '${{ parameters.scenario }}', '仕訳情報設定_支払依頼一覧（仕訳情報保存）' )
 
               - script: (SET ENABLE_SCREEN_SHOT=${{ parameters.enableScreenshot }}) && (SET ACCOUNT=${{ parameters.account }}) && (SET APP="${{ parameters.app }}") && npm run ${{BROWSER_NAME}} -- spec\journal_paymentRequest.js
                 workingDirectory: $(DIR)

@@ -38,7 +38,8 @@ const pdfInvoiceList = async (req, res, next) => {
 
   const invoices = invoiceRecords.map((record) => record.dataValues)
   invoices.forEach((invoice) => {
-    invoice.total = getTotal(invoice.PdfInvoiceLines, taxDatabase)
+    const linetotal = getTotal(invoice.PdfInvoiceLines, taxDatabase)
+    invoice.total = linetotal - getDiscount(invoice, getNoTaxTotal(invoice.PdfInvoiceLines))
     invoice.updatedAt = formatDate(invoice.updatedAt, 'YYYY年MM月DD日')
     invoice.paymentDate = invoice.paymentDate ? formatDate(invoice.paymentDate, 'YYYY年MM月DD日') : ''
   })
@@ -294,7 +295,7 @@ const deleteAndOutputPdfInvoice = async (req, res, next) => {
       type: req.file.mimetype.replace('image/', '')
     }
   } else {
-    if (invoiceRecord.PdfSealImp.dataValues.image) {
+    if (invoiceRecord.PdfSealImp?.dataValues.image) {
       const fileType = await FileType.fromBuffer(invoiceRecord.PdfSealImp.dataValues.image)
       console.log('==  fileType  ===================: ', fileType)
       sealImp = {
@@ -430,10 +431,38 @@ const getTotal = (lines, taxDatabase) => {
     let taxRate = 0
     const taxInfo = taxDatabase.find((tax) => tax.type === line.taxType)
     if (taxInfo) taxRate = taxInfo.taxRate
-    total += Math.floor(line.unitPrice * line.quantity * (1 + taxRate))
+    total +=
+      (line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity))) * (1 + taxRate)
   })
 
   return total
+}
+
+const getNoTaxTotal = (lines) => {
+  let total = 0
+  lines.forEach((line) => {
+    total += Math.floor(line.unitPrice * line.quantity - getDiscount(line, Math.floor(line.unitPrice * line.quantity)))
+  })
+  return total
+}
+
+/**
+ * 割引額取得
+ *
+ * @param {object} input DBから取得した変数リスト
+ * @param {number} subTotal  小計
+ * @returns {number} discounttotal 割引額
+ */
+function getDiscount(recodes, subTotal) {
+  let discounttotal = 0
+  for (let i = 1; i <= recodes.discounts; i++) {
+    if (recodes['discountUnit' + i] === 'jpy') {
+      discounttotal += Math.floor(recodes['discountAmount' + i])
+    } else {
+      discounttotal += subTotal * recodes['discountAmount' + i] * 0.01
+    }
+  }
+  return discounttotal
 }
 
 router.get('/list', csrfProtection, helper.bcdAuthenticate, pdfInvoiceList)

@@ -2,7 +2,6 @@ const webdriverUtils = require('../utils/webdriver-utils');
 const chai = require('chai');
 const chaiWithReporting = require('../utils/chai-with-reporting').chaiWithReporting;
 const comment = require('../utils/chai-with-reporting').comment;
-const config = require('../autotest-script-config');
 const fs = require('fs');
 const { parse } = require('csv-parse/sync');
 const common = require('./common');
@@ -18,8 +17,8 @@ describe('仕訳情報設定_勘定科目一覧', function () {
 
   // テストデータ
   const accountSets = [
-    {code:'TAccount01', name:'テスト用勘定科目名１ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー'}, // 新規登録用
-    {code:'TAccount02', name:'テスト用勘定科目名２ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー'} // 変更用
+    {code:'ATAccount1', name:'テスト用勘定科目名１ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー'}, // 新規登録用
+    {code:'ATAccount2', name:'テスト用勘定科目名２ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー'} // 変更用
   ];
 
   beforeAll(async function () {
@@ -50,22 +49,9 @@ describe('仕訳情報設定_勘定科目一覧', function () {
   };
 
   // 勘定科目一覧ページまで遷移する
-  async function gotoAccountCodeList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage) {
-    // 指定したURLに遷移する
-    await comment('Tradeshiftログインページへ移動する');
-    await page.goto(config.baseUrl);
-
-    // ログインを行う
-    await comment('ユーザ"' + account.id + '"でログインする');
-    await loginPage.doLogin(account.id, account.password);
-    await tradeShiftTopPage.waitForLoading();
-
-    // デジタルトレードアプリをクリックする
-    let appName = process.env.APP ? process.env.APP : config.appName;
-    appName = appName.replace(/\"/g, '');
-    await comment('アイコン「' + appName + '」をクリックする');
-    await tradeShiftTopPage.clickBcdApp(appName);
-    await topPage.waitForLoading();
+  async function gotoAccountCodeList(account, topPage, journalMenuPage, accountCodeListPage) {
+    // トップページを表示する
+    await common.gotoTop(page, account);
 
     // 仕訳情報管理メニューを開く
     await comment('「仕訳情報管理」をクリックする');
@@ -105,11 +91,10 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage, registAccountCodePage }
-        = common.getPageObject(browser, page);
+      const { topPage, journalMenuPage, accountCodeListPage, registAccountCodePage } = common.getPageObject(browser, page);
 
       // 勘定科目一覧ページへ遷移する
-      await gotoAccountCodeList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
+      await gotoAccountCodeList(account, topPage, journalMenuPage, accountCodeListPage);
 
       // 勘定科目登録ページへ遷移する
       await accountCodeListPage.clickRegist();
@@ -131,14 +116,12 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       // 勘定科目確認・変更ページへ遷移する
       await accountCodeListPage.clickEdit(accountSets[0].code);
       await registAccountCodePage.waitForLoading();
-      
+
       // 勘定科目を変更する
-      accountCode = 'TAccount02';
-      accountName = 'テスト用勘定科目名２ダミーダミーダミーダミーダミーダミーダミーダミーダミーダミー';
       await registAccountCodePage.regist(accountSets[1].code, accountSets[1].name);
       await registAccountCodePage.clickPopupOK();
       await accountCodeListPage.waitPopup();
-      
+
       // ポップアップメッセージを閉じる
       await accountCodeListPage.closePopup();
       await accountCodeListPage.waitForLoading();
@@ -151,6 +134,7 @@ describe('仕訳情報設定_勘定科目一覧', function () {
 
       // 「勘定科目を削除しました」のメッセージが表示され、一覧から削除されていること
       expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目を削除しました。', '【勘定科目一覧】「勘定科目を削除しました」のメッセージが表示される');
+      await accountCodeListPage.closePopup();
       expect(await accountCodeListPage.hasRow(accountSets[1].code, accountSets[1].name)).to.equal(false, '【勘定科目一覧】一覧から削除されていること');
       await page.waitForTimeout(1000);
     }
@@ -183,11 +167,11 @@ describe('仕訳情報設定_勘定科目一覧', function () {
       }
 
       // ページオブジェクト
-      const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage, uploadAccountCodePage }
+      const { topPage, journalMenuPage, accountCodeListPage, uploadAccountCodePage }
         = common.getPageObject(browser, page);
 
       // 勘定科目一覧ページへ遷移する
-      await gotoAccountCodeList(account, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
+      await gotoAccountCodeList(account, topPage, journalMenuPage, accountCodeListPage);
 
       // 勘定科目一括作成ページへ遷移する
       await accountCodeListPage.clickUpload();
@@ -206,39 +190,18 @@ describe('仕訳情報設定_勘定科目一覧', function () {
 
       // 正しくすべてのデータが一覧に反映されること
       expect(await accountCodeListPage.getPopupMessage()).to.equal('勘定科目取込が完了しました。', '【勘定科目一覧】「勘定科目取込が完了しました」のメッセージが表示されること');
+      await accountCodeListPage.closePopup();
       await accountCodeListPage.waitForLoading();
       let csvData = await getCsvData(csvPath);
-      let i = 2;
-      for (row of csvData) {
-        expect(await accountCodeListPage.hasRow(row['勘定科目コード'], row['勘定科目名'])).to.equal(true, '【勘定科目一覧】' + i + '行目のデータが一覧に反映されること');
-        i++;
+      for (i = 0; i < csvData.length; i++) {
+        expect(await accountCodeListPage.hasRow(csvData[i]['勘定科目コード'], csvData[i]['勘定科目名'])).to.equal(true, '【勘定科目一覧】' + (i + 2) + '行目のデータが一覧に反映されること');
+
+        // 確認し終えたデータを削除する
+        await accountCodeListPage.delete(csvData[i]['勘定科目コード']);
+        await accountCodeListPage.closePopup();
       }
       await page.waitForTimeout(1000);
     }
-  });
-  
-  it("後片付け（勘定科目全削除）", async function () {
-    // テストの初期化を実施
-    await initBrowser();
-
-    // 各アカウントごとにテストを実施
-    const context = await browser.newContext(contextOption);
-    if (page != null) {
-      page.close();
-    }
-    page = await context.newPage();
-    global.reporter.setBrowserInfo(browser, page);
-
-    // ページオブジェクト
-    const { loginPage, topPage, tradeShiftTopPage, journalMenuPage, accountCodeListPage }
-      = common.getPageObject(browser, page);
-
-    // 勘定科目一覧ページへ遷移する
-    await gotoAccountCodeList(config.company1.mng, loginPage, tradeShiftTopPage, topPage, journalMenuPage, accountCodeListPage);
-
-    // 勘定科目をすべて削除する
-    await accountCodeListPage.deleteAll();
-    await page.waitForTimeout(1000);
   });
 });
 

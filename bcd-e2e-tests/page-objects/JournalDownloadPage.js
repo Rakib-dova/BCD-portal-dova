@@ -30,7 +30,7 @@ class JournalDownloadPage {
   }
 
   // 条件絞り込みへ条件を入力する
-  async inputConditions(invoiceNo, minIssuedate, maxIssuedate, sendTo, wasApproved) {
+  async inputConditions(invoiceNo, minIssuedate, maxIssuedate, sendTo, approved, dataFormat) {
     if (invoiceNo) {
       await this.addComment('「請求書番号」にて、"' + invoiceNo + '"と入力する');
       await this.actionUtils.fill(this.frame, '#invoiceNumber', invoiceNo);
@@ -39,17 +39,24 @@ class JournalDownloadPage {
     await this.actionUtils.fill(this.frame, '#minIssuedate', minIssuedate);
     await this.actionUtils.fill(this.frame, '#maxIssuedate', maxIssuedate);
     if (sendTo) {
-      await this.addComment('「送信企業」にて、"' + sendTo + '"と入力する');
+      await this.addComment('「送信企業」にて、"' + sendTo + '"を選択する');
       await this.actionUtils.fill(this.frame, '#sendTo', sendTo);
-      await this.addComment('「送信企業」にて、「検索」をクリックする');
       await this.actionUtils.click(this.frame, '#sendToSearchBtn');
       await this.actionUtils.waitForLoading('//div[@id="searchResultBox"]//input');
-      await this.addComment('「送信企業」にて、「全選択」をクリックする');
       await this.actionUtils.click(this.frame, '#allSelectSentToBtn');
     }
-    if(!wasApproved) {
+    if (!approved) {
       await this.addComment('「ダウンロード対象」にて、「仕訳済みの請求書」をクリックする');
-      await this.actionUtils.click(this.frame, '#noneFinalapproval');
+      await this.actionUtils.click(this.frame, '//label[contains(text(), "仕訳済みの請求書")]');
+    }
+    if (dataFormat) {
+      await this.addComment('「出力フォーマット」にて、"' + dataFormat + '"を選択する');
+      if (await this.actionUtils.isExist(this.frame, '//select[@name="serviceDataFormat"]')) {
+        await this.actionUtils.selectByXpath(this.frame, '//select[@name="serviceDataFormat"]', dataFormat);
+      } else {
+        await this.actionUtils.click(this.frame, '//input[@name="serviceDataFormat"]/..');
+        await this.actionUtils.click(this.frame, '//input[@name="serviceDataFormat"]/../ul/li//span[contains(text(), "' + dataFormat + '")]');
+      }
     }
   }
 

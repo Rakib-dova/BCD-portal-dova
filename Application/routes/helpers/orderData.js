@@ -2,7 +2,7 @@ const constants = require('../../constants')
 
 class OrderData {
   /**
-   * 導入支援・ライトプラン用オーダー情報コンストラクタ
+   * 導入支援・スタンダードプラン用オーダー情報コンストラクタ
    * @param {string} tenantId テナントID
    * @param {object} inputData 画面入力データ
    * @param {string} orderType オーダー種別
@@ -33,7 +33,7 @@ class OrderData {
       // 開通希望年月日
       OpeningDate: inputData.openingDate?.replace(/-/g, '') ?? '',
       // 契約番号
-      contractNumber: inputData.contractNumber ?? '',
+      contractNumber: '',
       // 販売チャネルコード
       salesChannelCode: inputData.salesChannelCode || '79100100',
       // 販売チャネル名
@@ -57,9 +57,9 @@ class OrderData {
     // 新設の場合
     if (orderType === constants.statusConstants.orderTypes.newOrder) {
       // 販売店コード
-      this.contractBasicInfo.campaignCode = inputData.campaignCode ?? ''
+      this.contractBasicInfo.campaignCode = ''
       // 販売担当者名
-      this.contractBasicInfo.salesPersonName = inputData.salesPersonName?.replace(/\s+/g, '') ?? ''
+      this.contractBasicInfo.salesPersonName = ''
 
       // 契約者情報の設定
       this.contractAccountInfo = {
@@ -68,7 +68,7 @@ class OrderData {
         // 顧客区分ダミー番号とする(SOPFで補填のため空)
         customerType: '',
         // 共通顧客ID
-        commonCustomerId: inputData.commonCustomerId ?? '',
+        commonCustomerId: inputData.commonCustomerId || 'C9999999999',
         // 契約者名
         contractorName: inputData.contractorName ?? '',
         // 契約者カナ名
@@ -144,7 +144,6 @@ class OrderData {
   validateContractAccountInfo() {
     const contractAccountInfo = this.contractAccountInfo
     return (
-      contractAccountInfo.commonCustomerId &&
       contractAccountInfo.contractorName &&
       contractAccountInfo.contractorKanaName &&
       contractAccountInfo.postalNumber &&

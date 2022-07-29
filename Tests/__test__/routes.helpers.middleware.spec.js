@@ -57,7 +57,11 @@ let request,
   userCreateSpy,
   findContractSpy,
   contractFindOneSpy,
-  checkContractStatusSpy
+  checkContractStatusSpy,
+  contractfindLightPlanSpy,
+  contractfindIntroductionSupportPlanSpy,
+  contractfindLightPlanForEntrySpy,
+  contractfindIntroductionSupportPlanForEntrySpy
 describe('helpers/middlewareのテスト', () => {
   beforeEach(() => {
     request = new Request()
@@ -69,6 +73,13 @@ describe('helpers/middlewareのテスト', () => {
     contractFindOneSpy = jest.spyOn(contractController, 'findOne')
     accessTradeshiftSpy = jest.spyOn(apiManager, 'accessTradeshift')
     checkContractStatusSpy = jest.spyOn(middleware, 'checkContractStatus')
+    contractfindLightPlanSpy = jest.spyOn(contractController, 'findLightPlan')
+    contractfindIntroductionSupportPlanSpy = jest.spyOn(contractController, 'findIntroductionSupportPlan')
+    contractfindLightPlanForEntrySpy = jest.spyOn(contractController, 'findLightPlanForEntry')
+    contractfindIntroductionSupportPlanForEntrySpy = jest.spyOn(
+      contractController,
+      'findIntroductionSupportPlanForEntry'
+    )
   })
   afterEach(() => {
     request.resetMocked()
@@ -80,6 +91,10 @@ describe('helpers/middlewareのテスト', () => {
     userCreateSpy.mockRestore()
     findContractSpy.mockRestore()
     checkContractStatusSpy.mockRestore()
+    contractfindLightPlanSpy.mockRestore()
+    contractfindIntroductionSupportPlanSpy.mockRestore()
+    contractfindLightPlanForEntrySpy.mockRestore()
+    contractfindIntroductionSupportPlanForEntrySpy.mockRestore()
   })
 
   describe('isAuthenticated', () => {
@@ -1220,6 +1235,270 @@ describe('helpers/middlewareのテスト', () => {
         // 期待結果
         expect(next).toHaveBeenCalledWith(errorHelper.create(500))
       })
+    })
+  })
+
+  describe('getContractPlan', () => {
+    test('正常：無償プランの場合', async () => {
+      // 準備
+      // userIdに正常な値を想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      // DBから有償プランの契約データが取得されない
+      contractfindLightPlanSpy.mockReturnValue(null)
+      contractfindIntroductionSupportPlanSpy.mockReturnValue(null)
+      contractfindLightPlanForEntrySpy.mockReturnValue(null)
+      contractfindIntroductionSupportPlanForEntrySpy.mockReturnValue(null)
+      // 試験実施
+      await middleware.getContractPlan(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「る」
+      expect(next).toHaveBeenCalledWith()
+      // islightPlanが「false」
+      expect(request.contractPlan.isLightPlan).toEqual(false)
+      // isIntroductionSupportPlanが「false」
+      expect(request.contractPlan.isIntroductionSupportPlan).toEqual(false)
+      // isLightPlanForEntryが「false」
+      expect(request.contractPlan.isLightPlanForEntry).toEqual(false)
+      // isIntroductionSupportPlanForEntryが「false」
+      expect(request.contractPlan.isIntroductionSupportPlanForEntry).toEqual(false)
+    })
+    test('正常：スタンダードプラン契約中の場合', async () => {
+      // 準備
+      // userIdに正常な値を想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      // DBからスタンダードプランの契約データの取得を想定する
+      contractfindLightPlanSpy.mockReturnValue({
+        dataValues: {
+          contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: 'numberN',
+          contractStatus: '00',
+          serviceType: '030',
+          deleteFlag: false,
+          createdAt: '2021-07-15 17:41:38',
+          updatedAt: '2021-07-15 17:41:38'
+        }
+      })
+      contractfindIntroductionSupportPlanSpy.mockReturnValue(null)
+      contractfindLightPlanForEntrySpy.mockReturnValue(null)
+      contractfindIntroductionSupportPlanForEntrySpy.mockReturnValue(null)
+      // 試験実施
+      await middleware.getContractPlan(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「る」
+      expect(next).toHaveBeenCalledWith()
+      // islightPlanが「true」
+      expect(request.contractPlan.isLightPlan).toEqual(true)
+      // isIntroductionSupportPlanが「false」
+      expect(request.contractPlan.isIntroductionSupportPlan).toEqual(false)
+      // isLightPlanForEntryが「false」
+      expect(request.contractPlan.isLightPlanForEntry).toEqual(false)
+      // isIntroductionSupportPlanForEntryが「false」
+      expect(request.contractPlan.isIntroductionSupportPlanForEntry).toEqual(false)
+    })
+    test('正常：導入支援プラン契約中の場合', async () => {
+      // 準備
+      // userIdに正常な値を想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      contractfindLightPlanSpy.mockReturnValue(true)
+      // DBから導入支援プランの契約データの取得を想定する
+      contractfindIntroductionSupportPlanSpy.mockReturnValue({
+        dataValues: {
+          contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: 'numberN',
+          contractStatus: '00',
+          serviceType: '020',
+          deleteFlag: false,
+          createdAt: '2021-07-15 17:41:38',
+          updatedAt: '2021-07-15 17:41:38'
+        }
+      })
+      contractfindLightPlanForEntrySpy.mockReturnValue(null)
+      contractfindIntroductionSupportPlanForEntrySpy.mockReturnValue(null)
+      // 試験実施
+      await middleware.getContractPlan(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「る」
+      expect(next).toHaveBeenCalledWith()
+      // islightPlanが「false」
+      expect(request.contractPlan.isLightPlan).toEqual(true)
+      // isIntroductionSupportPlanが「true」
+      expect(request.contractPlan.isIntroductionSupportPlan).toEqual(true)
+      // isLightPlanForEntryが「false」
+      expect(request.contractPlan.isLightPlanForEntry).toEqual(false)
+      // isIntroductionSupportPlanForEntryが「false」
+      expect(request.contractPlan.isIntroductionSupportPlanForEntry).toEqual(false)
+    })
+    test('正常：スタンダードプラン申し込み中の場合', async () => {
+      // 準備
+      // userIdに正常な値を想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      contractfindLightPlanSpy.mockReturnValue(null)
+      contractfindIntroductionSupportPlanSpy.mockReturnValue(null)
+      // DBからスタンダードプランの契約データの取得を想定する
+      contractfindLightPlanForEntrySpy.mockReturnValue({
+        dataValues: {
+          contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: 'numberN',
+          contractStatus: '10',
+          serviceType: '030',
+          deleteFlag: false,
+          createdAt: '2021-07-15 17:41:38',
+          updatedAt: '2021-07-15 17:41:38'
+        }
+      })
+      contractfindIntroductionSupportPlanForEntrySpy.mockReturnValue(null)
+      // 試験実施
+      await middleware.getContractPlan(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「る」
+      expect(next).toHaveBeenCalledWith()
+      // islightPlanが「false」
+      expect(request.contractPlan.isLightPlan).toEqual(false)
+      // isIntroductionSupportPlanが「false」
+      expect(request.contractPlan.isIntroductionSupportPlan).toEqual(false)
+      // isLightPlanForEntryが「true」
+      expect(request.contractPlan.isLightPlanForEntry).toEqual(true)
+      // isIntroductionSupportPlanForEntryが「false」
+      expect(request.contractPlan.isIntroductionSupportPlanForEntry).toEqual(false)
+    })
+    test('正常：導入支援プラン申し込み中の場合', async () => {
+      // 準備
+      // userIdに正常な値を想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+
+      contractfindLightPlanSpy.mockReturnValue(null)
+      contractfindIntroductionSupportPlanSpy.mockReturnValue(null)
+      contractfindLightPlanForEntrySpy.mockReturnValue(null)
+      // DBから導入支援プランの契約データの取得を想定する
+      contractfindIntroductionSupportPlanForEntrySpy.mockReturnValue({
+        dataValues: {
+          contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: 'numberN',
+          contractStatus: '10',
+          serviceType: '020',
+          deleteFlag: false,
+          createdAt: '2021-07-15 17:41:38',
+          updatedAt: '2021-07-15 17:41:38'
+        }
+      })
+      // 試験実施
+      await middleware.getContractPlan(request, response, next)
+
+      // 期待結果
+      // 引数なしでnextが呼ばれ「る」
+      expect(next).toHaveBeenCalledWith()
+      // islightPlanが「false」
+      expect(request.contractPlan.isLightPlan).toEqual(false)
+      // isIntroductionSupportPlanが「false」
+      expect(request.contractPlan.isIntroductionSupportPlan).toEqual(false)
+      // isLightPlanForEntryが「false」
+      expect(request.contractPlan.isLightPlanForEntry).toEqual(false)
+      // isIntroductionSupportPlanForEntryが「true」
+      expect(request.contractPlan.isIntroductionSupportPlanForEntry).toEqual(true)
+    })
+  })
+
+  describe('isTenantManager', () => {
+    test('正常 管理者', async () => {
+      // 準備
+      // request.userのuserId、tenantIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      // DBから正常なユーザーデータの取得を想定する
+      userFindOneSpy.mockReturnValue({
+        dataValues: {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: null,
+          userStatus: 0,
+          lastRefreshedAt: null,
+          createdAt: '2021-01-25T10:15:15.086Z',
+          updatedAt: '2021-01-25T10:15:15.086Z'
+        }
+      })
+
+      // 試験実施
+      await middleware.isTenantManager(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith()
+    })
+
+    test('正常 一般ユーザー', async () => {
+      // 準備
+      // request.userのuserId、tenantIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      // DBから正常なユーザーデータの取得を想定する
+      userFindOneSpy.mockReturnValue({
+        dataValues: {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          userRole: 'fe888fbb-172f-467c-b9ad-efe0720fecf9',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: null,
+          userStatus: 0,
+          lastRefreshedAt: null,
+          createdAt: '2021-01-25T10:15:15.086Z',
+          updatedAt: '2021-01-25T10:15:15.086Z'
+        }
+      })
+
+      // 試験実施
+      await middleware.isTenantManager(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(noticeHelper.create('generaluser'))
+    })
+
+    test('準正常 DBエラー', async () => {
+      // 準備
+      // request.userのuserId、tenantIdに正常なUUIDを想定する
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+        tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089'
+      }
+
+      // DBから正常な契約データの取得を想定する
+      contractFindOneSpy.mockReturnValue(new Error('any'))
+
+      // 試験実施
+      await middleware.isOnOrChangeContract(request, response, next)
+
+      // 期待結果
+      expect(next).toHaveBeenCalledWith(errorHelper.create(500))
     })
   })
 })

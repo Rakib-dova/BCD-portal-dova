@@ -50,6 +50,9 @@ module.exports = (sequelize, DataTypes) => {
       taxType: {
         type: DataTypes.STRING
       },
+      discounts: {
+        type: DataTypes.INTEGER
+      },
       discountDescription1: {
         type: DataTypes.STRING
       },

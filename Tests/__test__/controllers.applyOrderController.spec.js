@@ -15,35 +15,49 @@ const contractStatuses = constants.contractStatuses
 const orderTypes = constants.orderTypes
 // 申込区分
 const appTypes = constants.appTypes
-// サービス種別(lightPlan)
-const serviceTypesLightPlan = constants.serviceTypes.lightPlan
-// 商品コード(lightPlan)
-const prdtCodesLightPlan = constants.prdtCodes.lightPlan
+// サービス種別
+const serviceTypes = constants.serviceTypes
+// 商品コード
+const prdtCodes = constants.prdtCodes
 
 const tenantId = '12345678-bdac-4195-80b9-1ea64b8cb70c'
 
-const newOrderData = new OrderData(
+// スタンダードオーダー
+const newStandardOrderData = new OrderData(
   tenantId,
   {},
   orderTypes.newOrder,
-  serviceTypesLightPlan,
-  prdtCodesLightPlan,
-  appTypes.new
+  serviceTypes.lightPlan,
+  prdtCodes.lightPlan,
+  appTypes.new,
+  null
+)
+
+// 導入支援サービスオーダー
+const newIntroductionSupportOrderData = new OrderData(
+  tenantId,
+  {},
+  orderTypes.newOrder,
+  serviceTypes.introductionSupport,
+  prdtCodes.introductionSupport,
+  appTypes.new,
+  null
 )
 
 const cancelOrderData = new OrderData(
   tenantId,
   {},
   orderTypes.cancelOrder,
-  serviceTypesLightPlan,
-  prdtCodesLightPlan,
-  appTypes.cancel
+  serviceTypes.lightPlan,
+  prdtCodes.lightPlan,
+  appTypes.cancel,
+  null
 )
 
 const contractData = {
   contractId: '034d9315-46e3-4032-8258-8e30b417f1b1',
   tenantId: tenantId,
-  serviceType: serviceTypesLightPlan,
+  serviceType: serviceTypes.lightPlan,
   numberN: 'numberN',
   contractStatus: contractStatuses.onContract,
   deleteFlag: false,
@@ -53,12 +67,13 @@ const contractData = {
 
 const dbError = new Error('DB error')
 
-let contractCreateSpy, contractUpdateSpy, orderCreateSpy, findContractSpy
+let contractBulkCreateSpy, contractUpdateSpy, orderBulkCreateSpy, orderCreateSpy, findContractSpy
 
 describe('applyOrderControllerのテスト', () => {
   beforeEach(() => {
-    contractCreateSpy = jest.spyOn(Contract, 'create')
+    contractBulkCreateSpy = jest.spyOn(Contract, 'bulkCreate')
     contractUpdateSpy = jest.spyOn(Contract, 'update')
+    orderBulkCreateSpy = jest.spyOn(Order, 'bulkCreate')
     orderCreateSpy = jest.spyOn(Order, 'create')
     findContractSpy = jest.spyOn(contractController, 'findContract')
 
@@ -70,19 +85,22 @@ describe('applyOrderControllerのテスト', () => {
   })
 
   afterEach(() => {
-    contractCreateSpy.mockRestore()
+    contractBulkCreateSpy.mockRestore()
     contractUpdateSpy.mockRestore()
+    orderBulkCreateSpy.mockRestore()
     orderCreateSpy.mockRestore()
     findContractSpy.mockRestore()
   })
 
-  describe('applyNewOrder', () => {
-    test('正常', async () => {
+  describe('applyNewOrders', () => {
+    test('正常 1件オーダー', async () => {
       // 準備
-      contractCreateSpy.mockImplementation(async (record, transaction) => {
+      contractBulkCreateSpy.mockImplementation(async (records, transaction) => {
+        expect(records.length).toBe(1)
+        const record = records[0]
         expect(record.contractId).toBeDefined()
         expect(record.tenantId).toEqual(tenantId)
-        expect(record.serviceType).toEqual(serviceTypesLightPlan)
+        expect(record.serviceType).toEqual(serviceTypes.lightPlan)
         expect(record.numberN).toEqual('')
         expect(record.contractStatus).toEqual(contractStatuses.newContractOrder)
         expect(record.deleteFlag).toBeFalsy()
@@ -90,15 +108,67 @@ describe('applyOrderControllerのテスト', () => {
         expect(record.updatedAt).toBeDefined()
       })
 
-      orderCreateSpy.mockImplementation(async (record, transaction) => {
+      orderBulkCreateSpy.mockImplementation(async (records, transaction) => {
+        expect(records.length).toBe(1)
+        const record = records[0]
         expect(record.contractId).toBeDefined()
         expect(record.tenantId).toEqual(tenantId)
         expect(record.orderType).toEqual(orderTypes.newOrder)
-        expect(record.orderData).toEqual(JSON.stringify(newOrderData))
+        expect(record.orderData).toEqual(JSON.stringify(newStandardOrderData))
       })
 
       // 試験実施
-      const result = await applyOrderController.applyNewOrder(tenantId, serviceTypesLightPlan, newOrderData)
+      const result = await applyOrderController.applyNewOrders(tenantId, [newStandardOrderData])
+
+      // 期待結果
+      expect(result).toBeUndefined()
+    })
+
+    test('正常 2件オーダー', async () => {
+      // 準備
+      contractBulkCreateSpy.mockImplementation(async (records, transaction) => {
+        expect(records.length).toBe(2)
+        const standardRecord = records[0]
+        expect(standardRecord.contractId).toBeDefined()
+        expect(standardRecord.tenantId).toEqual(tenantId)
+        expect(standardRecord.serviceType).toEqual(serviceTypes.lightPlan)
+        expect(standardRecord.numberN).toEqual('')
+        expect(standardRecord.contractStatus).toEqual(contractStatuses.newContractOrder)
+        expect(standardRecord.deleteFlag).toBeFalsy()
+        expect(standardRecord.createdAt).toBeDefined()
+        expect(standardRecord.updatedAt).toBeDefined()
+
+        const introductionSupportRecord = records[1]
+        expect(introductionSupportRecord.contractId).toBeDefined()
+        expect(introductionSupportRecord.tenantId).toEqual(tenantId)
+        expect(introductionSupportRecord.serviceType).toEqual(serviceTypes.introductionSupport)
+        expect(introductionSupportRecord.numberN).toEqual('')
+        expect(introductionSupportRecord.contractStatus).toEqual(contractStatuses.newContractOrder)
+        expect(introductionSupportRecord.deleteFlag).toBeFalsy()
+        expect(introductionSupportRecord.createdAt).toBeDefined()
+        expect(introductionSupportRecord.updatedAt).toBeDefined()
+      })
+
+      orderBulkCreateSpy.mockImplementation(async (records, transaction) => {
+        expect(records.length).toBe(2)
+        const standardRecord = records[0]
+        expect(standardRecord.contractId).toBeDefined()
+        expect(standardRecord.tenantId).toEqual(tenantId)
+        expect(standardRecord.orderType).toEqual(orderTypes.newOrder)
+        expect(standardRecord.orderData).toEqual(JSON.stringify(newStandardOrderData))
+
+        const introductionSupportRecord = records[1]
+        expect(introductionSupportRecord.contractId).toBeDefined()
+        expect(introductionSupportRecord.tenantId).toEqual(tenantId)
+        expect(introductionSupportRecord.orderType).toEqual(orderTypes.newOrder)
+        expect(introductionSupportRecord.orderData).toEqual(JSON.stringify(newIntroductionSupportOrderData))
+      })
+
+      // 試験実施
+      const result = await applyOrderController.applyNewOrders(tenantId, [
+        newStandardOrderData,
+        newIntroductionSupportOrderData
+      ])
 
       // 期待結果
       expect(result).toBeUndefined()
@@ -106,12 +176,12 @@ describe('applyOrderControllerのテスト', () => {
 
     test('準正常: DBエラー時', async () => {
       // 準備
-      contractCreateSpy.mockImplementation(async (record, transaction) => {
+      contractBulkCreateSpy.mockImplementation(async (record, transaction) => {
         throw dbError
       })
 
       // 試験実施
-      const result = await applyOrderController.applyNewOrder(tenantId, serviceTypesLightPlan, newOrderData)
+      const result = await applyOrderController.applyNewOrders(tenantId, [newStandardOrderData])
 
       // 期待結果
       expect(result).toEqual(dbError)
@@ -135,7 +205,7 @@ describe('applyOrderControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await applyOrderController.cancelOrder(tenantId, serviceTypesLightPlan, cancelOrderData)
+      const result = await applyOrderController.cancelOrder(tenantId, cancelOrderData)
 
       // 期待結果
       expect(result).toBeUndefined()
@@ -149,7 +219,7 @@ describe('applyOrderControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await applyOrderController.cancelOrder(tenantId, serviceTypesLightPlan, cancelOrderData)
+      const result = await applyOrderController.cancelOrder(tenantId, cancelOrderData)
 
       // 期待結果
       expect(result).toEqual(dbError)
@@ -163,7 +233,7 @@ describe('applyOrderControllerのテスト', () => {
       })
 
       // 試験実施
-      const result = await applyOrderController.cancelOrder(tenantId, serviceTypesLightPlan, cancelOrderData)
+      const result = await applyOrderController.cancelOrder(tenantId, cancelOrderData)
 
       // 期待結果
       expect(result).toEqual(new Error('Not Founded ContractId'))

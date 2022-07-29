@@ -7,6 +7,8 @@ const noticeHelper = require('./helpers/notice')
 const userController = require('../controllers/userController.js')
 const contractController = require('../controllers/contractController.js')
 const validate = require('../lib/validate')
+const { getBrowser } = require('../lib/utils')
+const logger = require('../lib/logger')
 const constants = require('../constants')
 const Parser = require('rss-parser')
 const parser = new Parser({
@@ -50,6 +52,30 @@ const cbGetIndex = async (req, res, next) => {
 
   if (!validate.isStatusForCancel(contractStatus, deleteFlag)) {
     return next(noticeHelper.create('cancelprocedure'))
+  }
+
+  // アプリ効果測定用ログ出力
+  const browser = getBrowser(req.headers['user-agent'])
+  console.log('======= browser ==========: ', browser)
+  let jsonLog
+  // 1つ目のブラウザ検知
+  if (!req.session.browserInfo) {
+    req.session.browserInfo = { browsers: [browser] }
+    jsonLog = {
+      tenantId: req.user.tenantId,
+      action: 'detectedBrowser',
+      browser
+    }
+    logger.info(jsonLog)
+  // 2つ目以降のブラウザ検知
+  } else if (req.session.browserInfo && !req.session.browserInfo.browsers.includes(browser)) {
+    req.session.browserInfo.browsers.push(browser)
+    jsonLog = {
+      tenantId: req.user.tenantId,
+      action: 'detectedBrowser',
+      browser
+    }
+    logger.info(jsonLog)
   }
 
   // お知らせ取得
@@ -132,11 +158,20 @@ const cbGetIndex = async (req, res, next) => {
     constructDataArr: constructDataArr,
     constructDataArrSize: constructDataArr[0].title ? constructDataArr.length : 0,
     memberSiteFlg: req.session.memberSiteCoopSession.memberSiteFlg /* 会員サイト開発により追加 */,
-    csrfToken: req.csrfToken() /* 会員サイト開発により追加 */
+    csrfToken: req.csrfToken() /* 会員サイト開発により追加 */,
+    contractPlan: req.contractPlan
   })
 }
 
-router.get('/', helper.isAuthenticated, helper.isTenantRegistered, helper.isUserRegistered, csrfProtection, cbGetIndex)
+router.get(
+  '/',
+  helper.isAuthenticated,
+  helper.isTenantRegistered,
+  helper.isUserRegistered,
+  helper.getContractPlan,
+  csrfProtection,
+  cbGetIndex
+)
 
 module.exports = {
   router: router,

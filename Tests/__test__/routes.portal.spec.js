@@ -54,6 +54,7 @@ describe('portalのテスト', () => {
         helper.isAuthenticated,
         helper.isTenantRegistered,
         helper.isUserRegistered,
+        helper.getContractPlan,
         expect.any(Function),
         portal.cbGetIndex
       )
@@ -76,6 +77,9 @@ describe('portalのテスト', () => {
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.contractPlan = {
+        islightPlan: false
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue({
@@ -151,7 +155,8 @@ describe('portalのテスト', () => {
         numberN: '0000011111',
         TS_HOST: process.env.TS_HOST,
         memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
-        csrfToken: dummyTokne /* 会員サイト開発により追加 */
+        csrfToken: dummyTokne /* 会員サイト開発により追加 */,
+        contractPlan: request.contractPlan
       })
     })
 
@@ -170,6 +175,9 @@ describe('portalのテスト', () => {
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.contractPlan = {
+        islightPlan: false
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue({
@@ -266,7 +274,8 @@ describe('portalのテスト', () => {
         numberN: '0000011111',
         TS_HOST: process.env.TS_HOST,
         memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
-        csrfToken: dummyTokne /* 会員サイト開発により追加 */
+        csrfToken: dummyTokne /* 会員サイト開発により追加 */,
+        contractPlan: request.contractPlan
       })
     })
 
@@ -285,6 +294,9 @@ describe('portalのテスト', () => {
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.contractPlan = {
+        islightPlan: false
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue({
@@ -391,7 +403,8 @@ describe('portalのテスト', () => {
         numberN: '0000011111',
         TS_HOST: process.env.TS_HOST,
         memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
-        csrfToken: dummyTokne /* 会員サイト開発により追加 */
+        csrfToken: dummyTokne /* 会員サイト開発により追加 */,
+        contractPlan: request.contractPlan
       })
     })
 
@@ -404,6 +417,9 @@ describe('portalのテスト', () => {
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.contractPlan = {
+        islightPlan: false
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue({
@@ -457,6 +473,9 @@ describe('portalのテスト', () => {
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
+      request.contractPlan = {
+        islightPlan: false
+      }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue({
         dataValues: {
@@ -506,6 +525,9 @@ describe('portalのテスト', () => {
       request.user = {
         userId: null
       }
+      request.contractPlan = {
+        islightPlan: false
+      }
 
       // 試験実施
       await portal.cbGetIndex(request, response, next)
@@ -528,6 +550,9 @@ describe('portalのテスト', () => {
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.contractPlan = {
+        islightPlan: false
       }
       // DBからのユーザデータの取得ができなかった(null)場合を想定する
       findOneSpy.mockReturnValue(null)
@@ -568,6 +593,9 @@ describe('portalのテスト', () => {
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.contractPlan = {
+        islightPlan: false
       }
       // DBからの契約情報が取得できなかった(null)場合を想定する
       findOneSpy.mockReturnValue({
@@ -612,6 +640,9 @@ describe('portalのテスト', () => {
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
       }
+      request.contractPlan = {
+        islightPlan: false
+      }
 
       findOneSpyContracts.mockReturnValue({
         dataValues: {
@@ -652,6 +683,9 @@ describe('portalのテスト', () => {
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.contractPlan = {
+        islightPlan: false
       }
 
       findOneSpy.mockReturnValue({
@@ -697,6 +731,9 @@ describe('portalのテスト', () => {
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.contractPlan = {
+        islightPlan: false
       }
       // DBから取得したユーザデータのuserStatusが0以外の場合を想定する
       findOneSpy.mockReturnValue({
@@ -745,6 +782,9 @@ describe('portalのテスト', () => {
       }
       request.user = {
         userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.contractPlan = {
+        islightPlan: false
       }
       // DBからの正常なユーザデータの取得を想定する
       findOneSpy.mockReturnValue({
@@ -811,7 +851,246 @@ describe('portalのテスト', () => {
         numberN: '0000011111',
         TS_HOST: process.env.TS_HOST,
         memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
-        csrfToken: dummyTokne /* 会員サイト開発により追加 */
+        csrfToken: dummyTokne /* 会員サイト開発により追加 */,
+        contractPlan: request.contractPlan
+      })
+    })
+
+    test('正常：有償プランの場合', async () => {
+      // 準備
+      // 会員サイト開発により追加
+      const memberSiteCoopSessionDto = new MemberSiteSessionDto()
+      memberSiteCoopSessionDto.memberSiteFlg = true
+      // 会員サイト開発により追加
+
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy',
+        memberSiteCoopSession: memberSiteCoopSessionDto // 会員サイト開発により追加
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.contractPlan = {
+        islightPlan: true
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue({
+        dataValues: {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: null,
+          userStatus: 0,
+          lastRefreshedAt: null,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
+      findOneSpyContracts.mockReturnValue({
+        dataValues: {
+          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: '0000011111',
+          contractStatus: '10',
+          deleteFlag: false,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
+
+      // お知らせ取得
+      const constructDataArr = {
+        items: []
+      }
+      const newsDataArr = {
+        items: []
+      }
+      const rssMaker = function (title, link, date) {
+        return {
+          title: title,
+          link: link,
+          date: date
+        }
+      }
+      constructDataArr.items.push(rssMaker('BConnection RSS 1', 'http://test', '2022-03-08'))
+      constructDataArr.items.push(rssMaker('BConnection RSS 2', 'http://test', '2022-03-08'))
+      newsDataArr.items.push(rssMaker('BConnection RSS2 1', 'http://test', '2022-03-08'))
+      newsDataArr.items.push(rssMaker('BConnection RSS2 2', 'http://test', '2022-03-08'))
+      const expectDateArr = newsDataArr.items.map((item) => {
+        const day = new Date(item.date)
+        return {
+          ...item,
+          date: day.getFullYear() + '年' + (day.getMonth() + 1) + '月' + day.getDate() + '日'
+        }
+      })
+      const expectconstructDataArr = constructDataArr.items.map((item) => {
+        const day = new Date(item.date)
+        return {
+          ...item,
+          date: day.getFullYear() + '年' + (day.getMonth() + 1) + '月' + day.getDate() + '日'
+        }
+      })
+      parseUrlSpy.mockImplementationOnce(async () => {
+        return newsDataArr
+      })
+      parseUrlSpy.mockImplementationOnce(async () => {
+        return constructDataArr
+      })
+
+      // CSRF対策
+      const dummyTokne = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyTokne
+      })
+
+      // 試験実施
+      await portal.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでportalが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('portal', {
+        constructDataArr: expectconstructDataArr,
+        constructDataArrSize: expectconstructDataArr[0].title ? expectconstructDataArr.length : 0,
+        newsDataArr: expectDateArr,
+        newsDataArrSize: expectDateArr.length,
+        title: 'ポータル',
+        tenantId: request.user.tenantId,
+        userRole: request.session.userRole,
+        numberN: '0000011111',
+        TS_HOST: process.env.TS_HOST,
+        memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
+        csrfToken: dummyTokne /* 会員サイト開発により追加 */,
+        contractPlan: request.contractPlan
+      })
+    })
+
+    test('正常：無償プランの場合', async () => {
+      // 準備
+      // 会員サイト開発により追加
+      const memberSiteCoopSessionDto = new MemberSiteSessionDto()
+      memberSiteCoopSessionDto.memberSiteFlg = true
+      // 会員サイト開発により追加
+
+      // requestのsession,userIdに正常値を入れる
+      request.session = {
+        userContext: 'NotLoggedIn',
+        userRole: 'dummy',
+        memberSiteCoopSession: memberSiteCoopSessionDto // 会員サイト開発により追加
+      }
+      request.user = {
+        userId: '12345678-cb0b-48ad-857d-4b42a44ede13'
+      }
+      request.contractPlan = {
+        islightPlan: false
+      }
+      // DBからの正常なユーザデータの取得を想定する
+      findOneSpy.mockReturnValue({
+        dataValues: {
+          userId: '12345678-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          userRole: 'a6a3edcd-00d9-427c-bf03-4ef0112ba16d',
+          appVersion: '0.0.1',
+          refreshToken: 'dummyRefreshToken',
+          subRefreshToken: null,
+          userStatus: 0,
+          lastRefreshedAt: null,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
+      findOneSpyContracts.mockReturnValue({
+        dataValues: {
+          contractId: '87654321-cb0b-48ad-857d-4b42a44ede13',
+          tenantId: '15e2d952-8ba0-42a4-8582-b234cb4a2089',
+          numberN: '0000011111',
+          contractStatus: '10',
+          deleteFlag: false,
+          createdAt: '2021-01-25T08:45:49.803Z',
+          updatedAt: '2021-01-25T08:45:49.803Z'
+        }
+      })
+
+      // お知らせ取得
+      const constructDataArr = {
+        items: []
+      }
+      const newsDataArr = {
+        items: []
+      }
+      const rssMaker = function (title, link, date) {
+        return {
+          title: title,
+          link: link,
+          date: date
+        }
+      }
+      constructDataArr.items.push(rssMaker('BConnection RSS 1', 'http://test', '2022-03-08'))
+      constructDataArr.items.push(rssMaker('BConnection RSS 2', 'http://test', '2022-03-08'))
+      newsDataArr.items.push(rssMaker('BConnection RSS2 1', 'http://test', '2022-03-08'))
+      newsDataArr.items.push(rssMaker('BConnection RSS2 2', 'http://test', '2022-03-08'))
+      const expectDateArr = newsDataArr.items.map((item) => {
+        const day = new Date(item.date)
+        return {
+          ...item,
+          date: day.getFullYear() + '年' + (day.getMonth() + 1) + '月' + day.getDate() + '日'
+        }
+      })
+      const expectconstructDataArr = constructDataArr.items.map((item) => {
+        const day = new Date(item.date)
+        return {
+          ...item,
+          date: day.getFullYear() + '年' + (day.getMonth() + 1) + '月' + day.getDate() + '日'
+        }
+      })
+      parseUrlSpy.mockImplementationOnce(async () => {
+        return newsDataArr
+      })
+      parseUrlSpy.mockImplementationOnce(async () => {
+        return constructDataArr
+      })
+
+      // CSRF対策
+      const dummyTokne = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyTokne
+      })
+
+      // 試験実施
+      await portal.cbGetIndex(request, response, next)
+
+      // 期待結果
+      // 404，500エラーがエラーハンドリング「されない」
+      expect(next).not.toHaveBeenCalledWith(error404)
+      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
+      // userContextがLoggedInになっている
+      expect(request.session?.userContext).toBe('LoggedIn')
+      // session.userRoleが'a6a3edcd-00d9-427c-bf03-4ef0112ba16d'になっている
+      expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
+      // response.renderでportalが呼ばれ「る」
+      expect(response.render).toHaveBeenCalledWith('portal', {
+        constructDataArr: expectconstructDataArr,
+        constructDataArrSize: expectconstructDataArr[0].title ? expectconstructDataArr.length : 0,
+        newsDataArr: expectDateArr,
+        newsDataArrSize: expectDateArr.length,
+        title: 'ポータル',
+        tenantId: request.user.tenantId,
+        userRole: request.session.userRole,
+        numberN: '0000011111',
+        TS_HOST: process.env.TS_HOST,
+        memberSiteFlg: memberSiteCoopSessionDto.memberSiteFlg /* 会員サイト開発により追加 */,
+        csrfToken: dummyTokne /* 会員サイト開発により追加 */,
+        contractPlan: request.contractPlan
       })
     })
   })

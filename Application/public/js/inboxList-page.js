@@ -132,7 +132,7 @@ function getWorkflow() {
               const contactAddress = document.createElement('td')
               const lightPlan = document.querySelector('#BtnInboxSearch')
               if (lightPlan) {
-                if (item.managerInfo.managerName === '（担当者不明）') {
+                if (item.managerInfo.managerName === '（ユーザー登録なし）') {
                   contactAddress.classList.add('text-color-red')
                 }
                 addColumnCSS(contactAddress)
@@ -479,17 +479,23 @@ if ($('#BtnInboxSearch')) {
       status = []
     }
 
+    let unKnownManager = form.unKnownManager.checked
+    if (unKnownManager === false) {
+      unKnownManager = undefined
+    }
+
     const managerAddress = form.managerAddress.value
     const validationCheck = []
     validationCheck.push(invoiceNumber)
     validationCheck.push(minIssuedate)
     validationCheck.push(maxIssuedate)
     validationCheck.push(managerAddress)
+    validationCheck.push(unKnownManager)
     validationCheck.push(sentBy)
     validationCheck.push(status)
     let checkCount = 0
     for (let i = 0; i < validationCheck.length; i++) {
-      if (i < 4) {
+      if (i < 5) {
         if (validationCheck[i] === '' || validationCheck[i] === undefined) {
           ++checkCount
         }
@@ -499,7 +505,7 @@ if ($('#BtnInboxSearch')) {
         }
       }
     }
-    if (checkCount === 6) {
+    if (checkCount === 7) {
       alert('検索条件を入力してください。')
     } else {
       if (managerAddress.length > 0) {

@@ -13,7 +13,31 @@ if (ua.indexOf('MSIE ') === -1 && ua.indexOf('Trident') === -1) {
   if (elm) elm.parentNode.removeChild(elm)
 }
 
+// document.getElementById、document.getElementsByClassName省略
+const $ = function (tagObjName) {
+  const classNamePattern = '\\.+[a-zA-Z0-9]'
+  const idNamePatten = '\\#+[a-zA-Z0-9]'
+  const classNameReg = new RegExp(classNamePattern)
+  const idNameReg = new RegExp(idNamePatten)
+  let selectors
+
+  if (classNameReg.test(tagObjName)) {
+    selectors = document.querySelectorAll(tagObjName)
+  } else if (idNameReg.test(tagObjName)) {
+    selectors = document.querySelectorAll(tagObjName)[0]
+    if (selectors === undefined) return null
+  } else {
+    return null
+  }
+  return Object.assign(selectors, Array.prototype, (type, event) => {
+    document.addEventListener(type, event)
+  })
+}
+
+const loadingProgress = document.getElementById('loading-progress-modal')
+
 window.onload = () => {
+  loadingProgress.classList.remove('is-active')
   document.querySelectorAll('.tabs').forEach((tab) => {
     tab.querySelectorAll('li').forEach((li) => {
       li.onclick = () => {
@@ -88,3 +112,7 @@ function createNotification(requestNoticeCnt, rejectedNoticeCnt) {
     document.querySelector('.column.is-12.menu').append(rejectedNotice)
   }
 }
+
+$('#moveInboxList').addEventListener('click', function () {
+  loadingProgress.classList.add('is-active')
+})
