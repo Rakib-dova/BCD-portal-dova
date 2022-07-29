@@ -225,13 +225,13 @@ class FreeeService {
       case 'JP 消費税 10%':
         {
           const taxAmount = ''
-          debitCategory = ['課税売上10%', `${taxAmount}`]
+          debitCategory = ['課対仕入10%', `${taxAmount}`]
         }
         break
       case 'JP 消費税(軽減税率) 8%':
         {
           const taxAmount = ''
-          debitCategory = ['課税売上8%（軽）', `${taxAmount}`]
+          debitCategory = ['課対仕入8%（軽）', `${taxAmount}`]
         }
         break
       case 'JP 免税 0%':
@@ -254,13 +254,13 @@ class FreeeService {
       case 'JP 消費税 10%':
         {
           const taxAmount = ''
-          creditCategory = ['課対仕入10%', `${taxAmount}`]
+          creditCategory = ['課税売上10%', `${taxAmount}`]
         }
         break
       case 'JP 消費税(軽減税率) 8%':
         {
           const taxAmount = ''
-          creditCategory = ['課対仕入8%（軽）', `${taxAmount}`]
+          creditCategory = ['課税売上8%（軽）', `${taxAmount}`]
         }
         break
       case 'JP 免税 0%':
