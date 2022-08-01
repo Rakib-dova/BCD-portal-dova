@@ -2,6 +2,7 @@
 const express = require('express')
 const router = express.Router()
 const fs = require('fs')
+const encoding = require('encoding-japanese')
 const path = require('path')
 
 const db = require('../models')
@@ -42,6 +43,30 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
 
+  // アップロードファイルが存在しない
+  if (!req.file?.buffer) {
+    return res.status(400).send(
+      JSON.stringify({
+        message: 'システムエラーです。（後程、接続してください）'
+      })
+    )
+  }
+  // 文字コードチェック
+  if (!encoding.detect(req.file.buffer, 'UTF8')) {
+    return res.status(400).send(
+      JSON.stringify({
+        message: '文字コードはUTF-8 BOM付で作成してください。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
+  // CSV内容チェック
+  if (req.file.buffer.equals(Buffer.from(new Uint8Array([0xef, 0xbb, 0xbf])))) {
+    return res.status(400).send(
+      JSON.stringify({
+        message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
   // csvファイル
   let uploadFileData
   let defaultCsvData

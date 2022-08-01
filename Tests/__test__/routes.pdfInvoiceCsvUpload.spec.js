@@ -10,6 +10,7 @@ const Request = require('jest-express').Request
 const Response = require('jest-express').Response
 const next = require('jest-express').Next
 const fs = require('fs')
+const Encoding = require('encoding-japanese')
 
 const apiManager = require('../../Application/controllers/apiManager.js')
 const pdfInvoiceController = require('../../Application/controllers/pdfInvoiceController.js')
@@ -29,6 +30,7 @@ let fsSpy
 let validateSpy, validateHeaderSpy
 let pdfInvoiceGetAccountAndSenderInfoSpy
 let convertCsvStringToMultiArray, convertToDataObject, convertCsvDataArrayToPdfInvoiceModels
+let encodingSpy
 
 // 404エラー定義
 const error404 = new Error('お探しのページは見つかりませんでした。')
@@ -423,6 +425,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
     convertToDataObject = jest.spyOn(csv, 'convertToDataObject')
     convertToDataObject.mockReturnValue({})
     convertCsvDataArrayToPdfInvoiceModels = jest.spyOn(csv, 'convertCsvDataArrayToPdfInvoiceModels')
+    encodingSpy = jest.spyOn(Encoding, 'detect')
   })
   afterEach(() => {
     request.resetMocked()
@@ -442,6 +445,7 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
     convertCsvStringToMultiArray.mockRestore()
     convertToDataObject.mockRestore()
     convertCsvDataArrayToPdfInvoiceModels.mockRestore()
+    encodingSpy.mockRestore()
   })
 
   describe('コールバック:pdfInvoiceCsvUploadIndex', () => {
@@ -608,11 +612,22 @@ describe('pdfInvoiceCsvUploadのテスト', () => {
       )
       expect(response.status).toHaveBeenCalledWith(400)
     })
+    test('準正常: 文字コードがUTF-8以外', async () => {
+      request.file = { buffer: 'あ' }
+      encodingSpy.mockReturnValue(false)
+
+      await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
+
+      expect(response.send).toHaveBeenCalledWith(
+        '{"message":"文字コードはUTF-8 BOM付で作成してください。CSVファイルの内容を確認の上、再度実行をお願いします。"}'
+      )
+      expect(response.status).toHaveBeenCalledWith(400)
+    })
     test('準正常: CSVファイル読込エラー', async () => {
-      request.file = { buffer: undefined }
       fsSpy.mockImplementation(() => {
         throw new Error('File Read Error')
       })
+      encodingSpy.mockReturnValue('UTF8')
 
       await pdfInvoiceCsvUpload.pdfInvoiceCsvUpload(request, response, next)
 
