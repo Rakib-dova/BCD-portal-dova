@@ -114,24 +114,25 @@ class OhkenService {
     return ohkenFormat.replace(/\[|\]/g, '')
   }
 
+  // 借方
   convertDebitTaxCategory(_taxCategory, amount) {
     let debitTaxCode
 
     switch (_taxCategory) {
       case 'JP 消費税 10%':
-        debitTaxCode = ['115', '']
+        debitTaxCode = ['715', '']
         break
       case 'JP 消費税(軽減税率) 8%':
-        debitTaxCode = ['114', '']
+        debitTaxCode = ['714', '']
         break
       case 'JP 不課税 0%':
         debitTaxCode = ['000', '']
         break
       case 'JP 免税 0%':
-        debitTaxCode = ['211', '']
+        debitTaxCode = ['000', '']
         break
       case 'JP 非課税 0%':
-        debitTaxCode = ['311', '']
+        debitTaxCode = ['811', '']
         break
       default:
         debitTaxCode = ['999', '']
@@ -140,6 +141,7 @@ class OhkenService {
     return debitTaxCode
   }
 
+  // 貸方
   convertCreditTaxCategory(_taxCategory, amount) {
     let creditTaxCode
 

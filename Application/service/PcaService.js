@@ -277,6 +277,7 @@ class PcaService {
     return mappedPcatoHeader
   }
 
+  // 借方
   convertDebitTaxCategory(_taxCategory, amount) {
     let debitCategory
 
@@ -298,7 +299,7 @@ class PcaService {
         debitCategory = ['00', '0']
         break
       case 'JP 非課税 0%':
-        debitCategory = ['A0', '0']
+        debitCategory = ['P0', '0']
         break
       default:
         debitCategory = ['99', '0']
@@ -307,6 +308,7 @@ class PcaService {
     return debitCategory
   }
 
+  // 貸方
   convertCreditTaxCategory(_taxCategory, amount) {
     let creditCategory
 
