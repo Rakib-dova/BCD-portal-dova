@@ -43,20 +43,27 @@ const pdfInvoiceCsvUpload = async (req, res, next) => {
   if (!req.user) return next(errorHelper.create(500)) // UTのエラー対策
   logger.info(`${constantsDefine.logMessage.INF000}${functionName}`)
 
-  // アップロードデータが空
-  if (!req.file.buffer) {
+  // アップロードファイルが存在しない
+  if (!req.file?.buffer) {
     return res.status(400).send(
       JSON.stringify({
-        message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。'
+        message: 'システムエラーです。（後程、接続してください）'
       })
     )
   }
   // 文字コードチェック
-  console.log('======', encoding.detect(req.file.buffer))
   if (!encoding.detect(req.file.buffer, 'UTF8')) {
     return res.status(400).send(
       JSON.stringify({
         message: '文字コードはUTF-8 BOM付で作成してください。CSVファイルの内容を確認の上、再度実行をお願いします。'
+      })
+    )
+  }
+  // CSV内容チェック
+  if (req.file.buffer.equals(Buffer.from(new Uint8Array([0xef, 0xbb, 0xbf])))) {
+    return res.status(400).send(
+      JSON.stringify({
+        message: 'CSVファイルのデータに不備があります。CSVファイルの内容を確認の上、再度実行をお願いします。'
       })
     )
   }
