@@ -126,8 +126,6 @@ class OhkenService {
         debitTaxCode = ['714', '']
         break
       case 'JP 不課税 0%':
-        debitTaxCode = ['000', '']
-        break
       case 'JP 免税 0%':
         debitTaxCode = ['000', '']
         break
@@ -159,7 +157,7 @@ class OhkenService {
         creditTaxCode = ['211', '']
         break
       case 'JP 非課税 0%':
-        creditTaxCode = ['811', '']
+        creditTaxCode = ['311', '']
         break
       default:
         creditTaxCode = ['999', '']
