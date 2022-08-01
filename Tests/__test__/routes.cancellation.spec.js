@@ -31,6 +31,7 @@ describe('cancellationのテスト', () => {
     createSpy = jest.spyOn(cancellationController, 'create')
     infoSpy = jest.spyOn(logger, 'info')
     checkContractStatusSpy = jest.spyOn(helper, 'checkContractStatus')
+    request.csrfToken = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -185,7 +186,12 @@ describe('cancellationのテスト', () => {
 
   describe('ルーティング', () => {
     test('cancellationのルーティングを確認', async () => {
-      expect(cancellation.router.get).toBeCalledWith('/', helper.isAuthenticated, cancellation.cbGetCancellation)
+      expect(cancellation.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.anything(),
+        cancellation.cbGetCancellation
+      )
     })
   })
 

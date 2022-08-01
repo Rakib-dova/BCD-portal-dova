@@ -198,6 +198,7 @@ describe('approvalInboxのテスト', () => {
     sendMailSpy = jest.spyOn(sendMail, 'mail')
     requestApprovalControllerFindOneRequestApprovalSpy = jest.spyOn(requestApprovalController, 'findOneRequestApproval')
     tradeshiftDTOSpy = jest.spyOn(TradeshiftDTO.prototype, 'findUser')
+    request.csrfToken = jest.fn()
   })
   afterEach(() => {
     request.resetMocked()
@@ -226,11 +227,17 @@ describe('approvalInboxのテスト', () => {
 
   describe('ルーティング', () => {
     test('approvalInboxのルーティングを確認', async () => {
-      expect(approvalInbox.router.get).toBeCalledWith('/:invoiceId', helper.isAuthenticated, approvalInbox.cbGetIndex)
+      expect(approvalInbox.router.get).toBeCalledWith(
+        '/:invoiceId',
+        helper.isAuthenticated,
+        expect.anything(),
+        approvalInbox.cbGetIndex
+      )
 
       expect(approvalInbox.router.post).toBeCalledWith(
         '/:invoiceId',
         helper.isAuthenticated,
+        expect.anything(),
         approvalInbox.cbPostApprove
       )
     })

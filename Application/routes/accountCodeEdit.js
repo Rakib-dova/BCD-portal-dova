@@ -11,6 +11,9 @@ const validate = require('../lib/validate')
 const constantsDefine = require('../constants')
 const accountCodeController = require('../controllers/accountCodeController')
 
+const csrf = require('csurf')
+const csrfProtection = csrf({ cookie: false })
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -71,7 +74,8 @@ const cbGetIndex = async (req, res, next) => {
     valueForCodeInput: result?.accountCode ?? '',
     valueForNameInput: result?.accountCodeName ?? '',
     logTitle: '勘定科目確認・変更',
-    logTitleEng: 'EDIT ACCOUNT CODE'
+    logTitleEng: 'EDIT ACCOUNT CODE',
+    csrfToken: req.csrfToken()
   })
   logger.info(constantsDefine.logMessage.INF001 + 'cbGetIndex')
 }
@@ -169,8 +173,8 @@ const cbPostIndex = async function (req, res, next) {
   logger.info(constantsDefine.logMessage.INF001 + 'cbPostIndex')
 }
 
-router.get('/:accountCodeId', helper.isAuthenticated, cbGetIndex)
-router.post('/:accountCodeId', helper.isAuthenticated, cbPostIndex)
+router.get('/:accountCodeId', helper.isAuthenticated, csrfProtection, cbGetIndex)
+router.post('/:accountCodeId', helper.isAuthenticated, csrfProtection, cbPostIndex)
 
 module.exports = {
   router: router,
