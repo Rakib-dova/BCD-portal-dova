@@ -8,14 +8,14 @@ class Freee {
     // 明細情報・借方
     this.debitAccount = coding.debitAccountName
     this.debitAccountCode = coding.debitAccountCode
-    this.debitSubAccount = ''
+    this.debitSubAccount = coding.debitSubAccountName
     this.debitDepartment = coding.debitDepartmentName
     this.debitAmount = coding.debitAmount
     ;[this.debitTaxCode, this.debitTaxAmount] = debitTaxCategory(coding.creditTaxCategory, coding.debitAmount)
     // 明細情報・貸方
     this.creditAccount = coding.creditAccountName
     this.creditAccountCode = coding.creditAccountCode
-    this.creditSubAccount = ''
+    this.creditSubAccount = coding.creditSubAccountName
     this.creditDepartment = coding.creditDepartmentName
     this.creditAmount = coding.creditAmount
     ;[this.creditTaxCode, this.creditTaxAmount] = creditTaxCategory(coding.creditTaxCategory, coding.creditAmount)
