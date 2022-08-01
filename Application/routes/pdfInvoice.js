@@ -124,6 +124,12 @@ const pdfInvoiceEdit = async (req, res, next) => {
 const createPdfInvoice = async (req, res, next) => {
   if (!req.body.invoice || !req.body.lines) return next(errorHelper.create(400))
   const invoice = JSON.parse(req.body.invoice)
+
+  // 一旦UTCの日付とみなして登録する（DB登録時に自動で＋9時間される）
+  invoice.billingDate = await getDateUTC(invoice.billingDate)
+  invoice.paymentDate = await getDateUTC(invoice.paymentDate)
+  invoice.deliveryDate = await getDateUTC(invoice.deliveryDate)
+
   const lines = JSON.parse(req.body.lines)
   if (!Array.isArray(lines)) return next(errorHelper.create(400))
 
@@ -209,6 +215,31 @@ const getJustDate = async (target) => {
   const targetDateJa = new Date(target).toLocaleDateString('ja')
   const justDate = new Date(targetDateJa + ' 00:00:00')
   return justDate
+}
+
+// 受け取った日付をUTC日付とみなし、
+// その値で作成し直したDateを返却する
+const getDateUTC = async (target) => {
+  if (!target) {
+    return target
+  }
+  const targetDate = new Date(target)
+  const targetDateMonth = targetDate.getUTCMonth() + 1
+  const targetDateUTC = new Date(
+    targetDate.getUTCFullYear() +
+      '/' +
+      targetDateMonth +
+      '/' +
+      targetDate.getUTCDate() +
+      ' ' +
+      targetDate.getUTCHours() +
+      ':' +
+      targetDate.getUTCMinutes() +
+      ':' +
+      targetDate.getUTCSeconds()
+  )
+
+  return targetDateUTC
 }
 
 const outputPdfInvoice = async (req, res, next) => {
