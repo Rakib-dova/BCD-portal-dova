@@ -20,6 +20,46 @@ const notiTitle = '請求書ダウンロード'
 const csrf = require('csurf')
 const csrfProtection = csrf({ cookie: false })
 
+function series(items, fn) {
+  console.log('fn', fn)
+  const result = []
+  return items
+    .reduce((acc, item) => {
+      acc = acc.then(() => {
+        return fn(item).then((res) => result.push(res))
+      })
+      return acc
+    }, Promise.resolve())
+    .then(() => result)
+}
+
+function createInvoiceDataForDownload(req, key, contract) {
+  return csvDownloadController.createInvoiceDataForDownload(req.user.accessToken, req.user.refreshToken, key)
+}
+
+function all(items, req, contract) {
+  const promises = items.map((item) => createInvoiceDataForDownload(req, item, contract))
+  return Promise.all(promises)
+}
+
+function splitToChunks(items, chunkSize = 50) {
+  const result = []
+  for (let i = 0; i < items.length; i += chunkSize) {
+    result.push(items.slice(i, i + chunkSize))
+  }
+  return result
+}
+
+function promiseAll(documentsResult, req, contract) {
+  const chunkSize = '5'
+  const chunks = splitToChunks(documentsResult.Document, chunkSize)
+  console.log('chunks.length:', chunks.length)
+  let result = []
+  return series(chunks, (chunk) => {
+    return all(chunk, req, contract).then((res) => (result = result.concat(res)))
+  }).then(() => result)
+}
+
 const cbGetIndex = async (req, res, next) => {
   logger.info(constantsDefine.logMessage.INF000 + 'cbGetIndex')
   // 認証情報取得処理
@@ -409,14 +449,17 @@ const cbPostIndex = async (req, res, next) => {
           res.redirect(303, '/csvDownload')
         }
       } else {
-        let invoicesForDownload
+        /** let invoicesForDownload
         await Promise.all(
           documentsResult.Document.map(async (key) => {
             return csvDownloadController.createInvoiceDataForDownload(req.user.accessToken, req.user.refreshToken, key)
           })
         ).then(function (result) {
           invoicesForDownload = result
-        })
+        }) **/
+
+        const invoicesForDownload = await promiseAll(documentsResult, req, contract)
+        console.log('invoicesForDownload:', invoicesForDownload)
 
         // エラーを確認する
         for (let i = 0; invoicesForDownload.length > i; i++) {
