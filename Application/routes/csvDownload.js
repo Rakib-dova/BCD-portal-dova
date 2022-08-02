@@ -42,7 +42,7 @@ function all(items, req, contract) {
   return Promise.all(promises)
 }
 
-function splitToChunks(items, chunkSize = 50) {
+function splitToChunks(items, chunkSize = 5) {
   const result = []
   for (let i = 0; i < items.length; i += chunkSize) {
     result.push(items.slice(i, i + chunkSize))
@@ -51,7 +51,7 @@ function splitToChunks(items, chunkSize = 50) {
 }
 
 function promiseAll(documentsResult, req, contract) {
-  const chunkSize = '5'
+  const chunkSize = 10
   const chunks = splitToChunks(documentsResult.Document, chunkSize)
   console.log('chunks.length:', chunks.length)
   let result = []
@@ -459,7 +459,7 @@ const cbPostIndex = async (req, res, next) => {
         }) **/
 
         const invoicesForDownload = await promiseAll(documentsResult, req, contract)
-        console.log('invoicesForDownload:', invoicesForDownload)
+        console.log('invoicesForDownload.length:', invoicesForDownload.length)
 
         // エラーを確認する
         for (let i = 0; invoicesForDownload.length > i; i++) {
