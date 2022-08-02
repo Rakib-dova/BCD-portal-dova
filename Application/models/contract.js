@@ -73,7 +73,6 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true
       },
       tenantId: DataTypes.UUID,
-      serviceType: DataTypes.STRING,
       numberN: DataTypes.STRING,
       contractStatus: DataTypes.STRING,
       deleteFlag: DataTypes.BOOLEAN,
