@@ -89,35 +89,53 @@ class YayoiService {
     return yayoiFormat.replace(/\[|\]/g, '')
   }
 
+  // 借方
   convertDebitTaxCategory(_taxCategory) {
     let debitCategory
 
     switch (_taxCategory) {
       case 'JP 消費税 10%':
-        debitCategory = '課税売上込10%'
+        debitCategory = '課対仕入込10%'
         break
       case 'JP 消費税(軽減税率) 8%':
-        debitCategory = '課税売上込軽減8%'
+        debitCategory = '課対仕入込軽減8%'
+        break
+      case 'JP 不課税 0%':
+      case 'JP 免税 0%':
+        debitCategory = '対象外'
+        break
+      case 'JP 非課税 0%':
+        debitCategory = '非課仕入'
         break
       default:
-        debitCategory = '対象外'
+        debitCategory = '不明'
+        break
     }
 
     return debitCategory
   }
 
+  // 貸方
   convertCreditTaxCategory(_taxCategory) {
     let creditCategory
 
     switch (_taxCategory) {
       case 'JP 消費税 10%':
-        creditCategory = '課対仕入込10%'
+        creditCategory = '課税売上込10%'
         break
       case 'JP 消費税(軽減税率) 8%':
-        creditCategory = '課対仕入込軽減8%'
+        creditCategory = '課税売上込軽減8%'
+        break
+      case 'JP 不課税 0%':
+      case 'JP 免税 0%':
+        creditCategory = '対象外'
+        break
+      case 'JP 非課税 0%':
+        creditCategory = '非課売上'
         break
       default:
-        creditCategory = '対象外'
+        creditCategory = '不明'
+        break
     }
 
     return creditCategory

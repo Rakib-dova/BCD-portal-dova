@@ -3614,15 +3614,14 @@ describe('csvuploadのテスト', () => {
         request,
         response
       )
-      expect(resultExt).toBe(0)
+      expect(resultExt).toBe(104)
 
       const resultRem = csvupload.cbRemoveCsv(filePath, filename)
       expect(resultRem).toBeTruthy()
 
       // 期待結果
-      // 404，500エラーがエラーハンドリング「されない」
+      // 404エラーがエラーハンドリング「されない」
       expect(next).not.toHaveBeenCalledWith(error404)
-      expect(next).not.toHaveBeenCalledWith(errorHelper.create(500))
     })
 
     test('正常：請求書数100件', async () => {

@@ -600,16 +600,19 @@ const cbExtractInvoice = async (_extractDir, _filename, _user, _invoices, _req, 
       }
     }
 
+    let statusStr = ''
+
     const getStatusString = (status) => {
       switch (status) {
         case 0:
-          return 'success'
+          statusStr = 'success'
+          return statusStr
         case 1:
-          return 'skip'
+          statusStr = 'skip'
+          return statusStr
         case -1:
-          return 'failure'
-        default:
-          return ''
+          statusStr = 'failure'
+          return statusStr
       }
     }
 
