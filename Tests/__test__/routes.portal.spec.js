@@ -584,6 +584,10 @@ describe('portalのテスト', () => {
       approvalInboxControllerGetRequestApprovalSpy.mockReturnValue(noRequestApproval)
       approvalInboxControllerHasPowerOfEditingSpy.mockReturnValue(false)
       requestApprovalModelFindAllSpy.mockReturnValueOnce([])
+<<<<<<< HEAD
+=======
+
+>>>>>>> release_v1.7.2.1
       // 試験実施
       await portal.cbGetIndex(request, response, next)
 
