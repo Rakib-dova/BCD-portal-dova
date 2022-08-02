@@ -107,6 +107,7 @@ describe('rejectApprovalのテスト', () => {
       expect(rejectApproval.router.post).toBeCalledWith(
         '/:invoiceId',
         helper.isAuthenticated,
+        expect.any(Function),
         rejectApproval.cbPostApprove
       )
     })

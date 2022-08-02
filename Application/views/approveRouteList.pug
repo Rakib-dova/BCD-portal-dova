@@ -6,6 +6,9 @@ block content
       .hero-body-noImage
         .title.is-family-noto-sans 承認ルート一覧
         .subtitle.is-family-noto-sans APPROVEROUTE LIST      
+    
+    input(type='hidden' name='_csrf' value=csrfToken)
+
     .columns.is-centered
       .column.is-11
         a.button.is-link.mb-4(href="/registApproveRoute") 新規登録する

@@ -86,7 +86,12 @@ describe('approveRouteListのテスト', () => {
 
   describe('ルーティング', () => {
     test('approveRouteListのルーティングを確認', async () => {
-      expect(approveRouteList.router.get).toBeCalledWith('/', helper.isAuthenticated, approveRouteList.cbGetIndex)
+      expect(approveRouteList.router.get).toBeCalledWith(
+        '/',
+        helper.isAuthenticated,
+        expect.any(Function),
+        approveRouteList.cbGetIndex
+      )
     })
   })
 
@@ -109,6 +114,12 @@ describe('approveRouteListのテスト', () => {
       // 承認ルートDB検索結果：ない場合
       approveRouteFindAllSpy.mockReturnValueOnce([])
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await approveRouteList.cbGetIndex(request, response, next)
 
@@ -119,7 +130,8 @@ describe('approveRouteListのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでapproveRouteListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('approveRouteList', {
-        approveRouteListArr: []
+        approveRouteListArr: [],
+        csrfToken: dummyToken
       })
     })
 
@@ -185,6 +197,12 @@ describe('approveRouteListのテスト', () => {
       })
       approveRouteFindAllSpy.mockReturnValueOnce(approveRouteArr)
 
+      // CSRF対策
+      const dummyToken = 'testCsrfToken'
+      request.csrfToken = jest.fn(() => {
+        return dummyToken
+      })
+
       // 試験実施
       await approveRouteList.cbGetIndex(request, response, next)
 
@@ -195,7 +213,8 @@ describe('approveRouteListのテスト', () => {
       expect(request.session?.userRole).toBe('a6a3edcd-00d9-427c-bf03-4ef0112ba16d')
       // response.renderでapproveRouteListが呼ばれ「る」
       expect(response.render).toHaveBeenCalledWith('approveRouteList', {
-        approveRouteListArr: expectResult
+        approveRouteListArr: expectResult,
+        csrfToken: dummyToken
       })
     })
 
