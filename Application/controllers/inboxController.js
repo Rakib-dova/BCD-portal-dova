@@ -246,7 +246,7 @@ const insertAndUpdateJournalizeInvoice = async (contractId, invoiceId, data) => 
       lineAccountCodeKey.forEach((value) => {
         const valueRelace = value.replace(`lineNo${idx}_lineAccountCode`, '')
         const number = valueRelace.substring(0, valueRelace.indexOf('_'))
-        if (!isNaN(number) && value !== 'lineId') {
+        if (!isNaN(number) && number !== '') {
           lineCount.push(number)
         }
       })
