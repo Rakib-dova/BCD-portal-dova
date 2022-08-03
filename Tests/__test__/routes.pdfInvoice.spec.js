@@ -162,7 +162,129 @@ const pdfInvoiceTestData = {
       }
     ]
   },
+  noSealImp2: {
+    dataValues: {
+      invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+      invoiceNo: '111111',
+      tmpFlg: false,
+      outputDate: new Date('2022-05-12T04:16:21.170Z'),
+      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      currency: 'JPY',
+      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      recCompany: '宛先ダミー企業',
+      recPost: '0000000',
+      recAddr1: '東京都',
+      recAddr2: '大手町',
+      recAddr3: '大手町ビル',
+      sendTenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
+      sendCompany: '送信先ダミー企業',
+      sendPost: '100-8019',
+      sendAddr1: '東京都',
+      sendAddr2: '大手町',
+      sendAddr3: '大手町プレイスウエスト',
+      sendRegistrationNo: 'T1234567890123',
+      bankName: '銀行名',
+      branchName: '支店',
+      accountType: '科目',
+      accountName: 'あああ',
+      accountNumber: '1234567',
+      note: '備考備考備考\n備考',
+      createdAt: new Date('2022-05-13T00:00:00.000Z'),
+      updatedAt: new Date('2022-05-13T00:00:00.000Z'),
+      PdfSealImp: {
+        dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: null }
+      }
+    },
+    PdfInvoiceLines: [
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 0,
+          lineId: 'a0001',
+          lineDescription: '内容１',
+          unit: 'KG',
+          unitPrice: 100,
+          quantity: 20,
+          taxType: 'tax8p'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 1,
+          lineId: 'a0002',
+          lineDescription: '内容２',
+          unit: 'KG',
+          unitPrice: 200,
+          quantity: 20,
+          taxType: 'tax8p'
+        }
+      }
+    ]
+  },
   hasSealImp: {
+    dataValues: {
+      invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+      invoiceNo: '111111',
+      tmpFlg: true,
+      outputDate: new Date('2022-05-12T04:16:21.170Z'),
+      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      currency: 'JPY',
+      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      recCompany: '宛先ダミー企業',
+      recPost: '0000000',
+      recAddr1: '東京都',
+      recAddr2: '大手町',
+      recAddr3: '大手町ビル',
+      sendTenantId: '795e60d0-1cf4-4bb3-a3e5-06d94ad438af',
+      sendCompany: '送信先ダミー企業',
+      sendPost: '100-8019',
+      sendAddr1: '東京都',
+      sendAddr2: '大手町',
+      sendAddr3: '大手町プレイスウエスト',
+      sendRegistrationNo: 'T1234567890123',
+      bankName: '銀行名',
+      branchName: '支店',
+      accountType: '科目',
+      accountName: 'あああ',
+      accountNumber: '1234567',
+      note: '備考備考備考\n備考',
+      createdAt: new Date('2022-05-13T00:00:00.000Z'),
+      updatedAt: new Date('2022-05-13T00:00:00.000Z'),
+      PdfSealImp: {
+        dataValues: { invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5', image: 'dummyBuffer' }
+      }
+    },
+    PdfInvoiceLines: [
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 0,
+          lineId: 'a0001',
+          lineDescription: '内容１',
+          unit: 'KG',
+          unitPrice: 100,
+          quantity: 20,
+          taxType: 'tax8p'
+        }
+      },
+      {
+        dataValues: {
+          invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
+          lineIndex: 1,
+          lineId: 'a0002',
+          lineDescription: '内容２',
+          unit: 'KG',
+          unitPrice: 200,
+          quantity: 20,
+          taxType: 'tax8p'
+        }
+      }
+    ]
+  },
+  hasSealImp2: {
     dataValues: {
       invoiceId: 'fddebebb-6bd2-4e79-9343-af7be96091e5',
       invoiceNo: '111111',
@@ -851,10 +973,10 @@ const exprectedEditData = {
       invoiceNo: '111111',
       tmpFlg: false,
       outputDate: new Date('2022-05-12T04:16:21.170Z'),
-      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
       currency: 'JPY',
-      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
-      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
       recCompany: '宛先ダミー企業',
       recPost: '0000000',
       recAddr1: '東京都',
@@ -911,10 +1033,10 @@ const exprectedEditData = {
       invoiceNo: '111111',
       tmpFlg: true,
       outputDate: new Date('2022-05-12T04:16:21.170Z'),
-      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
       currency: 'JPY',
-      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
-      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
       recCompany: '宛先ダミー企業',
       recPost: '0000000',
       recAddr1: '東京都',
@@ -971,10 +1093,10 @@ const exprectedEditData = {
       invoiceNo: '111111',
       tmpFlg: false,
       outputDate: new Date('2022-05-12T04:16:21.170Z'),
-      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
       currency: 'JPY',
-      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
-      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
       recCompany: '宛先ダミー企業',
       recPost: '0000000',
       recAddr1: '東京都',
@@ -1031,10 +1153,10 @@ const exprectedEditData = {
       invoiceNo: '111111',
       tmpFlg: true,
       outputDate: new Date('2022-05-12T04:16:21.170Z'),
-      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
       currency: 'JPY',
-      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
-      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
       recCompany: '宛先ダミー企業',
       recPost: '0000000',
       recAddr1: '東京都',
@@ -1091,10 +1213,10 @@ const exprectedEditData = {
       invoiceNo: '111111',
       tmpFlg: true,
       outputDate: new Date('2022-05-12T04:16:21.170Z'),
-      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
       currency: 'JPY',
-      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
-      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
       recCompany: '宛先ダミー企業',
       recPost: '0000000',
       recAddr1: '東京都',
@@ -1154,10 +1276,10 @@ const exprectedEditData = {
       invoiceNo: '111111',
       tmpFlg: true,
       outputDate: new Date('2022-05-12T04:16:21.170Z'),
-      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
       currency: 'JPY',
-      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
-      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
       recCompany: '宛先ダミー企業',
       recPost: '0000000',
       recAddr1: '東京都',
@@ -1223,10 +1345,10 @@ const exprectedEditData = {
       invoiceNo: '111111',
       tmpFlg: false,
       outputDate: new Date('2022-05-12T04:16:21.170Z'),
-      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
       currency: 'JPY',
-      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
-      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
       recCompany: '宛先ダミー企業',
       recPost: '0000000',
       recAddr1: '東京都',
@@ -1286,10 +1408,10 @@ const exprectedEditData = {
       invoiceNo: '111111',
       tmpFlg: true,
       outputDate: new Date('2022-05-12T04:16:21.170Z'),
-      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
       currency: 'JPY',
-      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
-      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
       recCompany: '宛先ダミー企業',
       recPost: '0000000',
       recAddr1: '東京都',
@@ -1355,10 +1477,10 @@ const exprectedEditData = {
       invoiceNo: '111111',
       tmpFlg: false,
       outputDate: new Date('2022-05-12T04:16:21.170Z'),
-      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
       currency: 'JPY',
-      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
-      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
       recCompany: '宛先ダミー企業',
       recPost: '0000000',
       recAddr1: '東京都',
@@ -1422,10 +1544,10 @@ const exprectedEditData = {
       invoiceNo: '111111',
       tmpFlg: false,
       outputDate: new Date('2022-05-12T04:16:21.170Z'),
-      billingDate: new Date('2022-05-13T00:00:00.000Z'),
+      billingDate: new Date('2022-05-13T09:00:00.000Z'),
       currency: 'JPY',
-      paymentDate: new Date('2022-05-14T00:00:00.000Z'),
-      deliveryDate: new Date('2022-05-15T00:00:00.000Z'),
+      paymentDate: new Date('2022-05-14T09:00:00.000Z'),
+      deliveryDate: new Date('2022-05-15T09:00:00.000Z'),
       recCompany: '宛先ダミー企業',
       recPost: '0000000',
       recAddr1: '東京都',
@@ -1767,7 +1889,7 @@ describe('pdfInvoiceのテスト', () => {
     test('正常: 印影なし、ロゴあり', async () => {
       request.params.invoiceId = 'dummyId'
       accessTradeshift.mockReturnValue(accountInfoTestData.hasLogo) // ユーザ情報正常取得を想定する
-      pdfInvoiceControllerfindInvoiceSpy.mockReturnValue(pdfInvoiceTestData.noSealImp) // DBからの正常なPDF請求書情報の取得を想定する
+      pdfInvoiceControllerfindInvoiceSpy.mockReturnValue(pdfInvoiceTestData.noSealImp2) // DBからの正常なPDF請求書情報の取得を想定する
 
       await pdfInvoice.pdfInvoiceEdit(request, response, next)
 
@@ -1776,7 +1898,7 @@ describe('pdfInvoiceのテスト', () => {
     test('正常: 印影あり、ロゴあり', async () => {
       request.params.invoiceId = 'dummyId'
       accessTradeshift.mockReturnValue(accountInfoTestData.hasLogo) // ユーザ情報正常取得を想定する
-      pdfInvoiceControllerfindInvoiceSpy.mockReturnValue(pdfInvoiceTestData.hasSealImp) // DBからの正常なPDF請求書情報の取得を想定する
+      pdfInvoiceControllerfindInvoiceSpy.mockReturnValue(pdfInvoiceTestData.hasSealImp2) // DBからの正常なPDF請求書情報の取得を想定する
 
       await pdfInvoice.pdfInvoiceEdit(request, response, next)
 
